@@ -1,0 +1,58 @@
+name: Ruff Linting
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.11' # Replace with your desired specific Python version
+
+# Permissions needed by reviewdog to post check annotations
+permissions:
+  contents: read
+  checks: write # To create Check runs and annotations
+  # Use 'pull-requests: write' if using reporter: github-pr-review
+
+jobs:
+  ruff-linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff and Report with Reviewdog
+        # This action runs Ruff and uses reviewdog to report issues
+        uses: reviewdog/action-ruff@v2 # Use a current version of the reviewdog action
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # reporter: github-pr-check # Report results as checks on the commit/PR (Default)
+          # reporter: github-pr-review # Report results as comments on the PR (Alternative)
+          fail_on_error: true       # Fail the workflow if Ruff finds errors (like strict: true)
+          level: error              # Report Ruff errors as errors (can also use 'warning')
+          ruff_flags: '.'           # Pass the target directory/files to Ruff (default is '.')
+          # You can add other Ruff flags here if needed, e.g.:
+          # ruff_flags: '--select E402 --ignore F841 .'
+
+      # Optional: Upload Ruff's raw output as an artifact if needed for debugging
+      # Note: reviewdog action doesn't directly expose the raw ruff output file easily
+      # If you absolutely need the raw JSON, you'd run ruff twice:
+      # - name: Run Ruff for Raw Output (Optional)
+      #   run: ruff check . --output-format=json --output-file=ruff_report.json
+      #   continue-on-error: true # Don't fail the job here
+      # - name: Upload Ruff JSON report artifact
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ruff-report-json
+      #     path: ruff_report.json
