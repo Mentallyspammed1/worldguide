@@ -1,0 +1,415 @@
+# ~/.zshrc
+
+# -----------------------------------------------------------------------------
+# Gemini AI-Powered Shell Functions with Keybindings
+# -----------------------------------------------------------------------------
+autoload -Uz compinit && compinit
+# Function to cache AI responses in a file
+cache_ai_response() {
+  local prompt="$1"
+  local response="$2"
+  local cache_file="$HOME/.aichat_cache"
+
+  mkdir -p "$(dirname "$cache_file")" # Ensure directory exists
+
+  echo "$prompt" > "$cache_file.$(echo "$prompt" | md5sum | cut -d' ' -f1).prompt"
+  echo "$response" > "$cache_file.$(echo "$prompt" | md5sum | cut -d' ' -f1).response"
+}
+
+# Function to retrieve AI responses from the cache
+get_cached_ai_response() {
+  local prompt="$1"
+  local cache_file="$HOME/.aichat_cache"
+  local hash=$(echo "$prompt" | md5sum | cut -d' ' -f1)
+
+  if [[ -f "$cache_file.$hash.response" ]]; then
+    cat "$cache_file.$hash.response"
+  else
+    return 1 # Indicate cache miss
+  fi
+}
+
+# 1. Explain a Command (Using Gemini)
+explain_command() {
+  local command
+  if [[ -z "$BUFFER" ]]; then
+    echo "Usage: explain_command <command>"
+    return 1
+  fi
+
+  command="$BUFFER"
+  prompt="Explain the following shell command: $command"
+
+  cached_response=$(get_cached_ai_response "$prompt")
+
+  if [[ -n "$cached_response" ]]; then
+    echo "Using cached response:"
+    echo "$cached_response"
+  else
+    response=$(aichat "$prompt" --model gemini-pro) # Specify Gemini model
+    if [[ -z "$response" ]]; then
+      echo "Error: No response from Gemini API."
+      return 1
+    fi
+    echo "$response"
+    cache_ai_response "$prompt" "$response"
+  fi
+  zle accept-line # Execute the original command after explanation
+}
+
+# 2. Suggest a Command (Based on a Description - Using Gemini)
+suggest_command() {
+  read -r -p "Describe what you want to do: " description
+  if [[ -z "$description" ]]; then
+    echo "No description provided."
+    return 1
+  fi
+
+  prompt="Suggest a shell command that would accomplish the following: $description"
+
+  cached_response=$(get_cached_ai_response "$prompt")
+
+  if [[ -n "$cached_response" ]]; then
+    echo "Using cached response:"
+    echo "$cached_response"
+  else
+    response=$(aichat "$prompt" --model gemini-pro) # Specify Gemini model
+    if [[ -z "$response" ]]; then
+      echo "Error: No response from Gemini API."
+      return 1
+    fi
+    echo "$response"
+    cache_ai_response "$prompt" "$response"
+  fi
+}
+
+# 3. Fix a Shell Script Error (Using Gemini)
+fix_script_error() {
+  read -r -p "Enter the error message: " error_message
+  if [[ -z "$error_message" ]]; then
+    echo "No error message provided."
+    return 1
+  fi
+
+  prompt="Suggest a fix for the following shell script error: $error_message"
+
+  cached_response=$(get_cached_ai_response "$prompt")
+
+  if [[ -n "$cached_response" ]]; then
+    echo "Using cached response:"
+    echo "$cached_response"
+  else
+    response=$(aichat "$prompt" --model gemini-pro) # Specify Gemini model
+    if [[ -z "$response" ]]; then
+      echo "Error: No response from Gemini API."
+      return 1
+    fi
+    echo "$response"
+    cache_ai_response "$prompt" "$response"
+  fi
+}
+
+# 4. Generate a command from a description (Using Gemini)
+gen_command() {
+  read -r -p "Describe the command you want to generate: " description
+  if [[ -z "$description" ]]; then
+    echo "No description provided."
+    return 1
+  fi
+
+  prompt="Generate a bash command that does the following: $description. Return only the command. Do not include any explanation."
+
+  cached_response=$(get_cached_ai_response "$prompt")
+
+  if [[ -n "$cached_response" ]]; then
+    echo "Using cached response:"
+    echo "$cached_response"
+  else
+    response=$(aichat "$prompt" --model gemini-pro) # Specify Gemini model
+    if [[ -z "$response" ]]; then
+      echo "Error: No response from Gemini API."
+      return 1
+    fi
+    echo "$response"
+    cache_ai_response "$prompt" "$response"
+  fi
+}
+
+# 5. Search documentation for a command (Using Gemini)
+doc_search() {
+  read -r -p "Enter the command to search documentation for: " command
+  if [[ -z "$command" ]]; then
+    echo "No command provided."
+    return 1
+  fi
+
+  prompt="Search documentation for the following command: $command. Give a brief summary of the most relevant information."
+
+  cached_response=$(get_cached_ai_response "$prompt")
+
+  if [[ -n "$cached_response" ]]; then
+    echo "Using cached response:"
+    echo "$cached_response"
+  else
+    response=$(aichat "$prompt" --model gemini-pro) # Specify Gemini model
+    if [[ -z "$response" ]]; then
+      echo "Error: No response from Gemini API."
+      return 1
+    fi
+    echo "$response"
+    cache_ai_response "$prompt" "$response"
+  fi
+}
+
+# 6. Refactor Shell Script (Basic Example - Using Gemini)
+refactor_script() {
+  read -r -p "Enter the path to the script file: " script_file
+  if [[ -z "$script_file" ]]; then
+    echo "No script file provided."
+    return 1
+  fi
+
+  if [[ ! -f "$script_file" ]]; then
+    echo "Error: File '$script_file' not found."
+    return 1
+  fi
+
+  script_content=$(cat "$script_file")
+  prompt="Refactor the following shell script to be more readable and efficient:\n\n$script_content"
+
+  cached_response=$(get_cached_ai_response "$prompt")
+
+  if [[ -n "$cached_response" ]]; then
+    echo "Using cached response:"
+    echo "$cached_response"
+  else
+    response=$(aichat "$prompt" --model gemini-pro) # Specify Gemini model
+    if [[ -z "$response" ]]; then
+      echo "Error: No response from Gemini API."
+      return 1
+    fi
+    echo "$response"
+    cache_ai_response "$prompt" "$response"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Zsh Keybindings
+# -----------------------------------------------------------------------------
+
+zle -N explain-command explain_command
+zle -N suggest-command suggest_command
+zle -N fix-script-error fix_script_error
+zle -N gen-command gen_command
+zle -N doc-search doc_search
+zle -N refactor-script refactor_script
+
+bindkey '^Xe' explain-command  # Ctrl+X then e
+bindkey '^Xs' suggest-command  # Ctrl+X then s
+bindkey '^Xf' fix-script-error  # Ctrl+X then f
+bindkey '^Xg' gen-command  # Ctrl+X then g
+bindkey '^Xd' doc-search  # Ctrl+X then d
+bindkey '^Xr' refactor-script # Ctrl+X then r
+
+# Main Zsh configuration file. Enhanced for clarity, security, and organization.
+# --- Pyrmethus the termux coding wizard's enhancements applied (Version 2) ---
+# --- Load .env file for API Keys (Shell-based loading) ---
+if [[ -f "$HOME/.env" ]]; then
+  source "$HOME/.env"
+  echo "Loaded environment variables from $HOME/.env" >&2 # Feedback message (stderr)
+else
+  echo "Warning: $HOME/.env file not found. API keys will not be loaded." >&2 # Feedback message (stderr)
+fi
+
+# --- Instant Prompt (Powerlevel10k) ---
+# Source P10k instant prompt for faster startup if it exists.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# --- Environment Variables ---
+export TERM="xterm-256color"
+export LANG="en_US.UTF-8"
+export SHELL="/data/data/com.termux/files/usr/bin/zsh"
+export EDITOR="nano" # Preferred text editor (vim, nano, neovim)
+export VISUAL="$EDITOR"
+export GOOGLE_API_KEY="AIzaSyAxcOL_jl9f9ReUMRTF_g73BsAnnVZ4IK4"
+# --- Python Executable ---
+# Define preferred Python executable path (prioritize python3, then python)
+if command -v python3 >/dev/null 2>&1; then
+  export PYTHON_EXECUTABLE="python3"
+elif command -v python >/dev/null 2>&1; then
+  export PYTHON_EXECUTABLE="python"
+else
+  export PYTHON_EXECUTABLE="/data/data/com.termux/files/usr/bin/python" # Fallback in Termux
+  echo "Warning: Python 3 or Python not found in PATH. Using fallback path (Termux default)." >&2
+  echo "         Ensure Python is installed if you intend to use Python-based functions." >&2
+fi
+# --- Java Home (If needed for Java development in Termux) ---
+if [[ -d "/data/data/com.termux/files/usr/libexec/java_home" ]]; then
+    export JAVA_HOME="/data/data/com.termux/files/usr/libexec/java_home"
+fi
+
+# --- Oh My Zsh Configuration ---
+export ZSH="$HOME/.oh-my-zsh"
+export ZSHRC="$HOME/.zshrc" # Standard location
+export ZSH_CUSTOM="$HOME/.config/zsh" # Custom user config directory (Oh My Zsh standard: $ZSH/custom)
+
+# Create custom directory if it doesn't exist
+if [[ ! -d "$ZSH_CUSTOM" ]]; then
+    mkdir -p "$ZSH_CUSTOM" && echo "Created custom Zsh config directory: $ZSH_CUSTOM"
+fi
+
+# --- PATH Configuration ---
+# Consolidated PATH (Order matters: user bins -> system bins)
+export PATH="$HOME/bin:$HOME/search:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/platform-tools:/data/data/com.termux/files/usr/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+# --- API Keys & Secrets - CRITICAL SECURITY WARNING! ---
+# SEE COMMENTS IN ORIGINAL FILE FOR SECURE HANDLING - DO NOT HARDCODE HERE
+
+# --- Zsh Options ---
+setopt AUTO_CD              # Change directory without `cd`
+setopt CORRECT              # Auto correct commands
+setopt NUMERIC_GLOB_SORT    # Sort filenames numerically when globbing
+setopt NO_FLOW_CONTROL      # Disable ^S/^Q flow control
+setopt EXTENDED_GLOB        # Use extended globbing features
+setopt INTERACTIVE_COMMENTS # Allow comments in interactive shell
+setopt GLOB_DOTS            # Include dotfiles in globbing results
+setopt PROMPT_SUBST         # Allow substitutions in prompt
+setopt HIST_VERIFY          # Show command from history before executing (allows editing)
+setopt SHARE_HISTORY        # Share history between concurrent sessions immediately
+setopt INC_APPEND_HISTORY   # Append history incrementally, don't overwrite
+setopt HIST_IGNORE_SPACE    # Ignore commands starting with space
+setopt HIST_IGNORE_DUPS     # Ignore duplicate commands consecutively
+setopt HIST_NO_FUNCTIONS    # Do not store function definitions in history
+setopt HIST_REDUCE_BLANKS   # Remove superfluous blanks from history entries
+
+# --- History Settings ---
+export HISTFILE="$HOME/.zsh_history" # History file path (plain text initially)
+export HISTSIZE=50000
+export SAVEHIST=50000
+# Ignore common, less useful commands from being stored in history
+export HIST_IGNORE="(ls|cd|pwd|exit|history|bg|fg|jobs|clear|cls|logout|sh|zsh|sleep)"
+
+# --- Oh My Zsh Configuration ---
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+plugins=(
+    git
+    zsh-z
+    command-not-found
+    zsh-completions
+    zsh-syntax-highlighting
+    zsh-autosuggestions
+    extract
+    encode64
+    # aichat
+)
+
+# Source Oh My Zsh
+if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
+    source "$ZSH/oh-my-zsh.sh"
+else
+    echo "Oh My Zsh not found at $ZSH." >&2
+    echo "Install with: sh -c \"\$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\"" >&2
+    command -v termux-toast >/dev/null 2>&1 && termux-toast "Error: Oh My Zsh not found. Install it."
+fi
+
+# --- Custom Zsh Settings & Sourcing ---
+if [[ -d "$ZSH_CUSTOM" ]]; then
+    [[ -f "$ZSH_CUSTOM/custom.zsh" ]] && source "$ZSH_CUSTOM/custom.zsh"
+    [[ -f "$ZSH_CUSTOM/aliases.zsh" ]] && source "$ZSH_CUSTOM/aliases.zsh"
+    [[ -f "$ZSH_CUSTOM/functions.zsh" ]] && source "$ZSH_CUSTOM/functions.zsh"
+    [[ -f "$ZSH_CUSTOM/ccxt_bybit_functions.zsh" ]] && source "$ZSH_CUSTOM/ccxt_bybit_functions.zsh"
+fi
+
+# --- Completion Settings ---
+autoload -Uz compinit
+compinit -i
+zstyle ':completion:*' menu select=1
+zstyle ':completion:*' list-colors "${LS_COLORS}"
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.zsh_cache"
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*:options' description 'yes'
+
+# --- Key bindings ---
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^?' backward-delete-char
+bindkey '^H' backward-delete-char
+bindkey '^W' backward-kill-word
+bindkey '^U' backward-kill-line
+bindkey '^K' kill-line
+bindkey '^L' clear-screen
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
+bindkey '^F' forward-char
+bindkey '^B' backward-char
+bindkey '^D' delete-char-or-list
+bindkey '\ew' kill-region
+bindkey '^[w' backward-kill-word
+bindkey '\el' down-case-word
+bindkey '\eu' up-case-word
+bindkey '\ec' capitalize-word
+bindkey '^X^U' undo
+
+# --- History Encryption/Decryption Hooks (Example using GPG) ---
+_zsh_history_encrypt_file="$HISTFILE.gpg"
+
+zsh_decrypt_history() {
+  if [[ -f "$_zsh_history_encrypt_file" ]]; then
+    if command -v gpg >/dev/null 2>&1; then
+      echo "Decrypting Zsh history..." >&2
+      gpg -d --batch --yes --quiet -o "$HISTFILE" "$_zsh_history_encrypt_file" 2>/dev/null
+      if [[ $? -ne 0 ]]; then
+        echo "Failed to decrypt history. Check GPG setup/password. Using empty history." >&2
+        : >| "$HISTFILE"
+      else
+        echo "History decrypted." >&2
+      fi
+    else
+      echo "Warning: gpg command not found. Cannot decrypt history from $_zsh_history_encrypt_file" >&2
+    fi
+  fi
+}
+
+zsh_encrypt_history() {
+  if [[ -f "$HISTFILE" ]]; then
+    if command -v gpg >/dev/null 2>&1; then
+      echo "Encrypting Zsh history..." >&2
+      fc -W
+      gpg -c --batch --yes --cipher-algo AES256 -o "${_zsh_history_encrypt_file}.tmp" "$HISTFILE" && \
+        mv "${_zsh_history_encrypt_file}.tmp" "$_zsh_history_encrypt_file" && \
+        rm "$HISTFILE" && \
+        echo "History encrypted to $_zsh_history_encrypt_file" >&2 || \
+        echo "Failed to encrypt history. History file '$HISTFILE' may still exist." >&2
+    else
+      echo "Warning: gpg command not found. Cannot encrypt history file '$HISTFILE'." >&2
+    fi
+  fi
+}
+
+zsh_decrypt_history
+zshexit_functions+=("zsh_encrypt_history")
+
+# --- Welcome Message (Optional) ---
+welcome_message() {
+   echo -e "\nWelcome back to Zsh! $(date '+%Y-%m-%d %H:%M:%S')\n"
+}
+welcome_message
+
+# --- Source Powerlevel10k configuration ---
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+# --- End of ~/.zshrc ---
+export BYBIT_API_KEY=I9iTUO2iaVFK1NjNo1                    
+export BYBIT_API_SECRET=B4KBZej8Mo6j4VwNpLqZ4M64BQJIqI4opiTR
+
