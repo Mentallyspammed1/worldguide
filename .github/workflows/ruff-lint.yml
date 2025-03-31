@@ -1,0 +1,74 @@
+name: Ruff Linting
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Use a specific Python version, e.g., 3.11, 3.12
+# Avoid '3.x.x' as it's not a valid specifier for setup-python
+env:
+  PYTHON_VERSION: '3.11' # <-- CHANGE THIS to your desired specific Python version
+
+jobs:
+  ruff-linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        # Use a more recent version of checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        # Use a more recent version of setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          # Enable caching for pip dependencies (correct syntax)
+          cache: 'pip'
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff
+        # Add an ID to this step so we can check its outcome later
+        id: ruff
+        # Run Ruff, check the current directory (.), output results to JSON for the reporter
+        # Use 'ruff check' explicitly for clarity
+        # Add 'continue-on-error: true' so the workflow continues to the reporting step even if Ruff finds issues
+        run: |
+          ruff --version
+          ruff check . --output-format=json --output-file=ruff_check.json
+        continue-on-error: true # Important: Allows next steps to run even if ruff finds issues
+
+      - name: Report Ruff results
+        # Make sure this custom action `actions/gha-reporter@v1.0.0` exists and works as expected.
+        # If it's an internal or specific action, ensure it's accessible.
+        # This step should run even if the previous one 'failed' (found issues), hence `if: always()`
+        if: always()
+        uses: actions/gha-reporter@v1.0.0 # Assuming this action exists and handles the JSON file
+        with:
+          category: Ruff
+          file: "ruff_check.json"    # Ensure this matches the output file from the previous step
+          strict: false             # Set strict to false here; we'll fail explicitly in the next step
+          verbose: true
+          context: "Ruff Linting"
+          # Check the gha-reporter documentation for how it signals success/failure
+          # And how 'strict: true' behaves with `continue-on-error` in the previous step.
+          # Setting strict: false assumes the reporter *reports* but doesn't fail the job itself.
+
+      # Optional: Upload the Ruff JSON report as an artifact for debugging
+      - name: Upload Ruff report artifact
+        if: always() # Upload artifact regardless of ruff success/failure
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-report
+          path: ruff_check.json
+
+      - name: Check Ruff output status
+        # This step explicitly fails the job if the 'Run Ruff' step (id: ruff)
+        # had an outcome of 'failure' (meaning ruff exited with a non-zero code).
+        if: steps.ruff.outcome == 'failure'
+        run: |
+          echo "Ruff found linting issues. Failing the workflow."
+          exit 1
