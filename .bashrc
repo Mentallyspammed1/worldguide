@@ -1,0 +1,44 @@
+#!/bin/bash
+IS_MAC=false
+[[ "$OSTYPE" == "darwin"* ]] && IS_MAC=true
+
+PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/\~}\007"'
+if [[ ${EUID} == 0 ]]; then
+    PS1='\[\033[01;31m\][\h\[\033[01;36m\] \W\[\033[01;31m\]]\$\[\033[00m\] '
+else
+    PS1='\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\] '
+fi
+
+complete -cf sudo
+shopt -s checkwinsize
+shopt -s expand_aliases
+shopt -s histappend
+
+# bash completions
+[ -r /usr/share/bash-completion/bash_completion ] && source /usr/share/bash-completion/bash_completion
+
+source ~/.config/shell/environment.sh
+$IS_MAC && [ -f ~/.config/mac/environment.sh ] && source ~/.config/mac/environment.sh
+source ~/.config/shell/functions.sh
+source ~/.config/shell/aliases.sh
+$IS_MAC && [ -f ~/.config/mac/aliases.sh ] && source ~/.config/mac/aliases.sh
+
+alias reload="source ~/.bashrc"
+
+# Tool confs for bash
+if type navi >/dev/null 2>&1; then eval "$(navi widget bash)"; fi
+if type zoxide >/dev/null 2>&1; then eval "$(zoxide init bash)"; fi
+if type fzf >/dev/null 2>&1; then eval "$(fzf --bash)"; fi
+if type mise >/dev/null 2>&1; then eval "$(mise activate bash)"; fi
+
+# Local configurations
+[ -f ~/.config/shell/local.sh ] && source ~/.config/shell/local.sh
+
+# argc-completions
+export ARGC_COMPLETIONS_ROOT="/data/data/com.termux/files/home/.config"
+export ARGC_COMPLETIONS_PATH="$ARGC_COMPLETIONS_ROOT/completions/linux:$ARGC_COMPLETIONS_ROOT/completions"
+export PATH="$ARGC_COMPLETIONS_ROOT/bin:$PATH"
+# To add completions for only the specified command, modify next line e.g. argc_scripts=( cargo git )
+argc_scripts=( $(ls -p -1 "\"/completions/linux" "\"/completions" | sed -n 's/\.sh$//p') )
+source <(argc --argc-completions bash "${rgc_scripts[@]}")
+# aichat completion                                               _aichat() {                                                           local cur prev                                                    _get_comp_words_by_shell || return                                cur="${COMP_WORDS[COMP_CWORD]}"                                   prev="${COMP_WORDS[COMP_CWORD-1]}"                                if [[ ${prev} == 'aichat' ]]; then                                    COMPREPLY=( $(compgen -W 'help version') )                    fi                                                            }                                                                 complete -F _aichat aichat

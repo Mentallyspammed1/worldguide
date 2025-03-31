@@ -1,0 +1,34 @@
+# Enhanced Nano Configuration for Python Development
+
+# Basic Usability Enhancements
+set linenumbers
+set mouse
+set autoindent
+set tabsize 4
+set tabstospaces
+set backup
+set softwrap
+set historylog
+
+# Syntax Highlighting
+include /usr/share/nano/syntax/*.nanorc
+
+# Python-Specific Enhancements
+
+# Define the Python file type
+syntax "python" "\.py$"
+  color brightcyan,bold "^[ ]*def "
+  color brightgreen,bold "^[ ]*class "
+  color brightblue "^[ ]*import "
+  color brightyellow "(#.*)"
+
+# Python Formatting and Linting (Requires: black, pylint)
+# Install with: pip install black pylint
+
+bind F9 execute "black %f"
+bind F10 execute "pylint %f"
+bind F11 execute "python3 -m py_compile %f"
+
+# Other Useful Settings (Uncomment as needed)
+
+

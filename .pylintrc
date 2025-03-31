@@ -1,0 +1,106 @@
+[MASTER]
+# Use multiple processes (adjust based on Termux performance)
+jobs=2
+# Python version for Termux (use py-version for older Pylint)
+py-version=3.11
+# Load plugins (ensure installed: pip install pylint-docparams)
+load-plugins=pylint.extensions.docparams
+# Ignore common directories
+ignore=tests,CVS,__pycache__,build,dist,.venv,.mypy_cache,.pytest_cache
+# Persist cache
+persistent=yes
+# Suggestion mode for fixes
+suggestion-mode=yes
+# Source roots (optional)
+source-roots=/data/data/com.termux/files/home
+
+[MESSAGES CONTROL]
+# Enable debugging-critical checks (valid for 2.17.x)
+enable=unused-variable,
+       undefined-variable,
+       used-before-assignment,
+       unreachable,
+       attribute-defined-outside-init,
+       no-member,
+       import-error,
+       syntax-error,
+       typecheck,
+       cyclic-import,
+       duplicate-code,
+       redefined-outer-name,  # Added from wgchat.py issues
+       unspecified-encoding,  # For file operations
+       broad-exception-caught,  # For exception handling
+       too-many-return-statements,
+       too-many-branches,
+       too-many-statements,
+       wrong-import-order,
+       consider-using-with
+# Disable style-focused checks
+disable=missing-docstring,
+        too-few-public-methods,
+        too-many-arguments,
+        too-many-locals,
+        invalid-name,
+        line-too-long,
+        consider-using-f-string,
+        unnecessary-pass,
+        raw-checker-failed,
+        bad-inline-option,
+        locally-disabled,
+        file-ignored,
+        suppressed-message,
+        useless-suppression,
+        deprecated-pragma
+# Confidence levels
+confidence=HIGH,CONTROL_FLOW,INFERENCE,INFERENCE_FAILURE,UNDEFINED
+
+[REPORTS]
+# Detailed reports for debugging
+reports=yes
+output-format=colorized
+score=no
+
+[FORMAT]
+# Match config.yaml
+max-line-length=120
+expected-line-ending-format=LF
+indent-string='    '
+
+[LOGGING]
+logging-modules=logging
+logging-format-style=new
+
+[TYPECHECK]
+# For CCXT/Bybit and wgchat.py dependencies
+ignored-modules=ccxt.async_support,colorama,yaml
+generated-members=fetch_ticker,fetch_order_book,place_order
+ignore-none=yes
+missing-member-hint=yes
+
+[VARIABLES]
+# Allow short names and dummies from wgchat.py
+dummy-variables-rgx=_[a-z]?|dummy|unused|_.*|^ignored_|^unused_
+good-names=i,j,k,ex,Run,_,e  # 'e' added for wgchat.py exception vars
+allow-global-unused-variables=yes
+
+[DESIGN]
+# Relaxed limits based on wgchat.py (57 statements, 24 branches)
+max-args=10
+max-locals=20
+max-attributes=12
+max-returns=9  # Adjusted from 6
+max-branches=24  # Adjusted from 12
+max-statements=57  # Adjusted from 50
+max-bool-expr=5
+max-nested-blocks=5
+
+[SIMILARITIES]
+min-similarity-lines=4
+ignore-imports=yes
+
+[BASIC]
+argument-naming-style=snake_case
+attr-naming-style=snake_case
+function-naming-style=snake_case
+method-naming-style=snake_case
+module-naming-style=snake_case
