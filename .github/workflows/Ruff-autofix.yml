@@ -1,20 +1,11 @@
-# .github/workflows/ruff-autofix-pr.yml
 name: Ruff Autofix PR
 
 on:
   push:
     branches:
-      - main # Or specific feature branches you want to check
-      # Avoid running on tags
-  # Consider if you want this on pull_request trigger - it might create PRs targeting the temporary merge commit.
-  # Often better to just run on push to the PR's source branch.
-  # pull_request:
-  #   branches: [ main ]
-  workflow_dispatch: # Allow manual triggering
+      - main
+  workflow_dispatch:
 
-# Permissions required:
-# contents: write - to push the new branch with fixes
-# pull-requests: write - to create the pull request
 permissions:
   contents: write
   pull-requests: write
@@ -22,7 +13,6 @@ permissions:
 jobs:
   ruff-propose-fixes:
     runs-on: ubuntu-latest
-    # Prevent multiple PRs being created for the same branch concurrently
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-pr
       cancel-in-progress: true
@@ -30,44 +20,34 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        # No token needed here, create-pull-request handles auth
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Use a specific Python version
+          python-version: '3.11'
           cache: 'pip'
 
       - name: Install Ruff
         run: pip install ruff
 
       - name: Run Ruff Formatter and Linter with Autofix
-        # We still want to know if Ruff failed, even if create-pull-request handles changes
         id: ruff_autofix
         run: |
           ruff check . --fix --exit-non-zero-on-fix
           echo "Ruff ran with exit code $?"
-        continue-on-error: true # IMPORTANT: Allow create-pull-request to run even if Ruff found issues/fixes
+        continue-on-error: true
 
       - name: Create Pull Request with fixes
-        # This action automatically detects changes, commits them to a new branch,
-        # pushes the branch, and creates a PR.
         id: create_pr
         uses: peter-evans/create-pull-request@v6
         with:
-          # Use the default GITHUB_TOKEN
           token: ${{ secrets.GITHUB_TOKEN }}
-          # Commit details
           commit-message: "[Auto] Apply Ruff fixes"
-          committer: GitHub <noreply@github.com> # Standard committer for GH Actions
+          committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-          # Branch and PR details
-          signoff: false
-          # Create branches like 'ruff-fixes/main' or 'ruff-fixes/feature-branch-name'
           branch: ruff-fixes/${{ github.head_ref || github.ref_name }}
-          # If a PR already exists for this branch, update it
-          branch-suffix: none # Default is 'short-commit-hash', 'none' makes it predictable if you re-run on same commit
-          delete-branch: true # Delete the branch automatically when the PR is merged/closed
+          branch-suffix: none
+          delete-branch: true
           title: '[Auto] Ruff fixes for ${{ github.head_ref || github.ref_name }}'
           body: |
             Ruff autofix identified and applied changes.
@@ -77,19 +57,16 @@ jobs:
 
             Please review and merge.
           labels: autofix, ruff, automated pr
-          assignees: ${{ github.actor }} # Assign the person who pushed
-          # reviewers: user1,team:myteam # Optional: request specific reviewers
+          assignees: ${{ github.actor }}
 
       - name: Check PR Creation Status and Ruff Outcome
-        if: always() # Ensure this runs even if previous steps had issues
+        if: always()
         run: |
           echo "Pull Request URL: ${{ steps.create_pr.outputs.pull-request-url }}"
           echo "PR Number: ${{ steps.create_pr.outputs.pull-request-number }}"
-          echo "PR Created/Updated: ${{ steps.create_pr.outputs.pull-request-operation }}" # e.g., 'created', 'updated', 'none'
+          echo "PR Created/Updated: ${{ steps.create_pr.outputs.pull-request-operation }}"
           echo "Ruff Autofix Step Outcome: ${{ steps.ruff_autofix.outcome }}"
 
-          # Explicitly fail the workflow if Ruff had unfixable errors,
-          # even if a PR with partial fixes was potentially created.
           if [[ "${{ steps.ruff_autofix.outcome }}" == "failure" ]]; then
             echo "::error::Ruff step failed, likely due to unfixable errors. Check the logs and the created PR (if any)."
             exit 1
@@ -97,4 +74,3 @@ jobs:
              echo "Ruff ran successfully and no code changes were needed."
           else
              echo "Ruff fixes proposed in PR ${{ steps.create_pr.outputs.pull-request-number }}."
-          fi
