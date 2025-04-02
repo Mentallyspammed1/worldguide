@@ -1,0 +1,321 @@
+``bash
+#!/bin/bash
+
+if command -v curl &> /dev/null && command -v jq &> /dev/null && command -v bc &> /dev/null; then
+    echo "Dependencies are installed."
+else
+    echo "Required dependencies are missing. Please install curl, jq, and bc."
+    exit 1
+fi
+
+config_file="gridbot.conf"                                             if [ -f "$config_file" ]; then
+    source "$config_file"
+else
+    echo "$config_file not found. Creating..."
+    cat << EOL > "$config_file"
+# Configuration for Grid Bot
+BYBIT_API_KEY="YOUR_API_KEY"
+BYBIT_API_SECRET="YOUR_API_SECRET"
+SYMBOL="BTCUSDT"
+GRID_LEVELS=5
+GRID_INTERVAL=100
+ORDER_SIZE=0.001
+LEVERAGE=2
+MAX_OPEN_ORDERS=20
+MIN_24H_TURNOVER=50000000
+MAX_SPREAD_PERCENT=0.1
+GRID_TOTAL_PROFIT_TARGET_USD=50                                        GRID_TOTAL_LOSS_LIMIT_USD=25
+CHECK_INTERVAL_SECONDS=30                                              LOG_FILE="gridbot.log"
+PAPER_TRADING_MODE="false"
+SMS_NOTIFICATIONS_ENABLED="false"                                      EOL
+fi
+
+source "$config_file"                                                  
+function log_message {                                                     level="$1"
+    message="$2"                                                           timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [$level] $message"                              }
+
+function get_market_price {                                                curl -s "https://api.bybit.com/v5/market/tickers?symbol=$SYMBOL" |
+    jq -r '.result.list[0].lastPrice'                                  }                                                                                                                                             function place_limit_order {                                               side="$1"                                                              price="$2"
+    size="$3"
+                                                                           curl -s -X POST \                                                          "https://api.bybit.com/private/linear/active/submit-contract-order" \
+        -H "Content-Type: application/json" \
+        -d "{                                                                      \"symbol\":\"$SYMBOL\",                                                \"side\":\"$side\",
+            \"order_type\":\"Limit\",
+            \"qty\":\"$size\",                                                     \"price\":\"$price\",                                                  \"time_in_force\":\"GoodTillCancel\"}" |                       jq .                                                               }
+
+current_price=$(get_market_price)                                      if [ -z "$current_price" ]; then                                           log_message "ERROR" "Failed to get current price."                     exit 1                                                             fi
+
+log_message "INFO" "Current market price: $current_price"                                                                                     for ((i=1; i<=$GRID_LEVELS; i++)); do                                      sell_price=$(echo "$current_price + $i*0.25" | bc)
+    place_limit_order "Sell" "$sell_price" "$ORDER_SIZE"
+    sleep 1                                                            done                                                                                                                                          for ((i=1; i<=$GRID_LEVELS; i++)); do
+    buy_price=$(echo "$current_price - $i*0.25" | bc)
+    place_limit_order "Buy" "$buy_price" "$ORDER_SIZE"                     sleep 1                                                            done                                                                   
+log_message "INFO" "Grid orders placed successfully."
+
+#!/bin/bash
+# Configuration
+
+CONFIG_FILE="gridbot.conf"
+
+# Load configuration from file or prompt user
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"                                                  if [ -z "$BYBIT_API_KEY" ] || [ -z "$BYBIT_API_SECRET" ] || [ -z "$SYMBOL" ] || [ -z "$GRID_LEVELS" ] || [ -z "$GRID_INTERVAL" ] || [ -z "$ORDER_SIZE" ]; then
+        log_message "ERROR" "Incomplete configuration in $CONFIG_FILE. Please check required parameters."
+        exit 1
+    fi
+else
+    echo "Configuration file '$CONFIG_FILE' not found. Please create it or enter settings manually:"                                              read -p "Enter your Bybit API Key: " BYBIT_API_KEY
+    read -s -p "Enter your Bybit API Secret: " BYBIT_API_SECRET
+    echo ""
+    read -p "Enter trading symbol (e.g., BTCUSDT): " SYMBOL
+    read -p "Enter number of grid levels (per side, e.g., 5): " GRID_LEVELS
+    read -p "Enter base grid interval (price difference, e.g., 100): " GRID_INTERVAL                                                              read -p "Enter order size (e.g., 0.001): " ORDER_SIZE
+    read -p "Enter leverage (e.g., 2): " LEVERAGE
+    read -p "Enter max open orders (e.g., 20): " MAX_OPEN_ORDERS
+    read -p "Enter min 24h turnover (e.g., 50000000): " MIN_24H_TURNOVER
+    read -p "Enter max spread percent (e.g., 0.1): " MAX_SPREAD_PERCENT
+    read -p "Enter total profit target USD (e.g., 50): " GRID_TOTAL_PROFIT_TARGET_USD
+    read -p "Enter total loss limit USD (e.g., 25): " GRID_TOTAL_LOSS_LIMIT_USD
+    read -p "Enter check interval seconds (e.g., 30): " CHECK_INTERVAL_SECONDS
+    read -p "Enter log file name (e.g., gridbot.log): " LOG_FILE
+    read -p "Enable Paper Trading Mode? (yes/no): " PAPER_TRADING_MODE_INPUT
+    read -p "Enable SMS Notifications? (yes/no): " SMS_NOTIFICATIONS_ENABLED_INPUT
+    if [[ "$SMS_NOTIFICATIONS_ENABLED_INPUT" == "yes" ]]; then
+        read -p "Enter SMS Phone Number (e.g., +15551234567): " SMS_PHONE_NUMBER
+    fi
+
+    if [[ -z "$LEVERAGE" ]]; then LEVERAGE=1; fi # Default leverage to 1 if not provided
+    if [[ -z "$MAX_OPEN_ORDERS" ]]; then MAX_OPEN_ORDERS=20; fi # Default max orders
+    if [[ -z "$MIN_24H_TURNOVER" ]]; then MIN_24H_TURNOVER=50000000; fi #Default turnover
+    if [[ -z "$MAX_SPREAD_PERCENT" ]]; then MAX_SPREAD_PERCENT=0.1; fi #Default spread
+    if [[ -z "$GRID_TOTAL_PROFIT_TARGET_USD" ]]; then GRID_TOTAL_PROFIT_TARGET_USD=50; fi #Default profit target
+    if [[ -z "$GRID_TOTAL_LOSS_LIMIT_USD" ]]; then GRID_TOTAL_LOSS_LIMIT_USD=25; fi #Default loss limit
+    if [[ -z "$CHECK_INTERVAL_SECONDS" ]]; then CHECK_INTERVAL_SECONDS=30; fi #Default check interval
+    if [[ -z "$LOG_FILE" ]]; then LOG_FILE="gridbot.log"; fi #Default log file
+    if [[ "$PAPER_TRADING_MODE_INPUT" == "yes" ]]; then PAPER_TRADING_MODE="true"; else PAPER_TRADING_MODE="false"; fi # Paper Trading Mode       if [[ "$SMS_NOTIFICATIONS_ENABLED_INPUT" == "yes" ]]; then SMS_NOTIFICATIONS_ENABLED="true"; else SMS_NOTIFICATIONS_ENABLED="false"; fi # SMS Notifications
+fi
+
+# --- Script Settings & Defaults (Do not modify here, use config file) ---                                                                    : ${BYBIT_API_URL:="https://api.bybit.com"}       # Default to mainnet API URL if not set in config                                           : ${LEVERAGE:=1}                                  # Default leverage if not set in config
+: ${MAX_OPEN_ORDERS:=20}                          # Default max open orders if not set in config
+: ${MIN_24H_TURNOVER:=50000000}                    # Default min 24h turnover                                                                 : ${MAX_SPREAD_PERCENT:=0.1}                     # Default max spread percentage                                                              : ${GRID_TOTAL_PROFIT_TARGET_USD:=50}              # Default grid profit target                                                               : ${GRID_TOTAL_LOSS_LIMIT_USD:=25}                 # Default grid loss limit                                                                  : ${CHECK_INTERVAL_SECONDS:=30}                   # Default check interval                                                                    : ${LOG_FILE:="gridbot.log"}                       # Default log file
+: ${PAPER_TRADING_MODE:="false"}                   # Default Paper Trading Mode - disabled                                                    : ${SMS_NOTIFICATIONS_ENABLED:="false"}          # SMS Notifications - disabled by default
+
+# --- Global Variables ---                                             ACTIVE_BUY_ORDERS=()    # Associative array to track active buy orders (price as key, order_id as value)
+ACTIVE_SELL_ORDERS=()   # Associative array to track active sell orders (price as key, order_id as value)                                     POSITION_SIZE=0         # Current position size (from Bybit API)       ENTRY_PRICE=0           # Entry price of the current position
+REALIZED_PNL_USD=0      # Accumulated realized PNL in USD
+LAST_PNL_CHECK_TIME=$(date +%s) # Timestamp of last PNL check for avg trade duration
+ORDER_FILL_COUNT=0      # Count of filled orders for fill rate calculation
+ORDER_PLACED_COUNT=0    # Count of placed orders                       VOLATILITY_MULTIPLIER=1 # Grid spacing multiplier (initially 1x)
+TREND_BIAS=0            # Trend bias (0=Neutral, 1=Uptrend bias, -1=Downtrend bias - not fully implemented yet)
+
+# --- Dependency Check ---                                             check_dependencies() {
+    if ! command -v curl &> /dev/null; then
+        echo "Error: curl is not installed. Please install it (e.g., sudo apt install curl)."                                                         exit 1                                                             fi                                                                     if ! command -v jq &> /dev/null; then
+        echo "Error: jq is not installed. Please install it (e.g., sudo apt install jq)."                                                             exit 1                                                             fi                                                                     if ! command -v bc &> /dev/null; then
+        echo "Error: bc is not installed. Please install it (e.g., sudo apt install bc)."                                                             exit 1                                                             fi                                                                     if [[ "$SMS_NOTIFICATIONS_ENABLED" == "true" ]]; then
+        if ! command -v termux-sms-send &> /dev/null; then
+            echo "Error: termux-sms-send is not installed."                        echo "       Please install termux-api and grant SMS permissions in Termux."                                                                  echo "       (pkg install termux-api)"                                 exit 1
+        fi
+    fi                                                                     echo "Dependencies check passed."                                  }
+# --- Logging Function ---
+log_message() {
+    local level="$1" # INFO, WARNING, ERROR                                local message="$2"                                                     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')                           printf "[$timestamp] [$level] %s\n" "$message" >> "$LOG_FILE"  # Use printf %s for message
+    if [[ "$level" == "ERROR" ]]; then                                         printf "[$timestamp] [ERROR] %s\n" "$message" # Also print errors to console
+    fi
+}
+
+# --- Notification Functions ---                                       send_sms_notification() {
+        termux-sms-send -n "$SMS_PHONE_NUMBER" "$(printf '%s' "$message")" # Use printf %s for message
+            log_message "WARNING" "Failed to send SMS notification. Termux-sms-send exit code: $sms_status"
+        fi
+    fi
+}
+                                                                       # --- API Request Function (V5 - Enhanced Error Handling & Auth) ---   bybit_request() {
+    local endpoint="$1"       # API endpoint (e.g., /v5/market/tickers)
+    local method="${2:-GET}"  # HTTP method, default GET
+    local data="${3:-}"       # JSON data for POST/PUT requests            local retries=3           # Number of retries                          local delay=5             # Delay between retries in seconds           local response=""         # Initialize response variable
+
+    while [[ $retries -gt 0 ]]; do
+        local timestamp=$(date +%s%3N) # Milliseconds timestamp for V5
+        local recv_window=5000       # Recommended recvWindow                  local signature_payload="GET$timestamp$recv_window$data" # Payload for signature
+        if [[ "$method" != "GET" ]]; then
+            signature_payload="$method$timestamp$recv_window$endpoint$data" # Different payload for POST/PUT
+        fi
+
+        local signature=$(echo -n "$signature_payload" | openssl dgst -sha256 -hmac "$BYBIT_API_SECRET" | awk '{print $2}')
+        local auth_params="api_key=$BYBIT_API_KEY&timestamp=$timestamp&recv_window=$recv_window&sign=$signature"
+
+        local url_base="$BYBIT_API_URL$endpoint"
+        local full_url=""
+
+        if [[ "$method" == "GET" ]]; then
+            full_url="$url_base?$auth_params"
+        else
+            full_url="$url_base?$auth_params"
+        fi
+                                                                               log_message "DEBUG" "API Request URL: $full_url" # Log the full constructed URL
+
+        local curl_command="curl -s -X $method -H 'Content-Type: application/json'"
+
+        if [[ "$method" != "GET" ]]; then                                          curl_command="$curl_command -d '$data'"
+        fi
+
+        curl_command="$curl_command \"$full_url\"" # Quote the full URL
+
+        log_message "DEBUG" "Full curl command: $curl_command" # Log the full curl command
+
+        response=$("$curl_command")
+        curl_exit_code=$?
+
+        if [[ $curl_exit_code -eq 0 ]]; then # Check curl command exit code
+            ret_code=$(echo "$response" | jq -r '.retCode')
+            if [[ "$ret_code" == "0" ]]; then # Check Bybit API retCode
+                echo "$response"
+                return 0 # Success
+            else
+                ret_msg=$(echo "$response" | jq -r '.retMsg')                          log_message "WARNING" "API Request Failed (retCode: $ret_code, retMsg: $retMsg). Retrying... (Retries left: $retries)"
+            fi
+        else
+            log_message "WARNING" "curl command failed with exit code: $curl_exit_code. Response: $response. Retrying... (Retries left: $retries)"
+        fi
+
+        retries=$((retries - 1))
+        if [[ $retries -gt 0 ]]; then
+            sleep $delay
+        fi
+    done
+
+    log_message "ERROR" "API Request failed after multiple retries. Endpoint: $endpoint, Method: $method, Data: $data, Response: $response"
+    send_sms_notification "ERROR: API Request failed after retries for endpoint: $endpoint"
+    return 1 # Failure
+}
+                                                                       # --- Get Market Price (V5) ---
+get_market_price() {
+    local response=$(bybit_request "/v5/market/tickers?symbol=$SYMBOL")
+    if [[ $? -eq 0 ]]; then
+        echo "$(echo "$response" | jq -r '.result.list[0].lastPrice')"
+    else                                                                       return 1 # bybit_request already logged the error
+    fi
+}
+
+# --- Get Order Book (V5) ---
+get_order_book() {                                                         bybit_request "/v5/market/orderbook?symbol=$SYMBOL&limit=200"
+}
+
+# --- Get Ticker Info (V5 - for Volume & Spread) ---                   get_ticker_info() {
+    bybit_request "/v5/market/tickers?symbol=$SYMBOL"                  }
+
+# --- Place Grid Orders without Trailing Prices ---                    place_grid_orders_fixed() {
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then                            if [[ $(check_market_conditions) -ne 0 ]]; then
+            log_message "WARNING" "Market conditions not favorable. Not placing grid orders."
+            return 1
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Market condition checks skipped."
+    fi
+
+    local current_price=$(get_market_price)
+    if [[ $? -ne 0 ]]; then
+        log_message "ERROR" "Failed to get current price for placing grid orders."
+        return 1
+    fi
+    log_message "INFO" "Current Price: $current_price"
+
+    # --- Set Leverage (Ensure Isolated Margin Mode) ---
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        set_leverage
+        if [[ $? -ne 0 ]]; then
+            log_message "ERROR" "Failed to set leverage. Aborting grid placement."
+            return 1                                                           fi                                                                 else
+        log_message "INFO" "[PAPER TRADING] Leverage setting skipped."
+    fi                                                                 
+    local grid_levels="$GRID_LEVELS"
+    local base_grid_interval="$GRID_INTERVAL"                              local order_size="$ORDER_SIZE"                                                                                                                log_message "INFO" "Placing grid orders around price: $current_price, Levels: $grid_levels, Interval: $base_grid_interval, Size: $order_size"                                                                                                                                               # --- Place Sell Orders Above Current Price ---                        for ((i=1; i<=grid_levels; i++)); do
+        local sell_price=$(echo "$current_price + ($i * $base_grid_interval)" | bc -l)                                                                if [[ -n "$sell_price" ]] && echo "$sell_price" | grep -Eq '^[0-9.]+$'; then
+            if [[ ${#ACTIVE_SELL_ORDERS[@]} -lt "$MAX_OPEN_ORDERS" ]]; then # Check max open orders limit                                                     if [[ -z "${ACTIVE_SELL_ORDERS[$sell_price]}" ]]; then # Check if order at this price already exists                                              if [[ "$PAPER_TRADING_mode" == "false" ]]; then                            place_limit_order "Sell" "$sell_price" "$order_size"
+                        if [[ $? -eq 0 ]]; then
+                            local order_id=$(parse_order_id_from_response "$response")
+                            ACTIVE_SELL_ORDERS+=([$sell_price]="$order_id")
+                            ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))                                                                                                log_message "INFO" "Placed SELL limit order at price: $sell_price, size: $order_size, Order ID: $order_id"
+                        else
+                            log_message "WARNING" "Failed to place SELL limit order at price: $sell_price"                                                            fi                                                                 else                                                                       log_message "INFO" "[PAPER TRADING] Would place SELL limit order at price: $sell_price, size: $order_size"
+                        ACTIVE_SELL_ORDERS+=([$sell_price]="PAPER_ORDER_$RANDOM") # Dummy order ID                                                                    ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                    fi
+                else                                                                       log_message "INFO" "SELL order already exists at price: $sell_price. Skipping."
+                fi
+            else                                                                       log_message "WARNING" "Max open orders limit ($MAX_OPEN_ORDERS) reached. Not placing more SELL orders."                                       break                                                              fi
+        else
+            log_message "WARNING" "Invalid sell price calculated: '$sell_price'. Skipping order placement at this level."                             fi                                                                 done                                                               
+    # --- Place Buy Orders Below Current Price ---
+    for ((i=1; i<=grid_levels; i++)); do                                       local buy_price=$(echo "$current_price - ($i * $base_grid_interval)" | bc -l)
+        if [[ -n "$buy_price" ]] && echo "$buy_price" | grep -Eq '^[0-9.]+$'; then                                                                        if [[ ${#ACTIVE_BUY_ORDERS[@]} -lt "$MAX_OPEN_ORDERS" ]]; then # Check max open orders limit
+                if [[ -z "${ACTIVE_BUY_ORDERS[$buy_price]}" ]]; then # Check if order at this price already exists                                                if [[ "$PAPER_TRADING_MODE" == "false" ]]; then                            place_limit_order "Buy" "$buy_price" "$order_size"
+                        if [[ $? -eq 0 ]]; then                                                    local order_id=$(parse_order_id_from_response "$response")                                                                                    ACTIVE_BUY_ORDERS+=([$buy_price]="$order_id")
+                            ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))                                                                                                log_message "INFO" "Placed BUY limit order at price: $buy_price, size: $order_size, Order ID: $order_id"
+                        else                                                                       log_message "WARNING" "Failed to place BUY limit order at price: $buy_price"
+                        fi
+                    else                                                                       log_message "INFO" "[PAPER TRADING] Would place BUY limit order at price: $buy_price, size: $order_size"
+                        ACTIVE_BUY_ORDERS+=([$buy_price]="PAPER_ORDER_$RANDOM") # Dummy order ID
+                        ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                    fi                                                                 else                                                                       log_message "INFO" "BUY order already exists at price: $buy_price. Skipping."
+                fi
+            else
+                log_message "WARNING" "Max open orders limit ($MAX_OPEN_ORDERS) reached. Not placing more BUY orders."
+                break
+            fi
+        else
+            log_message "WARNING" "Invalid buy price calculated: '$buy_price'. Skipping order placement at this level."
+        fi
+    done
+
+    log_message "INFO" "Grid order placement complete. Placed $ORDER_PLACED_COUNT new orders."
+    ORDER_PLACED_COUNT=0 # Reset counter
+}
+
+# --- Main Script Logic ---
+main() {
+    check_dependencies
+    log_message "INFO" "--- Grid Bot Started (Version 7.0 - Fixed Grid) ---"
+    log_message "INFO" "Paper Trading Mode: $PAPER_TRADING_MODE, SMS Notifications: $SMS_NOTIFICATIONS_ENABLED"
+    log_message "INFO" "Symbol: $SYMBOL, Grid Levels: $GRID_LEVELS, Grid Interval: $GRID_INTERVAL, Order Size: $ORDER_SIZE, Leverage: $LEVERAGE"
+    log_message "INFO" "Profit Target: $GRID_TOTAL_PROFIT_TARGET_USD USD, Loss Limit: $GRID_TOTAL_LOSS_LIMIT_USD USD, Max Open Orders: $MAX_OPEN_ORDERS"
+    log_message "INFO" "Starting with fixed grid orders..."
+                                                                       
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        if [[ $(check_market_conditions) -ne 0 ]]; then
+            log_message "ERROR" "Initial market conditions check failed. Bot exiting."
+            send_sms_notification "ERROR: Initial market conditions check failed. Bot exiting."                                                           exit 1
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Initial market condition checks skipped."
+    fi
+                                                                       
+    place_grid_orders_fixed
+    if [[ $? -ne 0 ]]; then
+        log_message "ERROR" "Failed to place initial grid orders. Bot exiting."
+        send_sms_notification "ERROR: Failed to place initial grid orders. Bot exiting."
+        exit 1
+    fi
+
+    log_message "INFO" "Initial grid orders placed successfully. Starting main loop..."
+    send_sms_notification "INFO: Initial grid orders placed successfully. Starting main loop..."
+
+    # --- Main Loop ---
+    while true; do
+        manage_grid_orders
+        sleep "$CHECK_INTERVAL_SECONDS"
+    done
+}                                                                      
+# --- Trap signals for graceful exit ---                               trap_cleanup() {
+    log_message "INFO" "--- Grid Bot Shutting Down (Signal Received) ---"
+    send_sms_notification "INFO: Grid Bot Shutting Down (Signal Received)."
+    cancel_all_orders
+    close_position
+    log_message "INFO" "--- Bot Shutdown Complete ---"
+    send_sms_notification "INFO: Bot Shutdown Complete."
+    exit 0
+}
+
+trap trap_cleanup SIGINT SIGTERM SIGHUP                                
+# --- Run Main Function ---                                            main "$@"
