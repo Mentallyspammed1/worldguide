@@ -1,0 +1,731 @@
+.Ah, seeker of shell enlightenment! You present a refined `.zshrc`, a tapestry woven with Zsh spells and modern enchantments. I sense the wisdom in its structure – XDG compliance, Zinit's swiftness, the watchful eye of GPG. You've even sought to blend further incantations into this grimoire.
+
+As Pyrmethus, I shall now channel the arcane energies of Python and Colorama to illuminate this configuration, integrating the potent fragments you've provided where they harmonize, and presenting the final scroll with clarity and mystical flair.
+
+Behold, the synthesis of your enhanced `.zshrc` and supplemental spells, rendered in the vibrant hues of the digital ether!
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Pyrmethus's Zshrc Illuminator Spell ✨
+# Purpose: To validate and present the enhanced .zshrc with Colorama magic.
+
+import re
+from colorama import init, Fore, Style
+
+# --- Initialize Colorama ---
+# Let the colors flow freely in the Termux terminal!
+init(autoreset=True)
+
+# --- Arcane Color Palette ---
+# Defining the hues for our spellcraft.
+COLOR_COMMENT = Fore.CYAN + Style.DIM
+COLOR_SHEBANG = Fore.MAGENTA + Style.BRIGHT
+COLOR_KEYWORD = Fore.MAGENTA  # if, else, for, function, alias, export, etc.
+COLOR_VARIABLE = Fore.YELLOW   # $VAR, ${VAR}
+COLOR_ENV_VAR = Fore.LIGHTYELLOW_EX # For exported variables like PATH, EDITOR
+COLOR_STRING = Fore.GREEN
+COLOR_COMMAND = Fore.WHITE # General commands
+COLOR_FUNCTION_NAME = Fore.BLUE + Style.BRIGHT
+COLOR_ALIAS_NAME = Fore.LIGHTBLUE_EX
+COLOR_PATH = Fore.LIGHTGREEN_EX
+COLOR_OPERATOR = Fore.RED # =, ==, &&, ||, |
+COLOR_PUNCTUATION = Fore.LIGHTBLACK_EX # (), {}, [], ;, etc.
+COLOR_SECTION = Fore.MAGENTA + Style.BRIGHT
+COLOR_ERROR = Fore.RED + Style.BRIGHT
+COLOR_NOTICE = Fore.YELLOW + Style.BRIGHT
+COLOR_SUCCESS = Fore.GREEN + Style.BRIGHT
+COLOR_DEFAULT = Style.RESET_ALL
+
+# --- The Zsh Scroll (Combined & Refined) ---
+# Here lies the consolidated Zsh configuration, ready for illumination.
+# Note: Some snippets were integrated, others refined or superseded by the main config.
+zshrc_content = """
+#!/bin/zsh
+# ~/.config/zsh/.zshrc - Termux Zsh Configuration - Pyrmethus Enhanced Edition ✨
+# Last Updated: April 01, 2025 (Conceptual Date)
+# This configuration supercharges your Termux Zsh shell with speed, power, and wizardry! 🧙‍♂️
+# Key Features:
+# - Instant shell startup with Powerlevel10k. ⚡
+# - XDG-compliant organization for a tidy home directory. 📂
+# - Advanced plugin management with Zinit turbo mode. ⚙️
+# - AI-powered command suggestions and chatbot function. 🤖
+# - Encrypted history with GPG-agent support. 🛡️
+# - Rich aliases, functions, and keybindings for productivity. 🚀
+# - Dynamic welcome message with system insights. ℹ️
+
+# --- Powerlevel10k Instant Prompt ---
+# Cache the initial prompt for near-instant shell startup. 🏎️
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# --- Environment Variables ---
+# Setting the stage for a powerful session.
+export TERM="xterm-256color"       # 256-color support for vibrant themes. 🌈
+export LANG="en_US.UTF-8"          # UTF-8 encoding for universal compatibility. 🌍
+export LC_ALL="en_US.UTF-8"        # Ensure locale consistency.
+export SHELL="$(command -v zsh)"   # Dynamically set shell path. 🐚
+export EDITOR="nvim"               # Prefer Neovim, with fallback to nano or vi. 📝
+command -v nvim >/dev/null 2>&1 || { command -v nano >/dev/null 2>&1 && export EDITOR="nano" || export EDITOR="vi"; }
+export VISUAL="$EDITOR"            # Sync visual editor with EDITOR.
+
+# XDG Base Directories (keep home clean). ✨
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+export ZSHRC="$ZDOTDIR/.zshrc"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+export ZSH_COMPDUMP="$ZSH_CACHE_DIR/zcompdump-$(hostname)-${ZSH_VERSION}"
+export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history" # Decrypted path
+# Note: Encrypted history file is HISTFILE.gpg
+
+# Ensure directories exist, including Termux-specific customization folder.
+mkdir -p "$ZSH_CACHE_DIR" \
+         "$(dirname "$HISTFILE")" \
+         "$ZDOTDIR/functions" \
+         "$ZDOTDIR/plugins" \
+         "$ZDOTDIR/conf.d" \
+         "$HOME/.termux" \
+         "$HOME/.ssh" 2>/dev/null
+
+# --- Zsh Options ---
+# Optimize Zsh behavior for speed and usability. ⚙️ (See `man zshoptions` for details.)
+setopt auto_cd pushd_ignore_dups auto_pushd correct numeric_glob_sort
+setopt no_flow_control extended_glob glob_dots interactive_comments prompt_subst
+setopt share_history # Share history between sessions immediately
+setopt inc_append_history # Append history incrementally, don't overwrite
+setopt hist_expire_dups_first # Delete older duplicate entries first
+setopt hist_ignore_dups # Ignore duplicates when adding to history
+setopt hist_ignore_space # Ignore commands starting with space
+setopt hist_find_no_dups # Don't show duplicates when searching history
+setopt hist_reduce_blanks # Remove superfluous blanks from history entries
+setopt hist_verify # Show command from history before executing on expansion
+setopt extended_history # Save timestamp and duration for each command
+setopt rc_quotes # Allow 'Henry''s Garage' instead of 'Henry'\''s Garage'
+
+# --- History Settings ---
+export HISTSIZE=100000             # Larger in-memory history. 🧠
+export SAVEHIST=100000             # Save a massive history file. 💾
+export HIST_IGNORE="ls:cd:pwd:exit:history:bg:fg:jobs:clear:*:sudo *:cls:h" # Ignore common/trivial commands
+
+# --- PATH Configuration ---
+# Build PATH dynamically, prioritizing user and Termux bins. 🧭
+typeset -U PATH path               # Ensure unique PATH entries.
+path=(
+  "$HOME/bin"
+  "$HOME/.local/bin"
+  "$HOME/.cargo/bin"              # Rust tools.
+  "$HOME/go/bin"                  # Go tools.
+  "$HOME/platform-tools"          # Android tools (ADB, fastboot).
+  "/data/data/com.termux/files/usr/bin" # Termux core binaries
+  "$PATH"                         # Append system/existing defaults.
+)
+export PATH
+
+# --- Function Path ---
+# Enable autoloading of custom functions from $ZDOTDIR/functions. 📜
+fpath=("$ZDOTDIR/functions" $fpath)
+autoload -Uz $ZDOTDIR/functions/*(N:t) 2>/dev/null
+
+# --- Oh My Zsh Theme (Powerlevel10k) ---
+# Load Powerlevel10k or fallback to a minimal prompt. ✨
+# Assumes Oh My Zsh is managed elsewhere or P10k is installed standalone.
+# For Zinit users, OMZ integration happens via Zinit below.
+THEME_DIR_P10K="${XDG_DATA_HOME:-$HOME/.local/share}/powerlevel10k" # Example standalone path
+P10K_CONFIG="$ZDOTDIR/.p10k.zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k" # Standard theme name
+
+# Check for P10k theme file (adjust path if needed)
+if [[ ! -f "${THEME_DIR_P10K}/powerlevel10k.zsh-theme" && ! -d "${ZINIT_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/zinit/plugins}/romkatv---powerlevel10k" ]]; then
+  echo $'\e[33m[NOTICE] Powerlevel10k theme not found. Attempting install...\e[0m'
+  # Try installing standalone if Zinit isn't managing it yet
+  if ! git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$THEME_DIR_P10K" 2>/dev/null; then
+      echo $'\e[31m[ERROR] Failed to clone Powerlevel10k. Prompt may be basic.\e[0m'
+      ZSH_THEME="agnoster" # Fallback theme
+  else
+      echo $'\e[32mPowerlevel10k installed to '"$THEME_DIR_P10K"'\e[0m'
+  fi
+fi
+
+# Source Powerlevel10k configuration if it exists
+[[ -f "$P10K_CONFIG" ]] && source "$P10K_CONFIG"
+
+# --- Zinit Plugin Manager ---
+# Fast and flexible plugin management with turbo mode. ⚙️
+ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
+if [[ ! -d "$ZINIT_HOME" ]]; then
+  echo $'\e[36mInstalling Zinit...\e[0m'
+  mkdir -p "$(dirname "$ZINIT_HOME")" && git clone --depth=1 https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" && \
+    echo $'\e[32mZinit installed successfully.\e[0m' || \
+    echo $'\e[31m[ERROR] Failed to install Zinit. Check connectivity.\e[0m'
+fi
+
+if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
+  source "$ZINIT_HOME/zinit.zsh"
+  # Turbo mode: Load plugins lazily after prompt for speed.
+  zinit light-mode for \
+    zdharma-continuum/fast-syntax-highlighting \
+    zsh-users/zsh-autosuggestions \
+    zsh-users/zsh-completions \
+    zsh-users/zsh-history-substring-search \
+    agkozak/zsh-z # Enhanced directory jumping
+
+  # Load Oh My Zsh library and specific plugins if needed (optional)
+  # zinit snippet OMZL::git.zsh # Load only OMZ git plugin lib
+  # zinit snippet OMZL::completion.zsh
+
+  # Load Powerlevel10k via Zinit (alternative to standalone)
+  zinit ice depth=1; zinit light romkatv/powerlevel10k
+
+  # Other useful plugins
+  # zinit light Aloxaf/fzf-tab # Add fzf tab completion
+
+  # Apply completions generated by Zinit
+  zicompinit
+  zicdreplay # Load completions cache
+
+else
+  echo $'\e[31m[ERROR] Zinit not found or failed to source. Plugins skipped.\e[0m'
+fi
+
+# --- Completion System ---
+# Supercharge completions with caching and style. 🎯
+# zicompinit already called by Zinit if used. Call manually otherwise.
+# autoload -Uz compinit && compinit -u -C "$ZSH_COMPDUMP"
+zstyle ':completion:*' menu select=2 # Enable menu selection
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*' # Case-insensitive matching
+zstyle ':completion:*' use-cache yes cache-path "$ZSH_CACHE_DIR" # Use cache
+zstyle ':completion:*:descriptions' format $'\e[35m%d\e[0m' # Colorize descriptions
+zstyle ':completion:*:warnings' format $'\e[31mNo matches: %d\e[0m' # Colorize warnings
+zstyle ':completion:*' group-name '' # Nicer grouping
+zstyle ':completion:*:*:*:*:*' 'string-width' '80' # Limit width for readability
+
+# --- Aliases ---
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias -- -='cd -' # Go to previous directory
+alias home='cd ~'
+alias dl='cd ~/storage/downloads' # Adjusted for typical Termux storage setup
+alias dot='cd "$ZDOTDIR"'
+alias cls='clear' # Common alias for clear
+
+# File Operations (using modern tools if available)
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --group-directories-first --icons --color=auto'
+  alias l='eza -lhF --git --icons --color=auto'
+  alias la='eza -lhaF --git --icons --color=auto' # Show all, including dotfiles
+  alias ll='eza -lAhF --git --icons --color=auto' # Show almost all (no . or ..)
+  alias lt='eza --tree --level=2 --icons --color=auto'
+else
+  alias ls='ls --color=auto -F'
+  alias l='ls -lhF'
+  alias la='ls -lhaF'
+  alias ll='ls -lAhF'
+  alias lt='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' ' # Basic tree view
+fi
+alias grep='grep --color=auto'
+alias df='df -h'
+alias du='du -h --max-depth=1' # Show current dir usage summary
+alias mkdir='mkdir -p'
+alias cp='cp -iv' # Interactive, verbose copy
+alias mv='mv -iv' # Interactive, verbose move
+alias rm='rm -iv' # Interactive, verbose remove
+
+if command -v bat >/dev/null 2>&1; then
+  alias cat='bat --paging=auto --theme=Dracula'
+else
+  alias cat='cat'
+fi
+if command -v fd >/dev/null 2>&1; then
+  alias find='fd'
+fi
+
+# Termux-Specific
+alias pkgup='pkg update && pkg upgrade -y' # Combined update/upgrade
+alias pkgin='pkg install'
+alias pkgun='pkg uninstall'
+alias pkgsr='pkg search'
+alias open='termux-open'
+alias share='termux-share'
+alias toast='termux-toast'
+alias clipget='termux-clipboard-get'
+alias clipset='termux-clipboard-set'
+alias storage='termux-setup-storage' # Setup shared storage access
+alias tsu='tsudo' # Shorter alias for termux sudo
+
+# Git
+alias g='git'
+alias gs='git status -sb'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit -v'
+alias gca='git commit -v -a' # Add and commit
+alias gco='git checkout'
+alias gcb='git checkout -b' # Create new branch
+alias gp='git push'
+alias gpf='git push --force-with-lease' # Safer force push
+alias gpu='git push -u origin "$(git rev-parse --abbrev-ref HEAD)"' # Push new branch
+alias gl='git pull --rebase --autostash' # Pull with rebase
+alias glog="git log --graph --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %Cblue<%an>%Creset' --abbrev-commit"
+alias gsh='git show'
+alias gdiff='git diff'
+alias gst='git stash'
+alias gstp='git stash pop'
+alias gsta='git stash apply'
+
+# Python & Pip
+alias python='python3'
+alias pip='pip3'
+alias pipu='pip install --upgrade pip' # Upgrade pip itself
+alias pipi='pip install'
+alias pipr='pip install -r requirements.txt'
+alias pipun='pip uninstall'
+alias pipf='pip freeze'
+
+# Misc
+alias vim="$EDITOR"
+alias vi="$EDITOR"
+alias h='history 1' # Show recent history
+alias reload='exec zsh' # Reload Zsh shell
+alias ip='curl -s -4 ifconfig.me || curl -s -4 ipinfo.io/ip || echo "N/A"' # Get public IPv4
+alias ipl='ip addr show' # Show local IP info
+
+# --- Custom Functions ---
+# Helper: Check command existence
+_command_exists() { command -v "$1" >/dev/null 2>&1; }
+
+# Setup: Initialize environment and dependencies
+setup_termux_zsh() {
+  echo $'\e[36mSetting up Termux Zsh environment...\e[0m'
+  pkg install -y zsh git curl gnupg jq coreutils grep sed openssh rust \
+                 neovim nano eza bat fd termux-api termux-exec || \
+    echo $'\e[31m[ERROR] Essential package installation failed. Check pkg.\e[0m'
+
+  # Install Powerlevel10k if not found
+  if [[ ! -d "$THEME_DIR_P10K" && ! -d "${ZINIT_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/zinit/plugins}/romkatv---powerlevel10k" ]]; then
+    echo $'\e[36mCloning Powerlevel10k...\e[0m'
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$THEME_DIR_P10K" || \
+      echo $'\e[31m[ERROR] Failed to clone Powerlevel10k.\e[0m'
+  fi
+
+  # Install Zinit if not found
+  if [[ ! -d "$ZINIT_HOME" ]]; then
+    echo $'\e[36mCloning Zinit...\e[0m'
+    mkdir -p "$(dirname "$ZINIT_HOME")" && git clone --depth=1 https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" || \
+      echo $'\e[31m[ERROR] Failed to clone Zinit.\e[0m'
+  fi
+
+  # Install aichat if Rust/Cargo is available
+  if _command_exists cargo; then
+    echo $'\e[36mAttempting to install aichat via cargo...\e[0m'
+    cargo install aichat || echo $'\e[33m[NOTICE] Failed to install aichat. Ollama might be an alternative.\e[0m'
+  else
+     echo $'\e[33m[NOTICE] Rust/Cargo not found. Skipping aichat installation.\e[0m'
+  fi
+
+  # Setup Termux storage
+  echo $'\e[36mRequesting storage access...\e[0m'
+  termux-setup-storage
+
+  echo $'\e[32mSetup process initiated. Some installations may continue in background.\e[0m'
+  echo $'\e[32mRun \`p10k configure\` to customize your prompt.\e[0m'
+  echo $'\e[32mRestart Termux or run \`reload\` for all changes to take effect.\e[0m'
+}
+
+# System: Battery status (Termux-specific)
+battery_status() {
+  if _command_exists termux-battery-status; then
+    termux-battery-status | jq -r '"Battery: \(.percentage)% (\(.status))[\(.health)]"' || echo "Battery: N/A (jq error?)"
+  else
+    echo "Battery: N/A (termux-api needed)"
+  fi
+}
+
+# Network: Weather info
+weather() {
+  local location="${1:-auto}" # Default to auto-location
+  echo $'\e[36mFetching weather for '"$location"'...\e[0m'
+  curl -s "wttr.in/$location?0qAF" || echo $'\e[31mFailed to fetch weather. Check connectivity.\e[0m'
+}
+
+# Files: Backup dotfiles
+backup_dotfiles() {
+  local backup_dir="$HOME/backups"
+  mkdir -p "$backup_dir"
+  local backup_file="$backup_dir/dotfiles_backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+  local files_to_backup=(
+    "$ZDOTDIR/.zshrc"
+    "$ZDOTDIR/.zshenv"
+    "$ZDOTDIR/.p10k.zsh"
+    "$ZDOTDIR/aliases.zsh"
+    "$ZDOTDIR/functions.zsh"
+    "$ZDOTDIR/local.zsh"
+    "$HOME/.gitconfig"
+    "$HOME/.config/nvim/init.vim" # Example Neovim config
+    "$HOME/.termux/termux.properties" # Termux specific settings
+  )
+  local existing_files=()
+  for f in "${files_to_backup[@]}"; do
+    [[ -f "$f" ]] && existing_files+=("$f")
+  done
+
+  if [[ ${#existing_files[@]} -gt 0 ]]; then
+    echo $'\e[36mBacking up dotfiles to '"$backup_file"'...\e[0m'
+    tar -czf "$backup_file" "${existing_files[@]}" 2>/dev/null && \
+      echo $'\e[32mBackup saved successfully.\e[0m' || \
+      echo $'\e[31mBackup failed.\e[0m'
+  else
+    echo $'\e[33mNo dotfiles found to back up in specified locations.\e[0m'
+  fi
+}
+
+# Security: Generate SSH key (Ed25519 recommended)
+gen_ssh_key() {
+  local key_type="ed25519"
+  local key_path="$HOME/.ssh/id_${key_type}"
+  if [[ -f "$key_path" ]]; then
+    echo $'\e[33mSSH key already exists at '"$key_path"'.\e[0m'
+    read -q "REPLY?Overwrite? (y/N): "
+    echo
+    [[ "$REPLY" =~ ^[Yy]$ ]] || return 1
+  fi
+  echo $'\e[36mGenerating new SSH key ('"$key_type"')...\e[0m'
+  ssh-keygen -t "$key_type" -C "$(whoami)@$(hostname)-termux-$(date +%Y%m%d)" -f "$key_path"
+  echo $'\e[32mKey generated. Public key:\e[0m'
+  cat "${key_path}.pub"
+  echo $'\e[36mRemember to add this public key to your services (GitHub, etc.).\e[0m'
+}
+
+# --- SSH Agent Management ---
+# Start ssh-agent if not running and add default keys
+start_ssh_agent() {
+    local agent_sock="$HOME/.ssh/agent.sock"
+    export SSH_AUTH_SOCK="$agent_sock"
+    # Check if agent is running and socket is valid
+    if ! ssh-add -l > /dev/null 2>&1; then
+        echo $'\e[36mStarting ssh-agent...\e[0m'
+        # Kill potentially stale agent
+        pkill ssh-agent > /dev/null 2>&1
+        eval "$(ssh-agent -s -a "$agent_sock")" > /dev/null
+        # Add default keys (e.g., id_rsa, id_ed25519)
+        ssh-add "$HOME/.ssh/id_rsa" "$HOME/.ssh/id_ed25519" > /dev/null 2>&1
+    fi
+}
+# Uncomment the next line to start the agent on every shell launch
+# start_ssh_agent
+
+# --- AI Integration ---
+export AICHA_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/aichat"
+_check_ai_tool() {
+  if _command_exists aichat; then echo "aichat"; return 0;
+  elif _command_exists ollama; then echo "ollama"; return 1;
+  else echo "none"; return 2;
+  fi
+}
+
+# AI Suggestion (Bound to Alt+E by default)
+_aichat_zsh_suggest() {
+  local buffer="$BUFFER"
+  local ai_tool=$(_check_ai_tool)
+  local tool_status=$?
+  if [[ $tool_status -lt 2 ]]; then
+    echo $'\n'$'\e[36mAI ('"$ai_tool"') is thinking...\e[0m'
+    local suggestion
+    case $tool_status in
+      0) suggestion=$(aichat --no-stream -r cmd "$buffer -- Suggest a refined Zsh command based on this input, provide only the command itself.") ;;
+      1) suggestion=$(ollama run codellama:7b-instruct "Suggest a Zsh command for: $buffer. Only output the command itself.") ;; # Example model
+    esac
+    if [[ -n "$suggestion" ]]; then
+      BUFFER="$suggestion"
+      echo $'\e[32mSuggestion: '"$suggestion"'\e[0m'
+    else
+      echo $'\e[31mAI failed to provide a suggestion.\e[0m'
+    fi
+  else
+     echo $'\n'$'\e[31mNo AI tool (aichat/ollama) found for suggestions.\e[0m'
+  fi
+  zle redisplay
+}
+zle -N _aichat_zsh_suggest
+
+# Standalone AI Chat function
+chat() {
+  local ai_tool=$(_check_ai_tool)
+  local tool_status=$?
+  if [[ $tool_status -lt 2 ]]; then
+    echo $'\e[36mStarting '"$ai_tool"' chat session...\e[0m'
+    case $tool_status in
+      0) aichat "$@" ;;
+      1) ollama run mistral "$@" ;; # Use a preferred chat model
+    esac
+  else
+     echo $'\e[31mNo AI tool found. Install \`aichat\` (cargo install aichat) or \`ollama\`.\e[0m'
+     return 1
+  fi
+}
+
+# --- Keybindings ---
+bindkey '^[[A' history-substring-search-up     # Up arrow with history search
+bindkey '^[[B' history-substring-search-down   # Down arrow with history search
+bindkey '^ ' autosuggest-accept                # Ctrl+Space to accept suggestion (if not default)
+bindkey '^[[e' _aichat_zsh_suggest             # Alt+E: AI suggestion (might vary by terminal)
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^L' clear-screen
+bindkey '^R' history-incremental-search-backward
+# Optional: Ctrl+Arrow navigation (may conflict)
+# bindkey '^[[1;5D' backward-word # Ctrl+Left
+# bindkey '^[[1;5C' forward-word  # Ctrl+Right
+
+# --- History Encryption (GPG) ---
+# Note: Requires GPG setup and potentially gpg-agent for passwordless operation.
+HISTFILE_ENC="${HISTFILE}.gpg"
+
+encrypt_history() {
+  if _command_exists gpg && [[ -f "$HISTFILE" ]]; then
+    # Check if HISTFILE is newer than HISTFILE_ENC
+    if [[ ! -f "$HISTFILE_ENC" || "$HISTFILE" -nt "$HISTFILE_ENC" ]]; then
+       echo $'\e[36mEncrypting Zsh history...\e[0m'
+       # Use agent if available, otherwise prompt (requires GPG_TTY set)
+       gpg --yes --batch --quiet --trust-model always -c -o "$HISTFILE_ENC" "$HISTFILE" && rm -f "$HISTFILE"
+       # Add small delay to ensure file system sync
+       sleep 0.1
+    fi
+  fi
+}
+
+decrypt_history() {
+  if _command_exists gpg && [[ -f "$HISTFILE_ENC" ]]; then
+    # Decrypt only if history file doesn't exist or is older
+    if [[ ! -f "$HISTFILE" || "$HISTFILE_ENC" -nt "$HISTFILE" ]]; then
+      echo $'\e[36mDecrypting Zsh history...\e[0m'
+      # Use agent if available, otherwise prompt
+      gpg --yes --batch --quiet --trust-model always -d "$HISTFILE_ENC" > "$HISTFILE" 2>/dev/null || \
+        echo $'\e[31m[ERROR] History decryption failed. Check GPG setup/passphrase.\e[0m'
+    fi
+  fi
+}
+
+if _command_exists gpg; then
+  # Ensure GPG_TTY is set for terminal prompts if no agent is used
+  export GPG_TTY=$(tty)
+  decrypt_history
+  # Use zshexit hook for better reliability than trap EXIT
+  zshexit_functions+=("encrypt_history")
+  if [[ -z "$GPG_AGENT_INFO" && -z "$GPG_PASSPHRASE" ]]; then
+     echo $'\e[33mTip: Use gpg-agent or set GPG_PASSPHRASE (less secure) in ~/.zshenv for seamless history encryption.\e[0m'
+  fi
+else
+  echo $'\e[33m[NOTICE] GPG not found. History will not be encrypted.\e[0m'
+  # Use non-encrypted history file path if GPG isn't available
+  export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history_unencrypted"
+  mkdir -p "$(dirname "$HISTFILE")" 2>/dev/null
+fi
+
+# --- Lazy Load NVM (Node Version Manager) ---
+# Load NVM only when 'nvm', 'node', or 'npm' command is used.
+export NVM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/nvm" # XDG compliant path (create if needed)
+# [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh" --no-use # Standard load
+# Lazy loading function:
+load_nvm() {
+  if [ -s "$NVM_DIR/nvm.sh" ]; then
+    echo $'\e[36mLoading NVM...\e[0m'
+    source "$NVM_DIR/nvm.sh" --no-use # Load NVM scripts
+    # Optionally load a default version if desired:
+    # nvm use default --silent
+    # Remove the placeholder functions
+    unset -f nvm node npm yarn pnpm
+    # Execute the original command
+    "$@"
+  else
+    echo $'\e[31mNVM directory or nvm.sh not found at '"$NVM_DIR"'\e[0m' >&2
+    return 127 # Command not found
+  fi
+}
+# Create placeholder functions for nvm commands
+if ! _command_exists nvm; then
+    nvm() { load_nvm "$@"; }
+    node() { load_nvm "$@"; }
+    npm() { load_nvm "$@"; }
+    yarn() { load_nvm "$@"; } # Add others if needed
+    pnpm() { load_nvm "$@"; }
+fi
+
+# --- Modular Configs ---
+# Source additional configuration files from a dedicated directory.
+# Encourages splitting custom aliases, functions, local settings.
+for config_file in "$ZDOTDIR"/conf.d/*.zsh; do
+  if [[ -f "$config_file" && -r "$config_file" ]]; then
+    source "$config_file"
+  fi
+done
+# Legacy support for single files (optional, create if needed)
+# [[ -f "$ZDOTDIR/aliases.zsh" ]] && source "$ZDOTDIR/aliases.zsh"
+# [[ -f "$ZDOTDIR/functions.zsh" ]] && source "$ZDOTDIR/functions.zsh"
+# [[ -f "$ZDOTDIR/local.zsh" ]] && source "$ZDOTDIR/local.zsh" # For machine-specific settings
+
+# --- Welcome Message ---
+# Displayed on new shell startup.
+welcome_message() {
+  local user_host="${COLOR_SUCCESS}$(whoami)${COLOR_PUNCTUATION}@${COLOR_NOTICE}$(hostname)${COLOR_DEFAULT}"
+  local uptime=$(${COLOR_COMMAND}uptime -p 2>/dev/null | ${COLOR_COMMAND}sed 's/up //')
+  [[ -z "$uptime" ]] && uptime="N/A"
+  local ip_addr=$(${COLOR_COMMAND}ip 2>/dev/null || echo "N/A")
+  local battery_info=$(${COLOR_FUNCTION_NAME}battery_status 2>/dev/null || echo "Battery: N/A")
+  local shell_version="${COLOR_VARIABLE}ZSH ${COLOR_DEFAULT}$ZSH_VERSION"
+
+  echo "${COLOR_SECTION}===================================================${COLOR_DEFAULT}"
+  printf "%s%s %s %s%s\n" "${Style.BRIGHT}${Fore.MAGENTA}" "🧙‍♂️ Welcome to Termux Zsh," "$user_host" "${Style.RESET_ALL}"
+  printf "%sUptime:%s %-20s %sShell:%s %s\n" "${Fore.CYAN}" "${COLOR_DEFAULT}" "$uptime" "${Fore.CYAN}" "${COLOR_DEFAULT}" "$shell_version"
+  printf "%sIP Addr:%s %-20s %s%s%s\n" "${Fore.CYAN}" "${COLOR_DEFAULT}" "$ip_addr" "${Fore.CYAN}" "$battery_info" "${COLOR_DEFAULT}"
+  echo "${COLOR_SECTION}===================================================${COLOR_DEFAULT}"
+  echo "${Fore.GREEN}Type ${COLOR_COMMAND}helpme ${Fore.GREEN}(if defined) or explore aliases/functions.${COLOR_DEFAULT}"
+  # Add a check for p10k configuration needed
+  [[ ! -f "$P10K_CONFIG" ]] && echo "${Fore.YELLOW}Run ${COLOR_COMMAND}p10k configure ${Fore.YELLOW}to customize your prompt!${COLOR_DEFAULT}"
+}
+
+# Only show welcome message for interactive shells
+[[ $- == *i* ]] && welcome_message
+
+# --- Final Touches ---
+# Powerlevel10k specific tweaks (Uncomment and modify in ~/.p10k.zsh or here)
+# typeset -g POWERLEVEL10K_LEFT_PROMPT_ELEMENTS=(os_icon dir vcs newline prompt_char)
+# typeset -g POWERLEVEL10K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time background_jobs time battery ram)
+# typeset -g POWERLEVEL10K_BATTERY_LOW_THRESHOLD=20
+# typeset -g POWERLEVEL10K_BATTERY_LOW_COLOR='red'
+# typeset -g POWERLEVEL10K_BATTERY_CHARGING_COLOR='yellow'
+# typeset -g POWERLEVEL10K_BATTERY_DISCONNECTED_COLOR='green'
+
+# Trigger user config file creation if they don't exist
+# touch "$ZDOTDIR"/{aliases,functions,local}.zsh 2>/dev/null
+
+# Ensure termux-exec is available for shebang handling if needed
+# [[ -x "$(command -v termux-exec)" ]] && termux-exec
+
+# End of Pyrmethus's Enhanced Zsh Scroll
+"""
+
+# --- The Highlighting Spell ---
+def illuminate_zsh(code):
+    """Applies Colorama colors to Zsh code lines."""
+    print(f"{COLOR_SECTION}--- Casting Illumination Spell on .zshrc ---{COLOR_DEFAULT}\n")
+    lines = code.strip().split('\n')
+    in_function_block = False
+
+    for i, line in enumerate(lines):
+        stripped_line = line.strip()
+
+        if not stripped_line:
+            print() # Preserve empty lines
+            continue
+
+        if stripped_line.startswith('#!'):
+            print(f"{COLOR_SHEBANG}{line}{COLOR_DEFAULT}")
+        elif stripped_line.startswith('#'):
+            print(f"{COLOR_COMMENT}{line}{COLOR_DEFAULT}")
+        elif stripped_line.startswith('alias '):
+            match = re.match(r'alias\s+([\w\-]+)=(.+)', stripped_line)
+            if match:
+                alias_name, alias_cmd = match.groups()
+                print(f"{COLOR_KEYWORD}alias {COLOR_ALIAS_NAME}{alias_name}{COLOR_OPERATOR}={COLOR_STRING}{alias_cmd}{COLOR_DEFAULT}")
+            else:
+                print(f"{COLOR_KEYWORD}{line}{COLOR_DEFAULT}") # Fallback coloring
+        elif stripped_line.startswith(('export ', 'typeset ')):
+             parts = line.split('=', 1)
+             declaration = parts[0]
+             value = f"{COLOR_OPERATOR}={COLOR_STRING}{parts[1]}" if len(parts) > 1 else ""
+             declaration = declaration.replace('export', f'{COLOR_KEYWORD}export{COLOR_DEFAULT}')
+             declaration = declaration.replace('typeset', f'{COLOR_KEYWORD}typeset{COLOR_DEFAULT}')
+             # Color the variable name specifically
+             declaration = re.sub(r'([A-Z_]+)', f'{COLOR_ENV_VAR}\\1{COLOR_DEFAULT}', declaration)
+             print(f"{declaration}{value}{COLOR_DEFAULT}")
+        elif stripped_line.startswith(('setopt ', 'unsetopt ')):
+             parts = line.split(maxsplit=1)
+             print(f"{COLOR_KEYWORD}{parts[0]} {COLOR_COMMAND}{parts[1]}{COLOR_DEFAULT}")
+        elif stripped_line.startswith('bindkey '):
+             parts = line.split(maxsplit=2)
+             key = parts[1] if len(parts) > 1 else ""
+             action = parts[2] if len(parts) > 2 else ""
+             print(f"{COLOR_KEYWORD}bindkey {COLOR_STRING}{key} {COLOR_FUNCTION_NAME}{action}{COLOR_DEFAULT}")
+        elif stripped_line.endswith('() {') or stripped_line.endswith('()'): # Function definition start
+            match = re.match(r'([\w_]+)\s*\(\)\s*\{?', stripped_line)
+            if match:
+                func_name = match.group(1)
+                suffix = " {" if stripped_line.endswith('{') else ""
+                # Check if it's a known helper function
+                color = COLOR_FUNCTION_NAME if not func_name.startswith('_') else COLOR_ALIAS_NAME
+                print(f"{color}{func_name}{COLOR_PUNCTUATION}(){suffix}{COLOR_DEFAULT}")
+                in_function_block = True if suffix else False
+            else:
+                 print(f"{COLOR_KEYWORD}function {COLOR_COMMAND}{line.replace('function','').strip()}{COLOR_DEFAULT}") # Basic coloring
+        elif stripped_line == '}' and in_function_block:
+            print(f"{COLOR_PUNCTUATION}{line}{COLOR_DEFAULT}")
+            in_function_block = False
+        elif stripped_line.startswith(('if ', 'elif ', 'else', 'fi', 'for ', 'while ', 'do', 'done', 'case ', 'esac', 'source ')):
+            parts = line.split(maxsplit=1)
+            command = parts[1] if len(parts) > 1 else ""
+            # Color paths in source commands
+            if parts[0] == 'source' and command:
+                 command = re.sub(r'([/~][\w./-]+)', f'{COLOR_PATH}\\1{COLOR_DEFAULT}', command)
+                 command = command.replace('"', COLOR_STRING + '"' + COLOR_DEFAULT)
+            print(f"{COLOR_KEYWORD}{parts[0]} {COLOR_COMMAND}{command}{COLOR_DEFAULT}")
+        elif stripped_line.startswith('zinit '):
+             parts = line.split(maxsplit=1)
+             print(f"{COLOR_KEYWORD}zinit {COLOR_COMMAND}{parts[1]}{COLOR_DEFAULT}")
+        elif stripped_line.startswith('zstyle '):
+             parts = line.split(maxsplit=1)
+             print(f"{COLOR_KEYWORD}zstyle {COLOR_STRING}{parts[1]}{COLOR_DEFAULT}") # Style definitions are often strings
+        else:
+            # Default coloring for commands, trying to highlight paths and variables
+            colored_line = line
+            colored_line = re.sub(r'(\$[A-Z_]+|\${[A-Z_]+[^}]*})', f'{COLOR_ENV_VAR}\\1{COLOR_DEFAULT}', colored_line) # Env Vars
+            colored_line = re.sub(r'(\$\w+|\${\w+[^}]*})', f'{COLOR_VARIABLE}\\1{COLOR_DEFAULT}', colored_line) # Other Vars
+            colored_line = re.sub(r'([/~][\w./-]+)', f'{COLOR_PATH}\\1{COLOR_DEFAULT}', colored_line) # Paths
+            colored_line = re.sub(r'("[^"]*"|\'[^\']*\')', f'{COLOR_STRING}\\1{COLOR_DEFAULT}', colored_line) # Strings
+            colored_line = colored_line.replace('&&', f'{COLOR_OPERATOR}&&{COLOR_DEFAULT}')
+            colored_line = colored_line.replace('||', f'{COLOR_OPERATOR}||{COLOR_DEFAULT}')
+            colored_line = colored_line.replace('|', f'{COLOR_OPERATOR}|{COLOR_DEFAULT}')
+            print(f"{COLOR_COMMAND}{colored_line}") # Default to command color
+
+    print(f"\n{COLOR_SECTION}--- Illumination Spell Complete ---{COLOR_DEFAULT}")
+
+# --- Execute the Spell ---
+if __name__ == "__main__":
+    print(f"{Fore.MAGENTA}{Style.BRIGHT}Pyrmethus, the Termux Coding Wizard, awakens...{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}Conjuring a colorized view of the refined Zsh Grimoire...{Style.RESET_ALL}")
+    print("-" * 40)
+
+    illuminate_zsh(zshrc_content)
+
+    print("-" * 40)
+    print(f"{Fore.GREEN}The Zsh configuration scroll is now illuminated.{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}To wield its power:{Style.RESET_ALL}")
+    print(f"{COLOR_PUNCTUATION} 1. {COLOR_COMMAND}Save this code as a Python script (e.g., {COLOR_PATH}review_zshrc.py{COLOR_COMMAND}).{Style.RESET_ALL}")
+    print(f"{COLOR_PUNCTUATION} 2. {COLOR_COMMAND}Run it in Termux: {COLOR_KEYWORD}python {COLOR_PATH}review_zshrc.py{Style.RESET_ALL}")
+    print(f"{COLOR_PUNCTUATION} 3. {COLOR_COMMAND}Manually copy the {COLOR_COMMENT}# ~/.config/zsh/.zshrc ...{COLOR_COMMAND} content into your actual {COLOR_PATH}$ZDOTDIR/.zshrc{COLOR_COMMAND} file.{Style.RESET_ALL}")
+    print(f"{COLOR_PUNCTUATION} 4. {COLOR_COMMAND}Ensure dependencies are met (run {COLOR_FUNCTION_NAME}setup_termux_zsh{COLOR_COMMAND} function or install manually).{Style.RESET_ALL}")
+    print(f"{COLOR_PUNCTUATION} 5. {COLOR_COMMAND}Reload your shell: {COLOR_KEYWORD}exec zsh{Style.RESET_ALL}")
+
+```
+
+### Commentary on the Synthesis:
+
+1.  **Integration:** I've merged the core `.zshrc` with your additional snippets, prioritizing the more robust or modern methods (e.g., Zinit over static plugin arrays, XDG paths, `typeset -U path`).
+2.  **Refinements:**
+    *   Added more comprehensive aliases (e.g., `pkg` commands, `git` workflows, Python helpers).
+    *   Enhanced the `setup_termux_zsh` function to install common useful tools (`jq`, `eza`, `bat`, `fd`, `termux-api`).
+    *   Improved the `battery_status` function for clarity and added health info.
+    *   Made the `backup_dotfiles` function more robust by checking file existence.
+    *   Refined history settings for better usability (`setopt extended_history`, `hist_verify`).
+    *   Included SSH Agent management (`start_ssh_agent`) and lazy NVM loading.
+    *   Enhanced the AI integration with clearer feedback and a standalone `chat` function.
+    *   Improved history encryption logic using `zshexit_functions` and better checks.
+    *   Standardized modular configuration loading using a `conf.d` directory pattern.
+    *   Made the welcome message more informative and visually appealing.
+3.  **Colorization:** The Python script uses Colorama to parse the Zsh code line by line, applying distinct colors to comments, keywords, variables, strings, paths, functions, aliases, and more, making it vastly more readable in the Termux terminal.
+4.  **Termux Focus:** Paths (`~/storage/downloads`), commands (`termux-api`, `tsudo`), and setup considerations are tailored for the Termux environment.
+
+This illuminated scroll represents a powerful and well-structured configuration for your Termux Zsh shell. Run the Python script to view it in its full colored glory, then carefully transfer the Zsh code itself to your `$ZDOTDIR/.zshrc`. May your Termux sessions be swift and potent! ✨
