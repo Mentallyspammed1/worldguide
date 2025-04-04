@@ -1,0 +1,471 @@
+Okay, here are 20 shell functions using `ccxt` for Bybit, designed to load API keys from a `.env` file.
+
+**Important Setup:**
+
+1.  **Install Dependencies:**
+    ```bash
+    pip install ccxt python-dotenv
+    ```
+2.  **Create `.env` file:** In the same directory where you'll use these functions, create a `.env` file with your Bybit API keys:
+    ```
+    BYBIT_API_KEY=YOUR_BYBIT_API_KEY
+    BYBIT_SECRET=YOUR_BYBIT_SECRET
+    ```
+    Replace `YOUR_BYBIT_API_KEY` and `YOUR_BYBIT_SECRET` with your actual Bybit API keys.
+3.  **Save functions to your shell config:** Add the following functions to your `~/.bashrc`, `~/.zshrc`, or your preferred shell configuration file, and then `source ~/.bashrc` (or your shell config file) to load them.
+
+**Shell Functions:**
+
+```bash
+# --- CCXT Bybit Functions ---
+
+# Helper function to execute python scripts with dotenv loading and ccxt
+_ccxt_bybit_python() {
+  python -c "
+import ccxt, os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+exchange = ccxt.bybit({
+    'apiKey': os.getenv('BYBIT_API_KEY'),
+    'secret': os.getenv('BYBIT_SECRET'),
+})
+
+if not exchange.apiKey or not exchange.secret:
+    print('Error: BYBIT_API_KEY and BYBIT_SECRET must be set in .env file.')
+    exit(1)
+
+${1} # Python code passed as argument
+  "
+}
+
+
+# 1. Get Account Balance
+bybit_balance() {
+  _ccxt_bybit_python "
+try:
+    balance = exchange.fetch_balance()
+    print('Account Balance:')
+    if balance and 'total' in balance:
+        for currency, amount in balance['total'].items():
+            if amount > 0: # Show only currencies with balance
+                print(f'  {currency}: {amount}')
+    else:
+        print('Could not retrieve balance or empty balance.')
+except Exception as e:
+    print(f'Error fetching balance: {e}')
+  "
+}
+
+# 2. Get Open Positions
+bybit_positions() {
+  _ccxt_bybit_python "
+try:
+    positions = exchange.fetch_positions()
+    open_positions = [p for p in positions if p['side']] # Filter out closed positions
+
+    if open_positions:
+        print('Open Positions:')
+        for pos in open_positions:
+            print(f'  Symbol: {pos['symbol']}, Side: {pos['side']}, Amount: {pos['amount']}, Entry Price: {pos['entryPrice']}, Liquidation Price: {pos['liquidationPrice']}')
+    else:
+        print('No open positions.')
+except Exception as e:
+    print(f'Error fetching positions: {e}')
+  "
+}
+
+# 3. Get Current Leverage (Requires symbol)
+bybit_leverage() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_leverage <symbol>"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+try:
+    leverage_settings = exchange.fetch_leverage(symbol) # This might not be directly available in ccxt, check Bybit API docs
+    print(f'Leverage for {symbol}:')
+    print(leverage_settings) # Output might need parsing based on actual API response
+except Exception as e:
+    print(f'Error fetching leverage for {symbol}: {e}')
+  "
+}
+
+# 4. Set Leverage (Requires symbol and leverage value)
+bybit_set_leverage() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: bybit_set_leverage <symbol> <leverage_value>"
+    echo "Example: bybit_set_leverage BTC/USDT 20"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+leverage = int('$2') # Ensure leverage is an integer
+try:
+    exchange.set_leverage(leverage, symbol)
+    print(f'Leverage set to {leverage}x for {symbol}')
+except Exception as e:
+    print(f'Error setting leverage for {symbol}: {e}')
+  "
+}
+
+# 5. Get All Markets
+bybit_markets() {
+  _ccxt_bybit_python "
+try:
+    markets = exchange.load_markets()
+    print('Bybit Markets:')
+    for symbol, market in markets.items():
+        print(f'  {symbol} - Type: {market['type']},  Quote: {market['quote']}, Base: {market['base']}')
+except Exception as e:
+    print(f'Error fetching markets: {e}')
+  "
+}
+
+# 6. Get Tickers for all Markets (Can be verbose)
+bybit_tickers() {
+  _ccxt_bybit_python "
+try:
+    tickers = exchange.fetch_tickers()
+    print('Bybit Tickers:')
+    for symbol, ticker in tickers.items():
+        print(f'  {symbol}: Bid: {ticker['bid']}, Ask: {ticker['ask']}, Last: {ticker['last']}, Volume: {ticker['baseVolume']}')
+except Exception as e:
+    print(f'Error fetching tickers: {e}')
+  "
+}
+
+# 7. Get Ticker for a Specific Symbol
+bybit_ticker() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_ticker <symbol>"
+    echo "Example: bybit_ticker BTC/USDT"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+try:
+    ticker = exchange.fetch_ticker(symbol)
+    print(f'Ticker for {symbol}:')
+    print(f'  Bid: {ticker['bid']}, Ask: {ticker['ask']}, Last: {ticker['last']}, Volume: {ticker['baseVolume']}, High: {ticker['high']}, Low: {ticker['low']}')
+except Exception as e:
+    print(f'Error fetching ticker for {symbol}: {e}')
+  "
+}
+
+# 8. Get Order Book for a Symbol (Default limit 10)
+bybit_orderbook() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_orderbook <symbol> [limit=10]"
+    echo "Example: bybit_orderbook BTC/USDT 20"
+    return 1
+  fi
+  limit=${2:-10} # Default limit is 10 if not provided
+  _ccxt_bybit_python "
+symbol = '$1'
+limit = int('$limit')
+try:
+    orderbook = exchange.fetch_order_book(symbol, limit=limit)
+    print(f'Order Book for {symbol} (Limit: {limit}):')
+    print('  Asks:')
+    for price, amount in orderbook['asks'][:5]: # Show top 5 asks
+        print(f'    Price: {price}, Amount: {amount}')
+    print('  Bids:')
+    for price, amount in orderbook['bids'][:5]: # Show top 5 bids
+        print(f'    Price: {price}, Amount: {amount}')
+except Exception as e:
+    print(f'Error fetching order book for {symbol}: {e}')
+  "
+}
+
+# 9. Get Recent Trades for a Symbol (Default limit 20)
+bybit_trades() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_trades <symbol> [limit=20]"
+    echo "Example: bybit_trades BTC/USDT 50"
+    return 1
+  fi
+  limit=${2:-20} # Default limit is 20 if not provided
+  _ccxt_bybit_python "
+symbol = '$1'
+limit = int('$limit')
+try:
+    trades = exchange.fetch_trades(symbol, limit=limit)
+    print(f'Recent Trades for {symbol} (Limit: {limit}):')
+    for trade in trades:
+        print(f'  ID: {trade['id']}, Timestamp: {trade['datetime']}, Side: {trade['side']}, Price: {trade['price']}, Amount: {trade['amount']}')
+except Exception as e:
+    print(f'Error fetching trades for {symbol}: {e}')
+  "
+}
+
+# 10. Get OHLCV Data (Candlesticks - Default timeframe 1h, limit 20)
+bybit_ohlcv() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_ohlcv <symbol> [timeframe=1h] [limit=20]"
+    echo "Example: bybit_ohlcv BTC/USDT 5m 100"
+    return 1
+  fi
+  timeframe=${2:-'1h'} # Default timeframe is 1h if not provided
+  limit=${3:-20}      # Default limit is 20 if not provided
+  _ccxt_bybit_python "
+symbol = '$1'
+timeframe = '$timeframe'
+limit = int('$limit')
+try:
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+    print(f'OHLCV Data for {symbol} ({timeframe}, Limit: {limit}):')
+    for candle in ohlcv:
+        print(f'  Timestamp: {exchange.iso8601(candle[0])}, Open: {candle[1]}, High: {candle[2]}, Low: {candle[3]}, Close: {candle[4]}, Volume: {candle[5]}')
+except Exception as e:
+    print(f'Error fetching OHLCV data for {symbol}: {e}')
+  "
+}
+
+# 11. Create Market Buy Order
+bybit_create_market_buy_order() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: bybit_create_market_buy_order <symbol> <amount>"
+    echo "Example: bybit_create_market_buy_order BTC/USDT 0.01"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+amount = float('$2')
+try:
+    order = exchange.create_market_buy_order(symbol, amount)
+    print('Market Buy Order Created:')
+    print(order)
+except Exception as e:
+    print(f'Error creating market buy order: {e}')
+  "
+}
+
+# 12. Create Market Sell Order
+bybit_create_market_sell_order() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: bybit_create_market_sell_order <symbol> <amount>"
+    echo "Example: bybit_create_market_sell_order BTC/USDT 0.01"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+amount = float('$2')
+try:
+    order = exchange.create_market_sell_order(symbol, amount)
+    print('Market Sell Order Created:')
+    print(order)
+except Exception as e:
+    print(f'Error creating market sell order: {e}')
+  "
+}
+
+# 13. Create Limit Buy Order
+bybit_create_limit_buy_order() {
+  if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+    echo "Usage: bybit_create_limit_buy_order <symbol> <amount> <price>"
+    echo "Example: bybit_create_limit_buy_order BTC/USDT 0.01 25000"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+amount = float('$2')
+price = float('$3')
+try:
+    order = exchange.create_limit_buy_order(symbol, amount, price)
+    print('Limit Buy Order Created:')
+    print(order)
+except Exception as e:
+    print(f'Error creating limit buy order: {e}')
+  "
+}
+
+# 14. Create Limit Sell Order
+bybit_create_limit_sell_order() {
+  if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+    echo "Usage: bybit_create_limit_sell_order <symbol> <amount> <price>"
+    echo "Example: bybit_create_limit_sell_order BTC/USDT 0.01 26000"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+amount = float('$2')
+price = float('$3')
+try:
+    order = exchange.create_limit_sell_order(symbol, amount, price)
+    print('Limit Sell Order Created:')
+    print(order)
+except Exception as e:
+    print(f'Error creating limit sell order: {e}')
+  "
+}
+
+# 15. Cancel Order (Requires order ID and symbol)
+bybit_cancel_order() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: bybit_cancel_order <order_id> <symbol>"
+    echo "Example: bybit_cancel_order 123456789 BTC/USDT"
+    return 1
+  fi
+  _ccxt_bybit_python "
+order_id = '$1'
+symbol = '$2'
+try:
+    result = exchange.cancel_order(order_id, symbol)
+    print(f'Order {order_id} cancelled:')
+    print(result)
+except Exception as e:
+    print(f'Error cancelling order {order_id}: {e}')
+  "
+}
+
+# 16. Cancel All Open Orders (Requires symbol)
+bybit_cancel_all_orders() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_cancel_all_orders <symbol>"
+    echo "Example: bybit_cancel_all_orders BTC/USDT"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+try:
+    result = exchange.cancel_all_orders(symbol)
+    print(f'All open orders for {symbol} cancelled:')
+    print(result)
+except Exception as e:
+    print(f'Error cancelling all orders for {symbol}: {e}')
+  "
+}
+
+# 17. Fetch Order (Requires order ID and symbol)
+bybit_fetch_order() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: bybit_fetch_order <order_id> <symbol>"
+    echo "Example: bybit_fetch_order 123456789 BTC/USDT"
+    return 1
+  fi
+  _ccxt_bybit_python "
+order_id = '$1'
+symbol = '$2'
+try:
+    order = exchange.fetch_order(order_id, symbol)
+    print(f'Order {order_id} details:')
+    print(order)
+except Exception as e:
+    print(f'Error fetching order {order_id}: {e}')
+  "
+}
+
+# 18. Fetch Open Orders (Requires symbol)
+bybit_fetch_orders() { # Renamed from fetch_open_orders as fetch_orders is more general
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_fetch_orders <symbol>"
+    echo "Example: bybit_fetch_orders BTC/USDT"
+    return 1
+  fi
+  _ccxt_bybit_python "
+symbol = '$1'
+try:
+    orders = exchange.fetch_orders(symbol) # fetch_orders without status arg fetches open orders by default on many exchanges
+    if orders:
+        print(f'Open Orders for {symbol}:')
+        for order in orders:
+            print(f'  ID: {order['id']}, Status: {order['status']}, Type: {order['type']}, Side: {order['side']}, Amount: {order['amount']}, Price: {order['price']}')
+    else:
+        print(f'No open orders for {symbol}.')
+except Exception as e:
+    print(f'Error fetching open orders for {symbol}: {e}')
+  "
+}
+
+
+# 19. Fetch Closed Orders (Requires symbol, optional limit)
+bybit_fetch_closed_orders() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_fetch_closed_orders <symbol> [limit=10]"
+    echo "Example: bybit_fetch_closed_orders BTC/USDT 5"
+    return 1
+  fi
+  limit=${2:-10} # Default limit is 10 if not provided
+  _ccxt_bybit_python "
+symbol = '$1'
+limit = int('$limit')
+try:
+    orders = exchange.fetch_closed_orders(symbol, limit=limit) # Some exchanges might require status='closed'
+    if orders:
+        print(f'Last {limit} Closed Orders for {symbol}:')
+        for order in orders:
+            print(f'  ID: {order['id']}, Status: {order['status']}, Type: {order['type']}, Side: {order['side']}, Amount: {order['amount']}, Price: {order['price']}, Filled: {order['filled']}, Remaining: {order['remaining']}')
+    else:
+        print(f'No closed orders found for {symbol}.')
+except Exception as e:
+    print(f'Error fetching closed orders for {symbol}: {e}')
+  "
+}
+
+
+# 20. Fetch My Trades (Requires symbol, optional limit)
+bybit_fetch_my_trades() {
+  if [ -z "$1" ]; then
+    echo "Usage: bybit_fetch_my_trades <symbol> [limit=10]"
+    echo "Example: bybit_fetch_my_trades BTC/USDT 20"
+    return 1
+  fi
+  symbol="$1"
+  limit=${2:-10} # Default limit is 10 if not provided
+  _ccxt_bybit_python "
+symbol = '$symbol'
+limit = int('$limit')
+try:
+    trades = exchange.fetch_my_trades(symbol, limit=limit)
+    if trades:
+        print(f'Last {limit} Trades for {symbol}:')
+        for trade in trades:
+            print(f'  ID: {trade['id']}, Timestamp: {exchange.iso8601(trade['timestamp'])}, Side: {trade['side']}, Price: {trade['price']}, Amount: {trade['amount']}, Cost: {trade['cost']}, Fee: {trade['fee']}')
+    else:
+        print(f'No trades found for {symbol}.')
+except Exception as e:
+    print(f'Error fetching trades for {symbol}: {e}')
+  "
+}
+
+# --- End CCXT Bybit Functions ---
+```
+
+**How to use:**
+
+1.  **Ensure setup is complete** (dependencies installed, `.env` file created and populated).
+2.  **Source your shell configuration file:** `source ~/.bashrc` (or whichever file you added the functions to).
+3.  **Use the functions from your terminal:**
+
+    *   `bybit_balance`
+    *   `bybit_positions`
+    *   `bybit_leverage BTC/USDT`
+    *   `bybit_set_leverage BTC/USDT 20`
+    *   `bybit_markets`
+    *   `bybit_tickers`
+    *   `bybit_ticker BTC/USDT`
+    *   `bybit_orderbook BTC/USDT 30`
+    *   `bybit_trades ETH/USDT 100`
+    *   `bybit_ohlcv BTC/USDT 15m 50`
+    *   `bybit_create_market_buy_order BTC/USDT 0.005`
+    *   `bybit_create_limit_sell_order ETH/USDT 0.1 1800`
+    *   `bybit_cancel_order ORDER_ID BTC/USDT` (replace `ORDER_ID`)
+    *   `bybit_cancel_all_orders BTC/USDT`
+    *   `bybit_fetch_order ORDER_ID BTC/USDT` (replace `ORDER_ID`)
+    *   `bybit_fetch_orders BTC/USDT`
+    *   `bybit_fetch_closed_orders BTC/USDT 5`
+    *   `bybit_fetch_my_trades BTC/USDT 10`
+
+**Important Notes:**
+
+*   **Error Handling:** The functions include basic error handling (try-except blocks) to catch common issues and print error messages to the console.
+*   **API Keys Security:**  Storing API keys in a `.env` file is better than hardcoding them in scripts, but still, be cautious about committing your `.env` file to version control or sharing it.
+*   **Rate Limiting:** Be mindful of Bybit's API rate limits.  Avoid running these functions in very rapid succession, especially functions that fetch a lot of data (like `bybit_tickers` or repeated calls to `bybit_ohlcv` with large limits).
+*   **Functionality:**  These functions cover a range of common actions. You can extend them or create new ones based on your specific trading needs and the capabilities of the `ccxt` and Bybit APIs.
+*   **Bybit API Specifics:** Some functions might need adjustments based on the exact way Bybit's API is implemented in `ccxt`. Always refer to the `ccxt` documentation and Bybit API documentation if you encounter issues or need more advanced features.
+*   **Leverage Function:** The `bybit_leverage` function is a placeholder as directly fetching leverage settings might not be a standard `ccxt` function. You might need to consult the Bybit API documentation for the specific endpoint to retrieve leverage information and adapt the function accordingly. Setting leverage (`bybit_set_leverage`) should work if supported by `ccxt` for Bybit.
+
+Remember to test these functions carefully in a test environment or with small amounts before using them for live trading with significant funds.
