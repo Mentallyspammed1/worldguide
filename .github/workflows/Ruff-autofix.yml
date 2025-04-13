@@ -1,9 +1,20 @@
-name: Ruff Autofix PR
+name: Auto Ruff Linting and Fixes
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.py'
+      - '.ruff.toml'
+      - 'pyproject.toml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.py'
+      - '.ruff.toml'
+      - 'pyproject.toml'
   workflow_dispatch:
 
 permissions:
@@ -11,66 +22,137 @@ permissions:
   pull-requests: write
 
 jobs:
-  ruff-propose-fixes:
+  ruff-auto-fix:
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-pr
       cancel-in-progress: true
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: 'requirements-lint.txt'
 
-      - name: Install Ruff
-        run: pip install ruff
-
-      - name: Run Ruff Formatter and Linter with Autofix
-        id: ruff_autofix
+      - name: Install Dependencies
         run: |
-          ruff check . --fix --exit-non-zero-on-fix
-          echo "Ruff ran with exit code $?"
+          python -m pip install --upgrade pip
+          pip install ruff==0.6.8
+
+      - name: Create Default Ruff Configuration
+        run: |
+          if [ ! -f pyproject.toml ]; then
+            echo '[tool.ruff]
+            line-length = 88
+            target-version = "py311"
+            select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "PT", "SIM", "TID", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "NPY", "RUF"]
+            ignore = []
+            fixable = ["ALL"]
+            unfixable = []
+            exclude = [
+                ".git",
+                ".venv",
+                "venv",
+                "__pycache__",
+                "build",
+                "dist",
+                "*.egg-info",
+                ".pytest_cache",
+                ".mypy_cache",
+                ".ruff_cache",
+            ]
+
+            [tool.ruff.format]
+            quote-style = "double"
+            indent-style = "space"
+            skip-magic-trailing-comma = false
+            line-ending = "lf"
+
+            [tool.ruff.lint]
+            ignore-init-module-imports = true
+
+            [tool.ruff.lint.pydocstyle]
+            convention = "google"
+
+            [tool.ruff.lint.isort]
+            known-first-party = []
+            known-third-party = []
+            force-single-line = false
+            combine-as-imports = true
+            split-on-trailing-comma = true' > pyproject.toml
+          fi
+
+      - name: Run Ruff Linting and Auto-Fix
+        id: ruff_lint
+        run: |
+          ruff format .
+          ruff check . --fix --exit-non-zero-on-fix --output-format=full > ruff_output.txt || true
+          echo "Ruff exit code: $?"
+          echo "changes_detected=false" >> $GITHUB_OUTPUT
+          if [ -s ruff_output.txt ]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          fi
         continue-on-error: true
 
-      - name: Create Pull Request with fixes
+      - name: Upload Ruff Output as Artifact
+        if: steps.ruff_lint.outputs.changes_detected == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-output
+          path: ruff_output.txt
+          retention-days: 7
+
+      - name: Create Pull Request with Fixes
+        if: steps.ruff_lint.outputs.changes_detected == 'true'
         id: create_pr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "[Auto] Apply Ruff fixes"
+          commit-message: "chore: Apply Ruff linting and formatting fixes"
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-          branch: ruff-fixes/${{ github.head_ref || github.ref_name }}
-          branch-suffix: none
+          branch: ruff-fixes/${{ github.run_id }}-${{ github.run_attempt }}
           delete-branch: true
-          title: '[Auto] Ruff fixes for ${{ github.head_ref || github.ref_name }}'
+          title: 'chore: Auto Ruff linting and formatting fixes'
           body: |
-            Ruff autofix identified and applied changes.
+            This pull request applies automated linting and formatting fixes using Ruff.
 
-            Triggered by commit: `${{ github.sha }}`
-            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ### Changes
+            - Ran `ruff format` for consistent code style
+            - Ran `ruff check --fix` to address linting issues
 
-            Please review and merge.
-          labels: autofix, ruff, automated pr
+            **Triggering Commit**: `${{ github.sha }}`
+            **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Please review the changes carefully. The Ruff output is available as an artifact in the workflow run.
+
+          labels: |
+            autofix
+            ruff
+            automated-pr
           assignees: ${{ github.actor }}
+          reviewers: ${{ github.actor }}
 
-      - name: Check PR Creation Status and Ruff Outcome
+      - name: Summarize Workflow Outcome
         if: always()
         run: |
-          echo "Pull Request URL: ${{ steps.create_pr.outputs.pull-request-url }}"
-          echo "PR Number: ${{ steps.create_pr.outputs.pull-request-number }}"
-          echo "PR Created/Updated: ${{ steps.create_pr.outputs.pull-request-operation }}"
-          echo "Ruff Autofix Step Outcome: ${{ steps.ruff_autofix.outcome }}"
+          echo "Ruff Step Outcome: ${{ steps.ruff_lint.outcome }}"
+          echo "Changes Detected: ${{ steps.ruff_lint.outputs.changes_detected }}"
+          echo "Pull Request URL: ${{ steps.create_pr.outputs.pull-request-url || 'No PR created' }}"
+          echo "PR Number: ${{ steps.create_pr.outputs.pull-request-number || 'N/A' }}"
 
-          if [[ "${{ steps.ruff_autofix.outcome }}" == "failure" ]]; then
-            echo "::error::Ruff step failed, likely due to unfixable errors. Check the logs and the created PR (if any)."
+          if [[ "${{ steps.ruff_lint.outcome }}" == "failure" && "${{ steps.ruff_lint.outputs.changes_detected }}" != "true" ]]; then
+            echo "::error::Ruff failed, likely due to unfixable errors. Check the logs for details."
             exit 1
-          elif [[ "${{ steps.create_pr.outputs.pull-request-operation }}" == "none" ]]; then
-             echo "Ruff ran successfully and no code changes were needed."
+          elif [[ "${{ steps.create_pr.outputs.pull-request-operation }}" == "none" || "${{ steps.ruff_lint.outputs.changes_detected }}" != "true" ]]; then
+            echo "No changes detected by Ruff. No pull request created."
           else
-             echo "Ruff fixes proposed in PR ${{ steps.create_pr.outputs.pull-request-number }}."
+            echo "Ruff fixes proposed in PR #${{ steps.create_pr.outputs.pull-request-number }}."
+          fi
