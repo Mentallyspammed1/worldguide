@@ -34,12 +34,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify Repository Checkout
+        run: |
+          if [ ! -d .git ]; then
+            echo "::error::Repository not properly checked out. Please ensure the checkout step is correct."
+            exit 1
+          fi
+          ls -la
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: 'requirements-lint.txt'
 
       - name: Install Dependencies
         run: |
@@ -87,6 +94,9 @@ jobs:
             force-single-line = false
             combine-as-imports = true
             split-on-trailing-comma = true' > pyproject.toml
+            echo "Created pyproject.toml with default Ruff configuration."
+          else
+            echo "pyproject.toml already exists, skipping creation."
           fi
 
       - name: Run Ruff Linting and Auto-Fix
@@ -127,6 +137,7 @@ jobs:
             ### Changes
             - Ran `ruff format` for consistent code style
             - Ran `ruff check --fix` to address linting issues
+            - Created `pyproject.toml` if it was missing
 
             **Triggering Commit**: `${{ github.sha }}`
             **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
