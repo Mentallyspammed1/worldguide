@@ -32,7 +32,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Ensure full repository history is checked out
 
       - name: Debug Repository Contents
         run: |
@@ -121,17 +121,13 @@ jobs:
         with:
           name: ruff-output
           path: ruff_output.txt
-          retention-days: 7
 
       - name: Create Pull Request with Fixes
         if: steps.ruff_lint.outputs.changes_detected == 'true'
-        id: create_pr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: Apply Ruff linting and formatting fixes"
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           branch: ruff-fixes/${{ github.run_id }}-${{ github.run_attempt }}
           delete-branch: true
           title: 'chore: Auto Ruff linting and formatting fixes'
@@ -170,4 +166,3 @@ jobs:
             echo "No changes detected by Ruff. No pull request created."
           else
             echo "Ruff fixes proposed in PR #${{ steps.create_pr.outputs.pull-request-number }}."
-          fi
