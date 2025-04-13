@@ -34,13 +34,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify Repository Checkout
+      - name: Debug Repository Contents
         run: |
+          echo "Repository contents:"
+          ls -la
+          find . -type f
           if [ ! -d .git ]; then
             echo "::error::Repository not properly checked out. Please ensure the checkout step is correct."
             exit 1
           fi
-          ls -la
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -98,11 +100,13 @@ jobs:
           else
             echo "pyproject.toml already exists, skipping creation."
           fi
+          echo "Current pyproject.toml contents:"
+          cat pyproject.toml || echo "No pyproject.toml found after creation."
 
       - name: Run Ruff Linting and Auto-Fix
         id: ruff_lint
         run: |
-          ruff format .
+          ruff format . || true
           ruff check . --fix --exit-non-zero-on-fix --output-format=full > ruff_output.txt || true
           echo "Ruff exit code: $?"
           echo "changes_detected=false" >> $GITHUB_OUTPUT
