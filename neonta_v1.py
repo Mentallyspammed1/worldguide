@@ -56,9 +56,6 @@ DEFAULT_TIMEZONE = "America/Chicago"
 try:
     TIMEZONE = ZoneInfo(os.getenv("TIMEZONE", DEFAULT_TIMEZONE))
 except Exception:
-    print(
-        f"{Fore.YELLOW}Warning: Could not load timezone '{os.getenv('TIMEZONE', DEFAULT_TIMEZONE)}'. Using UTC.{Style.RESET_ALL}"
-    )
     TIMEZONE = ZoneInfo("UTC")
 
 # Retry Configuration
@@ -182,13 +179,8 @@ def load_config(filepath: str) -> dict:
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=2)
-            print(
-                f"{NEON_YELLOW}Created new config file '{filepath}' with defaults.{RESET}"
-            )
             return default_config
-        except OSError as e:
-            print(f"{NEON_RED}Error creating default config file: {e}{RESET}")
-            print(f"{NEON_YELLOW}Loading internal defaults.{RESET}")
+        except OSError:
             return default_config
 
     try:
@@ -208,9 +200,7 @@ def load_config(filepath: str) -> dict:
                 if key in user_config and isinstance(user_config[key], dict):
                     merged_config[key] = {**default_config[key], **user_config[key]}
             return merged_config
-    except (FileNotFoundError, json.JSONDecodeError, TypeError) as e:
-        print(f"{NEON_RED}Error loading/parsing config file '{filepath}': {e}{RESET}")
-        print(f"{NEON_YELLOW}Loading internal defaults.{RESET}")
+    except (FileNotFoundError, json.JSONDecodeError, TypeError):
         return default_config
 
 
@@ -255,8 +245,8 @@ def setup_logger(symbol: str) -> logging.Logger:
         file_formatter = SensitiveFormatter("%(asctime)s - %(levelname)s - %(message)s")
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
-    except Exception as e:
-        print(f"{NEON_RED}Failed to set up file logger: {e}{RESET}")
+    except Exception:
+        pass
 
     # Stream Handler (Console)
     stream_handler = logging.StreamHandler()
@@ -301,7 +291,7 @@ class BybitCCXTClient:
         api_secret: str,
         base_url: str,
         logger_instance: logging.Logger,
-    ):
+    ) -> None:
         self.logger = logger_instance
         self.exchange = ccxt_async.bybit({
             "apiKey": api_key,
@@ -315,7 +305,7 @@ class BybitCCXTClient:
             "timeout": CCXT_TIMEOUT_MS,
         })
 
-    async def close(self):
+    async def close(self) -> None:
         """Close the underlying exchange connection."""
         if self.exchange:
             await self.exchange.close()
@@ -492,7 +482,9 @@ class BybitCCXTClient:
 class TradingAnalyzer:
     """Performs technical analysis on kline data."""
 
-    def __init__(self, config: dict, logger_instance: logging.Logger, symbol: str):
+    def __init__(
+        self, config: dict, logger_instance: logging.Logger, symbol: str
+    ) -> None:
         self.config = config
         self.logger = logger_instance
         self.symbol = symbol
@@ -631,7 +623,7 @@ class TradingAnalyzer:
             high_f = float(high)
             low_f = float(low)
             close_f = float(close)
-            current_price_f = float(current_price)
+            float(current_price)
 
             # Fibonacci Retracement
             diff = high_f - low_f
@@ -816,8 +808,8 @@ class TradingAnalyzer:
         # --- Trend & Momentum ---
         ema_short_col = f"EMA_{self.indicator_settings.get('ema_short_period', 12)}"
         ema_long_col = f"EMA_{self.indicator_settings.get('ema_long_period', 26)}"
-        sma_short_col = f"SMA_{self.indicator_settings.get('sma_short_period', 10)}"
-        sma_long_col = f"SMA_{self.indicator_settings.get('sma_long_period', 50)}"
+        f"SMA_{self.indicator_settings.get('sma_short_period', 10)}"
+        f"SMA_{self.indicator_settings.get('sma_long_period', 50)}"
         adx_col = f"ADX_{self.indicator_settings.get('adx_period', 14)}"
         dmp_col = f"DMP_{self.indicator_settings.get('adx_period', 14)}"  # ADX +DI
         dmn_col = f"DMN_{self.indicator_settings.get('adx_period', 14)}"  # ADX -DI
@@ -1334,7 +1326,7 @@ async def run_analysis_loop(
     client: BybitCCXTClient,
     analyzer: TradingAnalyzer,
     logger_instance: logging.Logger,
-):
+) -> None:
     """The main loop for fetching data and running analysis."""
     analysis_interval_sec = CONFIG.get("analysis_interval_seconds", 30)
     kline_limit = CONFIG.get("kline_limit", 200)
@@ -1443,7 +1435,7 @@ async def run_analysis_loop(
         await async_sleep(sleep_duration)
 
 
-async def main():
+async def main() -> None:
     global logger  # Allow modification of the global logger variable
 
     symbol = ""
@@ -1460,9 +1452,7 @@ async def main():
             symbol = symbol_input
             break
         else:
-            print(
-                f"{NEON_RED}Invalid symbol format. Use format like 'BTC/USDT'.{RESET}"
-            )
+            pass
 
     interval = ""
     while True:
@@ -1475,9 +1465,6 @@ async def main():
                 "default_interval", "15"
             )  # Example default
             interval = default_interval_minutes
-            print(
-                f"{NEON_YELLOW}No interval provided. Using default: {interval}{RESET}"
-            )
             break
         if interval_input in VALID_INTERVALS:
             interval = interval_input
@@ -1485,14 +1472,7 @@ async def main():
         # Allow ccxt intervals like '1h' as input too
         if interval_input in REVERSE_CCXT_INTERVAL_MAP:
             interval = REVERSE_CCXT_INTERVAL_MAP[interval_input]
-            print(
-                f"{NEON_YELLOW}Using interval {interval} (mapped from {interval_input}){RESET}"
-            )
             break
-
-        print(
-            f"{NEON_RED}Invalid interval. Choose from: {', '.join(VALID_INTERVALS)}{RESET}"
-        )
 
     # Setup logger after getting symbol
     logger = setup_logger(symbol)
@@ -1527,7 +1507,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print(f"\n{NEON_YELLOW}Process interrupted by user. Exiting.{RESET}")
-    except Exception as e:
+        pass
+    except Exception:
         # Catch potential errors during asyncio setup/shutdown itself
-        print(f"\n{NEON_RED}A critical error occurred: {e}{RESET}")
+        pass

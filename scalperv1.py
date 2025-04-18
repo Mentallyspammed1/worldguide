@@ -64,7 +64,7 @@ def retry_api_call(max_retries: int = 3, initial_delay: int = 1):
 
 
 class ImprovedTradingBot:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the trading bot with enhanced configuration and features.
         This version uses no external ML libraries and relies entirely on technical analysis.
         """
@@ -244,7 +244,7 @@ class ImprovedTradingBot:
         return analysis
 
     def calculate_ema(self, data: np.ndarray, period: int = None) -> float:
-        """Calculate Exponential Moving Average"""
+        """Calculate Exponential Moving Average."""
         if period is None:
             period = self.ema_period
         weights = np.exp(np.linspace(-1.0, 0.0, period))
@@ -252,7 +252,7 @@ class ImprovedTradingBot:
         return np.convolve(data, weights, mode="valid")[-1]
 
     def calculate_rsi(self, data: np.ndarray) -> float:
-        """Calculate Relative Strength Index"""
+        """Calculate Relative Strength Index."""
         deltas = np.diff(data)
         gains = np.maximum(deltas, 0)
         losses = -np.minimum(deltas, 0)
@@ -261,7 +261,7 @@ class ImprovedTradingBot:
         return 100 - (100 / (1 + avg_gain / avg_loss)) if avg_loss != 0 else 100
 
     def calculate_macd(self, data: np.ndarray) -> dict[str, float]:
-        """Calculate MACD indicators"""
+        """Calculate MACD indicators."""
         ema_fast = self.calculate_ema(data, self.macd_fast)
         ema_slow = self.calculate_ema(data, self.macd_slow)
         macd_line = ema_fast - ema_slow
@@ -273,7 +273,7 @@ class ImprovedTradingBot:
         }
 
     def calculate_bollinger_bands(self, data: np.ndarray) -> dict[str, float]:
-        """Calculate Bollinger Bands"""
+        """Calculate Bollinger Bands."""
         sma = np.mean(data[-self.bollinger_period :])
         std = np.std(data[-self.bollinger_period :])
         return {
@@ -285,7 +285,7 @@ class ImprovedTradingBot:
     def calculate_atr(
         self, highs: np.ndarray, lows: np.ndarray, closes: np.ndarray, period: int = 14
     ) -> float:
-        """Calculate Average True Range"""
+        """Calculate Average True Range."""
         tr_list = []
         for i in range(1, len(closes)):
             tr = max(
@@ -297,7 +297,7 @@ class ImprovedTradingBot:
         return np.mean(tr_list[-period:])
 
     def calculate_stoch_rsi(self, data: np.ndarray) -> tuple[float, float]:
-        """Calculate Stochastic RSI"""
+        """Calculate Stochastic RSI."""
         rsi_values = np.array([
             self.calculate_rsi(data[i:])
             for i in range(len(data) - self.stoch_period + 1)

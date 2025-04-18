@@ -9,7 +9,6 @@ import yaml
 from colorama import Fore, Style
 from colorama import init as colorama_init
 from dotenv import load_dotenv
-
 from ta.momentum import RSIIndicator
 from ta.trend import MACD, EMAIndicator
 from ta.volatility import AverageTrueRange
@@ -89,7 +88,7 @@ def retry_api_call(max_retries=3, initial_delay=1):
 class EnhancedTradingBot:
     """Enhanced Trading Bot with configurable signals and integrated Bybit trading via ccxt."""
 
-    def __init__(self, symbol, config_file="config.yaml"):
+    def __init__(self, symbol, config_file="config.yaml") -> None:
         self.load_config(config_file)
         logger.info("Initializing EnhancedTradingBot...")
 
@@ -170,7 +169,7 @@ class EnhancedTradingBot:
         logger.info(f"EnhancedTradingBot initialized for symbol: {self.symbol}")
         logger.info("EnhancedTradingBot initialization complete.")
 
-    def load_config(self, config_file):
+    def load_config(self, config_file) -> None:
         try:
             with open(config_file) as f:
                 self.config = yaml.safe_load(f)
@@ -289,8 +288,8 @@ class EnhancedTradingBot:
     def calculate_indicators(self, ohlcv):
         """Calculates technical indicators."""
         close_prices = np.array([candle[4] for candle in ohlcv])
-        high_prices = np.array([candle[2] for candle in ohlcv])
-        low_prices = np.array([candle[3] for candle in ohlcv])
+        np.array([candle[2] for candle in ohlcv])
+        np.array([candle[3] for candle in ohlcv])
 
         ema = self.calculate_ema(close_prices)
         rsi = self.calculate_rsi(close_prices)
@@ -318,8 +317,8 @@ class EnhancedTradingBot:
         if not orderbook or not orderbook["bids"] or not orderbook["asks"]:
             return 0  # Return neutral if order book data is insufficient
 
-        bid_volume = sum([bid[1] for bid in orderbook["bids"]])
-        ask_volume = sum([ask[1] for ask in orderbook["asks"]])
+        bid_volume = sum(bid[1] for bid in orderbook["bids"])
+        ask_volume = sum(ask[1] for ask in orderbook["asks"])
 
         if ask_volume > 0:  # Avoid division by zero
             imbalance = (bid_volume - ask_volume) / (bid_volume + ask_volume)
@@ -350,9 +349,9 @@ class EnhancedTradingBot:
         if not orderbook or not orderbook["bids"] or not orderbook["asks"]:
             return 0
 
-        current_ob_delta = sum([bid[1] for bid in orderbook["bids"]]) - sum([
+        current_ob_delta = sum(bid[1] for bid in orderbook["bids"]) - sum(
             ask[1] for ask in orderbook["asks"]
-        ])
+        )
         delta_change = (
             current_ob_delta - self.last_ob_delta
             if self.last_ob_delta is not None
@@ -381,7 +380,7 @@ class EnhancedTradingBot:
         else:
             return None
 
-    def generate_trading_signal(self, indicators, orderbook):
+    def generate_trading_signal(self, indicators, orderbook) -> str:
         """Generates a trading signal based on indicators and order book analysis."""
         ema = indicators["ema"]
         rsi = indicators["rsi"]
@@ -581,7 +580,7 @@ class EnhancedTradingBot:
             return None
 
     @retry_api_call()
-    def cancel_order(self, order_id):
+    def cancel_order(self, order_id) -> bool | None:
         """Cancels an open order."""
         if self.simulation_mode:
             logger.info(
@@ -653,7 +652,7 @@ class EnhancedTradingBot:
             return None
 
     @retry_api_call()
-    def set_leverage(self, leverage_value):
+    def set_leverage(self, leverage_value) -> bool | None:
         """Sets leverage for the trading symbol."""
         if self.simulation_mode:
             logger.info(
@@ -672,7 +671,7 @@ class EnhancedTradingBot:
             )
             return False
 
-    def check_trailing_stop_loss(self, position, current_price):
+    def check_trailing_stop_loss(self, position, current_price) -> bool:
         """Checks and potentially adjusts trailing stop loss."""
         if not position["trailing_stop_active"]:
             return False
@@ -712,7 +711,7 @@ class EnhancedTradingBot:
                     return True
         return False
 
-    def adjust_trailing_stop_loss(self, position, current_price):
+    def adjust_trailing_stop_loss(self, position, current_price) -> bool:
         """Adjusts the stop loss based on trailing stop logic."""
         if not position["trailing_stop_active"]:
             return False
@@ -744,7 +743,7 @@ class EnhancedTradingBot:
                 return True
         return False
 
-    def monitor_positions(self):
+    def monitor_positions(self) -> None:
         """Monitors open positions for take profit, stop loss, and trailing stop."""
         positions_to_remove = []
         for position in self.open_positions:
@@ -814,7 +813,7 @@ class EnhancedTradingBot:
             logger.error("Failed to close position.")
         return order
 
-    def run(self):
+    def run(self) -> None:
         """Main loop to run the trading bot."""
         logger.info("Starting trading bot loop...")
         while self.bot_running_flag:

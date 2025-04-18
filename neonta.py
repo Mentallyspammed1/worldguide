@@ -95,14 +95,12 @@ def load_config(filepath: str) -> dict:
     if not os.path.exists(filepath):
         with open(filepath, "w") as f:
             json.dump(default_config, f, indent=2)
-        print(f"{NEON_YELLOW}Created new config file with defaults{RESET}")
         return default_config
 
     try:
         with open(filepath, encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        print(f"{NEON_YELLOW}Could not load or parse config. Loading defaults.{RESET}")
         return default_config
 
 
@@ -323,7 +321,7 @@ class TradingAnalyzer:
         config: dict,
         symbol: str,
         interval: str,
-    ):
+    ) -> None:
         self.df = df
         self.logger = logger
         self.levels = {}
@@ -440,7 +438,7 @@ class TradingAnalyzer:
             self.logger.exception(f"{NEON_RED}Fibonacci calculation error: {e}{RESET}")
             return {}
 
-    def calculate_pivot_points(self, high: float, low: float, close: float):
+    def calculate_pivot_points(self, high: float, low: float, close: float) -> None:
         try:
             pivot = (high + low + close) / 3
             r1 = (2 * pivot) - low
@@ -471,7 +469,7 @@ class TradingAnalyzer:
             support_levels = []
             resistance_levels = []
 
-            def process_level(label, value):
+            def process_level(label, value) -> None:
                 if value < current_price:
                     support_levels.append((label, value))
                 elif value > current_price:
@@ -813,7 +811,7 @@ class TradingAnalyzer:
             bids_df,
             asks_df,
             threshold=self.config["orderbook_cluster_threshold"],
-        ):
+        ) -> str | None:
             bid_volume_at_level = bids_df[
                 (bids_df["price"] <= level_price + (level_price * 0.0005))
                 & (bids_df["price"] >= level_price - (level_price * 0.0005))
@@ -853,7 +851,7 @@ class TradingAnalyzer:
             return "  No significant orderbook clusters detected near Fibonacci/Pivot levels."
         return analysis_output.strip()
 
-    def analyze(self, current_price: Decimal, timestamp: str):
+    def analyze(self, current_price: Decimal, timestamp: str) -> None:
         high = self.df["high"].max()
         low = self.df["low"].min()
         close = self.df["close"].iloc[-1]
@@ -875,7 +873,7 @@ class TradingAnalyzer:
         wr = self.calculate_williams_r()
         adx = self.calculate_adx()
         adi = self.calculate_adi()
-        sma = self.calculate_sma(10)
+        self.calculate_sma(10)
         psar = self.calculate_psar()
         fve = self.calculate_fve()
         macd_df = self.calculate_macd()
@@ -968,7 +966,6 @@ class TradingAnalyzer:
 {orderbook_analysis_str}
 """
 
-        print(output)
         self.logger.info(output)
 
     def interpret_indicator(
@@ -1083,7 +1080,7 @@ class TradingAnalyzer:
             return f"{indicator_name.upper()}: Unexpected error."
 
 
-def main():
+def main() -> None:
     symbol = ""
     while True:
         symbol = (
@@ -1093,7 +1090,6 @@ def main():
         )
         if symbol:
             break
-        print(f"{NEON_RED}Symbol cannot be empty.{RESET}")
 
     interval = ""
     while True:
@@ -1102,13 +1098,9 @@ def main():
         ).strip()
         if not interval:
             interval = CONFIG["interval"]
-            print(
-                f"{NEON_YELLOW}No interval provided.  Using default of {interval}{RESET}"
-            )
             break
         if interval in VALID_INTERVALS:
             break
-        print(f"{NEON_RED}Invalid interval: {interval}{RESET}")
 
     logger = setup_logger(symbol)
     analysis_interval = CONFIG["analysis_interval"]
