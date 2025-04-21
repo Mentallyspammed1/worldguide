@@ -1,0 +1,314 @@
+//@version=6
+indicator("Enhanced Volumatic Trend + OB [Pyrmethus]", shorttitle="VolTrend+OB", overlay=true, max_bars_back=5000)
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📜 Script Info & Purpose
+// —————————————————————————————————————————————————————————————————————————————
+// This indicator combines two main concepts:
+// 1. Volumatic Trend: A trend-following system based on a smoothed EMA cross,
+//    visualizing trend direction and volume intensity. Volume is normalized
+//    and displayed as a histogram projected from trend boundaries.
+// 2. Pivot Order Blocks (OB): Identifies potential support/resistance zones
+//    based on pivot highs and lows, drawing boxes around the candle bodies
+//    or wicks at these pivot points. Boxes change color when price closes
+//    beyond them.
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📌 User Inputs - Volumatic Trend
+// —————————————————————————————————————————————————————————————————————————————
+volGroupTitle = "Volumatic Trend Settings"
+// Trend Calculation
+trendMaLength = input.int(40, title="Trend MA Length", tooltip="Length for the Exponential Moving Averages used in trend calculation.", group=volGroupTitle)
+atrLength = input.int(200, title="ATR Length", tooltip="Length for the Average True Range calculation, used to determine trend channel width.", group=volGroupTitle)
+atrMultiplier = input.float(3.0, title="ATR Multiplier", tooltip="Multiplier for ATR to set the distance of the upper/lower trend bands from the smoothed EMA.", group=volGroupTitle)
+
+// Appearance
+showVolumeHistogram = input.bool(true, title="Show Volume Histogram?", tooltip="Toggles the display of the volume histogram projected from the trend bands.", group=volGroupTitle)
+upTrendColor = input.color(#247ac0, title="Up Trend Color", group=volGroupTitle)
+downTrendColor = input.color(#c88829, title="Down Trend Color", group=volGroupTitle)
+volumeColorIntensity = input.int(25, title="Volume Color Intensity", minval=1, maxval=100, tooltip="Maximum normalized volume value for full color intensity gradient on candles/histogram.", group=volGroupTitle)
+volumeCandleIntensity = input.int(10, title="Volume Candle Intensity", minval=1, maxval=100, tooltip="Maximum normalized volume value for full color intensity gradient specifically on the main price candles.", group=volGroupTitle)
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📌 User Inputs - Pivot Order Blocks
+// —————————————————————————————————————————————————————————————————————————————
+pivotGroupTitle = "Order Block Settings"
+// Source & Pivots
+obSource = input.string("Wicks", title="OB Source", options=["Wicks", "Bodys"], tooltip="Determines whether Order Blocks are based on candle wicks (High/Low) or candle bodies (Open/Close).", group=pivotGroupTitle)
+leftLenH = input.int(25, "Pivot High Bars Left", inline="ph", tooltip="Number of bars to the left to check for a higher high.", group=pivotGroupTitle)
+rightLenH = input.int(25, "Right", inline="ph", tooltip="Number of bars to the right to check for a higher high. The pivot candle is 'rightLenH' bars ago.", group=pivotGroupTitle)
+leftLenL = input.int(25, "Pivot Low Bars Left", inline="pl", tooltip="Number of bars to the left to check for a lower low.", group=pivotGroupTitle)
+rightLenL = input.int(25, "Right", inline="pl", tooltip="Number of bars to the right to check for a lower low. The pivot candle is 'rightLenL' bars ago.", group=pivotGroupTitle)
+
+// Appearance & Management
+bullBoxColor = input.color(color.new(#00E600, 80), "Bull OB Color", tooltip="Color for bullish order blocks.", group=pivotGroupTitle) // Reduced default transparency slightly
+bearBoxColor = input.color(color.new(#FF0000, 80), "Bear OB Color", tooltip="Color for bearish order blocks.", group=pivotGroupTitle) // Reduced default transparency slightly
+closedBoxColor = input.color(color.new(color.gray, 85), "Closed OB Color", tooltip="Color for order blocks that have been mitigated (price closed beyond them).", group=pivotGroupTitle)
+extendBox = input.bool(true, "Extend OB Boxes?", tooltip="If checked, boxes extend indefinitely to the right until mitigated. If unchecked, uses 'Box Size'.", group=pivotGroupTitle)
+boxLength = input.int(30, "Fixed Box Size (Bars)", tooltip="If 'Extend OB Boxes' is unchecked, defines the fixed length of the OB boxes in bars.", group=pivotGroupTitle)
+max_boxes = input.int(50, "Max OB Boxes Displayed", tooltip="Maximum number of bullish and bearish boxes to keep displayed on the chart. Older boxes are removed.", group=pivotGroupTitle)
+
+// —————————————————————————————————————————————————————————————————————————————
+// ⚙️ Volumatic Trend Calculations
+// —————————————————————————————————————————————————————————————————————————————
+
+// Variables initialization (persistent across bars)
+var float upperBand = na
+var float lowerBand = na
+var float lowerVolBase = na
+var float upperVolBase = na
+var float stepUpVol = na
+var float stepDownVol = na
+var int trendChangeBarIndex = na
+
+// Helper function for Smoothed Weighted Moving Average (EMA of a 4-period Simpson-weighted average)
+ema_swma(src, len) =>
+    // Calculate a 4-period weighted average (weights: 1/6, 2/6, 2/6, 1/6)
+    swma_val = src[3] * 1/6 + src[2] * 2/6 + src[1] * 2/6 + src[0] * 1/6
+    // Calculate the EMA of the weighted average
+    ta.ema(swma_val, len)
+
+// Core Trend Calculations
+atrValue = ta.atr(atrLength)
+emaSmoothed = ema_swma(close, trendMaLength) // Smoothed EMA
+emaStandard = ta.ema(close, trendMaLength)  // Standard EMA
+
+// Trend Definition: Based on the comparison of the *previous* smoothed EMA and the *current* standard EMA.
+// This specific definition might capture shifts slightly differently than a simple crossover.
+isUpTrend = emaSmoothed[1] < emaStandard // True if trend is up, False if down
+isTrendChange = isUpTrend != isUpTrend[1]
+
+// Update trend levels and volume step values only when the trend changes
+if isTrendChange
+    // Calculate main trend bands based on the smoothed EMA at the trend change point
+    upperBand := emaSmoothed + atrValue * atrMultiplier
+    lowerBand := emaSmoothed - atrValue * atrMultiplier
+    // Calculate the base levels for volume histogram projection (slightly offset from main bands)
+    // Note: The original logic had a fixed offset of ATR*4. We keep this structure.
+    lowerVolBase := lowerBand + atrValue * 4 // Base for upward volume projection
+    upperVolBase := upperBand - atrValue * 4 // Base for downward volume projection
+    // Calculate the step size for volume projection (maps normalized volume to price range)
+    // Ensure non-zero range to avoid division by zero, though atrValue should prevent this usually.
+    stepUpVol := (lowerVolBase > lowerBand) ? (lowerVolBase - lowerBand) / 100 : 0 // Size per 1 unit of normalized volume (Up Trend)
+    stepDownVol := (upperBand > upperVolBase) ? (upperBand - upperVolBase) / 100 : 0 // Size per 1 unit of normalized volume (Down Trend)
+    trendChangeBarIndex := bar_index
+
+// Volume Normalization
+// Uses percentile to scale volume relative to recent activity (lookback = 1000 bars).
+// This helps compare volume across different periods or assets.
+volumeLookback = 1000
+percentileRank = ta.percentile_linear_interpolation(volume, volumeLookback, 100) // Find the 100th percentile (max) volume over lookback
+normalizedVolume = nz(percentileRank) != 0 ? math.round(volume / percentileRank * 100) : 0 // Volume as a percentage of the recent max (0-100+)
+// Clamp the normalized volume for gradient calculation consistency
+clampedVolume = math.min(normalizedVolume, volumeColorIntensity)
+clampedCandleVolume = math.min(normalizedVolume, volumeCandleIntensity)
+
+// Calculate volume projection height based on normalized volume and step size
+volumeProjectionUp = nz(stepUpVol * normalizedVolume)
+volumeProjectionDown = nz(stepDownVol * normalizedVolume)
+
+// Color Calculations based on trend and volume
+currentTrendColor = isUpTrend ? upTrendColor : downTrendColor
+bgColor = color.new(chart.bg_color, 100) // Fully transparent background color
+
+// Gradient colors for volume visualization
+// Uses the clamped volume for intensity calculation
+gradientColorVolHist = color.from_gradient(clampedVolume, 0, volumeColorIntensity, bgColor, currentTrendColor)
+gradientColorCandle = color.from_gradient(clampedCandleVolume, 0, volumeCandleIntensity, bgColor, currentTrendColor)
+
+// Conditional colors for volume histogram plots
+colorVolHistUp = isUpTrend ? gradientColorVolHist : na
+colorVolHistDown = not isUpTrend ? gradientColorVolHist : na
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📊 Plotting - Volumatic Trend
+// —————————————————————————————————————————————————————————————————————————————
+
+// 1. Volumatic Candles (Main Price Candles colored by volume intensity)
+plotcandle(open, high, low, close, title='Volumatic Candles',
+     color=gradientColorCandle, wickcolor=gradientColorCandle, bordercolor=gradientColorCandle)
+
+// 2. Volume Histogram - Up Trend Projection
+plotcandle(lowerBand, lowerBand, lowerBand + volumeProjectionUp, lowerBand + volumeProjectionUp, 'Volume Up Trend Hist',
+     color=colorVolHistUp, wickcolor=colorVolHistUp, bordercolor=colorVolHistUp,
+     display=showVolumeHistogram ? display.all : display.none) // Display only if enabled
+
+// 3. Volume Histogram - Down Trend Projection
+plotcandle(upperBand, upperBand, upperBand - volumeProjectionDown, upperBand - volumeProjectionDown, 'Volume Down Trend Hist',
+     color=colorVolHistDown, wickcolor=colorVolHistDown, bordercolor=colorVolHistDown,
+     display=showVolumeHistogram ? display.all : display.none) // Display only if enabled
+
+// 4. Trend Bands (Lines displayed when Volume Histogram is off)
+// Plot Upper Band during Up Trend (if histogram off)
+plot(isUpTrend and not showVolumeHistogram ? upperBand : na, "Upper Band", color=currentTrendColor, style=plot.style_linebr, linewidth=1)
+// Plot Lower Band during Up Trend (if histogram off)
+plot(isUpTrend and not showVolumeHistogram ? lowerBand : na, "Lower Band", color=currentTrendColor, style=plot.style_linebr, linewidth=1)
+// Plot Upper Band during Down Trend (if histogram off)
+plot(not isUpTrend and not showVolumeHistogram ? upperBand : na, "Upper Band ", color=currentTrendColor, style=plot.style_linebr, linewidth=1) // Space in title to make unique
+// Plot Lower Band during Down Trend (if histogram off)
+plot(not isUpTrend and not showVolumeHistogram ? lowerBand : na, "Lower Band ", color=currentTrendColor, style=plot.style_linebr, linewidth=1) // Space in title to make unique
+
+
+// 5. Smoothed EMA Trend Line
+plot(emaSmoothed, "Smoothed Trend Line", color=color.new(currentTrendColor, 20), linewidth=2)
+
+// 6. Trend Change Marker
+plotshape(isTrendChange ? emaSmoothed[1] : na, "Trend Change", style=shape.diamond,
+     location=location.absolute, color=currentTrendColor, size=size.tiny, offset=-1)
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📈 Volume Statistics Label (Since Last Trend Change)
+// —————————————————————————————————————————————————————————————————————————————
+// Calculate and display cumulative volume and delta since the last trend change on the most recent bar.
+if barstate.islast and not na(trendChangeBarIndex)
+    volumeDeltaSinceChange = 0.0
+    volumeTotalSinceChange = 0.0
+    barsSinceChange = bar_index - trendChangeBarIndex
+
+    // Loop through bars since the last trend change
+    for i = 0 to barsSinceChange
+        currentVolume = nz(volume[i])
+        volumeTotalSinceChange += currentVolume
+        // Add volume if close > open (up bar), subtract if close < open (down bar)
+        volumeDeltaSinceChange += (close[i] > open[i]) ? currentVolume : (close[i] < open[i] ? -currentVolume : 0.0)
+
+    // Determine label position dynamically based on settings and current trend
+    labelYPosition = showVolumeHistogram ? (isUpTrend ? lowerBand + volumeProjectionUp : upperBand - volumeProjectionDown) : emaSmoothed
+
+    // Construct label text
+    labelText = "Volume Since Trend Change (" + str.tostring(barsSinceChange + 1) + " bars)\n" +
+                 "Delta: " + str.tostring(volumeDeltaSinceChange, format.volume) + "\n" +
+                 "Total: " + str.tostring(volumeTotalSinceChange, format.volume)
+
+    // Create the label
+    label.new(x=bar_index, y=labelYPosition,
+         text=labelText,
+         textcolor=color.white,
+         style=label.style_label_left,
+         color=color.new(currentTrendColor, 10), // Use trend color with some transparency
+         size = size.small) // Adjusted size for better readability
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📦 Pivot Order Block Calculations & Drawing
+// —————————————————————————————————————————————————————————————————————————————
+
+// Determine price source for pivots based on input
+phSource = obSource == "Wicks" ? high : math.max(open, close) // Use high for wicks, higher of O/C for bodies
+plSource = obSource == "Wicks" ? low : math.min(open, close)  // Use low for wicks, lower of O/C for bodies
+
+// Detect Pivot Highs and Lows
+// A pivot high occurs 'rightLenH' bars ago if the source price at that bar is higher than surrounding bars.
+pivotHighPrice = ta.pivothigh(phSource, leftLenH, rightLenH) // Returns price level of pivot, na otherwise
+// A pivot low occurs 'rightLenL' bars ago if the source price at that bar is lower than surrounding bars.
+pivotLowPrice = ta.pivotlow(plSource, leftLenL, rightLenL)   // Returns price level of pivot, na otherwise
+
+// Box arrays to store active order blocks
+var box[] bullBoxes = array.new_box()
+var box[] bearBoxes = array.new_box()
+
+// Create Bearish Order Block (Supply Zone) when a Pivot High is detected
+if not na(pivotHighPrice)
+    // Define the candle index where the pivot occurred
+    pivotBarIndex = bar_index - rightLenH
+    // Define box boundaries based on the source type
+    // For 'Wicks', use High (top) and Close (bottom) of the pivot candle.
+    // For 'Bodys', use Close (top) and Open (bottom) of the pivot candle.
+    // This assumes a bearish OB forms on an up-close candle before the high.
+    boxTopPrice = obSource == "Wicks" ? high[rightLenH] : math.max(open[rightLenH], close[rightLenH])
+    boxBottomPrice = obSource == "Wicks" ? close[rightLenH] : math.min(open[rightLenH], close[rightLenH])
+
+    // Ensure top is always above bottom (handles potential inside bars or unusual candles)
+    if boxBottomPrice > boxTopPrice {
+        [boxTopPrice, boxBottomPrice] := [boxBottomPrice, boxTopPrice] // Use tuple assignment for cleaner swap
+    }
+
+    // Define box time boundaries
+    boxLeftIndex = pivotBarIndex
+    boxRightIndex = extendBox ? time + 1 : time[pivotBarIndex + boxLength] // Use time for extension/fixed length
+
+    // Create and add the new box to the array if prices are valid
+    if not na(boxTopPrice) and not na(boxBottomPrice)
+        newBearBox = box.new(left=boxLeftIndex, right=boxRightIndex,
+             top=boxTopPrice, bottom=boxBottomPrice,
+             bgcolor=bearBoxColor, // Use input color directly
+             border_color=color.new(bearBoxColor,0), // Border matching bgcolor
+             extend=extendBox ? extend.right : extend.none, // Set extension based on input
+             text = "Bear OB", text_color = color.new(color.white, 20), text_size = size.tiny, text_halign = text.align_right, text_valign = text.align_top)
+        array.push(bearBoxes, newBearBox)
+
+// Create Bullish Order Block (Demand Zone) when a Pivot Low is detected
+if not na(pivotLowPrice)
+    // Define the candle index where the pivot occurred
+    pivotBarIndex = bar_index - rightLenL
+    // Define box boundaries based on the source type
+    // For 'Wicks', use Open (top) and Low (bottom) of the pivot candle.
+    // For 'Bodys', use Open (top) and Close (bottom) of the pivot candle.
+    // This assumes a bullish OB forms on a down-close candle before the low.
+    boxTopPrice = obSource == "Wicks" ? open[rightLenL] : math.max(open[rightLenL], close[rightLenL])
+    boxBottomPrice = obSource == "Wicks" ? low[rightLenL] : math.min(open[rightLenL], close[rightLenL])
+
+    // Ensure top is always above bottom
+    if boxBottomPrice > boxTopPrice {
+        [boxTopPrice, boxBottomPrice] := [boxBottomPrice, boxTopPrice] // Cleaner swap
+    }
+
+    // Define box time boundaries
+    boxLeftIndex = pivotBarIndex
+    boxRightIndex = extendBox ? time + 1 : time[pivotBarIndex + boxLength] // Use time for extension/fixed length
+
+    // Create and add the new box to the array if prices are valid
+    if not na(boxTopPrice) and not na(bottomBull_price) // Original had typo: bottomBull_price, corrected to boxBottomPrice
+        newBullBox = box.new(left=boxLeftIndex, right=boxRightIndex,
+             top=boxTopPrice, bottom=boxBottomPrice,
+             bgcolor=bullBoxColor, // Use input color directly
+             border_color=color.new(bullBoxColor, 0), // Border matching bgcolor
+             extend=extendBox ? extend.right : extend.none, // Set extension based on input
+             text = "Bull OB", text_color = color.new(color.white, 20), text_size = size.tiny, text_halign = text.align_right, text_valign = text.align_bottom)
+        array.push(bullBoxes, newBullBox)
+
+
+// —————————————————————————————————————————————————————————————————————————————
+// 🔄 Box Management (Mitigation & Cleanup)
+// —————————————————————————————————————————————————————————————————————————————
+
+// Function to manage existing boxes (check for mitigation)
+manage_boxes(box_array, is_bull_zone) =>
+    if array.size(box_array) > 0
+        // Iterate backwards through the array as we might modify/delete elements
+        for i = array.size(box_array) - 1 to 0
+            current_box = array.get(box_array, i)
+            if not na(current_box) and box.get_border_color(current_box) != closedBoxColor // Only process active boxes
+
+                // Get the critical price level for mitigation check
+                mitigation_price = is_bull_zone ? box.get_bottom(current_box) : box.get_top(current_box)
+
+                // Check if the current close has mitigated the zone
+                is_mitigated = (is_bull_zone and close < mitigation_price) or (not is_bull_zone and close > mitigation_price)
+
+                if is_mitigated
+                    // Zone mitigated: Change color and stop extension
+                    box.set_bgcolor(current_box, closedBoxColor)
+                    box.set_border_color(current_box, closedBoxColor) // Use border color to mark as checked
+                    box.set_extend(current_box, extend.none) // Stop extending
+                    box.set_right(current_box, bar_index)     // Set right edge to current bar index
+                    box.set_text(current_box, box.get_text(current_box) + " - Mitigated")
+                    box.set_text_color(current_box, color.new(color.gray, 20))
+
+
+// Apply box management function to both bullish and bearish boxes on each bar
+manage_boxes(bullBoxes, true)  // Manage bullish (demand) zones
+manage_boxes(bearBoxes, false) // Manage bearish (supply) zones
+
+
+// Clean up oldest boxes if the maximum number is exceeded
+// This runs *after* potentially adding new boxes for the current bar.
+while array.size(bullBoxes) > max_boxes
+    box_to_delete = array.shift(bullBoxes) // Remove the oldest box (from the beginning of the array)
+    box.delete(box_to_delete)
+while array.size(bearBoxes) > max_boxes
+    box_to_delete = array.shift(bearBoxes) // Remove the oldest box
+    box.delete(box_to_delete)
+
+// —————————————————————————————————————————————————————————————————————————————
+// End Of Script
+// —————————————————————————————————————————————————————————————————————————————

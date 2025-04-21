@@ -1,0 +1,180 @@
+//@version=6
+indicator("Enhanced Volumatic Trend + OB [Pyrmethus]", shorttitle="VolTrend+OB", overlay=true, max_bars_back=5000)
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📌 User Inputs - Volumatic Trend
+// —————————————————————————————————————————————————————————————————————————————
+volGroupTitle = "Volumatic Trend Settings"
+length = input.int(40, title="Trend Length", group=volGroupTitle)
+vol_h = input.bool(true, title="Volume Histogram", group=volGroupTitle)
+color_up = input.color(#247ac0, title="Up Trend", group=volGroupTitle)
+color_dn = input.color(#c88829, title="Down Trend", group=volGroupTitle)
+
+// Variables initialization
+var float upper = na
+var float lower = na
+var float lower_vol = na
+var float upper_vol = na
+var float step_up = na
+var float step_dn = na
+var int last_index = na
+
+// Helper function for smoothed EMA
+ema_swma(x, len) =>
+    ta.ema(x[3] * 1/6 + x[2] * 2/6 + x[1] * 2/6 + x[0] * 1/6, len)
+
+// Trend calculations
+atr = ta.atr(200)
+ema1 = ema_swma(close, length)
+ema2 = ta.ema(close, length)
+trend = ema1[1] < ema2
+
+// Update trend levels
+if trend != trend[1]
+    upper := ema1 + atr * 3
+    lower := ema1 - atr * 3
+    lower_vol := lower + atr * 4
+    upper_vol := upper - atr * 4
+    step_up := (lower_vol - lower) / 100
+    step_dn := (upper - upper_vol) / 100
+    last_index := bar_index
+
+// Volume normalization
+percentile_vol = ta.percentile_linear_interpolation(volume, 1000, 100)
+vol = int(nz(percentile_vol) != 0 ? volume / percentile_vol * 100 : 0)
+vol_up = nz(step_up * vol)
+vol_dn = nz(step_dn * vol)
+
+// Color calculations
+trend_color = trend ? color_up : color_dn
+grad_col = color.from_gradient(vol, 0, 25, chart.bg_color, trend_color)
+grad_col1 = color.from_gradient(vol, 0, 10, chart.bg_color, trend_color)
+col_vol_up = trend ? grad_col : na
+col_vol_dn = not trend ? grad_col : na
+
+// Volumatic trend visualization
+plotcandle(open, high, low, close, title='Volumatic Candles', 
+     color=grad_col1, wickcolor=grad_col1, bordercolor=grad_col1)
+
+plotcandle(lower, lower, lower + vol_up, lower + vol_up, 'Volume Up Trend',
+     color=col_vol_up, wickcolor=col_vol_up, bordercolor=col_vol_up,
+     display=vol_h ? display.all : display.none)
+
+plotcandle(upper, upper, upper - vol_dn, upper - vol_dn, 'Volume Down Trend',
+     color=col_vol_dn, wickcolor=col_vol_dn, bordercolor=col_vol_dn,
+     display=vol_h ? display.all : display.none)
+
+plot(trend and vol_h ? na : upper, color=trend_color, style=plot.style_linebr,
+     display=vol_h ? display.all : display.none)
+plot(trend and vol_h ? lower : na, color=trend_color, style=plot.style_linebr,
+     display=vol_h ? display.all : display.none)
+
+plot(ema1, "Trend Line", color=color.new(trend_color, 20), linewidth=2)
+plotshape(trend != trend[1] ? ema1[1] : na, "Trend Change", style=shape.diamond,
+     location=location.absolute, color=trend_color, size=size.tiny, offset=-1)
+
+// Volume statistics
+if barstate.islast
+    volume_delta = 0.0
+    volume_total = 0.0
+    for i = 0 to (bar_index - last_index)
+        volume_total += nz(volume[i])
+        volume_delta += close[i] > open[i] ? nz(volume[i]) : -nz(volume[i])
+
+    label_text = "Delta > " + str.tostring(volume_delta, format.volume) + "\n" +
+                 "--------------------\n" +
+                 "Total > " + str.tostring(volume_total, format.volume)
+    
+    label.new(bar_index,
+         vol_h ? (trend ? lower + vol_up : upper - vol_dn) : ema1,
+         label_text,
+         textcolor=color.white,
+         style=label.style_label_left,
+         color=grad_col1)
+
+// —————————————————————————————————————————————————————————————————————————————
+// 📌 Pivot Order Blocks
+// —————————————————————————————————————————————————————————————————————————————
+pivotGroupTitle = "Order Block Settings"
+source_ob = input.string("Wicks", title="OB Source", options=["Wicks", "Bodys"], group=pivotGroupTitle)
+leftLenH = input.int(25, "Pivot High", inline="ph", group=pivotGroupTitle)
+rightLenH = input.int(25, "/", inline="ph", group=pivotGroupTitle)
+leftLenL = input.int(25, "Pivot Low", inline="pl", group=pivotGroupTitle)
+rightLenL = input.int(25, "/", inline="pl", group=pivotGroupTitle)
+bullBoxColor = input.color(color.new(#00E600, 90), "Bull Color", group=pivotGroupTitle)
+bearBoxColor = input.color(color.new(#FF0000, 90), "Bear Color", group=pivotGroupTitle)
+closedBoxColor = input.color(color.new(color.gray, 90), "Closed Color", group=pivotGroupTitle)
+extendBox = input.bool(true, "Extend Boxes", group=pivotGroupTitle)
+boxLength = input.int(30, "Box Size", group=pivotGroupTitle)
+max_boxes = input.int(50, "Max Boxes", group=pivotGroupTitle)
+
+// Pivot calculations
+phOption = source_ob == "Wicks" ? high : close
+plOption = source_ob == "Wicks" ? low : close
+ph = ta.pivothigh(phOption, leftLenH, rightLenH)
+pl = ta.pivotlow(plOption, leftLenL, rightLenL)
+
+// Box arrays
+var box[] bullBoxes = array.new_box()
+var box[] bearBoxes = array.new_box()
+
+// Create boxes
+if not na(ph)
+    leftBear_idx = bar_index - rightLenH
+    rightBear_idx = extendBox ? bar_index + 1 : leftBear_idx + boxLength
+    topBear_price = source_ob == "Bodys" ? close[rightLenH] : high[rightLenH]
+    bottomBear_price = source_ob == "Bodys" ? open[rightLenH] : close[rightLenH]
+    
+    if bottomBear_price > topBear_price
+        temp = topBear_price
+        topBear_price := bottomBear_price
+        bottomBear_price := temp
+    
+    if not na(topBear_price) and not na(bottomBear_price)
+        array.push(bearBoxes, box.new(left=leftBear_idx, right=rightBear_idx, 
+             top=topBear_price, bottom=bottomBear_price, 
+             bgcolor=color.new(bearBoxColor, 80), 
+             border_color=bearBoxColor, 
+             extend=extend.none))
+
+if not na(pl)
+    leftBull_idx = bar_index - rightLenL
+    rightBull_idx = extendBox ? bar_index + 1 : leftBull_idx + boxLength
+    topBull_price = source_ob == "Bodys" ? close[rightLenL] : open[rightLenL]
+    bottomBull_price = source_ob == "Bodys" ? open[rightLenL] : low[rightLenL]
+    
+    if bottomBull_price > topBull_price
+        temp = topBull_price
+        topBull_price := bottomBull_price
+        bottomBull_price := temp
+    
+    if not na(topBull_price) and not na(bottomBull_price)
+        array.push(bullBoxes, box.new(left=leftBull_idx, right=rightBull_idx, 
+             top=topBull_price, bottom=bottomBull_price, 
+             bgcolor=color.new(bullBoxColor, 80), 
+             border_color=bullBoxColor, 
+             extend=extend.none))
+
+// Box management
+manage_boxes(boxes, is_bull) =>
+    if array.size(boxes) > 0
+        for i = array.size(boxes) - 1 to 0
+            box = array.get(boxes, i)
+            if not na(box)
+                price = is_bull ? box.get_bottom(box) : box.get_top(box)
+                if (is_bull and close < price) or (not is_bull and close > price)
+                    box.set_bgcolor(box, closedBoxColor)
+                    box.set_border_color(box, closedBoxColor)
+                    box.set_right(box, bar_index)
+                else if extendBox
+                    box.set_right(box, bar_index + 1)
+
+// Apply box management
+manage_boxes(bullBoxes, true)
+manage_boxes(bearBoxes, false)
+
+// Clean up old boxes
+while array.size(bullBoxes) > max_boxes
+    box.delete(array.shift(bullBoxes))
+while array.size(bearBoxes) > max_boxes
+    box.delete(array.shift(bearBoxes))

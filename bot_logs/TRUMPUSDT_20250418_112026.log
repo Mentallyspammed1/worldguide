@@ -1,0 +1,64 @@
+2025-04-18 11:20:26,780 - INFO - Starting analysis for TRUMPUSDT on 5 interval.
+2025-04-18 11:20:26,782 - INFO - Analysis refresh rate: 30 seconds.
+2025-04-18 11:20:26,783 - INFO - Using configuration from: config.json
+2025-04-18 11:20:26,783 - INFO - Key Indicator Periods: RSI=14, BB=20, Mom=10, ATR=14
+2025-04-18 11:20:29,955 - INFO - Data fetch took 3.17 seconds.
+2025-04-18 11:20:29,979 - ERROR - [91mAn unexpected error occurred in the main loop: too many values to unpack (expected 2). Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1336, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1020, in analyze
+    adx = self.calculate_adx()
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 766, in calculate_adx
+    ph, pl = self.klines[i-1]['high'], self.klines[i-1]['low'], self.klines[i-1]['close']
+    ^^^^^^
+ValueError: too many values to unpack (expected 2)
+2025-04-18 11:20:37,409 - INFO - Data fetch took 2.42 seconds.
+2025-04-18 11:20:37,425 - ERROR - [91mAn unexpected error occurred in the main loop: too many values to unpack (expected 2). Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1336, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1020, in analyze
+    adx = self.calculate_adx()
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 766, in calculate_adx
+    ph, pl = self.klines[i-1]['high'], self.klines[i-1]['low'], self.klines[i-1]['close']
+    ^^^^^^
+ValueError: too many values to unpack (expected 2)
+2025-04-18 11:20:47,843 - INFO - Data fetch took 5.41 seconds.
+2025-04-18 11:20:47,854 - ERROR - [91mAn unexpected error occurred in the main loop: too many values to unpack (expected 2). Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1336, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1020, in analyze
+    adx = self.calculate_adx()
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 766, in calculate_adx
+    ph, pl = self.klines[i-1]['high'], self.klines[i-1]['low'], self.klines[i-1]['close']
+    ^^^^^^
+ValueError: too many values to unpack (expected 2)
+2025-04-18 11:20:57,027 - INFO - Data fetch took 4.17 seconds.
+2025-04-18 11:20:57,036 - ERROR - [91mAn unexpected error occurred in the main loop: too many values to unpack (expected 2). Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1336, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1020, in analyze
+    adx = self.calculate_adx()
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 766, in calculate_adx
+    ph, pl = self.klines[i-1]['high'], self.klines[i-1]['low'], self.klines[i-1]['close']
+    ^^^^^^
+ValueError: too many values to unpack (expected 2)
+2025-04-18 11:21:04,504 - INFO - Data fetch took 2.46 seconds.
+2025-04-18 11:21:04,514 - ERROR - [91mAn unexpected error occurred in the main loop: too many values to unpack (expected 2). Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1336, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 1020, in analyze
+    adx = self.calculate_adx()
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/trading_analyzer.py", line 766, in calculate_adx
+    ph, pl = self.klines[i-1]['high'], self.klines[i-1]['low'], self.klines[i-1]['close']
+    ^^^^^^
+ValueError: too many values to unpack (expected 2)

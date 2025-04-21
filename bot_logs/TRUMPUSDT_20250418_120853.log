@@ -1,0 +1,2019 @@
+2025-04-18 12:08:53,620 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:09:07,075 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.694[0m - 2025-04-18 12:09:07
+Signal: [92mHOLD[0m
+Entry: [33m7.6940[0m
+Take Profit: [92m7.6687[0m
+Stop Loss: [91m7.7591[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.5087[0m
+  EMA21: [33m7.4986[0m
+  Momentum: [33m0.4003[0m
+  RSI: [33m59.9057[0m
+  StochRSI_K: [33m0.9004[0m
+  StochRSI_D: [33m0.8577[0m
+  CCI: [33m146.8951[0m
+  Williams_R: [33m-17.9856[0m
+  PSAR: [33m7.4375[0m
+  SMA10: [33m7.5054[0m
+  VWAP: [33m7.6066[0m
+  MFI: [33m45.5725[0m
+  BB_Upper: [33m7.5340[0m
+  BB_Middle: [33m7.4918[0m
+  BB_Lower: [33m7.4496[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:09:17,285 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:09:28,385 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.698[0m - 2025-04-18 12:09:28
+Signal: [92mHOLD[0m
+Entry: [33m7.6980[0m
+Take Profit: [92m7.6727[0m
+Stop Loss: [91m7.7631[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.5087[0m
+  EMA21: [33m7.4986[0m
+  Momentum: [33m0.4003[0m
+  RSI: [33m59.9057[0m
+  StochRSI_K: [33m0.9004[0m
+  StochRSI_D: [33m0.8577[0m
+  CCI: [33m146.8951[0m
+  Williams_R: [33m-17.9856[0m
+  PSAR: [33m7.4375[0m
+  SMA10: [33m7.5054[0m
+  VWAP: [33m7.6066[0m
+  MFI: [33m45.5725[0m
+  BB_Upper: [33m7.5340[0m
+  BB_Middle: [33m7.4918[0m
+  BB_Lower: [33m7.4496[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:09:38,392 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:09:52,033 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.697[0m - 2025-04-18 12:09:52
+Signal: [92mHOLD[0m
+Entry: [33m7.6970[0m
+Take Profit: [92m7.6717[0m
+Stop Loss: [91m7.7621[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.5087[0m
+  EMA21: [33m7.4986[0m
+  Momentum: [33m0.4003[0m
+  RSI: [33m59.9057[0m
+  StochRSI_K: [33m0.9004[0m
+  StochRSI_D: [33m0.8577[0m
+  CCI: [33m146.8951[0m
+  Williams_R: [33m-17.9856[0m
+  PSAR: [33m7.4375[0m
+  SMA10: [33m7.5054[0m
+  VWAP: [33m7.6066[0m
+  MFI: [33m45.5725[0m
+  BB_Upper: [33m7.5340[0m
+  BB_Middle: [33m7.4918[0m
+  BB_Lower: [33m7.4496[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:10:02,039 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:10:11,907 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.696[0m - 2025-04-18 12:10:11
+Signal: [92mHOLD[0m
+Entry: [33m7.6960[0m
+Take Profit: [92m7.6704[0m
+Stop Loss: [91m7.7618[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6078[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:10:21,950 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:10:33,678 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.698[0m - 2025-04-18 12:10:33
+Signal: [92mHOLD[0m
+Entry: [33m7.6980[0m
+Take Profit: [92m7.6724[0m
+Stop Loss: [91m7.7638[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6078[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:10:43,696 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:10:57,636 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.691[0m - 2025-04-18 12:10:57
+Signal: [92mHOLD[0m
+Entry: [33m7.6910[0m
+Take Profit: [92m7.6654[0m
+Stop Loss: [91m7.7568[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6078[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:11:07,643 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:11:17,665 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.694[0m - 2025-04-18 12:11:17
+Signal: [92mHOLD[0m
+Entry: [33m7.6940[0m
+Take Profit: [92m7.6684[0m
+Stop Loss: [91m7.7598[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6079[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:11:27,672 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:11:47,292 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.708[0m - 2025-04-18 12:11:47
+Signal: [92mHOLD[0m
+Entry: [33m7.7080[0m
+Take Profit: [92m7.6824[0m
+Stop Loss: [91m7.7738[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6079[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:11:57,305 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:12:17,924 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.706[0m - 2025-04-18 12:12:17
+Signal: [92mHOLD[0m
+Entry: [33m7.7060[0m
+Take Profit: [92m7.6804[0m
+Stop Loss: [91m7.7718[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6081[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:12:27,951 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:12:45,432 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.704[0m - 2025-04-18 12:12:45
+Signal: [92mHOLD[0m
+Entry: [33m7.7040[0m
+Take Profit: [92m7.6784[0m
+Stop Loss: [91m7.7698[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6082[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:12:55,467 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:13:33,373 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.703[0m - 2025-04-18 12:13:33
+Signal: [92mHOLD[0m
+Entry: [33m7.7030[0m
+Take Profit: [92m7.6774[0m
+Stop Loss: [91m7.7688[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6082[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:13:43,414 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:13:55,957 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.695[0m - 2025-04-18 12:13:55
+Signal: [92mHOLD[0m
+Entry: [33m7.6950[0m
+Take Profit: [92m7.6694[0m
+Stop Loss: [91m7.7608[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6082[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:14:06,054 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:14:17,790 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.690[0m - 2025-04-18 12:14:17
+Signal: [92mHOLD[0m
+Entry: [33m7.6900[0m
+Take Profit: [92m7.6644[0m
+Stop Loss: [91m7.7558[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6082[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:14:27,840 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:14:49,354 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.695[0m - 2025-04-18 12:14:49
+Signal: [92mHOLD[0m
+Entry: [33m7.6950[0m
+Take Profit: [92m7.6694[0m
+Stop Loss: [91m7.7608[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0366[0m
+  EMA9: [33m7.5046[0m
+  EMA21: [33m7.4960[0m
+  Momentum: [33m0.5472[0m
+  RSI: [33m65.4545[0m
+  StochRSI_K: [33m0.9209[0m
+  StochRSI_D: [33m0.8082[0m
+  CCI: [33m187.3016[0m
+  Williams_R: [33m-11.5108[0m
+  PSAR: [33m7.4328[0m
+  SMA10: [33m7.5024[0m
+  VWAP: [33m7.6082[0m
+  MFI: [33m47.4173[0m
+  BB_Upper: [33m7.5297[0m
+  BB_Middle: [33m7.4904[0m
+  BB_Lower: [33m7.4511[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:14:59,389 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:15:27,378 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.698[0m - 2025-04-18 12:15:27
+Signal: [92mHOLD[0m
+Entry: [33m7.6980[0m
+Take Profit: [92m7.6728[0m
+Stop Loss: [91m7.7629[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6084[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:15:37,386 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:15:54,712 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.704[0m - 2025-04-18 12:15:54
+Signal: [92mHOLD[0m
+Entry: [33m7.7040[0m
+Take Profit: [92m7.6787[0m
+Stop Loss: [91m7.7689[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6084[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:16:04,782 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:16:15,694 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.702[0m - 2025-04-18 12:16:15
+Signal: [92mHOLD[0m
+Entry: [33m7.7020[0m
+Take Profit: [92m7.6768[0m
+Stop Loss: [91m7.7669[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6084[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:16:25,708 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:16:45,368 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.701[0m - 2025-04-18 12:16:45
+Signal: [92mHOLD[0m
+Entry: [33m7.7010[0m
+Take Profit: [92m7.6757[0m
+Stop Loss: [91m7.7659[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6084[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:16:55,398 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:17:13,756 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.698[0m - 2025-04-18 12:17:13
+Signal: [92mHOLD[0m
+Entry: [33m7.6980[0m
+Take Profit: [92m7.6728[0m
+Stop Loss: [91m7.7629[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6084[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:17:23,871 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:18:17,465 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.698[0m - 2025-04-18 12:18:17
+Signal: [92mHOLD[0m
+Entry: [33m7.6980[0m
+Take Profit: [92m7.6728[0m
+Stop Loss: [91m7.7629[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6084[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:18:27,498 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:19:04,745 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.692[0m - 2025-04-18 12:19:04
+Signal: [92mHOLD[0m
+Entry: [33m7.6920[0m
+Take Profit: [92m7.6668[0m
+Stop Loss: [91m7.7569[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6085[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:19:14,802 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:19:50,817 - WARNING - [33mFetch error: bybit GET https://api.bybit.com/v5/market/instruments-info?category=linear&limit=1000. Retrying...[0m
+2025-04-18 12:21:09,964 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.683[0m - 2025-04-18 12:21:09
+Signal: [92mHOLD[0m
+Entry: [33m7.6830[0m
+Take Profit: [92m7.6578[0m
+Stop Loss: [91m7.7479[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0361[0m
+  EMA9: [33m7.4973[0m
+  EMA21: [33m7.4922[0m
+  Momentum: [33m0.4148[0m
+  RSI: [33m61.2245[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.7251[0m
+  CCI: [33m166.6223[0m
+  Williams_R: [33m-32.3741[0m
+  PSAR: [33m7.4279[0m
+  SMA10: [33m7.4983[0m
+  VWAP: [33m7.6086[0m
+  MFI: [33m46.5319[0m
+  BB_Upper: [33m7.5224[0m
+  BB_Middle: [33m7.4886[0m
+  BB_Lower: [33m7.4548[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:21:20,014 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:21:45,388 - WARNING - [33mFetch error: bybit GET https://api.bybit.com/v5/market/instruments-info?category=linear&limit=1000. Retrying...[0m
+2025-04-18 12:22:10,777 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.684[0m - 2025-04-18 12:22:10
+Signal: [92mHOLD[0m
+Entry: [33m7.6840[0m
+Take Profit: [92m7.6606[0m
+Stop Loss: [91m7.7442[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6093[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:22:20,813 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:22:53,717 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.677[0m - 2025-04-18 12:22:53
+Signal: [92mHOLD[0m
+Entry: [33m7.6770[0m
+Take Profit: [92m7.6536[0m
+Stop Loss: [91m7.7372[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6094[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:23:03,733 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:23:22,737 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.683[0m - 2025-04-18 12:23:22
+Signal: [92mHOLD[0m
+Entry: [33m7.6830[0m
+Take Profit: [92m7.6596[0m
+Stop Loss: [91m7.7432[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6094[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:23:32,841 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:23:42,982 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.683[0m - 2025-04-18 12:23:42
+Signal: [92mHOLD[0m
+Entry: [33m7.6830[0m
+Take Profit: [92m7.6596[0m
+Stop Loss: [91m7.7432[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6094[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:23:52,993 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:24:12,773 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.690[0m - 2025-04-18 12:24:12
+Signal: [92mHOLD[0m
+Entry: [33m7.6900[0m
+Take Profit: [92m7.6666[0m
+Stop Loss: [91m7.7502[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6094[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:24:22,803 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:24:40,415 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.683[0m - 2025-04-18 12:24:40
+Signal: [92mHOLD[0m
+Entry: [33m7.6830[0m
+Take Profit: [92m7.6596[0m
+Stop Loss: [91m7.7432[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6094[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:24:50,462 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:25:13,075 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.682[0m - 2025-04-18 12:25:13
+Signal: [92mHOLD[0m
+Entry: [33m7.6820[0m
+Take Profit: [92m7.6586[0m
+Stop Loss: [91m7.7422[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0334[0m
+  EMA9: [33m7.4954[0m
+  EMA21: [33m7.4909[0m
+  Momentum: [33m0.6177[0m
+  RSI: [33m54.0000[0m
+  StochRSI_K: [33m0.7519[0m
+  StochRSI_D: [33m0.6894[0m
+  CCI: [33m55.8104[0m
+  Williams_R: [33m-31.6667[0m
+  PSAR: [33m7.4247[0m
+  SMA10: [33m7.4952[0m
+  VWAP: [33m7.6094[0m
+  MFI: [33m38.9204[0m
+  BB_Upper: [33m7.5206[0m
+  BB_Middle: [33m7.4878[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:25:23,107 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:25:41,262 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.682[0m - 2025-04-18 12:25:41
+Signal: [92mHOLD[0m
+Entry: [33m7.6820[0m
+Take Profit: [92m7.6580[0m
+Stop Loss: [91m7.7438[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6097[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:25:51,304 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:26:03,002 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.682[0m - 2025-04-18 12:26:03
+Signal: [92mHOLD[0m
+Entry: [33m7.6820[0m
+Take Profit: [92m7.6580[0m
+Stop Loss: [91m7.7438[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6097[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:26:13,019 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:26:27,917 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.677[0m - 2025-04-18 12:26:27
+Signal: [92mHOLD[0m
+Entry: [33m7.6770[0m
+Take Profit: [92m7.6529[0m
+Stop Loss: [91m7.7388[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6097[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:26:37,936 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:26:50,677 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.679[0m - 2025-04-18 12:26:50
+Signal: [92mHOLD[0m
+Entry: [33m7.6790[0m
+Take Profit: [92m7.6550[0m
+Stop Loss: [91m7.7408[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6097[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:27:00,726 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:27:14,962 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.672[0m - 2025-04-18 12:27:14
+Signal: [92mHOLD[0m
+Entry: [33m7.6720[0m
+Take Profit: [92m7.6479[0m
+Stop Loss: [91m7.7338[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:27:25,009 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:27:35,094 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.671[0m - 2025-04-18 12:27:35
+Signal: [92mHOLD[0m
+Entry: [33m7.6710[0m
+Take Profit: [92m7.6470[0m
+Stop Loss: [91m7.7328[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:27:45,126 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:27:59,716 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.670[0m - 2025-04-18 12:27:59
+Signal: [92mHOLD[0m
+Entry: [33m7.6700[0m
+Take Profit: [92m7.6460[0m
+Stop Loss: [91m7.7318[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:28:09,741 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:28:27,965 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.669[0m - 2025-04-18 12:28:27
+Signal: [92mHOLD[0m
+Entry: [33m7.6690[0m
+Take Profit: [92m7.6449[0m
+Stop Loss: [91m7.7308[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:28:38,015 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:28:50,155 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.677[0m - 2025-04-18 12:28:50
+Signal: [92mHOLD[0m
+Entry: [33m7.6770[0m
+Take Profit: [92m7.6529[0m
+Stop Loss: [91m7.7388[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:29:00,200 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:29:18,442 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.681[0m - 2025-04-18 12:29:18
+Signal: [92mHOLD[0m
+Entry: [33m7.6810[0m
+Take Profit: [92m7.6570[0m
+Stop Loss: [91m7.7428[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:29:28,487 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:29:43,804 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.679[0m - 2025-04-18 12:29:43
+Signal: [92mHOLD[0m
+Entry: [33m7.6790[0m
+Take Profit: [92m7.6550[0m
+Stop Loss: [91m7.7408[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0344[0m
+  EMA9: [33m7.4960[0m
+  EMA21: [33m7.4907[0m
+  Momentum: [33m0.1604[0m
+  RSI: [33m49.3151[0m
+  StochRSI_K: [33m0.6716[0m
+  StochRSI_D: [33m0.6022[0m
+  CCI: [33m6.9284[0m
+  Williams_R: [33m-30.0000[0m
+  PSAR: [33m7.4214[0m
+  SMA10: [33m7.4906[0m
+  VWAP: [33m7.6098[0m
+  MFI: [33m35.9041[0m
+  BB_Upper: [33m7.5209[0m
+  BB_Middle: [33m7.4879[0m
+  BB_Lower: [33m7.4549[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:29:53,849 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:30:23,070 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.681[0m - 2025-04-18 12:30:23
+Signal: [92mHOLD[0m
+Entry: [33m7.6810[0m
+Take Profit: [92m7.6582[0m
+Stop Loss: [91m7.7396[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:30:33,119 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:30:50,012 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.678[0m - 2025-04-18 12:30:50
+Signal: [92mHOLD[0m
+Entry: [33m7.6780[0m
+Take Profit: [92m7.6552[0m
+Stop Loss: [91m7.7366[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:31:00,027 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:31:20,531 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.680[0m - 2025-04-18 12:31:20
+Signal: [92mHOLD[0m
+Entry: [33m7.6800[0m
+Take Profit: [92m7.6572[0m
+Stop Loss: [91m7.7386[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:31:30,559 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:31:44,082 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.681[0m - 2025-04-18 12:31:44
+Signal: [92mHOLD[0m
+Entry: [33m7.6810[0m
+Take Profit: [92m7.6582[0m
+Stop Loss: [91m7.7396[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:31:54,098 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:32:05,522 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.682[0m - 2025-04-18 12:32:05
+Signal: [92mHOLD[0m
+Entry: [33m7.6820[0m
+Take Profit: [92m7.6592[0m
+Stop Loss: [91m7.7406[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:32:15,540 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:32:30,496 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.693[0m - 2025-04-18 12:32:30
+Signal: [92mHOLD[0m
+Entry: [33m7.6930[0m
+Take Profit: [92m7.6702[0m
+Stop Loss: [91m7.7516[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:32:40,632 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:32:51,529 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.694[0m - 2025-04-18 12:32:51
+Signal: [92mHOLD[0m
+Entry: [33m7.6940[0m
+Take Profit: [92m7.6712[0m
+Stop Loss: [91m7.7526[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4867[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:33:01,586 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:33:19,252 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.694[0m - 2025-04-18 12:33:19
+Signal: [92mHOLD[0m
+Entry: [33m7.6940[0m
+Take Profit: [92m7.6712[0m
+Stop Loss: [91m7.7526[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:33:29,274 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:33:46,534 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.691[0m - 2025-04-18 12:33:46
+Signal: [92mHOLD[0m
+Entry: [33m7.6910[0m
+Take Profit: [92m7.6682[0m
+Stop Loss: [91m7.7496[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6106[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:33:56,593 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:34:10,376 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.691[0m - 2025-04-18 12:34:10
+Signal: [92mHOLD[0m
+Entry: [33m7.6910[0m
+Take Profit: [92m7.6682[0m
+Stop Loss: [91m7.7496[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6107[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:34:20,398 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:34:31,372 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.685[0m - 2025-04-18 12:34:31
+Signal: [92mHOLD[0m
+Entry: [33m7.6850[0m
+Take Profit: [92m7.6622[0m
+Stop Loss: [91m7.7436[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6107[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:34:41,412 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:35:05,947 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.686[0m - 2025-04-18 12:35:05
+Signal: [92mHOLD[0m
+Entry: [33m7.6860[0m
+Take Profit: [92m7.6632[0m
+Stop Loss: [91m7.7446[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0326[0m
+  EMA9: [33m7.4962[0m
+  EMA21: [33m7.4902[0m
+  Momentum: [33m0.7367[0m
+  RSI: [33m58.1281[0m
+  StochRSI_K: [33m0.6449[0m
+  StochRSI_D: [33m0.5143[0m
+  CCI: [33m143.0235[0m
+  Williams_R: [33m-8.3333[0m
+  PSAR: [33m7.4181[0m
+  SMA10: [33m7.4894[0m
+  VWAP: [33m7.6107[0m
+  MFI: [33m39.4372[0m
+  BB_Upper: [33m7.5203[0m
+  BB_Middle: [33m7.4868[0m
+  BB_Lower: [33m7.4532[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:35:15,997 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:35:27,562 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.688[0m - 2025-04-18 12:35:27
+Signal: [92mHOLD[0m
+Entry: [33m7.6880[0m
+Take Profit: [92m7.6667[0m
+Stop Loss: [91m7.7428[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:35:37,620 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:36:01,303 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.682[0m - 2025-04-18 12:36:01
+Signal: [92mHOLD[0m
+Entry: [33m7.6820[0m
+Take Profit: [92m7.6607[0m
+Stop Loss: [91m7.7368[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4845[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:36:12,166 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:36:26,945 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.687[0m - 2025-04-18 12:36:26
+Signal: [92mHOLD[0m
+Entry: [33m7.6870[0m
+Take Profit: [92m7.6657[0m
+Stop Loss: [91m7.7418[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:36:36,997 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:36:52,300 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.689[0m - 2025-04-18 12:36:52
+Signal: [92mHOLD[0m
+Entry: [33m7.6890[0m
+Take Profit: [92m7.6677[0m
+Stop Loss: [91m7.7438[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:37:02,322 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:37:32,813 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.685[0m - 2025-04-18 12:37:32
+Signal: [92mHOLD[0m
+Entry: [33m7.6850[0m
+Take Profit: [92m7.6637[0m
+Stop Loss: [91m7.7398[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:37:43,104 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:37:53,836 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.682[0m - 2025-04-18 12:37:53
+Signal: [92mHOLD[0m
+Entry: [33m7.6820[0m
+Take Profit: [92m7.6607[0m
+Stop Loss: [91m7.7368[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:38:03,855 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:38:16,767 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.684[0m - 2025-04-18 12:38:16
+Signal: [92mHOLD[0m
+Entry: [33m7.6840[0m
+Take Profit: [92m7.6627[0m
+Stop Loss: [91m7.7388[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:38:26,791 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:38:42,640 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.694[0m - 2025-04-18 12:38:42
+Signal: [92mHOLD[0m
+Entry: [33m7.6940[0m
+Take Profit: [92m7.6727[0m
+Stop Loss: [91m7.7488[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6119[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4845[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:38:52,860 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:39:03,975 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.692[0m - 2025-04-18 12:39:03
+Signal: [92mHOLD[0m
+Entry: [33m7.6920[0m
+Take Profit: [92m7.6707[0m
+Stop Loss: [91m7.7468[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6120[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:39:14,003 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:39:33,389 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.690[0m - 2025-04-18 12:39:33
+Signal: [92mHOLD[0m
+Entry: [33m7.6900[0m
+Take Profit: [92m7.6687[0m
+Stop Loss: [91m7.7448[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6120[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:39:43,408 - INFO - Analyzing TRUMPUSDT with interval: 5
+2025-04-18 12:39:55,343 - INFO - 
+[36m--- Scalping Analysis for TRUMPUSDT (5) ---[0m
+Current Price: [92m7.690[0m - 2025-04-18 12:39:55
+Signal: [92mHOLD[0m
+Entry: [33m7.6900[0m
+Take Profit: [92m7.6687[0m
+Stop Loss: [91m7.7448[0m
+Confidence: [36m75.00%[0m
+Indicators:
+  ATR: [33m0.0304[0m
+  EMA9: [33m7.4900[0m
+  EMA21: [33m7.4871[0m
+  Momentum: [33m0.5227[0m
+  RSI: [33m50.7853[0m
+  StochRSI_K: [33m0.4903[0m
+  StochRSI_D: [33m0.4630[0m
+  CCI: [33m131.9161[0m
+  Williams_R: [33m-22.6087[0m
+  PSAR: [33m7.4159[0m
+  SMA10: [33m7.4839[0m
+  VWAP: [33m7.6120[0m
+  MFI: [33m22.8419[0m
+  BB_Upper: [33m7.5142[0m
+  BB_Middle: [33m7.4844[0m
+  BB_Lower: [33m7.4547[0m
+Fibonacci Levels:
+  Fib_0.0%: [35m7.5680[0m
+  Fib_23.6%: [35m7.5309[0m
+  Fib_38.2%: [35m7.5080[0m
+  Fib_50.0%: [35m7.4895[0m
+  Fib_61.8%: [35m7.4710[0m
+2025-04-18 12:40:05,371 - INFO - Analyzing TRUMPUSDT with interval: 5
