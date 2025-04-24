@@ -1,0 +1,275 @@
+2025-04-24 03:51:34 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2391] - --- Starting analysis cycle for 1000000BABYDOGE/USDT:USDT ---
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1598] - Market Info 1000000BABYDOGE/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-07, AmtPrec=100.0, MinAmt=100.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:51:34 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000BABYDOGE/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:34 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000BABYDOGE/USDT:USDT.[0m
+2025-04-24 03:51:34 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:2426] - Fetching 1100 klines for 1000000BABYDOGE/USDT:USDT 5m...
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:509] - Fetching klines for 1000000BABYDOGE/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:51:34 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000BABYDOGE/USDT:USDT 5m
+2025-04-24 03:51:34 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000BABYDOGE/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:34 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000BABYDOGE/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:51:34 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:51:34 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 03:51:34 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:51:34 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:51:34 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-21 03:30:00, Candle: 2025-04-21 01:25:00, Range: [0.00128, 0.00128])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 0.00128 < Bottom 0.00128)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 05:50:00, Candle: 2025-04-21 03:45:00, Range: [0.00128, 0.00128])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.00131 > Top 0.00128)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 07:40:00, Candle: 2025-04-21 05:35:00, Range: [0.00131, 0.00131])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.00129 < Bottom 0.00131)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 09:00:00, Candle: 2025-04-21 06:55:00, Range: [0.00130, 0.00130])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.00131 > Top 0.00130)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 11:20:00, Candle: 2025-04-21 09:15:00, Range: [0.00131, 0.00131])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00129 < Bottom 0.00131)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 14:00:00, Candle: 2025-04-21 11:55:00, Range: [0.00129, 0.00129])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-21 14:40:00, Candle: 2025-04-21 12:35:00, Range: [0.00129, 0.00129])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 0.00131 > Top 0.00129)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.00129 < Bottom 0.00129)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.00130, 0.00130])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.00127 < Bottom 0.00130)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-21 19:45:00, Candle: 2025-04-21 17:40:00, Range: [0.00128, 0.00128])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.00128 > Top 0.00128)
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-21 22:20:00, Candle: 2025-04-21 20:15:00, Range: [0.00128, 0.00128])
+2025-04-24 03:51:34 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.00127 < Bottom 0.00128)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_11 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.00127, 0.00127])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_11 (Close 0.00126 < Bottom 0.00127)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 02:05:00, Candle: 2025-04-22 00:00:00, Range: [0.00127, 0.00127])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.00129 > Top 0.00127)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-22 06:35:00, Candle: 2025-04-22 04:30:00, Range: [0.00127, 0.00128])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 0.00125 < Bottom 0.00127)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-22 08:15:00, Candle: 2025-04-22 06:10:00, Range: [0.00127, 0.00127])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.00132 > Top 0.00127)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_15 (Pivot: 2025-04-22 10:25:00, Candle: 2025-04-22 08:20:00, Range: [0.00130, 0.00132])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_15 (Close 0.00129 < Bottom 0.00130)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-22 15:20:00, Candle: 2025-04-22 13:15:00, Range: [0.00130, 0.00131])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.00137 > Top 0.00131)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 01:10:00, Candle: 2025-04-22 23:05:00, Range: [0.00137, 0.00137])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.00142 > Top 0.00137)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 06:25:00, Candle: 2025-04-23 04:20:00, Range: [0.00144, 0.00144])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.00147 > Top 0.00144)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 08:30:00, Candle: 2025-04-23 06:25:00, Range: [0.00146, 0.00146])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.00142 < Bottom 0.00146)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 10:55:00, Candle: 2025-04-23 08:50:00, Range: [0.00146, 0.00146])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.00149 > Top 0.00146)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 16:20:00, Candle: 2025-04-23 14:15:00, Range: [0.00145, 0.00148])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.00140 < Bottom 0.00145)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-23 17:20:00, Candle: 2025-04-23 15:15:00, Range: [0.00141, 0.00142])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.00145 > Top 0.00142)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_23 (Pivot: 2025-04-23 19:25:00, Candle: 2025-04-23 17:20:00, Range: [0.00145, 0.00145])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_23 (Close 0.00141 < Bottom 0.00145)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_24 (Pivot: 2025-04-24 01:20:00, Candle: 2025-04-23 23:15:00, Range: [0.00144, 0.00145])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_24 (Close 0.00140 < Bottom 0.00144)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_25 (Pivot: 2025-04-24 03:55:00, Candle: 2025-04-24 01:50:00, Range: [0.00141, 0.00142])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_25 (Close 0.00137 < Bottom 0.00141)
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_26 (Pivot: 2025-04-24 06:05:00, Candle: 2025-04-24 04:00:00, Range: [0.00137, 0.00137])
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_26 (Close 0.00139 > Top 0.00137)
+2025-04-24 03:51:35 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 14, Bear OBs: 12
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1143] - Indicator calculations complete for 1000000BABYDOGE/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1198] - Latest strategy state updated for 1000000BABYDOGE/USDT:USDT: {'open': '0.0013', 'high': '0.0013', 'low': '0.0013', 'close': '0.0013', 'volume': Decimal('11717800.0'), 'atr_risk': '0.0000'}
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1872] - Fetching position for symbol: 1000000BABYDOGE/USDT:USDT
+2025-04-24 03:51:35 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:51:36 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2024] - No active position found for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 03:51:36 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:432] - Fetching ticker for 1000000BABYDOGE/USDT:USDT...
+2025-04-24 03:51:36 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:441] - Ticker data received for 1000000BABYDOGE/USDT:USDT: {'symbol': '1000000BABYDOGE/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.0014892, 'low': 0.0012983, 'bid': 0.0013065, 'bidVolume': 31300.0, 'ask': 0.001307, 'askVolume': 40900.0, 'vwap': 0.001407463671559643, 'open': 0.0014507, 'close': 0.001307, 'last': 0.001307, 'previousClose': None, 'change': -0.0001437, 'percentage': -9.9055, 'average': 0.0013788, 'baseVolume': 3132121800.0, 'quoteVolume': 4408347.6484, 'markPrice': 0.0013059, 'indexPrice': 0.0013066, 'info': {'symbol': '1000000BABYDOGEUSDT', 'lastPrice': '0.0013070', 'indexPrice': '0.0013066', 'markPrice': '0.0013059', 'prevPrice24h': '0.0014507', 'price24hPcnt': '-0.099055', 'highPrice24h': '0.0014892', 'lowPrice24h': '0.0012983', 'prevPrice1h': '0.0013751', 'openInterest': '1534148700', 'openInterestValue': '2003444.79', 'turnover24h': '4408347.6484', 'volume24h': '3132121800.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745496000000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '40900', 'bid1Price': '0.0013065', 'ask1Price': '0.0013070', 'bid1Size': '31300', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:51:36 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:447] - Using 'last' price: 0.001307
+2025-04-24 03:51:36 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:51:36 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2611] - No open position for 1000000BABYDOGE/USDT:USDT. Checking for entry signals.
+2025-04-24 03:51:36 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:51:36 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2708] - --- Finished analysis cycle for 1000000BABYDOGE/USDT:USDT (2.65s) ---
+2025-04-24 03:53:49 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2391] - --- Starting analysis cycle for 1000000BABYDOGE/USDT:USDT ---
+2025-04-24 03:53:49 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1598] - Market Info 1000000BABYDOGE/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-07, AmtPrec=100.0, MinAmt=100.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:53:49 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000BABYDOGE/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:53:49 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000BABYDOGE/USDT:USDT.[0m
+2025-04-24 03:53:49 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 03:53:49 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:2426] - Fetching 1150 klines for 1000000BABYDOGE/USDT:USDT 5m...
+2025-04-24 03:53:49 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:509] - Fetching klines for 1000000BABYDOGE/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:53:50 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000BABYDOGE/USDT:USDT 5m
+2025-04-24 03:53:50 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000BABYDOGE/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:53:50 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000BABYDOGE/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:53:50 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:53:50 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:53:50 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:53:50 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:53:50 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-21 03:30:00, Candle: 2025-04-21 01:25:00, Range: [0.00128, 0.00128])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 0.00128 < Bottom 0.00128)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 05:50:00, Candle: 2025-04-21 03:45:00, Range: [0.00128, 0.00128])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.00131 > Top 0.00128)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 07:40:00, Candle: 2025-04-21 05:35:00, Range: [0.00131, 0.00131])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.00129 < Bottom 0.00131)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 09:00:00, Candle: 2025-04-21 06:55:00, Range: [0.00130, 0.00130])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.00131 > Top 0.00130)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 11:20:00, Candle: 2025-04-21 09:15:00, Range: [0.00131, 0.00131])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00129 < Bottom 0.00131)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 14:00:00, Candle: 2025-04-21 11:55:00, Range: [0.00129, 0.00129])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-21 14:40:00, Candle: 2025-04-21 12:35:00, Range: [0.00129, 0.00129])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 0.00131 > Top 0.00129)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.00129 < Bottom 0.00129)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.00130, 0.00130])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.00127 < Bottom 0.00130)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-21 19:45:00, Candle: 2025-04-21 17:40:00, Range: [0.00128, 0.00128])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.00128 > Top 0.00128)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-21 22:20:00, Candle: 2025-04-21 20:15:00, Range: [0.00128, 0.00128])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.00127 < Bottom 0.00128)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_11 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.00127, 0.00127])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_11 (Close 0.00126 < Bottom 0.00127)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 02:05:00, Candle: 2025-04-22 00:00:00, Range: [0.00127, 0.00127])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.00129 > Top 0.00127)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-22 06:35:00, Candle: 2025-04-22 04:30:00, Range: [0.00127, 0.00128])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 0.00125 < Bottom 0.00127)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-22 08:15:00, Candle: 2025-04-22 06:10:00, Range: [0.00127, 0.00127])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.00132 > Top 0.00127)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_15 (Pivot: 2025-04-22 10:25:00, Candle: 2025-04-22 08:20:00, Range: [0.00130, 0.00132])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_15 (Close 0.00129 < Bottom 0.00130)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-22 15:20:00, Candle: 2025-04-22 13:15:00, Range: [0.00130, 0.00131])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.00137 > Top 0.00131)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 01:10:00, Candle: 2025-04-22 23:05:00, Range: [0.00137, 0.00137])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.00142 > Top 0.00137)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 06:25:00, Candle: 2025-04-23 04:20:00, Range: [0.00144, 0.00144])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.00147 > Top 0.00144)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 08:30:00, Candle: 2025-04-23 06:25:00, Range: [0.00146, 0.00146])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.00142 < Bottom 0.00146)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 10:55:00, Candle: 2025-04-23 08:50:00, Range: [0.00146, 0.00146])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.00149 > Top 0.00146)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 16:20:00, Candle: 2025-04-23 14:15:00, Range: [0.00145, 0.00148])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.00140 < Bottom 0.00145)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-23 17:20:00, Candle: 2025-04-23 15:15:00, Range: [0.00141, 0.00142])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.00145 > Top 0.00142)
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_23 (Pivot: 2025-04-23 19:25:00, Candle: 2025-04-23 17:20:00, Range: [0.00145, 0.00145])
+2025-04-24 03:53:50 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_23 (Close 0.00141 < Bottom 0.00145)
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_24 (Pivot: 2025-04-24 01:20:00, Candle: 2025-04-23 23:15:00, Range: [0.00144, 0.00145])
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_24 (Close 0.00140 < Bottom 0.00144)
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_25 (Pivot: 2025-04-24 03:55:00, Candle: 2025-04-24 01:50:00, Range: [0.00141, 0.00142])
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_25 (Close 0.00137 < Bottom 0.00141)
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_26 (Pivot: 2025-04-24 06:05:00, Candle: 2025-04-24 04:00:00, Range: [0.00137, 0.00137])
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_26 (Close 0.00139 > Top 0.00137)
+2025-04-24 03:53:51 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 14, Bear OBs: 12
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1143] - Indicator calculations complete for 1000000BABYDOGE/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1198] - Latest strategy state updated for 1000000BABYDOGE/USDT:USDT: {'open': '0.0013', 'high': '0.0013', 'low': '0.0013', 'close': '0.0013', 'volume': Decimal('17796400.0'), 'atr_risk': '0.0000'}
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1872] - Fetching position for symbol: 1000000BABYDOGE/USDT:USDT
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:53:51 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2024] - No active position found for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:432] - Fetching ticker for 1000000BABYDOGE/USDT:USDT...
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:441] - Ticker data received for 1000000BABYDOGE/USDT:USDT: {'symbol': '1000000BABYDOGE/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.0014892, 'low': 0.0012983, 'bid': 0.0013048, 'bidVolume': 228600.0, 'ask': 0.0013051, 'askVolume': 38300.0, 'vwap': 0.00140715279872037, 'open': 0.0014581, 'close': 0.0013048, 'last': 0.0013048, 'previousClose': None, 'change': -0.0001533, 'percentage': -10.5136, 'average': 0.0013814, 'baseVolume': 3130780800.0, 'quoteVolume': 4405486.9649, 'markPrice': 0.0013054, 'indexPrice': 0.001306, 'info': {'symbol': '1000000BABYDOGEUSDT', 'lastPrice': '0.0013048', 'indexPrice': '0.0013060', 'markPrice': '0.0013054', 'prevPrice24h': '0.0014581', 'price24hPcnt': '-0.105136', 'highPrice24h': '0.0014892', 'lowPrice24h': '0.0012983', 'prevPrice1h': '0.0013739', 'openInterest': '1535639800', 'openInterestValue': '2004624.19', 'turnover24h': '4405486.9649', 'volume24h': '3130780800.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745496000000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '38300', 'bid1Price': '0.0013048', 'ask1Price': '0.0013051', 'bid1Size': '228600', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:447] - Using 'last' price: 0.0013048
+2025-04-24 03:53:51 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:53:51 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2611] - No open position for 1000000BABYDOGE/USDT:USDT. Checking for entry signals.
+2025-04-24 03:53:51 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:53:51 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2708] - --- Finished analysis cycle for 1000000BABYDOGE/USDT:USDT (2.52s) ---
+2025-04-24 16:19:39 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2391] - --- Starting analysis cycle for 1000000BABYDOGE/USDT:USDT ---
+2025-04-24 16:19:39 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1598] - Market Info 1000000BABYDOGE/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-07, AmtPrec=100.0, MinAmt=100.0, MinCost=None, ContractSize=1.0
+2025-04-24 16:19:39 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000BABYDOGE/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 16:19:39 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000BABYDOGE/USDT:USDT.[0m
+2025-04-24 16:19:39 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 16:19:39 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:2426] - Fetching 1100 klines for 1000000BABYDOGE/USDT:USDT 3m...
+2025-04-24 16:19:39 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:509] - Fetching klines for 1000000BABYDOGE/USDT:USDT, 3m, limit=1100 (Attempt 1/4)
+2025-04-24 16:19:40 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 16:19:40 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000BABYDOGE/USDT:USDT 3m
+2025-04-24 16:19:40 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000BABYDOGE/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 16:19:40 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000BABYDOGE/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 16:19:40 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 16:19:40 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 16:19:40 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 16:19:40 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 16:19:40 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 16:19:40 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-22 21:48:00, Candle: 2025-04-22 20:33:00, Range: [0.00134, 0.00135])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.00136 > Top 0.00135)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-23 01:09:00, Candle: 2025-04-22 23:54:00, Range: [0.00138, 0.00139])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.00143 > Top 0.00139)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-23 01:57:00, Candle: 2025-04-23 00:42:00, Range: [0.00139, 0.00139])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.00138 < Bottom 0.00139)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-23 04:39:00, Candle: 2025-04-23 03:24:00, Range: [0.00141, 0.00141])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.00145 > Top 0.00141)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-23 05:15:00, Candle: 2025-04-23 04:00:00, Range: [0.00143, 0.00144])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00142 < Bottom 0.00143)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_6 (Pivot: 2025-04-23 06:27:00, Candle: 2025-04-23 05:12:00, Range: [0.00143, 0.00143])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_6 (Close 0.00147 > Top 0.00143)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-23 08:30:00, Candle: 2025-04-23 07:15:00, Range: [0.00143, 0.00143])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.00142 < Bottom 0.00143)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_8 (Pivot: 2025-04-23 09:21:00, Candle: 2025-04-23 08:06:00, Range: [0.00142, 0.00142])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_8 (Close 0.00147 > Top 0.00142)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_9 (Pivot: 2025-04-23 10:15:00, Candle: 2025-04-23 09:00:00, Range: [0.00145, 0.00145])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_10 (Pivot: 2025-04-23 10:57:00, Candle: 2025-04-23 09:42:00, Range: [0.00146, 0.00147])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_10 (Close 0.00149 > Top 0.00147)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_11 (Pivot: 2025-04-23 11:51:00, Candle: 2025-04-23 10:36:00, Range: [0.00146, 0.00146])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_11 (Close 0.00145 < Bottom 0.00146)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-23 12:48:00, Candle: 2025-04-23 11:33:00, Range: [0.00147, 0.00147])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.00148 > Top 0.00147)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_9 (Close 0.00144 < Bottom 0.00145)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-23 16:24:00, Candle: 2025-04-23 15:09:00, Range: [0.00142, 0.00143])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 0.00140 < Bottom 0.00142)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-23 17:24:00, Candle: 2025-04-23 16:09:00, Range: [0.00141, 0.00142])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.00145 > Top 0.00142)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_15 (Pivot: 2025-04-23 19:27:00, Candle: 2025-04-23 18:12:00, Range: [0.00144, 0.00144])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_15 (Close 0.00141 < Bottom 0.00144)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 20:30:00, Candle: 2025-04-23 19:15:00, Range: [0.00142, 0.00142])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.00143 > Top 0.00142)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 21:45:00, Candle: 2025-04-23 20:30:00, Range: [0.00143, 0.00143])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.00141 < Bottom 0.00143)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-24 01:18:00, Candle: 2025-04-24 00:03:00, Range: [0.00143, 0.00144])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.00140 < Bottom 0.00143)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-24 02:12:00, Candle: 2025-04-24 00:57:00, Range: [0.00141, 0.00141])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.00143 > Top 0.00141)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-24 03:57:00, Candle: 2025-04-24 02:42:00, Range: [0.00141, 0.00141])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.00137 < Bottom 0.00141)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_21 (Pivot: 2025-04-24 06:03:00, Candle: 2025-04-24 04:48:00, Range: [0.00137, 0.00137])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_21 (Close 0.00140 > Top 0.00137)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-24 08:48:00, Candle: 2025-04-24 07:33:00, Range: [0.00138, 0.00138])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.00131 < Bottom 0.00138)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-24 10:51:00, Candle: 2025-04-24 09:36:00, Range: [0.00133, 0.00133])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.00135 > Top 0.00133)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_24 (Pivot: 2025-04-24 12:30:00, Candle: 2025-04-24 11:15:00, Range: [0.00134, 0.00134])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_24 (Close 0.00133 < Bottom 0.00134)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_25 (Pivot: 2025-04-24 16:54:00, Candle: 2025-04-24 15:39:00, Range: [0.00137, 0.00138])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_25 (Close 0.00141 > Top 0.00138)
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:947] - Created Bullish OB: BullOB_26 (Pivot: 2025-04-24 17:45:00, Candle: 2025-04-24 16:30:00, Range: [0.00139, 0.00139])
+2025-04-24 16:19:41 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:957] - Closed Bullish OB: BullOB_26 (Close 0.00136 < Bottom 0.00139)
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:918] - Created Bearish OB: BearOB_27 (Pivot: 2025-04-24 18:51:00, Candle: 2025-04-24 17:36:00, Range: [0.00137, 0.00137])
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:970] - Closed Bearish OB: BearOB_27 (Close 0.00138 > Top 0.00137)
+2025-04-24 16:19:42 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 13, Bear OBs: 14
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1143] - Indicator calculations complete for 1000000BABYDOGE/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1198] - Latest strategy state updated for 1000000BABYDOGE/USDT:USDT: {'open': '0.0014', 'high': '0.0014', 'low': '0.0014', 'close': '0.0014', 'volume': Decimal('159000.0'), 'atr_risk': '0.0000'}
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1872] - Fetching position for symbol: 1000000BABYDOGE/USDT:USDT
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 16:19:42 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2024] - No active position found for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:432] - Fetching ticker for 1000000BABYDOGE/USDT:USDT...
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:441] - Ticker data received for 1000000BABYDOGE/USDT:USDT: {'symbol': '1000000BABYDOGE/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.0014493, 'low': 0.0012983, 'bid': 0.0013724, 'bidVolume': 32000.0, 'ask': 0.0013726, 'askVolume': 1600.0, 'vwap': 0.001360239013307467, 'open': 0.0014192, 'close': 0.0013726, 'last': 0.0013726, 'previousClose': None, 'change': -4.66e-05, 'percentage': -3.2835, 'average': 0.0013959, 'baseVolume': 2805011600.0, 'quoteVolume': 3815486.2111, 'markPrice': 0.0013732, 'indexPrice': 0.0013732, 'info': {'symbol': '1000000BABYDOGEUSDT', 'lastPrice': '0.0013726', 'indexPrice': '0.0013732', 'markPrice': '0.0013732', 'prevPrice24h': '0.0014192', 'price24hPcnt': '-0.032835', 'highPrice24h': '0.0014493', 'lowPrice24h': '0.0012983', 'prevPrice1h': '0.0013722', 'openInterest': '1536986600', 'openInterestValue': '2110590.00', 'turnover24h': '3815486.2111', 'volume24h': '2805011600.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1600', 'bid1Price': '0.0013724', 'ask1Price': '0.0013726', 'bid1Size': '32000', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:447] - Using 'last' price: 0.0013726
+2025-04-24 16:19:42 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 16:19:42 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2611] - No open position for 1000000BABYDOGE/USDT:USDT. Checking for entry signals.
+2025-04-24 16:19:42 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 16:19:42 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2708] - --- Finished analysis cycle for 1000000BABYDOGE/USDT:USDT (2.89s) ---
+2025-04-24 16:26:57 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:2521] - --- Starting analysis cycle for 1000000BABYDOGE/USDT:USDT ---
+2025-04-24 16:26:57 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1653] - Market Info for 1000000BABYDOGE/USDT:USDT: ID=1000000BABYDOGEUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 1e-07/100.0/N/A, Limits(Amount Min/Max): 100.0/60000000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 16:26:57 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:483] - Fetching klines for 1000000BABYDOGE/USDT:USDT, 3m, limit=1100 (Attempt 1/4)
+2025-04-24 16:26:58 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:489] - Received 1000 klines from API.
+2025-04-24 16:26:58 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:548] - Successfully fetched and processed 1000 klines for 1000000BABYDOGE/USDT:USDT 3m
+2025-04-24 16:26:58 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1053] - [33mInsufficient data (1000 points) for 1000000BABYDOGE/USDT:USDT to calculate all indicators reliably (recommend min: ~1050). Results may be inaccurate or contain NaNs.[0m
+2025-04-24 16:26:58 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:1069] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 16:26:58 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:1073] - Calculating Volbot strategy indicators...
+2025-04-24 16:26:58 - INFO - [volbot_1000000BABYDOGE_USDT_USDT:611] - Calculating Volumatic Trend Levels...
+2025-04-24 16:26:58 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:577] - Calculating Smoothed Weighted EMA (SWMA) with length: 40...
+2025-04-24 16:26:59 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 124. Propagating previous levels.
+2025-04-24 16:26:59 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 125. Propagating previous levels.
+2025-04-24 16:26:59 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 127. Propagating previous levels.
+2025-04-24 16:26:59 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 137. Propagating previous levels.
+2025-04-24 16:27:00 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 193. Propagating previous levels.
+2025-04-24 16:27:00 - DEBUG - [volbot_1000000BABYDOGE_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 200. Propagating previous levels.
+2025-04-24 16:27:08 - ERROR - [volbot_1000000BABYDOGE_USDT_USDT:1087] - [91mError calculating indicators for 1000000BABYDOGE/USDT:USDT: 'numpy.ndarray' object has no attribute 'fillna'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 1074, in _calculate_strategy_indicators
+    df_calc = calculate_volatility_levels(df_calc, self.config, self.logger)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 688, in calculate_volatility_levels
+    ).fillna(0)
+      ^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'fillna'. Did you mean: 'fill'?
+2025-04-24 16:27:09 - WARNING - [volbot_1000000BABYDOGE_USDT_USDT:1097] - Cannot update latest state: Processed DataFrame is empty for 1000000BABYDOGE/USDT:USDT.
+2025-04-24 16:27:09 - ERROR - [volbot_1000000BABYDOGE_USDT_USDT:2556] - Failed to calculate indicators or update state for 1000000BABYDOGE/USDT:USDT. Skipping further analysis.

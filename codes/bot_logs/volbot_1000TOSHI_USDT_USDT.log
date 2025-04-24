@@ -1,0 +1,74 @@
+2025-04-24 03:54:58 - INFO - [volbot_1000TOSHI_USDT_USDT:2391] - --- Starting analysis cycle for 1000TOSHI/USDT:USDT ---
+2025-04-24 03:54:58 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1598] - Market Info 1000TOSHI/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:54:58 - WARNING - [volbot_1000TOSHI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000TOSHI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:58 - WARNING - [volbot_1000TOSHI_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000TOSHI/USDT:USDT.[0m
+2025-04-24 03:54:58 - WARNING - [volbot_1000TOSHI_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000TOSHI/USDT:USDT.
+2025-04-24 03:54:58 - DEBUG - [volbot_1000TOSHI_USDT_USDT:2426] - Fetching 1150 klines for 1000TOSHI/USDT:USDT 5m...
+2025-04-24 03:54:58 - DEBUG - [volbot_1000TOSHI_USDT_USDT:509] - Fetching klines for 1000TOSHI/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:54:59 - DEBUG - [volbot_1000TOSHI_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:54:59 - INFO - [volbot_1000TOSHI_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000TOSHI/USDT:USDT 5m
+2025-04-24 03:54:59 - WARNING - [volbot_1000TOSHI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000TOSHI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:59 - WARNING - [volbot_1000TOSHI_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000TOSHI/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:54:59 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:54:59 - INFO - [volbot_1000TOSHI_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:54:59 - WARNING - [volbot_1000TOSHI_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:54:59 - INFO - [volbot_1000TOSHI_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:54:59 - INFO - [volbot_1000TOSHI_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:54:59 - INFO - [volbot_1000TOSHI_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 02:30:00, Candle: 2025-04-21 00:25:00, Range: [0.31820, 0.31880])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.34050 > Top 0.31880)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_2 (Pivot: 2025-04-21 07:25:00, Candle: 2025-04-21 05:20:00, Range: [0.33600, 0.33750])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_2 (Close 0.33180 < Bottom 0.33600)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 08:20:00, Candle: 2025-04-21 06:15:00, Range: [0.33380, 0.33430])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.34770 > Top 0.33430)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 19:00:00, Candle: 2025-04-21 16:55:00, Range: [0.32700, 0.32830])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.32240 < Bottom 0.32700)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-21 20:35:00, Candle: 2025-04-21 18:30:00, Range: [0.32340, 0.32520])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 0.32860 > Top 0.32520)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_6 (Pivot: 2025-04-22 01:45:00, Candle: 2025-04-21 23:40:00, Range: [0.32860, 0.33010])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_6 (Close 0.34490 > Top 0.33010)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-22 08:45:00, Candle: 2025-04-22 06:40:00, Range: [0.33480, 0.33490])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 0.35600 > Top 0.33490)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 10:25:00, Candle: 2025-04-22 08:20:00, Range: [0.34750, 0.34890])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.34640 < Bottom 0.34750)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 12:15:00, Candle: 2025-04-22 10:10:00, Range: [0.34720, 0.34860])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.35380 > Top 0.34860)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 14:25:00, Candle: 2025-04-22 12:20:00, Range: [0.35050, 0.35380])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.34690 < Bottom 0.35050)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 15:10:00, Candle: 2025-04-22 13:05:00, Range: [0.35810, 0.35910])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.35930 > Top 0.35910)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 19:00:00, Candle: 2025-04-22 16:55:00, Range: [0.35220, 0.35370])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.36920 > Top 0.35370)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-23 00:00:00, Candle: 2025-04-22 21:55:00, Range: [0.38250, 0.38340])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-23 00:55:00, Candle: 2025-04-22 22:50:00, Range: [0.37920, 0.37920])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 0.37780 < Bottom 0.37920)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.38470 > Top 0.38340)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 06:45:00, Candle: 2025-04-23 04:40:00, Range: [0.38530, 0.38610])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.39770 > Top 0.38610)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-23 12:00:00, Candle: 2025-04-23 09:55:00, Range: [0.38970, 0.38970])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 0.38120 < Bottom 0.38970)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 14:40:00, Candle: 2025-04-23 12:35:00, Range: [0.38220, 0.38350])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.39820 > Top 0.38350)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-23 15:25:00, Candle: 2025-04-23 13:20:00, Range: [0.39260, 0.39480])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.37480 < Bottom 0.39260)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-23 18:25:00, Candle: 2025-04-23 16:20:00, Range: [0.37650, 0.37980])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.39430 > Top 0.37980)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 19:15:00, Candle: 2025-04-23 17:10:00, Range: [0.38310, 0.38350])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.38270 < Bottom 0.38310)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-24 03:35:00, Candle: 2025-04-24 01:30:00, Range: [0.36330, 0.36570])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.35600 < Bottom 0.36330)
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-24 06:05:00, Candle: 2025-04-24 04:00:00, Range: [0.35810, 0.35810])
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.36610 > Top 0.35810)
+2025-04-24 03:55:00 - INFO - [volbot_1000TOSHI_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 9, Bear OBs: 13
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1143] - Indicator calculations complete for 1000TOSHI/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1198] - Latest strategy state updated for 1000TOSHI/USDT:USDT: {'open': '0.3572', 'high': '0.3581', 'low': '0.3570', 'close': '0.3575', 'volume': Decimal('6209.0'), 'atr_risk': '0.0018'}
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1872] - Fetching position for symbol: 1000TOSHI/USDT:USDT
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:55:00 - INFO - [volbot_1000TOSHI_USDT_USDT:2024] - No active position found for 1000TOSHI/USDT:USDT.
+2025-04-24 03:55:00 - DEBUG - [volbot_1000TOSHI_USDT_USDT:432] - Fetching ticker for 1000TOSHI/USDT:USDT...
+2025-04-24 03:55:01 - DEBUG - [volbot_1000TOSHI_USDT_USDT:441] - Ticker data received for 1000TOSHI/USDT:USDT: {'symbol': '1000TOSHI/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.3984, 'low': 0.354, 'bid': 0.3575, 'bidVolume': 69.0, 'ask': 0.3576, 'askVolume': 6.0, 'vwap': 0.3805101598509924, 'open': 0.3953, 'close': 0.3575, 'last': 0.3575, 'previousClose': None, 'change': -0.0378, 'percentage': -9.5623, 'average': 0.3764, 'baseVolume': 13173018.0, 'quoteVolume': 5012467.1849, 'markPrice': 0.3575, 'indexPrice': 0.3589, 'info': {'symbol': '1000TOSHIUSDT', 'lastPrice': '0.3575', 'indexPrice': '0.3589', 'markPrice': '0.3575', 'prevPrice24h': '0.3953', 'price24hPcnt': '-0.095623', 'highPrice24h': '0.3984', 'lowPrice24h': '0.3540', 'prevPrice1h': '0.3592', 'openInterest': '3897182', 'openInterestValue': '1393242.57', 'turnover24h': '5012467.1849', 'volume24h': '13173018.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745496000000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '6', 'bid1Price': '0.3575', 'ask1Price': '0.3576', 'bid1Size': '69', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:55:01 - DEBUG - [volbot_1000TOSHI_USDT_USDT:447] - Using 'last' price: 0.3575
+2025-04-24 03:55:01 - DEBUG - [volbot_1000TOSHI_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:55:01 - INFO - [volbot_1000TOSHI_USDT_USDT:2611] - No open position for 1000TOSHI/USDT:USDT. Checking for entry signals.
+2025-04-24 03:55:01 - INFO - [volbot_1000TOSHI_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:55:01 - INFO - [volbot_1000TOSHI_USDT_USDT:2708] - --- Finished analysis cycle for 1000TOSHI/USDT:USDT (2.58s) ---

@@ -1,0 +1,2131 @@
+2025-04-24 03:41:57 - INFO - [volbot_init:2883] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 03:41:57 - INFO - [volbot_init:2884] - Using config file: config.json
+2025-04-24 03:41:57 - INFO - [volbot_init:2885] - Log directory: bot_logs
+2025-04-24 03:41:57 - INFO - [volbot_init:2886] - Quote Currency: USDT
+2025-04-24 03:41:57 - INFO - [volbot_init:2887] - Trading Enabled: True
+2025-04-24 03:41:57 - INFO - [volbot_init:2888] - Using Sandbox: False
+2025-04-24 03:41:57 - INFO - [volbot_init:2889] - Default Interval: 5
+2025-04-24 03:41:57 - WARNING - [volbot_init:323] - [91mUSING LIVE TRADING ENVIRONMENT[0m
+2025-04-24 03:41:57 - INFO - [volbot_init:326] - Loading markets for bybit...
+2025-04-24 03:42:12 - INFO - [volbot_init:328] - Markets loaded. CCXT exchange initialized (bybit). Sandbox: False
+2025-04-24 03:42:12 - INFO - [volbot_init:332] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-04-24 03:42:13 - INFO - [volbot_init:337] - [92mSuccessfully connected and fetched initial balance (CONTRACT).[0m (Example: USDT available: 3.44467351)
+2025-04-24 03:42:29 - DEBUG - [volbot_init:1653] - Market Info for FARTCOIN/USDT:USDT: ID=FARTCOINUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 0.0001/1.0/N/A, Limits(Amount Min/Max): 1.0/500000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 03:42:37 - INFO - [volbot_init:2902] - Starting analysis with symbols: FARTCOIN/USDT:USDT
+2025-04-24 03:42:37 - INFO - [volbot_init:2951] - [34m[1m--- Starting Main Trading Loop (1 symbols) ---[0m
+2025-04-24 03:42:37 - INFO - [volbot_init:2956] - *** New Cycle Start: 2025-04-24 03:42:37 CDT ***
+2025-04-24 03:42:43 - INFO - [volbot_init:2977] - Cycle duration: 6.30s. Sleeping for 8.70s...
+2025-04-24 03:42:52 - INFO - [volbot_init:2956] - *** New Cycle Start: 2025-04-24 03:42:52 CDT ***
+2025-04-24 03:42:57 - INFO - [volbot_init:2977] - Cycle duration: 5.45s. Sleeping for 9.55s...
+2025-04-24 03:43:07 - INFO - [volbot_init:2956] - *** New Cycle Start: 2025-04-24 03:43:07 CDT ***
+2025-04-24 03:43:13 - INFO - [volbot_init:2977] - Cycle duration: 6.61s. Sleeping for 8.39s...
+2025-04-24 03:43:16 - INFO - [volbot_init:2981] - [33mKeyboardInterrupt received. Shutting down gracefully...[0m
+2025-04-24 03:43:16 - WARNING - [volbot_init:2984] - Trading was enabled. Consider manually checking open positions/orders.
+2025-04-24 03:43:16 - INFO - [volbot_init:2989] - [34m[1m--- Volbot Shut Down ---[0m
+2025-04-24 03:50:50 - INFO - [volbot_init:2718] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 03:50:50 - INFO - [volbot_init:2719] - Config File: config.json
+2025-04-24 03:50:50 - INFO - [volbot_init:2720] - Log Directory: bot_logs
+2025-04-24 03:50:50 - INFO - [volbot_init:2721] - Quote Currency: USDT
+2025-04-24 03:50:50 - INFO - [volbot_init:2722] - Trading Enabled: True
+2025-04-24 03:50:50 - INFO - [volbot_init:2723] - Use Sandbox: False
+2025-04-24 03:50:50 - INFO - [volbot_init:2724] - Default Interval: 5
+2025-04-24 03:50:50 - INFO - [volbot_init:2725] - Timezone: America/Chicago
+2025-04-24 03:50:50 - INFO - [volbot_init:2726] - Console Log Level: INFO
+2025-04-24 03:50:50 - WARNING - [volbot_init:361] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 03:50:50 - INFO - [volbot_init:364] - Loading markets for bybit...
+2025-04-24 03:50:58 - INFO - [volbot_init:367] - Markets loaded successfully (2647 symbols).
+2025-04-24 03:50:58 - INFO - [volbot_init:373] - Attempting initial balance fetch to test API keys and connection...
+2025-04-24 03:50:58 - DEBUG - [volbot_init:1383] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 03:51:00 - DEBUG - [volbot_init:1491] - Parsed balance via standard ['USDT']['free'] (type: CONTRACT): 3.44467351 USDT
+2025-04-24 03:51:00 - DEBUG - [volbot_init:1491] - Parsed balance via standard ['USDT']['free'] (type: CONTRACT): 3.44467351 USDT
+2025-04-24 03:51:00 - INFO - [volbot_init:1426] - Available USDT balance: 3.4447
+2025-04-24 03:51:00 - INFO - [volbot_init:376] - [92mAPI keys and connection successful. Initial USDT balance: 3.4447[0m
+2025-04-24 03:51:20 - INFO - [volbot_init:2751] - Attempting to fetch all active linear USDT perpetual swaps...
+2025-04-24 03:51:29 - INFO - [volbot_init:2767] - Selected 507 linear USDT swaps.
+2025-04-24 03:51:29 - INFO - [volbot_init:2798] - [34m[1m--- Starting Main Trading Loop (507 symbols) ---[0m
+2025-04-24 03:51:29 - INFO - [volbot_init:2803] - *** New Cycle Start: 2025-04-24 03:51:29 CDT ***
+2025-04-24 03:51:56 - INFO - [volbot_init:2836] - 
+[33mKeyboardInterrupt received. Shutting down gracefully...[0m
+2025-04-24 03:51:56 - WARNING - [volbot_init:2839] - Trading was enabled. Check exchange for open positions/orders.
+2025-04-24 03:51:56 - INFO - [volbot_init:2857] - [34m[1m--- Volbot Shut Down ---[0m
+2025-04-24 03:53:25 - INFO - [volbot_init:2718] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 03:53:25 - INFO - [volbot_init:2719] - Config File: config.json
+2025-04-24 03:53:25 - INFO - [volbot_init:2720] - Log Directory: bot_logs
+2025-04-24 03:53:25 - INFO - [volbot_init:2721] - Quote Currency: USDT
+2025-04-24 03:53:25 - INFO - [volbot_init:2722] - Trading Enabled: True
+2025-04-24 03:53:25 - INFO - [volbot_init:2723] - Use Sandbox: False
+2025-04-24 03:53:25 - INFO - [volbot_init:2724] - Default Interval: 5
+2025-04-24 03:53:25 - INFO - [volbot_init:2725] - Timezone: America/Chicago
+2025-04-24 03:53:25 - INFO - [volbot_init:2726] - Console Log Level: INFO
+2025-04-24 03:53:25 - WARNING - [volbot_init:361] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 03:53:25 - INFO - [volbot_init:364] - Loading markets for bybit...
+2025-04-24 03:53:33 - INFO - [volbot_init:367] - Markets loaded successfully (2647 symbols).
+2025-04-24 03:53:33 - INFO - [volbot_init:373] - Attempting initial balance fetch to test API keys and connection...
+2025-04-24 03:53:33 - DEBUG - [volbot_init:1383] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 03:53:35 - DEBUG - [volbot_init:1491] - Parsed balance via standard ['USDT']['free'] (type: CONTRACT): 3.44467351 USDT
+2025-04-24 03:53:35 - DEBUG - [volbot_init:1491] - Parsed balance via standard ['USDT']['free'] (type: CONTRACT): 3.44467351 USDT
+2025-04-24 03:53:35 - INFO - [volbot_init:1426] - Available USDT balance: 3.4447
+2025-04-24 03:53:35 - INFO - [volbot_init:376] - [92mAPI keys and connection successful. Initial USDT balance: 3.4447[0m
+2025-04-24 03:53:37 - INFO - [volbot_init:2751] - Attempting to fetch all active linear USDT perpetual swaps...
+2025-04-24 03:53:46 - INFO - [volbot_init:2767] - Selected 507 linear USDT swaps.
+2025-04-24 03:53:46 - INFO - [volbot_init:2798] - [34m[1m--- Starting Main Trading Loop (507 symbols) ---[0m
+2025-04-24 03:53:46 - INFO - [volbot_init:2803] - *** New Cycle Start: 2025-04-24 03:53:46 CDT ***
+2025-04-24 03:55:41 - INFO - [volbot_init:2836] - 
+[33mKeyboardInterrupt received. Shutting down gracefully...[0m
+2025-04-24 03:55:41 - WARNING - [volbot_init:2839] - Trading was enabled. Check exchange for open positions/orders.
+2025-04-24 03:55:41 - INFO - [volbot_init:2857] - [34m[1m--- Volbot Shut Down ---[0m
+2025-04-24 04:19:29 - INFO - [volbot_init:3450] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 04:19:29 - INFO - [volbot_init:3451] - Timestamp: 2025-04-24 04:19:29 CDT
+2025-04-24 04:19:29 - INFO - [volbot_init:3452] - Config File: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-24 04:19:29 - INFO - [volbot_init:3453] - Log Directory: /data/data/com.termux/files/home/worldguide/codes/bot_logs
+2025-04-24 04:19:29 - INFO - [volbot_init:3454] - Quote Currency: USDT
+2025-04-24 04:19:29 - INFO - [volbot_init:3455] - Trading Enabled: True
+2025-04-24 04:19:29 - INFO - [volbot_init:3456] - Use Sandbox: False
+2025-04-24 04:19:29 - INFO - [volbot_init:3457] - Default Interval: 5 (5m)
+2025-04-24 04:19:29 - INFO - [volbot_init:3458] - Timezone: America/Chicago
+2025-04-24 04:19:29 - INFO - [volbot_init:3459] - Console Log Level: INFO
+2025-04-24 04:19:29 - WARNING - [volbot_init:406] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 04:19:29 - INFO - [volbot_init:409] - Loading markets for bybit...
+2025-04-24 04:19:42 - INFO - [volbot_init:412] - Markets loaded successfully (2647 symbols).
+2025-04-24 04:19:42 - INFO - [volbot_init:418] - Attempting initial balance fetch (USDT) to test API keys and connection...
+2025-04-24 04:19:42 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 04:19:43 - WARNING - [volbot_init:1795] - Exchange/Network error fetching balance (type CONTRACT): bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745486384680}. Trying next.
+2025-04-24 04:19:43 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'UNIFIED'} for USDT...
+2025-04-24 04:19:44 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'accountType': 'UNIFIED'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 04:19:44 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 04:19:44 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 04:19:44 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 04:19:44 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 04:19:44 - DEBUG - [volbot_init:1784] - Balance for USDT not found in 'UNIFIED' account type structure. Checking next type.
+2025-04-24 04:19:44 - DEBUG - [volbot_init:1806] - No positive balance found with specific account types. Fetching balance using default parameters for USDT...
+2025-04-24 04:19:45 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'type': 'default'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 04:19:45 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 04:19:45 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 04:19:45 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 04:19:45 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 04:19:45 - WARNING - [volbot_init:1816] - Default balance fetch did not find balance for USDT.
+2025-04-24 04:19:45 - ERROR - [volbot_init:1834] - [91mCould not determine available balance for USDT after all attempts.[0m
+2025-04-24 04:19:45 - DEBUG - [volbot_init:1836] - Last balance_info structure checked: {
+  "info": {
+    "retCode": "0",
+    "retMsg": "OK",
+    "result": {
+      "list": [
+        {
+          "totalEquity": "2.57638622",
+          "accountIMRate": "",
+          "totalMarginBalance": "",
+          "totalInitialMargin": "",
+          "accountType": "UNIFIED",
+          "totalAvailableBalance": "",
+          "accountMMRate": "",
+          "totalPerpUPL": "0.00600147",
+          "totalWalletBalance": "2.57038475",
+          "accountLTV": "",
+          "totalMaintenanceMargin": "",
+          "coin": [
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000091",
+              "totalPositionMM": "0",
+              "usdValue": "0.08402852",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000091",
+              "cumRealisedPnl": "-0.0000014",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "BTC"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "2.05580582",
+              "totalPositionMM": "0.03804727",
+              "usdValue": "2.05630949",
+              "unrealisedPnl": "0.006",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0.18192727",
+              "walletBalance": "2.04980582",
+              "cumRealisedPnl": "-1130.90640698",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "USDT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.059519",
+              "totalPositionMM": "0",
+              "usdValue": "0.01557737",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.059519",
+              "cumRealisedPnl": "-1.6356",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "XLM"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.0544",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "KLAY"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.0078",
+              "totalPositionMM": "0",
+              "usdValue": "0.09254418",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.0078",
+              "cumRealisedPnl": "-0.00243",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "TRUMP"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "1.4675",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "1.4675",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "PEPE2NEW"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00452528",
+              "totalPositionMM": "0",
+              "usdValue": "0.00094524",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00452528",
+              "cumRealisedPnl": "-0.13514",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "ALGO"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00286491",
+              "totalPositionMM": "0",
+              "usdValue": "0.00197",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00286491",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "MNT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000256",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000256",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETHF"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "3.4752063",
+              "totalPositionMM": "0",
+              "usdValue": "0.32501139",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "3.4752063",
+              "cumRealisedPnl": "-0.0184937",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETH3L"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.002",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "HOOK"
+            }
+          ]
+        }
+      ]
+    },
+    "retExtInfo": {},
+    "time": "1745486386509"
+  },
+  "timestamp": 1745486386509,
+  "datetime": "2025-04-24T09:19:46.509Z",
+  "BTC": {
+    "free": 9.1e-07,
+    "used": 0.0,
+    "total": 9.1e-07,
+    "debt": 0.0
+  },
+  "USDT": {
+    "free": 1.86787855,
+    "used": 0.18192727,
+    "total": 2.04980582,
+    "debt": 0.0
+  },
+  "XLM": {
+    "free": 0.059519,
+    "used": 0.0,
+    "total": 0.059519,
+    "debt": 0.0
+  },
+  "KLAY": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0
+  },
+  "TRUMP": {
+    "free": 0.0078,
+    "used": 0.0,
+    "total": 0.0078,
+    "debt": 0.0
+  },
+  "PEPE2NEW": {
+    "free": 1.4675,
+    "used": 0.0,
+    "total": 1.4675
+  },
+  "ALGO": {
+    "free": 0.00452528,
+    "used": 0.0,
+    "total": 0.00452528,
+    "debt": 0.0
+  },
+  "MNT": {
+    "free": 0.00286491,
+    "used": 0.0,
+    "total": 0.00286491,
+    "debt": 0.0
+  },
+  "ETHF": {
+    "free": 2.56e-06,
+    "used": 0.0,
+    "total": 2.56e-06
+  },
+  "ETH3L": {
+    "free": 3.4752063,
+    "used": 0.0,
+    "total": 3.4752063
+  },
+  "HOOK": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0,
+    "debt": 0.0
+  },
+  "free": {
+    "BTC": 9.1e-07,
+    "USDT": 1.86787855,
+    "XLM": 0.059519,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "used": {
+    "BTC": 0.0,
+    "USDT": 0.18192727,
+    "XLM": 0.0,
+    "KLAY": 0.0,
+    "TRUMP": 0.0,
+    "PEPE2NEW": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "ETHF": 0.0,
+    "ETH3L": 0.0,
+    "HOOK": 0.0
+  },
+  "total": {
+    "BTC": 9.1e-07,
+    "USDT": 2.04980582,
+    "XLM": 0.059519,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "debt": {
+    "BTC": 0.0,
+    "USDT": 0.0,
+    "XLM": 0.0,
+    "TRUMP": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "HOOK": 0.0
+  },
+  "params_used": {
+    "type": "default"
+  }
+}
+2025-04-24 04:19:45 - ERROR - [volbot_init:424] - [91mInitial balance fetch failed. This is critical.[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:425] - [91mPossible issues:[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:426] - [91m- Invalid API Key/Secret.[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:427] - [91m- Incorrect API permissions (Read required, Trade needed for execution).[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:428] - [91m- IP Whitelist mismatch on Bybit account settings.[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:429] - [91m- Using Live keys on Testnet or vice-versa.[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:430] - [91m- Network/Firewall issues blocking connection to Bybit API.[0m
+2025-04-24 04:19:45 - ERROR - [volbot_init:431] - [91m- Exchange API endpoint issues or maintenance.[0m
+2025-04-24 04:19:45 - CRITICAL - [volbot_init:3464] - [91mExchange initialization failed. Please check API keys, permissions, connection, and logs. Exiting.[0m
+2025-04-24 04:20:21 - INFO - [volbot_init:3450] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 04:20:21 - INFO - [volbot_init:3451] - Timestamp: 2025-04-24 04:20:21 CDT
+2025-04-24 04:20:21 - INFO - [volbot_init:3452] - Config File: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-24 04:20:21 - INFO - [volbot_init:3453] - Log Directory: /data/data/com.termux/files/home/worldguide/codes/bot_logs
+2025-04-24 04:20:21 - INFO - [volbot_init:3454] - Quote Currency: USDT
+2025-04-24 04:20:21 - INFO - [volbot_init:3455] - Trading Enabled: True
+2025-04-24 04:20:21 - INFO - [volbot_init:3456] - Use Sandbox: False
+2025-04-24 04:20:21 - INFO - [volbot_init:3457] - Default Interval: 5 (5m)
+2025-04-24 04:20:21 - INFO - [volbot_init:3458] - Timezone: America/Chicago
+2025-04-24 04:20:21 - INFO - [volbot_init:3459] - Console Log Level: INFO
+2025-04-24 04:20:21 - WARNING - [volbot_init:406] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 04:20:21 - INFO - [volbot_init:409] - Loading markets for bybit...
+2025-04-24 04:20:33 - INFO - [volbot_init:412] - Markets loaded successfully (2647 symbols).
+2025-04-24 04:20:33 - INFO - [volbot_init:418] - Attempting initial balance fetch (USDT) to test API keys and connection...
+2025-04-24 04:20:33 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 04:20:35 - WARNING - [volbot_init:1795] - Exchange/Network error fetching balance (type CONTRACT): bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745486436185}. Trying next.
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'UNIFIED'} for USDT...
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'accountType': 'UNIFIED'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 04:20:35 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1784] - Balance for USDT not found in 'UNIFIED' account type structure. Checking next type.
+2025-04-24 04:20:35 - DEBUG - [volbot_init:1806] - No positive balance found with specific account types. Fetching balance using default parameters for USDT...
+2025-04-24 04:20:36 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'type': 'default'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 04:20:36 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 04:20:36 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 04:20:36 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 04:20:36 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 04:20:36 - WARNING - [volbot_init:1816] - Default balance fetch did not find balance for USDT.
+2025-04-24 04:20:36 - ERROR - [volbot_init:1834] - [91mCould not determine available balance for USDT after all attempts.[0m
+2025-04-24 04:20:36 - DEBUG - [volbot_init:1836] - Last balance_info structure checked: {
+  "info": {
+    "retCode": "0",
+    "retMsg": "OK",
+    "result": {
+      "list": [
+        {
+          "totalEquity": "2.5802569",
+          "accountIMRate": "",
+          "totalMarginBalance": "",
+          "totalInitialMargin": "",
+          "accountType": "UNIFIED",
+          "totalAvailableBalance": "",
+          "accountMMRate": "",
+          "totalPerpUPL": "0.01020138",
+          "totalWalletBalance": "2.57005551",
+          "accountLTV": "",
+          "totalMaintenanceMargin": "",
+          "coin": [
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000091",
+              "totalPositionMM": "0",
+              "usdValue": "0.08402133",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000091",
+              "cumRealisedPnl": "-0.0000014",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "BTC"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "2.06000582",
+              "totalPositionMM": "0.03804727",
+              "usdValue": "2.06028598",
+              "unrealisedPnl": "0.0102",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0.18192727",
+              "walletBalance": "2.04980582",
+              "cumRealisedPnl": "-1130.90640698",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "USDT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.059519",
+              "totalPositionMM": "0",
+              "usdValue": "0.01556743",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.059519",
+              "cumRealisedPnl": "-1.6356",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "XLM"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.0544",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "KLAY"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.0078",
+              "totalPositionMM": "0",
+              "usdValue": "0.09249359",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.0078",
+              "cumRealisedPnl": "-0.00243",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "TRUMP"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "1.4675",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "1.4675",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "PEPE2NEW"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00452528",
+              "totalPositionMM": "0",
+              "usdValue": "0.00094473",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00452528",
+              "cumRealisedPnl": "-0.13514",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "ALGO"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00286491",
+              "totalPositionMM": "0",
+              "usdValue": "0.00196784",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00286491",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "MNT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000256",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000256",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETHF"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "3.4752063",
+              "totalPositionMM": "0",
+              "usdValue": "0.32497597",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "3.4752063",
+              "cumRealisedPnl": "-0.0184937",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETH3L"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.002",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "HOOK"
+            }
+          ]
+        }
+      ]
+    },
+    "retExtInfo": {},
+    "time": "1745486437437"
+  },
+  "timestamp": 1745486437437,
+  "datetime": "2025-04-24T09:20:37.437Z",
+  "BTC": {
+    "free": 9.1e-07,
+    "used": 0.0,
+    "total": 9.1e-07,
+    "debt": 0.0
+  },
+  "USDT": {
+    "free": 1.86787855,
+    "used": 0.18192727,
+    "total": 2.04980582,
+    "debt": 0.0
+  },
+  "XLM": {
+    "free": 0.059519,
+    "used": 0.0,
+    "total": 0.059519,
+    "debt": 0.0
+  },
+  "KLAY": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0
+  },
+  "TRUMP": {
+    "free": 0.0078,
+    "used": 0.0,
+    "total": 0.0078,
+    "debt": 0.0
+  },
+  "PEPE2NEW": {
+    "free": 1.4675,
+    "used": 0.0,
+    "total": 1.4675
+  },
+  "ALGO": {
+    "free": 0.00452528,
+    "used": 0.0,
+    "total": 0.00452528,
+    "debt": 0.0
+  },
+  "MNT": {
+    "free": 0.00286491,
+    "used": 0.0,
+    "total": 0.00286491,
+    "debt": 0.0
+  },
+  "ETHF": {
+    "free": 2.56e-06,
+    "used": 0.0,
+    "total": 2.56e-06
+  },
+  "ETH3L": {
+    "free": 3.4752063,
+    "used": 0.0,
+    "total": 3.4752063
+  },
+  "HOOK": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0,
+    "debt": 0.0
+  },
+  "free": {
+    "BTC": 9.1e-07,
+    "USDT": 1.86787855,
+    "XLM": 0.059519,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "used": {
+    "BTC": 0.0,
+    "USDT": 0.18192727,
+    "XLM": 0.0,
+    "KLAY": 0.0,
+    "TRUMP": 0.0,
+    "PEPE2NEW": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "ETHF": 0.0,
+    "ETH3L": 0.0,
+    "HOOK": 0.0
+  },
+  "total": {
+    "BTC": 9.1e-07,
+    "USDT": 2.04980582,
+    "XLM": 0.059519,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "debt": {
+    "BTC": 0.0,
+    "USDT": 0.0,
+    "XLM": 0.0,
+    "TRUMP": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "HOOK": 0.0
+  },
+  "params_used": {
+    "type": "default"
+  }
+}
+2025-04-24 04:20:36 - ERROR - [volbot_init:424] - [91mInitial balance fetch failed. This is critical.[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:425] - [91mPossible issues:[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:426] - [91m- Invalid API Key/Secret.[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:427] - [91m- Incorrect API permissions (Read required, Trade needed for execution).[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:428] - [91m- IP Whitelist mismatch on Bybit account settings.[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:429] - [91m- Using Live keys on Testnet or vice-versa.[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:430] - [91m- Network/Firewall issues blocking connection to Bybit API.[0m
+2025-04-24 04:20:36 - ERROR - [volbot_init:431] - [91m- Exchange API endpoint issues or maintenance.[0m
+2025-04-24 04:20:36 - CRITICAL - [volbot_init:3464] - [91mExchange initialization failed. Please check API keys, permissions, connection, and logs. Exiting.[0m
+2025-04-24 13:09:38 - INFO - [volbot_init:3450] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 13:09:38 - INFO - [volbot_init:3451] - Timestamp: 2025-04-24 13:09:38 CDT
+2025-04-24 13:09:38 - INFO - [volbot_init:3452] - Config File: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-24 13:09:38 - INFO - [volbot_init:3453] - Log Directory: /data/data/com.termux/files/home/worldguide/codes/bot_logs
+2025-04-24 13:09:38 - INFO - [volbot_init:3454] - Quote Currency: USDT
+2025-04-24 13:09:38 - INFO - [volbot_init:3455] - Trading Enabled: True
+2025-04-24 13:09:38 - INFO - [volbot_init:3456] - Use Sandbox: False
+2025-04-24 13:09:38 - INFO - [volbot_init:3457] - Default Interval: 3 (3m)
+2025-04-24 13:09:38 - INFO - [volbot_init:3458] - Timezone: America/Chicago
+2025-04-24 13:09:38 - INFO - [volbot_init:3459] - Console Log Level: INFO
+2025-04-24 13:09:38 - WARNING - [volbot_init:406] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 13:09:38 - INFO - [volbot_init:409] - Loading markets for bybit...
+2025-04-24 13:09:53 - INFO - [volbot_init:412] - Markets loaded successfully (2655 symbols).
+2025-04-24 13:09:53 - INFO - [volbot_init:418] - Attempting initial balance fetch (USDT) to test API keys and connection...
+2025-04-24 13:09:53 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 13:09:58 - WARNING - [volbot_init:1795] - Exchange/Network error fetching balance (type CONTRACT): bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745518199164}. Trying next.
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'UNIFIED'} for USDT...
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'accountType': 'UNIFIED'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 13:09:58 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1784] - Balance for USDT not found in 'UNIFIED' account type structure. Checking next type.
+2025-04-24 13:09:58 - DEBUG - [volbot_init:1806] - No positive balance found with specific account types. Fetching balance using default parameters for USDT...
+2025-04-24 13:09:59 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'type': 'default'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 13:09:59 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 13:09:59 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 13:09:59 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 13:09:59 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 13:09:59 - WARNING - [volbot_init:1816] - Default balance fetch did not find balance for USDT.
+2025-04-24 13:09:59 - ERROR - [volbot_init:1834] - [91mCould not determine available balance for USDT after all attempts.[0m
+2025-04-24 13:09:59 - DEBUG - [volbot_init:1836] - Last balance_info structure checked: {
+  "info": {
+    "retCode": "0",
+    "retMsg": "OK",
+    "result": {
+      "list": [
+        {
+          "totalEquity": "16.41091235",
+          "accountIMRate": "",
+          "totalMarginBalance": "",
+          "totalInitialMargin": "",
+          "accountType": "UNIFIED",
+          "totalAvailableBalance": "",
+          "accountMMRate": "",
+          "totalPerpUPL": "0",
+          "totalWalletBalance": "16.41091235",
+          "accountLTV": "",
+          "totalMaintenanceMargin": "",
+          "coin": [
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000091",
+              "totalPositionMM": "0",
+              "usdValue": "0.08483967",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000091",
+              "cumRealisedPnl": "-0.0000014",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "BTC"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "10.24602081",
+              "totalPositionMM": "0",
+              "usdValue": "10.24937126",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "10.24602081",
+              "cumRealisedPnl": "-1131.50743199",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "USDT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "20.22828154",
+              "totalPositionMM": "0",
+              "usdValue": "5.64045402",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "20.22828154",
+              "cumRealisedPnl": "-6.26224856",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "XLM"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.0544",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "KLAY"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.0078",
+              "totalPositionMM": "0",
+              "usdValue": "0.09392636",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.0078",
+              "cumRealisedPnl": "-0.00243",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "TRUMP"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "1.4675",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "1.4675",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "PEPE2NEW"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00452528",
+              "totalPositionMM": "0",
+              "usdValue": "0.00100753",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00452528",
+              "cumRealisedPnl": "-0.13514",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "ALGO"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00286491",
+              "totalPositionMM": "0",
+              "usdValue": "0.00202244",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00286491",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "MNT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000256",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000256",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETHF"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "3.4752063",
+              "totalPositionMM": "0",
+              "usdValue": "0.33929104",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "3.4752063",
+              "cumRealisedPnl": "-0.0184937",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETH3L"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.002",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "HOOK"
+            }
+          ]
+        }
+      ]
+    },
+    "retExtInfo": {},
+    "time": "1745518200533"
+  },
+  "timestamp": 1745518200533,
+  "datetime": "2025-04-24T18:10:00.533Z",
+  "BTC": {
+    "free": 9.1e-07,
+    "used": 0.0,
+    "total": 9.1e-07,
+    "debt": 0.0
+  },
+  "USDT": {
+    "free": 10.24602081,
+    "used": 0.0,
+    "total": 10.24602081,
+    "debt": 0.0
+  },
+  "XLM": {
+    "free": 20.22828154,
+    "used": 0.0,
+    "total": 20.22828154,
+    "debt": 0.0
+  },
+  "KLAY": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0
+  },
+  "TRUMP": {
+    "free": 0.0078,
+    "used": 0.0,
+    "total": 0.0078,
+    "debt": 0.0
+  },
+  "PEPE2NEW": {
+    "free": 1.4675,
+    "used": 0.0,
+    "total": 1.4675
+  },
+  "ALGO": {
+    "free": 0.00452528,
+    "used": 0.0,
+    "total": 0.00452528,
+    "debt": 0.0
+  },
+  "MNT": {
+    "free": 0.00286491,
+    "used": 0.0,
+    "total": 0.00286491,
+    "debt": 0.0
+  },
+  "ETHF": {
+    "free": 2.56e-06,
+    "used": 0.0,
+    "total": 2.56e-06
+  },
+  "ETH3L": {
+    "free": 3.4752063,
+    "used": 0.0,
+    "total": 3.4752063
+  },
+  "HOOK": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0,
+    "debt": 0.0
+  },
+  "free": {
+    "BTC": 9.1e-07,
+    "USDT": 10.24602081,
+    "XLM": 20.22828154,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "used": {
+    "BTC": 0.0,
+    "USDT": 0.0,
+    "XLM": 0.0,
+    "KLAY": 0.0,
+    "TRUMP": 0.0,
+    "PEPE2NEW": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "ETHF": 0.0,
+    "ETH3L": 0.0,
+    "HOOK": 0.0
+  },
+  "total": {
+    "BTC": 9.1e-07,
+    "USDT": 10.24602081,
+    "XLM": 20.22828154,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "debt": {
+    "BTC": 0.0,
+    "USDT": 0.0,
+    "XLM": 0.0,
+    "TRUMP": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "HOOK": 0.0
+  },
+  "params_used": {
+    "type": "default"
+  }
+}
+2025-04-24 13:09:59 - ERROR - [volbot_init:424] - [91mInitial balance fetch failed. This is critical.[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:425] - [91mPossible issues:[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:426] - [91m- Invalid API Key/Secret.[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:427] - [91m- Incorrect API permissions (Read required, Trade needed for execution).[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:428] - [91m- IP Whitelist mismatch on Bybit account settings.[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:429] - [91m- Using Live keys on Testnet or vice-versa.[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:430] - [91m- Network/Firewall issues blocking connection to Bybit API.[0m
+2025-04-24 13:09:59 - ERROR - [volbot_init:431] - [91m- Exchange API endpoint issues or maintenance.[0m
+2025-04-24 13:09:59 - CRITICAL - [volbot_init:3464] - [91mExchange initialization failed. Please check API keys, permissions, connection, and logs. Exiting.[0m
+2025-04-24 16:19:00 - INFO - [volbot_init:2718] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 16:19:00 - INFO - [volbot_init:2719] - Config File: config.json
+2025-04-24 16:19:00 - INFO - [volbot_init:2720] - Log Directory: bot_logs
+2025-04-24 16:19:00 - INFO - [volbot_init:2721] - Quote Currency: USDT
+2025-04-24 16:19:00 - INFO - [volbot_init:2722] - Trading Enabled: True
+2025-04-24 16:19:00 - INFO - [volbot_init:2723] - Use Sandbox: False
+2025-04-24 16:19:00 - INFO - [volbot_init:2724] - Default Interval: 3
+2025-04-24 16:19:00 - INFO - [volbot_init:2725] - Timezone: America/Chicago
+2025-04-24 16:19:00 - INFO - [volbot_init:2726] - Console Log Level: INFO
+2025-04-24 16:19:00 - WARNING - [volbot_init:361] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 16:19:00 - INFO - [volbot_init:364] - Loading markets for bybit...
+2025-04-24 16:19:11 - INFO - [volbot_init:367] - Markets loaded successfully (2655 symbols).
+2025-04-24 16:19:11 - INFO - [volbot_init:373] - Attempting initial balance fetch to test API keys and connection...
+2025-04-24 16:19:11 - DEBUG - [volbot_init:1383] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 16:19:12 - DEBUG - [volbot_init:1491] - Parsed balance via standard ['USDT']['free'] (type: CONTRACT): 8.72880712 USDT
+2025-04-24 16:19:12 - DEBUG - [volbot_init:1491] - Parsed balance via standard ['USDT']['free'] (type: CONTRACT): 8.72880712 USDT
+2025-04-24 16:19:12 - INFO - [volbot_init:1426] - Available USDT balance: 8.7288
+2025-04-24 16:19:12 - INFO - [volbot_init:376] - [92mAPI keys and connection successful. Initial USDT balance: 8.7288[0m
+2025-04-24 16:19:23 - INFO - [volbot_init:2751] - Attempting to fetch all active linear USDT perpetual swaps...
+2025-04-24 16:19:35 - INFO - [volbot_init:2767] - Selected 508 linear USDT swaps.
+2025-04-24 16:19:36 - INFO - [volbot_init:2798] - [34m[1m--- Starting Main Trading Loop (508 symbols) ---[0m
+2025-04-24 16:19:36 - INFO - [volbot_init:2803] - *** New Cycle Start: 2025-04-24 16:19:36 CDT ***
+2025-04-24 16:19:50 - INFO - [volbot_init:2836] - 
+[33mKeyboardInterrupt received. Shutting down gracefully...[0m
+2025-04-24 16:19:50 - WARNING - [volbot_init:2839] - Trading was enabled. Check exchange for open positions/orders.
+2025-04-24 16:19:50 - INFO - [volbot_init:2857] - [34m[1m--- Volbot Shut Down ---[0m
+2025-04-24 16:25:39 - INFO - [volbot_init:3450] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 16:25:39 - INFO - [volbot_init:3451] - Timestamp: 2025-04-24 16:25:39 CDT
+2025-04-24 16:25:39 - INFO - [volbot_init:3452] - Config File: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-24 16:25:39 - INFO - [volbot_init:3453] - Log Directory: /data/data/com.termux/files/home/worldguide/codes/bot_logs
+2025-04-24 16:25:39 - INFO - [volbot_init:3454] - Quote Currency: USDT
+2025-04-24 16:25:39 - INFO - [volbot_init:3455] - Trading Enabled: True
+2025-04-24 16:25:39 - INFO - [volbot_init:3456] - Use Sandbox: False
+2025-04-24 16:25:39 - INFO - [volbot_init:3457] - Default Interval: 3 (3m)
+2025-04-24 16:25:39 - INFO - [volbot_init:3458] - Timezone: America/Chicago
+2025-04-24 16:25:39 - INFO - [volbot_init:3459] - Console Log Level: INFO
+2025-04-24 16:25:39 - WARNING - [volbot_init:406] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 16:25:39 - INFO - [volbot_init:409] - Loading markets for bybit...
+2025-04-24 16:25:53 - INFO - [volbot_init:412] - Markets loaded successfully (2655 symbols).
+2025-04-24 16:25:53 - INFO - [volbot_init:418] - Attempting initial balance fetch (USDT) to test API keys and connection...
+2025-04-24 16:25:53 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 16:25:54 - WARNING - [volbot_init:1795] - Exchange/Network error fetching balance (type CONTRACT): bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745529956117}. Trying next.
+2025-04-24 16:25:54 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'UNIFIED'} for USDT...
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'accountType': 'UNIFIED'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 16:25:55 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1784] - Balance for USDT not found in 'UNIFIED' account type structure. Checking next type.
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1806] - No positive balance found with specific account types. Fetching balance using default parameters for USDT...
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'type': 'default'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 16:25:55 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 16:25:55 - WARNING - [volbot_init:1816] - Default balance fetch did not find balance for USDT.
+2025-04-24 16:25:55 - ERROR - [volbot_init:1834] - [91mCould not determine available balance for USDT after all attempts.[0m
+2025-04-24 16:25:55 - DEBUG - [volbot_init:1836] - Last balance_info structure checked: {
+  "info": {
+    "retCode": "0",
+    "retMsg": "OK",
+    "result": {
+      "list": [
+        {
+          "totalEquity": "16.29523944",
+          "accountIMRate": "",
+          "totalMarginBalance": "",
+          "totalInitialMargin": "",
+          "accountType": "UNIFIED",
+          "totalAvailableBalance": "",
+          "accountMMRate": "",
+          "totalPerpUPL": "-0.10225978",
+          "totalWalletBalance": "16.39749922",
+          "accountLTV": "",
+          "totalMaintenanceMargin": "",
+          "coin": [
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000091",
+              "totalPositionMM": "0",
+              "usdValue": "0.08496772",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000091",
+              "cumRealisedPnl": "-0.0000014",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "BTC"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "10.1274995",
+              "totalPositionMM": "0.31388838",
+              "usdValue": "10.13342409",
+              "unrealisedPnl": "-0.1022",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "1.50089238",
+              "walletBalance": "10.2296995",
+              "cumRealisedPnl": "-1131.5237533",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "USDT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "20.22828154",
+              "totalPositionMM": "0",
+              "usdValue": "5.63483056",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "20.22828154",
+              "cumRealisedPnl": "-6.26224856",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "XLM"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.0544",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "KLAY"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.0078",
+              "totalPositionMM": "0",
+              "usdValue": "0.09294498",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.0078",
+              "cumRealisedPnl": "-0.00243",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "TRUMP"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "1.4675",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "1.4675",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "PEPE2NEW"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00452528",
+              "totalPositionMM": "0",
+              "usdValue": "0.00100251",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00452528",
+              "cumRealisedPnl": "-0.13514",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "ALGO"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00286491",
+              "totalPositionMM": "0",
+              "usdValue": "0.00208424",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00286491",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "MNT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000256",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000256",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETHF"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "3.4752063",
+              "totalPositionMM": "0",
+              "usdValue": "0.3459853",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "3.4752063",
+              "cumRealisedPnl": "-0.0184937",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETH3L"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.002",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "HOOK"
+            }
+          ]
+        }
+      ]
+    },
+    "retExtInfo": {},
+    "time": "1745529956864"
+  },
+  "timestamp": 1745529956864,
+  "datetime": "2025-04-24T21:25:56.864Z",
+  "BTC": {
+    "free": 9.1e-07,
+    "used": 0.0,
+    "total": 9.1e-07,
+    "debt": 0.0
+  },
+  "USDT": {
+    "free": 8.72880712,
+    "used": 1.50089238,
+    "total": 10.2296995,
+    "debt": 0.0
+  },
+  "XLM": {
+    "free": 20.22828154,
+    "used": 0.0,
+    "total": 20.22828154,
+    "debt": 0.0
+  },
+  "KLAY": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0
+  },
+  "TRUMP": {
+    "free": 0.0078,
+    "used": 0.0,
+    "total": 0.0078,
+    "debt": 0.0
+  },
+  "PEPE2NEW": {
+    "free": 1.4675,
+    "used": 0.0,
+    "total": 1.4675
+  },
+  "ALGO": {
+    "free": 0.00452528,
+    "used": 0.0,
+    "total": 0.00452528,
+    "debt": 0.0
+  },
+  "MNT": {
+    "free": 0.00286491,
+    "used": 0.0,
+    "total": 0.00286491,
+    "debt": 0.0
+  },
+  "ETHF": {
+    "free": 2.56e-06,
+    "used": 0.0,
+    "total": 2.56e-06
+  },
+  "ETH3L": {
+    "free": 3.4752063,
+    "used": 0.0,
+    "total": 3.4752063
+  },
+  "HOOK": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0,
+    "debt": 0.0
+  },
+  "free": {
+    "BTC": 9.1e-07,
+    "USDT": 8.72880712,
+    "XLM": 20.22828154,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "used": {
+    "BTC": 0.0,
+    "USDT": 1.50089238,
+    "XLM": 0.0,
+    "KLAY": 0.0,
+    "TRUMP": 0.0,
+    "PEPE2NEW": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "ETHF": 0.0,
+    "ETH3L": 0.0,
+    "HOOK": 0.0
+  },
+  "total": {
+    "BTC": 9.1e-07,
+    "USDT": 10.2296995,
+    "XLM": 20.22828154,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "debt": {
+    "BTC": 0.0,
+    "USDT": 0.0,
+    "XLM": 0.0,
+    "TRUMP": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "HOOK": 0.0
+  },
+  "params_used": {
+    "type": "default"
+  }
+}
+2025-04-24 16:25:55 - ERROR - [volbot_init:424] - [91mInitial balance fetch failed. This is critical.[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:425] - [91mPossible issues:[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:426] - [91m- Invalid API Key/Secret.[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:427] - [91m- Incorrect API permissions (Read required, Trade needed for execution).[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:428] - [91m- IP Whitelist mismatch on Bybit account settings.[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:429] - [91m- Using Live keys on Testnet or vice-versa.[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:430] - [91m- Network/Firewall issues blocking connection to Bybit API.[0m
+2025-04-24 16:25:55 - ERROR - [volbot_init:431] - [91m- Exchange API endpoint issues or maintenance.[0m
+2025-04-24 16:25:55 - CRITICAL - [volbot_init:3464] - [91mExchange initialization failed. Please check API keys, permissions, connection, and logs. Exiting.[0m
+2025-04-24 16:26:25 - INFO - [volbot_init:2883] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 16:26:25 - INFO - [volbot_init:2884] - Using config file: config.json
+2025-04-24 16:26:25 - INFO - [volbot_init:2885] - Log directory: bot_logs
+2025-04-24 16:26:25 - INFO - [volbot_init:2886] - Quote Currency: USDT
+2025-04-24 16:26:25 - INFO - [volbot_init:2887] - Trading Enabled: True
+2025-04-24 16:26:25 - INFO - [volbot_init:2888] - Using Sandbox: False
+2025-04-24 16:26:25 - INFO - [volbot_init:2889] - Default Interval: 3
+2025-04-24 16:26:25 - WARNING - [volbot_init:323] - [91mUSING LIVE TRADING ENVIRONMENT[0m
+2025-04-24 16:26:25 - INFO - [volbot_init:326] - Loading markets for bybit...
+2025-04-24 16:26:37 - INFO - [volbot_init:328] - Markets loaded. CCXT exchange initialized (bybit). Sandbox: False
+2025-04-24 16:26:37 - INFO - [volbot_init:332] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-04-24 16:26:39 - INFO - [volbot_init:337] - [92mSuccessfully connected and fetched initial balance (CONTRACT).[0m (Example: USDT available: 8.72880712)
+2025-04-24 16:26:46 - INFO - [volbot_init:2908] - Attempting to fetch all linear contract symbols...
+2025-04-24 16:26:46 - INFO - [volbot_init:2922] - Selected 508 linear USDT swaps. Starting analysis...
+2025-04-24 16:26:47 - INFO - [volbot_init:2951] - [34m[1m--- Starting Main Trading Loop (508 symbols) ---[0m
+2025-04-24 16:26:47 - INFO - [volbot_init:2956] - *** New Cycle Start: 2025-04-24 16:26:47 CDT ***
+2025-04-24 16:27:38 - INFO - [volbot_init:2981] - [33mKeyboardInterrupt received. Shutting down gracefully...[0m
+2025-04-24 16:27:38 - WARNING - [volbot_init:2984] - Trading was enabled. Consider manually checking open positions/orders.
+2025-04-24 16:27:38 - INFO - [volbot_init:2989] - [34m[1m--- Volbot Shut Down ---[0m
+2025-04-24 16:28:19 - INFO - [volbot_init:3450] - [34m[1m--- Volbot Initializing ---[0m
+2025-04-24 16:28:19 - INFO - [volbot_init:3451] - Timestamp: 2025-04-24 16:28:19 CDT
+2025-04-24 16:28:19 - INFO - [volbot_init:3452] - Config File: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-24 16:28:19 - INFO - [volbot_init:3453] - Log Directory: /data/data/com.termux/files/home/worldguide/codes/bot_logs
+2025-04-24 16:28:19 - INFO - [volbot_init:3454] - Quote Currency: USDT
+2025-04-24 16:28:19 - INFO - [volbot_init:3455] - Trading Enabled: True
+2025-04-24 16:28:19 - INFO - [volbot_init:3456] - Use Sandbox: False
+2025-04-24 16:28:19 - INFO - [volbot_init:3457] - Default Interval: 3 (3m)
+2025-04-24 16:28:19 - INFO - [volbot_init:3458] - Timezone: America/Chicago
+2025-04-24 16:28:19 - INFO - [volbot_init:3459] - Console Log Level: INFO
+2025-04-24 16:28:19 - WARNING - [volbot_init:406] - Exchange bybit initialized. Status: [91mLIVE TRADING MODE[0m
+2025-04-24 16:28:19 - INFO - [volbot_init:409] - Loading markets for bybit...
+2025-04-24 16:28:28 - INFO - [volbot_init:412] - Markets loaded successfully (2655 symbols).
+2025-04-24 16:28:28 - INFO - [volbot_init:418] - Attempting initial balance fetch (USDT) to test API keys and connection...
+2025-04-24 16:28:28 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'CONTRACT'} for USDT...
+2025-04-24 16:28:30 - WARNING - [volbot_init:1795] - Exchange/Network error fetching balance (type CONTRACT): bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745530111333}. Trying next.
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1767] - Fetching balance with params={'type': 'UNIFIED'} for USDT...
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'accountType': 'UNIFIED'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 16:28:30 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1784] - Balance for USDT not found in 'UNIFIED' account type structure. Checking next type.
+2025-04-24 16:28:30 - DEBUG - [volbot_init:1806] - No positive balance found with specific account types. Fetching balance using default parameters for USDT...
+2025-04-24 16:28:31 - DEBUG - [volbot_init:1858] - _parse_balance: Attempting to parse for USDT with params {'type': 'default'}. Structure keys: ['info', 'timestamp', 'datetime', 'BTC', 'USDT', 'XLM', 'KLAY', 'TRUMP', 'PEPE2NEW', 'ALGO', 'MNT', 'ETHF', 'ETH3L', 'HOOK', 'free', 'used', 'total', 'debt', 'params_used']
+2025-04-24 16:28:31 - DEBUG - [volbot_init:1871] - _parse_balance: Found Bybit V5 'info.result.list' structure with 1 account(s).
+2025-04-24 16:28:31 - DEBUG - [volbot_init:1881] - _parse_balance: Checking coins in V5 account type 'UNIFIED'...
+2025-04-24 16:28:31 - DEBUG - [volbot_init:1895] - _parse_balance: Found USDT balance via Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED): 
+2025-04-24 16:28:31 - WARNING - [volbot_init:1928] - [33m_parse_balance: Failed to convert parsed balance string '' from Bybit V5 list ['availableToWithdraw'] (Account: UNIFIED) to Decimal.[0m
+2025-04-24 16:28:31 - WARNING - [volbot_init:1816] - Default balance fetch did not find balance for USDT.
+2025-04-24 16:28:31 - ERROR - [volbot_init:1834] - [91mCould not determine available balance for USDT after all attempts.[0m
+2025-04-24 16:28:31 - DEBUG - [volbot_init:1836] - Last balance_info structure checked: {
+  "info": {
+    "retCode": "0",
+    "retMsg": "OK",
+    "result": {
+      "list": [
+        {
+          "totalEquity": "16.41490212",
+          "accountIMRate": "",
+          "totalMarginBalance": "",
+          "totalInitialMargin": "",
+          "accountType": "UNIFIED",
+          "totalAvailableBalance": "",
+          "accountMMRate": "",
+          "totalPerpUPL": "0.04763036",
+          "totalWalletBalance": "16.36727176",
+          "accountLTV": "",
+          "totalMaintenanceMargin": "",
+          "coin": [
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000091",
+              "totalPositionMM": "0",
+              "usdValue": "0.08472884",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000091",
+              "cumRealisedPnl": "-0.0000014",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "BTC"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "10.2772995",
+              "totalPositionMM": "0.31388838",
+              "usdValue": "10.28385642",
+              "unrealisedPnl": "0.0476",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "1.50089238",
+              "walletBalance": "10.2296995",
+              "cumRealisedPnl": "-1131.5237533",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "USDT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "20.22828154",
+              "totalPositionMM": "0",
+              "usdValue": "5.60912041",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "20.22828154",
+              "cumRealisedPnl": "-6.26224856",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "XLM"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.0544",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "KLAY"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.0078",
+              "totalPositionMM": "0",
+              "usdValue": "0.09159114",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.0078",
+              "cumRealisedPnl": "-0.00243",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "TRUMP"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "1.4675",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "1.4675",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "PEPE2NEW"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00452528",
+              "totalPositionMM": "0",
+              "usdValue": "0.00099782",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00452528",
+              "cumRealisedPnl": "-0.13514",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "ALGO"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00286491",
+              "totalPositionMM": "0",
+              "usdValue": "0.00208124",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00286491",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "MNT"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0.00000256",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0.00000256",
+              "cumRealisedPnl": "0",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETHF"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "3.4752063",
+              "totalPositionMM": "0",
+              "usdValue": "0.34252621",
+              "unrealisedPnl": "0",
+              "collateralSwitch": false,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "3.4752063",
+              "cumRealisedPnl": "-0.0184937",
+              "locked": "0",
+              "marginCollateral": false,
+              "coin": "ETH3L"
+            },
+            {
+              "availableToBorrow": "",
+              "bonus": "0",
+              "accruedInterest": "0",
+              "availableToWithdraw": "",
+              "totalOrderIM": "0",
+              "equity": "0",
+              "totalPositionMM": "0",
+              "usdValue": "0",
+              "unrealisedPnl": "0",
+              "collateralSwitch": true,
+              "spotHedgingQty": "0",
+              "borrowAmount": "0",
+              "totalPositionIM": "0",
+              "walletBalance": "0",
+              "cumRealisedPnl": "-0.002",
+              "locked": "0",
+              "marginCollateral": true,
+              "coin": "HOOK"
+            }
+          ]
+        }
+      ]
+    },
+    "retExtInfo": {},
+    "time": "1745530112195"
+  },
+  "timestamp": 1745530112195,
+  "datetime": "2025-04-24T21:28:32.195Z",
+  "BTC": {
+    "free": 9.1e-07,
+    "used": 0.0,
+    "total": 9.1e-07,
+    "debt": 0.0
+  },
+  "USDT": {
+    "free": 8.72880712,
+    "used": 1.50089238,
+    "total": 10.2296995,
+    "debt": 0.0
+  },
+  "XLM": {
+    "free": 20.22828154,
+    "used": 0.0,
+    "total": 20.22828154,
+    "debt": 0.0
+  },
+  "KLAY": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0
+  },
+  "TRUMP": {
+    "free": 0.0078,
+    "used": 0.0,
+    "total": 0.0078,
+    "debt": 0.0
+  },
+  "PEPE2NEW": {
+    "free": 1.4675,
+    "used": 0.0,
+    "total": 1.4675
+  },
+  "ALGO": {
+    "free": 0.00452528,
+    "used": 0.0,
+    "total": 0.00452528,
+    "debt": 0.0
+  },
+  "MNT": {
+    "free": 0.00286491,
+    "used": 0.0,
+    "total": 0.00286491,
+    "debt": 0.0
+  },
+  "ETHF": {
+    "free": 2.56e-06,
+    "used": 0.0,
+    "total": 2.56e-06
+  },
+  "ETH3L": {
+    "free": 3.4752063,
+    "used": 0.0,
+    "total": 3.4752063
+  },
+  "HOOK": {
+    "free": 0.0,
+    "used": 0.0,
+    "total": 0.0,
+    "debt": 0.0
+  },
+  "free": {
+    "BTC": 9.1e-07,
+    "USDT": 8.72880712,
+    "XLM": 20.22828154,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "used": {
+    "BTC": 0.0,
+    "USDT": 1.50089238,
+    "XLM": 0.0,
+    "KLAY": 0.0,
+    "TRUMP": 0.0,
+    "PEPE2NEW": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "ETHF": 0.0,
+    "ETH3L": 0.0,
+    "HOOK": 0.0
+  },
+  "total": {
+    "BTC": 9.1e-07,
+    "USDT": 10.2296995,
+    "XLM": 20.22828154,
+    "KLAY": 0.0,
+    "TRUMP": 0.0078,
+    "PEPE2NEW": 1.4675,
+    "ALGO": 0.00452528,
+    "MNT": 0.00286491,
+    "ETHF": 2.56e-06,
+    "ETH3L": 3.4752063,
+    "HOOK": 0.0
+  },
+  "debt": {
+    "BTC": 0.0,
+    "USDT": 0.0,
+    "XLM": 0.0,
+    "TRUMP": 0.0,
+    "ALGO": 0.0,
+    "MNT": 0.0,
+    "HOOK": 0.0
+  },
+  "params_used": {
+    "type": "default"
+  }
+}
+2025-04-24 16:28:31 - ERROR - [volbot_init:424] - [91mInitial balance fetch failed. This is critical.[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:425] - [91mPossible issues:[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:426] - [91m- Invalid API Key/Secret.[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:427] - [91m- Incorrect API permissions (Read required, Trade needed for execution).[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:428] - [91m- IP Whitelist mismatch on Bybit account settings.[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:429] - [91m- Using Live keys on Testnet or vice-versa.[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:430] - [91m- Network/Firewall issues blocking connection to Bybit API.[0m
+2025-04-24 16:28:31 - ERROR - [volbot_init:431] - [91m- Exchange API endpoint issues or maintenance.[0m
+2025-04-24 16:28:31 - CRITICAL - [volbot_init:3464] - [91mExchange initialization failed. Please check API keys, permissions, connection, and logs. Exiting.[0m

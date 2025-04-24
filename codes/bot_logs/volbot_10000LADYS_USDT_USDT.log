@@ -1,0 +1,156 @@
+2025-04-24 03:51:52 - INFO - [volbot_10000LADYS_USDT_USDT:2391] - --- Starting analysis cycle for 10000LADYS/USDT:USDT ---
+2025-04-24 03:51:52 - DEBUG - [volbot_10000LADYS_USDT_USDT:1598] - Market Info 10000LADYS/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-07, AmtPrec=100.0, MinAmt=100.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:51:52 - WARNING - [volbot_10000LADYS_USDT_USDT:1045] - Could not determine price precision from tick size for 10000LADYS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:52 - WARNING - [volbot_10000LADYS_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 10000LADYS/USDT:USDT.[0m
+2025-04-24 03:51:52 - WARNING - [volbot_10000LADYS_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 10000LADYS/USDT:USDT.
+2025-04-24 03:51:52 - DEBUG - [volbot_10000LADYS_USDT_USDT:2426] - Fetching 1100 klines for 10000LADYS/USDT:USDT 5m...
+2025-04-24 03:51:52 - DEBUG - [volbot_10000LADYS_USDT_USDT:509] - Fetching klines for 10000LADYS/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:51:52 - DEBUG - [volbot_10000LADYS_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:51:52 - INFO - [volbot_10000LADYS_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 10000LADYS/USDT:USDT 5m
+2025-04-24 03:51:52 - WARNING - [volbot_10000LADYS_USDT_USDT:1045] - Could not determine price precision from tick size for 10000LADYS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:52 - WARNING - [volbot_10000LADYS_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 10000LADYS/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:51:52 - DEBUG - [volbot_10000LADYS_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:51:52 - INFO - [volbot_10000LADYS_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:51:52 - WARNING - [volbot_10000LADYS_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 03:51:52 - INFO - [volbot_10000LADYS_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:51:52 - INFO - [volbot_10000LADYS_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:51:52 - INFO - [volbot_10000LADYS_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:51:52 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-21 03:20:00, Candle: 2025-04-21 01:15:00, Range: [0.00035, 0.00035])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 08:35:00, Candle: 2025-04-21 06:30:00, Range: [0.00036, 0.00036])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.00038 > Top 0.00036)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 11:35:00, Candle: 2025-04-21 09:30:00, Range: [0.00036, 0.00036])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.00035 < Bottom 0.00036)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 11:45:00, Candle: 2025-04-21 09:40:00, Range: [0.00036, 0.00036])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.00036 > Top 0.00036)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.00036, 0.00036])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00035 < Bottom 0.00036)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 19:45:00, Candle: 2025-04-21 17:40:00, Range: [0.00035, 0.00035])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.00035, 0.00035])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 06:50:00, Candle: 2025-04-22 04:45:00, Range: [0.00035, 0.00035])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 07:55:00, Candle: 2025-04-22 05:50:00, Range: [0.00035, 0.00035])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.00035 > Top 0.00035)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 10:30:00, Candle: 2025-04-22 08:25:00, Range: [0.00035, 0.00035])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 15:15:00, Candle: 2025-04-22 13:10:00, Range: [0.00036, 0.00036])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.00037 > Top 0.00036)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-22 17:15:00, Candle: 2025-04-22 15:10:00, Range: [0.00037, 0.00037])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.00036 < Bottom 0.00037)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-22 23:40:00, Candle: 2025-04-22 21:35:00, Range: [0.00037, 0.00037])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.00040 > Top 0.00037)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-23 05:45:00, Candle: 2025-04-23 03:40:00, Range: [0.00040, 0.00040])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.00042 > Top 0.00040)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 07:55:00, Candle: 2025-04-23 05:50:00, Range: [0.00041, 0.00042])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.00042 > Top 0.00042)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-23 10:05:00, Candle: 2025-04-23 08:00:00, Range: [0.00042, 0.00042])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 0.00041 < Bottom 0.00042)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 12:10:00, Candle: 2025-04-23 10:05:00, Range: [0.00041, 0.00041])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.00041 > Top 0.00041)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-23 13:55:00, Candle: 2025-04-23 11:50:00, Range: [0.00041, 0.00041])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.00039 < Bottom 0.00041)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 16:20:00, Candle: 2025-04-23 14:15:00, Range: [0.00039, 0.00039])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.00038 < Bottom 0.00039)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 17:10:00, Candle: 2025-04-23 15:05:00, Range: [0.00039, 0.00039])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.00039 > Top 0.00039)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 19:25:00, Candle: 2025-04-23 17:20:00, Range: [0.00039, 0.00039])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.00038 < Bottom 0.00039)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-23 23:30:00, Candle: 2025-04-23 21:25:00, Range: [0.00039, 0.00039])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.00039 < Bottom 0.00039)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-24 02:30:00, Candle: 2025-04-24 00:25:00, Range: [0.00039, 0.00039])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.00040 > Top 0.00039)
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_24 (Pivot: 2025-04-24 03:55:00, Candle: 2025-04-24 01:50:00, Range: [0.00039, 0.00039])
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_24 (Close 0.00038 < Bottom 0.00039)
+2025-04-24 03:51:53 - INFO - [volbot_10000LADYS_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 14, Bear OBs: 10
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:1143] - Indicator calculations complete for 10000LADYS/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:1198] - Latest strategy state updated for 10000LADYS/USDT:USDT: {'open': '0.0004', 'high': '0.0004', 'low': '0.0004', 'close': '0.0004', 'volume': Decimal('1400200.0'), 'atr_risk': '0.0000'}
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:1872] - Fetching position for symbol: 10000LADYS/USDT:USDT
+2025-04-24 03:51:53 - DEBUG - [volbot_10000LADYS_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:51:54 - INFO - [volbot_10000LADYS_USDT_USDT:2024] - No active position found for 10000LADYS/USDT:USDT.
+2025-04-24 03:51:54 - DEBUG - [volbot_10000LADYS_USDT_USDT:432] - Fetching ticker for 10000LADYS/USDT:USDT...
+2025-04-24 03:51:54 - DEBUG - [volbot_10000LADYS_USDT_USDT:441] - Ticker data received for 10000LADYS/USDT:USDT: {'symbol': '10000LADYS/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.0004264, 'low': 0.000374, 'bid': 0.0003835, 'bidVolume': 26000.0, 'ask': 0.0003838, 'askVolume': 730400.0, 'vwap': 0.000392290469148109, 'open': 0.0004124, 'close': 0.0003836, 'last': 0.0003836, 'previousClose': None, 'change': -2.88e-05, 'percentage': -6.9835, 'average': 0.000398, 'baseVolume': 5426544300.0, 'quoteVolume': 2128781.6093, 'markPrice': 0.0003833, 'indexPrice': 0.000383, 'info': {'symbol': '10000LADYSUSDT', 'lastPrice': '0.0003836', 'indexPrice': '0.0003830', 'markPrice': '0.0003833', 'prevPrice24h': '0.0004124', 'price24hPcnt': '-0.069835', 'highPrice24h': '0.0004264', 'lowPrice24h': '0.0003740', 'prevPrice1h': '0.0003848', 'openInterest': '5226222700', 'openInterestValue': '2003211.16', 'turnover24h': '2128781.6093', 'volume24h': '5426544300.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '730400', 'bid1Price': '0.0003835', 'ask1Price': '0.0003838', 'bid1Size': '26000', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:51:54 - DEBUG - [volbot_10000LADYS_USDT_USDT:447] - Using 'last' price: 0.0003836
+2025-04-24 03:51:54 - DEBUG - [volbot_10000LADYS_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:51:54 - INFO - [volbot_10000LADYS_USDT_USDT:2611] - No open position for 10000LADYS/USDT:USDT. Checking for entry signals.
+2025-04-24 03:51:54 - INFO - [volbot_10000LADYS_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:51:54 - INFO - [volbot_10000LADYS_USDT_USDT:2708] - --- Finished analysis cycle for 10000LADYS/USDT:USDT (2.85s) ---
+2025-04-24 03:54:08 - INFO - [volbot_10000LADYS_USDT_USDT:2391] - --- Starting analysis cycle for 10000LADYS/USDT:USDT ---
+2025-04-24 03:54:08 - DEBUG - [volbot_10000LADYS_USDT_USDT:1598] - Market Info 10000LADYS/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-07, AmtPrec=100.0, MinAmt=100.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:54:08 - WARNING - [volbot_10000LADYS_USDT_USDT:1045] - Could not determine price precision from tick size for 10000LADYS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:08 - WARNING - [volbot_10000LADYS_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 10000LADYS/USDT:USDT.[0m
+2025-04-24 03:54:08 - WARNING - [volbot_10000LADYS_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 10000LADYS/USDT:USDT.
+2025-04-24 03:54:08 - DEBUG - [volbot_10000LADYS_USDT_USDT:2426] - Fetching 1150 klines for 10000LADYS/USDT:USDT 5m...
+2025-04-24 03:54:08 - DEBUG - [volbot_10000LADYS_USDT_USDT:509] - Fetching klines for 10000LADYS/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:54:08 - DEBUG - [volbot_10000LADYS_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:54:08 - INFO - [volbot_10000LADYS_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 10000LADYS/USDT:USDT 5m
+2025-04-24 03:54:08 - WARNING - [volbot_10000LADYS_USDT_USDT:1045] - Could not determine price precision from tick size for 10000LADYS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:08 - WARNING - [volbot_10000LADYS_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 10000LADYS/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:54:08 - DEBUG - [volbot_10000LADYS_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:54:08 - INFO - [volbot_10000LADYS_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:54:08 - WARNING - [volbot_10000LADYS_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:54:08 - INFO - [volbot_10000LADYS_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:54:09 - INFO - [volbot_10000LADYS_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:54:09 - INFO - [volbot_10000LADYS_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-21 03:20:00, Candle: 2025-04-21 01:15:00, Range: [0.00035, 0.00035])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 08:35:00, Candle: 2025-04-21 06:30:00, Range: [0.00036, 0.00036])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.00038 > Top 0.00036)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 11:35:00, Candle: 2025-04-21 09:30:00, Range: [0.00036, 0.00036])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.00035 < Bottom 0.00036)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 11:45:00, Candle: 2025-04-21 09:40:00, Range: [0.00036, 0.00036])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.00036 > Top 0.00036)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.00036, 0.00036])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00035 < Bottom 0.00036)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 19:45:00, Candle: 2025-04-21 17:40:00, Range: [0.00035, 0.00035])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.00035, 0.00035])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 06:50:00, Candle: 2025-04-22 04:45:00, Range: [0.00035, 0.00035])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 07:55:00, Candle: 2025-04-22 05:50:00, Range: [0.00035, 0.00035])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.00035 > Top 0.00035)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 10:30:00, Candle: 2025-04-22 08:25:00, Range: [0.00035, 0.00035])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.00035 < Bottom 0.00035)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 15:15:00, Candle: 2025-04-22 13:10:00, Range: [0.00036, 0.00036])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.00037 > Top 0.00036)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-22 17:15:00, Candle: 2025-04-22 15:10:00, Range: [0.00037, 0.00037])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.00036 < Bottom 0.00037)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-22 23:40:00, Candle: 2025-04-22 21:35:00, Range: [0.00037, 0.00037])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.00040 > Top 0.00037)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-23 05:45:00, Candle: 2025-04-23 03:40:00, Range: [0.00040, 0.00040])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.00042 > Top 0.00040)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 07:55:00, Candle: 2025-04-23 05:50:00, Range: [0.00041, 0.00042])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.00042 > Top 0.00042)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-23 10:05:00, Candle: 2025-04-23 08:00:00, Range: [0.00042, 0.00042])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 0.00041 < Bottom 0.00042)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 12:10:00, Candle: 2025-04-23 10:05:00, Range: [0.00041, 0.00041])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.00041 > Top 0.00041)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-23 13:55:00, Candle: 2025-04-23 11:50:00, Range: [0.00041, 0.00041])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.00039 < Bottom 0.00041)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 16:20:00, Candle: 2025-04-23 14:15:00, Range: [0.00039, 0.00039])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.00038 < Bottom 0.00039)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 17:10:00, Candle: 2025-04-23 15:05:00, Range: [0.00039, 0.00039])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.00039 > Top 0.00039)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 19:25:00, Candle: 2025-04-23 17:20:00, Range: [0.00039, 0.00039])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.00038 < Bottom 0.00039)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-23 23:30:00, Candle: 2025-04-23 21:25:00, Range: [0.00039, 0.00039])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.00039 < Bottom 0.00039)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-24 02:30:00, Candle: 2025-04-24 00:25:00, Range: [0.00039, 0.00039])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.00040 > Top 0.00039)
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:947] - Created Bullish OB: BullOB_24 (Pivot: 2025-04-24 03:55:00, Candle: 2025-04-24 01:50:00, Range: [0.00039, 0.00039])
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:957] - Closed Bullish OB: BullOB_24 (Close 0.00038 < Bottom 0.00039)
+2025-04-24 03:54:09 - INFO - [volbot_10000LADYS_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 14, Bear OBs: 10
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:1143] - Indicator calculations complete for 10000LADYS/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:1198] - Latest strategy state updated for 10000LADYS/USDT:USDT: {'open': '0.0004', 'high': '0.0004', 'low': '0.0004', 'close': '0.0004', 'volume': Decimal('4724300.0'), 'atr_risk': '0.0000'}
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:1872] - Fetching position for symbol: 10000LADYS/USDT:USDT
+2025-04-24 03:54:09 - DEBUG - [volbot_10000LADYS_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:54:10 - INFO - [volbot_10000LADYS_USDT_USDT:2024] - No active position found for 10000LADYS/USDT:USDT.
+2025-04-24 03:54:10 - DEBUG - [volbot_10000LADYS_USDT_USDT:432] - Fetching ticker for 10000LADYS/USDT:USDT...
+2025-04-24 03:54:10 - DEBUG - [volbot_10000LADYS_USDT_USDT:441] - Ticker data received for 10000LADYS/USDT:USDT: {'symbol': '10000LADYS/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.0004264, 'low': 0.000374, 'bid': 0.0003828, 'bidVolume': 69200.0, 'ask': 0.0003832, 'askVolume': 111700.0, 'vwap': 0.00039221372574381, 'open': 0.0004112, 'close': 0.0003831, 'last': 0.0003831, 'previousClose': None, 'change': -2.81e-05, 'percentage': -6.8336, 'average': 0.0003971, 'baseVolume': 5408856600.0, 'quoteVolume': 2121427.7991, 'markPrice': 0.0003832, 'indexPrice': 0.0003832, 'info': {'symbol': '10000LADYSUSDT', 'lastPrice': '0.0003831', 'indexPrice': '0.0003832', 'markPrice': '0.0003832', 'prevPrice24h': '0.0004112', 'price24hPcnt': '-0.068336', 'highPrice24h': '0.0004264', 'lowPrice24h': '0.0003740', 'prevPrice1h': '0.0003845', 'openInterest': '5227747700', 'openInterestValue': '2003272.92', 'turnover24h': '2121427.7991', 'volume24h': '5408856600.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '111700', 'bid1Price': '0.0003828', 'ask1Price': '0.0003832', 'bid1Size': '69200', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:54:10 - DEBUG - [volbot_10000LADYS_USDT_USDT:447] - Using 'last' price: 0.0003831
+2025-04-24 03:54:10 - DEBUG - [volbot_10000LADYS_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:54:10 - INFO - [volbot_10000LADYS_USDT_USDT:2611] - No open position for 10000LADYS/USDT:USDT. Checking for entry signals.
+2025-04-24 03:54:10 - INFO - [volbot_10000LADYS_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:54:10 - INFO - [volbot_10000LADYS_USDT_USDT:2708] - --- Finished analysis cycle for 10000LADYS/USDT:USDT (2.42s) ---

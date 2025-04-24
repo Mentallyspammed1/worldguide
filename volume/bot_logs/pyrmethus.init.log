@@ -1,0 +1,19 @@
+2025-04-24 00:36:27.779 UTC [pyrmethus.init:349] DEBUG    Logger 'pyrmethus.init' initialized. File: 'bot_logs/pyrmethus.init.log', Console Level: INFO
+2025-04-24 00:36:27.779 UTC [pyrmethus.init:354] INFO     [35m[1m===== Pyrmethus Volumatic Bot v1.5.0 Initializing =====[0m
+2025-04-24 00:36:27.784 UTC [pyrmethus.init:355] INFO     Timezone: America/Chicago (America/Chicago)
+2025-04-24 00:36:27.787 UTC [pyrmethus.init:356] DEBUG    Decimal Precision: 28
+2025-04-24 00:36:27.787 UTC [pyrmethus.init:357] DEBUG    Required packages: pandas, pandas_ta, numpy, ccxt, requests, python-dotenv, colorama, tzdata (optional but recommended)
+2025-04-24 00:36:27.788 UTC [pyrmethus.init:519] INFO     [36m# Loading configuration from 'config.json'...[0m
+2025-04-24 00:36:27.791 UTC [pyrmethus.init:593] INFO     Loaded config from 'config.json'.
+2025-04-24 00:36:27.793 UTC [pyrmethus.init:398] INFO     [33mConfig Update: Added missing key 'notifications' with default: {'enable_notifications': True}[0m
+2025-04-24 00:36:27.795 UTC [pyrmethus.init:398] INFO     [33mConfig Update: Added missing key 'backtesting' with default: {'enabled': False, 'start_date': '2023-01-01', 'end_date': '2023-12-31'}[0m
+2025-04-24 00:36:27.798 UTC [pyrmethus.init:621] INFO     Configuration updated with missing default keys.
+2025-04-24 00:36:27.800 UTC [pyrmethus.init:500] WARNING  [33mConfig Warning: Invalid value for 'fetch_limit'.
+  Provided: 1010 (Type: int)
+  Problem: Value 1.01E+3 is outside the allowed range [100, 1000].
+  Expected: integer in range [100, 1000]
+  Using default: 750[0m
+2025-04-24 00:36:27.803 UTC [pyrmethus.init:722] INFO     Quote currency set to: [33mUSDT[0m
+2025-04-24 00:36:27.805 UTC [pyrmethus.init:726] INFO     Configuration has been updated or corrected.
+2025-04-24 00:36:27.808 UTC [pyrmethus.init:730] INFO     [92mSaved updated config to 'config.json'.[0m
+2025-04-24 00:36:27.836 UTC [pyrmethus.init:2441] INFO     CCXT bybit instance created. Sandbox mode: False

@@ -1,0 +1,234 @@
+2025-04-24 03:51:37 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2391] - --- Starting analysis cycle for 1000000CHEEMS/USDT:USDT ---
+2025-04-24 03:51:37 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1598] - Market Info 1000000CHEEMS/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:51:37 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000CHEEMS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:37 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000CHEEMS/USDT:USDT.[0m
+2025-04-24 03:51:37 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000CHEEMS/USDT:USDT.
+2025-04-24 03:51:37 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:2426] - Fetching 1100 klines for 1000000CHEEMS/USDT:USDT 5m...
+2025-04-24 03:51:37 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:509] - Fetching klines for 1000000CHEEMS/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:51:37 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:51:37 - INFO - [volbot_1000000CHEEMS_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000CHEEMS/USDT:USDT 5m
+2025-04-24 03:51:37 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000CHEEMS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:37 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000CHEEMS/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:51:37 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:51:37 - INFO - [volbot_1000000CHEEMS_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:51:37 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 03:51:37 - INFO - [volbot_1000000CHEEMS_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:51:38 - INFO - [volbot_1000000CHEEMS_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:51:38 - INFO - [volbot_1000000CHEEMS_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 00:25:00, Candle: 2025-04-20 22:20:00, Range: [1.33750, 1.34360])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 1.35480 > Top 1.34360)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 06:15:00, Candle: 2025-04-21 04:10:00, Range: [1.34380, 1.34520])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 1.35540 > Top 1.34520)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 10:10:00, Candle: 2025-04-21 08:05:00, Range: [1.33100, 1.33160])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 1.26550 < Bottom 1.33100)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 18:15:00, Candle: 2025-04-21 16:10:00, Range: [1.28310, 1.28370])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 1.31720 > Top 1.28370)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-22 01:20:00, Candle: 2025-04-21 23:15:00, Range: [1.27030, 1.27030])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 1.28690 > Top 1.27030)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-22 05:05:00, Candle: 2025-04-22 03:00:00, Range: [1.25990, 1.26170])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-22 13:15:00, Candle: 2025-04-22 11:10:00, Range: [1.32680, 1.32840])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 1.36330 > Top 1.32840)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 16:10:00, Candle: 2025-04-22 14:05:00, Range: [1.34930, 1.35440])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 1.31170 < Bottom 1.34930)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 18:10:00, Candle: 2025-04-22 16:05:00, Range: [1.31630, 1.32780])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 1.40570 > Top 1.32780)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 22:15:00, Candle: 2025-04-22 20:10:00, Range: [1.39300, 1.39520])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 1.37420 < Bottom 1.39300)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-23 01:10:00, Candle: 2025-04-22 23:05:00, Range: [1.44060, 1.44390])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 1.53790 > Top 1.44390)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-23 04:50:00, Candle: 2025-04-23 02:45:00, Range: [1.48740, 1.49230])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 1.45600 < Bottom 1.48740)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-23 08:25:00, Candle: 2025-04-23 06:20:00, Range: [1.48430, 1.48520])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 1.46970 < Bottom 1.48430)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-23 15:15:00, Candle: 2025-04-23 13:10:00, Range: [1.57210, 1.57280])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 16:40:00, Candle: 2025-04-23 14:35:00, Range: [1.61440, 1.61440])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 1.62950 > Top 1.61440)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 1.56800 < Bottom 1.57210)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-23 21:15:00, Candle: 2025-04-23 19:10:00, Range: [1.57860, 1.58350])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 1.54610 < Bottom 1.57860)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 22:30:00, Candle: 2025-04-23 20:25:00, Range: [1.56230, 1.56390])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 1.59880 > Top 1.56390)
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-24 04:05:00, Candle: 2025-04-24 02:00:00, Range: [1.55240, 1.55770])
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 1.49050 < Bottom 1.55240)
+2025-04-24 03:51:38 - INFO - [volbot_1000000CHEEMS_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 9, Bear OBs: 9
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1143] - Indicator calculations complete for 1000000CHEEMS/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1198] - Latest strategy state updated for 1000000CHEEMS/USDT:USDT: {'open': '1.4463', 'high': '1.4517', 'low': '1.4463', 'close': '1.4517', 'volume': Decimal('991.0'), 'atr_risk': '0.0074'}
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1872] - Fetching position for symbol: 1000000CHEEMS/USDT:USDT
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:51:38 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2024] - No active position found for 1000000CHEEMS/USDT:USDT.
+2025-04-24 03:51:38 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:432] - Fetching ticker for 1000000CHEEMS/USDT:USDT...
+2025-04-24 03:51:39 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:441] - Ticker data received for 1000000CHEEMS/USDT:USDT: {'symbol': '1000000CHEEMS/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 1.6669, 'low': 1.4436, 'bid': 1.4516, 'bidVolume': 104.0, 'ask': 1.4529, 'askVolume': 69.0, 'vwap': 1.566066531597688, 'open': 1.4848, 'close': 1.4517, 'last': 1.4517, 'previousClose': None, 'change': -0.0331, 'percentage': -2.2292, 'average': 1.4682, 'baseVolume': 1514288.0, 'quoteVolume': 2371475.756, 'markPrice': 1.4504, 'indexPrice': 1.4496, 'info': {'symbol': '1000000CHEEMSUSDT', 'lastPrice': '1.4517', 'indexPrice': '1.4496', 'markPrice': '1.4504', 'prevPrice24h': '1.4848', 'price24hPcnt': '-0.022292', 'highPrice24h': '1.6669', 'lowPrice24h': '1.4436', 'prevPrice1h': '1.4781', 'openInterest': '870771', 'openInterestValue': '1262966.26', 'turnover24h': '2371475.7560', 'volume24h': '1514288.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745496000000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '69', 'bid1Price': '1.4516', 'ask1Price': '1.4529', 'bid1Size': '104', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:51:39 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:447] - Using 'last' price: 1.4517
+2025-04-24 03:51:39 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:51:39 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2611] - No open position for 1000000CHEEMS/USDT:USDT. Checking for entry signals.
+2025-04-24 03:51:39 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:51:39 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2708] - --- Finished analysis cycle for 1000000CHEEMS/USDT:USDT (2.21s) ---
+2025-04-24 03:53:52 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2391] - --- Starting analysis cycle for 1000000CHEEMS/USDT:USDT ---
+2025-04-24 03:53:52 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1598] - Market Info 1000000CHEEMS/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:53:52 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000CHEEMS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:53:52 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000CHEEMS/USDT:USDT.[0m
+2025-04-24 03:53:52 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000CHEEMS/USDT:USDT.
+2025-04-24 03:53:52 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:2426] - Fetching 1150 klines for 1000000CHEEMS/USDT:USDT 5m...
+2025-04-24 03:53:52 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:509] - Fetching klines for 1000000CHEEMS/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:53:53 - INFO - [volbot_1000000CHEEMS_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000CHEEMS/USDT:USDT 5m
+2025-04-24 03:53:53 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000CHEEMS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:53:53 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000CHEEMS/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:53:53 - INFO - [volbot_1000000CHEEMS_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:53:53 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:53:53 - INFO - [volbot_1000000CHEEMS_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:53:53 - INFO - [volbot_1000000CHEEMS_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:53:53 - INFO - [volbot_1000000CHEEMS_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 00:25:00, Candle: 2025-04-20 22:20:00, Range: [1.33750, 1.34360])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 1.35480 > Top 1.34360)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 06:15:00, Candle: 2025-04-21 04:10:00, Range: [1.34380, 1.34520])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 1.35540 > Top 1.34520)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 10:10:00, Candle: 2025-04-21 08:05:00, Range: [1.33100, 1.33160])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 1.26550 < Bottom 1.33100)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 18:15:00, Candle: 2025-04-21 16:10:00, Range: [1.28310, 1.28370])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 1.31720 > Top 1.28370)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-22 01:20:00, Candle: 2025-04-21 23:15:00, Range: [1.27030, 1.27030])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 1.28690 > Top 1.27030)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-22 05:05:00, Candle: 2025-04-22 03:00:00, Range: [1.25990, 1.26170])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-22 13:15:00, Candle: 2025-04-22 11:10:00, Range: [1.32680, 1.32840])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 1.36330 > Top 1.32840)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 16:10:00, Candle: 2025-04-22 14:05:00, Range: [1.34930, 1.35440])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 1.31170 < Bottom 1.34930)
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 18:10:00, Candle: 2025-04-22 16:05:00, Range: [1.31630, 1.32780])
+2025-04-24 03:53:53 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 1.40570 > Top 1.32780)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 22:15:00, Candle: 2025-04-22 20:10:00, Range: [1.39300, 1.39520])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 1.37420 < Bottom 1.39300)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-23 01:10:00, Candle: 2025-04-22 23:05:00, Range: [1.44060, 1.44390])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 1.53790 > Top 1.44390)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-23 04:50:00, Candle: 2025-04-23 02:45:00, Range: [1.48740, 1.49230])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 1.45600 < Bottom 1.48740)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-23 08:25:00, Candle: 2025-04-23 06:20:00, Range: [1.48430, 1.48520])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 1.46970 < Bottom 1.48430)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-23 15:15:00, Candle: 2025-04-23 13:10:00, Range: [1.57210, 1.57280])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 16:40:00, Candle: 2025-04-23 14:35:00, Range: [1.61440, 1.61440])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 1.62950 > Top 1.61440)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 1.56800 < Bottom 1.57210)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-23 21:15:00, Candle: 2025-04-23 19:10:00, Range: [1.57860, 1.58350])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 1.54610 < Bottom 1.57860)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-23 22:30:00, Candle: 2025-04-23 20:25:00, Range: [1.56230, 1.56390])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 1.59880 > Top 1.56390)
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-24 04:05:00, Candle: 2025-04-24 02:00:00, Range: [1.55240, 1.55770])
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 1.49050 < Bottom 1.55240)
+2025-04-24 03:53:54 - INFO - [volbot_1000000CHEEMS_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 9, Bear OBs: 9
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1143] - Indicator calculations complete for 1000000CHEEMS/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1198] - Latest strategy state updated for 1000000CHEEMS/USDT:USDT: {'open': '1.4463', 'high': '1.4521', 'low': '1.4463', 'close': '1.4478', 'volume': Decimal('1894.0'), 'atr_risk': '0.0075'}
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1872] - Fetching position for symbol: 1000000CHEEMS/USDT:USDT
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:53:54 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2024] - No active position found for 1000000CHEEMS/USDT:USDT.
+2025-04-24 03:53:54 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:432] - Fetching ticker for 1000000CHEEMS/USDT:USDT...
+2025-04-24 03:53:55 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:441] - Ticker data received for 1000000CHEEMS/USDT:USDT: {'symbol': '1000000CHEEMS/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 1.6669, 'low': 1.4436, 'bid': 1.4476, 'bidVolume': 69.0, 'ask': 1.4486, 'askVolume': 104.0, 'vwap': 1.56602971535947, 'open': 1.4868, 'close': 1.4478, 'last': 1.4478, 'previousClose': None, 'change': -0.039, 'percentage': -2.623, 'average': 1.4673, 'baseVolume': 1514577.0, 'quoteVolume': 2371872.5882, 'markPrice': 1.4489, 'indexPrice': 1.4488, 'info': {'symbol': '1000000CHEEMSUSDT', 'lastPrice': '1.4478', 'indexPrice': '1.4488', 'markPrice': '1.4489', 'prevPrice24h': '1.4868', 'price24hPcnt': '-0.02623', 'highPrice24h': '1.6669', 'lowPrice24h': '1.4436', 'prevPrice1h': '1.4758', 'openInterest': '871320', 'openInterestValue': '1262455.55', 'turnover24h': '2371872.5882', 'volume24h': '1514577.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745496000000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '104', 'bid1Price': '1.4476', 'ask1Price': '1.4486', 'bid1Size': '69', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:53:55 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:447] - Using 'last' price: 1.4478
+2025-04-24 03:53:55 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:53:55 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2611] - No open position for 1000000CHEEMS/USDT:USDT. Checking for entry signals.
+2025-04-24 03:53:55 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:53:55 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2708] - --- Finished analysis cycle for 1000000CHEEMS/USDT:USDT (2.71s) ---
+2025-04-24 16:19:43 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2391] - --- Starting analysis cycle for 1000000CHEEMS/USDT:USDT ---
+2025-04-24 16:19:43 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1598] - Market Info 1000000CHEEMS/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 16:19:43 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000CHEEMS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 16:19:43 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000CHEEMS/USDT:USDT.[0m
+2025-04-24 16:19:43 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000CHEEMS/USDT:USDT.
+2025-04-24 16:19:43 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:2426] - Fetching 1100 klines for 1000000CHEEMS/USDT:USDT 3m...
+2025-04-24 16:19:43 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:509] - Fetching klines for 1000000CHEEMS/USDT:USDT, 3m, limit=1100 (Attempt 1/4)
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 16:19:44 - INFO - [volbot_1000000CHEEMS_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000CHEEMS/USDT:USDT 3m
+2025-04-24 16:19:44 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000CHEEMS/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 16:19:44 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000CHEEMS/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 16:19:44 - INFO - [volbot_1000000CHEEMS_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 16:19:44 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 16:19:44 - INFO - [volbot_1000000CHEEMS_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 16:19:44 - INFO - [volbot_1000000CHEEMS_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 16:19:44 - INFO - [volbot_1000000CHEEMS_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-22 22:15:00, Candle: 2025-04-22 21:00:00, Range: [1.38930, 1.39040])
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 1.37430 < Bottom 1.38930)
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-23 01:09:00, Candle: 2025-04-22 23:54:00, Range: [1.44410, 1.44490])
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 1.54820 > Top 1.44490)
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-23 02:00:00, Candle: 2025-04-23 00:45:00, Range: [1.48730, 1.48760])
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 1.47280 < Bottom 1.48730)
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-23 04:51:00, Candle: 2025-04-23 03:36:00, Range: [1.47910, 1.48240])
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 1.45370 < Bottom 1.47910)
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-23 06:21:00, Candle: 2025-04-23 05:06:00, Range: [1.46590, 1.46760])
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 1.49080 > Top 1.46760)
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-23 08:27:00, Candle: 2025-04-23 07:12:00, Range: [1.47540, 1.47540])
+2025-04-24 16:19:44 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 1.46970 < Bottom 1.47540)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-23 14:48:00, Candle: 2025-04-23 13:33:00, Range: [1.58520, 1.60380])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 1.62050 > Top 1.60380)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-23 15:15:00, Candle: 2025-04-23 14:00:00, Range: [1.58720, 1.59610])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 1.57790 < Bottom 1.58720)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-23 16:39:00, Candle: 2025-04-23 15:24:00, Range: [1.58880, 1.59730])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 1.63020 > Top 1.59730)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-23 21:15:00, Candle: 2025-04-23 20:00:00, Range: [1.56210, 1.56390])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 1.54330 < Bottom 1.56210)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-23 22:30:00, Candle: 2025-04-23 21:15:00, Range: [1.54330, 1.54750])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 1.61080 > Top 1.54750)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-24 01:48:00, Candle: 2025-04-24 00:33:00, Range: [1.56900, 1.57640])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 1.54750 < Bottom 1.56900)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-24 02:27:00, Candle: 2025-04-24 01:12:00, Range: [1.55490, 1.56230])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 1.56670 > Top 1.56230)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-24 04:03:00, Candle: 2025-04-24 02:48:00, Range: [1.54590, 1.55610])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 1.48480 < Bottom 1.54590)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-24 05:48:00, Candle: 2025-04-24 04:33:00, Range: [1.49500, 1.49600])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 1.51390 > Top 1.49600)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-24 08:48:00, Candle: 2025-04-24 07:33:00, Range: [1.48700, 1.48760])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 1.44940 < Bottom 1.48700)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-24 14:09:00, Candle: 2025-04-24 12:54:00, Range: [1.43520, 1.43560])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 1.45090 > Top 1.43560)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-24 16:36:00, Candle: 2025-04-24 15:21:00, Range: [1.44730, 1.44840])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 1.45270 > Top 1.44840)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-24 17:21:00, Candle: 2025-04-24 16:06:00, Range: [1.42660, 1.43160])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 1.40370 < Bottom 1.42660)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-24 18:27:00, Candle: 2025-04-24 17:12:00, Range: [1.41290, 1.42600])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 1.45010 > Top 1.42600)
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-24 20:00:00, Candle: 2025-04-24 18:45:00, Range: [1.42590, 1.42800])
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 1.42120 < Bottom 1.42590)
+2025-04-24 16:19:45 - INFO - [volbot_1000000CHEEMS_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 11, Bear OBs: 10
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1143] - Indicator calculations complete for 1000000CHEEMS/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1198] - Latest strategy state updated for 1000000CHEEMS/USDT:USDT: {'open': '1.4301', 'high': '1.4301', 'low': '1.4278', 'close': '1.4278', 'volume': Decimal('155.0'), 'atr_risk': '0.0057'}
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1872] - Fetching position for symbol: 1000000CHEEMS/USDT:USDT
+2025-04-24 16:19:45 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 16:19:46 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2024] - No active position found for 1000000CHEEMS/USDT:USDT.
+2025-04-24 16:19:46 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:432] - Fetching ticker for 1000000CHEEMS/USDT:USDT...
+2025-04-24 16:19:46 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:441] - Ticker data received for 1000000CHEEMS/USDT:USDT: {'symbol': '1000000CHEEMS/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 1.6157, 'low': 1.3963, 'bid': 1.4275, 'bidVolume': 70.0, 'ask': 1.4283, 'askVolume': 56.0, 'vwap': 1.4754021680684866, 'open': 1.5461, 'close': 1.4278, 'last': 1.4278, 'previousClose': None, 'change': -0.1183, 'percentage': -7.6515, 'average': 1.4869, 'baseVolume': 1227452.0, 'quoteVolume': 1810985.342, 'markPrice': 1.4288, 'indexPrice': 1.4296, 'info': {'symbol': '1000000CHEEMSUSDT', 'lastPrice': '1.4278', 'indexPrice': '1.4296', 'markPrice': '1.4288', 'prevPrice24h': '1.5461', 'price24hPcnt': '-0.076515', 'highPrice24h': '1.6157', 'lowPrice24h': '1.3963', 'prevPrice1h': '1.4171', 'openInterest': '882312', 'openInterestValue': '1260647.39', 'turnover24h': '1810985.3420', 'volume24h': '1227452.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '56', 'bid1Price': '1.4275', 'ask1Price': '1.4283', 'bid1Size': '70', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 16:19:46 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:447] - Using 'last' price: 1.4278
+2025-04-24 16:19:46 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 16:19:46 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2611] - No open position for 1000000CHEEMS/USDT:USDT. Checking for entry signals.
+2025-04-24 16:19:46 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 16:19:46 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2708] - --- Finished analysis cycle for 1000000CHEEMS/USDT:USDT (3.07s) ---
+2025-04-24 16:27:09 - INFO - [volbot_1000000CHEEMS_USDT_USDT:2521] - --- Starting analysis cycle for 1000000CHEEMS/USDT:USDT ---
+2025-04-24 16:27:09 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1653] - Market Info for 1000000CHEEMS/USDT:USDT: ID=1000000CHEEMSUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 0.0001/1.0/N/A, Limits(Amount Min/Max): 1.0/115000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 16:27:09 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:483] - Fetching klines for 1000000CHEEMS/USDT:USDT, 3m, limit=1100 (Attempt 1/4)
+2025-04-24 16:27:09 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:489] - Received 1000 klines from API.
+2025-04-24 16:27:09 - INFO - [volbot_1000000CHEEMS_USDT_USDT:548] - Successfully fetched and processed 1000 klines for 1000000CHEEMS/USDT:USDT 3m
+2025-04-24 16:27:09 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1053] - [33mInsufficient data (1000 points) for 1000000CHEEMS/USDT:USDT to calculate all indicators reliably (recommend min: ~1050). Results may be inaccurate or contain NaNs.[0m
+2025-04-24 16:27:09 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:1069] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 16:27:09 - INFO - [volbot_1000000CHEEMS_USDT_USDT:1073] - Calculating Volbot strategy indicators...
+2025-04-24 16:27:09 - INFO - [volbot_1000000CHEEMS_USDT_USDT:611] - Calculating Volumatic Trend Levels...
+2025-04-24 16:27:09 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:577] - Calculating Smoothed Weighted EMA (SWMA) with length: 40...
+2025-04-24 16:27:10 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 42. Propagating previous levels.
+2025-04-24 16:27:10 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 61. Propagating previous levels.
+2025-04-24 16:27:11 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 123. Propagating previous levels.
+2025-04-24 16:27:11 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 136. Propagating previous levels.
+2025-04-24 16:27:11 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 150. Propagating previous levels.
+2025-04-24 16:27:11 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 156. Propagating previous levels.
+2025-04-24 16:27:12 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 161. Propagating previous levels.
+2025-04-24 16:27:12 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 167. Propagating previous levels.
+2025-04-24 16:27:12 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 168. Propagating previous levels.
+2025-04-24 16:27:12 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 193. Propagating previous levels.
+2025-04-24 16:27:12 - DEBUG - [volbot_1000000CHEEMS_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 195. Propagating previous levels.
+2025-04-24 16:27:21 - ERROR - [volbot_1000000CHEEMS_USDT_USDT:1087] - [91mError calculating indicators for 1000000CHEEMS/USDT:USDT: 'numpy.ndarray' object has no attribute 'fillna'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 1074, in _calculate_strategy_indicators
+    df_calc = calculate_volatility_levels(df_calc, self.config, self.logger)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 688, in calculate_volatility_levels
+    ).fillna(0)
+      ^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'fillna'. Did you mean: 'fill'?
+2025-04-24 16:27:21 - WARNING - [volbot_1000000CHEEMS_USDT_USDT:1097] - Cannot update latest state: Processed DataFrame is empty for 1000000CHEEMS/USDT:USDT.
+2025-04-24 16:27:21 - ERROR - [volbot_1000000CHEEMS_USDT_USDT:2556] - Failed to calculate indicators or update state for 1000000CHEEMS/USDT:USDT. Skipping further analysis.

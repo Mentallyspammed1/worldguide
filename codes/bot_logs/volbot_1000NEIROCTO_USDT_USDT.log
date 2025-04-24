@@ -1,0 +1,74 @@
+2025-04-24 03:54:49 - INFO - [volbot_1000NEIROCTO_USDT_USDT:2391] - --- Starting analysis cycle for 1000NEIROCTO/USDT:USDT ---
+2025-04-24 03:54:49 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1598] - Market Info 1000NEIROCTO/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:54:49 - WARNING - [volbot_1000NEIROCTO_USDT_USDT:1045] - Could not determine price precision from tick size for 1000NEIROCTO/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:49 - WARNING - [volbot_1000NEIROCTO_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000NEIROCTO/USDT:USDT.[0m
+2025-04-24 03:54:49 - WARNING - [volbot_1000NEIROCTO_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000NEIROCTO/USDT:USDT.
+2025-04-24 03:54:49 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:2426] - Fetching 1150 klines for 1000NEIROCTO/USDT:USDT 5m...
+2025-04-24 03:54:49 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:509] - Fetching klines for 1000NEIROCTO/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:54:49 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:54:49 - INFO - [volbot_1000NEIROCTO_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000NEIROCTO/USDT:USDT 5m
+2025-04-24 03:54:49 - WARNING - [volbot_1000NEIROCTO_USDT_USDT:1045] - Could not determine price precision from tick size for 1000NEIROCTO/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:49 - WARNING - [volbot_1000NEIROCTO_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000NEIROCTO/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:54:49 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:54:49 - INFO - [volbot_1000NEIROCTO_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:54:49 - WARNING - [volbot_1000NEIROCTO_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:54:49 - INFO - [volbot_1000NEIROCTO_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:54:50 - INFO - [volbot_1000NEIROCTO_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:54:50 - INFO - [volbot_1000NEIROCTO_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 01:50:00, Candle: 2025-04-20 23:45:00, Range: [0.18680, 0.18680])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.19020 > Top 0.18680)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_2 (Pivot: 2025-04-21 03:25:00, Candle: 2025-04-21 01:20:00, Range: [0.18970, 0.18980])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_2 (Close 0.18860 < Bottom 0.18970)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 06:45:00, Candle: 2025-04-21 04:40:00, Range: [0.19100, 0.19110])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.19650 > Top 0.19110)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 07:50:00, Candle: 2025-04-21 05:45:00, Range: [0.19270, 0.19310])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.19180 < Bottom 0.19270)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-21 09:10:00, Candle: 2025-04-21 07:05:00, Range: [0.19400, 0.19470])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 0.19610 > Top 0.19470)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 11:25:00, Candle: 2025-04-21 09:20:00, Range: [0.19480, 0.19550])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.19070 < Bottom 0.19480)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.19110, 0.19120])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.18650 < Bottom 0.19110)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_8 (Pivot: 2025-04-22 01:20:00, Candle: 2025-04-21 23:15:00, Range: [0.19160, 0.19170])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_9 (Pivot: 2025-04-22 03:10:00, Candle: 2025-04-22 01:05:00, Range: [0.18730, 0.18750])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_10 (Pivot: 2025-04-22 04:45:00, Candle: 2025-04-22 02:40:00, Range: [0.18800, 0.18850])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_10 (Close 0.19130 > Top 0.18850)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_9 (Close 0.18720 < Bottom 0.18730)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_11 (Pivot: 2025-04-22 06:35:00, Candle: 2025-04-22 04:30:00, Range: [0.19020, 0.19060])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_11 (Close 0.18250 < Bottom 0.19020)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_8 (Close 0.19210 > Top 0.19170)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 08:15:00, Candle: 2025-04-22 06:10:00, Range: [0.18650, 0.18730])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.19640 > Top 0.18730)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-22 15:25:00, Candle: 2025-04-22 13:20:00, Range: [0.19500, 0.19520])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.21110 > Top 0.19520)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-23 03:55:00, Candle: 2025-04-23 01:50:00, Range: [0.22150, 0.22330])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.23570 > Top 0.22330)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_15 (Pivot: 2025-04-23 06:45:00, Candle: 2025-04-23 04:40:00, Range: [0.23180, 0.23330])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_15 (Close 0.22850 < Bottom 0.23180)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 14:25:00, Candle: 2025-04-23 12:20:00, Range: [0.23360, 0.23760])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.24300 > Top 0.23760)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 15:25:00, Candle: 2025-04-23 13:20:00, Range: [0.24070, 0.24220])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.22490 < Bottom 0.24070)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 17:25:00, Candle: 2025-04-23 15:20:00, Range: [0.22570, 0.22790])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.23740 > Top 0.22790)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 21:40:00, Candle: 2025-04-23 19:35:00, Range: [0.22890, 0.23100])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.22780 < Bottom 0.22890)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 23:10:00, Candle: 2025-04-23 21:05:00, Range: [0.22910, 0.23060])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.23700 > Top 0.23060)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-24 04:00:00, Candle: 2025-04-24 01:55:00, Range: [0.22870, 0.22920])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.21720 < Bottom 0.22870)
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-24 05:50:00, Candle: 2025-04-24 03:45:00, Range: [0.21920, 0.22070])
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.22220 > Top 0.22070)
+2025-04-24 03:54:50 - INFO - [volbot_1000NEIROCTO_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 10, Bear OBs: 12
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1143] - Indicator calculations complete for 1000NEIROCTO/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1198] - Latest strategy state updated for 1000NEIROCTO/USDT:USDT: {'open': '0.2071', 'high': '0.2083', 'low': '0.2071', 'close': '0.2077', 'volume': Decimal('94108.0'), 'atr_risk': '0.0014'}
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1872] - Fetching position for symbol: 1000NEIROCTO/USDT:USDT
+2025-04-24 03:54:50 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:54:51 - INFO - [volbot_1000NEIROCTO_USDT_USDT:2024] - No active position found for 1000NEIROCTO/USDT:USDT.
+2025-04-24 03:54:51 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:432] - Fetching ticker for 1000NEIROCTO/USDT:USDT...
+2025-04-24 03:54:51 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:441] - Ticker data received for 1000NEIROCTO/USDT:USDT: {'symbol': '1000NEIROCTO/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.2454, 'low': 0.206, 'bid': 0.2076, 'bidVolume': 15026.0, 'ask': 0.2078, 'askVolume': 15813.0, 'vwap': 0.23262128260074547, 'open': 0.2332, 'close': 0.2077, 'last': 0.2077, 'previousClose': None, 'change': -0.0255, 'percentage': -10.9348, 'average': 0.2204, 'baseVolume': 74767117.0, 'quoteVolume': 17392422.6529, 'markPrice': 0.2077, 'indexPrice': 0.20771, 'info': {'symbol': '1000NEIROCTOUSDT', 'lastPrice': '0.20770', 'indexPrice': '0.20771', 'markPrice': '0.20770', 'prevPrice24h': '0.23320', 'price24hPcnt': '-0.109348', 'highPrice24h': '0.24540', 'lowPrice24h': '0.20600', 'prevPrice1h': '0.21200', 'openInterest': '12709544', 'openInterestValue': '2639772.29', 'turnover24h': '17392422.6529', 'volume24h': '74767117.0000', 'fundingRate': '0.00005', 'nextFundingTime': '1745496000000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '15813', 'bid1Price': '0.20760', 'ask1Price': '0.20780', 'bid1Size': '15026', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:54:51 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:447] - Using 'last' price: 0.2077
+2025-04-24 03:54:51 - DEBUG - [volbot_1000NEIROCTO_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:54:51 - INFO - [volbot_1000NEIROCTO_USDT_USDT:2611] - No open position for 1000NEIROCTO/USDT:USDT. Checking for entry signals.
+2025-04-24 03:54:51 - INFO - [volbot_1000NEIROCTO_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:54:51 - INFO - [volbot_1000NEIROCTO_USDT_USDT:2708] - --- Finished analysis cycle for 1000NEIROCTO/USDT:USDT (2.61s) ---

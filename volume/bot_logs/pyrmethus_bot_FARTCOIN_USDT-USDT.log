@@ -1,0 +1,947 @@
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3350] - ---=== [1mStarting Trading Loop for FARTCOIN/USDT:USDT (1)[0m ===---
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3351] - Trading Enabled: True, Sandbox Mode: False
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3353] - Settings: Risk=1.00%, Leverage=20x, TSL=ON, BE=ON
+2025-04-22 18:43:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3354] - Strategy Params: {"vt_length": 40, "vt_atr_period": 200, "vt_vol_ema_length": 1000, "vt_atr_multiplier": 3.0, "vt_step_atr_multiplier": 4.0, "ob_source": "Wicks", "ph_left": 10, "ph_right": 10, "pl_left": 10, "pl_right": 10, "ob_extend": true, "ob_max_boxes": 50, "ob_entry_proximity_factor": 1.005, "ob_exit_proximity_factor": 1.001}
+2025-04-22 18:43:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3355] - Protection Params: {"enable_trailing_stop": true, "trailing_stop_callback_rate": 0.005, "trailing_stop_activation_percentage": 0.003, "enable_break_even": true, "break_even_trigger_atr_multiple": 1.0, "break_even_offset_ticks": 2, "initial_stop_loss_atr_multiple": 1.8, "initial_take_profit_atr_multiple": 0.7}
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2336] - [36mInitializing VolumaticOB Strategy Engine...[0m
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2337] -   VT Params: Len=40, ATRLen=200, VolLen=1000, ATRMult=3, StepMult=4
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2338] -   OB Params: Src=Wicks, PH=10/10, PL=10/10, Extend=True, MaxBoxes=50
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2339] -   Minimum historical data points recommended: 1010
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2714] - Signal Generator Initialized.
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2715] -   OB Entry Proximity Factor: 1.005, OB Exit Proximity Factor: 1.001
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2716] -   Initial TP ATR Multiple: 0.7, Initial SL ATR Multiple: 1.8
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3366] - [1mEntering main trading loop... Press Ctrl+C to stop.[0m
+2025-04-22 18:43:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:43:19 CDT
+2025-04-22 18:43:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---
+2025-04-22 18:43:19 - WARNING - [pyrmethus_bot_FARTCOIN_USDT-USDT:2956] - [33mConfigured fetch_limit (750) < recommended (1060). Increasing to 1060.[0m
+2025-04-22 18:43:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 1m, limit=1060 (Attempt 1/4)
+2025-04-22 18:43:20 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:43:00+00:00 (Lag: 20.2s)
+2025-04-22 18:43:20 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 1m
+2025-04-22 18:43:20 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:43:20 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.85s. Sleeping for 14.15s...
+2025-04-22 18:43:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:43:34 CDT
+2025-04-22 18:43:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---
+2025-04-22 18:43:34 - WARNING - [pyrmethus_bot_FARTCOIN_USDT-USDT:2956] - [33mConfigured fetch_limit (750) < recommended (1060). Increasing to 1060.[0m
+2025-04-22 18:43:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 1m, limit=1060 (Attempt 1/4)
+2025-04-22 18:43:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:43:00+00:00 (Lag: 34.8s)
+2025-04-22 18:43:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 1m
+2025-04-22 18:43:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:43:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.52s. Sleeping for 14.48s...
+2025-04-22 18:43:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:43:49 CDT
+2025-04-22 18:43:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---
+2025-04-22 18:43:49 - WARNING - [pyrmethus_bot_FARTCOIN_USDT-USDT:2956] - [33mConfigured fetch_limit (750) < recommended (1060). Increasing to 1060.[0m
+2025-04-22 18:43:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 1m, limit=1060 (Attempt 1/4)
+2025-04-22 18:43:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:43:00+00:00 (Lag: 49.9s)
+2025-04-22 18:43:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 1m
+2025-04-22 18:43:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:43:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.56s. Sleeping for 14.44s...
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3350] - ---=== [1mStarting Trading Loop for FARTCOIN/USDT:USDT (5)[0m ===---
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3351] - Trading Enabled: True, Sandbox Mode: False
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3353] - Settings: Risk=1.00%, Leverage=20x, TSL=ON, BE=ON
+2025-04-22 18:45:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3354] - Strategy Params: {"vt_length": 40, "vt_atr_period": 200, "vt_vol_ema_length": 1000, "vt_atr_multiplier": 3.0, "vt_step_atr_multiplier": 4.0, "ob_source": "Wicks", "ph_left": 10, "ph_right": 10, "pl_left": 10, "pl_right": 10, "ob_extend": true, "ob_max_boxes": 50, "ob_entry_proximity_factor": 1.005, "ob_exit_proximity_factor": 1.001}
+2025-04-22 18:45:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3355] - Protection Params: {"enable_trailing_stop": true, "trailing_stop_callback_rate": 0.005, "trailing_stop_activation_percentage": 0.003, "enable_break_even": true, "break_even_trigger_atr_multiple": 1.0, "break_even_offset_ticks": 2, "initial_stop_loss_atr_multiple": 1.8, "initial_take_profit_atr_multiple": 0.7}
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2336] - [36mInitializing VolumaticOB Strategy Engine...[0m
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2337] -   VT Params: Len=40, ATRLen=200, VolLen=1000, ATRMult=3, StepMult=4
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2338] -   OB Params: Src=Wicks, PH=10/10, PL=10/10, Extend=True, MaxBoxes=50
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2339] -   Minimum historical data points recommended: 1010
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2714] - Signal Generator Initialized.
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2715] -   OB Entry Proximity Factor: 1.005, OB Exit Proximity Factor: 1.001
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2716] -   Initial TP ATR Multiple: 0.7, Initial SL ATR Multiple: 1.8
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3366] - [1mEntering main trading loop... Press Ctrl+C to stop.[0m
+2025-04-22 18:45:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:45:03 CDT
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:45:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:45:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 3.6s)
+2025-04-22 18:45:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:45:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:45:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.68s. Sleeping for 14.32s...
+2025-04-22 18:45:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:45:18 CDT
+2025-04-22 18:45:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:45:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:45:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 19.0s)
+2025-04-22 18:45:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:45:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:45:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.91s. Sleeping for 14.09s...
+2025-04-22 18:45:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:45:33 CDT
+2025-04-22 18:45:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:45:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:45:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 34.7s)
+2025-04-22 18:45:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:45:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:45:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.84s. Sleeping for 13.16s...
+2025-04-22 18:45:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:45:48 CDT
+2025-04-22 18:45:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:45:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:45:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 49.3s)
+2025-04-22 18:45:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:45:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:45:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.31s. Sleeping for 13.69s...
+2025-04-22 18:46:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:46:03 CDT
+2025-04-22 18:46:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:46:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:46:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 63.6s)
+2025-04-22 18:46:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:46:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:46:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.57s. Sleeping for 14.43s...
+2025-04-22 18:46:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:46:18 CDT
+2025-04-22 18:46:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:46:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:46:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 78.6s)
+2025-04-22 18:46:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:46:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:46:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.56s. Sleeping for 14.44s...
+2025-04-22 18:46:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:46:33 CDT
+2025-04-22 18:46:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:46:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:46:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 93.9s)
+2025-04-22 18:46:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:46:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:46:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.89s. Sleeping for 14.11s...
+2025-04-22 18:46:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:46:48 CDT
+2025-04-22 18:46:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:46:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:46:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 108.7s)
+2025-04-22 18:46:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:46:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:46:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.67s. Sleeping for 14.33s...
+2025-04-22 18:47:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:47:03 CDT
+2025-04-22 18:47:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:47:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:47:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 123.9s)
+2025-04-22 18:47:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:47:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:47:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.88s. Sleeping for 14.12s...
+2025-04-22 18:47:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:47:18 CDT
+2025-04-22 18:47:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:47:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:47:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 138.6s)
+2025-04-22 18:47:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:47:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:47:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.55s. Sleeping for 14.45s...
+2025-04-22 18:47:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:47:33 CDT
+2025-04-22 18:47:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:47:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:47:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 153.6s)
+2025-04-22 18:47:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:47:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:47:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.58s. Sleeping for 14.42s...
+2025-04-22 18:47:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:47:48 CDT
+2025-04-22 18:47:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:47:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:47:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 168.7s)
+2025-04-22 18:47:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:47:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:47:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.58s. Sleeping for 14.42s...
+2025-04-22 18:48:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:48:03 CDT
+2025-04-22 18:48:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:48:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:48:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 183.6s)
+2025-04-22 18:48:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:48:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:48:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.57s. Sleeping for 14.43s...
+2025-04-22 18:48:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:48:18 CDT
+2025-04-22 18:48:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:48:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:48:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 198.6s)
+2025-04-22 18:48:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:48:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:48:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.57s. Sleeping for 14.43s...
+2025-04-22 18:48:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:48:33 CDT
+2025-04-22 18:48:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:48:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:48:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 213.7s)
+2025-04-22 18:48:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:48:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:48:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.72s. Sleeping for 14.28s...
+2025-04-22 18:48:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:48:48 CDT
+2025-04-22 18:48:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:48:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:48:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 229.8s)
+2025-04-22 18:48:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:48:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:48:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.72s. Sleeping for 13.28s...
+2025-04-22 18:49:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:49:03 CDT
+2025-04-22 18:49:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:49:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:49:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 243.6s)
+2025-04-22 18:49:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:49:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:49:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.66s. Sleeping for 14.34s...
+2025-04-22 18:49:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:49:18 CDT
+2025-04-22 18:49:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:49:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:49:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 258.6s)
+2025-04-22 18:49:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:49:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:49:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.56s. Sleeping for 14.44s...
+2025-04-22 18:49:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:49:33 CDT
+2025-04-22 18:49:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:49:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:49:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 274.1s)
+2025-04-22 18:49:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:49:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:49:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.05s. Sleeping for 13.95s...
+2025-04-22 18:49:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:49:48 CDT
+2025-04-22 18:49:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:49:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:49:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:45:00+00:00 (Lag: 288.7s)
+2025-04-22 18:49:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:49:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:49:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.56s. Sleeping for 14.44s...
+2025-04-22 18:50:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:50:03 CDT
+2025-04-22 18:50:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:50:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:50:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 4.3s)
+2025-04-22 18:50:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:50:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:50:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.20s. Sleeping for 13.80s...
+2025-04-22 18:50:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:50:18 CDT
+2025-04-22 18:50:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:50:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:50:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 18.6s)
+2025-04-22 18:50:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:50:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:50:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.54s. Sleeping for 14.46s...
+2025-04-22 18:50:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:50:33 CDT
+2025-04-22 18:50:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:50:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:50:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 33.7s)
+2025-04-22 18:50:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:50:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:50:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.55s. Sleeping for 14.45s...
+2025-04-22 18:50:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:50:48 CDT
+2025-04-22 18:50:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:50:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:50:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 48.7s)
+2025-04-22 18:50:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:50:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:50:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.59s. Sleeping for 14.41s...
+2025-04-22 18:51:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:51:03 CDT
+2025-04-22 18:51:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:51:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:51:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 64.9s)
+2025-04-22 18:51:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:51:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:51:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.83s. Sleeping for 13.17s...
+2025-04-22 18:51:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:51:18 CDT
+2025-04-22 18:51:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:51:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:51:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 78.8s)
+2025-04-22 18:51:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:51:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:51:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.71s. Sleeping for 14.29s...
+2025-04-22 18:51:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:51:33 CDT
+2025-04-22 18:51:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:51:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:51:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 93.6s)
+2025-04-22 18:51:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:51:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:51:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.54s. Sleeping for 14.46s...
+2025-04-22 18:51:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:51:48 CDT
+2025-04-22 18:51:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:51:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:51:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 109.0s)
+2025-04-22 18:51:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:51:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:51:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.85s. Sleeping for 14.15s...
+2025-04-22 18:52:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:52:03 CDT
+2025-04-22 18:52:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:52:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:52:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 123.6s)
+2025-04-22 18:52:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:52:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:52:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.55s. Sleeping for 14.45s...
+2025-04-22 18:52:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:52:18 CDT
+2025-04-22 18:52:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:52:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:52:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 138.7s)
+2025-04-22 18:52:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:52:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:52:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.56s. Sleeping for 14.44s...
+2025-04-22 18:52:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:52:33 CDT
+2025-04-22 18:52:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:52:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:52:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 153.7s)
+2025-04-22 18:52:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:52:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:52:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.58s. Sleeping for 14.42s...
+2025-04-22 18:52:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:52:48 CDT
+2025-04-22 18:52:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:52:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:52:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 169.0s)
+2025-04-22 18:52:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:52:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:52:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 18:53:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:53:03 CDT
+2025-04-22 18:53:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:53:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:53:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 184.0s)
+2025-04-22 18:53:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:53:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:53:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 18:53:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:53:18 CDT
+2025-04-22 18:53:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:53:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:53:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 198.8s)
+2025-04-22 18:53:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:53:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:53:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 18:53:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:53:33 CDT
+2025-04-22 18:53:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:53:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:53:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 214.0s)
+2025-04-22 18:53:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:53:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:53:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.93s. Sleeping for 14.07s...
+2025-04-22 18:53:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:53:48 CDT
+2025-04-22 18:53:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:53:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:53:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 228.8s)
+2025-04-22 18:53:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:53:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:53:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.73s. Sleeping for 14.27s...
+2025-04-22 18:54:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:54:03 CDT
+2025-04-22 18:54:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:54:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:54:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 243.8s)
+2025-04-22 18:54:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:54:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:54:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 18:54:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:54:18 CDT
+2025-04-22 18:54:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:54:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:54:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 258.8s)
+2025-04-22 18:54:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:54:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:54:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.71s. Sleeping for 14.29s...
+2025-04-22 18:54:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:54:33 CDT
+2025-04-22 18:54:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:54:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:54:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 274.0s)
+2025-04-22 18:54:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:54:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:54:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 18:54:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:54:48 CDT
+2025-04-22 18:54:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:54:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:54:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:50:00+00:00 (Lag: 288.8s)
+2025-04-22 18:54:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:54:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:54:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.72s. Sleeping for 14.28s...
+2025-04-22 18:55:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:55:03 CDT
+2025-04-22 18:55:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:55:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:55:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 3.7s)
+2025-04-22 18:55:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:55:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:55:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.54s. Sleeping for 14.46s...
+2025-04-22 18:55:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:55:18 CDT
+2025-04-22 18:55:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:55:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:55:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 18.7s)
+2025-04-22 18:55:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:55:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:55:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.59s. Sleeping for 14.41s...
+2025-04-22 18:55:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:55:33 CDT
+2025-04-22 18:55:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:55:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:55:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 33.7s)
+2025-04-22 18:55:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:55:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:55:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.54s. Sleeping for 14.46s...
+2025-04-22 18:55:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:55:48 CDT
+2025-04-22 18:55:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:55:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:55:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 49.0s)
+2025-04-22 18:55:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:55:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:55:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.89s. Sleeping for 14.11s...
+2025-04-22 18:56:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:56:03 CDT
+2025-04-22 18:56:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:56:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:56:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 64.1s)
+2025-04-22 18:56:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:56:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:56:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.98s. Sleeping for 14.02s...
+2025-04-22 18:56:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:56:18 CDT
+2025-04-22 18:56:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:56:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:56:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 79.5s)
+2025-04-22 18:56:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:56:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:56:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.37s. Sleeping for 13.63s...
+2025-04-22 18:56:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:56:33 CDT
+2025-04-22 18:56:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:56:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:56:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 94.3s)
+2025-04-22 18:56:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:56:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:56:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.17s. Sleeping for 13.83s...
+2025-04-22 18:56:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:56:48 CDT
+2025-04-22 18:56:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:56:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:56:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 109.0s)
+2025-04-22 18:56:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:56:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:56:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 18:57:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:57:03 CDT
+2025-04-22 18:57:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:57:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:57:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 124.0s)
+2025-04-22 18:57:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:57:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:57:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.85s. Sleeping for 14.15s...
+2025-04-22 18:57:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:57:18 CDT
+2025-04-22 18:57:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:57:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:57:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 138.8s)
+2025-04-22 18:57:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:57:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:57:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 18:57:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:57:33 CDT
+2025-04-22 18:57:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:57:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:57:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 153.8s)
+2025-04-22 18:57:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:57:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:57:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 18:57:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:57:48 CDT
+2025-04-22 18:57:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:57:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:57:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 169.0s)
+2025-04-22 18:57:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:57:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:57:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.88s. Sleeping for 14.12s...
+2025-04-22 18:58:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:58:03 CDT
+2025-04-22 18:58:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:58:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:58:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 183.8s)
+2025-04-22 18:58:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:58:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:58:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 18:58:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:58:18 CDT
+2025-04-22 18:58:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:58:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:58:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 199.0s)
+2025-04-22 18:58:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:58:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:58:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.87s. Sleeping for 14.13s...
+2025-04-22 18:58:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:58:33 CDT
+2025-04-22 18:58:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:58:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:58:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 213.7s)
+2025-04-22 18:58:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:58:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:58:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.55s. Sleeping for 14.45s...
+2025-04-22 18:58:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:58:48 CDT
+2025-04-22 18:58:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:58:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:58:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 228.7s)
+2025-04-22 18:58:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:58:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:58:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.57s. Sleeping for 14.43s...
+2025-04-22 18:59:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:59:03 CDT
+2025-04-22 18:59:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:59:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:59:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 243.8s)
+2025-04-22 18:59:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:59:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:59:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.69s. Sleeping for 14.31s...
+2025-04-22 18:59:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:59:18 CDT
+2025-04-22 18:59:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:59:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:59:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 258.7s)
+2025-04-22 18:59:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:59:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:59:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.57s. Sleeping for 14.43s...
+2025-04-22 18:59:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:59:33 CDT
+2025-04-22 18:59:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:59:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:59:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 273.7s)
+2025-04-22 18:59:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:59:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:59:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.56s. Sleeping for 14.44s...
+2025-04-22 18:59:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 18:59:48 CDT
+2025-04-22 18:59:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 18:59:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 18:59:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-22 23:55:00+00:00 (Lag: 288.8s)
+2025-04-22 18:59:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 18:59:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 18:59:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.72s. Sleeping for 14.28s...
+2025-04-22 19:00:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:00:03 CDT
+2025-04-22 19:00:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:00:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:00:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 3.8s)
+2025-04-22 19:00:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:00:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:00:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.69s. Sleeping for 14.31s...
+2025-04-22 19:00:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:00:18 CDT
+2025-04-22 19:00:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:00:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:00:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 19.2s)
+2025-04-22 19:00:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:00:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:00:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.03s. Sleeping for 13.97s...
+2025-04-22 19:00:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:00:33 CDT
+2025-04-22 19:00:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:00:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:00:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 33.7s)
+2025-04-22 19:00:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:00:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:00:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.54s. Sleeping for 14.46s...
+2025-04-22 19:00:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:00:48 CDT
+2025-04-22 19:00:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:00:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:00:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 48.7s)
+2025-04-22 19:00:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:00:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:00:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.57s. Sleeping for 14.43s...
+2025-04-22 19:01:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:01:03 CDT
+2025-04-22 19:01:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:01:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:01:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 64.2s)
+2025-04-22 19:01:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:01:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:01:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.06s. Sleeping for 13.94s...
+2025-04-22 19:01:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:01:18 CDT
+2025-04-22 19:01:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:01:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:01:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 78.9s)
+2025-04-22 19:01:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:01:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:01:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 19:01:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:01:33 CDT
+2025-04-22 19:01:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:01:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:01:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 93.9s)
+2025-04-22 19:01:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:01:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:01:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.72s. Sleeping for 14.28s...
+2025-04-22 19:01:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:01:48 CDT
+2025-04-22 19:01:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:01:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:01:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 109.2s)
+2025-04-22 19:01:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:01:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:01:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.01s. Sleeping for 13.99s...
+2025-04-22 19:02:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:02:03 CDT
+2025-04-22 19:02:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:02:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:02:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 124.1s)
+2025-04-22 19:02:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:02:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:02:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.11s. Sleeping for 13.89s...
+2025-04-22 19:02:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:02:18 CDT
+2025-04-22 19:02:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:02:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:02:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 139.1s)
+2025-04-22 19:02:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:02:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:02:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.92s. Sleeping for 14.08s...
+2025-04-22 19:02:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:02:33 CDT
+2025-04-22 19:02:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:02:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:02:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 153.9s)
+2025-04-22 19:02:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:02:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:02:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.72s. Sleeping for 14.28s...
+2025-04-22 19:02:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:02:48 CDT
+2025-04-22 19:02:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:02:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:02:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 169.0s)
+2025-04-22 19:02:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:02:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:02:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.90s. Sleeping for 14.10s...
+2025-04-22 19:03:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:03:03 CDT
+2025-04-22 19:03:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:03:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:03:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 183.8s)
+2025-04-22 19:03:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:03:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:03:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.59s. Sleeping for 14.41s...
+2025-04-22 19:03:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:03:18 CDT
+2025-04-22 19:03:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:03:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:03:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 198.9s)
+2025-04-22 19:03:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:03:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:03:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.82s. Sleeping for 14.18s...
+2025-04-22 19:03:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:03:33 CDT
+2025-04-22 19:03:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:03:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:03:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 214.1s)
+2025-04-22 19:03:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:03:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:03:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.88s. Sleeping for 14.12s...
+2025-04-22 19:03:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:03:48 CDT
+2025-04-22 19:03:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:03:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:03:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 229.0s)
+2025-04-22 19:03:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:03:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:03:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.85s. Sleeping for 14.15s...
+2025-04-22 19:04:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:04:03 CDT
+2025-04-22 19:04:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:04:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:04:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 244.0s)
+2025-04-22 19:04:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:04:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:04:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.87s. Sleeping for 14.13s...
+2025-04-22 19:04:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:04:18 CDT
+2025-04-22 19:04:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:04:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:04:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 259.1s)
+2025-04-22 19:04:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:04:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:04:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.88s. Sleeping for 14.12s...
+2025-04-22 19:04:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:04:33 CDT
+2025-04-22 19:04:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:04:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:04:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 274.0s)
+2025-04-22 19:04:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:04:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:04:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 19:04:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:04:48 CDT
+2025-04-22 19:04:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:04:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:04:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:00:00+00:00 (Lag: 288.9s)
+2025-04-22 19:04:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:04:48 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:04:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.71s. Sleeping for 14.29s...
+2025-04-22 19:05:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:05:03 CDT
+2025-04-22 19:05:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:05:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:05:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 4.3s)
+2025-04-22 19:05:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:05:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:05:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.16s. Sleeping for 13.84s...
+2025-04-22 19:05:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:05:18 CDT
+2025-04-22 19:05:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:05:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:05:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 18.9s)
+2025-04-22 19:05:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:05:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:05:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.70s. Sleeping for 14.30s...
+2025-04-22 19:05:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:05:33 CDT
+2025-04-22 19:05:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:05:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:05:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 34.4s)
+2025-04-22 19:05:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:05:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:05:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.18s. Sleeping for 13.82s...
+2025-04-22 19:05:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:05:48 CDT
+2025-04-22 19:05:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:05:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:05:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 49.1s)
+2025-04-22 19:05:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:05:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:05:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.87s. Sleeping for 14.13s...
+2025-04-22 19:06:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:06:03 CDT
+2025-04-22 19:06:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:06:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:06:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 63.9s)
+2025-04-22 19:06:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:06:03 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:06:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.71s. Sleeping for 14.29s...
+2025-04-22 19:06:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:06:18 CDT
+2025-04-22 19:06:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:06:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:06:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 78.7s)
+2025-04-22 19:06:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:06:18 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:06:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.53s. Sleeping for 14.47s...
+2025-04-22 19:06:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:06:33 CDT
+2025-04-22 19:06:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:06:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:06:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 94.4s)
+2025-04-22 19:06:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:06:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:06:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.19s. Sleeping for 13.81s...
+2025-04-22 19:06:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:06:48 CDT
+2025-04-22 19:06:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:06:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:06:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 109.1s)
+2025-04-22 19:06:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:06:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:06:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 19:07:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:07:03 CDT
+2025-04-22 19:07:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:07:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:07:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 124.0s)
+2025-04-22 19:07:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:07:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:07:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.86s. Sleeping for 14.14s...
+2025-04-22 19:07:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:07:18 CDT
+2025-04-22 19:07:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:07:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:07:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 139.1s)
+2025-04-22 19:07:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:07:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:07:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.88s. Sleeping for 14.12s...
+2025-04-22 19:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:07:33 CDT
+2025-04-22 19:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:07:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 154.0s)
+2025-04-22 19:07:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:07:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:07:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.85s. Sleeping for 14.15s...
+2025-04-22 19:07:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:07:48 CDT
+2025-04-22 19:07:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:07:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:07:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 169.0s)
+2025-04-22 19:07:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:07:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:07:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.85s. Sleeping for 14.15s...
+2025-04-22 19:08:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:08:03 CDT
+2025-04-22 19:08:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:08:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:08:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 184.1s)
+2025-04-22 19:08:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:08:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:08:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.88s. Sleeping for 14.12s...
+2025-04-22 19:08:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:08:18 CDT
+2025-04-22 19:08:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:08:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:08:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 199.0s)
+2025-04-22 19:08:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:08:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:08:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.77s. Sleeping for 14.23s...
+2025-04-22 19:08:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:08:33 CDT
+2025-04-22 19:08:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:08:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:08:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 213.9s)
+2025-04-22 19:08:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:08:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:08:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.71s. Sleeping for 14.29s...
+2025-04-22 19:08:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:08:48 CDT
+2025-04-22 19:08:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:08:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:08:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 229.1s)
+2025-04-22 19:08:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:08:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:08:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.01s. Sleeping for 13.99s...
+2025-04-22 19:09:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:09:03 CDT
+2025-04-22 19:09:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:09:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:09:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 244.2s)
+2025-04-22 19:09:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:09:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:09:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.05s. Sleeping for 13.95s...
+2025-04-22 19:09:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:09:18 CDT
+2025-04-22 19:09:18 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:09:18 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:09:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 259.2s)
+2025-04-22 19:09:19 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:09:19 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:09:19 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.00s. Sleeping for 14.00s...
+2025-04-22 19:09:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:09:33 CDT
+2025-04-22 19:09:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:09:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:09:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 273.8s)
+2025-04-22 19:09:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:09:33 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:09:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.61s. Sleeping for 14.39s...
+2025-04-22 19:09:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:09:48 CDT
+2025-04-22 19:09:48 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:09:48 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:09:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:05:00+00:00 (Lag: 289.3s)
+2025-04-22 19:09:49 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:09:49 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:09:49 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 1.07s. Sleeping for 13.93s...
+2025-04-22 19:10:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3370] - >>> New Loop Cycle Start: 19:10:03 CDT
+2025-04-22 19:10:03 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2944] - 
+---== Analyzing FARTCOIN/USDT:USDT (5) Cycle Start ==---
+2025-04-22 19:10:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:653] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1500 (Attempt 1/4)
+2025-04-22 19:10:03 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:674] - Received 1000 klines. Last timestamp: 2025-04-23 00:10:00+00:00 (Lag: 3.9s)
+2025-04-22 19:10:04 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:762] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-22 19:10:04 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2961] - Failed to fetch sufficient kline data for FARTCOIN/USDT:USDT (fetched 1000, need >= 1010). Skipping cycle.
+2025-04-22 19:10:04 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3417] - <<< Loop cycle processed in 0.84s. Sleeping for 14.16s...
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3137] - ---=== [1mStarting Trading Loop for: FARTCOIN/USDT:USDT (Timeframe: 3)[0m ===---
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3138] - Trading Enabled: True, Sandbox Mode: False
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3141] - Key Settings: Risk=1.00%, Leverage=20x, TSL=ON, BE=ON
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2056] - [36mInitializing VolumaticOB Strategy Engine...[0m
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2057] -   VT Params: Length=40, ATR Period=200, Vol EMA Length=950, ATR Multiplier=3
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2058] -   OB Params: Source=Wicks, PH Lookback=10/10, PL Lookback=10/10, Extend=True, Max Boxes=50
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2059] -   Calculated Minimum Historical Data Needed: 1000 candles
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2424] - Signal Generator Initialized:
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2425] -   OB Entry Proximity Factor: 1.005
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2426] -   OB Exit Proximity Factor: 1.001
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2427] -   Initial TP ATR Multiple: 0.7
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2428] -   Initial SL ATR Multiple: 1.8
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3156] - [1mEntering main trading loop... Press Ctrl+C to stop gracefully.[0m
+2025-04-22 19:24:41 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3162] - >>> Starting Loop Cycle #1 at 19:24:41 CDT
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2648] - 
+[1m---== Analyzing FARTCOIN/USDT:USDT (3 TF) Cycle Start ==---[0m
+2025-04-22 19:24:41 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2661] - Strategy requires minimum 1000 candles.
+2025-04-22 19:24:41 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2662] - Config fetch_limit preference: 750.
+2025-04-22 19:24:41 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2663] - Effective fetch limit needed: 1000.
+2025-04-22 19:24:41 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2664] - Requesting 1000 klines (API limit: 1000)...
+2025-04-22 19:24:41 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:521] - Fetching klines for FARTCOIN/USDT:USDT, 3m, limit=1000 (Attempt 1/4)
+2025-04-22 19:24:41 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:530] - Using Bybit category 'linear' for kline fetch.
+2025-04-22 19:24:42 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:537] - Exchange returned 1000 candles (requested 1000).
+2025-04-22 19:24:42 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:560] - Last kline timestamp 2025-04-23 00:24:00+00:00 seems current (Lag: 42.5s).
+2025-04-22 19:24:42 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:652] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 3m
+2025-04-22 19:24:42 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2114] - Starting strategy analysis on 1000 candles (min required: 1000).
+2025-04-22 19:24:42 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2198] - Error during indicator calculation: module 'pandas_ta' has no attribute 'pivot'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/volumatictrend1.1.3.py", line 2190, in update
+    ph_signals = ta.pivot(high_series, left=self.ph_left, right=self.ph_right, high_low='high').fillna(0).astype(bool)
+                 ^^^^^^^^
+AttributeError: module 'pandas_ta' has no attribute 'pivot'. Did you mean: 'pvol'?
+2025-04-22 19:24:42 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2703] - [91mStrategy analysis completed but produced invalid/incomplete results. Skipping cycle.[0m
+2025-04-22 19:24:42 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2704] - Analysis Results: {'dataframe': Empty DataFrame
+Columns: []
+Index: [], 'last_close': Decimal('0'), 'current_trend_up': None, 'trend_just_changed': False, 'active_bull_boxes': [], 'active_bear_boxes': [], 'vol_norm_int': None, 'atr': None, 'upper_band': None, 'lower_band': None}
+2025-04-22 19:24:42 - CRITICAL - [pyrmethus_bot_FARTCOIN_USDT-USDT:3211] - [91mCRITICAL UNHANDLED ERROR outside main loop: name 'config' is not defined[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/volumatictrend1.1.3.py", line 3199, in main
+    loop_delay = config.get("loop_delay_seconds", LOOP_DELAY_SECONDS)
+                 ^^^^^^
+NameError: name 'config' is not defined
+2025-04-22 19:24:42 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3220] - --- Pyrmethus Bot (FARTCOIN/USDT:USDT) Stopping ---
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3137] - ---=== [1mStarting Trading Loop for: FARTCOIN/USDT:USDT (Timeframe: 1)[0m ===---
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3138] - Trading Enabled: True, Sandbox Mode: False
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3141] - Key Settings: Risk=1.00%, Leverage=20x, TSL=ON, BE=ON
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2056] - [36mInitializing VolumaticOB Strategy Engine...[0m
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2057] -   VT Params: Length=40, ATR Period=200, Vol EMA Length=950, ATR Multiplier=3
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2058] -   OB Params: Source=Wicks, PH Lookback=10/10, PL Lookback=10/10, Extend=True, Max Boxes=50
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2059] -   Calculated Minimum Historical Data Needed: 1000 candles
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2424] - Signal Generator Initialized:
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2425] -   OB Entry Proximity Factor: 1.005
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2426] -   OB Exit Proximity Factor: 1.001
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2427] -   Initial TP ATR Multiple: 0.7
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2428] -   Initial SL ATR Multiple: 1.8
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3156] - [1mEntering main trading loop... Press Ctrl+C to stop gracefully.[0m
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:3162] - >>> Starting Loop Cycle #1 at 20:07:33 CDT
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2648] - 
+[1m---== Analyzing FARTCOIN/USDT:USDT (1 TF) Cycle Start ==---[0m
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2661] - Strategy requires minimum 1000 candles.
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2662] - Config fetch_limit preference: 750.
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2663] - Effective fetch limit needed: 1000.
+2025-04-22 20:07:33 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:2664] - Requesting 1000 klines (API limit: 1000)...
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:521] - Fetching klines for FARTCOIN/USDT:USDT, 1m, limit=1000 (Attempt 1/4)
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:530] - Using Bybit category 'linear' for kline fetch.
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:537] - Exchange returned 1000 candles (requested 1000).
+2025-04-22 20:07:33 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:560] - Last kline timestamp 2025-04-23 01:07:00+00:00 seems current (Lag: 34.0s).
+2025-04-22 20:07:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:652] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 1m
+2025-04-22 20:07:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2114] - Starting strategy analysis on 1000 candles (min required: 1000).
+2025-04-22 20:07:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2198] - Error during indicator calculation: module 'pandas_ta' has no attribute 'pivot'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/volumatictrend1.1.3.py", line 2190, in update
+    ph_signals = ta.pivot(high_series, left=self.ph_left, right=self.ph_right, high_low='high').fillna(0).astype(bool)
+                 ^^^^^^^^
+AttributeError: module 'pandas_ta' has no attribute 'pivot'. Did you mean: 'pvol'?
+2025-04-22 20:07:34 - ERROR - [pyrmethus_bot_FARTCOIN_USDT-USDT:2703] - [91mStrategy analysis completed but produced invalid/incomplete results. Skipping cycle.[0m
+2025-04-22 20:07:34 - DEBUG - [pyrmethus_bot_FARTCOIN_USDT-USDT:2704] - Analysis Results: {'dataframe': Empty DataFrame
+Columns: []
+Index: [], 'last_close': Decimal('0'), 'current_trend_up': None, 'trend_just_changed': False, 'active_bull_boxes': [], 'active_bear_boxes': [], 'vol_norm_int': None, 'atr': None, 'upper_band': None, 'lower_band': None}
+2025-04-22 20:07:34 - CRITICAL - [pyrmethus_bot_FARTCOIN_USDT-USDT:3211] - [91mCRITICAL UNHANDLED ERROR outside main loop: name 'config' is not defined[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/volumatictrend1.1.3.py", line 3199, in main
+    loop_delay = config.get("loop_delay_seconds", LOOP_DELAY_SECONDS)
+                 ^^^^^^
+NameError: name 'config' is not defined
+2025-04-22 20:07:34 - INFO - [pyrmethus_bot_FARTCOIN_USDT-USDT:3220] - --- Pyrmethus Bot (FARTCOIN/USDT:USDT) Stopping ---

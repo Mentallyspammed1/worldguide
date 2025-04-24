@@ -1,0 +1,84 @@
+2025-04-24 03:42:37 - INFO - [volbot_FARTCOIN_USDT_USDT:2521] - --- Starting analysis cycle for FARTCOIN/USDT:USDT ---
+2025-04-24 03:42:37 - DEBUG - [volbot_FARTCOIN_USDT_USDT:1653] - Market Info for FARTCOIN/USDT:USDT: ID=FARTCOINUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 0.0001/1.0/N/A, Limits(Amount Min/Max): 1.0/500000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 03:42:37 - DEBUG - [volbot_FARTCOIN_USDT_USDT:483] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:42:38 - DEBUG - [volbot_FARTCOIN_USDT_USDT:489] - Received 1000 klines from API.
+2025-04-24 03:42:38 - INFO - [volbot_FARTCOIN_USDT_USDT:548] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-24 03:42:38 - WARNING - [volbot_FARTCOIN_USDT_USDT:1053] - [33mInsufficient data (1000 points) for FARTCOIN/USDT:USDT to calculate all indicators reliably (recommend min: ~1050). Results may be inaccurate or contain NaNs.[0m
+2025-04-24 03:42:38 - DEBUG - [volbot_FARTCOIN_USDT_USDT:1069] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:42:38 - INFO - [volbot_FARTCOIN_USDT_USDT:1073] - Calculating Volbot strategy indicators...
+2025-04-24 03:42:38 - INFO - [volbot_FARTCOIN_USDT_USDT:611] - Calculating Volumatic Trend Levels...
+2025-04-24 03:42:38 - DEBUG - [volbot_FARTCOIN_USDT_USDT:577] - Calculating Smoothed Weighted EMA (SWMA) with length: 40...
+2025-04-24 03:42:38 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 78. Propagating previous levels.
+2025-04-24 03:42:38 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 88. Propagating previous levels.
+2025-04-24 03:42:38 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 107. Propagating previous levels.
+2025-04-24 03:42:39 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 132. Propagating previous levels.
+2025-04-24 03:42:39 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 167. Propagating previous levels.
+2025-04-24 03:42:39 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 177. Propagating previous levels.
+2025-04-24 03:42:39 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 180. Propagating previous levels.
+2025-04-24 03:42:43 - ERROR - [volbot_FARTCOIN_USDT_USDT:1087] - [91mError calculating indicators for FARTCOIN/USDT:USDT: 'numpy.ndarray' object has no attribute 'fillna'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 1074, in _calculate_strategy_indicators
+    df_calc = calculate_volatility_levels(df_calc, self.config, self.logger)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 688, in calculate_volatility_levels
+    ).fillna(0)
+      ^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'fillna'. Did you mean: 'fill'?
+2025-04-24 03:42:43 - WARNING - [volbot_FARTCOIN_USDT_USDT:1097] - Cannot update latest state: Processed DataFrame is empty for FARTCOIN/USDT:USDT.
+2025-04-24 03:42:43 - ERROR - [volbot_FARTCOIN_USDT_USDT:2556] - Failed to calculate indicators or update state for FARTCOIN/USDT:USDT. Skipping further analysis.
+2025-04-24 03:42:52 - INFO - [volbot_FARTCOIN_USDT_USDT:2521] - --- Starting analysis cycle for FARTCOIN/USDT:USDT ---
+2025-04-24 03:42:52 - DEBUG - [volbot_FARTCOIN_USDT_USDT:1653] - Market Info for FARTCOIN/USDT:USDT: ID=FARTCOINUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 0.0001/1.0/N/A, Limits(Amount Min/Max): 1.0/500000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 03:42:52 - DEBUG - [volbot_FARTCOIN_USDT_USDT:483] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:42:52 - DEBUG - [volbot_FARTCOIN_USDT_USDT:489] - Received 1000 klines from API.
+2025-04-24 03:42:52 - INFO - [volbot_FARTCOIN_USDT_USDT:548] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-24 03:42:52 - WARNING - [volbot_FARTCOIN_USDT_USDT:1053] - [33mInsufficient data (1000 points) for FARTCOIN/USDT:USDT to calculate all indicators reliably (recommend min: ~1050). Results may be inaccurate or contain NaNs.[0m
+2025-04-24 03:42:52 - DEBUG - [volbot_FARTCOIN_USDT_USDT:1069] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:42:52 - INFO - [volbot_FARTCOIN_USDT_USDT:1073] - Calculating Volbot strategy indicators...
+2025-04-24 03:42:52 - INFO - [volbot_FARTCOIN_USDT_USDT:611] - Calculating Volumatic Trend Levels...
+2025-04-24 03:42:52 - DEBUG - [volbot_FARTCOIN_USDT_USDT:577] - Calculating Smoothed Weighted EMA (SWMA) with length: 40...
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 78. Propagating previous levels.
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 88. Propagating previous levels.
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 107. Propagating previous levels.
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 132. Propagating previous levels.
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 167. Propagating previous levels.
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 177. Propagating previous levels.
+2025-04-24 03:42:53 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 180. Propagating previous levels.
+2025-04-24 03:42:57 - ERROR - [volbot_FARTCOIN_USDT_USDT:1087] - [91mError calculating indicators for FARTCOIN/USDT:USDT: 'numpy.ndarray' object has no attribute 'fillna'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 1074, in _calculate_strategy_indicators
+    df_calc = calculate_volatility_levels(df_calc, self.config, self.logger)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 688, in calculate_volatility_levels
+    ).fillna(0)
+      ^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'fillna'. Did you mean: 'fill'?
+2025-04-24 03:42:57 - WARNING - [volbot_FARTCOIN_USDT_USDT:1097] - Cannot update latest state: Processed DataFrame is empty for FARTCOIN/USDT:USDT.
+2025-04-24 03:42:57 - ERROR - [volbot_FARTCOIN_USDT_USDT:2556] - Failed to calculate indicators or update state for FARTCOIN/USDT:USDT. Skipping further analysis.
+2025-04-24 03:43:07 - INFO - [volbot_FARTCOIN_USDT_USDT:2521] - --- Starting analysis cycle for FARTCOIN/USDT:USDT ---
+2025-04-24 03:43:07 - DEBUG - [volbot_FARTCOIN_USDT_USDT:1653] - Market Info for FARTCOIN/USDT:USDT: ID=FARTCOINUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 0.0001/1.0/N/A, Limits(Amount Min/Max): 1.0/500000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 03:43:07 - DEBUG - [volbot_FARTCOIN_USDT_USDT:483] - Fetching klines for FARTCOIN/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:43:08 - DEBUG - [volbot_FARTCOIN_USDT_USDT:489] - Received 1000 klines from API.
+2025-04-24 03:43:08 - INFO - [volbot_FARTCOIN_USDT_USDT:548] - Successfully fetched and processed 1000 klines for FARTCOIN/USDT:USDT 5m
+2025-04-24 03:43:08 - WARNING - [volbot_FARTCOIN_USDT_USDT:1053] - [33mInsufficient data (1000 points) for FARTCOIN/USDT:USDT to calculate all indicators reliably (recommend min: ~1050). Results may be inaccurate or contain NaNs.[0m
+2025-04-24 03:43:08 - DEBUG - [volbot_FARTCOIN_USDT_USDT:1069] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:43:08 - INFO - [volbot_FARTCOIN_USDT_USDT:1073] - Calculating Volbot strategy indicators...
+2025-04-24 03:43:08 - INFO - [volbot_FARTCOIN_USDT_USDT:611] - Calculating Volumatic Trend Levels...
+2025-04-24 03:43:08 - DEBUG - [volbot_FARTCOIN_USDT_USDT:577] - Calculating Smoothed Weighted EMA (SWMA) with length: 40...
+2025-04-24 03:43:08 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 78. Propagating previous levels.
+2025-04-24 03:43:08 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 88. Propagating previous levels.
+2025-04-24 03:43:08 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 107. Propagating previous levels.
+2025-04-24 03:43:09 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 132. Propagating previous levels.
+2025-04-24 03:43:09 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 167. Propagating previous levels.
+2025-04-24 03:43:09 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 177. Propagating previous levels.
+2025-04-24 03:43:09 - DEBUG - [volbot_FARTCOIN_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 180. Propagating previous levels.
+2025-04-24 03:43:13 - ERROR - [volbot_FARTCOIN_USDT_USDT:1087] - [91mError calculating indicators for FARTCOIN/USDT:USDT: 'numpy.ndarray' object has no attribute 'fillna'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 1074, in _calculate_strategy_indicators
+    df_calc = calculate_volatility_levels(df_calc, self.config, self.logger)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/volbot2.py", line 688, in calculate_volatility_levels
+    ).fillna(0)
+      ^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'fillna'. Did you mean: 'fill'?
+2025-04-24 03:43:13 - WARNING - [volbot_FARTCOIN_USDT_USDT:1097] - Cannot update latest state: Processed DataFrame is empty for FARTCOIN/USDT:USDT.
+2025-04-24 03:43:13 - ERROR - [volbot_FARTCOIN_USDT_USDT:2556] - Failed to calculate indicators or update state for FARTCOIN/USDT:USDT. Skipping further analysis.

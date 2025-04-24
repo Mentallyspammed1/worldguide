@@ -1,0 +1,88 @@
+2025-04-24 03:51:55 - INFO - [volbot_10000QUBIC_USDT_USDT:2391] - --- Starting analysis cycle for 10000QUBIC/USDT:USDT ---
+2025-04-24 03:51:55 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1598] - Market Info 10000QUBIC/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-06, AmtPrec=10.0, MinAmt=10.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:51:55 - WARNING - [volbot_10000QUBIC_USDT_USDT:1045] - Could not determine price precision from tick size for 10000QUBIC/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:55 - WARNING - [volbot_10000QUBIC_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 10000QUBIC/USDT:USDT.[0m
+2025-04-24 03:51:55 - WARNING - [volbot_10000QUBIC_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 10000QUBIC/USDT:USDT.
+2025-04-24 03:51:55 - DEBUG - [volbot_10000QUBIC_USDT_USDT:2426] - Fetching 1100 klines for 10000QUBIC/USDT:USDT 5m...
+2025-04-24 03:51:55 - DEBUG - [volbot_10000QUBIC_USDT_USDT:509] - Fetching klines for 10000QUBIC/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:51:56 - INFO - [volbot_10000QUBIC_USDT_USDT:2708] - --- Finished analysis cycle for 10000QUBIC/USDT:USDT (0.68s) ---
+2025-04-24 03:54:11 - INFO - [volbot_10000QUBIC_USDT_USDT:2391] - --- Starting analysis cycle for 10000QUBIC/USDT:USDT ---
+2025-04-24 03:54:11 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1598] - Market Info 10000QUBIC/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-06, AmtPrec=10.0, MinAmt=10.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:54:11 - WARNING - [volbot_10000QUBIC_USDT_USDT:1045] - Could not determine price precision from tick size for 10000QUBIC/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:11 - WARNING - [volbot_10000QUBIC_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 10000QUBIC/USDT:USDT.[0m
+2025-04-24 03:54:11 - WARNING - [volbot_10000QUBIC_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 10000QUBIC/USDT:USDT.
+2025-04-24 03:54:11 - DEBUG - [volbot_10000QUBIC_USDT_USDT:2426] - Fetching 1150 klines for 10000QUBIC/USDT:USDT 5m...
+2025-04-24 03:54:11 - DEBUG - [volbot_10000QUBIC_USDT_USDT:509] - Fetching klines for 10000QUBIC/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:54:11 - DEBUG - [volbot_10000QUBIC_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:54:11 - INFO - [volbot_10000QUBIC_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 10000QUBIC/USDT:USDT 5m
+2025-04-24 03:54:11 - WARNING - [volbot_10000QUBIC_USDT_USDT:1045] - Could not determine price precision from tick size for 10000QUBIC/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:11 - WARNING - [volbot_10000QUBIC_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 10000QUBIC/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:54:11 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:54:11 - INFO - [volbot_10000QUBIC_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:54:11 - WARNING - [volbot_10000QUBIC_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:54:11 - INFO - [volbot_10000QUBIC_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:54:12 - INFO - [volbot_10000QUBIC_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:54:12 - INFO - [volbot_10000QUBIC_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 02:00:00, Candle: 2025-04-20 23:55:00, Range: [0.01342, 0.01342])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.01379 > Top 0.01342)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 09:20:00, Candle: 2025-04-21 07:15:00, Range: [0.01382, 0.01382])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.01444 > Top 0.01382)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 10:40:00, Candle: 2025-04-21 08:35:00, Range: [0.01390, 0.01393])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 12:10:00, Candle: 2025-04-21 10:05:00, Range: [0.01420, 0.01434])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.01436 > Top 0.01434)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 14:05:00, Candle: 2025-04-21 12:00:00, Range: [0.01415, 0.01415])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.01395 < Bottom 0.01415)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_6 (Pivot: 2025-04-21 15:40:00, Candle: 2025-04-21 13:35:00, Range: [0.01423, 0.01432])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_6 (Close 0.01438 > Top 0.01432)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.01383 < Bottom 0.01390)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.01413, 0.01413])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.01377 < Bottom 0.01413)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_8 (Pivot: 2025-04-21 19:30:00, Candle: 2025-04-21 17:25:00, Range: [0.01399, 0.01402])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_8 (Close 0.01416 > Top 0.01402)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_9 (Pivot: 2025-04-21 21:30:00, Candle: 2025-04-21 19:25:00, Range: [0.01433, 0.01433])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_9 (Close 0.01388 < Bottom 0.01433)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 06:25:00, Candle: 2025-04-22 04:20:00, Range: [0.01450, 0.01450])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.01443 < Bottom 0.01450)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 10:35:00, Candle: 2025-04-22 08:30:00, Range: [0.01521, 0.01527])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.01555 > Top 0.01527)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-22 13:30:00, Candle: 2025-04-22 11:25:00, Range: [0.01552, 0.01554])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.01502 < Bottom 0.01552)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-22 19:05:00, Candle: 2025-04-22 17:00:00, Range: [0.01696, 0.01701])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.01780 > Top 0.01701)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-22 21:20:00, Candle: 2025-04-22 19:15:00, Range: [0.01724, 0.01774])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 0.01653 < Bottom 0.01724)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-22 22:30:00, Candle: 2025-04-22 20:25:00, Range: [0.01678, 0.01691])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.01764 > Top 0.01691)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 01:15:00, Candle: 2025-04-22 23:10:00, Range: [0.01692, 0.01729])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.01730 > Top 0.01729)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 02:00:00, Candle: 2025-04-22 23:55:00, Range: [0.01700, 0.01710])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.01665 < Bottom 0.01700)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 05:05:00, Candle: 2025-04-23 03:00:00, Range: [0.01686, 0.01698])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.01758 > Top 0.01698)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-23 09:15:00, Candle: 2025-04-23 07:10:00, Range: [0.01720, 0.01723])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.01771 > Top 0.01723)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 12:30:00, Candle: 2025-04-23 10:25:00, Range: [0.01673, 0.01679])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.01566 < Bottom 0.01673)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 15:35:00, Candle: 2025-04-23 13:30:00, Range: [0.01605, 0.01606])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.01538 < Bottom 0.01605)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-23 19:35:00, Candle: 2025-04-23 17:30:00, Range: [0.01548, 0.01564])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.01610 > Top 0.01564)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_23 (Pivot: 2025-04-24 00:25:00, Candle: 2025-04-23 22:20:00, Range: [0.01536, 0.01545])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_23 (Close 0.01491 < Bottom 0.01536)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:918] - Created Bearish OB: BearOB_24 (Pivot: 2025-04-24 02:05:00, Candle: 2025-04-24 00:00:00, Range: [0.01517, 0.01520])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:970] - Closed Bearish OB: BearOB_24 (Close 0.01525 > Top 0.01520)
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:947] - Created Bullish OB: BullOB_25 (Pivot: 2025-04-24 04:15:00, Candle: 2025-04-24 02:10:00, Range: [0.01521, 0.01525])
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:957] - Closed Bullish OB: BullOB_25 (Close 0.01474 < Bottom 0.01521)
+2025-04-24 03:54:12 - INFO - [volbot_10000QUBIC_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 12, Bear OBs: 13
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1143] - Indicator calculations complete for 10000QUBIC/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1198] - Latest strategy state updated for 10000QUBIC/USDT:USDT: {'open': '0.0142', 'high': '0.0142', 'low': '0.0142', 'close': '0.0142', 'volume': Decimal('161810.0'), 'atr_risk': '0.0001'}
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1872] - Fetching position for symbol: 10000QUBIC/USDT:USDT
+2025-04-24 03:54:12 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:54:13 - INFO - [volbot_10000QUBIC_USDT_USDT:2024] - No active position found for 10000QUBIC/USDT:USDT.
+2025-04-24 03:54:13 - DEBUG - [volbot_10000QUBIC_USDT_USDT:432] - Fetching ticker for 10000QUBIC/USDT:USDT...
+2025-04-24 03:54:13 - DEBUG - [volbot_10000QUBIC_USDT_USDT:441] - Ticker data received for 10000QUBIC/USDT:USDT: {'symbol': '10000QUBIC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.017803, 'low': 0.014097, 'bid': 0.01419, 'bidVolume': 3520.0, 'ask': 0.014212, 'askVolume': 360.0, 'vwap': 0.01571668420829794, 'open': 0.017175, 'close': 0.014201, 'last': 0.014201, 'previousClose': None, 'change': -0.002974, 'percentage': -17.3158, 'average': 0.015688, 'baseVolume': 196980920.0, 'quoteVolume': 3095886.9147, 'markPrice': 0.014201, 'indexPrice': 0.014174, 'info': {'symbol': '10000QUBICUSDT', 'lastPrice': '0.014201', 'indexPrice': '0.014174', 'markPrice': '0.014201', 'prevPrice24h': '0.017175', 'price24hPcnt': '-0.173158', 'highPrice24h': '0.017803', 'lowPrice24h': '0.014097', 'prevPrice1h': '0.014565', 'openInterest': '42853340', 'openInterestValue': '608560.28', 'turnover24h': '3095886.9147', 'volume24h': '196980920.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '360', 'bid1Price': '0.014190', 'ask1Price': '0.014212', 'bid1Size': '3520', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:54:13 - DEBUG - [volbot_10000QUBIC_USDT_USDT:447] - Using 'last' price: 0.014201
+2025-04-24 03:54:13 - DEBUG - [volbot_10000QUBIC_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:54:13 - INFO - [volbot_10000QUBIC_USDT_USDT:2611] - No open position for 10000QUBIC/USDT:USDT. Checking for entry signals.
+2025-04-24 03:54:13 - INFO - [volbot_10000QUBIC_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:54:13 - INFO - [volbot_10000QUBIC_USDT_USDT:2708] - --- Finished analysis cycle for 10000QUBIC/USDT:USDT (2.62s) ---
