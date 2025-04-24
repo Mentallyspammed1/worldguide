@@ -6749,3 +6749,1251 @@ Request ID: gzY4f4XMQajFjE02mzorW8n9d-qqqQFN9P7jkUBuv-NPM_h9grt2DA==
 2025-04-24 23:14:34.808 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
 2025-04-24 23:14:34.809 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.62 seconds ---
 2025-04-24 23:14:34.809 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.38 seconds before next cycle...
+2025-04-24 23:14:44.829 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 542 ---[0m
+2025-04-24 23:14:45.300 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:14:45.301 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:14:45.793 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:14:47.193 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:14:47 CDT ---
+2025-04-24 23:14:47.194 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:14:48.479 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 542 Finished (Duration: 3.65s) ---[0m
+2025-04-24 23:14:48.482 UTC - INFO     - [livebot_main:3384] - Waiting 11.35s for next cycle...
+2025-04-24 23:14:49.784 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.589s
+2025-04-24 23:14:49.785 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:14:49.785 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.59 seconds ---
+2025-04-24 23:14:49.786 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.41 seconds before next cycle...
+2025-04-24 23:14:59.832 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 543 ---[0m
+2025-04-24 23:15:00.201 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:15:00.202 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:15:00.797 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:15:02.194 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:15:02 CDT ---
+2025-04-24 23:15:02.195 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:15:03.340 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 543 Finished (Duration: 3.51s) ---[0m
+2025-04-24 23:15:03.343 UTC - INFO     - [livebot_main:3384] - Waiting 11.49s for next cycle...
+2025-04-24 23:15:04.761 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.566s
+2025-04-24 23:15:04.763 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:15:04.763 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.57 seconds ---
+2025-04-24 23:15:04.763 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.43 seconds before next cycle...
+2025-04-24 23:15:14.836 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 544 ---[0m
+2025-04-24 23:15:15.232 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:15:15.233 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:15:15.841 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:15:17.196 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:15:17 CDT ---
+2025-04-24 23:15:17.196 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:15:18.439 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 544 Finished (Duration: 3.60s) ---[0m
+2025-04-24 23:15:18.441 UTC - INFO     - [livebot_main:3384] - Waiting 11.40s for next cycle...
+2025-04-24 23:15:19.750 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.554s
+2025-04-24 23:15:19.751 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:15:19.751 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.56 seconds ---
+2025-04-24 23:15:19.752 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.44 seconds before next cycle...
+2025-04-24 23:15:29.840 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 545 ---[0m
+2025-04-24 23:15:30.213 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:15:30.214 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:15:30.851 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:15:32.196 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:15:32 CDT ---
+2025-04-24 23:15:32.197 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:15:33.362 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 545 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:15:33.371 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:15:35.099 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.903s
+2025-04-24 23:15:35.100 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:15:35.101 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.91 seconds ---
+2025-04-24 23:15:35.101 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.09 seconds before next cycle...
+2025-04-24 23:15:44.851 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 546 ---[0m
+2025-04-24 23:15:45.274 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:15:45.274 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:15:45.862 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:15:47.198 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:15:47 CDT ---
+2025-04-24 23:15:47.198 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:15:48.376 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 546 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:15:48.379 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:15:49.766 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.568s
+2025-04-24 23:15:49.767 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:15:49.768 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.57 seconds ---
+2025-04-24 23:15:49.768 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.43 seconds before next cycle...
+2025-04-24 23:15:59.856 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 547 ---[0m
+2025-04-24 23:16:00.222 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:16:00.223 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:16:00.856 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:16:02.199 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:16:02 CDT ---
+2025-04-24 23:16:02.201 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:16:03.373 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 547 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:16:03.374 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:16:04.744 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.543s
+2025-04-24 23:16:04.744 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:16:04.745 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.55 seconds ---
+2025-04-24 23:16:04.745 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.45 seconds before next cycle...
+2025-04-24 23:16:14.858 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 548 ---[0m
+2025-04-24 23:16:15.437 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:16:15.437 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:16:15.853 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:16:17.200 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:16:17 CDT ---
+2025-04-24 23:16:17.200 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:16:18.753 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 548 Finished (Duration: 3.89s) ---[0m
+2025-04-24 23:16:18.754 UTC - INFO     - [livebot_main:3384] - Waiting 11.11s for next cycle...
+2025-04-24 23:16:19.781 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.581s
+2025-04-24 23:16:19.781 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:16:19.782 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.58 seconds ---
+2025-04-24 23:16:19.782 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.42 seconds before next cycle...
+2025-04-24 23:16:29.861 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 549 ---[0m
+2025-04-24 23:16:30.231 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:16:30.232 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:16:30.838 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:16:32.201 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:16:32 CDT ---
+2025-04-24 23:16:32.202 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:16:33.377 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 549 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:16:33.379 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:16:34.740 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.538s
+2025-04-24 23:16:34.741 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:16:34.741 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.54 seconds ---
+2025-04-24 23:16:34.742 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.46 seconds before next cycle...
+2025-04-24 23:16:44.864 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 550 ---[0m
+2025-04-24 23:16:45.280 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:16:45.282 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:16:45.841 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:16:47.202 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:16:47 CDT ---
+2025-04-24 23:16:47.203 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:16:48.367 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 550 Finished (Duration: 3.50s) ---[0m
+2025-04-24 23:16:48.369 UTC - INFO     - [livebot_main:3384] - Waiting 11.50s for next cycle...
+2025-04-24 23:16:49.769 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.567s
+2025-04-24 23:16:49.770 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:16:49.771 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.57 seconds ---
+2025-04-24 23:16:49.771 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.43 seconds before next cycle...
+2025-04-24 23:16:59.867 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 551 ---[0m
+2025-04-24 23:17:00.304 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:17:00.304 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:17:00.826 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:17:02.203 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:17:02 CDT ---
+2025-04-24 23:17:02.203 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:17:03.529 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 551 Finished (Duration: 3.66s) ---[0m
+2025-04-24 23:17:03.531 UTC - INFO     - [livebot_main:3384] - Waiting 11.34s for next cycle...
+2025-04-24 23:17:04.756 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.553s
+2025-04-24 23:17:04.757 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:17:04.757 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.55 seconds ---
+2025-04-24 23:17:04.757 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.45 seconds before next cycle...
+2025-04-24 23:17:14.870 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 552 ---[0m
+2025-04-24 23:17:15.252 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:17:15.253 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:17:15.860 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:17:17.203 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:17:17 CDT ---
+2025-04-24 23:17:17.204 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:17:18.404 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 552 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:17:18.406 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:17:20.072 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.868s
+2025-04-24 23:17:20.073 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:17:20.074 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.87 seconds ---
+2025-04-24 23:17:20.074 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.13 seconds before next cycle...
+2025-04-24 23:17:29.873 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 553 ---[0m
+2025-04-24 23:17:30.237 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:17:30.238 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:17:30.854 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:17:32.204 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:17:32 CDT ---
+2025-04-24 23:17:32.205 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:17:33.380 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 553 Finished (Duration: 3.51s) ---[0m
+2025-04-24 23:17:33.382 UTC - INFO     - [livebot_main:3384] - Waiting 11.49s for next cycle...
+2025-04-24 23:17:35.332 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.127s
+2025-04-24 23:17:35.333 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:17:35.333 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.13 seconds ---
+2025-04-24 23:17:35.334 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.87 seconds before next cycle...
+2025-04-24 23:17:44.876 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 554 ---[0m
+2025-04-24 23:17:45.261 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:17:45.263 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:17:45.867 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:17:47.206 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:17:47 CDT ---
+2025-04-24 23:17:47.207 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:17:48.408 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 554 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:17:48.409 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:17:50.095 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.888s
+2025-04-24 23:17:50.096 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:17:50.097 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.89 seconds ---
+2025-04-24 23:17:50.097 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.11 seconds before next cycle...
+2025-04-24 23:17:59.906 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 555 ---[0m
+2025-04-24 23:18:00.332 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:18:00.332 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:18:00.898 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:18:02.208 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:18:02 CDT ---
+2025-04-24 23:18:02.213 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:18:03.629 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 555 Finished (Duration: 3.74s) ---[0m
+2025-04-24 23:18:03.634 UTC - INFO     - [livebot_main:3384] - Waiting 11.26s for next cycle...
+2025-04-24 23:18:05.416 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.206s
+2025-04-24 23:18:05.419 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:18:05.419 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.21 seconds ---
+2025-04-24 23:18:05.420 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.79 seconds before next cycle...
+2025-04-24 23:18:14.895 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 556 ---[0m
+2025-04-24 23:18:15.274 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:18:15.275 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:18:15.887 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:18:17.211 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:18:17 CDT ---
+2025-04-24 23:18:17.214 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:18:18.580 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 556 Finished (Duration: 3.69s) ---[0m
+2025-04-24 23:18:18.583 UTC - INFO     - [livebot_main:3384] - Waiting 11.31s for next cycle...
+2025-04-24 23:18:20.815 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.602s
+2025-04-24 23:18:20.817 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:18:20.818 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.61 seconds ---
+2025-04-24 23:18:20.819 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.39 seconds before next cycle...
+2025-04-24 23:18:29.898 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 557 ---[0m
+2025-04-24 23:18:30.391 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:18:30.391 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:18:30.865 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:18:32.211 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:18:32 CDT ---
+2025-04-24 23:18:32.211 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:18:33.518 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 557 Finished (Duration: 3.62s) ---[0m
+2025-04-24 23:18:33.525 UTC - INFO     - [livebot_main:3384] - Waiting 11.38s for next cycle...
+2025-04-24 23:18:35.410 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.198s
+2025-04-24 23:18:35.411 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:18:35.411 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.20 seconds ---
+2025-04-24 23:18:35.411 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.80 seconds before next cycle...
+2025-04-24 23:18:44.906 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 558 ---[0m
+2025-04-24 23:18:45.305 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:18:45.306 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:18:45.888 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:18:47.212 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:18:47 CDT ---
+2025-04-24 23:18:47.213 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:18:48.554 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 558 Finished (Duration: 3.65s) ---[0m
+2025-04-24 23:18:48.557 UTC - INFO     - [livebot_main:3384] - Waiting 11.35s for next cycle...
+2025-04-24 23:18:50.857 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.645s
+2025-04-24 23:18:50.859 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:18:50.859 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.65 seconds ---
+2025-04-24 23:18:50.860 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.35 seconds before next cycle...
+2025-04-24 23:18:59.910 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 559 ---[0m
+2025-04-24 23:19:00.347 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:19:00.348 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:19:00.894 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:19:02.213 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:19:02 CDT ---
+2025-04-24 23:19:02.213 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:19:03.445 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 559 Finished (Duration: 3.54s) ---[0m
+2025-04-24 23:19:03.454 UTC - INFO     - [livebot_main:3384] - Waiting 11.46s for next cycle...
+2025-04-24 23:19:05.190 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.977s
+2025-04-24 23:19:05.191 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:19:05.191 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.98 seconds ---
+2025-04-24 23:19:05.192 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.02 seconds before next cycle...
+2025-04-24 23:19:14.920 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 560 ---[0m
+2025-04-24 23:19:15.421 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:19:15.422 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:19:15.886 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:19:17.213 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:19:17 CDT ---
+2025-04-24 23:19:17.214 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:19:18.463 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 560 Finished (Duration: 3.54s) ---[0m
+2025-04-24 23:19:18.468 UTC - INFO     - [livebot_main:3384] - Waiting 11.46s for next cycle...
+2025-04-24 23:19:20.474 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.259s
+2025-04-24 23:19:20.475 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:19:20.475 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.26 seconds ---
+2025-04-24 23:19:20.476 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.74 seconds before next cycle...
+2025-04-24 23:19:29.926 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 561 ---[0m
+2025-04-24 23:19:30.300 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:19:30.301 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:19:30.919 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:19:32.215 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:19:32 CDT ---
+2025-04-24 23:19:32.216 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:19:33.476 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 561 Finished (Duration: 3.55s) ---[0m
+2025-04-24 23:19:33.479 UTC - INFO     - [livebot_main:3384] - Waiting 11.45s for next cycle...
+2025-04-24 23:19:34.791 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.575s
+2025-04-24 23:19:34.792 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:19:34.792 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.58 seconds ---
+2025-04-24 23:19:34.793 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.42 seconds before next cycle...
+2025-04-24 23:19:44.930 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 562 ---[0m
+2025-04-24 23:19:45.304 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:19:45.306 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:19:45.919 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:19:47.216 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:19:47 CDT ---
+2025-04-24 23:19:47.217 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:19:48.458 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 562 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:19:48.460 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:19:50.437 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.220s
+2025-04-24 23:19:50.438 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:19:50.438 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.22 seconds ---
+2025-04-24 23:19:50.439 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.78 seconds before next cycle...
+2025-04-24 23:19:59.933 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 563 ---[0m
+2025-04-24 23:20:00.294 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:20:00.295 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:20:00.926 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:20:02.217 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:20:02 CDT ---
+2025-04-24 23:20:02.219 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:20:03.595 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 563 Finished (Duration: 3.66s) ---[0m
+2025-04-24 23:20:03.598 UTC - INFO     - [livebot_main:3384] - Waiting 11.34s for next cycle...
+2025-04-24 23:20:04.769 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.550s
+2025-04-24 23:20:04.770 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:20:04.770 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.55 seconds ---
+2025-04-24 23:20:04.771 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.45 seconds before next cycle...
+2025-04-24 23:20:14.937 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 564 ---[0m
+2025-04-24 23:20:15.347 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:20:15.347 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:20:15.899 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:20:17.218 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:20:17 CDT ---
+2025-04-24 23:20:17.218 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:20:18.468 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 564 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:20:18.470 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:20:20.373 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.155s
+2025-04-24 23:20:20.375 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:20:20.375 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.16 seconds ---
+2025-04-24 23:20:20.376 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.84 seconds before next cycle...
+2025-04-24 23:20:29.940 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 565 ---[0m
+2025-04-24 23:20:30.327 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:20:30.327 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:20:30.913 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:20:32.218 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:20:32 CDT ---
+2025-04-24 23:20:32.219 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:20:33.446 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 565 Finished (Duration: 3.51s) ---[0m
+2025-04-24 23:20:33.448 UTC - INFO     - [livebot_main:3384] - Waiting 11.49s for next cycle...
+2025-04-24 23:20:35.829 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.610s
+2025-04-24 23:20:35.829 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:20:35.830 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.61 seconds ---
+2025-04-24 23:20:35.830 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.39 seconds before next cycle...
+2025-04-24 23:20:44.944 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 566 ---[0m
+2025-04-24 23:20:45.318 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:20:45.319 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:20:45.924 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:20:47.219 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:20:47 CDT ---
+2025-04-24 23:20:47.220 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:20:48.720 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 566 Finished (Duration: 3.78s) ---[0m
+2025-04-24 23:20:48.723 UTC - INFO     - [livebot_main:3384] - Waiting 11.22s for next cycle...
+2025-04-24 23:20:50.339 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.119s
+2025-04-24 23:20:50.340 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:20:50.340 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.12 seconds ---
+2025-04-24 23:20:50.340 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.88 seconds before next cycle...
+2025-04-24 23:20:59.947 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 567 ---[0m
+2025-04-24 23:21:00.329 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:21:00.330 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:21:00.929 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:21:02.220 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:21:02 CDT ---
+2025-04-24 23:21:02.221 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:21:03.505 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 567 Finished (Duration: 3.56s) ---[0m
+2025-04-24 23:21:03.508 UTC - INFO     - [livebot_main:3384] - Waiting 11.44s for next cycle...
+2025-04-24 23:21:04.765 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.544s
+2025-04-24 23:21:04.770 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:21:04.770 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.55 seconds ---
+2025-04-24 23:21:04.771 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.45 seconds before next cycle...
+2025-04-24 23:21:14.951 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 568 ---[0m
+2025-04-24 23:21:15.321 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:21:15.321 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:21:15.928 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:21:17.221 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:21:17 CDT ---
+2025-04-24 23:21:17.221 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:21:18.467 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 568 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:21:18.468 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:21:20.109 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.887s
+2025-04-24 23:21:20.110 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:21:20.110 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.89 seconds ---
+2025-04-24 23:21:20.111 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.11 seconds before next cycle...
+2025-04-24 23:21:29.953 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 569 ---[0m
+2025-04-24 23:21:30.316 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:21:30.316 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:21:30.932 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:21:32.222 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:21:32 CDT ---
+2025-04-24 23:21:32.222 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:21:33.647 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 569 Finished (Duration: 3.69s) ---[0m
+2025-04-24 23:21:33.651 UTC - INFO     - [livebot_main:3384] - Waiting 11.31s for next cycle...
+2025-04-24 23:21:35.870 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.648s
+2025-04-24 23:21:35.873 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:21:35.873 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.65 seconds ---
+2025-04-24 23:21:35.874 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.35 seconds before next cycle...
+2025-04-24 23:21:44.982 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 570 ---[0m
+2025-04-24 23:21:45.419 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:21:45.419 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:21:45.979 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:21:47.226 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:21:47 CDT ---
+2025-04-24 23:21:47.235 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:21:48.521 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 570 Finished (Duration: 3.56s) ---[0m
+2025-04-24 23:21:48.525 UTC - INFO     - [livebot_main:3384] - Waiting 11.44s for next cycle...
+2025-04-24 23:21:50.302 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.067s
+2025-04-24 23:21:50.307 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:21:50.308 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.09 seconds ---
+2025-04-24 23:21:50.309 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.91 seconds before next cycle...
+2025-04-24 23:21:59.971 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 571 ---[0m
+2025-04-24 23:22:00.351 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:22:00.352 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:22:00.939 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:22:02.225 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:22:02 CDT ---
+2025-04-24 23:22:02.225 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:22:04.137 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 571 Finished (Duration: 4.17s) ---[0m
+2025-04-24 23:22:04.140 UTC - INFO     - [livebot_main:3384] - Waiting 10.83s for next cycle...
+2025-04-24 23:22:06.715 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 4.490s
+2025-04-24 23:22:06.722 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:22:06.723 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 4.50 seconds ---
+2025-04-24 23:22:06.723 UTC - DEBUG    - [livebot_main:4807] - Waiting 10.50 seconds before next cycle...
+2025-04-24 23:22:14.975 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 572 ---[0m
+2025-04-24 23:22:15.364 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:22:15.365 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:22:15.954 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:22:17.226 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:22:17 CDT ---
+2025-04-24 23:22:17.227 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:22:18.581 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 572 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:22:18.583 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:22:20.580 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.353s
+2025-04-24 23:22:20.583 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:22:20.583 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.36 seconds ---
+2025-04-24 23:22:20.584 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.64 seconds before next cycle...
+2025-04-24 23:22:29.978 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 573 ---[0m
+2025-04-24 23:22:30.437 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:22:30.438 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:22:30.952 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:22:32.226 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:22:32 CDT ---
+2025-04-24 23:22:32.227 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:22:33.581 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 573 Finished (Duration: 3.60s) ---[0m
+2025-04-24 23:22:33.583 UTC - INFO     - [livebot_main:3384] - Waiting 11.40s for next cycle...
+2025-04-24 23:22:35.503 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.276s
+2025-04-24 23:22:35.504 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:22:35.505 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.28 seconds ---
+2025-04-24 23:22:35.505 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.72 seconds before next cycle...
+2025-04-24 23:22:44.981 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 574 ---[0m
+2025-04-24 23:22:45.367 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:22:45.367 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:22:46.082 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:22:47.229 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:22:47 CDT ---
+2025-04-24 23:22:47.241 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:22:48.587 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 574 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:22:48.589 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:22:50.544 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.303s
+2025-04-24 23:22:50.545 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:22:50.545 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.32 seconds ---
+2025-04-24 23:22:50.546 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.68 seconds before next cycle...
+2025-04-24 23:22:59.984 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 575 ---[0m
+2025-04-24 23:23:00.348 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:23:00.348 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:23:00.962 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:23:02.229 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:23:02 CDT ---
+2025-04-24 23:23:02.230 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:23:03.596 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 575 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:23:03.608 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:23:05.452 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.222s
+2025-04-24 23:23:05.457 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:23:05.457 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.23 seconds ---
+2025-04-24 23:23:05.458 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.77 seconds before next cycle...
+2025-04-24 23:23:14.998 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 576 ---[0m
+2025-04-24 23:23:15.600 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:23:15.602 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:23:16.151 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:23:17.232 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:23:17 CDT ---
+2025-04-24 23:23:17.236 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:23:18.734 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 576 Finished (Duration: 3.74s) ---[0m
+2025-04-24 23:23:18.738 UTC - INFO     - [livebot_main:3384] - Waiting 11.26s for next cycle...
+2025-04-24 23:23:20.198 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.963s
+2025-04-24 23:23:20.200 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:23:20.200 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.97 seconds ---
+2025-04-24 23:23:20.201 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.03 seconds before next cycle...
+2025-04-24 23:23:30.002 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 577 ---[0m
+2025-04-24 23:23:30.418 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:23:30.419 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:23:30.980 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:23:32.232 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:23:32 CDT ---
+2025-04-24 23:23:32.232 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:23:33.501 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 577 Finished (Duration: 3.50s) ---[0m
+2025-04-24 23:23:33.507 UTC - INFO     - [livebot_main:3384] - Waiting 11.50s for next cycle...
+2025-04-24 23:23:35.299 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.067s
+2025-04-24 23:23:35.300 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:23:35.300 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.07 seconds ---
+2025-04-24 23:23:35.301 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.93 seconds before next cycle...
+2025-04-24 23:23:45.010 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 578 ---[0m
+2025-04-24 23:23:45.402 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:23:45.403 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:23:46.003 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:23:47.233 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:23:47 CDT ---
+2025-04-24 23:23:47.233 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:23:48.524 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 578 Finished (Duration: 3.51s) ---[0m
+2025-04-24 23:23:48.527 UTC - INFO     - [livebot_main:3384] - Waiting 11.49s for next cycle...
+2025-04-24 23:23:50.368 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.135s
+2025-04-24 23:23:50.369 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:23:50.370 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.14 seconds ---
+2025-04-24 23:23:50.370 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.86 seconds before next cycle...
+2025-04-24 23:24:00.043 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 579 ---[0m
+2025-04-24 23:24:00.493 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:24:00.495 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:24:01.046 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:24:02.238 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:24:02 CDT ---
+2025-04-24 23:24:02.244 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:24:03.673 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 579 Finished (Duration: 3.65s) ---[0m
+2025-04-24 23:24:03.677 UTC - INFO     - [livebot_main:3384] - Waiting 11.35s for next cycle...
+2025-04-24 23:24:05.476 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.232s
+2025-04-24 23:24:05.480 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:24:05.481 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.25 seconds ---
+2025-04-24 23:24:05.481 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.75 seconds before next cycle...
+2025-04-24 23:24:15.053 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 580 ---[0m
+2025-04-24 23:24:15.485 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:24:15.486 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:24:16.127 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:24:17.235 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:24:17 CDT ---
+2025-04-24 23:24:17.237 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:24:18.744 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 580 Finished (Duration: 3.71s) ---[0m
+2025-04-24 23:24:18.748 UTC - INFO     - [livebot_main:3384] - Waiting 11.29s for next cycle...
+2025-04-24 23:24:20.257 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.020s
+2025-04-24 23:24:20.258 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:24:20.259 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.02 seconds ---
+2025-04-24 23:24:20.259 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.98 seconds before next cycle...
+2025-04-24 23:24:30.045 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 581 ---[0m
+2025-04-24 23:24:30.621 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:24:30.622 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:24:31.053 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:24:32.240 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:24:32 CDT ---
+2025-04-24 23:24:32.244 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:24:33.952 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 581 Finished (Duration: 3.91s) ---[0m
+2025-04-24 23:24:33.973 UTC - INFO     - [livebot_main:3384] - Waiting 11.09s for next cycle...
+2025-04-24 23:24:35.506 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.262s
+2025-04-24 23:24:35.508 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:24:35.508 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.27 seconds ---
+2025-04-24 23:24:35.509 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.73 seconds before next cycle...
+2025-04-24 23:24:45.066 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 582 ---[0m
+2025-04-24 23:24:45.468 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:24:45.469 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:24:46.173 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:24:47.238 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:24:47 CDT ---
+2025-04-24 23:24:47.239 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:24:48.749 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 582 Finished (Duration: 3.68s) ---[0m
+2025-04-24 23:24:48.757 UTC - INFO     - [livebot_main:3384] - Waiting 11.32s for next cycle...
+2025-04-24 23:24:50.503 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.264s
+2025-04-24 23:24:50.506 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:24:50.506 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.27 seconds ---
+2025-04-24 23:24:50.507 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.73 seconds before next cycle...
+2025-04-24 23:25:00.077 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 583 ---[0m
+2025-04-24 23:25:00.467 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:25:00.468 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:25:01.068 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:25:02.239 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:25:02 CDT ---
+2025-04-24 23:25:02.239 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:25:03.720 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 583 Finished (Duration: 3.64s) ---[0m
+2025-04-24 23:25:03.723 UTC - INFO     - [livebot_main:3384] - Waiting 11.36s for next cycle...
+2025-04-24 23:25:05.584 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.344s
+2025-04-24 23:25:05.585 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:25:05.585 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.35 seconds ---
+2025-04-24 23:25:05.586 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.65 seconds before next cycle...
+2025-04-24 23:25:15.081 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 584 ---[0m
+2025-04-24 23:25:15.451 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:25:15.452 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:25:16.086 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:25:17.240 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:25:17 CDT ---
+2025-04-24 23:25:17.241 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:25:18.659 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 584 Finished (Duration: 3.58s) ---[0m
+2025-04-24 23:25:18.662 UTC - INFO     - [livebot_main:3384] - Waiting 11.42s for next cycle...
+2025-04-24 23:25:19.973 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.733s
+2025-04-24 23:25:19.975 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:25:19.975 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.74 seconds ---
+2025-04-24 23:25:19.976 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.26 seconds before next cycle...
+2025-04-24 23:25:30.086 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 585 ---[0m
+2025-04-24 23:25:30.488 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:25:30.489 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:25:31.059 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:25:32.241 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:25:32 CDT ---
+2025-04-24 23:25:32.242 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:25:33.818 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 585 Finished (Duration: 3.73s) ---[0m
+2025-04-24 23:25:33.820 UTC - INFO     - [livebot_main:3384] - Waiting 11.27s for next cycle...
+2025-04-24 23:25:35.887 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.645s
+2025-04-24 23:25:35.889 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:25:35.889 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.65 seconds ---
+2025-04-24 23:25:35.890 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.35 seconds before next cycle...
+2025-04-24 23:25:45.089 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 586 ---[0m
+2025-04-24 23:25:45.497 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:25:45.498 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:25:46.068 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:25:47.241 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:25:47 CDT ---
+2025-04-24 23:25:47.242 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:25:48.720 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 586 Finished (Duration: 3.63s) ---[0m
+2025-04-24 23:25:48.733 UTC - INFO     - [livebot_main:3384] - Waiting 11.37s for next cycle...
+2025-04-24 23:25:50.231 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.989s
+2025-04-24 23:25:50.232 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:25:50.232 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.99 seconds ---
+2025-04-24 23:25:50.233 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.01 seconds before next cycle...
+2025-04-24 23:26:00.103 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 587 ---[0m
+2025-04-24 23:26:00.491 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:26:00.492 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:26:01.076 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:26:02.242 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:26:02 CDT ---
+2025-04-24 23:26:02.244 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:26:03.693 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 587 Finished (Duration: 3.59s) ---[0m
+2025-04-24 23:26:03.700 UTC - INFO     - [livebot_main:3384] - Waiting 11.41s for next cycle...
+2025-04-24 23:26:05.578 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.334s
+2025-04-24 23:26:05.580 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:26:05.581 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.34 seconds ---
+2025-04-24 23:26:05.581 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.66 seconds before next cycle...
+2025-04-24 23:26:15.118 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 588 ---[0m
+2025-04-24 23:26:15.495 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:26:15.496 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:26:16.098 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:26:17.243 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:26:17 CDT ---
+2025-04-24 23:26:17.244 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:26:18.640 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 588 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:26:18.649 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:26:20.482 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.238s
+2025-04-24 23:26:20.496 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:26:20.497 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.25 seconds ---
+2025-04-24 23:26:20.497 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.75 seconds before next cycle...
+2025-04-24 23:26:30.147 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 589 ---[0m
+2025-04-24 23:26:30.703 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:26:30.704 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:26:31.130 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:26:32.245 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:26:32 CDT ---
+2025-04-24 23:26:32.248 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:26:33.810 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 589 Finished (Duration: 3.68s) ---[0m
+2025-04-24 23:26:33.814 UTC - INFO     - [livebot_main:3384] - Waiting 11.32s for next cycle...
+2025-04-24 23:26:35.175 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.927s
+2025-04-24 23:26:35.176 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:26:35.176 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.93 seconds ---
+2025-04-24 23:26:35.177 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.07 seconds before next cycle...
+2025-04-24 23:26:45.139 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 590 ---[0m
+2025-04-24 23:26:45.586 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:26:45.587 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:26:46.108 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:26:47.245 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:26:47 CDT ---
+2025-04-24 23:26:47.246 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:26:49.292 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 590 Finished (Duration: 4.15s) ---[0m
+2025-04-24 23:26:49.299 UTC - INFO     - [livebot_main:3384] - Waiting 10.85s for next cycle...
+2025-04-24 23:26:51.700 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 4.453s
+2025-04-24 23:26:51.701 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:26:51.701 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 4.46 seconds ---
+2025-04-24 23:26:51.701 UTC - DEBUG    - [livebot_main:4807] - Waiting 10.54 seconds before next cycle...
+2025-04-24 23:27:00.148 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 591 ---[0m
+2025-04-24 23:27:00.628 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:27:00.630 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:27:01.131 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:27:02.246 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:27:02 CDT ---
+2025-04-24 23:27:02.248 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:27:03.713 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 591 Finished (Duration: 3.57s) ---[0m
+2025-04-24 23:27:03.723 UTC - INFO     - [livebot_main:3384] - Waiting 11.43s for next cycle...
+2025-04-24 23:27:05.301 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.053s
+2025-04-24 23:27:05.302 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:27:05.303 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.06 seconds ---
+2025-04-24 23:27:05.303 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.94 seconds before next cycle...
+2025-04-24 23:27:15.158 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 592 ---[0m
+2025-04-24 23:27:15.928 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:27:15.930 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:27:16.330 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:27:17.247 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:27:17 CDT ---
+2025-04-24 23:27:17.248 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:27:19.647 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 592 Finished (Duration: 4.49s) ---[0m
+2025-04-24 23:27:19.650 UTC - INFO     - [livebot_main:3384] - Waiting 10.51s for next cycle...
+2025-04-24 23:27:20.092 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.844s
+2025-04-24 23:27:20.093 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:27:20.093 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.85 seconds ---
+2025-04-24 23:27:20.094 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.15 seconds before next cycle...
+2025-04-24 23:27:30.163 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 593 ---[0m
+2025-04-24 23:27:30.529 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:27:30.529 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:27:31.151 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:27:32.248 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:27:32 CDT ---
+2025-04-24 23:27:32.249 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:27:33.778 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 593 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:27:33.780 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:27:35.296 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.046s
+2025-04-24 23:27:35.297 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:27:35.297 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.05 seconds ---
+2025-04-24 23:27:35.298 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.95 seconds before next cycle...
+2025-04-24 23:27:45.166 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 594 ---[0m
+2025-04-24 23:27:45.661 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:27:45.662 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:27:46.153 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:27:47.249 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:27:47 CDT ---
+2025-04-24 23:27:47.250 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:27:48.726 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 594 Finished (Duration: 3.56s) ---[0m
+2025-04-24 23:27:48.728 UTC - INFO     - [livebot_main:3384] - Waiting 11.44s for next cycle...
+2025-04-24 23:27:50.771 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.521s
+2025-04-24 23:27:50.772 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:27:50.772 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.52 seconds ---
+2025-04-24 23:27:50.773 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.48 seconds before next cycle...
+2025-04-24 23:28:00.169 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 595 ---[0m
+2025-04-24 23:28:00.577 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:28:00.578 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:28:01.317 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:28:02.250 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:28:02 CDT ---
+2025-04-24 23:28:02.251 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:28:03.909 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 595 Finished (Duration: 3.74s) ---[0m
+2025-04-24 23:28:03.917 UTC - INFO     - [livebot_main:3384] - Waiting 11.26s for next cycle...
+2025-04-24 23:28:05.530 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.279s
+2025-04-24 23:28:05.532 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:28:05.532 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.28 seconds ---
+2025-04-24 23:28:05.533 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.72 seconds before next cycle...
+2025-04-24 23:28:15.178 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 596 ---[0m
+2025-04-24 23:28:15.559 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:28:15.560 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:28:16.154 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:28:17.251 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:28:17 CDT ---
+2025-04-24 23:28:17.252 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:28:19.221 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 596 Finished (Duration: 4.04s) ---[0m
+2025-04-24 23:28:19.227 UTC - INFO     - [livebot_main:3384] - Waiting 10.96s for next cycle...
+2025-04-24 23:28:20.677 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.425s
+2025-04-24 23:28:20.679 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:28:20.679 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.43 seconds ---
+2025-04-24 23:28:20.679 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.57 seconds before next cycle...
+2025-04-24 23:28:30.185 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 597 ---[0m
+2025-04-24 23:28:30.550 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:28:30.551 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:28:31.155 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:28:32.252 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:28:32 CDT ---
+2025-04-24 23:28:32.252 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:28:33.759 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 597 Finished (Duration: 3.57s) ---[0m
+2025-04-24 23:28:33.761 UTC - INFO     - [livebot_main:3384] - Waiting 11.43s for next cycle...
+2025-04-24 23:28:35.780 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.527s
+2025-04-24 23:28:35.785 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:28:35.785 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.53 seconds ---
+2025-04-24 23:28:35.785 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.47 seconds before next cycle...
+2025-04-24 23:28:45.188 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 598 ---[0m
+2025-04-24 23:28:45.578 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:28:45.579 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:28:46.213 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:28:47.253 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:28:47 CDT ---
+2025-04-24 23:28:47.255 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:28:48.851 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 598 Finished (Duration: 3.66s) ---[0m
+2025-04-24 23:28:48.860 UTC - INFO     - [livebot_main:3384] - Waiting 11.34s for next cycle...
+2025-04-24 23:28:50.651 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.396s
+2025-04-24 23:28:50.653 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:28:50.654 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.40 seconds ---
+2025-04-24 23:28:50.654 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.60 seconds before next cycle...
+2025-04-24 23:29:00.199 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 599 ---[0m
+2025-04-24 23:29:00.585 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:29:00.586 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:29:01.167 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:29:02.254 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:29:02 CDT ---
+2025-04-24 23:29:02.255 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:29:03.910 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 599 Finished (Duration: 3.71s) ---[0m
+2025-04-24 23:29:03.916 UTC - INFO     - [livebot_main:3384] - Waiting 11.29s for next cycle...
+2025-04-24 23:29:05.459 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.204s
+2025-04-24 23:29:05.466 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:29:05.467 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.21 seconds ---
+2025-04-24 23:29:05.467 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.79 seconds before next cycle...
+2025-04-24 23:29:15.207 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 600 ---[0m
+2025-04-24 23:29:15.586 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:29:15.587 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:29:16.182 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:29:17.255 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:29:17 CDT ---
+2025-04-24 23:29:17.257 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:29:19.001 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 600 Finished (Duration: 3.79s) ---[0m
+2025-04-24 23:29:19.007 UTC - INFO     - [livebot_main:3384] - Waiting 11.21s for next cycle...
+2025-04-24 23:29:20.122 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.865s
+2025-04-24 23:29:20.124 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:29:20.124 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.87 seconds ---
+2025-04-24 23:29:20.125 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.13 seconds before next cycle...
+2025-04-24 23:29:30.215 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 601 ---[0m
+2025-04-24 23:29:30.589 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:29:30.589 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:29:31.237 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:29:32.256 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:29:32 CDT ---
+2025-04-24 23:29:32.257 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:29:33.828 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 601 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:29:33.833 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:29:35.265 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.008s
+2025-04-24 23:29:35.268 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:29:35.268 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.01 seconds ---
+2025-04-24 23:29:35.269 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.99 seconds before next cycle...
+2025-04-24 23:29:45.220 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 602 ---[0m
+2025-04-24 23:29:45.619 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:29:45.623 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:29:46.214 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:29:47.257 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:29:47 CDT ---
+2025-04-24 23:29:47.257 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:29:48.772 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 602 Finished (Duration: 3.55s) ---[0m
+2025-04-24 23:29:48.775 UTC - INFO     - [livebot_main:3384] - Waiting 11.45s for next cycle...
+2025-04-24 23:29:50.165 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.908s
+2025-04-24 23:29:50.166 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:29:50.166 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.91 seconds ---
+2025-04-24 23:29:50.167 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.09 seconds before next cycle...
+2025-04-24 23:30:00.224 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 603 ---[0m
+2025-04-24 23:30:00.645 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:30:00.646 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:30:01.245 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:30:02.258 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:30:02 CDT ---
+2025-04-24 23:30:02.262 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:30:03.968 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 603 Finished (Duration: 3.74s) ---[0m
+2025-04-24 23:30:03.978 UTC - INFO     - [livebot_main:3384] - Waiting 11.26s for next cycle...
+2025-04-24 23:30:05.688 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.426s
+2025-04-24 23:30:05.689 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:30:05.689 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.43 seconds ---
+2025-04-24 23:30:05.690 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.57 seconds before next cycle...
+2025-04-24 23:30:15.259 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 604 ---[0m
+2025-04-24 23:30:15.707 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:30:15.709 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:30:16.249 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:30:17.261 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:30:17 CDT ---
+2025-04-24 23:30:17.264 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:30:18.968 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 604 Finished (Duration: 3.72s) ---[0m
+2025-04-24 23:30:18.971 UTC - INFO     - [livebot_main:3384] - Waiting 11.28s for next cycle...
+2025-04-24 23:30:21.139 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.875s
+2025-04-24 23:30:21.140 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:30:21.141 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.88 seconds ---
+2025-04-24 23:30:21.141 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.12 seconds before next cycle...
+2025-04-24 23:30:30.247 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 605 ---[0m
+2025-04-24 23:30:30.617 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:30:30.617 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:30:31.219 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:30:32.259 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:30:32 CDT ---
+2025-04-24 23:30:32.260 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:30:33.781 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 605 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:30:33.784 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:30:34.901 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.641s
+2025-04-24 23:30:34.903 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:30:34.904 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.64 seconds ---
+2025-04-24 23:30:34.904 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.36 seconds before next cycle...
+2025-04-24 23:30:45.251 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 606 ---[0m
+2025-04-24 23:30:45.629 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:30:45.630 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:30:46.262 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:30:47.262 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:30:47 CDT ---
+2025-04-24 23:30:47.264 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:30:49.122 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 606 Finished (Duration: 3.87s) ---[0m
+2025-04-24 23:30:49.125 UTC - INFO     - [livebot_main:3384] - Waiting 11.13s for next cycle...
+2025-04-24 23:30:50.177 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.914s
+2025-04-24 23:30:50.179 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:30:50.179 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.92 seconds ---
+2025-04-24 23:30:50.180 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.08 seconds before next cycle...
+2025-04-24 23:31:00.254 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 607 ---[0m
+2025-04-24 23:31:00.638 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:31:00.640 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:31:01.576 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:31:02.262 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:31:02 CDT ---
+2025-04-24 23:31:02.265 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:31:04.092 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 607 Finished (Duration: 3.84s) ---[0m
+2025-04-24 23:31:04.096 UTC - INFO     - [livebot_main:3384] - Waiting 11.16s for next cycle...
+2025-04-24 23:31:05.373 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.108s
+2025-04-24 23:31:05.375 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:31:05.375 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.11 seconds ---
+2025-04-24 23:31:05.376 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.89 seconds before next cycle...
+2025-04-24 23:31:15.261 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 608 ---[0m
+2025-04-24 23:31:15.951 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:31:15.952 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:31:16.334 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:31:17.263 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:31:17 CDT ---
+2025-04-24 23:31:17.265 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:31:18.952 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 608 Finished (Duration: 3.69s) ---[0m
+2025-04-24 23:31:18.972 UTC - INFO     - [livebot_main:3384] - Waiting 11.31s for next cycle...
+2025-04-24 23:31:20.820 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.555s
+2025-04-24 23:31:20.821 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:31:20.821 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.56 seconds ---
+2025-04-24 23:31:20.822 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.44 seconds before next cycle...
+2025-04-24 23:31:30.282 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 609 ---[0m
+2025-04-24 23:31:30.685 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:31:30.686 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:31:31.385 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:31:32.264 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:31:32 CDT ---
+2025-04-24 23:31:32.265 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:31:34.002 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 609 Finished (Duration: 3.72s) ---[0m
+2025-04-24 23:31:34.015 UTC - INFO     - [livebot_main:3384] - Waiting 11.28s for next cycle...
+2025-04-24 23:31:35.903 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.638s
+2025-04-24 23:31:35.905 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:31:35.905 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.64 seconds ---
+2025-04-24 23:31:35.906 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.36 seconds before next cycle...
+2025-04-24 23:31:45.298 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 610 ---[0m
+2025-04-24 23:31:46.662 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:31:46.662 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:31:47.124 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:31:47.265 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:31:47 CDT ---
+2025-04-24 23:31:47.265 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:31:49.729 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 610 Finished (Duration: 4.43s) ---[0m
+2025-04-24 23:31:49.734 UTC - INFO     - [livebot_main:3384] - Waiting 10.57s for next cycle...
+2025-04-24 23:31:50.129 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.864s
+2025-04-24 23:31:50.130 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:31:50.131 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.87 seconds ---
+2025-04-24 23:31:50.131 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.13 seconds before next cycle...
+2025-04-24 23:32:00.304 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 611 ---[0m
+2025-04-24 23:32:00.714 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:32:00.719 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:32:01.303 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:32:02.266 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:32:02 CDT ---
+2025-04-24 23:32:02.267 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:32:03.942 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 611 Finished (Duration: 3.64s) ---[0m
+2025-04-24 23:32:03.946 UTC - INFO     - [livebot_main:3384] - Waiting 11.36s for next cycle...
+2025-04-24 23:32:05.876 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.608s
+2025-04-24 23:32:05.877 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:32:05.877 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.61 seconds ---
+2025-04-24 23:32:05.878 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.39 seconds before next cycle...
+2025-04-24 23:32:15.308 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 612 ---[0m
+2025-04-24 23:32:15.706 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:32:15.707 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:32:16.395 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:32:17.267 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:32:17 CDT ---
+2025-04-24 23:32:17.267 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:32:18.873 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 612 Finished (Duration: 3.56s) ---[0m
+2025-04-24 23:32:18.875 UTC - INFO     - [livebot_main:3384] - Waiting 11.44s for next cycle...
+2025-04-24 23:32:19.869 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.601s
+2025-04-24 23:32:19.871 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:32:19.871 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.60 seconds ---
+2025-04-24 23:32:19.871 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.40 seconds before next cycle...
+2025-04-24 23:32:30.311 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 613 ---[0m
+2025-04-24 23:32:30.700 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:32:30.701 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:32:31.286 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:32:32.267 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:32:32 CDT ---
+2025-04-24 23:32:32.268 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:32:34.159 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 613 Finished (Duration: 3.85s) ---[0m
+2025-04-24 23:32:34.164 UTC - INFO     - [livebot_main:3384] - Waiting 11.15s for next cycle...
+2025-04-24 23:32:35.606 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.338s
+2025-04-24 23:32:35.609 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:32:35.609 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.34 seconds ---
+2025-04-24 23:32:35.610 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.66 seconds before next cycle...
+2025-04-24 23:32:45.317 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 614 ---[0m
+2025-04-24 23:32:45.716 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:32:45.721 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:32:46.291 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:32:47.269 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:32:47 CDT ---
+2025-04-24 23:32:47.274 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:32:48.932 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 614 Finished (Duration: 3.62s) ---[0m
+2025-04-24 23:32:48.945 UTC - INFO     - [livebot_main:3384] - Waiting 11.38s for next cycle...
+2025-04-24 23:32:50.283 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.008s
+2025-04-24 23:32:50.283 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:32:50.284 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.02 seconds ---
+2025-04-24 23:32:50.284 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.98 seconds before next cycle...
+2025-04-24 23:33:00.330 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 615 ---[0m
+2025-04-24 23:33:00.698 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:33:00.698 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:33:01.347 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:33:02.269 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:33:02 CDT ---
+2025-04-24 23:33:02.270 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:33:03.854 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 615 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:33:03.857 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:33:05.101 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.831s
+2025-04-24 23:33:05.102 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:33:05.103 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.83 seconds ---
+2025-04-24 23:33:05.104 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.17 seconds before next cycle...
+2025-04-24 23:33:15.334 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 616 ---[0m
+2025-04-24 23:33:15.729 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:33:15.729 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:33:16.717 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:33:17.270 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:33:17 CDT ---
+2025-04-24 23:33:17.271 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:33:19.048 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 616 Finished (Duration: 3.71s) ---[0m
+2025-04-24 23:33:19.050 UTC - INFO     - [livebot_main:3384] - Waiting 11.29s for next cycle...
+2025-04-24 23:33:19.858 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.587s
+2025-04-24 23:33:19.859 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:33:19.859 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.59 seconds ---
+2025-04-24 23:33:19.860 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.41 seconds before next cycle...
+2025-04-24 23:33:30.337 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 617 ---[0m
+2025-04-24 23:33:30.766 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:33:30.767 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:33:31.423 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:33:32.271 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:33:32 CDT ---
+2025-04-24 23:33:32.271 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:33:34.098 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 617 Finished (Duration: 3.76s) ---[0m
+2025-04-24 23:33:34.100 UTC - INFO     - [livebot_main:3384] - Waiting 11.24s for next cycle...
+2025-04-24 23:33:35.005 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.733s
+2025-04-24 23:33:35.006 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:33:35.006 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.74 seconds ---
+2025-04-24 23:33:35.006 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.26 seconds before next cycle...
+2025-04-24 23:33:45.339 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 618 ---[0m
+2025-04-24 23:33:45.923 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:33:45.926 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:33:46.411 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:33:47.272 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:33:47 CDT ---
+2025-04-24 23:33:47.273 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:33:48.937 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 618 Finished (Duration: 3.60s) ---[0m
+2025-04-24 23:33:48.943 UTC - INFO     - [livebot_main:3384] - Waiting 11.40s for next cycle...
+2025-04-24 23:33:49.834 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.562s
+2025-04-24 23:33:49.835 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:33:49.836 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.56 seconds ---
+2025-04-24 23:33:49.836 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.44 seconds before next cycle...
+2025-04-24 23:34:00.346 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 619 ---[0m
+2025-04-24 23:34:00.742 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:34:00.743 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:34:01.328 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:34:02.273 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:34:02 CDT ---
+2025-04-24 23:34:02.274 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:34:04.081 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 619 Finished (Duration: 3.73s) ---[0m
+2025-04-24 23:34:04.090 UTC - INFO     - [livebot_main:3384] - Waiting 11.27s for next cycle...
+2025-04-24 23:34:05.216 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.942s
+2025-04-24 23:34:05.217 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:34:05.217 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.95 seconds ---
+2025-04-24 23:34:05.218 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.05 seconds before next cycle...
+2025-04-24 23:34:15.356 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 620 ---[0m
+2025-04-24 23:34:15.743 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:34:15.747 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:34:16.347 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:34:17.273 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:34:17 CDT ---
+2025-04-24 23:34:17.274 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:34:18.935 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 620 Finished (Duration: 3.58s) ---[0m
+2025-04-24 23:34:18.940 UTC - INFO     - [livebot_main:3384] - Waiting 11.42s for next cycle...
+2025-04-24 23:34:20.011 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.737s
+2025-04-24 23:34:20.013 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:34:20.013 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.74 seconds ---
+2025-04-24 23:34:20.013 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.26 seconds before next cycle...
+2025-04-24 23:34:30.362 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 621 ---[0m
+2025-04-24 23:34:31.114 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:34:31.115 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:34:31.488 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:34:32.274 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:34:32 CDT ---
+2025-04-24 23:34:32.275 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:34:34.182 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 621 Finished (Duration: 3.82s) ---[0m
+2025-04-24 23:34:34.184 UTC - INFO     - [livebot_main:3384] - Waiting 11.18s for next cycle...
+2025-04-24 23:34:35.078 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.803s
+2025-04-24 23:34:35.079 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:34:35.079 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.81 seconds ---
+2025-04-24 23:34:35.080 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.19 seconds before next cycle...
+2025-04-24 23:34:45.365 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 622 ---[0m
+2025-04-24 23:34:45.754 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:34:45.755 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:34:46.339 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:34:47.275 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:34:47 CDT ---
+2025-04-24 23:34:47.276 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:34:49.020 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 622 Finished (Duration: 3.65s) ---[0m
+2025-04-24 23:34:49.022 UTC - INFO     - [livebot_main:3384] - Waiting 11.35s for next cycle...
+2025-04-24 23:34:49.956 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.680s
+2025-04-24 23:34:49.957 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:34:49.957 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.68 seconds ---
+2025-04-24 23:34:49.958 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.32 seconds before next cycle...
+2025-04-24 23:35:00.367 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 623 ---[0m
+2025-04-24 23:35:00.786 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:35:00.786 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:35:01.344 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:35:02.276 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:35:02 CDT ---
+2025-04-24 23:35:02.278 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:35:04.123 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 623 Finished (Duration: 3.76s) ---[0m
+2025-04-24 23:35:04.130 UTC - INFO     - [livebot_main:3384] - Waiting 11.24s for next cycle...
+2025-04-24 23:35:05.219 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.941s
+2025-04-24 23:35:05.222 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:35:05.222 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.95 seconds ---
+2025-04-24 23:35:05.223 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.05 seconds before next cycle...
+2025-04-24 23:35:15.376 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 624 ---[0m
+2025-04-24 23:35:16.198 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:35:16.199 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:35:16.807 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:35:17.278 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:35:17 CDT ---
+2025-04-24 23:35:17.280 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:35:19.256 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 624 Finished (Duration: 3.88s) ---[0m
+2025-04-24 23:35:19.262 UTC - INFO     - [livebot_main:3384] - Waiting 11.12s for next cycle...
+2025-04-24 23:35:20.243 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.963s
+2025-04-24 23:35:20.244 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:35:20.245 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.97 seconds ---
+2025-04-24 23:35:20.245 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.03 seconds before next cycle...
+2025-04-24 23:35:30.383 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 625 ---[0m
+2025-04-24 23:35:30.781 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:35:30.787 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:35:31.361 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:35:32.278 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:35:32 CDT ---
+2025-04-24 23:35:32.279 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:35:34.041 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 625 Finished (Duration: 3.66s) ---[0m
+2025-04-24 23:35:34.046 UTC - INFO     - [livebot_main:3384] - Waiting 11.34s for next cycle...
+2025-04-24 23:35:34.999 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.720s
+2025-04-24 23:35:35.000 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:35:35.000 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.72 seconds ---
+2025-04-24 23:35:35.001 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.28 seconds before next cycle...
+2025-04-24 23:35:45.390 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 626 ---[0m
+2025-04-24 23:35:45.815 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:35:45.816 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:35:46.373 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:35:47.279 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:35:47 CDT ---
+2025-04-24 23:35:47.280 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:35:48.993 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 626 Finished (Duration: 3.60s) ---[0m
+2025-04-24 23:35:48.998 UTC - INFO     - [livebot_main:3384] - Waiting 11.40s for next cycle...
+2025-04-24 23:35:49.829 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.549s
+2025-04-24 23:35:49.830 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:35:49.830 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.55 seconds ---
+2025-04-24 23:35:49.830 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.45 seconds before next cycle...
+2025-04-24 23:36:00.395 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 627 ---[0m
+2025-04-24 23:36:00.782 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:36:00.783 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:36:01.464 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:36:02.280 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:36:02 CDT ---
+2025-04-24 23:36:02.281 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:36:04.006 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 627 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:36:04.012 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:36:05.000 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.719s
+2025-04-24 23:36:05.002 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:36:05.002 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.72 seconds ---
+2025-04-24 23:36:05.003 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.28 seconds before next cycle...
+2025-04-24 23:36:15.436 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 628 ---[0m
+2025-04-24 23:36:15.887 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:36:15.887 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:36:16.418 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:36:17.282 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:36:17 CDT ---
+2025-04-24 23:36:17.283 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:36:19.651 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 628 Finished (Duration: 4.23s) ---[0m
+2025-04-24 23:36:19.655 UTC - INFO     - [livebot_main:3384] - Waiting 10.77s for next cycle...
+2025-04-24 23:36:20.599 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.316s
+2025-04-24 23:36:20.601 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:36:20.601 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.32 seconds ---
+2025-04-24 23:36:20.602 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.68 seconds before next cycle...
+2025-04-24 23:36:30.423 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 629 ---[0m
+2025-04-24 23:36:30.842 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:36:30.843 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:36:31.403 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:36:32.283 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:36:32 CDT ---
+2025-04-24 23:36:32.283 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:36:33.958 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 629 Finished (Duration: 3.54s) ---[0m
+2025-04-24 23:36:33.964 UTC - INFO     - [livebot_main:3384] - Waiting 11.46s for next cycle...
+2025-04-24 23:36:34.862 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.579s
+2025-04-24 23:36:34.863 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:36:34.864 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.58 seconds ---
+2025-04-24 23:36:34.865 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.42 seconds before next cycle...
+2025-04-24 23:36:45.430 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 630 ---[0m
+2025-04-24 23:36:45.850 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:36:45.850 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:36:46.961 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:36:47.285 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:36:47 CDT ---
+2025-04-24 23:36:47.286 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:36:49.301 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 630 Finished (Duration: 3.87s) ---[0m
+2025-04-24 23:36:49.302 UTC - INFO     - [livebot_main:3384] - Waiting 11.13s for next cycle...
+2025-04-24 23:36:49.835 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.549s
+2025-04-24 23:36:49.836 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:36:49.836 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.55 seconds ---
+2025-04-24 23:36:49.836 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.45 seconds before next cycle...
+2025-04-24 23:37:00.433 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 631 ---[0m
+2025-04-24 23:37:00.819 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:37:00.819 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:37:01.410 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:37:02.286 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:37:02 CDT ---
+2025-04-24 23:37:02.287 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:37:04.043 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 631 Finished (Duration: 3.61s) ---[0m
+2025-04-24 23:37:04.046 UTC - INFO     - [livebot_main:3384] - Waiting 11.39s for next cycle...
+2025-04-24 23:37:04.839 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.552s
+2025-04-24 23:37:04.841 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:37:04.841 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.56 seconds ---
+2025-04-24 23:37:04.842 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.44 seconds before next cycle...
+2025-04-24 23:37:15.437 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 632 ---[0m
+2025-04-24 23:37:15.807 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:37:15.808 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:37:16.410 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:37:17.287 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:37:17 CDT ---
+2025-04-24 23:37:17.287 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:37:18.963 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 632 Finished (Duration: 3.53s) ---[0m
+2025-04-24 23:37:18.970 UTC - INFO     - [livebot_main:3384] - Waiting 11.47s for next cycle...
+2025-04-24 23:37:19.846 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.558s
+2025-04-24 23:37:19.846 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:37:19.847 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.56 seconds ---
+2025-04-24 23:37:19.847 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.44 seconds before next cycle...
+2025-04-24 23:37:30.445 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 633 ---[0m
+2025-04-24 23:37:30.817 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:37:30.817 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:37:31.420 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:37:32.287 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:37:32 CDT ---
+2025-04-24 23:37:32.288 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:37:33.953 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 633 Finished (Duration: 3.51s) ---[0m
+2025-04-24 23:37:33.955 UTC - INFO     - [livebot_main:3384] - Waiting 11.49s for next cycle...
+2025-04-24 23:37:34.846 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.558s
+2025-04-24 23:37:34.847 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:37:34.847 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.56 seconds ---
+2025-04-24 23:37:34.847 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.44 seconds before next cycle...
+2025-04-24 23:37:45.447 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 634 ---[0m
+2025-04-24 23:37:45.812 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:37:45.813 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:37:46.430 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:37:47.288 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:37:47 CDT ---
+2025-04-24 23:37:47.289 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:37:48.929 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 634 Finished (Duration: 3.48s) ---[0m
+2025-04-24 23:37:48.930 UTC - INFO     - [livebot_main:3384] - Waiting 11.52s for next cycle...
+2025-04-24 23:37:49.814 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.525s
+2025-04-24 23:37:49.814 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:37:49.815 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.53 seconds ---
+2025-04-24 23:37:49.815 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.47 seconds before next cycle...
+2025-04-24 23:38:00.450 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 635 ---[0m
+2025-04-24 23:38:01.188 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:38:01.188 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:38:01.551 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:38:02.289 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:38:02 CDT ---
+2025-04-24 23:38:02.291 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:38:04.077 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 635 Finished (Duration: 3.63s) ---[0m
+2025-04-24 23:38:04.078 UTC - INFO     - [livebot_main:3384] - Waiting 11.37s for next cycle...
+2025-04-24 23:38:04.830 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.539s
+2025-04-24 23:38:04.831 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:38:04.831 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.54 seconds ---
+2025-04-24 23:38:04.831 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.46 seconds before next cycle...
+2025-04-24 23:38:15.452 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 636 ---[0m
+2025-04-24 23:38:15.854 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:38:15.854 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:38:16.445 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:38:17.290 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:38:17 CDT ---
+2025-04-24 23:38:17.290 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:38:19.583 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 636 Finished (Duration: 4.13s) ---[0m
+2025-04-24 23:38:19.591 UTC - INFO     - [livebot_main:3384] - Waiting 10.87s for next cycle...
+2025-04-24 23:38:20.375 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.085s
+2025-04-24 23:38:20.376 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:38:20.376 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.09 seconds ---
+2025-04-24 23:38:20.376 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.91 seconds before next cycle...
+2025-04-24 23:38:30.460 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 637 ---[0m
+2025-04-24 23:38:31.024 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:38:31.025 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:38:31.496 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:38:32.290 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:38:32 CDT ---
+2025-04-24 23:38:32.291 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:38:34.387 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 637 Finished (Duration: 3.93s) ---[0m
+2025-04-24 23:38:34.390 UTC - INFO     - [livebot_main:3384] - Waiting 11.07s for next cycle...
+2025-04-24 23:38:35.384 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 3.093s
+2025-04-24 23:38:35.385 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:38:35.385 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 3.10 seconds ---
+2025-04-24 23:38:35.385 UTC - DEBUG    - [livebot_main:4807] - Waiting 11.90 seconds before next cycle...
+2025-04-24 23:38:45.464 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 638 ---[0m
+2025-04-24 23:38:45.919 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:38:45.919 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:38:46.476 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:38:47.291 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:38:47 CDT ---
+2025-04-24 23:38:47.292 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:38:49.054 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 638 Finished (Duration: 3.59s) ---[0m
+2025-04-24 23:38:49.060 UTC - INFO     - [livebot_main:3384] - Waiting 11.41s for next cycle...
+2025-04-24 23:38:49.923 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.631s
+2025-04-24 23:38:49.924 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:38:49.924 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.63 seconds ---
+2025-04-24 23:38:49.925 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.37 seconds before next cycle...
+2025-04-24 23:39:00.470 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 639 ---[0m
+2025-04-24 23:39:00.835 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:39:00.836 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:39:01.447 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:39:02.292 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:39:02 CDT ---
+2025-04-24 23:39:02.292 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:39:03.992 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 639 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:39:03.995 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:39:04.885 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.593s
+2025-04-24 23:39:04.886 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:39:04.886 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.60 seconds ---
+2025-04-24 23:39:04.887 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.40 seconds before next cycle...
+2025-04-24 23:39:15.475 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 640 ---[0m
+2025-04-24 23:39:15.841 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:39:15.842 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:39:16.435 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:39:17.293 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:39:17 CDT ---
+2025-04-24 23:39:17.293 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:39:18.959 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 640 Finished (Duration: 3.48s) ---[0m
+2025-04-24 23:39:18.960 UTC - INFO     - [livebot_main:3384] - Waiting 11.52s for next cycle...
+2025-04-24 23:39:19.880 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.586s
+2025-04-24 23:39:19.881 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:39:19.881 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.59 seconds ---
+2025-04-24 23:39:19.881 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.41 seconds before next cycle...
+2025-04-24 23:39:30.477 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 641 ---[0m
+2025-04-24 23:39:30.846 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:39:30.847 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:39:31.500 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:39:32.294 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:39:32 CDT ---
+2025-04-24 23:39:32.295 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:39:34.328 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 641 Finished (Duration: 3.85s) ---[0m
+2025-04-24 23:39:34.330 UTC - INFO     - [livebot_main:3384] - Waiting 11.15s for next cycle...
+2025-04-24 23:39:34.874 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.579s
+2025-04-24 23:39:34.875 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:39:34.875 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.58 seconds ---
+2025-04-24 23:39:34.875 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.42 seconds before next cycle...
+2025-04-24 23:39:45.504 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 642 ---[0m
+2025-04-24 23:39:46.003 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:39:46.004 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:39:46.518 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:39:47.297 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:39:47 CDT ---
+2025-04-24 23:39:47.302 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:39:49.345 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 642 Finished (Duration: 3.85s) ---[0m
+2025-04-24 23:39:49.349 UTC - INFO     - [livebot_main:3384] - Waiting 11.15s for next cycle...
+2025-04-24 23:39:50.204 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.902s
+2025-04-24 23:39:50.206 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:39:50.207 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.91 seconds ---
+2025-04-24 23:39:50.207 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.09 seconds before next cycle...
+2025-04-24 23:40:00.519 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 643 ---[0m
+2025-04-24 23:40:00.978 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:40:00.980 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:40:01.520 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:40:02.300 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:40:02 CDT ---
+2025-04-24 23:40:02.305 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:40:04.204 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 643 Finished (Duration: 3.70s) ---[0m
+2025-04-24 23:40:04.207 UTC - INFO     - [livebot_main:3384] - Waiting 11.30s for next cycle...
+2025-04-24 23:40:05.251 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.946s
+2025-04-24 23:40:05.252 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:40:05.253 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.96 seconds ---
+2025-04-24 23:40:05.253 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.04 seconds before next cycle...
+2025-04-24 23:40:15.511 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 644 ---[0m
+2025-04-24 23:40:15.887 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:40:15.887 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:40:16.482 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:40:17.297 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:40:17 CDT ---
+2025-04-24 23:40:17.298 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:40:19.058 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 644 Finished (Duration: 3.55s) ---[0m
+2025-04-24 23:40:19.060 UTC - INFO     - [livebot_main:3384] - Waiting 11.45s for next cycle...
+2025-04-24 23:40:19.855 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.557s
+2025-04-24 23:40:19.856 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:40:19.856 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.56 seconds ---
+2025-04-24 23:40:19.856 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.44 seconds before next cycle...
+2025-04-24 23:40:30.514 UTC - INFO     - [livebot_main:3209] - [36m--- Starting Bot Cycle 645 ---[0m
+2025-04-24 23:40:30.873 UTC - INFO     - [livebot_main:1446] - Available USDT balance (UNIFIED): 8.7288
+2025-04-24 23:40:30.873 UTC - INFO     - [livebot_main:3232] - Available USDT balance: 8.7288
+2025-04-24 23:40:31.476 UTC - INFO     - [livebot_main:3264] - Currently open positions: 1 / 2
+2025-04-24 23:40:32.298 UTC - INFO     - [livebot_main:4745] - --- Starting Bot Cycle 2025-04-24 18:40:32 CDT ---
+2025-04-24 23:40:32.299 UTC - DEBUG    - [livebot_main:4777] - Processing symbol: DOT/USDT:USDT
+2025-04-24 23:40:34.035 UTC - INFO     - [livebot_main:3376] - [36m--- Bot Cycle 645 Finished (Duration: 3.52s) ---[0m
+2025-04-24 23:40:34.038 UTC - INFO     - [livebot_main:3384] - Waiting 11.48s for next cycle...
+2025-04-24 23:40:35.080 UTC - DEBUG    - [livebot_main:4791] - Finished processing DOT/USDT:USDT in 2.781s
+2025-04-24 23:40:35.081 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
+2025-04-24 23:40:35.081 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.78 seconds ---
+2025-04-24 23:40:35.081 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.22 seconds before next cycle...
