@@ -1,0 +1,140 @@
+# Global Settings
+serve_addr: 127.0.0.1:8000
+user_agent: 'aichat/1.0'
+save_shell_history: true
+syncModelsURL: https://raw.githubusercontent.com/sigoden/aichat/main/models.yaml
+
+# Clients
+clients:
+  - type: gemini
+    api_key: AIzaSyDGIJHSOiWKfgbe5dQG7Lc4w9EMtRxUhPQ # Replace with your actual Gemini API key
+    extra:
+      safety_settings:
+        - category: HARM_CATEGORY_HARASSMENT
+          threshold: BLOCK_NONE
+        - category: HARM_CATEGORY_HATE_SPEECH
+          threshold: BLOCK_NONE
+
+# Models
+models:
+  - name: gemini:gemini-2.0-flash-thinking-exp-01-21
+    client: gemini
+  # Add other models here if needed
+  # - name: another_model_name
+  #   client: client_type
+
+# LLM Settings
+model: gemini:gemini-2.0-flash-thinking-exp # Default model, change if needed
+temperature: 0.7
+top_p: 0.9
+max_output_tokens: 60000
+
+# Behavior Settings
+stream: true # Enable streaming responses
+save: true # Save chat sessions
+keybinding: emacs # Keybindings for the REPL
+editor: nano # Default text editor
+wrap: auto # Text wrapping in the REPL
+wrap_code: true # Wrap code blocks
+highlight: true # Syntax highlighting
+save_session: true # Automatically save sessions
+compress_threshold: 4000 # Threshold for compressing session history
+copy_to_clipboard: true # Enable copying to clipboard
+
+# Function Calling
+function_calling: true # Enable function calling
+mapping_tools:
+  fs: 'fs_cat,fs_ls,fs_mkdir,fs_rm,fs_write' # Example: Map 'fs' to file system tools
+  web: 'web_search' # Example: Map 'web' to web search tool
+  # Add more tool mappings here! Example:
+  # trading: 'get_stock_price,place_order,cancel_order'
+use_tools: yes # Enable using tools
+
+# Preliminary Settings
+prelude: role:default # Default role to use at session start
+repl_prelude: session:default # Prelude for REPL sessions
+
+# Session Settings
+summarize_prompt: 'Summarize the session concisely.' # Prompt for session summarization
+
+# RAG Settings (Retrieval-Augmented Generation)
+rag_embedding_model: gemini:embedding-001 # Model for embeddings
+rag_top_k: 5 # Number of top documents to retrieve
+rag_chunk_size: 512 # Chunk size for text splitting
+rag_chunk_overlap: 128 # Overlap between text chunks
+rag_template: | # Template for RAG context injection
+  __CONTEXT__
+  __INPUT__
+
+# Appearance Settings
+left_prompt: '[{session}] {role} > ' # Left prompt format
+right_prompt: '{model}' # Right prompt format
+themes:
+  default:
+    prompt_color: "\033[1;34m" # Color for prompts (blue)
+    response_color: "\033[1;32m" # Color for responses (green)
+  # Add or modify themes as needed
+
+# Macros
+macros:
+  greet: "Hello, how can I assist you today?" # Example macro, trigger with :greet
+  # Add more macros here, e.g.,
+  # summarize: "Summarize the current conversation."
+
+# Functions
+functions:
+  enabled: true # Enable external functions
+  paths:
+    - ~/.config/aichat/functions  # <- ADJUST IF NEEDED: Functions in ~/.config/aichat/functions
+    - ~/llm-functions  # <- KEEP/ADJUST: Functions in ~/llm-functions (verify location)
+    # Add more paths to function directories if you have them
+    # - /path/to/another/functions_dir
+
+  # Example of an inline function (defined directly in config, NOT a script)
+  
+  # You can remove or modify the inline get_date function if you prefer
+  # to use only external function scripts.
+
+# Tools
+tools:
+  enabled: true # Enable external tools
+  paths:
+    - ~/.config/aichat/tools  # <- ADJUST IF NEEDED: Tools in ~/.config/aichat/tools
+    - ~/tools # <- KEEP/ADJUST: Tools in ~/tools (verify location)
+    # Add more paths to tool directories if you have them
+    # - /path/to/another/tools_dir
+
+# Debug Settings
+debug_mode: true # Enable debug mode for more verbose logging
+log_file: ~/.config/aichat/aichat.log # Path to the debug log file
+
+# AI-Powered Suggestions
+suggestionsEnabled: true # Enable AI-powered suggestions (if supported by aichat)
+
+# Multi-Modal Inputs
+multiModalEnabled: true # Enable multi-modal input (if supported by aichat)
+
+# Plugin System
+plugins:
+  # Example plugin (modify or remove if not using plugins)
+  - name: weather
+    script: /path/to/weather_plugin.sh # <- REPLACE with actual path to plugin script
+  # Add more plugins here if needed
+
+# Voice Input/Output
+voiceInput: true # Enable voice input (if supported by aichat)
+voiceOutput: true # Enable voice output (if supported by aichat)
+
+# Offline Mode
+offlineMode: true # Enable offline mode/caching
+cacheFile: /.config/aichat/cache.db # Path to the cache database file
+
+# Real-Time Collaboration
+collaborationEnabled: false # Disable real-time collaboration by default
+serverAddress: "0.0.0.0:8080" # Server address for collaboration (if enabled)
+
+
+# REMOVE THIS ENTIRE SECTION (it's redundant and likely incorrect):
+# Functions Path
+# functions_path: /data/data/com.termux4
+# /files/home/llm-functions

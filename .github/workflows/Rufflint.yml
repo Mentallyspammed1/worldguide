@@ -1,0 +1,52 @@
+name: Ruff Linting
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.11' # Replace with your desired specific Python version
+
+permissions:
+  contents: read
+  checks: write # To create Check runs and annotations
+  # Use 'pull-requests: write' if using reporter: github-pr-review
+
+jobs:
+  ruff-linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run Ruff
+        run: ruff check .
+
+      - name: Run Ruff and Report with Reviewdog
+        uses: reviewdog/action-ruff@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-check # Report results as checks on the commit/PR (Default)
+          fail_on_error: true       # Fail the workflow if Ruff finds errors (like strict: true)
+          level: error              # Report Ruff errors as errors (can also use 'warning')
+          ruff_flags: '.'           # Pass the target directory/files to Ruff (default is '.')
+
+      - name: Upload Ruff JSON report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-report-json
+          path: ruff_report.json

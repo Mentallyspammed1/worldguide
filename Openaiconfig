@@ -1,0 +1,11 @@
+# see https://github.com/sigoden/aichat/blob/main/config.example.yaml
+wrap_code: true
+stream: true
+save: true
+
+model: openrouter:deepseek/deepseek-r1-distill-qwen-14b:free
+clients:
+- type: openai-compatible
+  name: openrouter
+  api_base: https://openrouter.ai/api/v1
+  api_key: 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
