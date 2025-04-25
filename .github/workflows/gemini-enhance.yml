@@ -1,22 +1,15 @@
-# .github/workflows/gemini-enhance.yml
 name: Gemini File Enhancement
 
 # Controls when the workflow will run
 on:
   push:
     branches:
-      - main # Trigger on pushes to the main branch
-    # Optionally, add path filters to only run if specific files/dirs change:
-    # paths:
-    #  - 'src/**'
-    #  - 'docs/**'
-    #  - '**.py'
-    #  - '**.md'
-  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+      - main
+  workflow_dispatch:
 
 # Permissions needed for the workflow job
 permissions:
-  contents: write # Allow the job to write changes back to the repository
+  contents: write
 
 jobs:
   enhance_files_with_gemini:
@@ -27,8 +20,6 @@ jobs:
       - name: Checkout Repository Code
         uses: actions/checkout@v4
         with:
-          # Fetch entire history; needed if you plan to diff against previous commits.
-          # Otherwise, depth: 1 might suffice for basic find.
           fetch-depth: 0
 
       # Step 2: Install necessary tools (jq for JSON parsing)
@@ -45,52 +36,27 @@ jobs:
       - name: Process Files with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # Consider making the prompt a secret or variable if it gets complex
-          # GEMINI_PROMPT: "..."
         run: |
-          set -eo pipefail # Exit immediately if a command exits with a non-zero status
+          set -eo pipefail
 
           echo "Starting Gemini file enhancement process..."
 
-          # Find potential text files, excluding common non-text formats, git/github dirs, lock files etc.
-          # Customize the '-not -path' and '-not -name' patterns for your project needs.
-          # Using print0/read -d is safer for filenames with special characters.
-          find . -type f \
-            -not -path './.git/*' \
-            -not -path './.github/*' \
-            -not -path './node_modules/*' \
-            -not -path './vendor/*' \
-            -not -name '*.lock' \
-            -not -name '*.log' \
-            -not -name 'LICENSE' \
-            -not -name '*.png' -not -name '*.jpg' -not -name '*.jpeg' -not -name '*.gif' \
-            -not -name '*.svg' -not -name '*.ico' \
-            -not -name '*.pdf' -not -name '*.doc' -not -name '*.docx' -not -name '*.xls' -not -name '*.xlsx' \
-            -not -name '*.zip' -not -name '*.gz' -not -name '*.tar' -not -name '*.rar' \
-            -not -name '*.bin' -not -name '*.exe' -not -name '*.dll' -not -name '*.so' \
-            -not -name '*.o' -not -name '*.a' -not -name '*.class' -not -name '*.jar' \
-            -not -name '*.pyc' -not -name '*.pyo' \
-            -not -name '*.min.js' -not -name '*.min.css' \
-            -print0 | while IFS= read -r -d $'\0' file; do
+          # Process only changed files (added or modified) in the push
+          git diff --name-only --diff-filter=AM ${{ github.event.before }} ${{ github.sha }} --print0 | while IFS= read -r -d $'\0' file; do
+            echo "Processing changed file: $file"
 
-            echo "Processing file: $file"
-
-            # Basic check: Ensure file exists, is not empty, and appears to be text-based.
-            # The 'file' command provides a more robust check than simple extension matching.
+            # Ensure file exists, is not empty, and is text-based
             if [[ -f "$file" && -s "$file" ]] && file -b --mime-type "$file" | grep -q -E '^text/|^application/(json|xml|javascript|yaml)'; then
               echo "File identified as text-based. Preparing request for Gemini..."
 
-              # Read file content and escape it for JSON embedding using jq
-              # -R reads raw text, -s reads the entire input into a single string
+              # Read and escape file content for JSON
               file_content=$(jq -Rs '.' "$file")
               if [[ -z "$file_content" ]]; then
                 echo "Warning: Failed to read or encode file content for $file. Skipping."
                 continue
               fi
 
-              # Construct the JSON payload for the Gemini API
-              # Note: The prompt asks Gemini to ONLY return the enhanced code.
-              # Adjust the prompt, temperature, and model as needed.
+              # Construct JSON payload for Gemini API
               json_payload=$(cat <<EOF
               {
                 "contents": [{
@@ -99,12 +65,12 @@ jobs:
                   }]
                 }],
                 "generationConfig": {
-                  "temperature": 0.4,          # Lower temperature for more predictable, focused output
-                  "maxOutputTokens": 8192,     # Max tokens for the response
+                  "temperature": 0.4,
+                  "maxOutputTokens": 8192,
                   "topP": 0.95,
                   "topK": 40
                 },
-                "safetySettings": [             # Configure content safety levels
+                "safetySettings": [
                    { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
                    { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
                    { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
@@ -114,147 +80,62 @@ jobs:
 EOF
               )
 
-              # Call the Gemini API (using gemini-1.0-pro model)
+              # Call Gemini API
               api_url="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${GEMINI_API_KEY}"
-
               echo "Sending request to Gemini API for $file..."
-              # Use curl options: -s (silent), -f (fail fast on HTTP errors), -S (show errors)
-              response=$(curl -sfS -X POST -H "Content-Type: application/json" \
-                           -d "${json_payload}" "${api_url}")
+              response=$(curl -sfS -X POST -H "Content-Type: application/json" -d "${json_payload}" "${api_url}")
 
-              # Check curl exit status
               if [[ $? -ne 0 ]]; then
-                  echo "Error: curl command failed for file $file. See logs above for details. Skipping."
-                  # The raw response might not be available if curl failed early (e.g., network issue)
-                  # Consider adding specific error handling if needed
-                  continue # Move to the next file
+                echo "Error: curl command failed for file $file. Skipping."
+                continue
               fi
 
-              # Extract the enhanced content using jq. Handle potential errors or empty responses.
-              # Check for API errors first (e.g., safety blocks)
+              # Check for API errors
               api_error=$(echo "${response}" | jq -r '(.error.message // (.promptFeedback.blockReason // empty))')
               if [[ -n "$api_error" ]]; then
-                  echo "Warning: Gemini API returned an error for $file. Reason: ${api_error}. Skipping."
-                  echo "Full API response (error): ${response}" # Log the full error response
-                  continue # Move to the next file
+                echo "Warning: Gemini API returned an error for $file. Reason: ${api_error}. Skipping."
+                continue
               fi
 
-              # Extract the main content part
+              # Extract enhanced content
               enhanced_content=$(echo "${response}" | jq -r '.candidates[0].content.parts[0].text // empty')
-
               if [[ -z "$enhanced_content" ]]; then
-                # This might happen if the response structure is unexpected or content is truly empty
-                echo "Warning: Gemini provided no content or failed to parse for $file. Response: ${response}. Skipping."
-              else
-                # Write enhanced content to a temporary file
-                echo "${enhanced_content}" > "$file.gemini_tmp"
+                echo "Warning: Gemini provided no content for $file. Skipping."
+                continue
+              fi
 
-                # Check if the content actually changed before overwriting the original file
-                # Use `cmp -s` for silent comparison; returns 0 if identical, non-zero otherwise
-                if cmp -s "$file" "$file.gemini_tmp"; then
-                   echo "No changes detected for $file after Gemini processing."
-                   rm "$file.gemini_tmp" # Clean up temp file
-                else
-                   echo "Gemini has refined: $file. Applying changes."
-                   # Replace the original file with the enhanced version
-                   mv "$file.gemini_tmp" "$file"
-                fi
+              # Write to temp file and compare
+              echo "${enhanced_content}" > "$file.gemini_tmp"
+              if cmp -s "$file" "$file.gemini_tmp"; then
+                echo "No changes detected for $file."
+                rm "$file.gemini_tmp"
+              else
+                echo "Gemini has refined: $file. Applying changes."
+                mv "$file.gemini_tmp" "$file"
               fi
             else
-                echo "Skipping non-text, empty, or excluded file: $file"
+              echo "Skipping changed file (non-text, empty, or excluded type): $file"
             fi
 
-            # Add a small delay to respect potential API rate limits. Adjust as needed.
             sleep 1
           done
+
+          echo "Finished processing changed files."
 
       # Step 5: Commit and Push Changes
       - name: Commit and Push Enhancements
         run: |
-          # Check if there are any changes staged or unstaged
           if git diff --quiet && git diff --staged --quiet; then
             echo "No changes were made by Gemini."
           else
             echo "Changes detected. Committing Gemini's enhancements..."
-            # Add all changes (modified files)
             git add .
-            # Commit the changes. The '[skip ci]' tag prevents this commit from triggering the workflow again.
             git commit -m "chore: Enhance files via Gemini Bot [skip ci]" \
               -m "Automated file enhancements applied by the Gemini GitHub Action."
-
             echo "Pushing changes back to the repository..."
-            # Push to the same branch the workflow ran on
             git push origin HEAD:${{ github.ref_name }}
           fi
 
       # Step 6: Workflow Completion
       - name: Enhancement Process Complete
         run: echo "Gemini file enhancement workflow finished."
-
-```
-
-**Explanation of Improvements and Key Sections:**
-
-1.  **Clearer Naming:** Workflow name (`Gemini File Enhancement`), job name (`Enhance Files via Gemini`), and step names are more descriptive.
-2.  **Trigger Flexibility:** The `on` section still includes `push` to `main` and `workflow_dispatch`. Comments suggest how to add `paths` filters if you only want the workflow to run when specific files or directories change (highly recommended for larger repositories).
-3.  **Permissions:** `permissions: contents: write` is clearly explained.
-4.  **Robust Scripting (`run` steps):**
-    *   `set -eo pipefail`: Makes the script safer by exiting on errors and ensuring pipeline failures are caught.
-    *   **File Finding (`find`):** The exclusion list (`-not -path`, `-not -name`) is slightly expanded and better commented. *You should customize this list based on your project structure and file types.*
-    *   **File Type Check:** Uses `file -b --mime-type "$file" | grep -q -E '^text/|^application/(json|xml|javascript|yaml)'` for a more reliable check than just encoding, identifying common text-based MIME types.
-    *   **JSON Escaping (`jq -Rs '.'`):** Clearly explained. Added a check if `jq` fails to produce content.
-    *   **API Payload:** The prompt is refined to be very specific about wanting *only* the enhanced content and mentioning the filename for context. The model is specified (`gemini-1.0-pro`). `temperature` is slightly lowered for potentially more deterministic improvements. `topP` and `topK` are included for completeness.
-    *   **API Call (`curl`):** Uses `-sfS` options: `-s` (silent), `-f` (fail fast on HTTP errors like 4xx or 5xx), `-S` (still show errors if `-s` is used). Added explicit check of `curl`'s exit status (`$?`).
-    *   **Error Handling:**
-        *   Checks for `curl` failures.
-        *   Parses the `response` JSON specifically looking for `error.message` or `promptFeedback.blockReason` before trying to extract content. Logs the specific API error.
-        *   Logs a warning if `enhanced_content` is empty after a successful API call (might indicate unexpected response format).
-    *   **Idempotency (`cmp`):** Uses `cmp -s` to compare the original and enhanced files *before* overwriting. This prevents unnecessary file modifications and commits if Gemini returns identical content. The temporary file (`*.gemini_tmp`) ensures atomicity during the write.
-    *   **Rate Limiting (`sleep 1`):** Kept the delay, emphasizing it's adjustable.
-5.  **Commit Logic:**
-    *   Checks for changes using `git diff --quiet && git diff --staged --quiet` *before* running `git add .`. This accurately detects if any files were modified by the previous step.
-    *   Uses a more descriptive multi-line commit message.
-    *   Explicitly pushes to the correct branch using `HEAD:${{ github.ref_name }}`.
-    *   The `[skip ci]` tag in the commit message remains crucial to prevent infinite workflow loops.
-6.  **Important Considerations (Summary):**
-    *   **Cost and Rate Limits:** Processing every file on every push can be slow and might incur costs. Consider:
-        *   Running manually (`workflow_dispatch`).
-        *   Running on a schedule (`schedule`).
-        *   Using `paths` filters in the `on:` trigger.
-        *   **Recommended:** Modify the script to only process files changed in the push/commit (see below).
-    *   **API Key Security:** Reiterated the importance of using GitHub Secrets.
-    *   **Review AI Changes:** **Crucially, always review the changes made by the AI.** It's a tool, not infallible. Treat its suggestions like code review comments you need to verify.
-    *   **File Exclusions:** Customize the `find` command's `-not` patterns to match your project.
-    *   **Prompt Engineering:** The quality of results heavily depends on the prompt. You may need to experiment and refine it.
-    *   **Model Choice:** Uses `gemini-1.0-pro`. You might switch to other models (like `gemini-1.5-pro-latest` when available and suitable) by changing the `api_url`.
-    *   **Idempotency:** The `cmp` check and `[skip ci]` tag help prevent redundant operations and loops.
-
-**Alternative: Processing Only Changed Files**
-
-To make this much more efficient, especially on pushes, modify the script to only process files detected as changed. Replace the `find ... | while ... done` loop structure in the "Process Files with Gemini" step with something like this:
-
-```bash
-# Inside the "Process Files with Gemini" step's run block:
-echo "Identifying changed files..."
-# Get list of added (A) or modified (M) files in the last commit (for push events)
-# Use GITHUB_BEFORE, GITHUB_SHA for push events if available, otherwise fallback might be needed for workflow_dispatch
-# This example focuses on the common push scenario. Manual triggers might need different logic.
-
-# Use git diff to find changed files between the previous commit and the current one
-# Adjust based on your trigger type (push, pull_request, workflow_dispatch)
-# For push:
-git diff --name-only --diff-filter=AM ${{ github.event.before }} ${{ github.sha }} --print0 | while IFS= read -r -d $'\0' file; do
-  # --- Start of the existing file processing logic ---
-  echo "Processing changed file: $file"
-
-  # Basic check: Ensure file exists, is not empty, and appears to be text-based...
-  if [[ -f "$file" && -s "$file" ]] && file -b --mime-type "$file" | grep -q -E '^text/|^application/(json|xml|javascript|yaml)'; then
-      # ... (rest of the logic: read content, build payload, call API, check response, compare, overwrite) ...
-  else
-      echo "Skipping changed file (non-text, empty, or excluded type): $file"
-  fi
-  sleep 1 # Keep rate limiting
-  # --- End of the existing file processing logic ---
-done
-
-echo "Finished processing changed files."
