@@ -1,0 +1,884 @@
+2025-04-26 03:12:12 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 03:12:12 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 03:12:12 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 03:12:12 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 03:12:12 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 03:12:12 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 03:12:12 - EhlersStrategy - INFO [MainThread <module>:499] - Configuration loaded. Testnet: True, Symbol: FARTCOIN/USDT:USDT
+2025-04-26 03:12:53 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 03:12:53 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 03:12:53 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 03:12:53 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 03:12:53 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 03:12:53 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 03:12:53 - EhlersStrategy - INFO [MainThread <module>:499] - Configuration loaded. Testnet: True, Symbol: FARTCOIN/USDT:USDT
+2025-04-26 03:13:33 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 03:13:33 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 03:13:33 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 03:13:33 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 03:13:33 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 03:13:33 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 03:13:33 - EhlersStrategy - INFO [MainThread <module>:499] - Configuration loaded. Testnet: True, Symbol: FARTCOIN/USDT:USDT
+2025-04-26 03:23:29 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 03:23:29 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 03:23:29 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 03:23:29 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 03:23:29 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 03:23:29 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 03:23:29 - EhlersStrategy - INFO [MainThread <module>:499] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 03:47:49 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 03:47:49 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 03:47:49 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 03:47:49 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 03:47:49 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 03:47:49 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 03:47:49 - EhlersStrategy - INFO [MainThread <module>:499] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 03:48:06 - EhlersStrategy - WARNING [MainThread <module>:536] - Error closing exchange connection: 'bybit' object has no attribute 'close'
+2025-04-26 03:56:15 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 03:56:15 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 03:56:15 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 03:56:15 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 03:56:15 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 03:56:15 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 03:56:15 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 03:56:31 - EhlersStrategy - INFO [MainThread run_strategy:364] - [35m--- Starting Ehlers Volumetric Strategy for DOT/USDT:USDT on 5m ---[0m
+2025-04-26 03:56:31 - EhlersStrategy - INFO [MainThread run_strategy:365] - Risk per trade: 1.00%, Leverage: 10x
+2025-04-26 03:56:31 - EhlersStrategy - INFO [MainThread run_strategy:366] - EVT Params: Length=7, Multiplier=2.5
+2025-04-26 03:56:31 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T08:56:31.978970+00:00 ------------------------------
+2025-04-26 03:56:32 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 03:56:37 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 267, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 240, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 03:56:39 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 03:59:39 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T08:59:39.139581+00:00 ------------------------------
+2025-04-26 03:59:39 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 03:59:46 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 267, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 240, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 03:59:50 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 04:02:50 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T09:02:50.075302+00:00 ------------------------------
+2025-04-26 04:02:50 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 04:02:56 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 267, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 240, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 04:02:59 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 04:05:59 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T09:05:59.263478+00:00 ------------------------------
+2025-04-26 04:06:00 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 04:06:07 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 267, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 240, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 04:06:10 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 04:09:10 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T09:09:10.471064+00:00 ------------------------------
+2025-04-26 04:09:11 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 04:09:16 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 267, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 240, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 04:09:18 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 04:12:18 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T09:12:18.859797+00:00 ------------------------------
+2025-04-26 04:12:19 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 04:12:24 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 267, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 240, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 04:12:27 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 04:38:25 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 04:38:25 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 04:38:25 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 04:38:25 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 04:38:25 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 04:38:25 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 04:38:25 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:11:22 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 05:11:22 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 05:11:22 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 05:11:22 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 05:11:22 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 05:11:22 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 05:11:22 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:12:51 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 05:12:51 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 05:12:51 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 05:12:51 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 05:12:51 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 05:12:51 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 05:12:51 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:13:05 - EhlersStrategy - INFO [MainThread run_strategy:364] - [35m--- Starting Ehlers Volumetric Strategy for DOT/USDT:USDT on 5m ---[0m
+2025-04-26 05:13:05 - EhlersStrategy - INFO [MainThread run_strategy:365] - Risk per trade: 1.00%, Leverage: 10x
+2025-04-26 05:13:05 - EhlersStrategy - INFO [MainThread run_strategy:366] - EVT Params: Length=7, Multiplier=2.5
+2025-04-26 05:13:05 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:13:05.925815+00:00 ------------------------------
+2025-04-26 05:13:06 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 05:13:10 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 263, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 237, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 05:13:12 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:16:12 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:16:12.062988+00:00 ------------------------------
+2025-04-26 05:16:12 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 05:16:21 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 263, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 237, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 05:16:24 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:19:24 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:19:24.266793+00:00 ------------------------------
+2025-04-26 05:19:24 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 05:19:31 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 263, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 237, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 05:19:34 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:22:34 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:22:34.325855+00:00 ------------------------------
+2025-04-26 05:22:35 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 05:22:40 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 263, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 237, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 05:22:42 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:25:42 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:25:42.432338+00:00 ------------------------------
+2025-04-26 05:25:43 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 05:25:48 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 263, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 237, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 05:25:51 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:28:51 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:28:51.491436+00:00 ------------------------------
+2025-04-26 05:28:52 - EhlersStrategy - INFO [MainThread run_strategy:382] - Current Position: Side=NONE, Qty=Error
+2025-04-26 05:28:57 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 391, in run_strategy
+    ticker = bybit.fetch_ticker_validated(exchange, config.SYMBOL, config)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 263, in wrapper
+    raise e # Re-raise unexpected exceptions
+    ^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_utils.py", line 237, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 1223, in fetch_ticker_validated
+    if timestamp_ms is None or age_seconds > max_age_seconds or age_seconds < -10: raise ValueError(f"Ticker timestamp invalid/stale (Age: {age_seconds:.1f}s)")
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Ticker timestamp invalid/stale (Age: infs)
+2025-04-26 05:28:59 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:31:57 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 05:31:57 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 05:31:57 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 05:31:57 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 05:31:57 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 05:31:57 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 05:31:57 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:32:38 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 05:32:38 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 05:32:38 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 05:32:38 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 05:32:38 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 05:32:38 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 05:32:38 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:48:18 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 05:48:18 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 05:48:18 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 05:48:18 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 05:48:18 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 05:48:18 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 05:48:18 - EhlersStrategy - INFO [MainThread <module>:566] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:48:18 - EhlersStrategy - INFO [MainThread run_strategy:364] - [35m--- Starting Ehlers Volumetric Strategy for DOT/USDT:USDT on 5m ---[0m
+2025-04-26 05:48:18 - EhlersStrategy - INFO [MainThread run_strategy:365] - Risk per trade: 1.00%, Leverage: 10x
+2025-04-26 05:48:18 - EhlersStrategy - INFO [MainThread run_strategy:366] - EVT Params: Length=7, Multiplier=2.5
+2025-04-26 05:48:18 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:48:18.506367+00:00 ------------------------------
+2025-04-26 05:48:18 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 380, in run_strategy
+    current_side = current_position['side']
+                   ~~~~~~~~~~~~~~~~^^^^^^^^
+TypeError: 'coroutine' object is not subscriptable
+2025-04-26 05:48:21 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:51:21 - EhlersStrategy - INFO [MainThread run_strategy:373] - ------------------------------ Cycle Start: 2025-04-26T10:51:21.408225+00:00 ------------------------------
+2025-04-26 05:51:21 - EhlersStrategy - CRITICAL [MainThread run_strategy:535] - [41m[37m!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP !!![0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 380, in run_strategy
+    current_side = current_position['side']
+                   ~~~~~~~~~~~~~~~~^^^^^^^^
+TypeError: 'coroutine' object is not subscriptable
+2025-04-26 05:51:25 - EhlersStrategy - INFO [MainThread run_strategy:538] - Attempting to continue after critical error...
+2025-04-26 05:53:23 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 05:53:23 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 05:53:23 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 05:53:23 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 05:53:23 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 05:53:23 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 05:53:23 - EhlersStrategy - INFO [MainThread main:567] - Configuration loaded. Testnet: False, Symbol: DOT/USDT:USDT
+2025-04-26 05:53:23 - EhlersStrategy - DEBUG [MainThread main:578] - [36m# Awaiting leverage setting...[0m
+2025-04-26 05:53:23 - EhlersStrategy - CRITICAL [MainThread main:582] - [41m[37mFailed to set leverage to 10x. The exchange resists our command! Exiting.[0m
+2025-04-26 05:53:26 - EhlersStrategy - CRITICAL [MainThread main:588] - [41m[37mError setting leverage: object NoneType can't be used in 'await' expression. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlervolumatic.py", line 584, in main
+    await exchange.close() # Close connection if setup fails
+    ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object NoneType can't be used in 'await' expression
+2025-04-26 06:00:22 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 06:00:22 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 06:00:22 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 06:00:22 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 06:00:22 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread main:772] - Configuration loaded. Strategy: ehlers_volumetric, Symbol: DOT/USDT:USDT, Timeframe: 5m, Testnet: False
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread main:776] - SMS Alerts Disabled.
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread main:783] - Initializing connection to bybit...
+2025-04-26 06:00:22 - EhlersStrategy - SUCCESS [MainThread log_success:47] - [32mExchange connection initialized successfully.[0m
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread main:792] - Loading markets from exchange...
+2025-04-26 06:00:22 - EhlersStrategy - CRITICAL [MainThread main:867] - [41m[37mUnexpected critical error during setup phase: 'coroutine' object has no attribute 'load_markets'. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlstrat.py", line 793, in main
+    await exchange.load_markets() # Use await, load_markets is async
+          ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'load_markets'
+2025-04-26 06:00:22 - EhlersStrategy - ERROR [MainThread main:880] - [31mStrategy execution skipped due to setup failure.[0m
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread main:887] - [36m# Initiating cleanup phase...[0m
+2025-04-26 06:00:22 - EhlersStrategy - INFO [MainThread main:890] - [36m# Closing connection to the exchange realm...[0m
+2025-04-26 06:00:22 - EhlersStrategy - ERROR [MainThread main:894] - [31mError occurred while closing the exchange connection: object NoneType can't be used in 'await' expression[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlstrat.py", line 891, in main
+    await exchange.close() # exchange.close() IS typically async in ccxt
+    ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object NoneType can't be used in 'await' expression
+2025-04-26 06:00:22 - EhlersStrategy - WARNING [MainThread main:900] - [33mExiting script with error status due to setup failure.[0m
+2025-04-26 06:39:51 - EhlersStrategy - DEBUG [MainThread setup_logger:239] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread setup_logger:240] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 06:39:51 - EhlersStrategy - SUCCESS [MainThread log_success:47] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 06:39:51 - EhlersStrategy - WARNING [MainThread setup_logger:242] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 06:39:51 - EhlersStrategy - ERROR [MainThread setup_logger:243] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 06:39:51 - EhlersStrategy - CRITICAL [MainThread setup_logger:244] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread main:772] - Configuration loaded. Strategy: ehlers_volumetric, Symbol: DOT/USDT:USDT, Timeframe: 5m, Testnet: False
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread main:776] - SMS Alerts Disabled.
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread main:783] - Initializing connection to bybit...
+2025-04-26 06:39:51 - EhlersStrategy - SUCCESS [MainThread log_success:47] - [32mExchange connection initialized successfully.[0m
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread main:792] - Loading markets from exchange...
+2025-04-26 06:39:51 - EhlersStrategy - CRITICAL [MainThread main:867] - [41m[37mUnexpected critical error during setup phase: 'coroutine' object has no attribute 'load_markets'. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlstrat.py", line 793, in main
+    await exchange.load_markets() # Use await, load_markets is async
+          ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'load_markets'
+2025-04-26 06:39:51 - EhlersStrategy - ERROR [MainThread main:880] - [31mStrategy execution skipped due to setup failure.[0m
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread main:887] - [36m# Initiating cleanup phase...[0m
+2025-04-26 06:39:51 - EhlersStrategy - INFO [MainThread main:890] - [36m# Closing connection to the exchange realm...[0m
+2025-04-26 06:39:51 - EhlersStrategy - ERROR [MainThread main:894] - [31mError occurred while closing the exchange connection: object NoneType can't be used in 'await' expression[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlstrat.py", line 891, in main
+    await exchange.close() # exchange.close() IS typically async in ccxt
+    ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: object NoneType can't be used in 'await' expression
+2025-04-26 06:39:51 - EhlersStrategy - WARNING [MainThread main:900] - [33mExiting script with error status due to setup failure.[0m
+2025-04-26 06:54:12 - EhlersStrategy - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 06:54:12 - EhlersStrategy - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 06:54:12 - EhlersStrategy - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 06:54:12 - EhlersStrategy - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 06:54:12 - EhlersStrategy - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:988] - Configuration loaded successfully.
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:997] - Strategy: ehlers_volumetric, Symbol: DOT/USDT:USDT, Timeframe: 5m, Testnet: False
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:1001] - SMS Alerts Disabled.
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:1005] - --- Starting Setup Phase ---
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:1007] - Initializing async connection to bybit...
+2025-04-26 06:54:12 - EhlersStrategy - SUCCESS [MainThread log_success:55] - [32mAsync Exchange connection initialized successfully (Mainnet).[0m
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:1042] - Loading markets from exchange...
+2025-04-26 06:54:12 - EhlersStrategy - DEBUG [MainThread main:1043] - [36m# Awaiting exchange.load_markets()...[0m
+2025-04-26 06:54:12 - EhlersStrategy - CRITICAL [MainThread main:1120] - [41m[37mUnexpected critical error during setup phase: 'coroutine' object has no attribute 'load_markets'. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/evstrat.py", line 1044, in main
+    await exchange.load_markets()
+          ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'load_markets'
+2025-04-26 06:54:12 - EhlersStrategy - ERROR [MainThread main:1135] - [31mStrategy execution skipped due to setup failure.[0m
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:1139] - [36m--- Initiating Cleanup Phase ---[0m
+2025-04-26 06:54:12 - EhlersStrategy - INFO [MainThread main:1142] - [36m# Closing connection to the exchange...[0m
+2025-04-26 06:54:12 - EhlersStrategy - ERROR [MainThread main:1147] - [31mError occurred while closing the exchange connection: object NoneType can't be used in 'await' expression[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/evstrat.py", line 1144, in main
+    await exchange.close()
+TypeError: object NoneType can't be used in 'await' expression
+2025-04-26 06:54:12 - EhlersStrategy - WARNING [MainThread main:1157] - [33m[1m--- Strategy Shutdown Complete --- Exit Code: 1 (Indicates setup failure or abnormal termination)[0m
+2025-04-26 07:31:05 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 07:31:05 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 07:31:05 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 07:31:05 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 07:31:05 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:129] - ============================================================
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:130] - === TradingBot Initializing ===
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:134] - Testnet Mode: True
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:135] - Symbol: BTC/USDT:USDT
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:136] - Strategy: ExampleRsiMacd
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:137] - Timeframe: 15m
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread main:138] - ============================================================
+2025-04-26 07:31:05 - TradingBot - CRITICAL [MainThread __init__:94] - Missing essential Strategy configuration keys: ['risk_per_trade', 'stop_loss_atr_multiplier', 'EVT_ENABLED', 'EVT_LENGTH', 'STOP_LOSS_ATR_PERIOD']. Check config.py.
+2025-04-26 07:31:05 - TradingBot - CRITICAL [MainThread main:163] - Failed to instantiate strategy: Incomplete Strategy configuration.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 158, in main
+    strategy_instance = EhlersVolumetricStrategy(config=full_config, logger=logger)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 95, in __init__
+    raise ValueError("Incomplete Strategy configuration.")
+ValueError: Incomplete Strategy configuration.
+2025-04-26 07:31:05 - TradingBot - INFO [MainThread <module>:307] - --- Application Shutdown Complete (Runtime: 0.01s) ---
+2025-04-26 07:34:03 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 07:34:03 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 07:34:03 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 07:34:03 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 07:34:03 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:144] - Testnet Mode: True
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:145] - Symbol: BTC/USDT:USDT
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:147] - Strategy: ExampleRsiMacd
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:149] - Timeframe: 15m
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 07:34:03 - TradingBot - CRITICAL [MainThread __init__:94] - Missing essential Strategy configuration keys: ['risk_per_trade', 'stop_loss_atr_multiplier', 'EVT_ENABLED', 'EVT_LENGTH', 'STOP_LOSS_ATR_PERIOD']. Check config.py.
+2025-04-26 07:34:03 - TradingBot - CRITICAL [MainThread main:171] - Strategy instantiation failed due to configuration error: Incomplete Strategy configuration.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 168, in main
+    strategy_instance = EhlersVolumetricStrategy(config=full_config, logger=logger)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 95, in __init__
+    raise ValueError("Incomplete Strategy configuration.")
+ValueError: Incomplete Strategy configuration.
+2025-04-26 07:34:03 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.02s) ---
+2025-04-26 07:44:41 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 07:44:41 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 07:44:41 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 07:44:41 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 07:44:41 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 07:44:41 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 07:44:41 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 07:44:41 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 07:44:41 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 07:44:41 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 07:44:41 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.36s) ---
+2025-04-26 07:46:34 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 07:46:34 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 07:46:34 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 07:46:34 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 07:46:34 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 07:46:34 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 07:46:34 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 07:46:34 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 07:46:34 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 07:46:34 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 07:46:34 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.37s) ---
+2025-04-26 07:52:25 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 07:52:25 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 07:52:25 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 07:52:25 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 07:52:25 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 07:52:25 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 07:52:25 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 07:52:26 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 07:52:26 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 07:52:26 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 07:52:26 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 07:52:26 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 07:52:26 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 07:52:26 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 07:52:26 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 07:52:26 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.37s) ---
+2025-04-26 08:18:53 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 08:18:53 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 08:18:53 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 08:18:53 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 08:18:53 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 08:18:53 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:18:53 - TradingBot - CRITICAL [MainThread _initialize:220] - [41m[37mCritical error during strategy initialization: 'bybit' object has no attribute 'closed'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 165, in _initialize
+    self.exchange = await bybit.initialize_bybit(self.api_config)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 436, in async_wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 581, in initialize_bybit
+    if exchange and hasattr(exchange, 'close') and not exchange.closed:
+                                                       ^^^^^^^^^^^^^^^
+AttributeError: 'bybit' object has no attribute 'closed'
+2025-04-26 08:18:53 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 08:18:53 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 08:18:53 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 08:18:53 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.23s) ---
+2025-04-26 08:35:26 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 08:35:26 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 08:35:26 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 08:35:26 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 08:35:26 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 08:35:26 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:35:26 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:35:27 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 08:35:27 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 08:35:27 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 08:35:27 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 08:35:27 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 08:35:27 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 08:35:27 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 08:35:27 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 08:35:27 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.37s) ---
+2025-04-26 08:36:25 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 08:36:25 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 08:36:25 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 08:36:25 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 08:36:25 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 08:36:25 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:36:25 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:36:26 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 08:36:26 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 08:36:26 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 08:36:26 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 08:36:26 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 08:36:26 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 08:36:26 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 08:36:26 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 08:36:26 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.38s) ---
+2025-04-26 08:37:04 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 08:37:04 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 08:37:04 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 08:37:04 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 08:37:04 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 08:37:04 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:37:04 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 08:37:05 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 08:37:05 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 08:37:05 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 08:37:05 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 08:37:05 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 08:37:05 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 08:37:05 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 08:37:05 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 08:37:05 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.37s) ---
+2025-04-26 10:23:53 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 10:23:53 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 10:23:53 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 10:23:53 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 10:23:53 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 10:23:53 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 10:23:53 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 10:23:53 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 10:23:53 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 10:23:53 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 10:23:53 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.57s) ---
+2025-04-26 10:24:19 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 10:24:19 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 10:24:19 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 10:24:19 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 10:24:19 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 10:24:19 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 10:24:19 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 10:24:31 - TradingBot - INFO [MainThread _extract_market_details:253] - Market Details Set: Min Qty=0.1, Qty Step=0.1, Price Tick=0.0001
+2025-04-26 10:24:31 - TradingBot - INFO [MainThread _initialize:179] - Setting leverage for DOT/USDT:USDT to 10x...
+2025-04-26 10:24:32 - TradingBot - SUCCESS [MainThread log_success:55] - [32mLeverage set confirmed.[0m
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _initialize:191] - Fetching initial account state (position, orders, balance)...
+2025-04-26 10:24:32 - TradingBot - DEBUG [MainThread _update_state:262] - Updating strategy state...
+2025-04-26 10:24:32 - TradingBot - ERROR [MainThread _update_state:325] - Unexpected error during state update: module 'bybit_helpers' has no attribute 'get_current_position_bybit_v5'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 269, in _update_state
+    bybit.get_current_position_bybit_v5(self.exchange, self.symbol, self.api_config),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'bybit_helpers' has no attribute 'get_current_position_bybit_v5'
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _initialize:195] - Initial Position: Side=NONE, Qty=0
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _initialize:196] - Initial Open Orders: 0
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _initialize:197] - Initial Available Balance: 0.0000 USDT
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _initialize:200] - Performing initial cleanup: cancelling existing orders...
+2025-04-26 10:24:32 - TradingBot - CRITICAL [MainThread _initialize:220] - [41m[37mCritical error during strategy initialization: cancel_all_orders() got an unexpected keyword argument 'category'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 203, in _initialize
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 10:24:32 - TradingBot - CRITICAL [MainThread main:215] - Main execution block encountered an unhandled error: 'bybit' object has no attribute 'closed'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 203, in _initialize
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 188, in main
+    initialized = await strategy_instance._initialize() # Run initialization explicitly
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 222, in _initialize
+    if self.exchange and hasattr(self.exchange, 'close') and not self.exchange.closed:
+                                                                 ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'bybit' object has no attribute 'closed'
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread _cleanup:914] - Cancelling all remaining open orders...
+2025-04-26 10:24:32 - TradingBot - ERROR [MainThread main:230] - Error during strategy internal cleanup: cancel_all_orders() got an unexpected keyword argument 'category'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 228, in main
+    await cleanup_result
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 917, in _cleanup
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 10:24:32 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 10:24:32 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 10:24:32 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 12.92s) ---
+2025-04-26 15:07:06 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 15:07:06 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 15:07:06 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 15:07:06 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 15:07:06 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 15:07:06 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 15:07:06 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 15:07:07 - TradingBot - CRITICAL [MainThread _initialize:167] - Failed to initialize Bybit exchange connection. Stopping.
+2025-04-26 15:07:07 - TradingBot - CRITICAL [MainThread main:190] - Strategy initialization method failed. Cannot start trading loop.
+2025-04-26 15:07:07 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 15:07:07 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 15:07:07 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 15:07:07 - TradingBot - INFO [MainThread _cleanup:926] - --- Strategy Cleanup Complete ---
+2025-04-26 15:07:07 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 15:07:07 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 15:07:07 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.65s) ---
+2025-04-26 15:07:42 - TradingBot - DEBUG [MainThread setup_logger:297] - --- Logger Setup Complete (DEBUG Test) ---
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 15:07:42 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 15:07:42 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 15:07:42 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 15:07:42 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 15:07:42 - TradingBot - DEBUG [MainThread __init__:152] - Required indicators: ['evt_trend_7', 'evt_buy_7', 'evt_sell_7', 'ATRr_14']
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread _initialize:162] - [1m--- Strategy Initialization Phase ---[0m
+2025-04-26 15:07:51 - TradingBot - INFO [MainThread _extract_market_details:253] - Market Details Set: Min Qty=0.1, Qty Step=0.1, Price Tick=0.0001
+2025-04-26 15:07:51 - TradingBot - INFO [MainThread _initialize:179] - Setting leverage for DOT/USDT:USDT to 10x...
+2025-04-26 15:07:52 - TradingBot - SUCCESS [MainThread log_success:55] - [32mLeverage set confirmed.[0m
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:191] - Fetching initial account state (position, orders, balance)...
+2025-04-26 15:07:52 - TradingBot - DEBUG [MainThread _update_state:262] - Updating strategy state...
+2025-04-26 15:07:52 - TradingBot - ERROR [MainThread _update_state:325] - Unexpected error during state update: module 'bybit_helpers' has no attribute 'get_current_position_bybit_v5'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 269, in _update_state
+    bybit.get_current_position_bybit_v5(self.exchange, self.symbol, self.api_config),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'bybit_helpers' has no attribute 'get_current_position_bybit_v5'
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:195] - Initial Position: Side=NONE, Qty=0
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:196] - Initial Open Orders: 0
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:197] - Initial Available Balance: 0.0000 USDT
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:200] - Performing initial cleanup: cancelling existing orders...
+2025-04-26 15:07:52 - TradingBot - CRITICAL [MainThread _initialize:220] - [41m[37mCritical error during strategy initialization: cancel_all_orders() got an unexpected keyword argument 'category'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 203, in _initialize
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 15:07:52 - TradingBot - CRITICAL [MainThread main:215] - Main execution block encountered an unhandled error: 'bybit' object has no attribute 'closed'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 203, in _initialize
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 188, in main
+    initialized = await strategy_instance._initialize() # Run initialization explicitly
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 222, in _initialize
+    if self.exchange and hasattr(self.exchange, 'close') and not self.exchange.closed:
+                                                                 ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'bybit' object has no attribute 'closed'
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread main:219] - [1m--- Main Execution Block Finalizing (Run Success: False) ---[0m
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _cleanup:914] - Cancelling all remaining open orders...
+2025-04-26 15:07:52 - TradingBot - ERROR [MainThread main:230] - Error during strategy internal cleanup: cancel_all_orders() got an unexpected keyword argument 'category'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 228, in main
+    await cleanup_result
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 917, in _cleanup
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 15:07:52 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 15:07:52 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 9.93s) ---

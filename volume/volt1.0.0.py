@@ -3,31 +3,27 @@
 # Version 1.1.1: Adds dynamic sizing, risk management, performance tracking, and backtesting
 
 # --- Core Libraries ---
-import hashlib
-import hmac
 import json
 import logging
-import math
 import os
 import time
-from datetime import datetime
-from decimal import Decimal, ROUND_DOWN, ROUND_UP, getcontext
-from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, List, Optional, Tuple, TypedDict
-from zoneinfo import ZoneInfo
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from decimal import Decimal, getcontext
+from logging.handlers import RotatingFileHandler
+from typing import Any
+from zoneinfo import ZoneInfo
+
+import backtrader as bt  # For backtesting support
+import ccxt
+import jsonschema  # For configuration validation
 
 # --- Dependencies ---
-import numpy as np
 import pandas as pd
 import pandas_ta as ta
-import requests
-import ccxt
 from colorama import Fore, Style, init
 from dotenv import load_dotenv
-import jsonschema  # For configuration validation
-from dataclasses import dataclass, asdict
-import backtrader as bt  # For backtesting support
 
 # --- Initialize Environment ---
 getcontext().prec = 28
@@ -45,7 +41,6 @@ LOG_DIRECTORY = "bot_logs"
 try:
     TIMEZONE = ZoneInfo("America/Chicago")
 except Exception:
-    print(f"{Fore.RED}Failed to initialize timezone. Using UTC.{Style.RESET_ALL}")
     TIMEZONE = ZoneInfo("UTC")
 
 # API Settings
@@ -90,6 +85,7 @@ BRIGHT = Style.BRIGHT
 
 os.makedirs(LOG_DIRECTORY, exist_ok=True)
 
+
 # --- Performance Tracking ---
 @dataclass
 class TradeStats:
@@ -102,7 +98,7 @@ class TradeStats:
     current_drawdown: Decimal = Decimal('0')
     win_rate: float = 0.0
 
-    def update(self, trade_pnl: Decimal):
+    def update(self, trade_pnl: Decimal) -> None:
         """Updates stats with new trade PNL."""
         self.total_trades += 1
         if trade_pnl > Decimal('0'):
@@ -113,6 +109,7 @@ class TradeStats:
         self.current_drawdown = min(self.current_drawdown, self.total_pnl)
         self.max_drawdown = min(self.max_drawdown, self.current_drawdown)
         self.win_rate = (self.winning_trades / self.total_trades) if self.total_trades > 0 else 0.0
+
 
 # --- Configuration Schema ---
 CONFIG_SCHEMA = {
@@ -172,10 +169,11 @@ CONFIG_SCHEMA = {
     "required": ["interval", "quote_currency", "risk_per_trade", "leverage"]
 }
 
+
 # --- Logging Setup ---
 class StructuredLogger(logging.LoggerAdapter):
     """Custom logger with support for structured JSON logging."""
-    def __init__(self, logger: logging.Logger):
+    def __init__(self, logger: logging.Logger) -> None:
         super().__init__(logger, {})
         self.structured_logging = os.getenv("STRUCTURED_LOGGING", "false").lower() == "true"
 
@@ -189,6 +187,7 @@ class StructuredLogger(logging.LoggerAdapter):
             }
             return json.dumps(log_data), kwargs
         return msg, kwargs
+
 
 def setup_logger(name: str) -> StructuredLogger:
     """Sets up a logger with file and console handlers."""
@@ -227,8 +226,9 @@ def setup_logger(name: str) -> StructuredLogger:
     logger.propagate = False
     return StructuredLogger(logger)
 
+
 # --- Configuration Management ---
-def load_config(filepath: str) -> Dict[str, Any]:
+def load_config(filepath: str) -> dict[str, Any]:
     """Loads and validates configuration, falling back to defaults if needed."""
     default_config = {
         "interval": "5",
@@ -281,7 +281,7 @@ def load_config(filepath: str) -> Dict[str, Any]:
         return default_config
 
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             config = json.load(f)
         jsonschema.validate(config, CONFIG_SCHEMA)
         updated_config, changed = _ensure_config_keys(config, default_config)
@@ -297,7 +297,8 @@ def load_config(filepath: str) -> Dict[str, Any]:
         init_logger.error(f"{NEON_RED}Error loading config: {e}. Using default.{RESET}")
         return default_config
 
-def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any], parent_key: str = "") -> Tuple[Dict[str, Any], bool]:
+
+def _ensure_config_keys(config: dict[str, Any], default_config: dict[str, Any], parent_key: str = "") -> tuple[dict[str, Any], bool]:
     """Ensures all required config keys exist, adding defaults if missing."""
     updated_config = config.copy()
     changed = False
@@ -314,8 +315,9 @@ def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any], 
                 changed = True
     return updated_config, changed
 
+
 # --- Exchange Setup ---
-def initialize_exchange(logger: StructuredLogger) -> Optional[ccxt.Exchange]:
+def initialize_exchange(logger: StructuredLogger) -> ccxt.Exchange | None:
     """Initializes the Bybit exchange with retry logic."""
     lg = logger
     try:
@@ -364,8 +366,9 @@ def initialize_exchange(logger: StructuredLogger) -> Optional[ccxt.Exchange]:
         lg.critical(f"{NEON_RED}Exchange initialization failed: {e}{RESET}")
         return None
 
+
 # --- Data Fetching ---
-def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogger) -> Optional[Decimal]:
+def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogger) -> Decimal | None:
     """Fetches the current market price with retry logic."""
     lg = logger
     for attempt in range(MAX_API_RETRIES):
@@ -379,6 +382,7 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: Struc
             time.sleep(RETRY_DELAY_SECONDS * (2 ** attempt))
     lg.error(f"{NEON_RED}Failed to fetch price for {symbol}{RESET}")
     return None
+
 
 def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int, logger: StructuredLogger) -> pd.DataFrame:
     """Fetches OHLCV data with retry logic."""
@@ -406,10 +410,11 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
             time.sleep(RETRY_DELAY_SECONDS * (2 ** attempt))
     return pd.DataFrame()
 
+
 # --- Strategy Implementation ---
 class VolumaticOBStrategy:
     """Implements the Volumatic Trend and Pivot Order Block strategy."""
-    def __init__(self, config: Dict[str, Any], market_info: Dict, logger: StructuredLogger):
+    def __init__(self, config: dict[str, Any], market_info: dict, logger: StructuredLogger) -> None:
         self.config = config
         self.logger = logger
         self.market_info = market_info
@@ -425,12 +430,12 @@ class VolumaticOBStrategy:
         self.pl_right = strategy_params.get('pl_right', DEFAULT_PL_RIGHT)
         self.ob_extend = strategy_params.get('ob_extend', DEFAULT_OB_EXTEND)
         self.ob_max_boxes = strategy_params.get('ob_max_boxes', DEFAULT_OB_MAX_BOXES)
-        self.bull_boxes: List[Dict] = []
-        self.bear_boxes: List[Dict] = []
+        self.bull_boxes: list[dict] = []
+        self.bear_boxes: list[dict] = []
         self.min_data_len = max(self.vt_length * 2, self.vt_atr_period, self.vt_vol_ema_length,
                                 self.ph_left + self.ph_right, self.pl_left + self.pl_right) + 50
 
-    def update(self, df: pd.DataFrame) -> Dict:
+    def update(self, df: pd.DataFrame) -> dict:
         """Updates strategy indicators and order blocks."""
         if df.empty or len(df) < self.min_data_len:
             self.logger.error(f"Insufficient data: {len(df)} rows, need {self.min_data_len}")
@@ -510,10 +515,11 @@ class VolumaticOBStrategy:
             'lower_band': df['lower_band'].iloc[-1] if pd.notna(df['lower_band'].iloc[-1]) else None
         }
 
+
 # --- Signal Generation ---
 class SignalGenerator:
     """Generates trading signals based on strategy analysis."""
-    def __init__(self, config: Dict[str, Any], logger: StructuredLogger):
+    def __init__(self, config: dict[str, Any], logger: StructuredLogger) -> None:
         self.config = config
         self.logger = logger
         strategy_cfg = config.get('strategy_params', {})
@@ -523,11 +529,11 @@ class SignalGenerator:
         self.initial_tp_atr_multiple = Decimal(str(protection_cfg.get('initial_take_profit_atr_multiple', 0.7)))
         self.initial_sl_atr_multiple = Decimal(str(protection_cfg.get('initial_stop_loss_atr_multiple', 1.8)))
 
-    def generate_signal(self, analysis_results: Dict, open_position: Optional[Dict]) -> str:
+    def generate_signal(self, analysis_results: dict, open_position: dict | None) -> str:
         """Generates a trading signal based on analysis results."""
         if not analysis_results.get('dataframe') or analysis_results['last_close'] <= Decimal('0'):
             return "HOLD"
-        
+
         latest_close = analysis_results['last_close']
         is_trend_up = analysis_results['current_trend_up']
         active_bull_obs = analysis_results['active_bull_boxes']
@@ -550,12 +556,12 @@ class SignalGenerator:
                         return "SELL"
         return "HOLD"
 
-    def calculate_initial_tp_sl(self, entry_price: Decimal, signal: str, atr: Decimal, market_info: Dict, exchange: ccxt.Exchange) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+    def calculate_initial_tp_sl(self, entry_price: Decimal, signal: str, atr: Decimal, market_info: dict, exchange: ccxt.Exchange) -> tuple[Decimal | None, Decimal | None]:
         """Calculates initial take-profit and stop-loss prices."""
         if entry_price <= Decimal('0') or atr <= Decimal('0'):
             return None, None
 
-        min_tick_size = Decimal(str(market_info['precision']['price']))
+        Decimal(str(market_info['precision']['price']))
         tp_offset = atr * self.initial_tp_atr_multiple
         sl_offset = atr * self.initial_sl_atr_multiple
 
@@ -570,8 +576,9 @@ class SignalGenerator:
         stop_loss = exchange.price_to_precision(market_info['symbol'], float(stop_loss)) if stop_loss else None
         return Decimal(take_profit) if take_profit else None, Decimal(stop_loss) if stop_loss else None
 
+
 # --- Trading Logic ---
-def calculate_position_size(balance: Decimal, risk_per_trade: float, initial_stop_loss_price: Decimal, entry_price: Decimal, market_info: Dict, exchange: ccxt.Exchange, logger: StructuredLogger) -> Optional[Decimal]:
+def calculate_position_size(balance: Decimal, risk_per_trade: float, initial_stop_loss_price: Decimal, entry_price: Decimal, market_info: dict, exchange: ccxt.Exchange, logger: StructuredLogger) -> Decimal | None:
     """Calculates position size based on risk and volatility."""
     if balance <= Decimal('0') or entry_price <= Decimal('0') or initial_stop_loss_price <= Decimal('0'):
         logger.error(f"Invalid inputs for position sizing: Balance={balance}, Entry={entry_price}, SL={initial_stop_loss_price}")
@@ -591,7 +598,8 @@ def calculate_position_size(balance: Decimal, risk_per_trade: float, initial_sto
         formatted_size = min_size
     return formatted_size
 
-def place_trade(exchange: ccxt.Exchange, symbol: str, side: str, amount: Decimal, market_info: Dict, logger: StructuredLogger, reduce_only: bool = False) -> Optional[Dict]:
+
+def place_trade(exchange: ccxt.Exchange, symbol: str, side: str, amount: Decimal, market_info: dict, logger: StructuredLogger, reduce_only: bool = False) -> dict | None:
     """Places a market order with retry logic."""
     try:
         order_type = 'market'
@@ -603,7 +611,8 @@ def place_trade(exchange: ccxt.Exchange, symbol: str, side: str, amount: Decimal
         logger.error(f"Failed to place order: {e}")
         return None
 
-def set_trailing_stop_loss(exchange: ccxt.Exchange, symbol: str, market_info: Dict, position: Dict, config: Dict, logger: StructuredLogger, take_profit_price: Optional[Decimal] = None) -> bool:
+
+def set_trailing_stop_loss(exchange: ccxt.Exchange, symbol: str, market_info: dict, position: dict, config: dict, logger: StructuredLogger, take_profit_price: Decimal | None = None) -> bool:
     """Sets a trailing stop-loss order."""
     try:
         protection = config.get('protection', {})
@@ -616,11 +625,12 @@ def set_trailing_stop_loss(exchange: ccxt.Exchange, symbol: str, market_info: Di
         if take_profit_price:
             params['takeProfit'] = float(take_profit_price)
         exchange.private_post_position_trading_stop({'symbol': market_info['id'], **params})
-        logger.info(f"Trailing stop set: Callback={callback_rate*100}%")
+        logger.info(f"Trailing stop set: Callback={callback_rate * 100}%")
         return True
     except Exception as e:
         logger.error(f"Failed to set trailing stop: {e}")
         return False
+
 
 # --- Backtesting Support ---
 class VolumaticBacktestStrategy(bt.Strategy):
@@ -630,13 +640,13 @@ class VolumaticBacktestStrategy(bt.Strategy):
         ('logger', None),
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.strategy = VolumaticOBStrategy(self.params.config, {}, self.params.logger)
         self.signal_generator = SignalGenerator(self.params.config, self.params.logger)
         self.position_size = Decimal('0')
         self.entry_price = None
 
-    def next(self):
+    def next(self) -> None:
         df = pd.DataFrame({
             'open': [self.data.open[0]],
             'high': [self.data.high[0]],
@@ -663,8 +673,9 @@ class VolumaticBacktestStrategy(bt.Strategy):
         elif signal in ["EXIT_LONG", "SELL"] and self.position:
             self.close()
 
+
 # --- Main Loop ---
-def main():
+def main() -> None:
     """Main entry point for the trading bot."""
     global CONFIG
     init_logger = setup_logger("init")
@@ -720,7 +731,8 @@ def main():
         symbol_logger.info(f"Trade Stats: {asdict(trade_stats)}")
         logging.shutdown()
 
-def analyze_and_trade_symbol(exchange, symbol, config, logger, strategy_engine, signal_generator, market_info, trade_stats):
+
+def analyze_and_trade_symbol(exchange, symbol, config, logger, strategy_engine, signal_generator, market_info, trade_stats) -> None:
     """Analyzes market data and executes trades."""
     klines_df = fetch_klines_ccxt(exchange, symbol, CCXT_INTERVAL_MAP[config['interval']], config['fetch_limit'], logger)
     if klines_df.empty:
@@ -749,7 +761,8 @@ def analyze_and_trade_symbol(exchange, symbol, config, logger, strategy_engine, 
             if position:
                 place_trade(exchange, symbol, "SELL" if signal == "EXIT_LONG" else "BUY", abs(position['size_decimal']), market_info, logger, reduce_only=True)
 
-def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogger) -> Optional[Dict]:
+
+def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogger) -> dict | None:
     """Fetches the current open position for a symbol."""
     try:
         positions = exchange.fetch_positions([symbol])
@@ -767,7 +780,8 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: StructuredLo
         logger.error(f"Failed to fetch position: {e}")
         return None
 
-def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogger) -> Optional[Dict]:
+
+def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogger) -> dict | None:
     """Fetches market information for a symbol."""
     try:
         exchange.load_markets()
@@ -777,7 +791,8 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: StructuredLogg
         logger.error(f"Failed to get market info: {e}")
     return None
 
-def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: StructuredLogger) -> Optional[Decimal]:
+
+def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: StructuredLogger) -> Decimal | None:
     """Fetches the available balance for a currency."""
     try:
         balance = exchange.fetch_balance()
@@ -785,6 +800,7 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: StructuredLogg
     except Exception as e:
         logger.error(f"Failed to fetch balance: {e}")
         return None
+
 
 if __name__ == "__main__":
     main()

@@ -4,25 +4,20 @@
 # advanced position management (BE, TSL), and Bybit V5 compatibility.
 
 # Standard Library Imports
-import hashlib
-import hmac
 import json
 import logging
-import math
 import os
 import time
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal, ROUND_DOWN, ROUND_UP, InvalidOperation, getcontext
+from datetime import datetime
+from decimal import ROUND_DOWN, ROUND_UP, Decimal, getcontext
 from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 from zoneinfo import ZoneInfo
 
 # Third-Party Imports
 import ccxt
-import numpy as np
 import pandas as pd
 import pandas_ta as ta
-import requests
 from colorama import Fore, Style, init
 from dotenv import load_dotenv
 
@@ -91,8 +86,9 @@ FIB_LEVELS = [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]
 LOOP_DELAY_SECONDS = 10
 POSITION_CONFIRM_DELAY_SECONDS = 10
 
-config: Dict[str, Any] = {}
-default_config: Dict[str, Any] = {}
+config: dict[str, Any] = {}
+default_config: dict[str, Any] = {}
+
 
 # --- Configuration Loading & Validation ---
 class SensitiveFormatter(logging.Formatter):
@@ -110,7 +106,8 @@ class SensitiveFormatter(logging.Formatter):
                     msg = msg.replace(key_value, self._patterns[key_value])
         return msg
 
-def load_config(filepath: str) -> Dict[str, Any]:
+
+def load_config(filepath: str) -> dict[str, Any]:
     """Loads and validates configuration from a JSON file."""
     global TIMEZONE, default_config
     default_config = {
@@ -189,17 +186,14 @@ def load_config(filepath: str) -> Dict[str, Any]:
 
     if os.path.exists(filepath):
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding='utf-8') as f:
                 loaded_config = json.load(f)
             current_config = _merge_configs(loaded_config, default_config)
-            print(f"{NEON_GREEN}Loaded configuration from {filepath}{RESET}")
             if current_config != loaded_config:
                 needs_saving = True
-        except Exception as e:
-            print(f"{NEON_RED}Error loading config: {e}. Using defaults.{RESET}")
+        except Exception:
             needs_saving = True
     else:
-        print(f"{NEON_YELLOW}Config file not found. Creating default at {filepath}{RESET}")
         needs_saving = True
 
     def validate_param(key: str, validation_func: callable, error_msg: str) -> bool:
@@ -211,11 +205,9 @@ def load_config(filepath: str) -> Dict[str, Any]:
                 is_valid = True
             else:
                 current_config[key] = default
-                print(f"{NEON_RED}{error_msg.format(key=key, value=repr(value), default=default)}{RESET}")
                 nonlocal needs_saving
                 needs_saving = True
-        except Exception as e:
-            print(f"{NEON_RED}Validation error for '{key}': {e}. Reset to '{default}'.{RESET}")
+        except Exception:
             current_config[key] = default
             needs_saving = True
         return is_valid
@@ -227,8 +219,7 @@ def load_config(filepath: str) -> Dict[str, Any]:
 
     try:
         TIMEZONE = ZoneInfo(current_config["timezone"])
-    except Exception as e:
-        print(f"{NEON_RED}Invalid timezone: {e}. Reset to '{default_config['timezone']}'.{RESET}")
+    except Exception:
         current_config["timezone"] = default_config["timezone"]
         TIMEZONE = ZoneInfo(default_config["timezone"])
         needs_saving = True
@@ -287,9 +278,6 @@ def load_config(filepath: str) -> Dict[str, Any]:
             else:
                 raise ValueError
         except Exception:
-            bound_str = f"{'>' if not allow_min else '>='}{min_val} and {'<' if not allow_max else '<='}{max_val}"
-            type_str = 'integer' if is_int else 'number'
-            print(f"{NEON_RED}Invalid '{key}' ({value}). Must be {type_str} ({bound_str}). Reset to '{default}'.{RESET}")
             current_config[key] = default
             needs_saving = True
 
@@ -297,13 +285,13 @@ def load_config(filepath: str) -> Dict[str, Any]:
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(current_config, f, indent=4, sort_keys=True)
-            print(f"{NEON_YELLOW}Saved updated config to {filepath}{RESET}")
-        except Exception as e:
-            print(f"{NEON_RED}Error saving config: {e}{RESET}")
+        except Exception:
+            pass
 
     return current_config
 
-def _merge_configs(loaded_config: Dict, default_config: Dict) -> Dict:
+
+def _merge_configs(loaded_config: dict, default_config: dict) -> dict:
     """Recursively merges loaded config with defaults."""
     merged = default_config.copy()
     for key, value in loaded_config.items():
@@ -313,8 +301,9 @@ def _merge_configs(loaded_config: Dict, default_config: Dict) -> Dict:
             merged[key] = value
     return merged
 
+
 # --- Logging Setup ---
-def setup_logger(name: str, config: Dict[str, Any] = None, level: int = logging.INFO) -> logging.Logger:
+def setup_logger(name: str, config: dict[str, Any] = None, level: int = logging.INFO) -> logging.Logger:
     """Sets up a logger with file and console handlers."""
     logger = logging.getLogger(name)
     if logger.hasHandlers():
@@ -347,8 +336,9 @@ def setup_logger(name: str, config: Dict[str, Any] = None, level: int = logging.
     logger.propagate = False
     return logger
 
+
 # --- CCXT Exchange Setup ---
-def initialize_exchange(config: Dict[str, Any], logger: logging.Logger) -> Optional[ccxt.Exchange]:
+def initialize_exchange(config: dict[str, Any], logger: logging.Logger) -> ccxt.Exchange | None:
     """Initializes the CCXT Bybit exchange object."""
     lg = logger
     try:
@@ -402,6 +392,7 @@ def initialize_exchange(config: Dict[str, Any], logger: logging.Logger) -> Optio
         lg.critical(f"{NEON_RED}Exchange init failed: {e}{RESET}", exc_info=True)
         return None
 
+
 # --- Helper Functions ---
 def safe_api_call(func: callable, logger: logging.Logger, *args, **kwargs) -> Any:
     """Wraps API calls with retry logic."""
@@ -423,7 +414,8 @@ def safe_api_call(func: callable, logger: logging.Logger, *args, **kwargs) -> An
             lg.error(f"{NEON_RED}API call error: {e}{RESET}", exc_info=True)
             return None
 
-def fetch_balance(exchange: ccxt.Exchange, quote_currency: str, logger: logging.Logger) -> Optional[Decimal]:
+
+def fetch_balance(exchange: ccxt.Exchange, quote_currency: str, logger: logging.Logger) -> Decimal | None:
     """Fetches available balance with retries."""
     lg = logger
     try:
@@ -434,6 +426,7 @@ def fetch_balance(exchange: ccxt.Exchange, quote_currency: str, logger: logging.
     except Exception as e:
         lg.error(f"Balance fetch failed: {e}", exc_info=True)
     return None
+
 
 def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int, logger: logging.Logger) -> pd.DataFrame:
     """Fetches OHLCV data."""
@@ -448,7 +441,8 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
         lg.error(f"Klines fetch failed: {e}", exc_info=True)
     return pd.DataFrame()
 
-def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Decimal]:
+
+def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Decimal | None:
     """Fetches current ticker price."""
     lg = logger
     try:
@@ -459,7 +453,8 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
         lg.error(f"Price fetch failed: {e}", exc_info=True)
     return None
 
-def fetch_orderbook_ccxt(exchange: ccxt.Exchange, symbol: str, limit: int, logger: logging.Logger) -> Optional[Dict]:
+
+def fetch_orderbook_ccxt(exchange: ccxt.Exchange, symbol: str, limit: int, logger: logging.Logger) -> dict | None:
     """Fetches order book data."""
     lg = logger
     try:
@@ -471,7 +466,8 @@ def fetch_orderbook_ccxt(exchange: ccxt.Exchange, symbol: str, limit: int, logge
         lg.error(f"Orderbook fetch failed: {e}", exc_info=True)
     return None
 
-def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Dict]:
+
+def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> dict | None:
     """Retrieves market info with enhanced validation."""
     lg = logger
     try:
@@ -493,15 +489,16 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
         lg.error(f"Market info fetch failed for {symbol}: {e}", exc_info=True)
         return None
 
+
 # --- Trading Analysis ---
 class TradingAnalyzer:
     """Analyzes market data and generates trading signals."""
-    def __init__(self, klines_df: pd.DataFrame, logger: logging.Logger, config: Dict[str, Any], market_info: Dict):
+    def __init__(self, klines_df: pd.DataFrame, logger: logging.Logger, config: dict[str, Any], market_info: dict) -> None:
         self.df = klines_df
         self.lg = logger
         self.config = config
         self.market_info = market_info
-        self.indicator_values: Dict[str, Decimal] = {}
+        self.indicator_values: dict[str, Decimal] = {}
         self.calculate_indicators()
 
     def get_min_tick_size(self) -> Decimal:
@@ -527,7 +524,6 @@ class TradingAnalyzer:
     def calculate_indicators(self) -> None:
         """Calculates enabled technical indicators."""
         indicators = self.config.get("indicators", {})
-        df = self.df
 
         if indicators.get("ema_alignment", False):
             self._calculate_ema()
@@ -722,14 +718,14 @@ class TradingAnalyzer:
             return 1.0 if mfi < 20 else -1.0 if mfi > 80 else 0.0
         return 0.0
 
-    def _check_orderbook(self, orderbook_data: Optional[Dict], current_price: Decimal) -> float:
+    def _check_orderbook(self, orderbook_data: dict | None, current_price: Decimal) -> float:
         if orderbook_data and current_price:
             bid_vol = sum(v for p, v in orderbook_data['bids'] if p >= current_price * Decimal('0.995'))
             ask_vol = sum(v for p, v in orderbook_data['asks'] if p <= current_price * Decimal('1.005'))
             return 1.0 if bid_vol > ask_vol else -1.0 if ask_vol > bid_vol else 0.0
         return 0.0
 
-    def generate_trading_signal(self, current_price: Decimal, orderbook_data: Optional[Dict]) -> str:
+    def generate_trading_signal(self, current_price: Decimal, orderbook_data: dict | None) -> str:
         """Generates a trading signal based on weighted indicator scores."""
         weights = self.config["weight_sets"].get(self.config["active_weight_set"], {})
         scores = {}
@@ -767,7 +763,7 @@ class TradingAnalyzer:
             self.lg.info(f"Signal: {signal}, Score: {total_score:.2f}, Components: {', '.join(f'{k}={v:.1f}' for k, v in scores.items())}")
         return signal
 
-    def calculate_entry_tp_sl(self, entry_price: Decimal, signal: str) -> Tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
+    def calculate_entry_tp_sl(self, entry_price: Decimal, signal: str) -> tuple[Decimal | None, Decimal | None, Decimal | None]:
         """Calculates entry, take-profit, and stop-loss prices."""
         atr = self.indicator_values.get("ATR")
         if not atr or not entry_price.is_finite() or entry_price <= 0:
@@ -788,10 +784,11 @@ class TradingAnalyzer:
 
         return entry_price, tp if tp > 0 else None, sl if sl > 0 else None
 
+
 def calculate_position_size(
     balance: Decimal, risk_per_trade: float, initial_stop_loss_price: Decimal,
-    entry_price: Decimal, market_info: Dict, exchange: ccxt.Exchange, logger: logging.Logger
-) -> Optional[Decimal]:
+    entry_price: Decimal, market_info: dict, exchange: ccxt.Exchange, logger: logging.Logger
+) -> Decimal | None:
     """Calculates position size based on risk management."""
     lg = logger
     try:
@@ -822,7 +819,8 @@ def calculate_position_size(
         lg.error(f"Size calc error: {e}", exc_info=True)
         return None
 
-def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Dict]:
+
+def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> dict | None:
     """Fetches open position details."""
     lg = logger
     try:
@@ -848,7 +846,8 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logg
         lg.error(f"Position fetch error: {e}", exc_info=True)
         return None
 
-def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, market_info: Dict, logger: logging.Logger) -> bool:
+
+def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, market_info: dict, logger: logging.Logger) -> bool:
     """Sets leverage for the symbol."""
     lg = logger
     if not market_info.get('is_contract', False):
@@ -863,11 +862,12 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
         lg.error(f"Leverage set failed: {e}", exc_info=True)
         return False
 
+
 def place_trade(
     exchange: ccxt.Exchange, symbol: str, trade_signal: str, position_size: Decimal,
-    market_info: Dict, logger: logging.Logger, order_type: str = 'market',
-    limit_price: Optional[Decimal] = None, reduce_only: bool = False
-) -> Optional[Dict]:
+    market_info: dict, logger: logging.Logger, order_type: str = 'market',
+    limit_price: Decimal | None = None, reduce_only: bool = False
+) -> dict | None:
     """Places a trade order."""
     lg = logger
     side = 'buy' if trade_signal == "BUY" else 'sell'
@@ -885,11 +885,12 @@ def place_trade(
         lg.error(f"Trade placement failed: {e}", exc_info=True)
     return None
 
+
 def _set_position_protection(
-    exchange: ccxt.Exchange, symbol: str, market_info: Dict, position_info: Dict,
-    logger: logging.Logger, stop_loss_price: Optional[Decimal] = None,
-    take_profit_price: Optional[Decimal] = None, trailing_stop_distance: Optional[Decimal] = None,
-    tsl_activation_price: Optional[Decimal] = None
+    exchange: ccxt.Exchange, symbol: str, market_info: dict, position_info: dict,
+    logger: logging.Logger, stop_loss_price: Decimal | None = None,
+    take_profit_price: Decimal | None = None, trailing_stop_distance: Decimal | None = None,
+    tsl_activation_price: Decimal | None = None
 ) -> bool:
     """Sets position protection (SL/TP/TSL) for Bybit V5."""
     lg = logger
@@ -917,9 +918,10 @@ def _set_position_protection(
         lg.error(f"Protection error: {e}", exc_info=True)
         return False
 
+
 def set_trailing_stop_loss(
-    exchange: ccxt.Exchange, symbol: str, market_info: Dict, position_info: Dict,
-    config: Dict[str, Any], logger: logging.Logger, take_profit_price: Optional[Decimal] = None
+    exchange: ccxt.Exchange, symbol: str, market_info: dict, position_info: dict,
+    config: dict[str, Any], logger: logging.Logger, take_profit_price: Decimal | None = None
 ) -> bool:
     """Sets a trailing stop loss."""
     lg = logger
@@ -942,8 +944,9 @@ def set_trailing_stop_loss(
         lg.error(f"TSL error: {e}", exc_info=True)
         return False
 
+
 # --- Main Analysis and Trading Loop ---
-def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[str, Any], logger: logging.Logger) -> None:
+def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: dict[str, Any], logger: logging.Logger) -> None:
     """Executes one cycle of analysis and trading."""
     lg = logger
     lg.info(f"--- Cycle Start: {symbol} ({config['interval']}) ---")
@@ -1001,6 +1004,7 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
     except Exception as e:
         lg.error(f"Cycle error: {e}", exc_info=True)
 
+
 def main() -> None:
     """Main bot execution loop."""
     global config
@@ -1026,6 +1030,7 @@ def main() -> None:
         logger.critical(f"Startup error: {e}", exc_info=True)
     finally:
         logging.shutdown()
+
 
 if __name__ == "__main__":
     config = load_config(CONFIG_FILE)

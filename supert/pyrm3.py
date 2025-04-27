@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # ██████╗ ██╗   ██╗███████╗███╗   ███╗███████╗████████╗██╗   ██╗██╗   ██╗███████╗
 # ██╔══██╗╚██╗ ██╔╝██╔════╝████╗ ████║██╔════╝╚══██╔══╝██║   ██║██║   ██║██╔════╝
@@ -10,9 +9,8 @@
 # Pyrmethus - Unified Scalping Spell v2.3.0 (Refactored & Robust)
 # Conjures high-frequency trades on Bybit Futures with enhanced precision, adaptable strategies, and improved robustness.
 
-"""
-High-Frequency Trading Bot (Scalping) for Bybit USDT Futures
-Version: 2.3.0 (Unified: Selectable Strategies + Precision + Native SL/TSL + Refactoring + Robustness)
+"""High-Frequency Trading Bot (Scalping) for Bybit USDT Futures
+Version: 2.3.0 (Unified: Selectable Strategies + Precision + Native SL/TSL + Refactoring + Robustness).
 
 Features:
 - Multiple strategies selectable via config: "DUAL_SUPERTREND", "STOCHRSI_MOMENTUM", "EHLERS_FISHER", "EHLERS_MA_CROSS".
@@ -44,36 +42,40 @@ Disclaimer:
 # Standard Library Imports
 import logging
 import os
+import subprocess
 import sys
 import time
 import traceback
-import subprocess
+from decimal import (
+    ROUND_DOWN,
+    Decimal,
+    DivisionByZero,
+    InvalidOperation,
+    getcontext,
+)
+
 # import shlex # No longer needed with basic sanitization
-from typing import Dict, Optional, Any, Tuple, List, Union, Literal
-from decimal import Decimal, getcontext, ROUND_HALF_UP, ROUND_DOWN, InvalidOperation, DivisionByZero
+from typing import Any, Literal
 
 # Third-party Libraries
 try:
     import ccxt
     import pandas as pd
-    import pandas_ta as ta # type: ignore[import]
+    import pandas_ta as ta  # type: ignore[import]
+    from colorama import Back, Fore, Style
+    from colorama import init as colorama_init
     from dotenv import load_dotenv
-    from colorama import init as colorama_init, Fore, Style, Back
 except ImportError as e:
     missing_pkg = e.name
-    print(f"\033[91mMissing essential spell component: \033[1m{missing_pkg}\033[0m") # Bright Red
-    print("\033[93mTo conjure it, cast the following spell in your Termux terminal:\033[0m") # Bright Yellow
-    print(f"\033[1m\033[96mpip install {missing_pkg}\033[0m") # Bold Bright Cyan
-    print("\n\033[96mOr, to ensure all scrolls are present, cast:\033[0m") # Bright Cyan
     # Corrected dependency list (removed requests)
-    print("\033[1m\033[96mpip install ccxt pandas pandas_ta python-dotenv colorama\033[0m")
     sys.exit(1)
 
 # --- Initializations ---
 colorama_init(autoreset=True)
 load_dotenv()
-getcontext().prec = 28 # Set Decimal precision globally (adjust if needed)
-DECIMAL_QUANTIZE_EXP = Decimal('1e-8') # Default quantization exponent (8 decimal places)
+getcontext().prec = 28  # Set Decimal precision globally (adjust if needed)
+DECIMAL_QUANTIZE_EXP = Decimal('1e-8')  # Default quantization exponent (8 decimal places)
+
 
 # --- Configuration Class ---
 class Config:
@@ -88,35 +90,35 @@ class Config:
     TRIGGER_BY_LAST: Literal['LastPrice'] = "LastPrice"
     TRIGGER_BY_MARK: Literal['MarkPrice'] = "MarkPrice"
     TRIGGER_BY_INDEX: Literal['IndexPrice'] = "IndexPrice"
-    VALID_TRIGGER_TYPES: List[str] = [TRIGGER_BY_LAST, TRIGGER_BY_MARK, TRIGGER_BY_INDEX]
+    VALID_TRIGGER_TYPES: list[str] = [TRIGGER_BY_LAST, TRIGGER_BY_MARK, TRIGGER_BY_INDEX]
 
     def __init__(self) -> None:
         """Initializes the configuration by loading environment variables."""
         logger.info(f"{Fore.MAGENTA}--- Summoning Configuration Runes (v2.3.0) ---{Style.RESET_ALL}")
         # --- API Credentials ---
-        self.api_key: Optional[str] = self._get_env("BYBIT_API_KEY", required=True, color=Fore.RED)
-        self.api_secret: Optional[str] = self._get_env("BYBIT_API_SECRET", required=True, color=Fore.RED)
+        self.api_key: str | None = self._get_env("BYBIT_API_KEY", required=True, color=Fore.RED)
+        self.api_secret: str | None = self._get_env("BYBIT_API_SECRET", required=True, color=Fore.RED)
 
         # --- Trading Parameters ---
         self.symbol: str = self._get_env("SYMBOL", "BTC/USDT:USDT", color=Fore.YELLOW)
         self.interval: str = self._get_env("INTERVAL", "1m", color=Fore.YELLOW)
         self.leverage: int = self._get_env("LEVERAGE", 10, cast_type=int, color=Fore.YELLOW, min_val=1, max_val=100)
         self.sleep_seconds: int = self._get_env("SLEEP_SECONDS", 10, cast_type=int, color=Fore.YELLOW, min_val=1)
-        self.order_retry_delay: int = self._get_env("ORDER_RETRY_DELAY", 2, cast_type=int, color=Fore.YELLOW, min_val=1) # For potential future retries
+        self.order_retry_delay: int = self._get_env("ORDER_RETRY_DELAY", 2, cast_type=int, color=Fore.YELLOW, min_val=1)  # For potential future retries
 
         # --- Strategy Selection ---
         self.strategy_name: str = self._get_env("STRATEGY_NAME", "DUAL_SUPERTREND", color=Fore.CYAN).upper()
-        self.valid_strategies: List[str] = ["DUAL_SUPERTREND", "STOCHRSI_MOMENTUM", "EHLERS_FISHER", "EHLERS_MA_CROSS"]
+        self.valid_strategies: list[str] = ["DUAL_SUPERTREND", "STOCHRSI_MOMENTUM", "EHLERS_FISHER", "EHLERS_MA_CROSS"]
         if self.strategy_name not in self.valid_strategies:
             logger.critical(f"Invalid STRATEGY_NAME '{self.strategy_name}'. Valid options: {self.valid_strategies}")
             raise ValueError(f"Invalid STRATEGY_NAME '{self.strategy_name}'. Valid: {self.valid_strategies}")
         logger.info(f"Selected Strategy: {Fore.CYAN}{self.strategy_name}{Style.RESET_ALL}")
 
         # --- Risk Management ---
-        self.risk_per_trade_percentage: Decimal = self._get_env("RISK_PER_TRADE_PERCENTAGE", "0.005", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.0001"), max_val=Decimal("0.1")) # 0.01% to 10%
+        self.risk_per_trade_percentage: Decimal = self._get_env("RISK_PER_TRADE_PERCENTAGE", "0.005", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.0001"), max_val=Decimal("0.1"))  # 0.01% to 10%
         self.atr_stop_loss_multiplier: Decimal = self._get_env("ATR_STOP_LOSS_MULTIPLIER", "1.5", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.1"))
         self.max_order_usdt_amount: Decimal = self._get_env("MAX_ORDER_USDT_AMOUNT", "500.0", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("1.0"))
-        self.required_margin_buffer: Decimal = self._get_env("REQUIRED_MARGIN_BUFFER", "1.05", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("1.0")) # Must be >= 1
+        self.required_margin_buffer: Decimal = self._get_env("REQUIRED_MARGIN_BUFFER", "1.05", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("1.0"))  # Must be >= 1
 
         # --- SL/TSL Configuration ---
         self.sl_trigger_by: str = self._get_env("SL_TRIGGER_BY", self.TRIGGER_BY_LAST, color=Fore.GREEN)
@@ -125,8 +127,8 @@ class Config:
         if self.tsl_trigger_by not in self.VALID_TRIGGER_TYPES: raise ValueError(f"Invalid TSL_TRIGGER_BY: {self.tsl_trigger_by}")
 
         # --- Trailing Stop Loss (Exchange Native) ---
-        self.trailing_stop_percentage: Decimal = self._get_env("TRAILING_STOP_PERCENTAGE", "0.005", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.0001"), max_val=Decimal("0.1")) # 0.01% to 10% trail
-        self.trailing_stop_activation_offset_percent: Decimal = self._get_env("TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT", "0.001", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.0001"), max_val=Decimal("0.05")) # 0.01% to 5% activation offset
+        self.trailing_stop_percentage: Decimal = self._get_env("TRAILING_STOP_PERCENTAGE", "0.005", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.0001"), max_val=Decimal("0.1"))  # 0.01% to 10% trail
+        self.trailing_stop_activation_offset_percent: Decimal = self._get_env("TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT", "0.001", cast_type=Decimal, color=Fore.GREEN, min_val=Decimal("0.0001"), max_val=Decimal("0.05"))  # 0.01% to 5% activation offset
 
         # --- Indicator Parameters (Common) ---
         self.atr_calculation_period: int = self._get_env("ATR_CALCULATION_PERIOD", 14, cast_type=int, color=Fore.GREEN, min_val=2)
@@ -165,7 +167,7 @@ class Config:
 
         # --- Termux SMS Alerts ---
         self.enable_sms_alerts: bool = self._get_env("ENABLE_SMS_ALERTS", "false", cast_type=bool, color=Fore.MAGENTA)
-        self.sms_recipient_number: Optional[str] = self._get_env("SMS_RECIPIENT_NUMBER", None, color=Fore.MAGENTA)
+        self.sms_recipient_number: str | None = self._get_env("SMS_RECIPIENT_NUMBER", None, color=Fore.MAGENTA)
         self.sms_timeout_seconds: int = self._get_env("SMS_TIMEOUT_SECONDS", 30, cast_type=int, color=Fore.MAGENTA, min_val=5)
 
         # --- CCXT / API Parameters ---
@@ -177,15 +179,15 @@ class Config:
         # --- Internal Constants ---
         self.USDT_SYMBOL: str = "USDT"
         self.RETRY_COUNT: int = 3
-        self.RETRY_DELAY_SECONDS: int = self.order_retry_delay # Use configured delay
+        self.RETRY_DELAY_SECONDS: int = self.order_retry_delay  # Use configured delay
         self.API_FETCH_LIMIT_BUFFER: int = 50
         self.POSITION_QTY_EPSILON: Decimal = Decimal("1e-9")
         self.POST_CLOSE_DELAY_SECONDS: int = 3
-        self.MARKET_ORDER_FILL_CHECK_INTERVAL: float = 0.5 # Seconds between fill checks
+        self.MARKET_ORDER_FILL_CHECK_INTERVAL: float = 0.5  # Seconds between fill checks
 
         logger.info(f"{Fore.MAGENTA}--- Configuration Runes Summoned Successfully ---{Style.RESET_ALL}")
 
-    def _get_env(self, key: str, default: Any = None, cast_type: type = str, required: bool = False, color: str = Fore.WHITE, min_val: Optional[Union[int, Decimal]] = None, max_val: Optional[Union[int, Decimal]] = None) -> Any:
+    def _get_env(self, key: str, default: Any = None, cast_type: type = str, required: bool = False, color: str = Fore.WHITE, min_val: int | Decimal | None = None, max_val: int | Decimal | None = None) -> Any:
         """Fetches env var, casts, validates ranges, logs, handles defaults/errors."""
         value_str = os.getenv(key)
         value: Any = None
@@ -197,9 +199,9 @@ class Config:
                 if cast_type == bool: value = value_str.lower() in ['true', '1', 'yes', 'y']
                 elif cast_type == Decimal: value = Decimal(value_str)
                 elif cast_type is int: value = int(value_str)
-                elif cast_type is float: value = float(value_str) # Add float handling if needed
+                elif cast_type is float: value = float(value_str)  # Add float handling if needed
                 elif cast_type is str: value = str(value_str)
-                else: value = cast_type(value_str) # For other types if necessary
+                else: value = cast_type(value_str)  # For other types if necessary
 
                 # Validate numeric ranges after successful casting
                 if value is not None and cast_type in [int, Decimal, float]:
@@ -228,6 +230,7 @@ class Config:
         logger.debug(f"{color}Config {key}: {log_display_value} {log_source}{Style.RESET_ALL}")
         return value
 
+
 # --- Logger Setup ---
 # (Keep logger setup from v2.2.0)
 LOGGING_LEVEL: int = logging.DEBUG if os.getenv("DEBUG", "false").lower() == "true" else logging.INFO
@@ -243,9 +246,13 @@ logger.propagate = False
 
 SUCCESS_LEVEL: int = 25
 logging.addLevelName(SUCCESS_LEVEL, "SUCCESS")
+
+
 def log_success(self: logging.Logger, message: str, *args: Any, **kwargs: Any) -> None:
-    if self.isEnabledFor(SUCCESS_LEVEL): self._log(SUCCESS_LEVEL, message, args, **kwargs) # type: ignore
-logging.Logger.success = log_success # type: ignore[attr-defined]
+    if self.isEnabledFor(SUCCESS_LEVEL): self._log(SUCCESS_LEVEL, message, args, **kwargs)  # type: ignore
+
+
+logging.Logger.success = log_success  # type: ignore[attr-defined]
 
 if sys.stdout.isatty():
     logging.addLevelName(logging.DEBUG, f"{Fore.CYAN}{logging.getLevelName(logging.DEBUG)}{Style.RESET_ALL}")
@@ -266,6 +273,7 @@ except Exception as e:
     logger.debug(traceback.format_exc())
     sys.exit(1)
 
+
 # --- Helper & Utility Functions ---
 # (Keep safe_decimal_conversion, format_order_id, get_market_base_currency, format_price, format_amount, send_sms_alert, initialize_exchange as refined in v2.2.0 analysis)
 # --- safe_decimal_conversion ---
@@ -276,36 +284,46 @@ def safe_decimal_conversion(value: Any, default: Decimal = Decimal("NaN")) -> De
     except (InvalidOperation, TypeError, ValueError):
         logger.warning(f"Could not convert '{value}' (type: {type(value).__name__}) to Decimal, returning {default}")
         return default
+
+
 # --- format_order_id ---
-def format_order_id(order_id: Optional[Union[str, int]]) -> str:
+def format_order_id(order_id: str | int | None) -> str:
     """Returns a shortened representation of an order ID or 'N/A'."""
     return f"...{str(order_id)[-6:]}" if order_id else "N/A"
+
+
 # --- get_market_base_currency ---
 def get_market_base_currency(symbol: str) -> str:
     """Extracts the base currency from a symbol (e.g., 'BTC' from 'BTC/USDT:USDT')."""
     try: return symbol.split('/')[0]
     except IndexError: logger.warning(f"Could not parse base currency from symbol: {symbol}"); return symbol
+
+
 # --- format_price ---
-def format_price(exchange: ccxt.Exchange, symbol: str, price: Union[float, Decimal, str]) -> str:
+def format_price(exchange: ccxt.Exchange, symbol: str, price: float | Decimal | str) -> str:
     """Formats a price string according to market precision rules using CCXT."""
     try: return exchange.price_to_precision(symbol, float(price))
     except Exception as e:
         logger.error(f"{Fore.RED}Error formatting price '{price}' for {symbol}: {e}{Style.RESET_ALL}")
         try: return str(Decimal(str(price)).normalize())
         except: return str(price)
+
+
 # --- format_amount ---
-def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Union[float, Decimal, str], round_direction=ROUND_DOWN) -> str:
+def format_amount(exchange: ccxt.Exchange, symbol: str, amount: float | Decimal | str, round_direction=ROUND_DOWN) -> str:
     """Formats an amount (quantity) string according to market precision rules."""
-    try: return exchange.amount_to_precision(symbol, float(amount)) # CCXT usually handles rounding correctly
+    try: return exchange.amount_to_precision(symbol, float(amount))  # CCXT usually handles rounding correctly
     except Exception as e:
         logger.error(f"{Fore.RED}Error formatting amount '{amount}' for {symbol}: {e}{Style.RESET_ALL}")
-        try: # Fallback with explicit rounding
+        try:  # Fallback with explicit rounding
             precision_str = exchange.markets[symbol].get('precision', {}).get('amount')
             if precision_str:
                 decimal_places = Decimal(str(precision_str)).normalize().as_tuple().exponent * -1
                 return str(Decimal(str(amount)).quantize(Decimal('1e-' + str(decimal_places)), rounding=round_direction))
             return str(Decimal(str(amount)).quantize(DECIMAL_QUANTIZE_EXP, rounding=round_direction))
         except: return str(amount)
+
+
 # --- send_sms_alert ---
 def send_sms_alert(message: str) -> bool:
     """Sends an SMS alert using Termux:API if enabled and configured."""
@@ -313,21 +331,23 @@ def send_sms_alert(message: str) -> bool:
     if not CONFIG.sms_recipient_number: logger.warning("SMS alerts enabled, but SMS_RECIPIENT_NUMBER not set."); return False
     try:
         safe_message = message.replace('"', "'").replace("`", "'").replace("$", "")
-        command: List[str] = ['termux-sms-send', '-n', CONFIG.sms_recipient_number, safe_message]
-        logger.info(f"{Fore.MAGENTA}Attempting SMS to {'*****'+CONFIG.sms_recipient_number[-4:]} (Timeout: {CONFIG.sms_timeout_seconds}s): \"{safe_message[:60]}...\"{Style.RESET_ALL}")
+        command: list[str] = ['termux-sms-send', '-n', CONFIG.sms_recipient_number, safe_message]
+        logger.info(f"{Fore.MAGENTA}Attempting SMS to {'*****' + CONFIG.sms_recipient_number[-4:]} (Timeout: {CONFIG.sms_timeout_seconds}s): \"{safe_message[:60]}...\"{Style.RESET_ALL}")
         result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=CONFIG.sms_timeout_seconds)
         if result.returncode == 0: logger.success(f"{Fore.MAGENTA}SMS command executed successfully.{Style.RESET_ALL}"); return True
         else: logger.error(f"{Fore.RED}SMS command failed. RC: {result.returncode}, Stderr: {result.stderr.strip() or 'N/A'}{Style.RESET_ALL}"); return False
     except FileNotFoundError: logger.error(f"{Fore.RED}SMS failed: 'termux-sms-send' not found. Install Termux:API.{Style.RESET_ALL}"); return False
     except subprocess.TimeoutExpired: logger.error(f"{Fore.RED}SMS failed: Command timed out ({CONFIG.sms_timeout_seconds}s).{Style.RESET_ALL}"); return False
     except Exception as e: logger.error(f"{Fore.RED}SMS failed: Unexpected error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); return False
+
+
 # --- initialize_exchange ---
-def initialize_exchange() -> Optional[ccxt.Exchange]:
+def initialize_exchange() -> ccxt.Exchange | None:
     """Initializes and returns the CCXT Bybit exchange instance."""
     logger.info(f"{Fore.BLUE}Initializing CCXT Bybit connection...{Style.RESET_ALL}")
     if not CONFIG.api_key or not CONFIG.api_secret: logger.critical("API Key or Secret missing."); send_sms_alert("[Pyrmethus] CRITICAL: API keys missing."); return None
     try:
-        exchange = ccxt.bybit({'apiKey': CONFIG.api_key,'secret': CONFIG.api_secret,'enableRateLimit': True,'options': {'defaultType': 'linear','recvWindow': CONFIG.default_recv_window,'adjustForTimeDifference': True,'verbose': LOGGING_LEVEL <= logging.DEBUG}})
+        exchange = ccxt.bybit({'apiKey': CONFIG.api_key, 'secret': CONFIG.api_secret, 'enableRateLimit': True, 'options': {'defaultType': 'linear', 'recvWindow': CONFIG.default_recv_window, 'adjustForTimeDifference': True, 'verbose': LOGGING_LEVEL <= logging.DEBUG}})
         logger.debug("Loading markets (forced reload)..."); exchange.load_markets(True)
         logger.debug("Performing initial balance check..."); exchange.fetch_balance()
         logger.success(f"{Fore.GREEN}{Style.BRIGHT}CCXT Bybit Session Initialized (LIVE SCALPING MODE!).{Style.RESET_ALL}"); send_sms_alert("[Pyrmethus] Initialized & auth OK.")
@@ -337,6 +357,7 @@ def initialize_exchange() -> Optional[ccxt.Exchange]:
     except ccxt.ExchangeError as e: logger.critical(f"Exchange error on init: {e}. Check Bybit status."); send_sms_alert(f"[Pyrmethus] CRITICAL: Exchange Error Init: {e}.")
     except Exception as e: logger.critical(f"Unexpected error during init: {e}"); logger.debug(traceback.format_exc()); send_sms_alert(f"[Pyrmethus] CRITICAL: Unexpected Init Error: {type(e).__name__}.")
     return None
+
 
 # --- Indicator Calculation Functions ---
 # (Using refined versions from v2.2.0 analysis)
@@ -351,7 +372,7 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: Decimal, pre
     st_short_col = f"SUPERTs_{length}_{float(multiplier)}"
     required_input_cols = ["high", "low", "close"]
     min_required_len = length + 1
-    for col in target_cols: df[col] = pd.NA # Initialize cols
+    for col in target_cols: df[col] = pd.NA  # Initialize cols
     if df is None or df.empty or not all(c in df.columns for c in required_input_cols) or len(df) < min_required_len:
         logger.warning(f"{Fore.YELLOW}Indicator ({col_prefix}ST): Input invalid/short (Len: {len(df) if df is not None else 0}, Need: {min_required_len}).{Style.RESET_ALL}")
         return df
@@ -366,12 +387,14 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: Decimal, pre
         raw_cols = [st_col, st_trend_col, st_long_col, st_short_col]
         df.drop(columns=[col for col in raw_cols if col in df.columns], inplace=True)
         # ... (optional logging of last valid value) ...
-    except Exception as e: logger.error(f"{Fore.RED}Indicator ({col_prefix}ST): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols] # type: ignore
+    except Exception as e: logger.error(f"{Fore.RED}Indicator ({col_prefix}ST): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols]  # type: ignore
     return df
+
+
 # --- analyze_volume_atr ---
-def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[str, Optional[Decimal]]:
+def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> dict[str, Decimal | None]:
     """Calculates ATR, Volume MA, and volume ratio."""
-    results: Dict[str, Optional[Decimal]] = {"atr": None, "volume_ma": None, "last_volume": None, "volume_ratio": None}
+    results: dict[str, Decimal | None] = {"atr": None, "volume_ma": None, "last_volume": None, "volume_ratio": None}
     required_cols = ["high", "low", "close", "volume"]; min_len = max(atr_len, vol_ma_len) + 1
     if df is None or df.empty or not all(c in df.columns for c in required_cols) or len(df) < min_len:
         logger.warning(f"{Fore.YELLOW}Indicator (Vol/ATR): Input invalid/short (Len: {len(df) if df is not None else 0}, Need: {min_len}).{Style.RESET_ALL}"); return results
@@ -379,7 +402,7 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[
         atr_col = f"ATRr_{atr_len}"; df.ta.atr(length=atr_len, append=True)
         if atr_col in df.columns: results["atr"] = safe_decimal_conversion(df[atr_col].iloc[-1]); df.drop(columns=[atr_col], errors='ignore', inplace=True)
         else: logger.warning(f"ATR col '{atr_col}' not found.")
-        vol_ma_col = f'volume_ma_{vol_ma_len}'; df[volume_ma_col] = df['volume'].rolling(window=vol_ma_len, min_periods=max(1, vol_ma_len // 2)).mean()
+        df[volume_ma_col] = df['volume'].rolling(window=vol_ma_len, min_periods=max(1, vol_ma_len // 2)).mean()
         results["volume_ma"] = safe_decimal_conversion(df[volume_ma_col].iloc[-1])
         results["last_volume"] = safe_decimal_conversion(df['volume'].iloc[-1])
         df.drop(columns=[volume_ma_col], errors='ignore', inplace=True)
@@ -387,11 +410,13 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[
             try: results["volume_ratio"] = results["last_volume"] / results["volume_ma"]
             except (DivisionByZero, InvalidOperation): results["volume_ratio"] = Decimal('NaN')
         else: results["volume_ratio"] = Decimal('NaN')
-        for k, v in results.items(): # Convert NaN to None for easier checks
+        for k, v in results.items():  # Convert NaN to None for easier checks
             if isinstance(v, Decimal) and v.is_nan(): results[k] = None
         # ... (debug logging) ...
-    except Exception as e: logger.error(f"{Fore.RED}Indicator (Vol/ATR): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); results = {k: None for k in results}
+    except Exception as e: logger.error(f"{Fore.RED}Indicator (Vol/ATR): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); results = dict.fromkeys(results)
     return results
+
+
 # --- calculate_stochrsi_momentum ---
 def calculate_stochrsi_momentum(df: pd.DataFrame, rsi_len: int, stoch_len: int, k: int, d: int, mom_len: int) -> pd.DataFrame:
     """Calculates StochRSI (K and D lines) and Momentum indicator."""
@@ -410,8 +435,10 @@ def calculate_stochrsi_momentum(df: pd.DataFrame, rsi_len: int, stoch_len: int, 
         if mom_col in df.columns: df['momentum'] = df[mom_col].apply(safe_decimal_conversion); df.drop(columns=[mom_col], errors='ignore', inplace=True)
         else: logger.warning(f"Momentum col '{mom_col}' not found.")
         # ... (debug logging) ...
-    except Exception as e: logger.error(f"{Fore.RED}Indicator (StochRSI/Mom): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols] # type: ignore
+    except Exception as e: logger.error(f"{Fore.RED}Indicator (StochRSI/Mom): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols]  # type: ignore
     return df
+
+
 # --- calculate_ehlers_fisher ---
 def calculate_ehlers_fisher(df: pd.DataFrame, length: int, signal: int) -> pd.DataFrame:
     """Calculates the Ehlers Fisher Transform indicator."""
@@ -427,8 +454,10 @@ def calculate_ehlers_fisher(df: pd.DataFrame, length: int, signal: int) -> pd.Da
         if sig_col in fisher_df.columns: df['ehlers_signal'] = fisher_df[sig_col].apply(safe_decimal_conversion)
         # If signal=1, pandas_ta might not create signal col, default is NaN which is handled
         # ... (debug logging) ...
-    except Exception as e: logger.error(f"{Fore.RED}Indicator (EhlersFisher): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols] # type: ignore
+    except Exception as e: logger.error(f"{Fore.RED}Indicator (EhlersFisher): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols]  # type: ignore
     return df
+
+
 # --- calculate_ehlers_ma ---
 def calculate_ehlers_ma(df: pd.DataFrame, fast_len: int, slow_len: int) -> pd.DataFrame:
     """Calculates Ehlers MAs (Placeholder using EMA)."""
@@ -441,29 +470,30 @@ def calculate_ehlers_ma(df: pd.DataFrame, fast_len: int, slow_len: int) -> pd.Da
         df['fast_ema'] = df.ta.ema(length=fast_len).apply(safe_decimal_conversion)
         df['slow_ema'] = df.ta.ema(length=slow_len).apply(safe_decimal_conversion)
         # ... (debug logging) ...
-    except Exception as e: logger.error(f"{Fore.RED}Indicator (EhlersMA Placeholder): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols] # type: ignore
+    except Exception as e: logger.error(f"{Fore.RED}Indicator (EhlersMA Placeholder): Error: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); [df.__setitem__(c, pd.NA) for c in target_cols]  # type: ignore
     return df
+
 
 # --- Order Book Analysis ---
 # (Keep analyze_order_book refined version from v2.2.0)
-def analyze_order_book(exchange: ccxt.Exchange, symbol: str, depth: int, fetch_limit: int) -> Dict[str, Optional[Decimal]]:
+def analyze_order_book(exchange: ccxt.Exchange, symbol: str, depth: int, fetch_limit: int) -> dict[str, Decimal | None]:
     """Fetches and analyzes the L2 order book for bid/ask pressure and spread."""
-    results: Dict[str, Optional[Decimal]] = {"bid_ask_ratio": None, "spread": None, "best_bid": None, "best_ask": None}; log_prefix="Order Book"
+    results: dict[str, Decimal | None] = {"bid_ask_ratio": None, "spread": None, "best_bid": None, "best_ask": None}; log_prefix = "Order Book"
     logger.debug(f"{log_prefix}: Fetching L2 {symbol} (Depth:{depth}, Limit:{fetch_limit})...")
     if not exchange.has.get('fetchL2OrderBook'): logger.warning(f"{Fore.YELLOW}{log_prefix}: fetchL2OrderBook not supported.{Style.RESET_ALL}"); return results
     try:
         ob = exchange.fetch_l2_order_book(symbol, limit=fetch_limit); bids, asks = ob.get('bids', []), ob.get('asks', [])
         if not bids or not asks: logger.warning(f"{Fore.YELLOW}{log_prefix}: Fetched empty bids/asks for {symbol}.{Style.RESET_ALL}"); return results
-        best_bid = safe_decimal_conversion(bids[0][0]) if bids and len(bids[0])>0 else Decimal('NaN')
-        best_ask = safe_decimal_conversion(asks[0][0]) if asks and len(asks[0])>0 else Decimal('NaN')
+        best_bid = safe_decimal_conversion(bids[0][0]) if bids and len(bids[0]) > 0 else Decimal('NaN')
+        best_ask = safe_decimal_conversion(asks[0][0]) if asks and len(asks[0]) > 0 else Decimal('NaN')
         results["best_bid"] = None if best_bid.is_nan() else best_bid
         results["best_ask"] = None if best_ask.is_nan() else best_ask
         if results["best_bid"] and results["best_ask"]:
             if results["best_ask"] > results["best_bid"]: results["spread"] = results["best_ask"] - results["best_bid"]; logger.debug(f"{log_prefix}: Bid={results['best_bid']:.4f}, Ask={results['best_ask']:.4f}, Spread={results['spread']:.4f}")
             else: logger.warning(f"{Fore.YELLOW}{log_prefix}: Bid >= Ask. Spread invalid.{Style.RESET_ALL}"); results["spread"] = None
         else: logger.debug(f"{log_prefix}: Bid={results['best_bid'] or 'N/A'}, Ask={results['best_ask'] or 'N/A'} (Spread N/A)")
-        bid_vol = sum(safe_decimal_conversion(b[1], default=Decimal('0')) for b in bids[:depth] if len(b)>1)
-        ask_vol = sum(safe_decimal_conversion(a[1], default=Decimal('0')) for a in asks[:depth] if len(a)>1)
+        bid_vol = sum(safe_decimal_conversion(b[1], default=Decimal('0')) for b in bids[:depth] if len(b) > 1)
+        ask_vol = sum(safe_decimal_conversion(a[1], default=Decimal('0')) for a in asks[:depth] if len(a) > 1)
         logger.debug(f"{log_prefix} (Depth {depth}): BidVol={bid_vol:.4f}, AskVol={ask_vol:.4f}")
         if ask_vol > CONFIG.POSITION_QTY_EPSILON:
             try: results["bid_ask_ratio"] = bid_vol / ask_vol
@@ -473,13 +503,13 @@ def analyze_order_book(exchange: ccxt.Exchange, symbol: str, depth: int, fetch_l
         else: logger.debug(f"{log_prefix} Ratio: N/A (AskVol={ask_vol:.4f})")
     except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.warning(f"{Fore.YELLOW}{log_prefix}: API Error for {symbol}: {type(e).__name__} - {e}{Style.RESET_ALL}")
     except (IndexError, TypeError, KeyError) as e: logger.warning(f"{Fore.YELLOW}{log_prefix}: Error parsing data for {symbol}: {type(e).__name__} - {e}{Style.RESET_ALL}")
-    except Exception as e: logger.error(f"{Fore.RED}{log_prefix}: Unexpected error for {symbol}: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); results = {k: None for k in results}
+    except Exception as e: logger.error(f"{Fore.RED}{log_prefix}: Unexpected error for {symbol}: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); results = dict.fromkeys(results)
     return results
 
 
 # --- Data Fetching ---
 # (Keep get_market_data refined version from v2.2.0)
-def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: int) -> Optional[pd.DataFrame]:
+def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: int) -> pd.DataFrame | None:
     """Fetches and prepares OHLCV data from the exchange."""
     log_prefix = "Data Fetch"
     if not exchange.has.get("fetchOHLCV"): logger.error(f"{Fore.RED}{log_prefix}: Exchange '{exchange.id}' no fetchOHLCV.{Style.RESET_ALL}"); return None
@@ -506,10 +536,10 @@ def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: 
 # --- Position & Order Management ---
 # (Keep get_current_position, set_leverage, close_position, calculate_position_size, wait_for_order_fill refined versions from v2.2.0)
 # --- get_current_position ---
-def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]:
+def get_current_position(exchange: ccxt.Exchange, symbol: str) -> dict[str, Any]:
     """Fetches current position details using Bybit V5 API specifics via CCXT."""
-    default_pos: Dict[str, Any] = {'side': CONFIG.POS_NONE, 'qty': Decimal("0.0"), 'entry_price': Decimal("0.0")}
-    market: Optional[Dict] = None; market_id: Optional[str] = None; log_prefix = "Position Check"
+    default_pos: dict[str, Any] = {'side': CONFIG.POS_NONE, 'qty': Decimal("0.0"), 'entry_price': Decimal("0.0")}
+    market: dict | None = None; market_id: str | None = None; log_prefix = "Position Check"
     try: market = exchange.market(symbol); market_id = market['id']
     except Exception as e: logger.error(f"{Fore.RED}{log_prefix}: Failed get market info '{symbol}': {e}{Style.RESET_ALL}"); return default_pos
     if not market: return default_pos
@@ -522,7 +552,7 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
         for pos in fetched_positions:
             info = pos.get('info', {}); pos_market_id = info.get('symbol'); idx = int(info.get('positionIdx', -1)); side_v5 = info.get('side', 'None').strip(); size_str = info.get('size')
             if pos_market_id == market_id and idx == 0 and side_v5 in ['Buy', 'Sell']:
-                size = safe_decimal_conversion(size_str);
+                size = safe_decimal_conversion(size_str)
                 if not size.is_nan() and abs(size) > CONFIG.POSITION_QTY_EPSILON: active_pos_data = pos; break
         if active_pos_data:
             try:
@@ -538,6 +568,8 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
     except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.warning(f"{Fore.YELLOW}{log_prefix}: API Error fetching positions: {type(e).__name__} - {e}{Style.RESET_ALL}")
     except Exception as e: logger.error(f"{Fore.RED}{log_prefix}: Unexpected error fetching positions: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc())
     return default_pos
+
+
 # --- set_leverage ---
 def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
     """Sets leverage for a futures symbol using Bybit V5 specifics via CCXT."""
@@ -554,13 +586,15 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
             err_str = str(e).lower()
             if "leverage not modified" in err_str or "same as requested" in err_str or "110044" in err_str:
                 logger.info(f"{Fore.CYAN}{log_prefix}: Already set {leverage}x for {symbol}.{Style.RESET_ALL}"); return True
-            logger.warning(f"{Fore.YELLOW}{log_prefix}: Exchange error (Try {attempt+1}/{CONFIG.RETRY_COUNT}): {e}{Style.RESET_ALL}")
-        except Exception as e: logger.warning(f"{Fore.YELLOW}{log_prefix}: Network/Other error (Try {attempt+1}/{CONFIG.RETRY_COUNT}): {e}{Style.RESET_ALL}")
+            logger.warning(f"{Fore.YELLOW}{log_prefix}: Exchange error (Try {attempt + 1}/{CONFIG.RETRY_COUNT}): {e}{Style.RESET_ALL}")
+        except Exception as e: logger.warning(f"{Fore.YELLOW}{log_prefix}: Network/Other error (Try {attempt + 1}/{CONFIG.RETRY_COUNT}): {e}{Style.RESET_ALL}")
         if attempt < CONFIG.RETRY_COUNT - 1: time.sleep(CONFIG.RETRY_DELAY_SECONDS)
         else: logger.error(f"{Fore.RED}{log_prefix}: Failed after {CONFIG.RETRY_COUNT} attempts.{Style.RESET_ALL}")
     return False
+
+
 # --- close_position ---
-def close_position(exchange: ccxt.Exchange, symbol: str, position_to_close: Dict[str, Any], reason: str = "Signal") -> Optional[Dict[str, Any]]:
+def close_position(exchange: ccxt.Exchange, symbol: str, position_to_close: dict[str, Any], reason: str = "Signal") -> dict[str, Any] | None:
     """Closes the specified active position by placing a market order with reduceOnly=True."""
     initial_side = position_to_close.get('side', CONFIG.POS_NONE); initial_qty = position_to_close.get('qty', Decimal("0.0")); market_base = get_market_base_currency(symbol); log_prefix = "Close Position"
     logger.warning(f"{Back.YELLOW}{Fore.BLACK}{log_prefix}: Initiated for {symbol}. Reason: {reason}. Init State: {initial_side} Qty={initial_qty:.8f}{Style.RESET_ALL}")
@@ -584,15 +618,17 @@ def close_position(exchange: ccxt.Exchange, symbol: str, position_to_close: Dict
     except ccxt.InsufficientFunds as e: logger.error(f"{Fore.RED}{log_prefix} ({reason}): Insufficient Funds: {e}{Style.RESET_ALL}"); send_sms_alert(f"[{market_base}] ERROR Closing ({reason}): Insufficient Funds.")
     except ccxt.ExchangeError as e:
         err_str = str(e).lower()
-        if "position size is zero" in err_str or "order would not reduce position size" in err_str or "110025" in err_str or "110045" in err_str: # Example checks
+        if "position size is zero" in err_str or "order would not reduce position size" in err_str or "110025" in err_str or "110045" in err_str:  # Example checks
              logger.warning(f"{Fore.YELLOW}{log_prefix} ({reason}): Exchange indicates position already closed/zero: {e}. Assuming closed.{Style.RESET_ALL}"); send_sms_alert(f"[{market_base}] Close ({reason}): Already closed/zero reported."); return None
         else: logger.error(f"{Fore.RED}{log_prefix} ({reason}): Exchange error: {e}{Style.RESET_ALL}"); send_sms_alert(f"[{market_base}] ERROR Closing ({reason}): Exchange Error: {type(e).__name__}.")
     except Exception as e: logger.error(f"{Fore.RED}{log_prefix} ({reason}): Failed: {type(e).__name__} - {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); send_sms_alert(f"[{market_base}] ERROR Closing ({reason}): {type(e).__name__}.")
     return None
+
+
 # --- calculate_position_size ---
-def calculate_position_size(equity: Decimal,risk_per_trade_pct: Decimal,entry_price: Decimal,stop_loss_price: Decimal,leverage: int,symbol: str,exchange: ccxt.Exchange) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+def calculate_position_size(equity: Decimal, risk_per_trade_pct: Decimal, entry_price: Decimal, stop_loss_price: Decimal, leverage: int, symbol: str, exchange: ccxt.Exchange) -> tuple[Decimal | None, Decimal | None]:
     """Calculates position size (base currency) and estimated margin based on risk."""
-    log_prefix = "Risk Calc"; logger.debug(f"{log_prefix}: Eq={equity:.4f}, Risk%={(risk_per_trade_pct*100):.3f}%, Entry={entry_price:.4f}, SL={stop_loss_price:.4f}, Lev={leverage}x")
+    log_prefix = "Risk Calc"; logger.debug(f"{log_prefix}: Eq={equity:.4f}, Risk%={(risk_per_trade_pct * 100):.3f}%, Entry={entry_price:.4f}, SL={stop_loss_price:.4f}, Lev={leverage}x")
     if not (entry_price > 0 and stop_loss_price > 0): logger.error(f"{Fore.RED}{log_prefix} Error: Invalid entry/SL price.{Style.RESET_ALL}"); return None, None
     price_diff = abs(entry_price - stop_loss_price)
     if price_diff < CONFIG.POSITION_QTY_EPSILON: logger.error(f"{Fore.RED}{log_prefix} Error: Entry/SL too close (Diff: {price_diff:.8f}).{Style.RESET_ALL}"); return None, None
@@ -601,7 +637,7 @@ def calculate_position_size(equity: Decimal,risk_per_trade_pct: Decimal,entry_pr
     if leverage <= 0: logger.error(f"{Fore.RED}{log_prefix} Error: Invalid leverage: {leverage}.{Style.RESET_ALL}"); return None, None
     try:
         risk_amount_usdt = equity * risk_per_trade_pct; quantity_raw = risk_amount_usdt / price_diff
-        quantity_precise_str = format_amount(exchange, symbol, quantity_raw) # Rounds down
+        quantity_precise_str = format_amount(exchange, symbol, quantity_raw)  # Rounds down
         quantity_precise = safe_decimal_conversion(quantity_precise_str)
         if quantity_precise.is_nan() or quantity_precise <= CONFIG.POSITION_QTY_EPSILON:
             logger.warning(f"{Fore.YELLOW}{log_prefix} Warning: Qty negligible/zero after precision ({quantity_precise:.8f}). RiskAmt={risk_amount_usdt:.4f}, PriceDiff={price_diff:.4f}.{Style.RESET_ALL}"); return None, None
@@ -609,8 +645,10 @@ def calculate_position_size(equity: Decimal,risk_per_trade_pct: Decimal,entry_pr
         logger.debug(f"{log_prefix} Result: Qty={quantity_precise:.8f}, RiskAmt={risk_amount_usdt:.4f}, EstValue={pos_value_usdt:.4f}, EstMargin={required_margin:.4f}")
         return quantity_precise, required_margin
     except Exception as e: logger.error(f"{Fore.RED}{log_prefix} Error: Calculation failed: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); return None, None
+
+
 # --- wait_for_order_fill ---
-def wait_for_order_fill(exchange: ccxt.Exchange, order_id: str, symbol: str, timeout_seconds: int) -> Optional[Dict[str, Any]]:
+def wait_for_order_fill(exchange: ccxt.Exchange, order_id: str, symbol: str, timeout_seconds: int) -> dict[str, Any] | None:
     """Waits for a specific order to reach 'closed' (filled) status."""
     start_time = time.monotonic(); order_id_short = format_order_id(order_id); log_prefix = f"Wait Fill ({order_id_short})"
     logger.info(f"{Fore.CYAN}{log_prefix}: Waiting for {symbol} order (Timeout: {timeout_seconds}s)...{Style.RESET_ALL}")
@@ -631,8 +669,9 @@ def wait_for_order_fill(exchange: ccxt.Exchange, order_id: str, symbol: str, tim
     except Exception as final_e: logger.warning(f"{log_prefix}: Final status check failed: {final_e}")
     return None
 
+
 # --- Order Placement Refactoring ---
-def _calculate_initial_sl_price(entry_price: Decimal, atr: Decimal, multiplier: Decimal, side: str, min_price: Decimal, symbol: str, exchange: ccxt.Exchange) -> Optional[Decimal]:
+def _calculate_initial_sl_price(entry_price: Decimal, atr: Decimal, multiplier: Decimal, side: str, min_price: Decimal, symbol: str, exchange: ccxt.Exchange) -> Decimal | None:
     """Helper to calculate and validate the initial SL price."""
     log_prefix = "Place Order (Calc SL)"
     sl_distance = atr * multiplier
@@ -654,14 +693,15 @@ def _calculate_initial_sl_price(entry_price: Decimal, atr: Decimal, multiplier: 
     logger.info(f"{log_prefix}: Initial SL Price ~ {sl_price:.4f} (ATR Dist: {sl_distance:.4f})")
     return sl_price
 
+
 def _validate_and_cap_quantity(
     calculated_qty: Decimal, entry_price: Decimal, leverage: int, max_cap_usdt: Decimal,
-    min_qty_limit: Decimal, max_qty_limit: Optional[Decimal], symbol: str, exchange: ccxt.Exchange
-) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+    min_qty_limit: Decimal, max_qty_limit: Decimal | None, symbol: str, exchange: ccxt.Exchange
+) -> tuple[Decimal | None, Decimal | None]:
     """Helper to validate quantity against limits and cap, returns (final_qty, final_margin_est)."""
     log_prefix = "Place Order (Validate Qty)"
     final_qty = calculated_qty
-    req_margin_est = (final_qty * entry_price) / Decimal(leverage) # Initial estimate
+    req_margin_est = (final_qty * entry_price) / Decimal(leverage)  # Initial estimate
 
     # Apply Max Value Cap
     pos_value_est = final_qty * entry_price
@@ -669,10 +709,10 @@ def _validate_and_cap_quantity(
         logger.warning(f"{Fore.YELLOW}{log_prefix}: Est. value {pos_value_est:.2f} USDT > Cap {max_cap_usdt:.2f}. Capping.{Style.RESET_ALL}")
         try: capped_raw = max_cap_usdt / entry_price
         except DivisionByZero: logger.error(f"{log_prefix}: Cannot cap qty, entry price estimate is zero."); return None, None
-        capped_str = format_amount(exchange, symbol, capped_raw) # Rounds down
+        capped_str = format_amount(exchange, symbol, capped_raw)  # Rounds down
         final_qty = safe_decimal_conversion(capped_str)
         if final_qty.is_nan(): logger.error(f"{log_prefix}: Failed convert capped qty str '{capped_str}'."); return None, None
-        req_margin_est = (final_qty * entry_price) / Decimal(leverage) # Recalculate margin
+        req_margin_est = (final_qty * entry_price) / Decimal(leverage)  # Recalculate margin
         logger.info(f"{log_prefix}: Qty capped to {final_qty:.8f}. New Est. Margin ~{req_margin_est:.4f} USDT")
 
     # Check Limits
@@ -680,12 +720,13 @@ def _validate_and_cap_quantity(
     if min_qty_limit > 0 and final_qty < min_qty_limit: logger.error(f"{Fore.RED}{log_prefix}: Final qty {final_qty:.8f} < Min {min_qty_limit:.8f}. Abort.{Style.RESET_ALL}"); return None, None
     if max_qty_limit is not None and final_qty > max_qty_limit:
         logger.warning(f"{Fore.YELLOW}{log_prefix}: Final qty {final_qty:.8f} > Max {max_qty_limit:.8f}. Capping to max.{Style.RESET_ALL}")
-        final_qty = max_qty_limit # Already a Decimal
-        final_qty = safe_decimal_conversion(format_amount(exchange, symbol, final_qty)) # Reformat
+        final_qty = max_qty_limit  # Already a Decimal
+        final_qty = safe_decimal_conversion(format_amount(exchange, symbol, final_qty))  # Reformat
         if final_qty.is_nan(): logger.error(f"{log_prefix}: Failed convert max qty."); return None, None
-        req_margin_est = (final_qty * entry_price) / Decimal(leverage) # Recalculate margin
+        req_margin_est = (final_qty * entry_price) / Decimal(leverage)  # Recalculate margin
 
     return final_qty, req_margin_est
+
 
 def _check_margin_availability(req_margin_est: Decimal, free_balance: Decimal, buffer: Decimal, side: str, market_base: str) -> bool:
     """Helper to check if sufficient free margin is available."""
@@ -698,10 +739,11 @@ def _check_margin_availability(req_margin_est: Decimal, free_balance: Decimal, b
     logger.info(f"{Fore.GREEN}{log_prefix}: OK. EstMargin={req_margin_est:.4f}, BufferedReq={buffered_req_margin:.4f}, Free={free_balance:.4f}{Style.RESET_ALL}")
     return True
 
-def _place_and_confirm_entry_order(exchange: ccxt.Exchange, symbol: str, side: str, quantity: Decimal) -> Optional[Dict[str, Any]]:
+
+def _place_and_confirm_entry_order(exchange: ccxt.Exchange, symbol: str, side: str, quantity: Decimal) -> dict[str, Any] | None:
     """Places the market entry order and waits for fill confirmation."""
     log_prefix = f"Place Order ({side.upper()} Entry)"
-    entry_order_id: Optional[str] = None
+    entry_order_id: str | None = None
     try:
         qty_float = float(quantity)
         logger.warning(f"{Back.GREEN}{Fore.BLACK}{Style.BRIGHT}*** {log_prefix}: Placing MARKET ENTRY: {qty_float:.8f} {symbol} ***{Style.RESET_ALL}")
@@ -725,24 +767,25 @@ def _place_and_confirm_entry_order(exchange: ccxt.Exchange, symbol: str, side: s
             except Exception as cancel_err: logger.warning(f"{log_prefix}: Cancel failed: {cancel_err}")
         return None
 
-def _place_stop_order(exchange: ccxt.Exchange, symbol: str, pos_side: str, qty: Decimal, stop_price_str: str, trigger_by: str, is_tsl: bool = False, tsl_params: Optional[Dict] = None) -> Tuple[Optional[str], str]:
+
+def _place_stop_order(exchange: ccxt.Exchange, symbol: str, pos_side: str, qty: Decimal, stop_price_str: str, trigger_by: str, is_tsl: bool = False, tsl_params: dict | None = None) -> tuple[str | None, str]:
     """Helper to place either fixed SL or TSL order. Returns (order_id, status_message)."""
     order_type = "Trailing SL" if is_tsl else "Fixed SL"
     log_prefix = f"Place Order ({order_type})"
     sl_exec_side = CONFIG.SIDE_SELL if pos_side == CONFIG.POS_LONG else CONFIG.SIDE_BUY
-    order_id: Optional[str] = None
+    order_id: str | None = None
     status_msg: str = "Placement FAILED"
 
     try:
         qty_str = format_amount(exchange, symbol, qty)
         qty_float = float(qty_str)
-        stop_price_float = float(stop_price_str) # stopPrice for fixed SL, activePrice for TSL
+        stop_price_float = float(stop_price_str)  # stopPrice for fixed SL, activePrice for TSL
 
         params = {'reduceOnly': True, 'triggerBy': trigger_by}
         if is_tsl and tsl_params:
             # Specific TSL params for Bybit V5: trailingStop (%), activePrice
             params['trailingStop'] = tsl_params['trailingStop']
-            params['activePrice'] = stop_price_float # TSL activation price
+            params['activePrice'] = stop_price_float  # TSL activation price
             logger.info(f"{Fore.CYAN}{log_prefix} ({tsl_params['trail_percent_str']:.2%})... Side: {sl_exec_side.upper()}, Qty: {qty_float:.8f}, Trail%: {params['trailingStop']}, ActPx: {stop_price_str}{Style.RESET_ALL}")
         else:
             # Fixed SL params: stopPrice
@@ -771,7 +814,7 @@ def place_risked_market_order(
     exchange: ccxt.Exchange, symbol: str, side: str, risk_percentage: Decimal,
     current_atr: Decimal, sl_atr_multiplier: Decimal, leverage: int, max_order_cap_usdt: Decimal,
     margin_check_buffer: Decimal, tsl_percent: Decimal, tsl_activation_offset_percent: Decimal
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Orchestrates placing a market entry order with risk management, SL, and TSL."""
     market_base = get_market_base_currency(symbol)
     log_prefix = f"Place Order ({side.upper()})"
@@ -803,15 +846,15 @@ def place_risked_market_order(
 
         # Calculate estimated SL
         initial_sl_price = _calculate_initial_sl_price(entry_price_estimate, current_atr, sl_atr_multiplier, side, min_price, symbol, exchange)
-        if not initial_sl_price: return None # Error logged in helper
+        if not initial_sl_price: return None  # Error logged in helper
 
         # Calculate size
         calc_qty, req_margin_est = calculate_position_size(usdt_equity, risk_percentage, entry_price_estimate, initial_sl_price, leverage, symbol, exchange)
-        if calc_qty is None or req_margin_est is None: return None # Error logged in helper
+        if calc_qty is None or req_margin_est is None: return None  # Error logged in helper
 
         # Validate/Cap quantity
         final_qty, final_margin_est = _validate_and_cap_quantity(calc_qty, entry_price_estimate, leverage, max_order_cap_usdt, min_qty, max_qty, symbol, exchange)
-        if final_qty is None or final_margin_est is None: return None # Error logged in helper
+        if final_qty is None or final_margin_est is None: return None  # Error logged in helper
 
         # Check margin
         if not _check_margin_availability(final_margin_est, usdt_free, margin_check_buffer, side, market_base): return None
@@ -827,7 +870,7 @@ def place_risked_market_order(
                  logger.error(f"{Back.RED}{Fore.WHITE}{log_prefix} POSITION OPENED despite entry failure! Qty: {current_pos['qty']}. Emergency Closing!{Style.RESET_ALL}")
                  send_sms_alert(f"[{market_base}] CRITICAL: Position opened on FAILED entry! Closing NOW.")
                  close_position(exchange, symbol, current_pos, reason="Emergency Close - Failed Entry Confirm")
-             return None # Entry failed
+             return None  # Entry failed
 
         # --- Post-Entry SL/TSL Placement ---
         avg_fill_price = safe_decimal_conversion(filled_entry_order.get('average'))
@@ -835,14 +878,14 @@ def place_risked_market_order(
         pos_side = CONFIG.POS_LONG if side == CONFIG.SIDE_BUY else CONFIG.POS_SHORT
 
         # Calculate actual SL price based on fill
-        sl_distance = current_atr * sl_atr_multiplier # Use same ATR/mult as for sizing
+        sl_distance = current_atr * sl_atr_multiplier  # Use same ATR/mult as for sizing
         actual_sl_price_raw = (avg_fill_price - sl_distance) if side == CONFIG.SIDE_BUY else (avg_fill_price + sl_distance)
         if min_price > 0 and actual_sl_price_raw < min_price: actual_sl_price_raw = min_price
         elif actual_sl_price_raw <= 0:
              logger.error(f"{Fore.RED}{Style.BRIGHT}{log_prefix}: Invalid ACTUAL SL price ({actual_sl_price_raw:.4f}) post-fill. Cannot place SL!{Style.RESET_ALL}")
              send_sms_alert(f"[{market_base}] CRITICAL ({side.upper()}): Invalid ACTUAL SL price ({actual_sl_price_raw:.4f})! Emergency Closing.")
              close_position(exchange, symbol, {'side': pos_side, 'qty': filled_qty}, reason="Invalid SL Calc Post-Entry")
-             return filled_entry_order # Return filled entry, signal overall failure state
+             return filled_entry_order  # Return filled entry, signal overall failure state
 
         actual_sl_price_str = format_price(exchange, symbol, actual_sl_price_raw)
 
@@ -863,13 +906,13 @@ def place_risked_market_order(
                 if act_price_raw <= 0: raise ValueError(f"Invalid TSL activation price {act_price_raw:.4f}")
 
                 tsl_act_price_str = format_price(exchange, symbol, act_price_raw)
-                tsl_trail_val_str = str((tsl_percent * 100).quantize(Decimal("0.01"))) # e.g., "0.50"
+                tsl_trail_val_str = str((tsl_percent * 100).quantize(Decimal("0.01")))  # e.g., "0.50"
                 tsl_params_dict = {'trailingStop': tsl_trail_val_str, 'trail_percent_str': tsl_percent}
 
                 tsl_order_id, tsl_status_msg = _place_stop_order(exchange, symbol, pos_side, filled_qty, tsl_act_price_str, CONFIG.tsl_trigger_by, is_tsl=True, tsl_params=tsl_params_dict)
                 if not tsl_order_id:
                     send_sms_alert(f"[{market_base}] ERROR ({side.upper()}): Failed TSL placement! Relying on fixed SL if placed.")
-            except Exception as tsl_calc_err: # Catch errors in TSL activation price calc
+            except Exception as tsl_calc_err:  # Catch errors in TSL activation price calc
                  logger.error(f"{Fore.RED}{Style.BRIGHT}{log_prefix}: FAILED to calculate/place TSL: {tsl_calc_err}{Style.RESET_ALL}")
                  tsl_status_msg = f"Calculation/Placement FAILED: {tsl_calc_err}"
                  send_sms_alert(f"[{market_base}] ERROR ({side.upper()}): Failed TSL setup ({type(tsl_calc_err).__name__}).")
@@ -883,12 +926,12 @@ def place_risked_market_order(
 
         # Send summary SMS regardless of SL/TSL success (as entry succeeded)
         sms_summary = (f"[{market_base}] {side.upper()} {filled_qty:.6f}@{avg_fill_price:.3f}. "
-                       f"SL:{('~'+actual_sl_price_str if sl_order_id else 'FAIL')}. "
-                       f"TSL:{('%'+tsl_trail_val_str if tsl_order_id else ('FAIL' if tsl_percent > 0 else 'OFF'))}. "
+                       f"SL:{('~' + actual_sl_price_str if sl_order_id else 'FAIL')}. "
+                       f"TSL:{('%' + tsl_trail_val_str if tsl_order_id else ('FAIL' if tsl_percent > 0 else 'OFF'))}. "
                        f"EID:{format_order_id(filled_entry_order.get('id'))}")
         send_sms_alert(sms_summary)
 
-        return filled_entry_order # Return successful entry order
+        return filled_entry_order  # Return successful entry order
 
     except Exception as e:
         logger.error(f"{Fore.RED}{Style.BRIGHT}{log_prefix}: Overall process FAILED: {type(e).__name__} - {e}{Style.RESET_ALL}")
@@ -908,7 +951,7 @@ def cancel_open_orders(exchange: ccxt.Exchange, symbol: str, reason: str = "Clea
         if not open_orders: logger.info(f"{Fore.CYAN}{log_prefix}: No open orders found.{Style.RESET_ALL}"); return
         logger.warning(f"{Fore.YELLOW}{log_prefix}: Found {len(open_orders)} open orders. Cancelling...{Style.RESET_ALL}")
         for order in open_orders:
-            order_id = order.get('id'); order_info_str = f"ID:{format_order_id(order_id)} ({order.get('type','?')} {order.get('side','?')})"
+            order_id = order.get('id'); order_info_str = f"ID:{format_order_id(order_id)} ({order.get('type', '?')} {order.get('side', '?')})"
             if order_id:
                 try: logger.debug(f"{log_prefix}: Cancelling {order_info_str}"); exchange.cancel_order(order_id, symbol); logger.info(f"{Fore.CYAN}{log_prefix}: Success for {order_info_str}{Style.RESET_ALL}"); cancelled_count += 1; time.sleep(0.1)
                 except ccxt.OrderNotFound: logger.warning(f"{Fore.YELLOW}{log_prefix}: Not found (already closed?): {order_info_str}{Style.RESET_ALL}"); cancelled_count += 1
@@ -921,18 +964,19 @@ def cancel_open_orders(exchange: ccxt.Exchange, symbol: str, reason: str = "Clea
     except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.error(f"{Fore.RED}{log_prefix}: Failed fetching open orders: {e}{Style.RESET_ALL}")
     except Exception as e: logger.error(f"{Fore.RED}{log_prefix}: Unexpected error during cancel process: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc())
 
+
 # --- Strategy Signal Generation ---
 # (Keep generate_signals refined version from v2.2.0)
-def generate_signals(df: pd.DataFrame, strategy_name: str) -> Dict[str, Any]:
+def generate_signals(df: pd.DataFrame, strategy_name: str) -> dict[str, Any]:
     """Generates entry/exit signals based on the selected strategy and DataFrame columns."""
     signals = {'enter_long': False, 'enter_short': False, 'exit_long': False, 'exit_short': False, 'exit_reason': "Strategy Exit"}
     log_prefix = f"Signal Gen ({strategy_name})"
     if df is None or len(df) < 2: logger.debug(f"{log_prefix}: Insufficient data length."); return signals
     last, prev = df.iloc[-1], df.iloc[-2]
-    try: # Wrap entire strategy block
+    try:  # Wrap entire strategy block
         if strategy_name == "DUAL_SUPERTREND":
             st_l, st_s, cf_t = last.get('st_long'), last.get('st_short'), last.get('confirm_trend')
-            if pd.notna(st_l) and pd.notna(st_s) and pd.notna(cf_t): # Check indicators are valid
+            if pd.notna(st_l) and pd.notna(st_s) and pd.notna(cf_t):  # Check indicators are valid
                 if st_l and cf_t: signals['enter_long'] = True
                 if st_s and not cf_t: signals['enter_short'] = True
                 if st_s: signals['exit_long'] = True; signals['exit_reason'] = "Primary ST Short Flip"
@@ -970,6 +1014,7 @@ def generate_signals(df: pd.DataFrame, strategy_name: str) -> Dict[str, Any]:
     except Exception as e: logger.error(f"{Fore.RED}{log_prefix} Error: Unexpected: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); signals = {k: (v if k == 'exit_reason' else False) for k, v in signals.items()}
     return signals
 
+
 # --- Trading Logic ---
 def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_count: int) -> None:
     """Executes the main trading logic for one cycle."""
@@ -981,10 +1026,9 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
 
     # --- Data Sufficiency Check ---
     # (Keep required_rows check from v2.2.0)
-    required_rows = max(150, CONFIG.st_atr_length*2, CONFIG.confirm_st_atr_length*2, CONFIG.stochrsi_rsi_length + CONFIG.stochrsi_stoch_length + 5, CONFIG.momentum_length*2, CONFIG.ehlers_fisher_length*2, CONFIG.ehlers_fisher_signal_length*2, CONFIG.ehlers_fast_period*2, CONFIG.ehlers_slow_period*2, CONFIG.atr_calculation_period*2, CONFIG.volume_ma_period*2) + CONFIG.API_FETCH_LIMIT_BUFFER
+    required_rows = max(150, CONFIG.st_atr_length * 2, CONFIG.confirm_st_atr_length * 2, CONFIG.stochrsi_rsi_length + CONFIG.stochrsi_stoch_length + 5, CONFIG.momentum_length * 2, CONFIG.ehlers_fisher_length * 2, CONFIG.ehlers_fisher_signal_length * 2, CONFIG.ehlers_fast_period * 2, CONFIG.ehlers_slow_period * 2, CONFIG.atr_calculation_period * 2, CONFIG.volume_ma_period * 2) + CONFIG.API_FETCH_LIMIT_BUFFER
     if df is None or len(df) < required_rows: logger.warning(f"{Fore.YELLOW}{log_prefix} Insufficient data ({len(df) if df is not None else 0} rows, need ~{required_rows}). Skipping cycle.{Style.RESET_ALL}"); return
 
-    action_taken_this_cycle: bool = False
     try:
         # === Step 1: Calculate Necessary Indicators ===
         logger.debug(f"{log_prefix} Calculating indicators...")
@@ -1006,13 +1050,13 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
         last_candle = df.iloc[-1]
         current_price = safe_decimal_conversion(last_candle.get('close'))
         if current_price.is_nan() or current_price <= 0: logger.warning(f"{Fore.YELLOW}{log_prefix} Last candle close invalid ({current_price}). Skipping.{Style.RESET_ALL}"); return
-        can_place_new_order = current_atr is not None # Check if None, not NaN check needed after analyze_volume_atr
+        can_place_new_order = current_atr is not None  # Check if None, not NaN check needed after analyze_volume_atr
         if not can_place_new_order: logger.warning(f"{Fore.YELLOW}{log_prefix} Invalid ATR ({current_atr}). New order placement disabled.{Style.RESET_ALL}")
 
         # === Step 3: Get Position & Optional OB Data ===
         position = get_current_position(exchange, symbol)
         position_side = position['side']; position_qty = position['qty']; position_entry_price = position['entry_price']
-        ob_data: Optional[Dict[str, Optional[Decimal]]] = None
+        ob_data: dict[str, Decimal | None] | None = None
         if CONFIG.fetch_order_book_per_cycle: ob_data = analyze_order_book(exchange, symbol, CONFIG.order_book_depth, CONFIG.order_book_fetch_limit)
 
         # === Step 4: Log State (with PnL Estimate) ===
@@ -1039,7 +1083,7 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
         logger.info(f"{log_prefix} State | Position: Side={position_side}, Qty={position_qty:.8f}, Entry={position_entry_price:.4f}, Est. PnL: {pnl_str}")
 
         # === Step 5: Generate Signals ===
-        strategy_signals = generate_signals(df, CONFIG.strategy_name) # Pass df directly
+        strategy_signals = generate_signals(df, CONFIG.strategy_name)  # Pass df directly
         logger.debug(f"{log_prefix} Signals ({CONFIG.strategy_name}): {strategy_signals}")
 
         # === Step 6: Handle Exits ===
@@ -1054,9 +1098,9 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
                 time.sleep(0.5)
                 close_result = close_position(exchange, symbol, position, reason=exit_reason)
                 if close_result:
-                    action_taken_this_cycle = True; logger.info(f"{log_prefix} Pausing {CONFIG.POST_CLOSE_DELAY_SECONDS}s post-close..."); time.sleep(CONFIG.POST_CLOSE_DELAY_SECONDS)
+                    logger.info(f"{log_prefix} Pausing {CONFIG.POST_CLOSE_DELAY_SECONDS}s post-close..."); time.sleep(CONFIG.POST_CLOSE_DELAY_SECONDS)
                 else: logger.error(f"{Fore.RED}{log_prefix} Failed execute close for {position_side} exit! Check Manually!{Style.RESET_ALL}"); send_sms_alert(f"[{market_base}] CRITICAL: Failed CLOSE {position_side} on signal! Check!")
-                return # Exit cycle
+                return  # Exit cycle
             else: logger.info(f"{log_prefix} Holding {position_side}. No strategy exit. Waiting SL/TSL."); return
 
         # === Step 7: Handle Entries (If Flat) ===
@@ -1083,7 +1127,7 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
             logger.debug(f"{log_prefix} Final Entry Check | Short: {final_enter_short} ({vol_log}, {ob_log})")
 
             # --- Execute ---
-            entry_side: Optional[str] = None
+            entry_side: str | None = None
             if final_enter_long: entry_side = CONFIG.SIDE_BUY; logger.success(f"{Back.GREEN}{Fore.BLACK}{log_prefix} *** CONFIRMED LONG ENTRY ({CONFIG.strategy_name}) ***{Style.RESET_ALL}")
             elif final_enter_short: entry_side = CONFIG.SIDE_SELL; logger.success(f"{Back.RED}{Fore.WHITE}{log_prefix} *** CONFIRMED SHORT ENTRY ({CONFIG.strategy_name}) ***{Style.RESET_ALL}")
 
@@ -1091,8 +1135,8 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
                 cancel_open_orders(exchange, symbol, f"Pre-{entry_side.upper()} Entry"); time.sleep(0.5)
                 # Pass validated current_atr to placement function
                 place_result = place_risked_market_order(exchange, symbol, entry_side, CONFIG.risk_per_trade_percentage, current_atr, CONFIG.atr_stop_loss_multiplier, CONFIG.leverage, CONFIG.max_order_usdt_amount, CONFIG.required_margin_buffer, CONFIG.trailing_stop_percentage, CONFIG.trailing_stop_activation_offset_percent)
-                if place_result: action_taken_this_cycle = True
-                return # End cycle
+                if place_result: pass
+                return  # End cycle
             else: logger.info(f"{log_prefix} Holding Cash. Entry signal failed confirmation checks.")
 
     # ... (rest of error handling as before) ...
@@ -1106,7 +1150,7 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame, cycle_co
 
 # --- Graceful Shutdown ---
 # (Keep graceful_shutdown refined version from v2.2.0)
-def graceful_shutdown(exchange: Optional[ccxt.Exchange], symbol: Optional[str]) -> None:
+def graceful_shutdown(exchange: ccxt.Exchange | None, symbol: str | None) -> None:
     """Attempts to gracefully shut down the bot."""
     logger.warning(f"{Fore.YELLOW}{Style.BRIGHT}Shutdown requested. Initiating graceful exit...{Style.RESET_ALL}")
     market_base = get_market_base_currency(symbol) if symbol else "Bot"; send_sms_alert(f"[{market_base}] Shutdown initiated. Cleanup...")
@@ -1130,7 +1174,7 @@ def graceful_shutdown(exchange: Optional[ccxt.Exchange], symbol: Optional[str]) 
 # --- Main Execution ---
 def main() -> None:
     """Main function to initialize, set up, and run the trading loop."""
-    global cycle_count # Allow modification of global cycle count
+    global cycle_count  # Allow modification of global cycle count
     start_time_str = time.strftime('%Y-%m-%d %H:%M:%S %Z')
     logger.info(f"{Back.BLUE}{Fore.WHITE}{Style.BRIGHT}{'--- Pyrmethus Bybit Scalping Spell v2.3.0 Initializing ---':^80}{Style.RESET_ALL}")
     logger.info(f"{'Timestamp:':<20} {start_time_str}")
@@ -1138,8 +1182,8 @@ def main() -> None:
     logger.info(f"{'Risk Management:':<20} {Fore.GREEN}Initial ATR SL + Exchange TSL{Style.RESET_ALL}")
     logger.warning(f"{Back.YELLOW}{Fore.BLACK}{Style.BRIGHT}{'--- !!! LIVE FUTURES SCALPING MODE - EXTREME RISK INVOLVED !!! ---':^80}{Style.RESET_ALL}")
 
-    exchange: Optional[ccxt.Exchange] = None
-    symbol: Optional[str] = None
+    exchange: ccxt.Exchange | None = None
+    symbol: str | None = None
     market_base: str = "Bot"
     run_bot: bool = True
 
@@ -1158,7 +1202,7 @@ def main() -> None:
             if not market.get('contract'): raise ValueError("Not a contract market")
             logger.info(f"{Fore.GREEN}Using Symbol: {symbol} (Type: {market.get('type', 'N/A')}, ID: {market.get('id')}){Style.RESET_ALL}")
             if not set_leverage(exchange, symbol, CONFIG.leverage): raise RuntimeError("Leverage setup failed")
-        except Exception as e: # Catch all setup errors
+        except Exception as e:  # Catch all setup errors
             logger.critical(f"Symbol/Leverage setup failed for '{CONFIG.symbol}': {e}")
             send_sms_alert(f"[{market_base or 'Bot'}] CRITICAL: Symbol/Leverage setup FAILED ({type(e).__name__}). Exiting.")
             return
@@ -1199,18 +1243,18 @@ def main() -> None:
 
             try:
                 # Determine required data length dynamically
-                data_limit = max(150, CONFIG.atr_calculation_period*2, CONFIG.volume_ma_period*2, # Base + common
+                data_limit = max(150, CONFIG.atr_calculation_period * 2, CONFIG.volume_ma_period * 2,  # Base + common
                                 # Strategy specific lookbacks
-                                (CONFIG.st_atr_length*2 + CONFIG.confirm_st_atr_length*2) if CONFIG.strategy_name == "DUAL_SUPERTREND" else 0,
+                                (CONFIG.st_atr_length * 2 + CONFIG.confirm_st_atr_length * 2) if CONFIG.strategy_name == "DUAL_SUPERTREND" else 0,
                                 (CONFIG.stochrsi_rsi_length + CONFIG.stochrsi_stoch_length + max(CONFIG.stochrsi_k_period, CONFIG.stochrsi_d_period) + CONFIG.momentum_length) if CONFIG.strategy_name == "STOCHRSI_MOMENTUM" else 0,
-                                (CONFIG.ehlers_fisher_length*2 + CONFIG.ehlers_fisher_signal_length) if CONFIG.strategy_name == "EHLERS_FISHER" else 0,
-                                (CONFIG.ehlers_slow_period*2) if CONFIG.strategy_name == "EHLERS_MA_CROSS" else 0
+                                (CONFIG.ehlers_fisher_length * 2 + CONFIG.ehlers_fisher_signal_length) if CONFIG.strategy_name == "EHLERS_FISHER" else 0,
+                                (CONFIG.ehlers_slow_period * 2) if CONFIG.strategy_name == "EHLERS_MA_CROSS" else 0
                                 ) + CONFIG.API_FETCH_LIMIT_BUFFER
 
                 df = get_market_data(exchange, symbol, CONFIG.interval, limit=data_limit)
 
                 if df is not None and not df.empty:
-                    trade_logic(exchange, symbol, df, cycle_count) # Pass cycle count for logging
+                    trade_logic(exchange, symbol, df, cycle_count)  # Pass cycle count for logging
                 else:
                     logger.warning(f"{Fore.YELLOW}{log_prefix_cycle} No valid market data. Skipping logic.{Style.RESET_ALL}")
 
@@ -1232,7 +1276,7 @@ def main() -> None:
     except KeyboardInterrupt:
         logger.warning(f"\n{Fore.YELLOW}{Style.BRIGHT}KeyboardInterrupt received. Initiating shutdown...{Style.RESET_ALL}")
         run_bot = False
-    except Exception as e: # Catch setup errors
+    except Exception as e:  # Catch setup errors
          logger.critical(f"{Back.RED}{Fore.WHITE}{Style.BRIGHT}Critical error during bot setup phase: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc())
          send_sms_alert(f"[{market_base or 'Bot'}] CRITICAL SETUP ERROR: {type(e).__name__}! Bot failed start.")
          run_bot = False
@@ -1243,10 +1287,8 @@ def main() -> None:
         send_sms_alert(f"[{final_alert_market}] Pyrmethus v2.3 process terminated.")
         logger.info(f"{Back.BLUE}{Fore.WHITE}{Style.BRIGHT}{'--- Pyrmethus Scalping Spell Deactivated ---':^80}{Style.RESET_ALL}")
 
+
 if __name__ == "__main__":
     try: main()
     except Exception as e: logger.critical(f"{Back.RED}{Fore.WHITE}{Style.BRIGHT}Unhandled exception at top level: {e}{Style.RESET_ALL}"); logger.debug(traceback.format_exc()); sys.exit(1)
     sys.exit(0)
-
-
-

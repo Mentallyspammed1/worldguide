@@ -2,8 +2,9 @@
 # indicators.py - Placeholder for Technical Indicator Functions
 # Implement your indicator logic here.
 
+import numpy as np  # Often needed for calculations
 import pandas as pd
-import numpy as np # Often needed for calculations
+
 
 def rsi(close_prices: pd.Series, period: int = 14) -> pd.Series:
     """Calculates the Relative Strength Index (RSI)."""
@@ -14,7 +15,7 @@ def rsi(close_prices: pd.Series, period: int = 14) -> pd.Series:
         # For simplicity, we'll proceed, but calculations might yield NaNs
         pass
     if len(close_prices) < period:
-        return pd.Series([np.nan] * len(close_prices), index=close_prices.index) # Not enough data
+        return pd.Series([np.nan] * len(close_prices), index=close_prices.index)  # Not enough data
 
     delta = close_prices.diff()
     gain = delta.where(delta > 0, 0.0).fillna(0)
@@ -29,13 +30,12 @@ def rsi(close_prices: pd.Series, period: int = 14) -> pd.Series:
     # alpha = 1 / period
     alpha = 1.0 / period
     for i in range(period, len(close_prices)):
-         avg_gain[i] = (gain[i] * alpha) + (avg_gain[i-1] * (1 - alpha))
-         avg_loss[i] = (loss[i] * alpha) + (avg_loss[i-1] * (1 - alpha))
-
+         avg_gain[i] = (gain[i] * alpha) + (avg_gain[i - 1] * (1 - alpha))
+         avg_loss[i] = (loss[i] * alpha) + (avg_loss[i - 1] * (1 - alpha))
 
     rs = avg_gain / avg_loss
     rsi_values = 100.0 - (100.0 / (1.0 + rs))
-    rsi_values.fillna(50, inplace=True) # Fill initial NaNs, often RSI starts around 50 conceptually
+    rsi_values.fillna(50, inplace=True)  # Fill initial NaNs, often RSI starts around 50 conceptually
     # Ensure the final series has the same index as the input
     return rsi_values.reindex(close_prices.index)
 
@@ -48,7 +48,7 @@ def ATR(high_prices: pd.Series, low_prices: pd.Series, close_prices: pd.Series, 
         # Handle NaNs if necessary
         pass
     if len(high_prices) < period:
-         return pd.Series([np.nan] * len(high_prices), index=high_prices.index) # Not enough data
+         return pd.Series([np.nan] * len(high_prices), index=high_prices.index)  # Not enough data
 
     high_low = high_prices - low_prices
     high_close_prev = abs(high_prices - close_prices.shift(1))
@@ -81,4 +81,3 @@ def FibonacciPivotPoints(high: float, low: float, close: float) -> dict:
         'S3': pivot - (1.000 * fib_range)
     }
     return pivots
-

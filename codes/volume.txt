@@ -1,0 +1,1859 @@
+Below is a detailed explanation of the **Volumatic Trend ATR Strategy**, a trading approach that combines trend following with volatility-based risk management using the Average True Range (ATR). This strategy is designed to help traders enter trending markets, set dynamic stop-loss and take-profit levels, and manage risk effectively.
+
+---
+
+### **Overview of the Volumatic Trend ATR Strategy**
+The Volumatic Trend ATR Strategy is a systematic method for trading trending markets. It uses a moving average (MA) to identify the trend direction and the ATR to measure market volatility, which informs entry, exit, and risk management decisions.
+
+- **Objective**: Capture profits in trending markets while managing risk dynamically.
+- **Key Tools**:
+  - Moving Average (MA) for trend identification.
+  - Average True Range (ATR) for volatility measurement and setting trade levels.
+
+---
+
+### **Step-by-Step Breakdown**
+
+#### **1. Trend Identification**
+The first step is to determine the market trend using a moving average:
+- **Bullish Trend**: The price is above the moving average.
+- **Bearish Trend**: The price is below the moving average.
+
+**Common Moving Averages**:
+- **Simple Moving Average (SMA)**: Often set to 50 or 200 periods for a smoother trend signal.
+- **Exponential Moving Average (EMA)**: A shorter period (e.g., 50) can be used for faster responsiveness.
+
+**Example**:
+- If the closing price is above the 50-period SMA, the trend is bullish (consider buying).
+- If the closing price is below the 50-period SMA, the trend is bearish (consider selling).
+
+---
+
+#### **2. Volatility Measurement with ATR**
+The Average True Range (ATR) measures market volatility and helps set dynamic stop-loss and take-profit levels.
+- **ATR Period**: Typically 14 periods.
+- **How It Works**: ATR calculates the average range of price movements (high to low) over the specified period, factoring in gaps from previous closes.
+
+**Calculation**:
+- True Range (TR) = Maximum of:
+  - (High - Low)
+  - Absolute value of (High - Previous Close)
+  - Absolute value of (Low - Previous Close)
+- ATR = Average of TR over 14 periods.
+
+---
+
+#### **3. Entry Rules**
+Trades are entered in the direction of the trend:
+- **Long Entry (Buy)**:
+  - Price is above the moving average (bullish trend).
+  - Optional: Wait for a pullback to the MA or a bullish confirmation (e.g., a strong candlestick pattern).
+- **Short Entry (Sell)**:
+  - Price is below the moving average (bearish trend).
+  - Optional: Wait for a rally to the MA or a bearish confirmation (e.g., a reversal candlestick).
+
+**Optional Filters**:
+- Use indicators like the Relative Strength Index (RSI) to avoid entering in overbought (for longs) or oversold (for shorts) conditions.
+
+---
+
+#### **4. Stop-Loss and Take-Profit Levels**
+ATR is used to set dynamic levels that adjust to market volatility:
+- **Stop-Loss**:
+  - Multiplier: Typically 1.5x to 2x ATR.
+  - Long Position: Stop-loss = Entry Price - (ATR × multiplier).
+  - Short Position: Stop-loss = Entry Price + (ATR × multiplier).
+- **Take-Profit**:
+  - Multiplier: Typically 2x to 3x ATR.
+  - Long Position: Take-profit = Entry Price + (ATR × multiplier).
+  - Short Position: Take-profit = Entry Price - (ATR × multiplier).
+
+**Example**:
+- ATR = 1.0, Entry Price = 100:
+  - Stop-Loss (1.5x ATR): 100 - (1.5 × 1.0) = 98.5 (long).
+  - Take-Profit (2x ATR): 100 + (2 × 1.0) = 102 (long).
+
+---
+
+#### **5. Position Sizing**
+Position size is calculated to limit risk per trade (e.g., 1% of the account):
+- **Formula**:
+  - Position Size = (Account Risk) / (Stop-Loss Distance × Pip Value).
+- **Example**:
+  - Account = $10,000, Risk = 1% ($100), Stop-Loss Distance = 1.5 ATR (1.5 points), Pip Value = $10:
+  - Position Size = $100 / (1.5 × $10) = 6.67 units (adjust based on instrument).
+
+---
+
+#### **6. Trade Management**
+- **Trailing Stop (Optional)**:
+  - Adjust the stop-loss as the price moves in your favor.
+  - Long: Trailing Stop = Current Price - (ATR × multiplier, e.g., 1x).
+  - Short: Trailing Stop = Current Price + (ATR × multiplier).
+- **Re-entry**: If stopped out, wait for the next valid signal in the trend direction.
+
+---
+
+### **Practical Example**
+- **Instrument**: Forex pair (e.g., EUR/USD).
+- **Timeframe**: Daily chart.
+- **Setup**:
+  - 50-period SMA shows price above it (bullish trend).
+  - ATR (14) = 0.015 (1.5 pips).
+- **Trade**:
+  - Entry: Buy at 1.2000 after a pullback to the SMA.
+  - Stop-Loss: 1.2000 - (1.5 × 0.015) = 1.1977.
+  - Take-Profit: 1.2000 + (2 × 0.015) = 1.2030.
+  - Trailing Stop (optional): Adjust to 1x ATR below the current price as it rises.
+
+---
+
+### **Advantages**
+- Adapts to volatility with ATR-based levels.
+- Simple and effective in trending markets.
+- Built-in risk management.
+
+### **Limitations**
+- May struggle in choppy or ranging markets.
+- Requires accurate trend identification.
+
+---
+
+### **Tips for Success**
+- **Backtest**: Test on historical data to refine MA periods and ATR multipliers.
+- **Risk Control**: Always use stop-loss and proper position sizing.
+- **Enhancements**: Add volume or momentum indicators (e.g., RSI) for better timing.
+
+---
+
+### **Conclusion**
+The Volumatic Trend ATR Strategy is a powerful tool for trend-following traders. By combining moving averages for trend direction and ATR for volatility-adjusted exits, it provides a structured yet flexible approach to trading. With proper backtesting and risk management, this strategy can be applied across various markets and timeframes to pursue consistent results.# pyrmethus_volumatic_bot.py
+# Enhanced trading bot incorporating the Volumatic Trend and Pivot Order Block strategy
+# with advanced position management (SL/TP, BE, TSL).
+
+import hashlib
+import hmac
+import json
+import logging
+import math
+import os
+import time
+import numpy as np
+import pandas as pd
+import pandas_ta as ta
+import requests
+import threading
+import websocket  # For potential future WS integration, not used yet for klines
+from datetime import datetime
+from decimal import Decimal, ROUND_DOWN, ROUND_UP, getcontext
+from logging.handlers import RotatingFileHandler
+from typing import Any, Dict, Optional, Tuple, List, TypedDict
+from zoneinfo import ZoneInfo
+from colorama import Fore, Style, init
+from dotenv import load_dotenv
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+import ccxt
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from pydantic import BaseModel, validator, ValidationError
+
+# --- Initialize Environment and Settings ---
+getcontext().prec = 28  # High precision for Decimal calculations
+init(autoreset=True)  # Init Colorama
+load_dotenv()  # Load environment variables from .env
+
+# --- Constants ---
+API_KEY = os.getenv("BYBIT_API_KEY")
+API_SECRET = os.getenv("BYBIT_API_SECRET")
+if not API_KEY or not API_SECRET:
+    raise ValueError("BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env")
+
+CONFIG_FILE = "config.json"
+LOG_DIRECTORY = "bot_logs"
+TIMEZONE = ZoneInfo("America/Chicago")  # Adjust timezone as needed
+MAX_API_RETRIES = 3  # Max retries for recoverable API errors
+RETRY_DELAY_SECONDS = 5  # Delay between retries for network/rate limit errors
+VALID_INTERVALS = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"]  # Intervals supported by the bot logic
+CCXT_INTERVAL_MAP = {  # Map our intervals to ccxt's expected format
+    "1": "1m", "3": "3m", "5": "5m", "15": "15m", "30": "30m",
+    "60": "1h", "120": "2h", "240": "4h", "D": "1d", "W": "1w", "M": "1M"
+}
+RETRY_ERROR_CODES = [429, 500, 502, 503, 504]  # HTTP status codes considered retryable
+
+# Default Strategy/Indicator Periods (can be overridden by config.json)
+DEFAULT_VT_LENGTH = 40
+DEFAULT_VT_ATR_PERIOD = 200  # ATR period used in Volumatic Trend calc
+DEFAULT_VT_VOL_EMA_LENGTH = 1000  # Length for Volume smoothing
+DEFAULT_VT_ATR_MULTIPLIER = 3.0
+DEFAULT_VT_STEP_ATR_MULTIPLIER = 4.0
+
+# Order Block Params
+DEFAULT_OB_SOURCE = "Wicks"  # "Wicks" or "Bodys"
+DEFAULT_PH_LEFT = 10
+DEFAULT_PH_RIGHT = 10
+DEFAULT_PL_LEFT = 10
+DEFAULT_PL_RIGHT = 10
+DEFAULT_OB_EXTEND = True
+DEFAULT_OB_MAX_BOXES = 50
+
+# Fetch limit for initial historical data
+DEFAULT_FETCH_LIMIT = 750  # Ensure enough data for indicator lookbacks
+MAX_DF_LEN = 2000  # Keep DataFrame size manageable
+
+LOOP_DELAY_SECONDS = 15  # Time between the end of one cycle and the start of the next
+POSITION_CONFIRM_DELAY_SECONDS = 8  # Wait time after placing order before confirming position
+
+QUOTE_CURRENCY = "USDT"  # Default, will be updated from config
+
+# Neon Color Scheme for logging
+NEON_GREEN = Fore.LIGHTGREEN_EX
+NEON_BLUE = Fore.CYAN
+NEON_PURPLE = Fore.MAGENTA
+NEON_YELLOW = Fore.YELLOW
+NEON_RED = Fore.LIGHTRED_EX
+NEON_CYAN = Fore.CYAN
+RESET = Style.RESET_ALL
+BRIGHT = Style.BRIGHT
+DIM = Style.DIM
+
+os.makedirs(LOG_DIRECTORY, exist_ok=True)
+
+# --- Market Info Cache ---
+market_info_cache = {}
+
+# --- Configuration Validation with Pydantic ---
+class StrategyParams(BaseModel):
+    vt_length: int
+    vt_atr_period: int
+    vt_vol_ema_length: int
+    vt_atr_multiplier: float
+    vt_step_atr_multiplier: float
+    ob_source: str
+    ph_left: int
+    ph_right: int
+    pl_left: int
+    pl_right: int
+    ob_extend: bool
+    ob_max_boxes: int
+    ob_entry_proximity_factor: float
+    ob_exit_proximity_factor: float
+
+    @validator('vt_length', 'vt_atr_period', 'vt_vol_ema_length', 'ph_left', 'ph_right', 'pl_left', 'pl_right', 'ob_max_boxes')
+    def check_positive_int(cls, v):
+        if v <= 0:
+            raise ValueError('must be a positive integer')
+        return v
+
+    @validator('vt_atr_multiplier', 'vt_step_atr_multiplier', 'ob_entry_proximity_factor', 'ob_exit_proximity_factor')
+    def check_positive_float(cls, v):
+        if v <= 0:
+            raise ValueError('must be a positive float')
+        return v
+
+class ProtectionConfig(BaseModel):
+    enable_trailing_stop: bool
+    trailing_stop_callback_rate: float
+    trailing_stop_activation_percentage: float
+    enable_break_even: bool
+    break_even_trigger_atr_multiple: float
+    break_even_offset_ticks: int
+    initial_stop_loss_atr_multiple: float
+    initial_take_profit_atr_multiple: float
+
+    @validator('trailing_stop_callback_rate', 'trailing_stop_activation_percentage', 'break_even_trigger_atr_multiple', 'initial_stop_loss_atr_multiple', 'initial_take_profit_atr_multiple')
+    def check_non_negative_float(cls, v):
+        if v < 0:
+            raise ValueError('must be non-negative')
+        return v
+
+    @validator('break_even_offset_ticks')
+    def check_non_negative_int(cls, v):
+        if v < 0:
+            raise ValueError('must be non-negative')
+        return v
+
+class Config(BaseModel):
+    interval: str
+    retry_delay: int
+    fetch_limit: int
+    orderbook_limit: int
+    enable_trading: bool
+    use_sandbox: bool
+    risk_per_trade: float
+    leverage: int
+    max_concurrent_positions: int
+    quote_currency: str
+    loop_delay_seconds: int
+    position_confirm_delay_seconds: int
+    strategy_params: StrategyParams
+    protection: ProtectionConfig
+
+    @validator('interval')
+    def check_interval(cls, v):
+        if v not in VALID_INTERVALS:
+            raise ValueError(f'must be one of {VALID_INTERVALS}')
+        return v
+
+    @validator('risk_per_trade')
+    def check_risk_per_trade(cls, v):
+        if not (0 < v < 1):
+            raise ValueError('must be between 0 and 1')
+        return v
+
+    @validator('leverage', 'retry_delay', 'fetch_limit', 'orderbook_limit', 'max_concurrent_positions', 'loop_delay_seconds', 'position_confirm_delay_seconds')
+    def check_positive(cls, v):
+        if v <= 0:
+            raise ValueError('must be positive')
+        return v
+
+# --- Configuration Loading ---
+class SensitiveFormatter(logging.Formatter):
+    """Formatter to redact sensitive information (API keys) from logs."""
+    def format(self, record: logging.LogRecord) -> str:
+        msg = super().format(record)
+        if API_KEY:
+            msg = msg.replace(API_KEY, "***API_KEY***")
+        if API_SECRET:
+            msg = msg.replace(API_SECRET, "***API_SECRET***")
+        return msg
+
+def setup_logger(symbol: str) -> logging.Logger:
+    """Sets up a logger for the given symbol with file and console handlers."""
+    safe_symbol = symbol.replace('/', '_').replace(':', '-')
+    logger_name = f"pyrmethus_bot_{safe_symbol}"
+    log_filename = os.path.join(LOG_DIRECTORY, f"{logger_name}.log")
+    logger = logging.getLogger(logger_name)
+
+    if logger.hasHandlers():
+        return logger
+
+    logger.setLevel(logging.DEBUG)
+
+    try:
+        file_handler = RotatingFileHandler(
+            log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding='utf-8'
+        )
+        file_formatter = SensitiveFormatter("%(asctime)s - %(levelname)s - [%(name)s:%(lineno)d] - %(message)s")
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(logging.DEBUG)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        print(f"Error setting up file logger for {log_filename}: {e}")
+
+    stream_handler = logging.StreamHandler()
+    stream_formatter = SensitiveFormatter(
+        f"{NEON_BLUE}%(asctime)s{RESET} - {NEON_YELLOW}%(levelname)-8s{RESET} - {NEON_PURPLE}[%(name)s]{RESET} - %(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    stream_handler.setFormatter(stream_formatter)
+    stream_handler.setLevel(logging.INFO)
+    logger.addHandler(stream_handler)
+
+    logger.propagate = False
+    return logger
+
+def load_config(filepath: str) -> Dict[str, Any]:
+    """Load and validate configuration from JSON file using Pydantic."""
+    default_config = {
+        "interval": "5",
+        "retry_delay": 5,
+        "fetch_limit": DEFAULT_FETCH_LIMIT,
+        "orderbook_limit": 25,
+        "enable_trading": False,
+        "use_sandbox": True,
+        "risk_per_trade": 0.01,
+        "leverage": 20,
+        "max_concurrent_positions": 1,
+        "quote_currency": "USDT",
+        "loop_delay_seconds": LOOP_DELAY_SECONDS,
+        "position_confirm_delay_seconds": POSITION_CONFIRM_DELAY_SECONDS,
+        "strategy_params": {
+            "vt_length": DEFAULT_VT_LENGTH,
+            "vt_atr_period": DEFAULT_VT_ATR_PERIOD,
+            "vt_vol_ema_length": DEFAULT_VT_VOL_EMA_LENGTH,
+            "vt_atr_multiplier": DEFAULT_VT_ATR_MULTIPLIER,
+            "vt_step_atr_multiplier": DEFAULT_VT_STEP_ATR_MULTIPLIER,
+            "ob_source": DEFAULT_OB_SOURCE,
+            "ph_left": DEFAULT_PH_LEFT,
+            "ph_right": DEFAULT_PH_RIGHT,
+            "pl_left": DEFAULT_PL_LEFT,
+            "pl_right": DEFAULT_PL_RIGHT,
+            "ob_extend": DEFAULT_OB_EXTEND,
+            "ob_max_boxes": DEFAULT_OB_MAX_BOXES,
+            "ob_entry_proximity_factor": 1.005,
+            "ob_exit_proximity_factor": 1.001
+        },
+        "protection": {
+            "enable_trailing_stop": True,
+            "trailing_stop_callback_rate": 0.005,
+            "trailing_stop_activation_percentage": 0.003,
+            "enable_break_even": True,
+            "break_even_trigger_atr_multiple": 1.0,
+            "break_even_offset_ticks": 2,
+            "initial_stop_loss_atr_multiple": 1.8,
+            "initial_take_profit_atr_multiple": 0.7
+        }
+    }
+
+    if not os.path.exists(filepath):
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(default_config, f, indent=4)
+            print(f"{NEON_YELLOW}Created default config file: {filepath}{RESET}")
+            config_model = Config(**default_config)
+            return config_model.dict()
+        except IOError as e:
+            print(f"{NEON_RED}Error creating default config file {filepath}: {e}{RESET}")
+            return default_config
+
+    try:
+        with open(filepath, encoding="utf-8") as f:
+            config_from_file = json.load(f)
+        config_model = Config(**config_from_file)
+        return config_model.dict()
+    except (FileNotFoundError, json.JSONDecodeError, ValidationError) as e:
+        init_logger = logging.getLogger("init")
+        init_logger.error(f"Config error: {e}. Using default config.")
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(default_config, f, indent=4)
+            print(f"{NEON_YELLOW}Created default config file: {filepath}{RESET}")
+        except IOError:
+            pass
+        config_model = Config(**default_config)
+        return config_model.dict()
+
+CONFIG = load_config(CONFIG_FILE)
+QUOTE_CURRENCY = CONFIG.get("quote_currency", "USDT")
+config_mtime = os.path.getmtime(CONFIG_FILE)
+
+# --- CCXT Exchange Setup ---
+def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
+    """Initializes the CCXT Bybit exchange object with error handling."""
+    try:
+        exchange_options = {
+            'apiKey': API_KEY,
+            'secret': API_SECRET,
+            'enableRateLimit': True,
+            'options': {
+                'defaultType': 'linear',
+                'adjustForTimeDifference': True,
+                'fetchTickerTimeout': 10000,
+                'fetchBalanceTimeout': 15000,
+                'createOrderTimeout': 20000,
+                'cancelOrderTimeout': 15000,
+            }
+        }
+        exchange = ccxt.bybit(exchange_options)
+
+        if CONFIG.get('use_sandbox'):
+            logger.warning(f"{NEON_YELLOW}USING SANDBOX MODE (Testnet){RESET}")
+            exchange.set_sandbox_mode(True)
+
+        logger.info(f"Loading markets for {exchange.id}...")
+        exchange.load_markets()
+        logger.info(f"Markets loaded for {exchange.id}.")
+        logger.info(f"CCXT exchange initialized ({exchange.id}). Sandbox: {CONFIG.get('use_sandbox')}")
+
+        balance = exchange.fetch_balance(params={'type': 'CONTRACT'})
+        logger.info(f"{NEON_GREEN}Successfully connected. {QUOTE_CURRENCY} available: {balance.get(QUOTE_CURRENCY, {}).get('free', 'N/A')}{RESET}")
+        return exchange
+    except Exception as e:
+        logger.critical(f"{NEON_RED}Failed to initialize exchange: {e}{RESET}", exc_info=True)
+        return None
+
+# --- CCXT Data Fetching Helpers with Retries ---
+@retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((ccxt.NetworkError, ccxt.RequestTimeout))
+)
+def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Decimal]:
+    """Fetch the current price with retries."""
+    try:
+        ticker = exchange.fetch_ticker(symbol)
+        last_price = ticker.get('last')
+        if last_price:
+            price = Decimal(str(last_price))
+            if price > 0:
+                return price
+        bid = Decimal(str(ticker.get('bid', 0)))
+        ask = Decimal(str(ticker.get('ask', 0)))
+        if bid > 0 and ask > 0:
+            return (bid + ask) / 2
+        logger.error(f"Failed to fetch valid price for {symbol}.")
+        return None
+    except Exception as e:
+        logger.error(f"Error fetching price for {symbol}: {e}")
+        raise
+
+@retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((ccxt.NetworkError, ccxt.RequestTimeout))
+)
+def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int = DEFAULT_FETCH_LIMIT, logger: logging.Logger = None) -> pd.DataFrame:
+    """Fetch OHLCV kline data with retries."""
+    lg = logger or logging.getLogger(__name__)
+    try:
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+        if not ohlcv:
+            lg.warning(f"No kline data returned for {symbol} {timeframe}.")
+            return pd.DataFrame()
+
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df = df.iloc[::-1].reset_index(drop=True)
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', errors='coerce')
+        df.set_index('timestamp', inplace=True)
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        df.dropna(subset=['open', 'high', 'low', 'close'], inplace=True)
+        df = df[df['close'] > 0]
+        df.sort_index(inplace=True)
+        lg.info(f"Fetched {len(df)} klines for {symbol} {timeframe}")
+        return df.tail(MAX_DF_LEN).copy()
+    except Exception as e:
+        lg.error(f"Error fetching klines for {symbol}: {e}")
+        raise
+
+def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Dict]:
+    """Gets market information from cache or exchange."""
+    if symbol in market_info_cache:
+        return market_info_cache[symbol]
+    try:
+        market = exchange.market(symbol)
+        market['is_contract'] = market.get('contract', False) or market.get('type') in ['swap', 'future']
+        market_info_cache[symbol] = market
+        logger.debug(f"Cached market info for {symbol}: {market}")
+        return market
+    except Exception as e:
+        logger.error(f"Error getting market info for {symbol}: {e}")
+        return None
+
+@retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((ccxt.NetworkError, ccxt.RequestTimeout))
+)
+def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger) -> Optional[Decimal]:
+    """Fetches the available balance with retries."""
+    try:
+        balance_info = exchange.fetch_balance(params={'type': 'CONTRACT'})
+        available = balance_info.get(currency, {}).get('free')
+        if available is not None:
+            balance = Decimal(str(available))
+            if balance >= 0:
+                logger.info(f"Available {currency} balance: {balance:.4f}")
+                return balance
+        logger.error(f"Could not fetch balance for {currency}.")
+        return None
+    except Exception as e:
+        logger.error(f"Error fetching balance: {e}")
+        raise
+
+@retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((ccxt.NetworkError, ccxt.RequestTimeout))
+)
+def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Dict]:
+    """Checks for an open position with retries."""
+    try:
+        positions = exchange.fetch_positions([symbol])
+        for pos in positions:
+            size = Decimal(str(pos.get('contracts', pos.get('info', {}).get('size', '0'))))
+            if abs(size) > Decimal('1e-9'):
+                pos['side'] = 'long' if size > 0 else 'short'
+                info = pos.get('info', {})
+                pos['stopLossPrice'] = info.get('stopLoss', pos.get('stopLossPrice'))
+                pos['takeProfitPrice'] = info.get('takeProfit', pos.get('takeProfitPrice'))
+                pos['trailingStopLoss'] = info.get('trailingStop')
+                pos['tslActivationPrice'] = info.get('activePrice')
+                logger.info(f"Active {pos['side'].upper()} position found for {symbol}: Size={size}")
+                return pos
+        logger.info(f"No active position for {symbol}.")
+        return None
+    except Exception as e:
+        logger.error(f"Error fetching position for {symbol}: {e}")
+        raise
+
+def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, market_info: Dict, logger: logging.Logger) -> bool:
+    """Sets leverage for a symbol."""
+    if not market_info.get('is_contract', False) or leverage <= 0:
+        logger.info(f"Leverage setting skipped for {symbol}.")
+        return True
+    try:
+        params = {'buyLeverage': str(leverage), 'sellLeverage': str(leverage)}
+        exchange.set_leverage(leverage=leverage, symbol=symbol, params=params)
+        logger.info(f"Leverage set to {leverage}x for {symbol}.")
+        return True
+    except Exception as e:
+        logger.error(f"Error setting leverage for {symbol}: {e}")
+        return False
+
+def calculate_position_size(
+    balance: Decimal,
+    risk_per_trade: float,
+    initial_stop_loss_price: Decimal,
+    entry_price: Decimal,
+    market_info: Dict,
+    exchange: ccxt.Exchange,
+    logger: Optional[logging.Logger] = None
+) -> Optional[Decimal]:
+    """Calculates position size based on risk."""
+    lg = logger or logging.getLogger(__name__)
+    symbol = market_info.get('symbol', 'UNKNOWN')
+    if balance <= 0 or not (0 < risk_per_trade < 1) or initial_stop_loss_price <= 0 or entry_price <= 0:
+        lg.error(f"Invalid inputs for sizing {symbol}.")
+        return None
+    try:
+        risk_amount = balance * Decimal(str(risk_per_trade))
+        sl_distance = abs(entry_price - initial_stop_loss_price)
+        contract_size = Decimal(str(market_info.get('contractSize', '1')))
+        size = risk_amount / (sl_distance * contract_size)
+        min_amount = Decimal(str(market_info.get('limits', {}).get('amount', {}).get('min', '0')))
+        max_amount = Decimal(str(market_info.get('limits', {}).get('amount', {}).get('max', 'inf')))
+        size = max(min_amount, min(size, max_amount))
+        formatted_size = Decimal(exchange.amount_to_precision(symbol, float(size)))
+        if formatted_size <= 0:
+            lg.error(f"Final size zero for {symbol}.")
+            return None
+        lg.info(f"Position size for {symbol}: {formatted_size}")
+        return formatted_size
+    except Exception as e:
+        lg.error(f"Error calculating size for {symbol}: {e}")
+        return None
+
+@retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((ccxt.NetworkError, ccxt.RequestTimeout))
+)
+def place_trade(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    trade_signal: str,
+    position_size: Decimal,
+    market_info: Dict,
+    logger: Optional[logging.Logger] = None,
+    reduce_only: bool = False
+) -> Optional[Dict]:
+    """Places a market order with retries."""
+    lg = logger or logging.getLogger(__name__)
+    side = 'buy' if trade_signal == "BUY" else 'sell'
+    try:
+        amount = float(position_size)
+        if amount <= 0:
+            lg.error(f"Invalid size {amount} for {symbol}.")
+            return None
+        params = {'positionIdx': 0, 'reduceOnly': reduce_only}
+        if reduce_only:
+            params['timeInForce'] = 'IOC'
+        order = exchange.create_order(
+            symbol=symbol, type='market', side=side,
+            amount=amount, price=None, params=params
+        )
+        lg.info(f"Trade placed for {symbol}: Order ID {order.get('id')}")
+        return order
+    except Exception as e:
+        lg.error(f"Error placing trade for {symbol}: {e}")
+        raise
+
+def _set_position_protection(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    market_info: Dict,
+    position_info: Dict,
+    logger: logging.Logger,
+    stop_loss_price: Optional[Decimal] = None,
+    take_profit_price: Optional[Decimal] = None,
+    trailing_stop_distance: Optional[Decimal] = None,
+    tsl_activation_price: Optional[Decimal] = None,
+) -> bool:
+    """Sets SL, TP, or TSL for a position."""
+    lg = logger
+    if not market_info.get('is_contract', False) or not position_info:
+        lg.warning(f"Protection setting skipped for {symbol}.")
+        return False
+    pos_side = position_info.get('side')
+    if pos_side not in ['long', 'short']:
+        lg.error(f"Invalid position side for {symbol}.")
+        return False
+    has_sl = stop_loss_price and stop_loss_price > 0
+    has_tp = take_profit_price and take_profit_price > 0
+    has_tsl = trailing_stop_distance and trailing_stop_distance > 0 and tsl_activation_price and tsl_activation_price > 0
+    if not (has_sl or has_tp or has_tsl):
+        lg.info(f"No valid protection for {symbol}.")
+        return True
+
+    category = 'linear' if market_info.get('linear', True) else 'inverse'
+    position_idx = int(position_info.get('info', {}).get('positionIdx', 0))
+    params = {
+        'category': category,
+        'symbol': market_info['id'],
+        'tpslMode': 'Full',
+        'slTriggerBy': 'LastPrice',
+        'tpTriggerBy': 'LastPrice',
+        'slOrderType': 'Market',
+        'tpOrderType': 'Market',
+        'positionIdx': position_idx
+    }
+    if has_sl:
+        params['stopLoss'] = str(exchange.price_to_precision(symbol, float(stop_loss_price)))
+    if has_tp:
+        params['takeProfit'] = str(exchange.price_to_precision(symbol, float(take_profit_price)))
+    if has_tsl:
+        params['trailingStop'] = str(exchange.price_to_precision(symbol, float(trailing_stop_distance)))
+        params['activePrice'] = str(exchange.price_to_precision(symbol, float(tsl_activation_price)))
+
+    try:
+        exchange.private_post_position_set_tp_sl(params)
+        lg.info(f"Protection set for {symbol}: SL={stop_loss_price}, TP={take_profit_price}, TSL={trailing_stop_distance}")
+        return True
+    except Exception as e:
+        lg.error(f"Error setting protection for {symbol}: {e}")
+        return False
+
+def set_trailing_stop_loss(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    market_info: Dict,
+    position_info: Dict,
+    config: Dict[str, Any],
+    logger: logging.Logger,
+    take_profit_price: Optional[Decimal] = None
+) -> bool:
+    """Sets a trailing stop loss."""
+    lg = logger
+    protection_cfg = config.get("protection", {})
+    if not protection_cfg.get("enable_trailing_stop", False):
+        return False
+    side = position_info.get('side')
+    entry_price = Decimal(str(position_info.get('entryPrice', position_info.get('info', {}).get('avgPrice', '0'))))
+    callback_rate = Decimal(str(protection_cfg.get("trailing_stop_callback_rate", 0.005)))
+    activation_pct = Decimal(str(protection_cfg.get("trailing_stop_activation_percentage", 0.003)))
+    
+    if side == 'long':
+        activation_price = entry_price * (1 + activation_pct)
+        distance = entry_price * callback_rate
+    else:
+        activation_price = entry_price * (1 - activation_pct)
+        distance = entry_price * callback_rate
+
+    return _set_position_protection(
+        exchange, symbol, market_info, position_info, lg,
+        take_profit_price=take_profit_price,
+        trailing_stop_distance=distance,
+        tsl_activation_price=activation_price
+    )
+
+# --- Strategy Implementation ---
+class StrategyAnalysisResults(TypedDict):
+    dataframe: pd.DataFrame
+    last_close: Decimal
+    current_trend_up: Optional[bool]
+    trend_just_changed: bool
+    active_bull_boxes: List[Dict]
+    active_bear_boxes: List[Dict]
+    vol_norm_int: Optional[int]
+    atr: Optional[Decimal]
+    upper_band: Optional[Decimal]
+    lower_band: Optional[Decimal]
+
+class VolumaticOBStrategy:
+    """Volumatic Trend with Order Blocks strategy."""
+    def __init__(self, config: Dict[str, Any], market_info: Dict, logger: logging.Logger):
+        self.config = config
+        self.logger = logger
+        params = config.get("strategy_params", {})
+        self.trend_length = params.get("vt_length", DEFAULT_VT_LENGTH)
+        self.atr_length = params.get("vt_atr_period", DEFAULT_VT_ATR_PERIOD)
+        self.vol_ema_length = params.get("vt_vol_ema_length", DEFAULT_VT_VOL_EMA_LENGTH)
+        self.vol_atr_mult = Decimal(str(params.get("vt_atr_multiplier", DEFAULT_VT_ATR_MULTIPLIER)))
+        self.vol_step_atr_mult = Decimal(str(params.get("vt_step_atr_multiplier", DEFAULT_VT_STEP_ATR_MULTIPLIER)))
+        self.ob_source = params.get("ob_source", DEFAULT_OB_SOURCE)
+        self.ph_left = params.get("ph_left", DEFAULT_PH_LEFT)
+        self.ph_right = params.get("ph_right", DEFAULT_PH_RIGHT)
+        self.pl_left = params.get("pl_left", DEFAULT_PL_LEFT)
+        self.pl_right = params.get("pl_right", DEFAULT_PL_RIGHT)
+        self.ob_extend = params.get("ob_extend", DEFAULT_OB_EXTEND)
+        self.ob_max_boxes = params.get("ob_max_boxes", DEFAULT_OB_MAX_BOXES)
+        self.bull_boxes: List[Dict] = []
+        self.bear_boxes: List[Dict] = []
+        self.min_data_len = max(self.trend_length, self.atr_length, self.vol_ema_length) + 50
+
+    def _ema_swma(self, series: pd.Series, length: int) -> pd.Series:
+        """Simplified SWMA approximation using EMA."""
+        return ta.ema(series, length=length, fillna=np.nan)
+
+    def update(self, df: pd.DataFrame) -> StrategyAnalysisResults:
+        """Updates the strategy with new data."""
+        if df.empty:
+            return StrategyAnalysisResults(
+                dataframe=df, last_close=Decimal('0'), current_trend_up=None, trend_just_changed=False,
+                active_bull_boxes=[], active_bear_boxes=[], vol_norm_int=None, atr=None, upper_band=None, lower_band=None
+            )
+
+        self.logger.debug(f"Analyzing {len(df)} candles.")
+
+        # Volumatic Trend Calculations
+        df['atr'] = ta.atr(df['high'], df['low'], df['close'], length=self.atr_length, fillna=np.nan)
+        df['ema1'] = self._ema_swma(df['close'], self.trend_length)
+        df['ema2'] = ta.ema(df['close'], length=self.trend_length, fillna=np.nan)
+        df['trend_up'] = df['ema1'].shift(1) < df['ema2']
+        df['trend_up'] = df['trend_up'].ffill()
+        df['trend_changed'] = (df['trend_up'] != df['trend_up'].shift(1)) & df['trend_up'].notna() & df['trend_up'].shift(1).notna()
+        df['trend_changed'].fillna(False, inplace=True)
+
+        # Band Calculation
+        df['ema1_at_change'] = np.where(df['trend_changed'], df['ema1'], np.nan)
+        df['atr_at_change'] = np.where(df['trend_changed'], df['atr'], np.nan)
+        df['ema1_for_bands'] = df['ema1_at_change'].ffill()
+        df['atr_for_bands'] = df['atr_at_change'].ffill()
+        df['upper_band'] = df['ema1_for_bands'] + df['atr_for_bands'] * self.vol_atr_mult
+        df['lower_band'] = df['ema1_for_bands'] - df['atr_for_bands'] * self.vol_atr_mult
+        df.dropna(subset=['upper_band', 'lower_band'], inplace=True)
+
+        if df.empty:
+            self.logger.warning(f"DataFrame empty after band calc.")
+            return StrategyAnalysisResults(
+                dataframe=df, last_close=Decimal('0'), current_trend_up=None, trend_just_changed=False,
+                active_bull_boxes=[], active_bear_boxes=[], vol_norm_int=None, atr=None, upper_band=None, lower_band=None
+            )
+
+        # Volume Normalization
+        df['vol_percentile_val'] = df['volume'].rolling(window=self.vol_ema_length, min_periods=self.vol_ema_length // 2).apply(
+            lambda x: np.percentile(x[x.notna() & (x > 0)], 100) if np.any(x.notna() & (x > 0)) else np.nan, raw=True
+        )
+        df['vol_norm'] = (df['volume'] / df['vol_percentile_val'] * 100).fillna(0).clip(0, 200)
+        df['lower_vol_ref'] = df['lower_band'] + df['atr_for_bands'] * self.vol_step_atr_mult
+        df['upper_vol_ref'] = df['upper_band'] - df['atr_for_bands'] * self.vol_step_atr_mult
+        df['step_up_size'] = (df['lower_vol_ref'] - df['lower_band']) / 100
+        df['step_dn_size'] = (df['upper_band'] - df['upper_vol_ref']) / 100
+        df['vol_bar_up_top'] = df['lower_band'] + (df['step_up_size'] * df['vol_norm']).fillna(0)
+        df['vol_bar_dn_bottom'] = df['upper_band'] - (df['step_dn_size'] * df['vol_norm']).fillna(0)
+
+        # Order Block Calculations
+        high_series = df['high'] if self.ob_source == "Wicks" else df[['open', 'close']].max(axis=1)
+        low_series = df['low'] if self.ob_source == "Wicks" else df[['open', 'close']].min(axis=1)
+        df['ph_signal'] = ta.pivot(high_series, left=self.ph_left, right=self.ph_right, high_low='high')
+        df['pl_signal'] = ta.pivot(low_series, left=self.pl_left, right=self.pl_right, high_low='low')
+
+        recent_df = df.tail(max(self.ph_right, self.pl_right) + 5)
+        for idx in recent_df.index:
+            if pd.notna(recent_df.loc[idx, 'ph_signal']):
+                pivot_idx = idx - pd.Timedelta(minutes=int(self.config.get("interval", "5")) * self.ph_right)
+                if pivot_idx in df.index and not any(b['left_idx'] == pivot_idx for b in self.bear_boxes):
+                    ob_candle = df.loc[pivot_idx]
+                    box_top = Decimal(str(ob_candle['high' if self.ob_source == "Wicks" else 'close']))
+                    box_bottom = Decimal(str(ob_candle['close' if self.ob_source == "Wicks" else 'open']))
+                    if box_bottom > box_top:
+                        box_top, box_bottom = box_bottom, box_top
+                    if box_top > box_bottom:
+                        self.bear_boxes.append({
+                            'id': f"bear_{pivot_idx.strftime('%Y%m%d%H%M')}",
+                            'type': 'bear',
+                            'left_idx': pivot_idx,
+                            'right_idx': df.index[-1],
+                            'top': box_top,
+                            'bottom': box_bottom,
+                            'active': True,
+                            'violated': False
+                        })
+            if pd.notna(recent_df.loc[idx, 'pl_signal']):
+                pivot_idx = idx - pd.Timedelta(minutes=int(self.config.get("interval", "5")) * self.pl_right)
+                if pivot_idx in df.index and not any(b['left_idx'] == pivot_idx for b in self.bull_boxes):
+                    ob_candle = df.loc[pivot_idx]
+                    box_top = Decimal(str(ob_candle['open' if self.ob_source == "Wicks" else 'open']))
+                    box_bottom = Decimal(str(ob_candle['low' if self.ob_source == "Wicks" else 'close']))
+                    if box_bottom > box_top:
+                        box_top, box_bottom = box_bottom, box_top
+                    if box_top > box_bottom:
+                        self.bull_boxes.append({
+                            'id': f"bull_{pivot_idx.strftime('%Y%m%d%H%M')}",
+                            'type': 'bull',
+                            'left_idx': pivot_idx,
+                            'right_idx': df.index[-1],
+                            'top': box_top,
+                            'bottom': box_bottom,
+                            'active': True,
+                            'violated': False
+                        })
+
+        # Manage Boxes
+        last_close = Decimal(str(df['close'].iloc[-1]))
+        last_bar_idx = df.index[-1]
+        for box in self.bull_boxes:
+            if box['active']:
+                if last_close < box['bottom']:
+                    box.update({'active': False, 'violated': True, 'right_idx': last_bar_idx})
+                elif self.ob_extend:
+                    box['right_idx'] = last_bar_idx
+        for box in self.bear_boxes:
+            if box['active']:
+                if last_close > box['top']:
+                    box.update({'active': False, 'violated': True, 'right_idx': last_bar_idx})
+                elif self.ob_extend:
+                    box['right_idx'] = last_bar_idx
+
+        # Prune Boxes
+        self.bull_boxes.sort(key=lambda b: (b['active'], b['left_idx']), reverse=True)
+        self.bear_boxes.sort(key=lambda b: (b['active'], b['left_idx']), reverse=True)
+        active_bull = [b for b in self.bull_boxes if b['active']][:self.ob_max_boxes]
+        inactive_bull = [b for b in self.bull_boxes if not b['active']][:self.ob_max_boxes // 2]
+        active_bear = [b for b in self.bear_boxes if b['active']][:self.ob_max_boxes]
+        inactive_bear = [b for b in self.bear_boxes if not b['active']][:self.ob_max_boxes // 2]
+        self.bull_boxes = active_bull + inactive_bull
+        self.bear_boxes = active_bear + inactive_bear
+
+        # Results
+        last_row = df.iloc[-1]
+        return StrategyAnalysisResults(
+            dataframe=df,
+            last_close=Decimal(str(last_row.get('close', '0'))),
+            current_trend_up=bool(last_row.get('trend_up', False)),
+            trend_just_changed=bool(last_row.get('trend_changed', False)),
+            active_bull_boxes=active_bull,
+            active_bear_boxes=active_bear,
+            vol_norm_int=int(last_row.get('vol_norm', 0)),
+            atr=Decimal(str(last_row.get('atr', '0'))),
+            upper_band=Decimal(str(last_row.get('upper_band', '0'))),
+            lower_band=Decimal(str(last_row.get('lower_band', '0')))
+        )
+
+# --- Signal Generation ---
+class SignalGenerator:
+    """Generates trading signals."""
+    def __init__(self, config: Dict[str, Any], logger: logging.Logger):
+        self.config = config
+        self.logger = logger
+        params = config.get("strategy_params", {})
+        self.ob_entry_proximity_factor = Decimal(str(params.get("ob_entry_proximity_factor", 1.005)))
+        self.ob_exit_proximity_factor = Decimal(str(params.get("ob_exit_proximity_factor", 1.001)))
+
+    def generate_signal(self, analysis_results: StrategyAnalysisResults, open_position: Optional[Dict]) -> str:
+        """Generates BUY/SELL/HOLD/EXIT signals."""
+        if not analysis_results or analysis_results['dataframe'].empty or analysis_results['last_close'] <= 0:
+            self.logger.warning("Insufficient data for signal.")
+            return "HOLD"
+
+        latest_close = analysis_results['last_close']
+        is_trend_up = analysis_results['current_trend_up']
+        trend_just_changed = analysis_results['trend_just_changed']
+        active_bull_obs = analysis_results['active_bull_boxes']
+        active_bear_obs = analysis_results['active_bear_boxes']
+        current_pos_side = open_position.get('side') if open_position else None
+
+        if current_pos_side == 'long':
+            if not is_trend_up and trend_just_changed:
+                return "EXIT_LONG"
+            newest_bear_ob = sorted(active_bear_obs, key=lambda x: x['left_idx'], reverse=True)[:1]
+            if newest_bear_ob and latest_close >= newest_bear_ob[0]['top'] * (Decimal("1") - (self.ob_exit_proximity_factor - 1)):
+                return "EXIT_LONG"
+        elif current_pos_side == 'short':
+            if is_trend_up and trend_just_changed:
+                return "EXIT_SHORT"
+            newest_bull_ob = sorted(active_bull_obs, key=lambda x: x['left_idx'], reverse=True)[:1]
+            if newest_bull_ob and latest_close <= newest_bull_ob[0]['bottom'] * (Decimal("1") + (self.ob_exit_proximity_factor - 1)):
+                return "EXIT_SHORT"
+
+        if current_pos_side is None:
+            if is_trend_up:
+                for ob in active_bull_obs:
+                    if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+                        return "BUY"
+            elif not is_trend_up:
+                for ob in active_bear_obs:
+                    if ob['bottom'] * (Decimal("1") - (self.ob_entry_proximity_factor - 1)) <= latest_close <= ob['top']:
+                        return "SELL"
+        return "HOLD"
+
+    def calculate_initial_tp_sl(
+        self, entry_price: Decimal, signal: str, atr: Optional[Decimal], market_info: Dict
+    ) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+        """Calculates initial TP and SL."""
+        if signal not in ["BUY", "SELL"] or atr is None or atr <= 0 or entry_price <= 0:
+            self.logger.warning("Invalid inputs for TP/SL.")
+            return None, None
+        protection_cfg = self.config.get("protection", {})
+        try:
+            tp_multiple = Decimal(str(protection_cfg.get("initial_take_profit_atr_multiple", 0.7)))
+            sl_multiple = Decimal(str(protection_cfg.get("initial_stop_loss_atr_multiple", 1.8)))
+            min_tick = Decimal(str(market_info.get('precision', {}).get('price', '0.0001')))
+            tp_offset = atr * tp_multiple
+            sl_offset = atr * sl_multiple
+            if signal == "BUY":
+                tp = (entry_price + tp_offset).quantize(min_tick, rounding=ROUND_UP)
+                sl = (entry_price - sl_offset).quantize(min_tick, rounding=ROUND_DOWN)
+                if sl >= entry_price:
+                    sl = (entry_price - min_tick).quantize(min_tick, rounding=ROUND_DOWN)
+            else:
+                tp = (entry_price - tp_offset).quantize(min_tick, rounding=ROUND_DOWN)
+                sl = (entry_price + sl_offset).quantize(min_tick, rounding=ROUND_UP)
+                if sl <= entry_price:
+                    sl = (entry_price + min_tick).quantize(min_tick, rounding=ROUND_UP)
+            if tp <= entry_price if signal == "BUY" else tp >= entry_price:
+                tp = None
+            if sl <= 0 or tp <= 0:
+                sl, tp = None, None
+            return tp, sl
+        except Exception as e:
+            self.logger.error(f"Error calculating TP/SL: {e}")
+            return None, None
+
+# --- Main Analysis and Trading Loop ---
+def analyze_and_trade_symbol(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    config: Dict[str, Any],
+    logger: logging.Logger,
+    strategy_engine: VolumaticOBStrategy,
+    signal_generator: SignalGenerator
+) -> None:
+    """Main trading loop with periodic position checks."""
+    lg = logger
+    lg.info(f"---== Analyzing {symbol} ({config['interval']}) ==---")
+    cycle_start = time.monotonic()
+    position_check_counter = 0
+
+    market_info = get_market_info(exchange, symbol, lg)
+    if not market_info:
+        lg.error("Failed to get market info.")
+        return
+
+    ccxt_interval = CCXT_INTERVAL_MAP.get(config["interval"])
+    klines_df = fetch_klines_ccxt(exchange, symbol, ccxt_interval, config.get("fetch_limit", DEFAULT_FETCH_LIMIT), lg)
+    if klines_df.empty or len(klines_df) < strategy_engine.min_data_len:
+        lg.error("Insufficient kline data.")
+        return
+
+    analysis_results = strategy_engine.update(klines_df)
+    if not analysis_results or analysis_results['last_close'] <= 0:
+        lg.error("Strategy analysis failed.")
+        return
+
+    latest_close = analysis_results['last_close']
+    current_atr = analysis_results['atr']
+    open_position = get_open_position(exchange, symbol, lg)
+    signal = signal_generator.generate_signal(analysis_results, open_position)
+
+    if not config.get("enable_trading", False):
+        lg.debug("Trading disabled.")
+        return
+
+    if open_position is None and signal in ["BUY", "SELL"]:
+        balance = fetch_balance(exchange, QUOTE_CURRENCY, lg)
+        if balance is None:
+            lg.error("Trade aborted: Invalid balance.")
+            return
+        _, initial_tp, initial_sl = signal_generator.calculate_initial_tp_sl(latest_close, signal, current_atr, market_info)
+        if initial_sl is None:
+            lg.error("Trade aborted: Invalid SL.")
+            return
+        if market_info.get('is_contract', False):
+            if not set_leverage_ccxt(exchange, symbol, config.get("leverage", 1), market_info, lg):
+                lg.error("Trade aborted: Leverage failed.")
+                return
+        position_size = calculate_position_size(balance, config["risk_per_trade"], initial_sl, latest_close, market_info, exchange, lg)
+        if position_size is None:
+            lg.error("Trade aborted: Invalid size.")
+            return
+
+        trade_order = place_trade(exchange, symbol, signal, position_size, market_info, lg, reduce_only=False)
+        if trade_order:
+            time.sleep(config.get("position_confirm_delay_seconds", POSITION_CONFIRM_DELAY_SECONDS))
+            confirmed_position = get_open_position(exchange, symbol, lg)
+            if confirmed_position:
+                entry_price = Decimal(str(confirmed_position.get('entryPrice', latest_close)))
+                tp_final, _ = signal_generator.calculate_initial_tp_sl(entry_price, signal, current_atr, market_info)
+                protection_success = False
+                if config.get("protection", {}).get("enable_trailing_stop", False):
+                    protection_success = set_trailing_stop_loss(exchange, symbol, market_info, confirmed_position, config, lg, tp_final)
+                elif config.get("protection", {}).get("initial_stop_loss_atr_multiple", 0) > 0:
+                    _, sl_final = signal_generator.calculate_initial_tp_sl(entry_price, signal, current_atr, market_info)
+                    protection_success = _set_position_protection(exchange, symbol, market_info, confirmed_position, lg, sl_final, tp_final)
+                if not protection_success:
+                    lg.warning("Protection setting failed. Manual monitoring required.")
+    elif open_position:
+        pos_side = open_position['side']
+        exit_signal = "EXIT_LONG" if pos_side == 'long' else "EXIT_SHORT"
+        if signal == exit_signal:
+            size = abs(Decimal(str(open_position.get('contracts', open_position.get('info', {}).get('size', '0')))))
+            close_signal = "SELL" if pos_side == 'long' else "BUY"
+            place_trade(exchange, symbol, close_signal, size, market_info, lg, reduce_only=True)
+        else:
+            protection_cfg = config.get("protection", {})
+            if protection_cfg.get("enable_break_even", False) and not Decimal(str(open_position.get('trailingStopLoss', '0'))) > 0:
+                entry_price = Decimal(str(open_position.get('entryPrice', '0')))
+                profit = (latest_close - entry_price) if pos_side == 'long' else (entry_price - latest_close)
+                atr_mult = Decimal(str(protection_cfg.get("break_even_trigger_atr_multiple", 1.0)))
+                if profit >= current_atr * atr_mult:
+                    min_tick = Decimal(str(market_info.get('precision', {}).get('price', '0.0001')))
+                    offset = min_tick * protection_cfg.get("break_even_offset_ticks", 2)
+                    be_sl = (entry_price + offset if pos_side == 'long' else entry_price - offset).quantize(min_tick)
+                    current_sl = Decimal(str(open_position.get('stopLossPrice', '0') or '0'))
+                    if (pos_side == 'long' and be_sl > current_sl) or (pos_side == 'short' and be_sl < current_sl):
+                        _set_position_protection(exchange, symbol, market_info, open_position, lg, stop_loss_price=be_sl)
+            if protection_cfg.get("enable_trailing_stop", False) and not Decimal(str(open_position.get('trailingStopLoss', '0'))) > 0:
+                entry_price = Decimal(str(open_position.get('entryPrice', '0')))
+                tp, _ = signal_generator.calculate_initial_tp_sl(entry_price, pos_side.upper(), current_atr, market_info)
+                set_trailing_stop_loss(exchange, symbol, market_info, open_position, config, lg, tp)
+
+        position_check_counter += 1
+        if position_check_counter % 5 == 0:
+            confirmed_position = get_open_position(exchange, symbol, lg)
+            if confirmed_position:
+                if not confirmed_position.get('stopLossPrice') and not confirmed_position.get('trailingStopLoss'):
+                    lg.warning("Position lacks protection. Attempting to reapply.")
+                    entry_price = Decimal(str(confirmed_position.get('entryPrice', '0')))
+                    tp, sl = signal_generator.calculate_initial_tp_sl(entry_price, pos_side.upper(), current_atr, market_info)
+                    if config.get("protection", {}).get("enable_trailing_stop", False):
+                        set_trailing_stop_loss(exchange, symbol, market_info, confirmed_position, config, lg, tp)
+                    else:
+                        _set_position_protection(exchange, symbol, market_info, confirmed_position, lg, sl, tp)
+
+    lg.debug(f"Cycle completed in {time.monotonic() - cycle_start:.2f}s")
+
+def check_config_reload(logger: logging.Logger):
+    """Reloads config if modified."""
+    global CONFIG, config_mtime, QUOTE_CURRENCY
+    current_mtime = os.path.getmtime(CONFIG_FILE)
+    if current_mtime > config_mtime:
+        logger.info("Config file changed. Reloading...")
+        CONFIG = load_config(CONFIG_FILE)
+        QUOTE_CURRENCY = CONFIG.get("quote_currency", "USDT")
+        config_mtime = current_mtime
+
+def main() -> None:
+    """Main function to run the bot."""
+    global CONFIG, QUOTE_CURRENCY
+    setup_logger("init")
+    init_logger = logging.getLogger("init")
+    init_logger.info(f"Starting Pyrmethus Bot at {datetime.now(TIMEZONE)}")
+
+    if CONFIG.get("enable_trading") and not CONFIG.get("use_sandbox"):
+        init_logger.warning("Live trading enabled on real account.")
+        confirmation = input("Type 'confirm' to proceed: ").lower()
+        if confirmation != 'confirm':
+            init_logger.info("Aborted by user.")
+            return
+
+    exchange = initialize_exchange(init_logger)
+    if not exchange:
+        return
+
+    target_symbol = None
+    while not target_symbol:
+        symbol = input("Enter symbol (e.g., BTC/USDT): ").strip().upper().replace('-', '/')
+        market_info = get_market_info(exchange, symbol, init_logger)
+        if market_info:
+            target_symbol = market_info['symbol']
+            break
+        init_logger.error(f"Invalid symbol: {symbol}")
+
+    selected_interval = CONFIG['interval']
+    while True:
+        interval = input(f"Enter interval [{'/'.join(VALID_INTERVALS)}] (default: {selected_interval}): ").strip() or selected_interval
+        if interval in VALID_INTERVALS:
+            CONFIG["interval"] = interval
+            break
+        init_logger.error(f"Invalid interval: {interval}")
+
+    symbol_logger = setup_logger(target_symbol)
+    strategy_engine = VolumaticOBStrategy(CONFIG, market_info, symbol_logger)
+    signal_generator = SignalGenerator(CONFIG, symbol_logger)
+
+    try:
+        while True:
+            loop_start = time.time()
+            check_config_reload(symbol_logger)
+            analyze_and_trade_symbol(exchange, target_symbol, CONFIG, symbol_logger, strategy_engine, signal_generator)
+            elapsed = time.time() - loop_start
+            sleep_time = max(0, CONFIG.get("loop_delay_seconds", LOOP_DELAY_SECONDS) - elapsed)
+            symbol_logger.debug(f"Cycle took {elapsed:.2f}s. Sleeping {sleep_time:.2f}s")
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+    except KeyboardInterrupt:
+        symbol_logger.info("Shutting down...")
+    finally:
+        if exchange:
+            exchange.close()
+        logging.shutdown()
+
+if __name__ == "__main__":
+    with open(__file__, 'r', encoding='utf-8') as f:
+        script_content = f.read()
+    with open("pyrmethus_volumatic_bot.py", 'w', encoding='utf-8') as f:
+        f.write(script_content)
+    main()def check_emergency_stop(logger: logging.Logger) -> bool:
+    stop_file = os.path.join(LOG_DIRECTORY, 'emergency_stop.txt')
+    if os.path.exists(stop_file):
+        logger.critical("Emergency stop triggered.")
+        return True
+    return False
+
+# In analyze_and_trade_symbol(), at start
+if check_emergency_stop(lg):
+    open_position = get_open_position(exchange, symbol, lg)
+    if open_position:
+        size = abs(Decimal(str(open_position.get('contracts', '0'))))
+        close_signal = "SELL" if open_position['side'] == 'long' else "BUY"
+        place_trade(exchange, symbol, close_signal, size, market_info, lg, reduce_only=True)
+    returndef log_trade_to_csv(filepath: str, trade: Dict):
+    import csv
+    file_exists = os.path.exists(filepath)
+    with open(filepath, 'a', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['symbol', 'side', 'entry_price', 'exit_price', 'size', 'profit', 'timestamp'])
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(trade)
+
+# In PerformanceTracker.record_trade()
+log_trade_to_csv(os.path.join(LOG_DIRECTORY, 'trades.csv'), trade)def select_dynamic_timeframe(atr: Decimal, base_interval: str, logger: logging.Logger) -> str:
+    atr_threshold = Decimal('0.015')
+    interval_index = VALID_INTERVALS.index(base_interval)
+    if atr > atr_threshold and interval_index > 0:
+        new_interval = VALID_INTERVALS[interval_index - 1]
+        logger.info(f"Switching to lower timeframe: {new_interval}")
+        return new_interval
+    return base_interval
+
+# In analyze_and_trade_symbol()
+dynamic_interval = select_dynamic_timeframe(current_atr, config['interval'], lg)
+ccxt_interval = CCXT_INTERVAL_MAP.get(dynamic_interval)import sqlite3
+
+def init_trade_db(db_path: str):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS trades
+                 (symbol TEXT, side TEXT, entry_price TEXT, exit_price TEXT, size TEXT, profit TEXT, timestamp TEXT)''')
+    conn.commit()
+    conn.close()
+
+def log_trade_to_db(db_path: str, trade: Dict):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('''INSERT INTO trades (symbol, side, entry_price, exit_price, size, profit, timestamp)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)''', (
+        trade['symbol'], trade['side'], trade['entry_price'], trade['exit_price'],
+        trade['size'], trade['profit'], trade['timestamp']))
+    conn.commit()
+    conn.close()
+
+# In main()
+init_trade_db(os.path.join(LOG_DIRECTORY, 'trades.db'))
+
+# In PerformanceTracker.record_trade()
+log_trade_to_db(os.path.join(LOG_DIRECTORY, 'trades.db'), trade)def check_volatility(atr: Decimal, historical_atr: pd.Series, logger: logging.Logger) -> bool:
+    atr_z_score = (atr - historical_atr.mean()) / historical_atr.std() if not historical_atr.empty else Decimal('0')
+    if abs(atr_z_score) > Decimal('3'):  # 3 standard deviations
+        logger.warning(f"High volatility detected: ATR Z-score={atr_z_score:.2f}")
+        return False
+    return True
+
+# In analyze_and_trade_symbol(), before trading
+if current_atr and not check_volatility(current_atr, klines_df['atr'].dropna(), lg):
+    lg.info("Trading paused due to high volatility.")
+    returndef validate_symbol(symbol: str, exchange: ccxt.Exchange, logger: logging.Logger) -> Optional[str]:
+    symbol = symbol.strip().upper().replace('-', '/')
+    if not symbol.endswith(f'/{QUOTE_CURRENCY}'):
+        logger.error(f"Symbol must end with /{QUOTE_CURRENCY}")
+        return None
+    if get_market_info(exchange, symbol, logger):
+        return symbol
+    return None
+
+def validate_interval(interval: str, logger: logging.Logger) -> Optional[str]:
+    interval = interval.strip()
+    if interval in VALID_INTERVALS:
+        return interval
+    logger.error(f"Interval must be one of {VALID_INTERVALS}")
+    return None
+
+# In main()
+while True:
+    symbol_input = input("Enter symbol (e.g., BTC/USDT): ")
+    validated_symbol = validate_symbol(symbol_input, exchange, init_logger)
+    if validated_symbol:
+        target_symbol = validated_symbol
+        break
+while True:
+    interval_input = input(f"Enter interval [{'/'.join(VALID_INTERVALS)}] (default: {selected_interval}): ") or selected_interval
+    validated_interval = validate_interval(interval_input, init_logger)
+    if validated_interval:
+        CONFIG["interval"] = validated_interval
+        break# Update Config class
+class Config(BaseModel):
+    # ... (existing fields)
+    order_type: str = "market"  # "market" or "limit"
+
+    @validator('order_type')
+    def check_order_type(cls, v):
+        if v not in ['market', 'limit']:
+            raise ValueError("must be 'market' or 'limit'")
+        return v
+
+# In place_trade()
+if config.get('order_type') == 'limit':
+    current_price = fetch_current_price_ccxt(exchange, symbol, logger)
+    price = current_price * (Decimal('1.001') if trade_signal == "BUY" else Decimal('0.999'))
+    order = exchange.create_order(
+        symbol=symbol, type='limit', side=side,
+        amount=amount, price=float(price), params=params
+    )
+else:
+    order = exchange.create_order(
+        symbol=symbol, type='market', side=side,
+        amount=amount, price=None, params=params
+    )@retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((ccxt.NetworkError, ccxt.RequestTimeout))
+)
+def confirm_order(exchange: ccxt.Exchange, symbol: str, order_id: str, logger: logging.Logger, timeout: int = 30) -> bool:
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            order = exchange.fetch_order(order_id, symbol)
+            if order['status'] == 'closed':
+                logger.info(f"Order {order_id} filled.")
+                return True
+            elif order['status'] == 'canceled':
+                logger.warning(f"Order {order_id} canceled.")
+                return False
+            time.sleep(1)
+        except Exception as e:
+            logger.error(f"Error checking order {order_id}: {e}")
+    try:
+        exchange.cancel_order(order_id, symbol)
+        logger.warning(f"Order {order_id} timed out and canceled.")
+    except Exception as e:
+        logger.error(f"Error canceling order {order_id}: {e}")
+    return False
+
+# In place_trade(), after placing order
+if trade_order and confirm_order(exchange, symbol, trade_order['id'], lg):
+    time.sleep(config.get("position_confirm_delay_seconds", POSITION_CONFIRM_DELAY_SECONDS))
+    confirmed_position = get_open_position(exchange, symbol, lg)def optimize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    for col in ['open', 'high', 'low', 'close']:
+        df[col] = df[col].astype('float32')
+    df['volume'] = df['volume'].astype('float64')  # Volume may need higher precision
+    return df
+
+# In fetch_klines_ccxt(), after creating DataFrame
+df = optimize_dataframe(df)import statistics
+
+class PerformanceTracker:
+    def __init__(self, filepath: str):
+        self.filepath = filepath
+        self.trades = []
+        self.load_metrics()
+
+    def load_metrics(self):
+        if os.path.exists(self.filepath):
+            with open(self.filepath, 'r') as f:
+                self.trades = json.load(f)
+
+    def save_metrics(self):
+        with open(self.filepath, 'w') as f:
+            json.dump(self.trades, f, indent=4)
+
+    def record_trade(self, symbol: str, entry_price: Decimal, exit_price: Decimal, size: Decimal, side: str, timestamp: str):
+        profit = (exit_price - entry_price) * size if side == 'long' else (entry_price - exit_price) * size
+        self.trades.append({
+            'symbol': symbol, 'side': side, 'entry_price': str(entry_price),
+            'exit_price': str(exit_price), 'size': str(size), 'profit': str(profit),
+            'timestamp': timestamp
+        })
+        self.save_metrics()
+
+    def get_summary(self) -> Dict:
+        if not self.trades:
+            return {'total_trades': 0, 'win_rate': 0.0, 'total_profit': '0.0'}
+        profits = [Decimal(t['profit']) for t in self.trades]
+        wins = [p for p in profits if p > 0]
+        return {
+            'total_trades': len(self.trades),
+            'win_rate': len(wins) / len(self.trades) if self.trades else 0.0,
+            'total_profit': str(sum(profits)),
+            'avg_profit': str(statistics.mean(profits) if profits else 0.0)
+        }
+
+# In main(), initialize tracker
+tracker = PerformanceTracker(os.path.join(LOG_DIRECTORY, 'trade_metrics.json'))
+
+# In place_trade(), after confirming position
+if confirmed_position:
+    tracker.record_trade(symbol, entry_price, entry_price, position_size, confirmed_position['side'], datetime.now(TIMEZONE).isoformat())
+    logger.info(f"Trade recorded: {tracker.get_summary()}")import ccxt.asyncio as ccxt_async
+import asyncio
+
+async def fetch_klines_websocket(exchange: ccxt_async.Exchange, symbol: str, timeframe: str, limit: int, logger: logging.Logger) -> pd.DataFrame:
+    try:
+        await exchange.watch_ohlcv(symbol, timeframe, limit=limit)
+        ohlcv = exchange.ohlcv[symbol][timeframe]
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+        df = df.tail(MAX_DF_LEN).copy()
+        logger.info(f"Fetched {len(df)} klines via WebSocket for {symbol} {timeframe}")
+        return df
+    except Exception as e:
+        logger.error(f"WebSocket error for {symbol}: {e}")
+        return pd.DataFrame()
+
+async def analyze_and_trade_symbol_async(exchange, symbol, config, logger, strategy_engine, signal_generator):
+    ccxt_interval = CCXT_INTERVAL_MAP.get(config["interval"])
+    klines_df = await fetch_klines_websocket(exchange, symbol, ccxt_interval, config.get("fetch_limit", DEFAULT_FETCH_LIMIT), logger)
+    if klines_df.empty or len(klines_df) < strategy_engine.min_data_len:
+        logger.error("Insufficient WebSocket kline data.")
+        return
+    # ... (rest of analyze_and_trade_symbol logic)
+
+async def main_async():
+    exchange = ccxt_async.bybit({'apiKey': API_KEY, 'secret': API_SECRET, 'enableRateLimit': True})
+    if CONFIG.get('use_sandbox'):
+        exchange.set_sandbox_mode(True)
+    await exchange.load_markets()
+    # ... (symbol and interval input logic)
+    symbol_logger = setup_logger(target_symbol)
+    strategy_engine = VolumaticOBStrategy(CONFIG, get_market_info(exchange, target_symbol, symbol_logger), symbol_logger)
+    signal_generator = SignalGenerator(CONFIG, symbol_logger)
+    try:
+        while True:
+            await analyze_and_trade_symbol_async(exchange, target_symbol, CONFIG, symbol_logger, strategy_engine, signal_generator)
+            await asyncio.sleep(CONFIG.get("loop_delay_seconds", LOOP_DELAY_SECONDS))
+    finally:
+        await exchange.close()
+
+if __name__ == "__main__":
+    asyncio.run(main_async())Below are 25 improvement snippets specifically targeting the strategy logic, signal generation, and take-profit/stop-loss (TP/SL) mechanisms in the `pyrmethus_volumatic_bot.py` script. Each snippet enhances the Volumatic Trend and Order Block strategy, improves signal accuracy, or refines TP/SL calculations to optimize risk management and profitability. The snippets are modular, include explanations, and provide code changes that can be integrated into the existing script. They focus on robustness, adaptability, and performance while maintaining compatibility with the existing structure.
+
+---
+
+### 1. **Add Volume Confirmation for Signals**
+**Explanation**: Require high volume confirmation for entry signals to filter out low-conviction trades, reducing false positives.
+
+**Snippet**:
+```python
+# In SignalGenerator.generate_signal()
+volume_threshold = 75  # Require volume in top 25% percentile
+if current_pos_side is None:
+    if is_trend_up and analysis_results['vol_norm_int'] > volume_threshold:
+        for ob in active_bull_obs:
+            if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+                return "BUY"
+    elif not is_trend_up and analysis_results['vol_norm_int'] > volume_threshold:
+        for ob in active_bear_obs:
+            if ob['bottom'] * (Decimal("1") - (self.ob_entry_proximity_factor - 1)) <= latest_close <= ob['top']:
+                return "SELL"
+```
+
+---
+
+### 2. **Implement Dynamic ATR Multiplier for TP/SL**
+**Explanation**: Adjust TP/SL ATR multipliers based on market volatility (e.g., ATR percentile) to widen stops during high volatility and tighten them during low volatility.
+
+**Snippet**:
+```python
+# In SignalGenerator.calculate_initial_tp_sl()
+atr_percentile = analysis_results['dataframe']['atr'].rolling(100).quantile(0.75).iloc[-1]
+if atr > atr_percentile:
+    tp_multiple *= Decimal('1.2')  # Widen TP/SL in high volatility
+    sl_multiple *= Decimal('1.2')
+else:
+    tp_multiple *= Decimal('0.8')  # Tighten in low volatility
+    sl_multiple *= Decimal('0.8')
+```
+
+---
+
+### 3. **Add Trend Strength Filter**
+**Explanation**: Use ADX to filter signals, only allowing trades when trend strength is sufficient, improving signal quality.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update()
+df['adx'] = ta.adx(df['high'], df['low'], df['close'], length=14)['ADX_14']
+
+# In SignalGenerator.generate_signal()
+adx_threshold = 25  # Strong trend threshold
+if current_pos_side is None and analysis_results['dataframe']['adx'].iloc[-1] > adx_threshold:
+    # Existing entry logic
+```
+
+---
+
+### 4. **Implement Partial Take-Profit Levels**
+**Explanation**: Allow multiple TP levels (e.g., 50% at 1x ATR, 50% at 2x ATR) to lock in profits incrementally.
+
+**Snippet**:
+```python
+# In SignalGenerator.calculate_initial_tp_sl()
+tp_levels = [
+    {'multiple': Decimal('0.7'), 'percentage': Decimal('0.5')},
+    {'multiple': Decimal('1.5'), 'percentage': Decimal('0.5')}
+]
+tp_results = []
+for level in tp_levels:
+    offset = atr * level['multiple']
+    tp_price = (entry_price + offset if signal == "BUY" else entry_price - offset).quantize(min_tick, rounding=ROUND_UP if signal == "BUY" else ROUND_DOWN)
+    if tp_price > entry_price if signal == "BUY" else tp_price < entry_price:
+        tp_results.append({'price': tp_price, 'percentage': level['percentage']})
+return tp_results, sl
+
+# In analyze_and_trade_symbol(), after placing trade
+if confirmed_position:
+    entry_price = Decimal(str(confirmed_position.get('entryPrice', latest_close)))
+    tp_levels, sl_final = signal_generator.calculate_initial_tp_sl(entry_price, signal, current_atr, market_info)
+    for tp in tp_levels:
+        size = position_size * tp['percentage']
+        params = {'positionIdx': 0, 'reduceOnly': True}
+        exchange.create_order(symbol, 'limit', 'sell' if signal == "BUY" else 'buy', float(size), float(tp['price']), params)
+```
+
+---
+
+### 5. **Add Volatility-Based SL Adjustment**
+**Explanation**: Adjust SL distance based on recent volatility spikes to avoid premature stop-outs.
+
+**Snippet**:
+```python
+# In SignalGenerator.calculate_initial_tp_sl()
+volatility_factor = analysis_results['dataframe']['atr'].iloc[-10:].std() / analysis_results['dataframe']['atr'].iloc[-10:].mean()
+if volatility_factor > 1.5:
+    sl_multiple *= Decimal('1.3')  # Widen SL during volatility spikes
+```
+
+---
+
+### 6. **Implement Time-Based Exit**
+**Explanation**: Exit positions after a maximum holding period to avoid prolonged exposure.
+
+**Snippet**:
+```python
+# In analyze_and_trade_symbol(), for open positions
+max_holding_minutes = 60 * 4  # 4 hours
+if open_position:
+    entry_time = pd.to_datetime(open_position.get('info', {}).get('createdTime', 'now'))
+    if (datetime.now(TIMEZONE) - entry_time).total_seconds() / 60 > max_holding_minutes:
+        size = abs(Decimal(str(open_position.get('contracts', '0'))))
+        close_signal = "SELL" if pos_side == 'long' else "BUY"
+        place_trade(exchange, symbol, close_signal, size, market_info, lg, reduce_only=True)
+        lg.info(f"Position closed due to max holding time ({max_holding_minutes}m)")
+```
+
+---
+
+### 7. **Add RSI Confirmation for Entries**
+**Explanation**: Use RSI to confirm overbought/oversold conditions for bearish/bullish signals, reducing false entries.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update()
+df['rsi'] = ta.rsi(df['close'], length=14)
+
+# In SignalGenerator.generate_signal()
+rsi = analysis_results['dataframe']['rsi'].iloc[-1]
+if is_trend_up and rsi < 30:  # Oversold for BUY
+    for ob in active_bull_obs:
+        if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+            return "BUY"
+elif not is_trend_up and rsi > 70:  # Overbought for SELL
+    for ob in active_bear_obs:
+        if ob['bottom'] * (Decimal("1") - (self.ob_entry_proximity_factor - 1)) <= latest_close <= ob['top']:
+            return "SELL"
+```
+
+---
+
+### 8. **Dynamic Order Block Proximity**
+**Explanation**: Adjust OB entry proximity factor based on ATR to allow tighter entries in low-volatility markets.
+
+**Snippet**:
+```python
+# In SignalGenerator.generate_signal()
+dynamic_proximity = self.ob_entry_proximity_factor * (1 + (current_atr / latest_close) * Decimal('10'))
+if is_trend_up:
+    for ob in active_bull_obs:
+        if ob['bottom'] <= latest_close <= ob['top'] * dynamic_proximity:
+            return "BUY"
+```
+
+---
+
+### 9. **Add Trailing Stop Activation Delay**
+**Explanation**: Delay TSL activation until a minimum profit threshold is reached, preventing early stop-outs.
+
+**Snippet**:
+```python
+# In set_trailing_stop_loss()
+min_profit_atr = Decimal('0.5')  # Require 0.5x ATR profit
+current_price = fetch_current_price_ccxt(exchange, symbol, logger)
+profit = (current_price - entry_price) if side == 'long' else (entry_price - current_price)
+if profit < current_atr * min_profit_atr:
+    logger.info(f"TSL delayed: Profit {profit:.2f} < {current_atr * min_profit_atr:.2f}")
+    return False
+```
+
+---
+
+### 10. **Implement Fibonacci-Based TP Levels**
+**Explanation**: Use Fibonacci retracement levels for TP targets to align with market structure.
+
+**Snippet**:
+```python
+# In SignalGenerator.calculate_initial_tp_sl()
+fib_levels = [Decimal('0.382'), Decimal('0.618'), Decimal('1.0')]
+tp_results = []
+swing_high = analysis_results['dataframe']['high'].iloc[-20:].max()
+swing_low = analysis_results['dataframe']['low'].iloc[-20:].min()
+range_size = swing_high - swing_low
+for level in fib_levels:
+    if signal == "BUY":
+        tp_price = (entry_price + range_size * level).quantize(min_tick, rounding=ROUND_UP)
+    else:
+        tp_price = (entry_price - range_size * level).quantize(min_tick, rounding=ROUND_DOWN)
+    if tp_price > entry_price if signal == "BUY" else tp_price < entry_price:
+        tp_results.append({'price': tp_price, 'percentage': Decimal('0.33')})
+return tp_results, sl
+```
+
+---
+
+### 11. **Add Support for Reversal Patterns**
+**Explanation**: Detect candlestick reversal patterns (e.g., engulfing) to strengthen OB signals.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update()
+df['bull_engulfing'] = (df['close'] > df['open'].shift(1)) & (df['open'] < df['close'].shift(1)) & (df['close'] > df['open'])
+df['bear_engulfing'] = (df['close'] < df['open'].shift(1)) & (df['open'] > df['close'].shift(1)) & (df['close'] < df['open'])
+
+# In SignalGenerator.generate_signal()
+if is_trend_up and analysis_results['dataframe']['bull_engulfing'].iloc[-1]:
+    for ob in active_bull_obs:
+        if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+            return "BUY"
+```
+
+---
+
+### 12. **Implement ATR-Based Trailing Stop**
+**Explanation**: Use a dynamic ATR-based trailing stop instead of a fixed percentage for more adaptive exits.
+
+**Snippet**:
+```python
+# In set_trailing_stop_loss()
+trailing_atr_multiple = Decimal(str(protection_cfg.get("trailing_stop_atr_multiple", 1.0)))
+distance = current_atr * trailing_atr_multiple
+activation_price = entry_price * (1 + activation_pct if side == 'long' else 1 - activation_pct)
+```
+
+---
+
+### 13. **Add Support for Breakout Confirmation**
+**Explanation**: Require price to break above/below OB boundaries before entering to confirm momentum.
+
+**Snippet**:
+```python
+# In SignalGenerator.generate_signal()
+if is_trend_up:
+    for ob in active_bull_obs:
+        if latest_close > ob['top'] and analysis_results['dataframe']['close'].shift(1) <= ob['top']:
+            return "BUY"
+elif not is_trend_up:
+    for ob in active_bear_obs:
+        if latest_close < ob['bottom'] and analysis_results['dataframe']['close'].shift(1) >= ob['bottom']:
+            return "SELL"
+```
+
+---
+
+### 14. **Implement Risk-Reward Ratio Filter**
+**Explanation**: Only take trades where the potential reward justifies the risk (e.g., minimum 1:2 RR).
+
+**Snippet**:
+```python
+# In SignalGenerator.calculate_initial_tp_sl()
+min_rr_ratio = Decimal('2.0')
+risk = abs(entry_price - sl) if sl else Decimal('0')
+reward = abs(tp - entry_price) if tp else Decimal('0')
+if reward < risk * min_rr_ratio:
+    self.logger.warning(f"Trade skipped: RR {reward/risk if risk > 0 else 0:.2f} < {min_rr_ratio}")
+    return None, None
+```
+
+---
+
+### 15. **Add Support for VWAP Confirmation**
+**Explanation**: Use VWAP to confirm entries, ensuring price is above/below VWAP for bullish/bearish signals.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update()
+df['vwap'] = ta.vwap(df['high'], df['low'], df['close'], df['volume'])
+
+# In SignalGenerator.generate_signal()
+vwap = analysis_results['dataframe']['vwap'].iloc[-1]
+if is_trend_up and latest_close > vwap:
+    for ob in active_bull_obs:
+        if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+            return "BUY"
+```
+
+---
+
+### 16. **Implement Dynamic Break-Even Trigger**
+**Explanation**: Adjust break-even trigger based on trade duration to move SL to breakeven earlier for longer trades.
+
+**Snippet**:
+```python
+# In analyze_and_trade_symbol(), for break-even
+entry_time = pd.to_datetime(open_position.get('info', {}).get('createdTime', 'now'))
+holding_minutes = (datetime.now(TIMEZONE) - entry_time).total_seconds() / 60
+if holding_minutes > 60:  # Move to BE faster after 1 hour
+    atr_mult *= Decimal('0.7')
+```
+
+---
+
+### 17. **Add Support for Liquidity-Based OB Validation**
+**Explanation**: Only consider OBs with high volume candles to ensure they represent significant market structure.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update(), during OB creation
+if pd.notna(recent_df.loc[idx, 'ph_signal']):
+    pivot_idx = idx - pd.Timedelta(minutes=int(self.config.get("interval", "5")) * self.ph_right)
+    if pivot_idx in df.index and df.loc[pivot_idx, 'vol_norm'] > 100:
+        # Create bear OB
+```
+
+---
+
+### 18. **Implement Adaptive OB Sizing**
+**Explanation**: Adjust OB height based on ATR to create more relevant zones in volatile markets.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update(), during OB creation
+box_top = Decimal(str(ob_candle['high' if self.ob_source == "Wicks" else 'close'])) + current_atr * Decimal('0.2')
+box_bottom = Decimal(str(ob_candle['close' if self.ob_source == "Wicks" else 'open'])) - current_atr * Decimal('0.2')
+```
+
+---
+
+### 19. **Add Support for Multi-Timeframe Analysis**
+**Explanation**: Confirm signals with a higher timeframe trend to improve accuracy.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update()
+higher_tf = '15' if self.config['interval'] == '5' else '60'
+higher_df = fetch_klines_ccxt(exchange, symbol, CCXT_INTERVAL_MAP[higher_tf], limit=200, logger=self.logger)
+higher_strategy = VolumaticOBStrategy(self.config, market_info, self.logger)
+higher_results = higher_strategy.update(higher_df)
+
+# In SignalGenerator.generate_signal()
+if is_trend_up and higher_results['current_trend_up']:
+    for ob in active_bull_obs:
+        if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+            return "BUY"
+```
+
+---
+
+### 20. **Implement ATR-Based Position Sizing for TP/SL**
+**Explanation**: Adjust position size based on ATR to maintain consistent risk across volatile conditions.
+
+**Snippet**:
+```python
+# In calculate_position_size()
+atr_adjusted_risk = config["risk_per_trade"] * (1 + (current_atr / latest_close) * Decimal('5'))
+size = risk_amount / (sl_distance * contract_size * atr_adjusted_risk)
+```
+
+---
+
+### 21. **Add Support for OB Confluence**
+**Explanation**: Require multiple OBs within proximity to strengthen signal confidence.
+
+**Snippet**:
+```python
+# In SignalGenerator.generate_signal()
+bull_ob_count = sum(1 for ob in active_bull_obs if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor)
+if is_trend_up and bull_ob_count >= 2:
+    return "BUY"
+```
+
+---
+
+### 22. **Implement Dynamic TSL Callback Rate**
+**Explanation**: Adjust TSL callback rate based on profit to tighten stops as profits increase.
+
+**Snippet**:
+```python
+# In set_trailing_stop_loss()
+profit_atr = profit / current_atr
+if profit_atr > Decimal('2'):
+    callback_rate *= Decimal('0.5')  # Tighten TSL for larger profits
+```
+
+---
+
+### 23. **Add Support for Momentum Confirmation**
+**Explanation**: Use ROC (Rate of Change) to confirm momentum before entering trades.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update()
+df['roc'] = ta.roc(df['close'], length=10)
+
+# In SignalGenerator.generate_signal()
+roc = analysis_results['dataframe']['roc'].iloc[-1]
+if is_trend_up and roc > 0:
+    for ob in active_bull_obs:
+        if ob['bottom'] <= latest_close <= ob['top'] * self.ob_entry_proximity_factor:
+            return "BUY"
+```
+
+---
+
+### 24. **Implement SL Trailing to OB Boundaries**
+**Explanation**: Trail SL to the nearest OB boundary for dynamic risk management.
+
+**Snippet**:
+```python
+# In analyze_and_trade_symbol(), for open positions
+if pos_side == 'long':
+    nearest_ob = min(active_bull_obs, key=lambda x: x['bottom'] if x['bottom'] < latest_close else float('inf'), default=None)
+    if nearest_ob and nearest_ob['bottom'] > entry_price:
+        _set_position_protection(exchange, symbol, market_info, open_position, lg, stop_loss_price=nearest_ob['bottom'])
+```
+
+---
+
+### 25. **Add Support for ATR-Based OB Expiry**
+**Explanation**: Expire OBs after a number of ATR periods to keep only recent, relevant zones.
+
+**Snippet**:
+```python
+# In VolumaticOBStrategy.update(), during box management
+for box in self.bull_boxes:
+    if box['active']:
+        age_bars = (last_bar_idx - box['left_idx']).total_seconds() / (int(self.config['interval']) * 60)
+        if age_bars > 50 * (current_atr / df['atr'].mean()):  # Expire after 50 ATR-adjusted bars
+            box.update({'active': False, 'violated': True, 'right_idx': last_bar_idx})
+```
+
+---
+
+### Integration Notes
+- **Dependencies**: Some snippets require additional `pandas_ta` indicators (e.g., ADX, RSI, VWAP). Ensure `pandas_ta` is installed and updated.
+- **Config Updates**: Add new parameters (e.g., volume thresholds, Fibonacci levels) to `config.json` and update the `Config` model if needed.
+- **Testing**: Test each snippet in sandbox mode (`use_sandbox: true`) to verify signal and TP/SL behavior.
+- **Performance**: Snippets like multi-timeframe analysis (19) may increase API calls. Optimize with caching or WebSocket where possible.
+- **Conflict Resolution**: Ensure snippets modifying the same method (e.g., `generate_signal`) are merged carefully to avoid logic conflicts.
+
+These snippets enhance the strategy’s robustness, signal accuracy, and TP/SL management, making the bot more adaptive to market conditions. Let me know if you need assistance integrating specific snippets, resolving conflicts, or testing any enhancements!

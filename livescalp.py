@@ -1,4 +1,3 @@
-```python
 # sxs.py
 # Enhanced and Upgraded Scalping Bot Framework
 # Derived from xrscalper.py, focusing on robust execution, error handling,

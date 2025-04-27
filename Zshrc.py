@@ -1,9 +1,9 @@
 import os
+
 from rich.console import Console
-from rich.syntax import Syntax
-from rich.panel import Panel
-from rich.text import Text
 from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.syntax import Syntax
 
 console = Console()
 
@@ -556,7 +556,7 @@ zinit light romkatv/powerlevel10k
 # {Pyrmethus} --- Optional Familiars (Uncomment to Summon) ---
 # print -P "%F{111}Considering optional Familiars...%f"
 # Atuin Spirit (Chronicler of Time) - Needs setup: `atuin login`, `atuin sync`
-# zinit ice lucid wait'2' blockf atload"eval \$(atuin init zsh); _atuin_bind_widget"
+# zinit ice lucid wait'2' blockf atload"eval \\$(atuin init zsh); _atuin_bind_widget"
 # zinit light atuinsh/atuin
 
 # History Substring Search Spirit
@@ -681,9 +681,9 @@ for file_path, content in files_to_create.items():
     # Determine language for syntax highlighting
     lang = "bash"
     if relative_path.endswith((".zsh", ".zshenv", ".zshrc")):
-        lang = "bash" # Rich uses 'bash' for zsh highlighting
+        lang = "bash"  # Rich uses 'bash' for zsh highlighting
     elif relative_path.endswith(".p10k.zsh"):
-         lang = "bash" # Still shell script based
+         lang = "bash"  # Still shell script based
 
     syntax = Syntax(content, lang, theme="monokai", line_numbers=True, word_wrap=False)
     panel = Panel(
@@ -691,10 +691,10 @@ for file_path, content in files_to_create.items():
         title=f"[bold blue]📜 Scroll: {relative_path}[/bold blue]",
         subtitle=f"[dim]Etch this content into {relative_path}[/dim]",
         border_style="blue",
-        padding=(1, 1) # Add padding inside panel
+        padding=(1, 1)  # Add padding inside panel
     )
     console.print(panel)
-    console.print("\n---\n") # Separator for copy-pasting
+    console.print("\n---\n")  # Separator for copy-pasting
 
 
 # --- Final Incantations ---

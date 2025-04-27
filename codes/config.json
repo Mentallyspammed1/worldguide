@@ -110,5 +110,6 @@
             "wr": 0.3
         }
     },
-    "williams_r_window": 14
+    "williams_r_window": 14,
+    "position_confirm_delay_seconds": 8
 }

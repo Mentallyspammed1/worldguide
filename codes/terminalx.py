@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Bybit Futures Terminal - v2.8 - Pyrmethus Enhanced Edition
+"""Bybit Futures Terminal - v2.8 - Pyrmethus Enhanced Edition
 Original Author: Mentallyspammed1 (Enhanced by AI & Pyrmethus)
 Last Updated: 2025-04-25 (Pyrmethus Weaving Complete) - Enhanced based on review & fixing observed errors.
 
@@ -24,46 +22,43 @@ This enhanced version focuses on:
 - Fixes for observed errors (DataFrame boolean ambiguity, V5 balance fetch, input validation).
 """
 
-import os
-import sys
-import time
+import asyncio
 import json
 import logging
-import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union, Any, Tuple, Callable
-from dataclasses import dataclass, field
-from functools import wraps, partial # partial is used for async input handling
-from pathlib import Path
+import os
+import re  # For timeframe and symbol validation
 import signal  # For graceful shutdown
-import re # For timeframe and symbol validation
+import sys
+from collections.abc import Callable
+from dataclasses import dataclass
+from functools import partial  # partial is used for async input handling
+from pathlib import Path
+from typing import Any
 
 # Async & CCXT
 import ccxt.async_support as ccxt
+import numpy as np
 
 # Data & Analysis
 import pandas as pd
-import numpy as np
+
 try:
     import pandas_ta as ta
 except ImportError:
-    print("Warning: 'pandas_ta' library not found. Technical Analysis features will be limited.")
-    print("Install it using: pip install pandas_ta")
-    ta = None # Set ta to None if not installed
+    ta = None  # Set ta to None if not installed
 
 # Configuration & Environment
-from dotenv import load_dotenv
+import asciichartpy as asciichart
 
 # UI & Utilities
-from colorama import init, Fore, Back, Style
-import asciichartpy as asciichart
+from colorama import Fore, Style, init
+from dotenv import load_dotenv
+
 try:
     # Used for better table formatting in print_table
     from tabulate import tabulate
 except ImportError:
-    print("Warning: 'tabulate' library not found. Table formatting will be basic.")
-    print("Install it using: pip install tabulate")
-    tabulate = None # Set to None if not installed
+    tabulate = None  # Set to None if not installed
 
 
 # --- Initial Setup ---
@@ -76,16 +71,17 @@ log_file = 'terminal.log'
 # Ensure log file directory exists (useful if run from different locations)
 Path(log_file).parent.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
-    level=logging.INFO, # Default level, will be overridden by config later
+    level=logging.INFO,  # Default level, will be overridden by config later
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(log_file, encoding='utf-8'), # Specify encoding
-        logging.StreamHandler(sys.stdout) # Log to stdout as well
+        logging.FileHandler(log_file, encoding='utf-8'),  # Specify encoding
+        logging.StreamHandler(sys.stdout)  # Log to stdout as well
     ]
 )
 logger = logging.getLogger("BybitTerminal")
 
 # --- Configuration & Credentials ---
+
 
 @dataclass
 class APICredentials:
@@ -94,17 +90,18 @@ class APICredentials:
     api_secret: str
     testnet: bool = False
 
+
 class ConfigManager:
     """Manages the terminal configuration from config.json."""
     DEFAULT_CONFIG_PATH = "config.json"
     DEFAULT_CONFIG = {
         "theme": "dark",
         "log_level": "INFO",
-        "default_symbol": "BTC/USDT", # Use CCXT format
+        "default_symbol": "BTC/USDT",  # Use CCXT format
         "default_timeframe": "1h",
         "default_order_type": "Limit",
         "connection_timeout_ms": 30000,
-        "order_history_limit": 50, # Note: Not yet used, kept for future
+        "order_history_limit": 50,  # Note: Not yet used, kept for future
         "indicator_periods": {
             "sma_short": 20,
             "sma_long": 50,
@@ -120,21 +117,21 @@ class ConfigManager:
         },
         "chart_height": 10,
         "chart_points": 60,
-        "pivot_period": "1d" # Timeframe for pivot point calculation (use lowercase CCXT standard)
+        "pivot_period": "1d"  # Timeframe for pivot point calculation (use lowercase CCXT standard)
     }
 
-    def __init__(self, config_path: str = DEFAULT_CONFIG_PATH):
+    def __init__(self, config_path: str = DEFAULT_CONFIG_PATH) -> None:
         self.config_path = Path(config_path)
-        self.config: Dict = self._load_config()
-        self._apply_log_level() # Apply log level early
-        self.theme_colors: Dict = self._setup_theme_colors()
+        self.config: dict = self._load_config()
+        self._apply_log_level()  # Apply log level early
+        self.theme_colors: dict = self._setup_theme_colors()
         logger.info(f"{Fore.CYAN}# Configuration spell cast from '{self.config_path}'{Style.RESET_ALL}")
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Loads configuration from JSON file or creates default."""
         if self.config_path.exists():
             try:
-                with open(self.config_path, "r", encoding='utf-8') as f:
+                with open(self.config_path, encoding='utf-8') as f:
                     loaded_config = json.load(f)
                     # Ensure nested defaults are present if missing in loaded config
                     merged_config = self._deep_merge_dicts(self.DEFAULT_CONFIG.copy(), loaded_config)
@@ -155,7 +152,7 @@ class ConfigManager:
             logger.warning(f"{Fore.YELLOW}'{self.config_path}' not found. Conjuring default configuration.{Style.RESET_ALL}")
             return self._create_default_config()
 
-    def _deep_merge_dicts(self, base: Dict, update: Dict) -> Dict:
+    def _deep_merge_dicts(self, base: dict, update: dict) -> dict:
         """Recursively merges update dict into base dict."""
         for key, value in update.items():
             if isinstance(value, dict) and key in base and isinstance(base[key], dict):
@@ -164,7 +161,7 @@ class ConfigManager:
                 base[key] = value
         return base
 
-    def _create_default_config(self) -> Dict:
+    def _create_default_config(self) -> dict:
         """Creates a default configuration file."""
         try:
             self.config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -180,11 +177,11 @@ class ConfigManager:
                 json.dump(default_config, f, indent=4, ensure_ascii=False)
             logger.info(f"{Fore.GREEN}Default configuration scroll inscribed at '{self.config_path}'{Style.RESET_ALL}")
             return default_config
-        except IOError as e:
+        except OSError as e:
             logger.error(f"{Fore.RED}Error inscribing default config scroll: {e}. Using in-memory default.{Style.RESET_ALL}")
             return self.DEFAULT_CONFIG.copy()
 
-    def save_config(self):
+    def save_config(self) -> None:
         """Saves the current configuration to the file."""
         try:
             # Ensure specific keys are normalized before saving
@@ -198,22 +195,22 @@ class ConfigManager:
             with open(self.config_path, "w", encoding='utf-8') as f:
                 json.dump(self.config, f, indent=4, ensure_ascii=False)
             logger.info(f"{Fore.GREEN}Configuration scroll updated at '{self.config_path}'{Style.RESET_ALL}")
-        except IOError as e:
+        except OSError as e:
             logger.error(f"{Fore.RED}Error saving configuration scroll: {e}{Style.RESET_ALL}")
 
-    def _apply_log_level(self):
+    def _apply_log_level(self) -> None:
         """Applies the log level from the configuration."""
         log_level_str = self.config.get("log_level", "INFO").upper()
         log_level = getattr(logging, log_level_str, logging.INFO)
-        root_logger = logging.getLogger() # Get root logger
-        root_logger.setLevel(log_level) # Set root logger level first
-        logger.setLevel(log_level) # Set our specific logger level
+        root_logger = logging.getLogger()  # Get root logger
+        root_logger.setLevel(log_level)  # Set root logger level first
+        logger.setLevel(log_level)  # Set our specific logger level
         # Ensure handlers also respect the new level
         for handler in root_logger.handlers:
             handler.setLevel(log_level)
         logger.info(f"{Fore.BLUE}# Log level attuned to {log_level_str}{Style.RESET_ALL}")
 
-    def _setup_theme_colors(self) -> Dict:
+    def _setup_theme_colors(self) -> dict:
         """Sets up theme colors based on the configuration."""
         theme = self.config.get("theme", "dark").lower()
         if theme == "dark":
@@ -229,7 +226,7 @@ class ConfigManager:
                 'positive': Fore.GREEN, 'negative': Fore.RED, 'neutral': Fore.WHITE,
                 'dim': Style.DIM, 'reset': Style.RESET_ALL,
             }
-        else: # Light theme (Adjust as needed for better light mode visibility)
+        else:  # Light theme (Adjust as needed for better light mode visibility)
              return {
                 'primary': Fore.BLUE, 'secondary': Fore.GREEN, 'accent': Fore.MAGENTA,
                 'error': Fore.RED + Style.BRIGHT, 'success': Fore.GREEN + Style.BRIGHT,
@@ -244,15 +241,15 @@ class ConfigManager:
 
 # --- CCXT Exchange Client ---
 
+
 class BybitFuturesCCXTClient:
-    """
-    Client for interacting with Bybit Futures via CCXT.
+    """Client for interacting with Bybit Futures via CCXT.
     Handles initialization, context management, and core API calls (V5 focus).
     """
-    def __init__(self, credentials: APICredentials, config: Dict):
+    def __init__(self, credentials: APICredentials, config: dict) -> None:
         self.credentials = credentials
         self.config = config
-        self.exchange: Optional[ccxt.bybit] = None
+        self.exchange: ccxt.bybit | None = None
         self._initialized = False
         self._markets_loaded = False
 
@@ -265,7 +262,7 @@ class BybitFuturesCCXTClient:
         """Async context manager exit."""
         await self.close()
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Sets up the CCXT Bybit exchange instance, loads markets, handles V5."""
         if self._initialized:
             logger.debug("CCXT client already initialized.")
@@ -277,7 +274,7 @@ class BybitFuturesCCXTClient:
             'secret': self.credentials.api_secret,
             'enableRateLimit': True,
             'options': {
-                'defaultType': 'swap', # Explicitly target perpetual swaps
+                'defaultType': 'swap',  # Explicitly target perpetual swaps
                 'adjustForTimeDifference': True,
                 # V5 API requires 'category' often, CCXT might handle via defaultType/methods
                 # but we'll add it explicitly in methods where needed.
@@ -287,7 +284,7 @@ class BybitFuturesCCXTClient:
             'timeout': self.config.get("connection_timeout_ms", 30000),
         }
 
-        self.exchange = ccxt.bybit(exchange_config) # Initialize first
+        self.exchange = ccxt.bybit(exchange_config)  # Initialize first
 
         if self.credentials.testnet:
             logger.warning(f"{Fore.YELLOW}# Engaging Bybit TESTNET dimension.{Style.RESET_ALL}")
@@ -329,22 +326,22 @@ class BybitFuturesCCXTClient:
 
         except ccxt.AuthenticationError as e:
             logger.error(f"{Fore.RED}CCXT Authentication Sigil Rejected: Invalid API keys or permissions. Check .env file and Bybit API settings. {e}{Style.RESET_ALL}")
-            await self.close() # Ensure cleanup on failure
+            await self.close()  # Ensure cleanup on failure
             raise ConnectionError("CCXT Authentication Failed") from e
-        except (ccxt.NetworkError, ccxt.ExchangeNotAvailable, asyncio.TimeoutError) as e:
+        except (TimeoutError, ccxt.NetworkError, ccxt.ExchangeNotAvailable) as e:
             logger.error(f"{Fore.RED}CCXT Network Rift: Could not connect to Bybit. Check internet and exchange status. {e}{Style.RESET_ALL}")
             await self.close()
             raise ConnectionError("CCXT Network/Connection Failed") from e
-        except ccxt.ExchangeError as e: # Catch other exchange-specific errors during init/market load
+        except ccxt.ExchangeError as e:  # Catch other exchange-specific errors during init/market load
             logger.error(f"{Fore.RED}CCXT Exchange Anomaly during initialization: {e}{Style.RESET_ALL}")
             await self.close()
             raise ConnectionError("CCXT Exchange Initialization Failed") from e
-        except Exception as e: # Catch any other unexpected error
+        except Exception as e:  # Catch any other unexpected error
             logger.error(f"{Fore.RED}An unexpected vortex occurred initializing CCXT: {e}{Style.RESET_ALL}", exc_info=True)
             await self.close()
             raise ConnectionError("Unexpected CCXT Initialization Error") from e
 
-    async def close(self):
+    async def close(self) -> None:
         """Closes the underlying CCXT exchange connection gracefully."""
         if self.exchange:
             if hasattr(self.exchange, 'close') and callable(self.exchange.close):
@@ -360,12 +357,12 @@ class BybitFuturesCCXTClient:
         self._initialized = False
         self._markets_loaded = False
 
-    def _check_initialized(self):
+    def _check_initialized(self) -> None:
         """Raises a ConnectionError if the client is not initialized."""
         if not self.exchange or not self._initialized or not self._markets_loaded:
             raise ConnectionError("CCXT client is not initialized, failed to initialize, or markets not loaded.")
 
-    async def fetch_balance(self) -> Dict:
+    async def fetch_balance(self) -> dict:
         """Fetches account balance (USDT Futures) for V5 Unified/Contract accounts."""
         self._check_initialized()
         logger.debug(f"{Fore.BLUE}# Fetching arcane balance energies (CONTRACT account)...{Style.RESET_ALL}")
@@ -382,12 +379,12 @@ class BybitFuturesCCXTClient:
             if 'USDT' in balance:
                 usdt_balance = balance['USDT']
                 # Ensure info is present for detailed PNL extraction later if needed
-                usdt_balance['info'] = balance.get('info', {}) # Copy top-level info if available
+                usdt_balance['info'] = balance.get('info', {})  # Copy top-level info if available
                 # Try to populate PNL fields if missing in standard keys but present in raw 'info'
                 if 'info' in usdt_balance and usdt_balance['info']:
                      raw_list = usdt_balance['info'].get('result', {}).get('list', [])
                      if raw_list and isinstance(raw_list[0], dict):
-                         asset_info = raw_list[0] # Assuming first item is USDT for CONTRACT account
+                         asset_info = raw_list[0]  # Assuming first item is USDT for CONTRACT account
                          usdt_balance['unrealizedPnl'] = usdt_balance.get('unrealizedPnl') or asset_info.get('unrealisedPnl')
                          usdt_balance['cumRealisedPnl'] = usdt_balance.get('cumRealisedPnl') or asset_info.get('cumRealisedPnl')
                 logger.debug(f"Found standardized USDT balance: {usdt_balance}")
@@ -402,12 +399,12 @@ class BybitFuturesCCXTClient:
                          logger.debug(f"Parsing V5 balance structure from info: {asset_info}")
                          # Map Bybit keys to CCXT-like standard keys
                          parsed_balance = {
-                             'free': float(asset_info.get('availableToWithdraw', 0)), # Or 'availableBalance'? Check API docs.
+                             'free': float(asset_info.get('availableToWithdraw', 0)),  # Or 'availableBalance'? Check API docs.
                              'used': float(asset_info.get('usedMargin', 0)),
                              'total': float(asset_info.get('equity', 0)),
                              'unrealizedPnl': float(asset_info.get('unrealisedPnl', 0)),
                              'cumRealisedPnl': float(asset_info.get('cumRealisedPnl', 0)),
-                             'info': asset_info # Keep raw info
+                             'info': asset_info  # Keep raw info
                          }
                          logger.debug(f"Parsed V5 balance for USDT: {parsed_balance}")
                          return parsed_balance
@@ -423,21 +420,23 @@ class BybitFuturesCCXTClient:
             # Let's log clearly and re-raise. The fix above (params={'accountType': 'CONTRACT'}) should address this for Contract accounts.
             # If this error persists, the user might need a Unified account key or adjust permissions.
              logger.error(f"{Fore.RED}CCXT BadRequest fetching balance (likely V5 account type issue): {e}. Ensure API key is for CONTRACT or UNIFIED account and has permissions. Tried with accountType=CONTRACT.{Style.RESET_ALL}", exc_info=True)
-             raise # Re-raise specific CCXT error
+             raise  # Re-raise specific CCXT error
         except (ccxt.ExchangeError, ccxt.NetworkError) as e:
             logger.error(f"{Fore.RED}CCXT Error fetching balance: {e}{Style.RESET_ALL}", exc_info=True)
-            raise # Re-raise specific CCXT error
+            raise  # Re-raise specific CCXT error
         except Exception as e:
             logger.error(f"{Fore.RED}Unexpected error fetching balance: {e}{Style.RESET_ALL}", exc_info=True)
-            raise # Re-raise general error
+            raise  # Re-raise general error
 
-    async def place_order(self, symbol: str, side: str, order_type: str, amount: float, price: Optional[float] = None, params: Dict = {}) -> Dict:
+    async def place_order(self, symbol: str, side: str, order_type: str, amount: float, price: float | None = None, params: dict = None) -> dict:
         """Places an order using CCXT, handling common exceptions and V5 params."""
+        if params is None:
+            params = {}
         self._check_initialized()
 
         # Add V5 category param if not already present
         if 'category' not in params:
-            params['category'] = 'linear' # For USDT perpetuals
+            params['category'] = 'linear'  # For USDT perpetuals
 
         logger.info(f"{Fore.CYAN}# Weaving {order_type.capitalize()} {side.upper()} order: {amount} {symbol} @ {price if price else 'Market'} with params: {params}{Style.RESET_ALL}")
         try:
@@ -471,7 +470,7 @@ class BybitFuturesCCXTClient:
             raise
         except ccxt.InvalidOrder as e:
             # Provide more context if possible from the error message
-            err_msg = str(e).lower() # Lowercase for easier matching
+            err_msg = str(e).lower()  # Lowercase for easier matching
             if "order quantity" in err_msg or "order qty" in err_msg or "size" in err_msg:
                  logger.error(f"{Fore.RED}Order weaving failed: Invalid quantity. Check min/max order size and step size for {symbol}. {e}{Style.RESET_ALL}")
             elif "order price" in err_msg or "price" in err_msg:
@@ -489,7 +488,7 @@ class BybitFuturesCCXTClient:
             raise
         except ccxt.BadSymbol as e:
              logger.error(f"{Fore.RED}Order weaving failed: Invalid symbol sigil '{symbol}'. {e}{Style.RESET_ALL}")
-             raise # Re-raise BadSymbol specifically
+             raise  # Re-raise BadSymbol specifically
         except (ccxt.ExchangeError, ccxt.NetworkError) as e:
             logger.error(f"{Fore.RED}CCXT Exchange/Network Anomaly placing order: {e}{Style.RESET_ALL}", exc_info=True)
             raise
@@ -497,7 +496,7 @@ class BybitFuturesCCXTClient:
             logger.error(f"{Fore.RED}Unexpected vortex placing order: {e}{Style.RESET_ALL}", exc_info=True)
             raise
 
-    async def fetch_ohlcv(self, symbol: str, timeframe: str, limit: int, since: Optional[int] = None) -> List[List[Union[int, float]]]:
+    async def fetch_ohlcv(self, symbol: str, timeframe: str, limit: int, since: int | None = None) -> list[list[int | float]]:
         """Fetches OHLCV data, handling specific errors and V5 params."""
         self._check_initialized()
         logger.debug(f"{Fore.BLUE}# Scrying {limit} OHLCV candles for {symbol} ({timeframe})...{Style.RESET_ALL}")
@@ -529,7 +528,7 @@ class BybitFuturesCCXTClient:
             logger.error(f"{Fore.RED}Unexpected vortex fetching OHLCV: {e}{Style.RESET_ALL}", exc_info=True)
             raise
 
-    async def fetch_ticker(self, symbol: str) -> Dict:
+    async def fetch_ticker(self, symbol: str) -> dict:
         """Fetches the latest ticker information for a symbol using V5 params."""
         self._check_initialized()
         logger.debug(f"{Fore.BLUE}# Fetching current price pulse for {symbol}...{Style.RESET_ALL}")
@@ -548,7 +547,7 @@ class BybitFuturesCCXTClient:
             logger.error(f"{Fore.RED}Unexpected vortex fetching ticker: {e}{Style.RESET_ALL}", exc_info=True)
             raise
 
-    async def fetch_open_orders(self, symbol: Optional[str] = None) -> List[Dict]:
+    async def fetch_open_orders(self, symbol: str | None = None) -> list[dict]:
         """Fetches open orders using V5 params, optionally filtered by symbol."""
         self._check_initialized()
         action = f"for {symbol}" if symbol else "all symbols"
@@ -566,7 +565,7 @@ class BybitFuturesCCXTClient:
             logger.error(f"{Fore.RED}Unexpected vortex fetching open orders: {e}{Style.RESET_ALL}", exc_info=True)
             raise
 
-    async def fetch_positions(self, symbol: Optional[str] = None) -> List[Dict]:
+    async def fetch_positions(self, symbol: str | None = None) -> list[dict]:
         """Fetches open positions using V5 params, optionally filtered by symbol, and filters zero-size."""
         self._check_initialized()
         # CCXT standard fetch_positions takes a list of symbols or None for all
@@ -589,7 +588,7 @@ class BybitFuturesCCXTClient:
                 elif p.get('contractSize') is not None:
                      size_str = str(p['contractSize'])
                 elif 'info' in p and p['info'] and p['info'].get('size') is not None:
-                     size_str = str(p['info']['size']) # Bybit V5 uses 'size' in info
+                     size_str = str(p['info']['size'])  # Bybit V5 uses 'size' in info
 
                 try:
                     # Ensure size is treated as a number for comparison, handle potential None or empty string
@@ -615,7 +614,7 @@ class BybitFuturesCCXTClient:
 
 class TechnicalAnalysis:
     """Performs technical analysis on market data."""
-    def __init__(self, config: Dict):
+    def __init__(self, config: dict) -> None:
         self.config = config
         self.indicator_periods = config.get("indicator_periods", {})
         if ta is None:
@@ -627,14 +626,14 @@ class TechnicalAnalysis:
         """Calculates technical indicators using pandas_ta based on config."""
         if ta is None:
             logger.error(f"{Fore.RED}Cannot calculate indicators: pandas_ta library is not installed.{Style.RESET_ALL}")
-            return df # Return original dataframe
+            return df  # Return original dataframe
 
         if df.empty:
             logger.warning(f"{Fore.YELLOW}Cannot conjure indicators from empty DataFrame.{Style.RESET_ALL}")
             return df
 
         # Ensure standard column names (lowercase)
-        df_in = df.copy() # Work on a copy
+        df_in = df.copy()  # Work on a copy
         df_in.columns = [str(col).lower() for col in df_in.columns]
         required_cols = ['open', 'high', 'low', 'close', 'volume']
         if not all(col in df_in.columns for col in required_cols):
@@ -645,12 +644,12 @@ class TechnicalAnalysis:
 
         # Drop rows with NaN in essential columns before calculating TA
         initial_len = len(df_in)
-        df_in.dropna(subset=['open', 'high', 'low', 'close'], inplace=True) # Volume NaN might be acceptable for some indicators
+        df_in.dropna(subset=['open', 'high', 'low', 'close'], inplace=True)  # Volume NaN might be acceptable for some indicators
         if len(df_in) < initial_len:
              logger.warning(f"Dropped {initial_len - len(df_in)} rows with NaN OHLC data before TA calculation.")
         if df_in.empty:
              logger.error(f"{Fore.RED}DataFrame is empty after removing NaN OHLC data. Cannot calculate TA.{Style.RESET_ALL}")
-             return df # Return original
+             return df  # Return original
 
         logger.debug(f"{Fore.BLUE}# Calculating arcane indicators on {len(df_in)} rows...{Style.RESET_ALL}")
         df_out = df_in.copy()
@@ -679,7 +678,7 @@ class TechnicalAnalysis:
                     {"kind": "sma", "length": int(sma_long_len)},
                     {"kind": "ema", "length": int(ema_len)},
                     {"kind": "rsi", "length": int(rsi_len)},
-                    {"kind": "macd"}, # Uses default lengths (12, 26, 9)
+                    {"kind": "macd"},  # Uses default lengths (12, 26, 9)
                     {"kind": "bbands", "length": int(bb_len), "std": float(bb_std)},
                     {"kind": "stoch", "k": int(stoch_k), "d": int(stoch_d), "smooth_k": int(stoch_smooth_k)},
                     {"kind": "atr", "length": int(atr_len)},
@@ -692,7 +691,7 @@ class TechnicalAnalysis:
             added_cols = list(set(df_out.columns) - set(df_in.columns))
             if not added_cols:
                 # Check length vs required lookback
-                min_rows_needed = max(int(sma_long_len), int(bb_len), 26 + 9, int(stoch_k) + int(stoch_d) + int(stoch_smooth_k)) # Estimate
+                min_rows_needed = max(int(sma_long_len), int(bb_len), 26 + 9, int(stoch_k) + int(stoch_d) + int(stoch_smooth_k))  # Estimate
                 if len(df_out) < min_rows_needed:
                      logger.warning(f"{Fore.YELLOW}Pandas TA strategy ran but added no new indicator columns. Insufficient data length ({len(df_out)} rows) for lookback periods (e.g., ~{min_rows_needed} needed).{Style.RESET_ALL}")
                 else:
@@ -712,12 +711,12 @@ class TechnicalAnalysis:
                  logger.error(f"{Fore.RED}Pandas TA extension not found or failed to attach. Is pandas_ta installed and imported correctly?{Style.RESET_ALL}", exc_info=True)
              else:
                  logger.error(f"{Fore.RED}Attribute error calculating indicators: {e}{Style.RESET_ALL}", exc_info=True)
-             return df # Return original df on error
+             return df  # Return original df on error
         except Exception as e:
             logger.error(f"{Fore.RED}Error calculating indicators: {e}{Style.RESET_ALL}", exc_info=True)
-            return df # Return original df on error
+            return df  # Return original df on error
 
-    def calculate_pivot_points(self, df_period: pd.DataFrame) -> Optional[Dict]:
+    def calculate_pivot_points(self, df_period: pd.DataFrame) -> dict | None:
         """Calculates Classic Pivot Points based on the provided DataFrame (expects 1 row: last completed HLC)."""
         if df_period is None or df_period.empty:
             logger.warning(f"{Fore.YELLOW}Insufficient data for pivot point calculation (DataFrame empty).{Style.RESET_ALL}")
@@ -810,7 +809,7 @@ class TechnicalAnalysis:
         prev_row = valid_sma_df.iloc[-2]
 
         trend = "Neutral / Sideways"
-        color = Style.DIM # Default neutral color
+        color = Style.DIM  # Default neutral color
 
         # Current state
         is_bullish_now = last_row[sma_short_col] > last_row[sma_long_col]
@@ -837,7 +836,7 @@ class TechnicalAnalysis:
         logger.debug(f"{Fore.BLUE}# Trend determined: {trend}{Style.RESET_ALL}")
         return f"{color}{trend}{Style.RESET_ALL}"
 
-    def generate_ta_summary(self, df: pd.DataFrame) -> Dict[str, str]:
+    def generate_ta_summary(self, df: pd.DataFrame) -> dict[str, str]:
         """Generates a concise summary of key TA indicators from the last valid row."""
         summary = {}
         if ta is None: return {"Status": f"{Fore.YELLOW}pandas_ta missing{Style.RESET_ALL}"}
@@ -853,7 +852,7 @@ class TechnicalAnalysis:
         df_cols = df.columns.tolist()
 
         # Helper to safely get value from the last valid row, checking potential column names
-        def get_val(col_name_options: List[str], default="N/A"):
+        def get_val(col_name_options: list[str], default="N/A"):
             for col_name in col_name_options:
                 if col_name in df_cols and pd.notna(last.get(col_name)):
                     return last.get(col_name)
@@ -875,7 +874,7 @@ class TechnicalAnalysis:
             if rsi > 70: summary['RSI'] = f"{Fore.RED}{rsi_val} (Overbought){Style.RESET_ALL}"
             elif rsi < 30: summary['RSI'] = f"{Fore.GREEN}{rsi_val} (Oversold){Style.RESET_ALL}"
             else: summary['RSI'] = f"{Fore.WHITE}{rsi_val} (Neutral){Style.RESET_ALL}"
-        else: summary['RSI'] = rsi # Keep "N/A" or other non-numeric value
+        else: summary['RSI'] = rsi  # Keep "N/A" or other non-numeric value
 
         # MACD (pandas_ta defaults: MACD_12_26_9, MACDh_12_26_9, MACDs_12_26_9 or lowercase)
         hist = get_val(['macdh_12_26_9', 'MACDh_12_26_9'])
@@ -899,7 +898,7 @@ class TechnicalAnalysis:
             if k > 80 and d > 80: summary['Stochastic'] = f"{Fore.RED}{stoch_val} (Overbought){Style.RESET_ALL}"
             elif k < 20 and d < 20: summary['Stochastic'] = f"{Fore.GREEN}{stoch_val} (Oversold){Style.RESET_ALL}"
             else: summary['Stochastic'] = f"{Fore.WHITE}{stoch_val}{Style.RESET_ALL}"
-        else: summary['Stochastic'] = "N/A" # Combine if either k or d is missing
+        else: summary['Stochastic'] = "N/A"  # Combine if either k or d is missing
 
         # ATR (Volatility - e.g., ATR_14 or atr_14)
         atr_len = self.indicator_periods.get('atr', 14)
@@ -913,37 +912,34 @@ class TechnicalAnalysis:
 
 # --- Terminal UI ---
 
+
 class TerminalUI:
     """Handles the terminal user interface, menus, and input."""
-    def __init__(self, config_manager: ConfigManager):
+    def __init__(self, config_manager: ConfigManager) -> None:
         self.config_manager = config_manager
         self.colors = config_manager.theme_colors
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         """Clears the terminal screen."""
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def display_header(self, title: str):
+    def display_header(self, title: str) -> None:
         """Displays a standardized header."""
         self.clear_screen()
         try:
             term_width = os.get_terminal_size().columns
         except OSError:
-            term_width = 80 # Default width
-        border = f"{self.colors['primary']}{'=' * term_width}{self.colors['reset']}"
-        print(border)
-        print(f"{self.colors['title']}{title.center(term_width)}{self.colors['reset']}")
-        print(border + "\n")
+            term_width = 80  # Default width
+        f"{self.colors['primary']}{'=' * term_width}{self.colors['reset']}"
 
-    def display_menu(self, title: str, options: List[str], prompt: str = "Choose your action") -> str:
-        """
-        Displays a menu and gets user choice. Handles EOFError/KeyboardInterrupt.
+    def display_menu(self, title: str, options: list[str], prompt: str = "Choose your action") -> str:
+        """Displays a menu and gets user choice. Handles EOFError/KeyboardInterrupt.
         This is a BLOCKING function, intended to be run in an executor thread.
         """
         self.display_header(title)
-        for i, option in enumerate(options, 1):
+        for _i, _option in enumerate(options, 1):
             # Option text might already contain color codes (e.g., for disabled items)
-            print(f"{self.colors['menu_highlight']}{i}. {self.colors['menu_option']}{option}{self.colors['reset']}") # Reset after each option
+            pass  # Reset after each option
 
         while True:
             try:
@@ -954,7 +950,7 @@ class TerminalUI:
                     return choice
                 else:
                     # Use print_warning for invalid input feedback (avoids calling another blocking func)
-                    print(f"{self.colors['warning']}Warning: Invalid input. Please enter a number between 1 and {len(options)}.{self.colors['reset']}")
+                    pass
             except EOFError:
                  logger.warning("EOF detected in display_menu, signalling exit request.")
                  # Raise EOFError to be caught by the async executor wrapper
@@ -964,9 +960,8 @@ class TerminalUI:
                  # Raise KeyboardInterrupt to be caught by the async executor wrapper
                  raise KeyboardInterrupt("KeyboardInterrupt during menu input.")
 
-    def get_input(self, prompt: str, default: Optional[str] = None, required: bool = True, input_type: type = str, validation_func: Optional[Callable] = None) -> Any:
-        """
-        Gets validated user input. Handles EOFError/KeyboardInterrupt, type conversion, and validation.
+    def get_input(self, prompt: str, default: str | None = None, required: bool = True, input_type: type = str, validation_func: Callable | None = None) -> Any:
+        """Gets validated user input. Handles EOFError/KeyboardInterrupt, type conversion, and validation.
         This is a BLOCKING function, intended to be run in an executor thread.
         """
         while True:
@@ -978,23 +973,22 @@ class TerminalUI:
                 user_input = input(prompt_full).strip()
             except EOFError:
                  logger.warning(f"EOF detected getting input for '{prompt}'.")
-                 raise EOFError("Input stream closed unexpectedly.") # Propagate EOF
+                 raise EOFError("Input stream closed unexpectedly.")  # Propagate EOF
             except KeyboardInterrupt:
                  logger.warning(f"KeyboardInterrupt caught getting input for '{prompt}'.")
-                 raise KeyboardInterrupt # Propagate interrupt
+                 raise KeyboardInterrupt  # Propagate interrupt
 
             if not user_input and default is not None:
-                user_input = str(default) # Use default value
+                user_input = str(default)  # Use default value
                 logger.debug(f"Input for '{prompt}' using default: {default}")
 
             if required and not user_input:
                 # Use print_error directly here as it's synchronous
-                print(f"{self.colors['error']}Error: Input is required.{self.colors['reset']}")
                 continue
 
             if not user_input and not required:
                 logger.debug(f"Optional input for '{prompt}' left blank.")
-                return None # Return None for blank optional input
+                return None  # Return None for blank optional input
 
             # Proceed with conversion and validation even if default was used
             try:
@@ -1004,53 +998,44 @@ class TerminalUI:
                     elif user_input.lower() in ('false', '0', 'f', 'n', 'no'): value = False
                     else: raise ValueError("Invalid boolean value. Use True/False, Yes/No, 1/0.")
                 elif input_type == str:
-                    value = user_input # Already a string
+                    value = user_input  # Already a string
                 else:
                     # Attempt conversion to the target type (e.g., float, int)
                     value = input_type(user_input)
 
                 # Perform validation if a function is provided
                 if validation_func:
-                     validation_result = validation_func(value) # Pass the *converted* value
-                     if isinstance(validation_result, str): # Validation func returned an error message
-                         print(f"{self.colors['error']}Error: {validation_result}{self.colors['reset']}")
-                         continue
-                     elif validation_result is False: # Validation func returned generic failure
-                         print(f"{self.colors['error']}Error: Input validation failed.{self.colors['reset']}")
+                     validation_result = validation_func(value)  # Pass the *converted* value
+                     if isinstance(validation_result, str) or validation_result is False:  # Validation func returned an error message
                          continue
                      # If validation_result is True or None (implicit success), proceed
 
                 logger.debug(f"Input for '{prompt}': {repr(value)} (type: {input_type})")
                 return value
-            except ValueError as e:
+            except ValueError:
                 # Provide more specific feedback for common float errors
                 if input_type == float:
-                    print(f"{self.colors['error']}Error: Invalid input. Expected a number (e.g., 0.5, 100). Details: {e}{self.colors['reset']}")
+                    pass
                 else:
-                    print(f"{self.colors['error']}Error: Invalid input format. Expected {input_type.__name__}. Details: {e}{self.colors['reset']}")
-            except Exception as e: # Catch errors during validation_func execution
-                print(f"{self.colors['error']}Error: Input validation error: {e}{self.colors['reset']}")
+                    pass
+            except Exception:  # Catch errors during validation_func execution
+                pass
 
-
-    def print_error(self, message: str):
+    def print_error(self, message: str) -> None:
         """Prints an error message."""
-        print(f"{self.colors['error']}Error: {message}{self.colors['reset']}")
         # Avoid logging redundant "Error:" prefix if logger already adds levelname
         logger.error(message)
 
-    def print_success(self, message: str):
+    def print_success(self, message: str) -> None:
         """Prints a success message."""
-        print(f"{self.colors['success']}Success: {message}{self.colors['reset']}")
-        logger.info(message) # Log success messages too
+        logger.info(message)  # Log success messages too
 
-    def print_warning(self, message: str):
+    def print_warning(self, message: str) -> None:
         """Prints a warning message."""
-        print(f"{self.colors['warning']}Warning: {message}{self.colors['reset']}")
         logger.warning(message)
 
-    def print_info(self, message: str):
+    def print_info(self, message: str) -> None:
         """Prints an informational message."""
-        print(f"{self.colors['info']}{message}{self.colors['reset']}")
         # Optionally log info messages if needed for debugging flow
         # logger.info(message)
 
@@ -1059,44 +1044,40 @@ class TerminalUI:
         # Simple check for the escape character followed by [
         return '\x1b[' in text
 
-    def print_table(self, data: Union[pd.DataFrame, List[Dict], Dict], title: Optional[str] = None, float_format: str = '{:.4f}', index: bool = False):
+    def print_table(self, data: pd.DataFrame | list[dict] | dict, title: str | None = None, float_format: str = '{:.4f}', index: bool = False) -> None:
         """Prints data in a formatted table using tabulate if available, with better handling for colored strings."""
         if title:
-            print(f"\n{self.colors['table_header']}{'--- ' + title + ' ---'}{self.colors['reset']}")
+            pass
 
         if data is None or (isinstance(data, (list, dict, pd.DataFrame)) and not data):
-             print(f"{self.colors['warning']}No data to display.{self.colors['reset']}")
              return
 
         try:
             df = None
-            headers = "keys" # Default for dicts in tabulate
-            table_fmt = "pretty" # Default tabulate format
+            headers = "keys"  # Default for dicts in tabulate
             table_data = None
-            contains_color = False # Flag to detect colored strings
+            contains_color = False  # Flag to detect colored strings
 
             # --- Prepare Data for Tabulate ---
             if isinstance(data, pd.DataFrame):
                 df = data
                 if df.empty:
-                    print(f"{self.colors['warning']}No data to display.{self.colors['reset']}")
                     return
                 # Check for colored strings in DataFrame cells
                 if df.map(lambda x: isinstance(x, str) and self._contains_ansi_codes(x)).any().any():
                      contains_color = True
-                     print(f"{self.colors['warning']}(DataFrame contains colored strings, using basic print){self.colors['reset']}")
                 # Prepare DataFrame for tabulate
                 headers = list(df.columns)
                 if index:
                     df_to_print = df.reset_index()
-                    headers.insert(0, str(df_to_print.columns[0])) # Add index name to headers
+                    headers.insert(0, str(df_to_print.columns[0]))  # Add index name to headers
                 else:
                     df_to_print = df
                 table_data = df_to_print.values.tolist()
 
             elif isinstance(data, list) and data and all(isinstance(item, dict) for item in data):
                 # Convert list of dicts to format suitable for tabulate
-                headers = list(data[0].keys()) # Use keys from the first dict
+                headers = list(data[0].keys())  # Use keys from the first dict
                 table_data = []
                 for item in data:
                      row = []
@@ -1107,48 +1088,46 @@ class TerminalUI:
                          row.append(value)
                      table_data.append(row)
                 if contains_color:
-                    print(f"{self.colors['warning']}(Table data contains colored strings, formatting may be affected){self.colors['reset']}")
+                    pass
 
             elif isinstance(data, dict) and data:
                  # Format dictionary as a two-column table (Key, Value)
                  headers = ["Parameter", "Value"]
                  table_data = []
                  for key, value in data.items():
-                      value_str = str(value) # Default string representation
+                      value_str = str(value)  # Default string representation
                       # Check for color codes BEFORE formatting numbers
                       if isinstance(value, str) and self._contains_ansi_codes(value):
                            contains_color = True
                            # Keep the colored string as is for direct printing later
                            table_data.append([str(key), value_str])
-                           continue # Skip number formatting for colored strings
+                           continue  # Skip number formatting for colored strings
 
                       # Apply float formatting if applicable
                       if isinstance(value, (float, np.floating)):
                            try: value_str = float_format.format(value)
-                           except (ValueError, TypeError): pass # Keep original string if format fails
+                           except (ValueError, TypeError): pass  # Keep original string if format fails
 
                       table_data.append([str(key), value_str])
 
                  # If dict contained color, print manually as tabulate struggles with embedded codes
                  if contains_color:
-                     print(f"{self.colors['warning']}(Dictionary contains colored strings, printing directly){self.colors['reset']}")
-                     max_key_len = max(len(str(k)) for k in data.keys()) if data else 0
-                     for k, v in data.items():
+                     max(len(str(k)) for k in data) if data else 0
+                     for _k, _v in data.items():
                           # Align keys, print value (which might be colored)
-                          print(f"{self.colors['secondary']}{str(k):<{max_key_len}}{self.colors['reset']}: {v}") # v already contains color/reset
-                     return # Stop here for colored dicts
+                          pass  # v already contains color/reset
+                     return  # Stop here for colored dicts
 
             else:
                 # Handle cases like empty list/dict or unsupported types
                 if not data:
-                    print(f"{self.colors['warning']}No data to display.{self.colors['reset']}")
+                    pass
                 else:
                     self.print_error(f"Unsupported data type for print_table: {type(data)}")
-                    print(repr(data))
                 return
 
             # --- Use Tabulate or Fallback ---
-            if tabulate and table_data and not contains_color: # Only use tabulate if no color codes detected
+            if tabulate and table_data and not contains_color:  # Only use tabulate if no color codes detected
                 # Define float formatting function for tabulate
                 def fmt_num(val):
                     if isinstance(val, (float, np.floating)):
@@ -1157,33 +1136,30 @@ class TerminalUI:
                     # Handle None explicitly for tabulate
                     return "" if val is None else val
 
-                formatted_table_data = [[fmt_num(item) for item in row] for row in table_data]
-                print(f"{self.colors['neutral']}{tabulate(formatted_table_data, headers=headers, tablefmt=table_fmt, numalign='right', stralign='left', missingval='N/A')}{self.colors['reset']}")
+                [[fmt_num(item) for item in row] for row in table_data]
 
-            elif df is not None: # Fallback for Pandas DataFrame if tabulate is missing OR contains color
-                 if not tabulate: print(f"{self.colors['warning']}(Install 'tabulate' library for better table format: pip install tabulate){self.colors['reset']}")
+            elif df is not None:  # Fallback for Pandas DataFrame if tabulate is missing OR contains color
+                 if not tabulate: pass
                  try: term_width = os.get_terminal_size().columns
-                 except OSError: term_width = 120 # Wider default fallback
+                 except OSError: term_width = 120  # Wider default fallback
                  pd.set_option('display.max_rows', 100)
                  pd.set_option('display.max_columns', None)
                  pd.set_option('display.width', term_width)
                  pd.set_option('display.expand_frame_repr', True)
                  # Simplified float format lambda
-                 pd.options.display.float_format = float_format.format if not contains_color else None # Don't format if color exists
-                 print(f"{self.colors['neutral']}{df.to_string(index=index, na_rep='N/A')}{self.colors['reset']}")
-                 pd.reset_option('display.float_format') # Reset option
+                 pd.options.display.float_format = float_format.format if not contains_color else None  # Don't format if color exists
+                 pd.reset_option('display.float_format')  # Reset option
 
-            elif table_data: # Fallback for list/dict if tabulate missing OR contains color
-                 if not tabulate: print(f"{self.colors['warning']}(Install 'tabulate' library for better table format: pip install tabulate){self.colors['reset']}")
+            elif table_data:  # Fallback for list/dict if tabulate missing OR contains color
+                 if not tabulate: pass
                  # Basic fallback print (less aligned, handles color better than bad tabulate)
-                 if isinstance(headers, list): print(f"{self.colors['table_header']}" + " | ".join(map(str, headers)) + f"{self.colors['reset']}")
-                 print("-" * (sum(len(str(h)) for h in headers) + 3 * (len(headers)-1)) if isinstance(headers, list) else "---")
+                 if isinstance(headers, list): pass
                  for row in table_data:
                      # Format numbers if no color, otherwise print raw
                      formatted_row = []
                      for item in row:
                          if contains_color:
-                             formatted_row.append(str(item)) # Keep raw string with color
+                             formatted_row.append(str(item))  # Keep raw string with color
                          else:
                               # Apply float format if applicable
                               if isinstance(item, (float, np.floating)):
@@ -1191,19 +1167,13 @@ class TerminalUI:
                                    except (ValueError, TypeError): formatted_row.append(str(item))
                               else:
                                    formatted_row.append(str("" if item is None else item))
-                     print(f"{self.colors['neutral']}" + " | ".join(formatted_row) + f"{self.colors['reset']}") # Reset after row
 
         except Exception as e:
             logger.error(f"Error during print_table: {e}", exc_info=True)
             self.print_error(f"An error occurred while trying to display the table: {e}")
-            print("--- Raw Data ---")
-            print(repr(data))
-            print("----------------")
 
-
-    def wait_for_enter(self, prompt: str = "Press Enter to continue..."):
-        """
-        Pauses execution until Enter is pressed. Handles EOFError/KeyboardInterrupt.
+    def wait_for_enter(self, prompt: str = "Press Enter to continue...") -> None:
+        """Pauses execution until Enter is pressed. Handles EOFError/KeyboardInterrupt.
         This is a BLOCKING function, intended to be run in an executor thread.
         """
         try:
@@ -1215,14 +1185,13 @@ class TerminalUI:
             logger.warning("KeyboardInterrupt caught waiting for Enter.")
             raise KeyboardInterrupt("KeyboardInterrupt while waiting for Enter.")
 
-    def display_chart(self, data: List[float], title: str):
+    def display_chart(self, data: list[float], title: str) -> None:
         """Displays a simple ASCII chart using asciichartpy."""
         if not data:
             self.print_warning(f"No data available for chart: {title}")
             return
 
         chart_height = self.config_manager.config.get("chart_height", 10)
-        print(f"\n{self.colors['table_header']}{'--- ' + title + ' ---'}{self.colors['reset']}")
         try:
             # Clean data: ensure numeric, replace NaN/inf with previous valid value
             plot_data = []
@@ -1232,7 +1201,7 @@ class TerminalUI:
                 if isinstance(d, (int, float, np.number)) and np.isfinite(d):
                     last_valid = float(d)
                     plot_data.append(last_valid)
-                elif not np.isnan(last_valid): # Use last valid if current is bad/non-numeric
+                elif not np.isnan(last_valid):  # Use last valid if current is bad/non-numeric
                     plot_data.append(last_valid)
                 # If last_valid is still NaN (e.g., at the start), append NaN
                 # asciichartpy handles internal NaNs gracefully
@@ -1252,13 +1221,12 @@ class TerminalUI:
             color_map = {'31': asciichart.red, '32': asciichart.green, '33': asciichart.yellow,
                          '34': asciichart.blue, '35': asciichart.magenta, '36': asciichart.cyan,
                          '37': asciichart.white}
-            chart_color = color_map.get(chart_color_code, asciichart.default) # Default if code not found
+            chart_color = color_map.get(chart_color_code, asciichart.default)  # Default if code not found
 
             # Generate chart using asciichartpy
             # Use default config for asciichartpy unless specific settings are needed
-            chart = asciichart.plot(plot_data, {'height': chart_height, 'colors': [chart_color]})
+            asciichart.plot(plot_data, {'height': chart_height, 'colors': [chart_color]})
             # Print the chart - asciichartpy includes ANSI codes directly
-            print(chart) # No need for extra colorama wrapping if using asciichart colors
 
         except Exception as e:
             self.print_error(f"Failed to generate chart: {e}")
@@ -1266,27 +1234,25 @@ class TerminalUI:
 
 # --- Main Trading Terminal Application ---
 
+
 class TradingTerminal:
     """Main class for the trading terminal application."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.config_manager = ConfigManager()
         self.ui = TerminalUI(self.config_manager)
-        self.credentials: Optional[APICredentials] = None
-        self.exchange_client: Optional[BybitFuturesCCXTClient] = None
+        self.credentials: APICredentials | None = None
+        self.exchange_client: BybitFuturesCCXTClient | None = None
         self.ta_analyzer = TechnicalAnalysis(self.config_manager.config)
         self._running = False
         self._shutdown_event = asyncio.Event()
-        self._active_tasks: set[asyncio.Task] = set() # Store tasks created by _create_task
-        self._final_exit_code = 0 # Store exit code set by shutdown
+        self._active_tasks: set[asyncio.Task] = set()  # Store tasks created by _create_task
+        self._final_exit_code = 0  # Store exit code set by shutdown
 
-    def _create_task(self, coro, name: Optional[str] = None) -> asyncio.Task:
+    def _create_task(self, coro, name: str | None = None) -> asyncio.Task:
         """Creates an asyncio task, names it (if possible), and tracks it."""
         # Ensure name is provided for better debugging
         task_name = name or f"Task-{id(coro)}"
-        if sys.version_info >= (3, 8):
-            task = asyncio.create_task(coro, name=task_name)
-        else:
-            task = asyncio.create_task(coro) # name param not available < 3.8
+        task = asyncio.create_task(coro, name=task_name)  # name param not available < 3.8
 
         self._active_tasks.add(task)
         # Remove task from set when it's done to prevent memory leak
@@ -1294,12 +1260,12 @@ class TradingTerminal:
         logger.debug(f"Task '{task_name}' created.")
         return task
 
-    def _setup_signal_handlers(self):
+    def _setup_signal_handlers(self) -> None:
         """Sets up signal handlers for graceful shutdown."""
         loop = asyncio.get_running_loop()
         signals_to_handle = (signal.SIGINT, signal.SIGTERM)
 
-        def signal_handler(sig):
+        def signal_handler(sig) -> None:
             """Wrapper function to schedule shutdown asynchronously."""
             logger.info(f"Received signal {sig.name}. Initiating shutdown...")
             # Schedule the shutdown coroutine without blocking the handler
@@ -1324,10 +1290,10 @@ class TradingTerminal:
 
     async def setup_credentials(self) -> bool:
         """Loads API credentials from .env file."""
-        load_dotenv() # Load variables from .env file into environment
+        load_dotenv()  # Load variables from .env file into environment
         api_key = os.getenv('BYBIT_API_KEY')
         api_secret = os.getenv('BYBIT_API_SECRET')
-        testnet_str = os.getenv('TESTNET', 'False') # Default to 'False' if not set
+        testnet_str = os.getenv('TESTNET', 'False')  # Default to 'False' if not set
         # Robust boolean conversion for TESTNET
         testnet = testnet_str.strip().lower() in ('true', '1', 't', 'y', 'yes')
 
@@ -1344,7 +1310,7 @@ class TradingTerminal:
             self.credentials = APICredentials(api_key.strip(), api_secret.strip(), testnet)
             return True
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initializes the terminal, including API client connection."""
         self.ui.display_header("Pyrmethus Bybit Terminal - Initialization")
         self.ui.print_info(f"{Fore.CYAN}# Awakening terminal energies...{Style.RESET_ALL}")
@@ -1354,10 +1320,10 @@ class TradingTerminal:
             self.ui.print_warning("Running in limited mode without valid API credentials.")
             self.ui.print_info("Authenticated actions (trading, balance, positions, orders) will be unavailable.")
             # Don't wait, proceed to menu with limited options
-            return # Client will remain None
+            return  # Client will remain None
 
         # Credentials valid, attempt to initialize client
-        if not self.credentials: # Should not happen if setup_credentials returned True, but check anyway
+        if not self.credentials:  # Should not happen if setup_credentials returned True, but check anyway
             logger.error("Credentials object is None after successful setup, cannot initialize client.")
             self.ui.print_error("Internal error: Credentials not set.")
             return
@@ -1372,8 +1338,8 @@ class TradingTerminal:
             self.ui.print_error(f"Failed to initialize exchange client: {e}")
             self.ui.print_warning("Proceeding without a fully functional exchange client. Authenticated features will fail.")
             # Ensure client is None if init failed, even if object was created
-            if self.exchange_client: # Close only if object exists
-                 await self.exchange_client.close() # Explicitly close if init failed partially
+            if self.exchange_client:  # Close only if object exists
+                 await self.exchange_client.close()  # Explicitly close if init failed partially
             self.exchange_client = None
             # Don't wait, proceed to menu
         except Exception as e:
@@ -1384,15 +1350,15 @@ class TradingTerminal:
             # Use create_task to avoid awaiting shutdown within the exception handler
             self._create_task(self.shutdown(exit_code=1, signal="InitFailure"), name="ShutdownOnInitFailure")
 
-    async def shutdown(self, signal=None, exit_code=0):
+    async def shutdown(self, signal=None, exit_code=0) -> None:
         """Gracefully shuts down the application, cancelling tasks and closing connections."""
-        if self._shutdown_event.is_set(): # Prevent concurrent shutdowns
+        if self._shutdown_event.is_set():  # Prevent concurrent shutdowns
              if signal: logger.debug(f"Shutdown already in progress, ignoring signal {getattr(signal, 'name', signal)}")
              return
 
-        self._running = False # Signal loops to stop FIRST
-        self._shutdown_event.set() # Signal waiters SECOND
-        self._final_exit_code = exit_code # Store exit code
+        self._running = False  # Signal loops to stop FIRST
+        self._shutdown_event.set()  # Signal waiters SECOND
+        self._final_exit_code = exit_code  # Store exit code
 
         signal_name = f"signal {getattr(signal, 'name', signal)}" if signal else "request"
         logger.info(f"Shutdown initiated by {signal_name}... Setting exit code to {exit_code}")
@@ -1430,7 +1396,6 @@ class TradingTerminal:
                 # Log tasks that completed normally during shutdown too?
                 # else: logger.debug(f"Task '{task_name}' completed normally during shutdown.")
 
-
             logger.info(f"Background tasks processing complete: {cancelled_count} cancelled, {error_count} errors.")
         else:
             logger.info("No active background tasks to cancel.")
@@ -1438,13 +1403,12 @@ class TradingTerminal:
         # Close exchange client connection
         if self.exchange_client:
             logger.info("Closing exchange client connection...")
-            await self.exchange_client.close() # close() is idempotent and handles state
+            await self.exchange_client.close()  # close() is idempotent and handles state
 
         logger.info(f"Terminal shutdown sequence complete. Final exit code set to: {self._final_exit_code}")
         # The "Terminal has faded" message is now part of the final block in main
 
-
-    async def run(self):
+    async def run(self) -> None:
         """Runs the main terminal loop, handling menus and actions."""
         self._setup_signal_handlers()
         await self.initialize()
@@ -1452,7 +1416,7 @@ class TradingTerminal:
         # Check if shutdown was triggered during initialization (e.g., critical error)
         if self._shutdown_event.is_set():
              logger.warning("Shutdown triggered during initialization, exiting run loop.")
-             return # Don't start the main loop
+             return  # Don't start the main loop
 
         self._running = True
         logger.info("Starting main terminal loop.")
@@ -1493,43 +1457,43 @@ class TradingTerminal:
 
                 if menu_task in done:
                     try:
-                        choice = await menu_task # Get result (the user's choice string) or raise exception
+                        choice = await menu_task  # Get result (the user's choice string) or raise exception
                     except asyncio.CancelledError:
                          logger.info("Menu display task was cancelled, likely by shutdown.")
                          # If shutdown wasn't the trigger, this is unexpected
                          if not shutdown_triggered:
                              logger.warning("Menu task cancelled unexpectedly.")
                              # Consider triggering shutdown if menu fails weirdly? Or just retry loop.
-                         shutdown_triggered = True # Ensure loop breaks if menu cancelled
+                         shutdown_triggered = True  # Ensure loop breaks if menu cancelled
                     except (EOFError, KeyboardInterrupt) as e:
                          # These are now raised by the UI methods via the async wrapper
                          logger.info(f"'{type(e).__name__}' received from menu, initiating shutdown.")
-                         if not self._shutdown_event.is_set(): # Avoid duplicate calls if signal handler already triggered
+                         if not self._shutdown_event.is_set():  # Avoid duplicate calls if signal handler already triggered
                              self._create_task(self.shutdown(signal=type(e).__name__, exit_code=1), name=f"ShutdownOn{type(e).__name__}")
-                         shutdown_triggered = True # Ensure loop breaks
+                         shutdown_triggered = True  # Ensure loop breaks
                     except Exception as e:
                          logger.error(f"Error retrieving menu choice: {e}", exc_info=True)
                          self.ui.print_error(f"An error occurred in the menu display/input: {e}")
-                         await self.ui_wait_for_enter_async() # Pause before retrying menu
-                         continue # Go to next loop iteration to retry menu
+                         await self.ui_wait_for_enter_async()  # Pause before retrying menu
+                         continue  # Go to next loop iteration to retry menu
 
                 # Cancel any remaining pending tasks (e.g., if menu finished, cancel shutdown wait)
                 for task in pending:
                     task.cancel()
-                    try: await task # Await cancellation to suppress warnings
+                    try: await task  # Await cancellation to suppress warnings
                     except asyncio.CancelledError: pass
 
                 # Check again if shutdown happened while waiting or handling results
                 if shutdown_triggered or self._shutdown_event.is_set():
                     logger.info("Shutdown detected after wait/menu handling, breaking loop.")
-                    self._running = False # Ensure flag is set
+                    self._running = False  # Ensure flag is set
                     break
 
                 # If choice is None at this point, it means shutdown happened or an error occurred
                 if choice is None:
-                    if not self._running: break # Break if shutdown flag set
+                    if not self._running: break  # Break if shutdown flag set
                     logger.debug("Choice is None after wait, continuing loop (likely shutdown or menu error).")
-                    continue # Continue to next loop iteration (will likely break due to shutdown flag)
+                    continue  # Continue to next loop iteration (will likely break due to shutdown flag)
 
                 # --- Action Mapping ---
                 await self.process_menu_choice(choice)
@@ -1542,13 +1506,12 @@ class TradingTerminal:
                 if not self._shutdown_event.is_set():
                     self._create_task(self.shutdown(signal="MainLoopError", exit_code=1), name="ShutdownOnLoopError")
                 # Break the loop after attempting shutdown
-                self._running = False # Ensure loop terminates
+                self._running = False  # Ensure loop terminates
                 break
 
         logger.info("Main run loop finished.")
 
-
-    async def process_menu_choice(self, choice: str):
+    async def process_menu_choice(self, choice: str) -> None:
         """Determines and executes the action based on the menu choice."""
         is_authenticated = self.exchange_client is not None and self.exchange_client._initialized
 
@@ -1560,9 +1523,9 @@ class TradingTerminal:
             ("View Open Orders", self.view_open_orders, True),
             ("View Open Positions", self.view_open_positions, True),
             ("Check Current Price", self.check_price_menu, True),
-            ("Technical Analysis", self.technical_analysis_menu, True), # Keep TA available even if no auth? Needs fetch_ohlcv
-            ("Settings", self.settings_menu, False), # Settings always available
-            ("Exit", None, False) # Special case handled explicitly
+            ("Technical Analysis", self.technical_analysis_menu, True),  # Keep TA available even if no auth? Needs fetch_ohlcv
+            ("Settings", self.settings_menu, False),  # Settings always available
+            ("Exit", None, False)  # Special case handled explicitly
         ]
 
         # Build the list of *currently available* actions based on auth status
@@ -1578,17 +1541,16 @@ class TradingTerminal:
                   available_actions_map[str(current_menu_index)] = (text, method, requires_auth)
              current_menu_index += 1
 
-
         # --- Handle Choice ---
         if choice in available_actions_map:
             option_text, action_method, requires_auth = available_actions_map[choice]
 
             # Handle Exit explicitly
             if option_text == "Exit":
-                if not self._shutdown_event.is_set(): # Avoid duplicate calls
+                if not self._shutdown_event.is_set():  # Avoid duplicate calls
                     logger.info("Exit option selected.")
                     self._create_task(self.shutdown(signal="Exit Menu"), name="ShutdownOnExitMenu")
-                self._running = False # Signal loop to stop
+                self._running = False  # Signal loop to stop
                 return
 
             # Handle actions requiring auth when not available
@@ -1600,7 +1562,7 @@ class TradingTerminal:
 
             # Execute the action if available and method is defined
             if action_method:
-                action_name = option_text # Use menu text as action name for logging/errors
+                action_name = option_text  # Use menu text as action name for logging/errors
                 logger.info(f"Executing action: {action_name}")
                 # Call the action handler wrapper
                 await self.handle_action(action_method, action_name)
@@ -1613,8 +1575,7 @@ class TradingTerminal:
              self.ui.print_error(f"Invalid menu choice received: {choice}")
              await asyncio.sleep(1)
 
-
-    async def handle_action(self, action_coro: Callable, action_name: str):
+    async def handle_action(self, action_coro: Callable, action_name: str) -> None:
         """Executes a menu action coroutine and handles common exceptions."""
         try:
             await action_coro()
@@ -1633,29 +1594,29 @@ class TradingTerminal:
              logger.error(f"InvalidOrder during '{action_name}': {e}", exc_info=True)
              self.ui.print_error(f"Invalid Order parameters during '{action_name}'. Check details (symbol, size, price, etc.) and exchange rules. See logs for full error. Message: {e}")
              await self.ui_wait_for_enter_async()
-        except ccxt.BadRequest as e: # Catch things like invalid params, account type issues
+        except ccxt.BadRequest as e:  # Catch things like invalid params, account type issues
              logger.error(f"BadRequest during '{action_name}': {e}", exc_info=True)
              self.ui.print_error(f"Bad Request during '{action_name}'. Check parameters or account settings. Message: {e}")
              await self.ui_wait_for_enter_async()
         except ccxt.BadSymbol as e:
              self.ui.print_error(f"Invalid Symbol during '{action_name}': {e}. Ensure symbol exists and is formatted correctly (e.g., BTC/USDT).")
              await self.ui_wait_for_enter_async()
-        except ccxt.NetworkError as e: # Includes timeouts, DNS issues, etc.
+        except ccxt.NetworkError as e:  # Includes timeouts, DNS issues, etc.
              self.ui.print_error(f"Network Error during '{action_name}': {e}. Check internet connection and Bybit status.")
              await self.ui_wait_for_enter_async()
         except ccxt.ExchangeNotAvailable as e:
              self.ui.print_error(f"Exchange Not Available during '{action_name}': {e}. Bybit might be down for maintenance.")
              await self.ui_wait_for_enter_async()
-        except ccxt.ExchangeError as e: # Catch-all for other specific exchange-reported errors
+        except ccxt.ExchangeError as e:  # Catch-all for other specific exchange-reported errors
              logger.error(f"ExchangeError during '{action_name}': {e}", exc_info=True)
              self.ui.print_error(f"Exchange Error during '{action_name}': {e}.")
              await self.ui_wait_for_enter_async()
 
         # --- Application/Input Errors ---
-        except ConnectionError as e: # Raised by _check_initialized or client init failures
+        except ConnectionError as e:  # Raised by _check_initialized or client init failures
              self.ui.print_error(f"Connection Error during '{action_name}': {e}. Client might be offline or uninitialized.")
              await self.ui_wait_for_enter_async()
-        except ValueError as e: # Catch validation errors etc. from get_input or TA/data processing
+        except ValueError as e:  # Catch validation errors etc. from get_input or TA/data processing
              self.ui.print_error(f"Input or Data Error during '{action_name}': {e}")
              # Don't log full trace for simple value errors usually
              logger.error(f"Input/Data ValueError during '{action_name}': {e}")
@@ -1663,16 +1624,15 @@ class TradingTerminal:
         except (EOFError, KeyboardInterrupt) as e:
              # These are raised by the async input helpers if encountered during an action
              logger.warning(f"{type(e).__name__} caught during action '{action_name}'. Initiating shutdown.")
-             if not self._shutdown_event.is_set(): # Prevent duplicate calls
-                 self._create_task(self.shutdown(signal=type(e).__name__, exit_code=1), name=f"ShutdownOnActionInterrupt")
-             self._running = False # Signal loop to stop
+             if not self._shutdown_event.is_set():  # Prevent duplicate calls
+                 self._create_task(self.shutdown(signal=type(e).__name__, exit_code=1), name="ShutdownOnActionInterrupt")
+             self._running = False  # Signal loop to stop
              # Don't wait for enter, let shutdown proceed / main loop break
         except Exception as e:
             # Catch any other unexpected errors during the action's execution
             logger.error(f"Unhandled error in action '{action_name}': {e}", exc_info=True)
             self.ui.print_error(f"An unexpected error occurred in '{action_name}': {e}")
             await self.ui_wait_for_enter_async()
-
 
     # --- Async Input Helpers (Using run_in_executor) ---
 
@@ -1687,7 +1647,7 @@ class TradingTerminal:
         all_menu_options_text = [
             ("Place Order", True), ("View Account Balance", True), ("View Open Orders", True),
             ("View Open Positions", True), ("Check Current Price", True),
-            ("Technical Analysis", True), # Requires fetch_ohlcv which needs client
+            ("Technical Analysis", True),  # Requires fetch_ohlcv which needs client
             ("Settings", False), ("Exit", False)
         ]
 
@@ -1696,7 +1656,7 @@ class TradingTerminal:
         for text, requires_auth in all_menu_options_text:
              if requires_auth and not is_authenticated:
                   # Append disabled marker using theme colors
-                  current_menu_display_options.append(f"{text} {self.ui.colors['dim']}(Auth Required){self.ui.colors['menu_option']}") # Use menu_option color for text part
+                  current_menu_display_options.append(f"{text} {self.ui.colors['dim']}(Auth Required){self.ui.colors['menu_option']}")  # Use menu_option color for text part
              else:
                   current_menu_display_options.append(text)
 
@@ -1721,7 +1681,6 @@ class TradingTerminal:
             # Propagate unexpected errors as RuntimeErrors
             raise RuntimeError(f"Failed to display menu: {e}") from e
 
-
     async def ui_get_input_async(self, *args, **kwargs) -> Any:
         """Asynchronously gets validated user input using executor."""
         loop = asyncio.get_running_loop()
@@ -1737,8 +1696,7 @@ class TradingTerminal:
              logger.error(f"Unexpected error in get_input executor: {e}", exc_info=True)
              raise RuntimeError(f"Failed to get user input: {e}") from e
 
-
-    async def ui_wait_for_enter_async(self, prompt: str = "Press Enter to continue..."):
+    async def ui_wait_for_enter_async(self, prompt: str = "Press Enter to continue...") -> None:
         """Asynchronously waits for Enter key using executor."""
         loop = asyncio.get_running_loop()
         # Wrap the call using partial
@@ -1753,10 +1711,9 @@ class TradingTerminal:
              logger.error(f"Unexpected error in wait_for_enter executor: {e}", exc_info=True)
              raise RuntimeError(f"Failed waiting for Enter: {e}") from e
 
-
     # --- Input Validation Helpers ---
 
-    def _validate_symbol(self, symbol: str) -> Union[bool, str]:
+    def _validate_symbol(self, symbol: str) -> bool | str:
         """Validates symbol format and checks against loaded markets if available."""
         if not isinstance(symbol, str) or not symbol: return "Symbol cannot be empty."
         symbol_upper = symbol.strip().upper()
@@ -1775,10 +1732,10 @@ class TradingTerminal:
 
         # Validate against loaded markets if available and client is initialized
         if self.exchange_client and self.exchange_client._markets_loaded:
-           ccxt_symbol = self._get_ccxt_symbol(symbol) # Attempt to normalize format
+           ccxt_symbol = self._get_ccxt_symbol(symbol)  # Attempt to normalize format
            if not self.exchange_client.exchange or not self.exchange_client.exchange.markets:
                 logger.warning("Markets object missing during symbol validation.")
-                return True # Cannot validate further, assume okay for now
+                return True  # Cannot validate further, assume okay for now
 
            if ccxt_symbol not in self.exchange_client.exchange.markets:
                # Try to provide helpful suggestions
@@ -1786,8 +1743,8 @@ class TradingTerminal:
                usdt_symbols = sorted([s for s in available_symbols if isinstance(s, str) and s.endswith('/USDT')])
                suggestions = []
                # Try matching start or if user omitted slash
-               base_attempt = symbol_upper.replace('/', '') # Remove slash for comparison
-               suggestions = [s for s in usdt_symbols if s.startswith(base_attempt[:3]) or s.replace('/','') == base_attempt]
+               base_attempt = symbol_upper.replace('/', '')  # Remove slash for comparison
+               suggestions = [s for s in usdt_symbols if s.startswith(base_attempt[:3]) or s.replace('/', '') == base_attempt]
 
                suggestion_str = ""
                if suggestions:
@@ -1797,13 +1754,13 @@ class TradingTerminal:
 
                return f"Symbol '{ccxt_symbol}' not found on loaded exchange markets.{suggestion_str}"
 
-        return True # Passed basic checks or market check passed/unavailable
+        return True  # Passed basic checks or market check passed/unavailable
 
     def _get_ccxt_symbol(self, user_input: str) -> str:
         """Converts user input (e.g., BTCUSDT or BTC/USDT) to CCXT standard format (BTC/USDT)."""
-        if not isinstance(user_input, str): return "" # Handle non-string input
+        if not isinstance(user_input, str): return ""  # Handle non-string input
         symbol = user_input.strip().upper()
-        if '/' in symbol: return symbol # Already in correct format
+        if '/' in symbol: return symbol  # Already in correct format
 
         # If markets loaded, try to find the CCXT symbol matching the input (more reliable)
         if self.exchange_client and self.exchange_client._markets_loaded and self.exchange_client.exchange and self.exchange_client.exchange.markets:
@@ -1831,7 +1788,7 @@ class TradingTerminal:
                           possible_matches.append(market_symbol)
 
              if possible_matches:
-                  formatted = possible_matches[0] # Usually only one match for BASEQUOTE
+                  formatted = possible_matches[0]  # Usually only one match for BASEQUOTE
                   logger.debug(f"Formatted symbol '{symbol}' to '{formatted}' based on concatenated market (USDT Swap).")
                   return formatted
 
@@ -1843,26 +1800,26 @@ class TradingTerminal:
             return formatted
 
         logger.warning(f"{Fore.YELLOW}Could not reliably format symbol '{symbol}' to BASE/USDT swap format. Using as is. Exchange might reject it.{Style.RESET_ALL}")
-        return symbol # Return original if no formatting rule applied
+        return symbol  # Return original if no formatting rule applied
 
-    def _validate_side(self, side: str) -> Union[bool, str]:
+    def _validate_side(self, side: str) -> bool | str:
         """Validates order side."""
         if not isinstance(side, str) or side.lower() not in ['buy', 'sell']:
             return "Invalid side. Must be 'buy' or 'sell'."
         return True
 
-    def _validate_order_type(self, order_type: str) -> Union[bool, str]:
+    def _validate_order_type(self, order_type: str) -> bool | str:
         """Validates order type."""
         # Expand supported types if exchange/CCXT allows more easily (e.g., StopLimit)
-        supported_types = ['market', 'limit'] # Keep it simple for now
+        supported_types = ['market', 'limit']  # Keep it simple for now
         if not isinstance(order_type, str) or order_type.lower() not in supported_types:
             supported_str = ', '.join(t.capitalize() for t in supported_types)
             return f"Invalid order type. Supported: {supported_str}."
         return True
 
-    def _validate_positive_float(self, value: Any) -> Union[bool, str]:
+    def _validate_positive_float(self, value: Any) -> bool | str:
         """Validates if the value is a float strictly greater than zero."""
-        if value is None: return "Input cannot be empty/None." # Handle None explicitly
+        if value is None: return "Input cannot be empty/None."  # Handle None explicitly
         try:
             num_value = float(value)
             if not np.isfinite(num_value): return "Value must be a finite number."
@@ -1870,9 +1827,9 @@ class TradingTerminal:
             return True
         except (ValueError, TypeError): return "Input must be a valid number (e.g., 0.5, 100)."
 
-    def _validate_non_negative_float(self, value: Any) -> Union[bool, str]:
+    def _validate_non_negative_float(self, value: Any) -> bool | str:
         """Validates if the value is a float greater than or equal to zero."""
-        if value is None: return "Input cannot be empty/None." # Handle None explicitly
+        if value is None: return "Input cannot be empty/None."  # Handle None explicitly
         try:
             num_value = float(value)
             if not np.isfinite(num_value): return "Value must be a finite number."
@@ -1880,10 +1837,10 @@ class TradingTerminal:
             return True
         except (ValueError, TypeError): return "Input must be a valid number (e.g., 0, 0.5, 100)."
 
-    def _validate_percentage(self, value: Any) -> Union[bool, str]:
+    def _validate_percentage(self, value: Any) -> bool | str:
         """Validate percentage, usually > 0 and <= 100 for trailing stops."""
-        result = self._validate_positive_float(value) # Must be positive
-        if result is not True: return result # Inherit error message from positive float check
+        result = self._validate_positive_float(value)  # Must be positive
+        if result is not True: return result  # Inherit error message from positive float check
         num_value = float(value)
         # Set a reasonable upper limit (e.g., 100%, maybe less depending on context)
         if num_value > 100: return "Percentage cannot exceed 100."
@@ -1891,10 +1848,10 @@ class TradingTerminal:
         if num_value < 0.01: return "Percentage seems too small (Bybit min is typically 0.01%)."
         return True
 
-    def _validate_timeframe(self, timeframe: str) -> Union[bool, str]:
+    def _validate_timeframe(self, timeframe: str) -> bool | str:
         """Basic validation for common CCXT timeframe formats and checks against exchange."""
         if not timeframe: return "Timeframe cannot be empty."
-        timeframe_in = str(timeframe).lower() # Normalize to lowercase for checks
+        timeframe_in = str(timeframe).lower()  # Normalize to lowercase for checks
 
         # Regex for common CCXT styles (e.g., 1m, 5m, 1h, 4h, 1d, 1w, 1M)
         # Allow 1-3 digits for number part, single char for unit
@@ -1914,7 +1871,7 @@ class TradingTerminal:
         if self.exchange_client and self.exchange_client._markets_loaded and self.exchange_client.exchange and self.exchange_client.exchange.timeframes:
             # Check if the (potentially normalized) timeframe exists
             if timeframe_check not in self.exchange_client.exchange.timeframes:
-                available_tfs = sorted(list(self.exchange_client.exchange.timeframes.keys()))
+                available_tfs = sorted(self.exchange_client.exchange.timeframes.keys())
                 # Provide closer suggestions if possible
                 suggestions = [tf for tf in available_tfs if tf.startswith(timeframe_check[0]) or tf.endswith(timeframe_check[-1])]
                 suggestion_str = f" Available examples: {', '.join(available_tfs[:10])}..."
@@ -1922,20 +1879,19 @@ class TradingTerminal:
                      suggestion_str = f" Did you mean one of these? {', '.join(suggestions[:5])}... Or see examples: {', '.join(available_tfs[:5])}..."
 
                 return f"Timeframe '{timeframe_check}' may not be supported by the exchange.{suggestion_str}"
-        return True # Passed validation
-
+        return True  # Passed validation
 
     # --- Menu Actions ---
 
-    async def place_order_menu(self):
+    async def place_order_menu(self) -> None:
         """Handles the logic for placing an order via user input."""
         self.ui.display_header("Place Order Spell")
 
         default_symbol = self.config_manager.config.get("default_symbol", "BTC/USDT")
         # Use async input helper with validation
         symbol_input = await self.ui_get_input_async("Enter symbol sigil (e.g., BTC/USDT or BTCUSDT)", default=default_symbol, validation_func=self._validate_symbol)
-        if symbol_input is None: return # Handle potential None return on optional input or error propagation
-        symbol = self._get_ccxt_symbol(symbol_input) # Normalize after validation passes
+        if symbol_input is None: return  # Handle potential None return on optional input or error propagation
+        symbol = self._get_ccxt_symbol(symbol_input)  # Normalize after validation passes
 
         side = await self.ui_get_input_async("Enter side (buy/sell)", validation_func=self._validate_side)
         if side is None: return
@@ -1951,11 +1907,11 @@ class TradingTerminal:
         if amount is None: return
 
         price = None
-        params = {} # Dictionary for CCXT standard order parameters + exchange specifics
+        params = {}  # Dictionary for CCXT standard order parameters + exchange specifics
 
         if order_type == 'limit':
             price = await self.ui_get_input_async("Enter limit price", input_type=float, validation_func=self._validate_positive_float)
-            if price is None: return # Price required for limit order
+            if price is None: return  # Price required for limit order
 
         # --- Advanced Order Parameters ---
         self.ui.print_info("\nConfigure optional parameters (leave blank or 0 for none):")
@@ -1963,7 +1919,7 @@ class TradingTerminal:
         # Stop Loss (Trigger Price) - Use non-negative float validator
         sl_price = await self.ui_get_input_async("Stop Loss trigger price", default="0", required=False, input_type=float, validation_func=self._validate_non_negative_float)
         if sl_price is not None and sl_price > 0:
-            params['stopLossPrice'] = sl_price # CCXT standard key for trigger price
+            params['stopLossPrice'] = sl_price  # CCXT standard key for trigger price
             # Optional: Add trigger type input if needed
             # sl_trigger = await self.ui_get_input_async("SL Trigger By (MarkPrice/LastPrice/IndexPrice)", default="MarkPrice")
             # params['slTriggerBy'] = sl_trigger # Example Bybit V5 param
@@ -1972,7 +1928,7 @@ class TradingTerminal:
         # Take Profit (Trigger Price) - Use non-negative float validator
         tp_price = await self.ui_get_input_async("Take Profit trigger price", default="0", required=False, input_type=float, validation_func=self._validate_non_negative_float)
         if tp_price is not None and tp_price > 0:
-            params['takeProfitPrice'] = tp_price # CCXT standard key for trigger price
+            params['takeProfitPrice'] = tp_price  # CCXT standard key for trigger price
             # Optional: Add trigger type input if needed
             # tp_trigger = await self.ui_get_input_async("TP Trigger By (MarkPrice/LastPrice/IndexPrice)", default="MarkPrice")
             # params['tpTriggerBy'] = tp_trigger # Example Bybit V5 param
@@ -2000,9 +1956,8 @@ class TradingTerminal:
         if 'takeProfitPrice' in params: confirm_parts.append(f"with TP @ {params['takeProfitPrice']}")
         if 'trailingPercent' in params: confirm_parts.append(f"with Trail {params['trailingPercent']}%")
         if params.get('reduceOnly'): confirm_parts.append("(Reduce Only)")
-        confirm_msg = " ".join(confirm_parts) + "?"
+        " ".join(confirm_parts) + "?"
 
-        print(f"\n{self.ui.colors['warning']}{confirm_msg}{self.ui.colors['reset']}")
         confirm = await self.ui_get_input_async("Type 'yes' to confirm", default="no")
 
         if confirm is None or confirm.lower() != "yes":
@@ -2039,7 +1994,7 @@ class TradingTerminal:
                  # Format datetime
                  elif k == 'datetime' and value:
                       try: display_result[k] = pd.to_datetime(value).strftime('%Y-%m-%d %H:%M:%S UTC')
-                      except: display_result[k] = value # Fallback if parsing fails
+                      except: display_result[k] = value  # Fallback if parsing fails
                  # Format floats with appropriate precision
                  elif isinstance(value, (float, np.floating)):
                      precision = 8 if k in ['price', 'amount', 'cost', 'filled', 'remaining', 'average'] else 4
@@ -2057,12 +2012,10 @@ class TradingTerminal:
              if 'reduceOnly' not in display_result and info_data.get('reduceOnly') is not None: display_result['Reduce Only (Info)'] = info_data['reduceOnly']
              if 'status' not in display_result and info_data.get('orderStatus'): display_result['Status (Info)'] = info_data['orderStatus']
 
-
-        self.ui.print_table(display_result, title="Order Submission Result Details", float_format='{:.8f}') # Higher precision default
+        self.ui.print_table(display_result, title="Order Submission Result Details", float_format='{:.8f}')  # Higher precision default
         await self.ui_wait_for_enter_async()
 
-
-    async def view_balance(self):
+    async def view_balance(self) -> None:
         """Displays account balances using CCXT (handles V5 structure)."""
         self.ui.display_header("Account Balance Scrying (USDT Futures)")
         self.ui.print_info(f"{self.ui.colors['primary']}# Fetching balance essence...{self.ui.colors['reset']}")
@@ -2072,9 +2025,8 @@ class TradingTerminal:
 
         if not balance_data or not isinstance(balance_data, dict):
             self.ui.print_warning("No detailed USDT balance data found or format unexpected.")
-            if balance_data: # Print raw if something was received but not usable
+            if balance_data:  # Print raw if something was received but not usable
                  self.ui.print_info("Raw balance data received:")
-                 print(balance_data)
             await self.ui_wait_for_enter_async()
             return
 
@@ -2087,7 +2039,7 @@ class TradingTerminal:
 
         # Extract PNL from standardized keys populated by fetch_balance
         unrealized_pnl = balance_data.get('unrealizedPnl')
-        realized_pnl = balance_data.get('cumRealisedPnl') # Check if fetch_balance provides this
+        realized_pnl = balance_data.get('cumRealisedPnl')  # Check if fetch_balance provides this
 
         # Format PNL with color
         try:
@@ -2096,14 +2048,14 @@ class TradingTerminal:
                 pnl_color = self.ui.colors['positive'] if pnl_float > 0 else self.ui.colors['negative'] if pnl_float < 0 else self.ui.colors['neutral']
                 display_data["Unrealized PNL (Account)"] = f"{pnl_color}{pnl_float:.4f}{self.ui.colors['reset']}"
             else:
-                 display_data["Unrealized PNL (Account)"] = "N/A" # Explicitly show N/A
+                 display_data["Unrealized PNL (Account)"] = "N/A"  # Explicitly show N/A
 
             if realized_pnl is not None:
                 # Use neutral color for realized PNL? Or format based on value?
                 rpnl_float = float(realized_pnl)
-                rpnl_color = self.ui.colors['positive'] if rpnl_float > 0 else self.ui.colors['negative'] if rpnl_float < 0 else self.ui.colors['neutral']
+                self.ui.colors['positive'] if rpnl_float > 0 else self.ui.colors['negative'] if rpnl_float < 0 else self.ui.colors['neutral']
                 # display_data["Realized PNL (Account)"] = f"{rpnl_color}{rpnl_float:.4f}{self.ui.colors['reset']}" # Optional color
-                display_data["Realized PNL (Account)"] = f"{rpnl_float:.4f}" # Default: no color
+                display_data["Realized PNL (Account)"] = f"{rpnl_float:.4f}"  # Default: no color
             else:
                  display_data["Realized PNL (Account)"] = "N/A"
 
@@ -2112,7 +2064,6 @@ class TradingTerminal:
             if "Unrealized PNL (Account)" not in display_data: display_data["Unrealized PNL (Account)"] = f"Error: {unrealized_pnl}"
             if "Realized PNL (Account)" not in display_data: display_data["Realized PNL (Account)"] = f"Error: {realized_pnl}"
 
-
         # Filter out None values before printing for cleaner display
         # Keep N/A strings we added
         display_data_filtered = {k: v for k, v in display_data.items() if v is not None}
@@ -2120,7 +2071,6 @@ class TradingTerminal:
         if not display_data_filtered or not any(k in display_data_filtered for k in ["Available (Free)", "Used Margin", "Total Equity"]):
              self.ui.print_warning("Balance data received but key fields (free, used, total) are missing or null.")
              self.ui.print_info("Raw balance data:")
-             print(balance_data) # Show raw data for debugging
         else:
              # Let print_table handle the dictionary with colored strings directly
              self.ui.print_table(display_data_filtered, title="USDT Futures Account Balance", float_format='{:.4f}')
@@ -2130,7 +2080,7 @@ class TradingTerminal:
 
         await self.ui_wait_for_enter_async()
 
-    async def view_open_orders(self):
+    async def view_open_orders(self) -> None:
         """Fetches and displays open orders."""
         self.ui.display_header("View Open Order Scrolls")
         # Allow empty input for 'all symbols'
@@ -2162,24 +2112,24 @@ class TradingTerminal:
                     # Standard CCXT keys for triggers (might be None if not set or not returned)
                     "SL Price": order.get('stopLossPrice'),
                     "TP Price": order.get('takeProfitPrice'),
-                    "Trail %": order.get('trailingPercent'), # Standard key, might be None
+                    "Trail %": order.get('trailingPercent'),  # Standard key, might be None
                     "ReduceOnly": order.get('reduceOnly'),
                 }
 
                 # Add specific Trail info from 'info' if standard key is missing/None
                 trail_info_str = "N/A"
                 if order_info["Trail %"] is None and 'info' in order and isinstance(order['info'], dict):
-                     trail_info_raw = order['info'].get('trailingStop') # Bybit V5 key
+                     trail_info_raw = order['info'].get('trailingStop')  # Bybit V5 key
                      if trail_info_raw:
                          # Bybit often returns string "0" if not set, handle that
                          if trail_info_raw != "0":
-                             trail_info_str = str(trail_info_raw) # Show the raw value
+                             trail_info_str = str(trail_info_raw)  # Show the raw value
                              # Try to parse if it looks like a dict (less common now?)
                              # if isinstance(trail_info_raw, str) and trail_info_raw.startswith('{'): ...
                 elif order_info["Trail %"] is not None:
-                     trail_info_str = f"{order_info['Trail %']}%" # Format standard percentage
+                     trail_info_str = f"{order_info['Trail %']}%"  # Format standard percentage
 
-                order_info["Trail Info"] = trail_info_str # Add consolidated trail info
+                order_info["Trail Info"] = trail_info_str  # Add consolidated trail info
 
                 # Remove the original Trail % if we added Trail Info
                 if "Trail %" in order_info: del order_info["Trail %"]
@@ -2190,13 +2140,12 @@ class TradingTerminal:
 
                 display_data.append(order_info)
 
-
             # Use higher precision for price/amount in crypto
             self.ui.print_table(display_data, title=f"Open Orders {action}", float_format='{:.8f}')
 
         await self.ui_wait_for_enter_async()
 
-    async def view_open_positions(self):
+    async def view_open_positions(self) -> None:
         """Fetches and displays open positions."""
         self.ui.display_header("View Open Position Essences")
         symbol_input = await self.ui_get_input_async("Enter symbol to filter (e.g., BTC/USDT) or leave blank for all", required=False, validation_func=lambda s: True if not s else self._validate_symbol(s))
@@ -2216,22 +2165,22 @@ class TradingTerminal:
             for pos in positions:
                 # Extract data using standard CCXT keys
                 symbol = pos.get('symbol')
-                side = pos.get('side') # 'long' or 'short'
+                side = pos.get('side')  # 'long' or 'short'
                 # Use the size parsing logic from fetch_positions again for consistency
                 size_str = None
                 if pos.get('contracts') is not None: size_str = str(pos['contracts'])
                 elif pos.get('contractSize') is not None: size_str = str(pos['contractSize'])
                 elif 'info' in pos and pos['info'] and pos['info'].get('size') is not None: size_str = str(pos['info']['size'])
-                size = float(size_str) if size_str is not None and size_str != '' else 0.0 # Convert to float
+                size = float(size_str) if size_str is not None and size_str != '' else 0.0  # Convert to float
 
                 entry_price = pos.get('entryPrice')
                 mark_price = pos.get('markPrice')
                 liq_price = pos.get('liquidationPrice')
                 initial_margin = pos.get('initialMargin')
-                maint_margin = pos.get('maintenanceMargin')
+                pos.get('maintenanceMargin')
                 unrealized_pnl = pos.get('unrealizedPnl')
                 leverage = pos.get('leverage')
-                notional = pos.get('notional') # Size * Price
+                notional = pos.get('notional')  # Size * Price
 
                 pos_info = {
                     "Symbol": symbol,
@@ -2241,8 +2190,8 @@ class TradingTerminal:
                     "Mark Price": mark_price,
                     "Liq Price": liq_price,
                     "Margin": initial_margin,
-                    "uPNL": unrealized_pnl, # Will be formatted with color below
-                    "uPNL %": "N/A", # Placeholder, calculated below
+                    "uPNL": unrealized_pnl,  # Will be formatted with color below
+                    "uPNL %": "N/A",  # Placeholder, calculated below
                     "Leverage": f"{leverage}x" if leverage else 'N/A',
                     "Notional": notional,
                     # "Maint Margin": maint_margin, # Can be verbose, optional
@@ -2257,7 +2206,7 @@ class TradingTerminal:
                           # Store the colored string for display
                           pnl_percent_str = f"{pnl_color}{pnl_percent:.2f}%{self.ui.colors['reset']}"
                      except (ValueError, TypeError, ZeroDivisionError):
-                          pnl_percent_str = "Error" # Indicate calculation error
+                          pnl_percent_str = "Error"  # Indicate calculation error
 
                 pos_info["uPNL %"] = pnl_percent_str
 
@@ -2268,7 +2217,7 @@ class TradingTerminal:
                         pnl_color = self.ui.colors['positive'] if pnl_float > 0 else self.ui.colors['negative'] if pnl_float < 0 else self.ui.colors['neutral']
                         # Override the uPNL value with the colored string
                         pos_info["uPNL"] = f"{pnl_color}{pnl_float:.4f}{self.ui.colors['reset']}"
-                    except (ValueError, TypeError): pass # Keep original value if conversion fails
+                    except (ValueError, TypeError): pass  # Keep original value if conversion fails
 
                 # Add the processed dict to the list for the table
                 display_data.append(pos_info)
@@ -2278,7 +2227,7 @@ class TradingTerminal:
 
         await self.ui_wait_for_enter_async()
 
-    async def check_price_menu(self):
+    async def check_price_menu(self) -> None:
         """Fetches and displays the current ticker price."""
         self.ui.display_header("Check Price Pulse")
         default_symbol = self.config_manager.config.get("default_symbol", "BTC/USDT")
@@ -2300,11 +2249,11 @@ class TradingTerminal:
             "Ask Price": ticker.get('ask'),
             "High (24h)": ticker.get('high'),
             "Low (24h)": ticker.get('low'),
-            "Volume (24h Base)": ticker.get('baseVolume'), # e.g., BTC
-            "Volume (24h Quote)": ticker.get('quoteVolume'), # e.g., USDT
+            "Volume (24h Base)": ticker.get('baseVolume'),  # e.g., BTC
+            "Volume (24h Quote)": ticker.get('quoteVolume'),  # e.g., USDT
             "Change (24h)": ticker.get('change'),
-            "% Change (24h)": ticker.get('percentage'), # Will be formatted with color
-            "Funding Rate (Est)": ticker.get('fundingRate'), # Standard CCXT key
+            "% Change (24h)": ticker.get('percentage'),  # Will be formatted with color
+            "Funding Rate (Est)": ticker.get('fundingRate'),  # Standard CCXT key
             "Next Funding Time": pd.to_datetime(ticker.get('fundingTimestamp'), unit='ms').strftime('%Y-%m-%d %H:%M:%S UTC') if ticker.get('fundingTimestamp') else None,
         }
 
@@ -2315,13 +2264,13 @@ class TradingTerminal:
                  perc_float = float(perc_change)
                  perc_color = self.ui.colors['positive'] if perc_float > 0 else self.ui.colors['negative'] if perc_float < 0 else self.ui.colors['neutral']
                  display_data["% Change (24h)"] = f"{perc_color}{perc_float:.2f}%{self.ui.colors['reset']}"
-             except (ValueError, TypeError): pass # Keep original if not a number
+             except (ValueError, TypeError): pass  # Keep original if not a number
 
         # Format Funding Rate if available
         funding_rate = display_data.get("Funding Rate (Est)")
         if funding_rate is not None:
-             try: display_data["Funding Rate (Est)"] = f"{float(funding_rate) * 100:.4f}%" # Convert to percentage
-             except (ValueError, TypeError): pass # Keep original if not a number
+             try: display_data["Funding Rate (Est)"] = f"{float(funding_rate) * 100:.4f}%"  # Convert to percentage
+             except (ValueError, TypeError): pass  # Keep original if not a number
 
         # Filter None values before printing for cleaner display
         display_data_filtered = {k: v for k, v in display_data.items() if v is not None}
@@ -2330,8 +2279,7 @@ class TradingTerminal:
         self.ui.print_table(display_data_filtered, title=f"Current Ticker: {symbol}", float_format='{:.4f}')
         await self.ui_wait_for_enter_async()
 
-
-    async def technical_analysis_menu(self):
+    async def technical_analysis_menu(self) -> None:
         """Handles fetching data and displaying technical analysis."""
         if ta is None:
             self.ui.print_error("Technical Analysis requires the 'pandas_ta' library.")
@@ -2351,9 +2299,8 @@ class TradingTerminal:
         if timeframe_input is None: return
         # Normalize timeframe after validation passes
         timeframe = timeframe_input.lower()
-        tf_map = {'d': '1d', 'w': '1w', 'm': '1M'} # Map Bybit letters if used
+        tf_map = {'d': '1d', 'w': '1w', 'm': '1M'}  # Map Bybit letters if used
         if timeframe.upper() in tf_map: timeframe = tf_map[timeframe.upper()]
-
 
         # Determine data fetch limit
         chart_points = self.config_manager.config.get("chart_points", 60)
@@ -2363,24 +2310,24 @@ class TradingTerminal:
         try:
              # Use configured periods, provide large defaults if missing
              max_lookback_needed = max(
-                 int(indicator_periods.get("sma_long", 50)), # SMA needs length
-                 int(indicator_periods.get("ema", 20)), # EMA needs length
-                 int(indicator_periods.get("rsi", 14)), # RSI needs length + buffer
-                 int(indicator_periods.get("bbands", 20)), # BBands needs length
-                 26 + 9, # MACD default fast + signal periods
-                 int(indicator_periods.get("stoch_k", 14)) + int(indicator_periods.get("stoch_d", 3)) + int(indicator_periods.get("stoch_smooth_k", 3)), # Stoch needs k+d+smooth_k
-                 int(indicator_periods.get("atr", 14)) # ATR needs length
+                 int(indicator_periods.get("sma_long", 50)),  # SMA needs length
+                 int(indicator_periods.get("ema", 20)),  # EMA needs length
+                 int(indicator_periods.get("rsi", 14)),  # RSI needs length + buffer
+                 int(indicator_periods.get("bbands", 20)),  # BBands needs length
+                 26 + 9,  # MACD default fast + signal periods
+                 int(indicator_periods.get("stoch_k", 14)) + int(indicator_periods.get("stoch_d", 3)) + int(indicator_periods.get("stoch_smooth_k", 3)),  # Stoch needs k+d+smooth_k
+                 int(indicator_periods.get("atr", 14))  # ATR needs length
              )
              # Add a buffer (e.g., 50 candles) for NaN warmup
              max_lookback_needed += 50
         except Exception as e:
              logger.warning(f"Could not calculate max indicator lookback: {e}. Using default 250.")
-             max_lookback_needed = 250 # Default large lookback
+             max_lookback_needed = 250  # Default large lookback
 
         # Fetch enough data: max(chart points, indicator lookback) + buffer
         # CCXT limit parameter might have exchange restrictions (e.g., Bybit max 1000 or 200 for older API)
         # Fetch slightly more than needed, respecting potential exchange limits
-        fetch_limit = min(max(chart_points + 50, max_lookback_needed + 50), 1000) # Add buffer, cap at 1000
+        fetch_limit = min(max(chart_points + 50, max_lookback_needed + 50), 1000)  # Add buffer, cap at 1000
 
         self.ui.print_info(f"{self.ui.colors['primary']}# Scrying market data for {symbol} ({timeframe}, limit={fetch_limit})...{self.ui.colors['reset']}")
         ohlcv_data = await self.exchange_client.fetch_ohlcv(symbol, timeframe, limit=fetch_limit)
@@ -2391,7 +2338,7 @@ class TradingTerminal:
             return
 
         # --- Process Data ---
-        df = None # Initialize df to None
+        df = None  # Initialize df to None
         try:
             df = pd.DataFrame(ohlcv_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             # Convert timestamp to datetime and set as index
@@ -2406,7 +2353,7 @@ class TradingTerminal:
 
             # Drop rows where essential data (close) is missing AFTER conversion
             initial_len = len(df)
-            df.dropna(subset=['close', 'high', 'low'], inplace=True) # Need HLC for most indicators
+            df.dropna(subset=['close', 'high', 'low'], inplace=True)  # Need HLC for most indicators
             if len(df) < initial_len:
                  logger.warning(f"Dropped {initial_len - len(df)} rows with NaN OHLC data during processing.")
             if df.empty:
@@ -2422,18 +2369,18 @@ class TradingTerminal:
         # Pass the cleaned df to the calculator
         df_indicators = self.ta_analyzer.calculate_indicators(df)
         # Check if indicators were actually calculated (TA func logs details)
-        if df_indicators is df: # Check if the original df was returned due to error/no-op
+        if df_indicators is df:  # Check if the original df was returned due to error/no-op
              self.ui.print_error("Technical analysis calculation failed or produced no indicators. Check logs.")
              await self.ui_wait_for_enter_async()
              return
-        if df_indicators.empty: # Check if TA returned an empty dataframe
+        if df_indicators.empty:  # Check if TA returned an empty dataframe
              self.ui.print_error("Technical analysis calculation resulted in an empty DataFrame.")
              await self.ui_wait_for_enter_async()
              return
 
         # --- Calculate Pivot Points ---
         pivot_points = None
-        pivot_period_str = self.config_manager.config.get("pivot_period", "1d") # Already normalized in config load/save
+        pivot_period_str = self.config_manager.config.get("pivot_period", "1d")  # Already normalized in config load/save
         try:
             self.ui.print_info(f"{self.ui.colors['primary']}# Fetching data for {pivot_period_str} pivot points...{self.ui.colors['reset']}")
             # Ensure the pivot timeframe is valid before fetching
@@ -2443,7 +2390,7 @@ class TradingTerminal:
 
             # Fetch last 2 candles. Index 0 is the last *completed* candle. Index 1 is the current (incomplete).
             # Need to handle potential rate limits if called right after main data fetch
-            await asyncio.sleep(0.5) # Small delay
+            await asyncio.sleep(0.5)  # Small delay
             pivot_ohlcv = await self.exchange_client.fetch_ohlcv(symbol, pivot_period_str, limit=2)
 
             if pivot_ohlcv and len(pivot_ohlcv) >= 1:
@@ -2458,7 +2405,7 @@ class TradingTerminal:
                 # Use the first row fetched (index 0), which is the last completed period
                 if not df_pivot_period.empty and len(df_pivot_period) >= 1:
                      # Pass DataFrame slice containing only the row for calculation
-                     pivot_calc_data = df_pivot_period.iloc[[0]] # Pass as DataFrame slice
+                     pivot_calc_data = df_pivot_period.iloc[[0]]  # Pass as DataFrame slice
                      pivot_points = self.ta_analyzer.calculate_pivot_points(pivot_calc_data)
                      if pivot_points:
                          candle_time_str = df_pivot_period.index[0].strftime('%Y-%m-%d %H:%M:%S') if isinstance(df_pivot_period.index[0], pd.Timestamp) else str(df_pivot_period.index[0])
@@ -2471,13 +2418,13 @@ class TradingTerminal:
             else:
                  logger.warning(f"Could not fetch sufficient data (need >= 1 candle) for {pivot_period_str} pivot points.")
 
-        except ValueError as e: # Catch specific errors like invalid timeframe for pivots
+        except ValueError as e:  # Catch specific errors like invalid timeframe for pivots
             logger.error(f"Error fetching/calculating pivot points ({pivot_period_str}): {e}")
             self.ui.print_warning(f"Could not calculate pivot points ({pivot_period_str}): {e}")
         except (ccxt.ExchangeError, ccxt.NetworkError) as e:
              logger.error(f"CCXT Error fetching pivot data ({pivot_period_str}): {e}")
              self.ui.print_warning(f"Could not fetch data for pivot points ({pivot_period_str}): {e}")
-        except Exception as e: # Catch unexpected errors
+        except Exception as e:  # Catch unexpected errors
             logger.error(f"Unexpected error fetching/calculating pivot points: {e}", exc_info=True)
             self.ui.print_warning(f"Could not calculate pivot points ({pivot_period_str}): Unexpected error.")
 
@@ -2486,7 +2433,7 @@ class TradingTerminal:
         # TA Summary (from the last row of df_indicators)
         # Use the generate_ta_summary which finds the last valid row
         ta_summary = self.ta_analyzer.generate_ta_summary(df_indicators)
-        self.ui.print_table(ta_summary, title=f"TA Summary: {symbol} ({timeframe})") # Let print_table handle dict/colors
+        self.ui.print_table(ta_summary, title=f"TA Summary: {symbol} ({timeframe})")  # Let print_table handle dict/colors
 
         # Pivot Points
         if pivot_points:
@@ -2496,7 +2443,7 @@ class TradingTerminal:
 
         # Chart (using close prices from df_indicators)
         # Ensure enough valid data points exist before slicing/charting
-        close_prices = df_indicators['close'].dropna().tolist() # Drop NaNs before charting
+        close_prices = df_indicators['close'].dropna().tolist()  # Drop NaNs before charting
         if close_prices:
             points_to_chart = min(len(close_prices), chart_points)
             if points_to_chart < chart_points and len(close_prices) > 0:
@@ -2513,8 +2460,8 @@ class TradingTerminal:
             # Take tail, copy to avoid warnings, format index, make index a column
             display_df = df_indicators.tail(num_detail_rows).copy()
             if isinstance(display_df.index, pd.DatetimeIndex):
-                 display_df.index = display_df.index.strftime('%m-%d %H:%M') # Shorter format for table
-            display_df = display_df.reset_index() # Make timestamp a column
+                 display_df.index = display_df.index.strftime('%m-%d %H:%M')  # Shorter format for table
+            display_df = display_df.reset_index()  # Make timestamp a column
 
             # Select and reorder columns (use lowercase names from processing/TA)
             base_cols = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
@@ -2525,7 +2472,7 @@ class TradingTerminal:
 
             self.ui.print_table(display_df[final_cols], title=f"Recent Data & Indicators (Last {num_detail_rows})", float_format='{:.5f}', index=False)
 
-        elif not df_indicators.empty: # Handle case where less than num_detail_rows exist
+        elif not df_indicators.empty:  # Handle case where less than num_detail_rows exist
             self.ui.print_warning(f"Insufficient data ({len(df_indicators)} rows) to show detailed table of {num_detail_rows} rows. Showing all available.")
             display_df = df_indicators.copy()
             if isinstance(display_df.index, pd.DatetimeIndex): display_df.index = display_df.index.strftime('%m-%d %H:%M')
@@ -2533,24 +2480,22 @@ class TradingTerminal:
             base_cols = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
             indicator_cols = sorted([col for col in display_df.columns if col not in base_cols])
             final_cols = [col for col in base_cols + indicator_cols if col in display_df.columns]
-            self.ui.print_table(display_df[final_cols], title=f"Recent Data & Indicators (All Available)", float_format='{:.5f}', index=False)
+            self.ui.print_table(display_df[final_cols], title="Recent Data & Indicators (All Available)", float_format='{:.5f}', index=False)
         else:
              # This case should ideally be caught earlier if df_indicators is empty
              self.ui.print_warning("No data available for detailed indicator table.")
 
-
         await self.ui_wait_for_enter_async()
 
-
-    async def settings_menu(self):
+    async def settings_menu(self) -> None:
         """Handles the settings menu using async input."""
         settings_running = True
         while settings_running and self._running:
-            if self._shutdown_event.is_set(): break # Check shutdown flag
+            if self._shutdown_event.is_set(): break  # Check shutdown flag
 
             # Reload current config state for display
             current_config = self.config_manager.config
-            colors = self.ui.colors # Use current UI colors
+            colors = self.ui.colors  # Use current UI colors
 
             # Build options dynamically with current values
             options_map = {
@@ -2562,7 +2507,7 @@ class TradingTerminal:
                 "6": ("Pivot Period", current_config.get('pivot_period')),
                 "7": ("Chart Points", current_config.get('chart_points')),
                 "8": ("Chart Height", current_config.get('chart_height')),
-                "9": ("Back to Main Menu", None) # No current value needed
+                "9": ("Back to Main Menu", None)  # No current value needed
             }
             # Format options for display using current theme colors
             options_display = [
@@ -2578,32 +2523,32 @@ class TradingTerminal:
                      # Run the blocking menu display in executor
                      return await loop.run_in_executor(None, func_call)
                  except (EOFError, KeyboardInterrupt) as e:
-                     raise e # Re-raise to be caught below
+                     raise e  # Re-raise to be caught below
                  except Exception as e:
                      # Wrap other exceptions from the executor
                      raise RuntimeError(f"Failed to display settings menu: {e}") from e
 
             try:
                  choice = await _get_settings_choice()
-                 if choice is None: # Should not happen if menu handles errors, but check
+                 if choice is None:  # Should not happen if menu handles errors, but check
                      logger.warning("Settings menu returned None unexpectedly.")
                      continue
             except (EOFError, KeyboardInterrupt) as e:
                  logger.info(f"Settings menu interrupted ('{type(e).__name__}'), returning to main menu.")
                  # Don't trigger shutdown here, just exit settings loop
                  settings_running = False
-                 break # Break inner while loop
+                 break  # Break inner while loop
             except RuntimeError as e:
                  self.ui.print_error(str(e))
                  await asyncio.sleep(1)
-                 continue # Retry settings menu display
+                 continue  # Retry settings menu display
 
-            if not self._running or self._shutdown_event.is_set(): break # Check global flags again after input
+            if not self._running or self._shutdown_event.is_set(): break  # Check global flags again after input
 
             # --- Handle Settings Choices ---
             needs_save = False
             try:
-                if choice == "1": # Change Theme
+                if choice == "1":  # Change Theme
                     theme_input = await self.ui_get_input_async("Enter theme (dark/light)", default=current_config.get('theme'), validation_func=lambda t: t.lower() in ['dark', 'light'] or "Must be 'dark' or 'light'")
                     if theme_input:
                         new_theme = theme_input.lower()
@@ -2616,9 +2561,9 @@ class TradingTerminal:
                             self.ui.print_success(f"Theme changed to {new_theme}. Applied immediately.")
                         else:
                             self.ui.print_info("Theme unchanged.")
-                    await asyncio.sleep(0.5) # Short pause
+                    await asyncio.sleep(0.5)  # Short pause
 
-                elif choice == "2": # Set Default Symbol
+                elif choice == "2":  # Set Default Symbol
                     symbol_input = await self.ui_get_input_async("Enter default symbol (e.g., BTC/USDT)", default=current_config.get('default_symbol'), validation_func=self._validate_symbol)
                     if symbol_input:
                         new_symbol = self._get_ccxt_symbol(symbol_input)
@@ -2635,7 +2580,7 @@ class TradingTerminal:
                              self.ui.print_error(f"Validation failed for symbol '{new_symbol}': {validation_result}")
                     await asyncio.sleep(0.5)
 
-                elif choice == "3": # Set Default Timeframe
+                elif choice == "3":  # Set Default Timeframe
                      tf_input = await self.ui_get_input_async("Enter default timeframe (e.g., 1h)", default=current_config.get('default_timeframe'), validation_func=self._validate_timeframe)
                      if tf_input:
                          # Normalize timeframe
@@ -2651,10 +2596,10 @@ class TradingTerminal:
                              self.ui.print_info("Default timeframe unchanged.")
                      await asyncio.sleep(0.5)
 
-                elif choice == "4": # Set Default Order Type
+                elif choice == "4":  # Set Default Order Type
                      type_input = await self.ui_get_input_async("Enter default order type (Market/Limit)", default=current_config.get('default_order_type'), validation_func=self._validate_order_type)
                      if type_input:
-                         new_type_cap = type_input.capitalize() # Store capitalized version
+                         new_type_cap = type_input.capitalize()  # Store capitalized version
                          if new_type_cap != current_config.get('default_order_type'):
                              self.config_manager.config["default_order_type"] = new_type_cap
                              needs_save = True
@@ -2663,22 +2608,22 @@ class TradingTerminal:
                              self.ui.print_info("Default order type unchanged.")
                      await asyncio.sleep(0.5)
 
-                elif choice == "5": # Set Log Level
+                elif choice == "5":  # Set Log Level
                      log_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
                      level_input = await self.ui_get_input_async(f"Enter log level ({'/'.join(log_levels)})", default=current_config.get('log_level'), validation_func=lambda L: L.upper() in log_levels or f"Must be one of: {', '.join(log_levels)}")
                      if level_input:
                          new_level_upper = level_input.upper()
                          if new_level_upper != current_config.get('log_level'):
                              self.config_manager.config["log_level"] = new_level_upper
-                             self.config_manager._apply_log_level() # Apply immediately
+                             self.config_manager._apply_log_level()  # Apply immediately
                              needs_save = True
                              self.ui.print_success(f"Log level set to {new_level_upper}. Applied immediately.")
-                             logger.info(f"Log level changed to {new_level_upper} via settings.") # Log the change
+                             logger.info(f"Log level changed to {new_level_upper} via settings.")  # Log the change
                          else:
                               self.ui.print_info("Log level unchanged.")
                      await asyncio.sleep(0.5)
 
-                elif choice == "6": # Set Pivot Period
+                elif choice == "6":  # Set Pivot Period
                      pivot_tf_input = await self.ui_get_input_async("Enter timeframe for pivot points (e.g., 1h, 1d, 1W)", default=current_config.get('pivot_period'), validation_func=self._validate_timeframe)
                      if pivot_tf_input:
                          # Normalize timeframe
@@ -2694,10 +2639,11 @@ class TradingTerminal:
                               self.ui.print_info("Pivot period unchanged.")
                      await asyncio.sleep(0.5)
 
-                elif choice == "7": # Set Chart Points
-                    points_validator = lambda x: (isinstance(x, int) and 10 <= x <= 1000) or "Must be integer between 10 and 1000"
+                elif choice == "7":  # Set Chart Points
+                    def points_validator(x):
+                        return (isinstance(x, int) and 10 <= x <= 1000) or "Must be integer between 10 and 1000"
                     points_input = await self.ui_get_input_async("Enter number of points for chart (10-1000)", default=current_config.get('chart_points'), input_type=int, validation_func=points_validator)
-                    if points_input is not None: # Input is guaranteed to be int by validation
+                    if points_input is not None:  # Input is guaranteed to be int by validation
                          if points_input != current_config.get('chart_points'):
                              self.config_manager.config["chart_points"] = points_input
                              needs_save = True
@@ -2706,8 +2652,9 @@ class TradingTerminal:
                               self.ui.print_info("Chart points unchanged.")
                     await asyncio.sleep(0.5)
 
-                elif choice == "8": # Set Chart Height
-                    height_validator = lambda x: (isinstance(x, int) and 5 <= x <= 50) or "Must be integer between 5 and 50"
+                elif choice == "8":  # Set Chart Height
+                    def height_validator(x):
+                        return (isinstance(x, int) and 5 <= x <= 50) or "Must be integer between 5 and 50"
                     height_input = await self.ui_get_input_async("Enter height for ASCII chart (5-50)", default=current_config.get('chart_height'), input_type=int, validation_func=height_validator)
                     if height_input is not None:
                          if height_input != current_config.get('chart_height'):
@@ -2718,7 +2665,7 @@ class TradingTerminal:
                               self.ui.print_info("Chart height unchanged.")
                     await asyncio.sleep(0.5)
 
-                elif choice == "9": # Back
+                elif choice == "9":  # Back
                     settings_running = False
                     # Save config if changes were made before exiting settings
                     if needs_save:
@@ -2731,33 +2678,32 @@ class TradingTerminal:
                     await asyncio.sleep(1)
 
                 # Save config after each successful change (or just before exiting)
-                if needs_save and settings_running: # Save if changed and not exiting yet
+                if needs_save and settings_running:  # Save if changed and not exiting yet
                      self.config_manager.save_config()
-                     needs_save = False # Reset flag after saving
+                     needs_save = False  # Reset flag after saving
 
             except (EOFError, KeyboardInterrupt) as e:
                  # Should be caught by the _get_settings_choice wrapper, but handle defensively
                  logger.warning(f"Interruption '{type(e).__name__}' during settings input. Exiting settings.")
-                 settings_running = False # Exit settings loop
-                 if needs_save: self.config_manager.save_config() # Save pending changes on interrupt
+                 settings_running = False  # Exit settings loop
+                 if needs_save: self.config_manager.save_config()  # Save pending changes on interrupt
                  break
-            except ValueError as e: # Catch input conversion errors
+            except ValueError as e:  # Catch input conversion errors
                  self.ui.print_error(f"Invalid input value: {e}")
                  await asyncio.sleep(1)
-            except Exception as e: # Catch unexpected errors during setting update
+            except Exception as e:  # Catch unexpected errors during setting update
                  logger.error(f"Error handling setting choice '{choice}': {e}", exc_info=True)
                  self.ui.print_error(f"An unexpected error occurred: {e}")
-                 if needs_save: self.config_manager.save_config() # Attempt save on error too
+                 if needs_save: self.config_manager.save_config()  # Attempt save on error too
                  await self.ui_wait_for_enter_async()
 
 
 # --- Main Execution ---
 
-def check_create_env_file():
+def check_create_env_file() -> bool:
     """Checks for .env file and creates a default one if missing."""
     env_path = Path('.env')
     if not env_path.exists():
-        print(f"{Fore.YELLOW}File '{env_path}' not found. Creating a default one...{Style.RESET_ALL}")
         try:
             with open(env_path, 'w', encoding='utf-8') as f:
                 f.write("# Bybit API Credentials (replace with your actual keys)\n")
@@ -2769,37 +2715,32 @@ def check_create_env_file():
                 f.write("# Set to True to use Bybit's testnet environment\n")
                 f.write("# Testnet URL: https://testnet.bybit.com (Requires separate testnet API keys)\n")
                 f.write("TESTNET=False\n")
-            print(f"{Fore.GREEN}Created default '{env_path}' file.{Style.RESET_ALL}")
-            print(f"{Fore.YELLOW}>>> IMPORTANT: Please edit '{env_path}' to add your Bybit API credentials (and set TESTNET=True if needed) <<<")
-            print(f"{Fore.RED}{Style.BRIGHT}Security Charm: NEVER commit your .env file with real API keys to public repositories (like GitHub)! Add '.env' to your .gitignore scroll.{Style.RESET_ALL}")
-            return False # Indicate that user action is required
-        except IOError as e:
-            print(f"{Fore.RED}Error creating '{env_path}' file: {e}{Style.RESET_ALL}")
+            return False  # Indicate that user action is required
+        except OSError as e:
             logger.critical(f"Failed to create .env file: {e}")
-            return False # Indicate failure
+            return False  # Indicate failure
     # File exists, check if placeholders are still present
     else:
          try:
-             with open(env_path, 'r', encoding='utf-8') as f:
+             with open(env_path, encoding='utf-8') as f:
                  content = f.read()
                  if 'your_api_key_here' in content or 'your_api_secret_here' in content:
-                     print(f"{Fore.YELLOW}Warning: Found placeholder values in '{env_path}'.{Style.RESET_ALL}")
-                     print(f"{Fore.YELLOW}>>> Please edit '{env_path}' and replace them with your actual Bybit API credentials. <<<")
+                     pass
                      # Allow script to continue but credentials check will likely fail later
-         except IOError as e:
-              print(f"{Fore.RED}Error reading existing '{env_path}' file: {e}{Style.RESET_ALL}")
+         except OSError:
+              pass
               # Proceed cautiously
-    return True # File exists (even if it contains placeholders)
+    return True  # File exists (even if it contains placeholders)
+
 
 async def main():
     """Main asynchronous function to initialize and run the trading terminal."""
     if not check_create_env_file():
-        print("Exiting. Please configure the .env file.")
-        return 1 # Return non-zero exit code
+        return 1  # Return non-zero exit code
 
     terminal = TradingTerminal()
     main_task = None
-    exit_code = 0 # Default exit code
+    exit_code = 0  # Default exit code
     try:
         # Create the main task using the helper to track it
         main_task = terminal._create_task(terminal.run(), name="MainTerminalRun")
@@ -2818,16 +2759,15 @@ async def main():
              shutdown_task = terminal._create_task(terminal.shutdown(signal="MainTaskCancel"), name="ForcedShutdownOnCancel")
              try:
                  await asyncio.wait_for(shutdown_task, timeout=2.0)
-             except asyncio.TimeoutError:
+             except TimeoutError:
                  logger.error("Forced shutdown task timed out.")
              except Exception as e:
                  logger.error(f"Error during forced shutdown: {e}")
-        exit_code = terminal._final_exit_code if terminal else 1 # Get code if set, otherwise assume error
+        exit_code = terminal._final_exit_code if terminal else 1  # Get code if set, otherwise assume error
 
     except KeyboardInterrupt:
         # This should ideally be caught by the signal handler within `run`,
         # but catch here as a fallback (e.g., interrupt during initial setup before handlers are active).
-        print(f"\n{Fore.YELLOW}KeyboardInterrupt detected in main execution block. Shutting down...{Style.RESET_ALL}")
         logger.warning("KeyboardInterrupt caught directly in main async function.")
         if terminal and not terminal._shutdown_event.is_set():
             # Manually trigger shutdown if the handler didn't catch it or wasn't set yet
@@ -2836,23 +2776,22 @@ async def main():
              shutdown_task = terminal._create_task(terminal.shutdown(signal="KeyboardInterrupt", exit_code=1), name="ForcedShutdownOnKBInterrupt")
              try:
                  await asyncio.wait_for(shutdown_task, timeout=2.0)
-             except asyncio.TimeoutError:
+             except TimeoutError:
                  logger.error("Forced shutdown task timed out on KBInterrupt.")
              except Exception as e:
                  logger.error(f"Error during forced shutdown on KBInterrupt: {e}")
-        exit_code = 1 # Signal abnormal termination
+        exit_code = 1  # Signal abnormal termination
 
     except Exception as e:
         logger.critical(f"Critical unhandled error in main async function: {e}", exc_info=True)
-        print(f"{Fore.RED}{Style.BRIGHT}A critical error occurred! Check '{log_file}' for details.{Style.RESET_ALL}")
-        exit_code = 1 # Signal critical failure
+        exit_code = 1  # Signal critical failure
         if terminal and not terminal._shutdown_event.is_set():
              logger.info("Attempting emergency shutdown after critical error...")
              # Best effort shutdown
              shutdown_task = terminal._create_task(terminal.shutdown(exit_code=1, signal="CriticalError"), name="ForcedShutdownOnError")
              try:
                  await asyncio.wait_for(shutdown_task, timeout=2.0)
-             except asyncio.TimeoutError:
+             except TimeoutError:
                  logger.error("Emergency shutdown task timed out.")
              except Exception as se:
                  logger.error(f"Error during emergency shutdown: {se}")
@@ -2863,7 +2802,7 @@ async def main():
              # Check if client still exists and wasn't closed by shutdown already
              if terminal.exchange_client.exchange:
                  logger.info("Performing final check for client connection closure.")
-                 await terminal.exchange_client.close() # Ensure closed
+                 await terminal.exchange_client.close()  # Ensure closed
 
         logger.info("Main async function finished.")
         # Return the determined exit code
@@ -2872,8 +2811,6 @@ async def main():
 
 if __name__ == "__main__":
     # Check Python version
-    if sys.version_info < (3, 8):
-        print(f"{Fore.RED}Warning: This script requires Python 3.8+ for optimal async features (like named tasks). You are using {sys.version}{Style.RESET_ALL}", file=sys.stderr)
         # Allow running on < 3.8, but features might be limited or fail
 
     final_exit_code = 0
@@ -2884,18 +2821,15 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
          # Catch KeyboardInterrupt during asyncio.run() startup or final shutdown phase (less likely but possible)
-         print(f"\n{Fore.YELLOW}KeyboardInterrupt during main execution setup/teardown. Forcing exit.{Style.RESET_ALL}")
          # Use a different logger name or just print, as terminal logger might be shut down
          logging.getLogger("MainRunner").warning("KeyboardInterrupt caught outside main coroutine (during asyncio.run).")
-         final_exit_code = 1 # Signal abnormal termination
+         final_exit_code = 1  # Signal abnormal termination
     except Exception as e:
          # Catch truly fatal errors during startup or final shutdown managed by asyncio.run()
-         print(f"{Fore.RED}{Style.BRIGHT}Fatal error during application startup or final shutdown: {e}{Style.RESET_ALL}")
          logging.getLogger("MainRunner").critical(f"Fatal error outside main coroutine: {e}", exc_info=True)
-         final_exit_code = 1 # Signal critical failure
+         final_exit_code = 1  # Signal critical failure
     finally:
          # Ensure logging is flushed and handlers closed before exiting the process
          logging.shutdown()
          # Final message indicating the script is ending
-         print(f"{Style.RESET_ALL}{Fore.MAGENTA}Terminal has faded from view.{Style.RESET_ALL}")
          sys.exit(final_exit_code)

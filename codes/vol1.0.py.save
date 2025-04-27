@@ -1,0 +1,694 @@
+# pyrmethus_volumatic_bot.py
+# Enhanced trading bot incorporating the Volumatic Trend and Pivot Order Block strategy
+# with advanced position management (SL/TP, BE, TSL) and multiple enhancement snippets.
+
+# Standard Library Imports
+import json
+import logging
+import os
+import time
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal, ROUND_DOWN, ROUND_UP, getcontext, InvalidOperation
+from logging.handlers import RotatingFileHandler
+from typing import Any, Dict, Optional, Tuple, List, TypedDict, Union
+from zoneinfo import ZoneInfo 
+
+# Third-party Imports
+import ccxt
+import numpy as np
+import pandas as pd
+import pandas_ta as ta
+from colorama import Fore, Style, init
+from dotenv import load_dotenv
+from pydantic import BaseModel, Field, ValidationError, validator 
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, retry_any 
+
+# --- Initialize Environment and Settings ---
+getcontext().prec = 28  
+init(autoreset=True)    
+load_dotenv()          
+
+# --- Constants ---
+# API Credentials 
+API_KEY = os.getenv("BYBIT_API_KEY")
+API_SECRET = os.getenv("BYBIT_API_SECRET")
+if not API_KEY or not API_SECRET:
+    raise ValueError("BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env file")
+
+# File Paths and Directories
+CONFIG_FILE = "config.json"
+LOG_DIRECTORY = "bot_logs"
+
+# Timezone Configuration 
+DEFAULT_TIMEZONE_STR = "America/Chicago"
+try:
+    TIMEZONE = ZoneInfo(DEFAULT_TIMEZONE_STR)
+except Exception:
+    print(f"{Fore.YELLOW}Warning: Could not load timezone '{DEFAULT_TIMEZONE_STR}'. Using UTC.{Style.RESET_ALL}")
+    TIMEZONE = timezone.utc
+
+# API Interaction Settings
+MAX_API_RETRIES = 5  
+RETRY_DELAY_SECONDS = 5
+RETRY_WAIT_MULTIPLIER = 1.5 
+RETRY_WAIT_MIN = 4
+RETRY_WAIT_MAX = 20
+RETRYABLE_CCXT_EXCEPTIONS = (
+    ccxt.RequestTimeout,
+    ccxt.NetworkError,
+    ccxt.ExchangeNotAvailable,
+    ccxt.DDoSProtection,
+    ccxt.RateLimitExceeded,
+)
+
+# Bot Operation Settings
+LOOP_DELAY_SECONDS = 15  
+POSITION_CONFIRM_DELAY_SECONDS = 8 
+MAX_DF_LEN = 2000        
+
+# Supported Intervals and Mapping for CCXT
+VALID_INTERVALS = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"]
+CCXT_INTERVAL_MAP = {
+    "1": "1m", "3": "3m", "5": "5m", "15": "15m", "30": "30m",
+    "60": "1h", "120": "2h", "240": "4h", "D": "1d", "W": "1w", "M": "1M"
+}
+DEFAULT_INTERVAL = "5" 
+
+# Default Quote Currency 
+DEFAULT_QUOTE_CURRENCY = "USDT"
+
+# Default Strategy/Indicator Parameters 
+DEFAULT_VT_LENGTH = 40
+DEFAULT_VT_ATR_PERIOD = 200
+DEFAULT_VT_VOL_EMA_LENGTH = 1060 
+DEFAULT_VT_ATR_MULTIPLIER = 3.0
+DEFAULT_VT_STEP_ATR_MULTIPLIER = 4.0 
+DEFAULT_OB_SOURCE = "Wicks"  
+DEFAULT_PH_LEFT = 10
+DEFAULT_PH_RIGHT = 10
+DEFAULT_PL_LEFT = 10
+DEFAULT_PL_RIGHT = 10
+DEFAULT_OB_EXTEND = True
+DEFAULT_OB_MAX_BOXES = 50
+DEFAULT_OB_ENTRY_PROXIMITY_FACTOR = 1.005 
+DEFAULT_OB_EXIT_PROXIMITY_FACTOR = 1.001 
+DEFAULT_VOLUME_THRESHOLD = 75 
+DEFAULT_ADX_THRESHOLD = 25 
+DEFAULT_RSI_CONFIRM = True 
+DEFAULT_RSI_OVERSOLD = 30
+DEFAULT_RSI_OVERBOUGHT = 70
+DEFAULT_DYNAMIC_OB_PROXIMITY = True 
+DEFAULT_FIB_TP_LEVELS = False 
+DEFAULT_CANDLESTICK_CONFIRM = True 
+DEFAULT_BREAKOUT_CONFIRM = False 
+DEFAULT_VWAP_CONFIRM = True 
+DEFAULT_VALIDATE_OB_VOLUME = True 
+DEFAULT_ADAPTIVE_OB_SIZING = True 
+DEFAULT_MULTI_TF_CONFIRM = False 
+DEFAULT_HIGHER_TF = "60" 
+DEFAULT_OB_CONFLUENCE = 1 
+DEFAULT_MOMENTUM_CONFIRM = True 
+DEFAULT_ROC_LENGTH = 10 
+DEFAULT_OB_EXPIRY_ATR_PERIODS = 50.0 
+
+# Default Protection Parameters 
+DEFAULT_ENABLE_TRAILING_STOP = True
+DEFAULT_TSL_CALLBACK_RATE = 0.005 
+DEFAULT_TSL_ACTIVATION_PERCENTAGE = 0.003 
+DEFAULT_ENABLE_BREAK_EVEN = True
+DEFAULT_BE_TRIGGER_ATR_MULTIPLE = 1.0 
+DEFAULT_BE_OFFSET_TICKS = 2 
+DEFAULT_INITIAL_SL_ATR_MULTIPLE = 1.8
+DEFAULT_INITIAL_TP_ATR_MULTIPLE = 0.7 
+DEFAULT_DYNAMIC_ATR_MULTIPLIER = True 
+DEFAULT_VOLATILITY_SL_ADJUST = True 
+DEFAULT_TSL_ACTIVATION_DELAY_ATR = 0.5 
+DEFAULT_USE_ATR_TRAILING_STOP = True 
+DEFAULT_TSL_ATR_MULTIPLE = 1.5 
+DEFAULT_MIN_RR_RATIO = 1.5 
+DEFAULT_DYNAMIC_BE_TRIGGER = True 
+DEFAULT_DYNAMIC_TSL_CALLBACK = True 
+DEFAULT_SL_TRAIL_TO_OB = False 
+DEFAULT_PARTIAL_TP_LEVELS = [
+    {'multiple': 0.7, 'percentage': 0.5}, 
+    {'multiple': 1.5, 'percentage': 0.5}  
+]
+DEFAULT_ATR_POSITION_SIZING = True 
+DEFAULT_MAX_HOLDING_MINUTES = 240 
+DEFAULT_ORDER_TYPE = "market" 
+
+# Fetch limit for initial historical data
+DEFAULT_FETCH_LIMIT = 750
+
+# Neon Color Scheme for Logging
+NEON_GREEN = Fore.LIGHTGREEN_EX
+NEON_BLUE = Fore.CYAN
+NEON_PURPLE = Fore.MAGENTA
+NEON_YELLOW = Fore.YELLOW
+NEON_RED = Fore.LIGHTRED_EX
+NEON_CYAN = Fore.CYAN
+RESET = Style.RESET_ALL
+BRIGHT = Style.BRIGHT
+DIM = Style.DIM
+
+# Ensure log directory exists
+os.makedirs(LOG_DIRECTORY, exist_ok=True)
+
+# --- Global Variables ---
+market_info_cache: Dict[str, Dict] = {}
+CONFIG: Dict[str, Any] = {} 
+QUOTE_CURRENCY: str = DEFAULT_QUOTE_CURRENCY 
+config_mtime: float = 0.0 
+
+# --- Configuration Validation with Pydantic v1 Syntax ---
+
+class TakeProfitLevel(BaseModel):
+    multiple: float = Field(..., gt=0, description="ATR multiple for this TP level")
+    percentage: float = Field(..., gt=0, le=1.0, description="Percentage of the position to close at this level")
+
+class StrategyParams(BaseModel):
+    vt_length: int = Field(DEFAULT_VT_LENGTH, gt=0, description="Length for Volumatic Trend Moving Average")
+    vt_atr_period: int = Field(DEFAULT_VT_ATR_PERIOD, gt=0, description="ATR period for Volumatic Trend bands")
+    vt_vol_ema_length: int = Field(DEFAULT_VT_VOL_EMA_LENGTH, gt=0, description="Lookback period for Volume Normalization")
+    vt_atr_multiplier: float = Field(DEFAULT_VT_ATR_MULTIPLIER, gt=0, description="ATR multiplier for Volumatic Trend upper/lower bands")
+    vt_step_atr_multiplier: float = Field(DEFAULT_VT_STEP_ATR_MULTIPLIER, ge=0, description="ATR multiplier for Volumatic volume step visualization")
+    ob_source: str = Field(DEFAULT_OB_SOURCE, regex="^(Wicks|Bodys)$", description="Source for OB pivots")
+    ph_left: int = Field(DEFAULT_PH_LEFT, gt=0, description="Left lookback for Pivot High")
+    ph_right: int = Field(DEFAULT_PH_RIGHT, gt=0, description="Right lookback for Pivot High")
+    pl_left: int = Field(DEFAULT_PL_LEFT, gt=0, description="Left lookback for Pivot Low")
+    pl_right: int = Field(DEFAULT_PL_RIGHT, gt=0, description="Right lookback for Pivot Low")
+    ob_extend: bool = Field(DEFAULT_OB_EXTEND, description="Extend OB boxes to the right until violated")
+    ob_max_boxes: int = Field(DEFAULT_OB_MAX_BOXES, gt=0, description="Max number of active OBs to track")
+    ob_entry_proximity_factor: float = Field(DEFAULT_OB_ENTRY_PROXIMITY_FACTOR, ge=1.0, description="Factor to extend OB range for entry signal")
+    ob_exit_proximity_factor: float = Field(DEFAULT_OB_EXIT_PROXIMITY_FACTOR, ge=1.0, description="Factor to shrink OB range for exit signal")
+    volume_threshold: int = Field(DEFAULT_VOLUME_THRESHOLD, ge=0, le=100, description="[S1] Min normalized volume percentile rank for entry confirmation")
+    adx_threshold: int = Field(DEFAULT_ADX_THRESHOLD, ge=0, description="[S3] Min ADX value for trend strength confirmation")
+    rsi_confirm: bool = Field(DEFAULT_RSI_CONFIRM, description="[S7] Enable RSI overbought/oversold filter for entries")
+    rsi_oversold: int = Field(DEFAULT_RSI_OVERSOLD, ge=0, lt=100, description="[S7] RSI oversold level")
+    rsi_overbought: int = Field(DEFAULT_RSI_OVERBOUGHT, ge=0, lt=100, description="[S7] RSI overbought level")
+    dynamic_ob_proximity: bool = Field(DEFAULT_DYNAMIC_OB_PROXIMITY, description="[S8] Adjust OB entry proximity based on ATR volatility")
+    fib_tp_levels: bool = Field(DEFAULT_FIB_TP_LEVELS, description="[S10] Use Fibonacci retracement levels for TP instead of ATR multiples")
+    candlestick_confirm: bool = Field(DEFAULT_CANDLESTICK_CONFIRM, description="[S11] Enable candlestick pattern filter")
+    breakout_confirm: bool = Field(DEFAULT_BREAKOUT_CONFIRM, description="[S13] Use OB breakout logic for entries instead of OB zone entry")
+    vwap_confirm: bool = Field(DEFAULT_VWAP_CONFIRM, description="[S15] Enable VWAP filter")
+    validate_ob_volume: bool = Field(DEFAULT_VALIDATE_OB_VOLUME, description="[S17] Require OB formation candle to have volume above a threshold")
+    adaptive_ob_sizing: bool = Field(DEFAULT_ADAPTIVE_OB_SIZING, description="[S18] Adjust OB box size based on ATR")
+    multi_tf_confirm: bool = Field(DEFAULT_MULTI_TF_CONFIRM, description="[S19] Enable higher timeframe trend confirmation")
+    higher_tf: str = Field(DEFAULT_HIGHER_TF, description="[S19] Higher timeframe interval")
+    ob_confluence: int = Field(DEFAULT_OB_CONFLUENCE, ge=1, description="[S21] Minimum number of OBs price must touch for entry signal")
+    momentum_confirm: bool = Field(DEFAULT_MOMENTUM_CONFIRM, description="[S23] Enable momentum filter using ROC")
+    roc_length: int = Field(DEFAULT_ROC_LENGTH, gt=0, description="[S23] Lookback period for ROC indicator")
+    ob_expiry_atr_periods: Optional[float] = Field(DEFAULT_OB_EXPIRY_ATR_PERIODS, ge=0, description="[S25] Expire OBs after this many ATR-adjusted periods")
+
+    @validator('rsi_oversold')
+    def check_rsi_levels(cls, v, values): 
+        if 'rsi_overbought' in values and v >= values['rsi_overbought']:
+            raise ValueError('rsi_oversold must be less than rsi_overbought')
+        return v
+
+    @validator('higher_tf')
+    def check_higher_tf(cls, v: str, values): 
+        if values.get('multi_tf_confirm') and v not in VALID_INTERVALS:
+             raise ValueError(f"higher_tf '{v}' must be one of {VALID_INTERVALS} if multi_tf_confirm is true")
+        return v
+
+class ProtectionConfig(BaseModel):
+    enable_trailing_stop: bool = Field(DEFAULT_ENABLE_TRAILING_STOP, description="Enable Trailing Stop Loss")
+    trailing_stop_callback_rate: float = Field(DEFAULT_TSL_CALLBACK_RATE, ge=0, description="[If ATR TSL Disabled] TSL distance as a percentage of entry price")
+    trailing_stop_activation_percentage: float = Field(DEFAULT_TSL_ACTIVATION_PERCENTAGE, ge=0, description="[If ATR TSL Disabled] Profit percentage to activate TSL")
+    enable_break_even: bool = Field(DEFAULT_ENABLE_BREAK_EVEN, description="Enable moving Stop Loss to Break Even")
+    break_even_trigger_atr_multiple: float = Field(DEFAULT_BE_TRIGGER_ATR_MULTIPLE, ge=0, description="Profit in ATR multiples required to trigger Break Even")
+    break_even_offset_ticks: int = Field(DEFAULT_BE_OFFSET_TICKS, ge=0, description="Number of price ticks above/below entry price for Break Even SL")
+    initial_stop_loss_atr_multiple: float = Field(DEFAULT_INITIAL_SL_ATR_MULTIPLE, gt=0, description="ATR multiple for initial Stop Loss distance")
+    initial_take_profit_atr_multiple: float = Field(DEFAULT_INITIAL_TP_ATR_MULTIPLE, gt=0, description="Base ATR multiple for Take Profit")
+    dynamic_atr_multiplier: bool = Field(DEFAULT_DYNAMIC_ATR_MULTIPLIER, description="[S2] Adjust initial TP/SL ATR multiples based on ATR percentile")
+    volatility_sl_adjust: bool = Field(DEFAULT_VOLATILITY_SL_ADJUST, description="[S5] Widen initial SL based on recent ATR standard deviation")
+    tsl_activation_delay_atr: float = Field(DEFAULT_TSL_ACTIVATION_DELAY_ATR, ge=0, description="[S9] Minimum profit in ATR multiples before TSL becomes active")
+    use_atr_trailing_stop: bool = Field(DEFAULT_USE_ATR_TRAILING_STOP, description="[S12] Use ATR to calculate TSL distance instead of callback rate")
+    trailing_stop_atr_multiple: float = Field(DEFAULT_TSL_ATR_MULTIPLE, gt=0, description="[S12] ATR multiple for TSL distance")
+    min_rr_ratio: float = Field(DEFAULT_MIN_RR_RATIO, ge=0, description="[S14] Minimum required Risk/Reward ratio for trade entry")
+    dynamic_be_trigger: bool = Field(DEFAULT_DYNAMIC_BE_TRIGGER, description="[S16] Adjust BE trigger threshold based on trade holding time")
+    dynamic_tsl_callback: bool = Field(DEFAULT_DYNAMIC_TSL_CALLBACK, description="[S22] Dynamically adjust TSL distance based on current profit")
+    sl_trail_to_ob: bool = Field(DEFAULT_SL_TRAIL_TO_OB, description="[S24] Trail SL to the boundary of the nearest valid Order Block")
+    partial_tp_levels: Optional[List[TakeProfitLevel]] = Field(default_factory=lambda: DEFAULT_PARTIAL_TP_LEVELS.copy(), description="[S4] List of partial take profit levels")
+
+    @validator('partial_tp_levels')
+    def check_partial_tp_percentages(cls, v: Optional[List[TakeProfitLevel]]): 
+        if v: 
+            try:
+                total_percentage = sum(Decimal(str(level.percentage)) for level in v)
+                if abs(total_percentage - Decimal('1.0')) > Decimal('0.01'):
+                    raise ValueError(f"Partial TP percentages must sum to 1.0 (current sum: {total_percentage:.4f})")
+            except InvalidOperation:
+                 raise ValueError("Invalid numeric value found in partial TP percentages.")
+        return v
+
+class Config(BaseModel):
+    interval: str = Field(DEFAULT_INTERVAL, description=f"Trading interval, must be one of {VALID_INTERVALS}")
+    retry_delay: int = Field(RETRY_DELAY_SECONDS, gt=0, description="Base delay in seconds between API retry attempts")
+    fetch_limit: int = Field(DEFAULT_FETCH_LIMIT, gt=50, le=1500, description="Number of historical klines to fetch initially")
+    orderbook_limit: int = Field(25, gt=0, le=200, description="Depth of order book to fetch")
+    enable_trading: bool = Field(False, description="Master switch to enable/disable placing real trades")
+    use_sandbox: bool = Field(True, description="Use exchange's testnet/sandbox environment")
+    risk_per_trade: float = Field(0.01, gt=0, lt=1.0, description="Fraction of available balance to risk per trade")
+    leverage: int = Field(20, gt=0, description="Leverage to use for contract trading")
+    max_concurrent_positions: int = Field(1, ge=1, description="Maximum number of positions to hold concurrently")
+    quote_currency: str = Field(DEFAULT_QUOTE_CURRENCY, min_length=2, description="Quote currency for trading pairs")
+    loop_delay_seconds: int = Field(LOOP_DELAY_SECONDS, ge=1, description="Delay in seconds between trading cycles")
+    position_confirm_delay_seconds: int = Field(POSITION_CONFIRM_DELAY_SECONDS, ge=1, description="Delay after placing order before checking position status")
+    strategy_params: StrategyParams = Field(default_factory=StrategyParams, description="Strategy-specific parameters")
+    protection: ProtectionConfig = Field(default_factory=ProtectionConfig, description="Position protection settings")
+    max_holding_minutes: Optional[int] = Field(DEFAULT_MAX_HOLDING_MINUTES, ge=0, description="[S6] Maximum time in minutes to hold a position")
+    atr_position_sizing: bool = Field(DEFAULT_ATR_POSITION_SIZING, description="[S20] Adjust position size based on ATR volatility")
+    order_type: str = Field(DEFAULT_ORDER_TYPE, regex="^(market|limit)$", description="Order type for entries")
+
+    @validator('interval')
+    def check_interval(cls, v: str): 
+        if v not in VALID_INTERVALS:
+            raise ValueError(f"Interval must be one of {VALID_INTERVALS}")
+        return v
+
+# --- Configuration Loading ---
+
+class SensitiveFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        msg = super().format(record)
+        if API_KEY:
+            msg = msg.replace(API_KEY, "***API_KEY***")
+        if API_SECRET:
+            msg = msg.replace(API_SECRET, "***API_SECRET***")
+        return msg
+
+def setup_logger(name: str, level: int = logging.DEBUG) -> logging.Logger:
+    log_filename = os.path.join(LOG_DIRECTORY, f"{name}.log")
+    logger = logging.getLogger(name)
+
+    if logger.hasHandlers():
+        logger.setLevel(level)
+        return logger 
+
+    logger.setLevel(level)
+    logger.propagate = False 
+
+    try:
+        file_handler = RotatingFileHandler(
+            log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding='utf-8'
+        )
+        file_formatter = SensitiveFormatter(
+            "%(asctime)s - %(levelname)s - [%(name)s:%(lineno)d] - %(message)s",
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(logging.DEBUG)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        print(f"{NEON_RED}Error setting up file logger '{log_filename}': {e}{RESET}")
+
+    stream_handler = logging.StreamHandler()
+    stream_formatter = SensitiveFormatter(
+        f"{NEON_BLUE}%(asctime)s{RESET} - {NEON_YELLOW}%(levelname)-8s{RESET} - {NEON_PURPLE}[%(name)s]{RESET} - %(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    stream_handler.setFormatter(stream_formatter)
+    stream_handler.setLevel(logging.INFO)  
+    logger.addHandler(stream_handler)
+
+    return logger
+
+base_logger = setup_logger("PyrmethusBot_Base")
+
+def load_config(filepath: str) -> Dict[str, Any]:
+    global config_mtime 
+    default_config_model = Config()
+    default_config_dict = default_config_model.dict() 
+
+    if not os.path.exists(filepath):
+        base_logger.warning(f"Config file not found at '{filepath}'. Creating default config.")
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(default_config_dict, f, indent=4)
+            base_logger.info(f"Created default config file: {filepath}")
+            config_mtime = os.path.getmtime(filepath)
+            return default_config_dict
+        except IOError as e:
+            base_logger.error(f"Error creating default config file '{filepath}': {e}. Using internal defaults.")
+            config_mtime = time.time() 
+            return default_config_dict
+
+    try:
+        current_mtime = os.path.getmtime(filepath)
+        with open(filepath, 'r', encoding="utf-8") as f:
+            config_from_file = json.load(f)
+
+        validated_config = Config(**config_from_file)
+        validated_config_dict = validated_config.dict() 
+        base_logger.info("Configuration loaded and validated successfully.")
+        config_mtime = current_mtime
+        return validated_config_dict
+
+    except (json.JSONDecodeError, ValidationError) as e:
+        base_logger.error(f"Config error in '{filepath}': {e}. ", exc_info=False) 
+        base_logger.warning("Attempting to use default config and overwrite the invalid file.")
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(default_config_dict, f, indent=4)
+            base_logger.info(f"Overwrote '{filepath}' with default configuration.")
+            config_mtime = os.path.getmtime(filepath)
+            return default_config_dict
+        except IOError as e_write:
+            base_logger.error(f"Error overwriting config file '{filepath}': {e_write}. Using internal defaults.")
+            config_mtime = time.time()
+            return default_config_dict
+    except Exception as e:
+        base_logger.critical(f"Unexpected error loading config '{filepath}': {e}", exc_info=True)
+        base_logger.warning("Using internal default configuration.")
+        config_mtime = time.time()
+        return default_config_dict
+
+
+CONFIG = load_config(CONFIG_FILE)
+QUOTE_CURRENCY = CONFIG.get("quote_currency", DEFAULT_QUOTE_CURRENCY)
+
+# --- CCXT Exchange Setup ---
+
+def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
+    logger.info("Initializing CCXT Bybit exchange...")
+    try:
+        exchange_params = {
+            'apiKey': API_KEY,
+            'secret': API_SECRET,
+            'enableRateLimit': True, 
+            'options': {
+                'defaultType': 'linear',        
+                'adjustForTimeDifference': True,
+                'recvWindow': 10000,           
+                'fetchTickerTimeout': 15000,
+                'fetchBalanceTimeout': 20000,
+                'createOrderTimeout': 25000,
+                'cancelOrderTimeout': 20000,
+                'fetchOHLCVTimeout': 20000,
+                'fetchPositionsTimeout': 20000,
+            }
+        }
+        exchange = ccxt.bybit(exchange_params)
+
+        if CONFIG.get('use_sandbox', True):
+            logger.warning(f"{NEON_YELLOW}SANDBOX MODE ENABLED (Testnet){RESET}")
+            exchange.set_sandbox_mode(True)
+        else:
+            logger.warning(f"{BRIGHT}{NEON_RED}LIVE TRADING MODE ENABLED{RESET}")
+
+        logger.info(f"Loading markets for {exchange.id}...")
+        exchange.load_markets(True) 
+        logger.info(f"Markets loaded successfully for {exchange.id}.")
+
+        logger.info("Fetching initial balance to verify connection...")
+        account_type = 'UNIFIED' 
+        try:
+            balance = exchange.fetch_balance(params={'accountType': account_type})
+            available_quote = balance.get(QUOTE_CURRENCY, {}).get('free', 'N/A')
+            logger.info(f"{NEON_GREEN}Exchange initialized successfully. "
+                        f"Account Type: {account_type}, "
+                        f"Available {QUOTE_CURRENCY}: {available_quote}{RESET}")
+        except ccxt.AuthenticationError as auth_err:
+             logger.critical(f"{NEON_RED}Authentication failed: {auth_err}. Check API Key/Secret.{RESET}")
+             return None
+        except Exception as balance_err:
+             logger.warning(f"{NEON_YELLOW}Could not fetch initial balance (potential connection issue or account type mismatch): {balance_err}{RESET}")
+             logger.info(f"{NEON_GREEN}Exchange object created, but balance check failed. Proceeding cautiously.{RESET}")
+
+
+        return exchange
+
+    except (ccxt.AuthenticationError, ccxt.ExchangeError) as e:
+        logger.critical(f"{NEON_RED}Exchange Initialization Failed: {type(e).__name__} - {e}{RESET}", exc_info=False) 
+        return None
+    except ccxt.NetworkError as e:
+        logger.critical(f"{NEON_RED}Network error during exchange initialization: {e}{RESET}", exc_info=True)
+        return None
+    except Exception as e:
+        logger.critical(f"{NEON_RED}An unexpected error occurred during exchange initialization: {e}{RESET}", exc_info=True)
+        return None
+
+# --- CCXT Data Fetching Helpers with Retries ---
+
+def _should_retry_ccxt(exception: BaseException) -> bool:
+    if isinstance(exception, RETRYABLE_CCXT_EXCEPTIONS):
+        base_logger.warning(f"Retryable CCXT error encountered (standard type): {type(exception).__name__}. Retrying...")
+        return True
+    if isinstance(exception, ccxt.ExchangeError):
+        error_str = str(exception).lower()
+        retry_keywords = ["server error", "busy", "try again later", "request timeout", "service unavailable", "internal error"]
+        if any(keyword in error_str for keyword in retry_keywords):
+             base_logger.warning(f"Retryable ExchangeError encountered (keyword match): {exception}. Retrying...")
+             return True
+    base_logger.debug(f"Non-retryable error encountered: {type(exception).__name__} - {exception}")
+    return False
+
+retry_condition = retry_any(
+    retry_if_exception_type(RETRYABLE_CCXT_EXCEPTIONS), 
+    retry_if_exception(_should_retry_ccxt)              
+)
+
+ccxt_retry_decorator = retry(
+    stop=stop_after_attempt(MAX_API_RETRIES),
+    wait=wait_exponential(multiplier=RETRY_WAIT_MULTIPLIER, min=RETRY_WAIT_MIN, max=RETRY_WAIT_MAX),
+    retry=retry_condition, 
+    reraise=True 
+)
+
+@ccxt_retry_decorator
+def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Decimal]:
+    logger.debug(f"Fetching current price for {symbol}...")
+    ticker = None 
+    try:
+        ticker = exchange.fetch_ticker(symbol)
+        last_price = ticker.get('last')
+
+        if last_price is not None and last_price > 0:
+            price = Decimal(str(last_price))
+            logger.debug(f"Fetched last price for {symbol}: {price}")
+            return price
+
+        bid = ticker.get('bid')
+        ask = ticker.get('ask')
+        if bid is not None and ask is not None and bid > 0 and ask > 0:
+            bid_decimal = Decimal(str(bid))
+            ask_decimal = Decimal(str(ask))
+            mid_price = (bid_decimal + ask_decimal) / Decimal('2')
+            logger.debug(f"Fetched mid price (bid/ask) for {symbol}: {mid_price}")
+            return mid_price
+
+        close_price = ticker.get('close')
+        if close_price is not None and close_price > 0:
+             price = Decimal(str(close_price))
+             logger.debug(f"Fetched close price for {symbol}: {price}")
+             return price
+
+        logger.warning(f"Could not determine a valid price (last, mid, close) for {symbol}. Ticker data: {ticker}")
+        return None
+
+    except (ccxt.ExchangeError, ccxt.NetworkError) as e:
+        logger.error(f"CCXT error fetching price for {symbol}: {e}")
+        raise 
+    except (InvalidOperation, TypeError, ValueError) as e:
+         logger.error(f"Error converting price data for {symbol}: {e}. Ticker: {ticker if ticker else 'N/A'}")
+         return None
+    except Exception as e:
+        logger.error(f"Unexpected error fetching price for {symbol}: {e}", exc_info=True)
+        raise 
+
+def optimize_dataframe(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
+    if df.empty:
+        return df
+    try:
+        start_mem = df.memory_usage(deep=True).sum() / 1024**2
+        for col in ['open', 'high', 'low', 'close']:
+            if col in df.columns and df[col].dtype != 'float32':
+                df[col] = pd.to_numeric(df[col], errors='coerce').astype('float32')
+        if 'volume' in df.columns and df['volume'].dtype != 'float32':
+            max_vol = df['volume'].max()
+            if pd.notna(max_vol) and max_vol < np.finfo(np.float32).max:
+                 df['volume'] = pd.to_numeric(df['volume'], errors='coerce').astype('float32')
+            else:
+                 df['volume'] = pd.to_numeric(df['volume'], errors='coerce').astype('float64') 
+        end_mem = df.memory_usage(deep=True).sum() / 1024**2
+        if abs(start_mem - end_mem) > 0.1: 
+            logger.debug(f"DataFrame memory optimized: {start_mem:.2f} MB -> {end_mem:.2f} MB")
+    except Exception as e:
+        logger.warning(f"Could not optimize DataFrame memory usage: {e}")
+    return df
+
+@ccxt_retry_decorator
+def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int, logger: logging.Logger) -> pd.DataFrame:
+    logger.debug(f"Fetching {limit} klines for {symbol} ({timeframe})...")
+    ohlcv = [] 
+    try:
+        ohlcv = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+
+        if not ohlcv:
+            logger.warning(f"No kline data returned from exchange for {symbol} ({timeframe}).")
+            return pd.DataFrame()
+
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
+        try:
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True, errors='coerce')
+        except ValueError as e:
+            logger.error(f"Error converting timestamp for {symbol}: {e}. First few timestamps: {df['timestamp'].head().tolist()}")
+            return pd.DataFrame() 
+
+        df.dropna(subset=['timestamp'], inplace=True) 
+        if df.empty:
+             logger.warning(f"DataFrame empty after timestamp conversion for {symbol} ({timeframe}).")
+             return df
+        df.set_index('timestamp', inplace=True)
+
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        df.dropna(subset=['open', 'high', 'low', 'close'], inplace=True) 
+        df = df[(df['open'] > 0) & (df['high'] > 0) & (df['low'] > 0) & (df['close'] > 0)]
+        df.sort_index(inplace=True) 
+
+        df = optimize_dataframe(df.copy(), logger) 
+
+        if len(df) > MAX_DF_LEN:
+             df = df.iloc[-MAX_DF_LEN:]
+
+        logger.info(f"Fetched and processed {len(df)} klines for {symbol} ({timeframe}). "
+                    f"Last timestamp: {df.index[-1].strftime('%Y-%m-%d %H:%M:%S %Z') if not df.empty else 'N/A'}")
+        return df
+
+    except (ccxt.ExchangeError, ccxt.NetworkError) as e:
+        logger.error(f"CCXT error fetching klines for {symbol} ({timeframe}): {e}")
+        raise 
+    except (InvalidOperation, TypeError, ValueError) as e:
+         logger.error(f"Error processing kline data for {symbol} ({timeframe}): {e}. Data sample: {ohlcv[:5] if ohlcv else 'N/A'}")
+         return pd.DataFrame() 
+    except Exception as e:
+        logger.error(f"Unexpected error fetching klines for {symbol} ({timeframe}): {e}", exc_info=True)
+        raise 
+
+def safe_decimal(value: Any, default: Optional[Decimal] = None) -> Optional[Decimal]:
+    if value is None:
+        return default
+    try:
+        if isinstance(value, str) and 'e' in value.lower():
+            pass
+        elif isinstance(value, float) and (np.isinf(value) or np.isnan(value)):
+             return default 
+        return Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return default
+
+def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Dict]:
+    if symbol in market_info_cache:
+        return market_info_cache[symbol]
+
+    logger.debug(f"Fetching market info for {symbol} from exchange...")
+    market = None 
+    try:
+        market = exchange.market(symbol)
+        if not market:
+            logger.error(f"Market info not found for symbol '{symbol}' on {exchange.id}.")
+            return None
+
+        is_contract = market.get('contract', False) or \
+                      market.get('type') in ['swap', 'future'] or \
+                      market.get('linear', False) or \
+                      market.get('inverse', False)
+
+        limits = market.get('limits', {})
+        amount_limits = limits.get('amount', {})
+        price_limits = limits.get('price', {})
+        cost_limits = limits.get('cost', {})
+        precision = market.get('precision', {})
+
+        market_details = {
+            'id': market.get('id'),
+            'symbol': market.get('symbol'),
+            'base': market.get('base'),
+            'quote': market.get('quote'),
+            'active': market.get('active', False),
+            'type': market.get('type'), 
+            'linear': market.get('linear'),
+            'inverse': market.get('inverse'),
+            'contract': market.get('contract', False),
+            'contractSize': safe_decimal(market.get('contractSize', '1'), default=Decimal('1')), 
+            'is_contract': is_contract,
+            'limits': {
+                'amount': {
+                    'min': safe_decimal(amount_limits.get('min')), 
+                    'max': safe_decimal(amount_limits.get('max')),
+                },
+                 'price': {
+                    'min': safe_decimal(price_limits.get('min')),
+                    'max': safe_decimal(price_limits.get('max')),
+                },
+                 'cost': {
+                    'min': safe_decimal(cost_limits.get('min')),
+                    'max': safe_decimal(cost_limits.get('max')),
+                }
+            },
+            'precision': {
+                'amount': safe_decimal(precision.get('amount')), 
+                'price': safe_decimal(precision.get('price')),      
+            },
+            'taker': safe_decimal(market.get('taker'), default=Decimal('0.0006')),
+            'maker': safe_decimal(market.get('maker'), default=Decimal('0.0001')),
+            'info': market.get('info', {}) 
+        }
+
+        if market_details['precision']['amount'] is None or market_details['precision']['amount'] <= 0:
+             logger.warning(f"Amount precision (tick size) for {symbol} is invalid or missing: {market_details['precision']['amount']}. Sizing/formatting may fail.")
+        if market_details['precision']['price'] is None or market_details['precision']['price'] <= 0:
+             logger.warning(f"Price precision (tick size) for {symbol} is invalid or missing: {market_details['precision']['price']}. Order placement/formatting may fail.")
+        if market_details['limits']['amount']['min'] is None:
+             logger.warning(f"Minimum amount limit for {symbol} is missing. Sizing might use 0 or fail if calculated size is very small.")
+
+        market_info_cache[symbol] = market_details
+        logger.info(f"Cached market info for {symbol}: Type={market_details['type']}, Contract={market_details['is_contract']}, Active={market_details['active']}")
+        logger.debug(f"Limits: {market_details['limits']}")
+        logger.debug(f"Precision (Tick Sizes): {market_details['precision']}")
+        return market_details
+
+    except ccxt.BadSymbol:
+        logger.error(f"Symbol '{symbol}' not found on {exchange.id}.")
+        return None
+    except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+         logger.error(f"CCXT error getting market info for {symbol}: {e}")
+         return None
+    except (InvalidOperation, TypeError, ValueError) as e:
+         logger.error(f"Error processing market data for {symbol}: {e}. Market data: {market if market else 'N/A'}")
+         return None
+    except Exception as e:
+        logger.error(f"Unexpected error getting market info for {symbol}: {e}", exc_info=True)
+        return None
+
+@ccxt_retry_decorator
+def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger) -> Optional[Decimal]:
+    logger.debug(f"Fetching available balance for {currency}...")
+    balance_info = {} 
+    try:
+        params = {'accountType': 'UNIFIED'} 
+        balance_info = exchange.fetch_balance(params=params)
+
+        free_balance = balance_info.get('free', {}).get(currency)
+        currency_data = balance_info.get(currency, {})
+        available = currency_data.get('free') 
+        total_balance = balance_info.get('total', {}).get(currency) 
+
+        balance_value = None
+        if free_balance is not None:
+            balance_value = free_balance
+        elif available is not None:
+             balance_value = available
+        elif total_balance is not None:
+             logger.warning(f"Using 'total' balance for {currency} as 'free'/'available' not found directly.")
+             balance_value = total_balance
+        else:
+             logger.error(f"Could not find balance information for {currency} in response.")
+             return None
+
+        balance = safe

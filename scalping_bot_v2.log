@@ -1,0 +1,1534 @@
+2025-04-25 15:59:44,045 - ScalpingBot - INFO - [36mInitializing Scalping Bot...[0m
+2025-04-25 15:59:44,077 - ScalpingBot - INFO - [32mConfiguration loaded successfully from config.yaml[0m
+2025-04-25 15:59:44,077 - ScalpingBot - DEBUG - Validating configuration...
+2025-04-25 15:59:44,077 - ScalpingBot - ERROR - [31mConfiguration validation failed: Missing required section 'exchange' in config file.. Exiting.[0m
+2025-04-25 15:59:44,078 - ScalpingBot - INFO - Bot exited.
+2025-04-25 16:04:23,255 - ScalpingBot - INFO - [36mInitializing Scalping Bot...[0m
+2025-04-25 16:04:23,268 - ScalpingBot - INFO - [32mConfiguration loaded successfully from config.yaml[0m
+2025-04-25 16:04:23,269 - ScalpingBot - DEBUG - Validating configuration...
+2025-04-25 16:04:23,269 - ScalpingBot - INFO - [32mConfiguration validated successfully.[0m
+2025-04-25 16:04:23,269 - ScalpingBot - INFO - Logging level set to INFO from config.
+2025-04-25 16:04:23,270 - ScalpingBot - INFO - Initializing connection to BYBIT...
+2025-04-25 16:04:31,030 - ScalpingBot - INFO - [32mLIVE MODE[0m).
+2025-04-25 16:04:31,031 - ScalpingBot - WARNING - [32m--- RUNNING IN LIVE TRADING MODE ---[0m
+2025-04-25 16:04:31,031 - ScalpingBot - INFO - [36mScalping Bot initialization complete.[0m
+2025-04-25 16:04:31,031 - ScalpingBot - INFO - [36m--- Starting Scalping Bot Main Loop (Symbol: DOT/USDT:USDT) ---[0m
+2025-04-25 16:04:31,031 - ScalpingBot - INFO - 
+[34m===== Iteration 1 =====[0m
+2025-04-25 16:04:33,086 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00081
+2025-04-25 16:04:33,086 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=56.23, MACD=N/A, StochK=59.57
+2025-04-25 16:04:33,086 - ScalpingBot - INFO - Order Book Imbalance: 1.92 (Threshold: 1.5)
+2025-04-25 16:04:34,925 - ScalpingBot - INFO - Volatility (0.00081) adjusted order size factor: 1.000
+2025-04-25 16:04:34,925 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:04:34,925 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:04:34,926 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.92)[0m
+2025-04-25 16:04:34,926 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:04:34,926 - ScalpingBot - INFO -  -> [37m0: RSI (56.23) is neutral (30-70)[0m
+2025-04-25 16:04:34,926 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (59.57) & D (42.15) neutral[0m
+2025-04-25 16:04:34,927 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:04:44,928 - ScalpingBot - INFO - 
+[34m===== Iteration 2 =====[0m
+2025-04-25 16:04:46,855 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00081
+2025-04-25 16:04:46,856 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=54.47, MACD=N/A, StochK=57.18
+2025-04-25 16:04:46,857 - ScalpingBot - INFO - Order Book Imbalance: 1.57 (Threshold: 1.5)
+2025-04-25 16:04:47,828 - ScalpingBot - INFO - Volatility (0.00081) adjusted order size factor: 1.000
+2025-04-25 16:04:47,829 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:04:47,830 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:04:47,830 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.57)[0m
+2025-04-25 16:04:47,831 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:04:47,831 - ScalpingBot - INFO -  -> [37m0: RSI (54.47) is neutral (30-70)[0m
+2025-04-25 16:04:47,831 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (57.18) & D (41.35) neutral[0m
+2025-04-25 16:04:47,832 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:04:57,833 - ScalpingBot - INFO - 
+[34m===== Iteration 3 =====[0m
+2025-04-25 16:04:59,175 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00081
+2025-04-25 16:04:59,175 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=55.07, MACD=N/A, StochK=58.00
+2025-04-25 16:04:59,175 - ScalpingBot - INFO - Order Book Imbalance: 1.31 (Threshold: 1.5)
+2025-04-25 16:05:00,093 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:05:00,093 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:05:00,093 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:05:00,094 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.31)[0m
+2025-04-25 16:05:00,094 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:05:00,094 - ScalpingBot - INFO -  -> [37m0: RSI (55.07) is neutral (30-70)[0m
+2025-04-25 16:05:00,094 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (58.00) & D (41.63) neutral[0m
+2025-04-25 16:05:00,094 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:05:10,095 - ScalpingBot - INFO - 
+[34m===== Iteration 4 =====[0m
+2025-04-25 16:05:11,993 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00070
+2025-04-25 16:05:11,993 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=53.42, MACD=N/A, StochK=54.89
+2025-04-25 16:05:11,994 - ScalpingBot - INFO - Order Book Imbalance: 1.54 (Threshold: 1.5)
+2025-04-25 16:05:13,265 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:05:13,265 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:05:13,266 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:05:13,266 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.54)[0m
+2025-04-25 16:05:13,267 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:05:13,267 - ScalpingBot - INFO -  -> [37m0: RSI (53.42) is neutral (30-70)[0m
+2025-04-25 16:05:13,268 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (54.89) & D (50.82) neutral[0m
+2025-04-25 16:05:13,268 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:05:23,269 - ScalpingBot - INFO - 
+[34m===== Iteration 5 =====[0m
+2025-04-25 16:05:24,611 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00070
+2025-04-25 16:05:24,611 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=55.99, MACD=N/A, StochK=58.27
+2025-04-25 16:05:24,612 - ScalpingBot - INFO - Order Book Imbalance: 0.48 (Threshold: 1.5)
+2025-04-25 16:05:25,443 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:05:25,444 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:05:25,444 - ScalpingBot - INFO - Trade Signal Score: 2
+2025-04-25 16:05:25,445 - ScalpingBot - INFO -  -> [32m+1: Order book shows buy pressure (Imb: 0.48)[0m
+2025-04-25 16:05:25,445 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:05:25,445 - ScalpingBot - INFO -  -> [37m0: RSI (55.99) is neutral (30-70)[0m
+2025-04-25 16:05:25,445 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (58.27) & D (51.95) neutral[0m
+2025-04-25 16:05:25,445 - ScalpingBot - INFO - [32mPotential LONG entry signal detected (Score: 2)[0m
+2025-04-25 16:05:25,841 - ScalpingBot - WARNING - [33mCalculated order size 0.02408260 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:05:35,842 - ScalpingBot - INFO - 
+[34m===== Iteration 6 =====[0m
+2025-04-25 16:05:37,241 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00071
+2025-04-25 16:05:37,242 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=57.22, MACD=N/A, StochK=59.88
+2025-04-25 16:05:37,243 - ScalpingBot - INFO - Order Book Imbalance: 1.30 (Threshold: 1.5)
+2025-04-25 16:05:38,257 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:05:38,258 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:05:38,259 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:05:38,259 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.30)[0m
+2025-04-25 16:05:38,259 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:05:38,260 - ScalpingBot - INFO -  -> [37m0: RSI (57.22) is neutral (30-70)[0m
+2025-04-25 16:05:38,260 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (59.88) & D (52.48) neutral[0m
+2025-04-25 16:05:38,260 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:05:48,261 - ScalpingBot - INFO - 
+[34m===== Iteration 7 =====[0m
+2025-04-25 16:05:49,601 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00071
+2025-04-25 16:05:49,602 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=57.22, MACD=N/A, StochK=59.88
+2025-04-25 16:05:49,602 - ScalpingBot - INFO - Order Book Imbalance: 1.45 (Threshold: 1.5)
+2025-04-25 16:05:50,499 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:05:50,500 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:05:50,501 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:05:50,501 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.45)[0m
+2025-04-25 16:05:50,501 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:05:50,502 - ScalpingBot - INFO -  -> [37m0: RSI (57.22) is neutral (30-70)[0m
+2025-04-25 16:05:50,502 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (59.88) & D (52.48) neutral[0m
+2025-04-25 16:05:50,502 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:06:00,503 - ScalpingBot - INFO - 
+[34m===== Iteration 8 =====[0m
+2025-04-25 16:06:02,501 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00071
+2025-04-25 16:06:02,502 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=57.01, MACD=N/A, StochK=74.38
+2025-04-25 16:06:02,502 - ScalpingBot - INFO - Order Book Imbalance: 1.58 (Threshold: 1.5)
+2025-04-25 16:06:03,565 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:06:03,566 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:06:03,567 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:06:03,567 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.58)[0m
+2025-04-25 16:06:03,568 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:06:03,568 - ScalpingBot - INFO -  -> [37m0: RSI (57.01) is neutral (30-70)[0m
+2025-04-25 16:06:03,569 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (74.38) & D (63.40) neutral[0m
+2025-04-25 16:06:03,569 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:06:13,570 - ScalpingBot - INFO - 
+[34m===== Iteration 9 =====[0m
+2025-04-25 16:06:14,792 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00071
+2025-04-25 16:06:14,792 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=56.16, MACD=N/A, StochK=72.70
+2025-04-25 16:06:14,793 - ScalpingBot - INFO - Order Book Imbalance: 1.42 (Threshold: 1.5)
+2025-04-25 16:06:15,615 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:06:15,615 - ScalpingBot - INFO - [36mCalculated order size: 0.1028 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:06:15,616 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:06:15,616 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.42)[0m
+2025-04-25 16:06:15,616 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:06:15,616 - ScalpingBot - INFO -  -> [37m0: RSI (56.16) is neutral (30-70)[0m
+2025-04-25 16:06:15,617 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (72.70) & D (62.83) neutral[0m
+2025-04-25 16:06:15,617 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:06:17,950 - ScalpingBot - WARNING - [33m
+Ctrl+C detected. Shutting down bot gracefully...[0m
+2025-04-25 16:06:17,951 - ScalpingBot - INFO - Checking for open orders for DOT/USDT:USDT to cancel...
+2025-04-25 16:06:18,374 - ScalpingBot - INFO - No open orders found for DOT/USDT:USDT.
+2025-04-25 16:06:18,374 - ScalpingBot - INFO - Scalping Bot has been stopped.
+2025-04-25 16:07:05,059 - ScalpingBot - INFO - [36mInitializing Scalping Bot...[0m
+2025-04-25 16:07:05,074 - ScalpingBot - INFO - [32mConfiguration loaded successfully from config.yaml[0m
+2025-04-25 16:07:05,075 - ScalpingBot - DEBUG - Validating configuration...
+2025-04-25 16:07:05,075 - ScalpingBot - INFO - [32mConfiguration validated successfully.[0m
+2025-04-25 16:07:05,075 - ScalpingBot - INFO - Logging level set to INFO from config.
+2025-04-25 16:07:05,076 - ScalpingBot - INFO - Initializing connection to BYBIT...
+2025-04-25 16:07:16,585 - ScalpingBot - INFO - [32mLIVE MODE[0m).
+2025-04-25 16:07:16,586 - ScalpingBot - WARNING - [32m--- RUNNING IN LIVE TRADING MODE ---[0m
+2025-04-25 16:07:16,586 - ScalpingBot - INFO - [36mScalping Bot initialization complete.[0m
+2025-04-25 16:07:16,586 - ScalpingBot - INFO - [36m--- Starting Scalping Bot Main Loop (Symbol: DOT/USDT:USDT) ---[0m
+2025-04-25 16:07:16,586 - ScalpingBot - INFO - 
+[34m===== Iteration 1 =====[0m
+2025-04-25 16:07:17,862 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00071
+2025-04-25 16:07:17,862 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=59.78, MACD=N/A, StochK=87.62
+2025-04-25 16:07:17,862 - ScalpingBot - INFO - Order Book Imbalance: 2.16 (Threshold: 1.5)
+2025-04-25 16:07:20,492 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:07:20,493 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:07:20,493 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:07:20,493 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.16)[0m
+2025-04-25 16:07:20,493 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:07:20,494 - ScalpingBot - INFO -  -> [37m0: RSI (59.78) is neutral (30-70)[0m
+2025-04-25 16:07:20,494 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (87.62) & D (72.54) neutral[0m
+2025-04-25 16:07:20,494 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:07:30,494 - ScalpingBot - INFO - 
+[34m===== Iteration 2 =====[0m
+2025-04-25 16:07:31,762 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00071
+2025-04-25 16:07:31,763 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=61.89, MACD=N/A, StochK=87.62
+2025-04-25 16:07:31,763 - ScalpingBot - INFO - Order Book Imbalance: 0.96 (Threshold: 1.5)
+2025-04-25 16:07:32,627 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:07:32,628 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:07:32,629 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:07:32,629 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.96)[0m
+2025-04-25 16:07:32,629 - ScalpingBot - INFO -  -> [32m+1: Price (4.27) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:07:32,629 - ScalpingBot - INFO -  -> [37m0: RSI (61.89) is neutral (30-70)[0m
+2025-04-25 16:07:32,630 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (87.62) & D (72.54) neutral[0m
+2025-04-25 16:07:32,630 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:07:42,630 - ScalpingBot - INFO - 
+[34m===== Iteration 3 =====[0m
+2025-04-25 16:07:44,345 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:07:44,345 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=65.62, MACD=N/A, StochK=87.62
+2025-04-25 16:07:44,345 - ScalpingBot - INFO - Order Book Imbalance: 1.44 (Threshold: 1.5)
+2025-04-25 16:07:45,881 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:07:45,881 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:07:45,882 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:07:45,882 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.44)[0m
+2025-04-25 16:07:45,882 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:07:45,882 - ScalpingBot - INFO -  -> [37m0: RSI (65.62) is neutral (30-70)[0m
+2025-04-25 16:07:45,883 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (87.62) & D (72.54) neutral[0m
+2025-04-25 16:07:45,883 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:07:55,884 - ScalpingBot - INFO - 
+[34m===== Iteration 4 =====[0m
+2025-04-25 16:07:57,226 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:07:57,226 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=65.85, MACD=N/A, StochK=87.62
+2025-04-25 16:07:57,226 - ScalpingBot - INFO - Order Book Imbalance: 1.53 (Threshold: 1.5)
+2025-04-25 16:07:58,194 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:07:58,195 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:07:58,195 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:07:58,195 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.53)[0m
+2025-04-25 16:07:58,196 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:07:58,196 - ScalpingBot - INFO -  -> [37m0: RSI (65.85) is neutral (30-70)[0m
+2025-04-25 16:07:58,196 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (87.62) & D (72.54) neutral[0m
+2025-04-25 16:07:58,197 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:08:08,198 - ScalpingBot - INFO - 
+[34m===== Iteration 5 =====[0m
+2025-04-25 16:08:09,854 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:08:09,856 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=65.34, MACD=N/A, StochK=99.36
+2025-04-25 16:08:09,857 - ScalpingBot - INFO - Order Book Imbalance: 1.64 (Threshold: 1.5)
+2025-04-25 16:08:10,794 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:08:10,795 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:08:10,795 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:08:10,795 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.64)[0m
+2025-04-25 16:08:10,796 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:08:10,796 - ScalpingBot - INFO -  -> [37m0: RSI (65.34) is neutral (30-70)[0m
+2025-04-25 16:08:10,796 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (99.36) & D (86.73) > 80 (overbought)[0m
+2025-04-25 16:08:10,796 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:08:20,797 - ScalpingBot - INFO - 
+[34m===== Iteration 6 =====[0m
+2025-04-25 16:08:22,546 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:08:22,547 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=67.14, MACD=N/A, StochK=100.00
+2025-04-25 16:08:22,547 - ScalpingBot - INFO - Order Book Imbalance: 2.11 (Threshold: 1.5)
+2025-04-25 16:08:23,441 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:08:23,442 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:08:23,442 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:08:23,443 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.11)[0m
+2025-04-25 16:08:23,443 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:08:23,443 - ScalpingBot - INFO -  -> [37m0: RSI (67.14) is neutral (30-70)[0m
+2025-04-25 16:08:23,443 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (100.00) & D (86.94) > 80 (overbought)[0m
+2025-04-25 16:08:23,444 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:08:33,445 - ScalpingBot - INFO - 
+[34m===== Iteration 7 =====[0m
+2025-04-25 16:08:35,535 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:08:35,537 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=66.06, MACD=N/A, StochK=100.00
+2025-04-25 16:08:35,537 - ScalpingBot - INFO - Order Book Imbalance: 1.51 (Threshold: 1.5)
+2025-04-25 16:08:37,078 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:08:37,078 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:08:37,079 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:08:37,079 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.51)[0m
+2025-04-25 16:08:37,079 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:08:37,080 - ScalpingBot - INFO -  -> [37m0: RSI (66.06) is neutral (30-70)[0m
+2025-04-25 16:08:37,080 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (100.00) & D (86.94) > 80 (overbought)[0m
+2025-04-25 16:08:37,080 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:08:47,081 - ScalpingBot - INFO - 
+[34m===== Iteration 8 =====[0m
+2025-04-25 16:08:48,776 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00076
+2025-04-25 16:08:48,777 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=69.90, MACD=N/A, StochK=100.00
+2025-04-25 16:08:48,777 - ScalpingBot - INFO - Order Book Imbalance: 1.76 (Threshold: 1.5)
+2025-04-25 16:08:50,139 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:08:50,140 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:08:50,141 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:08:50,142 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.76)[0m
+2025-04-25 16:08:50,142 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:08:50,143 - ScalpingBot - INFO -  -> [37m0: RSI (69.90) is neutral (30-70)[0m
+2025-04-25 16:08:50,143 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (100.00) & D (86.94) > 80 (overbought)[0m
+2025-04-25 16:08:50,144 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:09:00,146 - ScalpingBot - INFO - 
+[34m===== Iteration 9 =====[0m
+2025-04-25 16:09:01,565 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00073
+2025-04-25 16:09:01,566 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=68.33, MACD=N/A, StochK=99.41
+2025-04-25 16:09:01,566 - ScalpingBot - INFO - Order Book Imbalance: 1.43 (Threshold: 1.5)
+2025-04-25 16:09:02,575 - ScalpingBot - INFO - Volatility (0.00073) adjusted order size factor: 1.000
+2025-04-25 16:09:02,576 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:09:02,577 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:09:02,577 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.43)[0m
+2025-04-25 16:09:02,577 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:09:02,578 - ScalpingBot - INFO -  -> [37m0: RSI (68.33) is neutral (30-70)[0m
+2025-04-25 16:09:02,578 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (99.41) & D (95.78) > 80 (overbought)[0m
+2025-04-25 16:09:02,578 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:09:12,579 - ScalpingBot - INFO - 
+[34m===== Iteration 10 =====[0m
+2025-04-25 16:09:14,208 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:09:14,209 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=67.12, MACD=N/A, StochK=97.98
+2025-04-25 16:09:14,209 - ScalpingBot - INFO - Order Book Imbalance: 1.54 (Threshold: 1.5)
+2025-04-25 16:09:15,392 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:09:15,393 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:09:15,394 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:09:15,394 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.54)[0m
+2025-04-25 16:09:15,395 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:09:15,395 - ScalpingBot - INFO -  -> [37m0: RSI (67.12) is neutral (30-70)[0m
+2025-04-25 16:09:15,396 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (97.98) & D (95.31) > 80 (overbought)[0m
+2025-04-25 16:09:15,396 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:09:25,397 - ScalpingBot - INFO - 
+[34m===== Iteration 11 =====[0m
+2025-04-25 16:09:26,912 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:09:26,912 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=65.95, MACD=N/A, StochK=96.60
+2025-04-25 16:09:26,912 - ScalpingBot - INFO - Order Book Imbalance: 1.12 (Threshold: 1.5)
+2025-04-25 16:09:28,143 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:09:28,144 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:09:28,144 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:09:28,144 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.12)[0m
+2025-04-25 16:09:28,144 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:09:28,144 - ScalpingBot - INFO -  -> [37m0: RSI (65.95) is neutral (30-70)[0m
+2025-04-25 16:09:28,145 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (96.60) & D (94.85) > 80 (overbought)[0m
+2025-04-25 16:09:28,145 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:09:38,146 - ScalpingBot - INFO - 
+[34m===== Iteration 12 =====[0m
+2025-04-25 16:09:39,901 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00073
+2025-04-25 16:09:39,902 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=68.83, MACD=N/A, StochK=100.00
+2025-04-25 16:09:39,902 - ScalpingBot - INFO - Order Book Imbalance: 1.88 (Threshold: 1.5)
+2025-04-25 16:09:41,111 - ScalpingBot - INFO - Volatility (0.00073) adjusted order size factor: 1.000
+2025-04-25 16:09:41,111 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:09:41,112 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:09:41,112 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.88)[0m
+2025-04-25 16:09:41,112 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:09:41,113 - ScalpingBot - INFO -  -> [37m0: RSI (68.83) is neutral (30-70)[0m
+2025-04-25 16:09:41,113 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (100.00) & D (95.98) > 80 (overbought)[0m
+2025-04-25 16:09:41,113 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:09:51,113 - ScalpingBot - INFO - 
+[34m===== Iteration 13 =====[0m
+2025-04-25 16:09:52,770 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:09:52,771 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=67.36, MACD=N/A, StochK=98.27
+2025-04-25 16:09:52,771 - ScalpingBot - INFO - Order Book Imbalance: 2.21 (Threshold: 1.5)
+2025-04-25 16:09:55,131 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:09:55,131 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:09:55,132 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:09:55,132 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.21)[0m
+2025-04-25 16:09:55,132 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:09:55,132 - ScalpingBot - INFO -  -> [37m0: RSI (67.36) is neutral (30-70)[0m
+2025-04-25 16:09:55,133 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (98.27) & D (95.40) > 80 (overbought)[0m
+2025-04-25 16:09:55,133 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:10:05,133 - ScalpingBot - INFO - 
+[34m===== Iteration 14 =====[0m
+2025-04-25 16:10:06,835 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:10:06,841 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=66.77, MACD=N/A, StochK=95.94
+2025-04-25 16:10:06,842 - ScalpingBot - INFO - Order Book Imbalance: 1.74 (Threshold: 1.5)
+2025-04-25 16:10:07,786 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:10:07,787 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:10:07,787 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:10:07,787 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.74)[0m
+2025-04-25 16:10:07,788 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:10:07,788 - ScalpingBot - INFO -  -> [37m0: RSI (66.77) is neutral (30-70)[0m
+2025-04-25 16:10:07,788 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (95.94) & D (98.07) > 80 (overbought)[0m
+2025-04-25 16:10:07,789 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:10:17,790 - ScalpingBot - INFO - 
+[34m===== Iteration 15 =====[0m
+2025-04-25 16:10:19,466 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:10:19,466 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=66.00, MACD=N/A, StochK=95.04
+2025-04-25 16:10:19,467 - ScalpingBot - INFO - Order Book Imbalance: 1.61 (Threshold: 1.5)
+2025-04-25 16:10:20,726 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:10:20,732 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:10:20,733 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:10:20,733 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.61)[0m
+2025-04-25 16:10:20,733 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:10:20,734 - ScalpingBot - INFO -  -> [37m0: RSI (66.00) is neutral (30-70)[0m
+2025-04-25 16:10:20,734 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (95.04) & D (97.77) > 80 (overbought)[0m
+2025-04-25 16:10:20,734 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:10:30,735 - ScalpingBot - INFO - 
+[34m===== Iteration 16 =====[0m
+2025-04-25 16:10:32,931 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:10:32,931 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=65.50, MACD=N/A, StochK=94.46
+2025-04-25 16:10:32,932 - ScalpingBot - INFO - Order Book Imbalance: 1.53 (Threshold: 1.5)
+2025-04-25 16:10:33,869 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:10:33,869 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:10:33,870 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:10:33,870 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.53)[0m
+2025-04-25 16:10:33,870 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:10:33,871 - ScalpingBot - INFO -  -> [37m0: RSI (65.50) is neutral (30-70)[0m
+2025-04-25 16:10:33,871 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (94.46) & D (97.58) > 80 (overbought)[0m
+2025-04-25 16:10:33,871 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:10:43,871 - ScalpingBot - INFO - 
+[34m===== Iteration 17 =====[0m
+2025-04-25 16:10:45,849 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:10:45,850 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=64.76, MACD=N/A, StochK=93.59
+2025-04-25 16:10:45,850 - ScalpingBot - INFO - Order Book Imbalance: 1.74 (Threshold: 1.5)
+2025-04-25 16:10:47,534 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:10:47,534 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:10:47,535 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:10:47,535 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.74)[0m
+2025-04-25 16:10:47,535 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:10:47,535 - ScalpingBot - INFO -  -> [37m0: RSI (64.76) is neutral (30-70)[0m
+2025-04-25 16:10:47,536 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (93.59) & D (97.29) > 80 (overbought)[0m
+2025-04-25 16:10:47,536 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:10:57,537 - ScalpingBot - INFO - 
+[34m===== Iteration 18 =====[0m
+2025-04-25 16:10:59,027 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00074
+2025-04-25 16:10:59,027 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=63.57, MACD=N/A, StochK=92.20
+2025-04-25 16:10:59,027 - ScalpingBot - INFO - Order Book Imbalance: 1.40 (Threshold: 1.5)
+2025-04-25 16:11:00,765 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:11:00,766 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:11:00,767 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:11:00,767 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.40)[0m
+2025-04-25 16:11:00,768 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:11:00,768 - ScalpingBot - INFO -  -> [37m0: RSI (63.57) is neutral (30-70)[0m
+2025-04-25 16:11:00,769 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (92.20) & D (96.82) > 80 (overbought)[0m
+2025-04-25 16:11:00,769 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:11:10,770 - ScalpingBot - INFO - 
+[34m===== Iteration 19 =====[0m
+2025-04-25 16:11:12,829 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00071
+2025-04-25 16:11:12,829 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=64.99, MACD=N/A, StochK=87.53
+2025-04-25 16:11:12,829 - ScalpingBot - INFO - Order Book Imbalance: 1.13 (Threshold: 1.5)
+2025-04-25 16:11:13,936 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:11:13,937 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:11:13,937 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:11:13,937 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.13)[0m
+2025-04-25 16:11:13,938 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:11:13,938 - ScalpingBot - INFO -  -> [37m0: RSI (64.99) is neutral (30-70)[0m
+2025-04-25 16:11:13,938 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (87.53) & D (92.65) > 80 (overbought)[0m
+2025-04-25 16:11:13,938 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:11:23,940 - ScalpingBot - INFO - 
+[34m===== Iteration 20 =====[0m
+2025-04-25 16:11:25,902 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00072
+2025-04-25 16:11:25,903 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=66.05, MACD=N/A, StochK=88.77
+2025-04-25 16:11:25,903 - ScalpingBot - INFO - Order Book Imbalance: 1.93 (Threshold: 1.5)
+2025-04-25 16:11:27,615 - ScalpingBot - INFO - Volatility (0.00072) adjusted order size factor: 1.000
+2025-04-25 16:11:27,615 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:11:27,616 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:11:27,616 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.93)[0m
+2025-04-25 16:11:27,617 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:11:27,617 - ScalpingBot - INFO -  -> [37m0: RSI (66.05) is neutral (30-70)[0m
+2025-04-25 16:11:27,617 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (88.77) & D (93.06) > 80 (overbought)[0m
+2025-04-25 16:11:27,617 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:11:37,618 - ScalpingBot - INFO - 
+[34m===== Iteration 21 =====[0m
+2025-04-25 16:11:39,594 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00071
+2025-04-25 16:11:39,594 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=64.72, MACD=N/A, StochK=87.21
+2025-04-25 16:11:39,594 - ScalpingBot - INFO - Order Book Imbalance: 1.72 (Threshold: 1.5)
+2025-04-25 16:11:40,688 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:11:40,688 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:11:40,688 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:11:40,689 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.72)[0m
+2025-04-25 16:11:40,689 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:11:40,689 - ScalpingBot - INFO -  -> [37m0: RSI (64.72) is neutral (30-70)[0m
+2025-04-25 16:11:40,689 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (87.21) & D (92.54) > 80 (overbought)[0m
+2025-04-25 16:11:40,690 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:11:50,690 - ScalpingBot - INFO - 
+[34m===== Iteration 22 =====[0m
+2025-04-25 16:11:52,365 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00071
+2025-04-25 16:11:52,365 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=64.15, MACD=N/A, StochK=86.55
+2025-04-25 16:11:52,365 - ScalpingBot - INFO - Order Book Imbalance: 1.31 (Threshold: 1.5)
+2025-04-25 16:11:53,629 - ScalpingBot - INFO - Volatility (0.00071) adjusted order size factor: 1.000
+2025-04-25 16:11:53,630 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:11:53,630 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:11:53,630 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.31)[0m
+2025-04-25 16:11:53,631 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:11:53,631 - ScalpingBot - INFO -  -> [37m0: RSI (64.15) is neutral (30-70)[0m
+2025-04-25 16:11:53,631 - ScalpingBot - INFO -  -> [31m-1: Stoch RSI K (86.55) & D (92.32) > 80 (overbought)[0m
+2025-04-25 16:11:53,631 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:12:03,632 - ScalpingBot - INFO - 
+[34m===== Iteration 23 =====[0m
+2025-04-25 16:12:05,636 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00072
+2025-04-25 16:12:05,637 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=62.05, MACD=N/A, StochK=77.35
+2025-04-25 16:12:05,638 - ScalpingBot - INFO - Order Book Imbalance: 1.04 (Threshold: 1.5)
+2025-04-25 16:12:06,680 - ScalpingBot - INFO - Volatility (0.00072) adjusted order size factor: 1.000
+2025-04-25 16:12:06,681 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:12:06,681 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:12:06,681 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.04)[0m
+2025-04-25 16:12:06,682 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:12:06,682 - ScalpingBot - INFO -  -> [37m0: RSI (62.05) is neutral (30-70)[0m
+2025-04-25 16:12:06,682 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (77.35) & D (84.36) neutral[0m
+2025-04-25 16:12:06,682 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:12:16,683 - ScalpingBot - INFO - 
+[34m===== Iteration 24 =====[0m
+2025-04-25 16:12:18,508 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00072
+2025-04-25 16:12:18,509 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=57.04, MACD=N/A, StochK=71.52
+2025-04-25 16:12:18,509 - ScalpingBot - INFO - Order Book Imbalance: 2.08 (Threshold: 1.5)
+2025-04-25 16:12:20,211 - ScalpingBot - INFO - Volatility (0.00072) adjusted order size factor: 1.000
+2025-04-25 16:12:20,211 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:12:20,211 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:12:20,212 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.08)[0m
+2025-04-25 16:12:20,212 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:12:20,212 - ScalpingBot - INFO -  -> [37m0: RSI (57.04) is neutral (30-70)[0m
+2025-04-25 16:12:20,212 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (71.52) & D (82.42) neutral[0m
+2025-04-25 16:12:20,213 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:12:30,213 - ScalpingBot - INFO - 
+[34m===== Iteration 25 =====[0m
+2025-04-25 16:12:32,191 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00072
+2025-04-25 16:12:32,191 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=57.72, MACD=N/A, StochK=72.32
+2025-04-25 16:12:32,192 - ScalpingBot - INFO - Order Book Imbalance: 1.82 (Threshold: 1.5)
+2025-04-25 16:12:33,758 - ScalpingBot - INFO - Volatility (0.00072) adjusted order size factor: 1.000
+2025-04-25 16:12:33,759 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:12:33,759 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:12:33,760 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.82)[0m
+2025-04-25 16:12:33,760 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:12:33,760 - ScalpingBot - INFO -  -> [37m0: RSI (57.72) is neutral (30-70)[0m
+2025-04-25 16:12:33,760 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (72.32) & D (82.69) neutral[0m
+2025-04-25 16:12:33,761 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:12:43,761 - ScalpingBot - INFO - 
+[34m===== Iteration 26 =====[0m
+2025-04-25 16:12:45,959 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00072
+2025-04-25 16:12:45,959 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=59.14, MACD=N/A, StochK=73.97
+2025-04-25 16:12:45,960 - ScalpingBot - INFO - Order Book Imbalance: 2.09 (Threshold: 1.5)
+2025-04-25 16:12:47,260 - ScalpingBot - INFO - Volatility (0.00072) adjusted order size factor: 1.000
+2025-04-25 16:12:47,260 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:12:47,261 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:12:47,261 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.09)[0m
+2025-04-25 16:12:47,261 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:12:47,262 - ScalpingBot - INFO -  -> [37m0: RSI (59.14) is neutral (30-70)[0m
+2025-04-25 16:12:47,262 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (73.97) & D (83.24) neutral[0m
+2025-04-25 16:12:47,262 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:12:57,263 - ScalpingBot - INFO - 
+[34m===== Iteration 27 =====[0m
+2025-04-25 16:12:58,970 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00072
+2025-04-25 16:12:58,972 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=58.19, MACD=N/A, StochK=72.86
+2025-04-25 16:12:58,972 - ScalpingBot - INFO - Order Book Imbalance: 1.99 (Threshold: 1.5)
+2025-04-25 16:13:00,206 - ScalpingBot - INFO - Volatility (0.00067) adjusted order size factor: 1.000
+2025-04-25 16:13:00,210 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:13:00,211 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:13:00,211 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.99)[0m
+2025-04-25 16:13:00,211 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:13:00,212 - ScalpingBot - INFO -  -> [37m0: RSI (58.19) is neutral (30-70)[0m
+2025-04-25 16:13:00,212 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (72.86) & D (82.87) neutral[0m
+2025-04-25 16:13:00,212 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:13:10,213 - ScalpingBot - INFO - 
+[34m===== Iteration 28 =====[0m
+2025-04-25 16:13:11,526 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00067
+2025-04-25 16:13:11,526 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=60.19, MACD=N/A, StochK=68.65
+2025-04-25 16:13:11,527 - ScalpingBot - INFO - Order Book Imbalance: 2.89 (Threshold: 1.5)
+2025-04-25 16:13:12,786 - ScalpingBot - INFO - Volatility (0.00067) adjusted order size factor: 1.000
+2025-04-25 16:13:12,787 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:13:12,787 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:13:12,787 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.89)[0m
+2025-04-25 16:13:12,788 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:13:12,788 - ScalpingBot - INFO -  -> [37m0: RSI (60.19) is neutral (30-70)[0m
+2025-04-25 16:13:12,788 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (68.65) & D (74.97) neutral[0m
+2025-04-25 16:13:12,788 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:13:22,789 - ScalpingBot - INFO - 
+[34m===== Iteration 29 =====[0m
+2025-04-25 16:13:24,634 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00067
+2025-04-25 16:13:24,635 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=60.19, MACD=N/A, StochK=68.65
+2025-04-25 16:13:24,635 - ScalpingBot - INFO - Order Book Imbalance: 1.68 (Threshold: 1.5)
+2025-04-25 16:13:25,874 - ScalpingBot - INFO - Volatility (0.00067) adjusted order size factor: 1.000
+2025-04-25 16:13:25,874 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:13:25,875 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:13:25,875 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.68)[0m
+2025-04-25 16:13:25,875 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:13:25,876 - ScalpingBot - INFO -  -> [37m0: RSI (60.19) is neutral (30-70)[0m
+2025-04-25 16:13:25,876 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (68.65) & D (74.97) neutral[0m
+2025-04-25 16:13:25,876 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:13:35,877 - ScalpingBot - INFO - 
+[34m===== Iteration 30 =====[0m
+2025-04-25 16:13:38,281 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00067
+2025-04-25 16:13:38,281 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=58.99, MACD=N/A, StochK=67.25
+2025-04-25 16:13:38,281 - ScalpingBot - INFO - Order Book Imbalance: 1.56 (Threshold: 1.5)
+2025-04-25 16:13:39,780 - ScalpingBot - INFO - Volatility (0.00067) adjusted order size factor: 1.000
+2025-04-25 16:13:39,781 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:13:39,781 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:13:39,781 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.56)[0m
+2025-04-25 16:13:39,782 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:13:39,782 - ScalpingBot - INFO -  -> [37m0: RSI (58.99) is neutral (30-70)[0m
+2025-04-25 16:13:39,782 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (67.25) & D (74.50) neutral[0m
+2025-04-25 16:13:39,782 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:13:49,783 - ScalpingBot - INFO - 
+[34m===== Iteration 31 =====[0m
+2025-04-25 16:13:51,597 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00067
+2025-04-25 16:13:51,598 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=60.52, MACD=N/A, StochK=69.04
+2025-04-25 16:13:51,598 - ScalpingBot - INFO - Order Book Imbalance: 2.05 (Threshold: 1.5)
+2025-04-25 16:13:52,635 - ScalpingBot - INFO - Volatility (0.00067) adjusted order size factor: 1.000
+2025-04-25 16:13:52,635 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:13:52,635 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:13:52,636 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.05)[0m
+2025-04-25 16:13:52,636 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:13:52,636 - ScalpingBot - INFO -  -> [37m0: RSI (60.52) is neutral (30-70)[0m
+2025-04-25 16:13:52,636 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (69.04) & D (75.10) neutral[0m
+2025-04-25 16:13:52,636 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:14:02,637 - ScalpingBot - INFO - 
+[34m===== Iteration 32 =====[0m
+2025-04-25 16:14:04,296 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00063
+2025-04-25 16:14:04,297 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=59.61, MACD=N/A, StochK=65.55
+2025-04-25 16:14:04,297 - ScalpingBot - INFO - Order Book Imbalance: 2.18 (Threshold: 1.5)
+2025-04-25 16:14:05,744 - ScalpingBot - INFO - Volatility (0.00063) adjusted order size factor: 1.000
+2025-04-25 16:14:05,744 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:14:05,745 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:14:05,745 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.18)[0m
+2025-04-25 16:14:05,746 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:14:05,746 - ScalpingBot - INFO -  -> [37m0: RSI (59.61) is neutral (30-70)[0m
+2025-04-25 16:14:05,746 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (65.55) & D (69.27) neutral[0m
+2025-04-25 16:14:05,746 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:14:15,747 - ScalpingBot - INFO - 
+[34m===== Iteration 33 =====[0m
+2025-04-25 16:14:17,759 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00064
+2025-04-25 16:14:17,760 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=57.30, MACD=N/A, StochK=62.45
+2025-04-25 16:14:17,760 - ScalpingBot - INFO - Order Book Imbalance: 1.77 (Threshold: 1.5)
+2025-04-25 16:14:18,778 - ScalpingBot - INFO - Volatility (0.00064) adjusted order size factor: 1.000
+2025-04-25 16:14:18,779 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:14:18,779 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:14:18,780 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.77)[0m
+2025-04-25 16:14:18,780 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:14:18,780 - ScalpingBot - INFO -  -> [37m0: RSI (57.30) is neutral (30-70)[0m
+2025-04-25 16:14:18,780 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (62.45) & D (68.24) neutral[0m
+2025-04-25 16:14:18,781 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:14:28,781 - ScalpingBot - INFO - 
+[34m===== Iteration 34 =====[0m
+2025-04-25 16:14:30,484 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00063
+2025-04-25 16:14:30,484 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=60.15, MACD=N/A, StochK=66.27
+2025-04-25 16:14:30,485 - ScalpingBot - INFO - Order Book Imbalance: 1.82 (Threshold: 1.5)
+2025-04-25 16:14:31,887 - ScalpingBot - INFO - Volatility (0.00063) adjusted order size factor: 1.000
+2025-04-25 16:14:31,887 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:14:31,888 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:14:31,888 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.82)[0m
+2025-04-25 16:14:31,888 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.27) (bullish trend)[0m
+2025-04-25 16:14:31,889 - ScalpingBot - INFO -  -> [37m0: RSI (60.15) is neutral (30-70)[0m
+2025-04-25 16:14:31,889 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (66.27) & D (69.51) neutral[0m
+2025-04-25 16:14:31,889 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:14:41,890 - ScalpingBot - INFO - 
+[34m===== Iteration 35 =====[0m
+2025-04-25 16:14:44,367 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00063
+2025-04-25 16:14:44,368 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=62.31, MACD=N/A, StochK=69.16
+2025-04-25 16:14:44,368 - ScalpingBot - INFO - Order Book Imbalance: 1.03 (Threshold: 1.5)
+2025-04-25 16:14:45,313 - ScalpingBot - INFO - Volatility (0.00063) adjusted order size factor: 1.000
+2025-04-25 16:14:45,314 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:14:45,314 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:14:45,314 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.03)[0m
+2025-04-25 16:14:45,315 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.28) (bullish trend)[0m
+2025-04-25 16:14:45,315 - ScalpingBot - INFO -  -> [37m0: RSI (62.31) is neutral (30-70)[0m
+2025-04-25 16:14:45,315 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (69.16) & D (70.47) neutral[0m
+2025-04-25 16:14:45,315 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:14:55,316 - ScalpingBot - INFO - 
+[34m===== Iteration 36 =====[0m
+2025-04-25 16:14:56,880 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00063
+2025-04-25 16:14:56,880 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=62.31, MACD=N/A, StochK=69.16
+2025-04-25 16:14:56,881 - ScalpingBot - INFO - Order Book Imbalance: 1.72 (Threshold: 1.5)
+2025-04-25 16:14:58,037 - ScalpingBot - INFO - Volatility (0.00063) adjusted order size factor: 1.000
+2025-04-25 16:14:58,038 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:14:58,038 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:14:58,038 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.72)[0m
+2025-04-25 16:14:58,038 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.28) (bullish trend)[0m
+2025-04-25 16:14:58,038 - ScalpingBot - INFO -  -> [37m0: RSI (62.31) is neutral (30-70)[0m
+2025-04-25 16:14:58,039 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (69.16) & D (70.47) neutral[0m
+2025-04-25 16:14:58,039 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:15:08,040 - ScalpingBot - INFO - 
+[34m===== Iteration 37 =====[0m
+2025-04-25 16:15:09,787 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00061
+2025-04-25 16:15:09,788 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=61.17, MACD=N/A, StochK=63.79
+2025-04-25 16:15:09,788 - ScalpingBot - INFO - Order Book Imbalance: 1.88 (Threshold: 1.5)
+2025-04-25 16:15:11,775 - ScalpingBot - INFO - Volatility (0.00061) adjusted order size factor: 1.000
+2025-04-25 16:15:11,775 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:15:11,776 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:15:11,776 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.88)[0m
+2025-04-25 16:15:11,776 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.28) (bullish trend)[0m
+2025-04-25 16:15:11,777 - ScalpingBot - INFO -  -> [37m0: RSI (61.17) is neutral (30-70)[0m
+2025-04-25 16:15:11,777 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (63.79) & D (67.40) neutral[0m
+2025-04-25 16:15:11,777 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:15:21,778 - ScalpingBot - INFO - 
+[34m===== Iteration 38 =====[0m
+2025-04-25 16:15:23,264 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00061
+2025-04-25 16:15:23,264 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=62.68, MACD=N/A, StochK=67.25
+2025-04-25 16:15:23,264 - ScalpingBot - INFO - Order Book Imbalance: 2.49 (Threshold: 1.5)
+2025-04-25 16:15:24,342 - ScalpingBot - INFO - Volatility (0.00061) adjusted order size factor: 1.000
+2025-04-25 16:15:24,343 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:15:24,343 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:15:24,343 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.49)[0m
+2025-04-25 16:15:24,344 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.28) (bullish trend)[0m
+2025-04-25 16:15:24,344 - ScalpingBot - INFO -  -> [37m0: RSI (62.68) is neutral (30-70)[0m
+2025-04-25 16:15:24,344 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (67.25) & D (68.55) neutral[0m
+2025-04-25 16:15:24,344 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:15:34,345 - ScalpingBot - INFO - 
+[34m===== Iteration 39 =====[0m
+2025-04-25 16:15:36,527 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00061
+2025-04-25 16:15:36,528 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=61.45, MACD=N/A, StochK=64.45
+2025-04-25 16:15:36,528 - ScalpingBot - INFO - Order Book Imbalance: 1.90 (Threshold: 1.5)
+2025-04-25 16:15:38,401 - ScalpingBot - INFO - Volatility (0.00061) adjusted order size factor: 1.000
+2025-04-25 16:15:38,402 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:15:38,402 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:15:38,402 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.90)[0m
+2025-04-25 16:15:38,403 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.28) (bullish trend)[0m
+2025-04-25 16:15:38,403 - ScalpingBot - INFO -  -> [37m0: RSI (61.45) is neutral (30-70)[0m
+2025-04-25 16:15:38,403 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (64.45) & D (67.62) neutral[0m
+2025-04-25 16:15:38,403 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:15:48,405 - ScalpingBot - INFO - 
+[34m===== Iteration 40 =====[0m
+2025-04-25 16:15:52,729 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00061
+2025-04-25 16:15:52,730 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=61.45, MACD=N/A, StochK=64.45
+2025-04-25 16:15:52,730 - ScalpingBot - INFO - Order Book Imbalance: 2.09 (Threshold: 1.5)
+2025-04-25 16:15:55,147 - ScalpingBot - INFO - Volatility (0.00061) adjusted order size factor: 1.000
+2025-04-25 16:15:55,148 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:15:55,148 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:15:55,149 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.09)[0m
+2025-04-25 16:15:55,149 - ScalpingBot - INFO -  -> [32m+1: Price (4.28) above EMA (4.28) (bullish trend)[0m
+2025-04-25 16:15:55,149 - ScalpingBot - INFO -  -> [37m0: RSI (61.45) is neutral (30-70)[0m
+2025-04-25 16:15:55,149 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (64.45) & D (67.62) neutral[0m
+2025-04-25 16:15:55,149 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:16:05,150 - ScalpingBot - INFO - 
+[34m===== Iteration 41 =====[0m
+2025-04-25 16:16:07,007 - ScalpingBot - INFO - Market State: Price=4.28, Volatility=0.00061
+2025-04-25 16:16:07,009 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=54.27, MACD=N/A, StochK=36.65
+2025-04-25 16:16:07,009 - ScalpingBot - INFO - Order Book Imbalance: 2.40 (Threshold: 1.5)
+2025-04-25 16:16:08,174 - ScalpingBot - INFO - Volatility (0.00061) adjusted order size factor: 1.000
+2025-04-25 16:16:08,175 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:16:08,175 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:16:08,176 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.40)[0m
+2025-04-25 16:16:08,176 - ScalpingBot - INFO -  -> [31m-1: Price (4.28) below EMA (4.28) (bearish trend)[0m
+2025-04-25 16:16:08,177 - ScalpingBot - INFO -  -> [37m0: RSI (54.27) is neutral (30-70)[0m
+2025-04-25 16:16:08,177 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (36.65) & D (55.44) neutral[0m
+2025-04-25 16:16:08,178 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:16:08,946 - ScalpingBot - WARNING - [33mCalculated order size 0.09623116 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:16:18,947 - ScalpingBot - INFO - 
+[34m===== Iteration 42 =====[0m
+2025-04-25 16:16:21,024 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00061
+2025-04-25 16:16:21,025 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=53.54, MACD=N/A, StochK=36.28
+2025-04-25 16:16:21,026 - ScalpingBot - INFO - Order Book Imbalance: 1.66 (Threshold: 1.5)
+2025-04-25 16:16:22,019 - ScalpingBot - INFO - Volatility (0.00061) adjusted order size factor: 1.000
+2025-04-25 16:16:22,021 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:16:22,023 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:16:22,023 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.66)[0m
+2025-04-25 16:16:22,024 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.28) (bearish trend)[0m
+2025-04-25 16:16:22,024 - ScalpingBot - INFO -  -> [37m0: RSI (53.54) is neutral (30-70)[0m
+2025-04-25 16:16:22,024 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (36.28) & D (55.32) neutral[0m
+2025-04-25 16:16:22,025 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:16:22,839 - ScalpingBot - WARNING - [33mCalculated order size 0.09625143 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:16:32,840 - ScalpingBot - INFO - 
+[34m===== Iteration 43 =====[0m
+2025-04-25 16:16:34,735 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00062
+2025-04-25 16:16:34,736 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=52.37, MACD=N/A, StochK=36.28
+2025-04-25 16:16:34,737 - ScalpingBot - INFO - Order Book Imbalance: 1.44 (Threshold: 1.5)
+2025-04-25 16:16:36,120 - ScalpingBot - INFO - Volatility (0.00062) adjusted order size factor: 1.000
+2025-04-25 16:16:36,121 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:16:36,122 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:16:36,122 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.44)[0m
+2025-04-25 16:16:36,122 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.28) (bearish trend)[0m
+2025-04-25 16:16:36,122 - ScalpingBot - INFO -  -> [37m0: RSI (52.37) is neutral (30-70)[0m
+2025-04-25 16:16:36,122 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (36.28) & D (55.32) neutral[0m
+2025-04-25 16:16:36,123 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:16:46,123 - ScalpingBot - INFO - 
+[34m===== Iteration 44 =====[0m
+2025-04-25 16:16:48,193 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00062
+2025-04-25 16:16:48,194 - ScalpingBot - INFO - Indicators: EMA=4.28, RSI=52.60, MACD=N/A, StochK=36.28
+2025-04-25 16:16:48,194 - ScalpingBot - INFO - Order Book Imbalance: 1.93 (Threshold: 1.5)
+2025-04-25 16:16:49,712 - ScalpingBot - INFO - Volatility (0.00062) adjusted order size factor: 1.000
+2025-04-25 16:16:49,713 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:16:49,714 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:16:49,714 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.93)[0m
+2025-04-25 16:16:49,714 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.28) (bearish trend)[0m
+2025-04-25 16:16:49,715 - ScalpingBot - INFO -  -> [37m0: RSI (52.60) is neutral (30-70)[0m
+2025-04-25 16:16:49,715 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (36.28) & D (55.32) neutral[0m
+2025-04-25 16:16:49,715 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:16:50,665 - ScalpingBot - WARNING - [33mCalculated order size 0.09624693 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:17:00,666 - ScalpingBot - INFO - 
+[34m===== Iteration 45 =====[0m
+2025-04-25 16:17:02,260 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00055
+2025-04-25 16:17:02,261 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=51.19, MACD=N/A, StochK=11.68
+2025-04-25 16:17:02,261 - ScalpingBot - INFO - Order Book Imbalance: 2.78 (Threshold: 1.5)
+2025-04-25 16:17:03,680 - ScalpingBot - INFO - Volatility (0.00055) adjusted order size factor: 1.000
+2025-04-25 16:17:03,680 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:17:03,681 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:17:03,681 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.78)[0m
+2025-04-25 16:17:03,681 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:17:03,682 - ScalpingBot - INFO -  -> [37m0: RSI (51.19) is neutral (30-70)[0m
+2025-04-25 16:17:03,682 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (11.68) & D (36.13) neutral[0m
+2025-04-25 16:17:03,682 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:17:04,210 - ScalpingBot - WARNING - [33mCalculated order size 0.09625813 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:17:14,212 - ScalpingBot - INFO - 
+[34m===== Iteration 46 =====[0m
+2025-04-25 16:17:16,060 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00055
+2025-04-25 16:17:16,061 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=51.19, MACD=N/A, StochK=11.68
+2025-04-25 16:17:16,061 - ScalpingBot - INFO - Order Book Imbalance: 2.07 (Threshold: 1.5)
+2025-04-25 16:17:17,045 - ScalpingBot - INFO - Volatility (0.00055) adjusted order size factor: 1.000
+2025-04-25 16:17:17,046 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:17:17,046 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:17:17,047 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.07)[0m
+2025-04-25 16:17:17,047 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:17:17,047 - ScalpingBot - INFO -  -> [37m0: RSI (51.19) is neutral (30-70)[0m
+2025-04-25 16:17:17,047 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (11.68) & D (36.13) neutral[0m
+2025-04-25 16:17:17,048 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:17:17,506 - ScalpingBot - WARNING - [33mCalculated order size 0.09627390 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:17:27,507 - ScalpingBot - INFO - 
+[34m===== Iteration 47 =====[0m
+2025-04-25 16:17:28,855 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00056
+2025-04-25 16:17:28,855 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=49.57, MACD=N/A, StochK=11.68
+2025-04-25 16:17:28,856 - ScalpingBot - INFO - Order Book Imbalance: 1.05 (Threshold: 1.5)
+2025-04-25 16:17:29,842 - ScalpingBot - INFO - Volatility (0.00056) adjusted order size factor: 1.000
+2025-04-25 16:17:29,843 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:17:29,844 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:17:29,844 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.05)[0m
+2025-04-25 16:17:29,845 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:17:29,845 - ScalpingBot - INFO -  -> [37m0: RSI (49.57) is neutral (30-70)[0m
+2025-04-25 16:17:29,845 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (11.68) & D (36.13) neutral[0m
+2025-04-25 16:17:29,846 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:17:39,846 - ScalpingBot - INFO - 
+[34m===== Iteration 48 =====[0m
+2025-04-25 16:17:41,972 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00055
+2025-04-25 16:17:41,976 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=51.87, MACD=N/A, StochK=12.96
+2025-04-25 16:17:41,976 - ScalpingBot - INFO - Order Book Imbalance: 2.19 (Threshold: 1.5)
+2025-04-25 16:17:43,228 - ScalpingBot - INFO - Volatility (0.00055) adjusted order size factor: 1.000
+2025-04-25 16:17:43,231 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:17:43,235 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:17:43,235 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.19)[0m
+2025-04-25 16:17:43,236 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:17:43,236 - ScalpingBot - INFO -  -> [37m0: RSI (51.87) is neutral (30-70)[0m
+2025-04-25 16:17:43,236 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (12.96) & D (36.56) neutral[0m
+2025-04-25 16:17:43,237 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:17:43,656 - ScalpingBot - WARNING - [33mCalculated order size 0.09625137 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:17:53,657 - ScalpingBot - INFO - 
+[34m===== Iteration 49 =====[0m
+2025-04-25 16:17:56,004 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00055
+2025-04-25 16:17:56,005 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=52.95, MACD=N/A, StochK=15.03
+2025-04-25 16:17:56,005 - ScalpingBot - INFO - Order Book Imbalance: 2.23 (Threshold: 1.5)
+2025-04-25 16:17:57,653 - ScalpingBot - INFO - Volatility (0.00055) adjusted order size factor: 1.000
+2025-04-25 16:17:57,654 - ScalpingBot - INFO - [36mCalculated order size: 0.4114 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:17:57,655 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:17:57,655 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.23)[0m
+2025-04-25 16:17:57,656 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:17:57,656 - ScalpingBot - INFO -  -> [37m0: RSI (52.95) is neutral (30-70)[0m
+2025-04-25 16:17:57,656 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (15.03) & D (37.25) neutral[0m
+2025-04-25 16:17:57,656 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:17:58,538 - ScalpingBot - WARNING - [33mCalculated order size 0.09624012 DOT is below minimum amount 0.1 DOT. Cannot place order.[0m
+2025-04-25 16:18:08,539 - ScalpingBot - INFO - 
+[34m===== Iteration 50 =====[0m
+2025-04-25 16:18:10,563 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00054
+2025-04-25 16:18:10,564 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=51.08, MACD=N/A, StochK=3.38
+2025-04-25 16:18:10,564 - ScalpingBot - INFO - Order Book Imbalance: 2.37 (Threshold: 1.5)
+2025-04-25 16:18:10,866 - ScalpingBot - WARNING - [33m
+Ctrl+C detected. Shutting down bot gracefully...[0m
+2025-04-25 16:18:10,867 - ScalpingBot - INFO - Checking for open orders for DOT/USDT:USDT to cancel...
+2025-04-25 16:18:12,681 - ScalpingBot - INFO - No open orders found for DOT/USDT:USDT.
+2025-04-25 16:18:12,682 - ScalpingBot - INFO - Scalping Bot has been stopped.
+2025-04-25 16:19:23,076 - ScalpingBot - INFO - [36mInitializing Scalping Bot...[0m
+2025-04-25 16:19:23,093 - ScalpingBot - INFO - [32mConfiguration loaded successfully from config.yaml[0m
+2025-04-25 16:19:23,093 - ScalpingBot - DEBUG - Validating configuration...
+2025-04-25 16:19:23,094 - ScalpingBot - INFO - [32mConfiguration validated successfully.[0m
+2025-04-25 16:19:23,094 - ScalpingBot - INFO - Logging level set to INFO from config.
+2025-04-25 16:19:23,094 - ScalpingBot - INFO - Initializing connection to BYBIT...
+2025-04-25 16:19:32,106 - ScalpingBot - INFO - [32mLIVE MODE[0m).
+2025-04-25 16:19:32,107 - ScalpingBot - WARNING - [32m--- RUNNING IN LIVE TRADING MODE ---[0m
+2025-04-25 16:19:32,108 - ScalpingBot - INFO - [36mScalping Bot initialization complete.[0m
+2025-04-25 16:19:32,109 - ScalpingBot - INFO - [36m--- Starting Scalping Bot Main Loop (Symbol: DOT/USDT:USDT) ---[0m
+2025-04-25 16:19:32,109 - ScalpingBot - INFO - 
+[34m===== Iteration 1 =====[0m
+2025-04-25 16:19:33,458 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00078
+2025-04-25 16:19:33,458 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=46.98, MACD=N/A, StochK=14.06
+2025-04-25 16:19:33,458 - ScalpingBot - INFO - Order Book Imbalance: 1.31 (Threshold: 1.5)
+2025-04-25 16:19:35,274 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:19:35,275 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:19:35,276 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:19:35,276 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.31)[0m
+2025-04-25 16:19:35,277 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:19:35,277 - ScalpingBot - INFO -  -> [37m0: RSI (46.98) is neutral (30-70)[0m
+2025-04-25 16:19:35,278 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (14.06) & D (10.61) < 20 (oversold)[0m
+2025-04-25 16:19:35,278 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:19:45,279 - ScalpingBot - INFO - 
+[34m===== Iteration 2 =====[0m
+2025-04-25 16:19:46,781 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00075
+2025-04-25 16:19:46,782 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=43.50, MACD=N/A, StochK=10.52
+2025-04-25 16:19:46,782 - ScalpingBot - INFO - Order Book Imbalance: 1.16 (Threshold: 1.5)
+2025-04-25 16:19:47,855 - ScalpingBot - INFO - Volatility (0.00075) adjusted order size factor: 1.000
+2025-04-25 16:19:47,855 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:19:47,856 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:19:47,857 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.16)[0m
+2025-04-25 16:19:47,857 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:19:47,858 - ScalpingBot - INFO -  -> [37m0: RSI (43.50) is neutral (30-70)[0m
+2025-04-25 16:19:47,858 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.52) & D (9.43) < 20 (oversold)[0m
+2025-04-25 16:19:47,858 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:19:57,860 - ScalpingBot - INFO - 
+[34m===== Iteration 3 =====[0m
+2025-04-25 16:19:59,665 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00075
+2025-04-25 16:19:59,665 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=43.13, MACD=N/A, StochK=10.14
+2025-04-25 16:19:59,666 - ScalpingBot - INFO - Order Book Imbalance: 1.91 (Threshold: 1.5)
+2025-04-25 16:20:00,515 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:20:00,515 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:20:00,516 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:20:00,516 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.91)[0m
+2025-04-25 16:20:00,516 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:20:00,517 - ScalpingBot - INFO -  -> [37m0: RSI (43.13) is neutral (30-70)[0m
+2025-04-25 16:20:00,517 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.14) & D (9.31) < 20 (oversold)[0m
+2025-04-25 16:20:00,517 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:20:10,518 - ScalpingBot - INFO - 
+[34m===== Iteration 4 =====[0m
+2025-04-25 16:20:11,756 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00074
+2025-04-25 16:20:11,757 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=43.15, MACD=N/A, StochK=13.64
+2025-04-25 16:20:11,757 - ScalpingBot - INFO - Order Book Imbalance: 2.04 (Threshold: 1.5)
+2025-04-25 16:20:12,572 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:20:12,573 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:20:12,574 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:20:12,574 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.04)[0m
+2025-04-25 16:20:12,574 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:20:12,575 - ScalpingBot - INFO -  -> [37m0: RSI (43.15) is neutral (30-70)[0m
+2025-04-25 16:20:12,575 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (13.64) & D (9.02) < 20 (oversold)[0m
+2025-04-25 16:20:12,575 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:20:22,576 - ScalpingBot - INFO - 
+[34m===== Iteration 5 =====[0m
+2025-04-25 16:20:23,792 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00074
+2025-04-25 16:20:23,793 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=42.09, MACD=N/A, StochK=12.57
+2025-04-25 16:20:23,793 - ScalpingBot - INFO - Order Book Imbalance: 2.44 (Threshold: 1.5)
+2025-04-25 16:20:24,655 - ScalpingBot - INFO - Volatility (0.00074) adjusted order size factor: 1.000
+2025-04-25 16:20:24,656 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:20:24,656 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:20:24,656 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.44)[0m
+2025-04-25 16:20:24,657 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:20:24,657 - ScalpingBot - INFO -  -> [37m0: RSI (42.09) is neutral (30-70)[0m
+2025-04-25 16:20:24,657 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (12.57) & D (8.66) < 20 (oversold)[0m
+2025-04-25 16:20:24,657 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:20:34,658 - ScalpingBot - INFO - 
+[34m===== Iteration 6 =====[0m
+2025-04-25 16:20:35,871 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00075
+2025-04-25 16:20:35,872 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=40.80, MACD=N/A, StochK=11.26
+2025-04-25 16:20:35,872 - ScalpingBot - INFO - Order Book Imbalance: 2.19 (Threshold: 1.5)
+2025-04-25 16:20:36,736 - ScalpingBot - INFO - Volatility (0.00075) adjusted order size factor: 1.000
+2025-04-25 16:20:36,737 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:20:36,737 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:20:36,738 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.19)[0m
+2025-04-25 16:20:36,738 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:20:36,738 - ScalpingBot - INFO -  -> [37m0: RSI (40.80) is neutral (30-70)[0m
+2025-04-25 16:20:36,738 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (11.26) & D (8.22) < 20 (oversold)[0m
+2025-04-25 16:20:36,739 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:20:46,739 - ScalpingBot - INFO - 
+[34m===== Iteration 7 =====[0m
+2025-04-25 16:20:48,004 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00075
+2025-04-25 16:20:48,005 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=39.71, MACD=N/A, StochK=10.16
+2025-04-25 16:20:48,005 - ScalpingBot - INFO - Order Book Imbalance: 1.66 (Threshold: 1.5)
+2025-04-25 16:20:48,873 - ScalpingBot - INFO - Volatility (0.00075) adjusted order size factor: 1.000
+2025-04-25 16:20:48,874 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:20:48,874 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:20:48,875 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.66)[0m
+2025-04-25 16:20:48,875 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:20:48,875 - ScalpingBot - INFO -  -> [37m0: RSI (39.71) is neutral (30-70)[0m
+2025-04-25 16:20:48,876 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.16) & D (7.85) < 20 (oversold)[0m
+2025-04-25 16:20:48,876 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:20:58,877 - ScalpingBot - INFO - 
+[34m===== Iteration 8 =====[0m
+2025-04-25 16:21:00,242 - ScalpingBot - INFO - Market State: Price=4.27, Volatility=0.00075
+2025-04-25 16:21:00,243 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=38.62, MACD=N/A, StochK=12.60
+2025-04-25 16:21:00,243 - ScalpingBot - INFO - Order Book Imbalance: 1.37 (Threshold: 1.5)
+2025-04-25 16:21:01,193 - ScalpingBot - INFO - Volatility (0.00075) adjusted order size factor: 1.000
+2025-04-25 16:21:01,194 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:21:01,194 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:21:01,195 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.37)[0m
+2025-04-25 16:21:01,195 - ScalpingBot - INFO -  -> [31m-1: Price (4.27) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:21:01,196 - ScalpingBot - INFO -  -> [37m0: RSI (38.62) is neutral (30-70)[0m
+2025-04-25 16:21:01,196 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (12.60) & D (11.00) < 20 (oversold)[0m
+2025-04-25 16:21:01,197 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:21:11,197 - ScalpingBot - INFO - 
+[34m===== Iteration 9 =====[0m
+2025-04-25 16:21:12,715 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00076
+2025-04-25 16:21:12,715 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=36.55, MACD=N/A, StochK=10.50
+2025-04-25 16:21:12,715 - ScalpingBot - INFO - Order Book Imbalance: 1.63 (Threshold: 1.5)
+2025-04-25 16:21:13,745 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:21:13,746 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:21:13,746 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:21:13,746 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.63)[0m
+2025-04-25 16:21:13,747 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:21:13,747 - ScalpingBot - INFO -  -> [37m0: RSI (36.55) is neutral (30-70)[0m
+2025-04-25 16:21:13,747 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.50) & D (10.30) < 20 (oversold)[0m
+2025-04-25 16:21:13,748 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:21:23,748 - ScalpingBot - INFO - 
+[34m===== Iteration 10 =====[0m
+2025-04-25 16:21:25,394 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00078
+2025-04-25 16:21:25,395 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=34.36, MACD=N/A, StochK=10.23
+2025-04-25 16:21:25,395 - ScalpingBot - INFO - Order Book Imbalance: 1.46 (Threshold: 1.5)
+2025-04-25 16:21:26,544 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:21:26,545 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:21:26,545 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:21:26,545 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.46)[0m
+2025-04-25 16:21:26,546 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:21:26,546 - ScalpingBot - INFO -  -> [37m0: RSI (34.36) is neutral (30-70)[0m
+2025-04-25 16:21:26,546 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.23) & D (10.21) < 20 (oversold)[0m
+2025-04-25 16:21:26,546 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:21:36,548 - ScalpingBot - INFO - 
+[34m===== Iteration 11 =====[0m
+2025-04-25 16:21:38,034 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00077
+2025-04-25 16:21:38,035 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=34.80, MACD=N/A, StochK=10.23
+2025-04-25 16:21:38,035 - ScalpingBot - INFO - Order Book Imbalance: 1.88 (Threshold: 1.5)
+2025-04-25 16:21:38,920 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:21:38,921 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:21:38,921 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:21:38,922 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.88)[0m
+2025-04-25 16:21:38,922 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:21:38,922 - ScalpingBot - INFO -  -> [37m0: RSI (34.80) is neutral (30-70)[0m
+2025-04-25 16:21:38,922 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.23) & D (10.21) < 20 (oversold)[0m
+2025-04-25 16:21:38,923 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:21:48,923 - ScalpingBot - INFO - 
+[34m===== Iteration 12 =====[0m
+2025-04-25 16:21:50,171 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00079
+2025-04-25 16:21:50,171 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=33.52, MACD=N/A, StochK=10.23
+2025-04-25 16:21:50,171 - ScalpingBot - INFO - Order Book Imbalance: 1.68 (Threshold: 1.5)
+2025-04-25 16:21:50,977 - ScalpingBot - INFO - Volatility (0.00079) adjusted order size factor: 1.000
+2025-04-25 16:21:50,977 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:21:50,978 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:21:50,978 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.68)[0m
+2025-04-25 16:21:50,978 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:21:50,979 - ScalpingBot - INFO -  -> [37m0: RSI (33.52) is neutral (30-70)[0m
+2025-04-25 16:21:50,979 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (10.23) & D (10.21) < 20 (oversold)[0m
+2025-04-25 16:21:50,979 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:22:00,980 - ScalpingBot - INFO - 
+[34m===== Iteration 13 =====[0m
+2025-04-25 16:22:02,356 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00069
+2025-04-25 16:22:02,356 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=34.59, MACD=N/A, StochK=3.37
+2025-04-25 16:22:02,357 - ScalpingBot - INFO - Order Book Imbalance: 1.29 (Threshold: 1.5)
+2025-04-25 16:22:03,251 - ScalpingBot - INFO - Volatility (0.00069) adjusted order size factor: 1.000
+2025-04-25 16:22:03,252 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:22:03,252 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:22:03,252 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.29)[0m
+2025-04-25 16:22:03,252 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:22:03,253 - ScalpingBot - INFO -  -> [37m0: RSI (34.59) is neutral (30-70)[0m
+2025-04-25 16:22:03,253 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (3.37) & D (7.93) < 20 (oversold)[0m
+2025-04-25 16:22:03,253 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:22:13,254 - ScalpingBot - INFO - 
+[34m===== Iteration 14 =====[0m
+2025-04-25 16:22:14,549 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00069
+2025-04-25 16:22:14,549 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=33.66, MACD=N/A, StochK=3.37
+2025-04-25 16:22:14,550 - ScalpingBot - INFO - Order Book Imbalance: 1.94 (Threshold: 1.5)
+2025-04-25 16:22:15,423 - ScalpingBot - INFO - Volatility (0.00069) adjusted order size factor: 1.000
+2025-04-25 16:22:15,424 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:22:15,425 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:22:15,425 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.94)[0m
+2025-04-25 16:22:15,425 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:22:15,425 - ScalpingBot - INFO -  -> [37m0: RSI (33.66) is neutral (30-70)[0m
+2025-04-25 16:22:15,425 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (3.37) & D (7.93) < 20 (oversold)[0m
+2025-04-25 16:22:15,426 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:22:25,426 - ScalpingBot - INFO - 
+[34m===== Iteration 15 =====[0m
+2025-04-25 16:22:26,738 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00070
+2025-04-25 16:22:26,739 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=37.19, MACD=N/A, StochK=5.99
+2025-04-25 16:22:26,739 - ScalpingBot - INFO - Order Book Imbalance: 1.33 (Threshold: 1.5)
+2025-04-25 16:22:27,609 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:22:27,610 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:22:27,611 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:22:27,611 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.33)[0m
+2025-04-25 16:22:27,612 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:22:27,612 - ScalpingBot - INFO -  -> [37m0: RSI (37.19) is neutral (30-70)[0m
+2025-04-25 16:22:27,613 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (5.99) & D (8.81) < 20 (oversold)[0m
+2025-04-25 16:22:27,613 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:22:37,614 - ScalpingBot - INFO - 
+[34m===== Iteration 16 =====[0m
+2025-04-25 16:22:39,218 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00070
+2025-04-25 16:22:39,219 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=35.48, MACD=N/A, StochK=4.27
+2025-04-25 16:22:39,219 - ScalpingBot - INFO - Order Book Imbalance: 1.31 (Threshold: 1.5)
+2025-04-25 16:22:40,175 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:22:40,176 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:22:40,176 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:22:40,177 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.31)[0m
+2025-04-25 16:22:40,177 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:22:40,177 - ScalpingBot - INFO -  -> [37m0: RSI (35.48) is neutral (30-70)[0m
+2025-04-25 16:22:40,177 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (4.27) & D (8.23) < 20 (oversold)[0m
+2025-04-25 16:22:40,177 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:22:50,178 - ScalpingBot - INFO - 
+[34m===== Iteration 17 =====[0m
+2025-04-25 16:22:51,464 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00070
+2025-04-25 16:22:51,464 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=33.43, MACD=N/A, StochK=3.37
+2025-04-25 16:22:51,464 - ScalpingBot - INFO - Order Book Imbalance: 1.59 (Threshold: 1.5)
+2025-04-25 16:22:52,341 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:22:52,341 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:22:52,341 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:22:52,342 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.59)[0m
+2025-04-25 16:22:52,342 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:22:52,342 - ScalpingBot - INFO -  -> [37m0: RSI (33.43) is neutral (30-70)[0m
+2025-04-25 16:22:52,343 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (3.37) & D (7.93) < 20 (oversold)[0m
+2025-04-25 16:22:52,343 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:23:02,344 - ScalpingBot - INFO - 
+[34m===== Iteration 18 =====[0m
+2025-04-25 16:23:03,745 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00069
+2025-04-25 16:23:03,745 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=33.08, MACD=N/A, StochK=0.00
+2025-04-25 16:23:03,745 - ScalpingBot - INFO - Order Book Imbalance: 1.40 (Threshold: 1.5)
+2025-04-25 16:23:04,664 - ScalpingBot - INFO - Volatility (0.00069) adjusted order size factor: 1.000
+2025-04-25 16:23:04,665 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:23:04,665 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:23:04,666 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.40)[0m
+2025-04-25 16:23:04,666 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:23:04,666 - ScalpingBot - INFO -  -> [37m0: RSI (33.08) is neutral (30-70)[0m
+2025-04-25 16:23:04,667 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (4.60) < 20 (oversold)[0m
+2025-04-25 16:23:04,667 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:23:14,668 - ScalpingBot - INFO - 
+[34m===== Iteration 19 =====[0m
+2025-04-25 16:23:15,991 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00070
+2025-04-25 16:23:15,991 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=31.81, MACD=N/A, StochK=0.00
+2025-04-25 16:23:15,991 - ScalpingBot - INFO - Order Book Imbalance: 1.50 (Threshold: 1.5)
+2025-04-25 16:23:16,933 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:23:16,934 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:23:16,935 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:23:16,935 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.50)[0m
+2025-04-25 16:23:16,935 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:23:16,935 - ScalpingBot - INFO -  -> [37m0: RSI (31.81) is neutral (30-70)[0m
+2025-04-25 16:23:16,936 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (4.60) < 20 (oversold)[0m
+2025-04-25 16:23:16,936 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:23:26,936 - ScalpingBot - INFO - 
+[34m===== Iteration 20 =====[0m
+2025-04-25 16:23:28,331 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00070
+2025-04-25 16:23:28,332 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=31.37, MACD=N/A, StochK=0.00
+2025-04-25 16:23:28,333 - ScalpingBot - INFO - Order Book Imbalance: 1.58 (Threshold: 1.5)
+2025-04-25 16:23:29,644 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:23:29,645 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:23:29,646 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:23:29,646 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.58)[0m
+2025-04-25 16:23:29,646 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:23:29,647 - ScalpingBot - INFO -  -> [37m0: RSI (31.37) is neutral (30-70)[0m
+2025-04-25 16:23:29,647 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (4.60) < 20 (oversold)[0m
+2025-04-25 16:23:29,648 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:23:39,648 - ScalpingBot - INFO - 
+[34m===== Iteration 21 =====[0m
+2025-04-25 16:23:41,183 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00070
+2025-04-25 16:23:41,184 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=31.37, MACD=N/A, StochK=0.00
+2025-04-25 16:23:41,184 - ScalpingBot - INFO - Order Book Imbalance: 1.30 (Threshold: 1.5)
+2025-04-25 16:23:42,093 - ScalpingBot - INFO - Volatility (0.00070) adjusted order size factor: 1.000
+2025-04-25 16:23:42,094 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:23:42,095 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:23:42,095 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.30)[0m
+2025-04-25 16:23:42,095 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:23:42,096 - ScalpingBot - INFO -  -> [37m0: RSI (31.37) is neutral (30-70)[0m
+2025-04-25 16:23:42,096 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (4.60) < 20 (oversold)[0m
+2025-04-25 16:23:42,097 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:23:52,098 - ScalpingBot - INFO - 
+[34m===== Iteration 22 =====[0m
+2025-04-25 16:23:53,509 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00072
+2025-04-25 16:23:53,509 - ScalpingBot - INFO - Indicators: EMA=4.27, RSI=28.97, MACD=N/A, StochK=0.00
+2025-04-25 16:23:53,510 - ScalpingBot - INFO - Order Book Imbalance: 2.37 (Threshold: 1.5)
+2025-04-25 16:23:54,440 - ScalpingBot - INFO - Volatility (0.00072) adjusted order size factor: 1.000
+2025-04-25 16:23:54,441 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:23:54,442 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:23:54,442 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.37)[0m
+2025-04-25 16:23:54,442 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.27) (bearish trend)[0m
+2025-04-25 16:23:54,443 - ScalpingBot - INFO -  -> [32m+1: RSI (28.97) < 30 (oversold)[0m
+2025-04-25 16:23:54,443 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (4.60) < 20 (oversold)[0m
+2025-04-25 16:23:54,443 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:24:04,444 - ScalpingBot - INFO - 
+[34m===== Iteration 23 =====[0m
+2025-04-25 16:24:05,834 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00076
+2025-04-25 16:24:05,835 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=28.70, MACD=N/A, StochK=1.52
+2025-04-25 16:24:05,835 - ScalpingBot - INFO - Order Book Imbalance: 5.02 (Threshold: 1.5)
+2025-04-25 16:24:06,840 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:24:06,841 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:24:06,841 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:24:06,842 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 5.02)[0m
+2025-04-25 16:24:06,842 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:24:06,843 - ScalpingBot - INFO -  -> [32m+1: RSI (28.70) < 30 (oversold)[0m
+2025-04-25 16:24:06,843 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (1.52) & D (1.62) < 20 (oversold)[0m
+2025-04-25 16:24:06,843 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:24:16,844 - ScalpingBot - INFO - 
+[34m===== Iteration 24 =====[0m
+2025-04-25 16:24:18,298 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00076
+2025-04-25 16:24:18,299 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=25.82, MACD=N/A, StochK=0.00
+2025-04-25 16:24:18,299 - ScalpingBot - INFO - Order Book Imbalance: 1.13 (Threshold: 1.5)
+2025-04-25 16:24:19,129 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:24:19,130 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:24:19,130 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:24:19,130 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.13)[0m
+2025-04-25 16:24:19,130 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:24:19,131 - ScalpingBot - INFO -  -> [32m+1: RSI (25.82) < 30 (oversold)[0m
+2025-04-25 16:24:19,131 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (1.11) < 20 (oversold)[0m
+2025-04-25 16:24:19,131 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:24:29,132 - ScalpingBot - INFO - 
+[34m===== Iteration 25 =====[0m
+2025-04-25 16:24:30,390 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00076
+2025-04-25 16:24:30,390 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=24.96, MACD=N/A, StochK=0.00
+2025-04-25 16:24:30,390 - ScalpingBot - INFO - Order Book Imbalance: 3.11 (Threshold: 1.5)
+2025-04-25 16:24:31,233 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:24:31,233 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:24:31,233 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:24:31,234 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 3.11)[0m
+2025-04-25 16:24:31,234 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:24:31,234 - ScalpingBot - INFO -  -> [32m+1: RSI (24.96) < 30 (oversold)[0m
+2025-04-25 16:24:31,234 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (1.11) < 20 (oversold)[0m
+2025-04-25 16:24:31,234 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:24:41,235 - ScalpingBot - INFO - 
+[34m===== Iteration 26 =====[0m
+2025-04-25 16:24:42,633 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00076
+2025-04-25 16:24:42,633 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=24.74, MACD=N/A, StochK=0.00
+2025-04-25 16:24:42,634 - ScalpingBot - INFO - Order Book Imbalance: 0.73 (Threshold: 1.5)
+2025-04-25 16:24:43,477 - ScalpingBot - INFO - Volatility (0.00076) adjusted order size factor: 1.000
+2025-04-25 16:24:43,477 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:24:43,478 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:24:43,478 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.73)[0m
+2025-04-25 16:24:43,478 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:24:43,479 - ScalpingBot - INFO -  -> [32m+1: RSI (24.74) < 30 (oversold)[0m
+2025-04-25 16:24:43,479 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (1.11) < 20 (oversold)[0m
+2025-04-25 16:24:43,479 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:24:53,480 - ScalpingBot - INFO - 
+[34m===== Iteration 27 =====[0m
+2025-04-25 16:24:54,982 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00081
+2025-04-25 16:24:54,983 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=22.53, MACD=N/A, StochK=0.00
+2025-04-25 16:24:54,983 - ScalpingBot - INFO - Order Book Imbalance: 0.93 (Threshold: 1.5)
+2025-04-25 16:24:56,245 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:24:56,245 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:24:56,245 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:24:56,246 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.93)[0m
+2025-04-25 16:24:56,246 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:24:56,246 - ScalpingBot - INFO -  -> [32m+1: RSI (22.53) < 30 (oversold)[0m
+2025-04-25 16:24:56,246 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (1.11) < 20 (oversold)[0m
+2025-04-25 16:24:56,246 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:25:06,248 - ScalpingBot - INFO - 
+[34m===== Iteration 28 =====[0m
+2025-04-25 16:25:07,559 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:25:07,559 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=22.35, MACD=N/A, StochK=0.00
+2025-04-25 16:25:07,559 - ScalpingBot - INFO - Order Book Imbalance: 4.11 (Threshold: 1.5)
+2025-04-25 16:25:08,431 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:25:08,432 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:25:08,432 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:25:08,433 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 4.11)[0m
+2025-04-25 16:25:08,433 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:25:08,433 - ScalpingBot - INFO -  -> [32m+1: RSI (22.35) < 30 (oversold)[0m
+2025-04-25 16:25:08,434 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (0.00) < 20 (oversold)[0m
+2025-04-25 16:25:08,434 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:25:18,435 - ScalpingBot - INFO - 
+[34m===== Iteration 29 =====[0m
+2025-04-25 16:25:19,710 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:25:19,710 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=22.29, MACD=N/A, StochK=0.00
+2025-04-25 16:25:19,710 - ScalpingBot - INFO - Order Book Imbalance: 0.85 (Threshold: 1.5)
+2025-04-25 16:25:20,799 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:25:20,800 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:25:20,800 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:25:20,800 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.85)[0m
+2025-04-25 16:25:20,800 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:25:20,801 - ScalpingBot - INFO -  -> [32m+1: RSI (22.29) < 30 (oversold)[0m
+2025-04-25 16:25:20,801 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.00) & D (0.00) < 20 (oversold)[0m
+2025-04-25 16:25:20,801 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:25:30,802 - ScalpingBot - INFO - 
+[34m===== Iteration 30 =====[0m
+2025-04-25 16:25:32,129 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:25:32,129 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=23.01, MACD=N/A, StochK=0.38
+2025-04-25 16:25:32,130 - ScalpingBot - INFO - Order Book Imbalance: 0.91 (Threshold: 1.5)
+2025-04-25 16:25:33,034 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:25:33,035 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:25:33,035 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:25:33,036 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.91)[0m
+2025-04-25 16:25:33,036 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:25:33,037 - ScalpingBot - INFO -  -> [32m+1: RSI (23.01) < 30 (oversold)[0m
+2025-04-25 16:25:33,037 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.38) & D (0.13) < 20 (oversold)[0m
+2025-04-25 16:25:33,038 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:25:43,038 - ScalpingBot - INFO - 
+[34m===== Iteration 31 =====[0m
+2025-04-25 16:25:44,701 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:25:44,702 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=23.24, MACD=N/A, StochK=0.57
+2025-04-25 16:25:44,702 - ScalpingBot - INFO - Order Book Imbalance: 0.89 (Threshold: 1.5)
+2025-04-25 16:25:45,573 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:25:45,574 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:25:45,574 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:25:45,575 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.89)[0m
+2025-04-25 16:25:45,575 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:25:45,576 - ScalpingBot - INFO -  -> [32m+1: RSI (23.24) < 30 (oversold)[0m
+2025-04-25 16:25:45,576 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.57) & D (0.19) < 20 (oversold)[0m
+2025-04-25 16:25:45,577 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:25:55,577 - ScalpingBot - INFO - 
+[34m===== Iteration 32 =====[0m
+2025-04-25 16:25:57,242 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:25:57,242 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=23.46, MACD=N/A, StochK=0.76
+2025-04-25 16:25:57,243 - ScalpingBot - INFO - Order Book Imbalance: 0.99 (Threshold: 1.5)
+2025-04-25 16:25:58,330 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:25:58,330 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:25:58,331 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:25:58,331 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.99)[0m
+2025-04-25 16:25:58,331 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:25:58,331 - ScalpingBot - INFO -  -> [32m+1: RSI (23.46) < 30 (oversold)[0m
+2025-04-25 16:25:58,332 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.76) & D (0.25) < 20 (oversold)[0m
+2025-04-25 16:25:58,332 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:26:08,333 - ScalpingBot - INFO - 
+[34m===== Iteration 33 =====[0m
+2025-04-25 16:26:09,881 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00079
+2025-04-25 16:26:09,881 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=22.82, MACD=N/A, StochK=0.84
+2025-04-25 16:26:09,882 - ScalpingBot - INFO - Order Book Imbalance: 0.71 (Threshold: 1.5)
+2025-04-25 16:26:10,873 - ScalpingBot - INFO - Volatility (0.00079) adjusted order size factor: 1.000
+2025-04-25 16:26:10,873 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:26:10,874 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:26:10,875 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.71)[0m
+2025-04-25 16:26:10,875 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:26:10,875 - ScalpingBot - INFO -  -> [32m+1: RSI (22.82) < 30 (oversold)[0m
+2025-04-25 16:26:10,876 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (0.84) & D (0.47) < 20 (oversold)[0m
+2025-04-25 16:26:10,876 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:26:20,878 - ScalpingBot - INFO - 
+[34m===== Iteration 34 =====[0m
+2025-04-25 16:26:22,379 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00079
+2025-04-25 16:26:22,379 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=23.44, MACD=N/A, StochK=1.35
+2025-04-25 16:26:22,380 - ScalpingBot - INFO - Order Book Imbalance: 4.47 (Threshold: 1.5)
+2025-04-25 16:26:23,417 - ScalpingBot - INFO - Volatility (0.00079) adjusted order size factor: 1.000
+2025-04-25 16:26:23,418 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:26:23,418 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:26:23,418 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 4.47)[0m
+2025-04-25 16:26:23,419 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:26:23,419 - ScalpingBot - INFO -  -> [32m+1: RSI (23.44) < 30 (oversold)[0m
+2025-04-25 16:26:23,419 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (1.35) & D (0.64) < 20 (oversold)[0m
+2025-04-25 16:26:23,419 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:26:33,420 - ScalpingBot - INFO - 
+[34m===== Iteration 35 =====[0m
+2025-04-25 16:26:34,858 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:26:34,858 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=27.40, MACD=N/A, StochK=4.65
+2025-04-25 16:26:34,859 - ScalpingBot - INFO - Order Book Imbalance: 1.24 (Threshold: 1.5)
+2025-04-25 16:26:35,746 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:26:35,747 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:26:35,747 - ScalpingBot - INFO - Trade Signal Score: 1
+2025-04-25 16:26:35,748 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.24)[0m
+2025-04-25 16:26:35,748 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:26:35,748 - ScalpingBot - INFO -  -> [32m+1: RSI (27.40) < 30 (oversold)[0m
+2025-04-25 16:26:35,749 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (4.65) & D (1.74) < 20 (oversold)[0m
+2025-04-25 16:26:35,749 - ScalpingBot - INFO - Neutral signal score (1). No trade entry signal.
+2025-04-25 16:26:45,750 - ScalpingBot - INFO - 
+[34m===== Iteration 36 =====[0m
+2025-04-25 16:26:47,631 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00082
+2025-04-25 16:26:47,632 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=30.76, MACD=N/A, StochK=7.46
+2025-04-25 16:26:47,632 - ScalpingBot - INFO - Order Book Imbalance: 3.25 (Threshold: 1.5)
+2025-04-25 16:26:48,514 - ScalpingBot - INFO - Volatility (0.00083) adjusted order size factor: 1.000
+2025-04-25 16:26:48,515 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:26:48,515 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:26:48,515 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 3.25)[0m
+2025-04-25 16:26:48,515 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:26:48,516 - ScalpingBot - INFO -  -> [37m0: RSI (30.76) is neutral (30-70)[0m
+2025-04-25 16:26:48,516 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (7.46) & D (2.68) < 20 (oversold)[0m
+2025-04-25 16:26:48,516 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:26:58,517 - ScalpingBot - INFO - 
+[34m===== Iteration 37 =====[0m
+2025-04-25 16:26:59,798 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:26:59,798 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=34.27, MACD=N/A, StochK=19.68
+2025-04-25 16:26:59,798 - ScalpingBot - INFO - Order Book Imbalance: 1.23 (Threshold: 1.5)
+2025-04-25 16:27:00,855 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:27:00,855 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:27:00,856 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:27:00,856 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.23)[0m
+2025-04-25 16:27:00,856 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:27:00,856 - ScalpingBot - INFO -  -> [37m0: RSI (34.27) is neutral (30-70)[0m
+2025-04-25 16:27:00,857 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (19.68) & D (10.07) < 20 (oversold)[0m
+2025-04-25 16:27:00,857 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:27:10,858 - ScalpingBot - INFO - 
+[34m===== Iteration 38 =====[0m
+2025-04-25 16:27:12,240 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00081
+2025-04-25 16:27:12,241 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=37.11, MACD=N/A, StochK=22.03
+2025-04-25 16:27:12,241 - ScalpingBot - INFO - Order Book Imbalance: 4.32 (Threshold: 1.5)
+2025-04-25 16:27:13,077 - ScalpingBot - INFO - Volatility (0.00081) adjusted order size factor: 1.000
+2025-04-25 16:27:13,077 - ScalpingBot - INFO - [36mCalculated order size: 0.5142 USDT (Balance: 10.28 USDT)[0m
+2025-04-25 16:27:13,078 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:27:13,078 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 4.32)[0m
+2025-04-25 16:27:13,079 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:27:13,079 - ScalpingBot - INFO -  -> [37m0: RSI (37.11) is neutral (30-70)[0m
+2025-04-25 16:27:13,079 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (22.03) & D (10.85) neutral[0m
+2025-04-25 16:27:13,080 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:27:13,507 - ScalpingBot - INFO - [31mAttempting to place LIVE LIMIT SELL order...[0m
+2025-04-25 16:27:13,930 - ScalpingBot - ERROR - [31mLIVE Order Failed (Unexpected Error): Failed to place sell order. Error: 'NoneType' object has no attribute 'upper'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 953, in place_order
+    f"ID: {order['id']}, Type: {order['type']}, Side: {order['side'].upper()}, "
+                                                       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-04-25 16:27:23,952 - ScalpingBot - INFO - 
+[34m===== Iteration 39 =====[0m
+2025-04-25 16:27:26,211 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:27:26,211 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=35.81, MACD=N/A, StochK=20.96
+2025-04-25 16:27:26,211 - ScalpingBot - INFO - Order Book Imbalance: 1.58 (Threshold: 1.5)
+2025-04-25 16:27:27,241 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:27:27,241 - ScalpingBot - INFO - [36mCalculated order size: 0.5131 USDT (Balance: 10.26 USDT)[0m
+2025-04-25 16:27:27,242 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:27:27,242 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 1.58)[0m
+2025-04-25 16:27:27,243 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:27:27,243 - ScalpingBot - INFO -  -> [37m0: RSI (35.81) is neutral (30-70)[0m
+2025-04-25 16:27:27,244 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (20.96) & D (10.50) neutral[0m
+2025-04-25 16:27:27,244 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:27:27,820 - ScalpingBot - INFO - [31mAttempting to place LIVE LIMIT SELL order...[0m
+2025-04-25 16:27:28,455 - ScalpingBot - ERROR - [31mLIVE Order Failed (Unexpected Error): Failed to place sell order. Error: 'NoneType' object has no attribute 'upper'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 953, in place_order
+    f"ID: {order['id']}, Type: {order['type']}, Side: {order['side'].upper()}, "
+                                                       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-04-25 16:27:38,460 - ScalpingBot - INFO - 
+[34m===== Iteration 40 =====[0m
+2025-04-25 16:27:40,112 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:27:40,112 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=33.67, MACD=N/A, StochK=19.19
+2025-04-25 16:27:40,113 - ScalpingBot - INFO - Order Book Imbalance: 4.41 (Threshold: 1.5)
+2025-04-25 16:27:41,050 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:27:41,050 - ScalpingBot - INFO - [36mCalculated order size: 0.5120 USDT (Balance: 10.24 USDT)[0m
+2025-04-25 16:27:41,051 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:27:41,051 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 4.41)[0m
+2025-04-25 16:27:41,052 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:27:41,052 - ScalpingBot - INFO -  -> [37m0: RSI (33.67) is neutral (30-70)[0m
+2025-04-25 16:27:41,053 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (19.19) & D (9.90) < 20 (oversold)[0m
+2025-04-25 16:27:41,053 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:27:51,055 - ScalpingBot - INFO - 
+[34m===== Iteration 41 =====[0m
+2025-04-25 16:27:52,734 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00080
+2025-04-25 16:27:52,735 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=33.67, MACD=N/A, StochK=19.19
+2025-04-25 16:27:52,735 - ScalpingBot - INFO - Order Book Imbalance: 0.93 (Threshold: 1.5)
+2025-04-25 16:27:53,719 - ScalpingBot - INFO - Volatility (0.00080) adjusted order size factor: 1.000
+2025-04-25 16:27:53,720 - ScalpingBot - INFO - [36mCalculated order size: 0.5120 USDT (Balance: 10.24 USDT)[0m
+2025-04-25 16:27:53,721 - ScalpingBot - INFO - Trade Signal Score: 0
+2025-04-25 16:27:53,721 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.93)[0m
+2025-04-25 16:27:53,722 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:27:53,722 - ScalpingBot - INFO -  -> [37m0: RSI (33.67) is neutral (30-70)[0m
+2025-04-25 16:27:53,723 - ScalpingBot - INFO -  -> [32m+1: Stoch RSI K (19.19) & D (9.90) < 20 (oversold)[0m
+2025-04-25 16:27:53,723 - ScalpingBot - INFO - Neutral signal score (0). No trade entry signal.
+2025-04-25 16:28:03,724 - ScalpingBot - INFO - 
+[34m===== Iteration 42 =====[0m
+2025-04-25 16:28:05,185 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00077
+2025-04-25 16:28:05,185 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=33.63, MACD=N/A, StochK=28.19
+2025-04-25 16:28:05,185 - ScalpingBot - INFO - Order Book Imbalance: 0.83 (Threshold: 1.5)
+2025-04-25 16:28:06,075 - ScalpingBot - INFO - Volatility (0.00077) adjusted order size factor: 1.000
+2025-04-25 16:28:06,075 - ScalpingBot - INFO - [36mCalculated order size: 0.5120 USDT (Balance: 10.24 USDT)[0m
+2025-04-25 16:28:06,076 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:28:06,076 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.83)[0m
+2025-04-25 16:28:06,076 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:28:06,076 - ScalpingBot - INFO -  -> [37m0: RSI (33.63) is neutral (30-70)[0m
+2025-04-25 16:28:06,076 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (28.19) & D (18.99) neutral[0m
+2025-04-25 16:28:06,077 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:28:16,077 - ScalpingBot - INFO - 
+[34m===== Iteration 43 =====[0m
+2025-04-25 16:28:17,449 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00077
+2025-04-25 16:28:17,449 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=33.63, MACD=N/A, StochK=28.19
+2025-04-25 16:28:17,450 - ScalpingBot - INFO - Order Book Imbalance: 0.69 (Threshold: 1.5)
+2025-04-25 16:28:18,311 - ScalpingBot - INFO - Volatility (0.00077) adjusted order size factor: 1.000
+2025-04-25 16:28:18,312 - ScalpingBot - INFO - [36mCalculated order size: 0.5120 USDT (Balance: 10.24 USDT)[0m
+2025-04-25 16:28:18,312 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:28:18,313 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.69)[0m
+2025-04-25 16:28:18,313 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:28:18,314 - ScalpingBot - INFO -  -> [37m0: RSI (33.63) is neutral (30-70)[0m
+2025-04-25 16:28:18,314 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (28.19) & D (18.99) neutral[0m
+2025-04-25 16:28:18,315 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:28:28,316 - ScalpingBot - INFO - 
+[34m===== Iteration 44 =====[0m
+2025-04-25 16:28:29,622 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00079
+2025-04-25 16:28:29,623 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=38.21, MACD=N/A, StochK=32.27
+2025-04-25 16:28:29,623 - ScalpingBot - INFO - Order Book Imbalance: 1.20 (Threshold: 1.5)
+2025-04-25 16:28:30,779 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:28:30,780 - ScalpingBot - INFO - [36mCalculated order size: 0.5120 USDT (Balance: 10.24 USDT)[0m
+2025-04-25 16:28:30,781 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:28:30,781 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.20)[0m
+2025-04-25 16:28:30,781 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:28:30,782 - ScalpingBot - INFO -  -> [37m0: RSI (38.21) is neutral (30-70)[0m
+2025-04-25 16:28:30,782 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (32.27) & D (20.35) neutral[0m
+2025-04-25 16:28:30,783 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:28:40,784 - ScalpingBot - INFO - 
+[34m===== Iteration 45 =====[0m
+2025-04-25 16:28:42,592 - ScalpingBot - INFO - Market State: Price=4.26, Volatility=0.00078
+2025-04-25 16:28:42,592 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=36.85, MACD=N/A, StochK=31.06
+2025-04-25 16:28:42,593 - ScalpingBot - INFO - Order Book Imbalance: 2.65 (Threshold: 1.5)
+2025-04-25 16:28:45,440 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:28:45,441 - ScalpingBot - INFO - [36mCalculated order size: 0.5120 USDT (Balance: 10.24 USDT)[0m
+2025-04-25 16:28:45,441 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:28:45,441 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.65)[0m
+2025-04-25 16:28:45,441 - ScalpingBot - INFO -  -> [31m-1: Price (4.26) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:28:45,442 - ScalpingBot - INFO -  -> [37m0: RSI (36.85) is neutral (30-70)[0m
+2025-04-25 16:28:45,442 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (31.06) & D (19.94) neutral[0m
+2025-04-25 16:28:45,442 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:28:45,921 - ScalpingBot - INFO - [31mAttempting to place LIVE LIMIT SELL order...[0m
+2025-04-25 16:28:47,137 - ScalpingBot - ERROR - [31mLIVE Order Failed (Unexpected Error): Failed to place sell order. Error: 'NoneType' object has no attribute 'upper'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 953, in place_order
+    f"ID: {order['id']}, Type: {order['type']}, Side: {order['side'].upper()}, "
+                                                       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-04-25 16:28:57,148 - ScalpingBot - INFO - 
+[34m===== Iteration 46 =====[0m
+2025-04-25 16:28:58,916 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00078
+2025-04-25 16:28:58,917 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=34.81, MACD=N/A, StochK=29.24
+2025-04-25 16:28:58,917 - ScalpingBot - INFO - Order Book Imbalance: 1.23 (Threshold: 1.5)
+2025-04-25 16:28:59,834 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:28:59,835 - ScalpingBot - INFO - [36mCalculated order size: 0.5110 USDT (Balance: 10.22 USDT)[0m
+2025-04-25 16:28:59,835 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:28:59,835 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.23)[0m
+2025-04-25 16:28:59,835 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:28:59,836 - ScalpingBot - INFO -  -> [37m0: RSI (34.81) is neutral (30-70)[0m
+2025-04-25 16:28:59,836 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (29.24) & D (19.34) neutral[0m
+2025-04-25 16:28:59,836 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:29:09,837 - ScalpingBot - INFO - 
+[34m===== Iteration 47 =====[0m
+2025-04-25 16:29:11,460 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00078
+2025-04-25 16:29:11,460 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=34.43, MACD=N/A, StochK=34.07
+2025-04-25 16:29:11,460 - ScalpingBot - INFO - Order Book Imbalance: 1.24 (Threshold: 1.5)
+2025-04-25 16:29:12,766 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:29:12,766 - ScalpingBot - INFO - [36mCalculated order size: 0.5110 USDT (Balance: 10.22 USDT)[0m
+2025-04-25 16:29:12,767 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:29:12,767 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.24)[0m
+2025-04-25 16:29:12,767 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:29:12,767 - ScalpingBot - INFO -  -> [37m0: RSI (34.43) is neutral (30-70)[0m
+2025-04-25 16:29:12,768 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (34.07) & D (27.84) neutral[0m
+2025-04-25 16:29:12,768 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:29:22,768 - ScalpingBot - INFO - 
+[34m===== Iteration 48 =====[0m
+2025-04-25 16:29:24,112 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00078
+2025-04-25 16:29:24,112 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=33.83, MACD=N/A, StochK=33.41
+2025-04-25 16:29:24,112 - ScalpingBot - INFO - Order Book Imbalance: 0.84 (Threshold: 1.5)
+2025-04-25 16:29:25,064 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:29:25,065 - ScalpingBot - INFO - [36mCalculated order size: 0.5110 USDT (Balance: 10.22 USDT)[0m
+2025-04-25 16:29:25,065 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:29:25,065 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.84)[0m
+2025-04-25 16:29:25,066 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:29:25,066 - ScalpingBot - INFO -  -> [37m0: RSI (33.83) is neutral (30-70)[0m
+2025-04-25 16:29:25,066 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (33.41) & D (27.62) neutral[0m
+2025-04-25 16:29:25,067 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:29:35,067 - ScalpingBot - INFO - 
+[34m===== Iteration 49 =====[0m
+2025-04-25 16:29:36,564 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00077
+2025-04-25 16:29:36,565 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=33.25, MACD=N/A, StochK=32.78
+2025-04-25 16:29:36,565 - ScalpingBot - INFO - Order Book Imbalance: 2.82 (Threshold: 1.5)
+2025-04-25 16:29:37,546 - ScalpingBot - INFO - Volatility (0.00077) adjusted order size factor: 1.000
+2025-04-25 16:29:37,547 - ScalpingBot - INFO - [36mCalculated order size: 0.5110 USDT (Balance: 10.22 USDT)[0m
+2025-04-25 16:29:37,548 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:29:37,548 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.82)[0m
+2025-04-25 16:29:37,548 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:29:37,549 - ScalpingBot - INFO -  -> [37m0: RSI (33.25) is neutral (30-70)[0m
+2025-04-25 16:29:37,549 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (32.78) & D (27.41) neutral[0m
+2025-04-25 16:29:37,550 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:29:38,194 - ScalpingBot - INFO - [31mAttempting to place LIVE LIMIT SELL order...[0m
+2025-04-25 16:29:38,998 - ScalpingBot - ERROR - [31mLIVE Order Failed (Unexpected Error): Failed to place sell order. Error: 'NoneType' object has no attribute 'upper'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 953, in place_order
+    f"ID: {order['id']}, Type: {order['type']}, Side: {order['side'].upper()}, "
+                                                       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-04-25 16:29:49,007 - ScalpingBot - INFO - 
+[34m===== Iteration 50 =====[0m
+2025-04-25 16:29:50,745 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00077
+2025-04-25 16:29:50,746 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=32.69, MACD=N/A, StochK=32.16
+2025-04-25 16:29:50,748 - ScalpingBot - INFO - Order Book Imbalance: 2.55 (Threshold: 1.5)
+2025-04-25 16:29:51,614 - ScalpingBot - INFO - Volatility (0.00077) adjusted order size factor: 1.000
+2025-04-25 16:29:51,615 - ScalpingBot - INFO - [36mCalculated order size: 0.5099 USDT (Balance: 10.20 USDT)[0m
+2025-04-25 16:29:51,615 - ScalpingBot - INFO - Trade Signal Score: -2
+2025-04-25 16:29:51,615 - ScalpingBot - INFO -  -> [31m-1: Order book shows sell pressure (Imb: 2.55)[0m
+2025-04-25 16:29:51,616 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:29:51,616 - ScalpingBot - INFO -  -> [37m0: RSI (32.69) is neutral (30-70)[0m
+2025-04-25 16:29:51,616 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (32.16) & D (27.20) neutral[0m
+2025-04-25 16:29:51,616 - ScalpingBot - INFO - [31mPotential SHORT entry signal detected (Score: -2)[0m
+2025-04-25 16:29:52,050 - ScalpingBot - INFO - [31mAttempting to place LIVE LIMIT SELL order...[0m
+2025-04-25 16:29:52,452 - ScalpingBot - ERROR - [31mLIVE Order Failed (Unexpected Error): Failed to place sell order. Error: 'NoneType' object has no attribute 'upper'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 953, in place_order
+    f"ID: {order['id']}, Type: {order['type']}, Side: {order['side'].upper()}, "
+                                                       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-04-25 16:30:02,470 - ScalpingBot - INFO - 
+[34m===== Iteration 51 =====[0m
+2025-04-25 16:30:03,867 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00078
+2025-04-25 16:30:03,868 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=32.35, MACD=N/A, StochK=34.02
+2025-04-25 16:30:03,869 - ScalpingBot - INFO - Order Book Imbalance: 0.96 (Threshold: 1.5)
+2025-04-25 16:30:04,658 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:30:04,659 - ScalpingBot - INFO - [36mCalculated order size: 0.5088 USDT (Balance: 10.18 USDT)[0m
+2025-04-25 16:30:04,659 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:30:04,660 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 0.96)[0m
+2025-04-25 16:30:04,660 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:30:04,660 - ScalpingBot - INFO -  -> [37m0: RSI (32.35) is neutral (30-70)[0m
+2025-04-25 16:30:04,660 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (34.02) & D (32.03) neutral[0m
+2025-04-25 16:30:04,660 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:30:14,665 - ScalpingBot - INFO - 
+[34m===== Iteration 52 =====[0m
+2025-04-25 16:30:15,901 - ScalpingBot - INFO - Market State: Price=4.25, Volatility=0.00078
+2025-04-25 16:30:15,901 - ScalpingBot - INFO - Indicators: EMA=4.26, RSI=31.88, MACD=N/A, StochK=33.51
+2025-04-25 16:30:15,902 - ScalpingBot - INFO - Order Book Imbalance: 1.34 (Threshold: 1.5)
+2025-04-25 16:30:16,797 - ScalpingBot - INFO - Volatility (0.00078) adjusted order size factor: 1.000
+2025-04-25 16:30:16,799 - ScalpingBot - INFO - [36mCalculated order size: 0.5088 USDT (Balance: 10.18 USDT)[0m
+2025-04-25 16:30:16,802 - ScalpingBot - INFO - Trade Signal Score: -1
+2025-04-25 16:30:16,803 - ScalpingBot - INFO -  -> [37m0: Order book relatively balanced (Imb: 1.34)[0m
+2025-04-25 16:30:16,803 - ScalpingBot - INFO -  -> [31m-1: Price (4.25) below EMA (4.26) (bearish trend)[0m
+2025-04-25 16:30:16,804 - ScalpingBot - INFO -  -> [37m0: RSI (31.88) is neutral (30-70)[0m
+2025-04-25 16:30:16,804 - ScalpingBot - INFO -  -> [37m0: Stoch RSI K (33.51) & D (31.86) neutral[0m
+2025-04-25 16:30:16,804 - ScalpingBot - INFO - Neutral signal score (-1). No trade entry signal.
+2025-04-25 16:30:19,152 - ScalpingBot - WARNING - [33m
+Ctrl+C detected. Shutting down bot gracefully...[0m
+2025-04-25 16:30:19,152 - ScalpingBot - INFO - Checking for open orders for DOT/USDT:USDT to cancel...
+2025-04-25 16:30:19,589 - ScalpingBot - INFO - [33mFound 5 open order(s) for DOT/USDT:USDT. Attempting cancellation...[0m
+2025-04-25 16:30:19,996 - ScalpingBot - INFO - [33mCancelled order: ID 96c5b0d5-2242-4aeb-8962-3d8629f84959, Side: sell, Price: 4.26, Amount: 0.1[0m
+2025-04-25 16:30:20,436 - ScalpingBot - INFO - [33mCancelled order: ID 42b0562d-2c2f-4c5a-b019-027c9043ed38, Side: sell, Price: 4.2593, Amount: 0.1[0m
+2025-04-25 16:30:20,876 - ScalpingBot - INFO - [33mCancelled order: ID e2595504-c82a-4aef-b6d8-e1a4d62ba919, Side: sell, Price: 4.2599, Amount: 0.1[0m
+2025-04-25 16:30:21,296 - ScalpingBot - INFO - [33mCancelled order: ID 91099484-d4d0-4680-950d-fa878d54cb1f, Side: sell, Price: 4.2576, Amount: 0.1[0m
+2025-04-25 16:30:21,710 - ScalpingBot - INFO - [33mCancelled order: ID bf9ed8ab-98d2-4c41-ace1-93c8c6229b5b, Side: sell, Price: 4.2571, Amount: 0.1[0m
+2025-04-25 16:30:21,732 - ScalpingBot - INFO - Order cancellation attempt finished. Cancelled: 5, Failed/Not Found: 0.
+2025-04-25 16:30:21,734 - ScalpingBot - INFO - Scalping Bot has been stopped.

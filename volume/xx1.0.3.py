@@ -1,17 +1,14 @@
-import hashlib
-import hmac
 import json
 import logging
 import math
 import os
 import re
-import signal
 import sys
 import time
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal, ROUND_DOWN, ROUND_UP, getcontext, InvalidOperation
+from datetime import UTC, datetime, timedelta
+from decimal import ROUND_DOWN, ROUND_UP, Decimal, InvalidOperation, getcontext
 from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
+from typing import Any, TypedDict
 
 # --- Timezone Handling ---
 try:
@@ -19,41 +16,45 @@ try:
     from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 except ImportError:
     # Fallback for older Python versions or if tzdata is not installed
-    print("Warning: 'zoneinfo' module not found. Falling back to UTC. "
-          "Ensure Python 3.9+ and install 'tzdata' (`pip install tzdata`).")
     # Basic UTC fallback implementation mimicking ZoneInfo interface
-    class ZoneInfo: # type: ignore [no-redef]
+    class ZoneInfo:  # type: ignore [no-redef]
         """Basic UTC fallback implementation mimicking the zoneinfo.ZoneInfo interface."""
-        def __init__(self, key: str):
-            self._key = "UTC" # Store the key, though we always use UTC
-        def __call__(self, dt: Optional[datetime] = None) -> Optional[datetime]:
+        def __init__(self, key: str) -> None:
+            self._key = "UTC"  # Store the key, though we always use UTC
+
+        def __call__(self, dt: datetime | None = None) -> datetime | None:
             """Attach UTC timezone info to a datetime object."""
-            return dt.replace(tzinfo=timezone.utc) if dt else None
+            return dt.replace(tzinfo=UTC) if dt else None
+
         def fromutc(self, dt: datetime) -> datetime:
             """Convert a UTC datetime to this timezone (which is UTC)."""
-            return dt.replace(tzinfo=timezone.utc)
-        def utcoffset(self, dt: Optional[datetime]) -> timedelta:
+            return dt.replace(tzinfo=UTC)
+
+        def utcoffset(self, dt: datetime | None) -> timedelta:
             """Return the UTC offset (always zero for UTC)."""
             return timedelta(0)
-        def dst(self, dt: Optional[datetime]) -> timedelta:
+
+        def dst(self, dt: datetime | None) -> timedelta:
             """Return the DST offset (always zero for UTC)."""
             return timedelta(0)
-        def tzname(self, dt: Optional[datetime]) -> str:
+
+        def tzname(self, dt: datetime | None) -> str:
             """Return the timezone name (always 'UTC')."""
             return "UTC"
-    class ZoneInfoNotFoundError(Exception): # type: ignore [no-redef]
+    class ZoneInfoNotFoundError(Exception):  # type: ignore [no-redef]
         """Exception raised when a timezone is not found (fallback definition)."""
         pass
 
 # --- Third-Party Library Imports ---
+import ccxt  # Crypto Exchange Trading Library
 import numpy as np
 import pandas as pd
 import pandas_ta as ta  # Technical Analysis library
-import requests         # For HTTP requests (used by ccxt)
-import ccxt             # Crypto Exchange Trading Library
+import requests  # For HTTP requests (used by ccxt)
 
 # Colorama for colored console output
-from colorama import Fore, Style, init as colorama_init
+from colorama import Fore, Style
+from colorama import init as colorama_init
 
 # Dotenv for loading environment variables from a .env file
 from dotenv import load_dotenv
@@ -73,36 +74,32 @@ BOT_VERSION = "1.4.1"
 API_KEY = os.getenv("BYBIT_API_KEY")
 API_SECRET = os.getenv("BYBIT_API_SECRET")
 if not API_KEY or not API_SECRET:
-    print(f"{Fore.RED}{Style.BRIGHT}FATAL: BYBIT_API_KEY and BYBIT_API_SECRET environment variables are missing. "
-          f"Ensure they are set in your system or in a .env file. Exiting.{Style.RESET_ALL}")
     sys.exit(1)
 
 # --- Configuration & Logging ---
 CONFIG_FILE = "config.json"
 LOG_DIRECTORY = "bot_logs"
-DEFAULT_TIMEZONE_STR = "America/Chicago" # Default if not set in .env
+DEFAULT_TIMEZONE_STR = "America/Chicago"  # Default if not set in .env
 TIMEZONE_STR = os.getenv("TIMEZONE", DEFAULT_TIMEZONE_STR)
 try:
     TIMEZONE = ZoneInfo(TIMEZONE_STR)
 except ZoneInfoNotFoundError:
-    print(f"{Fore.RED}Timezone '{TIMEZONE_STR}' not found using 'zoneinfo'. Falling back to UTC.{Style.RESET_ALL}")
     TIMEZONE = ZoneInfo("UTC")
     TIMEZONE_STR = "UTC"
-except Exception as tz_err:
-    print(f"{Fore.RED}An error occurred initializing timezone '{TIMEZONE_STR}': {tz_err}. Falling back to UTC.{Style.RESET_ALL}")
+except Exception:
     TIMEZONE = ZoneInfo("UTC")
     TIMEZONE_STR = "UTC"
 
 # --- API & Timing Constants ---
 MAX_API_RETRIES: int = 3           # Max number of retries for failed API calls
 RETRY_DELAY_SECONDS: int = 5       # Initial delay between retries
-POSITION_CONFIRM_DELAY_SECONDS: int = 8 # Delay after placing order to confirm position status
+POSITION_CONFIRM_DELAY_SECONDS: int = 8  # Delay after placing order to confirm position status
 LOOP_DELAY_SECONDS: int = 15       # Base delay between main loop cycles
 BYBIT_API_KLINE_LIMIT: int = 1000  # Max klines per Bybit API request (V5)
 
 # --- Data & Strategy Constants ---
-VALID_INTERVALS: List[str] = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"] # Supported intervals in config
-CCXT_INTERVAL_MAP: Dict[str, str] = { # Map config intervals to CCXT timeframes
+VALID_INTERVALS: list[str] = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"]  # Supported intervals in config
+CCXT_INTERVAL_MAP: dict[str, str] = {  # Map config intervals to CCXT timeframes
     "1": "1m", "3": "3m", "5": "5m", "15": "15m", "30": "30m",
     "60": "1h", "120": "2h", "240": "4h", "D": "1d", "W": "1w", "M": "1M"
 }
@@ -114,7 +111,7 @@ DEFAULT_VT_LENGTH: int = 40
 DEFAULT_VT_ATR_PERIOD: int = 200
 DEFAULT_VT_VOL_EMA_LENGTH: int = 950
 DEFAULT_VT_ATR_MULTIPLIER: float = 3.0
-DEFAULT_VT_STEP_ATR_MULTIPLIER: float = 4.0 # Note: This param wasn't used in the original placeholder logic
+DEFAULT_VT_STEP_ATR_MULTIPLIER: float = 4.0  # Note: This param wasn't used in the original placeholder logic
 
 # Default Order Block (OB) parameters
 DEFAULT_OB_SOURCE: str = "Wicks"    # "Wicks" or "Body"
@@ -142,38 +139,40 @@ DIM: str = Style.DIM
 # --- Create Log Directory ---
 try:
     os.makedirs(LOG_DIRECTORY, exist_ok=True)
-except OSError as e:
-    print(f"{NEON_RED}{BRIGHT}FATAL: Could not create log directory '{LOG_DIRECTORY}': {e}. Exiting.{RESET}")
+except OSError:
     sys.exit(1)
 
 # --- Global State ---
-_shutdown_requested: bool = False # Flag for graceful shutdown
+_shutdown_requested: bool = False  # Flag for graceful shutdown
+
 
 # --- Type Definitions ---
 class OrderBlock(TypedDict):
     """Represents an identified Order Block."""
     id: str                 # Unique identifier (e.g., "BULL_1678886400000")
     type: str               # "BULL" or "BEAR"
-    timestamp: pd.Timestamp # Timestamp of the candle defining the block
+    timestamp: pd.Timestamp  # Timestamp of the candle defining the block
     top: Decimal            # Top price of the block
     bottom: Decimal         # Bottom price of the block
     active: bool            # Is the block currently considered active?
     violated: bool          # Has the block been violated?
-    violation_ts: Optional[pd.Timestamp] # Timestamp of violation
-    extended_to_ts: Optional[pd.Timestamp] # Timestamp the box is currently extended to
+    violation_ts: pd.Timestamp | None  # Timestamp of violation
+    extended_to_ts: pd.Timestamp | None  # Timestamp the box is currently extended to
+
 
 class StrategyAnalysisResults(TypedDict):
     """Results from the strategy analysis on a DataFrame."""
-    dataframe: pd.DataFrame # The analyzed DataFrame with indicators
+    dataframe: pd.DataFrame  # The analyzed DataFrame with indicators
     last_close: Decimal     # Last closing price
-    current_trend_up: Optional[bool] # Current trend direction (True=Up, False=Down, None=Undetermined)
-    trend_just_changed: bool # Did the trend change on the last candle?
-    active_bull_boxes: List[OrderBlock] # List of currently active bullish OBs
-    active_bear_boxes: List[OrderBlock] # List of currently active bearish OBs
-    vol_norm_int: Optional[int] # Normalized volume indicator value (if used)
-    atr: Optional[Decimal]    # Current ATR value
-    upper_band: Optional[Decimal] # Upper band value (from VT or other indicator)
-    lower_band: Optional[Decimal] # Lower band value (from VT or other indicator)
+    current_trend_up: bool | None  # Current trend direction (True=Up, False=Down, None=Undetermined)
+    trend_just_changed: bool  # Did the trend change on the last candle?
+    active_bull_boxes: list[OrderBlock]  # List of currently active bullish OBs
+    active_bear_boxes: list[OrderBlock]  # List of currently active bearish OBs
+    vol_norm_int: int | None  # Normalized volume indicator value (if used)
+    atr: Decimal | None    # Current ATR value
+    upper_band: Decimal | None  # Upper band value (from VT or other indicator)
+    lower_band: Decimal | None  # Lower band value (from VT or other indicator)
+
 
 class MarketInfo(TypedDict):
     """Standardized market information from ccxt, enhanced with derived fields."""
@@ -182,10 +181,10 @@ class MarketInfo(TypedDict):
     symbol: str             # Standardized symbol (e.g., 'BTC/USDT')
     base: str               # Base currency (e.g., 'BTC')
     quote: str              # Quote currency (e.g., 'USDT')
-    settle: Optional[str]   # Settle currency (usually for futures)
+    settle: str | None   # Settle currency (usually for futures)
     baseId: str             # Exchange-specific base ID
     quoteId: str            # Exchange-specific quote ID
-    settleId: Optional[str] # Exchange-specific settle ID
+    settleId: str | None  # Exchange-specific settle ID
     type: str               # Market type ('spot', 'swap', 'future', etc.)
     spot: bool
     margin: bool
@@ -194,75 +193,78 @@ class MarketInfo(TypedDict):
     option: bool
     active: bool            # Is the market currently active/tradeable?
     contract: bool          # Is it a contract (swap, future)?
-    linear: Optional[bool]  # Linear contract?
-    inverse: Optional[bool] # Inverse contract?
-    quanto: Optional[bool]  # Quanto contract?
+    linear: bool | None  # Linear contract?
+    inverse: bool | None  # Inverse contract?
+    quanto: bool | None  # Quanto contract?
     taker: float            # Taker fee rate
     maker: float            # Maker fee rate
-    contractSize: Optional[Any] # Size of one contract
-    expiry: Optional[int]
-    expiryDatetime: Optional[str]
-    strike: Optional[float]
-    optionType: Optional[str]
-    precision: Dict[str, Any] # Price and amount precision rules
-    limits: Dict[str, Any]    # Order size and cost limits
-    info: Dict[str, Any]      # Raw market data from the exchange
+    contractSize: Any | None  # Size of one contract
+    expiry: int | None
+    expiryDatetime: str | None
+    strike: float | None
+    optionType: str | None
+    precision: dict[str, Any]  # Price and amount precision rules
+    limits: dict[str, Any]    # Order size and cost limits
+    info: dict[str, Any]      # Raw market data from the exchange
     # --- Added/Derived Fields ---
     is_contract: bool         # Convenience flag: True if swap, future, or option
     is_linear: bool           # Convenience flag: True if linear contract
     is_inverse: bool          # Convenience flag: True if inverse contract
     contract_type_str: str    # "Spot", "Linear", "Inverse", "Option", or "Unknown"
-    min_amount_decimal: Optional[Decimal] # Minimum order size as Decimal
-    max_amount_decimal: Optional[Decimal] # Maximum order size as Decimal
-    min_cost_decimal: Optional[Decimal]   # Minimum order cost as Decimal
-    max_cost_decimal: Optional[Decimal]   # Maximum order cost as Decimal
-    amount_precision_step_decimal: Optional[Decimal] # Smallest amount increment as Decimal
-    price_precision_step_decimal: Optional[Decimal]  # Smallest price increment as Decimal
-    contract_size_decimal: Decimal # Contract size as Decimal (defaults to 1 if not applicable/found)
+    min_amount_decimal: Decimal | None  # Minimum order size as Decimal
+    max_amount_decimal: Decimal | None  # Maximum order size as Decimal
+    min_cost_decimal: Decimal | None   # Minimum order cost as Decimal
+    max_cost_decimal: Decimal | None   # Maximum order cost as Decimal
+    amount_precision_step_decimal: Decimal | None  # Smallest amount increment as Decimal
+    price_precision_step_decimal: Decimal | None  # Smallest price increment as Decimal
+    contract_size_decimal: Decimal  # Contract size as Decimal (defaults to 1 if not applicable/found)
+
 
 class PositionInfo(TypedDict):
     """Standardized position information from ccxt, enhanced with state tracking."""
     # --- Standard CCXT Fields (subset, may vary slightly by exchange) ---
-    id: Optional[str]       # Position ID (exchange-specific)
+    id: str | None       # Position ID (exchange-specific)
     symbol: str             # Standardized symbol (e.g., 'BTC/USDT')
-    timestamp: Optional[int] # Position creation/update timestamp (ms)
-    datetime: Optional[str]  # ISO 8601 datetime string
-    contracts: Optional[float] # Number of contracts (use size_decimal instead)
-    contractSize: Optional[Any] # Size of one contract for this position
-    side: Optional[str]      # 'long' or 'short'
-    notional: Optional[Any]  # Position value in quote currency (Decimal preferred)
-    leverage: Optional[Any]  # Position leverage (Decimal preferred)
-    unrealizedPnl: Optional[Any] # Unrealized profit/loss (Decimal preferred)
-    realizedPnl: Optional[Any]   # Realized profit/loss (Decimal preferred)
-    collateral: Optional[Any]    # Margin used for the position (Decimal preferred)
-    entryPrice: Optional[Any]    # Average entry price (Decimal preferred)
-    markPrice: Optional[Any]     # Current mark price (Decimal preferred)
-    liquidationPrice: Optional[Any] # Estimated liquidation price (Decimal preferred)
-    marginMode: Optional[str]    # 'isolated' or 'cross'
-    hedged: Optional[bool]       # Is hedging enabled for this position? (Less common now)
-    maintenanceMargin: Optional[Any] # Decimal preferred
-    maintenanceMarginPercentage: Optional[float]
-    initialMargin: Optional[Any] # Decimal preferred
-    initialMarginPercentage: Optional[float]
-    marginRatio: Optional[float]
-    lastUpdateTimestamp: Optional[int]
-    info: Dict[str, Any]         # Raw position data from the exchange
+    timestamp: int | None  # Position creation/update timestamp (ms)
+    datetime: str | None  # ISO 8601 datetime string
+    contracts: float | None  # Number of contracts (use size_decimal instead)
+    contractSize: Any | None  # Size of one contract for this position
+    side: str | None      # 'long' or 'short'
+    notional: Any | None  # Position value in quote currency (Decimal preferred)
+    leverage: Any | None  # Position leverage (Decimal preferred)
+    unrealizedPnl: Any | None  # Unrealized profit/loss (Decimal preferred)
+    realizedPnl: Any | None   # Realized profit/loss (Decimal preferred)
+    collateral: Any | None    # Margin used for the position (Decimal preferred)
+    entryPrice: Any | None    # Average entry price (Decimal preferred)
+    markPrice: Any | None     # Current mark price (Decimal preferred)
+    liquidationPrice: Any | None  # Estimated liquidation price (Decimal preferred)
+    marginMode: str | None    # 'isolated' or 'cross'
+    hedged: bool | None       # Is hedging enabled for this position? (Less common now)
+    maintenanceMargin: Any | None  # Decimal preferred
+    maintenanceMarginPercentage: float | None
+    initialMargin: Any | None  # Decimal preferred
+    initialMarginPercentage: float | None
+    marginRatio: float | None
+    lastUpdateTimestamp: int | None
+    info: dict[str, Any]         # Raw position data from the exchange
     # --- Added/Derived Fields ---
     size_decimal: Decimal        # Position size as Decimal (positive for long, negative for short)
-    stopLossPrice: Optional[str] # Current stop loss price (as string from exchange, needs parsing)
-    takeProfitPrice: Optional[str] # Current take profit price (as string from exchange, needs parsing)
-    trailingStopLoss: Optional[str] # Current trailing stop distance/price (as string, interpretation depends on exchange)
-    tslActivationPrice: Optional[str] # Trailing stop activation price (as string, if available)
+    stopLossPrice: str | None  # Current stop loss price (as string from exchange, needs parsing)
+    takeProfitPrice: str | None  # Current take profit price (as string from exchange, needs parsing)
+    trailingStopLoss: str | None  # Current trailing stop distance/price (as string, interpretation depends on exchange)
+    tslActivationPrice: str | None  # Trailing stop activation price (as string, if available)
     # --- Bot State Tracking (Managed internally by the bot) ---
     be_activated: bool           # Has the break-even logic been triggered for this position by the bot?
     tsl_activated: bool          # Has the trailing stop loss been activated (either by bot or detected on exchange)?
+
 
 class SignalResult(TypedDict):
     """Result of the signal generation process."""
     signal: str              # "BUY", "SELL", "HOLD", "EXIT_LONG", "EXIT_SHORT"
     reason: str              # Explanation for the signal
-    initial_sl: Optional[Decimal] # Calculated initial stop loss price for a new entry
-    initial_tp: Optional[Decimal] # Calculated initial take profit price for a new entry
+    initial_sl: Decimal | None  # Calculated initial stop loss price for a new entry
+    initial_tp: Decimal | None  # Calculated initial take profit price for a new entry
+
 
 # --- Logging Setup ---
 class SensitiveFormatter(logging.Formatter):
@@ -281,10 +283,11 @@ class SensitiveFormatter(logging.Formatter):
                 msg = msg.replace(key, self._api_key_placeholder)
             if secret and isinstance(secret, str) and secret in msg:
                 msg = msg.replace(secret, self._api_secret_placeholder)
-        except Exception as e:
+        except Exception:
             # Avoid crashing the application if redaction fails
-            print(f"WARNING: Error during log message redaction: {e}", file=sys.stderr)
+            pass
         return msg
+
 
 class NeonConsoleFormatter(SensitiveFormatter):
     """Formats log messages for the console with timestamps (local time) and colors."""
@@ -295,11 +298,11 @@ class NeonConsoleFormatter(SensitiveFormatter):
         logging.ERROR: NEON_RED,
         logging.CRITICAL: NEON_RED + BRIGHT
     }
-    _tz = TIMEZONE # Use the globally configured timezone
+    _tz = TIMEZONE  # Use the globally configured timezone
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the record with level-specific colors and local timestamp."""
-        level_color = self._level_colors.get(record.levelno, NEON_BLUE) # Default to blue
+        level_color = self._level_colors.get(record.levelno, NEON_BLUE)  # Default to blue
         log_fmt = (
             f"{NEON_BLUE}%(asctime)s{RESET} - "
             f"{level_color}%(levelname)-8s{RESET} - "
@@ -310,22 +313,22 @@ class NeonConsoleFormatter(SensitiveFormatter):
         # Note: Using a lambda for converter makes it dynamic per record
         formatter = logging.Formatter(log_fmt, datefmt='%H:%M:%S')
         # Dynamically set the converter to use the local timezone for this record
-        formatter.converter = lambda *args: datetime.now(self._tz).timetuple() # type: ignore[assignment]
+        formatter.converter = lambda *args: datetime.now(self._tz).timetuple()  # type: ignore[assignment]
 
         # Use the parent SensitiveFormatter's format method for redaction,
         # applying it to the message *after* it has been formatted with local time and colors.
-        original_message = record.getMessage() # Get original message before formatting
-        record.message = formatter.formatMessage(record) # Temporarily set the already formatted message
-        formatted_redacted_message = super().format(record) # Apply redaction to the formatted message
-        record.message = original_message # Restore original message for other handlers
+        original_message = record.getMessage()  # Get original message before formatting
+        record.message = formatter.formatMessage(record)  # Temporarily set the already formatted message
+        super().format(record)  # Apply redaction to the formatted message
+        record.message = original_message  # Restore original message for other handlers
 
         # The super().format() might re-apply formatting, let's directly return the redacted version
         # of the already formatted string. Need to adjust how SensitiveFormatter is used.
 
         # Let's rethink: format the message string first, then apply redaction to it.
-        log_entry = formatter.format(record) # Get the fully formatted string (local time, colors)
+        log_entry = formatter.format(record)  # Get the fully formatted string (local time, colors)
         # Now apply redaction to this final string
-        redacted_log_entry = log_entry # Start with the formatted string
+        redacted_log_entry = log_entry  # Start with the formatted string
         key = API_KEY
         secret = API_SECRET
         try:
@@ -333,15 +336,14 @@ class NeonConsoleFormatter(SensitiveFormatter):
                 redacted_log_entry = redacted_log_entry.replace(key, self._api_key_placeholder)
             if secret and isinstance(secret, str) and secret in redacted_log_entry:
                 redacted_log_entry = redacted_log_entry.replace(secret, self._api_secret_placeholder)
-        except Exception as e:
-            print(f"WARNING: Error during log message redaction in NeonConsoleFormatter: {e}", file=sys.stderr)
+        except Exception:
+            pass
 
         return redacted_log_entry
 
 
 def setup_logger(name: str) -> logging.Logger:
-    """
-    Sets up and returns a logger instance with file (UTC) and console (local) handlers.
+    """Sets up and returns a logger instance with file (UTC) and console (local) handlers.
 
     Args:
         name: The name for the logger (often the symbol or 'main'/'init').
@@ -360,41 +362,42 @@ def setup_logger(name: str) -> logging.Logger:
     if logger.hasHandlers():
         return logger
 
-    logger.setLevel(logging.DEBUG) # Capture all levels; handlers filter later
+    logger.setLevel(logging.DEBUG)  # Capture all levels; handlers filter later
 
     # --- File Handler (UTC Time) ---
     try:
         # Rotate log files (10MB each, keep 5 backups)
-        fh = RotatingFileHandler(log_filename, maxBytes=10*1024*1024, backupCount=5, encoding='utf-8')
+        fh = RotatingFileHandler(log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding='utf-8')
         # Use UTC time for file logs for consistency across servers/timezones
         file_formatter = SensitiveFormatter(
             "%(asctime)s.%(msecs)03d UTC %(levelname)-8s [%(name)s:%(lineno)d] %(message)s",
             datefmt='%Y-%m-%d %H:%M:%S'
         )
-        file_formatter.converter = time.gmtime # Use UTC time tuple
+        file_formatter.converter = time.gmtime  # Use UTC time tuple
         fh.setFormatter(file_formatter)
-        fh.setLevel(logging.DEBUG) # Log everything to the file
+        fh.setLevel(logging.DEBUG)  # Log everything to the file
         logger.addHandler(fh)
-    except Exception as e:
+    except Exception:
         # Log setup errors should be visible on the console
-        print(f"{NEON_RED}Error setting up file logger '{log_filename}': {e}{RESET}")
+        pass
 
     # --- Console Handler (Local Time) ---
     try:
         sh = logging.StreamHandler(sys.stdout)
         # The NeonConsoleFormatter handles local time and colors internally
-        sh.setFormatter(NeonConsoleFormatter("%(message)s")) # Basic format string, formatter class does the work
+        sh.setFormatter(NeonConsoleFormatter("%(message)s"))  # Basic format string, formatter class does the work
 
         # Set console log level from environment variable or default to INFO
         log_level_str = os.getenv("CONSOLE_LOG_LEVEL", "INFO").upper()
         log_level = getattr(logging, log_level_str, logging.INFO)
         sh.setLevel(log_level)
         logger.addHandler(sh)
-    except Exception as e:
-        print(f"{NEON_RED}Error setting up console logger: {e}{RESET}")
+    except Exception:
+        pass
 
-    logger.propagate = False # Prevent messages going to the root logger
+    logger.propagate = False  # Prevent messages going to the root logger
     return logger
+
 
 # --- Initial Logger ---
 # Used for setup messages before symbol-specific loggers are created
@@ -404,10 +407,10 @@ init_logger.info(f"Using Timezone: {TIMEZONE_STR} ({TIMEZONE}) for console logs.
 # Add a note about requirements
 init_logger.debug("Ensure required packages are installed: pandas, pandas_ta, numpy, ccxt, requests, python-dotenv, colorama, tzdata (optional but recommended)")
 
+
 # --- Configuration Loading & Validation ---
-def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any], parent_key: str = "") -> Tuple[Dict[str, Any], bool]:
-    """
-    Recursively ensures all keys from default_config exist in config.
+def _ensure_config_keys(config: dict[str, Any], default_config: dict[str, Any], parent_key: str = "") -> tuple[dict[str, Any], bool]:
+    """Recursively ensures all keys from default_config exist in config.
     Adds missing keys with default values and logs changes.
 
     Args:
@@ -439,23 +442,23 @@ def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any], 
              # Basic type mismatch check (excluding None defaults)
              # More robust type checking happens during validation
              # init_logger.debug(f"Config Note: Type mismatch for '{full_key_path}'. Expected {type(default_value)}, got {type(updated_config.get(key))}. Validation will handle.")
-             pass # Let validation handle corrections
+             pass  # Let validation handle corrections
 
     return updated_config, changed
 
+
 def _validate_and_correct_numeric(
-    cfg_level: Dict[str, Any],
-    default_level: Dict[str, Any],
+    cfg_level: dict[str, Any],
+    default_level: dict[str, Any],
     leaf_key: str,
     key_path: str,
-    min_val: Union[Decimal, int, float],
-    max_val: Union[Decimal, int, float],
+    min_val: Decimal | int | float,
+    max_val: Decimal | int | float,
     is_strict_min: bool = False,
     is_int: bool = False,
     allow_zero: bool = False
 ) -> bool:
-    """
-    Validates a numeric value within a config dictionary level.
+    """Validates a numeric value within a config dictionary level.
     Corrects type (e.g., str -> int/float, float -> int) and clamps to range if necessary,
     using the default value as a fallback for invalid types or out-of-range values.
 
@@ -476,7 +479,7 @@ def _validate_and_correct_numeric(
     original_val = cfg_level.get(leaf_key)
     default_val = default_level.get(leaf_key)
     corrected = False
-    final_val = original_val # Assume no change initially
+    final_val = original_val  # Assume no change initially
 
     try:
         # Explicitly disallow boolean types for numeric fields
@@ -503,14 +506,13 @@ def _validate_and_correct_numeric(
             raise ValueError(f"Value {num_val} outside allowed range {'(' if is_strict_min else '['}{min_val}, {max_val}{']'}{' or 0' if allow_zero else ''}.")
 
         # Type Check and Correction (if needed)
-        target_type = int if is_int else float
         needs_type_correction = False
 
         if is_int:
             # Check if the Decimal value has fractional part or if original type wasn't int
             if num_val % 1 != 0 or not isinstance(original_val, int):
                 needs_type_correction = True
-                final_val = int(num_val.to_integral_value(rounding=ROUND_DOWN)) # Truncate towards zero for safety
+                final_val = int(num_val.to_integral_value(rounding=ROUND_DOWN))  # Truncate towards zero for safety
                 # Re-check range after potential truncation
                 final_dec = Decimal(final_val)
                 min_check_passed = final_dec > min_dec if is_strict_min else final_dec >= min_dec
@@ -518,9 +520,9 @@ def _validate_and_correct_numeric(
                 if not range_check_passed and not (allow_zero and final_dec.is_zero()):
                     raise ValueError(f"Value truncated to {final_val}, which is outside allowed range.")
             else:
-                final_val = int(num_val) # Already an integer conceptually
+                final_val = int(num_val)  # Already an integer conceptually
 
-        else: # Expecting float
+        else:  # Expecting float
             # Check if original type wasn't float (or int which is acceptable)
             if not isinstance(original_val, (float, int)):
                  needs_type_correction = True
@@ -531,11 +533,11 @@ def _validate_and_correct_numeric(
             if isinstance(original_val, float) and abs(original_val - converted_float) > 1e-9:
                  needs_type_correction = True
                  final_val = converted_float
-            elif isinstance(original_val, int): # Allow int if it converts cleanly to float
+            elif isinstance(original_val, int):  # Allow int if it converts cleanly to float
                  final_val = float(original_val)
                  # Mark as correction only if original wasn't float/int
                  # needs_type_correction = True # Optional: Mark int->float as correction
-            else: # Already a float and close enough
+            else:  # Already a float and close enough
                  final_val = converted_float
 
         if needs_type_correction:
@@ -551,7 +553,7 @@ def _validate_and_correct_numeric(
             f"Using default: {repr(default_val)}. Error: {e}. "
             f"Expected: {expected_type}, Range: {range_str}{RESET}"
         )
-        final_val = default_val # Use default value on error
+        final_val = default_val  # Use default value on error
         corrected = True
 
     # Update the config dictionary if a correction was made
@@ -561,9 +563,8 @@ def _validate_and_correct_numeric(
     return corrected
 
 
-def load_config(filepath: str) -> Dict[str, Any]:
-    """
-    Loads configuration from a JSON file, creates a default one if missing,
+def load_config(filepath: str) -> dict[str, Any]:
+    """Loads configuration from a JSON file, creates a default one if missing,
     validates parameters, ensures all necessary keys are present, and saves corrections.
 
     Args:
@@ -572,55 +573,55 @@ def load_config(filepath: str) -> Dict[str, Any]:
     Returns:
         The loaded and validated configuration dictionary.
     """
-    global QUOTE_CURRENCY # Allow updating the global QUOTE_CURRENCY constant
+    global QUOTE_CURRENCY  # Allow updating the global QUOTE_CURRENCY constant
     init_logger.info(f"{Fore.CYAN}# Loading configuration from '{filepath}'...{Style.RESET_ALL}")
 
     default_config = {
         "trading_pairs": ["BTC/USDT"],
-        "interval": "5", # Default timeframe (must be in VALID_INTERVALS)
-        "retry_delay": RETRY_DELAY_SECONDS, # Use constant default
-        "fetch_limit": DEFAULT_FETCH_LIMIT, # Use constant default
-        "orderbook_limit": 25, # Limit for order book fetching (if used later)
-        "enable_trading": False, # Safety default: trading disabled
+        "interval": "5",  # Default timeframe (must be in VALID_INTERVALS)
+        "retry_delay": RETRY_DELAY_SECONDS,  # Use constant default
+        "fetch_limit": DEFAULT_FETCH_LIMIT,  # Use constant default
+        "orderbook_limit": 25,  # Limit for order book fetching (if used later)
+        "enable_trading": False,  # Safety default: trading disabled
         "use_sandbox": True,    # Safety default: use sandbox environment
-        "risk_per_trade": 0.01, # Risk 1% of capital per trade (as float 0.0 to 1.0)
+        "risk_per_trade": 0.01,  # Risk 1% of capital per trade (as float 0.0 to 1.0)
         "leverage": 20,         # Default leverage (integer, 0 for spot/no leverage)
-        "max_concurrent_positions": 1, # Max simultaneous positions (integer >= 1)
-        "quote_currency": "USDT", # Default quote currency (string)
-        "loop_delay_seconds": LOOP_DELAY_SECONDS, # Use constant default (integer > 0)
-        "position_confirm_delay_seconds": POSITION_CONFIRM_DELAY_SECONDS, # Use constant default (integer > 0)
+        "max_concurrent_positions": 1,  # Max simultaneous positions (integer >= 1)
+        "quote_currency": "USDT",  # Default quote currency (string)
+        "loop_delay_seconds": LOOP_DELAY_SECONDS,  # Use constant default (integer > 0)
+        "position_confirm_delay_seconds": POSITION_CONFIRM_DELAY_SECONDS,  # Use constant default (integer > 0)
 
         "strategy_params": {
-            "vt_length": DEFAULT_VT_LENGTH, # int > 0
-            "vt_atr_period": DEFAULT_VT_ATR_PERIOD, # int > 0
-            "vt_vol_ema_length": DEFAULT_VT_VOL_EMA_LENGTH, # int > 0
-            "vt_atr_multiplier": float(DEFAULT_VT_ATR_MULTIPLIER), # float > 0
-            "vt_step_atr_multiplier": float(DEFAULT_VT_STEP_ATR_MULTIPLIER), # float > 0
-            "ob_source": DEFAULT_OB_SOURCE, # "Wicks" or "Body"
-            "ph_left": DEFAULT_PH_LEFT, # int > 0
-            "ph_right": DEFAULT_PH_RIGHT, # int > 0
-            "pl_left": DEFAULT_PL_LEFT, # int > 0
-            "pl_right": DEFAULT_PL_RIGHT, # int > 0
-            "ob_extend": DEFAULT_OB_EXTEND, # boolean
-            "ob_max_boxes": DEFAULT_OB_MAX_BOXES, # int > 0
-            "ob_entry_proximity_factor": 1.005, # float >= 1.0 (multiplier for OB range)
-            "ob_exit_proximity_factor": 1.001, # float >= 1.0 (multiplier for opposite OB range)
+            "vt_length": DEFAULT_VT_LENGTH,  # int > 0
+            "vt_atr_period": DEFAULT_VT_ATR_PERIOD,  # int > 0
+            "vt_vol_ema_length": DEFAULT_VT_VOL_EMA_LENGTH,  # int > 0
+            "vt_atr_multiplier": float(DEFAULT_VT_ATR_MULTIPLIER),  # float > 0
+            "vt_step_atr_multiplier": float(DEFAULT_VT_STEP_ATR_MULTIPLIER),  # float > 0
+            "ob_source": DEFAULT_OB_SOURCE,  # "Wicks" or "Body"
+            "ph_left": DEFAULT_PH_LEFT,  # int > 0
+            "ph_right": DEFAULT_PH_RIGHT,  # int > 0
+            "pl_left": DEFAULT_PL_LEFT,  # int > 0
+            "pl_right": DEFAULT_PL_RIGHT,  # int > 0
+            "ob_extend": DEFAULT_OB_EXTEND,  # boolean
+            "ob_max_boxes": DEFAULT_OB_MAX_BOXES,  # int > 0
+            "ob_entry_proximity_factor": 1.005,  # float >= 1.0 (multiplier for OB range)
+            "ob_exit_proximity_factor": 1.001,  # float >= 1.0 (multiplier for opposite OB range)
         },
 
         "protection": {
-            "enable_trailing_stop": True, # boolean
-            "trailing_stop_callback_rate": 0.005, # float > 0 (e.g., 0.005 for 0.5%)
-            "trailing_stop_activation_percentage": 0.003, # float >= 0 (e.g., 0.003 for 0.3% move)
-            "enable_break_even": True, # boolean
-            "break_even_trigger_atr_multiple": 1.0, # float > 0 (multiple of ATR)
-            "break_even_offset_ticks": 2, # int >= 0 (number of price ticks)
-            "initial_stop_loss_atr_multiple": 1.8, # float > 0 (multiple of ATR)
-            "initial_take_profit_atr_multiple": 0.7, # float >= 0 (multiple of ATR, 0 means no TP)
+            "enable_trailing_stop": True,  # boolean
+            "trailing_stop_callback_rate": 0.005,  # float > 0 (e.g., 0.005 for 0.5%)
+            "trailing_stop_activation_percentage": 0.003,  # float >= 0 (e.g., 0.003 for 0.3% move)
+            "enable_break_even": True,  # boolean
+            "break_even_trigger_atr_multiple": 1.0,  # float > 0 (multiple of ATR)
+            "break_even_offset_ticks": 2,  # int >= 0 (number of price ticks)
+            "initial_stop_loss_atr_multiple": 1.8,  # float > 0 (multiple of ATR)
+            "initial_take_profit_atr_multiple": 0.7,  # float >= 0 (multiple of ATR, 0 means no TP)
         }
     }
 
     config_needs_saving: bool = False
-    loaded_config: Dict[str, Any] = {}
+    loaded_config: dict[str, Any] = {}
 
     # --- File Existence Check ---
     if not os.path.exists(filepath):
@@ -635,16 +636,16 @@ def load_config(filepath: str) -> Dict[str, Any]:
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             init_logger.info(f"Using default quote currency: {NEON_YELLOW}{QUOTE_CURRENCY}{RESET}")
             return default_config
-        except IOError as e:
+        except OSError as e:
             init_logger.critical(f"{NEON_RED}FATAL: Error creating config file '{filepath}': {e}. Using internal defaults.{RESET}")
             # Still update global QUOTE_CURRENCY from internal default
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             init_logger.info(f"Using internal default quote currency: {NEON_YELLOW}{QUOTE_CURRENCY}{RESET}")
-            return default_config # Return default in-memory config
+            return default_config  # Return default in-memory config
 
     # --- File Loading ---
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             loaded_config = json.load(f)
         if not isinstance(loaded_config, dict):
             raise TypeError("Configuration file content is not a valid JSON object.")
@@ -658,7 +659,7 @@ def load_config(filepath: str) -> Dict[str, Any]:
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             init_logger.info(f"Using default quote currency: {NEON_YELLOW}{QUOTE_CURRENCY}{RESET}")
             return default_config
-        except IOError as e_create:
+        except OSError as e_create:
             init_logger.critical(f"{NEON_RED}FATAL: Error recreating config file: {e_create}. Using internal defaults.{RESET}")
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             init_logger.info(f"Using internal default quote currency: {NEON_YELLOW}{QUOTE_CURRENCY}{RESET}")
@@ -674,13 +675,13 @@ def load_config(filepath: str) -> Dict[str, Any]:
         # Ensure all default keys exist, add missing ones
         updated_config, keys_added = _ensure_config_keys(loaded_config, default_config)
         if keys_added:
-            config_needs_saving = True # Mark for saving later
+            config_needs_saving = True  # Mark for saving later
 
         # --- Validation Logic ---
         init_logger.debug("# Validating configuration parameters...")
 
         # Helper function to navigate nested dicts for validation
-        def get_nested_levels(cfg: Dict, path: str) -> Tuple[Optional[Dict], Optional[Dict], Optional[str]]:
+        def get_nested_levels(cfg: dict, path: str) -> tuple[dict | None, dict | None, str | None]:
             """Gets the dict level and leaf key for validation."""
             keys = path.split('.')
             current_cfg_level = cfg
@@ -701,7 +702,7 @@ def load_config(filepath: str) -> Dict[str, Any]:
                 return None, None, None
 
         # Define validation function that uses the helper
-        def validate_numeric(cfg: Dict, key_path: str, min_val, max_val, is_strict_min=False, is_int=False, allow_zero=False):
+        def validate_numeric(cfg: dict, key_path: str, min_val, max_val, is_strict_min=False, is_int=False, allow_zero=False) -> None:
             nonlocal config_needs_saving
             cfg_level, def_level, leaf_key = get_nested_levels(cfg, key_path)
             if cfg_level is None or def_level is None or leaf_key is None:
@@ -712,10 +713,10 @@ def load_config(filepath: str) -> Dict[str, Any]:
                 try:
                      for key in keys[:-1]: current_cfg = current_cfg[key]
                      if isinstance(current_cfg, dict):
-                          current_cfg[keys[-1]] = default_config # Set default value
+                          current_cfg[keys[-1]] = default_config  # Set default value
                           config_needs_saving = True
                           init_logger.warning(f"Config validation: Resetting '{key_path}' to default due to access error.")
-                except: pass # Ignore errors during recovery attempt
+                except: pass  # Ignore errors during recovery attempt
                 return
 
             # Check if key exists at the leaf level (should exist due to _ensure_config_keys)
@@ -733,12 +734,12 @@ def load_config(filepath: str) -> Dict[str, Any]:
             if corrected:
                 config_needs_saving = True
 
-        def validate_boolean(cfg: Dict, key_path: str):
+        def validate_boolean(cfg: dict, key_path: str) -> None:
             nonlocal config_needs_saving
             cfg_level, def_level, leaf_key = get_nested_levels(cfg, key_path)
-            if cfg_level is None or def_level is None or leaf_key is None: return # Error handled
+            if cfg_level is None or def_level is None or leaf_key is None: return  # Error handled
 
-            if leaf_key not in cfg_level: # Should not happen
+            if leaf_key not in cfg_level:  # Should not happen
                  cfg_level[leaf_key] = def_level[leaf_key]
                  config_needs_saving = True
                  return
@@ -748,12 +749,12 @@ def load_config(filepath: str) -> Dict[str, Any]:
                 cfg_level[leaf_key] = def_level[leaf_key]
                 config_needs_saving = True
 
-        def validate_string_choice(cfg: Dict, key_path: str, choices: List[str]):
+        def validate_string_choice(cfg: dict, key_path: str, choices: list[str]) -> None:
              nonlocal config_needs_saving
              cfg_level, def_level, leaf_key = get_nested_levels(cfg, key_path)
-             if cfg_level is None or def_level is None or leaf_key is None: return # Error handled
+             if cfg_level is None or def_level is None or leaf_key is None: return  # Error handled
 
-             if leaf_key not in cfg_level: # Should not happen
+             if leaf_key not in cfg_level:  # Should not happen
                  cfg_level[leaf_key] = def_level[leaf_key]
                  config_needs_saving = True
                  return
@@ -775,11 +776,11 @@ def load_config(filepath: str) -> Dict[str, Any]:
         validate_string_choice(updated_config, "interval", VALID_INTERVALS)
         validate_numeric(updated_config, "retry_delay", 1, 60, is_int=True)
         validate_numeric(updated_config, "fetch_limit", 50, MAX_DF_LEN, is_int=True)
-        validate_numeric(updated_config, "risk_per_trade", 0.0, 1.0, is_strict_min=True) # Risk must be > 0 and <= 1.0 (100%)
-        validate_numeric(updated_config, "leverage", 0, 200, is_int=True, allow_zero=True) # Allow 0 for spot/no leverage
+        validate_numeric(updated_config, "risk_per_trade", 0.0, 1.0, is_strict_min=True)  # Risk must be > 0 and <= 1.0 (100%)
+        validate_numeric(updated_config, "leverage", 0, 200, is_int=True, allow_zero=True)  # Allow 0 for spot/no leverage
         validate_numeric(updated_config, "loop_delay_seconds", 1, 3600, is_int=True)
         validate_numeric(updated_config, "position_confirm_delay_seconds", 1, 60, is_int=True)
-        validate_numeric(updated_config, "max_concurrent_positions", 1, 100, is_int=True) # Example range, must be >= 1
+        validate_numeric(updated_config, "max_concurrent_positions", 1, 100, is_int=True)  # Example range, must be >= 1
 
         if not isinstance(updated_config.get("quote_currency"), str) or not updated_config.get("quote_currency"):
             init_logger.warning(f"{NEON_YELLOW}Config Validation: Invalid 'quote_currency'. Must be a non-empty string. Using default '{default_config['quote_currency']}'.{RESET}")
@@ -803,20 +804,20 @@ def load_config(filepath: str) -> Dict[str, Any]:
         validate_numeric(updated_config, "strategy_params.pl_left", 1, 100, is_int=True)
         validate_numeric(updated_config, "strategy_params.pl_right", 1, 100, is_int=True)
         validate_numeric(updated_config, "strategy_params.ob_max_boxes", 1, 500, is_int=True)
-        validate_numeric(updated_config, "strategy_params.ob_entry_proximity_factor", 1.0, 1.1) # e.g., 1.0 to 1.1 range (must be >= 1.0)
-        validate_numeric(updated_config, "strategy_params.ob_exit_proximity_factor", 1.0, 1.1) # e.g., 1.0 to 1.1 range (must be >= 1.0)
+        validate_numeric(updated_config, "strategy_params.ob_entry_proximity_factor", 1.0, 1.1)  # e.g., 1.0 to 1.1 range (must be >= 1.0)
+        validate_numeric(updated_config, "strategy_params.ob_exit_proximity_factor", 1.0, 1.1)  # e.g., 1.0 to 1.1 range (must be >= 1.0)
         validate_string_choice(updated_config, "strategy_params.ob_source", ["Wicks", "Body"])
         validate_boolean(updated_config, "strategy_params.ob_extend")
 
         # Protection Params
         validate_boolean(updated_config, "protection.enable_trailing_stop")
         validate_boolean(updated_config, "protection.enable_break_even")
-        validate_numeric(updated_config, "protection.trailing_stop_callback_rate", 0.0, 0.1, is_strict_min=True) # Must be > 0
-        validate_numeric(updated_config, "protection.trailing_stop_activation_percentage", 0.0, 0.1, allow_zero=True) # Can be 0
-        validate_numeric(updated_config, "protection.break_even_trigger_atr_multiple", 0.0, 10.0, is_strict_min=True) # Must be > 0
-        validate_numeric(updated_config, "protection.break_even_offset_ticks", 0, 1000, is_int=True, allow_zero=True) # Can be 0
-        validate_numeric(updated_config, "protection.initial_stop_loss_atr_multiple", 0.0, 20.0, is_strict_min=True) # SL > 0
-        validate_numeric(updated_config, "protection.initial_take_profit_atr_multiple", 0.0, 20.0, allow_zero=True) # TP can be 0 (disabled)
+        validate_numeric(updated_config, "protection.trailing_stop_callback_rate", 0.0, 0.1, is_strict_min=True)  # Must be > 0
+        validate_numeric(updated_config, "protection.trailing_stop_activation_percentage", 0.0, 0.1, allow_zero=True)  # Can be 0
+        validate_numeric(updated_config, "protection.break_even_trigger_atr_multiple", 0.0, 10.0, is_strict_min=True)  # Must be > 0
+        validate_numeric(updated_config, "protection.break_even_offset_ticks", 0, 1000, is_int=True, allow_zero=True)  # Can be 0
+        validate_numeric(updated_config, "protection.initial_stop_loss_atr_multiple", 0.0, 20.0, is_strict_min=True)  # SL > 0
+        validate_numeric(updated_config, "protection.initial_take_profit_atr_multiple", 0.0, 20.0, allow_zero=True)  # TP can be 0 (disabled)
 
         # --- Save Updated Config if Needed ---
         if config_needs_saving:
@@ -839,13 +840,14 @@ def load_config(filepath: str) -> Dict[str, Any]:
         init_logger.info(f"Using internal default quote currency: {NEON_YELLOW}{QUOTE_CURRENCY}{RESET}")
         return default_config
 
+
 # --- Load Configuration ---
 CONFIG = load_config(CONFIG_FILE)
 
+
 # --- Exchange Initialization ---
-def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
-    """
-    Initializes the CCXT exchange instance with API keys and settings from config.
+def initialize_exchange(logger: logging.Logger) -> ccxt.Exchange | None:
+    """Initializes the CCXT exchange instance with API keys and settings from config.
     Loads markets and performs an initial balance check.
 
     Args:
@@ -860,16 +862,16 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
         exchange_options = {
             'apiKey': API_KEY,
             'secret': API_SECRET,
-            'enableRateLimit': True, # Enable built-in rate limiting
+            'enableRateLimit': True,  # Enable built-in rate limiting
             'options': {
                 'defaultType': 'linear',      # Prefer linear contracts if available
-                'adjustForTimeDifference': True, # Auto-sync time with server
+                'adjustForTimeDifference': True,  # Auto-sync time with server
                 # Set reasonable timeouts for common operations (in milliseconds)
                 'fetchTickerTimeout': 15000,    # 15 seconds
                 'fetchBalanceTimeout': 20000,   # 20 seconds
                 'createOrderTimeout': 30000,    # 30 seconds
                 'cancelOrderTimeout': 20000,    # 20 seconds
-                'fetchPositionsTimeout': 20000, # 20 seconds
+                'fetchPositionsTimeout': 20000,  # 20 seconds
                 'fetchOHLCVTimeout': 60000,     # 60 seconds (increased for potentially large history)
                 # Bybit specific options (example, may vary)
                 # 'recvWindow': 10000, # Optional: Increase receive window if needed
@@ -878,7 +880,7 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
         exchange = ccxt.bybit(exchange_options)
 
         # Set sandbox mode based on config
-        is_sandbox = CONFIG.get('use_sandbox', True) # Default to sandbox for safety
+        is_sandbox = CONFIG.get('use_sandbox', True)  # Default to sandbox for safety
         exchange.set_sandbox_mode(is_sandbox)
 
         if is_sandbox:
@@ -889,7 +891,7 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
         # Load market data (crucial for symbol info, precision, limits)
         lg.info(f"Loading market data for {exchange.id}...")
         markets_loaded = False
-        last_market_error: Optional[Exception] = None
+        last_market_error: Exception | None = None
         for attempt in range(MAX_API_RETRIES + 1):
             try:
                 lg.debug(f"Market load attempt {attempt + 1}...")
@@ -912,20 +914,20 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
                  wait = RETRY_DELAY_SECONDS * 3
                  lg.warning(f"{NEON_YELLOW}Rate limit exceeded loading markets: {e}. Waiting {wait}s...{RESET}")
                  time.sleep(wait)
-                 continue # Don't count as standard attempt, just wait
+                 continue  # Don't count as standard attempt, just wait
             except ccxt.AuthenticationError as e:
                 last_market_error = e
                 lg.critical(f"{NEON_RED}Authentication error loading markets: {e}. "
                             f"Check API Key/Secret and permissions. Exiting.{RESET}")
-                return None # Non-retryable
+                return None  # Non-retryable
             except Exception as e:
                 last_market_error = e
                 lg.critical(f"{NEON_RED}Unexpected critical error loading markets: {e}. Exiting.{RESET}", exc_info=True)
-                return None # Non-retryable
+                return None  # Non-retryable
 
             # Wait before retrying if not loaded and more attempts remain
             if not markets_loaded and attempt < MAX_API_RETRIES:
-                delay = RETRY_DELAY_SECONDS * (attempt + 1) # Basic exponential backoff
+                delay = RETRY_DELAY_SECONDS * (attempt + 1)  # Basic exponential backoff
                 lg.warning(f"Retrying market load in {delay}s...")
                 time.sleep(delay)
 
@@ -937,9 +939,9 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
         lg.info(f"Exchange initialized: {exchange.id} | Sandbox: {is_sandbox}")
 
         # Perform an initial balance check (optional but recommended)
-        balance_currency = CONFIG.get("quote_currency", QUOTE_CURRENCY) # Use configured quote currency
+        balance_currency = CONFIG.get("quote_currency", QUOTE_CURRENCY)  # Use configured quote currency
         lg.info(f"Performing initial balance check for {balance_currency}...")
-        initial_balance: Optional[Decimal] = None
+        initial_balance: Decimal | None = None
         try:
             initial_balance = fetch_balance(exchange, balance_currency, lg)
         except ccxt.AuthenticationError as auth_err:
@@ -948,7 +950,7 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
             return None
         except Exception as balance_err:
             # Log other balance errors as warnings, especially if trading is disabled
-            lg.warning(f"{NEON_YELLOW}Initial balance check failed: {balance_err}.{RESET}", exc_info=False) # exc_info=False to avoid noisy tracebacks for common issues
+            lg.warning(f"{NEON_YELLOW}Initial balance check failed: {balance_err}.{RESET}", exc_info=False)  # exc_info=False to avoid noisy tracebacks for common issues
 
         if initial_balance is not None:
             lg.info(f"{NEON_GREEN}Initial balance check successful: {initial_balance.normalize()} {balance_currency}{RESET}")
@@ -964,7 +966,7 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
             else:
                 lg.warning(f"{NEON_YELLOW}Trading is disabled. Proceeding without balance confirmation.{RESET}")
                 lg.info(f"{Fore.CYAN}# Exchange initialization complete (balance check failed, trading disabled).{Style.RESET_ALL}")
-                return exchange # Allow proceeding if trading is off
+                return exchange  # Allow proceeding if trading is off
 
     except ccxt.AuthenticationError as e:
          lg.critical(f"{NEON_RED}Authentication error during exchange setup: {e}. Exiting.{RESET}")
@@ -975,10 +977,10 @@ def initialize_exchange(logger: logging.Logger) -> Optional[ccxt.Exchange]:
 
 # --- CCXT Helper Functions ---
 
-def _safe_market_decimal(value: Optional[Any], field_name: str,
-                         allow_zero: bool = True, allow_negative: bool = False) -> Optional[Decimal]:
-    """
-    Safely converts a value (often from market or position data) to a Decimal.
+
+def _safe_market_decimal(value: Any | None, field_name: str,
+                         allow_zero: bool = True, allow_negative: bool = False) -> Decimal | None:
+    """Safely converts a value (often from market or position data) to a Decimal.
     Handles None, empty strings, non-finite numbers, and applies zero/negative checks.
 
     Args:
@@ -995,7 +997,7 @@ def _safe_market_decimal(value: Optional[Any], field_name: str,
     try:
         # Convert to string first to handle potential floats accurately and empty strings
         s_val = str(value).strip()
-        if not s_val: # Handle empty strings explicitly
+        if not s_val:  # Handle empty strings explicitly
             # init_logger.debug(f"Empty string rejected for '{field_name}'")
             return None
         d_val = Decimal(s_val)
@@ -1018,9 +1020,9 @@ def _safe_market_decimal(value: Optional[Any], field_name: str,
         # init_logger.debug(f"Failed to convert '{field_name}' to Decimal: {repr(value)}")
         return None
 
-def _format_price(exchange: ccxt.Exchange, symbol: str, price: Union[Decimal, float, str]) -> Optional[str]:
-    """
-    Formats a price according to the market's precision rules using ccxt.
+
+def _format_price(exchange: ccxt.Exchange, symbol: str, price: Decimal | float | str) -> str | None:
+    """Formats a price according to the market's precision rules using ccxt.
     Ensures the price is positive before formatting and the result is still positive.
 
     Args:
@@ -1063,9 +1065,9 @@ def _format_price(exchange: ccxt.Exchange, symbol: str, price: Union[Decimal, fl
         init_logger.warning(f"Unexpected error formatting price '{price}' for {symbol}: {e}")
         return None
 
-def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Decimal]:
-    """
-    Fetches the current market price for a symbol using ccxt's fetch_ticker.
+
+def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Decimal | None:
+    """Fetches the current market price for a symbol using ccxt's fetch_ticker.
     Attempts to use 'last', then mid-price ('bid'/'ask'), then 'ask', then 'bid'.
     Includes retry logic.
 
@@ -1079,17 +1081,17 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
     """
     lg = logger
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     while attempts <= MAX_API_RETRIES:
         try:
             lg.debug(f"Fetching ticker for price ({symbol}, Attempt {attempts + 1})...")
             ticker = exchange.fetch_ticker(symbol)
-            price: Optional[Decimal] = None
-            source = "N/A" # Source of the price (last, mid, ask, bid)
+            price: Decimal | None = None
+            source = "N/A"  # Source of the price (last, mid, ask, bid)
 
             # Helper to safely get Decimal from ticker data
-            def safe_decimal_from_ticker(val: Optional[Any], name: str) -> Optional[Decimal]:
+            def safe_decimal_from_ticker(val: Any | None, name: str) -> Decimal | None:
                 # Prices must be positive
                 return _safe_market_decimal(val, f"ticker.{name} ({symbol})", allow_zero=False, allow_negative=False)
 
@@ -1103,17 +1105,17 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
                 if bid and ask:
                     # Ensure bid < ask before calculating mid-price
                     if bid < ask:
-                        price = (bid + ask) / Decimal('2') # Mid-price
+                        price = (bid + ask) / Decimal('2')  # Mid-price
                         source = f"mid-price (Bid: {bid.normalize()}, Ask: {ask.normalize()})"
                     else:
                         # If bid >= ask, something is wrong, prefer ask as safer estimate
                         price = ask
                         source = f"'ask' price (used due to crossed/equal book: Bid={bid}, Ask={ask})"
                 elif ask:
-                    price = ask # Fallback to ask
+                    price = ask  # Fallback to ask
                     source = f"'ask' price ({ask.normalize()})"
                 elif bid:
-                    price = bid # Fallback to bid
+                    price = bid  # Fallback to bid
                     source = f"'bid' price ({bid.normalize()})"
 
             if price:
@@ -1139,11 +1141,11 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
         except ccxt.AuthenticationError as e:
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error fetching price: {e}. Cannot continue.{RESET}")
-            return None # Non-retryable
+            return None  # Non-retryable
         except ccxt.BadSymbol as e:
              last_exception = e
              lg.error(f"{NEON_RED}Invalid symbol '{symbol}' for fetching price on {exchange.id}.{RESET}")
-             return None # Non-retryable
+             return None  # Non-retryable
         except ccxt.ExchangeError as e:
             # General exchange errors (e.g., maintenance, temporary issues)
             last_exception = e
@@ -1153,21 +1155,21 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
             last_exception = e
             lg.error(f"{NEON_RED}Unexpected error fetching price ({symbol}): {e}{RESET}", exc_info=True)
             # Consider if this should be retryable or fatal
-            return None # Treat unexpected errors as potentially fatal for safety
+            return None  # Treat unexpected errors as potentially fatal for safety
 
         # Increment attempt count and wait before retrying (if applicable)
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to fetch price for {symbol} after {MAX_API_RETRIES + 1} attempts. "
              f"Last error: {last_exception}{RESET}")
     return None
 
+
 def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int, logger: logging.Logger) -> pd.DataFrame:
-    """
-    Fetches historical kline/OHLCV data for a symbol using ccxt.
+    """Fetches historical kline/OHLCV data for a symbol using ccxt.
     Handles pagination/chunking required by exchanges like Bybit (using 'until').
     Includes retry logic, data validation, lag check, deduplication, and length trimming.
 
@@ -1196,12 +1198,12 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
         sp = CONFIG.get('strategy_params', {})
         # Find the max lookback period needed by indicators
         min_required = max(
-            sp.get('vt_length', 0) * 2, # Example: Need more for initial EMA calculations
+            sp.get('vt_length', 0) * 2,  # Example: Need more for initial EMA calculations
             sp.get('vt_atr_period', 0),
             sp.get('vt_vol_ema_length', 0),
-            sp.get('ph_left', 0) + sp.get('ph_right', 0) + 1, # Pivots need left+right+current
+            sp.get('ph_left', 0) + sp.get('ph_right', 0) + 1,  # Pivots need left+right+current
             sp.get('pl_left', 0) + sp.get('pl_right', 0) + 1
-        ) + 50 # Add a generous buffer for calculations
+        ) + 50  # Add a generous buffer for calculations
         lg.debug(f"Estimated minimum candles required by strategy: ~{min_required}")
     except Exception as e:
         lg.warning(f"Could not estimate minimum candle requirement: {e}")
@@ -1211,8 +1213,8 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                    f"Indicator accuracy may be affected, especially on initial runs.{RESET}")
 
     # Determine category and market ID for Bybit V5 API
-    category = 'spot' # Default assumption
-    market_id = symbol # Default to symbol if market info fails
+    category = 'spot'  # Default assumption
+    market_id = symbol  # Default to symbol if market info fails
     is_bybit = 'bybit' in exchange.id.lower()
     try:
         market = exchange.market(symbol)
@@ -1226,13 +1228,13 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                    f"Proceeding with defaults (category='{category}', market_id='{market_id}'). May fail if incorrect for Bybit.")
 
     # --- Fetching Loop ---
-    all_ohlcv_data: List[List] = []
+    all_ohlcv_data: list[list] = []
     remaining_limit = limit
-    end_timestamp_ms: Optional[int] = None # For pagination: fetch candles *before* this timestamp
+    end_timestamp_ms: int | None = None  # For pagination: fetch candles *before* this timestamp
     # Calculate max chunks generously to avoid infinite loops if API behaves unexpectedly
     # Use the exchange's specific limit if available, otherwise the Bybit default
     api_limit_per_req = getattr(exchange, 'limits', {}).get('fetchOHLCV', {}).get('limit', BYBIT_API_KLINE_LIMIT)
-    max_chunks = math.ceil(limit / api_limit_per_req) + 3 # Add a buffer
+    max_chunks = math.ceil(limit / api_limit_per_req) + 3  # Add a buffer
     chunk_num = 0
     total_fetched = 0
 
@@ -1240,17 +1242,17 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
         chunk_num += 1
         fetch_size = min(remaining_limit, api_limit_per_req)
         lg.debug(f"Fetching kline chunk {chunk_num}/{max_chunks} ({fetch_size} candles) for {symbol}. "
-                 f"Ending before TS: {datetime.fromtimestamp(end_timestamp_ms / 1000, tz=timezone.utc) if end_timestamp_ms else 'Latest'}")
+                 f"Ending before TS: {datetime.fromtimestamp(end_timestamp_ms / 1000, tz=UTC) if end_timestamp_ms else 'Latest'}")
 
         attempts = 0
-        last_exception: Optional[Exception] = None
-        chunk_data: Optional[List[List]] = None
+        last_exception: Exception | None = None
+        chunk_data: list[list] | None = None
 
         while attempts <= MAX_API_RETRIES:
             try:
                 # --- Prepare API Call ---
                 params = {'category': category} if is_bybit else {}
-                fetch_args: Dict[str, Any] = {
+                fetch_args: dict[str, Any] = {
                     'symbol': symbol,       # Use standard symbol for ccxt call
                     'timeframe': timeframe,
                     'limit': fetch_size,
@@ -1271,10 +1273,10 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                 # --- Basic Validation & Lag Check (for the first chunk primarily) ---
                 if fetched_chunk:
                     # Check if data looks valid (e.g., expected number of columns)
-                    if not all(len(candle) >= 6 for candle in fetched_chunk): # Timestamp, O, H, L, C, V
+                    if not all(len(candle) >= 6 for candle in fetched_chunk):  # Timestamp, O, H, L, C, V
                         raise ValueError(f"Invalid candle format received in chunk {chunk_num} for {symbol}. Candles have < 6 values.")
 
-                    chunk_data = fetched_chunk # Assign valid data
+                    chunk_data = fetched_chunk  # Assign valid data
 
                     # Data Lag Check (only on the first chunk from the "latest" end)
                     if chunk_num == 1 and end_timestamp_ms is None:
@@ -1294,34 +1296,33 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                                                      f"Max allowed lag for {timeframe} is ~{max_lag_seconds:.1f}s.")
                                     last_exception = ValueError(lag_error_msg)
                                     lg.warning(f"{NEON_YELLOW}Lag Check ({symbol}): {lag_error_msg} Retrying fetch...{RESET}")
-                                    chunk_data = None # Discard potentially stale data and force retry
+                                    chunk_data = None  # Discard potentially stale data and force retry
                                     # No break here, let the retry logic handle it below
                                 else:
                                     lg.debug(f"Lag check passed ({symbol}): Last candle {actual_lag_seconds:.1f}s old (within limit).")
-                                    break # Valid chunk received, exit retry loop
+                                    break  # Valid chunk received, exit retry loop
                             else:
                                 lg.warning(f"Could not parse timeframe '{timeframe}' for lag check.")
-                                break # Proceed without lag check if timeframe parsing fails
+                                break  # Proceed without lag check if timeframe parsing fails
                         except IndexError:
-                             lg.warning(f"Could not perform lag check: No data in first chunk?")
-                             break # Should not happen if chunk_data is non-empty, but handle defensively
+                             lg.warning("Could not perform lag check: No data in first chunk?")
+                             break  # Should not happen if chunk_data is non-empty, but handle defensively
                         except Exception as ts_err:
                             lg.warning(f"Error during lag check ({symbol}): {ts_err}. Proceeding cautiously.")
-                            break # Proceed if lag check itself fails
-                    else: # Not the first chunk or not fetching latest, no lag check needed
-                        break # Valid chunk received, exit retry loop
+                            break  # Proceed if lag check itself fails
+                    else:  # Not the first chunk or not fetching latest, no lag check needed
+                        break  # Valid chunk received, exit retry loop
 
-                else: # API returned empty list
+                else:  # API returned empty list
                     lg.debug(f"API returned no data for chunk {chunk_num}. Assuming end of history or temporary issue.")
                     # If it's the *first* chunk, we should retry. If later chunks, maybe end of history.
                     if chunk_num > 1:
-                        lg.info(f"No more historical data found for {symbol} after chunk {chunk_num-1}.")
-                        remaining_limit = 0 # Assume end of history if not the first chunk
+                        lg.info(f"No more historical data found for {symbol} after chunk {chunk_num - 1}.")
+                        remaining_limit = 0  # Assume end of history if not the first chunk
                     # No 'break' here, let retry logic handle potential temporary issue for first chunk
                     # Unless we assume end of history, then break outer loop
                     if remaining_limit == 0:
                         break
-
 
             # --- Error Handling for fetch_ohlcv call ---
             except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
@@ -1329,18 +1330,18 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                 lg.warning(f"{NEON_YELLOW}Network error fetching klines chunk {chunk_num} ({symbol}): {e}. Retry {attempts + 1}...{RESET}")
             except ccxt.RateLimitExceeded as e:
                 last_exception = e
-                wait = RETRY_DELAY_SECONDS * 3 # Longer wait for rate limits
+                wait = RETRY_DELAY_SECONDS * 3  # Longer wait for rate limits
                 lg.warning(f"{NEON_YELLOW}Rate limit fetching klines chunk {chunk_num} ({symbol}): {e}. Waiting {wait}s...{RESET}")
                 time.sleep(wait)
-                continue # Don't increment standard attempts, just wait
+                continue  # Don't increment standard attempts, just wait
             except ccxt.AuthenticationError as e:
                 last_exception = e
                 lg.critical(f"{NEON_RED}Authentication error fetching klines: {e}. Cannot continue.{RESET}")
-                return pd.DataFrame() # Fatal
+                return pd.DataFrame()  # Fatal
             except ccxt.BadSymbol as e:
                  last_exception = e
                  lg.error(f"{NEON_RED}Invalid symbol '{symbol}' for fetching klines on {exchange.id}.{RESET}")
-                 return pd.DataFrame() # Fatal
+                 return pd.DataFrame()  # Fatal
             except ccxt.ExchangeError as e:
                 last_exception = e
                 lg.error(f"{NEON_RED}Exchange error fetching klines chunk {chunk_num} ({symbol}): {e}{RESET}")
@@ -1349,9 +1350,9 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                 non_retryable_msgs = ["invalid timeframe", "interval not supported", "symbol invalid", "instrument not found", "invalid category"]
                 if any(msg in err_str for msg in non_retryable_msgs):
                     lg.critical(f"{NEON_RED}Non-retryable exchange error encountered: {e}. Stopping kline fetch for {symbol}.{RESET}")
-                    return pd.DataFrame() # Fatal for this symbol
+                    return pd.DataFrame()  # Fatal for this symbol
                 # Otherwise, treat as potentially retryable
-            except ValueError as e: # Catch our validation errors (e.g., candle format, lag)
+            except ValueError as e:  # Catch our validation errors (e.g., candle format, lag)
                  last_exception = e
                  lg.error(f"{NEON_RED}Data validation error fetching klines chunk {chunk_num} ({symbol}): {e}. Retrying...{RESET}")
             except Exception as e:
@@ -1384,14 +1385,14 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                 end_timestamp_ms = int(next_until_ts) - 1
             except (IndexError, TypeError, ValueError) as ts_err:
                 lg.error(f"Error determining next 'until' timestamp from chunk data ({symbol}): {ts_err}. Stopping pagination.")
-                remaining_limit = 0 # Stop fetching if we can't paginate
+                remaining_limit = 0  # Stop fetching if we can't paginate
 
             # Check if the exchange returned fewer candles than requested (might be end of history)
             if chunk_len < fetch_size:
                 lg.debug(f"Received fewer candles ({chunk_len}) than requested ({fetch_size}). Assuming end of historical data.")
-                remaining_limit = 0 # Stop fetching more chunks
+                remaining_limit = 0  # Stop fetching more chunks
 
-        else: # Failed to fetch chunk after retries
+        else:  # Failed to fetch chunk after retries
             lg.error(f"{NEON_RED}Failed to fetch kline chunk {chunk_num} for {symbol} after {MAX_API_RETRIES + 1} attempts. "
                      f"Last error: {last_exception}{RESET}")
             if not all_ohlcv_data:
@@ -1401,11 +1402,11 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
             else:
                 # Failed on a subsequent chunk, proceed with what we have
                 lg.warning(f"Proceeding with {total_fetched} candles fetched before the error occurred.")
-                break # Exit the fetching loop
+                break  # Exit the fetching loop
 
         # Small delay between chunk requests to be polite to the API
         if remaining_limit > 0:
-            time.sleep(0.5) # 500ms delay
+            time.sleep(0.5)  # 500ms delay
 
     # --- Post-Fetching Checks ---
     if chunk_num >= max_chunks and remaining_limit > 0:
@@ -1424,7 +1425,7 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
     for candle in all_ohlcv_data:
         try:
             timestamp = int(candle[0])
-            if timestamp <= 0: continue # Skip invalid timestamps
+            if timestamp <= 0: continue  # Skip invalid timestamps
             # Keep the candle that appeared later in the raw list (usually more recent update)
             unique_candles_dict[timestamp] = candle
         except (IndexError, TypeError, ValueError):
@@ -1432,7 +1433,7 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
             continue
 
     # Extract unique candles and sort by timestamp
-    unique_data = sorted(list(unique_candles_dict.values()), key=lambda x: x[0])
+    unique_data = sorted(unique_candles_dict.values(), key=lambda x: x[0])
 
     duplicates_removed = len(all_ohlcv_data) - len(unique_data)
     if duplicates_removed > 0:
@@ -1475,17 +1476,17 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
 
                 # Apply Decimal conversion, explicitly handling NaN/Inf introduced by to_numeric
                 df[col] = numeric_series.apply(
-                    lambda x: _safe_market_decimal(x, f"df.{col}", allow_zero=(col=='volume'), allow_negative=False)
-                              if pd.notna(x) else Decimal('NaN') # Use helper for safety
+                    lambda x: _safe_market_decimal(x, f"df.{col}", allow_zero=(col == 'volume'), allow_negative=False)
+                              if pd.notna(x) else Decimal('NaN')  # Use helper for safety
                 )
                 # Check if conversion resulted in all NaNs (indicates bad data type)
                 if df[col].isnull().all():
                      lg.warning(f"Column '{col}' for {symbol} became all NaN after Decimal conversion. Original data type might be incompatible.")
 
-            elif col != 'volume': # Volume might legitimately be missing
+            elif col != 'volume':  # Volume might legitimately be missing
                 lg.warning(f"Expected OHLC column '{col}' not found in fetched data for {symbol}.")
                 # Return empty if essential columns are missing? Or fill with NaN? Filling is risky.
-                return pd.DataFrame() # Fail if essential OHLC missing
+                return pd.DataFrame()  # Fail if essential OHLC missing
 
         # --- Data Cleaning ---
         initial_len = len(df)
@@ -1497,8 +1498,8 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
             df = df[df['close'] > Decimal('0')]
         # Handle volume column if it exists
         if 'volume' in df.columns:
-            df.dropna(subset=['volume'], inplace=True) # Drop rows with NaN volume
-            df = df[df['volume'] >= Decimal('0')] # Ensure volume is non-negative
+            df.dropna(subset=['volume'], inplace=True)  # Drop rows with NaN volume
+            df = df[df['volume'] >= Decimal('0')]  # Ensure volume is non-negative
 
         rows_dropped = initial_len - len(df)
         if rows_dropped > 0:
@@ -1516,7 +1517,7 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
         # Optional: Limit DataFrame length to prevent excessive memory usage
         if len(df) > MAX_DF_LEN:
             lg.debug(f"DataFrame length ({len(df)}) exceeds max ({MAX_DF_LEN}). Trimming oldest data ({symbol}).")
-            df = df.iloc[-MAX_DF_LEN:].copy() # Keep the most recent MAX_DF_LEN rows
+            df = df.iloc[-MAX_DF_LEN:].copy()  # Keep the most recent MAX_DF_LEN rows
 
         lg.info(f"{NEON_GREEN}Successfully processed {len(df)} klines for {symbol} {timeframe}.{RESET}")
         return df
@@ -1525,9 +1526,9 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
         lg.error(f"{NEON_RED}Error processing fetched klines into DataFrame for {symbol}: {e}{RESET}", exc_info=True)
         return pd.DataFrame()
 
-def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[MarketInfo]:
-    """
-    Retrieves and standardizes market information for a symbol from the exchange.
+
+def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> MarketInfo | None:
+    """Retrieves and standardizes market information for a symbol from the exchange.
     Includes derived fields for convenience (e.g., is_linear, decimal precision/limits).
     Includes retry logic and validation of critical precision data.
 
@@ -1542,11 +1543,11 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
     lg = logger
     lg.debug(f"Retrieving market details for symbol: {symbol}...")
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     while attempts <= MAX_API_RETRIES:
         try:
-            market: Optional[Dict] = None
+            market: dict | None = None
             # Check if markets are loaded and contain the symbol
             if not exchange.markets or symbol not in exchange.markets:
                 lg.info(f"Market details for '{symbol}' not found in cached data. Attempting to refresh market map...")
@@ -1562,32 +1563,32 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
             try:
                 # exchange.market() throws BadSymbol if not found after load_markets
                 market = exchange.market(symbol)
-            except ccxt.BadSymbol as e:
+            except ccxt.BadSymbol:
                 # This is definitive: the symbol doesn't exist on the exchange according to ccxt
                 lg.error(f"{NEON_RED}Symbol '{symbol}' is invalid or not supported by {exchange.id} according to loaded markets.{RESET}")
-                return None # Non-retryable
+                return None  # Non-retryable
             except Exception as fetch_err:
                 # Other errors during market dict retrieval (might be temporary network issue?)
                 last_exception = fetch_err
                 lg.warning(f"Error retrieving market dictionary for '{symbol}': {fetch_err}. Retry {attempts + 1}...")
-                market = None # Ensure market is None to trigger retry logic
+                market = None  # Ensure market is None to trigger retry logic
 
             if market:
                 lg.debug(f"Raw market data found for {symbol}. Parsing and standardizing...")
                 # --- Standardize and Enhance Market Data ---
-                std_market = market.copy() # Work on a copy
+                std_market = market.copy()  # Work on a copy
 
                 # Basic type flags from ccxt structure
                 is_spot = std_market.get('spot', False)
                 is_swap = std_market.get('swap', False)
                 is_future = std_market.get('future', False)
-                is_option = std_market.get('option', False) # Added option check
-                is_contract_base = std_market.get('contract', False) # Base 'contract' flag
+                is_option = std_market.get('option', False)  # Added option check
+                is_contract_base = std_market.get('contract', False)  # Base 'contract' flag
 
                 # Determine if it's any kind of contract
                 std_market['is_contract'] = is_swap or is_future or is_option or is_contract_base
-                is_linear = std_market.get('linear') # Can be True/False/None
-                is_inverse = std_market.get('inverse') # Can be True/False/None
+                is_linear = std_market.get('linear')  # Can be True/False/None
+                is_inverse = std_market.get('inverse')  # Can be True/False/None
 
                 # Ensure linear/inverse flags are boolean and only True if it's actually a contract
                 std_market['is_linear'] = bool(is_linear) and std_market['is_contract']
@@ -1601,8 +1602,8 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
                 elif is_spot:
                      std_market['contract_type_str'] = "Spot"
                 elif is_option:
-                     std_market['contract_type_str'] = "Option" # Handle options if needed
-                elif std_market['is_contract']: # Catch-all for contract types ccxt doesn't label linear/inverse
+                     std_market['contract_type_str'] = "Option"  # Handle options if needed
+                elif std_market['is_contract']:  # Catch-all for contract types ccxt doesn't label linear/inverse
                      std_market['contract_type_str'] = "Contract (Other)"
                 else:
                      std_market['contract_type_str'] = "Unknown"
@@ -1619,9 +1620,9 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
 
                 # Convert limits to Decimal (must be non-negative, except maybe cost?)
                 std_market['min_amount_decimal'] = _safe_market_decimal(amount_limits.get('min'), f"{symbol} lim.amt.min", allow_zero=True, allow_negative=False)
-                std_market['max_amount_decimal'] = _safe_market_decimal(amount_limits.get('max'), f"{symbol} lim.amt.max", allow_zero=False, allow_negative=False) # Max > 0
+                std_market['max_amount_decimal'] = _safe_market_decimal(amount_limits.get('max'), f"{symbol} lim.amt.max", allow_zero=False, allow_negative=False)  # Max > 0
                 std_market['min_cost_decimal'] = _safe_market_decimal(cost_limits.get('min'), f"{symbol} lim.cost.min", allow_zero=True, allow_negative=False)
-                std_market['max_cost_decimal'] = _safe_market_decimal(cost_limits.get('max'), f"{symbol} lim.cost.max", allow_zero=False, allow_negative=False) # Max > 0
+                std_market['max_cost_decimal'] = _safe_market_decimal(cost_limits.get('max'), f"{symbol} lim.cost.max", allow_zero=False, allow_negative=False)  # Max > 0
 
                 # Convert contract size to Decimal (default to 1 if missing/invalid/spot)
                 contract_size_val = std_market.get('contractSize') if std_market['is_contract'] else '1'
@@ -1643,7 +1644,7 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
 
                 # --- Log Parsed Details ---
                 # Helper for formatting optional Decimals for logging
-                def fmt_dec_log(d: Optional[Decimal]) -> str:
+                def fmt_dec_log(d: Decimal | None) -> str:
                     return d.normalize() if d is not None else 'N/A'
 
                 amt_s = fmt_dec_log(std_market['amount_precision_step_decimal'])
@@ -1669,12 +1670,12 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
                 try:
                     # Attempt to cast the enhanced dictionary to the MarketInfo type
                     # This primarily serves static analysis; runtime check is implicit
-                    final_market_info: MarketInfo = std_market # type: ignore [assignment]
+                    final_market_info: MarketInfo = std_market  # type: ignore [assignment]
                     return final_market_info
                 except Exception as cast_err:
                     # Should not happen if MarketInfo matches the dict structure, but catch just in case
                     lg.error(f"Internal error casting market dictionary to MarketInfo type ({symbol}): {cast_err}. Returning raw dict cautiously.")
-                    return std_market # type: ignore [return-value] # Return the dict anyway
+                    return std_market  # type: ignore [return-value] # Return the dict anyway
 
             else:
                 # Market object was None after attempting fetch/lookup
@@ -1686,7 +1687,7 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
         except ccxt.BadSymbol as e:
             # This might be caught inside, but also handle here for robustness
             lg.error(f"Symbol '{symbol}' is invalid on {exchange.id}: {e}")
-            return None # Non-retryable
+            return None  # Non-retryable
         except (ccxt.NetworkError, ccxt.RequestTimeout) as e:
             last_exception = e
             lg.warning(f"{NEON_YELLOW}Network error retrieving market info ({symbol}): {e}. Retry {attempts + 1}...{RESET}")
@@ -1696,7 +1697,7 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
         except ccxt.AuthenticationError as e:
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error retrieving market info: {e}. Cannot continue.{RESET}")
-            return None # Non-retryable
+            return None  # Non-retryable
         except ccxt.ExchangeError as e:
             last_exception = e
             lg.error(f"{NEON_RED}Exchange error retrieving market info ({symbol}): {e}. Retrying...{RESET}")
@@ -1707,21 +1708,21 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
             # Catch any other unexpected errors
             last_exception = e
             lg.error(f"{NEON_RED}Unexpected error retrieving market info ({symbol}): {e}{RESET}", exc_info=True)
-            return None # Treat unexpected errors as fatal for this function
+            return None  # Treat unexpected errors as fatal for this function
 
         # --- Wait Before Next Retry ---
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to get market info for {symbol} after {MAX_API_RETRIES + 1} attempts. "
              f"Last error: {last_exception}{RESET}")
     return None
 
-def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger) -> Optional[Decimal]:
-    """
-    Fetches the available balance for a specific currency from the exchange.
+
+def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger) -> Decimal | None:
+    """Fetches the available balance for a specific currency from the exchange.
     Handles different account types for exchanges like Bybit (Unified/Contract/Spot).
     Includes retry logic and robust parsing.
 
@@ -1739,14 +1740,14 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
     lg = logger
     lg.debug(f"Fetching balance for currency: {currency}...")
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     while attempts <= MAX_API_RETRIES:
         try:
-            balance_str: Optional[str] = None
-            balance_source: str = "N/A" # Where the balance was found (e.g., account type, field name)
+            balance_str: str | None = None
+            balance_source: str = "N/A"  # Where the balance was found (e.g., account type, field name)
             found: bool = False
-            balance_info: Optional[Dict] = None # Store the last fetched balance structure for debugging
+            balance_info: dict | None = None  # Store the last fetched balance structure for debugging
             is_bybit = 'bybit' in exchange.id.lower()
 
             # For Bybit, try specific account types, then default
@@ -1756,7 +1757,7 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
             types_to_check = ['UNIFIED', 'CONTRACT', 'SPOT', ''] if is_bybit else ['']
 
             for acc_type in types_to_check:
-                if not is_bybit and acc_type: continue # Skip specific types for non-bybit
+                if not is_bybit and acc_type: continue  # Skip specific types for non-bybit
 
                 try:
                     params = {'accountType': acc_type} if acc_type else {}
@@ -1773,7 +1774,7 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
                         balance_str = str(balance_info[currency]['free'])
                         balance_source = f"{type_desc} (ccxt 'free' field)"
                         found = True
-                        break # Found balance, exit account type loop
+                        break  # Found balance, exit account type loop
 
                     # --- Try Bybit V5 specific structure (nested within 'info') ---
                     # Structure: info -> result -> list -> [ { accountType, coin: [ { coin, availableToWithdraw/availableBalance } ] } ]
@@ -1793,10 +1794,10 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
                                 for coin_data in account_details['coin']:
                                     if coin_data.get('coin') == currency:
                                         # Try different fields for available balance in preferred order
-                                        val = coin_data.get('availableToWithdraw') # Most preferred
+                                        val = coin_data.get('availableToWithdraw')  # Most preferred
                                         src = 'availableToWithdraw'
                                         if val is None:
-                                            val = coin_data.get('availableBalance') # Next best (might include borrowed?)
+                                            val = coin_data.get('availableBalance')  # Next best (might include borrowed?)
                                             src = 'availableBalance'
                                         # WalletBalance is less useful as it includes frozen/used margin
                                         # if val is None:
@@ -1807,17 +1808,17 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
                                             balance_str = str(val)
                                             balance_source = f"Bybit V5 ({fetched_acc_type or 'UnknownType'}, field: '{src}')"
                                             found = True
-                                            break # Found coin data, exit coin loop
-                                if found: break # Exit account details loop
-                        if found: break # Exit account type loop
+                                            break  # Found coin data, exit coin loop
+                                if found: break  # Exit account details loop
+                        if found: break  # Exit account type loop
 
                 except ccxt.ExchangeError as e:
                     err_str = str(e).lower()
                     # Bybit might throw specific errors for invalid account types
                     if acc_type and ("account type does not exist" in err_str or "invalid account type" in err_str):
                         lg.debug(f"Account type '{acc_type}' not found or invalid for balance check. Trying next...")
-                        last_exception = e # Keep track of the last error
-                        continue # Try the next account type
+                        last_exception = e  # Keep track of the last error
+                        continue  # Try the next account type
                     elif acc_type:
                          # Other exchange error for a specific type, log and try next
                          lg.debug(f"Exchange error fetching balance for {acc_type}: {e}. Trying next...")
@@ -1830,7 +1831,7 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
                     # Unexpected error during a specific account type check
                     lg.warning(f"Unexpected error fetching balance for {acc_type or 'Default'}: {e}. Trying next...")
                     last_exception = e
-                    continue # Try the next account type
+                    continue  # Try the next account type
 
             # --- Process Result After Checking All Account Types ---
             if found and balance_str is not None:
@@ -1863,12 +1864,12 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
             wait = RETRY_DELAY_SECONDS * 3
             lg.warning(f"{NEON_YELLOW}Rate limit exceeded fetching balance ({currency}): {e}. Waiting {wait}s...{RESET}")
             time.sleep(wait)
-            continue # Don't count as standard attempt
+            continue  # Don't count as standard attempt
         except ccxt.AuthenticationError as e:
             # This is critical and non-retryable
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error fetching balance: {e}. Cannot continue.{RESET}")
-            raise e # Re-raise to be caught by the caller (e.g., initialize_exchange)
+            raise e  # Re-raise to be caught by the caller (e.g., initialize_exchange)
         except ccxt.ExchangeError as e:
             # General exchange errors (e.g., temporary issues)
             last_exception = e
@@ -1883,16 +1884,16 @@ def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger
         # --- Retry Logic ---
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to fetch balance for {currency} after {MAX_API_RETRIES + 1} attempts. "
              f"Last error: {last_exception}{RESET}")
     return None
 
-def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketInfo, logger: logging.Logger) -> Optional[PositionInfo]:
-    """
-    Fetches the currently open position for a specific contract symbol.
+
+def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketInfo, logger: logging.Logger) -> PositionInfo | None:
+    """Fetches the currently open position for a specific contract symbol.
     Returns None if no position exists or if the symbol is not a contract.
     Standardizes the position information, parses key values to Decimal, and includes retry logic.
 
@@ -1914,7 +1915,7 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
 
     market_id = market_info.get('id')
     # Determine category for Bybit V5 based on standardized info
-    category = 'linear' # Default guess for contracts
+    category = 'linear'  # Default guess for contracts
     if market_info.get('is_linear'): category = 'linear'
     elif market_info.get('is_inverse'): category = 'inverse'
     is_bybit = 'bybit' in exchange.id.lower()
@@ -1929,12 +1930,12 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
     lg.debug(f"Checking for open position for {symbol} (Market ID: '{market_id}', Category: '{category if is_bybit else 'N/A'}')...")
 
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     while attempts <= MAX_API_RETRIES:
         try:
             lg.debug(f"Fetching positions ({symbol}, Attempt {attempts + 1})...")
-            positions: List[Dict] = [] # Initialize as empty list
+            positions: list[dict] = []  # Initialize as empty list
 
             # --- Fetch Positions from Exchange ---
             try:
@@ -1957,11 +1958,11 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                         all_fetched_positions = exchange.fetch_positions(symbols=[symbol], params=params)
                     except ccxt.NotSupported:
                          lg.debug(f"fetch_positions with specific symbol not supported by {exchange.id}. Fetching all...")
-                         all_fetched_positions = exchange.fetch_positions(params=params) # Fetch all for the category/default
+                         all_fetched_positions = exchange.fetch_positions(params=params)  # Fetch all for the category/default
                     except Exception as fetch_all_err:
                          # Handle case where even fetch_positions (all) fails
                          lg.warning(f"Error using fetch_positions: {fetch_all_err}. Falling back to fetch_position if available.")
-                         all_fetched_positions = [] # Ensure it's empty for fallback
+                         all_fetched_positions = []  # Ensure it's empty for fallback
 
                     # Filter results for the specific symbol
                     positions = [
@@ -1979,9 +1980,9 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                      # Ensure size exists and is non-zero before adding
                      pos_size_str = str(pos.get('info', {}).get('size', pos.get('contracts', ''))).strip()
                      if pos and pos_size_str and _safe_market_decimal(pos_size_str, "pos_size_check", allow_zero=False):
-                          positions = [pos] # Wrap in list for consistency
+                          positions = [pos]  # Wrap in list for consistency
                      else:
-                          positions = [] # No active position found
+                          positions = []  # No active position found
                      lg.debug(f"fetchPosition returned: {'Position found' if positions else 'No active position found'}")
                 else:
                     raise ccxt.NotSupported(f"{exchange.id} does not support fetchPositions or fetchPosition.")
@@ -1997,24 +1998,24 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                  code_str = ""
                  match = re.search(r'(retCode|ret_code)\s*[:=]\s*(\d+)', str(e.args[0] if e.args else ''), re.IGNORECASE)
                  if match: code_str = match.group(2)
-                 else: code_str = str(getattr(e, 'code', '') or getattr(e, 'retCode', '')) # Fallback
+                 else: code_str = str(getattr(e, 'code', '') or getattr(e, 'retCode', ''))  # Fallback
 
                  is_bybit_no_pos = is_bybit and code_str and any(str(c) == code_str for c in bybit_no_pos_codes)
                  is_common_no_pos = any(msg in err_str for msg in common_no_pos_msgs)
 
                  if is_bybit_no_pos or is_common_no_pos:
                      lg.info(f"No open position found for {symbol} (API indicated no position: Code='{code_str}', Msg='{err_str[:60]}...').")
-                     return None # This is the expected outcome when no position exists
+                     return None  # This is the expected outcome when no position exists
                  else:
                      # Re-raise other exchange errors
                      raise e
 
             # --- Process Fetched Positions ---
-            active_raw_position: Optional[Dict] = None
+            active_raw_position: dict | None = None
 
             # Define a small threshold for position size based on market precision
             # Use amount step if available, otherwise a very small Decimal fraction
-            size_threshold = Decimal('1e-9') # Default tiny threshold
+            size_threshold = Decimal('1e-9')  # Default tiny threshold
             amt_step = market_info.get('amount_precision_step_decimal')
             if amt_step and amt_step > 0:
                 # Use a fraction of the step size (e.g., 1%) if step is reasonably large,
@@ -2029,7 +2030,7 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                 # Try to get size from 'info' (often more reliable) or standard 'contracts' field
                 # Prefer 'size' from Bybit V5 'info' if available
                 size_raw = pos_data.get('info', {}).get('size')
-                if size_raw is None: # Fallback to 'contracts' if 'size' not in info
+                if size_raw is None:  # Fallback to 'contracts' if 'size' not in info
                     size_raw = pos_data.get('contracts')
 
                 # Safely convert size to Decimal
@@ -2045,18 +2046,18 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                     # Store the parsed Decimal size directly in the dict for later use
                     active_raw_position['size_decimal'] = size_decimal
                     lg.debug(f"Found active position candidate for {symbol} with size: {size_decimal.normalize()}")
-                    break # Found the first active position, stop searching
+                    break  # Found the first active position, stop searching
                 else:
                      lg.debug(f"Skipping position data with size near zero ({symbol}, Size: {size_decimal.normalize()}).")
 
             # --- Standardize and Return Active Position ---
             if active_raw_position:
                 std_pos = active_raw_position.copy()
-                info_dict = std_pos.get('info', {}) # Raw exchange-specific data
+                info_dict = std_pos.get('info', {})  # Raw exchange-specific data
 
                 # Determine Side (long/short) - crucial and sometimes inconsistent
-                parsed_size = std_pos['size_decimal'] # Use the Decimal size we stored
-                side = std_pos.get('side') # Standard ccxt field
+                parsed_size = std_pos['size_decimal']  # Use the Decimal size we stored
+                side = std_pos.get('side')  # Standard ccxt field
 
                 # Infer side if standard field is missing or ambiguous
                 if side not in ['long', 'short']:
@@ -2064,37 +2065,37 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                     side_v5 = str(info_dict.get('side', '')).strip().lower()
                     if side_v5 == 'buy': side = 'long'
                     elif side_v5 == 'sell': side = 'short'
-                    elif parsed_size > size_threshold: side = 'long' # Positive size implies long
-                    elif parsed_size < -size_threshold: side = 'short' # Negative size implies short
-                    else: side = None # Cannot determine side
+                    elif parsed_size > size_threshold: side = 'long'  # Positive size implies long
+                    elif parsed_size < -size_threshold: side = 'short'  # Negative size implies short
+                    else: side = None  # Cannot determine side
 
                 if not side:
                     lg.error(f"Could not determine position side for {symbol}. Size: {parsed_size}. Raw Info: {info_dict}")
-                    return None # Cannot proceed without knowing the side
+                    return None  # Cannot proceed without knowing the side
 
                 std_pos['side'] = side
 
                 # Safely parse other relevant fields to Decimal where applicable
                 # Prefer standard ccxt fields, fallback to 'info' dict fields if needed
                 std_pos['entryPrice'] = _safe_market_decimal(
-                    std_pos.get('entryPrice') or info_dict.get('avgPrice') or info_dict.get('entryPrice'), # Bybit V5 uses avgPrice in info
+                    std_pos.get('entryPrice') or info_dict.get('avgPrice') or info_dict.get('entryPrice'),  # Bybit V5 uses avgPrice in info
                     f"{symbol} pos.entry", allow_zero=False, allow_negative=False)
                 std_pos['leverage'] = _safe_market_decimal(
                     std_pos.get('leverage') or info_dict.get('leverage'),
-                    f"{symbol} pos.leverage", allow_zero=False, allow_negative=False) # Leverage > 0
+                    f"{symbol} pos.leverage", allow_zero=False, allow_negative=False)  # Leverage > 0
                 std_pos['liquidationPrice'] = _safe_market_decimal(
-                    std_pos.get('liquidationPrice') or info_dict.get('liqPrice'), # Bybit V5 uses liqPrice in info
-                    f"{symbol} pos.liq", allow_zero=False, allow_negative=False) # Liq price > 0
+                    std_pos.get('liquidationPrice') or info_dict.get('liqPrice'),  # Bybit V5 uses liqPrice in info
+                    f"{symbol} pos.liq", allow_zero=False, allow_negative=False)  # Liq price > 0
                 std_pos['unrealizedPnl'] = _safe_market_decimal(
-                    std_pos.get('unrealizedPnl') or info_dict.get('unrealisedPnl'), # Bybit V5 uses unrealisedPnl
-                    f"{symbol} pos.pnl", allow_zero=True, allow_negative=True) # PnL can be zero or negative
+                    std_pos.get('unrealizedPnl') or info_dict.get('unrealisedPnl'),  # Bybit V5 uses unrealisedPnl
+                    f"{symbol} pos.pnl", allow_zero=True, allow_negative=True)  # PnL can be zero or negative
                 std_pos['notional'] = _safe_market_decimal(
-                    std_pos.get('notional') or info_dict.get('positionValue'), # Bybit V5 uses positionValue
-                    f"{symbol} pos.notional", allow_zero=True, allow_negative=False) # Notional >= 0
+                    std_pos.get('notional') or info_dict.get('positionValue'),  # Bybit V5 uses positionValue
+                    f"{symbol} pos.notional", allow_zero=True, allow_negative=False)  # Notional >= 0
 
                 # Extract protection orders (SL, TP, TSL) - these are often strings in 'info'
                 # We need to check if the value represents an *active* order (e.g., not '0' or '0.0')
-                def get_protection_value(field_name: str) -> Optional[str]:
+                def get_protection_value(field_name: str) -> str | None:
                     """Safely gets a protection order value from info, returns None if zero/empty/invalid."""
                     value = info_dict.get(field_name)
                     if value is None: return None
@@ -2102,26 +2103,26 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                     # Check if it's a non-zero numeric value using safe decimal conversion
                     dec_val = _safe_market_decimal(s_value, f"{symbol} prot.{field_name}", allow_zero=False, allow_negative=False)
                     if dec_val is not None:
-                         return s_value # Return the original string if it represents a valid, non-zero price/value
+                         return s_value  # Return the original string if it represents a valid, non-zero price/value
                     else:
-                         return None # Treat '0', '0.0', empty string, or invalid as no order set
+                         return None  # Treat '0', '0.0', empty string, or invalid as no order set
 
                 std_pos['stopLossPrice'] = get_protection_value('stopLoss')
                 std_pos['takeProfitPrice'] = get_protection_value('takeProfit')
                 # Bybit V5 TSL fields: trailingStop (distance/price), activePrice (activation price)
-                std_pos['trailingStopLoss'] = get_protection_value('trailingStop') # This is the trailing distance/offset
-                std_pos['tslActivationPrice'] = get_protection_value('activePrice') # This is the activation price
+                std_pos['trailingStopLoss'] = get_protection_value('trailingStop')  # This is the trailing distance/offset
+                std_pos['tslActivationPrice'] = get_protection_value('activePrice')  # This is the activation price
 
                 # Initialize bot state tracking fields (these will be updated by bot logic)
-                std_pos['be_activated'] = False # Break-even not yet activated by bot logic for *this instance*
+                std_pos['be_activated'] = False  # Break-even not yet activated by bot logic for *this instance*
                 # TSL considered active *by the exchange* if the exchange reports a non-zero trailingStop value AND activation price
                 # Note: Internal bot state `position_state['tsl_activated']` tracks if the *bot* has activated it.
                 exchange_tsl_active = bool(std_pos['trailingStopLoss']) and bool(std_pos['tslActivationPrice'])
-                std_pos['tsl_activated'] = exchange_tsl_active # Reflect current exchange status
+                std_pos['tsl_activated'] = exchange_tsl_active  # Reflect current exchange status
 
                 # --- Log Found Position ---
                 # Helper for logging optional Decimal values safely
-                def fmt_log(val: Optional[Any]) -> str:
+                def fmt_log(val: Any | None) -> str:
                     # Use safe conversion allowing zero/negative for display where appropriate
                     dec = _safe_market_decimal(val, 'log_fmt', True, True)
                     return dec.normalize() if dec is not None else 'N/A'
@@ -2135,9 +2136,8 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
                 tsl_str = "Inactive"
                 if exchange_tsl_active:
                      tsl_str = f"ACTIVE (Dist/Px={tsl_dist} | ActPx={tsl_act})"
-                elif std_pos.get('trailingStopLoss') or std_pos.get('tslActivationPrice'): # Partially set?
+                elif std_pos.get('trailingStopLoss') or std_pos.get('tslActivationPrice'):  # Partially set?
                      tsl_str = f"PARTIAL? (Dist/Px={tsl_dist} | ActPx={tsl_act})"
-
 
                 pnl = fmt_log(std_pos.get('unrealizedPnl'))
                 liq = fmt_log(std_pos.get('liquidationPrice'))
@@ -2150,11 +2150,11 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
 
                 # --- Cast to TypedDict and Return ---
                 try:
-                    final_position_info: PositionInfo = std_pos # type: ignore [assignment]
+                    final_position_info: PositionInfo = std_pos  # type: ignore [assignment]
                     return final_position_info
                 except Exception as cast_err:
                     lg.error(f"Internal error casting position dictionary to PositionInfo type ({symbol}): {cast_err}. Returning raw dict cautiously.")
-                    return std_pos # type: ignore [return-value]
+                    return std_pos  # type: ignore [return-value]
 
             else:
                 # No position found with size > threshold after checking all returned data
@@ -2170,15 +2170,15 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
             wait = RETRY_DELAY_SECONDS * 3
             lg.warning(f"{NEON_YELLOW}Rate limit exceeded fetching positions ({symbol}): {e}. Waiting {wait}s...{RESET}")
             time.sleep(wait)
-            continue # Don't count as standard attempt
+            continue  # Don't count as standard attempt
         except ccxt.AuthenticationError as e:
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error fetching positions: {e}. Cannot continue.{RESET}")
-            return None # Non-retryable
+            return None  # Non-retryable
         except ccxt.NotSupported as e:
              last_exception = e
              lg.error(f"{NEON_RED}Position fetching method not supported by {exchange.id}: {e}. Cannot get position info.{RESET}")
-             return None # Non-retryable
+             return None  # Non-retryable
         except ccxt.ExchangeError as e:
             # Handled specific "no position" cases above, this catches others
             last_exception = e
@@ -2187,21 +2187,21 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: MarketI
             # Catch any other unexpected errors
             last_exception = e
             lg.error(f"{NEON_RED}Unexpected error fetching positions ({symbol}): {e}{RESET}", exc_info=True)
-            return None # Treat unexpected errors as fatal for this function
+            return None  # Treat unexpected errors as fatal for this function
 
         # --- Wait Before Next Retry ---
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to get position info for {symbol} after {MAX_API_RETRIES + 1} attempts. "
              f"Last error: {last_exception}{RESET}")
     return None
 
+
 def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, market_info: MarketInfo, logger: logging.Logger) -> bool:
-    """
-    Sets the leverage for a given contract symbol using ccxt's set_leverage.
+    """Sets the leverage for a given contract symbol using ccxt's set_leverage.
     Handles specific requirements for exchanges like Bybit V5 (category, buy/sell leverage as strings).
     Includes retry logic and checks for success, no change needed, or fatal errors.
 
@@ -2220,7 +2220,7 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
     # --- Pre-checks ---
     if not market_info.get('is_contract', False):
         lg.info(f"Leverage setting skipped for {symbol}: Not a contract market.")
-        return True # No action needed for non-contracts
+        return True  # No action needed for non-contracts
 
     if not isinstance(leverage, int) or leverage <= 0:
         lg.error(f"Leverage setting failed for {symbol}: Invalid leverage value '{leverage}'. Must be a positive integer.")
@@ -2233,14 +2233,14 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
              lg.warning(f"Exchange {exchange.id} might require setting leverage via market creation/modification, not directly via set_leverage. Skipping.")
              # Assume success for now if direct method not available, but warn user.
              # A more robust solution would check market capabilities or use exchange-specific methods.
-             return True # Cautiously assume ok if method missing, user must configure manually
+             return True  # Cautiously assume ok if method missing, user must configure manually
         else:
              lg.error(f"Leverage setting failed: Exchange {exchange.id} does not support setLeverage method or market modification via ccxt.")
              return False
 
     market_id = market_info.get('id')
     # Determine category for Bybit V5
-    category = 'linear' # Default guess
+    category = 'linear'  # Default guess
     if market_info.get('is_linear'): category = 'linear'
     elif market_info.get('is_inverse'): category = 'inverse'
     is_bybit = 'bybit' in exchange.id.lower()
@@ -2255,7 +2255,7 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
     lg.info(f"Attempting to set leverage for {symbol} (Market ID: {market_id}, Category: {category if is_bybit else 'N/A'}) to {leverage}x...")
 
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     while attempts <= MAX_API_RETRIES:
         try:
@@ -2267,7 +2267,7 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
                  # Bybit V5 requires category and separate buy/sell leverage as strings
                  params = {
                      'category': category,
-                     'buyLeverage': str(leverage), # Must be strings for Bybit V5 API
+                     'buyLeverage': str(leverage),  # Must be strings for Bybit V5 API
                      'sellLeverage': str(leverage)
                  }
                  lg.debug(f"Using Bybit V5 specific leverage parameters: {params}")
@@ -2278,21 +2278,21 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
             lg.debug(f"Raw response from set_leverage ({symbol}): {response}")
 
             # --- Response Validation (especially for Bybit V5) ---
-            ret_code_str: Optional[str] = None
+            ret_code_str: str | None = None
             ret_msg: str = "Response format not recognized or empty."
 
             if isinstance(response, dict):
                 # Try extracting Bybit V5 style response codes/messages from 'info' first
                 info_dict = response.get('info', {})
-                raw_code = info_dict.get('retCode') # Primary location in V5
-                if raw_code is None: raw_code = response.get('retCode') # Fallback to root level
+                raw_code = info_dict.get('retCode')  # Primary location in V5
+                if raw_code is None: raw_code = response.get('retCode')  # Fallback to root level
                 ret_code_str = str(raw_code) if raw_code is not None else None
-                ret_msg = info_dict.get('retMsg', response.get('retMsg', 'Unknown message')) # Prefer info.retMsg
+                ret_msg = info_dict.get('retMsg', response.get('retMsg', 'Unknown message'))  # Prefer info.retMsg
 
             # Check Bybit success code (0) or "leverage not modified" code (e.g., 110045)
             # Note: Code 110045 might mean "leverage not modified" or other param errors. Check message too.
             bybit_success_codes = ['0']
-            bybit_no_change_codes = ['110045'] # "Parameter Error" - often means leverage not modified
+            bybit_no_change_codes = ['110045']  # "Parameter Error" - often means leverage not modified
 
             if ret_code_str in bybit_success_codes:
                 lg.info(f"{NEON_GREEN}Leverage successfully set for {symbol} to {leverage}x (Code: {ret_code_str}).{RESET}")
@@ -2320,7 +2320,7 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
             err_code_str = ""
             match = re.search(r'(retCode|ret_code)\s*[:=]\s*(\d+)', str(e.args[0] if e.args else ''), re.IGNORECASE)
             if match: err_code_str = match.group(2)
-            else: err_code_str = str(getattr(e, 'code', '') or getattr(e, 'retCode', '')) # Fallback
+            else: err_code_str = str(getattr(e, 'code', '') or getattr(e, 'retCode', ''))  # Fallback
 
             lg.error(f"{NEON_RED}Exchange error setting leverage ({symbol} to {leverage}x): {e} (Code: {err_code_str}){RESET}")
 
@@ -2332,16 +2332,16 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
             # Check for known fatal/non-retryable error codes or messages
             # These may need adjustment based on the specific exchange (using Bybit V5 examples)
             fatal_codes = [
-                '10001', # Parameter error (e.g., invalid leverage value for symbol)
-                '10004', # Sign check error (API keys)
-                '110009',# Symbol expired
-                '110013',# Risk limit error (might prevent leverage change)
-                '110028',# Cross margin mode cannot modify leverage
-                '110043',# Set leverage error when position exists (isolated margin)
-                '110044',# Set leverage error when order exists (isolated margin)
-                '110055',# Cannot set leverage under Isolated margin mode for cross margin position
-                '3400045',# Leverage less than min limit / greater than max limit
-                '110066', # Cannot set leverage under Portfolio Margin account mode
+                '10001',  # Parameter error (e.g., invalid leverage value for symbol)
+                '10004',  # Sign check error (API keys)
+                '110009',  # Symbol expired
+                '110013',  # Risk limit error (might prevent leverage change)
+                '110028',  # Cross margin mode cannot modify leverage
+                '110043',  # Set leverage error when position exists (isolated margin)
+                '110044',  # Set leverage error when order exists (isolated margin)
+                '110055',  # Cannot set leverage under Isolated margin mode for cross margin position
+                '3400045',  # Leverage less than min limit / greater than max limit
+                '110066',  # Cannot set leverage under Portfolio Margin account mode
             ]
             fatal_messages = [
                 "margin mode", "position exists", "order exists", "risk limit", "parameter error",
@@ -2361,7 +2361,7 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
                 elif "parameter error" in err_str_lower or "invalid leverage" in err_str_lower or err_code_str in ['10001', '3400045']:
                      lg.error(f" >> Leverage value {leverage}x might be invalid for {symbol}. Check exchange limits.")
 
-                return False # Non-retryable failure
+                return False  # Non-retryable failure
 
             # If not fatal, proceed to retry logic
             if attempts >= MAX_API_RETRIES:
@@ -2377,22 +2377,23 @@ def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, marke
         except ccxt.AuthenticationError as e:
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error setting leverage ({symbol}): {e}. Cannot continue.{RESET}")
-            return False # Non-retryable
+            return False  # Non-retryable
         except Exception as e:
             # Catch any other unexpected errors
             last_exception = e
             lg.error(f"{NEON_RED}Unexpected error setting leverage ({symbol}): {e}{RESET}", exc_info=True)
-            return False # Treat unexpected errors as fatal
+            return False  # Treat unexpected errors as fatal
 
         # --- Wait Before Next Retry ---
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to set leverage for {symbol} to {leverage}x after {MAX_API_RETRIES + 1} attempts. "
              f"Last error: {last_exception}{RESET}")
     return False
+
 
 def calculate_position_size(
     balance: Decimal,
@@ -2400,11 +2401,10 @@ def calculate_position_size(
     initial_stop_loss_price: Decimal,
     entry_price: Decimal,
     market_info: MarketInfo,
-    exchange: ccxt.Exchange, # Keep exchange for potential future use (e.g., fetching quote price)
+    exchange: ccxt.Exchange,  # Keep exchange for potential future use (e.g., fetching quote price)
     logger: logging.Logger
-) -> Optional[Decimal]:
-    """
-    Calculates the position size based on available balance, risk percentage,
+) -> Decimal | None:
+    """Calculates the position size based on available balance, risk percentage,
     entry price, and stop loss price. Considers market constraints (min/max size,
     step size, min/max cost) and contract type (linear/inverse). Applies precision rounding.
 
@@ -2424,7 +2424,7 @@ def calculate_position_size(
     """
     lg = logger
     symbol = market_info['symbol']
-    quote_currency = market_info.get('quote', 'QUOTE') # Fallback if missing
+    quote_currency = market_info.get('quote', 'QUOTE')  # Fallback if missing
     base_currency = market_info.get('base', 'BASE')   # Fallback if missing
     is_inverse = market_info.get('is_inverse', False)
     is_spot = market_info.get('spot', False)
@@ -2459,12 +2459,12 @@ def calculate_position_size(
     # --- Extract Market Constraints ---
     try:
         amount_step = market_info['amount_precision_step_decimal']
-        price_step = market_info['price_precision_step_decimal'] # Used for logging/potential adjustments
-        min_amount = market_info['min_amount_decimal'] # Can be None
-        max_amount = market_info['max_amount_decimal'] # Can be None
+        price_step = market_info['price_precision_step_decimal']  # Used for logging/potential adjustments
+        min_amount = market_info['min_amount_decimal']  # Can be None
+        max_amount = market_info['max_amount_decimal']  # Can be None
         min_cost = market_info['min_cost_decimal']     # Can be None
         max_cost = market_info['max_cost_decimal']     # Can be None
-        contract_size = market_info['contract_size_decimal'] # Should default to 1 if missing
+        contract_size = market_info['contract_size_decimal']  # Should default to 1 if missing
 
         # Validate critical constraints needed for calculation/adjustment
         if not (amount_step and amount_step > 0): raise ValueError("Amount precision step (amount_step) is missing or invalid.")
@@ -2489,7 +2489,7 @@ def calculate_position_size(
 
     # --- Core Size Calculation ---
     # Quantize risk amount early to avoid precision issues down the line
-    risk_amount_quote = (balance * risk_decimal).quantize(Decimal('1e-8'), ROUND_DOWN) # Risk amount in quote currency
+    risk_amount_quote = (balance * risk_decimal).quantize(Decimal('1e-8'), ROUND_DOWN)  # Risk amount in quote currency
     stop_loss_distance = abs(entry_price - initial_stop_loss_price)
 
     if stop_loss_distance <= Decimal('0'):
@@ -2497,7 +2497,7 @@ def calculate_position_size(
         lg.error(f"Sizing failed ({symbol}): Stop loss distance is zero or negative.")
         return None
 
-    lg.info(f"  Inputs:")
+    lg.info("  Inputs:")
     lg.info(f"    Balance: {balance.normalize()} {quote_currency}")
     lg.info(f"    Risk % : {risk_decimal:.2%}")
     lg.info(f"    Risk Amt: {risk_amount_quote.normalize()} {quote_currency}")
@@ -2512,7 +2512,7 @@ def calculate_position_size(
             # Formula: Size = Risk Amount / (ContractSize * SL Distance)
             # Value change per contract/base unit at the stop loss level
             value_change_per_unit = stop_loss_distance * contract_size
-            if value_change_per_unit <= Decimal('1e-18'): # Avoid division by near-zero
+            if value_change_per_unit <= Decimal('1e-18'):  # Avoid division by near-zero
                 lg.error(f"Sizing failed ({symbol}, Linear/Spot): Calculated value change per unit ({value_change_per_unit}) is near zero. Check prices/contract size.")
                 return None
             calculated_size = risk_amount_quote / value_change_per_unit
@@ -2522,11 +2522,11 @@ def calculate_position_size(
             # Formula: Size = Risk Amount / (ContractSize * |(1/Entry) - (1/SL)|)
             # Value change per contract at the stop loss level (in quote currency terms)
             inverse_factor = abs((Decimal('1') / entry_price) - (Decimal('1') / initial_stop_loss_price))
-            if inverse_factor <= Decimal('1e-18'): # Avoid division by near-zero
+            if inverse_factor <= Decimal('1e-18'):  # Avoid division by near-zero
                 lg.error(f"Sizing failed ({symbol}, Inverse): Calculated inverse factor ({inverse_factor}) is near zero. Check prices.")
                 return None
             risk_per_contract_unit = contract_size * inverse_factor
-            if risk_per_contract_unit <= Decimal('1e-18'): # Avoid division by near-zero
+            if risk_per_contract_unit <= Decimal('1e-18'):  # Avoid division by near-zero
                  lg.error(f"Sizing failed ({symbol}, Inverse): Calculated risk per contract unit ({risk_per_contract_unit}) is near zero.")
                  return None
             calculated_size = risk_amount_quote / risk_per_contract_unit
@@ -2548,21 +2548,21 @@ def calculate_position_size(
     adjusted_size = calculated_size
 
     # Helper to estimate cost accurately based on contract type
-    def estimate_cost(size: Decimal, price: Decimal) -> Optional[Decimal]:
+    def estimate_cost(size: Decimal, price: Decimal) -> Decimal | None:
         """Estimates the cost of a position in quote currency."""
         if not isinstance(size, Decimal) or not isinstance(price, Decimal) or price <= 0 or size <= 0:
             lg.warning(f"Cost estimation skipped: Invalid size ({size}) or price ({price}).")
             return None
         try:
             cost: Decimal
-            if not is_inverse: # Linear / Spot
+            if not is_inverse:  # Linear / Spot
                 # Cost = Size (Contracts/Base) * ContractSize * EntryPrice
                 cost = size * contract_size * price
-            else: # Inverse
+            else:  # Inverse
                 # Cost = Size (Contracts) * ContractSize / EntryPrice (Cost is in Base currency value, but expressed in Quote)
                 cost = (size * contract_size) / price
             # Quantize cost to a reasonable precision (e.g., 8 decimal places) for checks
-            return cost.quantize(Decimal('1e-8'), ROUND_UP) # Round up cost estimate slightly for safety
+            return cost.quantize(Decimal('1e-8'), ROUND_UP)  # Round up cost estimate slightly for safety
         except (InvalidOperation, OverflowError, ZeroDivisionError) as cost_err:
             lg.error(f"Cost estimation failed: {cost_err} (Size: {size}, Price: {price}, ContractSize: {contract_size}, Inverse: {is_inverse})")
             return None
@@ -2571,10 +2571,10 @@ def calculate_position_size(
     # Ensure comparison uses effective limits (handling None)
     if adjusted_size < min_amount_eff:
         lg.warning(f"{NEON_YELLOW}Sizing ({symbol}): Initial size {adjusted_size.normalize()} < Min Amount {fmt_dec_log(min_amount)}. Adjusting UP to Min Amount.{RESET}")
-        adjusted_size = min_amount_eff # Use the Decimal value
+        adjusted_size = min_amount_eff  # Use the Decimal value
     if adjusted_size > max_amount_eff:
         lg.warning(f"{NEON_YELLOW}Sizing ({symbol}): Initial size {adjusted_size.normalize()} > Max Amount {fmt_dec_log(max_amount)}. Adjusting DOWN to Max Amount.{RESET}")
-        adjusted_size = max_amount_eff # Use the Decimal value
+        adjusted_size = max_amount_eff  # Use the Decimal value
 
     # Ensure adjusted size is still positive after min/max amount adjustments
     if adjusted_size <= Decimal('0'):
@@ -2626,7 +2626,6 @@ def calculate_position_size(
                     estimated_cost = estimate_cost(adjusted_size, entry_price)
                     if estimated_cost: lg.debug(f"  Re-estimated Cost: {estimated_cost.normalize()} {quote_currency}")
 
-
             except (InvalidOperation, OverflowError, ZeroDivisionError, ValueError) as e:
                 lg.error(f"{NEON_RED}Sizing failed ({symbol}): Error calculating size required for Min Cost: {e}.{RESET}")
                 return None
@@ -2652,18 +2651,17 @@ def calculate_position_size(
                 lg.info(f"  Theoretical max size allowed by Max Cost ({symbol}): {max_size_for_max_cost.normalize()} {size_unit}")
 
                 # Adjust size down to the max allowed by cost, but ensure it doesn't go below min_amount
-                target_size = min(adjusted_size, max_size_for_max_cost) # Take the smaller of current or max allowed by cost
-                final_target_size = max(min_amount_eff, target_size) # Ensure it's still >= min_amount
+                target_size = min(adjusted_size, max_size_for_max_cost)  # Take the smaller of current or max allowed by cost
+                final_target_size = max(min_amount_eff, target_size)  # Ensure it's still >= min_amount
 
                 # Log the adjustment clearly
-                if final_target_size < adjusted_size: # Check if adjustment actually happened
+                if final_target_size < adjusted_size:  # Check if adjustment actually happened
                      adjusted_size = final_target_size
                      lg.info(f"  Adjusted size DOWN to meet Max Cost (respecting Min Amount): {adjusted_size.normalize()} {size_unit}")
-                     if adjusted_size < target_size: # Log if Min Amount capped the reduction
+                     if adjusted_size < target_size:  # Log if Min Amount capped the reduction
                           lg.debug(f"    (Note: Size reduction for Max Cost was limited by Min Amount {min_amount_eff.normalize()})")
                 else:
-                     lg.debug(f"  Size already within Max Cost limit. No reduction needed.")
-
+                     lg.debug("  Size already within Max Cost limit. No reduction needed.")
 
             except (InvalidOperation, OverflowError, ZeroDivisionError, ValueError) as e:
                 lg.error(f"{NEON_RED}Sizing failed ({symbol}): Error calculating max size allowed by Max Cost: {e}.{RESET}")
@@ -2675,7 +2673,6 @@ def calculate_position_size(
 
     if cost_adjusted:
         lg.debug(f"  Size after Cost Limits ({symbol}): {adjusted_size.normalize()} {size_unit}")
-
 
     # 3. Apply Amount Precision (Step Size) - Crucial final step, round DOWN
     final_size = adjusted_size
@@ -2694,7 +2691,6 @@ def calculate_position_size(
         lg.error(f"{NEON_RED}Sizing failed ({symbol}): Error applying amount precision (step size): {e}.{RESET}")
         return None
 
-
     # --- Final Validation after Precision ---
     if final_size <= Decimal('0'):
         lg.error(f"{NEON_RED}Sizing failed ({symbol}): Final size after precision adjustment is zero or negative ({final_size.normalize()}).{RESET}")
@@ -2709,7 +2705,6 @@ def calculate_position_size(
         # Let's stick to failing here for safety.
         # Alternative: Could try setting size to min_amount_eff and re-applying step rounding *up*? Complex.
         return None
-
 
     # Re-check Max Amount (shouldn't be possible if rounding down, but check anyway)
     if final_size > max_amount_eff:
@@ -2741,9 +2736,9 @@ def calculate_position_size(
     lg.info(f"{BRIGHT}--- End Position Sizing ({symbol}) ---{RESET}")
     return final_size
 
+
 def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: logging.Logger) -> bool:
-    """
-    Cancels a specific order by its ID using ccxt.cancel_order.
+    """Cancels a specific order by its ID using ccxt.cancel_order.
     Includes retry logic and handles common errors like OrderNotFound and InvalidOrder gracefully.
     Passes necessary parameters for exchanges like Bybit V5.
 
@@ -2758,11 +2753,11 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
     """
     lg = logger
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
     lg.info(f"Attempting to cancel order ID {order_id} for symbol {symbol}...")
 
     # Prepare parameters (e.g., category for Bybit V5)
-    market_id = symbol # Default
+    market_id = symbol  # Default
     params = {}
     is_bybit = 'bybit' in exchange.id.lower()
     if is_bybit:
@@ -2771,12 +2766,12 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
             # Attempt to fetch it here, or rely on defaults/config if needed.
             # For simplicity here, let's assume linear/spot based on symbol (crude).
             # A better approach would pass MarketInfo or fetch it.
-            market = exchange.market(symbol) # Fetch market info
-            market_id = market['id'] # Use market_id if available
+            market = exchange.market(symbol)  # Fetch market info
+            market_id = market['id']  # Use market_id if available
             if market.get('linear'): category = 'linear'
             elif market.get('inverse'): category = 'inverse'
             elif market.get('spot'): category = 'spot'
-            else: category = 'linear' # Default guess if type unclear
+            else: category = 'linear'  # Default guess if type unclear
             params['category'] = category
             # Bybit cancelOrder might need symbol (market_id) in params too
             params['symbol'] = market_id
@@ -2785,7 +2780,6 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
             lg.warning(f"Could not get market details to determine category/market_id for cancel ({symbol}): {e}. Proceeding without category/specific symbol param.")
             # Use original symbol if market lookup fails
             market_id = symbol
-
 
     while attempts <= MAX_API_RETRIES:
         try:
@@ -2798,21 +2792,21 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
         except ccxt.OrderNotFound:
             # Order doesn't exist - could be already filled, cancelled, or wrong ID
             lg.warning(f"{NEON_YELLOW}Order ID {order_id} ({symbol}) not found on the exchange. Assuming cancellation is effectively complete.{RESET}")
-            return True # Treat as success for workflow purposes
+            return True  # Treat as success for workflow purposes
         except ccxt.InvalidOrder as e:
              # E.g., order already filled/cancelled and API gives specific error
              last_exception = e
              lg.warning(f"{NEON_YELLOW}Invalid order state for cancellation ({symbol}, ID: {order_id}): {e}. Assuming cancellation unnecessary/complete.{RESET}")
-             return True # Treat as success if it cannot be cancelled due to state
+             return True  # Treat as success if it cannot be cancelled due to state
         except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
             last_exception = e
             lg.warning(f"{NEON_YELLOW}Network error cancelling order {order_id} ({symbol}): {e}. Retry {attempts + 1}...{RESET}")
         except ccxt.RateLimitExceeded as e:
             last_exception = e
-            wait = RETRY_DELAY_SECONDS * 2 # Shorter wait for cancel might be okay
+            wait = RETRY_DELAY_SECONDS * 2  # Shorter wait for cancel might be okay
             lg.warning(f"{NEON_YELLOW}Rate limit exceeded cancelling order {order_id} ({symbol}): {e}. Waiting {wait}s...{RESET}")
             time.sleep(wait)
-            continue # Don't count as standard attempt
+            continue  # Don't count as standard attempt
         except ccxt.ExchangeError as e:
             # Other exchange errors during cancellation
             last_exception = e
@@ -2824,7 +2818,7 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
         except ccxt.AuthenticationError as e:
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error cancelling order {order_id} ({symbol}): {e}. Cannot continue.{RESET}")
-            return False # Non-retryable
+            return False  # Non-retryable
         except Exception as e:
             # Catch any other unexpected errors
             last_exception = e
@@ -2835,25 +2829,25 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
         # --- Retry Logic ---
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to cancel order {order_id} ({symbol}) after {MAX_API_RETRIES + 1} attempts. "
              f"Last error: {last_exception}{RESET}")
     return False
 
+
 def place_trade(
     exchange: ccxt.Exchange,
     symbol: str,
-    trade_signal: str, # "BUY", "SELL", "EXIT_LONG", "EXIT_SHORT"
+    trade_signal: str,  # "BUY", "SELL", "EXIT_LONG", "EXIT_SHORT"
     position_size: Decimal,
     market_info: MarketInfo,
     logger: logging.Logger,
     reduce_only: bool = False,
-    params: Optional[Dict] = None # Allow passing extra params for flexibility
-) -> Optional[Dict]:
-    """
-    Places a market order based on the trade signal and calculated size using ccxt.create_order.
+    params: dict | None = None  # Allow passing extra params for flexibility
+) -> dict | None:
+    """Places a market order based on the trade signal and calculated size using ccxt.create_order.
     Handles specifics for exchanges like Bybit V5 (category, reduceOnly, positionIdx).
     Includes retry logic and detailed error handling with hints.
 
@@ -2890,12 +2884,12 @@ def place_trade(
         return None
 
     # --- Prepare Order Details ---
-    order_type = 'market' # Strategy currently uses market orders
+    order_type = 'market'  # Strategy currently uses market orders
     is_contract = market_info.get('is_contract', False)
     base_currency = market_info.get('base', 'BASE')
     size_unit = "Contracts" if is_contract else base_currency
     action_desc = "Close/Reduce" if reduce_only else "Open/Increase"
-    market_id = market_info.get('id') # Use exchange-specific ID
+    market_id = market_info.get('id')  # Use exchange-specific ID
     is_bybit = 'bybit' in exchange.id.lower()
 
     if not market_id:
@@ -2914,7 +2908,7 @@ def place_trade(
             raise ValueError(f"Position size {position_size} rounded down to zero or negative based on step {amount_step}.")
         if rounded_size != position_size:
              lg.warning(f"Adjusting order size {position_size.normalize()} to {rounded_size.normalize()} due to precision step {amount_step.normalize()} before placing order.")
-             position_size = rounded_size # Use the rounded size
+             position_size = rounded_size  # Use the rounded size
 
         amount_float = float(position_size)
         # Check for effective zero after float conversion ( paranoia check)
@@ -2925,7 +2919,7 @@ def place_trade(
         return None
 
     # Base order arguments for ccxt create_order
-    order_args: Dict[str, Any] = {
+    order_args: dict[str, Any] = {
         'symbol': symbol,     # Use standard symbol for ccxt call
         'type': order_type,
         'side': side,
@@ -2934,18 +2928,18 @@ def place_trade(
     }
 
     # --- Exchange-Specific Parameters ---
-    order_params: Dict[str, Any] = {}
+    order_params: dict[str, Any] = {}
     if is_bybit and is_contract:
         try:
             # Determine category from market_info
-            category = 'linear' # Default
+            category = 'linear'  # Default
             if market_info.get('is_linear'): category = 'linear'
             elif market_info.get('is_inverse'): category = 'inverse'
             else: raise ValueError(f"Invalid contract category derived from market_info: {market_info.get('contract_type_str')}")
 
             order_params = {
                 'category': category,
-                'positionIdx': 0 # Assume one-way mode (0 index). Hedge mode would need 1 or 2.
+                'positionIdx': 0  # Assume one-way mode (0 index). Hedge mode would need 1 or 2.
                 # Other potential Bybit params: timeInForce, postOnly, etc.
             }
 
@@ -2958,7 +2952,7 @@ def place_trade(
 
         except Exception as e:
             lg.error(f"Failed to set Bybit V5 specific parameters for {symbol}: {e}. Proceeding with base params, order might fail.")
-            order_params = {} # Reset params if setup failed
+            order_params = {}  # Reset params if setup failed
 
     # Merge any externally provided params (allowing override of defaults)
     if params:
@@ -2974,14 +2968,13 @@ def place_trade(
     lg.warning(f"  Symbol : {symbol} ({market_id})")
     lg.warning(f"  Type   : {order_type.upper()}")
     lg.warning(f"  Side   : {side.upper()} ({trade_signal})")
-    lg.warning(f"  Size   : {position_size.normalize()} {size_unit} (Float: {amount_float})") # Log both Dec and float
+    lg.warning(f"  Size   : {position_size.normalize()} {size_unit} (Float: {amount_float})")  # Log both Dec and float
     if order_params:
         lg.warning(f"  Params : {order_params}")
 
-
     # --- Execute Order Placement with Retry ---
     attempts = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     while attempts <= MAX_API_RETRIES:
         try:
@@ -2992,7 +2985,7 @@ def place_trade(
 
             # --- Log Success ---
             order_id = order_result.get('id', 'N/A')
-            status = order_result.get('status', 'N/A') # e.g., 'open', 'closed', 'canceled'
+            status = order_result.get('status', 'N/A')  # e.g., 'open', 'closed', 'canceled'
             # Average fill price and filled amount might not be immediately available for market orders
             avg_price_raw = order_result.get('average')
             filled_raw = order_result.get('filled')
@@ -3013,7 +3006,7 @@ def place_trade(
 
             lg.info(log_msg)
             lg.debug(f"Full order result ({symbol}): {order_result}")
-            return order_result # Return the successful order details
+            return order_result  # Return the successful order details
 
         # --- Error Handling for create_order ---
         except ccxt.InsufficientFunds as e:
@@ -3047,7 +3040,7 @@ def place_trade(
                 # Bybit: 110025 (Position is closed), 110031 (Reduce-only rule violated)
                 lg.error(f"  >> Hint: Reduce-only order failed. Ensure there's an open position to reduce and the size ({position_size.normalize()}) doesn't increase the position.")
             elif "position size" in err_lower or "position idx" in err_lower:
-                 lg.error(f"  >> Hint: Check if order size conflicts with existing position, leverage limits, or position mode (One-Way/Hedge).")
+                 lg.error("  >> Hint: Check if order size conflicts with existing position, leverage limits, or position mode (One-Way/Hedge).")
 
             return None
         except ccxt.ExchangeError as e:
@@ -3057,7 +3050,7 @@ def place_trade(
             err_code = ""
             match = re.search(r'(retCode|ret_code)\s*[:=]\s*(\d+)', str(e.args[0] if e.args else ''), re.IGNORECASE)
             if match: err_code = match.group(2)
-            else: err_code = str(getattr(e, 'code', '') or getattr(e, 'retCode', '')) # Fallback
+            else: err_code = str(getattr(e, 'code', '') or getattr(e, 'retCode', ''))  # Fallback
 
             lg.error(f"{NEON_RED}Order Placement Failed ({symbol} {action_desc}): Exchange Error. (Code: {err_code}){RESET}")
             lg.error(f"  Error details: {e}")
@@ -3065,21 +3058,21 @@ def place_trade(
             # Check for known fatal/non-retryable error codes or messages
             # (Examples, may need adjustment per exchange - focusing on Bybit V5)
             fatal_codes = [
-                '10001', # Bybit: Parameter error (often non-retryable if args are wrong)
-                '10004', # Bybit: Sign error (API key issue)
-                '110007',# Bybit: Batch orders count exceeds limit (if using batch)
-                '110013',# Bybit: Price precision issue (InvalidOrder should catch, but also here)
-                '110014',# Bybit: Size precision issue (InvalidOrder should catch)
-                '110017',# Bybit: Position idx not match position mode (config error)
-                '110025',# Bybit: Position not found/closed (relevant for reduceOnly, InvalidOrder might catch)
-                '110031',# Bybit: Reduce-only rule violated (InvalidOrder should catch)
-                '110040',# Bybit: Order qty exceeds risk limit (config/leverage issue)
-                '30086', # Bybit: Order cost exceeds risk limit (config/leverage issue)
-                '3303001',# Bybit SPOT: Invalid symbol
-                '3303005',# Bybit SPOT: Price/Qty precision issue (InvalidOrder should catch)
-                '3400060',# Bybit SPOT: Order amount exceeds balance (InsufficientFunds should catch)
-                '3400088',# Bybit: Leverage exceed max limit (config error)
-                '110043',# Bybit: Cannot set leverage with open position (shouldn't happen here, but listed)
+                '10001',  # Bybit: Parameter error (often non-retryable if args are wrong)
+                '10004',  # Bybit: Sign error (API key issue)
+                '110007',  # Bybit: Batch orders count exceeds limit (if using batch)
+                '110013',  # Bybit: Price precision issue (InvalidOrder should catch, but also here)
+                '110014',  # Bybit: Size precision issue (InvalidOrder should catch)
+                '110017',  # Bybit: Position idx not match position mode (config error)
+                '110025',  # Bybit: Position not found/closed (relevant for reduceOnly, InvalidOrder might catch)
+                '110031',  # Bybit: Reduce-only rule violated (InvalidOrder should catch)
+                '110040',  # Bybit: Order qty exceeds risk limit (config/leverage issue)
+                '30086',  # Bybit: Order cost exceeds risk limit (config/leverage issue)
+                '3303001',  # Bybit SPOT: Invalid symbol
+                '3303005',  # Bybit SPOT: Price/Qty precision issue (InvalidOrder should catch)
+                '3400060',  # Bybit SPOT: Order amount exceeds balance (InsufficientFunds should catch)
+                '3400088',  # Bybit: Leverage exceed max limit (config error)
+                '110043',  # Bybit: Cannot set leverage with open position (shouldn't happen here, but listed)
             ]
             # Add messages that often indicate non-retryable issues
             fatal_msgs = [
@@ -3093,7 +3086,7 @@ def place_trade(
 
             if is_fatal_code or is_fatal_message:
                 lg.error(f"{NEON_RED} >> Hint: This appears to be a NON-RETRYABLE order placement error for {symbol}. Check arguments and config.{RESET}")
-                return None # Non-retryable failure
+                return None  # Non-retryable failure
 
             # If not identified as fatal, proceed to retry logic
             if attempts >= MAX_API_RETRIES:
@@ -3108,24 +3101,24 @@ def place_trade(
                 return None
         except ccxt.RateLimitExceeded as e:
             last_exception = e
-            wait = RETRY_DELAY_SECONDS * 3 # Longer wait for rate limits
+            wait = RETRY_DELAY_SECONDS * 3  # Longer wait for rate limits
             lg.warning(f"{NEON_YELLOW}Rate limit exceeded placing order ({symbol}): {e}. Waiting {wait}s...{RESET}")
             time.sleep(wait)
-            continue # Don't count as standard attempt
+            continue  # Don't count as standard attempt
         except ccxt.AuthenticationError as e:
             last_exception = e
             lg.critical(f"{NEON_RED}Authentication error placing order ({symbol}): {e}. Cannot continue.{RESET}")
-            return None # Non-retryable
+            return None  # Non-retryable
         except Exception as e:
             # Catch any other unexpected errors
             last_exception = e
             lg.error(f"{NEON_RED}Unexpected error placing order ({symbol}): {e}{RESET}", exc_info=True)
-            return None # Treat unexpected errors as fatal
+            return None  # Treat unexpected errors as fatal
 
         # --- Wait Before Next Retry ---
         attempts += 1
         if attempts <= MAX_API_RETRIES:
-            time.sleep(RETRY_DELAY_SECONDS * attempts) # Exponential backoff
+            time.sleep(RETRY_DELAY_SECONDS * attempts)  # Exponential backoff
 
     # If loop finishes without success
     lg.error(f"{NEON_RED}Failed to place {action_desc} order for {symbol} after {MAX_API_RETRIES + 1} attempts. "
@@ -3141,13 +3134,12 @@ def _set_position_protection(
     market_info: MarketInfo,
     position_info: PositionInfo,
     logger: logging.Logger,
-    stop_loss_price: Optional[Decimal] = None,
-    take_profit_price: Optional[Decimal] = None,
-    trailing_stop_distance: Optional[Decimal] = None, # TSL distance/offset (interpretation depends on exchange)
-    tsl_activation_price: Optional[Decimal] = None   # Price at which TSL should activate (Bybit V5)
+    stop_loss_price: Decimal | None = None,
+    take_profit_price: Decimal | None = None,
+    trailing_stop_distance: Decimal | None = None,  # TSL distance/offset (interpretation depends on exchange)
+    tsl_activation_price: Decimal | None = None   # Price at which TSL should activate (Bybit V5)
 ) -> bool:
-    """
-    Placeholder: Sets Stop Loss (SL), Take Profit (TP), and potentially Trailing Stop Loss (TSL)
+    """Placeholder: Sets Stop Loss (SL), Take Profit (TP), and potentially Trailing Stop Loss (TSL)
     for an existing position using exchange-specific methods or parameters.
 
     ** THIS IS A PLACEHOLDER - FULL IMPLEMENTATION IS REQUIRED **
@@ -3190,7 +3182,7 @@ def _set_position_protection(
     if tsl_activation_price: log_parts.append(f"TSL Act={tsl_activation_price.normalize()}")
     if not log_parts:
         lg.debug("  No protection parameters provided to set.")
-        return True # Nothing to do, considered success
+        return True  # Nothing to do, considered success
 
     lg.info(f"  Attempting to set: {', '.join(log_parts)}")
 
@@ -3201,16 +3193,16 @@ def _set_position_protection(
         # --- Bybit V5 Example ---
         try:
             market_id = market_info['id']
-            category = 'linear' # Default
+            category = 'linear'  # Default
             if market_info.get('is_linear'): category = 'linear'
             elif market_info.get('is_inverse'): category = 'inverse'
             else: raise ValueError("Invalid Bybit category")
 
-            params: Dict[str, Any] = {
+            params: dict[str, Any] = {
                 'category': category,
                 'symbol': market_id,
-                'positionIdx': 0, # Assuming one-way mode
-                'tpslMode': 'Full', # Set SL/TP for the entire position
+                'positionIdx': 0,  # Assuming one-way mode
+                'tpslMode': 'Full',  # Set SL/TP for the entire position
                 # Default trigger to Mark Price, make configurable if needed
                 'slTriggerBy': 'MarkPrice',
                 'tpTriggerBy': 'MarkPrice',
@@ -3237,7 +3229,7 @@ def _set_position_protection(
                       lg.error(f"Invalid TSL distance for {symbol}: {trailing_stop_distance}. Must be positive."); return False
                  # Format the distance like a price step (crude assumption, might need different precision)
                  ts_dist_str = exchange.price_to_precision(symbol, float(trailing_stop_distance))
-                 if ts_dist_str and float(ts_dist_str) > 0: # Double check formatting didn't yield zero/negative
+                 if ts_dist_str and float(ts_dist_str) > 0:  # Double check formatting didn't yield zero/negative
                       params['trailingStop'] = ts_dist_str
                  else:
                       lg.error(f"Invalid TSL distance format for {symbol}: {trailing_stop_distance} -> {ts_dist_str}"); return False
@@ -3260,9 +3252,9 @@ def _set_position_protection(
 
                  # --- Placeholder Response Check ---
                  # Assume success for now
-                 api_success = True # Placeholder
-                 api_ret_code = 0 # Placeholder
-                 api_ret_msg = "OK (Placeholder)" # Placeholder
+                 api_success = True  # Placeholder
+                 api_ret_code = 0  # Placeholder
+                 api_ret_msg = "OK (Placeholder)"  # Placeholder
 
                  # if response.get('retCode') == 0:
                  #     lg.info(f"Protection set successfully via API for {symbol}.")
@@ -3280,7 +3272,7 @@ def _set_position_protection(
 
             else:
                  lg.debug("No valid protection parameters formatted to send.")
-                 return True # Nothing to set, considered success
+                 return True  # Nothing to set, considered success
 
         except (ccxt.ExchangeError, ccxt.NetworkError, ValueError, TypeError) as e:
             lg.error(f"Error preparing or calling protection API for Bybit {symbol}: {e}", exc_info=True)
@@ -3294,19 +3286,19 @@ def _set_position_protection(
         lg.error(f"Protection setting logic not implemented for exchange {exchange.id} in placeholder.")
         # Implementation would involve finding the correct ccxt method or parameters
         # E.g., using params in create_order for SL/TP if supported, or edit_position methods.
-        return False # Assume failure if not implemented
+        return False  # Assume failure if not implemented
+
 
 def set_trailing_stop_loss(
     exchange: ccxt.Exchange,
     symbol: str,
     market_info: MarketInfo,
     position_info: PositionInfo,
-    config: Dict[str, Any], # Pass config for TSL parameters
+    config: dict[str, Any],  # Pass config for TSL parameters
     logger: logging.Logger,
-    take_profit_price: Optional[Decimal] = None # Can optionally set TP at the same time
+    take_profit_price: Decimal | None = None  # Can optionally set TP at the same time
 ) -> bool:
-    """
-    Placeholder: Sets up an initial Trailing Stop Loss (TSL) based on config parameters
+    """Placeholder: Sets up an initial Trailing Stop Loss (TSL) based on config parameters
     by calculating the required distance and activation price.
 
     ** THIS IS A PLACEHOLDER - FULL IMPLEMENTATION IS REQUIRED **
@@ -3333,8 +3325,8 @@ def set_trailing_stop_loss(
     prot_cfg = config.get('protection', {})
     # Get TSL parameters from config, convert to Decimal
     try:
-        callback_rate = Decimal(str(prot_cfg.get('trailing_stop_callback_rate', 0.005))) # e.g., 0.5%
-        activation_perc = Decimal(str(prot_cfg.get('trailing_stop_activation_percentage', 0.003))) # e.g., 0.3%
+        callback_rate = Decimal(str(prot_cfg.get('trailing_stop_callback_rate', 0.005)))  # e.g., 0.5%
+        activation_perc = Decimal(str(prot_cfg.get('trailing_stop_activation_percentage', 0.003)))  # e.g., 0.3%
         if callback_rate <= 0:
              lg.error(f"Invalid TSL callback rate ({callback_rate}) in config. Must be > 0."); return False
         if activation_perc < 0:
@@ -3348,7 +3340,7 @@ def set_trailing_stop_loss(
     current_price_raw = position_info.get('markPrice')
     source = "position mark price"
     if current_price_raw is None:
-         current_price_raw = fetch_current_price_ccxt(exchange, symbol, lg) # Fetch ticker if mark price missing
+         current_price_raw = fetch_current_price_ccxt(exchange, symbol, lg)  # Fetch ticker if mark price missing
          source = "ticker price"
 
     current_price = _safe_market_decimal(current_price_raw, f"{symbol} tsl.current ({source})", False, False)
@@ -3368,7 +3360,7 @@ def set_trailing_stop_loss(
     if side == 'long':
         act_raw = entry_price * (Decimal('1') + activation_perc)
         activation_price_calc = (act_raw / price_tick).quantize(Decimal('1'), ROUND_UP) * price_tick
-    else: # short
+    else:  # short
         act_raw = entry_price * (Decimal('1') - activation_perc)
         activation_price_calc = (act_raw / price_tick).quantize(Decimal('1'), ROUND_DOWN) * price_tick
 
@@ -3379,14 +3371,13 @@ def set_trailing_stop_loss(
     if activation_price_calc <= 0:
         lg.error(f"Calculated TSL activation price ({activation_price_calc}) is non-positive for {symbol}. Cannot set TSL."); return False
 
-
     # 2. Calculate TSL Distance (Callback):
     #    Interpretation depends heavily on the exchange API.
     #    Bybit V5 'trailingStop' expects the distance in price points (e.g., "50" for $50 distance).
     #    Let's assume callback_rate is a percentage of the *entry price* to determine the fixed price distance.
     #    Alternative: could be % of current price, or absolute price points from config.
     #    Using entry price provides a consistent distance based on initial risk setup.
-    tsl_distance_calc = (entry_price * callback_rate).quantize(price_tick, ROUND_UP) # Round distance up slightly
+    tsl_distance_calc = (entry_price * callback_rate).quantize(price_tick, ROUND_UP)  # Round distance up slightly
 
     # Ensure distance is at least one price tick
     if tsl_distance_calc < price_tick:
@@ -3400,10 +3391,10 @@ def set_trailing_stop_loss(
     # Pass the calculated Decimal values. _set_position_protection will handle formatting.
     success = _set_position_protection(
         exchange, symbol, market_info, position_info, lg,
-        stop_loss_price=None, # Not setting regular SL here, TSL replaces/manages it
-        take_profit_price=take_profit_price, # Pass through optional TP
-        trailing_stop_distance=tsl_distance_calc, # Pass calculated distance
-        tsl_activation_price=activation_price_calc # Pass calculated activation price
+        stop_loss_price=None,  # Not setting regular SL here, TSL replaces/manages it
+        take_profit_price=take_profit_price,  # Pass through optional TP
+        trailing_stop_distance=tsl_distance_calc,  # Pass calculated distance
+        tsl_activation_price=activation_price_calc  # Pass calculated activation price
     )
 
     if success:
@@ -3413,11 +3404,11 @@ def set_trailing_stop_loss(
     else:
         lg.error(f"Failed to set up/update trailing stop loss for {symbol} via _set_position_protection.")
 
-    return success # Return result of the underlying call
+    return success  # Return result of the underlying call
+
 
 class VolumaticOBStrategy:
-    """
-    Placeholder: Encapsulates the Volumatic Trend + Order Block strategy logic.
+    """Placeholder: Encapsulates the Volumatic Trend + Order Block strategy logic.
     Calculates indicators, identifies trends, finds order blocks, and stores analysis results.
 
     ** THIS IS A PLACEHOLDER - FULL IMPLEMENTATION IS REQUIRED **
@@ -3428,13 +3419,13 @@ class VolumaticOBStrategy:
     identification (based on pivots and source 'Wicks'/'Body'), violation checks,
     and extension logic need to be fully coded.
     """
-    def __init__(self, config: Dict[str, Any], market_info: MarketInfo, logger: logging.Logger):
+    def __init__(self, config: dict[str, Any], market_info: MarketInfo, logger: logging.Logger) -> None:
         self.lg = logger
         self.symbol = market_info['symbol']
         self.market_info = market_info
         self.params = config.get('strategy_params', {})
         self.protection_params = config.get('protection', {})
-        self.price_tick = market_info.get('price_precision_step_decimal') or Decimal('0.00000001') # Miniscule default
+        self.price_tick = market_info.get('price_precision_step_decimal') or Decimal('0.00000001')  # Miniscule default
 
         # --- Extract Params (with defaults and type safety) ---
         try:
@@ -3443,7 +3434,7 @@ class VolumaticOBStrategy:
             self.vt_vol_ema_len = int(self.params.get('vt_vol_ema_length', DEFAULT_VT_VOL_EMA_LENGTH))
             self.vt_atr_mult = Decimal(str(self.params.get('vt_atr_multiplier', DEFAULT_VT_ATR_MULTIPLIER)))
             # self.vt_step_atr_mult = Decimal(str(self.params.get('vt_step_atr_multiplier', DEFAULT_VT_STEP_ATR_MULTIPLIER))) # If needed
-            self.ob_source = str(self.params.get('ob_source', DEFAULT_OB_SOURCE)) # "Wicks" or "Body"
+            self.ob_source = str(self.params.get('ob_source', DEFAULT_OB_SOURCE))  # "Wicks" or "Body"
             self.ph_left = int(self.params.get('ph_left', DEFAULT_PH_LEFT))
             self.ph_right = int(self.params.get('ph_right', DEFAULT_PH_RIGHT))
             self.pl_left = int(self.params.get('pl_left', DEFAULT_PL_LEFT))
@@ -3463,15 +3454,14 @@ class VolumaticOBStrategy:
              # Optionally re-raise or set defaults to stop initialization
              raise ValueError(f"Strategy Initialization Failed for {self.symbol}: Invalid parameters.") from e
 
-
         # Estimate minimum data length needed (ensure sufficient history for longest lookback)
         self.min_data_len = max(
-            self.vt_len * 2, # Need more for initial EMA/MA stability
-            self.vt_atr_period + 1, # ATR needs N+1 periods
-            self.vt_vol_ema_len * 2, # EMA needs buffer
-            self.ph_left + self.ph_right + 1, # Pivots need lookback+lookforward+current
+            self.vt_len * 2,  # Need more for initial EMA/MA stability
+            self.vt_atr_period + 1,  # ATR needs N+1 periods
+            self.vt_vol_ema_len * 2,  # EMA needs buffer
+            self.ph_left + self.ph_right + 1,  # Pivots need lookback+lookforward+current
             self.pl_left + self.pl_right + 1
-        ) + 50 # Add a generous buffer
+        ) + 50  # Add a generous buffer
 
         self.lg.info(f"Strategy Engine initialized for {self.symbol} with min data length ~{self.min_data_len}")
         self.lg.debug(f"  Params: VT Len={self.vt_len}, ATR Period={self.vt_atr_period}, "
@@ -3480,23 +3470,23 @@ class VolumaticOBStrategy:
                       f"Extend={self.ob_extend}, Max Boxes={self.ob_max_boxes}")
 
         # State for tracking order blocks across updates (persistent between `update` calls)
-        self._active_bull_boxes: List[OrderBlock] = []
-        self._active_bear_boxes: List[OrderBlock] = []
-
+        self._active_bull_boxes: list[OrderBlock] = []
+        self._active_bear_boxes: list[OrderBlock] = []
 
     def _ema_swma(self, series: pd.Series, length: int) -> pd.Series:
         """Placeholder: Calculates Smoothed Weighted Moving Average (SWMA) via EMA.
-           Actual implementation depends on the precise definition of SWMA used.
-           Using pandas_ta.swma if available, otherwise simple EMA as fallback placeholder."""
+        Actual implementation depends on the precise definition of SWMA used.
+        Using pandas_ta.swma if available, otherwise simple EMA as fallback placeholder.
+        """
         self.lg.debug(f"Placeholder _ema_swma called for length {length}")
         if series.empty or length <= 0 or series.isnull().all():
-             return pd.Series(dtype=np.float64, index=series.index) # Return empty/NaN series matching index
+             return pd.Series(dtype=np.float64, index=series.index)  # Return empty/NaN series matching index
         try:
             # Try using pandas_ta implementation if it matches the desired SWMA
             if hasattr(ta, 'swma'):
                  # Ensure input is float64 for pandas_ta
                  result = ta.swma(series.astype(np.float64), length=length)
-                 return result.astype(np.float64) # Ensure output is float64
+                 return result.astype(np.float64)  # Ensure output is float64
             else:
                  # Fallback to simple EMA if ta.swma doesn't exist
                  self.lg.warning("pandas_ta.swma not found, using simple EMA as placeholder for _ema_swma.")
@@ -3504,13 +3494,13 @@ class VolumaticOBStrategy:
                  return result.astype(np.float64)
         except Exception as e:
              self.lg.error(f"Error calculating SWMA/EMA (placeholder) for length {length}: {e}", exc_info=True)
-             return pd.Series(np.nan, index=series.index, dtype=np.float64) # Return NaN series on error
+             return pd.Series(np.nan, index=series.index, dtype=np.float64)  # Return NaN series on error
 
     def _find_pivots(self, series: pd.Series, left: int, right: int, is_high: bool) -> pd.Series:
         """Placeholder: Finds pivot high or low points.
-           A pivot high is a point higher than `left` bars before and `right` bars after.
-           A pivot low is a point lower than `left` bars before and `right` bars after.
-           Returns a boolean Series indicating pivot points.
+        A pivot high is a point higher than `left` bars before and `right` bars after.
+        A pivot low is a point lower than `left` bars before and `right` bars after.
+        Returns a boolean Series indicating pivot points.
         """
         self.lg.debug(f"Placeholder _find_pivots called (Left:{left}, Right:{right}, High:{is_high})")
         if series.empty or left < 0 or right < 0 or series.isnull().all():
@@ -3521,8 +3511,8 @@ class VolumaticOBStrategy:
         # A proper implementation would use more optimized methods (e.g., comparing shifted series)
         # This placeholder likely won't work correctly for identifying true pivots.
         for i in range(left, len(series) - right):
-            window = series.iloc[i-left : i+right+1]
-            if window.isnull().any(): continue # Skip windows with NaN
+            window = series.iloc[i - left : i + right + 1]
+            if window.isnull().any(): continue  # Skip windows with NaN
 
             is_pivot = False
             current_val = series.iloc[i]
@@ -3530,7 +3520,7 @@ class VolumaticOBStrategy:
                  # Check if current is strictly the highest in the window
                  if current_val >= window.max() and (window == current_val).sum() == 1:
                       is_pivot = True
-            else: # is_low
+            else:  # is_low
                  # Check if current is strictly the lowest in the window
                  if current_val <= window.min() and (window == current_val).sum() == 1:
                      is_pivot = True
@@ -3540,11 +3530,9 @@ class VolumaticOBStrategy:
         self.lg.warning("Pivot detection logic is a basic placeholder and may not be accurate.")
         return pivots
 
-
     def update(self, df: pd.DataFrame) -> StrategyAnalysisResults:
-        """
-        Placeholder: Processes the input DataFrame to calculate indicators and identify strategy elements.
-        ** This function needs the full implementation of VT and OB logic. **
+        """Placeholder: Processes the input DataFrame to calculate indicators and identify strategy elements.
+        ** This function needs the full implementation of VT and OB logic. **.
 
         Args:
             df: The OHLCV DataFrame with 'open', 'high', 'low', 'close', 'volume' as Decimal, indexed by UTC timestamp.
@@ -3559,7 +3547,7 @@ class VolumaticOBStrategy:
         default_result = StrategyAnalysisResults(
             dataframe=df, last_close=df['close'].iloc[-1] if not df.empty else Decimal('0'),
             current_trend_up=None, trend_just_changed=False,
-            active_bull_boxes=self._active_bull_boxes, # Use current state
+            active_bull_boxes=self._active_bull_boxes,  # Use current state
             active_bear_boxes=self._active_bear_boxes,
             vol_norm_int=None, atr=None, upper_band=None, lower_band=None
         )
@@ -3595,7 +3583,7 @@ class VolumaticOBStrategy:
 
             # VT Bands (Placeholder - using simple +/- ATR from close)
             # *** Needs actual VT center line (e.g., EMA/SWMA of vol-weighted price) and band calculation ***
-            mid_band_placeholder = ta.ema(close_f, length=self.vt_len) # Simple EMA of close
+            mid_band_placeholder = ta.ema(close_f, length=self.vt_len)  # Simple EMA of close
             df_analysis['vt_upper'] = mid_band_placeholder + atr_series_f * float(self.vt_atr_mult)
             df_analysis['vt_lower'] = mid_band_placeholder - atr_series_f * float(self.vt_atr_mult)
             # Convert back to Decimal
@@ -3645,7 +3633,6 @@ class VolumaticOBStrategy:
             active_bull_boxes = [box for box in self._active_bull_boxes if box['active'] and not box['violated']]
             active_bear_boxes = [box for box in self._active_bear_boxes if box['active'] and not box['violated']]
 
-
         except Exception as e:
             self.lg.error(f"Error during strategy calculation for {self.symbol}: {e}", exc_info=True)
             # Return default results on error, ensuring last_close is updated if possible
@@ -3661,22 +3648,21 @@ class VolumaticOBStrategy:
         self.lg.debug(f"  Active Bull OBs (Placeholder): {len(active_bull_boxes)}, Active Bear OBs (Placeholder): {len(active_bear_boxes)}")
 
         return StrategyAnalysisResults(
-            dataframe=df_analysis, # Return the DataFrame with added indicator columns
+            dataframe=df_analysis,  # Return the DataFrame with added indicator columns
             last_close=last_close,
             current_trend_up=current_trend_up,
             trend_just_changed=trend_just_changed,
-            active_bull_boxes=active_bull_boxes, # Use the potentially updated lists
+            active_bull_boxes=active_bull_boxes,  # Use the potentially updated lists
             active_bear_boxes=active_bear_boxes,
             vol_norm_int=vol_norm_int,
             atr=current_atr,
-            upper_band=upper_band, # Placeholder value
+            upper_band=upper_band,  # Placeholder value
             lower_band=lower_band  # Placeholder value
         )
 
 
 class SignalGenerator:
-    """
-    Placeholder: Generates trading signals ("BUY", "SELL", "HOLD", "EXIT_LONG", "EXIT_SHORT")
+    """Placeholder: Generates trading signals ("BUY", "SELL", "HOLD", "EXIT_LONG", "EXIT_SHORT")
     based on the results from the VolumaticOBStrategy analysis and current position state.
 
      ** THIS IS A PLACEHOLDER - FULL IMPLEMENTATION IS REQUIRED **
@@ -3693,7 +3679,7 @@ class SignalGenerator:
         - (Stop Loss / Take Profit are handled by exchange orders, not direct exit signals here).
     - Calculates initial SL/TP based on entry price, ATR, and potentially OB levels.
     """
-    def __init__(self, config: Dict[str, Any], market_info: MarketInfo, logger: logging.Logger):
+    def __init__(self, config: dict[str, Any], market_info: MarketInfo, logger: logging.Logger) -> None:
         self.lg = logger
         self.symbol = market_info['symbol']
         self.market_info = market_info
@@ -3725,9 +3711,8 @@ class SignalGenerator:
         self.lg.debug(f"  Params: Entry Prox Factor={self.entry_prox_factor}, Exit Prox Factor={self.exit_prox_factor}, "
                       f"SL ATR Mult={self.sl_atr_mult}, TP ATR Mult={self.tp_atr_mult}")
 
-    def _calculate_initial_sl_tp(self, entry_price: Decimal, side: str, atr: Decimal) -> Tuple[Optional[Decimal], Optional[Decimal]]:
-        """
-        Placeholder: Calculates initial SL and TP based on entry price, side, and ATR multiplier.
+    def _calculate_initial_sl_tp(self, entry_price: Decimal, side: str, atr: Decimal) -> tuple[Decimal | None, Decimal | None]:
+        """Placeholder: Calculates initial SL and TP based on entry price, side, and ATR multiplier.
         Applies price tick precision rounding away from the entry price.
 
         Args:
@@ -3751,32 +3736,32 @@ class SignalGenerator:
         sl_distance = atr * self.sl_atr_mult
         tp_distance = atr * self.tp_atr_mult if self.tp_atr_mult > 0 else None
 
-        initial_sl_raw: Optional[Decimal] = None
-        initial_tp_raw: Optional[Decimal] = None
+        initial_sl_raw: Decimal | None = None
+        initial_tp_raw: Decimal | None = None
 
         if side == 'long':
             initial_sl_raw = entry_price - sl_distance
             if tp_distance:
                 initial_tp_raw = entry_price + tp_distance
-        else: # short
+        else:  # short
             initial_sl_raw = entry_price + sl_distance
             if tp_distance:
                 initial_tp_raw = entry_price - tp_distance
 
         # --- Apply Price Precision and Safety Checks ---
-        final_sl: Optional[Decimal] = None
-        final_tp: Optional[Decimal] = None
+        final_sl: Decimal | None = None
+        final_tp: Decimal | None = None
 
         # Stop Loss: Round *away* from entry, ensure it didn't cross entry, ensure positive
         if initial_sl_raw is not None:
-             rounding = ROUND_DOWN if side == 'long' else ROUND_UP # Round further away
+             rounding = ROUND_DOWN if side == 'long' else ROUND_UP  # Round further away
              sl_rounded = (initial_sl_raw / self.price_tick).quantize(Decimal('1'), rounding) * self.price_tick
 
              # Check if rounding made SL equal or cross entry price
              if side == 'long' and sl_rounded >= entry_price:
-                 sl_rounded = entry_price - self.price_tick # Move one tick away if crossed
+                 sl_rounded = entry_price - self.price_tick  # Move one tick away if crossed
              elif side == 'short' and sl_rounded <= entry_price:
-                 sl_rounded = entry_price + self.price_tick # Move one tick away if crossed
+                 sl_rounded = entry_price + self.price_tick  # Move one tick away if crossed
 
              # Final check: ensure SL is positive
              if sl_rounded > 0:
@@ -3786,21 +3771,20 @@ class SignalGenerator:
 
         # Take Profit: Round *away* from entry, ensure it didn't cross entry, ensure positive
         if initial_tp_raw is not None:
-             rounding = ROUND_UP if side == 'long' else ROUND_DOWN # Round further away
+             rounding = ROUND_UP if side == 'long' else ROUND_DOWN  # Round further away
              tp_rounded = (initial_tp_raw / self.price_tick).quantize(Decimal('1'), rounding) * self.price_tick
 
              # Check if rounding made TP equal or cross entry price
              if side == 'long' and tp_rounded <= entry_price:
-                 tp_rounded = entry_price + self.price_tick # Move one tick away if crossed
+                 tp_rounded = entry_price + self.price_tick  # Move one tick away if crossed
              elif side == 'short' and tp_rounded >= entry_price:
-                 tp_rounded = entry_price - self.price_tick # Move one tick away if crossed
+                 tp_rounded = entry_price - self.price_tick  # Move one tick away if crossed
 
              # Final check: ensure TP is positive
              if tp_rounded > 0:
                  final_tp = tp_rounded
              else:
                  self.lg.warning(f"Calculated initial TP ({tp_rounded.normalize()}) is non-positive after rounding for {self.symbol}. Setting TP to None.")
-
 
         self.lg.debug(f"Calculated SL/TP for {self.symbol} ({side}): Entry={entry_price.normalize()}, ATR={atr.normalize()} -> "
                       f"SL={final_sl.normalize() if final_sl else 'None'}, TP={final_tp.normalize() if final_tp else 'None'}")
@@ -3809,12 +3793,11 @@ class SignalGenerator:
     def generate_signal(
         self,
         analysis: StrategyAnalysisResults,
-        current_position: Optional[PositionInfo],
-        symbol: str # Explicit symbol for clarity
+        current_position: PositionInfo | None,
+        symbol: str  # Explicit symbol for clarity
     ) -> SignalResult:
-        """
-        Placeholder: Analyzes strategy results and current position to generate a trading signal.
-        ** This function needs the full implementation of the strategy's entry/exit rules. **
+        """Placeholder: Analyzes strategy results and current position to generate a trading signal.
+        ** This function needs the full implementation of the strategy's entry/exit rules. **.
 
         Args:
             analysis: The results from the VolumaticOBStrategy update.
@@ -3829,7 +3812,7 @@ class SignalGenerator:
 
         # --- Extract Key Analysis Results ---
         trend_up = analysis.get('current_trend_up')
-        trend_changed = analysis.get('trend_just_changed', False)
+        analysis.get('trend_just_changed', False)
         atr = analysis.get('atr')
         last_close = analysis.get('last_close')
         bull_boxes = analysis.get('active_bull_boxes', [])
@@ -3847,7 +3830,7 @@ class SignalGenerator:
         # --- Exit Logic First (if position exists) ---
         if current_position:
             pos_side = current_position.get('side')
-            entry_price = _safe_market_decimal(current_position.get('entryPrice'), "pos.entry", False, False)
+            _safe_market_decimal(current_position.get('entryPrice'), "pos.entry", False, False)
 
             # Example Exit 1: Trend Reversal
             if pos_side == 'long' and trend_up is False:
@@ -3860,16 +3843,16 @@ class SignalGenerator:
             # Example Exit 2: Price hits opposite OB (Placeholder - needs proximity check)
             elif pos_side == 'long' and bear_boxes and last_close:
                  # Check if close is near/inside the nearest bear box
-                 nearest_bear_box = min(bear_boxes, key=lambda b: b['bottom']) # Example: nearest bottom
+                 nearest_bear_box = min(bear_boxes, key=lambda b: b['bottom'])  # Example: nearest bottom
                  # Placeholder proximity check
-                 if last_close >= nearest_bear_box['bottom'] * (Decimal('1') - (self.exit_prox_factor - 1)): # Example check
+                 if last_close >= nearest_bear_box['bottom'] * (Decimal('1') - (self.exit_prox_factor - 1)):  # Example check
                       signal = "EXIT_LONG"
                       reason = f"Placeholder: Price near Bear OB {nearest_bear_box['id']} @ {nearest_bear_box['bottom']}-{nearest_bear_box['top']}."
             elif pos_side == 'short' and bull_boxes and last_close:
                  # Check if close is near/inside the nearest bull box
-                 nearest_bull_box = max(bull_boxes, key=lambda b: b['top']) # Example: nearest top
+                 nearest_bull_box = max(bull_boxes, key=lambda b: b['top'])  # Example: nearest top
                  # Placeholder proximity check
-                 if last_close <= nearest_bull_box['top'] * self.exit_prox_factor: # Example check
+                 if last_close <= nearest_bull_box['top'] * self.exit_prox_factor:  # Example check
                       signal = "EXIT_SHORT"
                       reason = f"Placeholder: Price near Bull OB {nearest_bull_box['id']} @ {nearest_bull_box['bottom']}-{nearest_bull_box['top']}."
 
@@ -3880,7 +3863,6 @@ class SignalGenerator:
             else:
                  reason = f"Holding {pos_side} position. Trend aligned or no exit condition met."
 
-
         # --- Entry Logic (if no position exists) ---
         elif current_position is None:
             # Example Entry: Trend aligned and price touches relevant OB (Placeholder)
@@ -3888,27 +3870,26 @@ class SignalGenerator:
                 # Check if close is near/inside the highest bull box
                 highest_bull_box = max(bull_boxes, key=lambda b: b['top'])
                 # Placeholder proximity check
-                if last_close <= highest_bull_box['top'] * self.entry_prox_factor: # Example check
+                if last_close <= highest_bull_box['top'] * self.entry_prox_factor:  # Example check
                     signal = "BUY"
                     reason = f"Placeholder: Trend UP, Price near Bull OB {highest_bull_box['id']} @ {highest_bull_box['bottom']}-{highest_bull_box['top']}."
                     # Calculate SL/TP based on entry (last_close approx) and ATR
                     initial_sl, initial_tp = self._calculate_initial_sl_tp(last_close, 'long', atr)
-                    if initial_sl is None: # Cannot enter without SL
+                    if initial_sl is None:  # Cannot enter without SL
                          signal = "HOLD"; reason += " (Failed to calculate valid SL)."
             elif trend_up is False and bear_boxes and last_close and atr:
                  # Check if close is near/inside the lowest bear box
                  lowest_bear_box = min(bear_boxes, key=lambda b: b['bottom'])
                  # Placeholder proximity check
-                 if last_close >= lowest_bear_box['bottom'] * (Decimal('1') - (self.entry_prox_factor - 1)): # Example check
+                 if last_close >= lowest_bear_box['bottom'] * (Decimal('1') - (self.entry_prox_factor - 1)):  # Example check
                      signal = "SELL"
                      reason = f"Placeholder: Trend DOWN, Price near Bear OB {lowest_bear_box['id']} @ {lowest_bear_box['bottom']}-{lowest_bear_box['top']}."
                      # Calculate SL/TP based on entry (last_close approx) and ATR
                      initial_sl, initial_tp = self._calculate_initial_sl_tp(last_close, 'short', atr)
-                     if initial_sl is None: # Cannot enter without SL
+                     if initial_sl is None:  # Cannot enter without SL
                           signal = "HOLD"; reason += " (Failed to calculate valid SL)."
             else:
                  reason = "Trend unclear or no suitable OB interaction for entry."
-
 
         # --- Final Logging ---
         self.lg.info(f"Signal for {symbol}: {BRIGHT}{signal}{RESET} ({reason})")
@@ -3924,18 +3905,18 @@ class SignalGenerator:
 
 # --- Trading Workflow Functions ---
 
+
 def analyze_and_trade_symbol(
     exchange: ccxt.Exchange,
     symbol: str,
-    config: Dict[str, Any],
+    config: dict[str, Any],
     logger: logging.Logger,
     strategy_engine: VolumaticOBStrategy,
     signal_generator: SignalGenerator,
     market_info: MarketInfo,
-    position_states: Dict[str, Dict[str, bool]] # Shared state for BE/TSL activation per symbol
-):
-    """
-    Orchestrates the analysis and trading logic for a single symbol within a loop cycle.
+    position_states: dict[str, dict[str, bool]]  # Shared state for BE/TSL activation per symbol
+) -> None:
+    """Orchestrates the analysis and trading logic for a single symbol within a loop cycle.
     Fetches data, runs analysis, gets position, manages existing position (BE/TSL),
     generates signal, and executes trade actions.
 
@@ -3971,10 +3952,10 @@ def analyze_and_trade_symbol(
         # 2. Run Strategy Analysis
         analysis_results = strategy_engine.update(df)
         # Strategy update should return default/empty results if it fails internally
-        if analysis_results is None: # Should not happen if strategy returns default
+        if analysis_results is None:  # Should not happen if strategy returns default
              lg.error(f"Strategy analysis returned None for {symbol}. Skipping trade logic.")
              return
-        if analysis_results['last_close'] <= 0: # Basic sanity check on analysis output
+        if analysis_results['last_close'] <= 0:  # Basic sanity check on analysis output
              lg.error(f"Strategy analysis resulted in invalid last_close ({analysis_results['last_close']}) for {symbol}. Skipping.")
              return
 
@@ -4006,7 +3987,6 @@ def analyze_and_trade_symbol(
                   position_state['be_activated'] = False
                   position_state['tsl_activated'] = False
 
-
         # 4. Manage Existing Position (SL updates, BE, TSL activation)
         if current_position:
             # Pass the potentially updated position_state to the management function
@@ -4026,7 +4006,7 @@ def analyze_and_trade_symbol(
     except ccxt.AuthenticationError as e:
         # Propagate auth errors immediately to stop the bot
         lg.critical(f"{NEON_RED}Authentication Error during {symbol} processing: {e}. Stopping bot.{RESET}")
-        raise e # Re-raise to be caught by main loop
+        raise e  # Re-raise to be caught by main loop
     except Exception as e:
         lg.error(f"{NEON_RED}!! Unhandled error during analysis/trading cycle for {symbol}: {e} !!{RESET}", exc_info=True)
         # Continue to the next symbol in the main loop
@@ -4041,11 +4021,10 @@ def manage_existing_position(
     market_info: MarketInfo,
     position_info: PositionInfo,
     analysis_results: StrategyAnalysisResults,
-    position_state: Dict[str, bool], # Internal state for BE/TSL (mutable)
+    position_state: dict[str, bool],  # Internal state for BE/TSL (mutable)
     logger: logging.Logger
-):
-    """
-    Placeholder: Manages an existing open position based on configuration and analysis results.
+) -> None:
+    """Placeholder: Manages an existing open position based on configuration and analysis results.
     Handles logic for activating Break-Even (BE) and Trailing Stop Loss (TSL).
     Updates the `position_state` dictionary directly if activation is successful.
 
@@ -4058,7 +4037,7 @@ def manage_existing_position(
     lg = logger
     lg.debug(f"Managing existing {position_info.get('side', 'N/A')} position for {symbol}...")
 
-    config = CONFIG # Access global config
+    config = CONFIG  # Access global config
     prot_cfg = config.get('protection', {})
     enable_be = prot_cfg.get('enable_break_even', False)
     enable_tsl = prot_cfg.get('enable_trailing_stop', False)
@@ -4084,8 +4063,8 @@ def manage_existing_position(
             # Check if all required data is valid
             if atr and entry_price and last_close and side and be_trigger_atr_mult > 0 and be_offset_ticks >= 0:
                 trigger_distance = atr * be_trigger_atr_mult
-                be_target_price: Optional[Decimal] = None
-                be_trigger_price: Optional[Decimal] = None
+                be_target_price: Decimal | None = None
+                be_trigger_price: Decimal | None = None
                 should_trigger_be = False
 
                 # Calculate BE offset amount
@@ -4118,7 +4097,7 @@ def manage_existing_position(
                     # --- Call API to move SL ---
                     success = _set_position_protection(exchange, symbol, market_info, position_info, lg, stop_loss_price=be_target_price)
                     if success:
-                           position_state['be_activated'] = True # Update shared state directly
+                           position_state['be_activated'] = True  # Update shared state directly
                            lg.info(f"BE Stop Loss set successfully for {symbol}.")
                     else:
                            lg.error(f"Failed to set BE Stop Loss for {symbol}.")
@@ -4131,7 +4110,6 @@ def manage_existing_position(
         except (ValueError, TypeError, InvalidOperation) as e:
              lg.error(f"Error during Break-Even calculation for {symbol}: {e}")
 
-
     # --- Trailing Stop Loss Activation Logic ---
     # Only activate TSL if enabled, not already active internally, and BE hasn't been activated
     # (If BE activates, it usually overrides TSL activation until TSL potentially takes over later)
@@ -4143,9 +4121,9 @@ def manage_existing_position(
             side = position_info.get('side')
 
             # Check required data
-            if entry_price and last_close and side and activation_perc >= 0: # Allow 0% activation (activate immediately)
+            if entry_price and last_close and side and activation_perc >= 0:  # Allow 0% activation (activate immediately)
                  activation_threshold_met = False
-                 activation_trigger_price: Optional[Decimal] = None
+                 activation_trigger_price: Decimal | None = None
 
                  if side == 'long':
                      activation_trigger_price = entry_price * (Decimal('1') + activation_perc)
@@ -4162,7 +4140,7 @@ def manage_existing_position(
                      # This calculates distance/activation and calls _set_position_protection
                      success = set_trailing_stop_loss(exchange, symbol, market_info, position_info, config, lg)
                      if success:
-                         position_state['tsl_activated'] = True # Update shared state directly
+                         position_state['tsl_activated'] = True  # Update shared state directly
                          lg.info(f"TSL activation successful for {symbol}.")
                      else:
                          lg.error(f"Failed to activate TSL for {symbol}.")
@@ -4187,14 +4165,13 @@ def execute_trade_action(
     exchange: ccxt.Exchange,
     symbol: str,
     market_info: MarketInfo,
-    current_position: Optional[PositionInfo],
+    current_position: PositionInfo | None,
     signal_info: SignalResult,
     analysis_results: StrategyAnalysisResults,
-    position_state: Dict[str, bool], # Pass state to reset on close (mutable)
+    position_state: dict[str, bool],  # Pass state to reset on close (mutable)
     logger: logging.Logger
-):
-    """
-    Placeholder: Executes the trade action based on the generated signal.
+) -> None:
+    """Placeholder: Executes the trade action based on the generated signal.
     Handles opening new positions (calculating size, setting leverage, placing order, setting initial SL/TP)
     and closing existing positions. Manages position state flags.
 
@@ -4213,9 +4190,9 @@ def execute_trade_action(
     lg = logger
     signal = signal_info['signal']
     reason = signal_info['reason']
-    config = CONFIG # Access global config
+    config = CONFIG  # Access global config
     enable_trading = config.get('enable_trading', False)
-    max_positions_global = config.get('max_concurrent_positions', 1) # Global limit
+    max_positions_global = config.get('max_concurrent_positions', 1)  # Global limit
 
     lg.debug(f"Executing trade action '{signal}' for {symbol}. Reason: {reason}")
 
@@ -4277,8 +4254,8 @@ def execute_trade_action(
         # This state needs to be managed externally or passed into this function.
         # Placeholder: Assume we need a function `get_current_active_positions_count()`
         # current_active_positions = get_current_active_positions_count(exchange, valid_symbols, lg) # Needs implementation
-        current_active_positions = 0 # !!! Placeholder - Replace with actual count !!!
-        lg.warning("Max concurrent position check is using a PLACEHOLDER count of 0.") # Warn about placeholder
+        current_active_positions = 0  # !!! Placeholder - Replace with actual count !!!
+        lg.warning("Max concurrent position check is using a PLACEHOLDER count of 0.")  # Warn about placeholder
 
         if current_active_positions >= max_positions_global:
              lg.warning(f"Skipping entry for {symbol}: Max concurrent positions ({max_positions_global}) reached globally.")
@@ -4310,5 +4287,4 @@ def execute_trade_action(
             return
 
         # --- Set Leverage (only if needed and applicable) ---
-        leverage = config.get("leverage", 0)
-        
+        config.get("leverage", 0)

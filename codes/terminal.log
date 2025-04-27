@@ -623,3 +623,75 @@ ccxt.base.errors.InvalidOrder: bybit {"retCode":110093,"retMsg":"expect Falling,
 2025-04-24 15:36:45,244 - BybitTerminal - INFO - Main async function finished.
 2025-04-24 15:36:45,400 - BybitTerminal - INFO - [32mCCXT connection banished.[0m
 2025-04-24 15:36:45,401 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 0
+2025-04-25 01:04:39,094 - BybitTerminal - INFO - [34m# Log level attuned to INFO[0m
+2025-04-25 01:04:39,095 - BybitTerminal - INFO - [36m# Configuration spell cast from 'config.json'[0m
+2025-04-25 01:04:39,095 - BybitTerminal - INFO - [36m# Technical Analysis Oracle initialized.[0m
+2025-04-25 01:04:39,097 - BybitTerminal - INFO - [36m# Signal conduits established for graceful departure.[0m
+2025-04-25 01:04:39,165 - BybitTerminal - INFO - [32mAPI credential sigils loaded successfully. Testnet mode: False[0m
+2025-04-25 01:04:39,165 - BybitTerminal - INFO - [36m# Summoning connection to Bybit via CCXT...[0m
+2025-04-25 01:04:39,193 - BybitTerminal - INFO - [34m# Loading market contracts...[0m
+2025-04-25 01:04:39,237 - BybitTerminal - ERROR - [31mCCXT Network Rift: Could not connect to Bybit. Check internet and exchange status. bybit GET https://api.bybit.com/v5/asset/coin/query-info?[0m
+2025-04-25 01:04:39,237 - BybitTerminal - INFO - [36m# Banishing CCXT Bybit client connection...[0m
+2025-04-25 01:04:39,488 - BybitTerminal - INFO - [32mCCXT connection banished.[0m
+2025-04-25 01:04:39,489 - BybitTerminal - ERROR - Failed to initialize exchange client: CCXT Network/Connection Failed
+2025-04-25 01:04:39,490 - BybitTerminal - WARNING - Proceeding without a fully functional exchange client. Authenticated features will fail.
+2025-04-25 01:04:39,490 - BybitTerminal - INFO - Starting main terminal loop.
+2025-04-25 01:04:42,334 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-25 01:04:42,335 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-25 01:04:47,543 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-25 01:04:47,544 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-25 01:04:52,489 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-25 01:04:52,490 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-25 01:05:13,158 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-25 01:05:13,165 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-25 01:05:17,128 - BybitTerminal - INFO - Exit option selected.
+2025-04-25 01:05:17,129 - BybitTerminal - INFO - Main run loop finished.
+2025-04-25 01:05:17,129 - BybitTerminal - INFO - Shutdown initiated by signal Exit Menu... Setting exit code to 0
+2025-04-25 01:05:17,129 - BybitTerminal - INFO - Cancelling 1 active background tasks...
+2025-04-25 01:05:17,129 - BybitTerminal - INFO - Background tasks processing complete: 0 cancelled, 0 errors.
+2025-04-25 01:05:17,130 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 0
+2025-04-25 01:05:17,130 - BybitTerminal - INFO - Main async function finished.
+2025-04-25 01:05:29,605 - BybitTerminal - INFO - [34m# Log level attuned to INFO[0m
+2025-04-25 01:05:29,605 - BybitTerminal - INFO - [36m# Configuration spell cast from 'config.json'[0m
+2025-04-25 01:05:29,606 - BybitTerminal - INFO - [36m# Technical Analysis Oracle initialized.[0m
+2025-04-25 01:05:29,607 - BybitTerminal - INFO - [36m# Signal conduits established for graceful departure.[0m
+2025-04-25 01:05:29,663 - BybitTerminal - INFO - [32mAPI credential sigils loaded successfully. Testnet mode: False[0m
+2025-04-25 01:05:29,663 - BybitTerminal - INFO - [36m# Summoning connection to Bybit via CCXT...[0m
+2025-04-25 01:05:29,690 - BybitTerminal - INFO - [34m# Loading market contracts...[0m
+2025-04-25 01:05:29,734 - BybitTerminal - ERROR - [31mCCXT Network Rift: Could not connect to Bybit. Check internet and exchange status. bybit GET https://api.bybit.com/v5/asset/coin/query-info?[0m
+2025-04-25 01:05:29,734 - BybitTerminal - INFO - [36m# Banishing CCXT Bybit client connection...[0m
+2025-04-25 01:05:29,985 - BybitTerminal - INFO - [32mCCXT connection banished.[0m
+2025-04-25 01:05:29,986 - BybitTerminal - ERROR - Failed to initialize exchange client: CCXT Network/Connection Failed
+2025-04-25 01:05:29,986 - BybitTerminal - WARNING - Proceeding without a fully functional exchange client. Authenticated features will fail.
+2025-04-25 01:05:29,986 - BybitTerminal - INFO - Starting main terminal loop.
+2025-04-25 01:05:31,991 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-25 01:05:31,992 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-25 01:05:41,106 - BybitTerminal - INFO - Exit option selected.
+2025-04-25 01:05:41,107 - BybitTerminal - INFO - Main run loop finished.
+2025-04-25 01:05:41,108 - BybitTerminal - INFO - Shutdown initiated by signal Exit Menu... Setting exit code to 0
+2025-04-25 01:05:41,109 - BybitTerminal - INFO - Cancelling 1 active background tasks...
+2025-04-25 01:05:41,110 - BybitTerminal - INFO - Background tasks processing complete: 0 cancelled, 0 errors.
+2025-04-25 01:05:41,111 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 0
+2025-04-25 01:05:41,112 - BybitTerminal - INFO - Main async function finished.
+2025-04-25 01:05:59,129 - BybitTerminal - INFO - [34m# Log level attuned to INFO[0m
+2025-04-25 01:05:59,130 - BybitTerminal - INFO - [36m# Configuration spell cast from 'config.json'[0m
+2025-04-25 01:05:59,130 - BybitTerminal - INFO - [36m# Technical Analysis Oracle initialized.[0m
+2025-04-25 01:05:59,131 - BybitTerminal - INFO - [36m# Signal conduits established for graceful departure.[0m
+2025-04-25 01:05:59,188 - BybitTerminal - INFO - [32mAPI credential sigils loaded successfully. Testnet mode: False[0m
+2025-04-25 01:05:59,188 - BybitTerminal - INFO - [36m# Summoning connection to Bybit via CCXT...[0m
+2025-04-25 01:05:59,216 - BybitTerminal - INFO - [34m# Loading market contracts...[0m
+2025-04-25 01:05:59,255 - BybitTerminal - ERROR - [31mCCXT Network Rift: Could not connect to Bybit. Check internet and exchange status. bybit GET https://api.bybit.com/v5/asset/coin/query-info?[0m
+2025-04-25 01:05:59,255 - BybitTerminal - INFO - [36m# Banishing CCXT Bybit client connection...[0m
+2025-04-25 01:05:59,507 - BybitTerminal - INFO - [32mCCXT connection banished.[0m
+2025-04-25 01:05:59,508 - BybitTerminal - ERROR - Failed to initialize exchange client: CCXT Network/Connection Failed
+2025-04-25 01:05:59,508 - BybitTerminal - WARNING - Proceeding without a fully functional exchange client. Authenticated features will fail.
+2025-04-25 01:05:59,508 - BybitTerminal - INFO - Starting main terminal loop.
+2025-04-25 01:06:05,446 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-25 01:06:05,447 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-25 01:06:08,274 - BybitTerminal - INFO - Received signal SIGINT. Initiating shutdown...
+2025-04-25 01:06:08,276 - BybitTerminal - INFO - Shutdown initiated by signal SIGINT... Setting exit code to 0
+2025-04-25 01:06:08,276 - BybitTerminal - INFO - Cancelling 3 active background tasks...
+2025-04-25 01:06:08,284 - BybitTerminal - INFO - Main terminal task was cancelled.
+2025-04-25 01:06:08,284 - BybitTerminal - INFO - Main async function finished.
+2025-04-25 01:06:08,285 - BybitTerminal - INFO - Background tasks processing complete: 3 cancelled, 0 errors.
+2025-04-25 01:06:08,285 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 0

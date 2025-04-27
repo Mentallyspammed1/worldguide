@@ -1,0 +1,100 @@
+# bybit_helpers.py
+
+# ... (imports and other code) ...
+
+@retry_api_call(
+    max_retries=2, # Keep retries low for initialization
+    initial_delay=3.0,
+    retry_on_exceptions=(NetworkError, ExchangeNotAvailable, RequestTimeout),
+)
+async def initialize_bybit(config: Config) -> ccxt.bybit | None: # Ensure return type hint matches async ccxt
+    """Initializes the Bybit CCXT exchange instance for V5 API."""
+    func_name = "initialize_bybit"
+    mode = "Testnet" if config["TESTNET_MODE"] else "Mainnet"
+    logger.info(
+        f"{Fore.BLUE}[{func_name}] Initializing Bybit V5 ({mode})...{Style.RESET_ALL}"
+    )
+    exchange: ccxt.bybit | None = None
+
+    try:
+        has_keys = bool(config.get("API_KEY") and config.get("API_SECRET"))
+        # ... (warning if no keys) ...
+
+        # --- SIMPLIFIED OPTIONS ---
+        exchange_options = {
+            'apiKey': config.get('API_KEY'),
+            'secret': config.get('API_SECRET'),
+            'enableRateLimit': True,
+            'options': {
+                # 'defaultType': config['EXPECTED_MARKET_TYPE'], # <-- Temporarily REMOVED
+                'adjustForTimeDifference': True, # Keep this, generally useful
+                'recvWindow': config['DEFAULT_RECV_WINDOW'], # Keep this for now
+                # 'brokerId': f"PB_Pyrmethus{config.get('VERSION', 'V3.3')}", # <-- Temporarily REMOVED
+            }
+        }
+        logger.debug(f"[{func_name}] Using simplified exchange options: {exchange_options['options']}")
+        # -------------------------
+
+        exchange = ccxt.bybit(exchange_options) # Instantiation uses async version
+
+        if config["TESTNET_MODE"]:
+            exchange.set_sandbox_mode(True)
+        logger.info(
+            f"[{func_name}] {mode} mode enabled. API Endpoint: {exchange.urls['api']}"
+        )
+
+        # Load markets using the cache
+        logger.info(f"[{func_name}] Attempting MarketCache.load_markets (reload=True)...")
+        await market_cache.load_markets(exchange, reload=True)
+        logger.info(f"[{func_name}] MarketCache.load_markets FINISHED.")
+
+
+        # Validate default symbol loaded correctly
+        if not market_cache.get_market(config["SYMBOL"]):
+            logger.critical(
+                f"{Back.RED}[{func_name}] CRITICAL: Market data for default symbol '{config['SYMBOL']}' NOT FOUND in cache after load attempt.{Style.RESET_ALL}"
+            )
+            if exchange and hasattr(exchange, 'close') and not exchange.closed: await exchange.close() # Cleanup attempt
+            return None
+
+        logger.debug(f"[{func_name}] Market data for {config.SYMBOL} confirmed in cache.")
+
+        # --- Perform Auth Check ---
+        if has_keys:
+            logger.info(f"[{func_name}] Performing auth check...")
+            try:
+                await exchange.fetch_balance(params={'accountType': 'UNIFIED'})
+                logger.info(f"[{func_name}] Auth check successful.")
+            # ... (rest of auth error handling) ...
+        else:
+            logger.info(f"[{func_name}] Skipping auth check (no keys).")
+
+
+        # --- Skip initial leverage/margin setting here - let strategy handle it ---
+        logger.info(f"[{func_name}] Skipping initial leverage/margin setting during init.")
+
+
+        logger.success(f"{Fore.GREEN}[{func_name}] Bybit V5 exchange initialized successfully.{Style.RESET_ALL}")
+        return exchange
+
+    # ... (rest of the function, including exception handling and cleanup) ...
+    except AuthenticationError as e:
+        logger.critical(f"{Back.RED}[{func_name}] CRITICAL Auth Error (Instantiation): {e}.{Style.RESET_ALL}")
+        if config.get('ENABLE_SMS_ALERTS'): send_sms_alert("[BybitHelper] CRITICAL: Bybit Auth Failed!", config)
+    except (NetworkError, ExchangeNotAvailable, RequestTimeout) as e:
+        logger.critical(f"{Back.RED}[{func_name}] CRITICAL Network Error (Init Retries Failed): {e}.{Style.RESET_ALL}")
+    except ExchangeError as e:
+        logger.critical(f"{Back.RED}[{func_name}] CRITICAL Exchange Error (Init): {e}{Style.RESET_ALL}", exc_info=False) # Less verbose TB
+        if config.get('ENABLE_SMS_ALERTS'): send_sms_alert(f"[BybitHelper] CRITICAL: Init ExchangeError: {type(e).__name__}", config)
+    except Exception as e:
+        logger.critical(f"{Back.RED}[{func_name}] CRITICAL Unexpected Error (Init): {e}{Style.RESET_ALL}", exc_info=True)
+        if config.get('ENABLE_SMS_ALERTS'): send_sms_alert(f"[BybitHelper] CRITICAL: Init Unexpected Error: {type(e).__name__}", config)
+
+    # Cleanup attempt
+    if exchange and hasattr(exchange, 'close') and not exchange.closed:
+        try:
+            logger.info(f"[{func_name}] Closing potentially failed exchange instance.")
+            await exchange.close()
+        except Exception as close_err:
+             logger.error(f"[{func_name}] Error closing exchange during cleanup: {close_err}")
+    return None # Explicitly return None on failure

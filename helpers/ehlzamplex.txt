@@ -1,0 +1,1999 @@
+# -*- coding: utf-8 -*-
+# --- Enhanced Ehlers Volumetric Strategy Spell ---
+# Woven by Pyrmethus for the Termux Sanctuary
+# Version: 2.0 (Enhanced Clarity & Resilience)
+
+import asyncio
+import logging
+import time
+from decimal import ROUND_DOWN, Decimal, InvalidOperation
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
+from pydantic import ( # For structured configuration runes & validation
+    BaseModel,
+    Field,
+    ValidationError,
+    validator,
+)
+
+# --- Import Custom Modules & Helpers ---
+# Assume these scrolls reside in the same directory or accessible via Python path
+try:
+    import bybit_helpers as bybit
+    from bybit_helpers import (
+        Category,
+        Config as HelperConfig,  # Keep separate if helpers have their own config needs
+        OrderFilter,
+        PositionIdx,
+        Side,
+        TimeInForce,
+        TriggerBy,
+        TriggerDirection,
+    )
+    import indicators as ind  # Contains the sacred calculation rites
+    from bybit_utils import (
+        format_amount,
+        format_order_id,
+        format_price,
+        safe_decimal_conversion,
+        send_sms_alert,  # Must be async-safe or designed to run in an executor
+    )
+except ImportError as e:
+    # Use basic printing here as Colorama/logging might not be fully initialized
+    print(f"\033[91m\033[1mStrategy FATAL: Failed to import helper modules: {e}\033[0m")
+    print(
+        "\033[93mEnsure neon_logger.py (if used separately), bybit_helpers.py, "
+        "indicators.py, and bybit_utils.py are present and accessible.\033[0m"
+    )
+    exit(1) # Cannot proceed without helpers
+
+# --- Colorama Enchantment ---
+# Provides vibrant hues to the console output for better readability
+try:
+    from colorama import Back, Fore, Style, init
+
+    init(autoreset=True)  # Ensure colors reset automatically after each print
+    COLORAMA_AVAILABLE = True
+    # Define standard color runes for logging levels and emphasis
+    C_INFO = Fore.CYAN
+    C_SUCCESS = Fore.GREEN
+    C_WARN = Fore.YELLOW
+    C_ERROR = Fore.RED + Style.BRIGHT # Make errors stand out
+    C_CRIT = Back.RED + Fore.WHITE + Style.BRIGHT # Critical errors demand attention
+    C_DEBUG = Fore.MAGENTA
+    C_BOLD = Style.BRIGHT
+    C_RESET = Style.RESET_ALL
+except ImportError:
+    # Create dummy color objects if Colorama is missing, allowing code to run without colors
+    class DummyColor:
+        def __getattr__(self, name: str) -> str:
+            return "" # Return empty string for any attribute access
+
+    Fore = Style = Back = DummyColor() # type: ignore
+    COLORAMA_AVAILABLE = False
+    C_INFO = C_SUCCESS = C_WARN = C_ERROR = C_CRIT = C_DEBUG = C_BOLD = C_RESET = ""
+    print("\033[93mWarning: Colorama module not found. Outputs will lack mystical hues.\033[0m")
+    print("\033[93mInstall it with: pip install colorama\033[0m")
+
+
+# --- Configuration Runes (Pydantic Models) ---
+# These runes define the expected structure, types, and validation rules
+# for the spell's parameters, preventing misconfiguration errors.
+
+class APIConfig(BaseModel):
+    """Runes for Exchange API Connection"""
+    API_KEY: str = Field(..., description="Bybit API Key")
+    API_SECRET: str = Field(..., description="Bybit API Secret")
+    SYMBOL: str = Field(..., description="Trading symbol (e.g., BTCUSDT)")
+    TESTNET_MODE: bool = Field(True, description="Use Bybit Testnet environment")
+
+    # Define position constants clearly, aligning with Bybit V5 terminology
+    POS_NONE: str = "NONE"  # Custom identifier for tracking no position state
+    POS_LONG: str = "Buy"   # Bybit V5 API uses "Buy" for long side in position info
+    POS_SHORT: str = "Sell"  # Bybit V5 API uses "Sell" for short side in position info
+    POSITION_QTY_EPSILON: Decimal = Field(
+        default=Decimal("0.000001"),
+        ge=0,
+        description="Small value to compare position quantities against zero",
+    )
+    USDT_SYMBOL: str = Field("USDT", description="Symbol for logging balance (usually USDT)")
+
+    @validator('POSITION_QTY_EPSILON', pre=True, always=True)
+    def validate_decimal_epsilon(cls, v):
+        """Ensures POSITION_QTY_EPSILON is a valid non-negative Decimal."""
+        try:
+            d = Decimal(v)
+            if d < 0:
+                raise ValueError("POSITION_QTY_EPSILON cannot be negative")
+            return d
+        except (InvalidOperation, TypeError, ValueError) as e:
+            raise ValueError(f"Invalid Decimal for POSITION_QTY_EPSILON: {v} ({e})")
+
+class IndicatorSettings(BaseModel):
+    """Runes for Indicator Calculation Parameters"""
+    min_data_periods: int = Field(
+        default=100, gt=10, description="Minimum historical candles needed for calculation"
+    )
+    evt_length: int = Field(default=7, gt=1, description="Period length for EVT indicator")
+    atr_period: int = Field(default=14, gt=1, description="Period length for ATR indicator")
+    # Add other parameters required by your specific 'indicators.py' logic here
+    # Example: sma_period: int = Field(default=50, gt=1)
+
+class AnalysisFlags(BaseModel):
+    """Runes to Enable/Disable Specific Analysis Components"""
+    use_evt: bool = Field(True, description="Enable Ehlers Volumetric Trend analysis")
+    use_atr: bool = Field(True, description="Enable ATR calculation (for SL or other analysis)")
+    # Add flags for other potential indicators or analyses
+    # Example: use_sma_filter: bool = False
+
+class StrategyConfig(BaseModel):
+    """Runes defining the Core Strategy Behavior"""
+    name: str = Field("EhlersVolumetricEnhanced", description="Name of the strategy instance")
+    timeframe: str = Field("15m", description="Candlestick timeframe (e.g., '1m', '5m', '1h')")
+    leverage: int = Field(
+        default=5, ge=1, le=100, description="Desired leverage (check exchange limits)"
+    )
+    indicator_settings: IndicatorSettings # Nested model for indicator params
+    analysis_flags: AnalysisFlags         # Nested model for analysis flags
+
+    risk_per_trade: Decimal = Field(
+        default=Decimal("0.01"), gt=0, le=0.1, description="Fraction of balance to risk per trade (e.g., 0.01 for 1%)"
+    )
+    stop_loss_atr_multiplier: Decimal = Field(
+        default=Decimal("2.0"), gt=0, description="ATR multiplier for calculating stop loss distance"
+    )
+    position_idx: PositionIdx = Field(
+        default=PositionIdx.ONE_WAY, description="Position mode (0: One-Way, 1: Hedge Buy, 2: Hedge Sell)"
+    )
+    polling_interval_seconds: int = Field(
+        default=60, ge=5, description="Frequency (in seconds) to check for signals and update state"
+    )
+
+    # Strategy-specific flags (can overlap with analysis_flags for clarity)
+    EVT_ENABLED: bool = Field(True, description="Explicit flag confirming EVT logic is core to this strategy")
+    # Re-declare for direct access and validation link
+    STOP_LOSS_ATR_PERIOD: int = Field(
+         description="ATR Period specifically for Stop Loss calculation (must match indicator_settings)"
+    )
+
+    # Optional field for passing generic parameters if needed by underlying logic
+    strategy_params: Dict[str, Any] = Field({}, description="Generic key-value parameters for custom logic")
+
+    @validator('risk_per_trade', 'stop_loss_atr_multiplier', pre=True, always=True)
+    def validate_decimal_positive(cls, v, field):
+        """Ensures risk and SL multiplier are positive Decimals."""
+        try:
+            d = Decimal(v)
+            if d <= 0:
+                raise ValueError(f"{field.name} must be positive")
+            return d
+        except (InvalidOperation, TypeError, ValueError) as e:
+            raise ValueError(f"Invalid Decimal for {field.name}: {v} ({e})")
+
+    @validator('position_idx', pre=True, always=True)
+    def validate_position_idx(cls, v):
+        """Ensures position_idx is a valid PositionIdx enum member."""
+        if isinstance(v, PositionIdx):
+            return v
+        try:
+            return PositionIdx(int(v))
+        except (ValueError, TypeError):
+            # We'll log a warning later if the input was invalid, but return default here
+            # to allow Pydantic validation to complete.
+            # Alternatively, raise ValueError here for stricter config enforcement.
+            print(f"\033[93mWarning: Invalid value '{v}' for position_idx. Defaulting to ONE_WAY (0).\033[0m")
+            return PositionIdx.ONE_WAY
+
+    @validator('STOP_LOSS_ATR_PERIOD', always=True)
+    def check_atr_period_match(cls, v, values):
+        """Ensures STOP_LOSS_ATR_PERIOD matches the ATR period in indicator_settings."""
+        # 'values' is a dict of already validated fields processed so far
+        if 'indicator_settings' in values and v != values['indicator_settings'].atr_period:
+            raise ValueError(
+                f"STOP_LOSS_ATR_PERIOD ({v}) must match indicator_settings.atr_period "
+                f"({values['indicator_settings'].atr_period})"
+            )
+        return v
+
+class SMSConfig(BaseModel):
+    """Runes for SMS Alerting via Twilio or other methods"""
+    ENABLE_SMS_ALERTS: bool = Field(False, description="Enable sending SMS alerts")
+    # Twilio specific fields (make Optional if alert method varies)
+    TWILIO_ACCOUNT_SID: Optional[str] = Field(None, description="Twilio Account SID")
+    TWILIO_AUTH_TOKEN: Optional[str] = Field(None, description="Twilio Auth Token")
+    TWILIO_PHONE_NUMBER: Optional[str] = Field(None, description="Twilio 'From' phone number")
+    RECIPIENT_PHONE_NUMBER: Optional[str] = Field(None, description="Recipient 'To' phone number")
+    # Add fields for Termux API method if used instead of Twilio
+    # Example: TERMUX_API_ENABLED: bool = False
+
+    @validator('ENABLE_SMS_ALERTS')
+    def check_sms_details(cls, v, values):
+        """If SMS alerts are enabled, ensures necessary details are provided."""
+        if v:
+            # Example validation for Twilio
+            twilio_fields = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER', 'RECIPIENT_PHONE_NUMBER']
+            if not all(values.get(field) for field in twilio_fields):
+                # Adjust this check based on your actual SMS implementation (Twilio, Termux API, etc.)
+                missing = [field for field in twilio_fields if not values.get(field)]
+                raise ValueError(f"SMS alerts enabled, but required Twilio details are missing: {missing}")
+            # Add similar checks if using Termux API or other methods
+        return v
+
+class AppConfig(BaseModel):
+    """The Master Rune: Holds all validated configuration sections"""
+    API_CONFIG: APIConfig
+    STRATEGY_CONFIG: StrategyConfig
+    SMS_CONFIG: SMSConfig
+    # Keep LOGGING_CONFIG flexible for now, can be refined if needed
+    LOGGING_CONFIG: Dict[str, Any] = Field({}, description="Configuration for logging setup")
+
+
+# --- The Enhanced Strategy Spell ---
+
+class EhlersVolumetricStrategyEnhanced:
+    """
+    An enhanced trading strategy harnessing the Ehlers Volumetric Trend (EVT) indicator,
+    imbued with Pyrmethus's refinements for clarity, robustness, and Termux execution.
+    Utilizes Pydantic for configuration validation and Colorama for enhanced logging.
+    """
+
+    def __init__(self, config: Dict[str, Any], logger: logging.Logger):
+        """
+        Initializes the strategy instance, validating the provided configuration runes.
+
+        Args:
+            config: A dictionary containing all configuration sections.
+            logger: An initialized logging.Logger instance for capturing spell activity.
+
+        Raises:
+            ValueError: If the provided configuration fails validation or essential
+                        strategy parameters are misconfigured.
+        """
+        self.logger = logger
+        self.logger.info(f"{C_INFO}{C_BOLD}Conjuring the {self.__class__.__name__}...")
+
+        # --- Validate and Bind Configuration Runes ---
+        try:
+            # Parse the raw config dict into the structured Pydantic model
+            self.app_config = AppConfig(**config)
+            # Assign validated config sections for easier access
+            self.api_config = self.app_config.API_CONFIG
+            self.strategy_config = self.app_config.STRATEGY_CONFIG
+            self.sms_config = self.app_config.SMS_CONFIG
+            self.logger.info(f"{C_SUCCESS}Configuration runes validated successfully.")
+        except ValidationError as e:
+            self.logger.critical(f"{C_CRIT}FATAL: Invalid configuration runes! Aborting spell.{C_RESET}")
+            # Log the detailed validation errors
+            self.logger.error(f"{C_ERROR}Validation Errors:\n{e}{C_RESET}")
+            raise ValueError("Invalid configuration provided.") from e
+
+        # --- Essential Strategy Logic Validation (Post-Pydantic) ---
+        # These checks ensure the validated config makes sense for *this specific* strategy
+        if not self.strategy_config.EVT_ENABLED or not self.strategy_config.analysis_flags.use_evt:
+            self.logger.critical(f"{C_CRIT}FATAL: Ehlers Volumetric strategy requires 'EVT_ENABLED' "
+                                 f"and 'analysis_flags.use_evt' to be True in config.{C_RESET}")
+            raise ValueError("EVT indicator not enabled correctly in configuration.")
+        if self.strategy_config.analysis_flags.use_atr and not self.strategy_config.STOP_LOSS_ATR_PERIOD > 0:
+            self.logger.critical(f"{C_CRIT}FATAL: ATR-based stop loss requires 'analysis_flags.use_atr' "
+                                 f"to be True and a valid 'STOP_LOSS_ATR_PERIOD'.{C_RESET}")
+            raise ValueError("ATR required for SL but not configured correctly.")
+
+        # --- Assign Core Parameters from Validated Config ---
+        self.symbol = self.api_config.SYMBOL
+        self.timeframe = self.strategy_config.timeframe
+        self.leverage = self.strategy_config.leverage
+        self.position_idx = self.strategy_config.position_idx
+        # Log if Pydantic defaulted position_idx due to invalid input (already printed warning during validation)
+        if self.position_idx == PositionIdx.ONE_WAY and config.get("STRATEGY_CONFIG", {}).get("position_idx") != 0:
+             self.logger.warning(
+                 f"{C_WARN}Configuration specified an invalid 'position_idx' ({config['STRATEGY_CONFIG']['position_idx']}), "
+                 f"defaulted to ONE_WAY (0).{C_RESET}"
+            )
+
+        # --- Exchange and Market Info (To be initialized asynchronously) ---
+        self.exchange: Optional[bybit.ccxt.bybit] = None # CCXT exchange instance
+        self.market_info: Optional[Dict[str, Any]] = None # Market details (precision, limits)
+        self.min_qty = Decimal("0.000001") # Smallest possible default, updated from market info
+        self.qty_step = Decimal("0.000001")# Default, updated from market info
+        self.price_tick = Decimal("0.000001")# Default, updated from market info
+
+        # --- Strategy State Variables ---
+        self.current_position: Optional[Dict[str, Any]] = None # Stores fetched position details
+        self.open_orders: Dict[str, Dict[str, Any]] = {} # Stores fetched open orders, keyed by ID
+        self.last_known_price = Decimal("0") # Last fetched ticker price
+        self.available_balance = Decimal("0") # Available balance for trading
+        self.is_running = False # Flag to control the main run loop
+        self.stop_loss_order_id: Optional[str] = None # Track the ID of our active SL order
+        self.loop: Optional[asyncio.AbstractEventLoop] = None # Reference to the event loop
+
+        # --- Indicator Configuration & Derived Column Names ---
+        # These names depend on the indicator settings and the logic in 'indicators.py'
+        self.evt_length = self.strategy_config.indicator_settings.evt_length
+        self.atr_period = self.strategy_config.indicator_settings.atr_period
+
+        # Construct column names dynamically based on settings
+        self.evt_trend_col = f"evt_trend_{self.evt_length}"
+        self.evt_buy_col = f"evt_buy_{self.evt_length}"
+        self.evt_sell_col = f"evt_sell_{self.evt_length}"
+        self.atr_col = f"ATRr_{self.atr_period}" # Assuming TA-Lib naming convention
+
+        # Determine required indicator columns based on enabled analysis flags
+        self.required_indicators: List[str] = []
+        if self.strategy_config.analysis_flags.use_evt:
+            self.required_indicators.extend([self.evt_trend_col, self.evt_buy_col, self.evt_sell_col])
+        if self.strategy_config.analysis_flags.use_atr:
+            self.required_indicators.append(self.atr_col)
+        # Add other required columns based on other enabled flags
+
+        self.logger.info(f"{C_INFO}Strategy '{C_BOLD}{self.strategy_config.name}{C_RESET}{C_INFO}' initialized for "
+                         f"{C_BOLD}{self.symbol}{C_RESET}{C_INFO} on {self.timeframe} timeframe.")
+        self.logger.debug(f"{C_DEBUG}Required indicators: {self.required_indicators}")
+        self.logger.debug(f"{C_DEBUG}Position Mode: {self.position_idx.name} ({self.position_idx.value})")
+        self.logger.debug(f"{C_DEBUG}Risk per trade: {self.strategy_config.risk_per_trade:.2%}")
+        self.logger.debug(f"{C_DEBUG}SL ATR Multiplier: {self.strategy_config.stop_loss_atr_multiplier}")
+
+    async def _initialize(self) -> bool:
+        """
+        Asynchronously awakens the connection to the exchange, gathers vital market lore,
+        attunes leverage, fetches the initial account state, and performs pre-run
+        cleansing rituals (e.g., cancelling stale orders).
+
+        Returns:
+            bool: True if the initialization spell succeeded, False otherwise.
+        """
+        self.logger.info(f"{C_INFO}{C_BOLD}--- Strategy Initialization Ritual ---{C_RESET}")
+        try:
+            self.loop = asyncio.get_running_loop() # Store the current event loop
+        except RuntimeError:
+            self.logger.critical(f"{C_CRIT}Could not get running event loop. Cannot proceed.{C_RESET}")
+            return False
+
+        try:
+            # 1. Awaken Exchange Connection (Async)
+            self.logger.info(f"{C_DEBUG}Summoning connection to Bybit ({'Testnet' if self.api_config.TESTNET_MODE else 'Live'})...")
+            # Pass the validated Pydantic model as a dict to the helper
+            self.exchange = await bybit.initialize_bybit(self.api_config.dict())
+            if not self.exchange:
+                # initialize_bybit should log the specific error
+                self.logger.critical(f"{C_CRIT}Failed to summon Bybit exchange connection. Halting the ritual.{C_RESET}")
+                return False
+            self.logger.info(f"{C_SUCCESS}Bybit connection established successfully.")
+
+            # 2. Gather Market Lore (Relies on cache populated by initialize_bybit)
+            self.logger.info(f"{C_DEBUG}Gathering market lore for {self.symbol}...")
+            self.market_info = bybit.market_cache.get_market(self.symbol)
+            if not self.market_info:
+                self.logger.critical(f"{C_CRIT}Market lore not found for {self.symbol}. "
+                                     f"Ensure the symbol is valid and loaded by the helper. Halting.{C_RESET}")
+                await self._safe_exchange_close()
+                return False
+            self._extract_market_details() # Set precision, limits etc. based on lore
+
+            # 3. Attune Leverage (Async)
+            if self.leverage > 0:
+                self.logger.info(f"{C_INFO}Attuning leverage for {self.symbol} to {C_BOLD}{self.leverage}x{C_RESET}{C_INFO}...")
+                leverage_set = await bybit.set_leverage(
+                    self.exchange, self.symbol, self.leverage, self.api_config.dict()
+                )
+                if not leverage_set:
+                    # set_leverage helper should log the specific reason for failure
+                    self.logger.warning(
+                        f"{C_WARN}Failed to attune leverage to {self.leverage}x. "
+                        f"Check API permissions or existing position state. Proceeding with current setting.{C_RESET}"
+                    )
+                else:
+                    self.logger.info(f"{C_SUCCESS}Leverage attunement confirmed at {self.leverage}x.")
+
+            # 4. Fetch Initial State (Async) - Position, Orders, Balance, Price
+            self.logger.info(f"{C_INFO}Scrying initial account state (position, orders, balance, price)...")
+            await self._update_state() # Handles internal errors and logging
+            # Log initial state summary after fetching
+            pos_side = self.current_position.get("side", self.api_config.POS_NONE) if self.current_position else self.api_config.POS_NONE
+            pos_qty = self.current_position.get("qty", Decimal(0)) if self.current_position else Decimal(0)
+            pos_qty_str = format_amount(self.exchange, self.symbol, pos_qty) if self.exchange else str(pos_qty)
+            self.logger.info(f"{C_INFO}Initial Position: Side={C_BOLD}{pos_side}{C_RESET}{C_INFO}, Qty={C_BOLD}{pos_qty_str}{C_RESET}")
+            self.logger.info(f"{C_INFO}Initial Open Orders Found: {C_BOLD}{len(self.open_orders)}{C_RESET}")
+            self.logger.info(f"{C_INFO}Initial Available Balance: {C_BOLD}{self.available_balance:.4f}{C_RESET} {self.api_config.USDT_SYMBOL}")
+            self.logger.info(f"{C_INFO}Initial Last Known Price: {C_BOLD}{self.last_known_price:.4f}{C_RESET}")
+
+
+            # 5. Initial Cleansing Ritual (Cancel Existing Orders for the Symbol)
+            self.logger.info(f"{C_INFO}Performing initial cleansing ritual: banishing existing orders for {self.symbol}...")
+            category = bybit.market_cache.get_category(self.symbol)
+            if category and self.exchange:
+                # Cancel ALL order types (regular + conditional) for this symbol
+                cancelled_count = await bybit.cancel_all_orders(
+                    self.exchange, symbol=self.symbol, category=category, config=self.api_config.dict(), reason="Strategy Init Cleanup"
+                )
+                if cancelled_count is not None:
+                    self.logger.info(f"{C_SUCCESS}Cleansing ritual complete: Banished {cancelled_count} existing orders.")
+                    await asyncio.sleep(1) # Brief pause for the ether to settle after cancellations
+                    await self._update_state() # Refresh state again after cleansing
+                else:
+                    # cancel_all_orders helper should log specific errors
+                    self.logger.warning(f"{C_WARN}Cleansing ritual (cancel_all_orders) did not fully complete. Check logs.{C_RESET}")
+            else:
+                self.logger.error(f"{C_ERROR}Cannot perform cleansing ritual: Market category unknown or exchange not ready for {self.symbol}.")
+
+            self.logger.info(f"{C_SUCCESS}{C_BOLD}--- Strategy Initialization Ritual Complete ---{C_RESET}")
+            return True
+
+        except Exception as e:
+            self.logger.critical(f"{C_CRIT}Critical failure during initialization ritual: {e}{C_RESET}", exc_info=True)
+            await self._safe_exchange_close() # Attempt cleanup on error
+            return False
+
+    def _extract_market_details(self):
+        """
+        Extracts and sets precision and limit runes from the gathered market lore.
+        Ensures minimum quantity, quantity step, and price tick are valid positive Decimals.
+        """
+        if not self.market_info or not self.exchange:
+            self.logger.error(f"{C_ERROR}Cannot extract market details: market_info or exchange is missing.{C_RESET}")
+            # Keep the tiny defaults, but log a warning
+            self.logger.warning(f"{C_WARN}Using default tiny market details. Order sizing/pricing might fail or be imprecise.{C_RESET}")
+            return
+
+        self.logger.debug(f"{C_DEBUG}Extracting market runes (precision, limits) from gathered lore...")
+        try:
+            limits = self.market_info.get("limits", {})
+            amount_limits = limits.get("amount", {})
+            price_limits = limits.get("price", {}) # V5 might have price limits too
+            precision = self.market_info.get("precision", {})
+
+            # Extract values, using None as default if missing
+            min_qty_str = amount_limits.get("min")
+            # max_qty_str = amount_limits.get("max") # Optional: consider max order size later
+            qty_step_str = precision.get("amount") # V5: 'amount' precision is the step size
+            price_tick_str = precision.get("price") # V5: 'price' precision is the tick size
+
+            # Use safe conversion, providing a reasonable default if parsing fails
+            # Ensure results are positive Decimals; use max with a tiny positive value
+            self.min_qty = max(Decimal("1E-8"), safe_decimal_conversion(min_qty_str, Decimal("0.000001")))
+            self.qty_step = max(Decimal("1E-8"), safe_decimal_conversion(qty_step_str, Decimal("0.000001")))
+            self.price_tick = max(Decimal("1E-8"), safe_decimal_conversion(price_tick_str, Decimal("0.01"))) # Default tick often larger
+
+            # Validate that steps/ticks are strictly positive after conversion
+            if self.qty_step <= 0 or self.price_tick <= 0:
+                raise ValueError(f"Parsed invalid non-positive step/tick size "
+                                 f"(QtyStep: {self.qty_step}, PriceTick: {self.price_tick}) "
+                                 f"from Market Info: {self.market_info}")
+
+            # Log the extracted and validated values using formatting helpers
+            min_qty_fmt = format_amount(self.exchange, self.symbol, self.min_qty)
+            qty_step_fmt = format_amount(self.exchange, self.symbol, self.qty_step)
+            price_tick_fmt = format_price(self.exchange, self.symbol, self.price_tick)
+
+            self.logger.info(f"{C_SUCCESS}Market Runes Set: Min Qty={C_BOLD}{min_qty_fmt}{C_RESET}{C_SUCCESS}, "
+                             f"Qty Step={C_BOLD}{qty_step_fmt}{C_RESET}{C_SUCCESS}, "
+                             f"Price Tick={C_BOLD}{price_tick_fmt}{C_RESET}")
+
+        except Exception as e:
+            self.logger.error(f"{C_ERROR}Failed to parse market runes for {self.symbol}: {e}{C_RESET}", exc_info=True)
+            # Revert to tiny defaults as a fallback, but warn
+            self.min_qty = Decimal("0.000001")
+            self.qty_step = Decimal("0.000001")
+            self.price_tick = Decimal("0.000001")
+            self.logger.warning(f"{C_WARN}Using default tiny market details due to parsing error. Order sizing/pricing might fail or be imprecise.{C_RESET}")
+
+
+    async def _update_state(self):
+        """
+        Gathers the current state from the exchange concurrently:
+        position, open orders, available balance, and last ticker price.
+        Logs the outcome of each fetch operation.
+        """
+        self.logger.debug(f"{C_DEBUG}Updating strategy state from exchange...")
+        if not self.exchange or not self.loop:
+            self.logger.error(f"{C_ERROR}Cannot update state: Exchange connection or event loop not available.{C_RESET}")
+            return
+        try:
+            # Use asyncio.gather for concurrent fetching of state components
+            tasks = {
+                "position": bybit.get_current_position_bybit_v5(self.exchange, self.symbol, self.api_config.dict()),
+                "orders": self._fetch_all_open_orders(), # Calls our dedicated order fetching method
+                "balance": bybit.fetch_usdt_balance(self.exchange, self.api_config.dict()),
+                "ticker": bybit.fetch_ticker_validated(self.exchange, self.symbol, self.api_config.dict()),
+            }
+            # return_exceptions=True allows gather to complete even if some tasks fail
+            results = await asyncio.gather(*tasks.values(), return_exceptions=True)
+            # Map results back to keys for easier processing
+            results_dict = dict(zip(tasks.keys(), results))
+
+            # --- Process results, logging success or failure for each component ---
+            state_update_summary = [] # Build a summary string for concise logging
+
+            # Position
+            pos_data = results_dict.get("position")
+            if isinstance(pos_data, Exception):
+                self.logger.error(f"{C_ERROR}State Update Failed (Position): {pos_data}{C_RESET}")
+                state_update_summary.append("Pos:Error")
+                # Decide if we should clear the position state or keep the old one?
+                # Keeping old state might be risky. Clearing might be safer.
+                # self.current_position = None # Optional: clear state on error
+            elif isinstance(pos_data, list): # Hedge mode returns a list
+                self.logger.debug(f"{C_DEBUG}Hedge mode position data received (list). Searching for index {self.position_idx.value}.")
+                # Find the position matching our strategy's index (0, 1, or 2)
+                found_pos = next((p for p in pos_data if p.get('positionIdx') == self.position_idx.value), None)
+                if found_pos and safe_decimal_conversion(found_pos.get('size'), 0) > self.api_config.POSITION_QTY_EPSILON:
+                    self.current_position = found_pos # Store the specific hedge position
+                    state_update_summary.append(f"Pos:{self.current_position['side']}(H)")
+                else:
+                    self.current_position = None # No position found for our index
+                    state_update_summary.append("Pos:None(H)")
+            elif isinstance(pos_data, dict) and safe_decimal_conversion(pos_data.get('size'), 0) > self.api_config.POSITION_QTY_EPSILON:
+                # One-way mode returns a dict for the single position
+                 self.current_position = pos_data
+                 state_update_summary.append(f"Pos:{self.current_position['side']}(O)")
+            else: # No position exists (empty dict/list or size is effectively zero)
+                 self.current_position = None
+                 state_update_summary.append("Pos:None")
+
+            # Open Orders
+            open_orders_list = results_dict.get("orders")
+            if isinstance(open_orders_list, Exception):
+                self.logger.error(f"{C_ERROR}State Update Failed (Orders): {open_orders_list}{C_RESET}")
+                state_update_summary.append("Orders:Error")
+                # Keep old order state? Clear it? Clearing seems safer.
+                # self.open_orders = {}
+            elif isinstance(open_orders_list, list):
+                # Rebuild the open_orders dict from the fresh list
+                self.open_orders = {o['id']: o for o in open_orders_list}
+                state_update_summary.append(f"Orders:{len(self.open_orders)}")
+                # Prune tracked SL order ID if it's no longer present in the fetched open orders
+                if self.stop_loss_order_id and self.stop_loss_order_id not in self.open_orders:
+                    self.logger.info(f"{C_INFO}Tracked SL order ...{format_order_id(self.stop_loss_order_id)} "
+                                     f"vanished from open orders (likely filled/cancelled). Clearing tracked ID.{C_RESET}")
+                    self.stop_loss_order_id = None
+            else:
+                 self.logger.error(f"{C_ERROR}State Update Failed (Orders): Unexpected data type received: {type(open_orders_list)}{C_RESET}")
+                 state_update_summary.append("Orders:Error")
+
+
+            # Balance
+            balance_tuple = results_dict.get("balance")
+            if isinstance(balance_tuple, Exception):
+                self.logger.error(f"{C_ERROR}State Update Failed (Balance): {balance_tuple}{C_RESET}")
+                state_update_summary.append("Bal:Error")
+                # Keep old balance? Set to 0? Setting to 0 might prevent trades.
+                # self.available_balance = Decimal(0)
+            elif isinstance(balance_tuple, tuple) and len(balance_tuple) == 2:
+                # Expected return: (total_balance, available_balance)
+                _, fetched_available = balance_tuple
+                if fetched_available is not None:
+                    self.available_balance = fetched_available
+                    state_update_summary.append(f"Bal:{self.available_balance:.2f}")
+                else:
+                    self.logger.error(f"{C_ERROR}State Update Failed (Balance): Fetched available balance was None.{C_RESET}")
+                    state_update_summary.append("Bal:Error")
+                    # self.available_balance = Decimal(0)
+            else:
+                self.logger.error(f"{C_ERROR}State Update Failed (Balance): Unexpected return format: {balance_tuple}{C_RESET}")
+                state_update_summary.append("Bal:Error")
+                # self.available_balance = Decimal(0)
+
+            # Ticker (Last Price)
+            ticker = results_dict.get("ticker")
+            if isinstance(ticker, Exception):
+                # Failing to get the latest price is usually not critical, but good to know
+                self.logger.warning(f"{C_WARN}State Update Warning (Ticker): {ticker}{C_RESET}")
+                state_update_summary.append(f"Px:Error(Stale:{self.last_known_price:.4f})")
+                # Keep the previous last_known_price
+            elif isinstance(ticker, dict) and ticker.get('last'):
+                new_price = safe_decimal_conversion(ticker['last'])
+                if new_price and new_price > 0: # Ensure the fetched price is valid
+                    self.last_known_price = new_price
+                    state_update_summary.append(f"Px:{self.last_known_price:.4f}")
+                else:
+                    self.logger.warning(f"{C_WARN}State Update Warning (Ticker): Fetched last price '{ticker['last']}' is invalid. "
+                                        f"Keeping previous: {self.last_known_price:.4f}{C_RESET}")
+                    state_update_summary.append(f"Px:Invalid(Stale:{self.last_known_price:.4f})")
+            else:
+                # Ticker fetched but 'last' price missing or empty
+                self.logger.warning(f"{C_WARN}State Update Warning (Ticker): Fetched ticker data missing 'last' price. "
+                                    f"Keeping previous: {self.last_known_price:.4f}{C_RESET}")
+                state_update_summary.append(f"Px:Missing(Stale:{self.last_known_price:.4f})")
+
+
+            # --- Log Overall State Summary ---
+            pos_side = self.current_position.get('side', self.api_config.POS_NONE) if self.current_position else self.api_config.POS_NONE
+            pos_qty = self.current_position.get('qty', Decimal(0)) if self.current_position else Decimal(0)
+            # Use 'size' from Bybit V5 position data for quantity
+            pos_qty_v5 = safe_decimal_conversion(self.current_position.get('size', '0')) if self.current_position else Decimal(0)
+            pos_qty_str = format_amount(self.exchange, self.symbol, pos_qty_v5) if self.exchange else str(pos_qty_v5)
+
+            self.logger.debug(f"{C_DEBUG}State Update Summary: {', '.join(state_update_summary)} | "
+                              f"Current Pos: {C_BOLD}{pos_side}{C_RESET}{C_DEBUG} Qty: {C_BOLD}{pos_qty_str}{C_RESET}")
+
+        except Exception as e:
+            # Catch unexpected errors during the state update process itself
+            self.logger.error(f"{C_ERROR}Unexpected error during state update ritual: {e}{C_RESET}", exc_info=True)
+            # Consider if state variables should be reset here
+
+    async def _fetch_all_open_orders(self) -> List[Dict[str, Any]]:
+        """
+        Fetches all relevant types of open orders (Regular Limit/Market, Stop/Conditional)
+        concurrently for the strategy's symbol.
+
+        Returns:
+            List[Dict[str, Any]]: A list of unique open order dictionaries, or an empty list on failure.
+        """
+        if not self.exchange:
+            self.logger.error(f"{C_ERROR}Cannot fetch orders: Exchange object not available.{C_RESET}")
+            return []
+        category = bybit.market_cache.get_category(self.symbol)
+        if not category:
+            self.logger.error(f"{C_ERROR}Cannot fetch orders: Market category unknown for {self.symbol}.{C_RESET}")
+            return []
+
+        self.logger.debug(f"{C_DEBUG}Fetching all relevant open order types (Limit, Stop)...")
+        tasks = []
+        # Define the Bybit V5 order filters needed to capture strategy-relevant orders
+        # OrderFilter.ORDER captures regular open limit orders.
+        # OrderFilter.STOP_ORDER captures conditional orders (like our native SL).
+        # We might not need OrderFilter.TP_SL_ORDER if using native SL via STOP_ORDER.
+        # We probably don't need OrderFilter.TAKE_PROFIT or OrderFilter.STOP_LOSS if they refer to order attachments (less common via API).
+        order_filters_to_check = [
+            OrderFilter.ORDER,      # Regular Limit/Market orders still open
+            OrderFilter.STOP_ORDER, # Conditional orders (includes SL/TP placed this way)
+            # Add other filters if your strategy uses different order types (e.g., TP_SL_ORDER)
+        ]
+        filter_names = [f.value for f in order_filters_to_check] # For logging
+
+        for i, order_filter in enumerate(order_filters_to_check):
+            self.logger.debug(f"{C_DEBUG}Creating task to fetch orders with filter: {filter_names[i]}")
+            tasks.append(
+                bybit.fetch_open_orders_filtered(
+                    exchange=self.exchange,
+                    symbol=self.symbol,
+                    category=category,
+                    order_filter=order_filter,
+                    config=self.api_config.dict()
+                )
+            )
+
+        # Execute fetches concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        all_orders: List[Dict[str, Any]] = []
+        for i, res in enumerate(results):
+            filter_name = filter_names[i]
+            if isinstance(res, Exception):
+                self.logger.warning(f"{C_WARN}Failed to fetch open orders with filter '{filter_name}': {res}{C_RESET}")
+            elif isinstance(res, list):
+                self.logger.debug(f"{C_DEBUG}Fetched {len(res)} open orders with filter '{filter_name}'.")
+                all_orders.extend(res)
+            else:
+                 self.logger.warning(f"{C_WARN}Unexpected result type ({type(res)}) when fetching orders with filter '{filter_name}'.{C_RESET}")
+
+
+        # Deduplicate orders based on their unique 'orderId' (or 'id' depending on helper format)
+        # Assuming the helper standardizes the key to 'id'
+        unique_orders_dict: Dict[str, Dict[str, Any]] = {}
+        for order in all_orders:
+            order_id = order.get('id') or order.get('orderId') # Check common keys
+            if order_id:
+                 unique_orders_dict[order_id] = order
+            else:
+                 self.logger.warning(f"{C_WARN}Found an order without a recognizable ID: {order}{C_RESET}")
+
+        num_unique = len(unique_orders_dict)
+        self.logger.debug(f"{C_DEBUG}Total unique open orders found across relevant filters: {num_unique}")
+        return list(unique_orders_dict.values())
+
+
+    async def _fetch_and_calculate_indicators(self) -> Optional[pd.DataFrame]:
+        """
+        Fetches the required historical OHLCV data and invokes the sacred indicator
+        calculation rites defined in the `indicators.py` module. Runs synchronous
+        calculations in an executor thread to avoid blocking the async loop.
+
+        Returns:
+            Optional[pd.DataFrame]: DataFrame with OHLCV and calculated indicator columns,
+                                    or None if fetching or calculation fails.
+        """
+        self.logger.debug(f"{C_DEBUG}Divining indicators: Fetching OHLCV data ({self.timeframe})...")
+        if not self.exchange or not self.loop:
+            self.logger.error(f"{C_ERROR}Cannot divine indicators: Exchange or event loop not available.{C_RESET}")
+            return None
+
+        try:
+            # Fetch enough data for indicators + warm-up buffer + potential lookback needs
+            min_periods = self.strategy_config.indicator_settings.min_data_periods
+            # Add a generous buffer (e.g., 50-100 candles) for indicator stability and lookbacks
+            buffer = 50
+            limit = min_periods + buffer
+            self.logger.debug(f"{C_DEBUG}Requesting {limit} candles (min: {min_periods} + buffer: {buffer}) for {self.symbol} {self.timeframe}.")
+
+            # Use the paginated fetcher helper
+            ohlcv_data = await bybit.fetch_ohlcv_paginated(
+                exchange=self.exchange,
+                symbol=self.symbol,
+                timeframe=self.timeframe,
+                limit=limit,
+                config=self.api_config.dict(),
+            )
+
+            # Validate fetched data
+            if ohlcv_data is None:
+                 self.logger.warning(f"{C_WARN}OHLCV data fetch returned None. Cannot divine indicators.{C_RESET}")
+                 return None
+
+            # Ensure data is a Pandas DataFrame (helper might return list or DataFrame)
+            if isinstance(ohlcv_data, list):
+                if not ohlcv_data:
+                    self.logger.warning(f"{C_WARN}OHLCV data fetch returned an empty list. Cannot divine indicators.{C_RESET}")
+                    return None
+                try:
+                    # Standard CCXT columns: timestamp, open, high, low, close, volume
+                    df_ohlcv = pd.DataFrame(ohlcv_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                    # Convert timestamp to datetime index (assuming milliseconds)
+                    df_ohlcv['datetime'] = pd.to_datetime(df_ohlcv['timestamp'], unit='ms', utc=True)
+                    df_ohlcv.set_index('datetime', inplace=True)
+                    # Convert OHLCV columns to numeric types, coercing errors
+                    for col in ['open', 'high', 'low', 'close', 'volume']:
+                        df_ohlcv[col] = pd.to_numeric(df_ohlcv[col], errors='coerce')
+                    df_ohlcv.dropna(subset=['open', 'high', 'low', 'close', 'volume'], inplace=True) # Drop rows with invalid numeric data
+                    self.logger.debug(f"{C_DEBUG}Converted OHLCV list to DataFrame. Shape: {df_ohlcv.shape}")
+                except Exception as conv_err:
+                    self.logger.error(f"{C_ERROR}Failed to convert fetched OHLCV list to DataFrame: {conv_err}{C_RESET}", exc_info=True)
+                    return None
+            elif isinstance(ohlcv_data, pd.DataFrame):
+                 df_ohlcv = ohlcv_data # Already a DataFrame
+                 if df_ohlcv.empty:
+                      self.logger.warning(f"{C_WARN}OHLCV data fetch returned an empty DataFrame. Cannot divine indicators.{C_RESET}")
+                      return None
+                 # Optional: Validate columns and types if helper doesn't guarantee format
+                 self.logger.debug(f"{C_DEBUG}Received OHLCV data as DataFrame. Shape: {df_ohlcv.shape}")
+            else:
+                 self.logger.error(f"{C_ERROR}Received unexpected data type for OHLCV: {type(ohlcv_data)}. Cannot divine indicators.{C_RESET}")
+                 return None
+
+            # Check if we have enough data *after* potential cleaning/conversion
+            if len(df_ohlcv) < min_periods:
+                self.logger.warning(f"{C_WARN}Insufficient OHLCV data after processing ({len(df_ohlcv)} candles < required {min_periods}). Cannot divine indicators.{C_RESET}")
+                return None
+
+            # --- Invoke Indicator Calculation Rites ---
+            # Prepare config context for the indicator calculation function
+            # Pass relevant parts of the validated strategy config
+            indicator_config_context = {
+                "indicator_settings": self.strategy_config.indicator_settings.dict(),
+                "analysis_flags": self.strategy_config.analysis_flags.dict(),
+                "strategy_params": self.strategy_config.strategy_params,
+                # Pass any other context your indicators.py might need (e.g., symbol, timeframe)
+                "symbol": self.symbol,
+                "timeframe": self.timeframe,
+            }
+            self.logger.debug(f"{C_DEBUG}Invoking indicator calculation rites in executor thread...")
+
+            # Run the potentially CPU-bound synchronous calculation in an executor
+            # Pass a copy of the DataFrame to avoid modifying the original in the executor
+            df_with_indicators = await self.loop.run_in_executor(
+                None, # Use default asyncio executor (usually ThreadPoolExecutor)
+                ind.calculate_all_indicators, # The function from indicators.py
+                df_ohlcv.copy(),              # Input DataFrame
+                indicator_config_context      # Context/Config for the function
+            )
+
+            # --- Validate Calculation Results ---
+            if df_with_indicators is None:
+                self.logger.error(f"{C_ERROR}Indicator calculation rite returned None. Cannot proceed.{C_RESET}")
+                return None
+            if not isinstance(df_with_indicators, pd.DataFrame):
+                 self.logger.error(f"{C_ERROR}Indicator calculation rite returned unexpected type: {type(df_with_indicators)}.{C_RESET}")
+                 return None
+            if df_with_indicators.empty:
+                 self.logger.error(f"{C_ERROR}Indicator calculation rite returned an empty DataFrame.{C_RESET}")
+                 return None
+
+            # Check if all required indicator columns are present in the result
+            missing_cols = [col for col in self.required_indicators if col not in df_with_indicators.columns]
+            if missing_cols:
+                self.logger.error(f"{C_ERROR}Required indicator columns missing after calculation: {missing_cols}. "
+                                  f"Check 'indicators.py' logic and column naming.{C_RESET}")
+                self.logger.debug(f"{C_DEBUG}Available columns: {list(df_with_indicators.columns)}")
+                return None
+
+            # Check for NaN values in the *last row* of required indicator columns (most critical for signals)
+            last_row_nan_check = df_with_indicators[self.required_indicators].iloc[-1].isna().any()
+            if last_row_nan_check:
+                 nan_cols_last_row = df_with_indicators[self.required_indicators].iloc[-1].isna()
+                 self.logger.warning(f"{C_WARN}NaN value(s) detected in the latest row of required indicators: "
+                                     f"{nan_cols_last_row[nan_cols_last_row].index.tolist()}. "
+                                     f"Signals may be unreliable.{C_RESET}")
+                 # Depending on strategy, might want to return None here or let signal check handle NaNs
+
+            self.logger.debug(f"{C_DEBUG}Indicator calculation rites complete. Result DataFrame shape: {df_with_indicators.shape}")
+            return df_with_indicators
+
+        except FileNotFoundError as fnf_err:
+             # Catch error if indicators.py relies on external files not found
+             self.logger.critical(f"{C_CRIT}Indicator calculation failed: File not found - {fnf_err}. Ensure necessary data files are present.{C_RESET}", exc_info=True)
+             return None
+        except Exception as e:
+            # Catch any other unexpected error during the process
+            self.logger.error(
+                f"{C_ERROR}Error during indicator divination ritual: {e}{C_RESET}", exc_info=True
+            )
+            return None
+
+
+    def _check_signals(self, df: pd.DataFrame) -> Tuple[Optional[Side], bool]:
+        """
+        Interprets the omens from the latest indicator data (specifically EVT signals)
+        to determine entry or exit conditions.
+
+        Args:
+            df: DataFrame containing OHLCV and calculated indicators.
+
+        Returns:
+            tuple: (entry_side, should_exit) where:
+                   entry_side (Optional[Side]): Side.BUY, Side.SELL if an entry signal
+                                                is detected, otherwise None.
+                   should_exit (bool): True if the current position should be closed based
+                                       on exit criteria, False otherwise.
+        """
+        entry_side: Optional[Side] = None
+        should_exit: bool = False
+
+        # Basic validation of input DataFrame
+        if df is None or df.empty:
+            self.logger.debug(f"{C_DEBUG}Signal Check: Cannot interpret omens, indicator DataFrame is missing or empty.")
+            return None, False
+        # Need at least two rows to compare current vs previous trend
+        if len(df) < 2:
+            self.logger.debug(f"{C_DEBUG}Signal Check: Indicator DataFrame has < 2 rows ({len(df)}), insufficient for trend comparison.")
+            return None, False
+
+        # Check if EVT analysis is enabled in the configuration
+        if not self.strategy_config.analysis_flags.use_evt:
+            self.logger.debug(f"{C_DEBUG}Signal Check: EVT analysis is disabled in config. No EVT signals generated.")
+            return None, False
+
+        try:
+            # Access the latest (most recent) and second-to-latest rows
+            latest = df.iloc[-1]
+            previous = df.iloc[-2]
+        except IndexError:
+            # Should not happen if len(df) >= 2 check passed, but defensively check
+            self.logger.warning(f"{C_WARN}Signal Check: Could not access latest/previous rows in indicator DataFrame despite length check.{C_RESET}")
+            return None, False
+
+        # --- Safely Read the Omens (Indicator Values) ---
+        # Use .get() to avoid KeyError if columns are somehow missing (though checked earlier)
+        trend_latest_raw = latest.get(self.evt_trend_col)
+        trend_prev_raw = previous.get(self.evt_trend_col)
+        buy_signal_latest_raw = latest.get(self.evt_buy_col)
+        sell_signal_latest_raw = latest.get(self.evt_sell_col)
+
+        # Check if essential EVT indicator values are available and not NaN/None
+        required_omens = {
+            self.evt_trend_col: trend_latest_raw,
+            f"{self.evt_trend_col}_prev": trend_prev_raw,
+            self.evt_buy_col: buy_signal_latest_raw,
+            self.evt_sell_col: sell_signal_latest_raw,
+        }
+        if any(pd.isna(v) for v in required_omens.values()):
+            nan_omens = {k: v for k, v in required_omens.items() if pd.isna(v)}
+            self.logger.debug(f"{C_DEBUG}Signal Check: EVT omens unclear (NaN/None found in required values: {list(nan_omens.keys())}). No signal generated.")
+            return None, False
+
+        # --- Interpret the Omens (Convert to Expected Types) ---
+        try:
+            # EVT Trend is expected to be integer (-1, 0, 1)
+            current_trend = int(trend_latest_raw)
+            previous_trend = int(trend_prev_raw)
+            # EVT Buy/Sell signals are expected to be boolean (or interpretable as such)
+            is_buy_signal = bool(buy_signal_latest_raw)
+            is_sell_signal = bool(sell_signal_latest_raw)
+        except (ValueError, TypeError) as e:
+            self.logger.error(f"{C_ERROR}Signal Check: Failed to interpret EVT omen types: {e}. "
+                              f"Raw values: Trend={trend_latest_raw}, PrevTrend={trend_prev_raw}, "
+                              f"Buy={buy_signal_latest_raw}, Sell={sell_signal_latest_raw}{C_RESET}")
+            return None, False
+
+        self.logger.debug(f"{C_DEBUG}Signal Check - Interpreted Omens: "
+                          f"Trend={current_trend} (Prev:{previous_trend}), "
+                          f"BuySignal={is_buy_signal}, SellSignal={is_sell_signal}")
+
+        # --- Define Entry/Exit Logic based on Interpreted Omens ---
+        # Get current position state
+        current_pos_side_raw = self.current_position.get("side") if self.current_position else self.api_config.POS_NONE
+        # Check if we are effectively flat (no position or size is negligible)
+        current_pos_qty = safe_decimal_conversion(self.current_position.get('size', '0')) if self.current_position else Decimal(0)
+        is_flat = current_pos_qty <= self.api_config.POSITION_QTY_EPSILON
+
+
+        # **Entry Omens (Only considered if currently flat)**
+        if is_flat:
+            if is_buy_signal and is_sell_signal:
+                 # Ambiguous signal - both buy and sell flags are true
+                 self.logger.warning(f"{C_WARN}Signal Check: Ambiguous entry omen - both EVT Buy and Sell flags are active. No entry signal generated.{C_RESET}")
+            elif is_buy_signal:
+                entry_side = Side.BUY
+                self.logger.info(f"{C_SUCCESS}{C_BOLD}ENTRY OMEN: BUY signal sighted! (EVT Buy flag is True){C_RESET}")
+            elif is_sell_signal:
+                entry_side = Side.SELL
+                self.logger.info(f"{C_ERROR}{C_BOLD}ENTRY OMEN: SELL signal sighted! (EVT Sell flag is True){C_RESET}")
+            # else: No buy or sell signal, remain flat
+
+        # **Exit Omens (Only considered if currently in a position)**
+        elif not is_flat:
+            # Determine if we are currently long or short based on API position side
+            is_long = current_pos_side_raw == self.api_config.POS_LONG
+            is_short = current_pos_side_raw == self.api_config.POS_SHORT
+
+            # Exit Long Condition: Trend flips from non-negative (1 or 0) to negative (-1)
+            if is_long and current_trend == -1 and previous_trend != -1:
+                should_exit = True
+                self.logger.warning(f"{C_WARN}{C_BOLD}EXIT OMEN: Close LONG position! "
+                                  f"(EVT Trend flipped bearish: {previous_trend} -> {current_trend}){C_RESET}")
+
+            # Exit Short Condition: Trend flips from non-positive (-1 or 0) to positive (1)
+            elif is_short and current_trend == 1 and previous_trend != 1:
+                should_exit = True
+                self.logger.warning(f"{C_WARN}{C_BOLD}EXIT OMEN: Close SHORT position! "
+                                  f"(EVT Trend flipped bullish: {previous_trend} -> {current_trend}){C_RESET}")
+
+            # Optional: Add exit condition if trend becomes neutral (0)?
+            # elif (is_long or is_short) and current_trend == 0 and previous_trend != 0:
+            #     should_exit = True
+            #     self.logger.warning(f"{C_WARN}{C_BOLD}EXIT OMEN: Close {current_pos_side_raw} position! (EVT Trend became neutral: {previous_trend} -> 0){C_RESET}")
+
+            # Optional: Add exit if the *opposite* signal appears while in position?
+            # elif is_long and is_sell_signal:
+            #     should_exit = True
+            #     self.logger.warning(f"{C_WARN}{C_BOLD}EXIT OMEN: Close LONG position! (Opposing EVT Sell Signal appeared){C_RESET}")
+            # elif is_short and is_buy_signal:
+            #     should_exit = True
+            #     self.logger.warning(f"{C_WARN}{C_BOLD}EXIT OMEN: Close SHORT position! (Opposing EVT Buy Signal appeared){C_RESET}")
+
+
+        # Log the final decision
+        if entry_side:
+            self.logger.debug(f"{C_DEBUG}Signal Check Result: Entry Signal = {entry_side.value}")
+        elif should_exit:
+             self.logger.debug(f"{C_DEBUG}Signal Check Result: Exit Signal = True")
+        else:
+             self.logger.debug(f"{C_DEBUG}Signal Check Result: No Entry or Exit Signal")
+
+        return entry_side, should_exit
+
+
+    def _calculate_position_size(self, entry_price: Decimal, stop_loss_price: Decimal) -> Optional[Decimal]:
+        """
+        Calculates the appropriate position size based on the defined risk percentage,
+        stop-loss distance, available balance, and market constraints (min qty, step size).
+
+        Args:
+            entry_price: The estimated or actual entry price of the trade.
+            stop_loss_price: The calculated stop loss price for the trade.
+
+        Returns:
+            Optional[Decimal]: The calculated and adjusted position size, or None if
+                               calculation is not possible or violates constraints.
+        """
+        self.logger.debug(f"{C_DEBUG}Calculating position size based on risk...")
+
+        # --- Input Validation ---
+        if not self.exchange:
+            self.logger.error(f"{C_ERROR}Position Size Calc: Cannot proceed, exchange object missing.{C_RESET}")
+            return None
+        if entry_price <= 0 or stop_loss_price <= 0:
+            self.logger.error(f"{C_ERROR}Position Size Calc: Invalid input prices (Entry: {entry_price}, SL: {stop_loss_price}).{C_RESET}")
+            return None
+        if self.available_balance <= 0:
+            self.logger.error(f"{C_ERROR}Position Size Calc: Available balance ({self.available_balance}) is zero or negative.{C_RESET}")
+            return None
+        if self.qty_step <= 0 or self.price_tick <= 0:
+             self.logger.error(f"{C_ERROR}Position Size Calc: Invalid market details (QtyStep: {self.qty_step}, PriceTick: {self.price_tick}).{C_RESET}")
+             return None
+
+        # --- Risk Calculation ---
+        risk_pct = self.strategy_config.risk_per_trade
+        risk_amount_usd = self.available_balance * risk_pct
+        price_diff = abs(entry_price - stop_loss_price)
+
+        # Ensure the stop loss distance is meaningful (at least one price tick away)
+        if price_diff < self.price_tick:
+            entry_fmt = format_price(self.exchange, self.symbol, entry_price)
+            sl_fmt = format_price(self.exchange, self.symbol, stop_loss_price)
+            tick_fmt = format_price(self.exchange, self.symbol, self.price_tick)
+            self.logger.error(
+                f"{C_ERROR}Position Size Calc: Stop loss distance ({price_diff:.8f}) is smaller than "
+                f"price tick ({tick_fmt}). Entry={entry_fmt}, SL={sl_fmt}. SL too tight or prices invalid.{C_RESET}"
+            )
+            return None
+
+        # --- Ideal Size Calculation (Base Quantity) ---
+        # Assuming linear contract value for simplicity (adjust if inverse contract)
+        # Size = (Risk Amount in Quote Currency) / (Price Difference per Unit in Quote Currency)
+        position_size_base = risk_amount_usd / price_diff
+        self.logger.debug(f"{C_DEBUG}Position Size Calc - Risk Amount: {risk_amount_usd:.4f} {self.api_config.USDT_SYMBOL}, "
+                          f"Price Diff: {price_diff:.4f}, Ideal Base Size: {position_size_base:.8f}")
+
+        # --- Adjust for Step Size (Quantize Down) ---
+        # Use floor division (//) to find how many steps fit, then multiply back
+        position_size_adjusted = (position_size_base // self.qty_step) * self.qty_step
+
+        if position_size_adjusted <= 0:
+            # This can happen if the ideal size is smaller than the step size
+            self.logger.warning(
+                f"{C_WARN}Position Size Calc: Calculated size ({position_size_base:.8f}) is zero after adjusting "
+                f"for step size {format_amount(self.exchange, self.symbol, self.qty_step)}. "
+                f"Risk Amount: {risk_amount_usd:.4f} {self.api_config.USDT_SYMBOL}. Cannot trade with current settings/balance.{C_RESET}"
+            )
+            return None
+
+        # --- Check Against Minimum Order Size ---
+        min_qty_fmt = format_amount(self.exchange, self.symbol, self.min_qty)
+        adj_size_fmt = format_amount(self.exchange, self.symbol, position_size_adjusted)
+
+        if position_size_adjusted < self.min_qty:
+            self.logger.warning(
+                f"{C_WARN}Position Size Calc: Adjusted size ({adj_size_fmt}) is below minimum order size ({min_qty_fmt}).{C_RESET}"
+            )
+            # Calculate the risk if we *were* to use the minimum quantity
+            min_qty_risk_usd = self.min_qty * price_diff
+            # Allow using minimum quantity only if it doesn't grossly exceed the risk budget
+            # Define an acceptable over-budget factor (e.g., 10% = 1.1)
+            max_acceptable_risk = risk_amount_usd * Decimal("1.10")
+            if min_qty_risk_usd <= max_acceptable_risk:
+                self.logger.info(f"{C_INFO}Position Size Calc: Using minimum order size ({min_qty_fmt}) as its risk "
+                                 f"({min_qty_risk_usd:.4f} {self.api_config.USDT_SYMBOL}) is within acceptable limits "
+                                 f"(Budget: {risk_amount_usd:.4f}, Max Acceptable: {max_acceptable_risk:.4f}).")
+                position_size_final = self.min_qty
+            else:
+                self.logger.error(
+                    f"{C_ERROR}Position Size Calc: Minimum order size ({min_qty_fmt}) risk ({min_qty_risk_usd:.4f} {self.api_config.USDT_SYMBOL}) "
+                    f"significantly exceeds risk budget ({risk_amount_usd:.4f}). Cannot place trade.{C_RESET}"
+                )
+                return None
+        else:
+            # Adjusted size is already >= minimum size
+            position_size_final = position_size_adjusted
+
+        # --- Basic Margin Check (Estimate) ---
+        # Calculate estimated cost considering leverage
+        leverage_decimal = Decimal(str(self.leverage)) if self.leverage > 0 else Decimal('1')
+        # Cost = (Quantity * Entry Price) / Leverage
+        cost_estimate = (position_size_final * entry_price) / leverage_decimal
+        # Leave a small buffer (e.g., 95-98% of balance) to account for fees, slippage, precision issues
+        margin_buffer_factor = Decimal('0.95') # Use 95% of available balance
+        max_allowable_cost = self.available_balance * margin_buffer_factor
+
+        if cost_estimate > max_allowable_cost:
+            final_size_fmt = format_amount(self.exchange, self.symbol, position_size_final)
+            self.logger.error(
+                f"{C_ERROR}Position Size Calc: Estimated cost for size {final_size_fmt} ({cost_estimate:.4f} {self.api_config.USDT_SYMBOL}) "
+                f"exceeds {margin_buffer_factor*100:.0f}% of available balance ({self.available_balance:.4f}) "
+                f"with {self.leverage}x leverage (Max Cost: {max_allowable_cost:.4f}). Cannot place trade.{C_RESET}"
+            )
+            return None
+
+        # --- Log Final Calculated Size ---
+        final_size_fmt = format_amount(self.exchange, self.symbol, position_size_final)
+        self.logger.info(
+            f"{C_SUCCESS}Calculated Position Size: {C_BOLD}{final_size_fmt}{C_RESET}{C_SUCCESS} "
+            f"(Risk: {risk_amount_usd:.4f} {self.api_config.USDT_SYMBOL}, Balance: {self.available_balance:.4f}, "
+            f"Est. Cost: {cost_estimate:.4f} {self.api_config.USDT_SYMBOL})"
+        )
+        return position_size_final
+
+
+    def _calculate_stop_loss_price(self, df: pd.DataFrame, side: Side, entry_price: Decimal) -> Optional[Decimal]:
+        """
+        Calculates the stop loss price based on the latest ATR value, the ATR multiplier,
+        the entry price, and market price precision. Performs sanity checks.
+
+        Args:
+            df: DataFrame containing indicators, including the required ATR column.
+            side: The side of the intended trade (Side.BUY or Side.SELL).
+            entry_price: The estimated or actual entry price.
+
+        Returns:
+            Optional[Decimal]: The calculated and formatted stop loss price, or None if
+                               calculation fails or inputs are invalid.
+        """
+        self.logger.debug(f"{C_DEBUG}Calculating Stop Loss price for {side.value} trade...")
+
+        # --- Prerequisite Checks ---
+        if not self.strategy_config.analysis_flags.use_atr:
+            self.logger.debug(f"{C_DEBUG}SL Calc: ATR analysis disabled in config, cannot calculate ATR-based SL.")
+            return None
+        if df is None or df.empty:
+            self.logger.warning(f"{C_WARN}SL Calc: Indicator DataFrame is missing or empty. Cannot calculate SL.{C_RESET}")
+            return None
+        if self.atr_col not in df.columns:
+             self.logger.error(f"{C_ERROR}SL Calc: Required ATR column '{self.atr_col}' not found in DataFrame.{C_RESET}")
+             return None
+        if not self.exchange:
+            self.logger.error(f"{C_ERROR}SL Calc: Cannot format price, exchange object missing.{C_RESET}")
+            return None
+        if entry_price <= 0:
+            self.logger.error(f"{C_ERROR}SL Calc: Invalid entry price ({entry_price}) provided.{C_RESET}")
+            return None
+        if self.price_tick <= 0:
+             self.logger.error(f"{C_ERROR}SL Calc: Invalid market price tick ({self.price_tick}).{C_RESET}")
+             return None
+
+        try:
+            # --- Get Latest ATR Value ---
+            latest_atr_raw = df.iloc[-1].get(self.atr_col)
+            if pd.isna(latest_atr_raw):
+                self.logger.warning(f"{C_WARN}SL Calc: Latest ATR value is NaN in indicator data. Cannot calculate SL.{C_RESET}")
+                return None
+
+            latest_atr = safe_decimal_conversion(latest_atr_raw)
+            if latest_atr is None or latest_atr <= 0:
+                self.logger.warning(f"{C_WARN}SL Calc: Invalid non-positive ATR value ({latest_atr_raw} -> {latest_atr}) found. Cannot calculate SL.{C_RESET}")
+                return None
+
+            # --- Calculate Raw SL Price ---
+            multiplier = self.strategy_config.stop_loss_atr_multiplier
+            stop_offset = latest_atr * multiplier
+
+            if side == Side.BUY:
+                # For longs, SL is below entry
+                sl_price_raw = entry_price - stop_offset
+            elif side == Side.SELL:
+                # For shorts, SL is above entry
+                sl_price_raw = entry_price + stop_offset
+            else:
+                # Should not happen if called correctly from entry/management logic
+                self.logger.error(f"{C_ERROR}SL Calc: Invalid side '{side}' provided for calculation.{C_RESET}")
+                return None
+
+            self.logger.debug(f"{C_DEBUG}SL Calc - Entry: {entry_price:.8f}, ATR: {latest_atr:.8f}, Mult: {multiplier}, Offset: {stop_offset:.8f}, Raw SL: {sl_price_raw:.8f}")
+
+            # --- Format SL Price according to Market Precision ---
+            # Use the formatting helper which should handle rounding/truncation based on price_tick
+            sl_price_formatted_str = format_price(self.exchange, self.symbol, sl_price_raw)
+            sl_price_formatted = safe_decimal_conversion(sl_price_formatted_str)
+
+            if sl_price_formatted is None or sl_price_formatted <= 0:
+                self.logger.error(f"{C_ERROR}SL Calc: Formatted SL price is invalid or non-positive: "
+                                  f"Raw={sl_price_raw:.8f}, FormattedStr={sl_price_formatted_str}, "
+                                  f"FormattedDec={sl_price_formatted}{C_RESET}")
+                return None
+
+            # --- Sanity Check and Adjustment ---
+            # Ensure SL is actually protective (below entry for long, above for short).
+            # If calculation lands exactly on or beyond the entry price due to large ATR or rounding,
+            # adjust it by one price tick further away.
+            sl_price_adjusted = sl_price_formatted # Start with the formatted price
+
+            if side == Side.BUY and sl_price_adjusted >= entry_price:
+                self.logger.warning(f"{C_WARN}SL Calc: Initial Buy SL ({sl_price_formatted_str}) is >= Entry Price ({entry_price:.8f}). Adjusting down by one tick.{C_RESET}")
+                sl_price_adjusted -= self.price_tick
+            elif side == Side.SELL and sl_price_adjusted <= entry_price:
+                self.logger.warning(f"{C_WARN}SL Calc: Initial Sell SL ({sl_price_formatted_str}) is <= Entry Price ({entry_price:.8f}). Adjusting up by one tick.{C_RESET}")
+                sl_price_adjusted += self.price_tick
+
+            # Final check: Ensure adjusted SL is still positive
+            if sl_price_adjusted <= 0:
+                 self.logger.error(f"{C_ERROR}SL Calc: Adjusted SL price became non-positive ({sl_price_adjusted:.8f}) after tick adjustment. Cannot use.{C_RESET}")
+                 return None
+
+            # --- Re-Format After Potential Adjustment (Important!) ---
+            # The adjustment might have created more decimal places than allowed.
+            sl_price_final_str = format_price(self.exchange, self.symbol, sl_price_adjusted)
+            sl_price_final = safe_decimal_conversion(sl_price_final_str)
+
+            # Final validation of the final SL price
+            if sl_price_final and sl_price_final > 0:
+                # Log the successful calculation
+                atr_fmt = format_price(self.exchange, self.symbol, latest_atr) # Format ATR for logging
+                entry_fmt = format_price(self.exchange, self.symbol, entry_price)
+                self.logger.info(f"{C_SUCCESS}Calculated SL Price: {C_BOLD}{sl_price_final_str}{C_RESET}{C_SUCCESS} "
+                                 f"(Side: {side.value}, Entry: {entry_fmt}, ATR: {atr_fmt}, Mult: {multiplier})")
+                return sl_price_final
+            else:
+                # This should be rare if previous checks passed, but catch it defensively
+                self.logger.error(f"{C_ERROR}SL Calc: Final SL price after adjustment/re-formatting is invalid: "
+                                  f"Adjusted={sl_price_adjusted:.8f}, FinalStr={sl_price_final_str}, FinalDec={sl_price_final}{C_RESET}")
+                return None
+
+        except Exception as e:
+            self.logger.error(f"{C_ERROR}SL Calc: Unexpected error calculating stop loss price: {e}{C_RESET}", exc_info=True)
+            return None
+
+    async def _place_stop_loss(self, entry_side: Side, qty: Decimal, sl_price: Decimal):
+        """
+        Places a native conditional stop loss order on the exchange using the
+        appropriate parameters for Bybit V5. Tracks the placed order ID.
+
+        Args:
+            entry_side: The side of the main position (BUY or SELL).
+            qty: The quantity of the position to protect.
+            sl_price: The calculated trigger price for the stop loss.
+        """
+        if not self.exchange:
+            self.logger.error(f"{C_ERROR}Place SL: Cannot place SL, exchange object missing.{C_RESET}")
+            return
+        if sl_price is None or sl_price <= 0:
+            self.logger.error(f"{C_ERROR}Place SL: Invalid SL trigger price ({sl_price}) provided. Cannot place SL.{C_RESET}")
+            return
+        if qty <= 0:
+            self.logger.error(f"{C_ERROR}Place SL: Invalid quantity ({qty}) provided. Cannot place SL.{C_RESET}")
+            return
+
+        # Determine SL order parameters based on the main position's side
+        sl_order_side = Side.SELL if entry_side == Side.BUY else Side.BUY
+        # Bybit V5 uses triggerDirection: 1 (Rise) or 2 (Fall)
+        # If SL is a SELL STOP (for a LONG position), it triggers when price FALLS to sl_price.
+        # If SL is a BUY STOP (for a SHORT position), it triggers when price RISES to sl_price.
+        trigger_direction = TriggerDirection.FALLING if sl_order_side == Side.SELL else TriggerDirection.RISING
+
+        qty_fmt = format_amount(self.exchange, self.symbol, qty)
+        sl_price_fmt = format_price(self.exchange, self.symbol, sl_price)
+        self.logger.info(f"{C_INFO}Placing {sl_order_side.value.upper()} native Stop Loss for {C_BOLD}{qty_fmt}{C_RESET}{C_INFO} "
+                         f"at trigger price {C_BOLD}{sl_price_fmt}{C_RESET}{C_INFO} (Trigger Direction: {trigger_direction.name})...")
+
+        # --- Prepare Parameters for Bybit V5 Conditional Order ---
+        # Use last known price as a reasonable base price estimate for trigger evaluation distance.
+        # The 'basePrice' helps Bybit determine if the trigger is far away initially.
+        base_price_for_sl = self.last_known_price
+        if base_price_for_sl <= 0:
+            self.logger.error(f"{C_CRIT}Place SL: Last known price ({base_price_for_sl}) is invalid. Cannot provide valid 'basePrice' for conditional SL order.{C_RESET}")
+            # This is critical - the position is entered but SL cannot be placed.
+            await self._trigger_alert(f"URGENT: Invalid basePrice ({base_price_for_sl}) needed for SL placement! Position UNPROTECTED.", critical=True)
+            # Consider emergency action here as the position is unprotected.
+            await self._emergency_close(f"Invalid basePrice ({base_price_for_sl}) for SL placement")
+            return
+
+        try:
+            # Use the dedicated helper function for placing native stop loss orders
+            sl_order = await bybit.place_native_stop_loss(
+                exchange=self.exchange,
+                symbol=self.symbol,
+                side=sl_order_side,        # The side of the SL order itself (opposite of entry)
+                amount=qty,                # The quantity to close
+                stop_price=sl_price,       # The trigger price
+                base_price=base_price_for_sl, # Required by V5 for conditional orders
+                config=self.api_config.dict(), # Pass API config
+                trigger_direction=trigger_direction, # V5 specific: 1 (Rise) or 2 (Fall)
+                is_reduce_only=True,       # Ensure SL only closes the position
+                order_type="Market",       # When triggered, execute as a Market order
+                position_idx=self.position_idx, # Match strategy's position mode
+                trigger_by=TriggerBy.LAST_PRICE # Trigger based on Last Price (or Mark Price if preferred)
+                # time_in_force = TimeInForce.GTC # Conditional orders are typically GTC
+            )
+
+            # --- Process Placement Result ---
+            if sl_order and sl_order.get('id'):
+                self.stop_loss_order_id = sl_order['id'] # Track the new SL order ID
+                sl_id_short = format_order_id(self.stop_loss_order_id)
+                self.logger.success(f"{C_SUCCESS}{C_BOLD}Native Stop Loss placed successfully! Order ID: ...{sl_id_short}{C_RESET}")
+                # Optional: Update state immediately to include the new SL order
+                # await self._update_state()
+            else:
+                # The helper function should ideally log specific errors from the API
+                self.logger.error(f"{C_CRIT}Place SL: Failed to place native Stop Loss order! Helper returned: {sl_order}. Position is UNPROTECTED.{C_RESET}")
+                self.stop_loss_order_id = None # Ensure ID is cleared if placement failed
+                await self._trigger_alert(f"URGENT: Failed SL placement after {entry_side.value} entry! Position UNPROTECTED.", critical=True)
+                # Consider emergency action
+                await self._emergency_close("Failed SL Placement after Entry")
+
+        except Exception as e:
+            self.logger.error(f"{C_CRIT}Place SL: Exception occurred during Stop Loss placement: {e}{C_RESET}", exc_info=True)
+            self.stop_loss_order_id = None # Clear ID on exception
+            await self._trigger_alert(f"EXCEPTION during SL placement ({type(e).__name__})! Position UNPROTECTED. Check Logs!", critical=True)
+            # Consider emergency action
+            await self._emergency_close(f"Exception ({type(e).__name__}) during SL Placement")
+
+
+    async def _cancel_stop_loss(self) -> bool:
+        """
+        Banishes the currently tracked stop loss order, if one exists.
+        Confirms cancellation by re-checking state if necessary.
+
+        Returns:
+            bool: True if the SL was successfully cancelled or no SL was tracked,
+                  False if cancellation failed or could not be confirmed.
+        """
+        if not self.exchange:
+            self.logger.error(f"{C_ERROR}Cancel SL: Cannot cancel SL, exchange object missing.{C_RESET}")
+            return False # Indicate failure
+
+        if self.stop_loss_order_id:
+            sl_id_to_cancel = self.stop_loss_order_id
+            sl_id_short = format_order_id(sl_id_to_cancel)
+            self.logger.info(f"{C_INFO}Attempting to banish existing Stop Loss order: ...{sl_id_short}")
+
+            try:
+                category = bybit.market_cache.get_category(self.symbol)
+                if not category:
+                    self.logger.error(f"{C_ERROR}Cancel SL: Cannot cancel SL {sl_id_short}, market category unknown for {self.symbol}.{C_RESET}")
+                    return False # Cannot proceed without category
+
+                # Use the specific helper for cancelling conditional orders (Stop Orders in V5)
+                success = await bybit.cancel_conditional_order(
+                    exchange=self.exchange,
+                    symbol=self.symbol,
+                    order_id=sl_id_to_cancel, # Use the ID we are tracking
+                    config=self.api_config.dict(),
+                    category=category # Pass category explicitly
+                )
+
+                if success:
+                    self.logger.info(f"{C_SUCCESS}Stop Loss ...{sl_id_short} banished successfully (API reported success).{C_RESET}")
+                    self.stop_loss_order_id = None # Clear tracked ID on success
+                    return True
+                else:
+                    # API reported failure (e.g., order not found, already filled/cancelled)
+                    # This might be okay if the order was already gone. Let's verify.
+                    self.logger.warning(f"{C_WARN}Cancel SL: API reported failure cancelling SL ...{sl_id_short}. "
+                                        f"Order might already be gone. Re-checking state...{C_RESET}")
+                    await asyncio.sleep(1) # Short delay before checking state again
+                    await self._update_state() # Refresh open orders
+
+                    # Check if the SL ID we *tried* to cancel is still in our tracked ID AND in open orders
+                    if self.stop_loss_order_id == sl_id_to_cancel and sl_id_to_cancel in self.open_orders:
+                        # It's still there after failed cancellation attempt - genuine failure
+                        self.logger.error(f"{C_ERROR}Cancel SL: Failed to banish Stop Loss order ...{sl_id_short} and it still appears in open orders.{C_RESET}")
+                        return False # Indicate persistent failure
+                    else:
+                        # Order is gone (or was never the one we tracked anymore)
+                        self.logger.info(f"{C_INFO}Cancel SL: Re-checked state confirms SL order ...{sl_id_short} is gone.")
+                        # Ensure tracked ID is cleared if it was the one we were trying to cancel
+                        if self.stop_loss_order_id == sl_id_to_cancel:
+                             self.stop_loss_order_id = None
+                        return True # Confirmed gone
+
+            except Exception as e:
+                self.logger.error(f"{C_ERROR}Cancel SL: Error occurred while banishing Stop Loss ...{sl_id_short}: {e}{C_RESET}", exc_info=True)
+                # Do not clear self.stop_loss_order_id here, as the cancellation attempt failed unexpectedly.
+                # Manual check might be needed, or retry logic could be added.
+                return False # Indicate failure
+
+        else:
+            # No SL order ID was being tracked
+            self.logger.debug(f"{C_DEBUG}Cancel SL: No active Stop Loss order ID tracked to banish.")
+            return True # Considered success as there was nothing to cancel
+
+
+    async def _manage_position(self, entry_side: Optional[Side], should_exit: bool, df_indicators: pd.DataFrame):
+        """
+        Orchestrates the entry and exit rituals based on the interpreted signals.
+        Handles placing entry orders, calculating/placing stop losses, and closing positions.
+
+        Args:
+            entry_side: The side for a potential new entry (BUY/SELL), or None.
+            should_exit: Flag indicating if the current position should be closed.
+            df_indicators: DataFrame with the latest indicator values.
+        """
+        # Get current position state (rely on _update_state having run recently)
+        current_pos_side_raw = self.current_position.get("side") if self.current_position else self.api_config.POS_NONE
+        current_pos_qty = safe_decimal_conversion(self.current_position.get('size', '0')) if self.current_position else Decimal(0)
+        is_flat = current_pos_qty <= self.api_config.POSITION_QTY_EPSILON
+
+        # --- Exit Ritual ---
+        # Trigger exit if signal received AND we are currently in a position
+        if should_exit and not is_flat:
+            pos_side_str = current_pos_side_raw # Should be 'Buy' or 'Sell'
+            qty_fmt = format_amount(self.exchange, self.symbol, current_pos_qty) if self.exchange else str(current_pos_qty)
+            self.logger.warning(f"{C_WARN}{C_BOLD}Exit signal received for {pos_side_str} position of {qty_fmt}. Initiating closing ritual...{C_RESET}")
+
+            # 1. Banish existing Stop Loss order FIRST (Critical before closing manually)
+            self.logger.info(f"{C_INFO}Exit Ritual: Attempting to cancel associated stop loss...")
+            sl_cancelled = await self._cancel_stop_loss()
+            if not sl_cancelled:
+                # Log warning but proceed with close attempt - better to try closing than stay in unwanted position.
+                # The SL might trigger concurrently, but the reduce_only close should still work.
+                self.logger.error(f"{C_ERROR}Exit Ritual: Failed to cancel SL before closing position. Attempting close anyway, but SL might interfere or have already triggered.{C_RESET}")
+            # Short pause to allow cancellation propagation if successful
+            await asyncio.sleep(0.5)
+
+            # 2. Close the position using a reduce-only market order
+            self.logger.info(f"{C_INFO}Exit Ritual: Submitting market order to close {pos_side_str} position of {qty_fmt}...")
+            # Use the helper designed for closing, passing the current position details
+            close_order = await bybit.close_position_reduce_only(
+                exchange=self.exchange,
+                symbol=self.symbol,
+                config=self.api_config.dict(),
+                position_to_close=self.current_position, # Pass the fetched position object
+                reason="Strategy Exit Signal (EVT Trend Reversal)"
+            )
+
+            if close_order and close_order.get('id'):
+                close_id_short = format_order_id(close_order['id'])
+                self.logger.success(f"{C_SUCCESS}Exit Ritual: Position close order ...{close_id_short} submitted successfully.{C_RESET}")
+                await self._trigger_alert(f"Closed {pos_side_str} Pos ({qty_fmt}). Reason: EVT Exit Signal")
+            else:
+                # close_position_reduce_only helper should log specific API errors
+                self.logger.error(f"{C_CRIT}Exit Ritual: Failed to submit position close order! Position may still be open. Manual intervention likely needed.{C_RESET}")
+                await self._trigger_alert(f"URGENT: Failed CLOSE order submission for {pos_side_str} ({qty_fmt})! Check Manually!", critical=True)
+
+            # Update state after attempting closure to confirm outcome
+            self.logger.info(f"{C_INFO}Exit Ritual: Waiting briefly and updating state after close attempt...")
+            await asyncio.sleep(5) # Allow time for order processing/state update propagation
+            await self._update_state()
+            return # Prevent attempting entry on the same tick after an exit signal
+
+        # --- Entry Ritual ---
+        # Trigger entry if signal received AND we are currently flat
+        if entry_side is not None and is_flat:
+            self.logger.info(f"{C_BOLD}{C_INFO}Entry signal detected: {entry_side.value.upper()}. Preparing entry ritual...{C_RESET}")
+
+            # 1. Optional but Recommended: Cleanse any lingering non-SL orders (defensive measure)
+            # This catches edge cases where previous orders might not have been fully cleaned up.
+            non_sl_orders = {oid: o for oid, o in self.open_orders.items() if oid != self.stop_loss_order_id}
+            if non_sl_orders:
+                self.logger.warning(f"{C_WARN}Entry Ritual: Found {len(non_sl_orders)} unexpected non-SL open orders before entry. Banishing them...")
+                category = bybit.market_cache.get_category(self.symbol)
+                if category and self.exchange:
+                    # Cancel only regular orders (OrderFilter.ORDER), leave other conditional orders if any
+                    cancelled_count = await bybit.cancel_all_orders(
+                        self.exchange, self.symbol, category=category,
+                        order_filter=OrderFilter.ORDER, # Target only regular orders
+                        config=self.api_config.dict(), reason="Pre-Entry Cleanup"
+                    )
+                    if cancelled_count is not None:
+                         self.logger.info(f"{C_INFO}Entry Ritual: Banished {cancelled_count} non-SL orders.")
+                    else:
+                         self.logger.warning(f"{C_WARN}Entry Ritual: Failed to execute non-SL order cleanup.{C_RESET}")
+                    await asyncio.sleep(1) # Pause after cancellation
+                    await self._update_state() # Refresh orders state
+                else:
+                    self.logger.error(f"{C_ERROR}Entry Ritual: Cannot cleanse non-SL orders, category or exchange missing.{C_RESET}")
+
+
+            # 2. Calculate SL Price (using current price as initial estimate for sizing)
+            # Use the most recent price we have as the *estimated* entry price for calculations
+            entry_price_estimate = self.last_known_price
+            if entry_price_estimate <= 0:
+                self.logger.error(f"{C_ERROR}Entry Ritual: Cannot calculate SL for entry. Invalid estimated entry price ({entry_price_estimate}). Aborting entry.{C_RESET}")
+                return
+
+            sl_price_initial = self._calculate_stop_loss_price(df_indicators, entry_side, entry_price_estimate)
+            if sl_price_initial is None:
+                # _calculate_stop_loss_price logs the specific reason
+                self.logger.error(f"{C_ERROR}Entry Ritual: Failed to calculate a valid initial SL price. Aborting entry ritual.{C_RESET}")
+                return
+
+            # 3. Calculate Position Size (based on estimated entry and initial SL)
+            qty_to_order = self._calculate_position_size(entry_price_estimate, sl_price_initial)
+            if qty_to_order is None or qty_to_order <= 0:
+                # _calculate_position_size logs the specific reason
+                self.logger.error(f"{C_ERROR}Entry Ritual: Failed to calculate a valid order quantity ({qty_to_order}). Aborting entry ritual.{C_RESET}")
+                return
+
+            # 4. Place Market Entry Order
+            # Convert Side enum to string ('Buy' or 'Sell') expected by helper/API
+            entry_order_side_str = entry_side.value
+            qty_fmt = format_amount(self.exchange, self.symbol, qty_to_order) if self.exchange else str(qty_to_order)
+            self.logger.info(f"{C_INFO}Entry Ritual: Placing {entry_order_side_str.upper()} market entry order for {C_BOLD}{qty_fmt}{C_RESET}{C_INFO}...")
+
+            entry_order = await bybit.place_market_order_slippage_check( # Use helper that might include slippage checks
+                exchange=self.exchange,
+                symbol=self.symbol,
+                side=entry_order_side_str,
+                amount=qty_to_order,
+                config=self.api_config.dict(),
+                is_reduce_only=False, # This is an opening order
+                # Use IOC for market orders to prevent accidentally leaving a partially filled limit order if market moves fast
+                time_in_force=TimeInForce.IOC, # ImmediateOrCancel
+                position_idx=self.position_idx,
+                reason="Strategy Entry Signal (EVT)"
+            )
+
+            # 5. Handle Entry Order Result & Place SL (CRITICAL SECTION)
+            if entry_order and entry_order.get('status') in ['filled', 'closed']: # 'closed' often means fully filled for market orders
+                # --- Entry Order Confirmed Filled ---
+                entry_id_short = format_order_id(entry_order.get('id', 'N/A'))
+                self.logger.success(f"{C_SUCCESS}Entry Ritual: Market entry order ...{entry_id_short} reported filled/closed.{C_RESET}")
+
+                # Try to get actual fill details from the order receipt
+                # Use 'avgPrice' and 'cumExecQty' or 'filled' from CCXT unified structure
+                filled_price_entry_raw = entry_order.get('average') # Average fill price
+                filled_qty_entry_raw = entry_order.get('filled') # Filled quantity
+
+                filled_price_entry = safe_decimal_conversion(filled_price_entry_raw)
+                filled_qty_entry = safe_decimal_conversion(filled_qty_entry_raw)
+
+                # If receipt lacks details, wait briefly and fetch fresh position state
+                if not filled_price_entry or not filled_qty_entry or filled_qty_entry <= 0:
+                    self.logger.warning(f"{C_WARN}Entry Ritual: Entry order receipt lacks clear fill details "
+                                        f"(AvgPx: {filled_price_entry_raw}, FilledQty: {filled_qty_entry_raw}). "
+                                        f"Waiting and re-fetching position state to confirm...{C_RESET}")
+                    await asyncio.sleep(5) # Wait longer for state update propagation after fill
+                    await self._update_state()
+
+                    # Verify if the position actually opened with the correct side and size
+                    expected_pos_side = self.api_config.POS_LONG if entry_side == Side.BUY else self.api_config.POS_SHORT
+                    if self.current_position and self.current_position.get('side') == expected_pos_side:
+                        self.logger.info(f"{C_INFO}Entry Ritual: Position state confirmed after entry.")
+                        # Use position data as the source of truth if available
+                        # Use 'avgPrice' and 'size' from V5 position data
+                        filled_price_entry = safe_decimal_conversion(self.current_position.get('avgPrice')) or entry_price_estimate # Fallback if avgPrice missing
+                        filled_qty_entry = safe_decimal_conversion(self.current_position.get('size')) or qty_to_order # Fallback if size missing
+
+                        if not filled_price_entry or filled_price_entry <= 0:
+                             self.logger.warning(f"{C_WARN}Entry Ritual: Could not get valid average price from position state, using estimate {entry_price_estimate}.{C_RESET}")
+                             filled_price_entry = entry_price_estimate
+                        if not filled_qty_entry or filled_qty_entry <= 0:
+                             self.logger.warning(f"{C_WARN}Entry Ritual: Could not get valid size from position state, using ordered qty {qty_to_order}.{C_RESET}")
+                             filled_qty_entry = qty_to_order # Less ideal, but better than nothing
+
+                    else:
+                        # Position state doesn't reflect the expected entry after waiting
+                        self.logger.error(f"{C_ERROR}Entry Ritual: Failed to confirm position opening via state check after entry order ({entry_id_short}). "
+                                          f"Expected side: {expected_pos_side}, Current state: {self.current_position}. Aborting SL placement.{C_RESET}")
+                        await self._trigger_alert(f"CRITICAL: Failed Entry Confirmation! Order: ...{entry_id_short}. Check Manually!", critical=True)
+                        # We might be flat, or worse, in an unexpected state. Don't place SL.
+                        return # Cannot proceed without confirmed entry
+
+                # Final check on the determined filled quantity
+                if filled_qty_entry <= 0:
+                    self.logger.error(f"{C_ERROR}Entry Ritual: Confirmed filled quantity is zero or invalid ({filled_qty_entry}). Cannot place SL.{C_RESET}")
+                    return
+
+                # Log confirmed entry details
+                filled_qty_fmt = format_amount(self.exchange, self.symbol, filled_qty_entry) if self.exchange else str(filled_qty_entry)
+                filled_price_fmt = format_price(self.exchange, self.symbol, filled_price_entry) if self.exchange else str(filled_price_entry)
+                self.logger.success(f"{C_SUCCESS}{C_BOLD}Entry Confirmed: Side={entry_side.value}, Qty={filled_qty_fmt}, AvgPx={filled_price_fmt}{C_RESET}")
+                await self._trigger_alert(f"Entered {entry_side.value} {filled_qty_fmt} @ {filled_price_fmt}")
+
+
+                # --- CRITICAL STEP: Recalculate SL price based on ACTUAL fill price ---
+                self.logger.info(f"{C_INFO}Entry Ritual: Recalculating SL based on actual fill price {filled_price_fmt}...")
+                # Pass the confirmed filled price to the SL calculation
+                sl_price_actual = self._calculate_stop_loss_price(df_indicators, entry_side, filled_price_entry)
+
+                if sl_price_actual is None:
+                    # Failed to calculate SL AFTER position is already open!
+                    self.logger.critical(f"{C_CRIT}Entry Ritual: FAILED to recalculate SL price based on actual fill price ({filled_price_fmt}). "
+                                         f"POSITION IS OPEN AND UNPROTECTED.{C_RESET}")
+                    await self._trigger_alert(f"URGENT: Failed SL RECALCULATION after {entry_side.value} entry ({filled_qty_fmt})! Position UNPROTECTED.", critical=True)
+                    # Trigger emergency close immediately as position is open and unprotected
+                    await self._emergency_close(f"Failed SL Recalculation after Entry ({entry_side.value} {filled_qty_fmt})")
+                    return # Stop further processing for this tick
+
+                # Short pause before placing SL order
+                await asyncio.sleep(0.5)
+
+                # --- Place the SL using actual filled quantity and recalculated SL price ---
+                await self._place_stop_loss(entry_side, filled_qty_entry, sl_price_actual)
+                # _place_stop_loss handles its own logging, alerts, and potential emergency close on failure
+
+                # Final state update after attempting entry and SL placement
+                self.logger.info(f"{C_INFO}Entry Ritual: Updating state after entry and SL placement attempt...")
+                await asyncio.sleep(2) # Allow SL order placement to reflect
+                await self._update_state()
+
+            elif entry_order:
+                # Order was submitted but status is not confirmed filled (e.g., 'open', 'new', 'rejected', 'canceled')
+                status = entry_order.get('status', 'unknown')
+                order_id = entry_order.get('id', 'N/A')
+                order_id_short = format_order_id(order_id)
+                info = entry_order.get('info', {}) # Get raw exchange info if available
+                self.logger.warning(f"{C_WARN}Entry Ritual: Entry market order (...{order_id_short}) submitted but status is '{status}'. "
+                                    f"Position may not have opened as expected. Raw info: {info}{C_RESET}")
+                # Update state to see if position opened despite unclear status or if order was rejected/canceled
+                await asyncio.sleep(3)
+                await self._update_state()
+                # Log the state *after* checking
+                pos_side = self.current_position.get('side', self.api_config.POS_NONE) if self.current_position else self.api_config.POS_NONE
+                self.logger.warning(f"{C_WARN}Entry Ritual: State after unclear entry order status: Position={pos_side}, Orders={len(self.open_orders)}")
+            else:
+                # place_market_order helper returned None or indicated failure before getting an order object
+                self.logger.error(f"{C_ERROR}Entry Ritual: Failed to place entry market order. Helper function indicated failure. Check helper logs. Aborting entry.{C_RESET}")
+                # No order was placed, so no need to check state again here.
+
+        # If no entry signal and no exit signal, do nothing this tick.
+        elif not entry_side and not should_exit:
+             self.logger.debug(f"{C_DEBUG}Manage Position: No entry or exit signal. Maintaining current state.")
+
+
+    async def run_loop(self):
+        """
+        The main enchantment loop. Continuously observes the market, divines indicators,
+        interprets omens (signals), and performs trading rituals (manage position)
+        at the configured polling interval. Includes robust error handling.
+        """
+        self.logger.info(f"{C_INFO}{C_BOLD}Initializing strategy spell...{C_RESET}")
+        if not await self._initialize():
+            self.logger.critical(f"{C_CRIT}Strategy initialization failed. Shutting down the spell before starting loop.{C_RESET}")
+            # Attempt cleanup even if initialization failed partially
+            await self._cleanup()
+            return # Do not start the loop
+
+        self.is_running = True
+        self.logger.info(f"{C_SUCCESS}{C_BOLD}=== Starting Ehlers Volumetric Strategy Loop ===")
+        self.logger.info(f"{C_INFO}Observing {C_BOLD}{self.symbol}{C_RESET}{C_INFO} on {C_BOLD}{self.timeframe}{C_RESET}{C_INFO} timeframe.")
+        self.logger.info(f"{C_INFO}Polling interval: {self.strategy_config.polling_interval_seconds} seconds.")
+        self.logger.info(f"{C_INFO}Press CTRL+C to weave the shutdown incantation.")
+
+        while self.is_running:
+            try:
+                loop_start_time = time.monotonic()
+                current_time_utc = pd.Timestamp.now(tz='UTC')
+                self.logger.info(
+                    f"{C_INFO}{C_BOLD}{'-'*25} Tick Start ({current_time_utc.strftime('%Y-%m-%d %H:%M:%S %Z')}) {'-'*25}{C_RESET}"
+                )
+
+                # 1. Update current state (position, orders, balance, price)
+                await self._update_state()
+
+                # Check if connection was lost or closed unexpectedly during state update
+                if self.exchange is None:
+                    self.logger.critical(f"{C_CRIT}Exchange connection lost or closed unexpectedly. Stopping loop.{C_RESET}")
+                    await self._trigger_alert("CRITICAL: Exchange connection lost! Strategy stopped.", critical=True)
+                    self.is_running = False # Signal loop termination
+                    continue # Skip rest of the loop iteration
+
+                # 2. Fetch data and calculate indicators (divine the omens)
+                df_indicators = await self._fetch_and_calculate_indicators()
+
+                # 3. Check for entry/exit signals (interpret the omens)
+                # Only proceed if indicator calculation was successful
+                if df_indicators is not None and not df_indicators.empty:
+                    entry_side, should_exit = self._check_signals(df_indicators)
+
+                    # 4. Manage position based on signals (perform rituals)
+                    await self._manage_position(entry_side, should_exit, df_indicators)
+                else:
+                    # Indicator calculation failed or returned empty/invalid data
+                    self.logger.warning(f"{C_WARN}Skipping signal check and position management for this tick due to indicator divination failure.{C_RESET}")
+                    # No signals to act upon, wait for the next cycle
+
+                # --- Loop Timing & Sleep ---
+                loop_end_time = time.monotonic()
+                elapsed = loop_end_time - loop_start_time
+                poll_interval = self.strategy_config.polling_interval_seconds
+                # Calculate sleep time, ensuring it's not negative and has a small minimum
+                sleep_time = max(0.1, poll_interval - elapsed)
+
+                self.logger.info(f"{C_INFO}Tick processed in {elapsed:.2f}s. Sleeping for {sleep_time:.2f}s until next cycle.")
+                await asyncio.sleep(sleep_time)
+
+            except asyncio.CancelledError:
+                # This occurs if the task running run_loop is cancelled externally
+                self.logger.warning(f"{C_WARN}{C_BOLD}Strategy loop task received cancellation request. Beginning shutdown ritual...{C_RESET}")
+                self.is_running = False # Ensure loop terminates cleanly on next check
+
+            except Exception as e:
+                # Catch-all for any other unexpected errors within the main loop
+                self.logger.critical(f"{C_CRIT}CRITICAL UNHANDLED ERROR in strategy loop: {type(e).__name__} - {e}{C_RESET}", exc_info=True)
+                await self._trigger_alert(f"CRITICAL LOOP ERROR: {type(e).__name__}. Strategy Continuing. Check Logs!", critical=True)
+                # Decide whether to stop or continue after a major error.
+                # Continuing might be risky, but stopping might miss recovery.
+                # Let's pause for a bit and continue, assuming the error might be transient.
+                self.logger.warning(f"{C_WARN}Pausing for 60 seconds after critical loop error before continuing...{C_RESET}")
+                await asyncio.sleep(60)
+
+        # --- Loop Termination ---
+        self.logger.info(f"{C_INFO}{C_BOLD}--- Strategy Loop Has Been Terminated ---{C_RESET}")
+        # Perform cleanup rituals after the loop finishes
+        await self._cleanup()
+
+
+    async def stop(self):
+        """
+        Signals the strategy loop to stop gracefully after completing the current tick.
+        This is the preferred way to shut down the strategy.
+        """
+        if self.is_running:
+            self.logger.warning(f"{C_WARN}{C_BOLD}Shutdown incantation received. Strategy loop will terminate after the current cycle completes.{C_RESET}")
+            self.is_running = False # Set the flag to False, the loop will exit on its next check
+        else:
+            self.logger.info(f"{C_INFO}Shutdown incantation received, but the strategy loop was not actively running.")
+
+
+    async def _cleanup(self):
+        """
+        Performs necessary cleanup rituals when the strategy spell is ending.
+        This includes cancelling any remaining open orders and closing the exchange connection.
+        """
+        self.logger.info(f"{C_INFO}{C_BOLD}--- Initiating Strategy Cleanup Ritual ---{C_RESET}")
+
+        if self.exchange:
+            # Attempt to cancel all remaining open orders for the symbol
+            # This includes any potentially lingering SL or other orders
+            self.logger.info(f"{C_INFO}Cleanup: Banishing any remaining open orders for {self.symbol}...")
+            category = bybit.market_cache.get_category(self.symbol)
+            if category:
+                try:
+                    # Use cancel_all_orders helper for comprehensive cleanup
+                    cancelled_count = await bybit.cancel_all_orders(
+                        exchange=self.exchange,
+                        symbol=self.symbol,
+                        category=category,
+                        config=self.api_config.dict(),
+                        reason="Strategy Shutdown Cleanup"
+                    )
+                    if cancelled_count is not None:
+                        self.logger.info(f"{C_SUCCESS}Cleanup: Banished {cancelled_count} remaining orders successfully.{C_RESET}")
+                    else:
+                        # Helper should log specific errors
+                        self.logger.warning(f"{C_WARN}Cleanup: Order banishment ritual (cancel_all) did not fully complete. Check helper logs.{C_RESET}")
+                except Exception as cancel_err:
+                    self.logger.error(f"{C_ERROR}Cleanup: Error during final order cancellation: {cancel_err}{C_RESET}", exc_info=True)
+            else:
+                self.logger.error(f"{C_ERROR}Cleanup: Cannot perform final order cancellation, market category unknown for {self.symbol}.")
+
+            # Close the connection to the exchange
+            await self._safe_exchange_close()
+        else:
+            self.logger.info(f"{C_INFO}Cleanup: Exchange connection already closed or was never established.")
+
+        self.logger.info(f"{C_SUCCESS}{C_BOLD}--- Strategy Cleanup Ritual Complete ---{C_RESET}")
+
+
+    async def _safe_exchange_close(self):
+        """
+        Safely attempts to close the CCXT exchange connection if it's open,
+        handling potential errors during closure.
+        """
+        if self.exchange and hasattr(self.exchange, 'close') and getattr(self.exchange, 'closed', True) is False:
+            self.logger.info(f"{C_INFO}Closing connection to the exchange...")
+            try:
+                await self.exchange.close()
+                self.logger.info(f"{C_SUCCESS}Exchange connection closed gracefully.")
+            except Exception as e:
+                # Log error but continue cleanup
+                self.logger.error(f"{C_ERROR}Error occurred while closing exchange connection: {e}{C_RESET}", exc_info=True)
+        # Ensure the exchange attribute is set to None regardless of closure success/failure
+        self.exchange = None
+
+
+    async def _trigger_alert(self, message: str, critical: bool = False):
+        """
+        Sends an alert message (e.g., via SMS) if configured.
+        Logs the alert message regardless. Runs blocking SMS functions in an executor.
+
+        Args:
+            message: The core message content for the alert.
+            critical: If True, logs at CRITICAL level and potentially uses a more
+                      urgent alert mechanism if available.
+        """
+        prefix = f"[{self.strategy_config.name}/{self.symbol}] "
+        full_message = prefix + message
+        log_level = logging.CRITICAL if critical else logging.WARNING
+        log_color = C_CRIT if critical else C_WARN
+
+        # Always log the alert message
+        self.logger.log(log_level, f"{log_color}{C_BOLD}ALERT: {message}{C_RESET}")
+
+        # Attempt to send SMS only if enabled and the event loop is available
+        if self.sms_config.ENABLE_SMS_ALERTS and self.loop and self.loop.is_running():
+            self.logger.debug(f"{C_DEBUG}Attempting to dispatch configured alert...")
+            try:
+                # Run the potentially blocking SMS function in an executor thread
+                # to avoid stalling the main async event loop.
+                # Assumes `send_sms_alert` is designed to be called synchronously.
+                await self.loop.run_in_executor(
+                    None, # Use the default executor
+                    send_sms_alert, # The function from bybit_utils.py
+                    full_message,
+                    self.app_config.dict() # Pass the *entire* validated app config dict
+                                           # so send_sms_alert can access SMS_CONFIG details
+                )
+                self.logger.info(f"{C_SUCCESS}Alert dispatched successfully via configured method.{C_RESET}")
+            except Exception as e:
+                self.logger.error(f"{C_ERROR}Failed to dispatch alert: {e}{C_RESET}", exc_info=True)
+        elif self.sms_config.ENABLE_SMS_ALERTS:
+            self.logger.warning(f"{C_WARN}Cannot dispatch alert: SMS alerts enabled, but event loop is not available or not running.{C_RESET}")
+
+
+    async def _emergency_close(self, reason: str):
+        """
+        Attempts to immediately close the current position with a market order
+        in a critical emergency situation (e.g., failed SL placement after entry).
+
+        Args:
+            reason: A brief description of why the emergency close was triggered.
+        """
+        self.logger.critical(f"{C_CRIT}{C_BOLD}EMERGENCY CLOSE TRIGGERED! Reason: {reason}{C_RESET}")
+        await self._trigger_alert(f"EMERGENCY Closing Position! Reason: {reason}", critical=True)
+
+        # Ensure state is as fresh as possible before acting, but don't wait too long
+        self.logger.info(f"{C_INFO}Emergency Close: Performing quick state update...")
+        try:
+             await asyncio.wait_for(self._update_state(), timeout=10.0) # Timeout state update
+        except asyncio.TimeoutError:
+             self.logger.error(f"{C_ERROR}Emergency Close: State update timed out. Proceeding with close based on potentially stale state.{C_RESET}")
+        except Exception as state_err:
+             self.logger.error(f"{C_ERROR}Emergency Close: Error during state update ({state_err}). Proceeding with potentially stale state.{C_RESET}")
+
+
+        # Check if we actually have a position to close based on (potentially stale) state
+        current_pos_qty = safe_decimal_conversion(self.current_position.get('size', '0')) if self.current_position else Decimal(0)
+        if self.current_position and current_pos_qty > self.api_config.POSITION_QTY_EPSILON:
+            pos_side = self.current_position.get('side', 'Unknown')
+            qty_fmt = format_amount(self.exchange, self.symbol, current_pos_qty) if self.exchange else str(current_pos_qty)
+
+            self.logger.warning(f"{C_WARN}Emergency Close: Attempting immediate market close of {pos_side} position of {qty_fmt}...{C_RESET}")
+
+            # 1. Attempt to cancel SL first (best effort, might fail or be slow)
+            self.logger.info(f"{C_INFO}Emergency Close: Attempting to cancel any tracked SL first...")
+            await self._cancel_stop_loss() # Don't wait long, proceed even if it fails
+            await asyncio.sleep(0.2) # Very short pause
+
+            # 2. Submit the emergency close order (reduce-only market)
+            close_order = await bybit.close_position_reduce_only(
+                exchange=self.exchange,
+                symbol=self.symbol,
+                config=self.api_config.dict(),
+                position_to_close=self.current_position,
+                reason=f"Emergency Close: {reason}"
+            )
+
+            if close_order and close_order.get('id'):
+                close_id_short = format_order_id(close_order['id'])
+                self.logger.warning(f"{C_WARN}{C_BOLD}Emergency close order submitted: ...{close_id_short}. Monitor execution manually.{C_RESET}")
+                # Alert was already sent at the start of the function
+            else:
+                # Helper function failed to submit the order
+                self.logger.critical(f"{C_CRIT}Emergency Close: FAILED TO SUBMIT emergency close order! MANUAL INTERVENTION REQUIRED IMMEDIATELY!{C_RESET}")
+                # Send another, more urgent alert
+                await self._trigger_alert(f"!!! CRITICAL FAILURE: FAILED to submit EMERGENCY CLOSE for {pos_side} ({qty_fmt}) !!! CHECK EXCHANGE NOW!", critical=True)
+        else:
+            self.logger.info(f"{C_INFO}Emergency close triggered, but no open position found (or position size is negligible) based on current state.")
+
+
+# --- Example Usage Cauldron ---
+# This section demonstrates how to conjure and run the strategy spell.
+# It would typically reside in your main execution script (e.g., `main_spell.py`).
+
+async def main_ritual():
+    """Main async function to configure logging, load config, and run the strategy."""
+
+    # 1. Configure Logging (Use basicConfig or your preferred setup)
+    # Adjust level (DEBUG, INFO, WARNING, ERROR, CRITICAL) as needed
+    log_level = logging.INFO # Default level
+    # Example: Set DEBUG level if a specific env var is set
+    # import os
+    # if os.environ.get("STRATEGY_DEBUG") == "1":
+    #    log_level = logging.DEBUG
+
+    log_format = '%(asctime)s - %(levelname)-8s - %(name)s - %(message)s'
+    logging.basicConfig(level=log_level, format=log_format, datefmt='%Y-%m-%d %H:%M:%S')
+
+    # Create a logger specific to this strategy instance
+    logger = logging.getLogger("EhlersVolumetricEnhanced")
+    logger.info(f"{C_INFO}Logging initialized at {logging.getLevelName(logger.getEffectiveLevel())} level.")
+    if not COLORAMA_AVAILABLE:
+         logger.warning("Colorama not found, logs will be monochrome.")
+
+    # 2. Load Configuration Runes (Replace with your loading method)
+    # Load from a JSON/YAML file, environment variables, or define directly.
+    # CRITICAL: Replace placeholders with your actual API keys and settings!
+    # Ensure all values match the types defined in the Pydantic models.
+    # Use strings for Decimal values in the dict, Pydantic will convert them.
+    strategy_configuration = {
+        "API_CONFIG": {
+            "API_KEY": "YOUR_TESTNET_API_KEY",        # <-- REPLACE
+            "API_SECRET": "YOUR_TESTNET_API_SECRET",  # <-- REPLACE
+            "SYMBOL": "BTCUSDT",                      # Example, ensure it exists on Bybit (Testnet)
+            "TESTNET_MODE": True,                     # Set to False for LIVE trading!
+            # Optional: Override defaults if needed
+            # "POSITION_QTY_EPSILON": "0.0000001",
+            # "USDT_SYMBOL": "USDT",
+        },
+        "STRATEGY_CONFIG": {
+            "name": "EhlersVolumetricTermux",
+            "timeframe": "15m",
+            "leverage": 5,                            # Check symbol's max leverage on Bybit
+            "indicator_settings": {
+                "min_data_periods": 100,
+                "evt_length": 7,
+                "atr_period": 14,
+            },
+            "analysis_flags": {
+                "use_evt": True,
+                "use_atr": True,
+            },
+            "risk_per_trade": "0.01",                 # Risk 1% of available balance
+            "stop_loss_atr_multiplier": "2.0",        # SL = Entry +/- 2 * ATR
+            "position_idx": 0,                        # 0=One-Way, 1=Hedge Buy, 2=Hedge Sell
+            "polling_interval_seconds": 60,           # Check every 60 seconds
+            "EVT_ENABLED": True,                      # Must be True for this strategy
+            "STOP_LOSS_ATR_PERIOD": 14,               # MUST match indicator_settings.atr_period
+            "strategy_params": {},                    # No extra params needed for base logic
+        },
+        "SMS_CONFIG": {
+            "ENABLE_SMS_ALERTS": False,               # Set to True to enable alerts
+            # --- Fill ONLY if ENABLE_SMS_ALERTS is True ---
+            "TWILIO_ACCOUNT_SID": None, # "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" <-- REPLACE if using Twilio
+            "TWILIO_AUTH_TOKEN": None,  # "your_twilio_auth_token"      <-- REPLACE if using Twilio
+            "TWILIO_PHONE_NUMBER": None,# "+15551234567"                <-- REPLACE if using Twilio
+            "RECIPIENT_PHONE_NUMBER": None, # "+15559876543"             <-- REPLACE
+            # Add Termux API config here if using that method
+        },
+        "LOGGING_CONFIG": {
+            # Example: Could be used to configure file logging, etc.
+            "log_file": None # "strategy_log.txt"
+        }
+    }
+
+    # Update log level based on config if desired
+    # configured_log_level = strategy_configuration.get("LOGGING_CONFIG", {}).get("level", "INFO").upper()
+    # numeric_level = getattr(logging, configured_log_level, logging.INFO)
+    # logger.setLevel(numeric_level)
+    # logging.getLogger().setLevel(numeric_level) # Set root logger level too if needed
+    # logger.info(f"Log level set to {configured_log_level} based on config.")
+
+
+    # 3. Instantiate the Strategy Spell
+    strategy_instance: Optional[EhlersVolumetricStrategyEnhanced] = None
+    try:
+        logger.info(f"{C_INFO}Attempting to instantiate the strategy spell...")
+        # Pydantic validation happens inside the __init__
+        strategy_instance = EhlersVolumetricStrategyEnhanced(strategy_configuration, logger)
+        logger.info(f"{C_SUCCESS}Strategy spell instance created successfully.")
+    except ValueError as config_error:
+        # __init__ raises ValueError on Pydantic validation failure or critical logic checks
+        logger.critical(f"{C_CRIT}Failed to instantiate strategy due to configuration errors: {config_error}{C_RESET}")
+        logger.critical(f"{C_CRIT}Please review the configuration runes and validation messages above.{C_RESET}")
+        return # Exit if config is invalid
+
+    # 4. Run the Strategy Loop (Main Execution)
+    try:
+        logger.info(f"{C_INFO}Invoking the main strategy run loop...")
+        await strategy_instance.run_loop()
+        # run_loop will continue until strategy_instance.is_running becomes False
+        # or an unhandled exception occurs (though it tries to handle them).
+
+    except KeyboardInterrupt:
+        logger.warning(f"{C_WARN}{C_BOLD}Manual interruption detected (CTRL+C). Initiating graceful shutdown...{C_RESET}")
+        if strategy_instance:
+            await strategy_instance.stop()
+            # Allow the loop to finish its current cycle and perform cleanup
+            # Add a small delay to ensure the stop signal is processed if loop is sleeping
+            await asyncio.sleep(2)
+        # The loop should exit cleanly, and cleanup runs afterwards.
+
+    except Exception as main_exec_error:
+        # Catch unexpected errors in the main execution context itself
+        logger.critical(f"{C_CRIT}Unhandled exception occurred in the main execution ritual: {main_exec_error}{C_RESET}", exc_info=True)
+        if strategy_instance:
+            logger.warning(f"{C_WARN}Attempting emergency stop due to main execution error...{C_RESET}")
+            await strategy_instance.stop() # Attempt graceful stop
+            await asyncio.sleep(2)
+            # Consider calling cleanup directly if stop() might not be reached
+            # await strategy_instance._cleanup()
+
+    finally:
+        # Ensure cleanup is attempted even if the loop exits unexpectedly
+        logger.info(f"{C_INFO}Main ritual concluded. Ensuring final cleanup is performed...")
+        if strategy_instance and strategy_instance.is_running:
+            # This might happen if the loop crashed hard without setting is_running=False
+            logger.warning(f"{C_WARN}Strategy loop was still marked as running during final cleanup check. Forcing stop and cleanup.{C_RESET}")
+            await strategy_instance.stop() # Signal stop again
+            await strategy_instance._cleanup() # Call cleanup directly
+        elif strategy_instance:
+            # Loop finished or was stopped correctly, cleanup should have run, but call again just in case.
+            # This might be redundant if _cleanup already ran inside run_loop's exit path.
+            logger.debug(f"{C_DEBUG}Performing final redundant cleanup check...")
+            await strategy_instance._cleanup()
+
+        logger.info(f"{C_SUCCESS}{C_BOLD}Strategy spell execution finished.{C_RESET}")
+
+
+if __name__ == "__main__":
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}--- Ehlers Volumetric Strategy Spell Activation ---{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Ensure this script is run within a stable environment.")
+    print(f"{Fore.YELLOW}Recommendations for Termux:")
+    print(f"{Fore.YELLOW}  - Use `tmux` or `screen` to prevent disconnection.")
+    print(f"{Fore.YELLOW}  - Run `termux-wake-lock` to keep the device awake.")
+    print(f"{Fore.YELLOW}Replace placeholder API keys in the 'strategy_configuration' dict!{Style.RESET_ALL}\n")
+
+    try:
+        # Start the asynchronous main ritual
+        asyncio.run(main_ritual())
+    except KeyboardInterrupt:
+        # Catch Ctrl+C if pressed *before* the async loop fully takes over shutdown
+        print(f"\n{Fore.YELLOW}{Style.BRIGHT}Spell interrupted manually during startup.{Style.RESET_ALL}")
+    except Exception as startup_error:
+        # Catch errors during asyncio.run() itself or initial setup
+        print(f"\n{Fore.RED}{Style.BRIGHT}A critical error disrupted the spell activation: {startup_error}{Style.RESET_ALL}")
+        # Log the exception traceback if possible
+        import traceback
+        traceback.print_exc()
+
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}--- Spell Deactivated ---{Style.RESET_ALL}")
+
