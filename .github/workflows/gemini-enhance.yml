@@ -1,3 +1,4 @@
+# filename: .github/workflows/gemini-enhance.yml
 name: Gemini File Enhancement
 
 # Controls when the workflow will run
@@ -5,25 +6,30 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual triggering
 
 # Permissions needed for the workflow job
 permissions:
-  contents: write
+  contents: write # Needed to commit and push changes
 
 jobs:
   enhance_files_with_gemini:
     name: Enhance Files via Gemini
     runs-on: ubuntu-latest
+    # Prevent running concurrently on the same branch to avoid race conditions
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
       # Step 1: Check out the repository code
       - name: Checkout Repository Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetch all history to allow comparison with 'before' commit
 
-      # Step 2: Install necessary tools (jq for JSON parsing)
-      - name: Install Utilities (jq)
+      # Step 2: Install necessary tools (jq for JSON parsing, file for MIME type checking)
+      - name: Install Utilities (jq, file)
         run: sudo apt-get update && sudo apt-get install -y jq file
 
       # Step 3: Configure Git for commits made by the Action
@@ -35,107 +41,150 @@ jobs:
       # Step 4: Process files with Gemini
       - name: Process Files with Gemini
         env:
+          # Ensure GEMINI_API_KEY is set in your repository's secrets
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          set -eo pipefail
-
+          set -eo pipefail # Exit on error, treat unset variables as error, pipe failures are errors
           echo "Starting Gemini file enhancement process..."
 
-          # Process only changed files (added or modified) in the push
-          git diff --name-only --diff-filter=AM ${{ github.event.before }} ${{ github.sha }} --print0 | while IFS= read -r -d $'\0' file; do
+          # Determine the commit range based on the event type
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # For pushes, compare the current commit (HEAD) with the commit before the push
+            COMMIT_RANGE="${{ github.event.before }}..${{ github.sha }}"
+            echo "Processing changes in push event range: ${COMMIT_RANGE}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # For manual dispatch, compare HEAD with its parent (last commit)
+            # Note: This enhances only the files changed in the *very last* commit.
+            # Adjust if you want to enhance all files or a different range on manual runs.
+            COMMIT_RANGE="HEAD^..HEAD"
+            echo "Processing changes in workflow_dispatch event range (last commit): ${COMMIT_RANGE}"
+          else
+            echo "Unsupported event type: ${{ github.event_name }}. Exiting."
+            exit 1
+          fi
+
+          # Process only changed files (added or modified) in the determined commit range
+          git diff --name-only --diff-filter=AM "${COMMIT_RANGE}" --print0 | while IFS= read -r -d $'\0' file; do
             echo "Processing changed file: $file"
 
-            # Ensure file exists, is not empty, and is text-based
-            if [[ -f "$file" && -s "$file" ]] && file -b --mime-type "$file" | grep -q -E '^text/|^application/(json|xml|javascript|yaml)'; then
+            # Ensure file exists, is not empty, and is a text-based type Gemini can likely handle
+            # Excludes binary files, image files, etc. Adjust the grep pattern as needed.
+            if [[ -f "$file" && -s "$file" ]] && file -b --mime-type "$file" | grep -q -E '^text/|^application/(json|xml|javascript|yaml|x-sh|toml|csv)'; then
               echo "File identified as text-based. Preparing request for Gemini..."
 
-              # Read and escape file content for JSON
+              # Read and escape file content for JSON embedding using jq
+              # Using jq -Rs '.' reads the raw file (-R), slurps it into one string (-s), and outputs as a JSON string literal ('.')
               file_content=$(jq -Rs '.' "$file")
               if [[ -z "$file_content" ]]; then
                 echo "Warning: Failed to read or encode file content for $file. Skipping."
                 continue
               fi
 
-              # Construct JSON payload for Gemini API
+              # Construct JSON payload for Gemini API using a Here Document
+              # --- START OF CORRECTED HERE DOCUMENT ---
               json_payload=$(cat <<EOF
-              {
-                "contents": [{
-                  "parts":[{
-                    "text": "You are an expert code reviewer and enhancer. Analyze the following file content (from file: '${file}'). Focus on quality, clarity, correctness, potential bugs, and adherence to best practices relevant to its likely language or format (e.g., Python, JavaScript, Markdown, YAML). Enhance the content where possible: fix errors, improve style/readability, add necessary comments ONLY if clarity is significantly improved (avoid redundant comments), optimize code (without changing functionality unless fixing a bug), and ensure consistency. Respond ONLY with the complete, enhanced file content. Do not include explanations, apologies, introductory phrases, or markdown formatting like \`\`\` code blocks. Return only the raw, improved file content. If no improvements are necessary, return the original content exactly.\n\nOriginal file content:\n${file_content}"
-                  }]
-                }],
-                "generationConfig": {
-                  "temperature": 0.4,
-                  "maxOutputTokens": 8192,
-                  "topP": 0.95,
-                  "topK": 40
-                },
-                "safetySettings": [
-                   { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
-                   { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
-                   { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
-                   { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" }
-                ]
-              }
+{
+  "contents": [{
+    "parts":[{
+      "text": "You are an expert code reviewer and enhancer. Analyze the following file content (from file: '${file}'). Focus on quality, clarity, correctness, potential bugs, and adherence to best practices relevant to its likely language or format (e.g., Python, JavaScript, Markdown, YAML). Enhance the content where possible: fix errors, improve style/readability, add necessary comments ONLY if clarity is significantly improved (avoid redundant comments), optimize code (without changing functionality unless fixing a bug), and ensure consistency. Respond ONLY with the complete, enhanced file content. Do not include explanations, apologies, introductory phrases, or markdown formatting like \`\`\` code blocks. Return only the raw, improved file content. If no improvements are necessary, return the original content exactly.\n\nOriginal file content:\n${file_content}"
+    }]
+  }],
+  "generationConfig": {
+    "temperature": 0.4,
+    "maxOutputTokens": 8192,
+    "topP": 0.95,
+    "topK": 40
+  },
+  "safetySettings": [
+     { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
+     { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
+     { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
+     { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" }
+  ]
+}
 EOF
-              )
+# --- END OF CORRECTED HERE DOCUMENT ---
+              ) # This parenthesis correctly closes the command substitution $(...)
 
               # Call Gemini API
               api_url="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${GEMINI_API_KEY}"
               echo "Sending request to Gemini API for $file..."
+              # Use curl options: -s (silent), -f (fail fast on HTTP errors), -S (show errors even if silent)
               response=$(curl -sfS -X POST -H "Content-Type: application/json" -d "${json_payload}" "${api_url}")
 
+              # Check if curl command itself failed (e.g., network error, DNS issue)
               if [[ $? -ne 0 ]]; then
-                echo "Error: curl command failed for file $file. Skipping."
+                echo "Error: curl command failed for file $file. See runner logs for details. Skipping."
                 continue
               fi
 
-              # Check for API errors
+              # Check for API errors reported in the JSON response
+              # Tries to get .error.message first, then .promptFeedback.blockReason
               api_error=$(echo "${response}" | jq -r '(.error.message // (.promptFeedback.blockReason // empty))')
               if [[ -n "$api_error" ]]; then
                 echo "Warning: Gemini API returned an error for $file. Reason: ${api_error}. Skipping."
+                # Optionally log the full response for debugging (can be large):
+                # echo "Full API response for error: ${response}"
                 continue
               fi
 
-              # Extract enhanced content
+              # Extract enhanced content. Use 'empty' as fallback for jq if path doesn't exist.
               enhanced_content=$(echo "${response}" | jq -r '.candidates[0].content.parts[0].text // empty')
+
               if [[ -z "$enhanced_content" ]]; then
-                echo "Warning: Gemini provided no content for $file. Skipping."
+                echo "Warning: Gemini provided no content (empty response) for $file. Skipping."
+                # Optionally log the full response for debugging:
+                # echo "Full API response for empty content: ${response}"
                 continue
               fi
 
-              # Write to temp file and compare
+              # Write the potentially enhanced content to a temporary file
               echo "${enhanced_content}" > "$file.gemini_tmp"
+
+              # Compare the original file with the temporary file containing Gemini's output
               if cmp -s "$file" "$file.gemini_tmp"; then
-                echo "No changes detected for $file."
-                rm "$file.gemini_tmp"
+                echo "No changes detected by Gemini for $file."
+                rm "$file.gemini_tmp" # Clean up temporary file
               else
                 echo "Gemini has refined: $file. Applying changes."
+                # Overwrite the original file with the enhanced content
                 mv "$file.gemini_tmp" "$file"
               fi
-            else
-              echo "Skipping changed file (non-text, empty, or excluded type): $file"
-            fi
 
+            else
+              # Provide more context on why a file is skipped
+              if [[ ! -f "$file" ]]; then
+                 echo "Skipping changed path (not a file): $file"
+              elif [[ ! -s "$file" ]]; then
+                 echo "Skipping changed file (empty): $file"
+              else
+                 mime_type=$(file -b --mime-type "$file")
+                 echo "Skipping changed file (non-text or excluded type: ${mime_type}): $file"
+              fi
+            fi
+            # Add a small delay to avoid hitting potential API rate limits
             sleep 1
           done
 
           echo "Finished processing changed files."
 
-      # Step 5: Commit and Push Changes
+      # Step 5: Commit and Push Changes if any were made
       - name: Commit and Push Enhancements
         run: |
+          # Check git status. If there are no changes to commit, exit cleanly.
           if git diff --quiet && git diff --staged --quiet; then
-            echo "No changes were made by Gemini."
+            echo "No changes were made by Gemini, nothing to commit."
           else
             echo "Changes detected. Committing Gemini's enhancements..."
-            git add .
+            git add . # Stage all changes (new files, modified files)
+            # Commit changes with a message indicating it's from the bot and should skip CI if possible
             git commit -m "chore: Enhance files via Gemini Bot [skip ci]" \
-              -m "Automated file enhancements applied by the Gemini GitHub Action."
-            echo "Pushing changes back to the repository..."
+                       -m "Automated file enhancements applied by the Gemini GitHub Action."
+            echo "Pushing changes back to the repository branch: ${{ github.ref_name }}..."
+            # Push the commit back to the origin repository on the same branch the workflow ran on
             git push origin HEAD:${{ github.ref_name }}
           fi
 
-      # Step 6: Workflow Completion
+      # Step 6: Workflow Completion Message
       - name: Enhancement Process Complete
-        run: echo "Gemini file enhancement workflow finished."
+        run: echo "Gemini file enhancement workflow finished successfully."
