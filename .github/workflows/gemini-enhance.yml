@@ -61,6 +61,8 @@ jobs:
                 continue
               fi
 
+              # --- FIX IS HERE ---
+              # Ensure <<EOF is followed by a newline, content starts on next line.
               json_payload=$(cat <<EOF
 {
   "contents": [{
@@ -82,7 +84,10 @@ jobs:
   ]
 }
 EOF
+# ^ Closing EOF must be alone at the start of its line
               )
+              # --- END FIX AREA ---
+
 
               api_url="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${GEMINI_API_KEY}"
               echo "Sending request to Gemini API for $file..."
