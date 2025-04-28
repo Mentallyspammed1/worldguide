@@ -1,0 +1,103 @@
+/* Custom styles for the Trading Bot interface */
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Position related color coding */
+.position-long {
+    color: #28a745;
+}
+
+.position-short {
+    color: #dc3545;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart container */
+.chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+/* Nav link styles */
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1rem;
+    color: var(--bs-secondary);
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--bs-primary);
+}
+
+.nav-link.active {
+    color: var(--bs-primary);
+}
+
+.nav-link svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Performance stats */
+.performance-stat {
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.performance-positive {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.performance-negative {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Table styles */
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+/* Form controls with better contrast */
+.form-control, .form-select {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+}
