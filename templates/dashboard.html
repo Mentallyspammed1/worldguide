@@ -396,8 +396,8 @@
 
         // Fetch and update market data
         function fetchMarketData() {
-            const symbol = document.getElementById('symbol').value;
-            const timeframe = document.getElementById('timeframe').value;
+            const symbol = document.getElementById('symbolSelector').value;
+            const timeframe = document.getElementById('timeframeSelector').value;
 
             fetch(`/api/market_data?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`)
                 .then(response => response.json())
