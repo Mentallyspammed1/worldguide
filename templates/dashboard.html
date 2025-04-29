@@ -451,10 +451,22 @@
         // Fetch market data through WebSocket
         function fetchMarketData() {
             if (!socket || !socket.connected) {
-                console.error('WebSocket not connected');
+                console.error('WebSocket not connected, attempting to reconnect...');
+                connectWebSocket();
+                // Schedule a retry after a short delay
+                setTimeout(() => {
+                    if (socket && socket.connected) {
+                        sendMarketDataRequest();
+                    }
+                }, 1000);
                 return;
             }
             
+            sendMarketDataRequest();
+        }
+        
+        // Helper function to send the market data request
+        function sendMarketDataRequest() {
             const symbol = document.getElementById('symbolSelector').value;
             const timeframe = document.getElementById('timeframeSelector').value;
             
@@ -846,22 +858,42 @@
             const runStrategyBtn = document.getElementById('runStrategyBtn');
             if (runStrategyBtn) {
                 runStrategyBtn.addEventListener('click', function() {
-                    const symbol = document.getElementById('symbolSelector').value;
-                    const timeframe = document.getElementById('timeframeSelector').value;
-                    const strategy = document.getElementById('strategy').textContent.trim();
-                    
                     if (!socket || !socket.connected) {
-                        console.error('WebSocket not connected');
+                        console.error('WebSocket not connected, attempting to reconnect...');
+                        connectWebSocket();
+                        // Schedule a retry after a short delay
+                        setTimeout(() => {
+                            if (socket && socket.connected) {
+                                sendStrategyRequest();
+                            } else {
+                                alert('Could not connect to the server. Please try again later.');
+                            }
+                        }, 1000);
                         return;
                     }
                     
-                    // Request strategy analysis via WebSocket
-                    socket.emit('run_strategy', {
-                        symbol: symbol,
-                        timeframe: timeframe,
-                        strategy: strategy
-                    });
+                    sendStrategyRequest();
                 });
+            }
+            
+            // Helper function to send strategy request
+            function sendStrategyRequest() {
+                const symbol = document.getElementById('symbolSelector').value;
+                const timeframe = document.getElementById('timeframeSelector').value;
+                const strategy = document.getElementById('strategy').textContent.trim();
+                
+                // Request strategy analysis via WebSocket
+                socket.emit('run_strategy', {
+                    symbol: symbol,
+                    timeframe: timeframe,
+                    strategy: strategy
+                });
+                
+                // Show loading indicator
+                const strategyElement = document.getElementById('strategy');
+                if (strategyElement) {
+                    strategyElement.innerHTML += ' <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                }
             }
         });
     </script>
