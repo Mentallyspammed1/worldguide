@@ -582,35 +582,73 @@ def evaluate_strategies(df: pd.DataFrame, higher_tf_df: pd.DataFrame, config: Di
     best_params = {}
     best_strategy = ""
     
-    # Evaluate Momentum Divergence Strategy
-    momentum_config = config.get("momentum_divergence", {})
-    signal_strength, direction, trade_params = calculate_momentum_divergence_strategy(df, momentum_config)
+    # Get weights for each strategy
+    momentum_weight = config.get("momentum_divergence", {}).get("weight", 1.0)
+    mtf_weight = config.get("multi_timeframe_trend", {}).get("weight", 1.0)
+    sr_weight = config.get("support_resistance_breakout", {}).get("weight", 1.0)
+    ehlers_weight = config.get("ehlers_supertrend", {}).get("weight", 1.2)
     
-    if signal_strength > best_signal and direction:
-        best_signal = signal_strength
-        best_direction = direction
-        best_params = trade_params
-        best_strategy = "momentum_divergence"
+    # Evaluate Momentum Divergence Strategy
+    if config.get("momentum_divergence", {}).get("enabled", True):
+        momentum_config = config.get("momentum_divergence", {})
+        signal_strength, direction, trade_params = calculate_momentum_divergence_strategy(df, momentum_config)
+        
+        # Apply strategy weight
+        weighted_signal = signal_strength * momentum_weight
+        
+        if weighted_signal > best_signal and direction:
+            best_signal = weighted_signal
+            best_direction = direction
+            best_params = trade_params
+            best_strategy = "momentum_divergence"
     
     # Evaluate Multi-Timeframe Trend Strategy
-    mtf_config = config.get("multi_timeframe_trend", {})
-    signal_strength, direction, trade_params = calculate_multi_timeframe_trend_strategy(df, higher_tf_df, mtf_config)
-    
-    if signal_strength > best_signal and direction:
-        best_signal = signal_strength
-        best_direction = direction
-        best_params = trade_params
-        best_strategy = "multi_timeframe_trend"
+    if config.get("multi_timeframe_trend", {}).get("enabled", True):
+        mtf_config = config.get("multi_timeframe_trend", {})
+        signal_strength, direction, trade_params = calculate_multi_timeframe_trend_strategy(df, higher_tf_df, mtf_config)
+        
+        # Apply strategy weight
+        weighted_signal = signal_strength * mtf_weight
+        
+        if weighted_signal > best_signal and direction:
+            best_signal = weighted_signal
+            best_direction = direction
+            best_params = trade_params
+            best_strategy = "multi_timeframe_trend"
     
     # Evaluate Support-Resistance Breakout Strategy
-    sr_config = config.get("support_resistance_breakout", {})
-    signal_strength, direction, trade_params = calculate_support_resistance_breakout_strategy(df, sr_config)
+    if config.get("support_resistance_breakout", {}).get("enabled", True):
+        sr_config = config.get("support_resistance_breakout", {})
+        signal_strength, direction, trade_params = calculate_support_resistance_breakout_strategy(df, sr_config)
+        
+        # Apply strategy weight
+        weighted_signal = signal_strength * sr_weight
+        
+        if weighted_signal > best_signal and direction:
+            best_signal = weighted_signal
+            best_direction = direction
+            best_params = trade_params
+            best_strategy = "support_resistance_breakout"
     
-    if signal_strength > best_signal and direction:
-        best_signal = signal_strength
-        best_direction = direction
-        best_params = trade_params
-        best_strategy = "support_resistance_breakout"
+    # Evaluate Ehlers Supertrend with Ranges Strategy
+    if config.get("ehlers_supertrend", {}).get("enabled", True):
+        try:
+            # Import here to avoid circular imports
+            from ehlers_supertrend_strategy import calculate_ehlers_supertrend_signal
+            
+            ehlers_config = config.get("ehlers_supertrend", {})
+            signal_strength, direction, trade_params = calculate_ehlers_supertrend_signal(df, ehlers_config)
+            
+            # Apply strategy weight
+            weighted_signal = signal_strength * ehlers_weight
+            
+            if weighted_signal > best_signal and direction:
+                best_signal = weighted_signal
+                best_direction = direction
+                best_params = trade_params
+                best_strategy = "ehlers_supertrend"
+        except ImportError as e:
+            pass  # Skip if module not available
     
     return {
         "signal": best_signal,
