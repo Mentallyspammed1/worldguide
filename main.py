@@ -14,7 +14,10 @@ import sys
 from logging.handlers import RotatingFileHandler
 
 from trading_bot import TradingBot
-from web_interface import app as flask_app
+from web_interface import app
+
+# Export the Flask application for Gunicorn
+# This is the variable that Gunicorn looks for by default
 
 # Configure basic logging
 logging.basicConfig(
@@ -81,7 +84,7 @@ def main():
     if args.web:
         # Start web interface
         logger.info("Starting web interface")
-        flask_app.run(host="0.0.0.0", port=5000, debug=args.debug)
+        app.run(host="0.0.0.0", port=5000, debug=args.debug)
     else:
         # Start trading bot
         logger.info("Starting trading bot")

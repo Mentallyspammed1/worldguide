@@ -56,37 +56,20 @@
         "position_size_pct": 1.0,
         "use_atr_position_sizing": true,
         "max_risk_per_trade_pct": 1.0,
-        "stop_loss": {
-            "enabled": true,
-            "mode": "atr",
-            "fixed_pct": 2.0,
-            "atr_multiplier": 2.0
-        },
-        "take_profit": {
-            "enabled": true,
-            "mode": "atr",
-            "fixed_pct": 4.0,
-            "atr_multiplier": 4.0
-        },
+        "stop_loss_pct": 2.0,
+        "take_profit_pct": 4.0,
         "trailing_stop": {
-            "enabled": false,
+            "enabled": true,
             "activation_pct": 1.0,
-            "callback_rate": 0.5
+            "trail_pct": 0.5
         },
-        "break_even": {
-            "enabled": false,
-            "activation_pct": 1.0
-        }
+        "use_sl_tp": true
     },
     
     "advanced": {
         "price_precision": 2,
         "amount_precision": 6,
-        "tick_size": 0.5,
-        "min_amount": 0.001,
-        "max_api_retries": 3,
-        "retry_delay_seconds": 5,
-        "use_exchange_time": true,
-        "candles_required": 100
+        "candles_limit": 200,
+        "log_level": "INFO"
     }
 }
