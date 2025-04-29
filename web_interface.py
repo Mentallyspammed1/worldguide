@@ -11,6 +11,7 @@ import os
 from datetime import datetime
 from typing import Dict, List, Optional
 
+import pandas as pd
 from flask import Flask, jsonify, render_template, request, session
 
 # Configure logger
@@ -149,6 +150,73 @@ def get_performance():
         "max_drawdown": max_drawdown,
         "current_positions": len(state.get("positions", {}))
     })
+
+@app.route("/api/market_data", methods=["GET"])
+def get_market_data():
+    """API endpoint to get current market data"""
+    try:
+        from trading_bot import TradingBot
+        
+        # Create a temporary bot instance to fetch market data
+        bot = TradingBot()
+        
+        # Load config and get selected symbol
+        config = load_config()
+        symbol = request.args.get("symbol", config.get("symbol", "BTC/USDT:USDT"))
+        timeframe = request.args.get("timeframe", config.get("timeframe", "15m"))
+        
+        # Update symbol and timeframe
+        bot.symbol = symbol
+        bot.timeframe = timeframe
+        
+        # Fetch latest candles
+        bot.update_candles()
+        
+        # Convert to dictionary for JSON serialization
+        candles = []
+        if bot.candles_df is not None:
+            for index, row in bot.candles_df.tail(50).iterrows():  # Last 50 candles
+                candle_data = {
+                    "timestamp": index.timestamp() * 1000,  # Convert to JS timestamp
+                    "open": float(row["open"]),
+                    "high": float(row["high"]),
+                    "low": float(row["low"]),
+                    "close": float(row["close"]),
+                    "volume": float(row["volume"]),
+                }
+                
+                # Add indicators if available
+                for indicator in ["rsi", "macd", "macd_signal", "macd_hist", 
+                                 "bb_upper", "bb_middle", "bb_lower", 
+                                 "ema_fast", "ema_slow", "atr"]:
+                    if indicator in row and not pd.isna(row[indicator]):
+                        candle_data[indicator] = float(row[indicator])
+                
+                candles.append(candle_data)
+        
+        # Get current market info
+        ticker = bot.exchange.fetch_ticker(symbol)
+        
+        return jsonify({
+            "candles": candles,
+            "ticker": {
+                "last": ticker["last"],
+                "bid": ticker["bid"],
+                "ask": ticker["ask"],
+                "volume": ticker["volume"],
+                "change": ticker["percentage"],
+                "high": ticker["high"],
+                "low": ticker["low"]
+            },
+            "last_update": datetime.now().timestamp() * 1000
+        })
+    except Exception as e:
+        logger.error(f"Error fetching market data: {e}")
+        return jsonify({
+            "error": str(e),
+            "candles": [],
+            "ticker": {}
+        }), 500
 
 
 if __name__ == "__main__":

@@ -322,71 +322,160 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
     <script>
-        // Sample data for charts
-        const priceData = {
-            labels: Array.from({length: 30}, (_, i) => i),
-            datasets: [
-                {
-                    label: 'Price',
-                    data: Array.from({length: 30}, () => Math.random() * 1000 + 20000),
-                    borderColor: '#0d6efd',
-                    tension: 0.1,
-                    pointRadius: 0,
-                    borderWidth: 2
-                }
-            ]
-        };
-
-        const performanceData = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [
-                {
-                    label: 'Monthly Return (%)',
-                    data: [3.2, -1.7, 5.1, 2.8, -0.9, 4.5],
-                    backgroundColor: (context) => {
-                        const value = context.dataset.data[context.dataIndex];
-                        return value >= 0 ? 'rgba(25, 135, 84, 0.5)' : 'rgba(220, 53, 69, 0.5)';
+        // Chart objects to update later
+        let priceChart;
+        let performanceChart;
+        let lastUpdateTime = 0;
+        
+        // Format currency values
+        function formatCurrency(value, currency = 'USD') {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+        
+        // Format percentage values
+        function formatPercentage(value) {
+            return value.toFixed(2) + '%';
+        }
+        
+        // Format date/time
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        }
+        
+        // Fetch and update market data
+        function fetchMarketData() {
+            const symbol = document.getElementById('symbol').value;
+            const timeframe = document.getElementById('timeframe').value;
+            
+            fetch(`/api/market_data?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching market data:', data.error);
+                        return;
+                    }
+                    
+                    // Update price chart
+                    updatePriceChart(data.candles);
+                    
+                    // Update ticker info
+                    if (data.ticker) {
+                        const ticker = data.ticker;
+                        const changeClass = ticker.change >= 0 ? 'positive' : 'negative';
+                        const changeSign = ticker.change >= 0 ? '+' : '';
+                        
+                        // You can add UI elements to display this data
+                        // Example: document.getElementById('currentPrice').textContent = ticker.last.toFixed(2);
+                        // Example: document.getElementById('priceChange').textContent = `${changeSign}${ticker.change.toFixed(2)}%`;
+                        // Example: document.getElementById('priceChange').className = changeClass;
+                    }
+                    
+                    // Update last update time
+                    lastUpdateTime = data.last_update;
+                })
+                .catch(error => console.error('Error fetching market data:', error));
+        }
+        
+        // Update price chart with new data
+        function updatePriceChart(candles) {
+            if (!candles || candles.length === 0) return;
+            
+            // Extract data for chart
+            const timestamps = candles.map(candle => new Date(candle.timestamp));
+            const prices = candles.map(candle => candle.close);
+            
+            // Update chart if it exists
+            if (priceChart) {
+                priceChart.data.labels = timestamps;
+                priceChart.data.datasets[0].data = prices;
+                priceChart.update();
+            } else {
+                // Create new chart
+                const priceCtx = document.getElementById('priceChart').getContext('2d');
+                priceChart = new Chart(priceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: timestamps,
+                        datasets: [{
+                            label: 'Price',
+                            data: prices,
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            tension: 0.1,
+                            pointRadius: 0,
+                            borderWidth: 2,
+                            fill: true
+                        }]
                     },
-                    borderColor: (context) => {
-                        const value = context.dataset.data[context.dataIndex];
-                        return value >= 0 ? 'rgb(25, 135, 84)' : 'rgb(220, 53, 69)';
-                    },
-                    borderWidth: 1
-                }
-            ]
-        };
-
-        // Initialize charts when the DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Price Chart
-            const priceCtx = document.getElementById('priceChart').getContext('2d');
-            new Chart(priceCtx, {
-                type: 'line',
-                data: priceData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.raw);
+                                    }
+                                }
+                            },
+                            legend: {
                                 display: false
                             }
                         },
-                        y: {
-                            position: 'right'
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'hour',
+                                    tooltipFormat: 'MMM dd, HH:mm'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                position: 'right',
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value, 'USD');
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+        }
 
-            // Performance Chart
+        // Initialize performance chart with monthly data
+        function initializePerformanceChart() {
+            const performanceData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Monthly Return (%)',
+                        data: [3.2, -1.7, 5.1, 2.8, -0.9, 4.5],
+                        backgroundColor: (context) => {
+                            const value = context.dataset.data[context.dataIndex];
+                            return value >= 0 ? 'rgba(25, 135, 84, 0.5)' : 'rgba(220, 53, 69, 0.5)';
+                        },
+                        borderColor: (context) => {
+                            const value = context.dataset.data[context.dataIndex];
+                            return value >= 0 ? 'rgb(25, 135, 84)' : 'rgb(220, 53, 69)';
+                        },
+                        borderWidth: 1
+                    }
+                ]
+            };
+            
             const perfCtx = document.getElementById('performanceChart').getContext('2d');
-            new Chart(perfCtx, {
+            performanceChart = new Chart(perfCtx, {
                 type: 'bar',
                 data: performanceData,
                 options: {
@@ -404,7 +493,19 @@
                     }
                 }
             });
+        }
 
+        // Initialize charts when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch initial market data
+            fetchMarketData();
+            
+            // Initialize performance chart
+            initializePerformanceChart();
+            
+            // Set up refresh interval (every 60 seconds)
+            setInterval(fetchMarketData, 60000);
+            
             // Load performance stats
             fetch('/api/performance')
                 .then(response => response.json())
