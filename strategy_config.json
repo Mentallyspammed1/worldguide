@@ -1,0 +1,78 @@
+{
+    "active_strategy": "auto",  
+    "strategy_threshold": 0.7,
+    "momentum_divergence": {
+        "enabled": true,
+        "rsi_divergence_threshold": 5,
+        "min_atr_pct": 0.5,
+        "max_atr_pct": 3.0,
+        "atr_multiplier": 2.5,
+        "take_profit_atr_multiplier": 5.0,
+        "min_rsi": 20,
+        "max_rsi": 80,
+        "risk_per_trade_pct": 1.0,
+        "weight": 1.0
+    },
+    "multi_timeframe_trend": {
+        "enabled": true,
+        "min_adx": 25,
+        "min_volume_factor": 1.5,
+        "stop_loss_lookback": 10,
+        "take_profit_factor": 3.0,
+        "scale_in_levels": 2,
+        "higher_timeframe": "1h",
+        "risk_per_trade_pct": 1.5,
+        "weight": 1.0
+    },
+    "support_resistance_breakout": {
+        "enabled": true,
+        "consolidation_period": 15,
+        "max_range_pct": 5.0,
+        "volume_breakout_factor": 2.0,
+        "stop_loss_factor": 0.5,
+        "max_time_in_trade": 20,
+        "false_breakout_pct": 0.2,
+        "risk_per_trade_pct": 1.0,
+        "weight": 1.0
+    },
+    "risk_management": {
+        "max_open_positions": 2,
+        "max_risk_per_trade_pct": 2.0,
+        "max_account_risk_pct": 5.0,
+        "max_drawdown_pct": 15.0,
+        "reduce_size_after_losses": true,
+        "consecutive_loss_threshold": 3,
+        "risk_reduction_factor": 0.5,
+        "min_risk_pct": 0.25,
+        "partial_take_profit": {
+            "enabled": true,
+            "tp_levels": [2.0, 3.0, 5.0],
+            "position_pcts": [30, 30, 40]
+        },
+        "trailing_stop": {
+            "enabled": true,
+            "activation_pct": 1.5,
+            "trail_pct": 0.75
+        },
+        "break_even": {
+            "enabled": true,
+            "activation_pct": 1.0
+        }
+    },
+    "filters": {
+        "time_filter": {
+            "enabled": false,
+            "blackout_hours": [0, 1, 2, 3, 4]
+        },
+        "volatility_filter": {
+            "enabled": true,
+            "min_atr_pct": 0.3,
+            "max_atr_pct": 5.0
+        },
+        "volume_filter": {
+            "enabled": true,
+            "min_24h_volume_usd": 5000000,
+            "min_candle_volume_factor": 1.0
+        }
+    }
+}
