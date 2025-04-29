@@ -1,53 +1,55 @@
 
 """
-Logging configuration module
+Enhanced Logger Setup Module
 """
-
 import logging
 import os
-from logging.handlers import RotatingFileHandler
 from colorama import init, Fore, Style
 
-# Initialize colorama
 init(autoreset=True)
 
-def setup_logger(name, log_file, level=logging.INFO):
-    """Configure logger with file and console handlers with color"""
-    
-    # Create logs directory if it doesn't exist
-    os.makedirs('bot_logs', exist_ok=True)
-    
-    # Create logger
+class ColoredFormatter(logging.Formatter):
+    """Custom formatter with colors"""
+    COLORS = {
+        'DEBUG': Fore.CYAN,
+        'INFO': Fore.GREEN,
+        'WARNING': Fore.YELLOW,
+        'ERROR': Fore.RED,
+        'CRITICAL': Fore.RED + Style.BRIGHT
+    }
+
+    def format(self, record):
+        # Add color to level name
+        record.levelname = f"{self.COLORS.get(record.levelname, '')}{record.levelname}{Style.RESET_ALL}"
+        return super().format(record)
+
+def setup_logger(name: str, log_file: str, level=logging.INFO) -> logging.Logger:
+    """Setup a logger with both file and console output"""
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
-    # Create formatters
-    file_formatter = logging.Formatter(
+    # Create logs directory if needed
+    os.makedirs('bot_logs', exist_ok=True)
+    
+    # File handler with standard formatting
+    fh = logging.FileHandler(os.path.join('bot_logs', log_file))
+    fh.setLevel(level)
+    fh_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+    fh.setFormatter(fh_formatter)
     
-    console_formatter = logging.Formatter(
-        f'{Fore.CYAN}%(asctime)s{Style.RESET_ALL} - '
-        f'{Fore.GREEN}%(name)s{Style.RESET_ALL} - '
-        f'{Fore.YELLOW}%(levelname)s{Style.RESET_ALL} - '
-        f'{Fore.WHITE}%(message)s{Style.RESET_ALL}'
+    # Console handler with colors
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    ch_formatter = ColoredFormatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
-    # File handler with rotation
-    file_handler = RotatingFileHandler(
-        os.path.join('bot_logs', log_file),
-        maxBytes=10*1024*1024,  # 10MB
-        backupCount=5
-    )
-    file_handler.setFormatter(file_formatter)
-    
-    # Console handler with color
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(console_formatter)
+    ch.setFormatter(ch_formatter)
     
     # Add handlers
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
     
     return logger
 

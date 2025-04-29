@@ -1255,13 +1255,27 @@ class TradingBot:
                     
 
 class MockBot:
-    """Mock trading bot for UI testing and development"""
+    """Enhanced mock trading bot for UI testing and development"""
     def __init__(self):
         self.logger = logging.getLogger("mock_bot")
         self.symbol = "BTC/USDT"
         self.timeframe = "15m"
         self.strategy_name = "ehlers_supertrend"
-        self.candles_df = pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
+        
+        # Initialize mock candles data
+        now = pd.Timestamp.now()
+        timestamps = pd.date_range(end=now, periods=100, freq='15min')
+        mock_data = {
+            'timestamp': timestamps,
+            'open': np.random.normal(50000, 1000, 100),
+            'high': np.random.normal(51000, 1000, 100),
+            'low': np.random.normal(49000, 1000, 100),
+            'close': np.random.normal(50000, 1000, 100),
+            'volume': np.random.normal(100, 20, 100)
+        }
+        self.candles_df = pd.DataFrame(mock_data).set_index('timestamp')
+        
+        # Initialize state
         self.current_positions = {}
         self.state = {
             "active": False,
