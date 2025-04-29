@@ -1253,6 +1253,60 @@ class TradingBot:
                     trade.get("side") == "sell" and position_side == "short" and
                     trade.get("status") == "open"):
                     
+
+class MockBot:
+    """Mock trading bot for UI testing and development"""
+    def __init__(self):
+        self.logger = logging.getLogger("mock_bot")
+        self.symbol = "BTC/USDT"
+        self.timeframe = "15m"
+        self.strategy_name = "ehlers_supertrend"
+        self.candles_df = pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
+        self.current_positions = {}
+        self.state = {
+            "active": False,
+            "trades": {"total": 0, "wins": 0, "losses": 0, "recent": []},
+            "balance": {"total": 10000, "free": 10000, "used": 0},
+            "performance": {"pnl_total": 0.0, "pnl_percentage": 0.0}
+        }
+        
+    def get_ticker(self):
+        """Return mock ticker data"""
+        return {
+            "symbol": self.symbol,
+            "last": 50000,
+            "bid": 49990,
+            "ask": 50010,
+            "high": 51000,
+            "low": 49000,
+            "volume": 1000.0,
+            "timestamp": int(time.time() * 1000)
+        }
+        
+    def get_balance(self):
+        """Return mock balance"""
+        return self.state["balance"]
+        
+    def analyze_market(self):
+        """Return mock analysis"""
+        return {
+            "timestamp": int(time.time() * 1000),
+            "symbol": self.symbol,
+            "strategy": self.strategy_name,
+            "signal_strength": 0,
+            "direction": "none"
+        }
+        
+    def start(self):
+        """Start mock bot"""
+        self.state["active"] = True
+        return True
+        
+    def stop(self):
+        """Stop mock bot"""
+        self.state["active"] = False 
+        return True
+
                     # Update the trade record
                     entry_price = trade.get("entry_price", 0)
                     exit_price = self.get_current_price()

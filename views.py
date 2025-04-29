@@ -24,7 +24,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db
-from models import User, TradingConfig, TradeHistory, Position
+from models import User, TradingConfiguration, TradeHistory, Position
 from trading_bot import TradingBot
 
 # Configure logger
@@ -60,11 +60,19 @@ def initialize_bot():
 
 
 def get_bot_instance():
-    """Get the current bot instance or initialize a new one"""
+    """Get the current bot instance or initialize a new one with fallback to mock"""
     global bot
     
     if bot is None:
-        initialize_bot()
+        try:
+            # Try loading saved config first
+            config_file = "config.json"
+            bot = TradingBot(config_file=config_file)
+            logger.info("Trading bot initialized successfully")
+        except Exception as e:
+            logger.error(f"Error initializing trading bot with default config: {e}")
+            logger.warning("Using mock bot instance for UI")
+            bot = MockBot()
     
     return bot
 

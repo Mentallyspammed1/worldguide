@@ -45,7 +45,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py --web"
+args = "python main.py --web --bot"
 
 [[ports]]
 localPort = 5000
