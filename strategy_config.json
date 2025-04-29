@@ -1,95 +1,99 @@
 {
-    "active_strategy": "auto",  
-    "strategy_threshold": 0.7,
-    "ehlers_supertrend": {
-        "enabled": true,
-        "supertrend_period1": 10,
-        "supertrend_multiplier1": 2.0,
-        "supertrend_period2": 20,
-        "supertrend_multiplier2": 3.5,
-        "volatility_period": 20,
-        "volatility_threshold": 1.5,
-        "it_alpha": 0.07,
-        "cog_period": 10,
-        "range_reversal_threshold": 0.8,
-        "range_exit_threshold": 1.5,
-        "trend_strength_threshold": 0.5,
-        "limit_order_offset": 0.5,
-        "risk_per_trade_pct": 1.0,
-        "weight": 1.2
-    },
-    "momentum_divergence": {
-        "enabled": true,
-        "rsi_divergence_threshold": 5,
-        "min_atr_pct": 0.5,
-        "max_atr_pct": 3.0,
-        "atr_multiplier": 2.5,
-        "take_profit_atr_multiplier": 5.0,
-        "min_rsi": 20,
-        "max_rsi": 80,
-        "risk_per_trade_pct": 1.0,
-        "weight": 1.0
-    },
-    "multi_timeframe_trend": {
-        "enabled": true,
-        "min_adx": 25,
-        "min_volume_factor": 1.5,
-        "stop_loss_lookback": 10,
-        "take_profit_factor": 3.0,
-        "scale_in_levels": 2,
-        "higher_timeframe": "1h",
-        "risk_per_trade_pct": 1.5,
-        "weight": 1.0
-    },
-    "support_resistance_breakout": {
-        "enabled": true,
-        "consolidation_period": 15,
-        "max_range_pct": 5.0,
-        "volume_breakout_factor": 2.0,
-        "stop_loss_factor": 0.5,
-        "max_time_in_trade": 20,
-        "false_breakout_pct": 0.2,
-        "risk_per_trade_pct": 1.0,
-        "weight": 1.0
-    },
-    "risk_management": {
-        "max_open_positions": 2,
-        "max_risk_per_trade_pct": 2.0,
-        "max_account_risk_pct": 5.0,
-        "max_drawdown_pct": 15.0,
-        "reduce_size_after_losses": true,
-        "consecutive_loss_threshold": 3,
-        "risk_reduction_factor": 0.5,
-        "min_risk_pct": 0.25,
-        "partial_take_profit": {
-            "enabled": true,
-            "tp_levels": [2.0, 3.0, 5.0],
-            "position_pcts": [30, 30, 40]
-        },
-        "trailing_stop": {
-            "enabled": true,
-            "activation_pct": 1.5,
-            "trail_pct": 0.75
-        },
-        "break_even": {
-            "enabled": true,
-            "activation_pct": 1.0
-        }
-    },
-    "filters": {
-        "time_filter": {
-            "enabled": false,
-            "blackout_hours": [0, 1, 2, 3, 4]
-        },
-        "volatility_filter": {
-            "enabled": true,
-            "min_atr_pct": 0.3,
-            "max_atr_pct": 5.0
-        },
-        "volume_filter": {
-            "enabled": true,
-            "min_24h_volume_usd": 5000000,
-            "min_candle_volume_factor": 1.0
-        }
+  "ehlers_supertrend": {
+    "name": "Dual Ehlers Supertrend with Ranges",
+    "description": "Advanced strategy that adapts to trending vs ranging markets using Ehlers indicators",
+    "timeframes": ["15m", "1h"],
+    "symbols": ["BTC/USDT", "ETH/USDT"],
+    "parameters": {
+      "atr_length": 10,
+      "atr_multiplier": 2.0,
+      "smoothing_length": 5,
+      "use_median_price": true,
+      "rsi_filter": true,
+      "rsi_length": 14,
+      "rsi_threshold_high": 70.0,
+      "rsi_threshold_low": 30.0,
+      "risk_per_trade_pct": 1.0,
+      "rr_ratio": 2.0,
+      "use_adaptive_parameters": true,
+      "use_dual_timeframe": true,
+      "use_trailing_stop": true,
+      "trailing_stop_activation_pct": 1.0,
+      "trailing_stop_trail_pct": 0.5,
+      "order_type": "limit",
+      "preferred_entry": "limit_better",
+      "exit_on_supertrend_flip": true
     }
+  },
+  "multi_timeframe_trend": {
+    "name": "Multi-Timeframe Trend Strategy",
+    "description": "Strategy that combines signals from multiple timeframes to confirm trends",
+    "timeframes": ["5m", "15m", "1h"],
+    "symbols": ["BTC/USDT", "ETH/USDT"],
+    "parameters": {
+      "fast_ma_length": 8,
+      "slow_ma_length": 21,
+      "signal_ma_length": 9,
+      "rsi_length": 14,
+      "rsi_threshold_high": 70,
+      "rsi_threshold_low": 30,
+      "trend_ma_length": 200,
+      "atr_length": 14,
+      "atr_multiplier": 2.5,
+      "risk_per_trade_pct": 1.0,
+      "rr_ratio": 1.5,
+      "use_trailing_stop": true,
+      "trailing_stop_activation_pct": 1.0,
+      "trailing_stop_trail_pct": 0.5
+    }
+  },
+  "momentum_divergence": {
+    "name": "Momentum Divergence Strategy",
+    "description": "Strategy that identifies momentum divergences for potential reversals",
+    "timeframes": ["1h", "4h"],
+    "symbols": ["BTC/USDT", "ETH/USDT"],
+    "parameters": {
+      "macd_fast": 12,
+      "macd_slow": 26,
+      "macd_signal": 9,
+      "rsi_length": 14,
+      "divergence_lookback": 10,
+      "atr_length": 14,
+      "atr_multiplier": 3.0,
+      "risk_per_trade_pct": 1.0,
+      "rr_ratio": 2.0,
+      "use_trailing_stop": false,
+      "require_trend_alignment": true
+    }
+  },
+  "support_resistance_breakout": {
+    "name": "Support/Resistance Breakout Strategy",
+    "description": "Strategy that identifies key support/resistance levels and trades breakouts",
+    "timeframes": ["4h", "1d"],
+    "symbols": ["BTC/USDT", "ETH/USDT"],
+    "parameters": {
+      "pivot_lookback": 5,
+      "level_strength_threshold": 2,
+      "atr_length": 14,
+      "atr_multiplier": 1.5,
+      "risk_per_trade_pct": 1.0,
+      "rr_ratio": 3.0,
+      "use_trailing_stop": true,
+      "trailing_stop_activation_pct": 2.0,
+      "trailing_stop_trail_pct": 1.0,
+      "volume_filter": true,
+      "volume_multiplier": 1.5
+    }
+  },
+  "default": {
+    "name": "Default Risk Settings",
+    "description": "Default risk management settings applied to all strategies",
+    "parameters": {
+      "max_open_trades": 3,
+      "max_risk_per_symbol": 2.0,
+      "max_daily_drawdown": 5.0,
+      "max_risk_per_trade": 2.0,
+      "default_exit_after_hours": 72
+    }
+  }
 }
