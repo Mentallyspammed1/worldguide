@@ -65,12 +65,28 @@ def get_bot_instance():
 
     if bot is None:
         try:
-            # Try loading saved config first
-            config_file = "config.json"
-            bot = TradingBot(config_file=config_file)
-            logger.info("Trading bot initialized successfully")
+            # Default user_id for single-user mode
+            user_id = 1
+            
+            # Try to get API key from database
+            api_key_rec = ApiKey.query.filter_by(user_id=user_id, exchange='bybit').first()
+            
+            if api_key_rec:
+                # Initialize with real API credentials
+                bot = TradingBot(
+                    config_file="config.json",
+                    exchange='bybit',
+                    api_key=api_key_rec.api_key,
+                    api_secret=api_key_rec.api_secret,
+                    is_testnet=api_key_rec.testnet
+                )
+                logger.info(f"Trading bot initialized with {api_key_rec.exchange} API key")
+            else:
+                # No API keys found, initialize with mock mode
+                bot = TradingBot(config_file="config.json")
+                logger.info("Trading bot initialized in mock mode - no API keys found")
         except Exception as e:
-            logger.error(f"Error initializing trading bot with default config: {e}")
+            logger.error(f"Error initializing trading bot: {e}")
             logger.warning("Using mock bot instance for UI")
             bot = MockBot()
 
@@ -352,6 +368,65 @@ def register():
 
 
 # API Routes
+@app.route('/api/validate_key', methods=['POST'])
+def api_validate_key():
+    """API endpoint to validate exchange API keys"""
+    if request.method != 'POST':
+        return jsonify({'status': 'error', 'message': 'Method not allowed'})
+        
+    try:
+        # Get key details from request
+        data = request.json
+        if not data:
+            return jsonify({'status': 'error', 'message': 'No data provided'})
+            
+        exchange = data.get('exchange', 'bybit')
+        api_key = data.get('api_key')
+        api_secret = data.get('api_secret')
+        is_testnet = data.get('is_testnet', True)
+        
+        # Validate inputs
+        if not api_key or not api_secret:
+            return jsonify({'status': 'error', 'message': 'API key and secret are required'})
+            
+        # Use TradingBot to validate key
+        validation_result = TradingBot.validate_api_key(
+            exchange=exchange,
+            api_key=api_key,
+            api_secret=api_secret,
+            testnet=is_testnet
+        )
+        
+        # Return result
+        if validation_result['valid']:
+            # Extract basic balance info
+            balance_data = validation_result.get('balance', {})
+            total_balance = 0
+            
+            if 'total' in balance_data and 'USDT' in balance_data['total']:
+                total_balance = balance_data['total']['USDT']
+            elif 'total' in balance_data:
+                # Get first available currency
+                currencies = list(balance_data['total'].keys())
+                if currencies:
+                    currency = currencies[0]
+                    total_balance = balance_data['total'][currency]
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'API key validation successful',
+                'balance': total_balance
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': validation_result['message']
+            })
+            
+    except Exception as e:
+        logger.error(f"Error validating API key: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
+
 @app.route('/api/market_data', methods=['GET'])
 def api_market_data():
     """API endpoint for market data"""
