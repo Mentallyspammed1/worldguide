@@ -10,6 +10,11 @@ from typing import Dict, List, Tuple, Optional, Union, Any
 
 import numpy as np
 import pandas as pd
+
+# Add numpy.NaN for pandas_ta compatibility
+if not hasattr(np, 'NaN'):
+    np.NaN = float('nan')
+
 import pandas_ta as ta
 
 # Configure logger

@@ -1,0 +1,18 @@
+{
+    "positions": {},
+    "orders": {},
+    "trades": [],
+    "last_update": 0,
+    "balance": {
+        "total": 10000.0,
+        "used": 0.0,
+        "free": 10000.0
+    },
+    "performance": {
+        "total_trades": 0,
+        "profitable_trades": 0,
+        "total_pnl": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0
+    }
+}
