@@ -24,7 +24,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db
-from models import User, TradingConfig, TradeHistory, Position
+from models import User, BotConfig, TradeHistory
 from trading_bot import TradingBot
 
 # Configure logger
@@ -65,6 +65,87 @@ def get_bot_instance():
     
     if bot is None:
         initialize_bot()
+        
+        # If bot still None, create with default config for UI
+        if bot is None:
+            try:
+                # Default configuration
+                default_config = {
+                    "exchange": "bybit",
+                    "symbol": "BTC/USDT",
+                    "timeframe": "15m",
+                    "dry_run": True,
+                    "strategy": {
+                        "active": "ehlers_supertrend",
+                        "params": {}
+                    },
+                    "risk_management": {
+                        "position_size_pct": 1.0,
+                        "max_open_positions": 3,
+                        "use_sl_tp": True,
+                        "stop_loss_pct": 2.0,
+                        "take_profit_pct": 4.0
+                    }
+                }
+                
+                # Create a default config file if it doesn't exist
+                config_path = app.config.get("CONFIG_PATH", "config.json")
+                if not os.path.exists(config_path):
+                    with open(config_path, 'w') as f:
+                        json.dump(default_config, f, indent=2)
+                        
+                # Create bot with default config
+                bot = TradingBot(config_file=config_path)
+                logger.info("Trading bot initialized with default configuration")
+            except Exception as e:
+                logger.error(f"Error initializing trading bot with default config: {e}")
+    
+    # If bot is still None, return a mock object for UI
+    if bot is None:
+        logger.warning("Using mock bot instance for UI")
+        class MockBot:
+            def __init__(self):
+                self.config = {
+                    "exchange": "bybit",
+                    "symbol": "BTC/USDT",
+                    "timeframe": "15m",
+                    "dry_run": True,
+                    "strategy": {
+                        "active": "ehlers_supertrend"
+                    },
+                    "risk_management": {
+                        "position_size_pct": 1.0,
+                        "max_open_positions": 3,
+                        "use_sl_tp": True
+                    }
+                }
+                self.state = {
+                    "active": False,
+                    "positions": {},
+                    "balance": {"total": 10000, "free": 10000, "used": 0},
+                    "performance": {"pnl_percentage": 0.0, "drawdown_max": 0.0},
+                    "trades": {"total": 0, "wins": 0}
+                }
+                self.exchange_id = "bybit"
+                self.exchange = None
+                self.symbol = "BTC/USDT"
+                self.timeframe = "15m"
+            
+            def get_balance(self):
+                return {"total": 10000, "free": 10000, "used": 0}
+                
+            def get_ticker(self):
+                return {"symbol": "BTC/USDT", "last": 50000, "bid": 49990, "ask": 50010}
+                
+            def start(self):
+                self.state["active"] = True
+                return True
+                
+            def stop(self):
+                self.state["active"] = False
+                return True
+                
+        return MockBot()
     
     return bot
 

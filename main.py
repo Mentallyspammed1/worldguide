@@ -1,39 +1,32 @@
 """
-Main Application Module
+Main Module
 
-This is the entry point for the Pyrmethus trading bot application.
-It imports the Flask app and sets up any additional configuration.
+This is the main entry point for the application.
 """
 
-import os
-import sys
 import logging
-import json
-from datetime import datetime
+import os
 
-# Configure root logger
+# Set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(os.path.join(os.getcwd(), 'bot_logs', 'app.log'), mode='a')
-    ]
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+logger = logging.getLogger("main")
 
-# Create logs directory if it doesn't exist
-os.makedirs(os.path.join(os.getcwd(), 'bot_logs'), exist_ok=True)
+# Log app startup
+logger.info("Pyrmethus Trading Bot starting up...")
 
-# Import Flask app
-try:
-    from app import app
-    logger = logging.getLogger("main")
-    logger.info("Pyrmethus Trading Bot starting up...")
-except Exception as e:
-    print(f"Error importing app: {e}")
-    sys.exit(1)
+# Import app here to avoid circular imports
+from app import app
 
-if __name__ == "__main__":
-    # Start the Flask development server
-    # Note: In production, use a proper WSGI server like gunicorn
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# Create database tables
+with app.app_context():
+    from app import db
+    import models
+    
+    try:
+        db.create_all()
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Error creating database tables: {e}")

@@ -294,25 +294,25 @@
                                 <div class="mb-3">
                                     <label for="exchange" class="form-label">Exchange</label>
                                     <select class="form-select" id="exchange" name="exchange">
-                                        <option value="bybit" {% if config.exchange == 'bybit' %}selected{% endif %}>Bybit</option>
-                                        <option value="binance" {% if config.exchange == 'binance' %}selected{% endif %}>Binance</option>
-                                        <option value="kucoin" {% if config.exchange == 'kucoin' %}selected{% endif %}>KuCoin</option>
+                                        <option value="bybit" {% if config.get('exchange') == 'bybit' %}selected{% endif %}>Bybit</option>
+                                        <option value="binance" {% if config.get('exchange') == 'binance' %}selected{% endif %}>Binance</option>
+                                        <option value="kucoin" {% if config.get('exchange') == 'kucoin' %}selected{% endif %}>KuCoin</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="symbol" class="form-label">Trading Pair</label>
-                                    <input type="text" class="form-control" id="symbol" name="symbol" value="{{ config.symbol }}">
+                                    <input type="text" class="form-control" id="symbol" name="symbol" value="{{ config.get('symbol', 'BTC/USDT') }}">
                                     <div class="form-text">Example: BTC/USDT:USDT</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="timeframe" class="form-label">Timeframe</label>
                                     <select class="form-select" id="timeframe" name="timeframe">
-                                        <option value="1m" {% if config.timeframe == '1m' %}selected{% endif %}>1 minute</option>
-                                        <option value="5m" {% if config.timeframe == '5m' %}selected{% endif %}>5 minutes</option>
-                                        <option value="15m" {% if config.timeframe == '15m' %}selected{% endif %}>15 minutes</option>
-                                        <option value="1h" {% if config.timeframe == '1h' %}selected{% endif %}>1 hour</option>
-                                        <option value="4h" {% if config.timeframe == '4h' %}selected{% endif %}>4 hours</option>
-                                        <option value="1d" {% if config.timeframe == '1d' %}selected{% endif %}>1 day</option>
+                                        <option value="1m" {% if config.get('timeframe') == '1m' %}selected{% endif %}>1 minute</option>
+                                        <option value="5m" {% if config.get('timeframe') == '5m' %}selected{% endif %}>5 minutes</option>
+                                        <option value="15m" {% if config.get('timeframe', '15m') == '15m' %}selected{% endif %}>15 minutes</option>
+                                        <option value="1h" {% if config.get('timeframe') == '1h' %}selected{% endif %}>1 hour</option>
+                                        <option value="4h" {% if config.get('timeframe') == '4h' %}selected{% endif %}>4 hours</option>
+                                        <option value="1d" {% if config.get('timeframe') == '1d' %}selected{% endif %}>1 day</option>
                                     </select>
                                 </div>
                             </div>
@@ -321,15 +321,18 @@
                                 <h5>Risk Management</h5>
                                 <div class="mb-3">
                                     <label for="position_size_pct" class="form-label">Position Size (%)</label>
-                                    <input type="number" class="form-control" id="position_size_pct" name="risk_management.position_size_pct" value="{{ config.risk_management.position_size_pct }}" min="0.1" max="100" step="0.1">
+                                    <input type="number" class="form-control" id="position_size_pct" name="risk_management.position_size_pct" 
+                                           value="{{ config.get('risk_management', {}).get('position_size_pct', 1) }}" min="0.1" max="100" step="0.1">
                                 </div>
                                 <div class="mb-3">
                                     <label for="max_open_positions" class="form-label">Max Open Positions</label>
-                                    <input type="number" class="form-control" id="max_open_positions" name="risk_management.max_open_positions" value="{{ config.risk_management.max_open_positions }}" min="1" max="10" step="1">
+                                    <input type="number" class="form-control" id="max_open_positions" name="risk_management.max_open_positions" 
+                                           value="{{ config.get('risk_management', {}).get('max_open_positions', 1) }}" min="1" max="10" step="1">
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="use_sl_tp" name="risk_management.use_sl_tp" {% if config.risk_management.use_sl_tp %}checked{% endif %}>
+                                        <input class="form-check-input" type="checkbox" id="use_sl_tp" name="risk_management.use_sl_tp" 
+                                               {% if config.get('risk_management', {}).get('use_sl_tp', True) %}checked{% endif %}>
                                         <label class="form-check-label" for="use_sl_tp">Use Stop Loss & Take Profit</label>
                                     </div>
                                 </div>
