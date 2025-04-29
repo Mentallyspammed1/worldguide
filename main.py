@@ -18,7 +18,7 @@ logger = logging.getLogger("main")
 logger.info("Pyrmethus Trading Bot starting up...")
 
 # Import app here to avoid circular imports
-from app import app
+from app import app, socketio
 
 # Create database tables
 with app.app_context():
@@ -30,3 +30,7 @@ with app.app_context():
         logger.info("Database tables created successfully")
     except Exception as e:
         logger.error(f"Error creating database tables: {e}")
+
+# Run the app using SocketIO instead of Flask's built-in server
+if __name__ == "__main__":  # This block won't run under Gunicorn
+    socketio.run(app, host="0.0.0.0", port=5000)

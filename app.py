@@ -9,6 +9,7 @@ import logging
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -46,6 +47,9 @@ app.config["DATA_PATH"] = os.environ.get("DATA_PATH", "data")
 
 # Initialize the app with extensions
 db.init_app(app)
+
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Register error handlers
 @app.errorhandler(404)
