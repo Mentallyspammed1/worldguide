@@ -502,7 +502,11 @@ class TradingBot:
             # Calculate stop loss and take profit
             entry_side = "long" if side == "buy" else "short"
             sl_price = self.calculate_stop_loss(current_price, entry_side)
-            tp_price = self.calculate_take_profit(current_price, entry_side)
+            tp_result = self.calculate_take_profit(current_price, entry_side, sl_price)
+            
+            # Convert to scalar if multi-level TP isn't returned
+            is_multi_tp = isinstance(tp_result, list)
+            tp_price = tp_result[0]["price"] if is_multi_tp else tp_result
             
             # Execute order
             order = retry_api_call(
@@ -549,33 +553,94 @@ class TradingBot:
                     "side": sl_side
                 }
             
-            if tp_price > 0:
+            # Handle take profit levels (single or multiple)
+            tp_orders = []
+            if is_multi_tp:
                 tp_side = "sell" if entry_side == "long" else "buy"
-                tp_order = retry_api_call(
-                    self.exchange.create_order,
-                    self.symbol,
-                    "limit",
-                    tp_side,
-                    amount,
-                    price=tp_price
-                )
-                self.logger.info(
-                    f"Placed take profit order at {tp_price} for {amount} {self.symbol}"
-                )
+                self.logger.info(f"Setting up {len(tp_result)} take profit levels")
                 
-                # Save take profit order to state
-                self.state["orders"]["tp"] = {
-                    "id": tp_order["id"],
-                    "price": tp_price,
-                    "amount": amount,
-                    "side": tp_side
-                }
+                # Create multiple take profit orders
+                for i, tp_level in enumerate(tp_result):
+                    level_price = tp_level["price"]
+                    level_percentage = tp_level["percentage"]
+                    level_amount = (amount * level_percentage / 100)
+                    
+                    # Round amount to precision
+                    level_amount = float(Decimal(str(level_amount)).quantize(
+                        Decimal('0.' + '0' * self.precision["amount"]),
+                        rounding=ROUND_DOWN
+                    ))
+                    
+                    # Ensure minimum amount
+                    min_amount = self.config.get("advanced", {}).get("min_amount", 0.001)
+                    if level_amount < min_amount:
+                        self.logger.warning(
+                            f"TP level {i+1} amount {level_amount} is below minimum {min_amount}. "
+                            f"Using minimum amount."
+                        )
+                        level_amount = min_amount
+                    
+                    try:
+                        tp_order = retry_api_call(
+                            self.exchange.create_order,
+                            self.symbol,
+                            "limit",
+                            tp_side,
+                            level_amount,
+                            price=level_price
+                        )
+                        self.logger.info(
+                            f"Placed take profit level {i+1} at {level_price} "
+                            f"for {level_amount} {self.symbol} ({level_percentage}% of position)"
+                        )
+                        
+                        tp_orders.append({
+                            "id": tp_order["id"],
+                            "price": level_price,
+                            "amount": level_amount,
+                            "percentage": level_percentage,
+                            "side": tp_side
+                        })
+                    except Exception as e:
+                        self.logger.error(f"Failed to place TP level {i+1}: {e}")
+                
+                # Save take profit orders to state
+                self.state["orders"]["tp_levels"] = tp_orders
+                
+            elif tp_price > 0:
+                # Single take profit level
+                tp_side = "sell" if entry_side == "long" else "buy"
+                try:
+                    tp_order = retry_api_call(
+                        self.exchange.create_order,
+                        self.symbol,
+                        "limit",
+                        tp_side,
+                        amount,
+                        price=tp_price
+                    )
+                    self.logger.info(
+                        f"Placed take profit order at {tp_price} for {amount} {self.symbol}"
+                    )
+                    
+                    # Save take profit order to state
+                    self.state["orders"]["tp"] = {
+                        "id": tp_order["id"],
+                        "price": tp_price,
+                        "amount": amount,
+                        "side": tp_side
+                    }
+                    
+                    tp_orders.append(self.state["orders"]["tp"])
+                except Exception as e:
+                    self.logger.error(f"Failed to place TP order: {e}")
             
             # Save filled order details to state
             if filled_order["status"] == "closed":
                 entry_price = filled_order["price"]
                 filled_amount = filled_order["filled"]
                 
+                # Create entry trade record 
                 entry_trade = {
                     "symbol": self.symbol,
                     "entry_side": entry_side,
@@ -586,13 +651,28 @@ class TradingBot:
                     "tp_price": tp_price
                 }
                 
-                self.state["positions"][self.symbol] = {
+                # Store take profit orders information
+                if is_multi_tp:
+                    entry_trade["tp_levels"] = tp_result
+                    entry_trade["tp_mode"] = "multi_level"
+                
+                # Create position state
+                position_state = {
                     "side": entry_side,
                     "amount": filled_amount,
                     "entry_price": entry_price,
                     "sl_price": sl_price,
-                    "tp_price": tp_price
+                    "tp_price": tp_price,
+                    "is_multi_tp": is_multi_tp,
                 }
+                
+                # Add multi-level TP info if used
+                if is_multi_tp:
+                    position_state["tp_levels"] = tp_result
+                    position_state["tp_mode"] = "multi_level"
+                
+                # Save position state
+                self.state["positions"][self.symbol] = position_state
                 
                 self.state["current_trade"] = entry_trade
                 self.save_state()
@@ -649,6 +729,7 @@ class TradingBot:
                 except Exception as e:
                     self.logger.warning(f"Error canceling stop loss order: {e}")
             
+            # Cancel single TP order if it exists
             if "tp" in self.state.get("orders", {}):
                 try:
                     tp_order_id = self.state["orders"]["tp"]["id"]
@@ -660,6 +741,20 @@ class TradingBot:
                     self.logger.info(f"Canceled take profit order {tp_order_id}")
                 except Exception as e:
                     self.logger.warning(f"Error canceling take profit order: {e}")
+            
+            # Cancel multi-level TP orders if they exist
+            if "tp_levels" in self.state.get("orders", {}):
+                for i, tp_level in enumerate(self.state["orders"]["tp_levels"]):
+                    try:
+                        tp_order_id = tp_level["id"]
+                        retry_api_call(
+                            self.exchange.cancel_order,
+                            tp_order_id,
+                            self.symbol
+                        )
+                        self.logger.info(f"Canceled take profit level {i+1} order {tp_order_id}")
+                    except Exception as e:
+                        self.logger.warning(f"Error canceling take profit level {i+1} order: {e}")
             
             # Execute market order to close position
             side = "sell" if self.current_position["side"] == "long" else "buy"
