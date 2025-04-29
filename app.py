@@ -77,3 +77,7 @@ with app.app_context():
 # Import views after app initialization to avoid circular imports
 from flask import render_template
 import views
+
+# Initialize WebSocket handlers
+import socket_handlers
+socket_handlers.init_socket_handlers()
