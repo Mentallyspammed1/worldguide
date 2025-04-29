@@ -109,9 +109,9 @@ class TradeHistory(db.Model):
         return f'<TradeHistory {self.symbol} {self.side} {self.size} @ {self.entry_price}>'
 
 
-class BotConfig(db.Model):
+class TradingConfiguration(db.Model):
     """Trading configuration model"""
-    __tablename__ = 'bot_configs'
+    __tablename__ = 'trading_configurations'
     
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
@@ -131,3 +131,25 @@ class BotConfig(db.Model):
     
     def __repr__(self):
         return f'<BotConfig {self.name} {self.exchange}:{self.symbol}>'
+
+
+class Position(db.Model):
+    """Position model for tracking open positions"""
+    __tablename__ = 'positions'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    exchange = Column(String(64), nullable=False)
+    symbol = Column(String(32), nullable=False)
+    side = Column(String(16), nullable=False)  # 'long' or 'short'
+    size = Column(Float, nullable=False)
+    entry_price = Column(Float, nullable=False)
+    leverage = Column(Float, default=1.0)
+    stop_loss = Column(Float)
+    take_profit = Column(Float)
+    unrealized_pnl = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Position {self.symbol} {self.side} {self.size}>'

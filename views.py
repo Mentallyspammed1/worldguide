@@ -24,8 +24,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db
-from models import User, BotConfig, TradeHistory
-from simple_bot import TradingBot, MockBot
+from models import User, TradingConfiguration, TradeHistory, Position #Fixed import
+from trading_bot import TradingBot
 
 # Configure logger
 logger = logging.getLogger("views")
@@ -47,7 +47,7 @@ def load_user(user_id):
 def initialize_bot():
     """Initialize the trading bot with configuration"""
     global bot
-    
+
     try:
         if bot is None:
             # Create new bot instance
@@ -59,13 +59,10 @@ def initialize_bot():
         bot = None
 
 
-# Use the MockBot class from simple_bot.py
-
-
 def get_bot_instance():
     """Get the current bot instance or initialize a new one with fallback to mock"""
     global bot
-    
+
     if bot is None:
         try:
             # Try loading saved config first
@@ -76,7 +73,7 @@ def get_bot_instance():
             logger.error(f"Error initializing trading bot with default config: {e}")
             logger.warning("Using mock bot instance for UI")
             bot = MockBot()
-    
+
     return bot
 
 
@@ -91,19 +88,19 @@ def dashboard():
     """Render the dashboard page"""
     # Initialize bot if needed
     bot = get_bot_instance()
-    
+
     # Get bot state and configuration
     state = {}
     config = {}
-    
+
     if bot:
         state = bot.state or {}
         config = bot.config or {}
-        
+
         # Ensure config has required structure
         if 'strategy' not in config:
             config['strategy'] = {'active': 'Not Configured'}
-    
+
     # Get trades from database
     trades = []
     try:
@@ -121,7 +118,7 @@ def dashboard():
             })
     except SQLAlchemyError as e:
         logger.error(f"Database error when fetching trades: {e}")
-    
+
     # Prepare template variables
     context = {
         'state': state,
@@ -129,7 +126,7 @@ def dashboard():
         'trades': trades,
         'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
-    
+
     return render_template('dashboard.html', **context)
 
 
@@ -139,7 +136,7 @@ def settings():
     # Get bot instance and config
     bot = get_bot_instance()
     config = bot.config if bot else {}
-    
+
     return render_template('settings.html', config=config)
 
 
@@ -148,14 +145,14 @@ def accounts():
     """Render the accounts page"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     # Get exchange accounts and balances
     accounts = []
     if bot:
         try:
             # Get balance from bot
             balance = bot.get_balance()
-            
+
             # Add to accounts list
             accounts.append({
                 'exchange': bot.exchange_id,
@@ -165,7 +162,7 @@ def accounts():
             })
         except Exception as e:
             logger.error(f"Error fetching account information: {e}")
-    
+
     return render_template('accounts.html', accounts=accounts)
 
 
@@ -174,14 +171,14 @@ def strategies():
     """Render the strategies page"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     # Get strategies configuration
     strategies = []
     if bot:
         # Get strategy config
         strategy_config = bot.config.get('strategy', {})
         active_strategy = strategy_config.get('active', 'ehlers_supertrend')
-        
+
         # Available strategies
         available_strategies = [
             {
@@ -209,9 +206,9 @@ def strategies():
                 'active': active_strategy == 'support_resistance_breakout'
             }
         ]
-        
+
         strategies = available_strategies
-    
+
     return render_template('strategies.html', strategies=strategies)
 
 
@@ -221,15 +218,15 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         user = User.query.filter_by(username=username).first()
-        
+
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             return redirect(url_for('dashboard'))
-        
+
         flash('Invalid username or password')
-    
+
     return render_template('login.html')
 
 
@@ -248,33 +245,33 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        
+
         # Check if user already exists
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash('Username already exists')
             return render_template('register.html')
-        
+
         # Create new user
         new_user = User(
             username=username,
             email=email,
             password_hash=generate_password_hash(password)
         )
-        
+
         try:
             db.session.add(new_user)
             db.session.commit()
-            
+
             # Log in the new user
             login_user(new_user)
-            
+
             return redirect(url_for('dashboard'))
         except SQLAlchemyError as e:
             logger.error(f"Database error during registration: {e}")
             db.session.rollback()
             flash('An error occurred during registration')
-    
+
     return render_template('register.html')
 
 
@@ -284,23 +281,23 @@ def api_market_data():
     """API endpoint for market data"""
     symbol = request.args.get('symbol')
     timeframe = request.args.get('timeframe', '15m')
-    
+
     if not symbol:
         return jsonify({'error': 'Symbol is required'})
-    
+
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     try:
         # Update symbol and timeframe if different
         if bot.symbol != symbol or bot.timeframe != timeframe:
             bot.symbol = symbol
             bot.timeframe = timeframe
             bot.update_candles()
-        
+
         # Prepare candles data
         candles = []
         if bot.candles_df is not None:
@@ -315,7 +312,7 @@ def api_market_data():
                     'volume': float(row['volume'])
                 }
                 candles.append(candle)
-        
+
         # Get ticker data
         ticker = None
         try:
@@ -332,7 +329,7 @@ def api_market_data():
                 }
         except Exception as e:
             logger.error(f"Error fetching ticker data: {e}")
-        
+
         return jsonify({
             'symbol': symbol,
             'timeframe': timeframe,
@@ -340,7 +337,7 @@ def api_market_data():
             'ticker': ticker,
             'last_update': int(time.time() * 1000)
         })
-    
+
     except Exception as e:
         logger.error(f"Error fetching market data: {e}")
         return jsonify({'error': str(e)})
@@ -351,32 +348,32 @@ def api_performance():
     """API endpoint for performance data"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     try:
         # Get performance data from state
         state = bot.state
-        
+
         performance = {
             'total_trades': state.get('trades', {}).get('total', 0),
             'win_rate': 0.0,
             'total_pnl': 0.0,
             'max_drawdown': 0.0
         }
-        
+
         # Calculate win rate
         wins = state.get('trades', {}).get('wins', 0)
         if performance['total_trades'] > 0:
             performance['win_rate'] = (wins / performance['total_trades']) * 100
-        
+
         # Get PnL and drawdown
         performance['total_pnl'] = state.get('performance', {}).get('pnl_percentage', 0.0)
         performance['max_drawdown'] = state.get('performance', {}).get('drawdown_max', 0.0)
-        
+
         return jsonify(performance)
-    
+
     except Exception as e:
         logger.error(f"Error fetching performance data: {e}")
         return jsonify({'error': str(e)})
@@ -387,18 +384,18 @@ def api_config():
     """API endpoint for configuration"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     if request.method == 'POST':
         try:
             # Get configuration data from request
             config_data = request.json
-            
+
             if not config_data:
                 return jsonify({'status': 'error', 'message': 'No configuration data provided'})
-            
+
             # Update bot configuration
             for key, value in config_data.items():
                 if isinstance(value, dict) and key in bot.config:
@@ -407,20 +404,20 @@ def api_config():
                 else:
                     # Update top-level key
                     bot.config[key] = value
-            
+
             # Save configuration to file
             with open(bot.config_file, 'w') as f:
                 json.dump(bot.config, f, indent=2)
-            
+
             # Reinitialize the bot with new configuration
             bot.initialize()
-            
+
             return jsonify({'status': 'success', 'message': 'Configuration updated successfully'})
-        
+
         except Exception as e:
             logger.error(f"Error updating configuration: {e}")
             return jsonify({'status': 'error', 'message': str(e)})
-    
+
     else:
         # Return current configuration
         return jsonify(bot.config)
@@ -431,19 +428,19 @@ def api_positions():
     """API endpoint for positions data"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     try:
         # Update positions
         bot.update_positions()
-        
+
         return jsonify({
             'positions': bot.current_positions,
             'last_update': int(time.time() * 1000)
         })
-    
+
     except Exception as e:
         logger.error(f"Error fetching positions data: {e}")
         return jsonify({'error': str(e)})
@@ -454,31 +451,31 @@ def api_close_position():
     """API endpoint to close a position"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     try:
         # Get position data from request
         position_data = request.json
-        
+
         if not position_data:
             return jsonify({'status': 'error', 'message': 'No position data provided'})
-        
+
         symbol = position_data.get('symbol')
         side = position_data.get('side')
-        
+
         if not symbol or not side:
             return jsonify({'status': 'error', 'message': 'Symbol and side are required'})
-        
+
         # Close position
         result = bot.close_position(side, symbol)
-        
+
         if result:
             return jsonify({'status': 'success', 'message': f'Position closed for {symbol}'})
         else:
             return jsonify({'status': 'error', 'message': 'Failed to close position'})
-    
+
     except Exception as e:
         logger.error(f"Error closing position: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
@@ -489,16 +486,16 @@ def api_start_bot():
     """API endpoint to start the trading bot"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     try:
         # Start the bot
         bot.start()
-        
+
         return jsonify({'status': 'success', 'message': 'Trading bot started'})
-    
+
     except Exception as e:
         logger.error(f"Error starting bot: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
@@ -509,16 +506,16 @@ def api_stop_bot():
     """API endpoint to stop the trading bot"""
     # Get bot instance
     bot = get_bot_instance()
-    
+
     if not bot:
         return jsonify({'error': 'Trading bot not initialized'})
-    
+
     try:
         # Stop the bot
         bot.stop()
-        
+
         return jsonify({'status': 'success', 'message': 'Trading bot stopped'})
-    
+
     except Exception as e:
         logger.error(f"Error stopping bot: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
