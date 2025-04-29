@@ -11,7 +11,7 @@ This module implements advanced risk management techniques:
 
 import logging
 import numpy as np
-from typing import Dict, Optional, Tuple, List, Union
+from typing import Dict, Optional, Tuple, List, Union, Any, cast
 from decimal import Decimal, ROUND_DOWN
 
 # Configure logger
@@ -23,7 +23,7 @@ def calculate_position_size(
     stop_loss: float,
     risk_pct: float,
     min_amount: float,
-    max_amount: float = None,
+    max_amount: Optional[float] = None,
     amount_precision: int = 6
 ) -> float:
     """
@@ -136,27 +136,164 @@ def calculate_take_profit(
     entry_price: float,
     stop_loss: float,
     rr_ratio: float = 2.0,
-    price_precision: int = 2
-) -> float:
+    atr_value: Optional[float] = None,
+    atr_multiplier: Optional[float] = None,
+    price_precision: int = 2,
+    tp_mode: str = "rr_ratio",
+    fixed_tp_pct: Optional[float] = None,
+    multi_tp_levels: bool = False
+) -> Union[float, List[Dict[str, float]]]:
     """
-    Calculate take profit based on risk-reward ratio.
+    Calculate take profit based on various strategies (risk-reward ratio, ATR, fixed percentage).
     
     Args:
         entry_price: Entry price
         stop_loss: Stop loss price
         rr_ratio: Risk-reward ratio
+        atr_value: Current ATR value for ATR-based take profit (optional)
+        atr_multiplier: Multiplier for ATR-based take profit (optional)
         price_precision: Decimal places for price
+        tp_mode: Take profit mode ('rr_ratio', 'atr', 'fixed', 'multi')
+        fixed_tp_pct: Fixed percentage for take profit (optional)
+        multi_tp_levels: Create multiple take profit levels
         
     Returns:
-        float: Take profit price
+        Union[float, List[Dict]]: Take profit price or list of take profit levels
     """
-    # Calculate risk
-    if entry_price > stop_loss:  # Long position
-        risk = entry_price - stop_loss
-        take_profit = entry_price + (risk * rr_ratio)
-    else:  # Short position
-        risk = stop_loss - entry_price
-        take_profit = entry_price - (risk * rr_ratio)
+    # Determine position side
+    is_long = entry_price > stop_loss if stop_loss > 0 else True
+    
+    # Calculate take profit based on selected mode
+    if tp_mode == "atr" and atr_value is not None and atr_multiplier is not None:
+        # ATR-based take profit
+        if is_long:
+            take_profit = entry_price + (atr_value * atr_multiplier)
+        else:
+            take_profit = entry_price - (atr_value * atr_multiplier)
+    elif tp_mode == "fixed" and fixed_tp_pct is not None:
+        # Fixed percentage take profit
+        if is_long:
+            take_profit = entry_price * (1 + fixed_tp_pct / 100)
+        else:
+            take_profit = entry_price * (1 - fixed_tp_pct / 100)
+    elif tp_mode == "multi":
+        # Multiple take profit levels
+        tp_levels = []
+        
+        if is_long:
+            # Calculate risk for R:R-based levels (if stop loss is set)
+            risk = entry_price - stop_loss if stop_loss > 0 else entry_price * 0.02
+            
+            # Level 1: 1:1 R:R or 1.5% (25% of position)
+            tp1 = entry_price + risk if stop_loss > 0 else entry_price * 1.015
+            tp_levels.append({
+                "price": round(tp1, price_precision),
+                "percentage": 25.0
+            })
+            
+            # Level 2: 2:1 R:R or 3% (50% of position)
+            tp2 = entry_price + (risk * 2) if stop_loss > 0 else entry_price * 1.03
+            tp_levels.append({
+                "price": round(tp2, price_precision),
+                "percentage": 50.0
+            })
+            
+            # Level 3: 3:1 R:R or 5% (25% of position)
+            tp3 = entry_price + (risk * 3) if stop_loss > 0 else entry_price * 1.05
+            tp_levels.append({
+                "price": round(tp3, price_precision),
+                "percentage": 25.0
+            })
+        else:
+            # Calculate risk for R:R-based levels (if stop loss is set)
+            risk = stop_loss - entry_price if stop_loss > 0 else entry_price * 0.02
+            
+            # Level 1: 1:1 R:R or 1.5% (25% of position)
+            tp1 = entry_price - risk if stop_loss > 0 else entry_price * 0.985
+            tp_levels.append({
+                "price": round(tp1, price_precision),
+                "percentage": 25.0
+            })
+            
+            # Level 2: 2:1 R:R or 3% (50% of position)
+            tp2 = entry_price - (risk * 2) if stop_loss > 0 else entry_price * 0.97
+            tp_levels.append({
+                "price": round(tp2, price_precision),
+                "percentage": 50.0
+            })
+            
+            # Level 3: 3:1 R:R or 5% (25% of position)
+            tp3 = entry_price - (risk * 3) if stop_loss > 0 else entry_price * 0.95
+            tp_levels.append({
+                "price": round(tp3, price_precision),
+                "percentage": 25.0
+            })
+        
+        return tp_levels
+    else:
+        # Default: Risk-reward ratio based take profit
+        if stop_loss <= 0:
+            # If no stop loss is set, use a default percentage
+            if is_long:
+                take_profit = entry_price * (1 + 0.03)  # Default 3% profit
+            else:
+                take_profit = entry_price * (1 - 0.03)  # Default 3% profit
+        else:
+            # Calculate based on risk-reward ratio
+            if is_long:
+                risk = entry_price - stop_loss
+                take_profit = entry_price + (risk * rr_ratio)
+            else:
+                risk = stop_loss - entry_price
+                take_profit = entry_price - (risk * rr_ratio)
+    
+    # Handle multi-TP for non-multi mode
+    if multi_tp_levels and tp_mode != "multi":
+        base_tp = take_profit
+        tp_levels = []
+        
+        if is_long:
+            # Level 1: 1/3 distance to target (25% of position)
+            tp1 = entry_price + (base_tp - entry_price) / 3
+            tp_levels.append({
+                "price": round(tp1, price_precision),
+                "percentage": 25.0
+            })
+            
+            # Level 2: 2/3 distance to target (50% of position)
+            tp2 = entry_price + 2 * (base_tp - entry_price) / 3
+            tp_levels.append({
+                "price": round(tp2, price_precision),
+                "percentage": 50.0
+            })
+            
+            # Level 3: full target (25% of position)
+            tp_levels.append({
+                "price": round(base_tp, price_precision),
+                "percentage": 25.0
+            })
+        else:
+            # Level 1: 1/3 distance to target (25% of position)
+            tp1 = entry_price - (entry_price - base_tp) / 3
+            tp_levels.append({
+                "price": round(tp1, price_precision),
+                "percentage": 25.0
+            })
+            
+            # Level 2: 2/3 distance to target (50% of position)
+            tp2 = entry_price - 2 * (entry_price - base_tp) / 3
+            tp_levels.append({
+                "price": round(tp2, price_precision),
+                "percentage": 50.0
+            })
+            
+            # Level 3: full target (25% of position)
+            tp_levels.append({
+                "price": round(base_tp, price_precision),
+                "percentage": 25.0
+            })
+        
+        return tp_levels
     
     # Round to precision
     take_profit = round(take_profit, price_precision)
@@ -170,10 +307,13 @@ def update_trailing_stop(
     current_stop: float,
     activation_pct: float,
     trail_pct: float,
-    price_precision: int = 2
+    atr_value: Optional[float] = None,
+    atr_multiplier: Optional[float] = None,
+    price_precision: int = 2,
+    advanced_mode: bool = False
 ) -> float:
     """
-    Update trailing stop if conditions are met.
+    Update trailing stop if conditions are met, with support for ATR-based trailing.
     
     Args:
         current_price: Current market price
@@ -182,7 +322,10 @@ def update_trailing_stop(
         current_stop: Current stop loss level
         activation_pct: Percentage move needed to activate trailing stop
         trail_pct: Percentage to trail by
+        atr_value: Current ATR value for ATR-based trailing (optional)
+        atr_multiplier: Multiplier for ATR-based trailing (optional)
         price_precision: Decimal places for price
+        advanced_mode: Use advanced trailing stop logic with multiple step levels
         
     Returns:
         float: Updated stop loss price (or current if no update)
@@ -194,13 +337,34 @@ def update_trailing_stop(
         
         if current_price >= activation_threshold:
             # Calculate trailing stop
-            new_stop = current_price * (1 - trail_pct / 100)
+            if atr_value is not None and atr_multiplier is not None:
+                # ATR-based trailing stop
+                new_stop = current_price - (atr_value * atr_multiplier)
+            else:
+                # Percentage-based trailing stop
+                new_stop = current_price * (1 - trail_pct / 100)
+            
+            # Advanced mode - step up trail percentage as profit increases
+            if advanced_mode:
+                # Calculate profit percentage
+                profit_pct = ((current_price - entry_price) / entry_price) * 100
+                
+                # Adjust trail percentage based on profit level
+                if profit_pct > 10:
+                    # Tighten trail to 25% of original trail percentage for substantial profits
+                    new_stop = current_price * (1 - (trail_pct * 0.25) / 100)
+                elif profit_pct > 5:
+                    # Tighten trail to 50% of original trail percentage for good profits
+                    new_stop = current_price * (1 - (trail_pct * 0.5) / 100)
+                elif profit_pct > activation_pct * 2:
+                    # Tighten trail to 75% of original trail percentage after profit above 2x activation
+                    new_stop = current_price * (1 - (trail_pct * 0.75) / 100)
             
             # Only update if new stop is higher than current
             if new_stop > current_stop:
                 logger.info(
-                    f"Trailing stop updated: {current_stop} -> {new_stop} "
-                    f"(price: {current_price}, activation: {activation_threshold})"
+                    f"Trailing stop updated: {current_stop:.{price_precision}f} -> {new_stop:.{price_precision}f} "
+                    f"(price: {current_price:.{price_precision}f}, activation: {activation_threshold:.{price_precision}f})"
                 )
                 return round(new_stop, price_precision)
     else:  # Short
@@ -208,13 +372,34 @@ def update_trailing_stop(
         
         if current_price <= activation_threshold:
             # Calculate trailing stop
-            new_stop = current_price * (1 + trail_pct / 100)
+            if atr_value is not None and atr_multiplier is not None:
+                # ATR-based trailing stop
+                new_stop = current_price + (atr_value * atr_multiplier)
+            else:
+                # Percentage-based trailing stop
+                new_stop = current_price * (1 + trail_pct / 100)
+            
+            # Advanced mode - step up trail percentage as profit increases
+            if advanced_mode:
+                # Calculate profit percentage
+                profit_pct = ((entry_price - current_price) / entry_price) * 100
+                
+                # Adjust trail percentage based on profit level
+                if profit_pct > 10:
+                    # Tighten trail to 25% of original trail percentage for substantial profits
+                    new_stop = current_price * (1 + (trail_pct * 0.25) / 100)
+                elif profit_pct > 5:
+                    # Tighten trail to 50% of original trail percentage for good profits
+                    new_stop = current_price * (1 + (trail_pct * 0.5) / 100)
+                elif profit_pct > activation_pct * 2:
+                    # Tighten trail to 75% of original trail percentage after profit above 2x activation
+                    new_stop = current_price * (1 + (trail_pct * 0.75) / 100)
             
             # Only update if new stop is lower than current
             if new_stop < current_stop:
                 logger.info(
-                    f"Trailing stop updated: {current_stop} -> {new_stop} "
-                    f"(price: {current_price}, activation: {activation_threshold})"
+                    f"Trailing stop updated: {current_stop:.{price_precision}f} -> {new_stop:.{price_precision}f} "
+                    f"(price: {current_price:.{price_precision}f}, activation: {activation_threshold:.{price_precision}f})"
                 )
                 return round(new_stop, price_precision)
     

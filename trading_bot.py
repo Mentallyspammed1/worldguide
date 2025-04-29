@@ -416,16 +416,17 @@ class TradingBot:
         
         return float(sl_price)
 
-    def calculate_take_profit(self, entry_price: float, side: str) -> float:
+    def calculate_take_profit(self, entry_price: float, side: str, stop_loss: float = 0.0) -> Union[float, List[Dict]]:
         """
-        Calculate take profit price based on configuration.
+        Calculate take profit price based on configuration with enhanced multi-level take profit options.
         
         Args:
             entry_price: Entry price for the position
             side: Position side ('long' or 'short')
+            stop_loss: Stop loss price (for risk:reward calculation) (optional)
             
         Returns:
-            float: Take profit price
+            Union[float, List[Dict]]: Take profit price or list of take profit levels
         """
         risk_settings = self.config.get("risk_management", {})
         tp_config = risk_settings.get("take_profit", {})
@@ -433,33 +434,51 @@ class TradingBot:
         if not tp_config.get("enabled", True):
             return 0.0
         
+        # Get take profit configuration
         tp_mode = tp_config.get("mode", "atr")
+        multi_tp_levels = tp_config.get("multi_level", False)
         
+        # Use enhanced risk management take profit function
+        from risk_management import calculate_take_profit as rm_calculate_take_profit
+        
+        # Prepare parameters
+        atr_value = None
+        atr_multiplier = None
+        fixed_tp_pct = None
+        rr_ratio = tp_config.get("rr_ratio", 2.0)
+        
+        # Get ATR if available
         if tp_mode == "atr" and "atr" in self.candles_df.columns:
-            atr = self.candles_df["atr"].iloc[-1]
+            atr_value = self.candles_df["atr"].iloc[-1]
             atr_multiplier = tp_config.get("atr_multiplier", 4.0)
-            
-            if side == "long":
-                tp_price = entry_price + (atr * atr_multiplier)
-            else:
-                tp_price = entry_price - (atr * atr_multiplier)
-        else:
-            # Fixed percentage
-            fixed_pct = tp_config.get("fixed_pct", 4.0)
-            
-            if side == "long":
-                tp_price = entry_price * (1 + fixed_pct / 100)
-            else:
-                tp_price = entry_price * (1 - fixed_pct / 100)
         
-        # Round to price precision
-        decimal_places = self.precision["price"]
-        tp_price = Decimal(str(tp_price)).quantize(
-            Decimal('0.' + '0' * decimal_places),
-            rounding=ROUND_DOWN if side == "short" else ROUND_DOWN  # Ensure conservative rounding
+        # Get fixed percentage if configured
+        if tp_mode == "fixed":
+            fixed_tp_pct = tp_config.get("fixed_pct", 4.0)
+        
+        # Calculate take profit using enhanced function
+        tp_result = rm_calculate_take_profit(
+            entry_price=entry_price,
+            stop_loss=stop_loss,
+            rr_ratio=rr_ratio,
+            atr_value=atr_value,
+            atr_multiplier=atr_multiplier,
+            price_precision=self.precision["price"],
+            tp_mode=tp_mode,
+            fixed_tp_pct=fixed_tp_pct,
+            multi_tp_levels=multi_tp_levels
         )
         
-        return float(tp_price)
+        # Handle multi-level TP or single TP
+        if isinstance(tp_result, list):
+            self.logger.info(f"Calculated multi-level take profit for {side} position:")
+            for level in tp_result:
+                self.logger.info(f"  Level: {level['price']} ({level['percentage']}% of position)")
+            return tp_result
+        else:
+            # Single TP level
+            self.logger.info(f"Calculated take profit for {side} position: {tp_result}")
+            return float(tp_result)
 
     def execute_entry(self, side: str, trade_params: Dict = None) -> Dict:
         """
@@ -1175,7 +1194,7 @@ class TradingBot:
             self.logger.error(f"Error in run_once: {e}")
             
     def update_trailing_stop(self) -> None:
-        """Update trailing stop if enabled and conditions are met"""
+        """Update trailing stop if enabled and conditions are met using enhanced trailing stop functionality"""
         if not self.current_position:
             return
             
@@ -1183,14 +1202,18 @@ class TradingBot:
         position_side = self.current_position["side"]
         entry_price = self.current_position["entry_price"]
         
-        # Try to load strategy configuration
+        # Get trailing stop configuration - first try from strategy_config.json, fallback to main config
+        trailing_stop_config = {}
         try:
-            with open("strategy_config.json", "r") as f:
-                strategy_config = json.load(f)
+            # Try to load strategy configuration first
+            try:
+                with open("strategy_config.json", "r") as f:
+                    strategy_config = json.load(f)
+                trailing_stop_config = strategy_config.get("risk_management", {}).get("trailing_stop", {})
+            except (FileNotFoundError, json.JSONDecodeError):
+                # Fallback to main config
+                trailing_stop_config = self.config.get("risk_management", {}).get("trailing_stop", {})
                 
-            # Get trailing stop settings
-            trailing_stop_config = strategy_config.get("risk_management", {}).get("trailing_stop", {})
-            
             if not trailing_stop_config.get("enabled", True):
                 return
                 
@@ -1201,6 +1224,8 @@ class TradingBot:
             # Get activation percentage and trail percentage
             activation_pct = trailing_stop_config.get("activation_pct", 1.5)
             trail_pct = trailing_stop_config.get("trail_pct", 0.75)
+            advanced_mode = trailing_stop_config.get("advanced_mode", False)
+            use_atr = trailing_stop_config.get("use_atr", False)
             
             # Get current trailing stop if it exists
             current_stop = self.current_position.get("trailing_stop_price", 0)
@@ -1216,38 +1241,83 @@ class TradingBot:
                     else:
                         current_stop = entry_price * 1.05  # 5% above entry
             
-            # Check if price has moved enough to activate trailing stop
-            activation_threshold = 0.0
-            if position_side == "long":
-                activation_threshold = entry_price * (1 + activation_pct/100)
+            # Get ATR data if enabled and available
+            atr_value = None
+            atr_multiplier = None
+            if use_atr and "atr" in self.candles_df.columns:
+                atr_value = self.candles_df["atr"].iloc[-1]
+                atr_multiplier = trailing_stop_config.get("atr_multiplier", 2.0)
+                self.logger.debug(f"Using ATR-based trailing stop: ATR = {atr_value}, multiplier = {atr_multiplier}")
+            
+            # Calculate new stop using the enhanced risk_management function
+            from risk_management import update_trailing_stop
+            
+            new_stop = update_trailing_stop(
+                current_price=current_price,
+                side=position_side,
+                entry_price=entry_price,
+                current_stop=current_stop,
+                activation_pct=activation_pct,
+                trail_pct=trail_pct,
+                atr_value=atr_value,
+                atr_multiplier=atr_multiplier,
+                price_precision=self.precision["price"],
+                advanced_mode=advanced_mode
+            )
+            
+            # If trailing stop changed, update position
+            if new_stop != current_stop:
+                self.logger.info(
+                    f"Updated trailing stop: {current_stop:.{self.precision['price']}f} -> {new_stop:.{self.precision['price']}f} "
+                    f"(price: {current_price:.{self.precision['price']}f})"
+                )
+                self.current_position["trailing_stop_price"] = new_stop
                 
-                if current_price >= activation_threshold:
-                    # Calculate new trailing stop
-                    new_stop = current_price * (1 - trail_pct/100)
-                    
-                    # Only update if new stop is higher than current
-                    if new_stop > current_stop:
-                        self.logger.info(f"Updated trailing stop: {current_stop} -> {new_stop}")
-                        self.current_position["trailing_stop_price"] = new_stop
-                        # Save position state
-                        self.state["positions"][self.symbol] = self.current_position
-                        self.save_state()
-            else:  # short position
-                activation_threshold = entry_price * (1 - activation_pct/100)
+                # Update stop-loss order if exists
+                if "sl" in self.state["orders"]:
+                    sl_order_id = self.state["orders"]["sl"].get("id")
+                    if sl_order_id:
+                        try:
+                            # Cancel existing stop loss order
+                            retry_api_call(
+                                self.exchange.cancel_order,
+                                sl_order_id,
+                                self.symbol
+                            )
+                            self.logger.info(f"Cancelled old stop loss order: {sl_order_id}")
+                            
+                            # Place new stop loss order
+                            sl_side = "sell" if position_side == "long" else "buy"
+                            amount = self.current_position["amount"]
+                            
+                            sl_order = retry_api_call(
+                                self.exchange.create_order,
+                                self.symbol,
+                                "stop",
+                                sl_side,
+                                amount,
+                                price=new_stop,
+                                params={"stopPrice": new_stop}
+                            )
+                            
+                            # Update order tracker
+                            self.state["orders"]["sl"] = {
+                                "id": sl_order["id"],
+                                "price": new_stop,
+                                "amount": amount,
+                                "side": sl_side
+                            }
+                            
+                            self.logger.info(f"Placed new trailing stop loss order at {new_stop}")
+                        except Exception as e:
+                            self.logger.error(f"Error updating stop loss order: {e}")
                 
-                if current_price <= activation_threshold:
-                    # Calculate new trailing stop
-                    new_stop = current_price * (1 + trail_pct/100)
-                    
-                    # Only update if new stop is lower than current
-                    if new_stop < current_stop:
-                        self.logger.info(f"Updated trailing stop: {current_stop} -> {new_stop}")
-                        self.current_position["trailing_stop_price"] = new_stop
-                        # Save position state
-                        self.state["positions"][self.symbol] = self.current_position
-                        self.save_state()
-                        
-        except (FileNotFoundError, json.JSONDecodeError):
+                # Save position state
+                self.state["positions"][self.symbol] = self.current_position
+                self.save_state()
+                
+        except Exception as e:
+            self.logger.error(f"Error updating trailing stop: {e}")
             # Skip trailing stop update if config not available
             return
 
