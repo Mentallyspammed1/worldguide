@@ -69,16 +69,52 @@ def dashboard():
     config = load_config()
     state = load_state()
     
-    # Format timestamps in trades for display
-    for trade in state.get("trades", []):
-        if "timestamp" in trade:
-            trade["time"] = datetime.fromtimestamp(trade["timestamp"] / 1000).strftime("%Y-%m-%d %H:%M:%S")
+    # Process trade data for template
+    trades = []
+    
+    # Check if trades are in the older format (array) or newer format (dict with 'recent' key)
+    if "trades" in state and isinstance(state["trades"], dict) and "recent" in state["trades"]:
+        trade_list = state["trades"]["recent"]
+    else:
+        trade_list = state.get("trades", [])
+    
+    # Process each trade to ensure it has all required fields
+    for trade in trade_list:
+        processed_trade = {
+            "symbol": trade.get("symbol", "Unknown"),
+            "side": trade.get("side", "unknown"),
+            "size": trade.get("size", 0),
+            "entry_price": trade.get("entry_price", 0),
+            "exit_price": trade.get("exit_price", 0),
+            "pnl": trade.get("pnl", 0),
+            "timestamp": trade.get("timestamp", 0)
+        }
+        
+        # Format timestamp for display
+        if processed_trade["timestamp"]:
+            processed_trade["time"] = datetime.fromtimestamp(
+                processed_trade["timestamp"] / 1000 if processed_trade["timestamp"] > 1e10 else processed_trade["timestamp"]
+            ).strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            processed_trade["time"] = "Unknown"
+            
+        trades.append(processed_trade)
+    
+    # Calculate last update time
+    last_update = "Never"
+    if state.get("last_update", 0) > 0:
+        timestamp = state["last_update"]
+        # Convert from milliseconds if needed
+        if timestamp > 1e10:  # Likely in milliseconds
+            timestamp = timestamp / 1000
+        last_update = datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     
     return render_template(
         "dashboard.html",
         config=config,
         state=state,
-        last_update=datetime.fromtimestamp(state.get("last_update", 0) / 1000).strftime("%Y-%m-%d %H:%M:%S") if state.get("last_update", 0) > 0 else "Never"
+        trades=trades,
+        last_update=last_update
     )
 
 
