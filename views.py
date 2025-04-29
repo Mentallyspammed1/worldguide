@@ -24,7 +24,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db
-from models import User, BotConfig, TradeHistory
+from models import User, TradingConfig, TradeHistory, Position
 from trading_bot import TradingBot
 
 # Configure logger
@@ -65,144 +65,6 @@ def get_bot_instance():
     
     if bot is None:
         initialize_bot()
-        
-        # If bot still None, create with default config for UI
-        if bot is None:
-            try:
-                # Default configuration
-                default_config = {
-                    "exchange": "bybit",
-                    "symbol": "BTC/USDT",
-                    "timeframe": "15m",
-                    "dry_run": True,
-                    "strategy": {
-                        "active": "ehlers_supertrend",
-                        "params": {}
-                    },
-                    "risk_management": {
-                        "position_size_pct": 1.0,
-                        "max_open_positions": 3,
-                        "use_sl_tp": True,
-                        "stop_loss_pct": 2.0,
-                        "take_profit_pct": 4.0
-                    }
-                }
-                
-                # Create a default config file if it doesn't exist
-                config_path = app.config.get("CONFIG_PATH", "config.json")
-                if not os.path.exists(config_path):
-                    with open(config_path, 'w') as f:
-                        json.dump(default_config, f, indent=2)
-                        
-                # Create bot with default config
-                bot = TradingBot(config_file=config_path)
-                logger.info("Trading bot initialized with default configuration")
-            except Exception as e:
-                logger.error(f"Error initializing trading bot with default config: {e}")
-    
-    # If bot is still None, return a mock object for UI
-    if bot is None:
-        logger.warning("Using mock bot instance for UI")
-        class MockBot:
-            def __init__(self):
-                import pandas as pd
-                import numpy as np
-                from datetime import datetime, timedelta
-                
-                self.config = {
-                    "exchange": "bybit",
-                    "symbol": "BTC/USDT",
-                    "timeframe": "15m",
-                    "dry_run": True,
-                    "strategy": {
-                        "active": "ehlers_supertrend",
-                        "params": {}
-                    },
-                    "risk_management": {
-                        "position_size_pct": 1.0,
-                        "max_open_positions": 3,
-                        "use_sl_tp": True,
-                        "stop_loss_pct": 2.0,
-                        "take_profit_pct": 4.0
-                    }
-                }
-                self.state = {
-                    "active": False,
-                    "positions": {},
-                    "balance": {"total": 10000, "free": 10000, "used": 0},
-                    "performance": {"pnl_percentage": 0.0, "drawdown_max": 0.0},
-                    "trades": {"total": 0, "wins": 0}
-                }
-                self.exchange_id = "bybit"
-                self.exchange = None
-                self.symbol = "BTC/USDT"
-                self.timeframe = "15m"
-                self.config_file = "config.json"
-                
-                # Create sample candles dataframe for the UI
-                now = datetime.now()
-                periods = 100
-                timestamps = [now - timedelta(minutes=15*i) for i in range(periods)]
-                timestamps.reverse()  # oldest first
-                
-                # Generate some random but plausible price data
-                base_price = 50000
-                price_data = []
-                for i in range(periods):
-                    change = np.random.normal(0, 1) * 100  # Random price movement
-                    price = base_price + change
-                    base_price = price  # Use as new base for next iteration
-                    
-                    # Create OHLCV candle with some randomness
-                    open_price = price - np.random.random() * 50
-                    close_price = price + np.random.random() * 50
-                    high_price = max(open_price, close_price) + np.random.random() * 50
-                    low_price = min(open_price, close_price) - np.random.random() * 50
-                    volume = np.random.random() * 100 + 10
-                    
-                    price_data.append({
-                        'open': open_price,
-                        'high': high_price,
-                        'low': low_price,
-                        'close': close_price,
-                        'volume': volume
-                    })
-                
-                # Create DataFrame with timestamps as index
-                self.candles_df = pd.DataFrame(price_data, index=timestamps)
-                self.current_positions = {}
-            
-            def get_balance(self):
-                return {"total": 10000, "free": 10000, "used": 0}
-                
-            def get_ticker(self):
-                return {"symbol": "BTC/USDT", "last": 50000, "bid": 49990, "ask": 50010, "volume": 1000, "percentage": 0.5, "high": 51000, "low": 49000}
-                
-            def start(self):
-                self.state["active"] = True
-                return True
-                
-            def stop(self):
-                self.state["active"] = False
-                return True
-                
-            def update_candles(self):
-                # This would normally fetch fresh candles, but for mock we'll just return existing ones
-                return True
-                
-            def initialize(self):
-                # This would reinitialize the trading bot with new config
-                return True
-                
-            def update_positions(self):
-                # This would update positions from the exchange
-                return self.current_positions
-                
-            def close_position(self, symbol, position_id=None):
-                # This would close a position
-                return True
-                
-        return MockBot()
     
     return bot
 
@@ -224,8 +86,12 @@ def dashboard():
     config = {}
     
     if bot:
-        state = bot.state
-        config = bot.config
+        state = bot.state or {}
+        config = bot.config or {}
+        
+        # Ensure config has required structure
+        if 'strategy' not in config:
+            config['strategy'] = {'active': 'Not Configured'}
     
     # Get trades from database
     trades = []

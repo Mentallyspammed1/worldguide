@@ -21,18 +21,18 @@
             --bg-medium: #1e1e1e;
             --bg-light: #2d2d2d;
         }
-        
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-color);
             font-family: 'Roboto', sans-serif;
         }
-        
+
         .navbar {
             background-color: var(--bg-medium);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
-        
+
         .card {
             background-color: var(--bg-light);
             border: none;
@@ -40,54 +40,54 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        
+
         .card-header {
             background-color: var(--bg-medium);
             color: var(--text-color);
             font-weight: 600;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .positive {
             color: var(--success-color);
         }
-        
+
         .negative {
             color: var(--danger-color);
         }
-        
+
         .table {
             color: var(--text-color);
         }
-        
+
         .table-dark {
             background-color: var(--bg-light);
         }
-        
+
         .config-form label {
             color: var(--text-color);
             font-weight: 500;
         }
-        
+
         .config-section {
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .config-section:last-child {
             border-bottom: none;
         }
-        
+
         #priceChart, #performanceChart {
             min-height: 250px;
         }
-        
+
         /* Badge styles */
         .badge.bg-success {
             background-color: var(--success-color) !important;
         }
-        
+
         .badge.bg-danger {
             background-color: var(--danger-color) !important;
         }
@@ -173,20 +173,14 @@
                             <div class="col-md-3 col-6">
                                 <div class="small text-muted">Strategy</div>
                                 <div class="fs-5 fw-bold" id="strategy">
-                                    {% if config.strategy and config.strategy.active %}
-                                        {{ config.strategy.active }}
-                                    {% elif config.get('strategy', {}).get('active') %}
-                                        {{ config.get('strategy', {}).get('active') }}
-                                    {% else %}
-                                        ehlers_supertrend
-                                    {% endif %}
+                                    {{ config.get('strategy', {}).get('active', 'Not Set') }}
                                 </div>
                             </div>
                         </div>
                         <canvas id="priceChart" height="300"></canvas>
                     </div>
                 </div>
-                
+
                 <!-- Open Positions Card -->
                 <div class="card mb-4">
                     <div class="card-header">Open Positions</div>
@@ -233,7 +227,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <!-- Trade History Card -->
                 <div class="card">
                     <div class="card-header">Trade History</div>
@@ -294,25 +288,25 @@
                                 <div class="mb-3">
                                     <label for="exchange" class="form-label">Exchange</label>
                                     <select class="form-select" id="exchange" name="exchange">
-                                        <option value="bybit" {% if config.get('exchange') == 'bybit' %}selected{% endif %}>Bybit</option>
-                                        <option value="binance" {% if config.get('exchange') == 'binance' %}selected{% endif %}>Binance</option>
-                                        <option value="kucoin" {% if config.get('exchange') == 'kucoin' %}selected{% endif %}>KuCoin</option>
+                                        <option value="bybit" {% if config.exchange == 'bybit' %}selected{% endif %}>Bybit</option>
+                                        <option value="binance" {% if config.exchange == 'binance' %}selected{% endif %}>Binance</option>
+                                        <option value="kucoin" {% if config.exchange == 'kucoin' %}selected{% endif %}>KuCoin</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="symbol" class="form-label">Trading Pair</label>
-                                    <input type="text" class="form-control" id="symbol" name="symbol" value="{{ config.get('symbol', 'BTC/USDT') }}">
+                                    <input type="text" class="form-control" id="symbol" name="symbol" value="{{ config.symbol }}">
                                     <div class="form-text">Example: BTC/USDT:USDT</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="timeframe" class="form-label">Timeframe</label>
                                     <select class="form-select" id="timeframe" name="timeframe">
-                                        <option value="1m" {% if config.get('timeframe') == '1m' %}selected{% endif %}>1 minute</option>
-                                        <option value="5m" {% if config.get('timeframe') == '5m' %}selected{% endif %}>5 minutes</option>
-                                        <option value="15m" {% if config.get('timeframe', '15m') == '15m' %}selected{% endif %}>15 minutes</option>
-                                        <option value="1h" {% if config.get('timeframe') == '1h' %}selected{% endif %}>1 hour</option>
-                                        <option value="4h" {% if config.get('timeframe') == '4h' %}selected{% endif %}>4 hours</option>
-                                        <option value="1d" {% if config.get('timeframe') == '1d' %}selected{% endif %}>1 day</option>
+                                        <option value="1m" {% if config.timeframe == '1m' %}selected{% endif %}>1 minute</option>
+                                        <option value="5m" {% if config.timeframe == '5m' %}selected{% endif %}>5 minutes</option>
+                                        <option value="15m" {% if config.timeframe == '15m' %}selected{% endif %}>15 minutes</option>
+                                        <option value="1h" {% if config.timeframe == '1h' %}selected{% endif %}>1 hour</option>
+                                        <option value="4h" {% if config.timeframe == '4h' %}selected{% endif %}>4 hours</option>
+                                        <option value="1d" {% if config.timeframe == '1d' %}selected{% endif %}>1 day</option>
                                     </select>
                                 </div>
                             </div>
@@ -321,18 +315,15 @@
                                 <h5>Risk Management</h5>
                                 <div class="mb-3">
                                     <label for="position_size_pct" class="form-label">Position Size (%)</label>
-                                    <input type="number" class="form-control" id="position_size_pct" name="risk_management.position_size_pct" 
-                                           value="{{ config.get('risk_management', {}).get('position_size_pct', 1) }}" min="0.1" max="100" step="0.1">
+                                    <input type="number" class="form-control" id="position_size_pct" name="risk_management.position_size_pct" value="{{ config.risk_management.position_size_pct }}" min="0.1" max="100" step="0.1">
                                 </div>
                                 <div class="mb-3">
                                     <label for="max_open_positions" class="form-label">Max Open Positions</label>
-                                    <input type="number" class="form-control" id="max_open_positions" name="risk_management.max_open_positions" 
-                                           value="{{ config.get('risk_management', {}).get('max_open_positions', 1) }}" min="1" max="10" step="1">
+                                    <input type="number" class="form-control" id="max_open_positions" name="risk_management.max_open_positions" value="{{ config.risk_management.max_open_positions }}" min="1" max="10" step="1">
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="use_sl_tp" name="risk_management.use_sl_tp" 
-                                               {% if config.get('risk_management', {}).get('use_sl_tp', True) %}checked{% endif %}>
+                                        <input class="form-check-input" type="checkbox" id="use_sl_tp" name="risk_management.use_sl_tp" {% if config.risk_management.use_sl_tp %}checked{% endif %}>
                                         <label class="form-check-label" for="use_sl_tp">Use Stop Loss & Take Profit</label>
                                     </div>
                                 </div>
@@ -381,7 +372,7 @@
         let priceChart;
         let performanceChart;
         let lastUpdateTime = 0;
-        
+
         // Format currency values
         function formatCurrency(value, currency = 'USD') {
             return new Intl.NumberFormat('en-US', {
@@ -391,23 +382,23 @@
                 maximumFractionDigits: 2
             }).format(value);
         }
-        
+
         // Format percentage values
         function formatPercentage(value) {
             return value.toFixed(2) + '%';
         }
-        
+
         // Format date/time
         function formatDateTime(timestamp) {
             const date = new Date(timestamp);
             return date.toLocaleString();
         }
-        
+
         // Fetch and update market data
         function fetchMarketData() {
             const symbol = document.getElementById('symbol').value;
             const timeframe = document.getElementById('timeframe').value;
-            
+
             fetch(`/api/market_data?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`)
                 .then(response => response.json())
                 .then(data => {
@@ -415,36 +406,36 @@
                         console.error('Error fetching market data:', data.error);
                         return;
                     }
-                    
+
                     // Update price chart
                     updatePriceChart(data.candles);
-                    
+
                     // Update ticker info
                     if (data.ticker) {
                         const ticker = data.ticker;
                         const changeClass = ticker.change >= 0 ? 'positive' : 'negative';
                         const changeSign = ticker.change >= 0 ? '+' : '';
-                        
+
                         // You can add UI elements to display this data
                         // Example: document.getElementById('currentPrice').textContent = ticker.last.toFixed(2);
                         // Example: document.getElementById('priceChange').textContent = `${changeSign}${ticker.change.toFixed(2)}%`;
                         // Example: document.getElementById('priceChange').className = changeClass;
                     }
-                    
+
                     // Update last update time
                     lastUpdateTime = data.last_update;
                 })
                 .catch(error => console.error('Error fetching market data:', error));
         }
-        
+
         // Update price chart with new data
         function updatePriceChart(candles) {
             if (!candles || candles.length === 0) return;
-            
+
             // Extract data for chart
             const timestamps = candles.map(candle => new Date(candle.timestamp));
             const prices = candles.map(candle => candle.close);
-            
+
             // Update chart if it exists
             if (priceChart) {
                 priceChart.data.labels = timestamps;
@@ -516,7 +507,7 @@
                 });
             }
         }
-        
+
         // Fetch and update performance data
         function fetchPerformanceData() {
             fetch('/api/performance')
@@ -527,33 +518,33 @@
                     document.getElementById('winRate').textContent = data.win_rate.toFixed(2) + '%';
                     document.getElementById('totalPnl').textContent = data.total_pnl.toFixed(2) + '%';
                     document.getElementById('maxDrawdown').textContent = data.max_drawdown.toFixed(2) + '%';
-                    
+
                     // Update performance chart
                     // This would require trade history data with timestamps
                 })
                 .catch(error => console.error('Error fetching performance data:', error));
         }
-        
+
         // Handle form submissions
         document.addEventListener('DOMContentLoaded', function() {
             // Fetch initial data
             fetchMarketData();
             fetchPerformanceData();
-            
+
             // Set up periodic refresh
             setInterval(fetchMarketData, 15000);  // Update market data every 15 seconds
             setInterval(fetchPerformanceData, 60000);  // Update performance data every minute
-            
+
             // Handle config form submission
             const configForm = document.getElementById('configForm');
             if (configForm) {
                 configForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     // Collect form data
                     const formData = new FormData(configForm);
                     const config = {};
-                    
+
                     // Process nested form data into an object
                     for (const [key, value] of formData.entries()) {
                         if (key.includes('.')) {
@@ -564,7 +555,7 @@
                             config[key] = value;
                         }
                     }
-                    
+
                     // Send to API
                     fetch('/api/config', {
                         method: 'POST',
@@ -587,18 +578,18 @@
                     });
                 });
             }
-            
+
             // Handle symbol and timeframe selectors
             const symbolSelector = document.getElementById('symbolSelector');
             const timeframeSelector = document.getElementById('timeframeSelector');
-            
+
             if (symbolSelector) {
                 symbolSelector.addEventListener('change', function() {
                     document.getElementById('symbol').value = this.value;
                     fetchMarketData();
                 });
             }
-            
+
             if (timeframeSelector) {
                 timeframeSelector.addEventListener('change', function() {
                     document.getElementById('timeframe').value = this.value;
