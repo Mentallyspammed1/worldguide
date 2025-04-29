@@ -260,48 +260,166 @@ def accounts():
 
 @app.route('/strategies')
 def strategies():
-    """Render the strategies page"""
+    """Render strategies page"""
+    strategy_data = load_strategies()
+    return render_template('strategies.html', strategies=strategy_data)
+
+
+@app.route('/api/strategy/<strategy_name>', methods=['GET'])
+def get_strategy(strategy_name):
+    """API endpoint to get strategy details"""
+    # Load all strategies
+    strategies = load_strategies()
+    
+    # Check if requested strategy exists
+    if strategy_name not in strategies:
+        return jsonify({"error": f"Strategy '{strategy_name}' not found"}), 404
+    
+    # Return strategy details
+    return jsonify(strategies[strategy_name])
+
+
+def load_strategies():
+    """Load strategies from configuration file or create defaults"""
+    strategies = {}
+    
     # Get bot instance
     bot = get_bot_instance()
-
-    # Get strategies configuration
-    strategies = []
-    if bot:
-        # Get strategy config
-        strategy_config = bot.config.get('strategy', {})
-        active_strategy = strategy_config.get('active', 'ehlers_supertrend')
-
-        # Available strategies
-        available_strategies = [
-            {
-                'id': 'ehlers_supertrend',
-                'name': 'Ehlers Supertrend',
-                'description': 'Trend-following strategy based on John Ehlers\' Supertrend indicator',
-                'active': active_strategy == 'ehlers_supertrend'
+    
+    # Get active strategy from bot config
+    active_strategy = None
+    if bot and 'strategy' in bot.config:
+        active_strategy = bot.config['strategy'].get('active')
+    
+    try:
+        # Try to load strategies from DB or config file
+        import json
+        import os
+        
+        # Load strategies from configuration file
+        config_path = 'strategy_config.json'
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config_data = json.load(f)
+                if 'strategies' in config_data:
+                    return config_data['strategies']
+        
+        # If no strategies found, create default ones
+        default_strategies = {
+            'simple_crossover': {
+                'enabled': active_strategy == 'simple_crossover',
+                'display_name': 'Simple Moving Average Crossover',
+                'description': 'Basic moving average crossover strategy',
+                'type': 'trend',
+                'risk_level': 'low',
+                'parameters': {
+                    'fast_period': 10,
+                    'slow_period': 30,
+                    'signal_threshold': 0.5
+                }
             },
-            {
-                'id': 'momentum_divergence',
-                'name': 'Momentum Divergence',
-                'description': 'Reversal strategy using RSI/MACD divergence with volatility filters',
-                'active': active_strategy == 'momentum_divergence'
+            'macd_crossover': {
+                'enabled': active_strategy == 'macd_crossover',
+                'display_name': 'MACD Crossover',
+                'description': 'MACD line crossing signal line with zero line filter',
+                'type': 'momentum',
+                'risk_level': 'medium',
+                'parameters': {
+                    'fast_period': 12,
+                    'slow_period': 26,
+                    'signal_period': 9,
+                    'zero_line_filter': True
+                }
             },
-            {
-                'id': 'multi_timeframe_trend',
-                'name': 'Multi-Timeframe Trend',
+            'rsi_divergence': {
+                'enabled': active_strategy == 'rsi_divergence',
+                'display_name': 'RSI Divergence',
+                'description': 'Identifies price/RSI divergences for reversal signals',
+                'type': 'reversal',
+                'risk_level': 'medium',
+                'parameters': {
+                    'rsi_period': 14,
+                    'lookback_periods': 5,
+                    'divergence_threshold': 5
+                }
+            },
+            'supertrend': {
+                'enabled': active_strategy == 'supertrend',
+                'display_name': 'Supertrend',
+                'description': 'Follows trend direction using ATR-based indicator',
+                'type': 'trend',
+                'risk_level': 'medium',
+                'parameters': {
+                    'atr_period': 10,
+                    'atr_multiplier': 3.0
+                }
+            },
+            'ehlers_supertrend': {
+                'enabled': active_strategy == 'ehlers_supertrend',
+                'display_name': 'Ehlers Supertrend',
+                'description': 'Enhanced Supertrend with Ehlers filters',
+                'type': 'adaptive',
+                'risk_level': 'medium',
+                'parameters': {
+                    'atr_length': 10,
+                    'atr_multiplier': 2.0,
+                    'smoothing_length': 5,
+                    'use_median_price': True,
+                    'rsi_filter': True,
+                    'rsi_length': 14
+                }
+            },
+            'momentum_divergence': {
+                'enabled': active_strategy == 'momentum_divergence',
+                'display_name': 'Momentum Divergence',
+                'description': 'Catches reversals using multiple oscillator divergences',
+                'type': 'reversal',
+                'risk_level': 'high',
+                'parameters': {
+                    'rsi_period': 14,
+                    'stoch_period': 14,
+                    'cci_period': 20,
+                    'min_divergences': 2
+                }
+            },
+            'multi_timeframe_trend': {
+                'enabled': active_strategy == 'multi_timeframe_trend',
+                'display_name': 'Multi-Timeframe Trend',
                 'description': 'Combines multiple timeframes for stronger trend signals',
-                'active': active_strategy == 'multi_timeframe_trend'
+                'type': 'trend',
+                'risk_level': 'low',
+                'parameters': {
+                    'primary_tf': '15m',
+                    'secondary_tf': '1h',
+                    'tertiary_tf': '4h',
+                    'alignment_required': 2
+                }
             },
-            {
-                'id': 'support_resistance_breakout',
-                'name': 'Support/Resistance Breakout',
+            'support_resistance_breakout': {
+                'enabled': active_strategy == 'support_resistance_breakout',
+                'display_name': 'Support/Resistance Breakout',
                 'description': 'Detects breakouts from key levels with volume confirmation',
-                'active': active_strategy == 'support_resistance_breakout'
+                'type': 'breakout',
+                'risk_level': 'high',
+                'parameters': {
+                    'sr_periods': 50,
+                    'min_touches': 3,
+                    'breakout_threshold': 1.5,
+                    'volume_filter': True
+                }
             }
-        ]
-
-        strategies = available_strategies
-
-    return render_template('strategies.html', strategies=strategies)
+        }
+        
+        # Save default strategies to config file
+        with open(config_path, 'w') as f:
+            json.dump({"strategies": default_strategies}, f, indent=4)
+        
+        return default_strategies
+        
+    except Exception as e:
+        logger.error(f"Error loading strategies: {e}")
+        # Return empty dict if there's an error
+        return {}
 
 
 @app.route('/login', methods=['GET', 'POST'])
