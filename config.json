@@ -2,9 +2,9 @@
     "exchange": "bybit",
     "symbol": "BTC/USDT:USDT",
     "timeframe": "15m",
-    "api_key": "",
-    "api_secret": "",
-    "test_mode": true,
+    "api_key": "use_env_variable",
+    "api_secret": "use_env_variable",
+    "test_mode": false,
     "timezone": "UTC",
     "loop_interval_seconds": 15,
     

@@ -145,8 +145,14 @@ class TradingBot:
         Returns:
             ccxt.Exchange: Configured exchange instance
         """
-        api_key = self.config.get("api_key") or os.getenv("API_KEY")
-        api_secret = self.config.get("api_secret") or os.getenv("API_SECRET")
+        # Check for environment variables specific to the exchange first
+        env_prefix = self.exchange_id.upper()
+        api_key_env = os.getenv(f"{env_prefix}_API_KEY")
+        api_secret_env = os.getenv(f"{env_prefix}_API_SECRET")
+        
+        # Use environment variables if available, otherwise use config values
+        api_key = api_key_env or self.config.get("api_key") or os.getenv("API_KEY")
+        api_secret = api_secret_env or self.config.get("api_secret") or os.getenv("API_SECRET")
         
         # Default options for the exchange
         options = {}
@@ -157,6 +163,12 @@ class TradingBot:
             options["defaultType"] = "swap"
             if self.config.get("test_mode", True):
                 params["testnet"] = True
+                
+        self.logger.info(f"Setting up {self.exchange_id} exchange connection")
+        if not api_key or not api_secret:
+            self.logger.warning("API credentials not found. Running in read-only mode.")
+        else:
+            self.logger.info("API credentials found. Full trading functionality enabled.")
         
         # Create exchange instance with retry mechanism
         exchange = setup_ccxt_exchange(
