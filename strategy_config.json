@@ -1,6 +1,23 @@
 {
     "active_strategy": "auto",  
     "strategy_threshold": 0.7,
+    "ehlers_supertrend": {
+        "enabled": true,
+        "supertrend_period1": 10,
+        "supertrend_multiplier1": 2.0,
+        "supertrend_period2": 20,
+        "supertrend_multiplier2": 3.5,
+        "volatility_period": 20,
+        "volatility_threshold": 1.5,
+        "it_alpha": 0.07,
+        "cog_period": 10,
+        "range_reversal_threshold": 0.8,
+        "range_exit_threshold": 1.5,
+        "trend_strength_threshold": 0.5,
+        "limit_order_offset": 0.5,
+        "risk_per_trade_pct": 1.0,
+        "weight": 1.2
+    },
     "momentum_divergence": {
         "enabled": true,
         "rsi_divergence_threshold": 5,
