@@ -49,4 +49,3 @@ args = "python main.py --web --bot --log-level=INFO"
 
 [[ports]]
 localPort = 5000
-externalPort = 80

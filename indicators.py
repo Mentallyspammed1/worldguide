@@ -513,4 +513,3 @@ def calculate_ehlers_supertrend_signal(df: pd.DataFrame, config: dict) -> tuple:
             signal_strength = min(1.5, volatility_factor / 2)  # Scale up to 1.5x based on volatility
     
     return signal_strength, direction, parameters
-    return calculate_supertrend_signal(df, config)
