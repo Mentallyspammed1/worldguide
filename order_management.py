@@ -1,625 +1,819 @@
 """
 Order Management Module
 
-This module implements advanced order management features for the trading bot:
-- Limit order handling
-- OCO (One-Cancels-Other) orders for stop loss and take profit
-- Trailing stop orders
-- Partial position entry and exit
-- Scale-in and scale-out strategies
+This module handles order creation, submission, tracking, and management
+with advanced features such as limit order placement, OCO orders,
+trailing stops, and dynamic order sizing.
 """
 
-import json
 import logging
 import time
-from typing import Dict, List, Optional, Tuple, Union, Any
-from decimal import Decimal, ROUND_DOWN
+from enum import Enum
+from typing import Dict, List, Optional, Tuple, Union, Any, Callable
 
-import ccxt
-import numpy as np
-import pandas as pd
-
-from utils import retry_api_call
-
+from error_handling import handle_api_errors, retry, ExchangeAPIError, NetworkError
+from utils import round_price, round_amount, generate_id
 
 # Configure logger
-logger = logging.getLogger("order_management")
+logger = logging.getLogger("trading_bot.orders")
 
+class OrderType(Enum):
+    """Order type enumeration"""
+    MARKET = "market"
+    LIMIT = "limit"
+    STOP = "stop"
+    STOP_LIMIT = "stop_limit"
+    TRAILING_STOP = "trailing_stop"
+    OCO = "oco"
 
-def execute_market_order(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    side: str,
-    amount: float,
-    params: Dict = None
-) -> Dict:
-    """
-    Execute a market order.
-    
-    Args:
-        exchange: Exchange instance
-        symbol: Trading symbol
-        side: Order side ('buy' or 'sell')
-        amount: Order amount in base currency
-        params: Additional parameters for the order
-        
-    Returns:
-        Dict: Order result
-    """
-    logger.info(f"Executing market {side} order for {amount} {symbol}")
-    
-    try:
-        order = retry_api_call(
-            exchange.create_order,
-            symbol,
-            "market",
-            side,
-            amount,
-            params=params or {}
-        )
-        
-        logger.info(f"Market order executed: {order['id']}")
-        return order
-    except Exception as e:
-        logger.error(f"Failed to execute market order: {e}")
-        raise
+class OrderSide(Enum):
+    """Order side enumeration"""
+    BUY = "buy"
+    SELL = "sell"
 
+class OrderStatus(Enum):
+    """Order status enumeration"""
+    OPEN = "open"
+    CLOSED = "closed"
+    CANCELED = "canceled"
+    EXPIRED = "expired"
+    REJECTED = "rejected"
+    PARTIALLY_FILLED = "partially_filled"
 
-def execute_limit_order(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    side: str,
-    amount: float,
-    price: float,
-    params: Dict = None
-) -> Dict:
-    """
-    Execute a limit order.
+class OrderBook:
+    """Class to track and manage orders"""
     
-    Args:
-        exchange: Exchange instance
-        symbol: Trading symbol
-        side: Order side ('buy' or 'sell')
-        amount: Order amount in base currency
-        price: Limit price
-        params: Additional parameters for the order
+    def __init__(self, max_orders: int = 1000):
+        """
+        Initialize order book
         
-    Returns:
-        Dict: Order result
-    """
-    logger.info(f"Executing limit {side} order for {amount} {symbol} at {price}")
+        Args:
+            max_orders: Maximum number of orders to store
+        """
+        self.orders: Dict[str, Dict] = {}
+        self.max_orders = max_orders
     
-    try:
-        order = retry_api_call(
-            exchange.create_order,
-            symbol,
-            "limit",
-            side,
-            amount,
-            price,
-            params=params or {}
-        )
+    def add_order(self, order: Dict) -> None:
+        """
+        Add order to order book
         
-        logger.info(f"Limit order placed: {order['id']}")
-        return order
-    except Exception as e:
-        logger.error(f"Failed to execute limit order: {e}")
-        raise
-
-
-def execute_stop_order(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    side: str,
-    amount: float,
-    price: float,
-    stop_price: float = None,
-    params: Dict = None
-) -> Dict:
-    """
-    Execute a stop order.
+        Args:
+            order: Order data
+        """
+        if "id" not in order:
+            order["id"] = generate_id("order-")
+        
+        self.orders[order["id"]] = order
+        
+        # Prune if needed
+        if len(self.orders) > self.max_orders:
+            self._prune_old_orders()
     
-    Args:
-        exchange: Exchange instance
-        symbol: Trading symbol
-        side: Order side ('buy' or 'sell')
-        amount: Order amount in base currency
-        price: Order price
-        stop_price: Stop price (same as price if None)
-        params: Additional parameters for the order
+    def update_order(self, order_id: str, updates: Dict) -> None:
+        """
+        Update order in order book
         
-    Returns:
-        Dict: Order result
-    """
-    stop_price = stop_price or price
-    logger.info(f"Executing stop {side} order for {amount} {symbol} "
-               f"at {price} (stop: {stop_price})")
+        Args:
+            order_id: Order ID
+            updates: Updates to apply
+        """
+        if order_id in self.orders:
+            self.orders[order_id].update(updates)
     
-    params = params or {}
-    params["stopPrice"] = stop_price
-    
-    try:
-        order = retry_api_call(
-            exchange.create_order,
-            symbol,
-            "stop",
-            side,
-            amount,
-            price,
-            params=params
-        )
+    def get_order(self, order_id: str) -> Optional[Dict]:
+        """
+        Get order by ID
         
-        logger.info(f"Stop order placed: {order['id']}")
-        return order
-    except Exception as e:
-        logger.error(f"Failed to execute stop order: {e}")
-        raise
-
-
-def execute_trailing_stop_order(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    side: str,
-    amount: float,
-    activation_price: float,
-    trail_value: float,
-    is_percentage: bool = True,
-    params: Dict = None
-) -> Dict:
-    """
-    Execute a trailing stop order if supported by the exchange.
-    
-    Args:
-        exchange: Exchange instance
-        symbol: Trading symbol
-        side: Order side ('buy' or 'sell')
-        amount: Order amount in base currency
-        activation_price: Price at which trailing begins
-        trail_value: Amount or percentage to trail by
-        is_percentage: Whether trail_value is a percentage (True) or absolute value (False)
-        params: Additional parameters for the order
-        
-    Returns:
-        Dict: Order result
-    """
-    logger.info(f"Executing trailing stop {side} order for {amount} {symbol}")
-    
-    params = params or {}
-    
-    # Add exchange-specific parameters
-    if exchange.id == "bybit":
-        # Bybit uses callbackRate for percentage-based trailing stops
-        if is_percentage:
-            params["callbackRate"] = trail_value
-            logger.info(f"Trailing by {trail_value}%")
-        else:
-            # Convert to percentage for Bybit
-            if activation_price > 0:
-                callback_rate = (trail_value / activation_price) * 100
-                params["callbackRate"] = callback_rate
-                logger.info(f"Trailing by {callback_rate}% (converted from {trail_value})")
-            else:
-                raise ValueError("Invalid activation price for calculating callback rate")
-        
-        if side == "buy":
-            # For short positions closing (buying)
-            params["activationPrice"] = activation_price
-        else:
-            # For long positions closing (selling)
-            params["activationPrice"] = activation_price
-    elif exchange.id in ["binance", "binanceusdm"]:
-        if is_percentage:
-            params["callbackRate"] = trail_value
-        else:
-            params["callbackValue"] = trail_value
-        
-        params["activatePrice"] = activation_price
-    else:
-        # For other exchanges that may have different parameter names
-        logger.warning(f"Trailing stop implementation not specifically adapted for {exchange.id}. "
-                      "Using generic parameters.")
-        params["trailValue"] = trail_value
-        params["activationPrice"] = activation_price
-        params["isPercentage"] = is_percentage
-    
-    try:
-        order = retry_api_call(
-            exchange.create_order,
-            symbol,
-            "TRAILING_STOP_MARKET",  # Type might differ by exchange
-            side,
-            amount,
-            None,  # No price for trailing stops
-            params=params
-        )
-        
-        logger.info(f"Trailing stop order placed: {order['id']}")
-        return order
-    except Exception as e:
-        logger.error(f"Failed to execute trailing stop order: {e}")
-        
-        # Fall back to regular stop order if trailing stops not supported
-        if "not supported" in str(e).lower():
-            logger.warning(f"Trailing stops not supported. Falling back to regular stop order.")
-            stop_price = activation_price
+        Args:
+            order_id: Order ID
             
-            if side == "sell" and is_percentage:  # Long position closing
-                stop_price = activation_price * (1 - trail_value/100)
-            elif side == "buy" and is_percentage:  # Short position closing
-                stop_price = activation_price * (1 + trail_value/100)
-            elif side == "sell":  # Long position closing with absolute value
-                stop_price = activation_price - trail_value
-            elif side == "buy":  # Short position closing with absolute value
-                stop_price = activation_price + trail_value
+        Returns:
+            Dict: Order data or None
+        """
+        return self.orders.get(order_id)
+    
+    def get_orders_by_status(self, status: str) -> List[Dict]:
+        """
+        Get orders by status
+        
+        Args:
+            status: Order status
             
-            return execute_stop_order(
-                exchange,
-                symbol,
-                side,
-                amount,
-                stop_price,
-                stop_price,
-                params=params
+        Returns:
+            List[Dict]: Matching orders
+        """
+        return [order for order in self.orders.values() 
+                if order.get("status") == status]
+    
+    def get_orders_by_symbol(self, symbol: str) -> List[Dict]:
+        """
+        Get orders for a symbol
+        
+        Args:
+            symbol: Trading symbol
+            
+        Returns:
+            List[Dict]: Matching orders
+        """
+        return [order for order in self.orders.values() 
+                if order.get("symbol") == symbol]
+    
+    def _prune_old_orders(self) -> None:
+        """Remove oldest closed/canceled orders to stay under max_orders"""
+        # First try to remove canceled or rejected orders
+        closed_orders = sorted(
+            [order for order in self.orders.values() 
+             if order.get("status") in ["canceled", "rejected", "expired"]],
+            key=lambda x: x.get("timestamp", 0)
+        )
+        
+        # Then try closed orders if still needed
+        if len(self.orders) - len(closed_orders) > self.max_orders:
+            closed_orders += sorted(
+                [order for order in self.orders.values() 
+                 if order.get("status") == "closed"],
+                key=lambda x: x.get("timestamp", 0)
             )
-        else:
-            raise
+        
+        # Remove oldest orders first
+        for order in closed_orders:
+            if len(self.orders) <= self.max_orders:
+                break
+            if order["id"] in self.orders:
+                del self.orders[order["id"]]
+                logger.debug(f"Pruned old order {order['id']} from order book")
 
 
-def execute_oco_order(
-    exchange: ccxt.Exchange,
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def create_market_order(
+    exchange: Any,
+    symbol: str,
+    side: str,
+    amount: float,
+    price: Optional[float] = None,
+    params: Dict = None
+) -> Dict:
+    """
+    Create and submit a market order
+    
+    Args:
+        exchange: CCXT exchange instance
+        symbol: Trading symbol
+        side: Order side ('buy' or 'sell')
+        amount: Order amount
+        price: Current price for estimation (optional)
+        params: Additional parameters (optional)
+        
+    Returns:
+        Dict: Order result
+    """
+    logger.info(f"Creating market {side} order for {amount} {symbol}")
+    
+    try:
+        # Create order
+        order = exchange.create_order(
+            symbol=symbol,
+            type='market',
+            side=side,
+            amount=amount,
+            params=params or {}
+        )
+        
+        logger.info(f"Market order created: {order['id']} ({side} {amount} {symbol})")
+        
+        return order
+    except Exception as e:
+        logger.error(f"Error creating market order: {e}")
+        raise
+
+
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def create_limit_order(
+    exchange: Any,
     symbol: str,
     side: str,
     amount: float,
     price: float,
+    params: Dict = None
+) -> Dict:
+    """
+    Create and submit a limit order
+    
+    Args:
+        exchange: CCXT exchange instance
+        symbol: Trading symbol
+        side: Order side ('buy' or 'sell')
+        amount: Order amount
+        price: Limit price
+        params: Additional parameters (optional)
+        
+    Returns:
+        Dict: Order result
+    """
+    logger.info(f"Creating limit {side} order for {amount} {symbol} at {price}")
+    
+    try:
+        # Create order
+        order = exchange.create_order(
+            symbol=symbol,
+            type='limit',
+            side=side,
+            amount=amount,
+            price=price,
+            params=params or {}
+        )
+        
+        logger.info(f"Limit order created: {order['id']} ({side} {amount} {symbol} @ {price})")
+        
+        return order
+    except Exception as e:
+        logger.error(f"Error creating limit order: {e}")
+        raise
+
+
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def create_stop_order(
+    exchange: Any,
+    symbol: str,
+    side: str,
+    amount: float,
     stop_price: float,
     params: Dict = None
 ) -> Dict:
     """
-    Execute a One-Cancels-Other (OCO) order if supported by the exchange.
-    This places a limit order and a stop order, and if one executes, the other is canceled.
+    Create and submit a stop order
     
     Args:
-        exchange: Exchange instance
+        exchange: CCXT exchange instance
         symbol: Trading symbol
         side: Order side ('buy' or 'sell')
-        amount: Order amount in base currency
-        price: Limit price (take profit)
-        stop_price: Stop price (stop loss)
-        params: Additional parameters for the order
+        amount: Order amount
+        stop_price: Stop price
+        params: Additional parameters (optional)
         
     Returns:
         Dict: Order result
     """
-    logger.info(f"Executing OCO {side} order for {amount} {symbol} "
-               f"limit: {price}, stop: {stop_price}")
+    logger.info(f"Creating stop {side} order for {amount} {symbol} at {stop_price}")
     
-    params = params or {}
-    
-    # Add exchange-specific parameters
-    if exchange.id in ["binance", "binanceusdm"]:
-        params["stopLimitPrice"] = stop_price  # On Binance, stopLimitPrice is required
-        params["stopPrice"] = stop_price
-        params["price"] = price
-        
-        try:
-            order = retry_api_call(
-                exchange.create_order,
-                symbol,
-                "OCO",
-                side,
-                amount,
-                price,
-                params=params
-            )
-            
-            logger.info(f"OCO order placed: {order['id']}")
-            return order
-        except Exception as e:
-            logger.error(f"Failed to execute OCO order: {e}")
-    
-    # For exchanges that don't support OCO orders directly
-    logger.warning(f"OCO orders not directly supported for {exchange.id}. "
-                  "Placing separate limit and stop orders.")
-    
-    # Place limit order (take profit)
     try:
-        limit_order = execute_limit_order(
-            exchange,
-            symbol,
-            side,
-            amount,
-            price,
-            params=params
-        )
+        # Check if exchange has native stop order support
+        if 'createStopOrder' in dir(exchange):
+            # Create stop order
+            order = exchange.create_stop_order(
+                symbol=symbol,
+                side=side,
+                amount=amount,
+                price=stop_price,
+                params=params or {}
+            )
+        else:
+            # Fallback to stop market or stop limit order
+            order_type = 'stop_market'  # Default
+            
+            # Check if exchange supports stop_market
+            if order_type not in exchange.has or not exchange.has[order_type]:
+                order_type = 'stop'  # Try regular stop
+            
+            if order_type not in exchange.has or not exchange.has[order_type]:
+                order_type = 'stop_limit'  # Try stop limit
+                
+            if order_type not in exchange.has or not exchange.has[order_type]:
+                raise ValueError(f"Exchange does not support stop orders: {exchange.id}")
+            
+            # Merge stop price into params
+            stop_params = params.copy() if params else {}
+            if order_type == 'stop_limit':
+                stop_params['stopPrice'] = stop_price
+                # For stop limit, we need a limit price too, slightly worse than stop
+                limit_price = stop_price * (0.99 if side == 'sell' else 1.01)
+                order = exchange.create_order(
+                    symbol=symbol,
+                    type=order_type,
+                    side=side,
+                    amount=amount,
+                    price=limit_price,
+                    params=stop_params
+                )
+            else:
+                stop_params['stopPrice'] = stop_price
+                order = exchange.create_order(
+                    symbol=symbol,
+                    type=order_type,
+                    side=side,
+                    amount=amount,
+                    price=stop_price,  # Some exchanges use this as trigger
+                    params=stop_params
+                )
         
-        # Place stop order (stop loss)
-        stop_order = execute_stop_order(
-            exchange,
-            symbol,
-            side,
-            amount,
-            stop_price,
-            stop_price,
-            params=params
-        )
+        logger.info(f"Stop order created: {order['id']} ({side} {amount} {symbol} @ {stop_price})")
         
-        # Return both orders
-        return {
-            "type": "manual_oco",
-            "limit_order": limit_order,
-            "stop_order": stop_order
-        }
+        return order
     except Exception as e:
-        logger.error(f"Failed to execute manual OCO orders: {e}")
+        logger.error(f"Error creating stop order: {e}")
         raise
 
 
-def execute_partial_position_entry(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    side: str,
-    total_amount: float,
-    partitions: List[float],
-    price_levels: List[float] = None,
-    order_types: List[str] = None,
-    params: Dict = None
-) -> Dict:
-    """
-    Execute a partial position entry with multiple orders at different price levels.
-    
-    Args:
-        exchange: Exchange instance
-        symbol: Trading symbol
-        side: Order side ('buy' or 'sell')
-        total_amount: Total position size in base currency
-        partitions: List of percentages for each order (should sum to 100)
-        price_levels: List of price levels for each order (None for market price)
-        order_types: List of order types ('market', 'limit') for each partition
-        params: Additional parameters for the orders
-        
-    Returns:
-        Dict: Order results
-    """
-    if price_levels is None:
-        # Use current price for all orders
-        ticker = exchange.fetch_ticker(symbol)
-        current_price = ticker["last"]
-        price_levels = [current_price] * len(partitions)
-    
-    if order_types is None:
-        # Default to market orders
-        order_types = ["market"] * len(partitions)
-    
-    if len(partitions) != len(price_levels) or len(partitions) != len(order_types):
-        raise ValueError("Partitions, price levels, and order types must have the same length")
-    
-    # Normalize partitions to percentages
-    total_percentage = sum(partitions)
-    partitions = [p / total_percentage * 100 for p in partitions]
-    
-    orders = []
-    params = params or {}
-    
-    logger.info(f"Executing partial position entry for {total_amount} {symbol} in {len(partitions)} parts")
-    
-    for i, (partition, price, order_type) in enumerate(zip(partitions, price_levels, order_types)):
-        # Calculate amount for this partition
-        amount = total_amount * partition / 100
-        
-        try:
-            if order_type == "market":
-                order = execute_market_order(
-                    exchange, 
-                    symbol, 
-                    side, 
-                    amount, 
-                    params=params
-                )
-            elif order_type == "limit":
-                order = execute_limit_order(
-                    exchange, 
-                    symbol, 
-                    side, 
-                    amount, 
-                    price, 
-                    params=params
-                )
-            else:
-                raise ValueError(f"Unsupported order type: {order_type}")
-            
-            orders.append(order)
-            logger.info(f"Executed part {i+1}/{len(partitions)}: {amount} at {price} ({order_type})")
-            
-        except Exception as e:
-            logger.error(f"Failed to execute part {i+1}/{len(partitions)}: {e}")
-            # Continue with other parts even if one fails
-    
-    return {
-        "type": "partial_entry",
-        "orders": orders,
-        "total_amount": total_amount,
-        "executed_amount": sum(order["amount"] for order in orders if "amount" in order)
-    }
-
-
-def execute_position_with_protection(
-    exchange: ccxt.Exchange,
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def create_oco_order(
+    exchange: Any,
     symbol: str,
     side: str,
     amount: float,
-    stop_loss_price: float,
-    take_profit_price: float = None,
-    entry_price: float = None,
-    order_type: str = "market",
-    trailing_stop: Dict = None,
-    partial_take_profits: List[Dict] = None,
+    stop_price: float,
+    limit_price: float,
+    params: Dict = None
+) -> Union[Dict, List[Dict]]:
+    """
+    Create a one-cancels-other (OCO) order (take profit and stop loss)
+    
+    Args:
+        exchange: CCXT exchange instance
+        symbol: Trading symbol
+        side: Order side ('buy' or 'sell')
+        amount: Order amount
+        stop_price: Stop loss price
+        limit_price: Take profit price
+        params: Additional parameters (optional)
+        
+    Returns:
+        Union[Dict, List[Dict]]: Order result(s)
+    """
+    logger.info(f"Creating OCO {side} order for {amount} {symbol} (stop: {stop_price}, limit: {limit_price})")
+    
+    try:
+        # Check if exchange has native OCO support
+        if 'createOCOOrder' in dir(exchange) or ('oco' in exchange.has and exchange.has['oco']):
+            if hasattr(exchange, 'create_oco_order'):
+                # Use native OCO function
+                order = exchange.create_oco_order(
+                    symbol=symbol,
+                    side=side,
+                    amount=amount,
+                    price=limit_price,
+                    stop_price=stop_price,
+                    params=params or {}
+                )
+                logger.info(f"OCO order created: {order['id']}")
+                return order
+            else:
+                # Try standard format with params
+                oco_params = params.copy() if params else {}
+                oco_params['stopPrice'] = stop_price
+                
+                order = exchange.create_order(
+                    symbol=symbol,
+                    type='oco',
+                    side=side,
+                    amount=amount,
+                    price=limit_price,
+                    params=oco_params
+                )
+                logger.info(f"OCO order created: {order['id']}")
+                return order
+        else:
+            # Fallback: Create two separate orders
+            logger.info(f"Exchange does not support OCO orders, creating separate stop and limit orders")
+            
+            # Create limit order (take profit)
+            limit_order = create_limit_order(
+                exchange=exchange,
+                symbol=symbol,
+                side=side,
+                amount=amount,
+                price=limit_price,
+                params=params
+            )
+            
+            # Create stop order (stop loss)
+            stop_order = create_stop_order(
+                exchange=exchange,
+                symbol=symbol,
+                side=side,
+                amount=amount,
+                stop_price=stop_price,
+                params=params
+            )
+            
+            # Return both orders
+            return [limit_order, stop_order]
+    except Exception as e:
+        logger.error(f"Error creating OCO order: {e}")
+        raise
+
+
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def cancel_order(
+    exchange: Any,
+    order_id: str,
+    symbol: str,
     params: Dict = None
 ) -> Dict:
     """
-    Execute a position with comprehensive protection orders (stop loss, take profit, trailing stop).
+    Cancel an open order
     
     Args:
-        exchange: Exchange instance
+        exchange: CCXT exchange instance
+        order_id: Order ID
         symbol: Trading symbol
-        side: Order side ('buy' or 'sell')
-        amount: Order amount in base currency
-        stop_loss_price: Stop loss price
-        take_profit_price: Take profit price (None for no take profit)
-        entry_price: Entry price for limit orders (None for market price)
-        order_type: Order type ('market' or 'limit')
-        trailing_stop: Trailing stop configuration (None for no trailing stop)
-        partial_take_profits: List of partial take profit levels (None for no partial take profits)
-        params: Additional parameters for the orders
+        params: Additional parameters (optional)
         
     Returns:
-        Dict: Complete position setup with all orders
+        Dict: Cancel result
     """
-    logger.info(f"Setting up {order_type} {side} position for {amount} {symbol} "
-               f"with stop loss at {stop_loss_price}")
+    logger.info(f"Canceling order {order_id} for {symbol}")
     
-    position_setup = {
-        "symbol": symbol,
-        "side": side,
-        "amount": amount,
-        "entry_order": None,
-        "stop_loss_order": None,
-        "take_profit_orders": [],
-        "trailing_stop_order": None,
-        "partial_take_profit_orders": []
-    }
-    
-    params = params or {}
-    
-    # 1. Execute entry order
     try:
-        if order_type == "market":
-            entry_order = execute_market_order(
-                exchange, 
-                symbol, 
-                side, 
-                amount, 
-                params=params
-            )
-        elif order_type == "limit" and entry_price is not None:
-            entry_order = execute_limit_order(
-                exchange, 
-                symbol, 
-                side, 
-                amount, 
-                entry_price, 
-                params=params
-            )
-        else:
-            raise ValueError(f"Invalid order type '{order_type}' or missing entry price")
-        
-        position_setup["entry_order"] = entry_order
-        logger.info(f"Entry order executed: {entry_order['id']}")
-        
-        # For limit orders, we need to wait for fill before placing protection orders
-        if order_type == "limit":
-            logger.info(f"Limit order placed. Protection orders will be handled separately once filled.")
-            return position_setup
-        
-        # Continue with protection orders for market orders
-        
-        # 2. Place stop loss order
-        opposite_side = "sell" if side == "buy" else "buy"
-        
-        stop_loss_order = execute_stop_order(
-            exchange, 
-            symbol, 
-            opposite_side, 
-            amount, 
-            stop_loss_price, 
-            stop_loss_price, 
-            params=params
+        result = exchange.cancel_order(
+            id=order_id,
+            symbol=symbol,
+            params=params or {}
         )
         
-        position_setup["stop_loss_order"] = stop_loss_order
-        logger.info(f"Stop loss order placed: {stop_loss_order['id']}")
+        logger.info(f"Order {order_id} canceled")
         
-        # 3. Place take profit order if specified
-        if take_profit_price is not None:
-            take_profit_order = execute_limit_order(
-                exchange, 
-                symbol, 
-                opposite_side, 
-                amount, 
-                take_profit_price, 
-                params=params
+        return result
+    except Exception as e:
+        logger.error(f"Error canceling order: {e}")
+        raise
+
+
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def get_order_status(
+    exchange: Any,
+    order_id: str,
+    symbol: str,
+    params: Dict = None
+) -> Dict:
+    """
+    Get status of an order
+    
+    Args:
+        exchange: CCXT exchange instance
+        order_id: Order ID
+        symbol: Trading symbol
+        params: Additional parameters (optional)
+        
+    Returns:
+        Dict: Order status
+    """
+    try:
+        result = exchange.fetch_order(
+            id=order_id,
+            symbol=symbol,
+            params=params or {}
+        )
+        
+        logger.debug(f"Order {order_id} status: {result.get('status')}")
+        
+        return result
+    except Exception as e:
+        logger.error(f"Error fetching order status: {e}")
+        raise
+
+
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def get_open_orders(
+    exchange: Any,
+    symbol: Optional[str] = None,
+    params: Dict = None
+) -> List[Dict]:
+    """
+    Get all open orders
+    
+    Args:
+        exchange: CCXT exchange instance
+        symbol: Trading symbol (optional)
+        params: Additional parameters (optional)
+        
+    Returns:
+        List[Dict]: List of open orders
+    """
+    try:
+        if symbol:
+            result = exchange.fetch_open_orders(
+                symbol=symbol,
+                params=params or {}
             )
-            
-            position_setup["take_profit_orders"].append(take_profit_order)
-            logger.info(f"Take profit order placed: {take_profit_order['id']}")
+            logger.debug(f"Found {len(result)} open orders for {symbol}")
+        else:
+            result = exchange.fetch_open_orders(
+                params=params or {}
+            )
+            logger.debug(f"Found {len(result)} open orders across all symbols")
         
-        # 4. Place partial take profit orders if specified
-        if partial_take_profits:
-            for tp_level in partial_take_profits:
-                tp_price = tp_level.get("level")
-                tp_percentage = tp_level.get("percentage", 0)
-                
-                if tp_price and tp_percentage > 0:
-                    # Calculate the amount for this partial TP
-                    tp_amount = amount * (tp_percentage / 100)
-                    
-                    tp_order = execute_limit_order(
-                        exchange, 
-                        symbol, 
-                        opposite_side, 
-                        tp_amount, 
-                        tp_price, 
+        return result
+    except Exception as e:
+        logger.error(f"Error fetching open orders: {e}")
+        raise
+
+
+@handle_api_errors
+@retry(max_tries=3, delay=1.0, backoff_factor=2.0)
+def cancel_all_orders(
+    exchange: Any,
+    symbol: Optional[str] = None,
+    params: Dict = None
+) -> List[Dict]:
+    """
+    Cancel all open orders
+    
+    Args:
+        exchange: CCXT exchange instance
+        symbol: Trading symbol (optional)
+        params: Additional parameters (optional)
+        
+    Returns:
+        List[Dict]: Cancel results
+    """
+    try:
+        if hasattr(exchange, 'cancel_all_orders'):
+            # Use native function if available
+            if symbol:
+                result = exchange.cancel_all_orders(
+                    symbol=symbol,
+                    params=params or {}
+                )
+                logger.info(f"Canceled all orders for {symbol}")
+            else:
+                result = exchange.cancel_all_orders(
+                    params=params or {}
+                )
+                logger.info("Canceled all orders across all symbols")
+            
+            return result
+        else:
+            # Fallback: Fetch open orders and cancel individually
+            open_orders = get_open_orders(exchange, symbol, params)
+            
+            results = []
+            for order in open_orders:
+                try:
+                    result = cancel_order(
+                        exchange=exchange,
+                        order_id=order['id'],
+                        symbol=order['symbol'],
                         params=params
                     )
-                    
-                    position_setup["partial_take_profit_orders"].append(tp_order)
-                    logger.info(f"Partial take profit order placed: {tp_order['id']} "
-                               f"for {tp_percentage}% at {tp_price}")
-        
-        # 5. Place trailing stop if specified
-        if trailing_stop and trailing_stop.get("enabled", False):
-            activation_pct = trailing_stop.get("activation_pct", 1.0)
-            trail_pct = trailing_stop.get("trail_pct", 0.5)
+                    results.append(result)
+                except Exception as e:
+                    logger.error(f"Error canceling order {order['id']}: {e}")
             
-            # Calculate activation price
-            entry_execution_price = float(entry_order["price"])
-            if entry_execution_price == 0 and "average" in entry_order:
-                entry_execution_price = float(entry_order["average"])
+            logger.info(f"Canceled {len(results)} orders out of {len(open_orders)} open orders")
             
-            if side == "buy":  # Long position
-                activation_price = entry_execution_price * (1.0 + activation_pct / 100.0)
-            else:  # Short position
-                activation_price = entry_execution_price * (1.0 - activation_pct / 100.0)
-            
-            try:
-                trailing_stop_order = execute_trailing_stop_order(
-                    exchange, 
-                    symbol, 
-                    opposite_side, 
-                    amount, 
-                    activation_price, 
-                    trail_pct, 
-                    is_percentage=True, 
-                    params=params
-                )
-                
-                position_setup["trailing_stop_order"] = trailing_stop_order
-                logger.info(f"Trailing stop order placed: {trailing_stop_order['id']} "
-                           f"activation: {activation_price}, trail: {trail_pct}%")
-            except Exception as e:
-                logger.error(f"Failed to place trailing stop order: {e}")
-                logger.info("Will handle trailing stop through bot logic instead")
-        
-        return position_setup
-        
+            return results
     except Exception as e:
-        logger.error(f"Failed to setup position with protection: {e}")
-        
-        # Cancel any orders placed if entry fails
-        if position_setup["entry_order"] and position_setup["entry_order"]["status"] != "closed":
-            try:
-                exchange.cancel_order(position_setup["entry_order"]["id"], symbol)
-                logger.info(f"Canceled entry order {position_setup['entry_order']['id']} after error")
-            except Exception as cancel_error:
-                logger.error(f"Failed to cancel entry order: {cancel_error}")
-        
+        logger.error(f"Error canceling all orders: {e}")
         raise
+
+
+def place_entry_order(
+    exchange: Any,
+    strategy: str,
+    symbol: str,
+    side: str,
+    amount: float,
+    price: float,
+    order_type: str,
+    signal_params: Dict = None,
+    prefered_entry: str = "limit_better",
+    max_slippage_pct: float = 0.5,  # Max slippage for limit orders
+    order_params: Dict = None
+) -> Dict:
+    """
+    Place an entry order with smart order type selection
+    
+    Args:
+        exchange: CCXT exchange instance
+        strategy: Strategy name
+        symbol: Trading symbol
+        side: Order side ('buy' or 'sell')
+        amount: Order amount
+        price: Current price
+        order_type: Order type from signal ('market', 'limit')
+        signal_params: Signal parameters (optional)
+        prefered_entry: Entry preference ('market', 'limit_better', 'limit_chase')
+        max_slippage_pct: Maximum allowed slippage percentage
+        order_params: Additional order parameters (optional)
+        
+    Returns:
+        Dict: Order result
+    """
+    # Normalize side
+    side = side.lower()
+    
+    # Get market info
+    market = exchange.market(symbol)
+    price_precision = market.get('precision', {}).get('price', 8)
+    
+    # Override order type if preferred entry is market
+    if prefered_entry == "market":
+        order_type = "market"
+    
+    # For limit_better, use limit at a better price
+    if prefered_entry == "limit_better" and order_type == "limit":
+        if side == "buy":
+            # For buy, set limit below market
+            limit_price = price * (1 - max_slippage_pct / 100)
+        else:
+            # For sell, set limit above market
+            limit_price = price * (1 + max_slippage_pct / 100)
+        
+        limit_price = round_price(limit_price, price_precision)
+        
+        logger.info(f"Using better limit price for {side}: {price} -> {limit_price}")
+        
+        return create_limit_order(
+            exchange=exchange,
+            symbol=symbol,
+            side=side,
+            amount=amount,
+            price=limit_price,
+            params=order_params
+        )
+    
+    # Default to market order
+    return create_market_order(
+        exchange=exchange,
+        symbol=symbol,
+        side=side,
+        amount=amount,
+        price=price,
+        params=order_params
+    )
+
+
+def place_exit_orders(
+    exchange: Any,
+    position: Dict,
+    stop_price: float,
+    take_profit_price: float,
+    order_types: Dict = None,
+    use_oco: bool = True,
+    order_params: Dict = None
+) -> Union[Dict, List[Dict]]:
+    """
+    Place exit orders for a position (stop loss and take profit)
+    
+    Args:
+        exchange: CCXT exchange instance
+        position: Position data
+        stop_price: Stop loss price
+        take_profit_price: Take profit price
+        order_types: Order types for each exit (optional)
+        use_oco: Whether to use OCO orders if supported
+        order_params: Additional order parameters (optional)
+        
+    Returns:
+        Union[Dict, List[Dict]]: Order result(s)
+    """
+    # Extract position details
+    symbol = position["symbol"]
+    side = position["side"]
+    amount = position["amount"]
+    
+    # Determine exit side (opposite of position side)
+    exit_side = "sell" if side == "long" else "buy"
+    
+    # If exchange supports OCO, use it
+    if use_oco:
+        try:
+            oco_result = create_oco_order(
+                exchange=exchange,
+                symbol=symbol,
+                side=exit_side,
+                amount=amount,
+                stop_price=stop_price,
+                limit_price=take_profit_price,
+                params=order_params
+            )
+            
+            return oco_result
+        except Exception as e:
+            logger.warning(f"Failed to create OCO order, falling back to separate orders: {e}")
+    
+    # Create separate stop and limit orders
+    orders = []
+    
+    # Stop loss order
+    stop_order_type = order_types.get("stop", "stop") if order_types else "stop"
+    try:
+        stop_order = create_stop_order(
+            exchange=exchange,
+            symbol=symbol,
+            side=exit_side,
+            amount=amount,
+            stop_price=stop_price,
+            params=order_params
+        )
+        orders.append(stop_order)
+    except Exception as e:
+        logger.error(f"Failed to create stop loss order: {e}")
+    
+    # Take profit order
+    try:
+        take_profit_order = create_limit_order(
+            exchange=exchange,
+            symbol=symbol,
+            side=exit_side,
+            amount=amount,
+            price=take_profit_price,
+            params=order_params
+        )
+        orders.append(take_profit_order)
+    except Exception as e:
+        logger.error(f"Failed to create take profit order: {e}")
+    
+    return orders
+
+
+def update_exit_orders(
+    exchange: Any,
+    position: Dict,
+    orders: Dict,
+    new_stop_price: Optional[float] = None,
+    new_take_profit_price: Optional[float] = None,
+    order_params: Dict = None
+) -> Dict:
+    """
+    Update exit orders for a position
+    
+    Args:
+        exchange: CCXT exchange instance
+        position: Position data
+        orders: Current exit orders
+        new_stop_price: New stop loss price (optional)
+        new_take_profit_price: New take profit price (optional)
+        order_params: Additional order parameters (optional)
+        
+    Returns:
+        Dict: Updated orders
+    """
+    # Extract position details
+    symbol = position["symbol"]
+    side = position["side"]
+    amount = position["amount"]
+    
+    # Determine exit side (opposite of position side)
+    exit_side = "sell" if side == "long" else "buy"
+    
+    # Update stop loss if needed
+    if new_stop_price and "stop_loss" in orders:
+        try:
+            # Cancel current stop loss
+            cancel_order(
+                exchange=exchange,
+                order_id=orders["stop_loss"]["id"],
+                symbol=symbol
+            )
+            
+            # Create new stop loss
+            stop_order = create_stop_order(
+                exchange=exchange,
+                symbol=symbol,
+                side=exit_side,
+                amount=amount,
+                stop_price=new_stop_price,
+                params=order_params
+            )
+            
+            orders["stop_loss"] = stop_order
+            logger.info(f"Updated stop loss for {symbol}: {new_stop_price}")
+            
+        except Exception as e:
+            logger.error(f"Failed to update stop loss: {e}")
+    
+    # Update take profit if needed
+    if new_take_profit_price and "take_profit" in orders:
+        try:
+            # Cancel current take profit
+            cancel_order(
+                exchange=exchange,
+                order_id=orders["take_profit"]["id"],
+                symbol=symbol
+            )
+            
+            # Create new take profit
+            take_profit_order = create_limit_order(
+                exchange=exchange,
+                symbol=symbol,
+                side=exit_side,
+                amount=amount,
+                price=new_take_profit_price,
+                params=order_params
+            )
+            
+            orders["take_profit"] = take_profit_order
+            logger.info(f"Updated take profit for {symbol}: {new_take_profit_price}")
+            
+        except Exception as e:
+            logger.error(f"Failed to update take profit: {e}")
+    
+    return orders
