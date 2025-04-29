@@ -1252,7 +1252,20 @@ class TradingBot:
                     trade.get("side") == "buy" and position_side == "long" or
                     trade.get("side") == "sell" and position_side == "short" and
                     trade.get("status") == "open"):
+                    # Update trade status and record PnL
+                    trade["status"] = "closed"
+                    trade["exit_price"] = close_price
+                    trade["exit_time"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                     
+                    # Calculate PnL
+                    if position_side == "long":
+                        trade["pnl"] = (close_price - trade.get("entry_price", 0)) / trade.get("entry_price", 1) * 100
+                    else:
+                        trade["pnl"] = (trade.get("entry_price", 0) - close_price) / trade.get("entry_price", 1) * 100
+                    
+                    # Log trade result
+                    self.logger.info(f"Trade closed: {self.symbol} {position_side} PnL: {trade['pnl']:.2f}%")
+                    break
 
 class MockBot:
     """Enhanced mock trading bot for UI testing and development"""
