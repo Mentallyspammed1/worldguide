@@ -1,0 +1,1070 @@
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# ██████╗ ██╗   ██╗██████╗ ███╗   ███╗███████╗ ██████╗ █████╗ ██╗     ██████╗
+# ██╔══██╗╚██╗ ██╔╝██╔══██╗████╗ ████║██╔════╝██╔════╝██╔══██╗██║     ██╔══██╗
+# ██████╔╝ ╚████╔╝ ██████╔╝██╔████╔██║███████╗██║     ███████║██║     ██████╔╝
+# ██╔═══╝   ╚██╔╝  ██╔══██╗██║╚██╔╝██║╚════██║██║     ██╔══██║██║     ██╔═══╝
+# ██║        ██║   ██║  ██║██║ ╚═╝ ██║███████║╚██████╗██║  ██║███████╗██║
+# ╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝
+# Pyrmethus - Termux Trading Spell (v2.1.4 - Enhanced Precision & Robustness)
+# Conjures market insights and executes trades on Bybit Futures with refined precision and improved robustness.
+# Optimized signals logic and state management for Bybit V5 position-based stops.
+
+import os
+import time
+import logging
+import sys
+import subprocess
+from typing import Dict, Optional, Any, Tuple, Union, List
+from decimal import Decimal, getcontext, ROUND_DOWN, InvalidOperation, DivisionByZero
+import copy
+
+# Attempt to import necessary enchantments
+try:
+    import ccxt
+    from dotenv import load_dotenv
+    import pandas as pd
+    import numpy as np
+    from tabulate import tabulate
+    from colorama import init, Fore, Style, Back
+    import requests
+    # Explicitly list common required packages for the error message
+    COMMON_PACKAGES = ['ccxt', 'python-dotenv', 'pandas', 'numpy', 'tabulate', 'colorama', 'requests']
+except ImportError as e:
+    # Provide specific guidance for Termux users
+    init(autoreset=True)
+    missing_pkg = e.name
+    print(f"{Fore.RED}{Style.BRIGHT}Missing essential spell component: {Style.BRIGHT}{missing_pkg}{Style.NORMAL}")
+    print(f"{Fore.YELLOW}To conjure it, cast the following spell in your Termux terminal:")
+    print(f"{Style.BRIGHT}pip install {missing_pkg}{Style.RESET_ALL}")
+    # Offer to install all common dependencies
+    print(f"\n{Fore.CYAN}Or, to ensure all scrolls are present, cast:")
+    print(f"{Style.BRIGHT}pip install {' '.join(COMMON_PACKAGES)}{Style.RESET_ALL}")
+    sys.exit(1)
+
+# Weave the Colorama magic into the terminal
+init(autoreset=True)
+
+# Set Decimal precision (adjust if needed, higher precision means more memory/CPU)
+# The default precision (usually 28) is often sufficient for most price/qty calcs,
+# especially when combined with quantize using market precision.
+# It might be necessary to increase if dealing with extremely small values or very high precision instruments.
+# getcontext().prec = 50 # Example: Increase precision if needed
+
+# Configure the Ethereal Log Scribe
+# Define custom log levels for trade actions
+TRADE_LEVEL_NUM = logging.INFO + 5  # Between INFO and WARNING
+logging.addLevelName(TRADE_LEVEL_NUM, "TRADE")
+
+def trade_log(self, message, *args, **kws):
+    """Custom logging method for trade-related events."""
+    if self.isEnabledFor(TRADE_LEVEL_NUM):
+        # pylint: disable=protected-access
+        self._log(TRADE_LEVEL_NUM, message, args, **kws)
+
+# Add the custom method to the Logger class if it doesn't exist
+if not hasattr(logging.Logger, 'trade'):
+    logging.Logger.trade = trade_log
+
+# More detailed log format, includes module and line number for easier debugging
+log_formatter = logging.Formatter(
+    Fore.CYAN + "%(asctime)s "
+    + Style.BRIGHT + "[%(levelname)-8s] " # Padded levelname
+    + Fore.WHITE + "(%(filename)s:%(lineno)d) " # Added file/line info
+    + Style.RESET_ALL
+    + Fore.WHITE + "%(message)s"
+)
+logger = logging.getLogger(__name__)
+# Set level via environment variable or default to INFO
+log_level_str = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level = getattr(logging, log_level_str, logging.INFO)
+logger.setLevel(log_level)
+
+# Explicitly use stdout to avoid potential issues in some environments
+# Ensure handlers are not duplicated if script is reloaded or run multiple times in same process
+# Check if any handlers are already configured for this logger
+if not logger.handlers:
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(log_formatter)
+    logger.addHandler(stream_handler)
+else:
+    # If handlers exist, check if a StreamHandler is already present and remove it to avoid duplicates
+    for handler in logger.handlers:
+        if isinstance(handler, logging.StreamHandler):
+            logger.removeHandler(handler)
+    # Add the desired stream handler
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(log_formatter)
+    logger.addHandler(stream_handler)
+
+
+# Prevent duplicate messages if the root logger is also configured (common issue)
+logger.propagate = False
+
+# --- Arcane Configuration ---
+logger.info(Fore.MAGENTA + Style.BRIGHT + "Initializing Arcane Configuration v2.1.4...")
+
+# Summon secrets from the .env scroll
+load_dotenv()
+
+class TradingConfig:
+    """Holds the sacred parameters of our spell, enhanced with precision awareness and validation."""
+    def __init__(self):
+        logger.debug("Loading configuration from environment variables...")
+        # Default symbol format for Bybit V5 Unified is BASE/QUOTE:SETTLE, e.g., BTC/USDT:USDT
+        self.symbol = self._get_env("SYMBOL", "BTC/USDT:USDT", Fore.YELLOW)
+        self.market_type = self._get_env("MARKET_TYPE", "linear", Fore.YELLOW, allowed_values=['linear', 'inverse']).lower() # 'linear' or 'inverse'
+        self.interval = self._get_env("INTERVAL", "1m", Fore.YELLOW)
+        # Risk as a percentage of total equity (e.g., 0.01 for 1%, 0.001 for 0.1%)
+        self.risk_percentage = self._get_env("RISK_PERCENTAGE", "0.01", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.00001"), max_val=Decimal("0.5")) # 0.001% to 50% risk
+        self.sl_atr_multiplier = self._get_env("SL_ATR_MULTIPLIER", "1.5", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")) # Reasonable bounds
+        # TSL activation threshold in ATR units above entry price
+        self.tsl_activation_atr_multiplier = self._get_env("TSL_ACTIVATION_ATR_MULTIPLIER", "1.0", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")) # Reasonable bounds
+        # Bybit V5 TSL distance is a percentage (e.g., 0.5 for 0.5%). Ensure value is suitable.
+        self.trailing_stop_percent = self._get_env("TRAILING_STOP_PERCENT", "0.5", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.001"), max_val=Decimal("10.0")) # 0.001% to 10% trail
+        # Trigger type for SL/TSL orders. Bybit V5 allows LastPrice, MarkPrice, IndexPrice.
+        self.sl_trigger_by = self._get_env("SL_TRIGGER_BY", "LastPrice", Fore.YELLOW, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"])
+        self.tsl_trigger_by = self._get_env("TSL_TRIGGER_BY", "LastPrice", Fore.YELLOW, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"]) # Usually same as SL
+
+        # --- Optimized Indicator Periods (Read from .env with new recommended defaults) ---
+        self.trend_ema_period = self._get_env("TREND_EMA_PERIOD", "12", Fore.YELLOW, cast_type=int, min_val=5, max_val=500)
+        self.fast_ema_period = self._get_env("FAST_EMA_PERIOD", "9", Fore.YELLOW, cast_type=int, min_val=1, max_val=200)
+        self.slow_ema_period = self._get_env("SLOW_EMA_PERIOD", "21", Fore.YELLOW, cast_type=int, min_val=2, max_val=500)
+        self.stoch_period = self._get_env("STOCH_PERIOD", "7", Fore.YELLOW, cast_type=int, min_val=1, max_val=100)
+        self.stoch_smooth_k = self._get_env("STOCH_SMOOTH_K", "3", Fore.YELLOW, cast_type=int, min_val=1, max_val=10)
+        self.stoch_smooth_d = self._get_env("STOCH_SMOOTH_D", "3", Fore.YELLOW, cast_type=int, min_val=1, max_val=10)
+        self.atr_period = self._get_env("ATR_PERIOD", "5", Fore.YELLOW, cast_type=int, min_val=1, max_val=100)
+
+        # --- Signal Logic Thresholds (Configurable) ---
+        self.stoch_oversold_threshold = self._get_env("STOCH_OVERSOLD_THRESHOLD", "30", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("45"))
+        self.stoch_overbought_threshold = self._get_env("STOCH_OVERBOUGHT_THRESHOLD", "70", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("55"), max_val=Decimal("100"))
+        # Loosened Trend Filter Threshold (price within X% of Trend EMA)
+        self.trend_filter_buffer_percent = self._get_env("TREND_FILTER_BUFFER_PERCENT", "0.5", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("5"))
+        # ATR Filter Threshold (price move must be > X * ATR)
+        self.atr_move_filter_multiplier = self._get_env("ATR_MOVE_FILTER_MULTIPLIER", "0.5", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("5"))
+
+        # Epsilon: Small value for comparing quantities, dynamically determined after market info is loaded.
+        self.position_qty_epsilon = Decimal("1E-12") # Default tiny Decimal, will be overridden based on market precision
+
+        self.api_key = self._get_env("BYBIT_API_KEY", None, Fore.RED)
+        self.api_secret = self._get_env("BYBIT_API_SECRET", None, Fore.RED)
+        self.ohlcv_limit = self._get_env("OHLCV_LIMIT", "200", Fore.YELLOW, cast_type=int, min_val=50, max_val=1000)
+        self.loop_sleep_seconds = self._get_env("LOOP_SLEEP_SECONDS", "15", Fore.YELLOW, cast_type=int, min_val=5)
+        self.order_check_delay_seconds = self._get_env("ORDER_CHECK_DELAY_SECONDS", "2", Fore.YELLOW, cast_type=int, min_val=1)
+        self.order_check_timeout_seconds = self._get_env("ORDER_CHECK_TIMEOUT_SECONDS", "12", Fore.YELLOW, cast_type=int, min_val=5)
+        self.max_fetch_retries = self._get_env("MAX_FETCH_RETRIES", "3", Fore.YELLOW, cast_type=int, min_val=1, max_val=10)
+        self.trade_only_with_trend = self._get_env("TRADE_ONLY_WITH_TREND", "True", Fore.YELLOW, cast_type=bool)
+
+        if not self.api_key or not self.api_secret:
+            logger.critical(Fore.RED + Style.BRIGHT + "BYBIT_API_KEY or BYBIT_API_SECRET not found in .env scroll! Halting.")
+            sys.exit(1)
+
+        # Validate EMA periods relative to each other
+        if self.fast_ema_period >= self.slow_ema_period:
+             logger.critical(f"{Fore.RED+Style.BRIGHT}FAST_EMA_PERIOD ({self.fast_ema_period}) must be less than SLOW_EMA_PERIOD ({self.slow_ema_period}). Halting.")
+             sys.exit(1)
+        if self.trend_ema_period <= self.slow_ema_period:
+             logger.warning(f"{Fore.YELLOW}TREND_EMA_PERIOD ({self.trend_ema_period}) is not significantly longer than SLOW_EMA_PERIOD ({self.slow_ema_period}). Consider increasing TREND_EMA_PERIOD for a smoother trend filter.")
+
+        # Validate Stochastic thresholds relative to each other
+        if self.stoch_oversold_threshold >= self.stoch_overbought_threshold:
+             logger.critical(f"{Fore.RED+Style.BRIGHT}STOCH_OVERSOLD_THRESHOLD ({self.stoch_oversold_threshold}) must be less than STOCH_OVERBOUGHT_THRESHOLD ({self.stoch_overbought_threshold}). Halting.")
+             sys.exit(1)
+
+        # Validate TSL activation relative to SL multiplier
+        if self.tsl_activation_atr_multiplier < self.sl_atr_multiplier:
+             logger.warning(f"{Fore.YELLOW}TSL_ACTIVATION_ATR_MULTIPLIER ({self.tsl_activation_atr_multiplier}) is less than SL_ATR_MULTIPLIER ({self.sl_atr_multiplier}). TSL may activate before the fixed SL is surpassed.")
+
+
+        logger.debug("Configuration loaded successfully.")
+
+    def _get_env(self, key: str, default: Any, color: str, cast_type: type = str,
+                 min_val: Optional[Union[int, Decimal]] = None,
+                 max_val: Optional[Union[int, Decimal]] = None,
+                 allowed_values: Optional[List[str]] = None) -> Any:
+        """Gets value from environment, casts, validates, and logs."""
+        value_str = os.getenv(key)
+        is_default = False
+        # Mask secrets in logs
+        log_value = "****" if "SECRET" in key.upper() or "KEY" in key.upper() else value_str
+
+        if value_str is None or value_str.strip() == "": # Treat empty string as not set
+            value = default
+            is_default = True
+            if default is not None:
+                # Log default only if it's actually used because the key wasn't set
+                logger.warning(f"{color}Using default value for {key}: {default}")
+            # Use default value string for casting below if needed
+            value_str = str(default) if default is not None else None
+        else:
+             logger.info(f"{color}Summoned {key}: {log_value}")
+
+        # Handle case where default is None and no value is set
+        if value_str is None:
+            if default is None:
+                # If no value is set and default is None, it means the config is missing a required value.
+                # This should ideally be caught by explicit checks after config loading (like API keys).
+                # But for robustness, return None and let caller handle.
+                return None
+            else:
+                # This case should be covered by the is_default logic above, but double check
+                logger.warning(f"{color}Value for {key} not found, using default: {default}")
+                value = default # Keep original default value/type
+                value_str = str(default) # Use string representation for casting attempt below
+
+        # --- Casting ---
+        casted_value = None
+        try:
+            if cast_type == bool:
+                # Robust boolean check
+                casted_value = value_str.lower() in ['true', '1', 'yes', 'y', 'on']
+            elif cast_type == Decimal:
+                casted_value = Decimal(value_str)
+            elif cast_type == int:
+                casted_value = int(value_str)
+            elif cast_type == float:
+                casted_value = float(value_str)
+            else: # Default is str
+                casted_value = str(value_str)
+        except (ValueError, TypeError, InvalidOperation) as e:
+            logger.error(f"{Fore.RED}Could not cast {key} ('{value_str}') to {cast_type.__name__}: {e}. Attempting to use default value '{default}'.")
+            # Attempt to cast the default value itself
+            try:
+                if default is None: return None # If default was None, casting failed, return None
+                # Recast default carefully to the target type
+                if cast_type == bool: return str(default).lower() in ['true', '1', 'yes', 'y', 'on']
+                if cast_type == Decimal: return Decimal(str(default))
+                return cast_type(default)
+            except (ValueError, TypeError, InvalidOperation):
+                logger.critical(f"{Fore.RED+Style.BRIGHT}Default value '{default}' for {key} also cannot be cast to {cast_type.__name__}. Halting.")
+                sys.exit(1)
+
+        # --- Validation ---
+        if casted_value is None: # Should not happen if casting succeeded or defaulted
+             logger.critical(f"{Fore.RED+Style.BRIGHT}Failed to obtain a valid value for {key} after casting attempts. Halting.")
+             sys.exit(1)
+
+        # Allowed values check (for strings like trigger types)
+        if allowed_values and casted_value not in allowed_values:
+            logger.error(f"{Fore.RED}Invalid value '{casted_value}' for {key}. Allowed values: {allowed_values}. Using default: {default}")
+            # Return default after logging error
+            try:
+                if default is None: return None
+                if cast_type == bool: return str(default).lower() in ['true', '1', 'yes', 'y', 'on']
+                if cast_type == Decimal: return Decimal(str(default))
+                return cast_type(default)
+            except (ValueError, TypeError, InvalidOperation):
+                logger.critical(f"{Fore.RED+Style.BRIGHT}Default value '{default}' for {key} also cannot be cast to {cast_type.__name__} for validation fallback. Halting.")
+                sys.exit(1)
+
+
+        # Min/Max checks (for numeric types - Decimal, int, float)
+        validation_failed = False
+        if isinstance(casted_value, (Decimal, int, float)):
+            try:
+                # Ensure min_val/max_val are comparable types (Decimal if casted is Decimal, else same type)
+                min_val_comp = Decimal(str(min_val)) if isinstance(casted_value, Decimal) and min_val is not None else min_val
+                max_val_comp = Decimal(str(max_val)) if isinstance(casted_value, Decimal) and max_val is not None else max_val
+
+                if min_val_comp is not None and casted_value < min_val_comp:
+                    logger.error(f"{Fore.RED}{key} value {casted_value} is below minimum {min_val}. Using default: {default}")
+                    validation_failed = True
+                if max_val_comp is not None and casted_value > max_val_comp:
+                     logger.error(f"{Fore.RED}{key} value {casted_value} is above maximum {max_val}. Using default: {default}")
+                     validation_failed = True
+            except InvalidOperation as e:
+                 logger.error(f"{Fore.RED}Error during min/max validation for {key} with value {casted_value} and limits ({min_val}, {max_val}): {e}. Using default: {default}")
+                 validation_failed = True
+            except TypeError as e:
+                 logger.error(f"{Fore.RED}TypeError during min/max validation for {key}: {e}. Value type: {type(casted_value).__name__}, Limit types: {type(min_val).__name__}/{type(max_val).__name__}. Using default: {default}")
+                 validation_failed = True
+
+
+        if validation_failed:
+            # Re-cast default to ensure correct type is returned
+            try:
+                if default is None: return None
+                if cast_type == bool: return str(default).lower() in ['true', '1', 'yes', 'y', 'on']
+                if cast_type == Decimal: return Decimal(str(default))
+                return cast_type(default)
+            except (ValueError, TypeError, InvalidOperation):
+                logger.critical(f"{Fore.RED+Style.BRIGHT}Default value '{default}' for {key} also cannot be cast to {cast_type.__name__}. Halting.")
+                sys.exit(1)
+
+        return casted_value
+
+
+CONFIG = TradingConfig()
+MARKET_INFO: Optional[Dict] = None # Global to store market details after connection
+EXCHANGE: Optional[ccxt.Exchange] = None # Global for the exchange instance
+
+# --- Core Spell Functions ---
+
+def fetch_with_retries(fetch_function, *args, **kwargs) -> Any:
+    """Generic wrapper to fetch data with retries and exponential backoff."""
+    global EXCHANGE
+    if EXCHANGE is None:
+        logger.critical("Exchange object is None, cannot fetch data.")
+        return None # Indicate critical failure
+
+    last_exception = None
+    # Add category param automatically for V5 if not already present in kwargs['params']
+    # Check if 'params' is a dict before attempting to add category
+    if 'params' not in kwargs or not isinstance(kwargs['params'], dict):
+        kwargs['params'] = {}
+    # Ensure category is set if it's a V5 exchange and category is configured
+    # Check for EXCHANGE.options and its structure defensively
+    if hasattr(EXCHANGE, 'options') and isinstance(EXCHANGE.options, dict) and 'v5' in EXCHANGE.options and isinstance(EXCHANGE.options['v5'], dict) and 'category' in EXCHANGE.options['v5']:
+         if 'category' not in kwargs['params']: # Only add if not explicitly provided
+             kwargs['params']['category'] = EXCHANGE.options['v5']['category']
+             # logger.debug(f"Auto-added category '{kwargs['params']['category']}' to params for {fetch_function.__name__}")
+    # Also add symbol param for specific endpoints if needed and not present (e.g., Bybit V5 set-trading-stop)
+    # Check if symbol is the first arg or in kwargs, and if the function needs it
+    # This is tricky to generalize, better to add it explicitly in the caller if the endpoint requires it in params.
+    # However, for common V5 calls like fetch_open_orders, fetch_positions, it's usually handled by CCXT's unified API.
+    # Let's assume CCXT handles passing symbol correctly unless a specific endpoint (like set-trading-stop) requires it in params.
+
+    for attempt in range(CONFIG.max_fetch_retries + 1): # +1 to allow logging final failure
+        try:
+            # Log the attempt number and function being called at DEBUG level
+            # Be cautious not to log sensitive parameters like API keys if they were somehow passed directly
+            # Simple masking for common sensitive keys in dict params
+            log_kwargs = {}
+            for k, v in kwargs.items():
+                 if isinstance(v, dict):
+                      log_kwargs[k] = {vk: ('****' if 'secret' in str(vk).lower() or 'key' in str(vk).lower() else vv) for vk, vv in v.items()}
+                 else:
+                      log_kwargs[k] = '****' if 'secret' in str(k).lower() or 'key' in str(k).lower() else v
+            log_args = ['****' if 'secret' in str(a).lower() or 'key' in str(a).lower() else a for a in args]
+            logger.debug(f"Attempt {attempt + 1}/{CONFIG.max_fetch_retries + 1}: Calling {fetch_function.__name__} with args={log_args}, kwargs={log_kwargs}")
+
+            result = fetch_function(*args, **kwargs)
+            return result # Success
+        except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection) as e:
+            last_exception = e
+            wait_time = 2 ** attempt # Exponential backoff (1, 2, 4, 8...)
+            logger.warning(Fore.YELLOW + f"{fetch_function.__name__}: Network issue (Attempt {attempt + 1}/{CONFIG.max_fetch_retries + 1}). Retrying in {wait_time}s... Error: {e}")
+            if attempt < CONFIG.max_fetch_retries:
+                time.sleep(wait_time)
+            else:
+                logger.error(Fore.RED + f"{fetch_function.__name__}: Failed after {CONFIG.max_fetch_retries + 1} attempts due to network issues.")
+                # On final failure, return None. Caller handles the consequence.
+                return None
+        except ccxt.ExchangeNotAvailable as e:
+             last_exception = e
+             logger.error(Fore.RED + f"{fetch_function.__name__}: Exchange not available: {e}. Stopping retries.")
+             # This is usually a hard stop, no point retrying
+             return None # Indicate failure
+        except ccxt.AuthenticationError as e:
+             last_exception = e
+             logger.critical(Fore.RED + Style.BRIGHT + f"{fetch_function.__name__}: Authentication error: {e}. Halting script.")
+             sys.exit(1) # Exit immediately on auth failure
+        except (ccxt.OrderNotFound, ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.BadRequest, ccxt.PermissionDenied) as e:
+            # These are typically non-retryable errors related to the request parameters or exchange state.
+            last_exception = e
+            error_type = type(e).__name__
+            logger.error(Fore.RED + f"{fetch_function.__name__}: Non-retryable error ({error_type}): {e}. Stopping retries for this call.")
+            # Re-raise these specific errors so the caller can handle them appropriately
+            raise e
+        except ccxt.ExchangeError as e:
+            # Includes rate limit errors, potentially invalid requests etc.
+            last_exception = e
+            # Attempt to extract Bybit V5 error code and message from the exception's info dictionary
+            error_code = None
+            error_message = str(e)
+            if hasattr(e, 'info') and isinstance(e.info, dict):
+                 info_data = e.info
+                 # Check for Bybit V5 structure: info -> retCode, retMsg
+                 if 'retCode' in info_data:
+                      error_code = info_data.get('retCode')
+                      error_message = info_data.get('retMsg', error_message)
+                 # Fallback to checking general info keys if V5 structure isn't present
+                 elif 'code' in info_data:
+                      error_code = info_data.get('code')
+                      error_message = info_data.get('msg', error_message) # Common msg key
+
+            should_retry = True
+            wait_time = 2 * (attempt + 1) # Default backoff
+
+            # Check for common rate limit codes/messages
+            if "Rate limit exceeded" in error_message or error_code in [10017, 10018, 10009]: # Bybit V5 rate limit codes
+                 wait_time = 5 * (attempt + 1) # Longer wait for rate limits
+                 logger.warning(f"{Fore.YELLOW}{fetch_function.__name__}: Rate limit hit (Code: {error_code}). Retrying in {wait_time}s... Error: {error_message}")
+            # Check for specific non-retryable errors (e.g., invalid parameter codes)
+            # Bybit V5 Invalid Parameter codes often start with 11xxxx or others indicating bad input/state
+            elif error_code is not None and ( (110000 <= error_code <= 110100) or error_code in [30034] ): # Add other known non-retryable codes
+                 logger.error(Fore.RED + f"{fetch_function.__name__}: Non-retryable parameter/logic exchange error (Code: {error_code}): {error_message}. Stopping retries.")
+                 should_retry = False
+            else:
+                 # General exchange error, apply default backoff
+                 logger.warning(f"{Fore.YELLOW}{fetch_function.__name__}: Exchange error (Attempt {attempt + 1}/{CONFIG.max_fetch_retries + 1}, Code: {error_code}). Retrying in {wait_time}s... Error: {error_message}")
+
+            if should_retry and attempt < CONFIG.max_fetch_retries:
+                time.sleep(wait_time)
+            elif should_retry: # Final attempt failed
+                 logger.error(Fore.RED + f"{fetch_function.__name__}: Failed after {CONFIG.max_fetch_retries + 1} attempts due to exchange errors.")
+                 break # Exit retry loop
+            else: # Non-retryable error encountered
+                 break # Exit retry loop
+
+        except Exception as e:
+            # Catch-all for unexpected errors
+            last_exception = e
+            logger.error(Fore.RED + f"{fetch_function.__name__}: Unexpected shadow encountered: {e}", exc_info=True)
+            break # Stop on unexpected errors
+
+    # If loop finished without returning, it means all retries failed or a break occurred
+    # Re-raise the last specific non-retryable exception if it wasn't already
+    if isinstance(last_exception, (ccxt.OrderNotFound, ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.BadRequest, ccxt.PermissionDenied)):
+         raise last_exception # Propagate specific non-retryable errors
+
+    # For other failures (Network, ExchangeNotAvailable, general ExchangeError after retries), return None
+    if last_exception:
+         logger.error(f"{fetch_function.__name__} ultimately failed after {CONFIG.max_fetch_retries + 1} attempts or encountered a non-retryable error type not explicitly re-raised.")
+         return None # Indicate failure
+
+    # Should not reach here if successful, but defensive return None
+    return None
+
+
+# --- Exchange Nexus Initialization ---
+logger.info(Fore.MAGENTA + Style.BRIGHT + "\nEstablishing Nexus with the Exchange v2.1.4...")
+try:
+    exchange_options = {
+        "apiKey": CONFIG.api_key,
+        "secret": CONFIG.api_secret,
+        "enableRateLimit": True, # CCXT built-in rate limiter
+        "options": {
+            'defaultType': 'swap', # More specific for futures/swaps than 'future'
+            'defaultSubType': CONFIG.market_type, # 'linear' or 'inverse'
+            'adjustForTimeDifference': True, # Auto-sync clock with server
+            # Bybit V5 API often requires 'category' for unified endpoints
+            'brokerId': 'PyrmethusV214', # Custom identifier for Bybit API tracking
+            'v5': {'category': CONFIG.market_type} # Explicitly set category for V5 requests where applicable
+        }
+    }
+    # Log options excluding secrets for debugging
+    log_options = exchange_options.copy()
+    log_options['apiKey'] = '****'
+    log_options['secret'] = '****'
+    # Ensure nested options are also masked if they contain sensitive info (unlikely here, but good practice)
+    log_options['options'] = copy.deepcopy(exchange_options['options'])
+    if 'v5' in log_options['options']:
+         if 'apiKey' in log_options['options']['v5']: log_options['options']['v5']['apiKey'] = '****'
+         if 'secret' in log_options['options']['v5']: log_options['options']['v5']['secret'] = '****' # Defensive masking
+
+    logger.debug(f"Initializing CCXT Bybit with options: {log_options}")
+
+    EXCHANGE = ccxt.bybit(exchange_options)
+
+    # Test connectivity and credentials (important!)
+    logger.info("Verifying credentials and connection...")
+    EXCHANGE.check_required_credentials() # Checks if keys are present/formatted ok
+    logger.info("Credentials format check passed.")
+    # Fetch time to verify connectivity, API key validity, and clock sync
+    # Use fetch_time with retries
+    # Ensure fetch_with_retries is defined *before* this call
+    # The NameError occurred because the definition was below this block.
+    server_time_ms = fetch_with_retries(EXCHANGE.fetch_time)
+    if server_time_ms is None:
+         logger.critical(Fore.RED + Style.BRIGHT + "Failed to fetch server time after retries. Cannot verify connection/credentials. Halting.")
+         sys.exit(1)
+
+    local_time_ms = EXCHANGE.milliseconds()
+    time_diff_ms = abs(server_time_ms - local_time_ms)
+    logger.info(f"Exchange time synchronized: {EXCHANGE.iso8601(server_time_ms)} (Difference: {time_diff_ms} ms)")
+    if time_diff_ms > 5000: # Warn if clock skew is significant (e.g., > 5 seconds)
+        logger.warning(Fore.YELLOW + f"Significant time difference ({time_diff_ms} ms) between system and exchange. Check system clock synchronization.")
+
+    # Load markets (force reload to ensure fresh data)
+    logger.info("Loading market spirits (market data)...")
+    # Use fetch_with_retries for load_markets if possible? No, load_markets is a special CCXT method.
+    # It handles its own retries internally often, or it's designed to be a single call.
+    # Catch errors directly here.
+    try:
+        EXCHANGE.load_markets(True) # Force reload
+        logger.info(Fore.GREEN + Style.BRIGHT + f"Successfully connected to Bybit Nexus ({CONFIG.market_type.capitalize()} Markets).")
+    except Exception as e:
+         logger.critical(Fore.RED + Style.BRIGHT + f"Failed to load markets: {e}", exc_info=True)
+         sys.exit(1)
+
+
+    # Verify symbol exists and get market details
+    if CONFIG.symbol not in EXCHANGE.markets:
+         logger.error(Fore.RED + Style.BRIGHT + f"Symbol {CONFIG.symbol} not found in Bybit {CONFIG.market_type} market spirits.")
+         # Suggest available symbols more effectively
+         available_symbols = []
+         try:
+             # Extract settle currency robustly (handles SYMBOL/QUOTE:SETTLE format)
+             # For futures, settle currency is often the key identifier in market lists
+             settle_currency_candidates = CONFIG.symbol.split(':') # e.g., ['BTC/USDT', 'USDT']
+             settle_currency = settle_currency_candidates[-1].strip() if len(settle_currency_candidates) > 1 else None
+             logger.info(f"Attempting to find symbols settling in {settle_currency} for type {CONFIG.market_type}...")
+
+             for s, m in EXCHANGE.markets.items():
+                  # Check if market matches the configured type (linear/inverse) and is active
+                  is_correct_type = False
+                  if CONFIG.market_type == 'linear' and m.get('linear'): is_correct_type = True
+                  if CONFIG.market_type == 'inverse' and m.get('inverse'): is_correct_type = True
+
+                  # Filter by settle currency if known and check if active
+                  if m.get('active') and is_correct_type:
+                      if settle_currency is None or m.get('settle') == settle_currency:
+                          available_symbols.append(s)
+
+         except Exception as parse_err:
+             logger.error(f"Could not parse symbol or filter suggestions: {parse_err}")
+             # Fallback: List all active symbols of the correct type if filtering fails
+             available_symbols = [
+                 s for s, m in EXCHANGE.markets.items()
+                 if m.get('active') and ((CONFIG.market_type == 'linear' and m.get('linear')) or (CONFIG.market_type == 'inverse' and m.get('inverse')))
+             ]
+
+
+         suggestion_limit = 50 # Increased suggestion limit
+         if available_symbols:
+             suggestions = ", ".join(sorted(available_symbols)[:suggestion_limit])
+             if len(available_symbols) > suggestion_limit:
+                 suggestions += ", ..."
+             logger.info(Fore.CYAN + f"Available active {CONFIG.market_type} symbols (sample): " + suggestions)
+         else:
+             logger.info(Fore.CYAN + f"Could not find any active {CONFIG.market_type} symbols to suggest matching criteria.")
+         sys.exit(1)
+    else:
+        MARKET_INFO = EXCHANGE.market(CONFIG.symbol)
+        logger.info(Fore.CYAN + f"Market spirit for {CONFIG.symbol} acknowledged (ID: {MARKET_INFO.get('id')}).")
+
+        # --- Log key precision and limits using Decimal ---
+        # Extract values safely, providing defaults or logging errors
+        try:
+            # precision['price'] might be a tick size (Decimal/string) or number of decimal places (int)
+            price_precision_raw = MARKET_INFO['precision'].get('price')
+            # precision['amount'] might be a step size (Decimal/string) or number of decimal places (int)
+            amount_precision_raw = MARKET_INFO['precision'].get('amount')
+            min_amount_raw = MARKET_INFO['limits']['amount'].get('min')
+            max_amount_raw = MARKET_INFO['limits']['amount'].get('max') # Max might be None
+            contract_size_raw = MARKET_INFO.get('contractSize') # Can be None
+            min_cost_raw = MARKET_INFO['limits'].get('cost', {}).get('min') # Min cost might not exist
+
+            # Convert to Decimal for logging and potential use, handle None/N/A
+            price_prec_dec = Decimal(str(price_precision_raw)) if price_precision_raw is not None else Decimal("NaN")
+            amount_prec_dec = Decimal(str(amount_precision_raw)) if amount_precision_raw is not None else Decimal("NaN")
+            min_amount_dec = Decimal(str(min_amount_raw)) if min_amount_raw is not None else Decimal("NaN")
+            max_amount_dec = Decimal(str(max_amount_raw)) if max_amount_raw is not None else Decimal('Infinity') # Use Infinity for no max
+            contract_size_dec = Decimal(str(contract_size_raw)) if contract_size_raw is not None else Decimal("1") # Default to '1' if not present/None
+            min_cost_dec = Decimal(str(min_cost_raw)) if min_cost_raw is not None else Decimal("NaN")
+
+            logger.debug(f"Market Precision: Price Tick/Decimals={price_prec_dec.normalize() if not price_prec_dec.is_nan() else 'N/A'}, Amount Step/Decimals={amount_prec_dec.normalize() if not amount_prec_dec.is_nan() else 'N/A'}")
+            logger.debug(f"Market Limits: Min Amount={min_amount_dec.normalize() if not min_amount_dec.is_nan() else 'N/A'}, Max Amount={max_amount_dec.normalize() if max_amount_dec != Decimal('Infinity') else 'Infinity'}, Min Cost={min_cost_dec.normalize() if not min_cost_dec.is_nan() else 'N/A'}")
+            logger.debug(f"Contract Size: {contract_size_dec.normalize()}")
+
+
+            # --- Dynamically set epsilon based on amount precision (step size) ---
+            # CCXT often provides amount precision as the step size directly
+            amount_step_size_info = MARKET_INFO['precision'].get('amount')
+            if amount_step_size_info is not None:
+                try:
+                    # Use a very small fraction of the step size as epsilon.
+                    # 1E-12 is safe for most crypto step sizes which are typically >= 1e-8.
+                    # A more dynamic approach could be Decimal(str(amount_step_size_info)) * Decimal('1E-6')
+                    CONFIG.position_qty_epsilon = Decimal("1E-12") # A very small, fixed epsilon
+                    logger.info(f"Set position_qty_epsilon to a small fixed value: {CONFIG.position_qty_epsilon:.1E}")
+                except (InvalidOperation, TypeError):
+                    logger.warning(f"Could not parse amount step size '{amount_step_size_info}'. Using default epsilon: {CONFIG.position_qty_epsilon:.1E}")
+            else:
+                 logger.warning(f"Market info does not provide amount step size ('precision.amount'). Using default epsilon: {CONFIG.position_qty_epsilon:.1E}")
+
+
+        except (KeyError, TypeError, InvalidOperation) as e:
+             logger.critical(f"{Fore.RED+Style.BRIGHT}Failed to parse critical market info (precision/limits/size) from MARKET_INFO: {e}. Halting.", exc_info=True)
+             logger.debug(f"Problematic MARKET_INFO: {MARKET_INFO}")
+             sys.exit(1)
+
+except ccxt.AuthenticationError as e:
+    logger.critical(Fore.RED + Style.BRIGHT + f"Authentication failed! Check API Key/Secret validity and permissions. Error: {e}")
+    sys.exit(1)
+except ccxt.NetworkError as e:
+    logger.critical(Fore.RED + Style.BRIGHT + f"Network error connecting to Bybit: {e}. Check internet connection and Bybit status.")
+    sys.exit(1)
+except ccxt.ExchangeNotAvailable as e:
+    logger.critical(Fore.RED + Style.BRIGHT + f"Bybit exchange is currently unavailable: {e}. Check Bybit status.")
+    sys.exit(1)
+except ccxt.ExchangeError as e:
+    logger.critical(Fore.RED + Style.BRIGHT + f"Exchange Nexus Error during initialization: {e}", exc_info=True)
+    sys.exit(1)
+except Exception as e:
+    logger.critical(Fore.RED + Style.BRIGHT + f"Unexpected error during Nexus initialization: {e}", exc_info=True)
+    sys.exit(1)
+
+
+# --- Global State Runes ---
+# Tracks active SL/TSL order IDs or position-based markers associated with a potential long or short position.
+# Reset when a position is closed or a new entry order is successfully placed.
+# Uses placeholders like "POS_SL_LONG", "POS_TSL_LONG" for Bybit V5 position-based stops.
+# Note: Bybit V5 position stops do NOT return order IDs, so we track their *presence* using these markers.
+order_tracker: Dict[str, Dict[str, Optional[str]]] = {
+    "long": {"sl_id": None, "tsl_id": None}, # sl_id/tsl_id stores marker (e.g., "POS_SL_LONG") or None
+    "short": {"sl_id": None, "tsl_id": None}
+}
+
+# --- Termux Utility Spell ---
+def termux_notify(title: str, content: str) -> None:
+    """Sends a notification using Termux API (if available) via termux-toast."""
+    if not os.getenv("TERMUX_VERSION"):
+        logger.debug("Not running in Termux environment. Skipping notification.")
+        return
+
+    try:
+        # Check if command exists using which (more portable than 'command -v')
+        check_cmd = subprocess.run(['which', 'termux-toast'], capture_output=True, text=True, check=False)
+        if check_cmd.returncode != 0:
+            logger.debug("termux-toast command not found. Skipping notification.")
+            return
+
+        # Basic sanitization - focus on preventing shell interpretation issues
+        # Replace potentially problematic characters with spaces or remove them
+        safe_title = title.replace('"', "'").replace('`', "'").replace('$', '').replace('\\', '').replace(';', '').replace('&', '').replace('|', '').replace('(', '').replace(')', '')
+        safe_content = content.replace('"', "'").replace('`', "'").replace('$', '').replace('\\', '').replace(';', '').replace('&', '').replace('|', '').replace('(', '').replace(')', '')
+
+        # Limit length to avoid potential buffer issues or overly long toasts
+        max_len = 250 # Increased length slightly for more info
+        full_message = f"{safe_title}: {safe_content}"[:max_len]
+
+        # Use list format for subprocess.run for security
+        # Example styling: gravity middle, black text on green background, short duration
+        cmd_list = ['termux-toast', '-g', 'middle', '-c', 'black', '-b', 'green', '-s', full_message]
+        # Use shell=False with list format for security
+        result = subprocess.run(cmd_list, capture_output=True, text=True, check=False, timeout=5, shell=False) # Add timeout and shell=False
+
+        if result.returncode != 0:
+            # Log stderr if available
+            stderr_msg = result.stderr.strip()
+            logger.warning(f"termux-toast command failed with code {result.returncode}" + (f": {stderr_msg}" if stderr_msg else ""))
+        # No else needed, success is silent
+
+    except FileNotFoundError:
+         logger.debug("termux-toast command not found (FileNotFoundError). Skipping notification.")
+    except subprocess.TimeoutExpired:
+         logger.warning("termux-toast command timed out. Skipping notification.")
+    except Exception as e:
+        # Catch other potential exceptions during subprocess execution
+        logger.warning(Fore.YELLOW + f"Could not conjure Termux notification: {e}", exc_info=True)
+
+# --- Precision Casting Spells ---
+
+def format_price(symbol: str, price: Union[Decimal, str, float, int]) -> str:
+    """Formats price according to market precision rules using exchange's method."""
+    global MARKET_INFO, EXCHANGE
+    if MARKET_INFO is None or EXCHANGE is None:
+        logger.error(f"{Fore.RED}Market info or Exchange not loaded for {symbol}, cannot format price.")
+        # Fallback with a reasonable number of decimal places using Decimal
+        try:
+            price_dec = Decimal(str(price))
+            # Use getcontext().prec for fallback precision if market info unavailable
+            return str(price_dec.quantize(Decimal('1').scaleb(-getcontext().prec + 1), rounding=ROUND_DOWN)) # Quantize to high precision
+        except Exception:
+            return str(price) # Last resort
+
+    try:
+        # CCXT's price_to_precision handles rounding/truncation based on market rules (tick size).
+        # Ensure input is float as expected by CCXT methods.
+        # Need to handle potential NaN Decimal input
+        if isinstance(price, Decimal) and price.is_nan():
+             logger.warning(f"Attempted to format NaN price for {symbol}. Returning 'NaN'.")
+             return "NaN"
+        price_float = float(price)
+        return EXCHANGE.price_to_precision(symbol, price_float)
+    except (AttributeError, KeyError, InvalidOperation, ValueError, TypeError) as e:
+         logger.error(f"{Fore.RED}Market info for {symbol} missing precision data or invalid price format '{price}': {e}. Using fallback formatting.")
+         try:
+             price_dec = Decimal(str(price))
+             return str(price_dec.quantize(Decimal('1').scaleb(-getcontext().prec + 1), rounding=ROUND_DOWN))
+         except Exception:
+              return str(price)
+    except Exception as e:
+        logger.error(f"{Fore.RED}Error formatting price {price} for {symbol}: {e}. Using fallback.")
+        try:
+             price_dec = Decimal(str(price))
+             return str(price_dec.quantize(Decimal('1').scaleb(-getcontext().prec + 1), rounding=ROUND_DOWN))
+        except Exception:
+            return str(price)
+
+def format_amount(symbol: str, amount: Union[Decimal, str, float, int], rounding_mode=ROUND_DOWN) -> str:
+    """Formats amount according to market precision rules (step size) using exchange's method."""
+    global MARKET_INFO, EXCHANGE
+    if MARKET_INFO is None or EXCHANGE is None:
+        logger.error(f"{Fore.RED}Market info or Exchange not loaded for {symbol}, cannot format amount.")
+        # Fallback with a reasonable number of decimal places using Decimal
+        try:
+            amount_dec = Decimal(str(amount))
+            # Use quantize for fallback if Decimal input, with high precision
+            return str(amount_dec.quantize(Decimal('1').scaleb(-getcontext().prec + 1), rounding=rounding_mode))
+        except Exception:
+            return str(amount) # Last resort
+
+    try:
+        # CCXT's amount_to_precision handles step size and rounding.
+        # Map Python Decimal rounding modes to CCXT rounding modes.
+        # Bybit usually requires truncation (ROUND_DOWN) for quantity.
+        ccxt_rounding_mode = ccxt.TRUNCATE if rounding_mode == ROUND_DOWN else ccxt.ROUND # Basic mapping
+        # Ensure input is float as expected by CCXT methods.
+        # Need to handle potential NaN Decimal input
+        if isinstance(amount, Decimal) and amount.is_nan():
+             logger.warning(f"Attempted to format NaN amount for {symbol}. Returning 'NaN'.")
+             return "NaN"
+        amount_float = float(amount)
+        return EXCHANGE.amount_to_precision(symbol, amount_float, rounding_mode=ccxt_rounding_mode)
+    except (AttributeError, KeyError, InvalidOperation, ValueError, TypeError) as e:
+         logger.error(f"{Fore.RED}Market info for {symbol} missing precision data or invalid amount format '{amount}': {e}. Using fallback formatting.")
+         try:
+             amount_dec = Decimal(str(amount))
+             return str(amount_dec.quantize(Decimal('1').scaleb(-getcontext().prec + 1), rounding=rounding_mode))
+         except Exception:
+              return str(amount)
+    except Exception as e:
+        logger.error(f"{Fore.RED}Error formatting amount {amount} for {symbol}: {e}. Using fallback.")
+        try:
+             amount_dec = Decimal(str(amount))
+             return str(amount_dec.quantize(Decimal('1').scaleb(-getcontext().prec + 1), rounding=rounding_mode))
+        except Exception:
+            return str(amount)
+
+
+def fetch_market_data(symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
+    """Fetch OHLCV data using the retry wrapper and perform validation."""
+    global EXCHANGE
+    logger.info(Fore.CYAN + f"# Channeling market whispers for {symbol} ({timeframe})...")
+
+    if EXCHANGE is None or not hasattr(EXCHANGE, 'fetch_ohlcv'):
+         logger.error(Fore.RED + "Exchange object not properly initialized or missing fetch_ohlcv.")
+         return None
+
+    # Ensure limit is positive (already validated in config, but double check)
+    if limit <= 0:
+         logger.error(f"Invalid OHLCV limit requested: {limit}. Using default 100.")
+         limit = 100
+
+    ohlcv_data = None
+    try:
+        # fetch_with_retries handles category param automatically
+        ohlcv_data = fetch_with_retries(EXCHANGE.fetch_ohlcv, symbol, timeframe, limit=limit)
+    except Exception as e:
+        # fetch_with_retries should handle most errors, but catch any unexpected ones here
+        logger.error(Fore.RED + f"Unhandled exception during fetch_ohlcv call via fetch_with_retries: {e}", exc_info=True)
+        return None
+
+    if ohlcv_data is None:
+        # fetch_with_retries already logged the failure reason
+        logger.error(Fore.RED + f"Failed to fetch OHLCV data for {symbol}.")
+        return None
+    # Check if ohlcv_data is a list and not empty
+    if not isinstance(ohlcv_data, list) or not ohlcv_data:
+        logger.error(Fore.RED + f"Received empty or invalid OHLCV data type: {type(ohlcv_data)}. Content: {str(ohlcv_data)[:100]}")
+        return None
+
+    # Check if each item in the list is a list of expected length
+    expected_ohlcv_len = 6 # timestamp, open, high, low, close, volume
+    if not all(isinstance(item, list) and len(item) >= expected_ohlcv_len for item in ohlcv_data):
+        logger.error(Fore.RED + f"Received OHLCV data with unexpected item format. Expected list of lists with >= {expected_ohlcv_len} items.")
+        # Log first few problematic items for debugging
+        for i, item in enumerate(ohlcv_data[:5]):
+             if not (isinstance(item, list) and len(item) >= expected_ohlcv_len):
+                  logger.debug(f"Problematic OHLCV item {i}: {item}")
+        return None
+
+
+    try:
+        # Use Decimal for numeric columns directly during DataFrame creation where possible
+        # However, pandas expects floats for most calculations, so convert back later
+        # Convert list of lists to DataFrame, ensuring columns have appropriate names.
+        # If volume is missing, CCXT might return lists of length 5. Handle this.
+        column_names = ["timestamp", "open", "high", "low", "close"]
+        if len(ohlcv_data[0]) >= 6:
+             column_names.append("volume")
+        df = pd.DataFrame(ohlcv_data, columns=column_names)
+
+        # Convert timestamp immediately to UTC datetime objects
+        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True, errors='coerce')
+        initial_len = len(df)
+        df.dropna(subset=["timestamp"], inplace=True) # Drop rows where timestamp conversion failed
+        if len(df) < initial_len:
+             dropped_count = initial_len - len(df)
+             logger.warning(f"Dropped {dropped_count} rows due to invalid timestamp.")
+             initial_len = len(df) # Update initial_len for next check
+
+        # Convert numeric columns to float first for pandas/numpy compatibility
+        numeric_cols = ["open", "high", "low", "close"]
+        if "volume" in df.columns: numeric_cols.append("volume")
+        for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # Check for NaNs in critical price columns *after* conversion
+        df.dropna(subset=["open", "high", "low", "close"], inplace=True)
+        if len(df) < initial_len:
+            dropped_count = initial_len - len(df)
+            logger.warning(f"Dropped {dropped_count} rows with missing essential price data from OHLCV.")
+
+        if df.empty:
+            logger.error(Fore.RED + "DataFrame is empty after processing and cleaning OHLCV data (all rows dropped?).")
+            return None
+
+        df = df.set_index("timestamp")
+        # Ensure data is sorted chronologically (fetch_ohlcv usually guarantees this, but verify)
+        if not df.index.is_monotonic_increasing:
+             logger.warning("OHLCV data was not sorted chronologically. Sorting now.")
+             df.sort_index(inplace=True)
+
+        # Check for duplicate timestamps (can indicate data issues)
+        if df.index.duplicated().any():
+             duplicates = df.index[df.index.duplicated()].unique()
+             logger.warning(Fore.YELLOW + f"Duplicate timestamps found in OHLCV data ({len(duplicates)} unique duplicates). Keeping last entry for each.")
+             df = df[~df.index.duplicated(keep='last')]
+
+        # Check time difference between last two candles vs expected interval
+        if len(df) > 1:
+             time_diff = df.index[-1] - df.index[-2]
+             try:
+                 # Use pandas to parse timeframe string robustly
+                 interval_seconds = EXCHANGE.parse_timeframe(timeframe)
+                 expected_interval_td = pd.Timedelta(interval_seconds, unit='s')
+                 # Allow some tolerance (e.g., 20% of interval + 10s buffer) for minor timing differences/API lag
+                 tolerance_seconds = interval_seconds * 0.2 + 10
+                 tolerance = pd.Timedelta(seconds=tolerance_seconds)
+                 if abs(time_diff.total_seconds()) > expected_interval_td.total_seconds() + tolerance.total_seconds():
+                      logger.warning(f"Unexpected large time gap between last two candles: {time_diff} (expected ~{expected_interval_td}, allowed lag ~{tolerance}).")
+             except ValueError:
+                 logger.warning(f"Could not parse timeframe '{timeframe}' to calculate expected interval for time gap check.")
+             except Exception as time_check_e:
+                 logger.warning(f"Error during time difference check: {time_check_e}")
+
+        # Check if enough candles are returned compared to the requested limit
+        if len(df) < limit:
+             logger.warning(f"{Fore.YELLOW}Fetched fewer candles ({len(df)}) than requested limit ({limit}). Data might be incomplete.")
+
+        logger.info(Fore.GREEN + f"Market whispers received ({len(df)} candles). Latest: {df.index[-1].strftime('%Y-%m-%d %H:%M:%S %Z')}")
+        return df
+    except Exception as e:
+        logger.error(Fore.RED + f"Error processing OHLCV data into DataFrame: {e}", exc_info=True)
+        return None
+
+
+def calculate_indicators(df: pd.DataFrame) -> Optional[Dict[str, Decimal]]:
+    """Calculate technical indicators using CONFIG periods, returning results as Decimals for precision."""
+    logger.info(Fore.CYAN + "# Weaving indicator patterns...")
+    if df is None or df.empty:
+        logger.error(Fore.RED + "Cannot calculate indicators on missing or empty DataFrame.")
+        return None
+    try:
+        # Ensure data is float for TA-Lib / Pandas calculations, convert to Decimal at the end
+        # Defensive: Make a copy to avoid modifying the original DataFrame if it's used elsewhere
+        df_calc = df.copy()
+        # Convert relevant columns to float, coercing errors
+        close = pd.to_numeric(df_calc["close"], errors='coerce')
+        high = pd.to_numeric(df_calc["high"], errors='coerce')
+        low = pd.to_numeric(df_calc["low"], errors='coerce')
+
+        # Drop any rows where these critical columns are NaN *after* conversion
+        df_calc.dropna(subset=["close", "high", "low"], inplace=True)
+        if df_calc.empty:
+             logger.error(Fore.RED + "DataFrame is empty after dropping rows with NaN price data. Cannot calculate indicators.")
+             return None
+
+        close = df_calc["close"].astype(float)
+        high = df_calc["high"].astype(float)
+        low = df_calc["low"].astype(float)
+
+
+        # --- Check Data Length Requirements ---
+        # Ensure enough data for EWMA initial states to stabilize somewhat
+        # EWMA needs `span` number of points for the first value *if* adjust=True (default).
+        # With adjust=False, the first value is just the first data point, and subsequent values are direct EMA.
+        # However, the EMA doesn't represent a true average over the period until `span` points have passed.
+        # Stochastic needs `period + smooth_k + smooth_d - 2` data points (approx).
+        # ATR needs `period + 1` data points (for the first TR calculation involving previous close).
+        required_len_ema_stable = max(CONFIG.fast_ema_period, CONFIG.slow_ema_period, CONFIG.trend_ema_period)
+        required_len_stoch = CONFIG.stoch_period + CONFIG.stoch_smooth_k + CONFIG.stoch_smooth_d - 2
+        required_len_atr = CONFIG.atr_period + 1
+
+        min_required_len = max(required_len_ema_stable, required_len_stoch, required_len_atr)
+        # Add a small buffer to ensure the latest indicator values are not the very first calculated ones
+        # A buffer of the max smoothing period (stoch_smooth_d) is reasonable.
+        min_safe_len = min_required_len + max(CONFIG.stoch_smooth_d, 1)
+
+        if len(df_calc) < min_safe_len:
+             logger.warning(f"{Fore.YELLOW}Not enough data ({len(df_calc)}) for stable indicators (minimum safe: {min_safe_len}). Indicator values might be less reliable. Increase OHLCV_LIMIT or wait for more data.")
+             # Proceed anyway, but warn
+
+        if len(df_calc) < min_required_len:
+             logger.error(f"{Fore.RED}Insufficient data ({len(df_calc)}) for core indicator calculations (minimum required: {min_required_len}). Cannot calculate indicators.")
+             return None # Critical failure if even minimum isn't met
+
+
+        # --- Calculations using Pandas and CONFIG periods ---
+        fast_ema_series = close.ewm(span=CONFIG.fast_ema_period, adjust=False).mean()
+        slow_ema_series = close.ewm(span=CONFIG.slow_ema_period, adjust=False).mean()
+        trend_ema_series = close.ewm(span=CONFIG.trend_ema_period, adjust=False).mean()
+
+        # Stochastic Oscillator %K and %D
+        low_min = low.rolling(window=CONFIG.stoch_period).min()
+        high_max = high.rolling(window=CONFIG.stoch_period).max()
+        # Add epsilon to prevent division by zero if high == low over the period
+        # Use numpy's epsilon for float calculations
+        stoch_k_raw = 100 * (close - low_min) / (high_max - low_min + np.finfo(float).eps)
+        stoch_k = stoch_k_raw.rolling(window=CONFIG.stoch_smooth_k).mean()
+        stoch_d = stoch_k.rolling(window=CONFIG.stoch_smooth_d).mean()
+
+        # Average True Range (ATR) - Wilder's smoothing matches TradingView standard
+        # Calculate True Range first
+        prev_close = close.shift(1)
+        tr_df = pd.DataFrame(index=df_calc.index)
+        tr_df["hl"] = high - low
+        tr_df["hc"] = (high - prev_close).abs()
+        tr_df["lc"] = (low - prev_close).abs()
+        tr = tr_df[["hl", "hc", "lc"]].max(axis=1)
+        # Use ewm with alpha = 1/period for Wilder's smoothing, skip initial NaN TR value
+        atr_series = tr[1:].ewm(alpha=1/CONFIG.atr_period, adjust=False).mean()
+        # Prepend NaN for the first candle's ATR if needed for index alignment
+        atr_series = pd.concat([pd.Series([np.nan], index=[df_calc.index[0]]), atr_series])
+
+
+        # --- Extract Latest Values & Convert to Decimal ---
+        # Define quantizers for consistent decimal places (adjust as needed)
+        # These are for *internal* Decimal representation, not API formatting.
+        # Use enough precision to avoid rounding errors before API formatting.
+        # A precision that matches or exceeds the typical market price precision is good.
+        price_quantizer = Decimal("1E-8") # 8 decimal places for price-like values
+        percent_quantizer = Decimal("1E-2") # 2 decimal places for Stoch
+        atr_quantizer = Decimal("1E-8") # 8 decimal places for ATR
+
+        # Helper to safely get latest non-NaN value, convert to Decimal, and handle errors
+        def get_latest_decimal(series: pd.Series, quantizer: Decimal, name: str, default_val: Decimal = Decimal("NaN")) -> Decimal:
+            if series.empty or series.isna().all():
+                logger.warning(f"Indicator series '{name}' is empty or all NaN.")
+                return default_val
+            # Get the last valid (non-NaN) value
+            latest_valid_val = series.dropna().iloc[-1] if not series.dropna().empty else None
+
+            if latest_valid_val is None:
+                 # This case should be covered by the initial min_required_len check, but defensive
+                 logger.warning(f"Indicator calculation for '{name}' resulted in NaN or only NaNs.")
+                 return default_val
+            try:
+                # Convert via string for precision, then quantize
+                return Decimal(str(latest_valid_val)).quantize(quantizer)
+            except (InvalidOperation, TypeError) as e:
+                logger.error(f"Could not convert indicator '{name}' value {latest_valid_val} to Decimal: {e}. Returning default.")
+                return default_val
+
+        # Get latest values
+        latest_fast_ema = get_latest_decimal(fast_ema_series, price_quantizer, "fast_ema")
+        latest_slow_ema = get_latest_decimal(slow_ema_series, price_quantizer, "slow_ema")
+        latest_trend_ema = get_latest_decimal(trend_ema_series, price_quantizer, "trend_ema")
+        latest_stoch_k = get_latest_decimal(stoch_k, percent_quantizer, "stoch_k", default_val=Decimal("50.00")) # Default neutral
+        latest_stoch_d = get_latest_decimal(stoch_d, percent_quantizer, "stoch_d", default_val=Decimal("50.00")) # Default neutral
+        latest_atr = get_latest_decimal(atr_series, atr_quantizer, "atr", default_val=Decimal("0.0")) # Default zero
+
+        # --- Calculate Stochastic Cross Signals (Boolean) ---
+        # Requires at least 2 data points for the shift
+        stoch_kd_bullish = False
+        stoch_kd_bearish = False
+        # Ensure series have enough data and last two values are not NaN
+        if len(stoch_k) >= 2 and not stoch_k.iloc[-1].is_nan() and not stoch_d.iloc[-1].is_nan() \
+           and not stoch_k.iloc[-2].is_nan() and not stoch_d.iloc[-2].is_nan():
+             try:
+                  # Get the last two values as Decimals
+                  stoch_k_last = Decimal(str(stoch_k.iloc[-1]))
+                  stoch_d_last = Decimal(str(stoch_d.iloc[-1]))
+                  stoch_k_prev = Decimal(str(stoch_k.iloc[-2]))
+                  stoch_d_prev = Decimal(str(stoch_d.iloc[-2]))
+
+                  # Check for crossover using previous vs current values (Decimal comparison)
+                  # Bullish cross: K crosses above D
+                  stoch_kd_bullish = (stoch_k_last > stoch_d_last) and (stoch_k_prev <= stoch_d_prev)
+                  # Bearish cross: K crosses below D
+                  stoch_kd_bearish = (stoch_k_last < stoch_d_last) and (stoch_k_prev >= stoch_d_prev)
+
+                  # Ensure crossover happens within the relevant zones for signalling (optional but common)
+                  # Only signal bullish cross if it happens *in* or *from* the oversold zone (K or D was <= threshold)
+                  if stoch_kd_bullish and stoch_k_prev > CONFIG.stoch_oversold_threshold and stoch_d_prev > CONFIG.stoch_oversold_threshold:
+                      logger.debug(f"Stoch K/D Bullish cross happened above oversold zone ({CONFIG.stoch_oversold_threshold}). Not using for signal.")
+                      stoch_kd_bullish = False
+                  # Only signal bearish cross if it happens *in* or *from* the overbought zone (K or D was >= threshold)
+                  if stoch_kd_bearish and stoch_k_prev < CONFIG.stoch_overbought_threshold and stoch_d_prev < CONFIG.stoch_overbought_threshold:
+                       logger.debug(f"Stoch K/D Bearish cross happened below overbought zone ({CONFIG.stoch_overbought_threshold}). Not using for signal.")
+                       stoch_kd_bearish = False
+
+             except (InvalidOperation, TypeError) as e:
+                  logger.warning(f"Error calculating Stoch K/D cross: {e}. Cross signals will be False.")
+                  stoch_kd_bullish = False
+                  stoch_kd_bearish = False
+        else:
+             logger.debug("Not enough data or NaN values for Stoch K/D cross calculation.")
+
+
+        indicators_out = {
+            "fast_ema": latest_fast_ema,
+            "slow_ema": latest_slow_ema,
+            "trend_ema": latest_trend_ema,
+            "stoch_k": latest_stoch_k,
+            "stoch_d": latest_stoch_d,
+            "atr": latest_atr,
+            "atr_period": CONFIG.atr_period, # Store period for display
+            "stoch_kd_bullish": stoch_kd_bullish, # Add cross signals
+            "stoch_kd_bearish": stoch_kd_bearish # Add cross signals
+        }
+
+        # Check if any crucial indicator calculation failed (returned NaN default)
+        critical_indicators = ['fast_ema', 'slow_ema', 'trend_ema', 'stoch_k', 'stoch_d', 'atr']
+        failed_indicators = [key for key in critical_indicators if indicators_out[key].is_nan()]
+
+        if failed_indicators:
+             logger.error(f"{Fore.RED}One or more critical indicators failed to calculate (NaN): {', '.join(failed_indicators)}")
+             return None # Signal failure
+
+        logger.info(Fore.GREEN + "Indicator patterns woven successfully.")
+        # logger.debug(f"Latest Indicators: { {k: str(v) for k, v in indicators_out.items()} }") # Log values at debug, convert Decimal to str for clean log
+        return indicators_out
+
+    except Exception as e:
+        logger.error(Fore.RED + f"Failed to weave indicator patterns: {e}", exc_info=True)
+        return None
+
+def get_current_position(symbol: str) -> Optional[Dict[str, Dict[str, Any]]]:
+    """Fetch current positions using retry wrapper, returning quantities and prices as Decimals."""
+    global EXCHANGE
+    logger.info(Fore.CYAN + f"# Consulting position spirits for {symbol}...")
+
+    if EXCHANGE is None:
+         logger.error("Exchange object not available for fetching positions.")
+         return None
+
+    # Initialize with Decimal zero for clarity
+    pos_dict = {
+        "long": {"qty": Decimal("0.0"), "entry_price": Decimal("NaN"), "liq_price": Decimal("NaN"), "pnl": Decimal("NaN")},
+        "short": {"qty": Decimal("0.0"), "entry_price": Decimal("NaN"), "liq_price": Decimal("NaN"), "pnl": Decimal("NaN")}
+    }
+
+    positions_data = None
+    try:
+        # fetch_with_retries handles category param automatically
+        # Note: Bybit V5 fetch_positions might return multiple entries per symbol (e.g., isolated/cross, or different sides).
+        # We assume one-way mode and sum up quantities/use average price if necessary, or just process the first entry found for each side.
+        # For simplicity, this code assumes one-way mode and picks the first long/short entry with non-zero quantity.
+        positions_data = fetch_with_retries(EXCHANGE.fetch_positions, symbols=[symbol])
+    except Exception as e:
+        # Handle potential exceptions raised by fetch_with_retries itself (e.g., AuthenticationError, Non-retryable ExchangeError)
+        logger.error(Fore.RED + f"Unhandled exception during fetch_positions call via fetch_with_retries: {e}", exc_info=True)
+        return None # Indicate failure
+
+    if positions_data is None:
+         # fetch_with_retries already logged the failure reason
+         logger.error(Fore.RED + f"Failed to fetch positions for {symbol}.")
+         return None # Indicate failure
+
+    if not isinstance(positions_data, list):
+         logger.error(f"Unexpected data type received from fetch_positions: {type(positions_data)}. Expected list. Data: {str(positions_data)[:200]}")
+         return None
+
+    if not positions_data:
+         logger.info(Fore.BLUE + f"No open positions reported by exchange for
