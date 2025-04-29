@@ -98,13 +98,26 @@ def calculate_indicators(df: pd.DataFrame, config: dict) -> pd.DataFrame:
         
         # Stochastic RSI
         if indicator_config.get("stoch_rsi", {}).get("enabled", True):
-            stoch_period = indicator_config.get("stoch_rsi", {}).get("period", 14)
-            stoch_k = indicator_config.get("stoch_rsi", {}).get("k", 3)
-            stoch_d = indicator_config.get("stoch_rsi", {}).get("d", 3)
-            
-            stoch = ta.stoch(df_copy["high"], df_copy["low"], df_copy["close"], k=stoch_k, d=stoch_d, length=stoch_period)
-            df_copy["stoch_k"] = stoch["STOCHk_" + str(stoch_period) + "_" + str(stoch_k) + "_" + str(stoch_d)]
-            df_copy["stoch_d"] = stoch["STOCHd_" + str(stoch_period) + "_" + str(stoch_k) + "_" + str(stoch_d)]
+            try:
+                stoch_period = indicator_config.get("stoch_rsi", {}).get("period", 14)
+                stoch_k = indicator_config.get("stoch_rsi", {}).get("k", 3)
+                stoch_d = indicator_config.get("stoch_rsi", {}).get("d", 3)
+                
+                stoch = ta.stoch(df_copy["high"], df_copy["low"], df_copy["close"], k=stoch_k, d=stoch_d, length=stoch_period)
+                k_col = f"STOCHk_{stoch_period}_{stoch_k}_{stoch_d}"
+                d_col = f"STOCHd_{stoch_period}_{stoch_k}_{stoch_d}"
+                
+                if k_col in stoch.columns:
+                    df_copy["stoch_k"] = stoch[k_col]
+                else:
+                    logger.warning(f"Column {k_col} not found in stoch result")
+                    
+                if d_col in stoch.columns:    
+                    df_copy["stoch_d"] = stoch[d_col]
+                else:
+                    logger.warning(f"Column {d_col} not found in stoch result")
+            except Exception as e:
+                logger.warning(f"Error calculating Stochastic: {e}")
         
         # ADX
         if indicator_config.get("adx", {}).get("enabled", True):
@@ -457,6 +470,47 @@ def calculate_ehlers_supertrend_signal(df: pd.DataFrame, config: dict) -> tuple:
     Returns:
         tuple: (signal_strength, direction, parameters)
     """
-    # For now, just use the regular Supertrend indicator
-    # In a real implementation, replace this with the Ehlers version
+    # For now, use regular supertrend logic until Ehlers' implementation is complete
+    if "supertrend_direction" not in df.columns:
+        return 0.0, "none", {}
+    
+    # Get the last two rows
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
+    
+    # Check for trend change
+    current_direction = current["supertrend_direction"]
+    previous_direction = previous["supertrend_direction"]
+    
+    signal_strength = 0.0
+    direction = "none"
+    parameters = {
+        "atr": current.get("atr", 0.0),
+        "current_price": current["close"],
+        "supertrend": current["supertrend"],
+        "supertrend_upper": current.get("supertrend_upper", 0),
+        "supertrend_lower": current.get("supertrend_lower", 0)
+    }
+    
+    # Trend change from down to up (buy signal)
+    if current_direction == 1 and previous_direction == -1:
+        signal_strength = 1.0
+        direction = "long"
+        
+        # Adjust strength based on ATR
+        if "atr" in current:
+            volatility_factor = current["atr"] / current["close"] * 100  # ATR as % of price
+            signal_strength = min(1.5, volatility_factor / 2)  # Scale up to 1.5x based on volatility
+    
+    # Trend change from up to down (sell signal)
+    elif current_direction == -1 and previous_direction == 1:
+        signal_strength = 1.0
+        direction = "short"
+        
+        # Adjust strength based on ATR
+        if "atr" in current:
+            volatility_factor = current["atr"] / current["close"] * 100  # ATR as % of price
+            signal_strength = min(1.5, volatility_factor / 2)  # Scale up to 1.5x based on volatility
+    
+    return signal_strength, direction, parameters
     return calculate_supertrend_signal(df, config)
