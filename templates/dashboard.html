@@ -133,20 +133,26 @@
                 <!-- Market Overview Card -->
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Market Overview: {{ config.symbol }}</span>
+                        <span>Market Overview: {{ config.get('symbol', 'BTC/USDT') }}</span>
                         <div>
                             <select id="symbolSelector" class="form-select form-select-sm d-inline-block w-auto">
-                                {% for symbol in state.symbols %}
-                                <option value="{{ symbol }}" {% if symbol == config.symbol %}selected{% endif %}>{{ symbol }}</option>
-                                {% endfor %}
+                                {% if state and state.symbols %}
+                                    {% for symbol in state.symbols %}
+                                        <option value="{{ symbol }}" {% if symbol == config.get('symbol') %}selected{% endif %}>{{ symbol }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="BTC/USDT">BTC/USDT</option>
+                                    <option value="ETH/USDT">ETH/USDT</option>
+                                    <option value="SOL/USDT">SOL/USDT</option>
+                                {% endif %}
                             </select>
                             <select id="timeframeSelector" class="form-select form-select-sm d-inline-block w-auto ms-2">
-                                <option value="1m" {% if config.timeframe == '1m' %}selected{% endif %}>1m</option>
-                                <option value="5m" {% if config.timeframe == '5m' %}selected{% endif %}>5m</option>
-                                <option value="15m" {% if config.timeframe == '15m' %}selected{% endif %}>15m</option>
-                                <option value="1h" {% if config.timeframe == '1h' %}selected{% endif %}>1h</option>
-                                <option value="4h" {% if config.timeframe == '4h' %}selected{% endif %}>4h</option>
-                                <option value="1d" {% if config.timeframe == '1d' %}selected{% endif %}>1d</option>
+                                <option value="1m" {% if config.get('timeframe') == '1m' %}selected{% endif %}>1m</option>
+                                <option value="5m" {% if config.get('timeframe') == '5m' %}selected{% endif %}>5m</option>
+                                <option value="15m" {% if config.get('timeframe', '15m') == '15m' %}selected{% endif %}>15m</option>
+                                <option value="1h" {% if config.get('timeframe') == '1h' %}selected{% endif %}>1h</option>
+                                <option value="4h" {% if config.get('timeframe') == '4h' %}selected{% endif %}>4h</option>
+                                <option value="1d" {% if config.get('timeframe') == '1d' %}selected{% endif %}>1d</option>
                             </select>
                         </div>
                     </div>
@@ -166,7 +172,15 @@
                             </div>
                             <div class="col-md-3 col-6">
                                 <div class="small text-muted">Strategy</div>
-                                <div class="fs-5 fw-bold" id="strategy">{{ config.strategy.active }}</div>
+                                <div class="fs-5 fw-bold" id="strategy">
+                                    {% if config.strategy and config.strategy.active %}
+                                        {{ config.strategy.active }}
+                                    {% elif config.get('strategy', {}).get('active') %}
+                                        {{ config.get('strategy', {}).get('active') }}
+                                    {% else %}
+                                        ehlers_supertrend
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                         <canvas id="priceChart" height="300"></canvas>

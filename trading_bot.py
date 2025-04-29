@@ -575,6 +575,84 @@ class TradingBot:
             self.logger.error(f"Error updating balance: {e}")
             self.error_count += 1
             return self.state["balance"]
+            
+    def get_balance(self) -> Dict:
+        """
+        Get the current account balance
+        
+        Returns:
+            Dict: Balance information
+        """
+        return self.update_balance()
+        
+    def get_ticker(self) -> Dict:
+        """
+        Get ticker information for the current symbol
+        
+        Returns:
+            Dict: Ticker information
+        """
+        try:
+            if not self.exchange:
+                # Return dummy data in case exchange is not available
+                return {
+                    "symbol": self.symbol,
+                    "last": 0,
+                    "bid": 0,
+                    "ask": 0,
+                    "high": 0,
+                    "low": 0,
+                    "volume": 0,
+                    "timestamp": int(time.time() * 1000)
+                }
+                
+            # Fetch ticker from exchange
+            ticker = retry_api_call(
+                lambda: self.exchange.fetch_ticker(self.symbol)
+            )
+            return ticker
+            
+        except Exception as e:
+            self.logger.error(f"Error fetching ticker: {e}")
+            return {}
+            
+    def start(self) -> bool:
+        """
+        Start the trading bot
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Set active flag in state
+            self.state["active"] = True
+            self.save_state()
+            
+            self.logger.info("Trading bot started")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error starting trading bot: {e}")
+            return False
+            
+    def stop(self) -> bool:
+        """
+        Stop the trading bot
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Set active flag in state
+            self.state["active"] = False
+            self.save_state()
+            
+            self.logger.info("Trading bot stopped")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error stopping trading bot: {e}")
+            return False
 
     def analyze_market(self) -> Dict:
         """
