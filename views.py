@@ -140,30 +140,106 @@ def settings():
     return render_template('settings.html', config=config)
 
 
-@app.route('/accounts')
+@app.route('/accounts', methods=['GET', 'POST'])
 def accounts():
-    """Render the accounts page"""
-    # Get bot instance
-    bot = get_bot_instance()
-
+    """Render the accounts page with API key management"""
+    # Check if user is logged in
+    user_id = 1  # Default user ID for demonstration (would normally check session)
+    
+    if request.method == 'POST':
+        # Process API key submission
+        exchange = request.form.get('exchange', 'bybit')
+        api_key = request.form.get('api_key', '')
+        api_secret = request.form.get('api_secret', '')
+        key_name = request.form.get('key_name', 'Default')
+        is_testnet = request.form.get('is_testnet', 'false') == 'true'
+        
+        # Input validation
+        if not api_key or not api_secret:
+            flash('API Key and Secret are required', 'danger')
+            return redirect(url_for('accounts'))
+        
+        try:
+            # Check if key for this exchange already exists
+            existing_key = ApiKey.query.filter_by(user_id=user_id, exchange=exchange).first()
+            
+            if existing_key:
+                # Update existing key
+                existing_key.api_key = api_key
+                if api_secret:  # Only update secret if provided
+                    existing_key.api_secret = api_secret
+                existing_key.name = key_name
+                existing_key.testnet = is_testnet
+                existing_key.last_used = datetime.utcnow()
+                
+                db.session.commit()
+                flash(f'Updated API key for {exchange}', 'success')
+            else:
+                # Create new key
+                new_key = ApiKey(
+                    user_id=user_id,
+                    exchange=exchange,
+                    name=key_name,
+                    api_key=api_key,
+                    api_secret=api_secret,
+                    testnet=is_testnet
+                )
+                
+                db.session.add(new_key)
+                db.session.commit()
+                flash(f'Added new API key for {exchange}', 'success')
+                
+            # Restart the bot with new credentials
+            global bot
+            bot = None  # Force reinitialization with new credentials
+            
+        except SQLAlchemyError as e:
+            logger.error(f"Database error when saving API key: {e}")
+            db.session.rollback()
+            flash('Failed to save API key', 'danger')
+    
+    # Get existing API keys
+    api_keys = []
+    try:
+        user_keys = ApiKey.query.filter_by(user_id=user_id).all()
+        for key in user_keys:
+            # Mask the sensitive information
+            masked_key = key.api_key[:4] + '****' + key.api_key[-4:] if key.api_key else ''
+            masked_secret = key.api_secret[:4] + '****' + key.api_secret[-4:] if key.api_secret else ''
+            
+            api_keys.append({
+                'id': key.id,
+                'exchange': key.exchange,
+                'name': key.name,
+                'api_key': masked_key,
+                'api_secret': masked_secret,
+                'testnet': key.testnet,
+                'last_used': key.last_used
+            })
+    except SQLAlchemyError as e:
+        logger.error(f"Database error when fetching API keys: {e}")
+    
+    # Get bot instance and balance
+    bot_instance = get_bot_instance()
+    
     # Get exchange accounts and balances
     accounts = []
-    if bot:
+    if bot_instance:
         try:
             # Get balance from bot
-            balance = bot.get_balance()
-
+            balance = bot_instance.get_balance()
+            
             # Add to accounts list
             accounts.append({
-                'exchange': bot.exchange_id,
-                'name': bot.exchange_id.capitalize(),
+                'exchange': bot_instance.exchange_id,
+                'name': bot_instance.exchange_id.capitalize(),
                 'balance': balance,
-                'connected': bot.exchange is not None
+                'connected': bot_instance.exchange is not None
             })
         except Exception as e:
             logger.error(f"Error fetching account information: {e}")
-
-    return render_template('accounts.html', accounts=accounts)
+    
+    return render_template('accounts.html', accounts=accounts, api_keys=api_keys)
 
 
 @app.route('/strategies')
