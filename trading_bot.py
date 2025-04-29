@@ -20,6 +20,8 @@ import numpy as np
 import pandas as pd
 
 from indicators import calculate_indicators, calculate_signal
+from strategies import evaluate_strategies, calculate_momentum_divergence_strategy, calculate_multi_timeframe_trend_strategy, calculate_support_resistance_breakout_strategy
+from risk_management import calculate_position_size, calculate_dynamic_stop_loss, calculate_take_profit, update_trailing_stop, check_max_drawdown, adjust_risk_after_losses
 from utils import parse_timeframe, setup_ccxt_exchange, retry_api_call
 
 # Configure logger
