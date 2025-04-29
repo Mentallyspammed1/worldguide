@@ -12,20 +12,46 @@ import json
 import logging
 import os
 import time
+from datetime import datetime, timedelta
 from decimal import Decimal, ROUND_DOWN
-from typing import Dict, List, Optional, Tuple, Union, Any
+from threading import Event
+from typing import Dict, List, Optional, Tuple, Union, Any, TypedDict
 
 import ccxt
 import numpy as np
 import pandas as pd
 
 from indicators import calculate_indicators, calculate_signal
-from strategies import evaluate_strategies, calculate_momentum_divergence_strategy, calculate_multi_timeframe_trend_strategy, calculate_support_resistance_breakout_strategy
-from risk_management import calculate_position_size, calculate_dynamic_stop_loss, calculate_take_profit, update_trailing_stop, check_max_drawdown, adjust_risk_after_losses
-from utils import parse_timeframe, setup_ccxt_exchange, retry_api_call
+from strategies import (
+    calculate_ehlers_supertrend_strategy,
+    calculate_momentum_divergence_strategy,
+    calculate_multi_timeframe_trend_strategy,
+    calculate_support_resistance_breakout_strategy
+)
+from risk_management import (
+    calculate_position_size,
+    calculate_dynamic_stop_loss,
+    calculate_take_profit,
+    update_trailing_stop
+)
+from utils import setup_ccxt_exchange, retry_api_call, safe_float
 
 # Configure logger
 logger = logging.getLogger("trading_bot")
+
+
+class TradeParams(TypedDict, total=False):
+    """Type definition for trade parameters"""
+    symbol: str
+    side: str
+    size: float
+    price: float
+    stop_loss: float
+    take_profit: float
+    leverage: float
+    reduce_only: bool
+    order_type: str
+    params: dict
 
 
 class TradingBot:
@@ -39,12 +65,25 @@ class TradingBot:
     - Managing risk and positions
     """
 
-    def __init__(self, config_file: str = "config.json"):
+    def __init__(
+        self,
+        config_file: str = "config.json",
+        validate_only: bool = False,
+        exchange: Optional[str] = None,
+        api_key: Optional[str] = None,
+        api_secret: Optional[str] = None,
+        is_testnet: bool = False
+    ):
         """
         Initialize the trading bot with the given configuration.
         
         Args:
             config_file: Path to the configuration file
+            validate_only: If True, only validate the configuration without connecting to exchange
+            exchange: Exchange name to override config
+            api_key: API key to override config
+            api_secret: API secret to override config
+            is_testnet: Whether to use testnet (sandbox)
         """
         self.logger = logger
         self.config_file = config_file
@@ -52,27 +91,50 @@ class TradingBot:
         self.state_file = "bot_state.json"
         self.state = self.load_state()
         
-        # Initialize exchange connection
+        # Apply overrides
+        if exchange:
+            self.config["exchange"] = exchange
+        if api_key:
+            self.config["api_key"] = api_key
+        if api_secret:
+            self.config["api_secret"] = api_secret
+        if is_testnet:
+            self.config["test_mode"] = is_testnet
+            
+        # Initialize exchange and symbol information
         self.exchange_id = self.config.get("exchange", "bybit")
-        self.exchange = self.setup_exchange()
-        
-        # Market and position information
         self.symbol = self.config.get("symbol", "BTC/USDT:USDT")
         self.timeframe = self.config.get("timeframe", "15m")
+        self.strategy_name = self.config.get("strategy", {}).get("active", "ehlers_supertrend")
+        
+        # Initialize state variables
         self.market_info = None
-        self.current_position = None
+        self.current_positions = {}
         self.candles_df = None
+        self.higher_timeframe_df = None
+        self.last_update_time = 0
+        self.last_analysis_time = 0
+        self.trading_paused = False
+        self.error_count = 0
+        
+        # Parse trading parameters
         self.precision = {
             "price": self.config.get("advanced", {}).get("price_precision", 2),
             "amount": self.config.get("advanced", {}).get("amount_precision", 6)
         }
         
-        # Initialize exchange and fetch market data
-        self.initialize()
+        # Connect to exchange
+        if not validate_only:
+            self.exchange = self.setup_exchange()
+            # Initialize market data and positions
+            self.initialize()
+        else:
+            self.exchange = None
+            self.logger.info("Running in validation mode - not connecting to exchange")
 
     def load_config(self) -> Dict:
         """
-        Load configuration from JSON file.
+        Load configuration from JSON file
         
         Returns:
             Dict: Configuration dictionary
@@ -80,158 +142,276 @@ class TradingBot:
         try:
             with open(self.config_file, "r") as f:
                 config = json.load(f)
-            self.logger.info(f"Configuration loaded from {self.config_file}")
-            return config
-        except FileNotFoundError:
-            self.logger.error(f"Configuration file {self.config_file} not found")
-            # Create default config if file doesn't exist
-            default_config = {
+                self.logger.info(f"Loaded configuration from {self.config_file}")
+                return config
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            self.logger.error(f"Error loading config from {self.config_file}: {e}")
+            # Return default configuration
+            self.logger.warning("Using default configuration")
+            return {
                 "exchange": "bybit",
                 "symbol": "BTC/USDT:USDT",
                 "timeframe": "15m",
-                "api_key": "",
-                "api_secret": "",
-                "test_mode": True
+                "api_key": "use_env_variable",
+                "api_secret": "use_env_variable",
+                "test_mode": True,
+                "strategy": {
+                    "active": "ehlers_supertrend",
+                    "indicators": {
+                        "rsi": {"window": 14, "overbought": 70, "oversold": 30},
+                        "macd": {"fast_period": 12, "slow_period": 26, "signal_period": 9},
+                        "bollinger_bands": {"window": 20, "std_dev": 2.0},
+                        "atr": {"window": 14}
+                    }
+                },
+                "risk_management": {
+                    "max_open_positions": 1,
+                    "position_size_pct": 1.0,
+                    "stop_loss_pct": 2.0,
+                    "take_profit_pct": 4.0,
+                    "trailing_stop": {
+                        "enabled": True,
+                        "activation_pct": 1.0,
+                        "trail_pct": 0.5
+                    }
+                },
+                "advanced": {
+                    "price_precision": 2,
+                    "amount_precision": 6,
+                    "candles_limit": 200,
+                }
             }
-            with open(self.config_file, "w") as f:
-                json.dump(default_config, f, indent=4)
-            self.logger.info(f"Created default configuration file {self.config_file}")
-            return default_config
-        except json.JSONDecodeError:
-            self.logger.error(f"Invalid JSON in configuration file {self.config_file}")
-            raise
 
     def load_state(self) -> Dict:
         """
-        Load bot state from JSON file.
+        Load bot state from JSON file
         
         Returns:
-            Dict: Bot state dictionary
+            Dict: State dictionary
         """
         try:
             with open(self.state_file, "r") as f:
                 state = json.load(f)
-            self.logger.info(f"State loaded from {self.state_file}")
-            return state
-        except (FileNotFoundError, json.JSONDecodeError):
-            # Initialize with default state if file doesn't exist or is invalid
-            default_state = {
+                return state
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            self.logger.warning(f"Error loading state from {self.state_file}: {e}")
+            # Return default state structure
+            return {
+                "active": False,
+                "last_update": 0,
+                "symbols": [],
+                "timeframes": [],
+                "active_strategy": "",
+                "balance": {
+                    "last_checked": 0,
+                    "total": 0,
+                    "free": 0,
+                    "used": 0,
+                    "history": []
+                },
                 "positions": {},
-                "orders": {},
-                "trades": [],
-                "last_update": 0
+                "orders": {"active": {}, "history": []},
+                "trades": {"total": 0, "wins": 0, "losses": 0, "recent": []},
+                "performance": {
+                    "pnl_total": 0.0,
+                    "pnl_percentage": 0.0,
+                    "drawdown_current": 0.0,
+                    "drawdown_max": 0.0
+                },
+                "strategy_stats": {},
+                "market_conditions": {},
+                "errors": {
+                    "last_error": "",
+                    "last_error_time": 0,
+                    "error_count": 0,
+                    "recent_errors": []
+                },
+                "config": {
+                    "dry_run": True,
+                    "exchange": self.exchange_id
+                }
             }
-            self.save_state(default_state)
-            return default_state
 
-    def save_state(self, state: Optional[Dict] = None) -> None:
+    def save_state(self) -> bool:
         """
-        Save bot state to JSON file.
+        Save bot state to JSON file
         
-        Args:
-            state: State dictionary to save (uses self.state if None)
+        Returns:
+            bool: True if successful, False otherwise
         """
-        if state is None:
-            state = self.state
         try:
+            # Update timestamp
+            self.state["last_update"] = int(time.time() * 1000)
+            
             with open(self.state_file, "w") as f:
-                json.dump(state, f, indent=4)
-            self.logger.debug(f"State saved to {self.state_file}")
+                json.dump(self.state, f, indent=2)
+            return True
         except Exception as e:
-            self.logger.error(f"Failed to save state: {e}")
+            self.logger.error(f"Error saving state to {self.state_file}: {e}")
+            return False
 
     def setup_exchange(self) -> ccxt.Exchange:
         """
-        Set up the CCXT exchange instance.
+        Set up and configure the CCXT exchange connection
         
         Returns:
             ccxt.Exchange: Configured exchange instance
         """
-        # Check for environment variables specific to the exchange first
-        env_prefix = self.exchange_id.upper()
-        api_key_env = os.getenv(f"{env_prefix}_API_KEY")
-        api_secret_env = os.getenv(f"{env_prefix}_API_SECRET")
+        api_key = self.config.get("api_key")
+        api_secret = self.config.get("api_secret")
         
-        # Use environment variables if available, otherwise use config values
-        api_key = api_key_env or self.config.get("api_key") or os.getenv("API_KEY")
-        api_secret = api_secret_env or self.config.get("api_secret") or os.getenv("API_SECRET")
+        # Check for environment variables if specified
+        if api_key == "use_env_variable":
+            api_key = os.environ.get(f"{self.exchange_id.upper()}_API_KEY")
+        if api_secret == "use_env_variable":
+            api_secret = os.environ.get(f"{self.exchange_id.upper()}_API_SECRET")
         
-        # Default options for the exchange
-        options = {}
-        params = {}
-        
-        # Add exchange-specific options
-        if self.exchange_id == "bybit":
-            options["defaultType"] = "swap"
-            if self.config.get("test_mode", True):
-                params["testnet"] = True
-                
-        self.logger.info(f"Setting up {self.exchange_id} exchange connection")
+        # Check for required credentials
         if not api_key or not api_secret:
-            self.logger.warning("API credentials not found. Running in read-only mode.")
-        else:
-            self.logger.info("API credentials found. Full trading functionality enabled.")
+            self.logger.warning(f"API credentials not provided for {self.exchange_id}")
+            if not self.config.get("dry_run", True):
+                self.logger.error("Live trading requires API credentials")
+                raise ValueError("API credentials required for live trading")
         
-        # Create exchange instance with retry mechanism
-        exchange = setup_ccxt_exchange(
-            self.exchange_id,
-            api_key,
-            api_secret,
-            options=options,
-            params=params
-        )
-        
-        if exchange:
-            self.logger.info(f"Connected to {exchange.id} exchange")
-            # Load markets to get trading info
-            retry_api_call(exchange.load_markets)
+        # Setup exchange with error handling
+        try:
+            test_mode = self.config.get("test_mode", False)
+            exchange = setup_ccxt_exchange(
+                exchange_id=self.exchange_id,
+                api_key=api_key,
+                api_secret=api_secret,
+                testnet=test_mode
+            )
+            
+            # Load markets for symbol info
+            self.logger.info(f"Loading markets for {self.exchange_id}")
+            exchange.load_markets()
+            
             return exchange
-        else:
-            self.logger.error(f"Failed to connect to {self.exchange_id} exchange")
-            raise ConnectionError(f"Failed to connect to {self.exchange_id} exchange")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize exchange {self.exchange_id}: {e}")
+            raise
 
     def initialize(self) -> None:
-        """Initialize exchange connection and load market data"""
+        """Initialize the bot by fetching market data and positions"""
         try:
-            # Fetch market information for the symbol
-            self.market_info = self.exchange.market(self.symbol)
-            self.logger.info(f"Market info loaded for {self.symbol}")
+            # Fetch market information
+            self.market_info = self.fetch_market_info()
             
-            # Update precision settings from market info if available
-            if "precision" in self.market_info:
-                if "price" in self.market_info["precision"]:
-                    self.precision["price"] = self.market_info["precision"]["price"]
-                if "amount" in self.market_info["precision"]:
-                    self.precision["amount"] = self.market_info["precision"]["amount"]
-            
-            # Fetch current position
-            self.update_position()
+            # Fetch current positions
+            self.update_positions()
             
             # Fetch initial candles
             self.update_candles()
             
-            self.logger.info(f"Bot initialized successfully for {self.symbol}")
+            # Update account balance
+            self.update_balance()
+            
+            # Update bot state
+            self.state["active"] = True
+            self.state["active_strategy"] = self.strategy_name
+            
+            if self.symbol not in self.state["symbols"]:
+                self.state["symbols"].append(self.symbol)
+            
+            if self.timeframe not in self.state["timeframes"]:
+                self.state["timeframes"].append(self.timeframe)
+            
+            self.save_state()
+            
+            self.logger.info(f"Bot initialized for {self.symbol} on {self.exchange_id}")
         except Exception as e:
-            self.logger.error(f"Initialization error: {e}")
+            self.logger.error(f"Error during initialization: {e}")
             raise
 
-    def update_candles(self) -> None:
-        """Fetch and update OHLCV candles data"""
+    def fetch_market_info(self) -> Dict:
+        """
+        Fetch market information for the configured symbol
+        
+        Returns:
+            Dict: Market information
+        """
         try:
-            # Determine how many candles we need
-            candles_required = self.config.get("advanced", {}).get("candles_required", 100)
+            if self.symbol in self.exchange.markets:
+                market = self.exchange.markets[self.symbol]
+                
+                # Add some derived convenience fields
+                market["is_contract"] = market["swap"] or market["future"]
+                market["is_linear"] = market.get("linear", False)
+                market["is_inverse"] = market.get("inverse", False)
+                
+                # Create a descriptive string for this contract type
+                if market["spot"]:
+                    market["contract_type_str"] = "spot"
+                elif market["swap"] and market["linear"]:
+                    market["contract_type_str"] = "linear_perpetual"
+                elif market["swap"] and market["inverse"]:
+                    market["contract_type_str"] = "inverse_perpetual"
+                elif market["future"] and market["linear"]:
+                    market["contract_type_str"] = "linear_future"
+                elif market["future"] and market["inverse"]:
+                    market["contract_type_str"] = "inverse_future"
+                else:
+                    market["contract_type_str"] = "unknown"
+                
+                self.logger.info(f"Market info for {self.symbol}: {market['contract_type_str']}")
+                
+                # Safe extraction of limit values as Decimal
+                try:
+                    limits = market.get("limits", {})
+                    market["min_amount_decimal"] = Decimal(str(limits.get("amount", {}).get("min", 0)))
+                    market["max_amount_decimal"] = Decimal(str(limits.get("amount", {}).get("max", float('inf'))))
+                    market["min_cost_decimal"] = Decimal(str(limits.get("cost", {}).get("min", 0)))
+                    market["max_cost_decimal"] = Decimal(str(limits.get("cost", {}).get("max", float('inf'))))
+                    
+                    # Extract precision step info
+                    precision = market.get("precision", {})
+                    market["amount_precision_step_decimal"] = Decimal(str(10 ** -precision.get("amount", 8)))
+                    market["price_precision_step_decimal"] = Decimal(str(10 ** -precision.get("price", 8)))
+                    
+                    # For contracts, extract contract size
+                    if market["is_contract"]:
+                        market["contract_size_decimal"] = Decimal(str(market.get("contractSize", 1)))
+                    else:
+                        market["contract_size_decimal"] = Decimal("1")
+                except Exception as e:
+                    self.logger.warning(f"Error converting market limits to Decimal: {e}")
+                
+                return market
+            else:
+                raise ValueError(f"Symbol {self.symbol} not found in {self.exchange_id} markets")
+        except Exception as e:
+            self.logger.error(f"Error fetching market info for {self.symbol}: {e}")
+            raise
+
+    def update_candles(self) -> pd.DataFrame:
+        """
+        Fetch and update OHLCV candles for the configured symbol and timeframe
+        
+        Returns:
+            pd.DataFrame: DataFrame with candle data and indicators
+        """
+        try:
+            # Determine how many candles to fetch
+            candles_limit = self.config.get("advanced", {}).get("candles_limit", 200)
             
-            # Fetch candles with retry mechanism
-            ohlcv = retry_api_call(
-                self.exchange.fetch_ohlcv,
-                self.symbol,
-                timeframe=self.timeframe,
-                limit=candles_required
+            # Fetch candles
+            self.logger.info(f"Fetching {candles_limit} candles for {self.symbol} ({self.timeframe})")
+            candles = retry_api_call(
+                lambda: self.exchange.fetch_ohlcv(
+                    symbol=self.symbol,
+                    timeframe=self.timeframe,
+                    limit=candles_limit
+                )
             )
+            
+            if not candles or len(candles) == 0:
+                self.logger.warning(f"No candles returned for {self.symbol} ({self.timeframe})")
+                return self.candles_df
             
             # Convert to DataFrame
             df = pd.DataFrame(
-                ohlcv,
+                candles,
                 columns=["timestamp", "open", "high", "low", "close", "volume"]
             )
             
@@ -239,1387 +419,1290 @@ class TradingBot:
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             df.set_index("timestamp", inplace=True)
             
-            self.candles_df = df
-            self.logger.debug(f"Updated {len(df)} candles for {self.symbol}")
-            
             # Calculate indicators
-            self.candles_df = calculate_indicators(
-                self.candles_df, 
-                self.config.get("strategy", {}).get("indicators", {})
-            )
+            df = calculate_indicators(df, self.config)
+            
+            # Update class attribute
+            self.candles_df = df
+            self.last_update_time = time.time()
+            
+            return df
         except Exception as e:
             self.logger.error(f"Error updating candles: {e}")
-            raise
+            self.error_count += 1
+            return self.candles_df  # Return previous data if available
 
-    def update_position(self) -> None:
-        """Update current position information from exchange"""
-        try:
-            positions = retry_api_call(
-                self.exchange.fetch_positions,
-                [self.symbol]
-            ) or []
-            
-            # Find the position for our symbol
-            for position in positions:
-                if position["symbol"] == self.symbol:
-                    if float(position["contracts"]) > 0:
-                        self.current_position = {
-                            "side": "long",
-                            "amount": float(position["contracts"]),
-                            "entry_price": float(position["entryPrice"]),
-                            "pnl": float(position["unrealizedPnl"]),
-                            "liquidation_price": float(position.get("liquidationPrice", 0))
-                        }
-                        break
-                    elif float(position["contracts"]) < 0:
-                        self.current_position = {
-                            "side": "short",
-                            "amount": abs(float(position["contracts"])),
-                            "entry_price": float(position["entryPrice"]),
-                            "pnl": float(position["unrealizedPnl"]),
-                            "liquidation_price": float(position.get("liquidationPrice", 0))
-                        }
-                        break
-            else:
-                self.current_position = None
-            
-            # Update state
-            if self.current_position:
-                self.state["positions"][self.symbol] = self.current_position
-            elif self.symbol in self.state["positions"]:
-                del self.state["positions"][self.symbol]
-            
-            self.save_state()
-            self.logger.debug(f"Position updated: {self.current_position}")
-        except Exception as e:
-            self.logger.error(f"Error updating position: {e}")
-
-    def calculate_position_size(self, price: float, risk_pct: float = None) -> float:
+    def update_higher_timeframe_data(self) -> Optional[pd.DataFrame]:
         """
-        Calculate position size based on risk management settings.
+        Fetch and update OHLCV candles for a higher timeframe for multi-timeframe analysis
         
-        Args:
-            price: Current price for the asset
-            risk_pct: Risk percentage override (uses config value if None)
-            
         Returns:
-            float: Position size in base currency
-        """
-        # Get risk management settings
-        risk_settings = self.config.get("risk_management", {})
-        if risk_pct is None:
-            risk_pct = risk_settings.get("max_risk_per_trade_pct", 1.0)
-        
-        try:
-            # Fetch account balance
-            balance = retry_api_call(
-                self.exchange.fetch_balance
-            )
-            
-            quote_currency = self.symbol.split('/')[1].split(':')[0]
-            available_balance = float(balance.get(quote_currency, {}).get("free", 0))
-            
-            # Calculate position size based on percentage of balance
-            position_size_pct = risk_settings.get("position_size_pct", 1.0)
-            position_value = available_balance * (position_size_pct / 100)
-            
-            # If ATR position sizing is enabled, adjust based on ATR
-            if risk_settings.get("use_atr_position_sizing", False) and "atr" in self.candles_df.columns:
-                atr = self.candles_df["atr"].iloc[-1]
-                stop_loss_pct = None
-                
-                # Get stop loss configuration
-                sl_config = risk_settings.get("stop_loss", {})
-                if sl_config.get("enabled", True):
-                    sl_mode = sl_config.get("mode", "atr")
-                    if sl_mode == "atr":
-                        atr_multiplier = sl_config.get("atr_multiplier", 2.0)
-                        stop_loss_pct = (atr * atr_multiplier / price) * 100
-                    else:
-                        stop_loss_pct = sl_config.get("fixed_pct", 2.0)
-                else:
-                    # Default stop loss percentage if not configured
-                    stop_loss_pct = 2.0
-                
-                # Calculate risk-adjusted position size
-                risk_amount = available_balance * (risk_pct / 100)
-                if stop_loss_pct > 0:
-                    position_value = min(position_value, risk_amount / (stop_loss_pct / 100))
-            
-            # Calculate actual amount in base currency
-            amount = position_value / price
-            
-            # Round down to meet exchange precision requirements
-            decimal_places = self.precision["amount"]
-            amount = Decimal(str(amount)).quantize(
-                Decimal('0.' + '0' * decimal_places),
-                rounding=ROUND_DOWN
-            )
-            
-            # Check against minimum amount
-            min_amount = self.config.get("advanced", {}).get("min_amount", 0.001)
-            if float(amount) < min_amount:
-                self.logger.warning(
-                    f"Calculated position size {float(amount)} is below minimum {min_amount}. "
-                    f"Using minimum amount."
-                )
-                amount = Decimal(str(min_amount))
-                
-            return float(amount)
-        except Exception as e:
-            self.logger.error(f"Error calculating position size: {e}")
-            # Return a safe minimal value
-            return self.config.get("advanced", {}).get("min_amount", 0.001)
-
-    def calculate_stop_loss(self, entry_price: float, side: str) -> float:
-        """
-        Calculate stop loss price based on configuration.
-        
-        Args:
-            entry_price: Entry price for the position
-            side: Position side ('long' or 'short')
-            
-        Returns:
-            float: Stop loss price
-        """
-        risk_settings = self.config.get("risk_management", {})
-        sl_config = risk_settings.get("stop_loss", {})
-        
-        if not sl_config.get("enabled", True):
-            return 0.0
-        
-        sl_mode = sl_config.get("mode", "atr")
-        
-        if sl_mode == "atr" and "atr" in self.candles_df.columns:
-            atr = self.candles_df["atr"].iloc[-1]
-            atr_multiplier = sl_config.get("atr_multiplier", 2.0)
-            
-            if side == "long":
-                sl_price = entry_price - (atr * atr_multiplier)
-            else:
-                sl_price = entry_price + (atr * atr_multiplier)
-        else:
-            # Fixed percentage
-            fixed_pct = sl_config.get("fixed_pct", 2.0)
-            
-            if side == "long":
-                sl_price = entry_price * (1 - fixed_pct / 100)
-            else:
-                sl_price = entry_price * (1 + fixed_pct / 100)
-        
-        # Round to price precision
-        decimal_places = self.precision["price"]
-        sl_price = Decimal(str(sl_price)).quantize(
-            Decimal('0.' + '0' * decimal_places),
-            rounding=ROUND_DOWN if side == "long" else ROUND_DOWN  # Ensure conservative rounding
-        )
-        
-        return float(sl_price)
-
-    def calculate_take_profit(self, entry_price: float, side: str, stop_loss: float = 0.0) -> Union[float, List[Dict]]:
-        """
-        Calculate take profit price based on configuration with enhanced multi-level take profit options.
-        
-        Args:
-            entry_price: Entry price for the position
-            side: Position side ('long' or 'short')
-            stop_loss: Stop loss price (for risk:reward calculation) (optional)
-            
-        Returns:
-            Union[float, List[Dict]]: Take profit price or list of take profit levels
-        """
-        risk_settings = self.config.get("risk_management", {})
-        tp_config = risk_settings.get("take_profit", {})
-        
-        if not tp_config.get("enabled", True):
-            return 0.0
-        
-        # Get take profit configuration
-        tp_mode = tp_config.get("mode", "atr")
-        multi_tp_levels = tp_config.get("multi_level", False)
-        
-        # Use enhanced risk management take profit function
-        from risk_management import calculate_take_profit as rm_calculate_take_profit
-        
-        # Prepare parameters
-        atr_value = None
-        atr_multiplier = None
-        fixed_tp_pct = None
-        rr_ratio = tp_config.get("rr_ratio", 2.0)
-        
-        # Get ATR if available
-        if tp_mode == "atr" and "atr" in self.candles_df.columns:
-            atr_value = self.candles_df["atr"].iloc[-1]
-            atr_multiplier = tp_config.get("atr_multiplier", 4.0)
-        
-        # Get fixed percentage if configured
-        if tp_mode == "fixed":
-            fixed_tp_pct = tp_config.get("fixed_pct", 4.0)
-        
-        # Calculate take profit using enhanced function
-        tp_result = rm_calculate_take_profit(
-            entry_price=entry_price,
-            stop_loss=stop_loss,
-            rr_ratio=rr_ratio,
-            atr_value=atr_value,
-            atr_multiplier=atr_multiplier,
-            price_precision=self.precision["price"],
-            tp_mode=tp_mode,
-            fixed_tp_pct=fixed_tp_pct,
-            multi_tp_levels=multi_tp_levels
-        )
-        
-        # Handle multi-level TP or single TP
-        if isinstance(tp_result, list):
-            self.logger.info(f"Calculated multi-level take profit for {side} position:")
-            for level in tp_result:
-                self.logger.info(f"  Level: {level['price']} ({level['percentage']}% of position)")
-            return tp_result
-        else:
-            # Single TP level
-            self.logger.info(f"Calculated take profit for {side} position: {tp_result}")
-            return float(tp_result)
-
-    def execute_entry(self, side: str, trade_params: Dict = None) -> Dict:
-        """
-        Execute an entry order for the given side.
-        
-        Args:
-            side: Order side ('buy' for long, 'sell' for short)
-            trade_params: Additional trade parameters including order type, price, etc.
-            
-        Returns:
-            Dict: Order result information
+            pd.DataFrame: DataFrame with higher timeframe candle data
         """
         try:
-            # Get current market price
-            ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
-            current_price = ticker["last"]
-            
-            # Calculate position size
-            amount = self.calculate_position_size(current_price)
-            
-            # Calculate stop loss and take profit
-            entry_side = "long" if side == "buy" else "short"
-            sl_price = self.calculate_stop_loss(current_price, entry_side)
-            tp_result = self.calculate_take_profit(current_price, entry_side, sl_price)
-            
-            # Convert to scalar if multi-level TP isn't returned
-            is_multi_tp = isinstance(tp_result, list)
-            tp_price = tp_result[0]["price"] if is_multi_tp else tp_result
-            
-            # Execute order
-            order = retry_api_call(
-                self.exchange.create_market_order,
-                self.symbol,
-                side,
-                amount
-            )
-            
-            # Wait for order to be filled
-            time.sleep(1)
-            
-            # Update order with actual fill price and amount
-            filled_order = retry_api_call(
-                self.exchange.fetch_order,
-                order["id"],
-                self.symbol
-            )
-            
-            # Update position
-            self.update_position()
-            
-            # If stop loss or take profit is enabled, place those orders
-            if sl_price > 0:
-                sl_side = "sell" if entry_side == "long" else "buy"
-                sl_order = retry_api_call(
-                    self.exchange.create_order,
-                    self.symbol,
-                    "stop",
-                    sl_side,
-                    amount,
-                    price=sl_price,
-                    params={"stopPrice": sl_price}
-                )
-                self.logger.info(
-                    f"Placed stop loss order at {sl_price} for {amount} {self.symbol}"
-                )
-                
-                # Save stop loss order to state
-                self.state["orders"]["sl"] = {
-                    "id": sl_order["id"],
-                    "price": sl_price,
-                    "amount": amount,
-                    "side": sl_side
-                }
-            
-            # Handle take profit levels (single or multiple)
-            tp_orders = []
-            if is_multi_tp:
-                tp_side = "sell" if entry_side == "long" else "buy"
-                self.logger.info(f"Setting up {len(tp_result)} take profit levels")
-                
-                # Create multiple take profit orders
-                for i, tp_level in enumerate(tp_result):
-                    level_price = tp_level["price"]
-                    level_percentage = tp_level["percentage"]
-                    level_amount = (amount * level_percentage / 100)
-                    
-                    # Round amount to precision
-                    level_amount = float(Decimal(str(level_amount)).quantize(
-                        Decimal('0.' + '0' * self.precision["amount"]),
-                        rounding=ROUND_DOWN
-                    ))
-                    
-                    # Ensure minimum amount
-                    min_amount = self.config.get("advanced", {}).get("min_amount", 0.001)
-                    if level_amount < min_amount:
-                        self.logger.warning(
-                            f"TP level {i+1} amount {level_amount} is below minimum {min_amount}. "
-                            f"Using minimum amount."
-                        )
-                        level_amount = min_amount
-                    
-                    try:
-                        tp_order = retry_api_call(
-                            self.exchange.create_order,
-                            self.symbol,
-                            "limit",
-                            tp_side,
-                            level_amount,
-                            price=level_price
-                        )
-                        self.logger.info(
-                            f"Placed take profit level {i+1} at {level_price} "
-                            f"for {level_amount} {self.symbol} ({level_percentage}% of position)"
-                        )
-                        
-                        tp_orders.append({
-                            "id": tp_order["id"],
-                            "price": level_price,
-                            "amount": level_amount,
-                            "percentage": level_percentage,
-                            "side": tp_side
-                        })
-                    except Exception as e:
-                        self.logger.error(f"Failed to place TP level {i+1}: {e}")
-                
-                # Save take profit orders to state
-                self.state["orders"]["tp_levels"] = tp_orders
-                
-            elif tp_price > 0:
-                # Single take profit level
-                tp_side = "sell" if entry_side == "long" else "buy"
-                try:
-                    tp_order = retry_api_call(
-                        self.exchange.create_order,
-                        self.symbol,
-                        "limit",
-                        tp_side,
-                        amount,
-                        price=tp_price
-                    )
-                    self.logger.info(
-                        f"Placed take profit order at {tp_price} for {amount} {self.symbol}"
-                    )
-                    
-                    # Save take profit order to state
-                    self.state["orders"]["tp"] = {
-                        "id": tp_order["id"],
-                        "price": tp_price,
-                        "amount": amount,
-                        "side": tp_side
-                    }
-                    
-                    tp_orders.append(self.state["orders"]["tp"])
-                except Exception as e:
-                    self.logger.error(f"Failed to place TP order: {e}")
-            
-            # Save filled order details to state
-            if filled_order["status"] == "closed":
-                entry_price = filled_order["price"]
-                filled_amount = filled_order["filled"]
-                
-                # Create entry trade record 
-                entry_trade = {
-                    "symbol": self.symbol,
-                    "entry_side": entry_side,
-                    "entry_price": entry_price,
-                    "amount": filled_amount,
-                    "timestamp": int(time.time() * 1000),
-                    "sl_price": sl_price,
-                    "tp_price": tp_price
-                }
-                
-                # Store take profit orders information
-                if is_multi_tp:
-                    entry_trade["tp_levels"] = tp_result
-                    entry_trade["tp_mode"] = "multi_level"
-                
-                # Create position state
-                position_state = {
-                    "side": entry_side,
-                    "amount": filled_amount,
-                    "entry_price": entry_price,
-                    "sl_price": sl_price,
-                    "tp_price": tp_price,
-                    "is_multi_tp": is_multi_tp,
-                }
-                
-                # Add multi-level TP info if used
-                if is_multi_tp:
-                    position_state["tp_levels"] = tp_result
-                    position_state["tp_mode"] = "multi_level"
-                
-                # Save position state
-                self.state["positions"][self.symbol] = position_state
-                
-                self.state["current_trade"] = entry_trade
-                self.save_state()
-                
-                self.logger.info(
-                    f"Opened {entry_side} position of {filled_amount} {self.symbol} at {entry_price}"
-                )
-                
-                return {
-                    "success": True,
-                    "side": entry_side,
-                    "amount": filled_amount,
-                    "price": entry_price
-                }
-            else:
-                self.logger.warning(f"Order not fully filled: {filled_order}")
-                return {
-                    "success": False,
-                    "message": "Order not fully filled"
-                }
-                
-        except Exception as e:
-            self.logger.error(f"Error executing entry: {e}")
-            return {
-                "success": False,
-                "message": str(e)
+            # Determine higher timeframe (e.g. if 15m, use 1h)
+            timeframe_dict = {
+                "1m": "15m",
+                "5m": "1h",
+                "15m": "4h",
+                "30m": "6h",
+                "1h": "1d",
+                "4h": "1d",
+                "1d": "1w"
             }
-
-    def execute_exit(self) -> Dict:
-        """
-        Execute an exit order for the current position.
-        
-        Returns:
-            Dict: Order result information
-        """
-        if not self.current_position:
-            self.logger.warning("No position to exit")
-            return {
-                "success": False,
-                "message": "No position to exit"
-            }
-        
-        try:
-            # Cancel any existing SL/TP orders
-            if "sl" in self.state.get("orders", {}):
-                try:
-                    sl_order_id = self.state["orders"]["sl"]["id"]
-                    retry_api_call(
-                        self.exchange.cancel_order,
-                        sl_order_id,
-                        self.symbol
-                    )
-                    self.logger.info(f"Canceled stop loss order {sl_order_id}")
-                except Exception as e:
-                    self.logger.warning(f"Error canceling stop loss order: {e}")
+            higher_tf = timeframe_dict.get(self.timeframe, "1d")
             
-            # Cancel single TP order if it exists
-            if "tp" in self.state.get("orders", {}):
-                try:
-                    tp_order_id = self.state["orders"]["tp"]["id"]
-                    retry_api_call(
-                        self.exchange.cancel_order,
-                        tp_order_id,
-                        self.symbol
-                    )
-                    self.logger.info(f"Canceled take profit order {tp_order_id}")
-                except Exception as e:
-                    self.logger.warning(f"Error canceling take profit order: {e}")
-            
-            # Cancel multi-level TP orders if they exist
-            if "tp_levels" in self.state.get("orders", {}):
-                for i, tp_level in enumerate(self.state["orders"]["tp_levels"]):
-                    try:
-                        tp_order_id = tp_level["id"]
-                        retry_api_call(
-                            self.exchange.cancel_order,
-                            tp_order_id,
-                            self.symbol
-                        )
-                        self.logger.info(f"Canceled take profit level {i+1} order {tp_order_id}")
-                    except Exception as e:
-                        self.logger.warning(f"Error canceling take profit level {i+1} order: {e}")
-            
-            # Execute market order to close position
-            side = "sell" if self.current_position["side"] == "long" else "buy"
-            amount = self.current_position["amount"]
-            
-            order = retry_api_call(
-                self.exchange.create_market_order,
-                self.symbol,
-                side,
-                amount
+            # Fetch candles
+            self.logger.info(f"Fetching higher timeframe ({higher_tf}) candles for {self.symbol}")
+            candles = retry_api_call(
+                lambda: self.exchange.fetch_ohlcv(
+                    symbol=self.symbol,
+                    timeframe=higher_tf,
+                    limit=100
+                )
             )
             
-            # Wait for order to be filled
-            time.sleep(1)
-            
-            # Update order with actual fill price
-            filled_order = retry_api_call(
-                self.exchange.fetch_order,
-                order["id"],
-                self.symbol
-            )
-            
-            if filled_order["status"] == "closed":
-                exit_price = filled_order["price"]
-                filled_amount = filled_order["filled"]
-                
-                # Calculate PnL
-                entry_price = self.current_position["entry_price"]
-                if self.current_position["side"] == "long":
-                    pnl = (exit_price - entry_price) * filled_amount
-                    pnl_pct = (exit_price / entry_price - 1) * 100
-                else:  # short
-                    pnl = (entry_price - exit_price) * filled_amount
-                    pnl_pct = (1 - exit_price / entry_price) * 100
-                
-                # Add trade to history
-                if "current_trade" in self.state:
-                    current_trade = self.state["current_trade"]
-                    current_trade["exit_price"] = exit_price
-                    current_trade["exit_timestamp"] = int(time.time() * 1000)
-                    current_trade["pnl"] = pnl
-                    current_trade["pnl_pct"] = pnl_pct
-                    
-                    self.state["trades"].append(current_trade)
-                    del self.state["current_trade"]
-                
-                # Clear position from state
-                if self.symbol in self.state["positions"]:
-                    del self.state["positions"][self.symbol]
-                
-                # Clear orders from state
-                self.state["orders"] = {}
-                
-                self.save_state()
-                
-                # Update position
-                self.update_position()
-                
-                self.logger.info(
-                    f"Closed {self.current_position['side']} position of {filled_amount} {self.symbol} "
-                    f"at {exit_price} with PnL: {pnl:.2f} ({pnl_pct:.2f}%)"
-                )
-                
-                return {
-                    "success": True,
-                    "amount": filled_amount,
-                    "price": exit_price,
-                    "pnl": pnl,
-                    "pnl_pct": pnl_pct
-                }
-            else:
-                self.logger.warning(f"Exit order not fully filled: {filled_order}")
-                return {
-                    "success": False,
-                    "message": "Exit order not fully filled"
-                }
-                
-        except Exception as e:
-            self.logger.error(f"Error executing exit: {e}")
-            return {
-                "success": False,
-                "message": str(e)
-            }
-
-    def should_enter_trade(self) -> Tuple[bool, str, Dict]:
-        """
-        Determine if we should enter a trade based on advanced strategies.
-        
-        Returns:
-            Tuple[bool, str, Dict]: (should_enter, side, trade_parameters)
-        """
-        # Don't enter if we already have a position
-        if self.current_position:
-            return False, "", {}
-        
-        # Try to load strategy configuration
-        strategy_config_file = "strategy_config.json"
-        try:
-            with open(strategy_config_file, "r") as f:
-                strategy_config = json.load(f)
-                
-            # Check if advanced strategies are enabled
-            active_strategy = strategy_config.get("active_strategy", "auto")
-            self.logger.info(f"Using strategy mode: {active_strategy}")
-            
-            # If using only basic indicators, fall back to original method
-            if active_strategy == "basic":
-                raise FileNotFoundError("Using basic indicator mode")
-                
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            # Fall back to basic indicator signals if strategy config not available
-            self.logger.warning(f"Using basic indicators: {str(e)}")
-            
-            # Get strategy settings
-            strategy = self.config.get("strategy", {})
-            indicators = strategy.get("indicators", {})
-            entry_threshold = strategy.get("entry_threshold", 0.5)
-            
-            # Get volume filter settings
-            volume_filter = strategy.get("volume_filter", {})
-            if volume_filter.get("enabled", False):
-                min_volume = volume_filter.get("min_24h_volume_usd", 1000000)
-                ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
-                volume_usd = ticker["quoteVolume"]
-                
-                if volume_usd < min_volume:
-                    self.logger.debug(
-                        f"Volume filter rejected trade: {volume_usd:.2f} < {min_volume:.2f}"
-                    )
-                    return False, "", {}
-            
-            # Calculate signal
-            signal_strength, signal_direction = calculate_signal(
-                self.candles_df,
-                indicators,
-                threshold=entry_threshold
-            )
-            
-            # Check if signal is strong enough to enter
-            if signal_strength >= entry_threshold and signal_direction in ["long", "short"]:
-                self.logger.info(
-                    f"Entry signal: {signal_direction} with strength {signal_strength:.2f}"
-                )
-                return True, signal_direction, {}
-            
-            return False, "", {}
-        
-        # Apply global filters first
-        filters = strategy_config.get("filters", {})
-        
-        # Check volume filter
-        if filters.get("volume_filter", {}).get("enabled", True):
-            min_volume = filters["volume_filter"].get("min_24h_volume_usd", 5000000)
-            ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
-            volume_usd = ticker["quoteVolume"]
-            
-            if volume_usd < min_volume:
-                self.logger.debug(
-                    f"Volume filter rejected trade: {volume_usd:.2f} < {min_volume:.2f}"
-                )
-                return False, "", {}
-        
-        # Check volatility filter
-        if filters.get("volatility_filter", {}).get("enabled", True):
-            if "atr" not in self.candles_df.columns:
-                self.logger.warning("ATR indicator missing for volatility filter")
-            else:
-                current_atr = self.candles_df["atr"].iloc[-1]
-                current_price = self.candles_df["close"].iloc[-1]
-                atr_pct = (current_atr / current_price) * 100
-                
-                min_atr_pct = filters["volatility_filter"].get("min_atr_pct", 0.3)
-                max_atr_pct = filters["volatility_filter"].get("max_atr_pct", 5.0)
-                
-                if atr_pct < min_atr_pct or atr_pct > max_atr_pct:
-                    self.logger.debug(
-                        f"Volatility filter rejected trade: ATR {atr_pct:.2f}% outside range [{min_atr_pct}%, {max_atr_pct}%]"
-                    )
-                    return False, "", {}
-        
-        # Check time filter
-        if filters.get("time_filter", {}).get("enabled", False):
-            import datetime
-            current_hour = datetime.datetime.now().hour
-            blackout_hours = filters["time_filter"].get("blackout_hours", [])
-            
-            if current_hour in blackout_hours:
-                self.logger.debug(
-                    f"Time filter rejected trade: Current hour {current_hour} in blackout hours {blackout_hours}"
-                )
-                return False, "", {}
-        
-        # Get higher timeframe data if available
-        higher_tf = strategy_config.get("multi_timeframe_trend", {}).get("higher_timeframe", "1h")
-        higher_tf_df = None
-        
-        try:
-            # Fetch higher timeframe candles
-            higher_tf_ohlcv = retry_api_call(
-                self.exchange.fetch_ohlcv,
-                self.symbol,
-                timeframe=higher_tf,
-                limit=100
-            )
+            if not candles or len(candles) == 0:
+                self.logger.warning(f"No higher timeframe candles returned for {self.symbol} ({higher_tf})")
+                return None
             
             # Convert to DataFrame
-            higher_tf_df = pd.DataFrame(
-                higher_tf_ohlcv,
+            df = pd.DataFrame(
+                candles,
                 columns=["timestamp", "open", "high", "low", "close", "volume"]
             )
             
             # Convert timestamp to datetime
-            higher_tf_df["timestamp"] = pd.to_datetime(higher_tf_df["timestamp"], unit="ms")
-            higher_tf_df.set_index("timestamp", inplace=True)
+            df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+            df.set_index("timestamp", inplace=True)
             
             # Calculate indicators for higher timeframe
-            higher_tf_df = calculate_indicators(
-                higher_tf_df, 
-                self.config.get("strategy", {}).get("indicators", {})
-            )
-            self.logger.debug(f"Successfully loaded higher timeframe data ({higher_tf})")
+            df = calculate_indicators(df, self.config)
+            
+            # Update class attribute
+            self.higher_timeframe_df = df
+            
+            return df
         except Exception as e:
-            self.logger.error(f"Error fetching higher timeframe data: {e}")
-            higher_tf_df = self.candles_df.copy()  # Fallback to current timeframe
-        
-        # Evaluate strategies
-        strategy_signal = evaluate_strategies(
-            self.candles_df,
-            higher_tf_df,
-            strategy_config
-        )
-        
-        # Get signal threshold
-        threshold = strategy_config.get("strategy_threshold", 0.7)
-        
-        # Check if we have a valid signal
-        if strategy_signal["signal"] >= threshold and strategy_signal["direction"]:
-            self.logger.info(
-                f"Entry signal detected ({strategy_signal['strategy']}): "
-                f"{strategy_signal['direction']} with strength {strategy_signal['signal']:.2f}"
-            )
-            return True, strategy_signal["direction"], strategy_signal["parameters"]
-        
-        return False, "", {}
+            self.logger.error(f"Error updating higher timeframe data: {e}")
+            return None
 
-    def should_exit_trade(self) -> bool:
+    def update_positions(self) -> Dict:
         """
-        Determine if we should exit the current position.
+        Fetch and update current positions from the exchange
         
         Returns:
-            bool: True if should exit, False otherwise
-        """
-        if not self.current_position:
-            return False
-        
-        # Get current position details
-        position_side = self.current_position["side"]
-        entry_price = self.current_position["entry_price"]
-        
-        # Get current price
-        ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
-        current_price = ticker["last"]
-        
-        # Try to load the strategy configuration
-        strategy_config_file = "strategy_config.json"
-        try:
-            with open(strategy_config_file, "r") as f:
-                strategy_config = json.load(f)
-                
-            # Check if advanced exit rules are enabled
-            active_strategy = strategy_config.get("active_strategy", "auto")
-            if active_strategy == "basic":
-                raise FileNotFoundError("Using basic indicator mode for exit")
-            
-            # Get risk management settings
-            risk_mgmt = strategy_config.get("risk_management", {})
-            
-            # Check if we have trade parameters in the position state
-            if "parameters" in self.current_position:
-                trade_params = self.current_position["parameters"]
-                
-                # Check take profit level
-                if "take_profit" in trade_params:
-                    tp_price = trade_params["take_profit"]
-                    if (position_side == "long" and current_price >= tp_price) or \
-                       (position_side == "short" and current_price <= tp_price):
-                        self.logger.info(f"Exit signal: Take profit target reached at {tp_price}")
-                        return True
-                
-                # Check stop loss level
-                if "stop_loss" in trade_params:
-                    sl_price = trade_params["stop_loss"]
-                    if (position_side == "long" and current_price <= sl_price) or \
-                       (position_side == "short" and current_price >= sl_price):
-                        self.logger.info(f"Exit signal: Stop loss triggered at {sl_price}")
-                        return True
-                
-                # Check false breakout exit (for support/resistance strategy)
-                if trade_params.get("strategy") == "support_resistance_breakout":
-                    if "false_breakout_level" in trade_params:
-                        fb_level = trade_params["false_breakout_level"]
-                        if (position_side == "long" and current_price < fb_level) or \
-                           (position_side == "short" and current_price > fb_level):
-                            self.logger.info(f"Exit signal: False breakout detected at {fb_level}")
-                            return True
-                
-                # Check time-based exit
-                if "entry_time" in trade_params and "max_time_in_trade" in trade_params:
-                    entry_time = trade_params["entry_time"]
-                    max_time = trade_params["max_time_in_trade"]
-                    current_time = time.time() * 1000  # Current time in ms
-                    
-                    if (current_time - entry_time) / (60 * 1000) > max_time:  # Convert to minutes
-                        self.logger.info(f"Exit signal: Maximum time in trade ({max_time} candles) reached")
-                        return True
-                
-                # Check trailing stop
-                if risk_mgmt.get("trailing_stop", {}).get("enabled", True):
-                    if "trailing_stop_price" in self.current_position:
-                        ts_price = self.current_position["trailing_stop_price"]
-                        if (position_side == "long" and current_price <= ts_price) or \
-                           (position_side == "short" and current_price >= ts_price):
-                            self.logger.info(f"Exit signal: Trailing stop triggered at {ts_price}")
-                            return True
-            
-            # Check multi-timeframe trend exit signals
-            if trade_params.get("strategy") == "multi_timeframe_trend" and "exit_indicator" in trade_params:
-                if trade_params["exit_indicator"] == "Higher TF EMA 50 cross":
-                    # Get higher timeframe data
-                    higher_tf = strategy_config.get("multi_timeframe_trend", {}).get("higher_timeframe", "1h")
-                    
-                    try:
-                        # Fetch higher timeframe candles
-                        higher_tf_ohlcv = retry_api_call(
-                            self.exchange.fetch_ohlcv,
-                            self.symbol,
-                            timeframe=higher_tf,
-                            limit=100
-                        )
-                        
-                        # Convert to DataFrame
-                        higher_tf_df = pd.DataFrame(
-                            higher_tf_ohlcv,
-                            columns=["timestamp", "open", "high", "low", "close", "volume"]
-                        )
-                        
-                        # Calculate EMA 50
-                        if "ema_50" not in higher_tf_df.columns:
-                            higher_tf_df["ema_50"] = higher_tf_df["close"].ewm(span=50, adjust=False).mean()
-                        
-                        # Check EMA cross condition
-                        current_price = higher_tf_df["close"].iloc[-1]
-                        current_ema50 = higher_tf_df["ema_50"].iloc[-1]
-                        
-                        if (position_side == "long" and current_price < current_ema50) or \
-                           (position_side == "short" and current_price > current_ema50):
-                            self.logger.info(f"Exit signal: Higher timeframe trend change detected")
-                            return True
-                    except Exception as e:
-                        self.logger.error(f"Error checking higher timeframe exit: {e}")
-                        
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            # Fall back to basic exit rules
-            self.logger.warning(f"Using basic exit rules: {str(e)}")
-            
-        # Basic exit rules (as a fallback)
-        # Get strategy settings
-        strategy = self.config.get("strategy", {})
-        indicators = strategy.get("indicators", {})
-        exit_threshold = strategy.get("exit_threshold", -0.3)
-        
-        # Calculate signal
-        signal_strength, signal_direction = calculate_signal(
-            self.candles_df,
-            indicators,
-            threshold=abs(exit_threshold)
-        )
-        
-        # Check for exit signal (opposite to current position)
-        if position_side == "long" and signal_direction == "short":
-            if signal_strength >= abs(exit_threshold):
-                self.logger.info(
-                    f"Exit signal for long: short with strength {signal_strength:.2f}"
-                )
-                return True
-        elif position_side == "short" and signal_direction == "long":
-            if signal_strength >= abs(exit_threshold):
-                self.logger.info(
-                    f"Exit signal for short: long with strength {signal_strength:.2f}"
-                )
-                return True
-        
-        # Check for EMA cross exit condition if enabled
-        if "ema_cross" in indicators and indicators["ema_cross"].get("use_for_exit", False):
-            if "ema_cross" in self.candles_df.columns:
-                ema_cross = self.candles_df["ema_cross"].iloc[-1]
-                prev_ema_cross = self.candles_df["ema_cross"].iloc[-2] if len(self.candles_df) > 2 else 0
-                
-                if position_side == "long" and ema_cross == -1 and prev_ema_cross != -1:
-                    self.logger.info("Exit signal for long: EMA cross turned bearish")
-                    return True
-                elif position_side == "short" and ema_cross == 1 and prev_ema_cross != 1:
-                    self.logger.info("Exit signal for short: EMA cross turned bullish")
-                    return True
-        
-        return False
-
-    def check_break_even(self) -> None:
-        """Check and adjust stop loss to break even if configured"""
-        if not self.current_position:
-            return
-        
-        risk_settings = self.config.get("risk_management", {})
-        break_even = risk_settings.get("break_even", {})
-        
-        if not break_even.get("enabled", False):
-            return
-        
-        # Get break even activation percentage
-        activation_pct = break_even.get("activation_pct", 1.0)
-        
-        # Get current price
-        ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
-        current_price = ticker["last"]
-        
-        # Calculate current profit percentage
-        entry_price = self.current_position["entry_price"]
-        side = self.current_position["side"]
-        
-        if side == "long":
-            profit_pct = (current_price / entry_price - 1) * 100
-        else:  # short
-            profit_pct = (1 - current_price / entry_price) * 100
-        
-        # If profit exceeds activation percentage, move stop loss to break even
-        if profit_pct >= activation_pct:
-            # Check if we have a stop loss order in state
-            if "sl" in self.state.get("orders", {}):
-                try:
-                    # Cancel existing stop loss order
-                    sl_order_id = self.state["orders"]["sl"]["id"]
-                    retry_api_call(
-                        self.exchange.cancel_order,
-                        sl_order_id,
-                        self.symbol
-                    )
-                    
-                    # Place new stop loss order at break even
-                    sl_side = "sell" if side == "long" else "buy"
-                    amount = self.current_position["amount"]
-                    
-                    # Add a small buffer to break even price to account for fees
-                    buffer_pct = 0.1  # 0.1% buffer
-                    if side == "long":
-                        break_even_price = entry_price * (1 + buffer_pct / 100)
-                    else:
-                        break_even_price = entry_price * (1 - buffer_pct / 100)
-                    
-                    # Round to price precision
-                    decimal_places = self.precision["price"]
-                    break_even_price = Decimal(str(break_even_price)).quantize(
-                        Decimal('0.' + '0' * decimal_places),
-                        rounding=ROUND_DOWN if side == "long" else ROUND_DOWN
-                    )
-                    
-                    sl_order = retry_api_call(
-                        self.exchange.create_order,
-                        self.symbol,
-                        "stop",
-                        sl_side,
-                        amount,
-                        price=float(break_even_price),
-                        params={"stopPrice": float(break_even_price)}
-                    )
-                    
-                    # Update stop loss order in state
-                    self.state["orders"]["sl"] = {
-                        "id": sl_order["id"],
-                        "price": float(break_even_price),
-                        "amount": amount,
-                        "side": sl_side
-                    }
-                    
-                    self.save_state()
-                    self.logger.info(
-                        f"Moved stop loss to break even: {float(break_even_price)}"
-                    )
-                    
-                except Exception as e:
-                    self.logger.error(f"Error adjusting stop loss to break even: {e}")
-
-    def run_once(self) -> None:
-        """
-        Execute a single iteration of the trading bot logic.
+            Dict: Updated positions dictionary
         """
         try:
-            # Update market data
-            self.update_candles()
+            # Skip if in dry-run mode
+            if self.config.get("dry_run", True):
+                self.logger.info("Dry run mode - skipping position update")
+                return self.current_positions
             
-            # Update position information
-            self.update_position()
+            # Fetch positions from exchange
+            self.logger.info(f"Fetching positions for {self.symbol}")
+            positions = retry_api_call(
+                lambda: self.exchange.fetch_positions([self.symbol])
+            )
             
-            # Check if we should exit an existing position
-            if self.current_position:
-                if self.should_exit_trade():
-                    self.execute_exit()
-                else:
-                    # If we're not exiting, check if we should move stop loss to break even
-                    self.check_break_even()
-                    
-                    # Update trailing stop if active
-                    self.update_trailing_stop()
-            # Check if we should enter a new position
-            else:
-                should_enter, side, trade_params = self.should_enter_trade()
-                if should_enter:
-                    # Convert side to order side
-                    order_side = "buy" if side == "long" else "sell"
-                    
-                    # Add current timestamp to trade parameters
-                    if trade_params:
-                        trade_params["entry_time"] = int(time.time() * 1000)
-                        
-                    # Execute entry with strategy parameters
-                    self.execute_entry(order_side, trade_params)
+            # Process positions
+            position_dict = {}
+            for pos in positions:
+                symbol = pos["symbol"]
+                contracts = safe_float(pos, "contracts", 0)
+                if contracts > 0:
+                    position_dict[symbol] = pos
+                    self.logger.info(f"Found position: {symbol} - {pos['side']} {contracts} contracts at {pos['entryPrice']}")
             
-            # Update state with timestamp
-            self.state["last_update"] = int(time.time() * 1000)
+            # Update state
+            self.current_positions = position_dict
+            self.state["positions"] = position_dict
             self.save_state()
             
+            return position_dict
         except Exception as e:
-            self.logger.error(f"Error in run_once: {e}")
-            
-    def update_trailing_stop(self) -> None:
-        """Update trailing stop if enabled and conditions are met using enhanced trailing stop functionality"""
-        if not self.current_position:
-            return
-            
-        # Get current position details
-        position_side = self.current_position["side"]
-        entry_price = self.current_position["entry_price"]
-        
-        # Get trailing stop configuration - first try from strategy_config.json, fallback to main config
-        trailing_stop_config = {}
-        try:
-            # Try to load strategy configuration first
-            try:
-                with open("strategy_config.json", "r") as f:
-                    strategy_config = json.load(f)
-                trailing_stop_config = strategy_config.get("risk_management", {}).get("trailing_stop", {})
-            except (FileNotFoundError, json.JSONDecodeError):
-                # Fallback to main config
-                trailing_stop_config = self.config.get("risk_management", {}).get("trailing_stop", {})
-                
-            if not trailing_stop_config.get("enabled", True):
-                return
-                
-            # Get current price
-            ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
-            current_price = ticker["last"]
-            
-            # Get activation percentage and trail percentage
-            activation_pct = trailing_stop_config.get("activation_pct", 1.5)
-            trail_pct = trailing_stop_config.get("trail_pct", 0.75)
-            advanced_mode = trailing_stop_config.get("advanced_mode", False)
-            use_atr = trailing_stop_config.get("use_atr", False)
-            
-            # Get current trailing stop if it exists
-            current_stop = self.current_position.get("trailing_stop_price", 0)
-            
-            # Default to initial stop loss if no trailing stop set yet
-            if current_stop == 0:
-                if "parameters" in self.current_position and "stop_loss" in self.current_position["parameters"]:
-                    current_stop = self.current_position["parameters"]["stop_loss"]
-                else:
-                    # Calculate a default stop loss
-                    if position_side == "long":
-                        current_stop = entry_price * 0.95  # 5% below entry
-                    else:
-                        current_stop = entry_price * 1.05  # 5% above entry
-            
-            # Get ATR data if enabled and available
-            atr_value = None
-            atr_multiplier = None
-            if use_atr and "atr" in self.candles_df.columns:
-                atr_value = self.candles_df["atr"].iloc[-1]
-                atr_multiplier = trailing_stop_config.get("atr_multiplier", 2.0)
-                self.logger.debug(f"Using ATR-based trailing stop: ATR = {atr_value}, multiplier = {atr_multiplier}")
-            
-            # Calculate new stop using the enhanced risk_management function
-            from risk_management import update_trailing_stop
-            
-            new_stop = update_trailing_stop(
-                current_price=current_price,
-                side=position_side,
-                entry_price=entry_price,
-                current_stop=current_stop,
-                activation_pct=activation_pct,
-                trail_pct=trail_pct,
-                atr_value=atr_value,
-                atr_multiplier=atr_multiplier,
-                price_precision=self.precision["price"],
-                advanced_mode=advanced_mode
-            )
-            
-            # If trailing stop changed, update position
-            if new_stop != current_stop:
-                self.logger.info(
-                    f"Updated trailing stop: {current_stop:.{self.precision['price']}f} -> {new_stop:.{self.precision['price']}f} "
-                    f"(price: {current_price:.{self.precision['price']}f})"
-                )
-                self.current_position["trailing_stop_price"] = new_stop
-                
-                # Update stop-loss order if exists
-                if "sl" in self.state["orders"]:
-                    sl_order_id = self.state["orders"]["sl"].get("id")
-                    if sl_order_id:
-                        try:
-                            # Cancel existing stop loss order
-                            retry_api_call(
-                                self.exchange.cancel_order,
-                                sl_order_id,
-                                self.symbol
-                            )
-                            self.logger.info(f"Cancelled old stop loss order: {sl_order_id}")
-                            
-                            # Place new stop loss order
-                            sl_side = "sell" if position_side == "long" else "buy"
-                            amount = self.current_position["amount"]
-                            
-                            sl_order = retry_api_call(
-                                self.exchange.create_order,
-                                self.symbol,
-                                "stop",
-                                sl_side,
-                                amount,
-                                price=new_stop,
-                                params={"stopPrice": new_stop}
-                            )
-                            
-                            # Update order tracker
-                            self.state["orders"]["sl"] = {
-                                "id": sl_order["id"],
-                                "price": new_stop,
-                                "amount": amount,
-                                "side": sl_side
-                            }
-                            
-                            self.logger.info(f"Placed new trailing stop loss order at {new_stop}")
-                        except Exception as e:
-                            self.logger.error(f"Error updating stop loss order: {e}")
-                
-                # Save position state
-                self.state["positions"][self.symbol] = self.current_position
-                self.save_state()
-                
-        except Exception as e:
-            self.logger.error(f"Error updating trailing stop: {e}")
-            # Skip trailing stop update if config not available
-            return
+            self.logger.error(f"Error updating positions: {e}")
+            self.error_count += 1
+            return self.current_positions
 
-    def run(self) -> None:
+    def update_balance(self) -> Dict:
         """
-        Run the trading bot in continuous mode.
-        """
-        self.logger.info(f"Starting trading bot for {self.symbol} on {self.exchange_id}")
-        
-        loop_interval = self.config.get("loop_interval_seconds", 15)
-        
-        try:
-            while True:
-                start_time = time.time()
-                
-                self.run_once()
-                
-                # Calculate time to sleep
-                elapsed = time.time() - start_time
-                sleep_time = max(0, loop_interval - elapsed)
-                
-                if sleep_time > 0:
-                    self.logger.debug(f"Sleeping for {sleep_time:.2f} seconds")
-                    time.sleep(sleep_time)
-                
-        except KeyboardInterrupt:
-            self.logger.info("Trading bot stopped by user")
-        except Exception as e:
-            self.logger.exception(f"Unexpected error: {e}")
-            raise
-
-    def run_backtest(self) -> Dict:
-        """
-        Run the trading bot in backtest mode using historical data.
+        Fetch and update account balance
         
         Returns:
-            Dict: Backtest results
+            Dict: Balance information
         """
-        self.logger.info(f"Starting backtest for {self.symbol} on {self.exchange_id}")
-        
-        # Initialize backtest state
-        backtest_state = {
-            "trades": [],
-            "current_position": None,
-            "equity_curve": [],
-            "starting_balance": 10000,  # Default starting balance
-            "current_balance": 10000,
-            "max_drawdown": 0,
-            "max_drawdown_pct": 0,
-            "peak_balance": 10000
-        }
-        
         try:
-            # Fetch historical data for backtest period
-            # (In a full implementation, this would fetch more historical data)
-            historical_data = self.candles_df.copy()
+            # Skip if in dry-run mode
+            if self.config.get("dry_run", True):
+                self.logger.info("Dry run mode - skipping balance update")
+                return self.state["balance"]
             
-            # Calculate indicators
-            historical_data = calculate_indicators(
-                historical_data,
-                self.config.get("strategy", {}).get("indicators", {})
+            # Fetch balance from exchange
+            self.logger.info("Fetching account balance")
+            balance = retry_api_call(
+                lambda: self.exchange.fetch_balance()
             )
             
-            # Simulate trades on historical data
-            for i in range(len(historical_data) - 1):
-                # Skip the first few bars until we have enough data for indicators
-                if i < 20:
-                    continue
-                
-                # Get current candle data
-                current_data = historical_data.iloc[:i+1]
-                current_candle = current_data.iloc[-1]
-                
-                # Get strategy settings
-                strategy = self.config.get("strategy", {})
-                indicators = strategy.get("indicators", {})
-                entry_threshold = strategy.get("entry_threshold", 0.5)
-                exit_threshold = strategy.get("exit_threshold", -0.3)
-                
-                # Check for exit if in position
-                if backtest_state["current_position"]:
-                    signal_strength, signal_direction = calculate_signal(
-                        current_data,
-                        indicators,
-                        threshold=abs(exit_threshold)
-                    )
-                    
-                    position = backtest_state["current_position"]
-                    should_exit = False
-                    
-                    # Check for exit signal (opposite to current position)
-                    if position["side"] == "long" and signal_direction == "short":
-                        if signal_strength >= abs(exit_threshold):
-                            should_exit = True
-                    elif position["side"] == "short" and signal_direction == "long":
-                        if signal_strength >= abs(exit_threshold):
-                            should_exit = True
-                    
-                    # Execute exit if needed
-                    if should_exit:
-                        exit_price = current_candle["close"]
-                        entry_price = position["entry_price"]
-                        amount = position["amount"]
-                        
-                        # Calculate PnL
-                        if position["side"] == "long":
-                            pnl = (exit_price - entry_price) * amount
-                            pnl_pct = (exit_price / entry_price - 1) * 100
-                        else:  # short
-                            pnl = (entry_price - exit_price) * amount
-                            pnl_pct = (1 - exit_price / entry_price) * 100
-                        
-                        # Update balance
-                        backtest_state["current_balance"] += pnl
-                        
-                        # Record trade
-                        trade = {
-                            "entry_timestamp": position["timestamp"],
-                            "exit_timestamp": current_candle.name.timestamp() * 1000,
-                            "entry_price": entry_price,
-                            "exit_price": exit_price,
-                            "amount": amount,
-                            "side": position["side"],
-                            "pnl": pnl,
-                            "pnl_pct": pnl_pct
-                        }
-                        backtest_state["trades"].append(trade)
-                        
-                        # Clear position
-                        backtest_state["current_position"] = None
-                        
-                        self.logger.debug(
-                            f"Backtest exit: {position['side']} at {exit_price} with PnL: {pnl:.2f} ({pnl_pct:.2f}%)"
-                        )
-                
-                # Check for entry if not in position
-                else:
-                    signal_strength, signal_direction = calculate_signal(
-                        current_data,
-                        indicators,
-                        threshold=entry_threshold
-                    )
-                    
-                    # Check if signal is strong enough to enter
-                    if signal_strength >= entry_threshold and signal_direction in ["long", "short"]:
-                        entry_price = current_candle["close"]
-                        
-                        # Calculate position size
-                        position_size_pct = self.config.get("risk_management", {}).get("position_size_pct", 1.0)
-                        position_value = backtest_state["current_balance"] * (position_size_pct / 100)
-                        amount = position_value / entry_price
-                        
-                        # Record position
-                        backtest_state["current_position"] = {
-                            "side": signal_direction,
-                            "entry_price": entry_price,
-                            "amount": amount,
-                            "timestamp": current_candle.name.timestamp() * 1000
-                        }
-                        
-                        self.logger.debug(
-                            f"Backtest entry: {signal_direction} at {entry_price} with amount: {amount:.6f}"
-                        )
-                
-                # Update equity curve
-                backtest_state["equity_curve"].append({
-                    "timestamp": current_candle.name.timestamp() * 1000,
-                    "balance": backtest_state["current_balance"]
+            # Extract relevant information
+            total = safe_float(balance, "total", 0)
+            free = safe_float(balance, "free", 0)
+            used = safe_float(balance, "used", 0)
+            
+            # Update state
+            self.state["balance"]["last_checked"] = int(time.time() * 1000)
+            self.state["balance"]["total"] = total
+            self.state["balance"]["free"] = free
+            self.state["balance"]["used"] = used
+            
+            # Update balance history (once per day)
+            today = datetime.utcnow().strftime("%Y-%m-%d")
+            history = self.state["balance"].get("history", [])
+            
+            # Check if we already have an entry for today
+            today_entry = next((item for item in history if item["date"] == today), None)
+            if today_entry:
+                today_entry["balance"] = total
+            else:
+                history.append({
+                    "date": today,
+                    "balance": total,
+                    "timestamp": int(time.time() * 1000)
                 })
-                
-                # Update drawdown metrics
-                if backtest_state["current_balance"] > backtest_state["peak_balance"]:
-                    backtest_state["peak_balance"] = backtest_state["current_balance"]
-                
-                current_drawdown = backtest_state["peak_balance"] - backtest_state["current_balance"]
-                current_drawdown_pct = (current_drawdown / backtest_state["peak_balance"]) * 100
-                
-                if current_drawdown > backtest_state["max_drawdown"]:
-                    backtest_state["max_drawdown"] = current_drawdown
-                    backtest_state["max_drawdown_pct"] = current_drawdown_pct
+                self.state["balance"]["history"] = history
             
-            # Calculate backtest results
-            total_trades = len(backtest_state["trades"])
-            profitable_trades = sum(1 for trade in backtest_state["trades"] if trade["pnl"] > 0)
-            win_rate = (profitable_trades / total_trades * 100) if total_trades > 0 else 0
+            self.save_state()
+            self.logger.info(f"Balance updated: {total} (Free: {free}, Used: {used})")
             
-            # Calculate returns
-            starting_balance = backtest_state["starting_balance"]
-            final_balance = backtest_state["current_balance"]
-            total_return = final_balance - starting_balance
-            total_return_pct = (final_balance / starting_balance - 1) * 100
+            return self.state["balance"]
+        except Exception as e:
+            self.logger.error(f"Error updating balance: {e}")
+            self.error_count += 1
+            return self.state["balance"]
+
+    def analyze_market(self) -> Dict:
+        """
+        Analyze market data using the selected strategy
+        
+        Returns:
+            Dict: Analysis results
+        """
+        try:
+            # Make sure we have the latest data
+            if self.candles_df is None or time.time() - self.last_update_time > 60:
+                self.update_candles()
             
-            results = {
-                "total_trades": total_trades,
-                "profitable_trades": profitable_trades,
-                "win_rate": win_rate,
-                "total_return": total_return,
-                "total_return_pct": total_return_pct,
-                "max_drawdown": backtest_state["max_drawdown"],
-                "max_drawdown_pct": backtest_state["max_drawdown_pct"],
-                "trades": backtest_state["trades"],
-                "equity_curve": backtest_state["equity_curve"]
+            # For multi-timeframe strategies, also update higher timeframe data
+            if self.strategy_name == "multi_timeframe_trend" or self.config.get("strategy", {}).get("use_higher_timeframe", False):
+                self.update_higher_timeframe_data()
+            
+            # Calculate trading signal based on the selected strategy
+            signal_strength, direction, params = self.calculate_signal()
+            
+            # Calculate risk parameters
+            risk_params = self.calculate_risk_parameters(direction, params)
+            
+            # Update last analysis time
+            self.last_analysis_time = time.time()
+            
+            # Create and return analysis result
+            result = {
+                "timestamp": int(time.time() * 1000),
+                "symbol": self.symbol,
+                "timeframe": self.timeframe,
+                "strategy": self.strategy_name,
+                "signal_strength": signal_strength,
+                "direction": direction,
+                "params": params,
+                "risk_params": risk_params,
+                "candles_count": len(self.candles_df) if self.candles_df is not None else 0,
+                "current_price": self.get_current_price()
             }
             
-            self.logger.info(f"Backtest completed with {total_trades} trades and {win_rate:.2f}% win rate")
-            return results
-            
+            return result
         except Exception as e:
-            self.logger.error(f"Error in backtest: {e}")
-            return {"error": str(e)}
+            self.logger.error(f"Error analyzing market: {e}")
+            self.error_count += 1
+            return {
+                "timestamp": int(time.time() * 1000),
+                "symbol": self.symbol,
+                "strategy": self.strategy_name,
+                "signal_strength": 0,
+                "direction": "none",
+                "error": str(e)
+            }
+
+    def calculate_signal(self) -> Tuple[float, str, Dict]:
+        """
+        Calculate trading signal using the selected strategy
+        
+        Returns:
+            Tuple[float, str, Dict]: Signal strength, direction, and parameters
+        """
+        if self.candles_df is None:
+            return 0, "none", {}
+        
+        strategy = self.strategy_name.lower()
+        
+        if strategy == "ehlers_supertrend":
+            return calculate_ehlers_supertrend_strategy(
+                self.candles_df,
+                self.config.get("strategy", {}).get("ehlers_supertrend", {})
+            )
+        elif strategy == "momentum_divergence":
+            return calculate_momentum_divergence_strategy(
+                self.candles_df,
+                self.higher_timeframe_df,
+                self.config.get("strategy", {}).get("momentum_divergence", {})
+            )
+        elif strategy == "multi_timeframe_trend":
+            return calculate_multi_timeframe_trend_strategy(
+                self.candles_df,
+                self.higher_timeframe_df,
+                self.config.get("strategy", {}).get("multi_timeframe_trend", {})
+            )
+        elif strategy == "support_resistance_breakout":
+            return calculate_support_resistance_breakout_strategy(
+                self.candles_df,
+                self.higher_timeframe_df,
+                self.config.get("strategy", {}).get("support_resistance_breakout", {})
+            )
+        else:
+            self.logger.warning(f"Unknown strategy: {strategy}, defaulting to ehlers_supertrend")
+            return calculate_ehlers_supertrend_strategy(
+                self.candles_df,
+                self.config.get("strategy", {}).get("ehlers_supertrend", {})
+            )
+
+    def calculate_risk_parameters(self, direction: str, signal_params: Dict) -> Dict:
+        """
+        Calculate risk parameters for the trade
+        
+        Args:
+            direction: Trade direction ('buy' or 'sell')
+            signal_params: Parameters from the signal
+            
+        Returns:
+            Dict: Risk parameters
+        """
+        if self.candles_df is None or direction == "none":
+            return {}
+        
+        current_price = self.get_current_price()
+        if current_price is None:
+            return {}
+        
+        # Get ATR for position sizing and SL/TP
+        atr = signal_params.get("atr")
+        if atr is None:
+            # Try to get ATR from DataFrame
+            if "atr" in self.candles_df.columns:
+                atr = self.candles_df["atr"].iloc[-1]
+            else:
+                # Use a simple volatility estimate if ATR not available
+                high = self.candles_df["high"].iloc[-10:].max()
+                low = self.candles_df["low"].iloc[-10:].min()
+                close = self.candles_df["close"].iloc[-1]
+                atr = (high - low) / 10
+        
+        # Set up risk parameters
+        risk_config = self.config.get("risk_management", {})
+        risk_percentage = risk_config.get("max_risk_per_trade_pct", 1.0) / 100.0
+        
+        # Get balance for position sizing
+        if self.config.get("dry_run", True):
+            # Use simulated balance in dry run
+            balance = self.config.get("simulated_balance", 10000.0)
+        else:
+            # Use actual balance
+            balance = self.state["balance"].get("total", 0)
+        
+        # Calculate SL and TP distances
+        # Mode 1: Fixed percentage
+        if risk_config.get("use_fixed_sl_tp", True):
+            sl_percentage = risk_config.get("stop_loss_pct", 2.0) / 100.0
+            tp_percentage = risk_config.get("take_profit_pct", 4.0) / 100.0
+            
+            if direction == "buy":
+                sl_price = current_price * (1 - sl_percentage)
+                tp_price = current_price * (1 + tp_percentage)
+            else:
+                sl_price = current_price * (1 + sl_percentage)
+                tp_price = current_price * (1 - tp_percentage)
+        
+        # Mode 2: ATR-based
+        else:
+            sl_atr_mult = risk_config.get("sl_atr_mult", 1.5)
+            tp_atr_mult = risk_config.get("tp_atr_mult", 3.0)
+            
+            if direction == "buy":
+                sl_price = current_price - (atr * sl_atr_mult)
+                tp_price = current_price + (atr * tp_atr_mult)
+            else:
+                sl_price = current_price + (atr * sl_atr_mult)
+                tp_price = current_price - (atr * tp_atr_mult)
+        
+        # Calculate position size
+        if risk_config.get("use_atr_position_sizing", False) and atr:
+            # Risk-based position sizing using ATR
+            risk_amount = balance * risk_percentage
+            position_size = risk_amount / atr if atr > 0 else 0
+        else:
+            # Simple percentage of balance
+            position_pct = risk_config.get("position_size_pct", 1.0) / 100.0
+            position_size = (balance * position_pct) / current_price
+        
+        # Round position size to market precision
+        if self.market_info:
+            precision = self.market_info.get("precision", {}).get("amount", 8)
+            min_amount = self.market_info.get("limits", {}).get("amount", {}).get("min", 0)
+            
+            # Round down to precision
+            position_size = np.floor(position_size * 10**precision) / 10**precision
+            
+            # Check minimum size
+            if position_size < min_amount:
+                position_size = 0
+                self.logger.warning(f"Calculated position size {position_size} is below minimum {min_amount}")
+        
+        # Calculate leverage (if applicable)
+        leverage = 1.0
+        if self.market_info and self.market_info.get("is_contract", False):
+            leverage = risk_config.get("leverage", 1.0)
+            # Adjust position size for leverage
+            position_size = position_size * leverage
+        
+        # Trailing stop parameters
+        trailing_stop = risk_config.get("trailing_stop", {})
+        use_trailing_stop = trailing_stop.get("enabled", False)
+        activation_percentage = trailing_stop.get("activation_pct", 1.0) / 100.0
+        trail_percentage = trailing_stop.get("trail_pct", 0.5) / 100.0
+        
+        return {
+            "position_size": position_size,
+            "entry_price": current_price,
+            "stop_loss": sl_price,
+            "take_profit": tp_price,
+            "leverage": leverage,
+            "risk_amount": balance * risk_percentage,
+            "use_trailing_stop": use_trailing_stop,
+            "activation_percentage": activation_percentage,
+            "trail_percentage": trail_percentage
+        }
+
+    def execute_trade(self, direction: str, risk_params: Dict) -> Optional[Dict]:
+        """
+        Execute a trade based on the analysis
+        
+        Args:
+            direction: Trade direction ('buy' or 'sell')
+            risk_params: Risk parameters
+            
+        Returns:
+            Dict: Trade result or None if no trade was executed
+        """
+        # Skip if direction is 'none' or trading is paused
+        if direction == "none" or self.trading_paused:
+            return None
+        
+        # Check if we already have a position
+        has_position = self.check_existing_position()
+        
+        # Skip if we already have a position in this direction
+        if has_position:
+            position = self.current_positions.get(self.symbol, {})
+            position_side = position.get("side", "")
+            
+            if (direction == "buy" and position_side == "long") or (direction == "sell" and position_side == "short"):
+                self.logger.info(f"Already have a {position_side} position, skipping {direction} trade")
+                return None
+            
+            # Handle case where we want to reverse the position
+            self.logger.info(f"Have a {position_side} position, but signal is {direction}. Considering position reversal.")
+            
+            # Check if position reversal is allowed
+            if self.config.get("risk_management", {}).get("allow_position_reversal", False):
+                # Close existing position first
+                self.logger.info(f"Closing existing {position_side} position before opening {direction} position")
+                close_result = self.close_position(position_side)
+                
+                if not close_result:
+                    self.logger.warning("Failed to close existing position, cannot reverse")
+                    return None
+                
+                # Wait a bit before opening the new position
+                time.sleep(2)
+                
+                # Refetch market data
+                self.update_candles()
+                self.update_positions()
+            else:
+                self.logger.info("Position reversal not allowed in configuration")
+                return None
+        
+        # Check maximum open positions
+        max_positions = self.config.get("risk_management", {}).get("max_open_positions", 1)
+        open_positions = len(self.current_positions)
+        
+        if open_positions >= max_positions:
+            self.logger.info(f"Maximum open positions ({max_positions}) reached, skipping trade")
+            return None
+        
+        # Prepare trade parameters
+        size = risk_params.get("position_size", 0)
+        
+        if size <= 0:
+            self.logger.warning(f"Invalid position size: {size}, skipping trade")
+            return None
+        
+        price = risk_params.get("entry_price")
+        sl_price = risk_params.get("stop_loss")
+        tp_price = risk_params.get("take_profit")
+        leverage = risk_params.get("leverage", 1.0)
+        
+        # Set trade parameters
+        trade_params: TradeParams = {
+            "symbol": self.symbol,
+            "side": direction,
+            "size": size,
+            "price": price,
+            "stop_loss": sl_price,
+            "take_profit": tp_price,
+            "leverage": leverage,
+            "reduce_only": False,
+            "order_type": "market",
+            "params": {}
+        }
+        
+        # Execute trade
+        try:
+            # Set leverage if needed
+            if leverage > 1 and self.market_info and self.market_info.get("is_contract", False):
+                self.set_leverage(leverage)
+            
+            # Create trade
+            if self.config.get("dry_run", True):
+                # Simulate order in dry run mode
+                self.logger.info(f"[DRY RUN] Creating {direction} order: {size} {self.symbol} @ {price}")
+                order_result = self.simulate_order(trade_params)
+            else:
+                # Create real order
+                self.logger.info(f"Creating {direction} order: {size} {self.symbol} @ {price}")
+                order_result = self.create_order(trade_params)
+            
+            if not order_result:
+                self.logger.warning("Failed to create order")
+                return None
+            
+            # Update state
+            self.update_positions()
+            
+            # Record trade in state
+            trade_record = {
+                "id": order_result.get("id", f"trade_{int(time.time() * 1000)}"),
+                "symbol": self.symbol,
+                "side": direction,
+                "size": size,
+                "entry_price": price,
+                "timestamp": int(time.time() * 1000),
+                "stop_loss": sl_price,
+                "take_profit": tp_price,
+                "leverage": leverage,
+                "strategy": self.strategy_name,
+                "order_type": "market",
+                "status": "open"
+            }
+            
+            # Add trade to state
+            if "recent" not in self.state["trades"]:
+                self.state["trades"]["recent"] = []
+            
+            self.state["trades"]["recent"].append(trade_record)
+            self.state["trades"]["total"] += 1
+            self.save_state()
+            
+            return trade_record
+        except Exception as e:
+            self.logger.error(f"Error executing trade: {e}")
+            self.error_count += 1
+            return None
+
+    def check_existing_position(self) -> bool:
+        """
+        Check if we already have an open position for the symbol
+        
+        Returns:
+            bool: True if position exists, False otherwise
+        """
+        return self.symbol in self.current_positions
+
+    def set_leverage(self, leverage: float) -> bool:
+        """
+        Set leverage for the symbol
+        
+        Args:
+            leverage: Leverage value
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Skip in dry run mode
+            if self.config.get("dry_run", True):
+                self.logger.info(f"[DRY RUN] Setting leverage to {leverage}x for {self.symbol}")
+                return True
+            
+            self.logger.info(f"Setting leverage to {leverage}x for {self.symbol}")
+            
+            result = retry_api_call(
+                lambda: self.exchange.set_leverage(leverage, self.symbol)
+            )
+            
+            self.logger.info(f"Leverage set to {leverage}x for {self.symbol}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Error setting leverage: {e}")
+            return False
+
+    def create_order(self, params: TradeParams) -> Optional[Dict]:
+        """
+        Create an order on the exchange
+        
+        Args:
+            params: Trade parameters
+            
+        Returns:
+            Dict: Order result or None if failed
+        """
+        try:
+            # Prepare order parameters
+            order_type = params.get("order_type", "market")
+            side = params.get("side", "")
+            amount = params.get("size", 0)
+            price = params.get("price")
+            
+            # Convert side to exchange format
+            if side == "buy":
+                order_side = "buy"
+            elif side == "sell":
+                order_side = "sell"
+            else:
+                self.logger.error(f"Invalid side: {side}")
+                return None
+            
+            # Prepare extra parameters
+            extra_params = params.get("params", {})
+            
+            # Add stop loss and take profit if supported
+            if self.config.get("risk_management", {}).get("use_sl_tp", True):
+                sl_price = params.get("stop_loss")
+                tp_price = params.get("take_profit")
+                
+                if self.exchange_id == "bybit":
+                    # Bybit supports SL/TP in the same order
+                    extra_params["stopLoss"] = sl_price
+                    extra_params["takeProfit"] = tp_price
+                    extra_params["reduce_only"] = False
+            
+            # Create the order
+            order = retry_api_call(
+                lambda: self.exchange.create_order(
+                    symbol=self.symbol,
+                    type=order_type,
+                    side=order_side,
+                    amount=amount,
+                    price=price if order_type == "limit" else None,
+                    params=extra_params
+                )
+            )
+            
+            self.logger.info(f"Order created: {order.get('id')} - {order_side} {amount} {self.symbol}")
+            
+            # If exchange doesn't support SL/TP in the same order, create separate orders
+            if self.config.get("risk_management", {}).get("use_sl_tp", True) and self.exchange_id != "bybit":
+                sl_price = params.get("stop_loss")
+                tp_price = params.get("take_profit")
+                
+                # Create stop loss order
+                if sl_price:
+                    sl_side = "sell" if order_side == "buy" else "buy"
+                    self.logger.info(f"Creating stop loss order: {sl_side} {amount} {self.symbol} @ {sl_price}")
+                    
+                    sl_order = retry_api_call(
+                        lambda: self.exchange.create_order(
+                            symbol=self.symbol,
+                            type="stop",
+                            side=sl_side,
+                            amount=amount,
+                            price=sl_price,
+                            params={"stopPrice": sl_price, "reduce_only": True}
+                        )
+                    )
+                    
+                    self.logger.info(f"Stop loss order created: {sl_order.get('id')}")
+                
+                # Create take profit order
+                if tp_price:
+                    tp_side = "sell" if order_side == "buy" else "buy"
+                    self.logger.info(f"Creating take profit order: {tp_side} {amount} {self.symbol} @ {tp_price}")
+                    
+                    tp_order = retry_api_call(
+                        lambda: self.exchange.create_order(
+                            symbol=self.symbol,
+                            type="limit",
+                            side=tp_side,
+                            amount=amount,
+                            price=tp_price,
+                            params={"reduce_only": True}
+                        )
+                    )
+                    
+                    self.logger.info(f"Take profit order created: {tp_order.get('id')}")
+            
+            return order
+        except Exception as e:
+            self.logger.error(f"Error creating order: {e}")
+            self.error_count += 1
+            return None
+
+    def simulate_order(self, params: TradeParams) -> Dict:
+        """
+        Simulate an order in dry run mode
+        
+        Args:
+            params: Trade parameters
+            
+        Returns:
+            Dict: Simulated order result
+        """
+        # Create a simulated order response
+        order_id = f"dryrun_{int(time.time() * 1000)}"
+        
+        order = {
+            "id": order_id,
+            "symbol": params["symbol"],
+            "type": params["order_type"],
+            "side": params["side"],
+            "amount": params["size"],
+            "price": params["price"],
+            "status": "closed",
+            "timestamp": int(time.time() * 1000),
+            "datetime": datetime.utcnow().isoformat(),
+            "fee": {
+                "cost": params["size"] * params["price"] * 0.0005,
+                "currency": "USDT"
+            },
+            "info": {
+                "stop_loss": params["stop_loss"],
+                "take_profit": params["take_profit"],
+                "leverage": params["leverage"],
+                "simulated": True
+            }
+        }
+        
+        # Simulate adding to the positions
+        self.current_positions[params["symbol"]] = {
+            "symbol": params["symbol"],
+            "side": "long" if params["side"] == "buy" else "short",
+            "contracts": params["size"],
+            "entryPrice": params["price"],
+            "leverage": params["leverage"],
+            "liquidationPrice": 0.0,
+            "unrealizedPnl": 0.0,
+            "simulated": True
+        }
+        
+        return order
+
+    def close_position(self, position_side: str) -> Optional[Dict]:
+        """
+        Close an open position
+        
+        Args:
+            position_side: Position side ('long' or 'short')
+            
+        Returns:
+            Dict: Order result or None if failed
+        """
+        try:
+            position = self.current_positions.get(self.symbol, {})
+            if not position:
+                self.logger.warning(f"No position found for {self.symbol}")
+                return None
+            
+            size = position.get("contracts", 0)
+            if size <= 0:
+                self.logger.warning(f"Invalid position size: {size}")
+                return None
+            
+            # Determine close side
+            side = "sell" if position_side == "long" else "buy"
+            
+            # Create close order parameters
+            close_params = {
+                "symbol": self.symbol,
+                "side": side,
+                "size": size,
+                "price": self.get_current_price(),
+                "order_type": "market",
+                "reduce_only": True,
+                "params": {"reduce_only": True}
+            }
+            
+            if self.config.get("dry_run", True):
+                # Simulate close in dry run mode
+                self.logger.info(f"[DRY RUN] Closing {position_side} position: {size} {self.symbol}")
+                order_result = self.simulate_close(close_params)
+            else:
+                # Create real order
+                self.logger.info(f"Closing {position_side} position: {size} {self.symbol}")
+                order_result = self.create_order(close_params)
+            
+            if not order_result:
+                self.logger.warning("Failed to close position")
+                return None
+            
+            # Update positions and record in state
+            self.update_positions()
+            
+            # Find the corresponding open trade record
+            for trade in self.state["trades"].get("recent", []):
+                if (trade.get("symbol") == self.symbol and 
+                    trade.get("side") == "buy" and position_side == "long" or
+                    trade.get("side") == "sell" and position_side == "short" and
+                    trade.get("status") == "open"):
+                    
+                    # Update the trade record
+                    entry_price = trade.get("entry_price", 0)
+                    exit_price = self.get_current_price()
+                    
+                    # Calculate PnL
+                    if position_side == "long":
+                        pnl_pct = (exit_price - entry_price) / entry_price * 100
+                    else:
+                        pnl_pct = (entry_price - exit_price) / entry_price * 100
+                    
+                    trade["exit_price"] = exit_price
+                    trade["exit_time"] = int(time.time() * 1000)
+                    trade["pnl"] = pnl_pct
+                    trade["status"] = "closed"
+                    
+                    # Update win/loss counters
+                    if pnl_pct > 0:
+                        self.state["trades"]["wins"] += 1
+                    else:
+                        self.state["trades"]["losses"] += 1
+                    
+                    # Update strategy-specific stats
+                    if self.strategy_name not in self.state["strategy_stats"]:
+                        self.state["strategy_stats"][self.strategy_name] = {
+                            "trades": 0,
+                            "wins": 0,
+                            "losses": 0,
+                            "pnl": 0.0
+                        }
+                    
+                    self.state["strategy_stats"][self.strategy_name]["trades"] += 1
+                    if pnl_pct > 0:
+                        self.state["strategy_stats"][self.strategy_name]["wins"] += 1
+                    else:
+                        self.state["strategy_stats"][self.strategy_name]["losses"] += 1
+                    
+                    self.state["strategy_stats"][self.strategy_name]["pnl"] += pnl_pct
+                    
+                    # Save state
+                    self.save_state()
+                    
+                    break
+            
+            return order_result
+        except Exception as e:
+            self.logger.error(f"Error closing position: {e}")
+            self.error_count += 1
+            return None
+
+    def simulate_close(self, params: Dict) -> Dict:
+        """
+        Simulate closing a position in dry run mode
+        
+        Args:
+            params: Close parameters
+            
+        Returns:
+            Dict: Simulated order result
+        """
+        # Create a simulated close order response
+        order_id = f"dryrun_close_{int(time.time() * 1000)}"
+        
+        order = {
+            "id": order_id,
+            "symbol": params["symbol"],
+            "type": params["order_type"],
+            "side": params["side"],
+            "amount": params["size"],
+            "price": params["price"],
+            "status": "closed",
+            "timestamp": int(time.time() * 1000),
+            "datetime": datetime.utcnow().isoformat(),
+            "fee": {
+                "cost": params["size"] * params["price"] * 0.0005,
+                "currency": "USDT"
+            },
+            "info": {
+                "reduce_only": True,
+                "simulated": True
+            }
+        }
+        
+        # Remove from simulated positions
+        if params["symbol"] in self.current_positions:
+            del self.current_positions[params["symbol"]]
+        
+        return order
+
+    def get_current_price(self) -> Optional[float]:
+        """
+        Get the current price for the symbol
+        
+        Returns:
+            float: Current price or None if unavailable
+        """
+        try:
+            if self.candles_df is not None and len(self.candles_df) > 0:
+                # Use the last close price from candles
+                return self.candles_df["close"].iloc[-1]
+            
+            # Fetch ticker as fallback
+            ticker = retry_api_call(
+                lambda: self.exchange.fetch_ticker(self.symbol)
+            )
+            
+            if ticker and "last" in ticker:
+                return ticker["last"]
+            
+            return None
+        except Exception as e:
+            self.logger.error(f"Error getting current price: {e}")
+            return None
+
+    def update_trailing_stops(self) -> None:
+        """Update trailing stops for open positions"""
+        try:
+            # Skip if in dry run or no positions
+            if self.config.get("dry_run", True) or not self.current_positions:
+                return
+            
+            position = self.current_positions.get(self.symbol)
+            if not position:
+                return
+            
+            # Check if trailing stop is enabled
+            trail_config = self.config.get("risk_management", {}).get("trailing_stop", {})
+            if not trail_config.get("enabled", False):
+                return
+            
+            # Get position details
+            position_side = position.get("side", "")
+            entry_price = position.get("entryPrice", 0)
+            current_price = self.get_current_price()
+            
+            if not current_price or not entry_price:
+                return
+            
+            # Calculate activation threshold
+            activation_pct = trail_config.get("activation_pct", 1.0) / 100.0
+            trail_pct = trail_config.get("trail_pct", 0.5) / 100.0
+            
+            # Check if position has reached activation threshold
+            if position_side == "long":
+                activation_price = entry_price * (1 + activation_pct)
+                if current_price >= activation_price:
+                    # Calculate new stop loss
+                    new_stop = current_price * (1 - trail_pct)
+                    self.logger.info(f"Updating trailing stop for {self.symbol}: {new_stop}")
+                    self.update_stop_loss(new_stop)
+            
+            elif position_side == "short":
+                activation_price = entry_price * (1 - activation_pct)
+                if current_price <= activation_price:
+                    # Calculate new stop loss
+                    new_stop = current_price * (1 + trail_pct)
+                    self.logger.info(f"Updating trailing stop for {self.symbol}: {new_stop}")
+                    self.update_stop_loss(new_stop)
+        
+        except Exception as e:
+            self.logger.error(f"Error updating trailing stops: {e}")
+
+    def update_stop_loss(self, new_stop: float) -> bool:
+        """
+        Update stop loss for an open position
+        
+        Args:
+            new_stop: New stop loss price
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Skip in dry run mode
+            if self.config.get("dry_run", True):
+                self.logger.info(f"[DRY RUN] Updating stop loss to {new_stop} for {self.symbol}")
+                return True
+            
+            # Get position and open orders
+            position = self.current_positions.get(self.symbol)
+            if not position:
+                return False
+            
+            # Fetch open orders
+            open_orders = retry_api_call(
+                lambda: self.exchange.fetch_open_orders(self.symbol)
+            )
+            
+            # Find existing stop loss order
+            sl_order = None
+            for order in open_orders:
+                if order.get("type") == "stop" or "stopPrice" in order.get("info", {}):
+                    sl_order = order
+                    break
+            
+            # Cancel existing stop loss if found
+            if sl_order:
+                self.logger.info(f"Canceling existing stop loss order: {sl_order.get('id')}")
+                cancel_result = retry_api_call(
+                    lambda: self.exchange.cancel_order(sl_order.get("id"), self.symbol)
+                )
+                
+                if not cancel_result:
+                    self.logger.warning("Failed to cancel existing stop loss order")
+                    return False
+            
+            # Create new stop loss order
+            position_side = position.get("side", "")
+            size = position.get("contracts", 0)
+            
+            # Determine side for stop loss
+            sl_side = "sell" if position_side == "long" else "buy"
+            
+            self.logger.info(f"Creating new stop loss order: {sl_side} {size} {self.symbol} @ {new_stop}")
+            
+            sl_order = retry_api_call(
+                lambda: self.exchange.create_order(
+                    symbol=self.symbol,
+                    type="stop",
+                    side=sl_side,
+                    amount=size,
+                    price=new_stop,
+                    params={"stopPrice": new_stop, "reduce_only": True}
+                )
+            )
+            
+            if not sl_order:
+                self.logger.warning("Failed to create new stop loss order")
+                return False
+            
+            self.logger.info(f"New stop loss order created: {sl_order.get('id')}")
+            return True
+        
+        except Exception as e:
+            self.logger.error(f"Error updating stop loss: {e}")
+            return False
+
+    def handle_exit_signals(self, analysis: Dict) -> None:
+        """
+        Handle exit signals from the strategy
+        
+        Args:
+            analysis: Analysis results containing signal information
+        """
+        try:
+            # Skip if no positions or exit_signal not present
+            if not self.current_positions or "exit_signal" not in analysis:
+                return
+            
+            position = self.current_positions.get(self.symbol)
+            if not position:
+                return
+            
+            exit_signal = analysis.get("exit_signal", False)
+            if not exit_signal:
+                return
+            
+            # Get position details
+            position_side = position.get("side", "")
+            self.logger.info(f"Exit signal received for {position_side} position in {self.symbol}")
+            
+            # Close the position
+            self.close_position(position_side)
+        
+        except Exception as e:
+            self.logger.error(f"Error handling exit signals: {e}")
+
+    def run(self, stop_event: Optional[Event] = None) -> None:
+        """
+        Run the trading bot main loop
+        
+        Args:
+            stop_event: Event to signal stopping the bot
+        """
+        local_stop_event = stop_event or Event()
+        
+        self.logger.info(f"Starting trading bot main loop for {self.symbol} on {self.exchange_id}")
+        self.logger.info(f"Strategy: {self.strategy_name}")
+        
+        # Track loop iterations and errors
+        iterations = 0
+        consecutive_errors = 0
+        
+        try:
+            while not local_stop_event.is_set():
+                try:
+                    # Increment iteration counter
+                    iterations += 1
+                    
+                    # Fetch updated market data
+                    self.update_candles()
+                    
+                    # Update positions
+                    self.update_positions()
+                    
+                    # Check if we should update balance (every 10 iterations)
+                    if iterations % 10 == 0:
+                        self.update_balance()
+                    
+                    # Analyze market
+                    analysis = self.analyze_market()
+                    
+                    # Log analysis results
+                    signal_strength = analysis.get("signal_strength", 0)
+                    direction = analysis.get("direction", "none")
+                    
+                    self.logger.info(
+                        f"Analysis results for {self.symbol}: "
+                        f"Signal={signal_strength:.2f}, Direction={direction}"
+                    )
+                    
+                    # Handle exit signals first
+                    self.handle_exit_signals(analysis)
+                    
+                    # Update trailing stops for open positions
+                    self.update_trailing_stops()
+                    
+                    # Check signal strength threshold for entry
+                    entry_threshold = self.config.get("strategy", {}).get("entry_threshold", 0.5)
+                    
+                    if abs(signal_strength) >= entry_threshold and direction != "none":
+                        # Execute trade based on signal
+                        risk_params = analysis.get("risk_params", {})
+                        trade_result = self.execute_trade(direction, risk_params)
+                        
+                        if trade_result:
+                            self.logger.info(f"Trade executed: {direction} {trade_result.get('size')} {self.symbol}")
+                    
+                    # Reset consecutive error counter on successful iteration
+                    consecutive_errors = 0
+                    
+                    # Save state periodically
+                    if iterations % 5 == 0:
+                        self.save_state()
+                    
+                    # Calculate sleep time based on configuration
+                    loop_interval = self.config.get("loop_interval_seconds", 15)
+                    
+                    # Sleep but check for stop event periodically
+                    for _ in range(loop_interval):
+                        if local_stop_event.is_set():
+                            break
+                        time.sleep(1)
+                
+                except Exception as e:
+                    # Increment error counter
+                    consecutive_errors += 1
+                    self.error_count += 1
+                    
+                    # Log error
+                    self.logger.error(f"Error in main loop (iteration {iterations}): {e}")
+                    
+                    # Record error in state
+                    error_info = {
+                        "timestamp": int(time.time() * 1000),
+                        "error": str(e),
+                        "traceback": traceback.format_exc()
+                    }
+                    
+                    self.state["errors"]["last_error"] = str(e)
+                    self.state["errors"]["last_error_time"] = int(time.time() * 1000)
+                    self.state["errors"]["error_count"] += 1
+                    
+                    if "recent_errors" not in self.state["errors"]:
+                        self.state["errors"]["recent_errors"] = []
+                    
+                    # Keep only the last 10 errors
+                    self.state["errors"]["recent_errors"].append(error_info)
+                    self.state["errors"]["recent_errors"] = self.state["errors"]["recent_errors"][-10:]
+                    
+                    self.save_state()
+                    
+                    # Stop bot if too many consecutive errors
+                    max_consecutive_errors = self.config.get("advanced", {}).get("max_consecutive_errors", 5)
+                    if consecutive_errors >= max_consecutive_errors:
+                        self.logger.error(f"Too many consecutive errors ({consecutive_errors}), stopping bot")
+                        break
+                    
+                    # Sleep before retry
+                    time.sleep(5)
+        
+        except KeyboardInterrupt:
+            self.logger.info("Bot stopped by user")
+        
+        finally:
+            # Final cleanup
+            self.logger.info("Saving final state")
+            self.state["active"] = False
+            self.save_state()
+            
+            self.logger.info("Bot stopped")
+
+    def run_backtest(self) -> None:
+        """Run backtest using the current configuration"""
+        self.logger.info("Backtesting not implemented in base class")
+        # This should be implemented in a separate backtesting module
+
+    def validate_config(self) -> Dict:
+        """
+        Validate the bot configuration
+        
+        Returns:
+            Dict: Validation result
+        """
+        errors = []
+        
+        # Basic configuration checks
+        if not self.config.get("exchange"):
+            errors.append("Exchange not specified")
+        
+        if not self.config.get("symbol"):
+            errors.append("Trading symbol not specified")
+        
+        if not self.config.get("timeframe"):
+            errors.append("Timeframe not specified")
+        
+        # Strategy checks
+        if not self.config.get("strategy", {}).get("active"):
+            errors.append("Active strategy not specified")
+        
+        # Risk management checks
+        risk_config = self.config.get("risk_management", {})
+        if risk_config.get("position_size_pct", 0) <= 0:
+            errors.append("Position size percentage must be greater than 0")
+        
+        if risk_config.get("max_open_positions", 0) <= 0:
+            errors.append("Maximum open positions must be greater than 0")
+        
+        # Create validation result
+        if errors:
+            return {
+                "valid": False,
+                "errors": errors
+            }
+        else:
+            # Return successful validation with details
+            return {
+                "valid": True,
+                "details": {
+                    "exchange": self.config.get("exchange"),
+                    "symbol": self.config.get("symbol"),
+                    "timeframe": self.config.get("timeframe"),
+                    "strategy": self.config.get("strategy", {}).get("active"),
+                    "max_positions": risk_config.get("max_open_positions"),
+                    "position_size": f"{risk_config.get('position_size_pct')}%",
+                    "mode": "Dry run" if self.config.get("dry_run", True) else "Live trading"
+                }
+            }
+
+    def set_symbol(self, symbol: str) -> None:
+        """
+        Set trading symbol
+        
+        Args:
+            symbol: Trading symbol (e.g., 'BTC/USDT:USDT')
+        """
+        self.symbol = symbol
+        self.config["symbol"] = symbol
+        self.logger.info(f"Symbol set to {symbol}")
+
+    def set_timeframe(self, timeframe: str) -> None:
+        """
+        Set trading timeframe
+        
+        Args:
+            timeframe: Trading timeframe (e.g., '15m')
+        """
+        self.timeframe = timeframe
+        self.config["timeframe"] = timeframe
+        self.logger.info(f"Timeframe set to {timeframe}")
+
+    def set_exchange(self, exchange: str) -> None:
+        """
+        Set exchange
+        
+        Args:
+            exchange: Exchange name (e.g., 'bybit')
+        """
+        self.exchange_id = exchange
+        self.config["exchange"] = exchange
+        self.logger.info(f"Exchange set to {exchange}")
+
+    def set_strategy(self, strategy: str) -> None:
+        """
+        Set active strategy
+        
+        Args:
+            strategy: Strategy name (e.g., 'ehlers_supertrend')
+        """
+        self.strategy_name = strategy
+        self.config["strategy"] = {"active": strategy}
+        self.logger.info(f"Strategy set to {strategy}")
+
+    def fetch_candles(self, limit: int = 100) -> List:
+        """
+        Fetch OHLCV candles for the configured symbol and timeframe
+        
+        Args:
+            limit: Number of candles to fetch
+            
+        Returns:
+            List: Candles data
+        """
+        try:
+            self.logger.info(f"Fetching {limit} candles for {self.symbol} ({self.timeframe})")
+            candles = retry_api_call(
+                lambda: self.exchange.fetch_ohlcv(
+                    symbol=self.symbol,
+                    timeframe=self.timeframe,
+                    limit=limit
+                )
+            )
+            
+            return candles
+        except Exception as e:
+            self.logger.error(f"Error fetching candles: {e}")
+            return []
+
+    def fetch_ticker(self) -> Dict:
+        """
+        Fetch ticker data for the symbol
+        
+        Returns:
+            Dict: Ticker data
+        """
+        try:
+            ticker = retry_api_call(
+                lambda: self.exchange.fetch_ticker(self.symbol)
+            )
+            
+            return ticker
+        except Exception as e:
+            self.logger.error(f"Error fetching ticker: {e}")
+            return {}

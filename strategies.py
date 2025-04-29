@@ -1,10 +1,11 @@
 """
 Advanced Trading Strategies Module
 
-This module implements three advanced trading strategies with entry and exit rules:
-1. Momentum Divergence Strategy - Uses RSI/MACD divergence with volatility filters
-2. Trend Following with Multi-Timeframe Confirmation
-3. Support/Resistance Breakout with Volume Confirmation
+This module implements several advanced trading strategies with entry and exit rules:
+1. Ehlers Supertrend Strategy - Based on John Ehlers' Supertrend with market adaptation
+2. Momentum Divergence Strategy - Uses RSI/MACD divergence with volatility filters 
+3. Multi-Timeframe Trend Strategy - Combines multiple timeframes for trend confirmation
+4. Support/Resistance Breakout Strategy - Detects breakouts with volume confirmation
 
 Each strategy includes comprehensive risk management parameters.
 """
@@ -12,647 +13,555 @@ Each strategy includes comprehensive risk management parameters.
 import logging
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union, Any
+
+from indicators import calculate_supertrend_signal
 
 # Configure logger
 logger = logging.getLogger("strategies")
 
-#############################
-# Strategy 1: Momentum Divergence Strategy
-#############################
 
-def calculate_momentum_divergence_strategy(df: pd.DataFrame, config: Dict) -> Tuple[float, str, Dict]:
+def evaluate_strategies(
+    df: pd.DataFrame,
+    higher_tf_df: Optional[pd.DataFrame] = None,
+    config: Optional[Dict] = None
+) -> Dict:
     """
-    Momentum Divergence Strategy with Volatility Filters
+    Evaluate all enabled strategies and return a consolidated signal
     
-    Entry Rules:
-    - LONG: RSI divergence (price making lower lows while RSI makes higher lows)
-    - SHORT: RSI divergence (price making higher highs while RSI makes lower highs)
+    Args:
+        df: DataFrame with indicator data
+        higher_tf_df: Optional higher timeframe DataFrame
+        config: Strategy configuration
+        
+    Returns:
+        Dict: Consolidated results with signals and weights
+    """
+    if config is None:
+        config = {}
     
-    Exit Rules:
-    - Take profit at specified target
-    - Stop loss based on ATR
-    - Exit when RSI crosses midpoint in opposite direction
+    strategies_config = config.get("strategies", {})
+    enabled_strategies = [
+        s for s, conf in strategies_config.items() 
+        if conf.get("enabled", False)
+    ]
     
-    Filters:
-    - Only enter when volatility (ATR %) is within acceptable range
-    - Only take long positions when price is above 200 EMA
-    - Only take short positions when price is below 200 EMA
+    if not enabled_strategies:
+        # Fall back to the active strategy if no explicit strategy configurations
+        active_strategy = config.get("strategy", {}).get("active", "ehlers_supertrend")
+        enabled_strategies = [active_strategy]
     
-    Risk Management:
-    - Position size based on ATR stop loss
-    - Trailing stop activated after specific profit target
-    - Max drawdown control - reduce position size after consecutive losses
+    results = {}
+    weights = {}
+    total_weight = 0
+    
+    # Evaluate each enabled strategy
+    for strategy_name in enabled_strategies:
+        strategy_config = strategies_config.get(strategy_name, {})
+        weight = strategy_config.get("weight", 1.0)
+        
+        # Get the signal from the appropriate strategy function
+        if strategy_name == "ehlers_supertrend":
+            signal_strength, direction, params = calculate_ehlers_supertrend_strategy(
+                df, strategy_config
+            )
+        elif strategy_name == "momentum_divergence":
+            signal_strength, direction, params = calculate_momentum_divergence_strategy(
+                df, higher_tf_df, strategy_config
+            )
+        elif strategy_name == "multi_timeframe_trend":
+            signal_strength, direction, params = calculate_multi_timeframe_trend_strategy(
+                df, higher_tf_df, strategy_config
+            )
+        elif strategy_name == "support_resistance_breakout":
+            signal_strength, direction, params = calculate_support_resistance_breakout_strategy(
+                df, higher_tf_df, strategy_config
+            )
+        else:
+            logger.warning(f"Unknown strategy: {strategy_name}, skipping")
+            continue
+        
+        # Store results with weight
+        results[strategy_name] = {
+            "signal_strength": signal_strength,
+            "direction": direction,
+            "params": params,
+            "weight": weight
+        }
+        weights[strategy_name] = weight
+        total_weight += weight
+    
+    # Calculate weighted signals
+    buy_signal = 0.0
+    sell_signal = 0.0
+    
+    for strategy_name, result in results.items():
+        if result["direction"] == "buy":
+            buy_signal += result["signal_strength"] * result["weight"]
+        elif result["direction"] == "sell":
+            sell_signal += result["signal_strength"] * result["weight"]
+    
+    # Normalize by total weight
+    if total_weight > 0:
+        buy_signal /= total_weight
+        sell_signal /= total_weight
+    
+    # Determine final direction and strength
+    final_direction = "none"
+    final_strength = 0.0
+    
+    if buy_signal > sell_signal and buy_signal >= config.get("entry_threshold", 0.5):
+        final_direction = "buy"
+        final_strength = buy_signal
+    elif sell_signal > buy_signal and sell_signal >= config.get("entry_threshold", 0.5):
+        final_direction = "sell"
+        final_strength = sell_signal
+    
+    # Collect all parameters from all strategies
+    all_params = {}
+    for result in results.values():
+        all_params.update(result["params"])
+    
+    return {
+        "strategies": results,
+        "consolidated_signal": {
+            "direction": final_direction,
+            "strength": final_strength,
+            "buy_signal": buy_signal,
+            "sell_signal": sell_signal,
+            "params": all_params
+        }
+    }
+
+
+def calculate_ehlers_supertrend_strategy(
+    df: pd.DataFrame, 
+    config: Optional[Dict] = None
+) -> Tuple[float, str, Dict]:
+    """
+    Calculate signal based on Ehlers Supertrend strategy
+    
+    This is a trend-following strategy that uses John Ehlers' Supertrend indicator
+    with dynamic adaptation to market conditions.
     
     Args:
         df: DataFrame with indicator data
         config: Strategy configuration
         
     Returns:
-        Tuple[float, str, Dict]: Signal strength, direction, and additional trade parameters
+        Tuple[float, str, Dict]: Signal strength, direction, and parameters
     """
-    if df.empty or len(df) < 200:
-        return 0.0, "", {}
+    if df is None or len(df) < 2:
+        return 0.0, "none", {}
     
-    # Get the last 20 candles for analysis
-    recent_df = df.tail(20)
+    if config is None:
+        config = {}
     
-    # Calculate 200 EMA if not present
-    if "ema_200" not in df.columns:
-        df["ema_200"] = df["close"].ewm(span=200, adjust=False).mean()
-    
-    # Get current price and indicator values
-    current_price = df["close"].iloc[-1]
-    current_ema_200 = df["ema_200"].iloc[-1]
-    
-    # Check for required indicators
-    if "rsi" not in df.columns or "atr" not in df.columns:
-        logger.warning("RSI or ATR indicators missing for Momentum Divergence Strategy")
-        return 0.0, "", {}
-    
-    # Get configuration values with defaults
-    rsi_divergence_threshold = config.get("rsi_divergence_threshold", 5)
-    min_atr_pct = config.get("min_atr_pct", 0.5)
-    max_atr_pct = config.get("max_atr_pct", 3.0)
-    atr_multiplier = config.get("atr_multiplier", 2.5)
-    take_profit_atr_multiplier = config.get("take_profit_atr_multiplier", 5.0)
-    
-    # Current ATR and ATR percentage
-    current_atr = df["atr"].iloc[-1]
-    atr_pct = (current_atr / current_price) * 100
-    
-    # Skip if volatility is outside acceptable range
-    if atr_pct < min_atr_pct or atr_pct > max_atr_pct:
-        return 0.0, "", {}
-        
-    # Check for bullish divergence (price making lower lows, RSI making higher lows)
-    price_lows = recent_df["low"].rolling(window=2).min()
-    rsi_lows = recent_df["rsi"].rolling(window=2).min()
-    
-    bullish_divergence = False
-    if len(price_lows.dropna()) > 5 and len(rsi_lows.dropna()) > 5:
-        price_lower_low = price_lows.iloc[-1] < price_lows.iloc[-5]
-        rsi_higher_low = rsi_lows.iloc[-1] > rsi_lows.iloc[-5]
-        bullish_divergence = price_lower_low and rsi_higher_low
-    
-    # Check for bearish divergence (price making higher highs, RSI making lower highs)
-    price_highs = recent_df["high"].rolling(window=2).max()
-    rsi_highs = recent_df["rsi"].rolling(window=2).max()
-    
-    bearish_divergence = False
-    if len(price_highs.dropna()) > 5 and len(rsi_highs.dropna()) > 5:
-        price_higher_high = price_highs.iloc[-1] > price_highs.iloc[-5]
-        rsi_lower_high = rsi_highs.iloc[-1] < rsi_highs.iloc[-5]
-        bearish_divergence = price_higher_high and rsi_lower_high
-    
-    # Calculate signal
-    signal_strength = 0.0
-    direction = ""
-    trade_params = {}
-    
-    # LONG signal
-    if bullish_divergence and current_price > current_ema_200:
-        signal_strength = 0.8  # Strong signal
-        direction = "long"
-        
-        # Calculate stop loss and take profit levels
-        stop_loss = current_price - (current_atr * atr_multiplier)
-        take_profit = current_price + (current_atr * take_profit_atr_multiplier)
-        
-        # Trailing stop settings
-        trailing_stop = {
-            "enabled": True,
-            "activation_pct": 2.0,
-            "trail_pct": 1.0
-        }
-        
-        # Additional trade parameters
-        trade_params = {
-            "entry_price": current_price,
-            "stop_loss": stop_loss,
-            "take_profit": take_profit,
-            "risk_reward_ratio": take_profit_atr_multiplier / atr_multiplier,
-            "trailing_stop": trailing_stop,
-            "risk_per_trade_pct": 1.0,
-            "strategy": "momentum_divergence"
-        }
-    
-    # SHORT signal
-    elif bearish_divergence and current_price < current_ema_200:
-        signal_strength = 0.8  # Strong signal
-        direction = "short"
-        
-        # Calculate stop loss and take profit levels
-        stop_loss = current_price + (current_atr * atr_multiplier)
-        take_profit = current_price - (current_atr * take_profit_atr_multiplier)
-        
-        # Trailing stop settings
-        trailing_stop = {
-            "enabled": True,
-            "activation_pct": 2.0,
-            "trail_pct": 1.0
-        }
-        
-        # Additional trade parameters
-        trade_params = {
-            "entry_price": current_price,
-            "stop_loss": stop_loss,
-            "take_profit": take_profit,
-            "risk_reward_ratio": take_profit_atr_multiplier / atr_multiplier,
-            "trailing_stop": trailing_stop,
-            "risk_per_trade_pct": 1.0,
-            "strategy": "momentum_divergence"
-        }
-    
-    return signal_strength, direction, trade_params
+    # For now, we'll use the standard Supertrend indicator as a simpler implementation
+    # In a real implementation, could add Ehlers' specific enhancements
+    return calculate_supertrend_signal(df, config)
 
-#############################
-# Strategy 2: Multi-Timeframe Trend Following
-#############################
+
+def calculate_momentum_divergence_strategy(
+    df: pd.DataFrame, 
+    higher_tf_df: Optional[pd.DataFrame] = None,
+    config: Optional[Dict] = None
+) -> Tuple[float, str, Dict]:
+    """
+    Calculate signal based on momentum divergence
+    
+    This strategy looks for divergences between price and momentum indicators
+    (like RSI or MACD) to identify potential trend reversals.
+    
+    Args:
+        df: DataFrame with indicator data
+        higher_tf_df: Optional higher timeframe DataFrame
+        config: Strategy configuration
+        
+    Returns:
+        Tuple[float, str, Dict]: Signal strength, direction, and parameters
+    """
+    if df is None or len(df) < 20:  # Need sufficient data for divergence detection
+        return 0.0, "none", {}
+    
+    if config is None:
+        config = {}
+    
+    # Get configuration parameters with defaults
+    rsi_period = config.get("rsi_period", 14)
+    rsi_overbought = config.get("rsi_overbought", 70)
+    rsi_oversold = config.get("rsi_oversold", 30)
+    lookback_period = config.get("lookback_period", 20)
+    use_macd = config.get("use_macd_divergence", True)
+    use_rsi = config.get("use_rsi_divergence", True)
+    
+    # Default values
+    signal_strength = 0.0
+    direction = "none"
+    params = {"current_price": df["close"].iloc[-1]}
+    
+    if "atr" in df.columns:
+        params["atr"] = df["atr"].iloc[-1]
+    
+    # Check if we have necessary indicators
+    if use_rsi and "rsi" not in df.columns:
+        logger.warning("RSI not found in DataFrame but required for momentum divergence strategy")
+        use_rsi = False
+    
+    if use_macd and ("macd" not in df.columns or "macd_signal" not in df.columns):
+        logger.warning("MACD not found in DataFrame but required for momentum divergence strategy")
+        use_macd = False
+    
+    if not use_rsi and not use_macd:
+        logger.warning("Neither RSI nor MACD available for momentum divergence strategy")
+        return 0.0, "none", params
+    
+    # Get the recent data subset for divergence analysis
+    recent_df = df.iloc[-lookback_period:]
+    
+    # RSI Divergence
+    if use_rsi:
+        # Find peak/trough for price and RSI
+        price_high_idx = recent_df["close"].idxmax()
+        price_low_idx = recent_df["close"].idxmin()
+        rsi_high_idx = recent_df["rsi"].idxmax()
+        rsi_low_idx = recent_df["rsi"].idxmin()
+        
+        current_rsi = recent_df["rsi"].iloc[-1]
+        
+        # Bullish divergence (price makes lower low, RSI makes higher low)
+        if price_low_idx > rsi_low_idx and recent_df.loc[price_low_idx, "rsi"] > recent_df.loc[rsi_low_idx, "rsi"]:
+            if current_rsi < rsi_oversold:  # Confirm with oversold condition
+                signal_strength = max(signal_strength, 0.8)
+                direction = "buy"
+                params["divergence_type"] = "bullish_rsi"
+        
+        # Bearish divergence (price makes higher high, RSI makes lower high)
+        elif price_high_idx > rsi_high_idx and recent_df.loc[price_high_idx, "rsi"] < recent_df.loc[rsi_high_idx, "rsi"]:
+            if current_rsi > rsi_overbought:  # Confirm with overbought condition
+                signal_strength = max(signal_strength, 0.8)
+                direction = "sell"
+                params["divergence_type"] = "bearish_rsi"
+    
+    # MACD Divergence
+    if use_macd:
+        # For MACD, use histogram for divergence
+        if "macd_hist" not in df.columns:
+            logger.warning("MACD histogram not found in DataFrame")
+        else:
+            recent_hist = recent_df["macd_hist"]
+            
+            # Find histogram peaks/troughs
+            macd_high_idx = recent_hist.idxmax()
+            macd_low_idx = recent_hist.idxmin()
+            
+            current_macd = recent_df["macd"].iloc[-1]
+            current_macd_signal = recent_df["macd_signal"].iloc[-1]
+            
+            # Bullish divergence (price makes lower low, MACD hist makes higher low)
+            if price_low_idx > macd_low_idx and recent_hist.loc[price_low_idx] > recent_hist.loc[macd_low_idx]:
+                if current_macd < 0 and current_macd > current_macd_signal:  # Confirm with MACD crossing up while negative
+                    signal_strength = max(signal_strength, 0.9)
+                    direction = "buy"
+                    params["divergence_type"] = "bullish_macd"
+            
+            # Bearish divergence (price makes higher high, MACD hist makes lower high)
+            elif price_high_idx > macd_high_idx and recent_hist.loc[price_high_idx] < recent_hist.loc[macd_high_idx]:
+                if current_macd > 0 and current_macd < current_macd_signal:  # Confirm with MACD crossing down while positive
+                    signal_strength = max(signal_strength, 0.9)
+                    direction = "sell"
+                    params["divergence_type"] = "bearish_macd"
+    
+    return signal_strength, direction, params
+
 
 def calculate_multi_timeframe_trend_strategy(
     df: pd.DataFrame, 
-    higher_tf_df: pd.DataFrame, 
-    config: Dict
+    higher_tf_df: Optional[pd.DataFrame] = None,
+    config: Optional[Dict] = None
 ) -> Tuple[float, str, Dict]:
     """
-    Multi-Timeframe Trend Following Strategy
+    Calculate signal based on multi-timeframe trend alignment
     
-    Entry Rules:
-    - LONG: Higher timeframe in uptrend (price > 50 EMA) + current timeframe bullish engulfing
-    - SHORT: Higher timeframe in downtrend (price < 50 EMA) + current timeframe bearish engulfing
-    
-    Exit Rules:
-    - Take profit at 3x initial risk
-    - Stop loss based on recent swing high/low
-    - Exit when price closes below the higher timeframe 50 EMA (for longs)
-    - Exit when price closes above the higher timeframe 50 EMA (for shorts)
-    
-    Filters:
-    - Only enter when ADX > 25 (strong trend)
-    - Volume on signal candle > 150% of 20-period average volume
-    - Avoid trading during high-impact news events
-    
-    Risk Management:
-    - Position size based on distance to swing high/low
-    - Scale-in strategy: add to position when trend continues
-    - Partial take-profit at 2x risk, move stop loss to breakeven
+    This strategy aligns trends across multiple timeframes for stronger signals.
     
     Args:
-        df: DataFrame with indicator data (current timeframe)
-        higher_tf_df: DataFrame with indicator data (higher timeframe)
+        df: DataFrame with indicator data
+        higher_tf_df: Optional higher timeframe DataFrame
         config: Strategy configuration
         
     Returns:
-        Tuple[float, str, Dict]: Signal strength, direction, and additional trade parameters
+        Tuple[float, str, Dict]: Signal strength, direction, and parameters
     """
-    if df.empty or higher_tf_df.empty or len(df) < 50:
-        return 0.0, "", {}
+    if df is None or len(df) < 2:
+        return 0.0, "none", {}
     
-    # Calculate required indicators if not present
-    if "ema_50" not in higher_tf_df.columns:
-        higher_tf_df["ema_50"] = higher_tf_df["close"].ewm(span=50, adjust=False).mean()
+    if config is None:
+        config = {}
     
-    if "adx" not in df.columns:
-        # Calculate ADX using pandas_ta
-        try:
-            import pandas_ta as ta
-            df_temp = df.copy()
-            df_temp["adx"] = ta.adx(df["high"], df["low"], df["close"], length=14)["ADX_14"]
-            df["adx"] = df_temp["adx"]
-        except Exception as e:
-            logger.error(f"Error calculating ADX: {e}")
-            # Use simplified ADX approximation
-            df["tr"] = np.maximum(
-                df["high"] - df["low"],
-                np.maximum(
-                    abs(df["high"] - df["close"].shift(1)),
-                    abs(df["low"] - df["close"].shift(1))
-                )
-            )
-            df["atr_14"] = df["tr"].rolling(window=14).mean()
-            df["plus_dm"] = np.where(
-                (df["high"] - df["high"].shift(1)) > (df["low"].shift(1) - df["low"]),
-                np.maximum(df["high"] - df["high"].shift(1), 0),
-                0
-            )
-            df["minus_dm"] = np.where(
-                (df["low"].shift(1) - df["low"]) > (df["high"] - df["high"].shift(1)),
-                np.maximum(df["low"].shift(1) - df["low"], 0),
-                0
-            )
-            df["plus_di_14"] = 100 * (df["plus_dm"].rolling(window=14).mean() / df["atr_14"])
-            df["minus_di_14"] = 100 * (df["minus_dm"].rolling(window=14).mean() / df["atr_14"])
-            df["dx"] = 100 * abs(df["plus_di_14"] - df["minus_di_14"]) / (df["plus_di_14"] + df["minus_di_14"])
-            df["adx"] = df["dx"].rolling(window=14).mean()
+    # Default values
+    signal_strength = 0.0
+    direction = "none"
+    params = {"current_price": df["close"].iloc[-1]}
     
-    # Get current price and indicator values
+    if "atr" in df.columns:
+        params["atr"] = df["atr"].iloc[-1]
+    
+    # Check if we have higher timeframe data
+    if higher_tf_df is None or len(higher_tf_df) < 2:
+        logger.warning("Higher timeframe data not available for multi-timeframe trend strategy")
+        return 0.0, "none", params
+    
+    # Get configuration parameters
+    use_ema = config.get("use_ema", True)
+    use_supertrend = config.get("use_supertrend", True)
+    use_adx = config.get("use_adx", True)
+    adx_threshold = config.get("adx_threshold", 25)
+    
+    # Check current timeframe trend
+    current_trend = "none"
+    current_strength = 0.0
+    
+    # Check via EMA
+    if use_ema and "ema_fast" in df.columns and "ema_slow" in df.columns:
+        if df["ema_fast"].iloc[-1] > df["ema_slow"].iloc[-1]:
+            current_trend = "up"
+            current_strength += 0.5
+        elif df["ema_fast"].iloc[-1] < df["ema_slow"].iloc[-1]:
+            current_trend = "down"
+            current_strength += 0.5
+    
+    # Check via Supertrend
+    if use_supertrend and "supertrend_direction" in df.columns:
+        supertrend_direction = df["supertrend_direction"].iloc[-1]
+        if supertrend_direction == 1:  # Uptrend
+            if current_trend == "up":
+                current_strength += 0.5
+            elif current_trend == "none":
+                current_trend = "up"
+                current_strength += 0.5
+        elif supertrend_direction == -1:  # Downtrend
+            if current_trend == "down":
+                current_strength += 0.5
+            elif current_trend == "none":
+                current_trend = "down"
+                current_strength += 0.5
+    
+    # Check via ADX
+    if use_adx and "adx" in df.columns:
+        if df["adx"].iloc[-1] > adx_threshold:
+            current_strength *= 1.5  # Boost strength if trend is strong
+    
+    # Check higher timeframe trend
+    higher_trend = "none"
+    higher_strength = 0.0
+    
+    # Check via higher timeframe EMA
+    if use_ema and "ema_fast" in higher_tf_df.columns and "ema_slow" in higher_tf_df.columns:
+        if higher_tf_df["ema_fast"].iloc[-1] > higher_tf_df["ema_slow"].iloc[-1]:
+            higher_trend = "up"
+            higher_strength += 0.5
+        elif higher_tf_df["ema_fast"].iloc[-1] < higher_tf_df["ema_slow"].iloc[-1]:
+            higher_trend = "down"
+            higher_strength += 0.5
+    
+    # Check via higher timeframe Supertrend
+    if use_supertrend and "supertrend_direction" in higher_tf_df.columns:
+        higher_supertrend_direction = higher_tf_df["supertrend_direction"].iloc[-1]
+        if higher_supertrend_direction == 1:  # Uptrend
+            if higher_trend == "up":
+                higher_strength += 0.5
+            elif higher_trend == "none":
+                higher_trend = "up"
+                higher_strength += 0.5
+        elif higher_supertrend_direction == -1:  # Downtrend
+            if higher_trend == "down":
+                higher_strength += 0.5
+            elif higher_trend == "none":
+                higher_trend = "down"
+                higher_strength += 0.5
+    
+    # Check for alignment between timeframes
+    if current_trend == higher_trend and current_trend != "none":
+        # Calculate final signal strength
+        signal_strength = (current_strength + higher_strength) / 3.0  # Normalize to 0-1 range
+        
+        # Set direction
+        if current_trend == "up":
+            direction = "buy"
+        else:
+            direction = "sell"
+        
+        # Add to parameters
+        params["current_trend"] = current_trend
+        params["higher_trend"] = higher_trend
+        params["current_strength"] = current_strength
+        params["higher_strength"] = higher_strength
+    
+    return signal_strength, direction, params
+
+
+def calculate_support_resistance_breakout_strategy(
+    df: pd.DataFrame, 
+    higher_tf_df: Optional[pd.DataFrame] = None,
+    config: Optional[Dict] = None
+) -> Tuple[float, str, Dict]:
+    """
+    Calculate signal based on support/resistance breakouts with volume confirmation
+    
+    This strategy identifies support and resistance levels and generates signals
+    when price breaks these levels with volume confirmation.
+    
+    Args:
+        df: DataFrame with indicator data
+        higher_tf_df: Optional higher timeframe DataFrame for S/R levels
+        config: Strategy configuration
+        
+    Returns:
+        Tuple[float, str, Dict]: Signal strength, direction, and parameters
+    """
+    if df is None or len(df) < 30:  # Need sufficient data for S/R detection
+        return 0.0, "none", {}
+    
+    if config is None:
+        config = {}
+    
+    # Default values
+    signal_strength = 0.0
+    direction = "none"
+    params = {"current_price": df["close"].iloc[-1]}
+    
+    if "atr" in df.columns:
+        params["atr"] = df["atr"].iloc[-1]
+    
+    # Get configuration parameters
+    lookback_period = config.get("lookback_period", 100)
+    min_touches = config.get("min_touches", 2)
+    volume_increase_threshold = config.get("volume_increase_threshold", 1.5)
+    
+    # Calculate S/R levels
+    levels = find_support_resistance_levels(
+        df.iloc[-min(len(df), lookback_period):],
+        min_touches=min_touches
+    )
+    
+    # Get recent price and volume data
     current_price = df["close"].iloc[-1]
-    current_adx = df["adx"].iloc[-1]
-    
-    # Get configuration values with defaults
-    min_adx = config.get("min_adx", 25)
-    min_volume_factor = config.get("min_volume_factor", 1.5)
-    stop_loss_lookback = config.get("stop_loss_lookback", 10)
-    take_profit_factor = config.get("take_profit_factor", 3.0)
-    scale_in_levels = config.get("scale_in_levels", 2)
-    
-    # Skip if ADX is below minimum threshold
-    if current_adx < min_adx:
-        return 0.0, "", {}
-    
-    # Check volume condition
-    avg_volume = df["volume"].iloc[-20:].mean()
+    previous_price = df["close"].iloc[-2]
     current_volume = df["volume"].iloc[-1]
-    volume_condition = current_volume > (avg_volume * min_volume_factor)
+    avg_volume = df["volume"].iloc[-21:-1].mean()  # 20-period volume average
     
-    # Higher timeframe trend detection
-    higher_tf_price = higher_tf_df["close"].iloc[-1]
-    higher_tf_ema50 = higher_tf_df["ema_50"].iloc[-1]
-    uptrend = higher_tf_price > higher_tf_ema50
-    downtrend = higher_tf_price < higher_tf_ema50
+    # Check for breakout with volume confirmation
+    volume_condition = current_volume > (avg_volume * volume_increase_threshold)
     
-    # Bullish engulfing pattern
-    prev_open = df["open"].iloc[-2]
-    prev_close = df["close"].iloc[-2]
-    curr_open = df["open"].iloc[-1]
-    curr_close = df["close"].iloc[-1]
-    
-    bullish_engulfing = (
-        curr_close > curr_open and
-        prev_close < prev_open and
-        curr_open <= prev_close and
-        curr_close > prev_open
-    )
-    
-    # Bearish engulfing pattern
-    bearish_engulfing = (
-        curr_close < curr_open and
-        prev_close > prev_open and
-        curr_open >= prev_close and
-        curr_close < prev_open
-    )
-    
-    # Find recent swing low/high for stop loss
-    recent_low = df["low"].iloc[-stop_loss_lookback:].min()
-    recent_high = df["high"].iloc[-stop_loss_lookback:].max()
-    
-    # Calculate signal
-    signal_strength = 0.0
-    direction = ""
-    trade_params = {}
-    
-    # LONG signal
-    if uptrend and bullish_engulfing and volume_condition:
-        # Calculate stop loss and risk
-        stop_loss = recent_low * 0.998  # Slightly below recent low
-        risk_amount = current_price - stop_loss
+    # Check if we have any levels
+    if levels and len(levels) > 0:
+        # Find closest level
+        closest_level = min(levels, key=lambda x: abs(x - current_price))
         
-        # Calculate take profit levels
-        take_profit_full = current_price + (risk_amount * take_profit_factor)
-        take_profit_partial = current_price + (risk_amount * 2.0)
+        # Calculate breakout threshold (0.5% of price or ATR)
+        breakout_threshold = 0.005 * current_price
+        if "atr" in df.columns:
+            breakout_threshold = max(breakout_threshold, df["atr"].iloc[-1] * 0.5)
         
-        # Scale-in levels
-        scale_in_points = []
-        for i in range(1, scale_in_levels + 1):
-            scale_point = current_price + (risk_amount * 0.5 * i)
-            scale_in_points.append(scale_point)
+        # Check for bullish breakout (break above resistance)
+        if previous_price < closest_level and current_price > closest_level and volume_condition:
+            # Calculate distance to next resistance (if any)
+            higher_levels = [l for l in levels if l > current_price]
+            if higher_levels:
+                next_resistance = min(higher_levels)
+                distance_to_resistance = next_resistance - current_price
+                
+                # Adjust signal strength based on room to move
+                signal_strength = 0.8 + min(0.2, distance_to_resistance / (current_price * 0.1))
+            else:
+                signal_strength = 1.0
+            
+            direction = "buy"
+            params["breakout_level"] = closest_level
+            params["breakout_type"] = "resistance"
         
-        signal_strength = 0.9  # Strong signal
-        direction = "long"
-        
-        # Additional trade parameters
-        trade_params = {
-            "entry_price": current_price,
-            "stop_loss": stop_loss,
-            "take_profit": take_profit_full,
-            "take_profit_partial": take_profit_partial,
-            "partial_exit_pct": 50,  # Exit 50% of position at partial take profit
-            "risk_reward_ratio": take_profit_factor,
-            "scale_in_points": scale_in_points,
-            "adx": current_adx,
-            "risk_per_trade_pct": 1.5,
-            "strategy": "multi_timeframe_trend",
-            "move_to_breakeven_at": take_profit_partial,
-            "exit_indicator": "Higher TF EMA 50 cross"
-        }
+        # Check for bearish breakout (break below support)
+        elif previous_price > closest_level and current_price < closest_level and volume_condition:
+            # Calculate distance to next support (if any)
+            lower_levels = [l for l in levels if l < current_price]
+            if lower_levels:
+                next_support = max(lower_levels)
+                distance_to_support = current_price - next_support
+                
+                # Adjust signal strength based on room to move
+                signal_strength = 0.8 + min(0.2, distance_to_support / (current_price * 0.1))
+            else:
+                signal_strength = 1.0
+            
+            direction = "sell"
+            params["breakout_level"] = closest_level
+            params["breakout_type"] = "support"
     
-    # SHORT signal
-    elif downtrend and bearish_engulfing and volume_condition:
-        # Calculate stop loss and risk
-        stop_loss = recent_high * 1.002  # Slightly above recent high
-        risk_amount = stop_loss - current_price
-        
-        # Calculate take profit levels
-        take_profit_full = current_price - (risk_amount * take_profit_factor)
-        take_profit_partial = current_price - (risk_amount * 2.0)
-        
-        # Scale-in levels
-        scale_in_points = []
-        for i in range(1, scale_in_levels + 1):
-            scale_point = current_price - (risk_amount * 0.5 * i)
-            scale_in_points.append(scale_point)
-        
-        signal_strength = 0.9  # Strong signal
-        direction = "short"
-        
-        # Additional trade parameters
-        trade_params = {
-            "entry_price": current_price,
-            "stop_loss": stop_loss,
-            "take_profit": take_profit_full,
-            "take_profit_partial": take_profit_partial,
-            "partial_exit_pct": 50,  # Exit 50% of position at partial take profit
-            "risk_reward_ratio": take_profit_factor,
-            "scale_in_points": scale_in_points,
-            "adx": current_adx,
-            "risk_per_trade_pct": 1.5,
-            "strategy": "multi_timeframe_trend",
-            "move_to_breakeven_at": take_profit_partial,
-            "exit_indicator": "Higher TF EMA 50 cross"
-        }
-    
-    return signal_strength, direction, trade_params
+    return signal_strength, direction, params
 
-#############################
-# Strategy 3: Support-Resistance Breakout with Volume Confirmation
-#############################
 
-def calculate_support_resistance_breakout_strategy(df: pd.DataFrame, config: Dict) -> Tuple[float, str, Dict]:
+def find_support_resistance_levels(df: pd.DataFrame, min_touches: int = 2) -> List[float]:
     """
-    Support-Resistance Breakout Strategy with Volume Confirmation
-    
-    Entry Rules:
-    - LONG: Breakout above significant resistance level with volume confirmation
-    - SHORT: Breakdown below significant support level with volume confirmation
-    
-    Exit Rules:
-    - Take profit at the next resistance level
-    - Stop loss at 50% of the height of the consolidation range
-    - Exit when prices close back inside the consolidation range (false breakout)
-    
-    Filters:
-    - Minimum consolidation period of 15 candles
-    - Range must be tight (less than 5% from high to low)
-    - Volume spike on breakout (>200% of average volume)
-    
-    Risk Management:
-    - Position size based on ATR for risk control
-    - Use OCO (One-Cancels-Other) orders for take profit and stop loss
-    - Use time-based exit if price stalls after breakout
+    Find support and resistance levels in price data
     
     Args:
-        df: DataFrame with indicator data
-        config: Strategy configuration
+        df: DataFrame with OHLCV data
+        min_touches: Minimum number of times price must touch a level
         
     Returns:
-        Tuple[float, str, Dict]: Signal strength, direction, and additional trade parameters
+        List[float]: List of S/R levels
     """
-    if df.empty or len(df) < 30:
-        return 0.0, "", {}
+    # Find local maxima/minima
+    highs = df["high"].values
+    lows = df["low"].values
     
-    # Get configuration values with defaults
-    consolidation_period = config.get("consolidation_period", 15)
-    max_range_pct = config.get("max_range_pct", 5.0)
-    volume_breakout_factor = config.get("volume_breakout_factor", 2.0)
-    stop_loss_factor = config.get("stop_loss_factor", 0.5)
-    max_time_in_trade = config.get("max_time_in_trade", 20)  # candles
-    false_breakout_pct = config.get("false_breakout_pct", 0.2)
+    potential_levels = []
     
-    # Current price and volume
-    current_close = df["close"].iloc[-1]
-    current_volume = df["volume"].iloc[-1]
-    previous_close = df["close"].iloc[-2]
+    # Extract significant highs
+    for i in range(2, len(highs) - 2):
+        if highs[i] > highs[i-1] and highs[i] > highs[i-2] and highs[i] > highs[i+1] and highs[i] > highs[i+2]:
+            potential_levels.append(highs[i])
     
-    # Get the consolidation range (excluding the most recent candle)
-    consolidation_df = df.iloc[-(consolidation_period+1):-1]
-    consolidation_high = consolidation_df["high"].max()
-    consolidation_low = consolidation_df["low"].min()
-    consolidation_range = consolidation_high - consolidation_low
-    consolidation_range_pct = (consolidation_range / consolidation_low) * 100
+    # Extract significant lows
+    for i in range(2, len(lows) - 2):
+        if lows[i] < lows[i-1] and lows[i] < lows[i-2] and lows[i] < lows[i+1] and lows[i] < lows[i+2]:
+            potential_levels.append(lows[i])
     
-    # Average volume during consolidation
-    avg_volume = consolidation_df["volume"].mean()
+    # Find clusters of levels (combine levels that are close to each other)
+    if not potential_levels:
+        return []
     
-    # Check if range is tight enough
-    if consolidation_range_pct > max_range_pct:
-        return 0.0, "", {}
+    # Sort levels
+    potential_levels.sort()
     
-    # Find the next resistance and support levels using zigzag method
-    def find_pivot_points(df, window=10):
-        highs = []
-        lows = []
+    # Group levels that are close (within 0.5% of each other)
+    grouped_levels = []
+    current_group = [potential_levels[0]]
+    
+    for level in potential_levels[1:]:
+        if level - current_group[-1] < current_group[-1] * 0.005:  # Within 0.5%
+            current_group.append(level)
+        else:
+            grouped_levels.append(sum(current_group) / len(current_group))  # Average of group
+            current_group = [level]
+    
+    # Add the last group
+    if current_group:
+        grouped_levels.append(sum(current_group) / len(current_group))
+    
+    # Count touches for each level
+    filtered_levels = []
+    for level in grouped_levels:
+        # Count how many times price comes within 0.5% of level
+        touches = 0
+        for i in range(len(df)):
+            if (df["high"].iloc[i] >= level >= df["low"].iloc[i] or  # Level inside candle
+                abs(df["high"].iloc[i] - level) / level < 0.005 or    # High near level
+                abs(df["low"].iloc[i] - level) / level < 0.005):      # Low near level
+                touches += 1
         
-        # Find pivot highs
-        for i in range(window, len(df) - window):
-            if df["high"].iloc[i] == df["high"].iloc[i-window:i+window+1].max():
-                highs.append((i, df["high"].iloc[i]))
-        
-        # Find pivot lows
-        for i in range(window, len(df) - window):
-            if df["low"].iloc[i] == df["low"].iloc[i-window:i+window+1].min():
-                lows.append((i, df["low"].iloc[i]))
-        
-        return highs, lows
+        if touches >= min_touches:
+            filtered_levels.append(level)
     
-    pivot_highs, pivot_lows = find_pivot_points(df.iloc[:-1], window=5)  # Exclude current candle
-    
-    # Sort by price level
-    resistance_levels = sorted([price for _, price in pivot_highs])
-    support_levels = sorted([price for _, price in pivot_lows])
-    
-    # Find next resistance and support levels
-    next_resistance = None
-    for level in resistance_levels:
-        if level > current_close:
-            next_resistance = level
-            break
-    
-    next_support = None
-    for level in reversed(support_levels):
-        if level < current_close:
-            next_support = level
-            break
-    
-    # Calculate signal
-    signal_strength = 0.0
-    direction = ""
-    trade_params = {}
-    
-    # Check for breakout/breakdown with volume confirmation
-    breakout = (
-        previous_close <= consolidation_high and
-        current_close > consolidation_high and
-        current_volume > (avg_volume * volume_breakout_factor)
-    )
-    
-    breakdown = (
-        previous_close >= consolidation_low and
-        current_close < consolidation_low and
-        current_volume > (avg_volume * volume_breakout_factor)
-    )
-    
-    # LONG signal (Breakout)
-    if breakout and next_resistance is not None:
-        # Calculate stop loss
-        stop_loss = current_close - (consolidation_range * stop_loss_factor)
-        
-        # Calculate take profit
-        take_profit = next_resistance
-        
-        # Risk calculation
-        risk_amount = current_close - stop_loss
-        reward_amount = take_profit - current_close
-        risk_reward_ratio = reward_amount / risk_amount if risk_amount > 0 else 0
-        
-        # Only take trades with good risk/reward
-        if risk_reward_ratio >= 1.5:
-            signal_strength = 0.85
-            direction = "long"
-            
-            # Additional trade parameters
-            trade_params = {
-                "entry_price": current_close,
-                "stop_loss": stop_loss,
-                "take_profit": take_profit,
-                "risk_reward_ratio": risk_reward_ratio,
-                "consolidation_high": consolidation_high,
-                "consolidation_low": consolidation_low,
-                "false_breakout_level": consolidation_high * (1 - false_breakout_pct/100),
-                "max_time_in_trade": max_time_in_trade,
-                "volume_confirmation": current_volume / avg_volume,
-                "risk_per_trade_pct": 1.0,
-                "strategy": "support_resistance_breakout"
-            }
-    
-    # SHORT signal (Breakdown)
-    elif breakdown and next_support is not None:
-        # Calculate stop loss
-        stop_loss = current_close + (consolidation_range * stop_loss_factor)
-        
-        # Calculate take profit
-        take_profit = next_support
-        
-        # Risk calculation
-        risk_amount = stop_loss - current_close
-        reward_amount = current_close - take_profit
-        risk_reward_ratio = reward_amount / risk_amount if risk_amount > 0 else 0
-        
-        # Only take trades with good risk/reward
-        if risk_reward_ratio >= 1.5:
-            signal_strength = 0.85
-            direction = "short"
-            
-            # Additional trade parameters
-            trade_params = {
-                "entry_price": current_close,
-                "stop_loss": stop_loss,
-                "take_profit": take_profit,
-                "risk_reward_ratio": risk_reward_ratio,
-                "consolidation_high": consolidation_high,
-                "consolidation_low": consolidation_low,
-                "false_breakout_level": consolidation_low * (1 + false_breakout_pct/100),
-                "max_time_in_trade": max_time_in_trade,
-                "volume_confirmation": current_volume / avg_volume,
-                "risk_per_trade_pct": 1.0,
-                "strategy": "support_resistance_breakout"
-            }
-    
-    return signal_strength, direction, trade_params
-
-#############################
-# Strategy Selection and Evaluation
-#############################
-
-def evaluate_strategies(df: pd.DataFrame, higher_tf_df: pd.DataFrame, config: Dict) -> Dict:
-    """
-    Evaluate all strategies and return the best signal with parameters.
-    
-    Args:
-        df: DataFrame with indicator data
-        higher_tf_df: DataFrame with higher timeframe data
-        config: Strategy configuration
-        
-    Returns:
-        Dict: Best strategy signal and parameters
-    """
-    # Initialize results
-    best_signal = 0.0
-    best_direction = ""
-    best_params = {}
-    best_strategy = ""
-    
-    # Get weights for each strategy
-    momentum_weight = config.get("momentum_divergence", {}).get("weight", 1.0)
-    mtf_weight = config.get("multi_timeframe_trend", {}).get("weight", 1.0)
-    sr_weight = config.get("support_resistance_breakout", {}).get("weight", 1.0)
-    ehlers_weight = config.get("ehlers_supertrend", {}).get("weight", 1.2)
-    
-    # Evaluate Momentum Divergence Strategy
-    if config.get("momentum_divergence", {}).get("enabled", True):
-        momentum_config = config.get("momentum_divergence", {})
-        signal_strength, direction, trade_params = calculate_momentum_divergence_strategy(df, momentum_config)
-        
-        # Apply strategy weight
-        weighted_signal = signal_strength * momentum_weight
-        
-        if weighted_signal > best_signal and direction:
-            best_signal = weighted_signal
-            best_direction = direction
-            best_params = trade_params
-            best_strategy = "momentum_divergence"
-    
-    # Evaluate Multi-Timeframe Trend Strategy
-    if config.get("multi_timeframe_trend", {}).get("enabled", True):
-        mtf_config = config.get("multi_timeframe_trend", {})
-        signal_strength, direction, trade_params = calculate_multi_timeframe_trend_strategy(df, higher_tf_df, mtf_config)
-        
-        # Apply strategy weight
-        weighted_signal = signal_strength * mtf_weight
-        
-        if weighted_signal > best_signal and direction:
-            best_signal = weighted_signal
-            best_direction = direction
-            best_params = trade_params
-            best_strategy = "multi_timeframe_trend"
-    
-    # Evaluate Support-Resistance Breakout Strategy
-    if config.get("support_resistance_breakout", {}).get("enabled", True):
-        sr_config = config.get("support_resistance_breakout", {})
-        signal_strength, direction, trade_params = calculate_support_resistance_breakout_strategy(df, sr_config)
-        
-        # Apply strategy weight
-        weighted_signal = signal_strength * sr_weight
-        
-        if weighted_signal > best_signal and direction:
-            best_signal = weighted_signal
-            best_direction = direction
-            best_params = trade_params
-            best_strategy = "support_resistance_breakout"
-    
-    # Evaluate Ehlers Supertrend with Ranges Strategy
-    if config.get("ehlers_supertrend", {}).get("enabled", True):
-        try:
-            # Import here to avoid circular imports
-            from ehlers_supertrend_strategy import calculate_ehlers_supertrend_signal
-            
-            ehlers_config = config.get("ehlers_supertrend", {})
-            signal_strength, direction, trade_params = calculate_ehlers_supertrend_signal(df, ehlers_config)
-            
-            # Apply strategy weight
-            weighted_signal = signal_strength * ehlers_weight
-            
-            if weighted_signal > best_signal and direction:
-                best_signal = weighted_signal
-                best_direction = direction
-                best_params = trade_params
-                best_strategy = "ehlers_supertrend"
-        except ImportError as e:
-            pass  # Skip if module not available
-    
-    return {
-        "signal": best_signal,
-        "direction": best_direction,
-        "parameters": best_params,
-        "strategy": best_strategy
-    }
+    return filtered_levels

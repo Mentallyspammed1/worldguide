@@ -1,490 +1,462 @@
 """
 Technical Indicators Module
 
-This module contains functions for calculating technical indicators
-and trading signals based on the configured strategy.
+This module provides functions for calculating various technical indicators
+used in trading strategies, including:
+- RSI (Relative Strength Index)
+- MACD (Moving Average Convergence Divergence)
+- Bollinger Bands
+- ATR (Average True Range)
+- EMA/SMA (Exponential/Simple Moving Averages)
+- Supertrend
+- And more
 """
 
 import logging
-from typing import Dict, List, Tuple, Optional, Union, Any
-
 import numpy as np
 import pandas as pd
-
-# Add numpy.NaN for pandas_ta compatibility
-if not hasattr(np, 'NaN'):
-    np.NaN = float('nan')
-
-import pandas_ta as ta
+import pandas_ta as ta  # pandas_ta provides many technical indicators
 
 # Configure logger
 logger = logging.getLogger("indicators")
 
-# Default indicator parameters
-DEFAULT_RSI_WINDOW = 14
-DEFAULT_MACD_FAST = 12
-DEFAULT_MACD_SLOW = 26
-DEFAULT_MACD_SIGNAL = 9
-DEFAULT_BB_WINDOW = 20
-DEFAULT_BB_STD = 2.0
-DEFAULT_EMA_FAST = 8
-DEFAULT_EMA_SLOW = 21
-DEFAULT_ATR_WINDOW = 14
-DEFAULT_CCI_WINDOW = 20
-DEFAULT_STOCH_WINDOW = 14
-DEFAULT_STOCH_K = 3
-DEFAULT_STOCH_D = 3
 
-
-def calculate_indicators(df: pd.DataFrame, config: Dict) -> pd.DataFrame:
+def calculate_indicators(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     """
-    Calculate technical indicators based on configuration.
+    Calculate standard technical indicators on OHLCV data
     
     Args:
         df: DataFrame with OHLCV data
-        config: Dictionary with indicator configuration
+        config: Configuration dictionary with indicator parameters
         
     Returns:
         pd.DataFrame: DataFrame with added indicator columns
     """
-    # Make a copy to avoid modifying the original
-    df_copy = df.copy()
+    if df is None or len(df) == 0:
+        logger.warning("Empty DataFrame provided to calculate_indicators")
+        return df
     
-    # Calculate RSI if enabled
-    if "rsi" in config and config["rsi"].get("enabled", True):
-        window = config["rsi"].get("window", DEFAULT_RSI_WINDOW)
-        try:
-            df_copy["rsi"] = ta.rsi(df_copy["close"], length=window)
-            logger.debug(f"Calculated RSI with window={window}")
-        except Exception as e:
-            logger.error(f"Error calculating RSI: {e}")
-    
-    # Calculate MACD if enabled
-    if "macd" in config and config["macd"].get("enabled", True):
-        fast_period = config["macd"].get("fast_period", DEFAULT_MACD_FAST)
-        slow_period = config["macd"].get("slow_period", DEFAULT_MACD_SLOW)
-        signal_period = config["macd"].get("signal_period", DEFAULT_MACD_SIGNAL)
-        try:
+    try:
+        # Extract indicator config with defaults
+        indicator_config = config.get("strategy", {}).get("indicators", {})
+        
+        # Make a copy to avoid modifying the original DataFrame
+        df_copy = df.copy()
+        
+        # Add basic indicators based on config
+        # RSI
+        if indicator_config.get("rsi", {}).get("enabled", True):
+            rsi_period = indicator_config.get("rsi", {}).get("window", 14)
+            df_copy["rsi"] = ta.rsi(df_copy["close"], length=rsi_period)
+        
+        # MACD
+        if indicator_config.get("macd", {}).get("enabled", True):
+            fast_period = indicator_config.get("macd", {}).get("fast_period", 12)
+            slow_period = indicator_config.get("macd", {}).get("slow_period", 26)
+            signal_period = indicator_config.get("macd", {}).get("signal_period", 9)
+            
             macd = ta.macd(
-                df_copy["close"], 
-                fast=fast_period, 
-                slow=slow_period, 
+                df_copy["close"],
+                fast=fast_period,
+                slow=slow_period,
                 signal=signal_period
             )
-            # Add MACD components to dataframe
+            
             df_copy["macd"] = macd["MACD_" + str(fast_period) + "_" + str(slow_period) + "_" + str(signal_period)]
             df_copy["macd_signal"] = macd["MACDs_" + str(fast_period) + "_" + str(slow_period) + "_" + str(signal_period)]
             df_copy["macd_hist"] = macd["MACDh_" + str(fast_period) + "_" + str(slow_period) + "_" + str(signal_period)]
-            logger.debug(f"Calculated MACD with fast={fast_period}, slow={slow_period}, signal={signal_period}")
-        except Exception as e:
-            logger.error(f"Error calculating MACD: {e}")
+        
+        # Bollinger Bands
+        if indicator_config.get("bollinger_bands", {}).get("enabled", True):
+            bb_period = indicator_config.get("bollinger_bands", {}).get("window", 20)
+            bb_std = indicator_config.get("bollinger_bands", {}).get("std_dev", 2.0)
+            
+            bbands = ta.bbands(df_copy["close"], length=bb_period, std=bb_std)
+            df_copy["bb_upper"] = bbands["BBU_" + str(bb_period) + "_" + str(bb_std)]
+            df_copy["bb_middle"] = bbands["BBM_" + str(bb_period) + "_" + str(bb_std)]
+            df_copy["bb_lower"] = bbands["BBL_" + str(bb_period) + "_" + str(bb_std)]
+        
+        # ATR
+        if indicator_config.get("atr", {}).get("enabled", True):
+            atr_period = indicator_config.get("atr", {}).get("window", 14)
+            df_copy["atr"] = ta.atr(df_copy["high"], df_copy["low"], df_copy["close"], length=atr_period)
+        
+        # Moving Averages (EMA/SMA)
+        if indicator_config.get("ema_cross", {}).get("enabled", True):
+            ema_fast_period = indicator_config.get("ema_cross", {}).get("fast_period", 8)
+            ema_slow_period = indicator_config.get("ema_cross", {}).get("slow_period", 21)
+            
+            df_copy["ema_fast"] = ta.ema(df_copy["close"], length=ema_fast_period)
+            df_copy["ema_slow"] = ta.ema(df_copy["close"], length=ema_slow_period)
+        
+        if indicator_config.get("sma", {}).get("enabled", True):
+            sma_fast_period = indicator_config.get("sma", {}).get("fast_period", 10)
+            sma_slow_period = indicator_config.get("sma", {}).get("slow_period", 50)
+            
+            df_copy["sma_fast"] = ta.sma(df_copy["close"], length=sma_fast_period)
+            df_copy["sma_slow"] = ta.sma(df_copy["close"], length=sma_slow_period)
+        
+        # Stochastic RSI
+        if indicator_config.get("stoch_rsi", {}).get("enabled", True):
+            stoch_period = indicator_config.get("stoch_rsi", {}).get("period", 14)
+            stoch_k = indicator_config.get("stoch_rsi", {}).get("k", 3)
+            stoch_d = indicator_config.get("stoch_rsi", {}).get("d", 3)
+            
+            stoch = ta.stoch(df_copy["high"], df_copy["low"], df_copy["close"], k=stoch_k, d=stoch_d, length=stoch_period)
+            df_copy["stoch_k"] = stoch["STOCHk_" + str(stoch_period) + "_" + str(stoch_k) + "_" + str(stoch_d)]
+            df_copy["stoch_d"] = stoch["STOCHd_" + str(stoch_period) + "_" + str(stoch_k) + "_" + str(stoch_d)]
+        
+        # ADX
+        if indicator_config.get("adx", {}).get("enabled", True):
+            adx_period = indicator_config.get("adx", {}).get("period", 14)
+            adx = ta.adx(df_copy["high"], df_copy["low"], df_copy["close"], length=adx_period)
+            
+            df_copy["adx"] = adx["ADX_" + str(adx_period)]
+            df_copy["plus_di"] = adx["DMP_" + str(adx_period)]
+            df_copy["minus_di"] = adx["DMN_" + str(adx_period)]
+        
+        # Volume indicators
+        if indicator_config.get("volume", {}).get("enabled", True):
+            vol_sma_period = indicator_config.get("volume", {}).get("sma_period", 20)
+            df_copy["volume_sma"] = ta.sma(df_copy["volume"], length=vol_sma_period)
+            
+            # On-Balance Volume
+            df_copy["obv"] = ta.obv(df_copy["close"], df_copy["volume"])
+            
+            # Accumulation/Distribution Index
+            df_copy["adi"] = ta.ad(df_copy["high"], df_copy["low"], df_copy["close"], df_copy["volume"])
+        
+        # Supertrend Indicator
+        if indicator_config.get("supertrend", {}).get("enabled", True):
+            atr_period = indicator_config.get("supertrend", {}).get("atr_period", 10)
+            atr_multiplier = indicator_config.get("supertrend", {}).get("multiplier", 3.0)
+            
+            supertrend = calculate_supertrend(df_copy, atr_period, atr_multiplier)
+            
+            df_copy["supertrend"] = supertrend["supertrend"]
+            df_copy["supertrend_direction"] = supertrend["direction"]
+            df_copy["supertrend_upper"] = supertrend["upper_band"]
+            df_copy["supertrend_lower"] = supertrend["lower_band"]
+        
+        # Ehlers' Indicators for use in Ehlers' strategies
+        # if needed, implement Ehlers indicators from the provided file
+
+        return df_copy
     
-    # Calculate Bollinger Bands if enabled
-    if "bollinger_bands" in config and config["bollinger_bands"].get("enabled", True):
-        window = config["bollinger_bands"].get("window", DEFAULT_BB_WINDOW)
-        std_dev = config["bollinger_bands"].get("std_dev", DEFAULT_BB_STD)
-        try:
-            bbands = ta.bbands(df_copy["close"], length=window, std=std_dev)
-            df_copy["bb_upper"] = bbands["BBU_" + str(window) + "_" + str(std_dev)]
-            df_copy["bb_middle"] = bbands["BBM_" + str(window) + "_" + str(std_dev)]
-            df_copy["bb_lower"] = bbands["BBL_" + str(window) + "_" + str(std_dev)]
-            df_copy["bb_width"] = bbands["BBB_" + str(window) + "_" + str(std_dev)]
-            logger.debug(f"Calculated Bollinger Bands with window={window}, std_dev={std_dev}")
-        except Exception as e:
-            logger.error(f"Error calculating Bollinger Bands: {e}")
-    
-    # Calculate EMA Cross if enabled
-    if "ema_cross" in config and config["ema_cross"].get("enabled", True):
-        fast_period = config["ema_cross"].get("fast_period", DEFAULT_EMA_FAST)
-        slow_period = config["ema_cross"].get("slow_period", DEFAULT_EMA_SLOW)
-        try:
-            df_copy["ema_fast"] = ta.ema(df_copy["close"], length=fast_period)
-            df_copy["ema_slow"] = ta.ema(df_copy["close"], length=slow_period)
-            # Calculate crossover signals
-            df_copy["ema_cross"] = np.where(
-                df_copy["ema_fast"] > df_copy["ema_slow"], 
-                1, 
-                np.where(df_copy["ema_fast"] < df_copy["ema_slow"], -1, 0)
-            )
-            logger.debug(f"Calculated EMA Cross with fast={fast_period}, slow={slow_period}")
-        except Exception as e:
-            logger.error(f"Error calculating EMA Cross: {e}")
-    
-    # Calculate ATR if enabled
-    if "atr" in config and config["atr"].get("enabled", True):
-        window = config["atr"].get("window", DEFAULT_ATR_WINDOW)
-        try:
-            df_copy["atr"] = ta.atr(
-                df_copy["high"], 
-                df_copy["low"], 
-                df_copy["close"], 
-                length=window
-            )
-            logger.debug(f"Calculated ATR with window={window}")
-        except Exception as e:
-            logger.error(f"Error calculating ATR: {e}")
-    
-    # Calculate CCI if enabled
-    if "cci" in config and config["cci"].get("enabled", True):
-        window = config["cci"].get("window", DEFAULT_CCI_WINDOW)
-        try:
-            df_copy["cci"] = ta.cci(
-                df_copy["high"], 
-                df_copy["low"], 
-                df_copy["close"], 
-                length=window
-            )
-            logger.debug(f"Calculated CCI with window={window}")
-        except Exception as e:
-            logger.error(f"Error calculating CCI: {e}")
-    
-    # Calculate Stochastic if enabled
-    if "stochastic" in config and config["stochastic"].get("enabled", True):
-        window = config["stochastic"].get("window", DEFAULT_STOCH_WINDOW)
-        k = config["stochastic"].get("k", DEFAULT_STOCH_K)
-        d = config["stochastic"].get("d", DEFAULT_STOCH_D)
-        try:
-            stoch = ta.stoch(
-                df_copy["high"], 
-                df_copy["low"], 
-                df_copy["close"], 
-                k=window, 
-                d=k, 
-                smooth_d=d
-            )
-            df_copy["stoch_k"] = stoch["STOCHk_" + str(window) + "_" + str(k) + "_" + str(d)]
-            df_copy["stoch_d"] = stoch["STOCHd_" + str(window) + "_" + str(k) + "_" + str(d)]
-            logger.debug(f"Calculated Stochastic with window={window}, k={k}, d={d}")
-        except Exception as e:
-            logger.error(f"Error calculating Stochastic: {e}")
-    
-    # Calculate Stochastic RSI if enabled
-    if "stoch_rsi" in config and config["stoch_rsi"].get("enabled", True):
-        window = config["stoch_rsi"].get("window", DEFAULT_STOCH_WINDOW)
-        k = config["stoch_rsi"].get("k", DEFAULT_STOCH_K)
-        d = config["stoch_rsi"].get("d", DEFAULT_STOCH_D)
-        try:
-            stoch_rsi = ta.stochrsi(
-                df_copy["close"], 
-                length=window, 
-                rsi_length=window, 
-                k=k, 
-                d=d
-            )
-            df_copy["stoch_rsi_k"] = stoch_rsi["STOCHRSIk_" + str(window) + "_" + str(k) + "_" + str(d)]
-            df_copy["stoch_rsi_d"] = stoch_rsi["STOCHRSId_" + str(window) + "_" + str(k) + "_" + str(d)]
-            logger.debug(f"Calculated Stochastic RSI with window={window}, k={k}, d={d}")
-        except Exception as e:
-            logger.error(f"Error calculating Stochastic RSI: {e}")
-    
-    # Calculate PSAR if enabled
-    if "psar" in config and config["psar"].get("enabled", True):
-        af = config["psar"].get("af", 0.02)
-        max_af = config["psar"].get("max_af", 0.2)
-        try:
-            psar = ta.psar(
-                df_copy["high"], 
-                df_copy["low"], 
-                af=af, 
-                max_af=max_af
-            )
-            df_copy["psar"] = psar["PSARl_" + str(af).replace(".", "_") + "_" + str(max_af).replace(".", "_")]
-            df_copy["psar_direction"] = psar["PSARaf_" + str(af).replace(".", "_") + "_" + str(max_af).replace(".", "_")]
-            df_copy["psar_signal"] = np.where(
-                df_copy["close"] > df_copy["psar"], 
-                1, 
-                np.where(df_copy["close"] < df_copy["psar"], -1, 0)
-            )
-            logger.debug(f"Calculated PSAR with af={af}, max_af={max_af}")
-        except Exception as e:
-            logger.error(f"Error calculating PSAR: {e}")
-    
-    return df_copy
+    except Exception as e:
+        logger.error(f"Error calculating indicators: {e}")
+        # Return original DataFrame if calculation fails
+        return df
 
 
-def calculate_rsi_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+def calculate_supertrend(df: pd.DataFrame, period: int = 10, multiplier: float = 3.0) -> dict:
     """
-    Calculate trading signal based on RSI indicator.
+    Calculate Supertrend indicator
     
     Args:
-        df: DataFrame with indicator data
-        config: RSI configuration
+        df: DataFrame with OHLCV data
+        period: ATR period
+        multiplier: ATR multiplier
         
     Returns:
-        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+        dict: Dictionary with supertrend, direction, and band values
     """
-    if "rsi" not in df.columns:
-        return 0.0, ""
+    # Calculate ATR
+    atr = ta.atr(df["high"], df["low"], df["close"], length=period)
     
-    # Get parameters
-    rsi = df["rsi"].iloc[-1]
-    overbought = config.get("overbought", 70)
-    oversold = config.get("oversold", 30)
+    # Calculate basic upper and lower bands
+    hl2 = (df["high"] + df["low"]) / 2
     
-    # Calculate signal
-    if rsi <= oversold:
-        # Oversold - buy signal
-        signal_strength = 1.0 - (rsi / oversold)
-        return signal_strength, "long"
-    elif rsi >= overbought:
-        # Overbought - sell signal
-        signal_strength = (rsi - overbought) / (100 - overbought)
-        return signal_strength, "short"
-    else:
-        # Neutral zone - weak signal
-        midpoint = (overbought + oversold) / 2
-        if rsi < midpoint:
-            signal_strength = (midpoint - rsi) / (midpoint - oversold) * 0.5
-            return signal_strength, "long"
+    upper_band = hl2 + (multiplier * atr)
+    lower_band = hl2 - (multiplier * atr)
+    
+    # Initialize Supertrend direction as 1 (uptrend)
+    supertrend = pd.Series([np.nan] * len(df), index=df.index)
+    direction = pd.Series([1] * len(df), index=df.index)
+    
+    # Calculate Supertrend using iteration (can't be fully vectorized due to dependencies)
+    for i in range(1, len(df)):
+        # Determine direction
+        if df["close"].iloc[i] > upper_band.iloc[i-1]:
+            direction.iloc[i] = 1  # Uptrend
+        elif df["close"].iloc[i] < lower_band.iloc[i-1]:
+            direction.iloc[i] = -1  # Downtrend
         else:
-            signal_strength = (rsi - midpoint) / (overbought - midpoint) * 0.5
-            return signal_strength, "short"
+            direction.iloc[i] = direction.iloc[i-1]  # Continue previous trend
+            
+            # Adjust bands based on previous direction
+            if direction.iloc[i] == 1 and lower_band.iloc[i] < lower_band.iloc[i-1]:
+                lower_band.iloc[i] = lower_band.iloc[i-1]
+            if direction.iloc[i] == -1 and upper_band.iloc[i] > upper_band.iloc[i-1]:
+                upper_band.iloc[i] = upper_band.iloc[i-1]
+        
+        # Calculate Supertrend value
+        if direction.iloc[i] == 1:
+            supertrend.iloc[i] = lower_band.iloc[i]
+        else:
+            supertrend.iloc[i] = upper_band.iloc[i]
+    
+    return {
+        "supertrend": supertrend,
+        "direction": direction,
+        "upper_band": upper_band,
+        "lower_band": lower_band
+    }
 
 
-def calculate_macd_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+def calculate_signal(df: pd.DataFrame, strategy: str, config: dict) -> tuple:
     """
-    Calculate trading signal based on MACD indicator.
+    Calculate trading signal based on indicators
     
     Args:
         df: DataFrame with indicator data
-        config: MACD configuration
+        strategy: Strategy name
+        config: Strategy configuration
         
     Returns:
-        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+        tuple: (signal_strength, direction, parameters)
     """
-    if "macd" not in df.columns or "macd_signal" not in df.columns or "macd_hist" not in df.columns:
-        return 0.0, ""
+    if df is None or len(df) < 2:
+        return 0.0, "none", {}
     
-    # Get latest values
-    macd = df["macd"].iloc[-1]
-    signal = df["macd_signal"].iloc[-1]
-    hist = df["macd_hist"].iloc[-1]
-    prev_hist = df["macd_hist"].iloc[-2] if len(df) > 2 else 0
+    # Get the last row for current values
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
     
-    # Calculate signal
-    if hist > 0 and prev_hist <= 0:
-        # Bullish crossover
-        signal_strength = min(1.0, abs(hist) / 0.5)  # Normalize with typical value
-        return signal_strength, "long"
-    elif hist < 0 and prev_hist >= 0:
-        # Bearish crossover
-        signal_strength = min(1.0, abs(hist) / 0.5)  # Normalize with typical value
-        return signal_strength, "short"
-    elif hist > 0:
-        # Bullish trend
-        signal_strength = min(0.5, abs(hist) / 1.0)  # Weaker signal during trend
-        return signal_strength, "long"
-    elif hist < 0:
-        # Bearish trend
-        signal_strength = min(0.5, abs(hist) / 1.0)  # Weaker signal during trend
-        return signal_strength, "short"
+    # Default return values
+    signal_strength = 0.0
+    direction = "none"
+    parameters = {}
+    
+    # Dispatch to appropriate strategy
+    if strategy == "simple_crossover":
+        return calculate_simple_crossover_signal(df, config)
+    elif strategy == "macd_crossover":
+        return calculate_macd_crossover_signal(df, config)
+    elif strategy == "rsi_divergence":
+        return calculate_rsi_divergence_signal(df, config)
+    elif strategy == "supertrend":
+        return calculate_supertrend_signal(df, config)
+    elif strategy == "ehlers_supertrend":
+        return calculate_ehlers_supertrend_signal(df, config)
     else:
-        return 0.0, ""
+        logger.warning(f"Unknown strategy: {strategy}")
+        return signal_strength, direction, parameters
 
 
-def calculate_bollinger_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+def calculate_simple_crossover_signal(df: pd.DataFrame, config: dict) -> tuple:
     """
-    Calculate trading signal based on Bollinger Bands indicator.
+    Calculate signal based on moving average crossover
     
     Args:
         df: DataFrame with indicator data
-        config: Bollinger Bands configuration
+        config: Strategy configuration
         
     Returns:
-        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
-    """
-    if "bb_upper" not in df.columns or "bb_lower" not in df.columns or "bb_middle" not in df.columns:
-        return 0.0, ""
-    
-    # Get latest values
-    close = df["close"].iloc[-1]
-    upper = df["bb_upper"].iloc[-1]
-    lower = df["bb_lower"].iloc[-1]
-    middle = df["bb_middle"].iloc[-1]
-    width = df["bb_width"].iloc[-1] if "bb_width" in df.columns else (upper - lower) / middle
-    
-    # Percentage distance from bands
-    upper_dist = (upper - close) / (upper - lower) if upper != lower else 0
-    lower_dist = (close - lower) / (upper - lower) if upper != lower else 0
-    
-    # Calculate signal
-    if close <= lower:
-        # Price at or below lower band - strong buy signal
-        signal_strength = min(1.0, 1.0 + lower_dist)  # Can exceed 1.0 for breakouts
-        return signal_strength, "long"
-    elif close >= upper:
-        # Price at or above upper band - strong sell signal
-        signal_strength = min(1.0, 1.0 + upper_dist)  # Can exceed 1.0 for breakouts
-        return signal_strength, "short"
-    elif close < middle:
-        # Price between middle and lower band - weak buy signal
-        signal_strength = lower_dist * 0.5  # Scale down for less confident signal
-        return signal_strength, "long"
-    elif close > middle:
-        # Price between middle and upper band - weak sell signal
-        signal_strength = upper_dist * 0.5  # Scale down for less confident signal
-        return signal_strength, "short"
-    else:
-        return 0.0, ""
-
-
-def calculate_ema_cross_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
-    """
-    Calculate trading signal based on EMA cross indicator.
-    
-    Args:
-        df: DataFrame with indicator data
-        config: EMA cross configuration
-        
-    Returns:
-        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+        tuple: (signal_strength, direction, parameters)
     """
     if "ema_fast" not in df.columns or "ema_slow" not in df.columns:
-        return 0.0, ""
+        return 0.0, "none", {}
     
-    # Get latest values
-    fast = df["ema_fast"].iloc[-1]
-    slow = df["ema_slow"].iloc[-1]
+    # Get the last two rows
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
     
-    # Get previous values if available
-    prev_fast = df["ema_fast"].iloc[-2] if len(df) > 2 else fast
-    prev_slow = df["ema_slow"].iloc[-2] if len(df) > 2 else slow
+    # Check for crossover
+    current_cross = current["ema_fast"] > current["ema_slow"]
+    previous_cross = previous["ema_fast"] > previous["ema_slow"]
     
-    # Calculate percentage difference between fast and slow EMAs
-    diff_pct = (fast - slow) / slow * 100 if slow != 0 else 0
+    signal_strength = 0.0
+    direction = "none"
+    parameters = {
+        "atr": current.get("atr", 0.0),
+        "current_price": current["close"]
+    }
     
-    # Calculate signal
-    if fast > slow and prev_fast <= prev_slow:
-        # Bullish crossover - strong buy signal
+    # Bullish crossover (fast crosses above slow)
+    if current_cross and not previous_cross:
         signal_strength = 1.0
-        return signal_strength, "long"
-    elif fast < slow and prev_fast >= prev_slow:
-        # Bearish crossover - strong sell signal
+        direction = "buy"
+    
+    # Bearish crossover (fast crosses below slow)
+    elif not current_cross and previous_cross:
         signal_strength = 1.0
-        return signal_strength, "short"
-    elif fast > slow:
-        # Fast above slow - existing bullish trend
-        signal_strength = min(0.5, abs(diff_pct) / 2.0)  # Normalize to reasonable range
-        return signal_strength, "long"
-    elif fast < slow:
-        # Fast below slow - existing bearish trend
-        signal_strength = min(0.5, abs(diff_pct) / 2.0)  # Normalize to reasonable range
-        return signal_strength, "short"
-    else:
-        return 0.0, ""
+        direction = "sell"
+    
+    return signal_strength, direction, parameters
 
 
-def calculate_atr_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+def calculate_macd_crossover_signal(df: pd.DataFrame, config: dict) -> tuple:
     """
-    Calculate volatility-adjusted signal based on ATR.
-    This function doesn't provide direction, only volatility assessment.
+    Calculate signal based on MACD crossover
     
     Args:
         df: DataFrame with indicator data
-        config: ATR configuration
+        config: Strategy configuration
         
     Returns:
-        Tuple[float, str]: Signal strength (0.0 to 1.0) and empty direction
+        tuple: (signal_strength, direction, parameters)
     """
-    if "atr" not in df.columns:
-        return 0.0, ""
+    if "macd" not in df.columns or "macd_signal" not in df.columns:
+        return 0.0, "none", {}
     
-    # Get latest values
-    atr = df["atr"].iloc[-1]
-    close = df["close"].iloc[-1]
+    # Get the last two rows
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
     
-    # Calculate ATR as percentage of price
-    atr_pct = (atr / close) * 100 if close != 0 else 0
+    # Check for MACD crossover
+    current_cross = current["macd"] > current["macd_signal"]
+    previous_cross = previous["macd"] > previous["macd_signal"]
     
-    # Typical ATR percentages range from 0.5% to 5% for most assets
-    # Higher ATR percentage indicates higher volatility
-    # Scale to 0-1 range assuming 5% is maximum expected volatility
-    max_expected_atr_pct = 5.0
-    volatility_score = min(1.0, atr_pct / max_expected_atr_pct)
+    signal_strength = 0.0
+    direction = "none"
+    parameters = {
+        "atr": current.get("atr", 0.0),
+        "current_price": current["close"],
+        "macd": current["macd"],
+        "macd_signal": current["macd_signal"],
+        "macd_hist": current.get("macd_hist", 0.0)
+    }
     
-    # ATR doesn't provide direction, only volatility assessment
-    return volatility_score, ""
+    # Bullish crossover (MACD crosses above signal)
+    if current_cross and not previous_cross:
+        signal_strength = 1.0
+        direction = "buy"
+        
+        # Adjust strength based on histogram
+        if current.get("macd_hist", 0) > 0:
+            signal_strength = min(1.5, abs(current["macd_hist"]) * 10)
+    
+    # Bearish crossover (MACD crosses below signal)
+    elif not current_cross and previous_cross:
+        signal_strength = 1.0
+        direction = "sell"
+        
+        # Adjust strength based on histogram
+        if current.get("macd_hist", 0) < 0:
+            signal_strength = min(1.5, abs(current["macd_hist"]) * 10)
+    
+    return signal_strength, direction, parameters
 
 
-def calculate_signal(df: pd.DataFrame, indicators_config: Dict, 
-                     threshold: float = 0.5) -> Tuple[float, str]:
+def calculate_rsi_divergence_signal(df: pd.DataFrame, config: dict) -> tuple:
     """
-    Calculate overall trading signal based on multiple indicators.
+    Calculate signal based on RSI divergence
     
     Args:
         df: DataFrame with indicator data
-        indicators_config: Configuration for all indicators
-        threshold: Signal threshold for entry
+        config: Strategy configuration
         
     Returns:
-        Tuple[float, str]: Overall signal strength (-1.0 to 1.0) and direction ("long" or "short")
+        tuple: (signal_strength, direction, parameters)
     """
-    if df.empty:
-        return 0.0, ""
+    if "rsi" not in df.columns or len(df) < 20:
+        return 0.0, "none", {}
     
-    # Initialize variables for weighted signal calculation
-    total_weight = 0.0
-    long_signal = 0.0
-    short_signal = 0.0
+    # Config values
+    lookback = config.get("lookback", 14)
+    rsi_overbought = config.get("rsi_overbought", 70)
+    rsi_oversold = config.get("rsi_oversold", 30)
     
-    # RSI signal
-    if "rsi" in indicators_config and indicators_config["rsi"].get("enabled", True):
-        weight = float(indicators_config["rsi"].get("weight", 1.0))
-        signal_strength, direction = calculate_rsi_signal(df, indicators_config["rsi"])
-        total_weight += weight
-        if direction == "long":
-            long_signal += signal_strength * weight
-        elif direction == "short":
-            short_signal += signal_strength * weight
+    # Get the last value
+    current = df.iloc[-1]
     
-    # MACD signal
-    if "macd" in indicators_config and indicators_config["macd"].get("enabled", True):
-        weight = float(indicators_config["macd"].get("weight", 1.0))
-        signal_strength, direction = calculate_macd_signal(df, indicators_config["macd"])
-        total_weight += weight
-        if direction == "long":
-            long_signal += signal_strength * weight
-        elif direction == "short":
-            short_signal += signal_strength * weight
+    # Initialize
+    signal_strength = 0.0
+    direction = "none"
+    parameters = {
+        "atr": current.get("atr", 0.0),
+        "current_price": current["close"],
+        "rsi": current["rsi"]
+    }
     
-    # Bollinger Bands signal
-    if "bollinger_bands" in indicators_config and indicators_config["bollinger_bands"].get("enabled", True):
-        weight = float(indicators_config["bollinger_bands"].get("weight", 1.0))
-        signal_strength, direction = calculate_bollinger_signal(df, indicators_config["bollinger_bands"])
-        total_weight += weight
-        if direction == "long":
-            long_signal += signal_strength * weight
-        elif direction == "short":
-            short_signal += signal_strength * weight
+    # Check for divergence within lookback period
+    subset = df.iloc[-lookback:]
     
-    # EMA Cross signal
-    if "ema_cross" in indicators_config and indicators_config["ema_cross"].get("enabled", True):
-        weight = float(indicators_config["ema_cross"].get("weight", 1.0))
-        signal_strength, direction = calculate_ema_cross_signal(df, indicators_config["ema_cross"])
-        total_weight += weight
-        if direction == "long":
-            long_signal += signal_strength * weight
-        elif direction == "short":
-            short_signal += signal_strength * weight
+    # Find price highs/lows
+    price_high_idx = subset["close"].idxmax()
+    price_low_idx = subset["close"].idxmin()
     
-    # If no weights/signals, return neutral
-    if total_weight == 0:
-        return 0.0, ""
+    # Find RSI highs/lows
+    rsi_high_idx = subset["rsi"].idxmax()
+    rsi_low_idx = subset["rsi"].idxmin()
     
-    # Calculate final signals normalized by total weight
-    final_long_signal = long_signal / total_weight
-    final_short_signal = short_signal / total_weight
+    # Bullish divergence (price makes lower low but RSI makes higher low)
+    if price_low_idx > rsi_low_idx and subset.loc[price_low_idx, "rsi"] > subset.loc[rsi_low_idx, "rsi"] and current["rsi"] < rsi_oversold:
+        signal_strength = 1.0
+        direction = "buy"
+        
+        # Adjust strength based on RSI
+        signal_strength = min(1.5, (rsi_oversold - current["rsi"]) / 10)
     
-    # Determine direction based on strongest signal
-    if final_long_signal > final_short_signal:
-        if final_long_signal >= threshold:
-            return final_long_signal, "long"
-        else:
-            return final_long_signal, ""  # Below threshold
-    elif final_short_signal > final_long_signal:
-        if final_short_signal >= threshold:
-            return final_short_signal, "short"
-        else:
-            return -final_short_signal, ""  # Below threshold
-    else:
-        return 0.0, ""  # Neutral
+    # Bearish divergence (price makes higher high but RSI makes lower high)
+    elif price_high_idx > rsi_high_idx and subset.loc[price_high_idx, "rsi"] < subset.loc[rsi_high_idx, "rsi"] and current["rsi"] > rsi_overbought:
+        signal_strength = 1.0
+        direction = "sell"
+        
+        # Adjust strength based on RSI
+        signal_strength = min(1.5, (current["rsi"] - rsi_overbought) / 10)
+    
+    return signal_strength, direction, parameters
+
+
+def calculate_supertrend_signal(df: pd.DataFrame, config: dict) -> tuple:
+    """
+    Calculate signal based on Supertrend indicator
+    
+    Args:
+        df: DataFrame with indicator data
+        config: Strategy configuration
+        
+    Returns:
+        tuple: (signal_strength, direction, parameters)
+    """
+    if "supertrend_direction" not in df.columns:
+        return 0.0, "none", {}
+    
+    # Get the last two rows
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
+    
+    # Check for trend change
+    current_direction = current["supertrend_direction"]
+    previous_direction = previous["supertrend_direction"]
+    
+    signal_strength = 0.0
+    direction = "none"
+    parameters = {
+        "atr": current.get("atr", 0.0),
+        "current_price": current["close"],
+        "supertrend": current["supertrend"],
+        "supertrend_upper": current["supertrend_upper"],
+        "supertrend_lower": current["supertrend_lower"]
+    }
+    
+    # Trend change detection
+    if current_direction != previous_direction:
+        # Bullish trend change
+        if current_direction == 1:
+            signal_strength = 1.0
+            direction = "buy"
+        # Bearish trend change
+        elif current_direction == -1:
+            signal_strength = 1.0
+            direction = "sell"
+    
+    return signal_strength, direction, parameters
+
+
+def calculate_ehlers_supertrend_signal(df: pd.DataFrame, config: dict) -> tuple:
+    """
+    Calculate signal based on Ehlers Supertrend strategy
+    
+    Args:
+        df: DataFrame with indicator data
+        config: Strategy configuration
+        
+    Returns:
+        tuple: (signal_strength, direction, parameters)
+    """
+    # For now, just use the regular Supertrend indicator
+    # In a real implementation, replace this with the Ehlers version
+    return calculate_supertrend_signal(df, config)
