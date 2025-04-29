@@ -1,99 +1,64 @@
 """
 Logger Setup Module
 
-This module provides a unified logging configuration for the trading bot.
-It includes colorized console output and file logging with rotation.
+This module configures the logging for the application.
 """
 
-import os
 import logging
+import os
 import sys
 from logging.handlers import RotatingFileHandler
-from colorama import Fore, Style, init
 
-# Initialize colorama for cross-platform colored terminal output
-init(autoreset=True)
-
-# Ensure log directory exists
-log_dir = "bot_logs"
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-# Colors for different log levels
-LOG_COLORS = {
-    'DEBUG': Fore.CYAN,
-    'INFO': Fore.GREEN,
-    'WARNING': Fore.YELLOW,
-    'ERROR': Fore.RED,
-    'CRITICAL': Fore.RED + Style.BRIGHT
-}
-
-class ColoredFormatter(logging.Formatter):
-    """Custom formatter to add colors to log messages based on level"""
-    
-    def format(self, record):
-        levelname = record.levelname
-        if levelname in LOG_COLORS:
-            record.levelname = f"{LOG_COLORS[levelname]}{levelname}{Style.RESET_ALL}"
-            record.msg = f"{LOG_COLORS[levelname]}{record.msg}{Style.RESET_ALL}"
-        return super().format(record)
-
-def setup_logger(name, log_file=None, level=logging.INFO, format_string=None):
+def setup_logging(log_level=logging.INFO, log_to_file=True):
     """
-    Set up a logger with both console and file handlers
+    Configure logging for the application
     
     Args:
-        name: Logger name
-        log_file: Path to log file (relative to log_dir)
-        level: Logging level
-        format_string: Custom format string
-        
-    Returns:
-        logging.Logger: Configured logger
+        log_level: Logging level (default: INFO)
+        log_to_file: Whether to log to file (default: True)
     """
-    if format_string is None:
-        format_string = "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s"
+    # Create logs directory if it doesn't exist
+    log_dir = "bot_logs"
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
     
-    # Don't add handlers if they already exist
-    if logger.handlers:
-        return logger
+    # Clear existing handlers to avoid duplicate logs
+    if root_logger.handlers:
+        root_logger.handlers.clear()
     
-    # Console handler with colored output
+    # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(level)
-    colored_formatter = ColoredFormatter(format_string)
-    console_handler.setFormatter(colored_formatter)
-    logger.addHandler(console_handler)
+    console_handler.setLevel(log_level)
+    console_format = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    console_handler.setFormatter(console_format)
+    root_logger.addHandler(console_handler)
     
-    # File handler if log_file provided
-    if log_file:
-        file_path = os.path.join(log_dir, log_file)
+    # File handler (optional)
+    if log_to_file:
         file_handler = RotatingFileHandler(
-            file_path, maxBytes=10*1024*1024, backupCount=5
+            f"{log_dir}/bot.log",
+            maxBytes=10 * 1024 * 1024,  # 10MB
+            backupCount=5
         )
-        file_handler.setLevel(level)
-        file_formatter = logging.Formatter(format_string)
-        file_handler.setFormatter(file_formatter)
-        logger.addHandler(file_handler)
+        file_handler.setLevel(log_level)
+        file_format = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        file_handler.setFormatter(file_format)
+        root_logger.addHandler(file_handler)
     
-    return logger
-
-def setup_default_loggers():
-    """Configure the default loggers used by the trading bot"""
-    # App-wide logger
-    root_logger = setup_logger("trading_bot", "trading_bot.log")
+    # Set specific loggers to lower levels for debugging
+    logging.getLogger('app').setLevel(log_level)
+    logging.getLogger('flask.app').setLevel(log_level)
     
-    # Component-specific loggers
-    setup_logger("trading_bot.strategies", "strategies.log")
-    setup_logger("trading_bot.indicators", "indicators.log")
-    setup_logger("trading_bot.orders", "orders.log")
-    setup_logger("trading_bot.risk", "risk.log")
-    setup_logger("trading_bot.web", "web.log")
-    
-    # Debug logger for detailed diagnostics
-    debug_logger = setup_logger("trading_bot.debug", "debug.log", level=logging.DEBUG)
+    # Suppress chatty third-party logs
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
     
     return root_logger
