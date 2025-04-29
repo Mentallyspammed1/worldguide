@@ -6,6 +6,10 @@
     <title>Pyrmethus Trading Bot | Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Socket.IO client -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/styles.css">
     <style>
@@ -175,6 +179,7 @@
                                 <div class="fs-5 fw-bold" id="strategy">
                                     {{ config.get('strategy', {}).get('active', 'Not Set') }}
                                 </div>
+                                <button id="runStrategyBtn" class="btn btn-sm btn-primary mt-2">Run Analysis</button>
                             </div>
                         </div>
                         <canvas id="priceChart" height="300"></canvas>
@@ -394,38 +399,276 @@
             return date.toLocaleString();
         }
 
-        // Fetch and update market data
+        // Socket.IO instance
+        let socket;
+        
+        // Connect to Socket.IO server
+        function connectWebSocket() {
+            socket = io();
+            
+            // Connection events
+            socket.on('connect', () => {
+                console.log('WebSocket connected');
+                fetchMarketData(); // Fetch data on connection
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('WebSocket disconnected');
+            });
+            
+            // Market data event handler
+            socket.on('market_data', (data) => {
+                console.log('Received market data');
+                
+                // Update price chart
+                updatePriceChart(data.candles);
+                
+                // Update indicators table
+                updateIndicatorsDisplay(data.latest_indicators);
+                
+                // Update ticker data
+                updateTickerData(data.ticker);
+                
+                // Update last update time
+                if (data.last_update) {
+                    lastUpdateTime = data.last_update;
+                    updateLastUpdateDisplay();
+                }
+            });
+            
+            // Handle market data errors
+            socket.on('market_data_error', (data) => {
+                console.error('Error fetching market data:', data.error);
+            });
+            
+            // Strategy result handler
+            socket.on('strategy_result', (data) => {
+                console.log('Received strategy result:', data);
+                updateStrategyDisplay(data);
+            });
+        }
+        
+        // Fetch market data through WebSocket
         function fetchMarketData() {
+            if (!socket || !socket.connected) {
+                console.error('WebSocket not connected');
+                return;
+            }
+            
             const symbol = document.getElementById('symbolSelector').value;
             const timeframe = document.getElementById('timeframeSelector').value;
-
-            fetch(`/api/market_data?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error('Error fetching market data:', data.error);
-                        return;
+            
+            // Request market data via WebSocket
+            socket.emit('request_market_data', {
+                symbol: symbol,
+                timeframe: timeframe
+            });
+        }
+        
+        // Update ticker display with new data
+        function updateTickerData(ticker) {
+            if (!ticker) return;
+            
+            // Update price info
+            if (document.getElementById('lastPrice')) {
+                document.getElementById('lastPrice').textContent = formatCurrency(ticker.last);
+            }
+            
+            // Update 24h change
+            if (document.getElementById('priceChange')) {
+                const changeClass = ticker.change >= 0 ? 'positive' : 'negative';
+                const changeSign = ticker.change >= 0 ? '+' : '';
+                document.getElementById('priceChange').textContent = `${changeSign}${ticker.change.toFixed(2)}%`;
+                document.getElementById('priceChange').className = `fs-5 fw-bold ${changeClass}`;
+            }
+            
+            // Update volume
+            if (document.getElementById('volume')) {
+                document.getElementById('volume').textContent = formatCurrency(ticker.volume);
+            }
+        }
+        
+        // Update indicators table
+        function updateIndicatorsDisplay(indicators) {
+            if (!indicators) return;
+            
+            // Get or create indicators table
+            let indicatorsTable = document.getElementById('indicatorsTable');
+            if (!indicatorsTable) {
+                // Create table if it doesn't exist
+                const indicatorsCard = document.createElement('div');
+                indicatorsCard.className = 'card mb-4';
+                indicatorsCard.innerHTML = `
+                    <div class="card-header">Technical Indicators</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover" id="indicatorsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Indicator</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="indicatorsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert after market overview card
+                const marketCard = document.querySelector('.card.mb-4');
+                if (marketCard) {
+                    marketCard.parentNode.insertBefore(indicatorsCard, marketCard.nextSibling);
+                }
+                
+                indicatorsTable = document.getElementById('indicatorsTable');
+            }
+            
+            // Get table body
+            const tableBody = document.getElementById('indicatorsTableBody');
+            if (!tableBody) return;
+            
+            // Clear previous rows
+            tableBody.innerHTML = '';
+            
+            // Add rows for each indicator
+            for (const [indicator, value] of Object.entries(indicators)) {
+                if (value === null || value === undefined) continue;
+                
+                const row = document.createElement('tr');
+                
+                // Format value based on type
+                let formattedValue = value;
+                if (typeof value === 'number') {
+                    formattedValue = value.toFixed(6);
+                    
+                    // Add color for certain indicators
+                    if (indicator.includes('MACD') || 
+                        indicator.includes('RSI') || 
+                        indicator.includes('CCI') ||
+                        indicator.includes('STOCH')) {
+                        const isPositive = value > 0;
+                        row.className = isPositive ? 'positive' : 'negative';
                     }
-
-                    // Update price chart
-                    updatePriceChart(data.candles);
-
-                    // Update ticker info
-                    if (data.ticker) {
-                        const ticker = data.ticker;
-                        const changeClass = ticker.change >= 0 ? 'positive' : 'negative';
-                        const changeSign = ticker.change >= 0 ? '+' : '';
-
-                        // You can add UI elements to display this data
-                        // Example: document.getElementById('currentPrice').textContent = ticker.last.toFixed(2);
-                        // Example: document.getElementById('priceChange').textContent = `${changeSign}${ticker.change.toFixed(2)}%`;
-                        // Example: document.getElementById('priceChange').className = changeClass;
+                }
+                
+                row.innerHTML = `
+                    <td>${indicator}</td>
+                    <td>${formattedValue}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Update last update time display
+        function updateLastUpdateDisplay() {
+            if (!lastUpdateTime) return;
+            
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            if (lastUpdateEl) {
+                lastUpdateEl.textContent = formatTimestamp(lastUpdateTime);
+            }
+        }
+        
+        // Update strategy analysis display
+        function updateStrategyDisplay(data) {
+            if (!data) return;
+            
+            // Update strategy name
+            const strategyEl = document.getElementById('strategy');
+            if (strategyEl) {
+                strategyEl.textContent = data.strategy;
+            }
+            
+            // Add signal display if it doesn't exist
+            let signalEl = document.getElementById('signalDisplay');
+            if (!signalEl) {
+                const signalCard = document.createElement('div');
+                signalCard.className = 'card mb-4';
+                signalCard.innerHTML = `
+                    <div class="card-header">Strategy Signal</div>
+                    <div class="card-body" id="signalDisplay">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="small text-muted">Signal Direction</div>
+                                <div class="fs-5 fw-bold" id="signalDirection">None</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="small text-muted">Signal Strength</div>
+                                <div class="fs-5 fw-bold" id="signalStrength">0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="small text-muted">Timestamp</div>
+                                <div class="fs-5 fw-bold" id="signalTimestamp">-</div>
+                            </div>
+                        </div>
+                        <div class="mt-3" id="signalParameters"></div>
+                    </div>
+                `;
+                
+                // Insert after indicators table
+                const indicatorsCard = document.getElementById('indicatorsTable');
+                if (indicatorsCard) {
+                    const parentCard = indicatorsCard.closest('.card');
+                    if (parentCard) {
+                        parentCard.parentNode.insertBefore(signalCard, parentCard.nextSibling);
                     }
-
-                    // Update last update time
-                    lastUpdateTime = data.last_update;
-                })
-                .catch(error => console.error('Error fetching market data:', error));
+                }
+                
+                signalEl = document.getElementById('signalDisplay');
+            }
+            
+            // Update signal direction
+            const directionEl = document.getElementById('signalDirection');
+            if (directionEl) {
+                let directionText = data.direction;
+                let directionClass = '';
+                
+                if (data.direction === 'long') {
+                    directionText = 'BUY (Long)';
+                    directionClass = 'positive';
+                } else if (data.direction === 'short') {
+                    directionText = 'SELL (Short)';
+                    directionClass = 'negative';
+                } else {
+                    directionText = 'NEUTRAL';
+                }
+                
+                directionEl.textContent = directionText;
+                directionEl.className = `fs-5 fw-bold ${directionClass}`;
+            }
+            
+            // Update signal strength
+            const strengthEl = document.getElementById('signalStrength');
+            if (strengthEl) {
+                strengthEl.textContent = data.signal_strength.toFixed(2);
+            }
+            
+            // Update timestamp
+            const timestampEl = document.getElementById('signalTimestamp');
+            if (timestampEl) {
+                timestampEl.textContent = formatTimestamp(data.timestamp);
+            }
+            
+            // Update parameters
+            const parametersEl = document.getElementById('signalParameters');
+            if (parametersEl && data.parameters) {
+                let paramHTML = '<div class="small text-muted mt-2">Parameters</div><div class="row">';
+                
+                for (const [param, value] of Object.entries(data.parameters)) {
+                    if (typeof value === 'object') continue;
+                    paramHTML += `
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="small text-muted">${param}</div>
+                            <div>${value}</div>
+                        </div>
+                    `;
+                }
+                
+                paramHTML += '</div>';
+                parametersEl.innerHTML = paramHTML;
+            }
         }
 
         // Update price chart with new data
@@ -527,8 +770,10 @@
 
         // Handle form submissions
         document.addEventListener('DOMContentLoaded', function() {
-            // Fetch initial data
-            fetchMarketData();
+            // Initialize WebSocket connection
+            connectWebSocket();
+            
+            // Fetch performance data (not via socket yet)
             fetchPerformanceData();
 
             // Set up periodic refresh
@@ -594,6 +839,28 @@
                 timeframeSelector.addEventListener('change', function() {
                     document.getElementById('timeframe').value = this.value;
                     fetchMarketData();
+                });
+            }
+            
+            // Handle run strategy button
+            const runStrategyBtn = document.getElementById('runStrategyBtn');
+            if (runStrategyBtn) {
+                runStrategyBtn.addEventListener('click', function() {
+                    const symbol = document.getElementById('symbolSelector').value;
+                    const timeframe = document.getElementById('timeframeSelector').value;
+                    const strategy = document.getElementById('strategy').textContent.trim();
+                    
+                    if (!socket || !socket.connected) {
+                        console.error('WebSocket not connected');
+                        return;
+                    }
+                    
+                    // Request strategy analysis via WebSocket
+                    socket.emit('run_strategy', {
+                        symbol: symbol,
+                        timeframe: timeframe,
+                        strategy: strategy
+                    });
                 });
             }
         });
