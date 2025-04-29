@@ -48,8 +48,14 @@ app.config["DATA_PATH"] = os.environ.get("DATA_PATH", "data")
 # Initialize the app with extensions
 db.init_app(app)
 
-# Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*")
+# Initialize SocketIO with async mode that's compatible with the environment
+# Note: We don't specify async_mode, letting Flask-SocketIO choose the best available
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="*",
+    logger=True,  # Enable logging
+    engineio_logger=True  # Show detailed connection logs
+)
 
 # Register error handlers
 @app.errorhandler(404)

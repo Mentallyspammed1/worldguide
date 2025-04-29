@@ -404,7 +404,20 @@
         
         // Connect to Socket.IO server
         function connectWebSocket() {
-            socket = io();
+            // Close existing connection if any
+            if (socket) {
+                socket.close();
+            }
+            
+            // Create Socket.IO instance with explicit URL and reconnection settings
+            const socketURL = window.location.protocol + '//' + window.location.host;
+            console.log('Connecting to WebSocket at:', socketURL);
+            socket = io(socketURL, {
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                timeout: 5000
+            });
             
             // Connection events
             socket.on('connect', () => {
@@ -414,6 +427,18 @@
             
             socket.on('disconnect', () => {
                 console.log('WebSocket disconnected');
+                
+                // Attempt to reconnect after delay if not already reconnecting
+                setTimeout(() => {
+                    if (!socket.connected) {
+                        console.log('Attempting to reconnect...');
+                        connectWebSocket();
+                    }
+                }, 3000);
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.error('WebSocket connection error:', error);
             });
             
             // Market data event handler
