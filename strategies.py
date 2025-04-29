@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Optional, Union, Any
 
-from indicators import calculate_supertrend_signal
+from indicators import calculate_supertrend_signal, calculate_signal
 
 # Configure logger
 logger = logging.getLogger("strategies")

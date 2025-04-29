@@ -22,12 +22,7 @@ import numpy as np
 import pandas as pd
 
 from indicators import calculate_indicators, calculate_signal
-from strategies import (
-    calculate_ehlers_supertrend_strategy,
-    calculate_momentum_divergence_strategy,
-    calculate_multi_timeframe_trend_strategy,
-    calculate_support_resistance_breakout_strategy
-)
+from strategies import calculate_ehlers_supertrend_strategy
 from risk_management import (
     calculate_position_size,
     calculate_dynamic_stop_loss,
@@ -650,29 +645,36 @@ class TradingBot:
                 self.candles_df,
                 self.config.get("strategy", {}).get("ehlers_supertrend", {})
             )
-        elif strategy == "momentum_divergence":
-            return calculate_momentum_divergence_strategy(
-                self.candles_df,
-                self.higher_timeframe_df,
-                self.config.get("strategy", {}).get("momentum_divergence", {})
+        elif strategy == "supertrend":
+            from indicators import calculate_supertrend_signal
+            return calculate_supertrend_signal(
+                self.candles_df, 
+                self.config.get("strategy", {})
             )
-        elif strategy == "multi_timeframe_trend":
-            return calculate_multi_timeframe_trend_strategy(
+        elif strategy == "macd_crossover":
+            from indicators import calculate_macd_crossover_signal
+            return calculate_macd_crossover_signal(
                 self.candles_df,
-                self.higher_timeframe_df,
-                self.config.get("strategy", {}).get("multi_timeframe_trend", {})
+                self.config.get("strategy", {})
             )
-        elif strategy == "support_resistance_breakout":
-            return calculate_support_resistance_breakout_strategy(
+        elif strategy == "rsi_divergence":
+            from indicators import calculate_rsi_divergence_signal
+            return calculate_rsi_divergence_signal(
                 self.candles_df,
-                self.higher_timeframe_df,
-                self.config.get("strategy", {}).get("support_resistance_breakout", {})
+                self.config.get("strategy", {})
+            )
+        elif strategy == "simple_crossover":
+            from indicators import calculate_simple_crossover_signal
+            return calculate_simple_crossover_signal(
+                self.candles_df,
+                self.config.get("strategy", {})
             )
         else:
-            self.logger.warning(f"Unknown strategy: {strategy}, defaulting to ehlers_supertrend")
-            return calculate_ehlers_supertrend_strategy(
+            self.logger.warning(f"Unknown strategy: {strategy}, defaulting to supertrend")
+            from indicators import calculate_supertrend_signal
+            return calculate_supertrend_signal(
                 self.candles_df,
-                self.config.get("strategy", {}).get("ehlers_supertrend", {})
+                self.config.get("strategy", {})
             )
 
     def calculate_risk_parameters(self, direction: str, signal_params: Dict) -> Dict:

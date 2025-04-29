@@ -3,258 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Bot Dashboard</title>
+    <title>Pyrmethus Trading Bot | Dashboard</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #9d00ff;
-            --neon-pink: #ff00e4;
-            --neon-green: #00ff9d;
-            --dark-bg: #0f1222;
-            --darker-bg: #080b17;
-            --card-bg: #161b30;
-            --text-primary: #e0e0e0;
-            --text-secondary: #a0a0a0;
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --text-color: #ecf0f1;
+            --bg-dark: #121212;
+            --bg-medium: #1e1e1e;
+            --bg-light: #2d2d2d;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-primary);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(157, 0, 255, 0.05) 0%, transparent 20%);
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
         }
         
-        .header-icon {
-            color: var(--neon-blue);
-            margin-right: 10px;
-            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.5));
+        .navbar {
+            background-color: var(--bg-medium);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
         
         .card {
+            background-color: var(--bg-light);
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-            background-color: var(--card-bg);
-            border: 1px solid rgba(0, 243, 255, 0.1);
-            border-radius: 10px;
         }
         
         .card-header {
+            background-color: var(--bg-medium);
+            color: var(--text-color);
             font-weight: 600;
-            background-color: rgba(0, 243, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-            color: var(--text-primary);
-        }
-        
-        .card-body {
-            background-color: var(--card-bg);
-        }
-        
-        .stat-card {
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, var(--card-bg), rgba(22, 27, 48, 0.8));
-            border: 1px solid rgba(0, 243, 255, 0.1);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 10px 0;
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .positive {
-            color: var(--neon-green);
-            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+            color: var(--success-color);
         }
         
         .negative {
-            color: var(--neon-pink);
-            text-shadow: 0 0 10px rgba(255, 0, 228, 0.3);
-        }
-        
-        .neutral {
-            color: var(--text-secondary);
-        }
-        
-        .trades-table {
-            font-size: 0.875rem;
-            color: var(--text-primary);
+            color: var(--danger-color);
         }
         
         .table {
-            color: var(--text-primary);
-            border-color: rgba(0, 243, 255, 0.1);
-        }
-        
-        .table thead th {
-            border-bottom: 2px solid rgba(0, 243, 255, 0.2);
-            color: var(--neon-blue);
+            color: var(--text-color);
         }
         
         .table-dark {
-            background-color: var(--card-bg);
+            background-color: var(--bg-light);
         }
         
         .config-form label {
-            font-weight: 600;
-            margin-top: 10px;
-            color: var(--neon-blue);
+            color: var(--text-color);
+            font-weight: 500;
         }
         
         .config-section {
-            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            margin-bottom: 20px;
             padding-bottom: 15px;
-            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .form-control, .form-select {
-            background-color: var(--darker-bg);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            color: var(--text-primary);
+        .config-section:last-child {
+            border-bottom: none;
         }
         
-        .form-control:focus, .form-select:focus {
-            background-color: var(--darker-bg);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 0.25rem rgba(0, 243, 255, 0.25);
-            color: var(--text-primary);
+        #priceChart, #performanceChart {
+            min-height: 250px;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border: none;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
-        }
-        
-        .btn-outline-secondary {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-        }
-        
-        .btn-outline-secondary:hover {
-            background-color: rgba(0, 243, 255, 0.1);
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-        }
-        
+        /* Badge styles */
         .badge.bg-success {
-            background: linear-gradient(to right, var(--neon-green), var(--neon-blue)) !important;
+            background-color: var(--success-color) !important;
         }
         
-        .text-muted {
-            color: var(--text-secondary) !important;
-        }
-        
-        /* Chart styling */
-        canvas {
-            border-radius: 10px;
-            background-color: var(--darker-bg);
-            border: 1px solid rgba(0, 243, 255, 0.1);
+        .badge.bg-danger {
+            background-color: var(--danger-color) !important;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid py-4">
-        <header class="pb-3 mb-4 border-bottom">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity header-icon">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
-                    <h1 class="fs-4 mb-0">Trading Bot Dashboard</h1>
-                </div>
-                <a href="/" class="btn btn-outline-secondary btn-sm">Back to Home</a>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Pyrmethus</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts">Accounts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/strategies">Strategies</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-link">Last Update: <span id="lastUpdate">{{ last_update }}</span></span>
+                    </li>
+                </ul>
             </div>
-        </header>
+        </div>
+    </nav>
 
+    <!-- Main Content -->
+    <div class="container">
         <div class="row">
             <!-- Left Column (70%) -->
             <div class="col-lg-8">
-                <!-- Status Card -->
+                <!-- Market Overview Card -->
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Bot Status</span>
+                        <span>Market Overview: {{ config.symbol }}</span>
                         <div>
-                            <span class="badge bg-success">Running</span>
-                            <small class="text-muted ms-2">Last update: {{ last_update }}</small>
+                            <select id="symbolSelector" class="form-select form-select-sm d-inline-block w-auto">
+                                {% for symbol in state.symbols %}
+                                <option value="{{ symbol }}" {% if symbol == config.symbol %}selected{% endif %}>{{ symbol }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="timeframeSelector" class="form-select form-select-sm d-inline-block w-auto ms-2">
+                                <option value="1m" {% if config.timeframe == '1m' %}selected{% endif %}>1m</option>
+                                <option value="5m" {% if config.timeframe == '5m' %}selected{% endif %}>5m</option>
+                                <option value="15m" {% if config.timeframe == '15m' %}selected{% endif %}>15m</option>
+                                <option value="1h" {% if config.timeframe == '1h' %}selected{% endif %}>1h</option>
+                                <option value="4h" {% if config.timeframe == '4h' %}selected{% endif %}>4h</option>
+                                <option value="1d" {% if config.timeframe == '1d' %}selected{% endif %}>1d</option>
+                            </select>
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="card stat-card bg-light">
-                                    <div class="card-body text-center">
-                                        <div class="text-muted small">Current Positions</div>
-                                        <div class="stat-value">{{ state.positions|length }}</div>
-                                    </div>
-                                </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3 col-6">
+                                <div class="small text-muted">Last Price</div>
+                                <div class="fs-5 fw-bold" id="lastPrice">0.00</div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card stat-card bg-light">
-                                    <div class="card-body text-center">
-                                        <div class="text-muted small">Open Orders</div>
-                                        <div class="stat-value">{{ state.orders|length }}</div>
-                                    </div>
-                                </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small text-muted">24h Change</div>
+                                <div class="fs-5 fw-bold" id="priceChange">0.00%</div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card stat-card bg-light">
-                                    <div class="card-body text-center">
-                                        <div class="text-muted small">Exchange</div>
-                                        <div class="stat-value">
-                                            <span class="text-primary">{{ config.exchange|upper }}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small text-muted">24h Volume</div>
+                                <div class="fs-5 fw-bold" id="volume">0.00</div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card stat-card bg-light">
-                                    <div class="card-body text-center">
-                                        <div class="text-muted small">Symbol</div>
-                                        <div class="stat-value">
-                                            <span class="text-primary">{{ config.symbol.split('/')[0] }}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small text-muted">Strategy</div>
+                                <div class="fs-5 fw-bold" id="strategy">{{ config.strategy.active }}</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Chart Card -->
-                <div class="card mb-4">
-                    <div class="card-header">Price Chart</div>
-                    <div class="card-body">
                         <canvas id="priceChart" height="300"></canvas>
                     </div>
                 </div>
-
-                <!-- Positions Card -->
+                
+                <!-- Open Positions Card -->
                 <div class="card mb-4">
-                    <div class="card-header">Current Positions</div>
+                    <div class="card-header">Open Positions</div>
                     <div class="card-body">
                         {% if state.positions %}
                         <div class="table-responsive">
-                            <table class="table table-dark table-striped table-hover">
+                            <table class="table table-dark table-hover">
                                 <thead>
                                     <tr>
                                         <th>Symbol</th>
@@ -262,14 +187,14 @@
                                         <th>Size</th>
                                         <th>Entry Price</th>
                                         <th>Current Price</th>
-                                        <th>PNL</th>
+                                        <th>Unrealized PnL</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for symbol, position in state.positions.items() %}
                                     <tr>
-                                        <td>{{ symbol }}</td>
+                                        <td>{{ position.symbol }}</td>
                                         <td>
                                             {% if position.side == 'long' %}
                                             <span class="badge bg-success">Long</span>
@@ -277,14 +202,12 @@
                                             <span class="badge bg-danger">Short</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ position.size }}</td>
-                                        <td>{{ "%.2f"|format(position.entry_price) }}</td>
-                                        <td>{{ "%.2f"|format(position.current_price) }}</td>
-                                        <td class="{{ 'positive' if position.pnl > 0 else 'negative' }}">
-                                            {{ "%.2f"|format(position.pnl) }}%
-                                        </td>
+                                        <td>{{ position.contracts }}</td>
+                                        <td>{{ "%.2f"|format(position.entryPrice) }}</td>
+                                        <td id="current-price-{{ position.symbol|replace('/', '-') }}">Loading...</td>
+                                        <td id="pnl-{{ position.symbol|replace('/', '-') }}">Loading...</td>
                                         <td>
-                                            <button class="btn btn-danger btn-sm">Close</button>
+                                            <button class="btn btn-sm btn-danger close-position" data-symbol="{{ position.symbol }}" data-side="{{ position.side }}">Close</button>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -296,14 +219,14 @@
                         {% endif %}
                     </div>
                 </div>
-
+                
                 <!-- Trade History Card -->
                 <div class="card">
                     <div class="card-header">Trade History</div>
                     <div class="card-body">
-                        {% if state.trades %}
+                        {% if trades and trades|length > 0 %}
                         <div class="table-responsive">
-                            <table class="table table-dark table-sm table-striped trades-table">
+                            <table class="table table-dark table-hover">
                                 <thead>
                                     <tr>
                                         <th>Time</th>
@@ -547,144 +470,124 @@
                             x: {
                                 type: 'time',
                                 time: {
-                                    unit: 'hour',
-                                    tooltipFormat: 'MMM dd, HH:mm'
+                                    unit: 'minute',
+                                    displayFormats: {
+                                        minute: 'HH:mm'
+                                    }
                                 },
                                 grid: {
                                     display: false
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
                                 }
                             },
                             y: {
-                                position: 'right',
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
                                 ticks: {
-                                    callback: function(value) {
-                                        return formatCurrency(value, 'USD');
-                                    }
+                                    color: 'rgba(255, 255, 255, 0.7)'
                                 }
                             }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
                         }
                     }
                 });
             }
         }
-
-        // Initialize performance chart with monthly data
-        function initializePerformanceChart() {
-            const performanceData = {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [
-                    {
-                        label: 'Monthly Return (%)',
-                        data: [3.2, -1.7, 5.1, 2.8, -0.9, 4.5],
-                        backgroundColor: (context) => {
-                            const value = context.dataset.data[context.dataIndex];
-                            return value >= 0 ? 'rgba(25, 135, 84, 0.5)' : 'rgba(220, 53, 69, 0.5)';
-                        },
-                        borderColor: (context) => {
-                            const value = context.dataset.data[context.dataIndex];
-                            return value >= 0 ? 'rgb(25, 135, 84)' : 'rgb(220, 53, 69)';
-                        },
-                        borderWidth: 1
-                    }
-                ]
-            };
-            
-            const perfCtx = document.getElementById('performanceChart').getContext('2d');
-            performanceChart = new Chart(perfCtx, {
-                type: 'bar',
-                data: performanceData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Initialize charts when the DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fetch initial market data
-            fetchMarketData();
-            
-            // Initialize performance chart
-            initializePerformanceChart();
-            
-            // Set up refresh interval (every 60 seconds)
-            setInterval(fetchMarketData, 60000);
-            
-            // Load performance stats
+        
+        // Fetch and update performance data
+        function fetchPerformanceData() {
             fetch('/api/performance')
                 .then(response => response.json())
                 .then(data => {
+                    // Update performance stats
                     document.getElementById('totalTrades').textContent = data.total_trades;
-                    document.getElementById('winRate').textContent = data.win_rate.toFixed(1) + '%';
+                    document.getElementById('winRate').textContent = data.win_rate.toFixed(2) + '%';
                     document.getElementById('totalPnl').textContent = data.total_pnl.toFixed(2) + '%';
                     document.getElementById('maxDrawdown').textContent = data.max_drawdown.toFixed(2) + '%';
+                    
+                    // Update performance chart
+                    // This would require trade history data with timestamps
                 })
                 .catch(error => console.error('Error fetching performance data:', error));
-
-            // Handle form submission
-            document.getElementById('configForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const config = {};
-                
-                // Process form data into nested config object
-                for (let [key, value] of formData.entries()) {
-                    const keys = key.split('.');
-                    let current = config;
+        }
+        
+        // Handle form submissions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch initial data
+            fetchMarketData();
+            fetchPerformanceData();
+            
+            // Set up periodic refresh
+            setInterval(fetchMarketData, 15000);  // Update market data every 15 seconds
+            setInterval(fetchPerformanceData, 60000);  // Update performance data every minute
+            
+            // Handle config form submission
+            const configForm = document.getElementById('configForm');
+            if (configForm) {
+                configForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
                     
-                    for (let i = 0; i < keys.length; i++) {
-                        const k = keys[i];
-                        if (i === keys.length - 1) {
-                            // Convert checkbox values to boolean
-                            if (value === 'on') {
-                                value = true;
-                            } else if (value === 'off') {
-                                value = false;
-                            }
-                            // Convert numeric values to numbers
-                            if (!isNaN(value) && value !== '') {
-                                value = Number(value);
-                            }
-                            current[k] = value;
+                    // Collect form data
+                    const formData = new FormData(configForm);
+                    const config = {};
+                    
+                    // Process nested form data into an object
+                    for (const [key, value] of formData.entries()) {
+                        if (key.includes('.')) {
+                            const [section, property] = key.split('.');
+                            if (!config[section]) config[section] = {};
+                            config[section][property] = value;
                         } else {
-                            current[k] = current[k] || {};
-                            current = current[k];
+                            config[key] = value;
                         }
                     }
-                }
-                
-                // Submit to API
-                fetch('/api/config', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(config)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert('Configuration saved successfully!');
-                    } else {
-                        alert('Error saving configuration: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error saving configuration. See console for details.');
+                    
+                    // Send to API
+                    fetch('/api/config', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(config)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Configuration saved successfully');
+                        } else {
+                            alert('Error saving configuration: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving configuration:', error);
+                        alert('Error saving configuration. See console for details.');
+                    });
                 });
-            });
+            }
+            
+            // Handle symbol and timeframe selectors
+            const symbolSelector = document.getElementById('symbolSelector');
+            const timeframeSelector = document.getElementById('timeframeSelector');
+            
+            if (symbolSelector) {
+                symbolSelector.addEventListener('change', function() {
+                    document.getElementById('symbol').value = this.value;
+                    fetchMarketData();
+                });
+            }
+            
+            if (timeframeSelector) {
+                timeframeSelector.addEventListener('change', function() {
+                    document.getElementById('timeframe').value = this.value;
+                    fetchMarketData();
+                });
+            }
         });
     </script>
 </body>
