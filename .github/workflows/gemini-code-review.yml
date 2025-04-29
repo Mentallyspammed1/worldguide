@@ -1,68 +1,14 @@
-# Workflow name
-name: Code Review with Gemini
-
-# Triggers: Run on pull requests targeting specific branches
-on:
-  pull_request:
-    types: [opened, synchronize, reopened] # Events that indicate new code or reopening
-    branches:
-      - main      # Target branch: main
-      - develop   # Target branch: develop
-      # Add any other primary branches you want reviews on
-
-# Permissions: Define the minimal permissions needed by the workflow
-permissions:
-  contents: read          # Required by actions/checkout to read repository code
-  pull-requests: write  # Required to post review comments on the PR
-
-jobs:
-  code_review:
-    name: Gemini Code Review
-    runs-on: ubuntu-latest # Use the latest stable Ubuntu runner
-
-    # Security: Prevent running on forks if secrets aren't explicitly shared/intended.
-    # This ensures your GEMINI_API_KEY is not exposed or used unintentionally by forks.
-    if: github.event.pull_request.head.repo.full_name == github.repository
-
-    steps:
-      # Step 1: Check out the code from the PR branch
-      - name: Checkout PR Code
-        uses: actions/checkout@v4 # Use specific major version tag
-        with:
-          # Checkout the actual commit SHA of the pull request's head branch
-          ref: ${{ github.event.pull_request.head.sha }}
-          # Fetch all history. Required for accurate diff generation,
-          # especially if comparing against the base branch.
-          fetch-depth: 0
-
-      # Step 2: Set up the Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v5 # Use specific major version tag
-        with:
-          python-version: '3.10' # Specify a consistent Python version
-
-      # Step 3: Install Python dependencies
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # Install required libraries for GitHub API interaction and Gemini API
-          pip install PyGithub google-generativeai
-
-      # Step 4: Execute the Python script for code review
-      - name: Run Gemini Code Review Script
-        # Environment variables passed to the Python script
-        env:
-          # GitHub token (automatically provided by Actions runner) for API auth
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Gemini API Key (must be configured as a Repository Secret)
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # Repository name (e.g., 'owner/repo')
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          # Pull Request number associated with the event
-          GITHUB_EVENT_NUMBER: ${{ github.event.number }}
-          # Workspace path (where the code is checked out) for finding local files like style guides
-          GITHUB_WORKSPACE: ${{ github.workspace }}
-        run: |
-          # Execute the Python script located in the specified path
-          python .github/workflows/scripts/gemini_review_code.py
-
+            - name: Gemini AI Reviewer
+  # You may pin to the exact commit or the version.
+  # uses: HoangNguyen0403/gemini-ai-code-reviewer@1b846939f85b7e8d7ebda26662bbb7554e44c22f
+  uses: HoangNguyen0403/gemini-ai-code-reviewer@v0.0.3
+  with:
+    # GitHub token to interact with the repository
+    GITHUB_TOKEN: 
+    # Google Gemini API key
+    GEMINI_API_KEY:AIzaSyCy9Lby7bwCsL2YV_TM75AxXiqa1IhcPZ4
+    # The Gemini model to use for code review
+    GEMINI_MODEL: gemini-2.5-pro-exp-03-25
+    # Comma-separated list of file patterns to exclude
+    INPUT_EXCLUDE: # optional, default is 
+          
