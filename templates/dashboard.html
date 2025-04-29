@@ -7,53 +7,168 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.min.css">
     <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #9d00ff;
+            --neon-pink: #ff00e4;
+            --neon-green: #00ff9d;
+            --dark-bg: #0f1222;
+            --darker-bg: #080b17;
+            --card-bg: #161b30;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(157, 0, 255, 0.05) 0%, transparent 20%);
         }
+        
         .header-icon {
-            color: #0d6efd;
+            color: var(--neon-blue);
             margin-right: 10px;
+            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.5));
         }
+        
         .card {
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            background-color: var(--card-bg);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            border-radius: 10px;
         }
+        
         .card-header {
             font-weight: 600;
-            background-color: rgba(13, 110, 253, 0.05);
+            background-color: rgba(0, 243, 255, 0.05);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            color: var(--text-primary);
         }
+        
+        .card-body {
+            background-color: var(--card-bg);
+        }
+        
         .stat-card {
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--card-bg), rgba(22, 27, 48, 0.8));
+            border: 1px solid rgba(0, 243, 255, 0.1);
         }
+        
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            border: 1px solid rgba(0, 243, 255, 0.3);
         }
+        
         .stat-value {
             font-size: 1.8rem;
             font-weight: 700;
             margin: 10px 0;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
         }
+        
         .positive {
-            color: #198754;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
         }
+        
         .negative {
-            color: #dc3545;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 0, 228, 0.3);
         }
+        
         .neutral {
-            color: #6c757d;
+            color: var(--text-secondary);
         }
+        
         .trades-table {
             font-size: 0.875rem;
+            color: var(--text-primary);
         }
+        
+        .table {
+            color: var(--text-primary);
+            border-color: rgba(0, 243, 255, 0.1);
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid rgba(0, 243, 255, 0.2);
+            color: var(--neon-blue);
+        }
+        
+        .table-dark {
+            background-color: var(--card-bg);
+        }
+        
         .config-form label {
             font-weight: 600;
             margin-top: 10px;
+            color: var(--neon-blue);
         }
+        
         .config-section {
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
             padding-bottom: 15px;
             margin-bottom: 15px;
+        }
+        
+        .form-control, .form-select {
+            background-color: var(--darker-bg);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: var(--darker-bg);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 243, 255, 0.25);
+            color: var(--text-primary);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+        }
+        
+        .btn-outline-secondary {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        
+        .badge.bg-success {
+            background: linear-gradient(to right, var(--neon-green), var(--neon-blue)) !important;
+        }
+        
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+        
+        /* Chart styling */
+        canvas {
+            border-radius: 10px;
+            background-color: var(--darker-bg);
+            border: 1px solid rgba(0, 243, 255, 0.1);
         }
     </style>
 </head>
@@ -139,7 +254,7 @@
                     <div class="card-body">
                         {% if state.positions %}
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-dark table-striped table-hover">
                                 <thead>
                                     <tr>
                                         <th>Symbol</th>
@@ -188,7 +303,7 @@
                     <div class="card-body">
                         {% if state.trades %}
                         <div class="table-responsive">
-                            <table class="table table-sm table-striped trades-table">
+                            <table class="table table-dark table-sm table-striped trades-table">
                                 <thead>
                                     <tr>
                                         <th>Time</th>
@@ -405,8 +520,8 @@
                         datasets: [{
                             label: 'Price',
                             data: prices,
-                            borderColor: '#0d6efd',
-                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            borderColor: 'rgba(0, 243, 255, 1)',
+                            backgroundColor: 'rgba(0, 243, 255, 0.1)',
                             tension: 0.1,
                             pointRadius: 0,
                             borderWidth: 2,

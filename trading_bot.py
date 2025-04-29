@@ -461,12 +461,13 @@ class TradingBot:
         
         return float(tp_price)
 
-    def execute_entry(self, side: str) -> Dict:
+    def execute_entry(self, side: str, trade_params: Dict = None) -> Dict:
         """
         Execute an entry order for the given side.
         
         Args:
             side: Order side ('buy' for long, 'sell' for short)
+            trade_params: Additional trade parameters including order type, price, etc.
             
         Returns:
             Dict: Order result information
