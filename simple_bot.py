@@ -11,6 +11,10 @@ from typing import Dict, List, Optional, Any, Union, TypedDict
 
 import pandas as pd
 import numpy as np
+import json
+import os
+
+from indicators import calculate_indicators
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +128,16 @@ class TradingBot:
             })
         
         # Create DataFrame with timestamps as index
-        return pd.DataFrame(price_data, index=timestamps)
+        df = pd.DataFrame(price_data, index=timestamps)
+        
+        # Calculate indicators
+        try:
+            df = calculate_indicators(df, self.config)
+            self.logger.info("Mock candles generated with indicators")
+        except Exception as e:
+            self.logger.error(f"Error calculating indicators for mock candles: {e}")
+            
+        return df
         
     def load_config(self) -> Dict:
         """Load configuration from file (mock implementation)"""
@@ -324,7 +337,10 @@ class TradingBot:
                 
                 # Update candles
                 self.candles_df = df
-                self.logger.info(f"Updated candles for {self.symbol} ({self.timeframe})")
+                
+                # Calculate indicators
+                self.candles_df = calculate_indicators(self.candles_df, self.config)
+                self.logger.info(f"Updated candles with indicators for {self.symbol} ({self.timeframe})")
                 
                 return self.candles_df
             except Exception as e:
