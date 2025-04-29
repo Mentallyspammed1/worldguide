@@ -476,3 +476,257 @@ TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
 2025-04-24 00:39:18.387 DEBUG    [pyrmethus_bot_BCH_USDT:3619] Executing trade action 'HOLD' for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
 2025-04-24 00:39:18.387 INFO     [pyrmethus_bot_BCH_USDT:3738] Holding position or waiting for signal for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
 2025-04-24 00:39:18.388 INFO     [pyrmethus_bot_BCH_USDT:3473] --- Finished Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:34:55.027 INFO     [pyrmethus_bot_BCH_USDT:3776] Validating pair: BCH/USDT...
+2025-04-28 17:34:55.028 DEBUG    [pyrmethus_bot_BCH_USDT:1422] Retrieving market details for symbol: BCH/USDT...
+2025-04-28 17:34:55.028 DEBUG    [pyrmethus_bot_BCH_USDT:1454] Raw market data found for BCH/USDT. Parsing and standardizing...
+2025-04-28 17:34:55.028 DEBUG    [pyrmethus_bot_BCH_USDT:1532] Market Details Parsed (BCH/USDT): Type=Spot, Active=True
+  Precision (Amount/Price Step): 0.001 / 0.1
+  Limits    (Amount Min/Max) : 0.003 / 7707.1291
+  Limits    (Cost Min/Max)   : 5 / 2E+6
+  Contract Size: 1
+2025-04-28 17:34:55.029 INFO     [pyrmethus_bot_BCH_USDT:3780]  -> [92mBCH/USDT is valid and active on bybit.[0m
+2025-04-28 17:34:55.029 INFO     [pyrmethus_bot_BCH_USDT:3110] Strategy Engine initialized for BCH/USDT with min data length ~1000
+2025-04-28 17:34:55.029 DEBUG    [pyrmethus_bot_BCH_USDT:3111]   Params: VT Len=40, ATR Period=200, Vol EMA=950, ATR Mult=3.0, OB Src=Wicks, Pivots L/R=(10/10, 10/10), Extend=True, Max Boxes=50
+2025-04-28 17:34:55.030 INFO     [pyrmethus_bot_BCH_USDT:3256] Signal Generator initialized for BCH/USDT
+2025-04-28 17:34:55.030 DEBUG    [pyrmethus_bot_BCH_USDT:3257]   Params: Entry Prox=1.005, Exit Prox=1.001, SL Mult=1.8, TP Mult=0.7
+2025-04-28 17:34:55.030 INFO     [pyrmethus_bot_BCH_USDT:3788]  -> Strategy and Signal Generator initialized for BCH/USDT.
+2025-04-28 17:34:55.031 INFO     [pyrmethus_bot_BCH_USDT:3401] --- Starting Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:34:55.031 INFO     [pyrmethus_bot_BCH_USDT:1103] [36m# Fetching klines for BCH/USDT | Timeframe: 5m | Target Limit: 1000...[0m
+2025-04-28 17:34:55.032 DEBUG    [pyrmethus_bot_BCH_USDT:1122] Estimated minimum candles required by strategy: ~1000
+2025-04-28 17:34:55.032 DEBUG    [pyrmethus_bot_BCH_USDT:1139] Using API parameters: category='spot', market ID='BCHUSDT'.
+2025-04-28 17:34:55.032 DEBUG    [pyrmethus_bot_BCH_USDT:1156] Fetching kline chunk 1/3 (1000 candles) for BCH/USDT. Ending before TS: Latest
+2025-04-28 17:34:55.032 DEBUG    [pyrmethus_bot_BCH_USDT:1178] Calling fetch_ohlcv with args: {'symbol': 'BCH/USDT', 'timeframe': '5m', 'limit': 1000, 'params': {'category': 'spot'}}
+2025-04-28 17:34:55.519 DEBUG    [pyrmethus_bot_BCH_USDT:1181] API returned 1000 candles for chunk 1.
+2025-04-28 17:34:55.520 DEBUG    [pyrmethus_bot_BCH_USDT:1205] Lag check passed (BCH/USDT): Last candle 295.5s old (within limit).
+2025-04-28 17:34:55.521 INFO     [pyrmethus_bot_BCH_USDT:1312] Total raw klines fetched: 1000
+2025-04-28 17:34:55.523 DEBUG    [pyrmethus_bot_BCH_USDT:1340] Processing 1000 final unique candles into DataFrame for BCH/USDT...
+2025-04-28 17:34:55.596 INFO     [pyrmethus_bot_BCH_USDT:1400] [92mSuccessfully processed 1000 klines for BCH/USDT 5m.[0m
+2025-04-28 17:34:55.597 DEBUG    [pyrmethus_bot_BCH_USDT:3147] Running strategy update for BCH/USDT with DataFrame length 1000
+2025-04-28 17:34:55.618 DEBUG    [pyrmethus_bot_BCH_USDT:3123] Placeholder _ema_swma called for length 950
+2025-04-28 17:34:55.624 ERROR    [pyrmethus_bot_BCH_USDT:3205] Error during strategy calculation for BCH/USDT: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 218, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 242, in evaluate
+    return _evaluate(op, op_str, a, b)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 73, in _evaluate_standard
+    return op(a, b)
+           ^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/xx1.0.2.py", line 3173, in update
+    df_analysis['vt_upper'] = mid_band + df_analysis['atr'] * self.vt_atr_mult
+                              ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/common.py", line 76, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/arraylike.py", line 186, in __add__
+    return self._arith_method(other, operator.add)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/series.py", line 6135, in _arith_method
+    return base.IndexOpsMixin._arith_method(self, other, op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/base.py", line 1382, in _arith_method
+    result = ops.arithmetic_op(lvalues, rvalues, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 283, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 227, in _na_arithmetic_op
+    result = _masked_arith_op(left, right, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 163, in _masked_arith_op
+    result[mask] = op(xrav[mask], yrav[mask])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+2025-04-28 17:34:55.649 DEBUG    [pyrmethus_bot_BCH_USDT:1761] Position check skipped for BCH/USDT: It is a 'Spot' market, not a contract.
+2025-04-28 17:34:55.650 DEBUG    [pyrmethus_bot_BCH_USDT:3325] Generating signal for BCH/USDT...
+2025-04-28 17:34:55.650 INFO     [pyrmethus_bot_BCH_USDT:3371] Signal for BCH/USDT: [1mHOLD[0m (Placeholder: Trend unclear or missing data for entry.)
+2025-04-28 17:34:55.650 DEBUG    [pyrmethus_bot_BCH_USDT:3599] Executing trade action 'HOLD' for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:34:55.650 INFO     [pyrmethus_bot_BCH_USDT:3717] Holding position or waiting for signal for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:34:55.650 INFO     [pyrmethus_bot_BCH_USDT:3458] --- Finished Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:35:05.036 INFO     [pyrmethus_bot_BCH_USDT:3401] --- Starting Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:35:05.036 INFO     [pyrmethus_bot_BCH_USDT:1103] [36m# Fetching klines for BCH/USDT | Timeframe: 5m | Target Limit: 1000...[0m
+2025-04-28 17:35:05.037 DEBUG    [pyrmethus_bot_BCH_USDT:1122] Estimated minimum candles required by strategy: ~1000
+2025-04-28 17:35:05.037 DEBUG    [pyrmethus_bot_BCH_USDT:1139] Using API parameters: category='spot', market ID='BCHUSDT'.
+2025-04-28 17:35:05.037 DEBUG    [pyrmethus_bot_BCH_USDT:1156] Fetching kline chunk 1/3 (1000 candles) for BCH/USDT. Ending before TS: Latest
+2025-04-28 17:35:05.037 DEBUG    [pyrmethus_bot_BCH_USDT:1178] Calling fetch_ohlcv with args: {'symbol': 'BCH/USDT', 'timeframe': '5m', 'limit': 1000, 'params': {'category': 'spot'}}
+2025-04-28 17:35:05.503 DEBUG    [pyrmethus_bot_BCH_USDT:1181] API returned 1000 candles for chunk 1.
+2025-04-28 17:35:05.504 DEBUG    [pyrmethus_bot_BCH_USDT:1205] Lag check passed (BCH/USDT): Last candle 5.5s old (within limit).
+2025-04-28 17:35:05.505 INFO     [pyrmethus_bot_BCH_USDT:1312] Total raw klines fetched: 1000
+2025-04-28 17:35:05.506 DEBUG    [pyrmethus_bot_BCH_USDT:1340] Processing 1000 final unique candles into DataFrame for BCH/USDT...
+2025-04-28 17:35:05.577 INFO     [pyrmethus_bot_BCH_USDT:1400] [92mSuccessfully processed 1000 klines for BCH/USDT 5m.[0m
+2025-04-28 17:35:05.578 DEBUG    [pyrmethus_bot_BCH_USDT:3147] Running strategy update for BCH/USDT with DataFrame length 1000
+2025-04-28 17:35:05.597 DEBUG    [pyrmethus_bot_BCH_USDT:3123] Placeholder _ema_swma called for length 950
+2025-04-28 17:35:05.603 ERROR    [pyrmethus_bot_BCH_USDT:3205] Error during strategy calculation for BCH/USDT: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 218, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 242, in evaluate
+    return _evaluate(op, op_str, a, b)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 73, in _evaluate_standard
+    return op(a, b)
+           ^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/xx1.0.2.py", line 3173, in update
+    df_analysis['vt_upper'] = mid_band + df_analysis['atr'] * self.vt_atr_mult
+                              ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/common.py", line 76, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/arraylike.py", line 186, in __add__
+    return self._arith_method(other, operator.add)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/series.py", line 6135, in _arith_method
+    return base.IndexOpsMixin._arith_method(self, other, op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/base.py", line 1382, in _arith_method
+    result = ops.arithmetic_op(lvalues, rvalues, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 283, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 227, in _na_arithmetic_op
+    result = _masked_arith_op(left, right, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 163, in _masked_arith_op
+    result[mask] = op(xrav[mask], yrav[mask])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+2025-04-28 17:35:05.608 DEBUG    [pyrmethus_bot_BCH_USDT:1761] Position check skipped for BCH/USDT: It is a 'Spot' market, not a contract.
+2025-04-28 17:35:05.609 DEBUG    [pyrmethus_bot_BCH_USDT:3325] Generating signal for BCH/USDT...
+2025-04-28 17:35:05.609 INFO     [pyrmethus_bot_BCH_USDT:3371] Signal for BCH/USDT: [1mHOLD[0m (Placeholder: Trend unclear or missing data for entry.)
+2025-04-28 17:35:05.609 DEBUG    [pyrmethus_bot_BCH_USDT:3599] Executing trade action 'HOLD' for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:35:05.609 INFO     [pyrmethus_bot_BCH_USDT:3717] Holding position or waiting for signal for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:35:05.610 INFO     [pyrmethus_bot_BCH_USDT:3458] --- Finished Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:35:15.065 INFO     [pyrmethus_bot_BCH_USDT:3401] --- Starting Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:35:15.067 INFO     [pyrmethus_bot_BCH_USDT:1103] [36m# Fetching klines for BCH/USDT | Timeframe: 5m | Target Limit: 1000...[0m
+2025-04-28 17:35:15.068 DEBUG    [pyrmethus_bot_BCH_USDT:1122] Estimated minimum candles required by strategy: ~1000
+2025-04-28 17:35:15.068 DEBUG    [pyrmethus_bot_BCH_USDT:1139] Using API parameters: category='spot', market ID='BCHUSDT'.
+2025-04-28 17:35:15.069 DEBUG    [pyrmethus_bot_BCH_USDT:1156] Fetching kline chunk 1/3 (1000 candles) for BCH/USDT. Ending before TS: Latest
+2025-04-28 17:35:15.070 DEBUG    [pyrmethus_bot_BCH_USDT:1178] Calling fetch_ohlcv with args: {'symbol': 'BCH/USDT', 'timeframe': '5m', 'limit': 1000, 'params': {'category': 'spot'}}
+2025-04-28 17:35:15.718 DEBUG    [pyrmethus_bot_BCH_USDT:1181] API returned 1000 candles for chunk 1.
+2025-04-28 17:35:15.736 DEBUG    [pyrmethus_bot_BCH_USDT:1205] Lag check passed (BCH/USDT): Last candle 15.7s old (within limit).
+2025-04-28 17:35:15.736 INFO     [pyrmethus_bot_BCH_USDT:1312] Total raw klines fetched: 1000
+2025-04-28 17:35:15.738 DEBUG    [pyrmethus_bot_BCH_USDT:1340] Processing 1000 final unique candles into DataFrame for BCH/USDT...
+2025-04-28 17:35:15.827 INFO     [pyrmethus_bot_BCH_USDT:1400] [92mSuccessfully processed 1000 klines for BCH/USDT 5m.[0m
+2025-04-28 17:35:15.829 DEBUG    [pyrmethus_bot_BCH_USDT:3147] Running strategy update for BCH/USDT with DataFrame length 1000
+2025-04-28 17:35:15.854 DEBUG    [pyrmethus_bot_BCH_USDT:3123] Placeholder _ema_swma called for length 950
+2025-04-28 17:35:15.861 ERROR    [pyrmethus_bot_BCH_USDT:3205] Error during strategy calculation for BCH/USDT: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 218, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 242, in evaluate
+    return _evaluate(op, op_str, a, b)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 73, in _evaluate_standard
+    return op(a, b)
+           ^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/xx1.0.2.py", line 3173, in update
+    df_analysis['vt_upper'] = mid_band + df_analysis['atr'] * self.vt_atr_mult
+                              ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/common.py", line 76, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/arraylike.py", line 186, in __add__
+    return self._arith_method(other, operator.add)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/series.py", line 6135, in _arith_method
+    return base.IndexOpsMixin._arith_method(self, other, op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/base.py", line 1382, in _arith_method
+    result = ops.arithmetic_op(lvalues, rvalues, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 283, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 227, in _na_arithmetic_op
+    result = _masked_arith_op(left, right, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 163, in _masked_arith_op
+    result[mask] = op(xrav[mask], yrav[mask])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+2025-04-28 17:35:15.877 DEBUG    [pyrmethus_bot_BCH_USDT:1761] Position check skipped for BCH/USDT: It is a 'Spot' market, not a contract.
+2025-04-28 17:35:15.878 DEBUG    [pyrmethus_bot_BCH_USDT:3325] Generating signal for BCH/USDT...
+2025-04-28 17:35:15.878 INFO     [pyrmethus_bot_BCH_USDT:3371] Signal for BCH/USDT: [1mHOLD[0m (Placeholder: Trend unclear or missing data for entry.)
+2025-04-28 17:35:15.878 DEBUG    [pyrmethus_bot_BCH_USDT:3599] Executing trade action 'HOLD' for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:35:15.879 INFO     [pyrmethus_bot_BCH_USDT:3717] Holding position or waiting for signal for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:35:15.879 INFO     [pyrmethus_bot_BCH_USDT:3458] --- Finished Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:35:25.069 INFO     [pyrmethus_bot_BCH_USDT:3401] --- Starting Analysis & Trading Cycle for: BCH/USDT ---
+2025-04-28 17:35:25.071 INFO     [pyrmethus_bot_BCH_USDT:1103] [36m# Fetching klines for BCH/USDT | Timeframe: 5m | Target Limit: 1000...[0m
+2025-04-28 17:35:25.072 DEBUG    [pyrmethus_bot_BCH_USDT:1122] Estimated minimum candles required by strategy: ~1000
+2025-04-28 17:35:25.073 DEBUG    [pyrmethus_bot_BCH_USDT:1139] Using API parameters: category='spot', market ID='BCHUSDT'.
+2025-04-28 17:35:25.074 DEBUG    [pyrmethus_bot_BCH_USDT:1156] Fetching kline chunk 1/3 (1000 candles) for BCH/USDT. Ending before TS: Latest
+2025-04-28 17:35:25.075 DEBUG    [pyrmethus_bot_BCH_USDT:1178] Calling fetch_ohlcv with args: {'symbol': 'BCH/USDT', 'timeframe': '5m', 'limit': 1000, 'params': {'category': 'spot'}}
+2025-04-28 17:35:25.564 DEBUG    [pyrmethus_bot_BCH_USDT:1181] API returned 1000 candles for chunk 1.
+2025-04-28 17:35:25.565 DEBUG    [pyrmethus_bot_BCH_USDT:1205] Lag check passed (BCH/USDT): Last candle 25.6s old (within limit).
+2025-04-28 17:35:25.566 INFO     [pyrmethus_bot_BCH_USDT:1312] Total raw klines fetched: 1000
+2025-04-28 17:35:25.567 DEBUG    [pyrmethus_bot_BCH_USDT:1340] Processing 1000 final unique candles into DataFrame for BCH/USDT...
+2025-04-28 17:35:25.640 INFO     [pyrmethus_bot_BCH_USDT:1400] [92mSuccessfully processed 1000 klines for BCH/USDT 5m.[0m
+2025-04-28 17:35:25.642 DEBUG    [pyrmethus_bot_BCH_USDT:3147] Running strategy update for BCH/USDT with DataFrame length 1000
+2025-04-28 17:35:25.659 DEBUG    [pyrmethus_bot_BCH_USDT:3123] Placeholder _ema_swma called for length 950
+2025-04-28 17:35:25.665 ERROR    [pyrmethus_bot_BCH_USDT:3205] Error during strategy calculation for BCH/USDT: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 218, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 242, in evaluate
+    return _evaluate(op, op_str, a, b)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/computation/expressions.py", line 73, in _evaluate_standard
+    return op(a, b)
+           ^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/xx1.0.2.py", line 3173, in update
+    df_analysis['vt_upper'] = mid_band + df_analysis['atr'] * self.vt_atr_mult
+                              ~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/common.py", line 76, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/arraylike.py", line 186, in __add__
+    return self._arith_method(other, operator.add)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/series.py", line 6135, in _arith_method
+    return base.IndexOpsMixin._arith_method(self, other, op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/base.py", line 1382, in _arith_method
+    result = ops.arithmetic_op(lvalues, rvalues, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 283, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 227, in _na_arithmetic_op
+    result = _masked_arith_op(left, right, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 163, in _masked_arith_op
+    result[mask] = op(xrav[mask], yrav[mask])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+2025-04-28 17:35:25.676 DEBUG    [pyrmethus_bot_BCH_USDT:1761] Position check skipped for BCH/USDT: It is a 'Spot' market, not a contract.
+2025-04-28 17:35:25.676 DEBUG    [pyrmethus_bot_BCH_USDT:3325] Generating signal for BCH/USDT...
+2025-04-28 17:35:25.676 INFO     [pyrmethus_bot_BCH_USDT:3371] Signal for BCH/USDT: [1mHOLD[0m (Placeholder: Trend unclear or missing data for entry.)
+2025-04-28 17:35:25.676 DEBUG    [pyrmethus_bot_BCH_USDT:3599] Executing trade action 'HOLD' for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:35:25.677 INFO     [pyrmethus_bot_BCH_USDT:3717] Holding position or waiting for signal for BCH/USDT. Reason: Placeholder: Trend unclear or missing data for entry.
+2025-04-28 17:35:25.677 INFO     [pyrmethus_bot_BCH_USDT:3458] --- Finished Analysis & Trading Cycle for: BCH/USDT ---

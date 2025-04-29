@@ -1,0 +1,265 @@
+import os
+import time
+import logging
+from datetime import datetime
+from typing import Dict, List, Tuple, Optional
+import ccxt
+from ccxt.base.error import AuthenticationError, ExchangeError, NetworkError
+import pandas as pd
+import pandas_ta as ta
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('trading_bot.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger()
+
+# Dual Supertrend Parameters
+STRENTH1_LENGTH = 10
+STRENTH1_MULTIPLIER = 2.0
+STRENTH2_LENGTH = 20
+STRENTH2_MULTIPLIER = 3.0
+
+# Risk Management Parameters
+MAX_DAILY_RISK = 0.02  # 2% daily risk per position
+STOP_LOSS_PERCENTAGE = 1.5  # 1.5% below entry for stop-loss
+TAKE_PROFIT_PERCENTAGE = 2.5  # 2.5% above entry for take-profit
+ATR_MULTIPLIER = 2  # Use 2x ATR for stop-loss calculation
+
+# Load environment variables
+BYBIT_API_KEY = os.getenv('BYBIT_API_KEY')
+BYBIT_API_SECRET = os.getenv('BYBIT_API_SECRET')
+
+if not BYBIT_API_KEY or not BYBIT_API_SECRET:
+    logger.error("Bybit API keys not found in environment variables")
+    sys.exit(1)
+
+def initialize_exchange(api_key: str, api_secret: str) -> ccxt.Exchange:
+    try:
+        exchange = ccxt.bybit({
+            'apiKey': api_key,
+            'apiSecret': api_secret,
+            'enableRateLimit': True,
+            'options': {
+                'defaultType': 'linear',
+                'version': 'v5'
+            }
+        })
+        return exchange
+    except Exception as e:
+        logger.error(f"Failed to initialize exchange: {e}")
+        sys.exit(1)
+
+def fetch_klines(exchange: ccxt.Exchange, symbol: str, timeframe: str) -> Optional[pd.DataFrame]:
+    for attempt in range(5):
+        try:
+            klines = exchange.fetch_ohlcv(symbol, timeframe=timeframe)
+            df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            return df
+        except NetworkError as e:
+            if attempt < 4:
+                logger.warning(f"Network error fetching klines (attempt {attempt + 1}/5): {e}")
+                time.sleep(5)
+        except ExchangeError as e:
+            logger.error(f"Exchange error fetching klines: {e}")
+            break
+    return None
+
+def calculate_supertrend(df: pd.DataFrame) -> pd.DataFrame:
+    try:
+        # Calculate first Supertrend
+        df.ta.supertrend(length=STRENTH1_LENGTH, multiplier=STRENTH1_MULTIPLIER, append=True)
+        # Calculate second Supertrend with different parameters
+        df.ta.supertrend(length=STRENTH2_LENGTH, multiplier=STRENTH2_MULTIPLIER, append=True)
+        
+        # Rename columns for clarity
+        df.rename(columns={
+            'SUPERTrend_': f'Supertrend_{STRENTH1_LENGTH}',
+            'SUPERTrendH': f'SupertrendH_{STRENTH1_LENGTH}',
+            'SUPERTrendL': f'SupertrendL_{STRENTH1_LENGTH}',
+            'SUPERTrendB': f'SupertrendB_{STRENTH1_LENGTH}',
+            'SUPERTrenduem': f'SupertrendUeem_{STRENTH1_LENGTH}',
+
+            'SUPERTrendh': f'Supertrendh_{STRENTH2_LENGTH}',
+            'SUPERTrendl': f'Supertrendl_{STRENTH2_LENGTH}',
+            'SUPERTrendmfm': f'Supertrendmfm_{STRENTH2_LENGTH}',
+            'SUPERTrenddea': f'Supertrenddea_{STRENTH2_LENGTH}'
+        }, inplace=True)
+        
+        return df
+    except Exception as e:
+        logger.error(f"Error calculating Supertrend: {e}")
+        return df
+
+def calculate_strategies(df: pd.DataFrame) -> pd.DataFrame:
+    df = calculate_supertrend(df)
+    try:
+        # Add Moving Averages
+        df['ma20'] = df['close'].rolling(window=20).mean()
+        df['ma50'] = df['close'].rolling(window=50).mean()
+        # Add RSI
+        df['rsi'] = df['close'].ta.rsi(length=14)
+        # Add ATR
+        df['atr'] = df['close'].ta.traderay(length=14)
+        return df
+    except Exception as e:
+        logger.error(f"Error calculating indicators: {e}")
+        return df
+
+def get_current_price(exchange: ccxt.Exchange, symbol: str) -> Optional[float]:
+    for attempt in range(5):
+        try:
+            ticker = exchange.fetch_ticker(symbol)
+            return float(ticker['close'])
+        except NetworkError as e:
+            if attempt < 4:
+                logger.warning(f"Network error getting current price (attempt {attempt + 1}/5): {e}")
+                time.sleep(5)
+        except ExchangeError as e:
+            logger.error(f"Exchange error getting current price: {e}")
+            break
+    return None
+
+def calculate_position_size(balance: float, atr: float, entry_price: float, stop_loss_price: float) -> float:
+    try:
+        # Calculate position size based on ATR and fixed stop-loss percentage
+        risk_amount = balance * MAX_DAILY_RISK  # Risk 2% of balance
+        stop_loss_distance = abs(entry_price - stop_loss_price)
+        position_size = risk_amount / (stop_loss_distance * entry_price)
+        return position_size
+    except Exception as e:
+        logger.error(f"Error calculating position size: {e}")
+        return 0.0
+
+def check_entry_signal(df: pd.DataFrame) -> Optional[str]:
+    if df.empty:
+        return None
+    
+    # Get the latest values
+    supertrend1 = df[f'Supertrend_{STRENTH1_LENGTH}'].iloc[-1]
+    supertrend2 = df[f'Supertrend_{STRENTH2_LENGTH}'].iloc[-1]
+    suptrend_random = df[f'Supertrenddea_{STRENTH1_LENGTH}'].iloc[-1]
+
+    # Check if both Supertrend indicators agree
+    if (supertrend1 > 0 and supertrend2 > 0 and suptrend_random > 0 and df['close'].iloc[-1] > df[f'Supertrend_{STRENTH1_LENGTH}'].iloc[-1]):
+        return 'BUY'
+    elif (supertrend1 < 0 and supertrend2 < 0 and suptrend_random < 0 and df['close'].iloc[-1] < df[f'Supertrend_{STRENTH1_LENGTH}'].iloc[-1]):
+        return 'SELL'
+    return None
+
+def check_exit_signal(df: pd.DataFrame, entry_price: float, side: str) -> bool:
+    last_close = df['close'].iloc[-1]
+    if side == 'buy':
+        # Trailing stop condition
+        if last_close > entry_price * 1.02:  # Take profit condition
+            return True
+        # Stop-loss condition
+        if last_close < entry_price * 0.985:
+            return True
+    elif side == 'sell':
+        if last_close < entry_price * 0.98:
+            return True
+        if last_close > entry_price * 1.02:
+            return True
+    return False
+
+def execute_market_order(exchange: ccxt.Exchange, symbol: str, side: str, quantity: float) -> Optional[Dict]:
+    for attempt in range(5):
+        try:
+            order = exchange.create_order(symbol, 'market', side, quantity)
+            logger.info(f"Executed {side} order: {order}")
+            return order
+        except NetworkError as e:
+            if attempt < 4:
+                logger.warning(f"Network error executing order (attempt {attempt + 1}/5): {e}")
+                time.sleep(5)
+        except ExchangeError as e:
+            logger.error(f"Exchange error executing order: {e}")
+            break
+    return None
+
+def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
+    for attempt in range(5):
+        try:
+            exchange.set_leverage(leverage, symbol)
+            logger.info(f"Leverage set to {leverage}")
+            return True
+        except NetworkError as e:
+            if attempt < 4:
+                logger.warning(f"Network error setting leverage (attempt {attempt + 1}/5): {e}")
+                time.sleep(5)
+        except ExchangeError as e:
+            logger.error(f"Exchange error setting leverage: {e}")
+            break
+    return False
+
+def main():
+    exchange = initialize_exchange(BYBIT_API_KEY, BYBIT_API_SECRET)
+    set_leverage(exchange, 'BTCUSDT:USDT', 10)
+
+    while True:
+        try:
+            current_price = get_current_price(exchange, 'BTCUSDT:USDT')
+            if current_price is None:
+                time.sleep(60)
+                continue
+
+            df = fetch_klines(exchange, 'BTCUSDT:USDT', '1h')
+            if df is None:
+                time.sleep(60)
+                continue
+
+            df = calculate_strategies(df)
+            if df.empty:
+                time.sleep(60)
+                continue
+
+            stop_price = current_price * (1 - STOP_LOSS_PERCENTAGE / 100)
+            take_profit_price = current_price * (1 + TAKE_PROFIT_PERCENTAGE / 100)
+
+            signal = check_entry_signal(df)
+            if signal == 'BUY':
+                balance = exchange.fetch_balance()['USDT']['free']
+                if balance <= 0:
+                    logger.warning("Insufficient balance to execute trade")
+                    continue
+
+                position_size = calculate_position_size(balance, df['atr'].iloc[-1], current_price, stop_price)
+                if position_size <= 0:
+                    logger.warning("Invalid position size calculation")
+                    continue
+
+                order = execute_market_order(exchange, 'BTCUSDT:USDT', 'buy', position_size)
+                if order:
+                    logger.info(f"Buy order executed at {current_price}")
+                    logger.info(f"Stop Loss: {stop_price:.2f}, Take Profit: {take_profit_price:.2f}")
+            elif signal == 'SELL':
+                balance = exchange.fetch_balance()['USDT']['free']
+                if balance <= 0:
+                    logger.warning("Insufficient balance to execute trade")
+                    continue
+
+                position_size = calculate_position_size(balance, df['atr'].iloc[-1], current_price, stop_price)
+                if position_size <= 0:
+                    logger.warning("Invalid position size calculation")
+                    continue
+
+                order = execute_market_order(exchange, 'BTCUSDT:USDT', 'sell', position_size)
+                if order:
+                    logger.info(f"Sell order executed at {current_price}")
+                    logger.info(f"Stop Loss: {stop_price:.2f}, Take Profit: {take_profit_price:.2f}")
+            else:
+                logger.info("No trading signal generated")
+
+        except Exception as e:
+            logger.error(f"Error in main loop: {e}")
+            time.sleep(60)
+
+if __name__ == "__main__":
+    main()

@@ -1532,3 +1532,16 @@ Ctrl+C detected. Shutting down bot gracefully...[0m
 2025-04-25 16:30:21,710 - ScalpingBot - INFO - [33mCancelled order: ID bf9ed8ab-98d2-4c41-ace1-93c8c6229b5b, Side: sell, Price: 4.2571, Amount: 0.1[0m
 2025-04-25 16:30:21,732 - ScalpingBot - INFO - Order cancellation attempt finished. Cancelled: 5, Failed/Not Found: 0.
 2025-04-25 16:30:21,734 - ScalpingBot - INFO - Scalping Bot has been stopped.
+2025-04-28 14:50:42,884 - ScalpingBot - INFO - [36mInitializing Scalping Bot...[0m
+2025-04-28 14:50:42,900 - ScalpingBot - INFO - [32mConfiguration loaded successfully from config.yaml[0m
+2025-04-28 14:50:42,900 - ScalpingBot - DEBUG - Validating configuration...
+2025-04-28 14:50:42,901 - ScalpingBot - INFO - [32mConfiguration validated successfully.[0m
+2025-04-28 14:50:42,901 - ScalpingBot - CRITICAL - [31mFailed to initialize or run the bot: 'exchange_id'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 1332, in <module>
+    bot = ScalpingBot(config_file=CONFIG_FILE_NAME)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/trade_v3.py", line 153, in __init__
+    self.exchange_id: str = self.config["exchange"]["exchange_id"]
+                            ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'exchange_id'

@@ -1,0 +1,10 @@
+{
+    "BTC/USDT:USDT": {
+        "break_even_triggered": false,
+        "last_entry_price": null
+    },
+    "DOT/USDT:USDT": {
+        "break_even_triggered": false,
+        "last_entry_price": null
+    }
+}

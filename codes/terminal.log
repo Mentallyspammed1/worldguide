@@ -695,3 +695,115 @@ ccxt.base.errors.InvalidOrder: bybit {"retCode":110093,"retMsg":"expect Falling,
 2025-04-25 01:06:08,284 - BybitTerminal - INFO - Main async function finished.
 2025-04-25 01:06:08,285 - BybitTerminal - INFO - Background tasks processing complete: 3 cancelled, 0 errors.
 2025-04-25 01:06:08,285 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 0
+2025-04-28 11:21:38,131 - BybitTerminal - INFO - [34m# Log level attuned to INFO[0m
+2025-04-28 11:21:38,132 - BybitTerminal - INFO - [36m# Configuration spell cast from 'config.json'[0m
+2025-04-28 11:21:38,132 - BybitTerminal - INFO - [36m# Technical Analysis Oracle initialized.[0m
+2025-04-28 11:21:38,134 - BybitTerminal - INFO - [36m# Signal conduits established for graceful departure.[0m
+2025-04-28 11:21:38,202 - BybitTerminal - INFO - [32mAPI credential sigils loaded successfully. Testnet mode: False[0m
+2025-04-28 11:21:38,203 - BybitTerminal - INFO - [36m# Summoning connection to Bybit via CCXT...[0m
+2025-04-28 11:21:38,239 - BybitTerminal - INFO - [34m# Loading market contracts...[0m
+2025-04-28 11:21:40,029 - BybitTerminal - ERROR - [31mCCXT Authentication Sigil Rejected: Invalid API keys or permissions. Check .env file and Bybit API settings. bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1745857300806}[0m
+2025-04-28 11:21:40,030 - BybitTerminal - INFO - [36m# Banishing CCXT Bybit client connection...[0m
+2025-04-28 11:21:40,282 - BybitTerminal - INFO - [32mCCXT connection banished.[0m
+2025-04-28 11:21:40,283 - BybitTerminal - ERROR - Failed to initialize exchange client: CCXT Authentication Failed
+2025-04-28 11:21:40,283 - BybitTerminal - WARNING - Proceeding without a fully functional exchange client. Authenticated features will fail.
+2025-04-28 11:21:40,284 - BybitTerminal - INFO - Starting main terminal loop.
+2025-04-28 11:21:42,758 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-28 11:21:42,758 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-28 11:21:50,294 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-28 11:21:50,295 - BybitTerminal - WARNING - Please check your .env file and restart, or check logs for connection errors.
+2025-04-28 11:21:52,432 - BybitTerminal - INFO - Received signal SIGINT. Initiating shutdown...
+2025-04-28 11:21:52,433 - BybitTerminal - INFO - Shutdown initiated by signal SIGINT... Setting exit code to 0
+2025-04-28 11:21:52,433 - BybitTerminal - INFO - Cancelling 1 active background tasks...
+2025-04-28 11:21:52,434 - BybitTerminal - INFO - Main terminal task was cancelled.
+2025-04-28 11:21:52,435 - BybitTerminal - INFO - Main async function finished.
+2025-04-28 11:21:52,435 - BybitTerminal - INFO - Background tasks processing complete: 1 cancelled, 0 errors.
+2025-04-28 11:21:52,436 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 0
+2025-04-28 11:23:14,255 - BybitTerminal - INFO - Received signal SIGINT. Initiating shutdown...
+2025-04-28 11:23:33,786 - BybitTerminal - INFO - '.env' file found and appears configured (no placeholders detected).
+2025-04-28 11:23:35,292 - BybitTerminal - INFO - [34m# Log level attuned to INFO[0m
+2025-04-28 11:23:35,293 - BybitTerminal - INFO - [36m# Configuration spell cast from 'config.json'[0m
+2025-04-28 11:23:35,293 - BybitTerminal - INFO - [36m# Technical Analysis Oracle initialized.[0m
+2025-04-28 11:23:35,295 - BybitTerminal - INFO - [36m# Signal conduits established for graceful departure.[0m
+2025-04-28 11:23:35,391 - BybitTerminal - INFO - [32mAPI credential sigils loaded successfully. Testnet mode: False[0m
+2025-04-28 11:23:35,392 - BybitTerminal - INFO - [36m# Summoning connection to Bybit via CCXT...[0m
+2025-04-28 11:23:35,429 - BybitTerminal - INFO - [34m# Loading market contracts...[0m
+2025-04-28 11:23:37,234 - BybitTerminal - ERROR - [31mCCXT Authentication Sigil Rejected: Invalid API keys or permissions. Check .env file and Bybit API settings. Ensure key has CONTRACT TRADE permissions. bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1745857418094}[0m
+2025-04-28 11:23:37,236 - BybitTerminal - INFO - [36m# Banishing CCXT Bybit client connection...[0m
+2025-04-28 11:23:37,491 - BybitTerminal - INFO - [32mCCXT connection banished.[0m
+2025-04-28 11:23:37,494 - BybitTerminal - ERROR - Failed to initialize exchange client: CCXT Authentication Failed
+2025-04-28 11:23:37,495 - BybitTerminal - WARNING - Proceeding without a fully functional exchange client.
+2025-04-28 11:23:40,521 - BybitTerminal - INFO - Starting main terminal loop.
+2025-04-28 11:23:44,886 - asyncio - ERROR - Exception in callback TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...locks.py:199>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562
+handle: <Handle TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...locks.py:199>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562>
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 1566, in _task_done_callback
+    exc = fut.exception()
+          ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+2025-04-28 11:23:44,904 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-28 11:23:44,905 - BybitTerminal - WARNING - Please check your .env file, restart the terminal, or check logs for connection errors.
+2025-04-28 11:23:57,414 - asyncio - ERROR - Exception in callback TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...locks.py:199>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562
+handle: <Handle TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...locks.py:199>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562>
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 1566, in _task_done_callback
+    exc = fut.exception()
+          ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+2025-04-28 11:23:57,423 - BybitTerminal - ERROR - This action requires initialized API credentials and a connection.
+2025-04-28 11:23:57,423 - BybitTerminal - WARNING - Please check your .env file, restart the terminal, or check logs for connection errors.
+2025-04-28 11:24:00,459 - BybitTerminal - INFO - Received signal SIGINT. Initiating graceful shutdown...
+2025-04-28 11:24:00,460 - BybitTerminal - INFO - Shutdown sequence initiated by signal SIGINT... Setting final exit code to 1
+2025-04-28 11:24:00,460 - BybitTerminal - INFO - Cancelling 3 active background tasks...
+2025-04-28 11:24:00,461 - asyncio - ERROR - Exception in callback TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...locks.py:199>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562
+handle: <Handle TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...locks.py:199>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562>
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 1566, in _task_done_callback
+    exc = fut.exception()
+          ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+2025-04-28 11:24:00,464 - asyncio - ERROR - Exception in callback TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...inal.py:1791>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562
+handle: <Handle TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...inal.py:1791>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562>
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 1566, in _task_done_callback
+    exc = fut.exception()
+          ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 1824, in run
+    done, pending = await asyncio.wait(
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/tasks.py", line 464, in wait
+    return await _wait(fs, timeout, return_when, loop)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/tasks.py", line 550, in _wait
+    await waiter
+asyncio.exceptions.CancelledError
+2025-04-28 11:24:00,474 - BybitTerminal - INFO - Main terminal task was cancelled.
+2025-04-28 11:24:00,474 - BybitTerminal - INFO - Main async function 'main' finished execution. Returning exit code: 1
+2025-04-28 11:24:00,475 - asyncio - ERROR - Exception in callback TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...inal.py:2076>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562
+handle: <Handle TradingTerminal._create_task.<locals>._task_done_callback(<Task cancell...inal.py:2076>>) at /data/data/com.termux/files/home/worldguide/codes/terminal.py:1562>
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 1566, in _task_done_callback
+    exc = fut.exception()
+          ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/codes/terminal.py", line 2117, in ui_display_menu_async
+    choice = await loop.run_in_executor(None, func_call)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+2025-04-28 11:24:00,477 - BybitTerminal - INFO - Background tasks processing complete: 3 cancelled, 0 completed normally, 0 errors.
+2025-04-28 11:24:00,477 - BybitTerminal - INFO - Terminal shutdown sequence complete. Final exit code set to: 1

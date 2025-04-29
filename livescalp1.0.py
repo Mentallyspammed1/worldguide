@@ -1,4 +1,3 @@
-```python
 # sxs.py
 # Enhanced and Upgraded Scalping Bot Framework
 # Derived from xrscalper.py, focusing on robust execution, error handling,
@@ -2740,4 +2739,3 @@ if __name__ == "__main__":
     logger.info("SXS Bot Framework execution finished (example run).")
     # In a real bot, replace the example snippet with the main trading loop.
 
-```

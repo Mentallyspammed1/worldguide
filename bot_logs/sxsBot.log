@@ -1,0 +1,78 @@
+2025-04-28T14:03:37.257Z INFO     [sxsBot:631] [92mINITIALIZING IN LIVE (Real Money) Environment.[0m
+2025-04-28T14:03:37.257Z INFO     [sxsBot:656] Initializing bybit (API: {'spot': 'https://api.{hostname}', 'futures': 'https://api.{hostname}', 'v2': 'https://api.{hostname}', 'public': 'https://api.{hostname}', 'private': 'https://api.{hostname}'})...
+2025-04-28T14:03:37.257Z INFO     [sxsBot:659] Loading markets for bybit...
+2025-04-28T14:03:39.718Z ERROR    [sxsBot:801] [91mAuthentication Error in 'load_markets': bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849020517}. Aborting call.[0m
+2025-04-28T14:03:39.719Z ERROR    [sxsBot:802] [91m>> Check API Key/Secret, permissions, IP whitelist, Environment (Live/Testnet).[0m
+2025-04-28T14:03:39.720Z CRITICAL [sxsBot:686] [91mCRITICAL: Failed to load markets: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849020517}. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livescalp1.0.py", line 661, in initialize_exchange
+    safe_api_call(exchange.load_markets, lg, reload=True)
+  File "/data/data/com.termux/files/home/worldguide/livescalp1.0.py", line 803, in safe_api_call
+    raise e
+  File "/data/data/com.termux/files/home/worldguide/livescalp1.0.py", line 755, in safe_api_call
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.AuthenticationError: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849020517}
+2025-04-28T14:03:39.761Z CRITICAL [sxsBot:2672] [91mExchange initialization failed. Bot cannot start.[0m
+2025-04-28T14:03:49.314Z INFO     [sxsBot:631] [92mINITIALIZING IN LIVE (Real Money) Environment.[0m
+2025-04-28T14:03:49.315Z INFO     [sxsBot:656] Initializing bybit (API: {'spot': 'https://api.{hostname}', 'futures': 'https://api.{hostname}', 'v2': 'https://api.{hostname}', 'public': 'https://api.{hostname}', 'private': 'https://api.{hostname}'})...
+2025-04-28T14:03:49.315Z INFO     [sxsBot:659] Loading markets for bybit...
+2025-04-28T14:03:53.505Z ERROR    [sxsBot:801] [91mAuthentication Error in 'load_markets': bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849032806}. Aborting call.[0m
+2025-04-28T14:03:53.506Z ERROR    [sxsBot:802] [91m>> Check API Key/Secret, permissions, IP whitelist, Environment (Live/Testnet).[0m
+2025-04-28T14:03:53.507Z CRITICAL [sxsBot:686] [91mCRITICAL: Failed to load markets: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849032806}. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livescalp1.0.py", line 661, in initialize_exchange
+    safe_api_call(exchange.load_markets, lg, reload=True)
+  File "/data/data/com.termux/files/home/worldguide/livescalp1.0.py", line 803, in safe_api_call
+    raise e
+  File "/data/data/com.termux/files/home/worldguide/livescalp1.0.py", line 755, in safe_api_call
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.AuthenticationError: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849032806}
+2025-04-28T14:03:53.537Z CRITICAL [sxsBot:2672] [91mExchange initialization failed. Bot cannot start.[0m

@@ -1703,3 +1703,17 @@ ccxt.base.errors.InvalidOrder: bybit amount of DOT/USDT:USDT must be greater tha
 2025-04-25 18:24:28,641 - ScalpingBotV4 - DEBUG [MainThread] - Created state backup: scalping_bot_state.json.bak
 2025-04-25 18:24:28,641 - ScalpingBotV4 - DEBUG [MainThread] - State recorded successfully to scalping_bot_state.json.
 2025-04-25 18:24:28,641 - ScalpingBotV4 - INFO [MainThread] - [36m[1m--- Scalping Bot Shutdown Complete ---[0m
+2025-04-28 10:34:43,959 - ScalpingBotV4 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-28 10:34:43,961 - ScalpingBotV4 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v4 Awakening ---[0m
+2025-04-28 10:34:43,973 - ScalpingBotV4 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-28 10:34:43,974 - ScalpingBotV4 - DEBUG [MainThread] - Scrutinizing the configuration spellbook for potency and validity...
+2025-04-28 10:34:43,974 - ScalpingBotV4 - CRITICAL [MainThread] - [31mConfiguration flaw detected: Config Error [exchange.exchange_id]: Must be a non-empty string.. Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-28 10:34:43,974 - ScalpingBotV4 - ERROR [MainThread] - Bot exited via SystemExit with unexpected code: 1.
+2025-04-28 10:34:43,974 - ScalpingBotV4 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-28 14:50:25,185 - ScalpingBotV4 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-28 14:50:25,187 - ScalpingBotV4 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v4 Awakening ---[0m
+2025-04-28 14:50:25,200 - ScalpingBotV4 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-28 14:50:25,200 - ScalpingBotV4 - DEBUG [MainThread] - Scrutinizing the configuration spellbook...
+2025-04-28 14:50:25,201 - ScalpingBotV4 - CRITICAL [MainThread] - [31mConfiguration flaw detected: exchange.exchange_id required. Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-28 14:50:25,201 - ScalpingBotV4 - ERROR [MainThread] - Bot exited via SystemExit (Code: 1).
+2025-04-28 14:50:25,201 - ScalpingBotV4 - INFO [MainThread] - Bot instance not fully initialized. Shutting down logging.

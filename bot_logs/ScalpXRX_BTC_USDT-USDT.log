@@ -91,3 +91,127 @@ Traceback (most recent call last):
     mom = ta.momentum(df['close'], length=self.config["momentum_period"])
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 TypeError: 'module' object is not callable
+2025-04-28T14:04:26.962Z INFO     [ScalpXRX_BTC_USDT-USDT:373] [92mLIVE MODE[0m
+2025-04-28T14:04:26.963Z INFO     [ScalpXRX_BTC_USDT-USDT:378] Loading markets for bybit...
+2025-04-28T14:04:28.939Z CRITICAL [ScalpXRX_BTC_USDT-USDT:392] [91mExchange init failed: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849069362}[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 379, in initialize_exchange
+    exchange.load_markets(reload=True)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.AuthenticationError: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849069362}
+2025-04-28T14:04:28.962Z CRITICAL [ScalpXRX_BTC_USDT-USDT:1021] Exchange init failed.
+2025-04-28T14:05:47.434Z INFO     [ScalpXRX_BTC_USDT-USDT:373] [92mLIVE MODE[0m
+2025-04-28T14:05:47.435Z INFO     [ScalpXRX_BTC_USDT-USDT:378] Loading markets for bybit...
+2025-04-28T14:05:57.557Z CRITICAL [ScalpXRX_BTC_USDT-USDT:392] [91mExchange init failed: bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745849147436],server_timestamp[1745849156295],recv_window[5000]","result":{},"retExtInfo":{},"time":1745849156295}[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 379, in initialize_exchange
+    exchange.load_markets(reload=True)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4388, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.InvalidNonce: bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745849147436],server_timestamp[1745849156295],recv_window[5000]","result":{},"retExtInfo":{},"time":1745849156295}
+2025-04-28T14:05:57.592Z CRITICAL [ScalpXRX_BTC_USDT-USDT:1021] Exchange init failed.
+2025-04-28T14:06:30.402Z INFO     [ScalpXRX_BTC_USDT-USDT:373] [92mLIVE MODE[0m
+2025-04-28T14:06:30.407Z INFO     [ScalpXRX_BTC_USDT-USDT:378] Loading markets for bybit...
+2025-04-28T14:06:31.791Z CRITICAL [ScalpXRX_BTC_USDT-USDT:392] [91mExchange init failed: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849192715}[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 379, in initialize_exchange
+    exchange.load_markets(reload=True)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.AuthenticationError: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1745849192715}
+2025-04-28T14:06:31.815Z CRITICAL [ScalpXRX_BTC_USDT-USDT:1021] Exchange init failed.
+2025-04-28T14:07:14.261Z INFO     [ScalpXRX_BTC_USDT-USDT:373] [92mLIVE MODE[0m
+2025-04-28T14:07:14.262Z INFO     [ScalpXRX_BTC_USDT-USDT:378] Loading markets for bybit...
+2025-04-28T14:07:25.170Z INFO     [ScalpXRX_BTC_USDT-USDT:389] [92mExchange initialized. Balance: 10.2844 USDT[0m
+2025-04-28T14:07:25.171Z INFO     [ScalpXRX_BTC_USDT-USDT:952] --- Cycle Start: BTC/USDT:USDT (5) ---
+2025-04-28T14:07:27.237Z ERROR    [ScalpXRX_BTC_USDT-USDT:1005] Cycle error: 'module' object is not callable
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 965, in analyze_and_trade_symbol
+    analyzer = TradingAnalyzer(klines_df, lg, config, market_info)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 502, in __init__
+    self.calculate_indicators()
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 531, in calculate_indicators
+    self._calculate_momentum()
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 565, in _calculate_momentum
+    mom = ta.momentum(df['close'], length=self.config["momentum_period"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'module' object is not callable
+2025-04-28T14:07:37.248Z INFO     [ScalpXRX_BTC_USDT-USDT:952] --- Cycle Start: BTC/USDT:USDT (5) ---
+2025-04-28T14:07:39.481Z ERROR    [ScalpXRX_BTC_USDT-USDT:1005] Cycle error: 'module' object is not callable
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 965, in analyze_and_trade_symbol
+    analyzer = TradingAnalyzer(klines_df, lg, config, market_info)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 502, in __init__
+    self.calculate_indicators()
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 531, in calculate_indicators
+    self._calculate_momentum()
+  File "/data/data/com.termux/files/home/worldguide/livewirex.py", line 565, in _calculate_momentum
+    mom = ta.momentum(df['close'], length=self.config["momentum_period"])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'module' object is not callable

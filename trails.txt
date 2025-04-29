@@ -1,0 +1,143 @@
+import os
+import ccxt
+from dotenv import load_dotenv
+import sys # Import sys for exiting on critical errors
+
+# --- Configuration ---
+# Load environment variables from .env file
+load_dotenv()
+
+# API keys from environment variables
+API_KEY = os.getenv('BYBIT_API_KEY')
+API_SECRET = os.getenv('BYBIT_API_SECRET')
+
+# Trailing stop percentage (e.g., 0.01 for 1%)
+# Can be set in the .env file: TRAILING_STOP_PERCENTAGE=0.015
+DEFAULT_TRAILING_STOP_PERCENTAGE = 0.01 # Default to 1%
+TRAILING_STOP_PERCENTAGE_STR = os.getenv('TRAILING_STOP_PERCENTAGE', str(DEFAULT_TRAILING_STOP_PERCENTAGE))
+
+try:
+    TRAILING_STOP_PERCENTAGE = float(TRAILING_STOP_PERCENTAGE_STR)
+    if not (0 < TRAILING_STOP_PERCENTAGE < 1):
+         print(f"Warning: TRAILING_STOP_PERCENTAGE ({TRAILING_STOP_PERCENTAGE}) is outside the typical range (0 to 1).", file=sys.stderr)
+except ValueError:
+    print(f"Error: Invalid value for TRAILING_STOP_PERCENTAGE in .env or environment. Using default {DEFAULT_TRAILING_STOP_PERCENTAGE}.", file=sys.stderr)
+    TRAILING_STOP_PERCENTAGE = DEFAULT_TRAILING_STOP_PERCENTAGE
+
+# --- Script Logic ---
+
+def main():
+    """
+    Connects to Bybit, fetches open positions, and sets a trailing stop
+    for any position currently in profit.
+    """
+    if not API_KEY or not API_SECRET:
+        print("Error: BYBIT_API_KEY and BYBIT_API_SECRET must be set in the .env file or environment variables.", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Connecting to Bybit...")
+    try:
+        # Initialize CCXT with Bybit
+        exchange = ccxt.bybit({
+            'apiKey': API_KEY,
+            'secret': API_SECRET,
+            'options': {
+                'defaultType': 'linear'  # For linear perpetual contracts like BTCUSDT
+            },
+            'enableRateLimit': True # Good practice to respect API rate limits
+        })
+        print("Successfully connected to Bybit.")
+
+    except Exception as e:
+        print(f"Error initializing Bybit exchange: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    print("Fetching open positions...")
+    try:
+        # Fetch open positions
+        # Note: fetch_positions might return positions even if closed depending on exchange/version.
+        # We'll filter for open positions based on position size > 0 later.
+        positions = exchange.fetch_positions()
+        print(f"Fetched {len(positions)} potential position entries.")
+
+    except ccxt.BaseError as e:
+        print(f"Error fetching positions: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred while fetching positions: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Filter for actual open positions (size > 0)
+    open_positions = [p for p in positions if p.get('info', {}).get('size', 0) and float(p.get('info', {}).get('size', 0)) > 0]
+    print(f"Found {len(open_positions)} open positions.")
+
+    if not open_positions:
+        print("No open positions found. Exiting.")
+        return
+
+    print("-" * 30)
+
+    # Iterate through each open position and set trailing stop if in profit
+    for position in open_positions:
+        symbol = position.get('symbol', 'Unknown Symbol')
+        side = position.get('side', 'Unknown Side') # 'long' or 'short' (CCXT standard)
+        unrealizedPnl = float(position.get('unrealizedPnl', 0))
+        markPrice = float(position.get('markPrice', 0))
+        entryPrice = float(position.get('entryPrice', 0))
+        positionIdx = position.get('positionIdx', 0) # Default to 0 for one-way mode (Bybit V5)
+
+        print(f"Processing position: {symbol} {side.upper()}")
+        print(f"  Entry Price: {entryPrice}, Mark Price: {markPrice}, Unrealized PnL: {unrealizedPnl:.2f}")
+
+
+        # Check if the position is in profit
+        if unrealizedPnl > 0:
+            # Calculate trailing stop distance based on configured percentage
+            # For Bybit V5 Trading Stop, trailingStop parameter is the distance.
+            # activePrice is the trigger price.
+            trailing_stop_distance = TRAILING_STOP_PERCENTAGE * markPrice
+
+            # Ensure trailing stop distance is a positive value
+            if trailing_stop_distance <= 0:
+                 print(f"  Calculated trailing stop distance is not positive ({trailing_stop_distance:.6f}), skipping.")
+                 continue
+
+            print(f"  Position is in profit. Calculated trailing stop distance: {trailing_stop_distance:.6f}")
+
+            # Prepare parameters for setting trailing stop using Bybit's V5 endpoint
+            # Note: Bybit V5 requires positionIdx for certain modes (like Hedge Mode or UTA)
+            # For One-Way mode, positionIdx is typically 0.
+            # setting activePrice to markPrice means the trailing stop starts trailing immediately
+            # from the current mark price.
+            params = {
+                'symbol': symbol,
+                'side': side.capitalize(), # Bybit API expects 'Buy' or 'Sell' for side in this endpoint
+                'positionIdx': positionIdx,
+                'trailingStop': str(round(trailing_stop_distance, 6)), # Use 6 decimal places for precision
+                'activePrice': str(round(markPrice, 6)) # Set active price to current mark price
+            }
+
+            print(f"  Attempting to set trailing stop with params: {params}")
+
+            try:
+                # Set trailing stop using Bybit's private V5 endpoint
+                # https://bybit-exchange.github.io/docs/v5/position/trading-stop
+                response = exchange.privatePostV5PositionTradingStop(params)
+                # Check the response structure based on Bybit API docs if needed for more detailed success check
+                # For simplicity, we'll assume success if no exception was raised.
+                print(f"  Successfully set trailing stop for {symbol} {side.upper()} with distance {trailing_stop_distance:.6f}")
+
+            except ccxt.BaseError as e:
+                print(f"  Error setting trailing stop for {symbol} {side.upper()}: {e}", file=sys.stderr)
+            except Exception as e:
+                print(f"  An unexpected error occurred while setting trailing stop for {symbol} {side.upper()}: {e}", file=sys.stderr)
+
+        else:
+            print(f"  Position is not in profit (PnL: {unrealizedPnl:.2f}), skipping.")
+
+        print("-" * 30)
+
+    print("Process completed.")
+
+if __name__ == "__main__":
+    main()

@@ -350,3 +350,179 @@ NameError: name 'config' is not defined
 2025-04-24 00:38:16.295 INFO     [pyrmethus_bot_init:771] [36m# Configuration loading and validation complete.[0m
 2025-04-24 00:39:23.796 WARNING  [pyrmethus_bot_init:3750] 
 [91m[1mShutdown signal (SIGINT) received! Initiating graceful shutdown...[0m
+2025-04-28 12:02:15 - DEBUG    - [pyrmethus_bot_init:476] - Quote currency set to: USDT
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:3433] - [1m--- Starting Pyrmethus Volumatic OB Bot v1.1.6 ---[0m
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:3434] - Timestamp: 2025-04-28 12:02:15 CDT
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:3435] - Loaded Configuration: Quote Currency=USDT, Trading Enabled=True, Sandbox Mode=False
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:3443] - Versions: Python=3.12.10, CCXT=4.4.72, Pandas=2.2.3, Numpy=2.2.5, Pandas-TA=0.3.14b0
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3449] - 
+[33m[1m╔═════════════════════════════════════════════════════════════╗
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3450] - ║ [31m[1m!!!           LIVE TRADING IS ENABLED           !!![0m[33m[1m ║
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3451] - ╚═════════════════════════════════════════════════════════════╝[0m
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3453] - Trading Mode: [91m!!! LIVE (REAL FUNDS AT RISK) !!![0m
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3457] - [1m--- Please Review Key Trading Settings ---[0m
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3458] -   Risk Per Trade: 1.00%
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3459] -   Leverage: 20x (0 uses exchange default)
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3460] -   Trailing Stop (TSL): ENABLED
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3462] -     - Callback Rate: 0.500%
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3463] -     - Activation Pct: 0.300%
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3464] -   Break Even (BE): ENABLED
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3466] -     - Trigger ATRs: 1.0
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3467] -     - Offset Ticks: 2
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3468] -   Initial SL ATR Multiple: 1.8
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:3470] -   Initial TP ATR Multiple: 0.7 
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:3475] - User confirmed settings. Proceeding with trading.
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:3486] - Initializing CCXT exchange connection...
+2025-04-28 12:02:15 - WARNING  - [pyrmethus_bot_init:532] - [91m[1m!!! USING LIVE TRADING ENVIRONMENT - REAL FUNDS AT RISK !!![0m
+2025-04-28 12:02:15 - INFO     - [pyrmethus_bot_init:535] - Attempting to load markets for bybit...
+2025-04-28 12:02:42 - WARNING  - [pyrmethus_bot_init:548] - Network error loading markets (Attempt 1/4): bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745859735670],server_timestamp[1745859763784],recv_window[5000]","result":{},"retExtInfo":{},"time":1745859763784}.
+2025-04-28 12:02:42 - WARNING  - [pyrmethus_bot_init:552] - Retrying in 5 seconds...
+2025-04-28 12:02:48 - CRITICAL - [pyrmethus_bot_init:555] - [91mAuthentication error loading markets: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1745859769358}. Check API Key/Secret/Permissions. Exiting.[0m
+2025-04-28 12:02:48 - CRITICAL - [pyrmethus_bot_init:3489] - Exchange initialization failed. Cannot continue. Exiting.
+2025-04-28 12:03:10 - DEBUG    - [pyrmethus_bot_init:476] - Quote currency set to: USDT
+2025-04-28 12:03:10 - INFO     - [pyrmethus_bot_init:3433] - [1m--- Starting Pyrmethus Volumatic OB Bot v1.1.6 ---[0m
+2025-04-28 12:03:10 - INFO     - [pyrmethus_bot_init:3434] - Timestamp: 2025-04-28 12:03:10 CDT
+2025-04-28 12:03:10 - INFO     - [pyrmethus_bot_init:3435] - Loaded Configuration: Quote Currency=USDT, Trading Enabled=True, Sandbox Mode=False
+2025-04-28 12:03:10 - INFO     - [pyrmethus_bot_init:3443] - Versions: Python=3.12.10, CCXT=4.4.72, Pandas=2.2.3, Numpy=2.2.5, Pandas-TA=0.3.14b0
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3449] - 
+[33m[1m╔═════════════════════════════════════════════════════════════╗
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3450] - ║ [31m[1m!!!           LIVE TRADING IS ENABLED           !!![0m[33m[1m ║
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3451] - ╚═════════════════════════════════════════════════════════════╝[0m
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3453] - Trading Mode: [91m!!! LIVE (REAL FUNDS AT RISK) !!![0m
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3457] - [1m--- Please Review Key Trading Settings ---[0m
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3458] -   Risk Per Trade: 1.00%
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3459] -   Leverage: 20x (0 uses exchange default)
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3460] -   Trailing Stop (TSL): ENABLED
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3462] -     - Callback Rate: 0.500%
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3463] -     - Activation Pct: 0.300%
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3464] -   Break Even (BE): ENABLED
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3466] -     - Trigger ATRs: 1.0
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3467] -     - Offset Ticks: 2
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3468] -   Initial SL ATR Multiple: 1.8
+2025-04-28 12:03:10 - WARNING  - [pyrmethus_bot_init:3470] -   Initial TP ATR Multiple: 0.7 
+2025-04-28 12:03:12 - INFO     - [pyrmethus_bot_init:3475] - User confirmed settings. Proceeding with trading.
+2025-04-28 12:03:12 - INFO     - [pyrmethus_bot_init:3486] - Initializing CCXT exchange connection...
+2025-04-28 12:03:12 - WARNING  - [pyrmethus_bot_init:532] - [91m[1m!!! USING LIVE TRADING ENVIRONMENT - REAL FUNDS AT RISK !!![0m
+2025-04-28 12:03:12 - INFO     - [pyrmethus_bot_init:535] - Attempting to load markets for bybit...
+2025-04-28 12:03:14 - CRITICAL - [pyrmethus_bot_init:555] - [91mAuthentication error loading markets: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1745859795498}. Check API Key/Secret/Permissions. Exiting.[0m
+2025-04-28 12:03:14 - CRITICAL - [pyrmethus_bot_init:3489] - Exchange initialization failed. Cannot continue. Exiting.
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3284] - [1m--- Pyrmethus Volumatic OB Bot v1.1.5 Starting ---[0m
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3285] - Timestamp: 2025-04-28 12:03:43 CDT
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3286] - Loaded Configuration:
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3287] -   Quote Currency: USDT
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3288] -   Trading Enabled: True
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3289] -   Sandbox Mode: False
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3292] - Python Version: 3.12.10
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3293] - CCXT Version: 4.4.72
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3294] - Pandas Version: 2.2.3
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3295] - Pandas-TA Version: 0.3.14b0
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3296] - NumPy Version: 2.2.5
+2025-04-28 12:03:43 - INFO - [pyrmethus_bot_init:3297] - Requests Version: 2.32.3
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3303] - 
+[33m[1m╔════════════════════════════════════════════╗
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3304] - ║ [31m[1m!!! LIVE TRADING IS ENABLED !!![0m[33m[1m          ║
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3305] - ╚════════════════════════════════════════════╝[0m
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3307] - Trading Mode: [91mLIVE (REAL FUNDS AT RISK)[0m
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3313] - [1m--- Review Key Trading Settings ---[0m
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3314] -   Risk Per Trade: 1.00%
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3315] -   Leverage: 20x
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3316] -   Trailing Stop (TSL): ENABLED
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3318] -     Callback Rate: 0.500%
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3319] -     Activation Pct: 0.300%
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3320] -   Break Even (BE): ENABLED
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3322] -     Trigger ATRs: 1.0
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3323] -     Offset Ticks: 2
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3324] -   Initial SL ATR Mult: 1.8
+2025-04-28 12:03:43 - WARNING - [pyrmethus_bot_init:3326] -   Initial TP ATR Mult: 0.7 
+2025-04-28 12:03:45 - INFO - [pyrmethus_bot_init:3331] - User confirmed settings. Proceeding with trading enabled.
+2025-04-28 12:03:45 - INFO - [pyrmethus_bot_init:3340] - Initializing CCXT exchange connection...
+2025-04-28 12:03:45 - WARNING - [pyrmethus_bot_init:438] - [91m[1mUSING LIVE TRADING ENVIRONMENT - REAL FUNDS AT RISK[0m
+2025-04-28 12:03:45 - INFO - [pyrmethus_bot_init:441] - Loading markets for bybit...
+2025-04-28 12:03:46 - CRITICAL - [pyrmethus_bot_init:466] - [91mAn unexpected error occurred loading markets: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1745859827640}. Exiting.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/volume/volumatictrend1.2.4.py", line 446, in initialize_exchange
+    exchange.load_markets(reload=attempt > 0)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.AuthenticationError: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1745859827640}
+2025-04-28 12:03:46 - CRITICAL - [pyrmethus_bot_init:3343] - Exchange initialization failed. Cannot continue. Exiting.
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3284] - [1m--- Pyrmethus Volumatic OB Bot v1.1.5 Starting ---[0m
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3285] - Timestamp: 2025-04-28 12:04:47 CDT
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3286] - Loaded Configuration:
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3287] -   Quote Currency: USDT
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3288] -   Trading Enabled: True
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3289] -   Sandbox Mode: False
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3292] - Python Version: 3.12.10
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3293] - CCXT Version: 4.4.72
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3294] - Pandas Version: 2.2.3
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3295] - Pandas-TA Version: 0.3.14b0
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3296] - NumPy Version: 2.2.5
+2025-04-28 12:04:47 - INFO - [pyrmethus_bot_init:3297] - Requests Version: 2.32.3
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3303] - 
+[33m[1m╔════════════════════════════════════════════╗
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3304] - ║ [31m[1m!!! LIVE TRADING IS ENABLED !!![0m[33m[1m          ║
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3305] - ╚════════════════════════════════════════════╝[0m
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3307] - Trading Mode: [91mLIVE (REAL FUNDS AT RISK)[0m
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3313] - [1m--- Review Key Trading Settings ---[0m
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3314] -   Risk Per Trade: 1.00%
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3315] -   Leverage: 20x
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3316] -   Trailing Stop (TSL): ENABLED
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3318] -     Callback Rate: 0.500%
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3319] -     Activation Pct: 0.300%
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3320] -   Break Even (BE): ENABLED
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3322] -     Trigger ATRs: 1.0
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3323] -     Offset Ticks: 2
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3324] -   Initial SL ATR Mult: 1.8
+2025-04-28 12:04:47 - WARNING - [pyrmethus_bot_init:3326] -   Initial TP ATR Mult: 0.7 
+2025-04-28 12:04:48 - INFO - [pyrmethus_bot_init:3331] - User confirmed settings. Proceeding with trading enabled.
+2025-04-28 12:04:48 - INFO - [pyrmethus_bot_init:3340] - Initializing CCXT exchange connection...
+2025-04-28 12:04:48 - WARNING - [pyrmethus_bot_init:438] - [91m[1mUSING LIVE TRADING ENVIRONMENT - REAL FUNDS AT RISK[0m
+2025-04-28 12:04:48 - INFO - [pyrmethus_bot_init:441] - Loading markets for bybit...
+2025-04-28 12:04:56 - INFO - [pyrmethus_bot_init:448] - Markets loaded successfully (2571 symbols).
+2025-04-28 12:04:56 - INFO - [pyrmethus_bot_init:473] - CCXT exchange initialized: bybit (Sandbox: False)
+2025-04-28 12:04:56 - INFO - [pyrmethus_bot_init:476] - Attempting initial balance fetch for USDT...
+2025-04-28 12:04:56 - DEBUG - [pyrmethus_bot_init:870] - Fetching balance for USDT (Account Type: UNIFIED, Attempt 1/4)...
+2025-04-28 12:04:57 - DEBUG - [pyrmethus_bot_init:877] - Found balance in standard structure for UNIFIED: 10.50191335
+2025-04-28 12:04:57 - INFO - [pyrmethus_bot_init:480] - [92mInitial balance check OK: 10.50191335 USDT[0m
+2025-04-28 12:04:57 - INFO - [pyrmethus_bot_init:3346] - Exchange 'bybit' initialized successfully.
+2025-04-28 12:05:13 - INFO - [pyrmethus_bot_init:3358] - Validating symbol 'FARTCOIN/USDT:USDT' and fetching market info...
+2025-04-28 12:05:13 - DEBUG - [pyrmethus_bot_init:804] - Market Info Retrieved: FARTCOIN/USDT:USDT
+2025-04-28 12:05:13 - DEBUG - [pyrmethus_bot_init:805] -   ID: FARTCOINUSDT, Type: swap, Contract Type: Linear
+2025-04-28 12:05:13 - DEBUG - [pyrmethus_bot_init:806] -   Precision (Price/Amount): 0.0001 / 1
+2025-04-28 12:05:13 - DEBUG - [pyrmethus_bot_init:807] -   Limits Amount (Min/Max): 1 / 5E+5
+2025-04-28 12:05:13 - DEBUG - [pyrmethus_bot_init:808] -   Limits Cost (Min/Max): N/A / N/A
+2025-04-28 12:05:13 - DEBUG - [pyrmethus_bot_init:809] -   Contract Size: 1
+2025-04-28 12:05:13 - INFO - [pyrmethus_bot_init:3364] - Symbol Validated: [92mFARTCOIN/USDT:USDT[0m
+2025-04-28 12:05:13 - INFO - [pyrmethus_bot_init:3365] -   Market Type: Linear
+2025-04-28 12:05:15 - INFO - [pyrmethus_bot_init:3398] - Using timeframe: 3 (CCXT mapping: 3m)
+2025-04-28 12:12:23 - INFO - [pyrmethus_bot_init:3496] - --- Pyrmethus Bot (FARTCOIN/USDT:USDT) Stopping ---
+2025-04-28 17:34:44.750 INFO     [pyrmethus_bot_init:388] [35m[1mPyrmethus Volumatic Bot v1.4.1 Initializing...[0m
+2025-04-28 17:34:44.750 INFO     [pyrmethus_bot_init:389] Using Timezone: America/Chicago (America/Chicago)
+2025-04-28 17:34:44.751 DEBUG    [pyrmethus_bot_init:391] Ensure required packages are installed: pandas, pandas_ta, numpy, ccxt, requests, python-dotenv, colorama, tzdata (optional but recommended)
+2025-04-28 17:34:44.751 INFO     [pyrmethus_bot_init:530] [36m# Loading configuration from 'config.json'...[0m
+2025-04-28 17:34:44.753 DEBUG    [pyrmethus_bot_init:630] # Validating configuration parameters...
+2025-04-28 17:34:44.753 INFO     [pyrmethus_bot_init:702] Quote currency set to: [33mUSDT[0m
+2025-04-28 17:34:44.753 INFO     [pyrmethus_bot_init:771] [36m# Configuration loading and validation complete.[0m
+2025-04-28 17:35:29.704 WARNING  [pyrmethus_bot_init:3729] 
+[91m[1mShutdown signal (SIGINT) received! Initiating graceful shutdown...[0m

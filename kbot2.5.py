@@ -13,6 +13,7 @@ import sys
 import subprocess # For termux-toast security
 from typing import Dict, Optional, Any, Tuple, Union, List
 from decimal import Decimal, getcontext, ROUND_DOWN, InvalidOperation, DivisionByZero
+import copy # For deepcopy of tracker state
 
 # Attempt to import necessary enchantments
 try:
@@ -810,7 +811,8 @@ def calculate_indicators(df: pd.DataFrame) -> Optional[Dict[str, Decimal]]:
             "confirm_ema": get_latest_decimal(confirm_ema_series, price_quantizer, "confirm_ema"),
             "stoch_k": get_latest_decimal(stoch_k, percent_quantizer, "stoch_k", default_val=Decimal("50.00")), # Default neutral
             "stoch_d": get_latest_decimal(stoch_d, percent_quantizer, "stoch_d", default_val=Decimal("50.00")), # Default neutral
-            "atr": get_latest_decimal(atr_series, atr_quantizer, "atr", default_val=Decimal("0.0")) # Default zero
+            "atr": get_latest_decimal(atr_series, atr_quantizer, "atr", default_val=Decimal("0.0")), # Default zero
+            "atr_period": atr_period # Store period for display
         }
 
         # Check if any crucial indicator calculation failed (returned NaN default)
@@ -1102,7 +1104,7 @@ def check_order_status(order_id: str, symbol: str, timeout: int = CONFIG.order_c
                 filled_qty_raw = order_status_data.get('filled', 0.0)
                 filled_qty = Decimal(str(filled_qty_raw)) # Convert to Decimal for accurate comparison
 
-                logger.info(f"Order {order_id} status check: {last_status}, Filled: {filled_qty}")
+                logger.info(f"Order {order_id} status check: {last_status}, Filled: {filled_qty.normalize()}") # Use normalize for cleaner log
 
                 # Check for terminal states (fully filled, canceled, rejected, expired)
                 # 'closed' usually means fully filled for market/limit orders on Bybit.
@@ -1114,7 +1116,7 @@ def check_order_status(order_id: str, symbol: str, timeout: int = CONFIG.order_c
                 remaining_qty_raw = order_status_data.get('remaining', 0.0)
                 remaining_qty = Decimal(str(remaining_qty_raw))
                 if last_status == 'open' and remaining_qty < CONFIG.position_qty_epsilon and filled_qty >= CONFIG.position_qty_epsilon:
-                    logger.info(f"Order {order_id} is 'open' but fully filled ({filled_qty}). Treating as 'closed'.")
+                    logger.info(f"Order {order_id} is 'open' but fully filled ({filled_qty.normalize()}). Treating as 'closed'.")
                     order_status_data['status'] = 'closed' # Update status locally for clarity
                     return order_status_data
 
@@ -1231,12 +1233,13 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
         # Sanity check SL placement relative to current price
         # Use a small multiple of price tick size for tolerance if available, else a tiny Decimal
         try:
-            price_tick_size_raw = MARKET_INFO['precision'].get('price')
-            # If precision is number of decimals, calculate tick size 1 / (10^decimals)
-            if isinstance(price_tick_size_raw, int):
-                price_tick_size = Decimal(1) / (Decimal(10) ** price_tick_size_raw)
-            elif isinstance(price_tick_size_raw, (str, Decimal)):
-                 price_tick_size = Decimal(str(price_tick_size_raw))
+            price_precision_info = MARKET_INFO['precision'].get('price')
+            # If precision is number of decimals (int), calculate tick size 1 / (10^decimals)
+            if isinstance(price_precision_info, int):
+                price_tick_size = Decimal(1) / (Decimal(10) ** price_precision_info)
+            # If precision is tick size (string or Decimal)
+            elif isinstance(price_precision_info, (str, Decimal)):
+                 price_tick_size = Decimal(str(price_precision_info))
             else:
                  price_tick_size = Decimal("1E-8") # Fallback tiny Decimal
         except Exception:
@@ -1276,42 +1279,24 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
 
         elif CONFIG.market_type == 'inverse':
             # Inverse (e.g., BTC/USD:BTC): Size is in Contracts. For BTC/USD on Bybit, 1 Contract = 1 USD.
-            # Risk Amount (Quote = USD) = Qty (Contracts) * (Contract Value in Base) * Stop Distance (Quote)
-            # Contract Value in Base = Contract Size (Quote/Contract) / Price (Quote/Base)
-            # For BTC/USD, Contract Size is 1 USD, Price is USD/BTC.
-            # Contract Value in BTC = 1 USD / (Price USD/BTC) = BTC
-            # Risk (USD) = Qty (Contracts) * (1/Price) * Stop Distance (USD)
-            # Qty (Contracts) = Risk (USD) * Price (USD/BTC) / Stop Distance (USD)
+            # Risk (USD) = Qty (Contracts) * Stop Distance (USD per Contract)
+            # Stop Distance (USD per Contract) = (Price_entry - SL_Price_entry) * Contract_Size (Base/Contract)
+            # Bybit Inverse contract size (Base/Contract) is 1/Price (Quote/Base) for USD pairs.
+            # Example BTC/USD: Contract Size = 1/Price (USD/BTC). So 1 Contract = 1/Price (USD/BTC) BTC.
+            # This is confusing. A simpler view for Inverse (Bybit V5):
+            # Size is in Contracts. 1 Contract = $1 for BTC/USD.
+            # Position Value (in Base) = Qty (Contracts) * Contract_Size (Base/Contract)
+            # Let's re-evaluate the core risk formula:
+            # Risk Amount (Quote) = (Entry Price - SL Price) * Position Quantity (in Base)
+            # Position Quantity (in Base) = Qty (Contracts) * Contract Size (Base/Contract)
+            # Contract Size (Base/Contract) = 1 / Price (Quote/Base) for Bybit Inverse USD pairs
+            # So, Risk (Quote) = (Entry Price - SL Price) * Qty (Contracts) * (1 / Price (Quote/Base))
+            # Risk (Quote) = Stop Distance (Quote) * Qty (Contracts) / Price (Quote/Base)
+            # Qty (Contracts) = Risk (Quote) * Price (Quote/Base) / Stop Distance (Quote)
+            # This confirms the formula used previously is correct for Bybit Inverse USD pairs where Contract Size is 1 USD.
             if price <= Decimal("0"):
                 logger.error(Fore.RED + f"{trade_action} failed: Cannot calculate inverse size with zero or negative price.")
                 return False
-            # Assuming contract_size for Inverse indicates the value per contract in the SETTLE currency (e.g. 1 for BTC/USD:BTC)
-            # If contract_size represents something else, this formula needs adjustment.
-            # Bybit Inverse: Contracts * Contract_Value_in_USD / Price_in_USD = Quantity in Base Asset
-            # Risk (USD) = Qty (Base) * Stop Distance (USD)
-            # Qty (Base) = Risk (USD) / Stop Distance (USD)
-            # Qty (Contracts) = Qty (Base) * Price (USD/BTC) / Contract_Value_in_USD
-            # Qty (Contracts) = (Risk (USD) / Stop Distance (USD)) * Price (USD/BTC) / 1
-            # This simplifies to the same formula as above: Qty (Contracts) = Risk (USD) * Price (USD/BTC) / Stop Distance (USD)
-            # Let's double-check the Bybit V5 docs on contract size interpretation for inverse.
-            # Bybit V5 Inverse perpetual contracts: Contract Size = 1 (for BTC/USD). Quantity is in Contracts.
-            # Position Value = Qty (Contracts) * Contract_Size / Price (Base/Quote)
-            # Example BTC/USD: Value = Qty * 1 / Price (BTC/USD) = Qty / Price (BTC)
-            # Risk (USD) = Value (BTC) * Stop Distance (USD/BTC) = (Qty / Price_entry) * (Price_entry - SL_Price_entry)
-            # This feels off. The stop distance in USD is the relevant factor for risk calculation.
-            # The formula Risk_USD = Qty_Contracts * Stop_Distance_USD makes sense if Qty_Contracts is in USD value.
-            # If 1 Contract = 1 USD, then Qty_Contracts * 1 is the USD value.
-            # Risk (USD) = (Qty Contracts) * Stop Distance (USD per Contract)
-            # Stop Distance (USD per Contract) = (Price_entry - SL_Price_entry) * Contract_Size (Base/Contract)
-            # If Contract_Size (Base/Contract) is 1/Price (Quote/Base), this gets complicated.
-            # Simpler approach: Calculate size in Base currency first, then convert to Contracts.
-            # Size (Base) = Risk (Quote) / Stop Distance (Quote) -- This is Qty_raw from linear calc
-            # Then convert Base Qty to Contracts: Qty (Contracts) = Qty (Base) / Contract_Size (Base/Contract)
-            # Bybit inverse contract size is often 1 USD. So Contract_Size (Quote/Contract) = 1.
-            # Contract Size (Base/Contract) = 1 / Price (Quote/Base)
-            # Qty (Contracts) = Qty (Base) / (1 / Price (Quote/Base)) = Qty (Base) * Price (Quote/Base)
-            # So Qty (Contracts) = (Risk (Quote) / Stop Distance (Quote)) * Price (Quote/Base)
-            # This matches the formula derived earlier. Let's stick to:
             qty_raw = (risk_amount_quote * price) / stop_distance_quote
             logger.debug(f"Inverse Sizing (Contract Size = {contract_size} {quote_currency}): Qty (Contracts) = ({risk_amount_quote:.8f} * {price:.8f}) / {stop_distance_quote:.8f} = {qty_raw:.8f}")
 
@@ -1385,8 +1370,11 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
     # --- Cast the Market Order Spell ---
     order = None
     order_id = None
+    filled_qty = Decimal("0.0") # Initialize filled_qty for later use
+    average_price = price # Initialize average_price for later use
+
     try:
-        logger.trade(f"Submitting {side.upper()} market order for {qty} {symbol}...")
+        logger.trade(f"Submitting {side.upper()} market order for {qty.normalize()} {symbol}...")
         # fetch_with_retries handles category param
         # CCXT expects float amount
         order = fetch_with_retries(
@@ -1403,9 +1391,12 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
 
         logger.debug(f"Market order raw response: {order}")
         order_id = order.get('id')
+
+        # --- Verify Order Fill (Crucial Step) ---
         # Bybit V5 create_market_order might return retCode=0 without an order ID in the standard field immediately.
         # The actual filled order details might be in 'info'->'result'->'list'.
-        # Let's check retCode first if ID is missing.
+        # Let's check retCode first if ID is missing, and try to extract details.
+        order_status_data = None # Initialize as None to indicate status check is needed
         if not order_id:
             if isinstance(order.get('info'), dict):
                  ret_code = order['info'].get('retCode')
@@ -1418,31 +1409,32 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
                            first_order_info = order['info']['result']['list'][0]
                            order_id = first_order_info.get('orderId')
                            # Also capture filled details from response if possible (more accurate than check_order_status if available)
-                           filled_qty_from_response = Decimal(str(first_order_info.get('cumExecQty', '0'))) # Bybit V5 field
-                           avg_price_from_response = Decimal(str(first_order_info.get('avgPrice', 'NaN'))) # Bybit V5 field
-                           logger.debug(f"Extracted details from V5 response: ID={order_id}, Filled={filled_qty_from_response}, AvgPrice={avg_price_from_response}")
+                           filled_qty_from_response_raw = first_order_info.get('cumExecQty', '0') # Bybit V5 field
+                           avg_price_from_response_raw = first_order_info.get('avgPrice', 'NaN') # Bybit V5 field
+                           try:
+                                filled_qty_from_response = Decimal(str(filled_qty_from_response_raw))
+                                avg_price_from_response = Decimal(str(avg_price_from_response_raw))
+                           except InvalidOperation:
+                                logger.error(f"Could not parse filled qty ({filled_qty_from_response_raw}) or avg price ({avg_price_from_response_raw}) from V5 response.")
+                                filled_qty_from_response = Decimal('0')
+                                avg_price_from_response = Decimal('NaN')
+
+                           logger.debug(f"Extracted details from V5 response: ID={order_id}, Filled={filled_qty_from_response.normalize()}, AvgPrice={avg_price_from_response}")
                            # Use extracted details if valid
-                           if filled_qty_from_response >= CONFIG.position_qty_epsilon:
+                           if filled_qty_from_response.copy_abs() >= CONFIG.position_qty_epsilon:
                                 filled_qty = filled_qty_from_response
                                 average_price = avg_price_from_response if not avg_price_from_response.is_nan() else price # Use estimated price if avgPrice is NaN
-                                logger.trade(Fore.GREEN + Style.BRIGHT + f"Market order confirmed FILLED from response: {filled_qty} @ {average_price:.4f}")
-                                # Skip check_order_status and proceed to SL placement immediately
-                                order_status_data = {'status': 'closed', 'filled': float(filled_qty), 'average': float(average_price), 'id': order_id} # Synthesize a CCXT-like dict
+                                logger.trade(Fore.GREEN + Style.BRIGHT + f"Market order confirmed FILLED from response: {filled_qty.normalize()} @ {average_price:.4f}")
+                                # Synthesize a CCXT-like dict for consistency if needed later, but primarily use filled_qty/average_price
+                                order_status_data = {'status': 'closed', 'filled': float(filled_qty), 'average': float(average_price), 'id': order_id}
                                 logger.debug("Skipping check_order_status due to immediate fill confirmation in response.")
-                                # Jump to SL placement block
-                                pass # Continue to the SL placement logic below
+                                # Proceed to SL placement block immediately below
                            else:
-                                logger.warning(f"{trade_action}: Order ID found ({order_id}) but filled quantity from response ({filled_qty_from_response}) is zero. Will proceed with check_order_status.")
+                                logger.warning(f"{trade_action}: Order ID found ({order_id}) but filled quantity from response ({filled_qty_from_response.normalize()}) is zero or negligible. Will proceed with check_order_status.")
                                 # Need to proceed with status check if filled qty is zero in response
-                                order_id = order_id # Keep the extracted ID
-                                order_status_data = None # Reset to trigger check_order_status below
+                                # order_id is set, order_status_data is None -> check_order_status will be called
                       else:
-                          logger.warning(f"{trade_action}: Market order submitted (retCode 0) but no Order ID or fill details found in V5 result list. Will proceed with check_order_status, but tracking might be difficult.")
-                          # order_id remains None, check_order_status will need symbol only (less reliable) or might fail.
-                          # For now, proceed with check_order_status passing symbol. CCXT fetch_order requires ID, this path is problematic.
-                          # CRITICAL: If Market Order gives retCode 0 but no ID, tracking is lost.
-                          # Decision: Treat as failure unless ID is found in response.
-                          logger.error(Fore.RED + f"{trade_action} failed: Market order submitted (retCode 0) but no Order ID found in response. Cannot track status. Aborting.")
+                          logger.warning(f"{trade_action}: Market order submitted (retCode 0) but no Order ID or fill details found in V5 result list. Cannot reliably track status. Aborting.")
                           return False # Cannot proceed safely without order ID
                  else:
                       logger.error(Fore.RED + f"{trade_action} failed: Market order submission failed. Exchange message: {ret_msg} (Code: {ret_code})")
@@ -1454,8 +1446,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
              logger.trade(f"Market order submitted: ID {order_id}")
              # Proceed to verify fill status via check_order_status
 
-        # --- Verify Order Fill (Crucial Step, unless already confirmed from response) ---
-        # If order_status_data is None here, it means we didn't get immediate fill confirmation from response
+        # If order_status_data is None here, it means we got an order_id but no immediate fill confirmation in the response
         if order_status_data is None:
             logger.info(f"Waiting {CONFIG.order_check_delay_seconds}s before checking fill status for order {order_id}...")
             time.sleep(CONFIG.order_check_delay_seconds)
@@ -1463,10 +1454,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
             # Use the dedicated check_order_status function
             order_status_data = check_order_status(order_id, symbol, timeout=CONFIG.order_check_timeout_seconds)
 
-        filled_qty = Decimal("0.0")
-        average_price = price # Fallback to estimated entry price
         order_final_status = 'unknown'
-
         if order_status_data and isinstance(order_status_data, dict):
             order_final_status = order_status_data.get('status', 'unknown')
             filled_str = order_status_data.get('filled')
@@ -1482,31 +1470,35 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
                          average_price = avg_price_decimal
                 except InvalidOperation: logger.error(f"Could not parse average price '{average_str}' to Decimal.")
 
-            logger.debug(f"Order {order_id} status check result: Status='{order_final_status}', Filled='{filled_qty}', AvgPrice='{average_price}'")
+            logger.debug(f"Order {order_id} status check result: Status='{order_final_status}', Filled='{filled_qty.normalize()}', AvgPrice='{average_price:.4f}'")
 
             # 'closed' means fully filled for market orders on Bybit
-            if order_final_status == 'closed' and filled_qty >= CONFIG.position_qty_epsilon:
-                logger.trade(Fore.GREEN + Style.BRIGHT + f"Order {order_id} confirmed FILLED: {filled_qty} @ {average_price:.4f}")
+            if order_final_status == 'closed' and filled_qty.copy_abs() >= CONFIG.position_qty_epsilon:
+                logger.trade(Fore.GREEN + Style.BRIGHT + f"Order {order_id} confirmed FILLED: {filled_qty.normalize()} @ {average_price:.4f}")
             # Handle partial fills (less common for market, but possible during high volatility)
             # Bybit V5 market orders typically fill fully or are rejected. If partially filled, something unusual is happening.
-            elif order_final_status in ['open', 'partially_filled'] and filled_qty >= CONFIG.position_qty_epsilon:
-                 logger.warning(Fore.YELLOW + f"Market Order {order_id} status is '{order_final_status}' but partially/fully filled ({filled_qty}). This is unusual for market orders. Proceeding with filled amount.")
+            elif order_final_status in ['open', 'partially_filled'] and filled_qty.copy_abs() >= CONFIG.position_qty_epsilon:
+                 logger.warning(Fore.YELLOW + f"Market Order {order_id} status is '{order_final_status}' but partially/fully filled ({filled_qty.normalize()}). This is unusual for market orders. Proceeding with filled amount.")
                  # Assume the filled quantity is the position size and proceed.
-            elif order_final_status in ['open', 'partially_filled'] and filled_qty < CONFIG.position_qty_epsilon:
-                 logger.error(Fore.RED + f"{trade_action} failed: Order {order_id} has status '{order_final_status}' but filled quantity is effectively zero ({filled_qty}). Aborting SL placement.")
+            elif order_final_status in ['open', 'partially_filled'] and filled_qty.copy_abs() < CONFIG.position_qty_epsilon:
+                 logger.error(Fore.RED + f"{trade_action} failed: Order {order_id} has status '{order_final_status}' but filled quantity is effectively zero ({filled_qty.normalize()}). Aborting SL placement.")
                  # Attempt to cancel just in case it's stuck (defensive)
                  try:
                      logger.info(f"Attempting cancellation of stuck/unfilled order {order_id}.")
-                     fetch_with_retries(EXCHANGE.cancel_order, order_id, symbol) # Use fetch_with_retries
+                     # Bybit V5 cancel_order requires category and symbol
+                     cancel_params = {'category': CONFIG.market_type, 'symbol': MARKET_INFO['id']}
+                     fetch_with_retries(EXCHANGE.cancel_order, order_id, symbol, params=cancel_params) # Use fetch_with_retries
                  except Exception as cancel_err: logger.warning(f"Failed to cancel stuck order {order_id}: {cancel_err}")
                  return False
             else: # canceled, rejected, expired, failed, unknown, or closed with zero fill
-                 logger.error(Fore.RED + Style.BRIGHT + f"{trade_action} failed: Order {order_id} did not fill successfully: Status '{order_final_status}', Filled Qty: {filled_qty}. Aborting SL placement.")
+                 logger.error(Fore.RED + Style.BRIGHT + f"{trade_action} failed: Order {order_id} did not fill successfully: Status '{order_final_status}', Filled Qty: {filled_qty.normalize()}. Aborting SL placement.")
                  # Attempt to cancel if not already in a terminal state (defensive)
                  if order_final_status not in ['canceled', 'rejected', 'expired']:
                      try:
                           logger.info(f"Attempting cancellation of failed/unknown status order {order_id}.")
-                          fetch_with_retries(EXCHANGE.cancel_order, order_id, symbol) # Use fetch_with_retries
+                          # Bybit V5 cancel_order requires category and symbol
+                          cancel_params = {'category': CONFIG.market_type, 'symbol': MARKET_INFO['id']}
+                          fetch_with_retries(EXCHANGE.cancel_order, order_id, symbol, params=cancel_params) # Use fetch_with_retries
                      except Exception: pass # Ignore errors here, main goal failed anyway
                  return False
         else:
@@ -1517,20 +1509,22 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
                   logger.info(f"Attempting cancellation of unknown status order {order_id}.")
                   # If order_id was None earlier, this will fail. check_order_status should handle None ID internally if possible, but better to have ID.
                   if order_id:
-                       fetch_with_retries(EXCHANGE.cancel_order, order_id, symbol)
+                       # Bybit V5 cancel_order requires category and symbol
+                       cancel_params = {'category': CONFIG.market_type, 'symbol': MARKET_INFO['id']}
+                       fetch_with_retries(EXCHANGE.cancel_order, order_id, symbol, params=cancel_params)
                   else:
                        logger.warning("Cannot attempt cancellation: No order ID available.")
              except Exception: pass
              return False
 
         # Final check on filled quantity after status check
-        if filled_qty < CONFIG.position_qty_epsilon:
-             logger.error(Fore.RED + f"{trade_action} failed: Order {order_id} resulted in effectively zero filled quantity ({filled_qty}) after status check. No position opened.")
+        if filled_qty.copy_abs() < CONFIG.position_qty_epsilon:
+             logger.error(Fore.RED + f"{trade_action} failed: Order {order_id} resulted in effectively zero filled quantity ({filled_qty.normalize()}) after status check. No position opened.")
              return False
 
         # --- Place Initial Stop-Loss Order (Set on Position for Bybit V5) ---
         position_side = "long" if side == "buy" else "short"
-        logger.trade(f"Setting initial SL for new {position_side.upper()} position...")
+        logger.trade(f"Setting initial SL for new {position_side.upper()} position (filled qty: {filled_qty.normalize()})...")
 
         # Use the SL price calculated earlier, already formatted string
         sl_price_str_for_api = sl_price_formatted_str
@@ -1585,7 +1579,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
 
                 # Use actual average fill price in notification
                 entry_msg = (
-                    f"ENTERED {side.upper()} {filled_qty} {symbol.split('/')[0]} @ {average_price:.4f}. "
+                    f"ENTERED {side.upper()} {filled_qty.normalize()} {symbol.split('/')[0]} @ {average_price:.4f}. "
                     f"Initial SL @ {sl_price_str_for_api}. TSL pending profit threshold."
                 )
                 logger.trade(Back.GREEN + Fore.BLACK + Style.BRIGHT + entry_msg)
@@ -1611,7 +1605,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
                  emergency_close_side = "sell" if position_side == "long" else "buy"
                  # Use the *filled quantity* from the successful market order fill check
                  # Format filled quantity precisely for closure order
-                 close_qty_str = format_amount(symbol, filled_qty, ROUND_DOWN)
+                 close_qty_str = format_amount(symbol, filled_qty.copy_abs(), ROUND_DOWN)
                  close_qty_decimal = Decimal(close_qty_str)
 
                  # Check against minimum quantity again before closing
@@ -1622,7 +1616,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
                       min_qty_close = Decimal("0") # Assume zero if unavailable
 
                  if close_qty_decimal < min_qty_close:
-                      logger.critical(f"{Fore.RED}Emergency closure quantity {close_qty_decimal} is below minimum {min_qty_close}. MANUAL CLOSURE REQUIRED for {position_side.upper()} position!")
+                      logger.critical(f"{Fore.RED}Emergency closure quantity {close_qty_decimal.normalize()} is below minimum {min_qty_close}. MANUAL CLOSURE REQUIRED for {position_side.upper()} position!")
                       termux_notify("EMERGENCY!", f"{symbol} {position_side.upper()} POS UNPROTECTED & < MIN QTY! Close manually!")
                       # Do NOT reset tracker state here, as we don't know the position status for sure.
                       return False # Indicate failure of the entire entry process
@@ -1664,7 +1658,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
             try:
                  position_side = "long" if side == "buy" else "short"
                  emergency_close_side = "sell" if position_side == "long" else "buy"
-                 close_qty_str = format_amount(symbol, filled_qty, ROUND_DOWN)
+                 close_qty_str = format_amount(symbol, filled_qty.copy_abs(), ROUND_DOWN)
                  close_qty_decimal = Decimal(close_qty_str)
                  try:
                       min_qty_close = Decimal(str(MARKET_INFO['limits']['amount']['min']))
@@ -1673,7 +1667,7 @@ def place_risked_market_order(symbol: str, side: str, risk_percentage: Decimal, 
                       min_qty_close = Decimal("0") # Assume zero if unavailable
 
                  if close_qty_decimal < min_qty_close:
-                      logger.critical(f"{Fore.RED}Emergency closure quantity {close_qty_decimal} is below minimum {min_qty_close}. MANUAL CLOSURE REQUIRED for {position_side.upper()} position!")
+                      logger.critical(f"{Fore.RED}Emergency closure quantity {close_qty_decimal.normalize()} is below minimum {min_qty_close}. MANUAL CLOSURE REQUIRED for {position_side.upper()} position!")
                       termux_notify("EMERGENCY!", f"{symbol} {position_side.upper()} POS UNPROTECTED & < MIN QTY! Close manually!")
                       return False # Indicate failure
 
@@ -1733,10 +1727,10 @@ def manage_trailing_stop(
          return
 
     # --- Initial Checks ---
-    if position_qty < CONFIG.position_qty_epsilon or entry_price.is_nan() or entry_price <= Decimal("0"):
+    if position_qty.copy_abs() < CONFIG.position_qty_epsilon or entry_price.is_nan() or entry_price <= Decimal("0"):
         # If position seems closed or invalid, ensure tracker is clear.
         if order_tracker[position_side]["sl_id"] or order_tracker[position_side]["tsl_id"]:
-             logger.info(f"Position {position_side} appears closed or invalid (Qty: {position_qty}, Entry: {entry_price}). Clearing stale order trackers.")
+             logger.info(f"Position {position_side} appears closed or invalid (Qty: {position_qty.normalize()}, Entry: {entry_price}). Clearing stale order trackers.")
              order_tracker[position_side] = {"sl_id": None, "tsl_id": None}
         return # No position to manage TSL for
 
@@ -1912,8 +1906,10 @@ def print_status_panel(
     price_color = Fore.WHITE
     trend_desc = f"{Fore.YELLOW}Trend N/A"
     if price is not None and not price.is_nan() and not trend_ema.is_nan():
-        if price > trend_ema: price_color = Fore.GREEN; trend_desc = f"{price_color}(Above Trend)"
-        elif price < trend_ema: price_color = Fore.RED; trend_desc = f"{price_color}(Below Trend)"
+        # Use a small buffer for display consistency
+        trend_buffer_display = trend_ema * Decimal('0.0001')
+        if price > trend_ema + trend_buffer_display: price_color = Fore.GREEN; trend_desc = f"{price_color}(Above Trend)"
+        elif price < trend_ema - trend_buffer_display: price_color = Fore.RED; trend_desc = f"{price_color}(Below Trend)"
         else: price_color = Fore.YELLOW; trend_desc = f"{price_color}(At Trend)"
 
     stoch_k = indicators.get('stoch_k', Decimal('NaN')) if indicators else Decimal('NaN')
@@ -2028,7 +2024,7 @@ def print_status_panel(
     short_signal_color = Fore.RED + Style.BRIGHT if short_signal_status else Fore.WHITE
     trend_status = f"(Trend Filter: {value_color}{'ON' if CONFIG.trade_only_with_trend else 'OFF'}{header_color})"
     signal_reason_text = signals.get('reason', 'N/A')
-    print(f" Signals {trend_status}: Long [{long_signal_color}{str(long_signal_status):<5}{header_color}] | Short [{short_signal_color}{str(short_signal_status):<5}{header_color}]")
+    print(f" Signals {trend_status}: Long [{long_signal_color}{str(long_signal_status).upper():<5}{header_color}] | Short [{short_signal_color}{str(short_signal_status).upper():<5}{header_color}]") # Use .upper() for bool string
     # Display the signal reason below
     print(f" Reason: {Fore.YELLOW}{signal_reason_text}{Style.RESET_ALL}")
     print(header_color + "=" * 80 + reset_all)
@@ -2067,7 +2063,7 @@ def generate_signals(indicators: Optional[Dict[str, Decimal]], current_price: Op
         ema_bullish_cross = fast_ema > slow_ema
         ema_bearish_cross = fast_ema < slow_ema
         # Use a small buffer (e.g., 0.01%) for price vs trend EMA comparison to avoid false signals on tiny fluctuations
-        trend_buffer = trend_ema * Decimal('0.0001') # 0.01% buffer
+        trend_buffer = trend_ema.copy_abs() * Decimal('0.0001') # 0.01% buffer based on EMA value
         price_above_trend = current_price > trend_ema + trend_buffer
         price_below_trend = current_price < trend_ema - trend_buffer
         price_at_trend = abs(current_price - trend_ema) <= trend_buffer
@@ -2209,19 +2205,18 @@ def trading_spell_cycle(cycle_count: int) -> None:
         logger.error(Fore.RED + "Failed to fetch valid current balance/equity. Cannot perform risk calculation or trading actions.")
         # Don't proceed with trade actions without knowing equity
         cycle_success = False
-        # Fall through to display panel
+        # Fall through to display panel (will show N/A equity)
 
     # Fetch positions (crucial state)
     positions = get_current_position(CONFIG.symbol)
     if positions is None:
         logger.error(Fore.RED + "Failed to fetch current positions. Cannot manage state or trade.")
         cycle_success = False
-        # Fall through to display panel
+        # Fall through to display panel (will show N/A positions)
 
     # --- Capture State Snapshot for Status Panel & Logic ---
     # Do this *before* potentially modifying state (like TSL management or entry)
     # Use deepcopy for the tracker to ensure the panel shows state before any potential updates in this cycle
-    import copy
     order_tracker_snapshot = copy.deepcopy(order_tracker)
     # Use the fetched positions directly as the snapshot (if fetch succeeded)
     positions_snapshot = positions if positions is not None else {
@@ -2230,7 +2225,17 @@ def trading_spell_cycle(cycle_count: int) -> None:
     }
 
     # --- Logic continues only if critical data is available (positions and equity) ---
-    if positions is not None and current_equity is not None and not current_equity.is_nan():
+    # Note: We can still show the panel even if positions/equity fetch failed,
+    # but we *cannot* perform trade actions or TSL management safely.
+    can_trade_logic = (
+        positions is not None and
+        current_equity is not None and
+        not current_equity.is_nan() and
+        current_equity > Decimal('0')
+    )
+
+
+    if can_trade_logic:
         # Use the *current* state from `positions` dict (not snapshot) for logic decisions
         active_long_pos = positions.get('long', {})
         active_short_pos = positions.get('short', {})
@@ -2244,7 +2249,7 @@ def trading_spell_cycle(cycle_count: int) -> None:
 
         # 5. Manage Trailing Stops
         # Only attempt TSL management if indicators and current price are available
-        if indicators is not None and not current_price.is_nan():
+        if indicators is not None and not current_price.is_nan() and not current_atr.is_nan():
              if has_long_pos:
                  logger.debug("Managing TSL for existing LONG position...")
                  manage_trailing_stop(CONFIG.symbol, "long", active_long_qty, active_long_pos.get('entry_price', Decimal('NaN')), current_price, current_atr)
@@ -2262,7 +2267,7 @@ def trading_spell_cycle(cycle_count: int) -> None:
                      order_tracker_snapshot["long"] = {"sl_id": None, "tsl_id": None}
                      order_tracker_snapshot["short"] = {"sl_id": None, "tsl_id": None}
         else:
-             logger.warning("Skipping TSL management due to missing indicators or invalid price.")
+             logger.warning("Skipping TSL management due to missing indicators, invalid price, or invalid ATR.")
 
         # 6. Generate Trading Signals
         # Signals only generated if indicators and current price are available
@@ -2276,7 +2281,7 @@ def trading_spell_cycle(cycle_count: int) -> None:
 
         # 7. Execute Trades based on Signals
         # Only attempt entry if currently flat, indicators/ATR are available, and equity is sufficient
-        if is_flat and indicators is not None and not current_atr.is_nan() and current_equity > Decimal('0'):
+        if is_flat and indicators is not None and not current_atr.is_nan(): # Equity checked in can_trade_logic
             trade_attempted = False
             if signals.get("long"):
                 logger.info(Fore.GREEN + Style.BRIGHT + f"Long signal detected! {signals.get('reason', '')}. Attempting entry...")
@@ -2307,11 +2312,16 @@ def trading_spell_cycle(cycle_count: int) -> None:
              # Example: if pos_side == "LONG" and signals.get("short"): close_position("long")
              # Example: if pos_side == "SHORT" and signals.get("long"): close_position("short")
         else:
-             logger.warning("Skipping trade entry logic due to insufficient data, existing position, or zero equity.")
+             # This block is hit if can_trade_logic is False, meaning positions/equity fetch failed
+             logger.warning("Skipping trade entry logic due to earlier critical data failure (positions or equity).")
+             # signals will retain the "Skipped due to critical data failure" reason
+
     else:
-        # Cycle failed earlier (positions or equity fetch failed), skip trade logic
-        logger.warning("Skipping trade logic due to earlier critical data fetch failure (positions or equity).")
+        # Cycle failed earlier (positions or equity fetch failed), skip trade logic entirely
+        logger.warning("Skipping all trade logic (TSL management, signal generation, entry) due to earlier critical data failure (positions or equity).")
         signals = {"long": False, "short": False, "reason": "Skipped due to critical data failure"} # Ensure signals are false for panel
+        indicators = None # Ensure indicators is None if logic skipped due to data failure
+
 
     # 8. Display Status Panel (Always display if data allows)
     # Use the state captured *before* TSL management and potential trade execution for consistency
@@ -2339,6 +2349,7 @@ def graceful_shutdown() -> None:
 
     symbol = CONFIG.symbol
     market_id = MARKET_INFO.get('id') # Exchange specific ID
+    quote_currency = MARKET_INFO.get('settle', 'USDT') # Use settle currency
 
     # 1. Cancel All Open Orders for the Symbol
     # This includes stop loss / take profit orders if they are separate entities (unlikely for Bybit V5 position stops)
@@ -2368,9 +2379,9 @@ def graceful_shutdown() -> None:
                 # Use cancel_all_orders for efficiency if supported and reliable
                 # Note: cancel_all_orders might not exist or work reliably for all exchanges/params
                 # Fallback: loop through fetched open orders and cancel individually
-                if EXCHANGE.has.get('cancelAllOrders') and hasattr(EXCHANGE, 'private_post_order_cancel_all'): # Check both CCXT flag and implicit method
-                    logger.info(f"Using cancel_all_orders for {symbol}...")
-                    # Bybit V5 specific endpoint: POST /v5/order/cancel-all
+                # Bybit V5 supports POST /v5/order/cancel-all
+                if hasattr(EXCHANGE, 'private_post_order_cancel_all'):
+                    logger.info(f"Using private_post_order_cancel_all for {symbol}...")
                     response = fetch_with_retries(EXCHANGE.private_post_order_cancel_all, params=cancel_params)
                     logger.debug(f"Cancel all orders raw response: {response}")
                     logger.info(f"Cancel all orders command sent for {symbol}. Checking response...")
@@ -2381,7 +2392,8 @@ def graceful_shutdown() -> None:
                         error_msg = response.get('info', {}).get('retMsg', 'Unknown error') if isinstance(response, dict) else str(response)
                         logger.warning(Fore.YELLOW + f"Cancel all orders command sent, success confirmation unclear or failed: {error_msg}. MANUAL CHECK REQUIRED.")
                 else:
-                    logger.info("cancel_all_orders not available/reliable, cancelling individually...")
+                    # Fallback to individual cancellation if cancel_all is not supported or the specific method isn't found
+                    logger.info("cancel_all_orders method not directly available or reliable, cancelling individually...")
                     cancelled_count = 0
                     for order in open_orders_list:
                          try:
@@ -2432,12 +2444,23 @@ def graceful_shutdown() -> None:
                  min_qty_dec = Decimal("0") # Assume zero if unavailable
 
             # Iterate through fetched positions (not the default pos_dict)
-            for side, pos_data in positions.items():
-                 qty = pos_data.get('qty', Decimal("0.0"))
-                 entry_price = pos_data.get('entry_price', Decimal("NaN"))
+            # Ensure we are iterating over the fetched positions, which might be different from the initial pos_dict state
+            fetched_positions_to_process = {}
+            if positions is not None:
+                # Filter for positions with significant quantity
+                for side, pos_data in positions.items():
+                     qty = pos_data.get('qty', Decimal("0.0"))
+                     if qty.copy_abs() >= CONFIG.position_qty_epsilon:
+                          fetched_positions_to_process[side] = pos_data
 
-                 # Check if quantity is significant using epsilon
-                 if qty.copy_abs() >= CONFIG.position_qty_epsilon:
+            if not fetched_positions_to_process:
+                 logger.info(Fore.GREEN + "No significant open positions found requiring closure.")
+            else:
+                logger.warning(Fore.YELLOW + f"Found {len(fetched_positions_to_process)} positions requiring closure.")
+
+                for side, pos_data in fetched_positions_to_process.items():
+                     qty = pos_data.get('qty', Decimal("0.0"))
+                     entry_price = pos_data.get('entry_price', Decimal("NaN"))
                      close_side = "sell" if side == "long" else "buy"
                      logger.warning(Fore.YELLOW + f"Closing {side} position (Qty: {qty.normalize()}, Entry: {entry_price:.4f if not entry_price.is_nan() else 'N/A'}) with market order...")
                      try:
@@ -2447,7 +2470,7 @@ def graceful_shutdown() -> None:
 
                          # Validate against minimum quantity before attempting closure
                          if close_qty_decimal < min_qty_dec:
-                              logger.critical(f"{Fore.RED}Closure quantity {close_qty_decimal} for {side} position is below exchange minimum {min_qty_dec}. MANUAL CLOSURE REQUIRED!")
+                              logger.critical(f"{Fore.RED}Closure quantity {close_qty_decimal.normalize()} for {side} position is below exchange minimum {min_qty_dec}. MANUAL CLOSURE REQUIRED!")
                               termux_notify("EMERGENCY!", f"{symbol} {side.upper()} POS < MIN QTY! Close manually!")
                               continue # Skip trying to close this position
 
@@ -2483,18 +2506,18 @@ def graceful_shutdown() -> None:
                      except Exception as e:
                          logger.critical(Fore.RED + Style.BRIGHT + f"Unexpected error closing {side} position: {e}. MANUAL INTERVENTION REQUIRED!", exc_info=True)
                          termux_notify("EMERGENCY!", f"{symbol} {side.upper()} POS CLOSURE FAILED! Manual action!")
-                 else:
-                      logger.debug(f"No significant {side} position found (Qty: {qty.normalize()}).")
+
 
             # Final summary message
-            if closed_count > 0:
-                 logger.info(Fore.GREEN + f"Successfully placed {closed_count} closure order(s).")
-            elif any(p['qty'].copy_abs() >= CONFIG.position_qty_epsilon for p in positions.values()):
-                 # This case means positions existed but closure attempts failed or quantities were too small
-                 logger.warning(Fore.YELLOW + "Attempted shutdown but closure orders failed or were not possible for all open positions. MANUAL CHECK REQUIRED.")
-                 termux_notify("Shutdown Warning!", f"{symbol} Manual check needed - positions might remain.")
+            if closed_count == len(fetched_positions_to_process):
+                 logger.info(Fore.GREEN + f"Successfully placed closure orders for all {closed_count} detected positions.")
+            elif closed_count > 0:
+                 logger.warning(Fore.YELLOW + f"Placed closure orders for {closed_count} positions, but {len(fetched_positions_to_process) - closed_count} positions may remain. MANUAL CHECK REQUIRED.")
+                 termux_notify("Shutdown Warning!", f"{symbol} Manual check needed - {len(fetched_positions_to_process) - closed_count} positions might remain.")
             else:
-                logger.info(Fore.GREEN + "No open positions found requiring closure.")
+                logger.warning(Fore.YELLOW + "Attempted shutdown but closure orders failed or were not possible for all open positions. MANUAL CHECK REQUIRED.")
+                termux_notify("Shutdown Warning!", f"{symbol} Manual check needed - positions might remain.")
+
 
         elif positions is None:
              # Failure to fetch positions during shutdown is critical
@@ -2533,6 +2556,7 @@ if __name__ == "__main__":
     logger.info(f"Loop Interval: {CONFIG.loop_sleep_seconds}s")
     logger.info(f"OHLCV Limit: {CONFIG.ohlcv_limit}")
     logger.info(f"Fetch Retries: {CONFIG.max_fetch_retries}")
+    logger.info(f"Order Check Timeout: {CONFIG.order_check_timeout_seconds}s")
     logger.info(f"-----------------------------")
 
 
@@ -2582,5 +2606,4 @@ if __name__ == "__main__":
         print(Back.MAGENTA + Fore.WHITE + Style.BRIGHT + " " * 80)
         print(Back.MAGENTA + Fore.WHITE + Style.BRIGHT + "*** Pyrmethus Trading Spell Deactivated ***")
         print(Back.MAGENTA + Fore.WHITE + Style.BRIGHT + " " * 80 + Style.RESET_ALL)
-
 

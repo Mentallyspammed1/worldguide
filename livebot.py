@@ -1,4 +1,3 @@
-```python
 # livebot.py
 # Enhanced and Upgraded Scalping Bot Framework (Derived from sxs.py)
 # Focuses on robust execution, error handling, advanced position management (BE, TSL),
