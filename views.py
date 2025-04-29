@@ -105,18 +105,25 @@ def get_bot_instance():
         logger.warning("Using mock bot instance for UI")
         class MockBot:
             def __init__(self):
+                import pandas as pd
+                import numpy as np
+                from datetime import datetime, timedelta
+                
                 self.config = {
                     "exchange": "bybit",
                     "symbol": "BTC/USDT",
                     "timeframe": "15m",
                     "dry_run": True,
                     "strategy": {
-                        "active": "ehlers_supertrend"
+                        "active": "ehlers_supertrend",
+                        "params": {}
                     },
                     "risk_management": {
                         "position_size_pct": 1.0,
                         "max_open_positions": 3,
-                        "use_sl_tp": True
+                        "use_sl_tp": True,
+                        "stop_loss_pct": 2.0,
+                        "take_profit_pct": 4.0
                     }
                 }
                 self.state = {
@@ -130,12 +137,46 @@ def get_bot_instance():
                 self.exchange = None
                 self.symbol = "BTC/USDT"
                 self.timeframe = "15m"
+                self.config_file = "config.json"
+                
+                # Create sample candles dataframe for the UI
+                now = datetime.now()
+                periods = 100
+                timestamps = [now - timedelta(minutes=15*i) for i in range(periods)]
+                timestamps.reverse()  # oldest first
+                
+                # Generate some random but plausible price data
+                base_price = 50000
+                price_data = []
+                for i in range(periods):
+                    change = np.random.normal(0, 1) * 100  # Random price movement
+                    price = base_price + change
+                    base_price = price  # Use as new base for next iteration
+                    
+                    # Create OHLCV candle with some randomness
+                    open_price = price - np.random.random() * 50
+                    close_price = price + np.random.random() * 50
+                    high_price = max(open_price, close_price) + np.random.random() * 50
+                    low_price = min(open_price, close_price) - np.random.random() * 50
+                    volume = np.random.random() * 100 + 10
+                    
+                    price_data.append({
+                        'open': open_price,
+                        'high': high_price,
+                        'low': low_price,
+                        'close': close_price,
+                        'volume': volume
+                    })
+                
+                # Create DataFrame with timestamps as index
+                self.candles_df = pd.DataFrame(price_data, index=timestamps)
+                self.current_positions = {}
             
             def get_balance(self):
                 return {"total": 10000, "free": 10000, "used": 0}
                 
             def get_ticker(self):
-                return {"symbol": "BTC/USDT", "last": 50000, "bid": 49990, "ask": 50010}
+                return {"symbol": "BTC/USDT", "last": 50000, "bid": 49990, "ask": 50010, "volume": 1000, "percentage": 0.5, "high": 51000, "low": 49000}
                 
             def start(self):
                 self.state["active"] = True
@@ -143,6 +184,22 @@ def get_bot_instance():
                 
             def stop(self):
                 self.state["active"] = False
+                return True
+                
+            def update_candles(self):
+                # This would normally fetch fresh candles, but for mock we'll just return existing ones
+                return True
+                
+            def initialize(self):
+                # This would reinitialize the trading bot with new config
+                return True
+                
+            def update_positions(self):
+                # This would update positions from the exchange
+                return self.current_positions
+                
+            def close_position(self, symbol, position_id=None):
+                # This would close a position
                 return True
                 
         return MockBot()
