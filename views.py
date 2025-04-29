@@ -24,8 +24,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db
-from models import User, TradingConfiguration, TradeHistory, Position #Fixed import
-from trading_bot import TradingBot
+from models import User, BotConfig, TradeHistory, ApiKey
+from simple_bot import TradingBot, MockBot
 
 # Configure logger
 logger = logging.getLogger("views")

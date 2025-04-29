@@ -109,9 +109,9 @@ class TradeHistory(db.Model):
         return f'<TradeHistory {self.symbol} {self.side} {self.size} @ {self.entry_price}>'
 
 
-class TradingConfiguration(db.Model):
+class BotConfig(db.Model):
     """Trading configuration model"""
-    __tablename__ = 'trading_configurations'
+    __tablename__ = 'bot_configs'
     
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
