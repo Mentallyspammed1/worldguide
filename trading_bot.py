@@ -724,26 +724,75 @@ class TradingBot:
                 "message": str(e)
             }
 
-    def should_enter_trade(self) -> Tuple[bool, str]:
+    def should_enter_trade(self) -> Tuple[bool, str, Dict]:
         """
-        Determine if we should enter a trade based on signals.
+        Determine if we should enter a trade based on advanced strategies.
         
         Returns:
-            Tuple[bool, str]: (should_enter, side)
+            Tuple[bool, str, Dict]: (should_enter, side, trade_parameters)
         """
         # Don't enter if we already have a position
         if self.current_position:
-            return False, ""
+            return False, "", {}
         
-        # Get strategy settings
-        strategy = self.config.get("strategy", {})
-        indicators = strategy.get("indicators", {})
-        entry_threshold = strategy.get("entry_threshold", 0.5)
+        # Try to load strategy configuration
+        strategy_config_file = "strategy_config.json"
+        try:
+            with open(strategy_config_file, "r") as f:
+                strategy_config = json.load(f)
+                
+            # Check if advanced strategies are enabled
+            active_strategy = strategy_config.get("active_strategy", "auto")
+            self.logger.info(f"Using strategy mode: {active_strategy}")
+            
+            # If using only basic indicators, fall back to original method
+            if active_strategy == "basic":
+                raise FileNotFoundError("Using basic indicator mode")
+                
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            # Fall back to basic indicator signals if strategy config not available
+            self.logger.warning(f"Using basic indicators: {str(e)}")
+            
+            # Get strategy settings
+            strategy = self.config.get("strategy", {})
+            indicators = strategy.get("indicators", {})
+            entry_threshold = strategy.get("entry_threshold", 0.5)
+            
+            # Get volume filter settings
+            volume_filter = strategy.get("volume_filter", {})
+            if volume_filter.get("enabled", False):
+                min_volume = volume_filter.get("min_24h_volume_usd", 1000000)
+                ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
+                volume_usd = ticker["quoteVolume"]
+                
+                if volume_usd < min_volume:
+                    self.logger.debug(
+                        f"Volume filter rejected trade: {volume_usd:.2f} < {min_volume:.2f}"
+                    )
+                    return False, "", {}
+            
+            # Calculate signal
+            signal_strength, signal_direction = calculate_signal(
+                self.candles_df,
+                indicators,
+                threshold=entry_threshold
+            )
+            
+            # Check if signal is strong enough to enter
+            if signal_strength >= entry_threshold and signal_direction in ["long", "short"]:
+                self.logger.info(
+                    f"Entry signal: {signal_direction} with strength {signal_strength:.2f}"
+                )
+                return True, signal_direction, {}
+            
+            return False, "", {}
         
-        # Get volume filter settings
-        volume_filter = strategy.get("volume_filter", {})
-        if volume_filter.get("enabled", False):
-            min_volume = volume_filter.get("min_24h_volume_usd", 1000000)
+        # Apply global filters first
+        filters = strategy_config.get("filters", {})
+        
+        # Check volume filter
+        if filters.get("volume_filter", {}).get("enabled", True):
+            min_volume = filters["volume_filter"].get("min_24h_volume_usd", 5000000)
             ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
             volume_usd = ticker["quoteVolume"]
             
@@ -751,23 +800,90 @@ class TradingBot:
                 self.logger.debug(
                     f"Volume filter rejected trade: {volume_usd:.2f} < {min_volume:.2f}"
                 )
-                return False, ""
+                return False, "", {}
         
-        # Calculate signal
-        signal_strength, signal_direction = calculate_signal(
+        # Check volatility filter
+        if filters.get("volatility_filter", {}).get("enabled", True):
+            if "atr" not in self.candles_df.columns:
+                self.logger.warning("ATR indicator missing for volatility filter")
+            else:
+                current_atr = self.candles_df["atr"].iloc[-1]
+                current_price = self.candles_df["close"].iloc[-1]
+                atr_pct = (current_atr / current_price) * 100
+                
+                min_atr_pct = filters["volatility_filter"].get("min_atr_pct", 0.3)
+                max_atr_pct = filters["volatility_filter"].get("max_atr_pct", 5.0)
+                
+                if atr_pct < min_atr_pct or atr_pct > max_atr_pct:
+                    self.logger.debug(
+                        f"Volatility filter rejected trade: ATR {atr_pct:.2f}% outside range [{min_atr_pct}%, {max_atr_pct}%]"
+                    )
+                    return False, "", {}
+        
+        # Check time filter
+        if filters.get("time_filter", {}).get("enabled", False):
+            import datetime
+            current_hour = datetime.datetime.now().hour
+            blackout_hours = filters["time_filter"].get("blackout_hours", [])
+            
+            if current_hour in blackout_hours:
+                self.logger.debug(
+                    f"Time filter rejected trade: Current hour {current_hour} in blackout hours {blackout_hours}"
+                )
+                return False, "", {}
+        
+        # Get higher timeframe data if available
+        higher_tf = strategy_config.get("multi_timeframe_trend", {}).get("higher_timeframe", "1h")
+        higher_tf_df = None
+        
+        try:
+            # Fetch higher timeframe candles
+            higher_tf_ohlcv = retry_api_call(
+                self.exchange.fetch_ohlcv,
+                self.symbol,
+                timeframe=higher_tf,
+                limit=100
+            )
+            
+            # Convert to DataFrame
+            higher_tf_df = pd.DataFrame(
+                higher_tf_ohlcv,
+                columns=["timestamp", "open", "high", "low", "close", "volume"]
+            )
+            
+            # Convert timestamp to datetime
+            higher_tf_df["timestamp"] = pd.to_datetime(higher_tf_df["timestamp"], unit="ms")
+            higher_tf_df.set_index("timestamp", inplace=True)
+            
+            # Calculate indicators for higher timeframe
+            higher_tf_df = calculate_indicators(
+                higher_tf_df, 
+                self.config.get("strategy", {}).get("indicators", {})
+            )
+            self.logger.debug(f"Successfully loaded higher timeframe data ({higher_tf})")
+        except Exception as e:
+            self.logger.error(f"Error fetching higher timeframe data: {e}")
+            higher_tf_df = self.candles_df.copy()  # Fallback to current timeframe
+        
+        # Evaluate strategies
+        strategy_signal = evaluate_strategies(
             self.candles_df,
-            indicators,
-            threshold=entry_threshold
+            higher_tf_df,
+            strategy_config
         )
         
-        # Check if signal is strong enough to enter
-        if signal_strength >= entry_threshold and signal_direction in ["long", "short"]:
-            self.logger.info(
-                f"Entry signal: {signal_direction} with strength {signal_strength:.2f}"
-            )
-            return True, signal_direction
+        # Get signal threshold
+        threshold = strategy_config.get("strategy_threshold", 0.7)
         
-        return False, ""
+        # Check if we have a valid signal
+        if strategy_signal["signal"] >= threshold and strategy_signal["direction"]:
+            self.logger.info(
+                f"Entry signal detected ({strategy_signal['strategy']}): "
+                f"{strategy_signal['direction']} with strength {strategy_signal['signal']:.2f}"
+            )
+            return True, strategy_signal["direction"], strategy_signal["parameters"]
+        
+        return False, "", {}
 
     def should_exit_trade(self) -> bool:
         """
@@ -779,6 +895,117 @@ class TradingBot:
         if not self.current_position:
             return False
         
+        # Get current position details
+        position_side = self.current_position["side"]
+        entry_price = self.current_position["entry_price"]
+        
+        # Get current price
+        ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
+        current_price = ticker["last"]
+        
+        # Try to load the strategy configuration
+        strategy_config_file = "strategy_config.json"
+        try:
+            with open(strategy_config_file, "r") as f:
+                strategy_config = json.load(f)
+                
+            # Check if advanced exit rules are enabled
+            active_strategy = strategy_config.get("active_strategy", "auto")
+            if active_strategy == "basic":
+                raise FileNotFoundError("Using basic indicator mode for exit")
+            
+            # Get risk management settings
+            risk_mgmt = strategy_config.get("risk_management", {})
+            
+            # Check if we have trade parameters in the position state
+            if "parameters" in self.current_position:
+                trade_params = self.current_position["parameters"]
+                
+                # Check take profit level
+                if "take_profit" in trade_params:
+                    tp_price = trade_params["take_profit"]
+                    if (position_side == "long" and current_price >= tp_price) or \
+                       (position_side == "short" and current_price <= tp_price):
+                        self.logger.info(f"Exit signal: Take profit target reached at {tp_price}")
+                        return True
+                
+                # Check stop loss level
+                if "stop_loss" in trade_params:
+                    sl_price = trade_params["stop_loss"]
+                    if (position_side == "long" and current_price <= sl_price) or \
+                       (position_side == "short" and current_price >= sl_price):
+                        self.logger.info(f"Exit signal: Stop loss triggered at {sl_price}")
+                        return True
+                
+                # Check false breakout exit (for support/resistance strategy)
+                if trade_params.get("strategy") == "support_resistance_breakout":
+                    if "false_breakout_level" in trade_params:
+                        fb_level = trade_params["false_breakout_level"]
+                        if (position_side == "long" and current_price < fb_level) or \
+                           (position_side == "short" and current_price > fb_level):
+                            self.logger.info(f"Exit signal: False breakout detected at {fb_level}")
+                            return True
+                
+                # Check time-based exit
+                if "entry_time" in trade_params and "max_time_in_trade" in trade_params:
+                    entry_time = trade_params["entry_time"]
+                    max_time = trade_params["max_time_in_trade"]
+                    current_time = time.time() * 1000  # Current time in ms
+                    
+                    if (current_time - entry_time) / (60 * 1000) > max_time:  # Convert to minutes
+                        self.logger.info(f"Exit signal: Maximum time in trade ({max_time} candles) reached")
+                        return True
+                
+                # Check trailing stop
+                if risk_mgmt.get("trailing_stop", {}).get("enabled", True):
+                    if "trailing_stop_price" in self.current_position:
+                        ts_price = self.current_position["trailing_stop_price"]
+                        if (position_side == "long" and current_price <= ts_price) or \
+                           (position_side == "short" and current_price >= ts_price):
+                            self.logger.info(f"Exit signal: Trailing stop triggered at {ts_price}")
+                            return True
+            
+            # Check multi-timeframe trend exit signals
+            if trade_params.get("strategy") == "multi_timeframe_trend" and "exit_indicator" in trade_params:
+                if trade_params["exit_indicator"] == "Higher TF EMA 50 cross":
+                    # Get higher timeframe data
+                    higher_tf = strategy_config.get("multi_timeframe_trend", {}).get("higher_timeframe", "1h")
+                    
+                    try:
+                        # Fetch higher timeframe candles
+                        higher_tf_ohlcv = retry_api_call(
+                            self.exchange.fetch_ohlcv,
+                            self.symbol,
+                            timeframe=higher_tf,
+                            limit=100
+                        )
+                        
+                        # Convert to DataFrame
+                        higher_tf_df = pd.DataFrame(
+                            higher_tf_ohlcv,
+                            columns=["timestamp", "open", "high", "low", "close", "volume"]
+                        )
+                        
+                        # Calculate EMA 50
+                        if "ema_50" not in higher_tf_df.columns:
+                            higher_tf_df["ema_50"] = higher_tf_df["close"].ewm(span=50, adjust=False).mean()
+                        
+                        # Check EMA cross condition
+                        current_price = higher_tf_df["close"].iloc[-1]
+                        current_ema50 = higher_tf_df["ema_50"].iloc[-1]
+                        
+                        if (position_side == "long" and current_price < current_ema50) or \
+                           (position_side == "short" and current_price > current_ema50):
+                            self.logger.info(f"Exit signal: Higher timeframe trend change detected")
+                            return True
+                    except Exception as e:
+                        self.logger.error(f"Error checking higher timeframe exit: {e}")
+                        
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            # Fall back to basic exit rules
+            self.logger.warning(f"Using basic exit rules: {str(e)}")
+            
+        # Basic exit rules (as a fallback)
         # Get strategy settings
         strategy = self.config.get("strategy", {})
         indicators = strategy.get("indicators", {})
@@ -792,13 +1019,13 @@ class TradingBot:
         )
         
         # Check for exit signal (opposite to current position)
-        if self.current_position["side"] == "long" and signal_direction == "short":
+        if position_side == "long" and signal_direction == "short":
             if signal_strength >= abs(exit_threshold):
                 self.logger.info(
                     f"Exit signal for long: short with strength {signal_strength:.2f}"
                 )
                 return True
-        elif self.current_position["side"] == "short" and signal_direction == "long":
+        elif position_side == "short" and signal_direction == "long":
             if signal_strength >= abs(exit_threshold):
                 self.logger.info(
                     f"Exit signal for short: long with strength {signal_strength:.2f}"
@@ -811,10 +1038,10 @@ class TradingBot:
                 ema_cross = self.candles_df["ema_cross"].iloc[-1]
                 prev_ema_cross = self.candles_df["ema_cross"].iloc[-2] if len(self.candles_df) > 2 else 0
                 
-                if self.current_position["side"] == "long" and ema_cross == -1 and prev_ema_cross != -1:
+                if position_side == "long" and ema_cross == -1 and prev_ema_cross != -1:
                     self.logger.info("Exit signal for long: EMA cross turned bearish")
                     return True
-                elif self.current_position["side"] == "short" and ema_cross == 1 and prev_ema_cross != 1:
+                elif position_side == "short" and ema_cross == 1 and prev_ema_cross != 1:
                     self.logger.info("Exit signal for short: EMA cross turned bullish")
                     return True
         
@@ -922,13 +1149,22 @@ class TradingBot:
                 else:
                     # If we're not exiting, check if we should move stop loss to break even
                     self.check_break_even()
+                    
+                    # Update trailing stop if active
+                    self.update_trailing_stop()
             # Check if we should enter a new position
             else:
-                should_enter, side = self.should_enter_trade()
+                should_enter, side, trade_params = self.should_enter_trade()
                 if should_enter:
                     # Convert side to order side
                     order_side = "buy" if side == "long" else "sell"
-                    self.execute_entry(order_side)
+                    
+                    # Add current timestamp to trade parameters
+                    if trade_params:
+                        trade_params["entry_time"] = int(time.time() * 1000)
+                        
+                    # Execute entry with strategy parameters
+                    self.execute_entry(order_side, trade_params)
             
             # Update state with timestamp
             self.state["last_update"] = int(time.time() * 1000)
@@ -936,6 +1172,83 @@ class TradingBot:
             
         except Exception as e:
             self.logger.error(f"Error in run_once: {e}")
+            
+    def update_trailing_stop(self) -> None:
+        """Update trailing stop if enabled and conditions are met"""
+        if not self.current_position:
+            return
+            
+        # Get current position details
+        position_side = self.current_position["side"]
+        entry_price = self.current_position["entry_price"]
+        
+        # Try to load strategy configuration
+        try:
+            with open("strategy_config.json", "r") as f:
+                strategy_config = json.load(f)
+                
+            # Get trailing stop settings
+            trailing_stop_config = strategy_config.get("risk_management", {}).get("trailing_stop", {})
+            
+            if not trailing_stop_config.get("enabled", True):
+                return
+                
+            # Get current price
+            ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
+            current_price = ticker["last"]
+            
+            # Get activation percentage and trail percentage
+            activation_pct = trailing_stop_config.get("activation_pct", 1.5)
+            trail_pct = trailing_stop_config.get("trail_pct", 0.75)
+            
+            # Get current trailing stop if it exists
+            current_stop = self.current_position.get("trailing_stop_price", 0)
+            
+            # Default to initial stop loss if no trailing stop set yet
+            if current_stop == 0:
+                if "parameters" in self.current_position and "stop_loss" in self.current_position["parameters"]:
+                    current_stop = self.current_position["parameters"]["stop_loss"]
+                else:
+                    # Calculate a default stop loss
+                    if position_side == "long":
+                        current_stop = entry_price * 0.95  # 5% below entry
+                    else:
+                        current_stop = entry_price * 1.05  # 5% above entry
+            
+            # Check if price has moved enough to activate trailing stop
+            activation_threshold = 0.0
+            if position_side == "long":
+                activation_threshold = entry_price * (1 + activation_pct/100)
+                
+                if current_price >= activation_threshold:
+                    # Calculate new trailing stop
+                    new_stop = current_price * (1 - trail_pct/100)
+                    
+                    # Only update if new stop is higher than current
+                    if new_stop > current_stop:
+                        self.logger.info(f"Updated trailing stop: {current_stop} -> {new_stop}")
+                        self.current_position["trailing_stop_price"] = new_stop
+                        # Save position state
+                        self.state["positions"][self.symbol] = self.current_position
+                        self.save_state()
+            else:  # short position
+                activation_threshold = entry_price * (1 - activation_pct/100)
+                
+                if current_price <= activation_threshold:
+                    # Calculate new trailing stop
+                    new_stop = current_price * (1 + trail_pct/100)
+                    
+                    # Only update if new stop is lower than current
+                    if new_stop < current_stop:
+                        self.logger.info(f"Updated trailing stop: {current_stop} -> {new_stop}")
+                        self.current_position["trailing_stop_price"] = new_stop
+                        # Save position state
+                        self.state["positions"][self.symbol] = self.current_position
+                        self.save_state()
+                        
+        except (FileNotFoundError, json.JSONDecodeError):
+            # Skip trailing stop update if config not available
+            return
 
     def run(self) -> None:
         """
