@@ -2,7 +2,7 @@ modules = ["python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["aichat", "glibcLocales", "openssl", "postgresql", "saw-tools"]
+packages = ["aichat", "glibcLocales", "openssl", "postgresql", "saw-tools", "gh"]
 
 [deployment]
 deploymentTarget = "autoscale"
