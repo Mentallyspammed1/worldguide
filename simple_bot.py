@@ -29,7 +29,7 @@ class TradeParams(TypedDict, total=False):
 
 class TradingBot:
     """
-    Simplified trading bot class for UI testing
+    Simplified trading bot class for UI testing with real API support
     """
     def __init__(
         self,
@@ -38,19 +38,30 @@ class TradingBot:
         exchange: Optional[str] = None,
         api_key: Optional[str] = None,
         api_secret: Optional[str] = None,
-        is_testnet: bool = False
+        is_testnet: bool = True
     ):
-        """Initialize the mock trading bot"""
+        """Initialize the trading bot"""
         self.logger = logging.getLogger("trading_bot")
         self.config_file = config_file
         self.config = self._get_default_config()
         self.state = self._get_default_state()
-        self.exchange_id = "bybit"
+        self.exchange_id = exchange or "bybit"
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.is_testnet = is_testnet
         self.exchange = None
         self.symbol = "BTC/USDT"
         self.timeframe = "15m"
         self.candles_df = self._generate_mock_candles()
         self.current_positions = {}
+        
+        # Try to initialize the exchange if API credentials are provided
+        if api_key and api_secret:
+            try:
+                self.setup_exchange()
+            except Exception as e:
+                self.logger.error(f"Failed to initialize exchange: {e}")
+                # Fall back to mock mode
         
     def _get_default_config(self) -> Dict:
         """Get default configuration"""
