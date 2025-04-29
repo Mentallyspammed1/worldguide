@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Accounts | Pyrmethus Trading Bot{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Exchange Accounts</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Accounts</li>
+    </ol>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-key me-1"></i>
+                    API Keys
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Exchange</th>
+                                    <th>Name</th>
+                                    <th>API Key</th>
+                                    <th>Testnet</th>
+                                    <th>Last Used</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if api_keys %}
+                                    {% for key in api_keys %}
+                                    <tr>
+                                        <td>{{ key.exchange|capitalize }}</td>
+                                        <td>{{ key.name }}</td>
+                                        <td><code>{{ key.api_key }}</code></td>
+                                        <td>{{ 'Yes' if key.testnet else 'No' }}</td>
+                                        <td>{{ key.last_used|default('-', true) }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editApiKeyModal" 
+                                                data-id="{{ key.id }}" 
+                                                data-exchange="{{ key.exchange }}" 
+                                                data-name="{{ key.name }}" 
+                                                data-testnet="{{ key.testnet }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No API keys found. Add one to connect to exchanges.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addApiKeyModal">
+                        <i class="fas fa-plus-circle me-1"></i> Add API Key
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Exchange Balances
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Exchange</th>
+                                    <th>Status</th>
+                                    <th>Total Balance</th>
+                                    <th>Available</th>
+                                    <th>In Use</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if accounts %}
+                                    {% for account in accounts %}
+                                    <tr>
+                                        <td>{{ account.name }}</td>
+                                        <td>
+                                            {% if account.connected %}
+                                            <span class="badge bg-success">Connected</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Disconnected</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ account.balance.total|default('0', true)|round(2) }} USDT</td>
+                                        <td>{{ account.balance.free|default('0', true)|round(2) }} USDT</td>
+                                        <td>{{ account.balance.used|default('0', true)|round(2) }} USDT</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No connected exchanges. Add an API key to view balances.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-success" id="refreshBalanceBtn">
+                            <i class="fas fa-sync me-1"></i> Refresh Balances
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add API Key Modal -->
+<div class="modal fade" id="addApiKeyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add API Key</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('accounts') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exchange" class="form-label">Exchange</label>
+                        <select class="form-select" id="exchange" name="exchange" required>
+                            <option value="bybit" selected>Bybit</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="key_name" class="form-label">Key Name</label>
+                        <input type="text" class="form-control" id="key_name" name="key_name" placeholder="Main Account" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="api_key" class="form-label">API Key</label>
+                        <input type="text" class="form-control" id="api_key" name="api_key" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="api_secret" class="form-label">API Secret</label>
+                        <input type="password" class="form-control" id="api_secret" name="api_secret" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_testnet" name="is_testnet" value="true" checked>
+                        <label class="form-check-label" for="is_testnet">Use Testnet (for testing)</label>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-1"></i> Your API key should have permissions for reading account data and trading. Never share your API secret with anyone!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save API Key</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit API Key Modal -->
+<div class="modal fade" id="editApiKeyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit API Key</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('accounts') }}" method="POST">
+                <input type="hidden" id="edit_api_key_id" name="api_key_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_exchange" class="form-label">Exchange</label>
+                        <select class="form-select" id="edit_exchange" name="exchange" required>
+                            <option value="bybit" selected>Bybit</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_key_name" class="form-label">Key Name</label>
+                        <input type="text" class="form-control" id="edit_key_name" name="key_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_api_key" class="form-label">API Key</label>
+                        <input type="text" class="form-control" id="edit_api_key" name="api_key" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_api_secret" class="form-label">API Secret</label>
+                        <input type="password" class="form-control" id="edit_api_secret" name="api_secret" placeholder="Enter new secret to change">
+                        <small class="text-muted">Leave empty to keep current secret</small>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_is_testnet" name="is_testnet" value="true">
+                        <label class="form-check-label" for="edit_is_testnet">Use Testnet (for testing)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update API Key</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle edit modal data
+        const editApiKeyModal = document.getElementById('editApiKeyModal');
+        if (editApiKeyModal) {
+            editApiKeyModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const exchange = button.getAttribute('data-exchange');
+                const name = button.getAttribute('data-name');
+                const testnet = button.getAttribute('data-testnet') === 'True';
+                
+                // Set form values
+                document.getElementById('edit_api_key_id').value = id;
+                document.getElementById('edit_exchange').value = exchange;
+                document.getElementById('edit_key_name').value = name;
+                document.getElementById('edit_is_testnet').checked = testnet;
+            });
+        }
+        
+        // Handle refresh balance button
+        const refreshBalanceBtn = document.getElementById('refreshBalanceBtn');
+        if (refreshBalanceBtn) {
+            refreshBalanceBtn.addEventListener('click', function() {
+                // Show spinner
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing...';
+                this.disabled = true;
+                
+                // Reload the page to refresh balances
+                window.location.reload();
+            });
+        }
+    });
+</script>
+{% endblock %}
