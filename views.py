@@ -25,7 +25,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db
 from models import User, BotConfig, TradeHistory
-from trading_bot import TradingBot
+from simple_bot import TradingBot, MockBot
 
 # Configure logger
 logger = logging.getLogger("views")
@@ -57,6 +57,9 @@ def initialize_bot():
     except Exception as e:
         logger.error(f"Error initializing trading bot: {e}")
         bot = None
+
+
+# Use the MockBot class from simple_bot.py
 
 
 def get_bot_instance():
