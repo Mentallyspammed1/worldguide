@@ -1,0 +1,10 @@
+2025-05-01 04:22:29,057 - INFO - [intermediate_code.tmp:112] - Configuration loaded successfully from config.json
+2025-05-01 04:22:29,057 - ERROR - [intermediate_code.tmp:132] - Missing required configuration section: 'exchange'
+2025-05-01 04:22:29,058 - CRITICAL - [intermediate_code.tmp:1128] - Failed to load configuration. Exiting.
+2025-05-01 04:30:28,553 - INFO - [y.1.4.py:134] - Configuration loaded successfully from config.json
+2025-05-01 04:30:28,554 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'exchange'
+2025-05-01 04:30:28,554 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'api_credentials'
+2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'trading_settings'
+2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'risk_management'
+2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:137] - Configuration validation failed.
+2025-05-01 04:30:28,555 - CRITICAL - [y.1.4.py:1560] - Failed to load or validate configuration. Exiting.

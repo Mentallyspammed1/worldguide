@@ -1,12 +1,178 @@
+
+
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 678, in run_until_complete
+    self.run_forever()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 645, in run_forever
+    self._run_once()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1999, in _run_once
+    handle._run()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2536, in main
+    main_logger.info(f"Orderbook Limit: {CONFIG.orderbook_settings.limit} levels")
+Message: 'Orderbook Limit: 50 levels'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/logging/__init__.py", line 1160, in emit
+    msg = self.format(record)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/logging/__init__.py", line 999, in format
+    return fmt.format(record)
+           ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 365, in format
+    formatter = logging.Formatter(log_fmt, self.datefmt, self.style)
+                                                         ^^^^^^^^^^
+AttributeError: 'ColorStreamFormatter' object has no attribute 'style'. Did you mean: '_style'?
+Call stack:
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2588, in <module>
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 678, in run_until_complete
+    self.run_forever()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 645, in run_forever
+    self._run_once()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1999, in _run_once
+    handle._run()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2537, in main
+    main_logger.info(f"Timezone: {APP_TIMEZONE}")
+Message: 'Timezone: America/Chicago'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/logging/__init__.py", line 1160, in emit
+    msg = self.format(record)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/logging/__init__.py", line 999, in format
+    return fmt.format(record)
+           ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 365, in format
+    formatter = logging.Formatter(log_fmt, self.datefmt, self.style)
+                                                         ^^^^^^^^^^
+AttributeError: 'ColorStreamFormatter' object has no attribute 'style'. Did you mean: '_style'?
+Call stack:
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2588, in <module>
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 678, in run_until_complete
+    self.run_forever()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 645, in run_forever
+    self._run_once()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1999, in _run_once
+    handle._run()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2257, in run_analysis_loop
+    logger_instance.info(f"Starting analysis loop for {symbol} with interval {interval_config}...")
+Message: 'Starting analysis loop for TRUMP/USDT with interval 5...'
+Arguments: ()
+/data/data/com.termux/files/usr/lib/python3.12/multiprocessing/pool.py:48: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value '[ 30863.76743333 116768.70643333  73285.9556      16078.98333333
+  29496.35466667  48945.37773333  94515.72176667 123993.275
+  71800.974      217233.06366667  75737.6062     157477.7144
+ 341667.73666667  23412.7712      90534.909      102656.84066667
+ 111171.60216667  33738.189       40792.14626667  18284.17666667
+  25715.053       21972.5532      71493.12753333  32384.583
+  71928.13046667  67600.6752      43356.4705      13659.0624
+  25268.0521      26490.1362      21803.10933333  48580.28486667
+  14179.91666667  12154.765       52602.5664      22578.62656667
+  78584.35613333  45580.58266667 368367.89093333 522643.1648
+ 570697.85483333  97827.9768      70724.03516667 252925.8389
+ 343949.1346     109646.524      101047.0912     263812.11166667
+ 197421.9616     236303.5232     124613.87233333  80119.29986667
+  93888.29233333  37846.3308      60345.1612     438909.231
+ 181142.52        92759.04346667 177797.88693333  33949.012
+  53198.748       84331.69246667 174616.84266667 143190.5748
+  67562.32923333 158750.87953333  67651.03833333  21836.8026
+  17412.10613333  34508.5         32485.9393      65043.8934
+  36947.69866667  64467.34        46254.9475      35855.85
+  65893.232       72213.94206667  72745.58206667  59084.27983333
+  39312.375       24004.97533333  89388.46716667  38583.7045
+  45147.71        57347.1846      45974.44413333  51325.67786667
+  75082.37453333 521695.40366667  38324.176       25733.05933333
+  52953.55466667  50769.05856667 133806.3364     274149.01563333
+  48557.30966667 116163.9024     172496.92883333]' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
+  return list(map(*args))
+/data/data/com.termux/files/usr/lib/python3.12/multiprocessing/pool.py:48: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value '[ 20060.3416      31227.26186667  32181.0983      50126.648
+  36416.8768      69124.9176     119885.23306667  30624.9039
+  48099.0275      39890.95356667  92865.08546667  27979.9213
+  37261.02453333  97366.184       19262.2785      44714.0657
+  46731.618      116472.07        44080.00013333  41401.2084
+  36281.2404      22615.23383333  31802.0632      72119.5203
+  50523.2573      50943.122       16518.535       14897.6685
+   5917.26196667   9883.192       30832.34        26229.97433333
+  96883.5685       8149.46366667  65236.6136      66922.85896667
+ 264319.78906667  62658.41316667  66530.82146667  83448.2497
+  47976.72        42413.59466667 129670.3713     204050.25
+ 138846.0815      73535.14666667  83745.6594      69040.09966667
+  56668.0898      31015.1969      68711.3426      33767.12173333
+  97522.047       67959.355      113273.556       29630.0898
+ 137025.6832      38573.021       63946.666       45951.16783333
+ 168385.448       44624.60263333  31132.01753333 127226.47
+  89492.97096667  86815.0784      75406.5109     101350.9048
+ 390458.34583333 235979.9        130718.40716667  40713.10493333
+  96439.0152      28384.82746667  61425.4233      52867.4965
+  78078.0344      39816.57983333  57754.6684      49940.332
+  34455.57413333  35677.8184      35635.7391      52893.16926667
+ 192244.7289      87284.48373333 255021.67386667  34773.6195
+  76669.977       40351.3472      49940.72293333 178342.30626667
+  18087.54326667 150093.048       44189.97053333  37100.5856    ]' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
+  return list(map(*args))
+/data/data/com.termux/files/home/worldguide/neonta_v4.py:1437: DeprecationWarning: In future, it will be an error for 'np.bool' scalars to be interpreted as an index
+  details = f"S:{format_decimal(ema_short)} {'><'[ema_short > ema_long]} L:{format_decimal(ema_long)}"
+--- Logging error ---
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/logging/__init__.py", line 1160, in emit
+    msg = self.format(record)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/logging/__init__.py", line 999, in format
+    return fmt.format(record)
+           ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 365, in format
+    formatter = logging.Formatter(log_fmt, self.datefmt, self.style)
+                                                         ^^^^^^^^^^
+AttributeError: 'ColorStreamFormatter' object has no attribute 'style'. Did you mean: '_style'?
+Call stack:
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2588, in <module>
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 678, in run_until_complete
+    self.run_forever()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 645, in run_forever
+    self._run_once()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1999, in _run_once
+    handle._run()
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.py", line 2329, in run_analysis_loop
+    logger_instance.info(output_string)
+Message: '\n--- Analysis Report for \x1b[35mTRUMP/USDT\x1b[0m --- (2025-05-01 04:09:46 CDT)\n\x1b[36mInterval:\x1b[0m 0 days 00:05:00    \x1b[36mCurrent Price:\x1b[0m $13.1700\nEMA Align (12/26): \x1b[92mBullish\x1b[0m (S:13.16 < L:13.15)\nADX Trend (14) (12.17): \x1b[33mRanging\x1b[0m (ADX < 25)\nPSAR (13.0976): \x1b[92mBullish\x1b[0m\nRSI (14) (52.28): \x1b[33mNeutral\x1b[0m\nMFI (14) (62.10): \x1b[33mNeutral\x1b[0m\nCCI (20) (80.63): \x1b[33mNeutral\x1b[0m\nWilliams %R (14) (-35.71): \x1b[33mNeutral\x1b[0m\nStochRSI (3/3) (K:74.70 D:83.06): \x1b[91mBearish\x1b[0m (Crossed Down)\nMACD (12/26/9) (L:0.0104 S:0.0056): \x1b[92mAbove Signal\x1b[0m (Line > Signal)\nBBands (20/2.0) (13.17): \x1b[33mWithin Bands\x1b[0m (L:13.08 M:13.14 U:13.21)\nVolume vs MA(20) (2816): \x1b[35mLow Volume\x1b[0m (Vol:2816 MA:7167)\nOBV Trend (219458): \x1b[33mFlat\x1b[0m\nA/D Osc Trend: \x1b[33mN/A\x1b[0m\n\x1b[36m\n--- Levels & Orderbook ---\x1b[0m\nPivot Point: $13.0700\nNearest Support:\n  > Fib 38.2% (Retrace Down): $13.1286\n  > Fib 50.0% (Retrace Down): $13.0200\n  > Fib 61.8% (Retrace Down): $12.9114\nNearest Resistance:\n  > Fib 23.6% (Retrace Down): $13.2629\n  > Period High: $13.4800\n  > R1: $13.5800\n\nOB Pressure (Top 50): \x1b[33mNeutral Pressure\x1b[0m\nOB Value (Bids): $916614\nOB Value (Asks): $763740\n\x1b[35mSignificant OB Clusters (Top 5):\x1b[0m\n\x1b[92m  Support near Pivot ($13.0700) - Value: $114843\x1b[0m\n\x1b[92m  Support near Fib 38.2% (Retrace Down) ($13.1286) - Value: $104736\x1b[0m\n\x1b[91m  Resistance near Fib 23.6% (Retrace Down) ($13.2629) - Value: $71663\x1b[0m\n\x1b[92m  Support near Fib 50.0% (Retrace Down) ($13.0200) - Value: $32166\x1b[0m\n\x1b[92m  Support near Fib 61.8% (Retrace Down) ($12.9114) - Value: $25123\x1b[0m\n'
+Arguments: ()
+
 # -*- coding: utf-8 -*-
-\"\"\"
+"""
 Neonta v3: Cryptocurrency Technical Analysis Bot
 
 This script performs technical analysis on cryptocurrency pairs using data
 fetched from the Bybit exchange via the ccxt library. It calculates various
 technical indicators, identifies potential support/resistance levels, analyzes
 order book data, and provides an interpretation of the market state.
-\"\"\"
+"""
 
 import asyncio
 import hashlib

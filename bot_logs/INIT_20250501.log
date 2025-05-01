@@ -80,3 +80,14 @@ TypeError: string indices must be integers, not 'str'
 2025-05-01 03:59:32,424 - ERROR - Max retries reached for loading markets.
 2025-05-01 03:59:32,426 - CRITICAL - Failed to load markets. Cannot proceed. Exiting.
 2025-05-01 03:59:32,678 - INFO - Closed ccxt exchange connection.
+2025-05-01T04:09:02-0500 - INFO - INIT - Application starting...
+2025-05-01T04:09:02-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-01T04:09:02-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-01T04:09:02-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-01T04:09:02-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-01T04:09:02-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T04:09:02-0500 - INFO - INIT - Attempting to load markets...
+2025-05-01T04:09:13-0500 - INFO - INIT - Successfully loaded 2603 markets from Bybit.
+2025-05-01T04:09:13-0500 - INFO - INIT - Cached categories for 2603 markets.
+2025-05-01T04:09:13-0500 - INFO - INIT - Closed CCXT exchange connection.
+2025-05-01T04:09:13-0500 - INFO - INIT - Market data loaded successfully.

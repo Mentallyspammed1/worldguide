@@ -1,21 +1,33 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env zsh
 
-# Bash script for Termux to enhance a local code file using Gemini API,
-# requesting the complete enhanced code block as output.
+# Zsh script for Termux/Linux to enhance a local code file using Gemini API,
+# requesting the complete enhanced code block incorporating all improvements.
 
 # --- Configuration ---
-# Use a capable model like 1.5 Pro or a stable 1.0 Pro
+# Use a capable model like 1.5 Pro for better results on complex tasks
 API_MODEL="gemini-2.5-pro-exp-03-25"
 # API_MODEL="gemini-1.0-pro" # Alternative stable model
 
-# Temporary file for the API response body
-RESPONSE_BODY_FILE="gemini_response_body.tmp.$$" # Add PID for basic uniqueness
+# --- Temporary File/Directory Setup ---
+# Create a temporary directory using mktemp for better security and cleanup
+TEMP_DIR=$(mktemp -d "gemini_enhance.XXXXXX" 2>/dev/null)
+# Fallback if mktemp -d fails (less secure)
+if [[ -z "$TEMP_DIR" ]] || [[ ! -d "$TEMP_DIR" ]]; then
+    TIMESTAMP=$(date +%s)
+    TEMP_DIR="gemini_enhance_${TIMESTAMP}_$$"
+    echo "⚠️ Warning: mktemp -d failed, using potentially less secure fallback directory: $TEMP_DIR" >&2
+    mkdir -p "$TEMP_DIR" || { echo "❌ Error: Cannot create temporary directory '$TEMP_DIR'." >&2; exit 1; }
+fi
+RESPONSE_BODY_FILE="${TEMP_DIR}/response.json"
+
 
 # --- Function for cleanup ---
-# Cleans up the temporary file created during execution
+# Cleans up the temporary directory created during execution
 cleanup() {
-  # echo "🧹 Cleaning up temporary file ($RESPONSE_BODY_FILE)..." # Optional debug message
-  rm -f "$RESPONSE_BODY_FILE"
+  if [[ -n "$TEMP_DIR" ]] && [[ -d "$TEMP_DIR" ]]; then
+      echo "🧹 Cleaning up temporary directory ($TEMP_DIR)..."
+      command rm -rf "$TEMP_DIR" # Use command prefix to bypass aliases
+  fi
 }
 
 # --- Ensure cleanup runs on script exit or interruption ---
@@ -23,14 +35,14 @@ trap cleanup EXIT TERM INT
 
 # --- Check for required tools ---
 echo "⚙️ Checking for required tools (curl, jq)..."
-missing_tools=""
-command -v curl >/dev/null 2>&1 || missing_tools+=" curl"
-command -v jq >/dev/null 2>&1 || missing_tools+=" jq"
+typeset -a missing_tools # Zsh array
+command -v curl >/dev/null 2>&1 || missing_tools+=("curl")
+command -v jq >/dev/null 2>&1 || missing_tools+=("jq")
 
-if [[ -n "$missing_tools" ]]; then
+if [[ ${#missing_tools[@]} -gt 0 ]]; then
     # Print errors to standard error
-    echo "❌ Error: Required tools are missing:$missing_tools." >&2
-    echo "   Please install them using: pkg install$missing_tools" >&2
+    echo "❌ Error: Required tools are missing: ${missing_tools[*]}." >&2
+    echo "   Please install them (e.g., 'pkg install ${missing_tools[*]}' in Termux)." >&2
     exit 1
 fi
 echo "✅ Tools found."
@@ -54,57 +66,49 @@ echo "🔑 Gemini API Key found in environment."
 
 # --- Get User Input ---
 echo "---"
-# Use -e for read if needing backslash interpretation, but usually not needed here
-read -p "Enter the full path to the local code file to enhance: " INPUT_FILE_PATH
-read -p "Enter the desired name for the final enhanced output file: " OUTPUT_FILE_NAME
+# Use Zsh's prompt syntax
+read "?Enter the full path to the local code file to enhance: " INPUT_FILE_PATH
+read "?Enter the desired name for the final enhanced output file: " OUTPUT_FILE_NAME
 
 # --- Validate Input ---
-if [[ -z "$INPUT_FILE_PATH" ]]; then
-    echo "❌ Error: No input file path provided." >&2
-    exit 1
-fi
-if [[ ! -f "$INPUT_FILE_PATH" ]]; then
-    echo "❌ Error: Input file not found at '$INPUT_FILE_PATH'." >&2
-    exit 1
-fi
-if [[ ! -r "$INPUT_FILE_PATH" ]]; then
-    echo "❌ Error: Cannot read input file '$INPUT_FILE_PATH'. Check permissions." >&2
+# Check file existence and readability
+if [[ -z "$INPUT_FILE_PATH" ]] || [[ ! -f "$INPUT_FILE_PATH" ]] || [[ ! -r "$INPUT_FILE_PATH" ]]; then
+    echo "❌ Error: Invalid or unreadable input file path '$INPUT_FILE_PATH'." >&2
     exit 1
 fi
 if [[ -z "$OUTPUT_FILE_NAME" ]]; then
   echo "❌ Error: No output file name provided." >&2
   exit 1
 fi
-# Optional: Check if output file already exists and warn/prompt
-# if [[ -e "$OUTPUT_FILE_NAME" ]]; then
-#   read -p "⚠️ Warning: Output file '$OUTPUT_FILE_NAME' already exists. Overwrite? (y/N): " confirm_overwrite
-#   if [[ "${confirm_overwrite,,}" != "y" ]]; then
-#      echo "Aborted."
-#      exit 0
-#   fi
-# fi
-
+# Check if output directory is writable (basic check)
+OUTPUT_DIR=$(dirname "$OUTPUT_FILE_NAME")
+# Handle case where output is in current directory (dirname is '.')
+[[ "$OUTPUT_DIR" == "." ]] && OUTPUT_DIR=$PWD
+if [[ ! -w "$OUTPUT_DIR" ]]; then
+    echo "❌ Error: Output directory '$OUTPUT_DIR' is not writable. Check permissions." >&2
+    exit 1
+fi
 
 # --- Read and Format Original Code Content ---
 echo "---"
-echo "📑 Reading and formatting code content from '$INPUT_FILE_PATH'..."
-# Escape backslashes, then quotes, then newlines
-# Check for read errors (though already checked readability above)
-ORIGINAL_CODE_CONTENT=$(cat "$INPUT_FILE_PATH" | sed 's/\\/\\\\/g; s/"/\\"/g' | sed -z 's/\n/\\n/g')
-if [[ $? -ne 0 ]]; then
+echo "📑 Reading and formatting original code from '$INPUT_FILE_PATH'..."
+# Escape backslashes, then quotes, then newlines. Standard sed loop. Check pipeline status.
+ORIGINAL_CODE_CONTENT=$(cat "$INPUT_FILE_PATH" | sed 's/\\/\\\\/g; s/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+if [[ $pipestatus[1] -ne 0 ]] || [[ $pipestatus[2] -ne 0 ]] || [[ $pipestatus[3] -ne 0 ]]; then
   echo "❌ Error: Failed to read or format file content from '$INPUT_FILE_PATH'." >&2
+  echo "   Pipeline exit codes: ${pipestatus[*]}" >&2
   exit 1
 fi
 
 # --- Detect Language Hint (Optional but helpful) ---
-# Use bash parameter expansion
-FILE_EXT="${INPUT_FILE_PATH##*.}"
+FILE_EXT=${INPUT_FILE_PATH:e} # Zsh parameter expansion for extension
 LANG_HINT=""
 case "$FILE_EXT" in
   py) LANG_HINT="python" ;;
   js) LANG_HINT="javascript" ;;
-  sh|bash) LANG_HINT="bash" ;; # Use bash hint for bash script
-  *) LANG_HINT="" ;; # Let Gemini infer if unknown
+  sh|zsh) LANG_HINT="shell" ;; # Generic shell hint often works
+  bash) LANG_HINT="bash" ;;
+  *) LANG_HINT="" ;;
 esac
 echo "✅ Code formatted. Language hint: ${LANG_HINT:-'none'}."
 
@@ -113,11 +117,11 @@ echo "✅ Code formatted. Language hint: ${LANG_HINT:-'none'}."
 # API Call: Analyze, Enhance, Implement, and Return Final Code
 # ================================================================
 echo "---"
-echo "🚀 Sending request to Gemini API ($API_MODEL) to enhance and return final code..."
+echo "🚀 Sending request to Gemini API ($API_MODEL) to analyze, enhance, and return final code..."
 API_URL="https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent?key=${GEMINI_API_KEY}"
 
-# Explicit prompt asking for analysis, enhancement, and ONLY the final code
-PROMPT_ENHANCE="Please thoroughly analyze, upgrade, and enhance the following code snippet (from local file: ${INPUT_FILE_PATH##*/}). Incorporate *all* your suggested improvements regarding readability, maintainability, efficiency, error handling, security, and modern best practices (${LANG_HINT:-for the language}).
+# Explicit prompt asking for analysis, enhancement, incorporation of ALL ideas, and ONLY the final code block
+PROMPT_ENHANCE="Please perform a thorough analysis of the following code snippet (from local file: ${INPUT_FILE_PATH##*/}). Identify areas for upgrades and enhancements related to readability, maintainability, efficiency, performance, robustness, error handling, security best practices, and the use of modern language features or idioms (${LANG_HINT:-for the language}). After your internal analysis, incorporate *all* identified improvements into the code.
 
 CRITICAL INSTRUCTION: Your entire response must consist *only* of the complete, final, enhanced code block, ready to be saved directly as the improved file. Do not include *any* introductory text, explanations, summaries, or markdown formatting outside the final code block itself. Use comments *within* the code only if necessary for clarity on specific changes.
 
@@ -125,7 +129,7 @@ Original Code:
 \`\`\`${LANG_HINT}\n${ORIGINAL_CODE_CONTENT}\n\`\`\`"
 
 # Create JSON payload using jq for robust quoting
-# Use lower temperature for more focused code generation
+# Use lower temperature for more focused code generation based on analysis
 JSON_PAYLOAD=$(jq -n --arg prompt "$PROMPT_ENHANCE" \
   '{contents: [{parts: [{text: $prompt}]}], "generationConfig": {"temperature": 0.3}}')
 if [[ $? -ne 0 ]]; then
@@ -134,22 +138,27 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Perform the curl request, capture HTTP status code separately
-# Use -L to follow redirects if any
+# Use -L to follow redirects
 HTTP_CODE=$(curl -L -s -w "%{http_code}" \
      -H 'Content-Type: application/json' \
      -d "$JSON_PAYLOAD" \
      -X POST "$API_URL" \
      -o "$RESPONSE_BODY_FILE") # Save body to temp file
+CURL_EXIT_CODE=$?
 
 # --- Check API Response Status ---
-if [[ "$HTTP_CODE" -ne 200 ]]; then
+if [[ $CURL_EXIT_CODE -ne 0 ]]; then
+    echo "❌ Error: curl command failed during API request (Exit code: $CURL_EXIT_CODE)." >&2
+    exit 1
+elif [[ "$HTTP_CODE" -ne 200 ]]; then
   echo "--------------------------------------------------------------------" >&2
   echo "❌ Error: API request failed (HTTP $HTTP_CODE)." >&2
-  if [[ -f "$RESPONSE_BODY_FILE" ]]; then
+  # Check readability before catting error response
+  if [[ -f "$RESPONSE_BODY_FILE" ]] && [[ -r "$RESPONSE_BODY_FILE" ]]; then
       echo "   API Response:" >&2
-      cat "$RESPONSE_BODY_FILE" >&2 # Print error response body
+      cat "$RESPONSE_BODY_FILE" >&2
   else
-      echo "   No response body file created." >&2
+      echo "   Could not read API response body file ($RESPONSE_BODY_FILE)." >&2
   fi
   echo "--------------------------------------------------------------------" >&2
   exit 1 # Trap will cleanup RESPONSE_BODY_FILE
@@ -165,6 +174,7 @@ if [[ ! -r "$RESPONSE_BODY_FILE" ]]; then
     exit 1
 fi
 
+# Use jq -r to get raw text, default to empty string if path doesn't exist
 RAW_FINAL_CONTENT=$(jq -r '.candidates[0].content.parts[0].text // ""' "$RESPONSE_BODY_FILE")
 JQ_EXIT_CODE=$?
 
@@ -177,7 +187,8 @@ if [[ $JQ_EXIT_CODE -ne 0 ]] || [[ -z "$RAW_FINAL_CONTENT" ]]; then
     echo "--------------------------------------------------------------------" >&2
     # Save raw response as fallback
     echo "-- ERROR: Failed to extract valid text content from API response. Raw response follows: --" > "$OUTPUT_FILE_NAME"
-    cat "$RESPONSE_BODY_FILE" >> "$OUTPUT_FILE_NAME" # Append raw response for debugging
+    # Check readability again before catting fallback
+    [[ -r "$RESPONSE_BODY_FILE" ]] && cat "$RESPONSE_BODY_FILE" >> "$OUTPUT_FILE_NAME"
     exit 1 # Indicate failure
 fi
 
@@ -196,8 +207,8 @@ if [[ -z "$FINAL_CODE_CONTENT" ]]; then
 fi
 
 # --- Save Final Code ---
-# Use printf for potentially safer output than echo, especially with backslashes
-printf "%s\n" "$FINAL_CODE_CONTENT" > "$OUTPUT_FILE_NAME"
+# Use print -r -- for potentially safer output than echo in Zsh
+print -r -- "$FINAL_CODE_CONTENT" > "$OUTPUT_FILE_NAME"
 if [[ $? -ne 0 ]]; then
   echo "❌ Error: Failed to write final enhanced code to '$OUTPUT_FILE_NAME'. Check permissions or disk space." >&2
   exit 1
@@ -205,8 +216,8 @@ fi
 
 echo "--------------------------------------------------------------------"
 echo "✅ Success! Final enhanced code saved to:"
-# Use pwd for current directory context
-echo "   $(pwd)/$OUTPUT_FILE_NAME"
+# Use Zsh's PWD which is usually faster than calling pwd command
+echo "   ${PWD}/$OUTPUT_FILE_NAME"
 echo "--------------------------------------------------------------------"
 
 # Trap handles cleanup

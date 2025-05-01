@@ -1,0 +1,68 @@
+{
+  "analysis_interval_seconds": 30,
+  "kline_limit": 200,
+  "indicator_settings": {
+    "default_interval": "15",
+    "momentum_period": 10,
+    "volume_ma_period": 20,
+    "atr_period": 14,
+    "rsi_period": 14,
+    "stoch_rsi_period": 14,
+    "stoch_k_period": 3,
+    "stoch_d_period": 3,
+    "cci_period": 20,
+    "williams_r_period": 14,
+    "mfi_period": 14,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "bollinger_bands_period": 20,
+    "bollinger_bands_std_dev": 2.0,
+    "ema_short_period": 12,
+    "ema_long_period": 26,
+    "sma_short_period": 10,
+    "sma_long_period": 50,
+    "adx_period": 14,
+    "psar_step": 0.02,
+    "psar_max_step": 0.2
+  },
+  "analysis_flags": {
+    "ema_alignment": true,
+    "momentum_crossover": false,
+    "volume_confirmation": true,
+    "rsi_divergence": false,
+    "macd_divergence": true,
+    "stoch_rsi_cross": true,
+    "rsi_threshold": true,
+    "mfi_threshold": true,
+    "cci_threshold": true,
+    "williams_r_threshold": true,
+    "macd_cross": true,
+    "bollinger_bands_break": true,
+    "adx_trend_strength": true,
+    "obv_trend": true,
+    "adi_trend": true,
+    "psar_flip": true
+  },
+  "thresholds": {
+    "rsi_overbought": 70,
+    "rsi_oversold": 30,
+    "mfi_overbought": 80,
+    "mfi_oversold": 20,
+    "cci_overbought": 100,
+    "cci_oversold": -100,
+    "williams_r_overbought": -20,
+    "williams_r_oversold": -80,
+    "adx_trending": 25
+  },
+  "orderbook_settings": {
+    "limit": 50,
+    "cluster_threshold_usd": 10000,
+    "cluster_proximity_pct": 0.1
+  },
+  "logging": {
+    "level": "INFO",
+    "rotation_max_bytes": 10485760,
+    "rotation_backup_count": 5
+  }
+}

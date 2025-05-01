@@ -1,4 +1,3 @@
-```python
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=logging-fstring-interpolation, too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods, invalid-name, unused-argument, too-many-lines
@@ -3500,4 +3499,4 @@ if __name__ == "__main__":
             f"Bot failed: {str(main_exception)[:100]}",
         )
         sys.exit(1) # Ensure non-zero exit code on critical failure
-```
+
