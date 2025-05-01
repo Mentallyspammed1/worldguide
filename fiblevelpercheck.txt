@@ -1,0 +1,215 @@
+--- Add near configuration loading ---                               ENABLE_FIB_PIVOT_ACTIONS: bool = config.get("enable_fib_pivot_actions", False) # Master switch for Fib pivots                                 PIVOT_TIMEFRAME: str = config.get("pivot_timeframe", "1d") # Timeframe for Pivot calculation (e.g., '1d', '1W')
+FIB_LEVELS_TO_CALC: List[float] = config.get("fib_levels_to_calc", [0.382, 0.618, 1.0]) # Fibonacci levels (based on H-L range)
+FIB_NEAREST_COUNT: int = int(config.get("fib_nearest_count", 5)) # How many nearest levels to track
+FIB_ENTRY_CONFIRM_PERCENT: float = float(config.get("fib_entry_confirm_percent", 0.002)) # Price must be within X% of a Fib support(long)/resistance(short)
+FIB_EXIT_WARN_PERCENT: float = float(config.get("fib_exit_warn_percent", 0.0015)) # Warn/Exit if price within Y% of Fib resistance(long)/support(short)
+FIB_EXIT_ACTION: str = config.get("fib_exit_action", "warn").lower() # Action on exit warning: "warn", "exit"
+
+if ENABLE_FIB_PIVOT_ACTIONS:
+    log_info(f"Fibonacci Pivot Actions: ENABLED (Pivot TF: {PIVOT_TIMEFRAME}, Levels: {FIB_LEVELS_TO_CALC}, "                                              f"Nearest: {FIB_NEAREST_COUNT}, Entry%: {FIB_ENTRY_CONFIRM_PERCENT*100:.3f}%, "
+             f"Exit%: {FIB_EXIT_WARN_PERCENT*100:.3f}%, Exit Action: {FIB_EXIT_ACTION.upper()})")
+    if FIB_NEAREST_COUNT <= 0 or FIB_ENTRY_CONFIRM_PERCENT <= 0 or FIB_EXIT_WARN_PERCENT <= 0:
+        log_error("CRITICAL: Invalid Fibonacci Pivot parameter(s) in config. Values must be positive.")                                               sys.exit(1)
+    if PIVOT_TIMEFRAME not in exchange.timeframes:
+        log_error(f"CRITICAL: Pivot timeframe '{PIVOT_TIMEFRAME}' not supported by exchange {exchange_id}. Available: {list(exchange.timeframes.keys())}")
+        sys.exit(1)
+    if FIB_EXIT_ACTION not in ["warn", "exit"]:                                log_error("CRITICAL: Invalid 'fib_exit_action' in config. Use 'warn' or 'exit'.")                                                             sys.exit(1)
+else:
+    log_info("Fibonacci Pivot Actions: DISABLED")                      
+
+# --- Helper Functions for Pivots ---                                  
+def calculate_fibonacci_pivots(high: float, low: float, close: float) -> Dict[str, float]:                                                        """
+    Calculates standard Pivot Points and Fibonacci Pivot Levels based on HLC.
+    """                                                                    if high <= low: # Basic validation
+        return {}
+                                                                           pivot_levels = {}
+    pivot_range = high - low
+
+    # Standard Pivot Point (PP)                                            pp = (high + low + close) / 3
+    pivot_levels['PP'] = pp                                            
+    # Standard Resistance Levels
+    pivot_levels['R1'] = (2 * pp) - low
+    pivot_levels['R2'] = pp + pivot_range                                  pivot_levels['R3'] = high + 2 * (pp - low)
+
+    # Standard Support Levels
+    pivot_levels['S1'] = (2 * pp) - high
+    pivot_levels['S2'] = pp - pivot_range                                  pivot_levels['S3'] = low - 2 * (high - pp)
+
+    # Fibonacci Levels based on PP and Range
+    for level in FIB_LEVELS_TO_CALC:                                           pivot_levels[f'FR{level:.3f}'] = pp + (level * pivot_range)
+        pivot_levels[f'FS{level:.3f}'] = pp - (level * pivot_range)    
+    # Ensure levels are floats and remove potential duplicates (though unlikely with names)
+    unique_levels = {name: float(price) for name, price in pivot_levels.items() if isinstance(price, (int, float))}                               return unique_levels
+
+def get_nearest_fib_levels(all_levels: Dict[str, float], current_price: float, count: int) -> Dict[str, float]:
+    """
+    Finds the N nearest pivot levels to the current price.                 Returns a dictionary of {level_name: price}.
+    """
+    if not all_levels or count <= 0:
+        return {}
+
+    # Calculate absolute distance for each level
+    distances = {name: abs(price - current_price) for name, price in all_levels.items()}                                                      
+    # Sort levels by distance                                              sorted_levels = sorted(distances.items(), key=lambda item: item[1])
+                                                                           # Get the top N nearest levels
+    nearest_levels = {name: all_levels[name] for name, dist in sorted_levels[:count]}
+                                                                           return nearest_levels
+
+
+# --- Add to main trading loop ---
+
+# Inside the `while True:` loop, AFTER fetching base timeframe data and calculating indicators,
+# but BEFORE checking position/entry/exit logic:
+
+        # --- Calculate Fibonacci Pivot Levels (if enabled) ---                nearest_pivots: Dict[str, float] = {}
+        pivot_support_levels: Dict[str, float] = {}
+        pivot_resistance_levels: Dict[str, float] = {}
+        if ENABLE_FIB_PIVOT_ACTIONS:
+            log_debug(f"Calculating Fibonacci Pivots based on {PIVOT_TIMEFRAME} timeframe...")
+            try:
+                # Fetch data for the pivot timeframe (need previous closed candle)
+                # Fetch 2 candles to ensure we have the completed previous one
+                pivot_ohlcv_df = fetch_ohlcv_data(exchange, symbol, PIVOT_TIMEFRAME, limit_count=2)
+                                                                                       if pivot_ohlcv_df is not None and len(pivot_ohlcv_df) >= 2:                                                                                       # Use the second to last row (index -2) which is the *last completed* candle
+                    prev_pivot_candle = pivot_ohlcv_df.iloc[-2]                            prev_high = float(prev_pivot_candle['high'])
+                    prev_low = float(prev_pivot_candle['low'])
+                    prev_close = float(prev_pivot_candle['close'])
+                    log_debug(f"Previous {PIVOT_TIMEFRAME} candle HLC: H={prev_high:.{price_precision_digits}f}, L={prev_low:.{price_precision_digits}f}, C={prev_close:.{price_precision_digits}f}")
+
+                    all_calculated_pivots = calculate_fibonacci_pivots(prev_high, prev_low, prev_close)
+
+                    if all_calculated_pivots:                                                  nearest_pivots = get_nearest_fib_levels(all_calculated_pivots, current_price, FIB_NEAREST_COUNT)
+                        # Separate into support and resistance relative to current price                                                                              pivot_support_levels = {name: price for name, price in nearest_pivots.items() if price < current_price}                                       pivot_resistance_levels = {name: price for name, price in nearest_pivots.items() if price >= current_price} # Include levels at current price as resistance
+
+                        log_info(f"Nearest {len(nearest_pivots)} Pivots: " + ", ".join([f"{n}={p:.{price_precision_digits}f}" for n, p in sorted(nearest_pivots.items(), key=lambda item: item[1])]))                                        log_debug(f"Nearest Support Pivots: {pivot_support_levels}")                                                                                  log_debug(f"Nearest Resistance Pivots: {pivot_resistance_levels}")
+                    else:                                                                      log_warning(f"Failed to calculate pivot levels from {PIVOT_TIMEFRAME} data.")                                                         else:
+                    log_warning(f"Could not fetch sufficient data ({len(pivot_ohlcv_df) if pivot_ohlcv_df is not None else 0} candles) for {PIVOT_TIMEFRAME} pivots.")
+            except Exception as pivot_e:
+                 log_error(f"Error during Fibonacci Pivot calculation: {pivot_e}", exc_info=True)
+
+
+        # --- Modify Entry Logic ---
+        # Inside the `else: # position['status'] is None` block:       
+            # --- Combine Conditions for Final Entry Signal ---                    fib_long_confirm = False
+            fib_short_confirm = False                                              fib_reason_part = ""
+                                                                                   if ENABLE_FIB_PIVOT_ACTIONS and not nearest_pivots:
+                log_warning("Fib Pivot confirmation enabled, but no pivot levels calculated. Entry check will fail.")
+
+            if ENABLE_FIB_PIVOT_ACTIONS and nearest_pivots:
+                # Check Long confirmation against nearest SUPPORT pivots
+                if base_long_signal:                                                       for name, price in pivot_support_levels.items():
+                        if abs(current_price - price) / price <= FIB_ENTRY_CONFIRM_PERCENT:
+                            fib_long_confirm = True
+                            fib_reason_part = f"Near Fib Support {name}={price:.{price_precision_digits}f} ({FIB_ENTRY_CONFIRM_PERCENT*100:.3f}%)"                                                                                               break # Found one confirmation
+                    if not fib_long_confirm:                                                   log_debug(f"Base Long signal, but price {current_price:.{price_precision_digits}f} not near any Fib support level within {FIB_ENTRY_CONFIRM_PERCENT*100:.3f}%.")
+
+                # Check Short confirmation against nearest RESISTANCE pivots
+                if base_short_signal:
+                    for name, price in pivot_resistance_levels.items():
+                        # Ensure price > 0 for division                                        if price > 0 and abs(current_price - price) / price <= FIB_ENTRY_CONFIRM_PERCENT:
+                            fib_short_confirm = True
+                            fib_reason_part = f"Near Fib Resistance {name}={price:.{price_precision_digits}f} ({FIB_ENTRY_CONFIRM_PERCENT*100:.3f}%)"
+                            break # Found one confirmation
+                    if not fib_short_confirm:
+                        log_debug(f"Base Short signal, but price {current_price:.{price_precision_digits}f} not near any Fib resistance level within {FIB_ENTRY_CONFIRM_PERCENT*100:.3f}%.")
+            else:
+                 # If Fib pivots are disabled, confirmation is implicitly true                                                                                 fib_long_confirm = True
+                 fib_short_confirm = True
+
+
+            # --- Update Final Entry Conditions ---
+            long_entry_condition = base_long_signal and long_ob_price_check and volume_confirmed and fib_long_confirm
+            short_entry_condition = base_short_signal and short_ob_price_check and volume_confirmed and fib_short_confirm
+                                                                                   long_reason = ""
+            short_reason = ""
+            if long_entry_condition:
+                 long_reason = (f"RSI ({last_rsi:.1f} < {rsi_oversold}), "
+                                f"StochK ({last_stoch_k:.1f} < {stoch_oversold}), "                                                                                           f"{long_ob_reason_part}" +
+                                (f", {fib_reason_part}" if ENABLE_FIB_PIVOT_ACTIONS and fib_reason_part else "") +
+                                (", Volume Confirmed" if entry_volume_confirmation_enabled else ""))                                                      elif short_entry_condition:
+                 short_reason = (f"RSI ({last_rsi:.1f} > {rsi_overbought}), "
+                                 f"StochK ({last_stoch_k:.1f} > {stoch_overbought}), "                                                                                         f"{short_ob_reason_part}" +
+                                 (f", {fib_reason_part}" if ENABLE_FIB_PIVOT_ACTIONS and fib_reason_part else "") +
+                                 (", Volume Confirmed" if entry_volume_confirmation_enabled else ""))                                                     # Log reasons for failure if base signal was met but other checks failed
+            elif base_long_signal and long_ob_price_check and volume_confirmed and not fib_long_confirm and ENABLE_FIB_PIVOT_ACTIONS:
+                 log_debug("Long Base/OB/Vol conditions met, but Fib support confirmation failed.")
+            elif base_short_signal and short_ob_price_check and volume_confirmed and not fib_short_confirm and ENABLE_FIB_PIVOT_ACTIONS:
+                 log_debug("Short Base/OB/Vol conditions met, but Fib resistance confirmation failed.")
+            # ... (other existing failure logs) ...
+
+
+        # --- Add Fib Pivot Exit Check ---
+        # Inside the `if position['status'] is not None:` block, AFTER TSL check, BEFORE indicator exit check:
+
+            # C. Check for Fibonacci Pivot Exit Warning/Action (if enabled)
+            fib_exit_triggered = False                                             fib_exit_reason = ""
+            if ENABLE_FIB_PIVOT_ACTIONS and nearest_pivots:                            if position['status'] == 'long':
+                    # Check proximity to nearest RESISTANCE levels                         for name, price in pivot_resistance_levels.items():
+                         # Ensure price > 0 for division
+                         if price > 0 and abs(current_price - price) / price <= FIB_EXIT_WARN_PERCENT:                                                                    fib_exit_triggered = True
+                            fib_exit_reason = f"Price {current_price:.{price_precision_digits}f} approaching Fib Resistance {name}={price:.{price_precision_digits}f} ({FIB_EXIT_WARN_PERCENT*100:.3f}%)"
+                            break # Found one resistance level too close
+                elif position['status'] == 'short':
+                    # Check proximity to nearest SUPPORT levels
+                    for name, price in pivot_support_levels.items():
+                         # Ensure price > 0 for division
+                         if price > 0 and abs(current_price - price) / price <= FIB_EXIT_WARN_PERCENT:
+                            fib_exit_triggered = True
+                            fib_exit_reason = f"Price {current_price:.{price_precision_digits}f} approaching Fib Support {name}={price:.{price_precision_digits}f} ({FIB_EXIT_WARN_PERCENT*100:.3f}%)"
+                            break # Found one support level too close
+
+            if fib_exit_triggered:
+                if FIB_EXIT_ACTION == "warn":                                               log_warning(f"{NEON_YELLOW}Fib Pivot Exit Warning: {fib_exit_reason}{RESET}")
+                     # Action: Could potentially tighten TSL here if desired, but currently just warns.
+                elif FIB_EXIT_ACTION == "exit":
+                     log_warning(f"{NEON_RED}Fib Pivot Exit Signal: {fib_exit_reason}. Attempting market exit.{RESET}")                                            display_signal("Exit (Fib Pivot)", position['status'], fib_exit_reason)                                                  
+                     # --- Execute Market Exit (similar to indicator exit logic) ---
+                     log_warning(f"Attempting to close {position['status'].upper()} position via market order due to Fib Pivot proximity.")
+                     sl_id_to_cancel = position.get('sl_order_id')
+                     tp_id_to_cancel = position.get('tp_order_id')
+                     orders_cancelled_successfully = True
+
+                     for order_id, order_type in [(sl_id_to_cancel, "SL"), (tp_id_to_cancel, "TP")]:
+                         if order_id:                                                               log_info(f"Cancelling existing {order_type} order {order_id} before Fib Pivot exit...")                                                       try: cancel_order_with_retry(exchange, order_id, symbol)
+                             except ccxt.OrderNotFound: log_info(f"{order_type} order {order_id} already closed/cancelled.")
+                             except Exception as e:
+                                 log_error(f"Error cancelling {order_type} order {order_id} during Fib Pivot exit: {e}", exc_info=False)
+                                 orders_cancelled_successfully = False                                                                                             if not orders_cancelled_successfully:
+                         log_error("Failed to cancel SL/TP orders. Aborting Fib Pivot market exit.")
+                     else:
+                         close_side = 'sell' if position['status'] == 'long' else 'buy'
+                         exit_qty = position.get('quantity')
+                         if exit_qty is None or exit_qty <= 0:                                      log_error("Cannot place Fib Pivot exit order: Invalid quantity in position state.")
+                         else:
+                             order_result = place_market_order(exchange, symbol, close_side, exit_qty, reduce_only=True)
+                             if order_result and order_result.get('id'):
+                                 log_info(f"Fib Pivot-based {position['status']} position close order placed: ID {order_result.get('id', 'N/A')}")
+                             else:
+                                 log_error(f"Fib Pivot-based market exit order FAILED for {position['status']} position.")
+
+                             # Reset state regardless of order confirmation (intent was to close)
+                             log_info("Resetting local position state after Fib Pivot-based market exit attempt.")
+                             default_state = {k: None for k in position.keys()}                                                                                            position.update(default_state)
+                             save_position_state()
+                             display_position_status(position, price_precision_digits, amount_precision_digits)                                                            # Go to next cycle immediately after exit attempt
+                             neon_sleep_timer(sleep_interval_seconds)
+                             continue # Skip remaining checks in this cycle
+
+            # D. Check for Indicator-Based Exits (Only if Fib exit didn't happen)
+            if not fib_exit_triggered or FIB_EXIT_ACTION == "warn": # Proceed if no Fib exit or only warned
+                execute_indicator_exit = False
+                exit_reason = ""                                                       # ... (rest of the existing indicator exit logic remains the same) ...                                                                        if position['status'] == 'long' and last_rsi > rsi_overbought:
+                    exit_reason = f"Indicator Exit Signal (RSI {last_rsi:.1f} > {rsi_overbought})"
+                    execute_indicator_exit = True
+                elif position['status'] == 'short' and last_rsi < rsi_oversold:
+                    exit_reason = f"Indicator Exit Signal (RSI {last_rsi:.1f} < {rsi_oversold})"                                                                  execute_indicator_exit = True
+
+                if execute_indicator_exit:
+                    # ... (Existing logic to cancel SL/TP and place market exit order) ...
+                    # Ensure this logic also resets the position state correctly.
+                    pass # Placeholder for existing indicator exit logic
+                else:                                                                      # If no exit, log monitoring status
+                    log_info(f"Monitoring {position['status'].upper()} position. Waiting for SL/TP ({position.get('sl_order_id') or 'N/A'}/{position.get('tp_order_id') or 'N/A'}) or TSL update.")
+
+        # --- End of main loop ---
+```

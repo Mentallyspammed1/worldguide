@@ -1,24 +1,3 @@
-Okay, let's enhance the provided Python trading bot code.
-
-The existing code already has a good structure with robust logging, configuration, state management, and basic CCXT wrappers. The enhancements will focus on:
-
-1.  **Completing Core Logic:** Implement the missing parts of the trading logic, including:
-    *   Full indicator calculation and scoring in `TradingAnalyzer`.
-    *   Break-Even Stop Loss management.
-    *   Trailing Stop Loss calculation and setting.
-    *   MA Cross Exit condition.
-    *   Consolidated position size calculation.
-    *   Orchestrating the entry sequence (`attempt_new_entry`) and position management (`manage_existing_position`).
-2.  **Improving CCXT Wrappers:** Refine the CCXT wrappers to handle Bybit V5 specifics more explicitly (`category`, `positionIdx`, parameter formatting) and integrate them smoothly with the Decimal type. Ensure parsing of V5 responses is robust.
-3.  **Decimal Consistency:** Double-check and enforce consistent use of `Decimal` for all financial calculations and storage where precision is paramount (prices, amounts, balances, PnL, calculated levels). Handle conversions to/from `float` when interacting with libraries like pandas_ta or CCXT methods that expect `float`.
-4.  **Error Handling & Robustness:** Expand the `safe_ccxt_call` with more Bybit V5 error codes. Add more validation checks throughout the code (e.g., validating fetched data, calculated values). Improve error messages.
-5.  **Clarity & Documentation:** Add/improve docstrings and type hints. Refine variable names and code structure for better readability.
-6.  **Configuration & State:** Ensure config and state handling correctly manage Decimal types. Add more specific validation rules in config loading.
-7.  **Logging:** Enhance logging messages, particularly for signal generation, trade execution, and position management, using colorama for emphasis.
-
-Let's integrate these enhancements into the provided code structure.
-
-```python
 import argparse
 import json
 import logging

@@ -1,0 +1,333 @@
+`python
+# --- Add near configuration loading ---
+ENABLE_OB_PROFIT_ACTIONS: bool = config.get("enable_ob_profit_actions", False) # Master switch
+OB_FETCH_DEPTH: int = int(config.get("ob_fetch_depth", 20)) # How many levels of bids/asks to fetch
+# Threshold for wall detection: Size in quote currency (e.g., USD) relative to current position value
+OB_WALL_SIZE_MULT: float = float(config.get("ob_wall_size_mult", 5.0)) # e.g., wall > 5x current position value
+# How close the wall needs to be to current price (percentage)
+OB_WALL_DISTANCE_PERCENT: float = float(config.get("ob_wall_distance_percent", 0.005)) # e.g., within 0.5%
+# How much to add when scaling in (multiplier of ORIGINAL entry quantity)
+OB_SCALE_IN_AMOUNT_MULT: float = float(config.get("ob_scale_in_amount_mult", 0.5)) # e.g., add 50% of original size
+OB_MAX_SCALE_INS: int = int(config.get("ob_max_scale_ins", 2)) # Max number of times to scale into a position
+
+if ENABLE_OB_PROFIT_ACTIONS:
+    log_info(f"Order Book Profit Actions: ENABLED (Depth: {OB_FETCH_DEPTH}, Wall Size: {OB_WALL_SIZE_MULT}x PosVal, "
+             f"Distance: {OB_WALL_DISTANCE_PERCENT*100:.2f}%, Scale Mult: {OB_SCALE_IN_AMOUNT_MULT}, Max Scales: {OB_MAX_SCALE_INS})")
+    if OB_FETCH_DEPTH <= 0 or OB_WALL_SIZE_MULT <= 0 or OB_WALL_DISTANCE_PERCENT <= 0 or OB_SCALE_IN_AMOUNT_MULT <= 0 or OB_MAX_SCALE_INS < 0:
+        log_error("CRITICAL: Invalid order book analysis parameter(s) in config. Values must be positive (Max Scales >= 0).")
+        sys.exit(1)
+    # Add check if exchange supports fetching order book
+    if not exchange.has.get('fetchL2OrderBook'):
+         log_error(f"CRITICAL: Exchange {exchange_id} does not support fetchL2OrderBook via CCXT. Disable 'enable_ob_profit_actions'.")
+         sys.exit(1)
+else:
+    log_info("Order Book Profit Actions: DISABLED")
+
+
+# --- Add to Position Management State ---
+position: Dict[str, Any] = {
+    # ... (existing fields) ...
+    'original_quantity': None, # Float: Store the quantity of the initial entry
+    'times_scaled_in': 0,      # Int: Counter for scale-in operations
+    'last_ob_action_time': None # pd.Timestamp: Prevent rapid consecutive OB actions
+}
+# --- Ensure load_position_state handles these new fields ---
+# (Modify load_position_state to initialize these keys if missing in the file)
+# Example addition inside load_position_state, after loading `loaded_state`:
+#   ...
+#   position['original_quantity'] = loaded_state.get('original_quantity', position.get('quantity')) # Initialize intelligently
+#   position['times_scaled_in'] = loaded_state.get('times_scaled_in', 0)
+#   last_ob_action_time_str = loaded_state.get('last_ob_action_time')
+#   if last_ob_action_time_str:
+#       try:
+#           ts_ob = pd.Timestamp(last_ob_action_time_str)
+#           if ts_ob.tzinfo is None: ts_ob = ts_ob.tz_localize('UTC')
+#           else: ts_ob = ts_ob.tz_convert('UTC')
+#           position['last_ob_action_time'] = ts_ob
+#       except ValueError:
+#           position['last_ob_action_time'] = None
+#   else:
+#       position['last_ob_action_time'] = None
+#   ...
+
+# --- Add new Order Book Analysis Function (Decorated) ---
+@api_retry_decorator
+def fetch_and_analyze_order_book(exchange_instance: ccxt.Exchange, trading_symbol: str, current_pos_value_quote: float) -> Tuple[bool, bool, float, float]:
+    """
+    Fetches L2 order book and analyzes for significant walls near the current price.
+    Returns: (large_support_found, large_resistance_found, total_support_value, total_resistance_value)
+    """
+    log_debug(f"Fetching order book for {trading_symbol} (Depth: {OB_FETCH_DEPTH})...")
+    try:
+        order_book = exchange_instance.fetch_l2_order_book(trading_symbol, limit=OB_FETCH_DEPTH)
+
+        if not order_book or not order_book.get('bids') or not order_book.get('asks'):
+            log_warning("Order book data is empty or incomplete.")
+            return False, False, 0.0, 0.0
+
+        ticker = exchange_instance.fetch_ticker(trading_symbol) # Get current price again for accuracy
+        if not ticker or 'last' not in ticker:
+             log_warning("Could not fetch ticker for current price during OB analysis.")
+             return False, False, 0.0, 0.0
+        current_price = ticker['last']
+
+        price_distance_threshold = current_price * OB_WALL_DISTANCE_PERCENT
+        wall_value_threshold = current_pos_value_quote * OB_WALL_SIZE_MULT
+
+        log_debug(f"OB Analysis | Current Price: {current_price:.{price_precision_digits}f}, "
+                  f"Distance Threshold: +/- {price_distance_threshold:.{price_precision_digits}f} ({OB_WALL_DISTANCE_PERCENT*100:.2f}%), "
+                  f"Wall Value Threshold: {wall_value_threshold:.{price_precision_digits}f} {market_info.get('quote', '')}")
+
+        # Analyze Bids (Support)
+        total_support_value_near = 0.0
+        large_support_found = False
+        for price, amount in order_book['bids']:
+            if price >= current_price - price_distance_threshold:
+                level_value = price * amount
+                total_support_value_near += level_value
+                if level_value >= wall_value_threshold:
+                    large_support_found = True
+                    log_debug(f"Large Support Wall Found: Price={price:.{price_precision_digits}f}, Amount={amount:.{amount_precision_digits}f}, Value={level_value:.2f}")
+                    # break # Found one, no need to check further bids for the flag (but continue summing total)
+            else:
+                break # Bids are sorted descending, no need to check further
+
+        # Analyze Asks (Resistance)
+        total_resistance_value_near = 0.0
+        large_resistance_found = False
+        for price, amount in order_book['asks']:
+            if price <= current_price + price_distance_threshold:
+                level_value = price * amount
+                total_resistance_value_near += level_value
+                if level_value >= wall_value_threshold:
+                    large_resistance_found = True
+                    log_debug(f"Large Resistance Wall Found: Price={price:.{price_precision_digits}f}, Amount={amount:.{amount_precision_digits}f}, Value={level_value:.2f}")
+                    # break # Found one, no need to check further asks for the flag (but continue summing total)
+            else:
+                break # Asks are sorted ascending, no need to check further
+
+        log_info(f"OB Analysis Result | Support Found: {large_support_found}, Resistance Found: {large_resistance_found} "
+                 f"| Near Support Value: {total_support_value_near:.2f}, Near Resistance Value: {total_resistance_value_near:.2f}")
+
+        return large_support_found, large_resistance_found, total_support_value_near, total_resistance_value_near
+
+    except ccxt.NetworkError as e:
+         # Handled by decorator, but log specific context
+         log_warning(f"Network error fetching order book: {e}")
+         raise # Re-raise for decorator
+    except ccxt.ExchangeError as e:
+        log_error(f"Exchange error fetching/analyzing order book: {e}")
+        return False, False, 0.0, 0.0 # Treat as no walls found on error
+    except Exception as e:
+        if not isinstance(e, RETRYABLE_EXCEPTIONS):
+             log_error(f"Unexpected error fetching/analyzing order book: {e}", exc_info=True)
+        return False, False, 0.0, 0.0 # Treat as no walls found on error
+
+
+# --- Modify the main trading loop ---
+# Inside the `while True:` loop, within the `if position['status'] is not None:` block:
+
+        # --- Check if ALREADY IN A POSITION ---
+        if position['status'] is not None:
+            log_info(f"Currently in {position['status'].upper()} position.")
+            # Ensure entry price and quantity are valid before proceeding
+            if position.get('entry_price') is None or position.get('quantity') is None or position['quantity'] <= 0:
+                 log_error("Position state has invalid entry_price or quantity. Cannot manage position.")
+                 # Consider resetting state here or attempting recovery
+                 neon_sleep_timer(sleep_interval_seconds)
+                 continue
+
+            # A. Check Trailing Stop Logic (if enabled)
+            update_trailing_stop(exchange, symbol, current_price, last_atr if last_atr else 0.0)
+
+            # B. Check Order Book Actions (if enabled and profitable)
+            ob_action_taken_this_cycle = False # Flag to prevent other actions if OB action occurs
+            if ENABLE_OB_PROFIT_ACTIONS:                                               is_profitable = (position['status'] == 'long' and current_price > position['entry_price']) or \
+                                (position['status'] == 'short' and current_price < position['entry_price'])
+
+                # Add time check to prevent rapid actions
+                can_take_ob_action = True
+                if position.get('last_ob_action_time'):
+                    time_since_last_action = pd.Timestamp.now(tz='UTC') - position['last_ob_action_time']
+                    # Prevent action if last OB action was within, say, half the sleep interval
+                    if time_since_last_action < pd.Timedelta(seconds=sleep_interval_seconds / 2):
+                        log_debug(f"Skipping OB check: Too soon since last OB action ({time_since_last_action.total_seconds():.0f}s ago).")
+                        can_take_ob_action = False
+
+                if is_profitable and can_take_ob_action:
+                    log_info("Position is profitable. Analyzing order book for potential actions...")
+                    current_position_value_quote = position['quantity'] * current_price
+                                                                                           try:
+                        support_found, resistance_found, _, _ = fetch_and_analyze_order_book(
+                            exchange, symbol, current_position_value_quote
+                        )
+                                                                                               # --- OB Early Exit Logic ---
+                        if position['status'] == 'long' and resistance_found:
+                            log_warning(f"{NEON_RED}Large resistance wall detected ahead! Attempting early exit from LONG position.{RESET}")
+                            ob_action_taken_this_cycle = True
+                            # --- Execute Market Exit ---
+                            log_warning(f"Attempting to close LONG position via market order due to OB resistance.")
+                            sl_id_to_cancel = position.get('sl_order_id')                                                                                                 tp_id_to_cancel = position.get('tp_order_id')
+                            orders_cancelled_successfully = True
+                            for order_id, order_type in [(sl_id_to_cancel, "SL"), (tp_id_to_cancel, "TP")]:
+                                if order_id:
+                                    log_info(f"Cancelling existing {order_type} order {order_id} before OB exit...")
+                                    try: cancel_order_with_retry(exchange, order_id, symbol)
+                                    except ccxt.OrderNotFound: log_info(f"{order_type} order {order_id} already closed/cancelled.")
+                                    except Exception as e:
+                                        log_error(f"Error cancelling {order_type} order {order_id} during OB exit: {e}", exc_info=False)
+                                        orders_cancelled_successfully = False
+                            if not orders_cancelled_successfully:
+                                log_error("Failed to cancel SL/TP orders. Aborting OB market exit.")                                                                      else:
+                                exit_qty = position.get('quantity')                                    if exit_qty and exit_qty > 0:
+                                    order_result = place_market_order(exchange, symbol, 'sell', exit_qty, reduce_only=True)                                                       if order_result and order_result.get('id'):
+                                        log_info(f"OB-based LONG position close order placed: ID {order_result.get('id', 'N/A')}")
+                                        position['last_ob_action_time'] = pd.Timestamp.now(tz='UTC') # Record action time
+                                    else:                                                                      log_error("OB-based market exit order FAILED.")
+                                    # Reset state regardless of order confirmation (intent was to close)                                                                          log_info("Resetting local position state after OB-based market exit attempt.")
+                                    default_state = {k: None for k in position.keys()}
+                                    position.update(default_state)
+                                    save_position_state()                                              else: log_error("Cannot place OB exit order: Invalid quantity in position state.")
+                            # --- End Market Exit ---
+
+                        elif position['status'] == 'short' and support_found:                                                                                             log_warning(f"{NEON_GREEN}Large support wall detected below! Attempting early exit from SHORT position.{RESET}")
+                            ob_action_taken_this_cycle = True
+                            # --- Execute Market Exit ---
+                            log_warning(f"Attempting to close SHORT position via market order due to OB support.")
+                            sl_id_to_cancel = position.get('sl_order_id')
+                            tp_id_to_cancel = position.get('tp_order_id')
+                            orders_cancelled_successfully = True
+                            for order_id, order_type in [(sl_id_to_cancel, "SL"), (tp_id_to_cancel, "TP")]:
+                                if order_id:
+                                    log_info(f"Cancelling existing {order_type} order {order_id} before OB exit...")
+                                    try: cancel_order_with_retry(exchange, order_id, symbol)
+                                    except ccxt.OrderNotFound: log_info(f"{order_type} order {order_id} already closed/cancelled.")
+                                    except Exception as e:                                                     log_error(f"Error cancelling {order_type} order {order_id} during OB exit: {e}", exc_info=False)
+                                        orders_cancelled_successfully = False
+                            if not orders_cancelled_successfully:
+                                log_error("Failed to cancel SL/TP orders. Aborting OB market exit.")
+                            else:
+                                exit_qty = position.get('quantity')
+                                if exit_qty and exit_qty > 0:
+                                    order_result = place_market_order(exchange, symbol, 'buy', exit_qty, reduce_only=True)
+                                    if order_result and order_result.get('id'):
+                                        log_info(f"OB-based SHORT position close order placed: ID {order_result.get('id', 'N/A')}")
+                                        position['last_ob_action_time'] = pd.Timestamp.now(tz='UTC') # Record action time
+                                    else:
+                                        log_error("OB-based market exit order FAILED.")
+                                    # Reset state regardless of order confirmation (intent was to close)
+                                    log_info("Resetting local position state after OB-based market exit attempt.")
+                                    default_state = {k: None for k in position.keys()}                                                                                            position.update(default_state)
+                                    save_position_state()
+                                else: log_error("Cannot place OB exit order: Invalid quantity in position state.")
+                            # --- End Market Exit ---
+
+                        # --- OB Scale-In Logic (only if no exit occurred and max scale-ins not reached) ---
+                        elif not ob_action_taken_this_cycle and position.get('times_scaled_in', 0) < OB_MAX_SCALE_INS:
+                            scale_in_triggered = False
+                            scale_in_side = None
+                            scale_in_reason = ""
+
+                            if position['status'] == 'long' and support_found:
+                                scale_in_triggered = True
+                                scale_in_side = 'buy'
+                                scale_in_reason = "Large support wall detected below current price."
+                            elif position['status'] == 'short' and resistance_found:
+                                scale_in_triggered = True                                              scale_in_side = 'sell'
+                                scale_in_reason = "Large resistance wall detected above current price."
+
+                            if scale_in_triggered:
+                                log_info(f"{NEON_CYAN}OB Scale-In Opportunity Detected! Reason: {scale_in_reason}{RESET}")
+                                ob_action_taken_this_cycle = True
+
+                                # Ensure original quantity was stored
+                                if position.get('original_quantity') is None:
+                                     position['original_quantity'] = position['quantity'] # Store it now if missing                           
+                                original_qty = position.get('original_quantity', position['quantity']) # Fallback                                                             if original_qty is None or original_qty <= 0:
+                                     log_error("Cannot scale in: Original quantity not available or invalid.")                                                                else:
+                                    additional_quantity = original_qty * OB_SCALE_IN_AMOUNT_MULT
+                                    log_info(f"Attempting to scale into {position['status']} position by adding {additional_quantity:.{amount_precision_digits}f} (Side: {scale_in_side})")
+                                                                                                           # Place additional market order (NOT reduceOnly)
+                                    scale_order_result = place_market_order(exchange, symbol, scale_in_side, additional_quantity, reduce_only=False)
+                                    is_filled = scale_order_result and (scale_order_result.get('status') == 'closed' or (scale_order_result.get('status') == 'open' and scale_order_result.get('filled', 0) > 0))
+
+                                    if is_filled:
+                                        filled_add_qty = scale_order_result.get('filled', additional_quantity)
+                                        filled_add_price = scale_order_result.get('average', current_price)
+                                        log_info(f"Scale-in order filled/processed: ID {scale_order_result.get('id', 'N/A')} at ~{filled_add_price:.{price_precision_digits}f} for {filled_add_qty:.{amount_precision_digits}f}")
+
+                                        # --- Update Position State ---
+                                        old_total_value = position['entry_price'] * position['quantity']
+                                        added_value = filled_add_price * filled_add_qty
+                                        new_total_quantity = position['quantity'] + filled_add_qty
+                                        new_average_entry_price = (old_total_value + added_value) / new_total_quantity if new_total_quantity > 0 else position['entry_price']
+
+                                        position['quantity'] = new_total_quantity
+                                        position['entry_price'] = new_average_entry_price
+                                        position['times_scaled_in'] = position.get('times_scaled_in', 0) + 1
+                                        position['last_ob_action_time'] = pd.Timestamp.now(tz='UTC') # Record action time                                                             # Original quantity remains the same                                                                                                          # Keep existing SL/TP orders and IDs - manual adjustment might be needed                                                                      log_info(f"Position state updated after scale-in: New Qty={new_total_quantity:.{amount_precision_digits}f}, New Avg Entry={new_average_entry_price:.{price_precision_digits}f}")
+                                        log_warning("SL/TP orders were NOT automatically adjusted after scale-in. Original SL/TP targets remain.")                                                                                                           save_position_state()
+                                        display_position_status(position, price_precision_digits, amount_precision_digits)                    
+                                    else:                                                                      log_error(f"Failed to place or confirm fill for scale-in order. Result: {scale_order_result}")
+                        # --- End Scale-In Logic ---
+                                                                                           except Exception as ob_e:
+                         # Errors during fetch/analysis are handled inside the function
+                         # This catches unexpected errors in the logic block itself                                                                                    log_error(f"Error during order book action processing: {ob_e}", exc_info=True)
+                                                                                       elif is_profitable and not can_take_ob_action:
+                     pass # Logged already inside the time check
+                elif not is_profitable:
+                     log_debug("Position not currently profitable. Skipping order book actions.")
+                                                                                                                                                          # C. Check for Indicator-Based Exits (Only if no OB action taken this cycle)                                                                  if not ob_action_taken_this_cycle:
+                execute_indicator_exit = False
+                exit_reason = ""
+                # ... (rest of the existing indicator exit logic remains the same) ...
+                if position['status'] == 'long' and last_rsi > rsi_overbought:
+                    exit_reason = f"Indicator Exit Signal (RSI {last_rsi:.1f} > {rsi_overbought})"
+                    execute_indicator_exit = True
+                elif position['status'] == 'short' and last_rsi < rsi_oversold:
+                    exit_reason = f"Indicator Exit Signal (RSI {last_rsi:.1f} < {rsi_oversold})"
+                    execute_indicator_exit = True                      
+                if execute_indicator_exit:
+                    # ... (Existing logic to cancel SL/TP and place market exit order) ...                                                                        # IMPORTANT: Ensure this logic also resets the new state fields:
+                    # 'original_quantity', 'times_scaled_in', 'last_ob_action_time' to None/0
+                    # The existing `default_state = {k: None for k in position.keys()}` reset should handle this.
+                    pass # Placeholder for existing logic
+                else:
+                    # If no indicator exit, just log monitoring status
+                    log_info(f"Monitoring {position['status'].upper()} position. Waiting for SL/TP ({position.get('sl_order_id') or 'N/A'}/{position.get('tp_order_id') or 'N/A'}) or TSL update.")
+                                                                       
+        # --- Check for NEW ENTRIES (only if not currently in a position) ---
+        else: # position['status'] is None                                         # ... (Existing entry logic remains the same) ...
+            # IMPORTANT: When a new entry is made, initialize the new state fields:
+            # Inside the `if is_filled:` block after placing the initial entry order and SL/TP:
+            #   position.update({                                                  #       ... (existing fields) ...
+            #       'original_quantity': filled_quantity, # Store initial quantity
+            #       'times_scaled_in': 0,                                          #       'last_ob_action_time': None
+            #   })
+            pass # Placeholder for existing logic
+
+        # 7. Wait for the next cycle                                           # ... (Existing sleep logic) ...
+
+# --- Ensure state reset logic handles new fields ---                  # In `check_position_and_orders`, when resetting state:
+# The line `default_state = {k: None for k in position.keys()}` should correctly
+# capture the new keys and set them to None (or default value if modified).
+# Ensure `times_scaled_in` defaults to 0, not None, if using the loop counter approach.
+# Let's refine the reset:                                              # Inside `check_position_and_orders`, replace the simple reset with:   #
+#             log_info("Resetting local position state.")
+#             position['status'] = None                                #             position['entry_price'] = None
+#             position['quantity'] = None
+#             position['order_id'] = None
+#             position['stop_loss'] = None
+#             position['take_profit'] = None                           #             position['entry_time'] = None
+#             position['sl_order_id'] = None
+#             position['tp_order_id'] = None
+#             position['highest_price_since_entry'] = None             #             position['lowest_price_since_entry'] = None
+#             position['current_trailing_sl_price'] = None
+#             # Reset new fields
+#             position['original_quantity'] = None                     #             position['times_scaled_in'] = 0
+#             position['last_ob_action_time'] = None
+#             save_position_state() # Save the reset state
+#             display_position_status(position, price_precision_digits, amount_precision_digits) # Show updated status                        #             return True # Indicate position was reset
+
+# Similarly, ensure the fallback indicator exit logic uses this detailed reset.
+# And ensure the OB early exit logic uses this detailed reset.
