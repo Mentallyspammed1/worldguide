@@ -1,0 +1,29 @@
+# Gemini Code Assist Configuration - Default
+# See documentation for all options: <Link to Docs if available>
+
+# Example: Enable fun mode (if applicable)
+have_fun: true
+
+# Code Review Settings
+code_review:
+  # Completely disable code review feature
+  disable: false
+
+  # Minimum severity level for comments to be posted (LOW, MEDIUM, HIGH, CRITICAL)
+  comment_severity_threshold: MEDIUM
+
+  # Max number of review comments per run (-1 for unlimited)
+  max_review_comments: -1
+
+  # Actions triggered when a pull request is opened or synchronized
+  pull_request_opened:
+    # Provide helpful hints via comments
+    help: false
+    # Generate a summary comment of the PR changes
+    summary: true
+    # Perform code review on the PR changes
+    code_review: true
+
+# Other potential top-level features (add as needed)
+# code_explanation:
+#   disable: true
