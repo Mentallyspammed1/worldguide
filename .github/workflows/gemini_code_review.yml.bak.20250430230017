@@ -3,12 +3,6 @@ name: Gemini Code Review Spell
 on:
   pull_request:
     types: [opened, synchronize]
-  workflow_dispatch:
-    inputs:
-      base_branch:
-        description: 'Base branch for diff comparison (default: main)'
-        required: false
-        default: 'main'
 
 jobs:
   gemini-review:
@@ -28,17 +22,9 @@ jobs:
         shell: bash
         run: |
           echo "Forging the diff..."
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            BASE_BRANCH="${{ github.event.inputs.base_branch || 'main' }}"
-            echo "Manual run: Comparing HEAD with $BASE_BRANCH"
-            git fetch origin $BASE_BRANCH:$BASE_BRANCH
-            DIFF_CONTENT=$(git diff $BASE_BRANCH HEAD -- . ':(exclude).github/*')
-          else
-            echo "PR run: Comparing ${{ github.event.pull_request.base.ref }} with PR head"
-            git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-            git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
-            DIFF_CONTENT=$(git diff "origin/${{ github.event.pull_request.base.ref }}" "${{ github.event.pull_request.head.sha }}" -- . ':(exclude).github/*')
-          fi
+          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
+          git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
+          DIFF_CONTENT=$(git diff "origin/${{ github.event.pull_request.base.ref }}" "${{ github.event.pull_request.head.sha }}" -- . ':(exclude).github/*')
           if [ -z "$DIFF_CONTENT" ]; then
             echo "No code changes detected to analyze."
             echo "diff_content=" >> $GITHUB_OUTPUT
@@ -56,7 +42,7 @@ jobs:
         if: steps.get_diff.outputs.diff_content != ''
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10'
 
       - name: Install Dependencies
         if: steps.get_diff.outputs.diff_content != ''
@@ -72,16 +58,6 @@ jobs:
           REPO_NAME: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_DIFF: ${{ steps.get_diff.outputs.diff_content }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          EVENT_NAME: ${{ github.event_name }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           python .github/scripts/analyze_code.py
-          cat review_report.json
-
-      - name: Upload Review Report
-        if: steps.get_diff.outputs.diff_content != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: gemini-review-report
-          path: review_report.json
-          retention-days: 7

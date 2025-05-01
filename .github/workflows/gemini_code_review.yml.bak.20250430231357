@@ -56,7 +56,7 @@ jobs:
         if: steps.get_diff.outputs.diff_content != ''
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10'
 
       - name: Install Dependencies
         if: steps.get_diff.outputs.diff_content != ''
