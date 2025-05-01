@@ -1,0 +1,43 @@
+{
+  "symbol": "BTCUSDT",
+  "interval": "5",
+  "mode": "Live",
+  "log_level": "INFO",
+
+  "order": {
+    "type": "Market",
+    "risk_per_trade_percent": 1.0,
+    "leverage": 5,
+    "tp_ratio": 2.0
+  },
+
+  "strategy": {
+    "class": "VolumaticOBStrategy",
+    "params": {
+      "length": 40,
+      "vol_atr_period": 200,
+      "vol_percentile_len": 1000,
+      "vol_percentile": 100,
+      "ob_source": "Wicks",
+      "pivot_left_h": 10,
+      "pivot_right_h": 10,
+      "pivot_left_l": 10,
+      "pivot_right_l": 10,
+      "max_boxes": 5
+    },
+    "stop_loss": {
+      "method": "ATR",
+      "atr_multiplier": 2.0
+    }
+  },
+
+  "data": {
+      "fetch_limit": 750,
+      "max_df_len": 2000
+  },
+
+  "websocket": {
+      "ping_interval": 20
+  },
+  "position_check_interval": 10
+}

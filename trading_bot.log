@@ -8,3 +8,10 @@
 2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'risk_management'
 2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:137] - Configuration validation failed.
 2025-05-01 04:30:28,555 - CRITICAL - [y.1.4.py:1560] - Failed to load or validate configuration. Exiting.
+2025-05-01 18:13:27,911 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'exchange'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'api_credentials'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'trading_settings'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'risk_management'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-01 18:13:27,913 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
