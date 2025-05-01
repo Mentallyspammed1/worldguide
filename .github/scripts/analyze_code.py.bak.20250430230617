@@ -98,9 +98,6 @@ def analyze_code_chunk_with_gemini(diff_chunk, model):
         return []
 
 def post_github_comment(repo_name, pr_number, commit_sha, github_token, issue_report):
-    if not pr_number:
-        print_wizard_message("No pull request number provided (manual workflow run?). Skipping comment posting.", Fore.YELLOW)
-        return
     api_url = f"{GITHUB_API_BASE_URL}/repos/{repo_name}/pulls/{pr_number}/comments"
     headers = {
         "Authorization": f"Bearer {github_token}",
@@ -155,25 +152,9 @@ def main():
     pr_number = os.getenv('PR_NUMBER')
     pr_diff = os.getenv('PR_DIFF')
     commit_sha = os.getenv('COMMIT_SHA')
-    event_name = os.getenv('EVENT_NAME')
-
-    if not gemini_api_key:
-        print_error_message("GEMINI_API_KEY is missing. Please set it in GitHub Secrets.")
+    if not all([gemini_api_key, github_token, repo_name, pr_number, pr_diff, commit_sha]):
+        print_error_message("One or more required environment variables are missing!")
         exit(1)
-    if not github_token:
-        print_error_message("GITHUB_TOKEN is missing. Please ensure the workflow has permissions.")
-        exit(1)
-    if not repo_name:
-        print_error_message("REPO_NAME is missing. Please ensure the workflow is run in a GitHub repository.")
-        exit(1)
-    if not pr_diff:
-        print_error_message("PR_DIFF is missing. No code changes to analyze.")
-        exit(1)
-    if event_name == 'workflow_dispatch':
-        print_wizard_message("Manual workflow run detected. Analysis will proceed, but comments require a pull request.", Fore.YELLOW)
-        pr_number = None  # Prevent comment posting
-        commit_sha = commit_sha or 'unknown'
-
     try:
         genai.configure(api_key=gemini_api_key)
         model = genai.GenerativeModel(GEMINI_MODEL_NAME)
@@ -181,7 +162,6 @@ def main():
     except Exception as e:
         print_error_message(f"Failed to configure Gemini API: {e}")
         exit(1)
-
     diff_chunks = chunk_diff(pr_diff)
     total_issues_found = 0
     for chunk, file_context in diff_chunks:

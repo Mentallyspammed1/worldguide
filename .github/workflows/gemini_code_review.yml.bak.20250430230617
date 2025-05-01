@@ -3,7 +3,6 @@ name: Gemini Code Review Spell
 on:
   pull_request:
     types: [opened, synchronize]
-  workflow_dispatch: # Allow manual triggering
 
 jobs:
   gemini-review:
@@ -23,16 +22,9 @@ jobs:
         shell: bash
         run: |
           echo "Forging the diff..."
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # For manual runs, compare HEAD with main
-            git fetch origin main:main
-            DIFF_CONTENT=$(git diff main HEAD -- . ':(exclude).github/*')
-          else
-            # For PRs, compare base branch with PR head
-            git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-            git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
-            DIFF_CONTENT=$(git diff "origin/${{ github.event.pull_request.base.ref }}" "${{ github.event.pull_request.head.sha }}" -- . ':(exclude).github/*')
-          fi
+          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
+          git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
+          DIFF_CONTENT=$(git diff "origin/${{ github.event.pull_request.base.ref }}" "${{ github.event.pull_request.head.sha }}" -- . ':(exclude).github/*')
           if [ -z "$DIFF_CONTENT" ]; then
             echo "No code changes detected to analyze."
             echo "diff_content=" >> $GITHUB_OUTPUT
@@ -66,7 +58,6 @@ jobs:
           REPO_NAME: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_DIFF: ${{ steps.get_diff.outputs.diff_content }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          EVENT_NAME: ${{ github.event_name }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           python .github/scripts/analyze_code.py
