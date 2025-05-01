@@ -29,32 +29,38 @@ jobs:
       cancel-in-progress: true
 
     steps:
+      # Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensure full repository history is checked out
+          fetch-depth: 0
 
+      # Debug Repository Contents
       - name: Debug Repository Contents
         run: |
           echo "Repository contents:"
           ls -la
           find . -type f
           if [ ! -d .git ]; then
-            echo "::error::Repository not properly checked out. Please ensure the checkout step is correct."
+            echo "::error::Repository not properly checked out"
             exit 1
           fi
 
+      # Set up Python with Cache
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
+      # Install Dependencies with Cache
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install ruff==0.6.8
+          pip cache dir
 
+      # Create Default Ruff Configuration
       - name: Create Default Ruff Configuration
         run: |
           if [ ! -f pyproject.toml ]; then
@@ -76,6 +82,22 @@ jobs:
                 ".pytest_cache",
                 ".mypy_cache",
                 ".ruff_cache",
+                "**/__init__.py",
+                "node_modules",
+                "target",
+                "vendor",
+                "env",
+                "ENV",
+                ".eggs",
+                ".svn",
+                "CVS",
+                ".bzr",
+                ".hg",
+                "_build",
+                "buck-out",
+                "build",
+                "dist",
+                "venv"
             ]
 
             [tool.ruff.format]
@@ -95,26 +117,43 @@ jobs:
             known-third-party = []
             force-single-line = false
             combine-as-imports = true
-            split-on-trailing-comma = true' > pyproject.toml
+            split-on-trailing-comma = true
+
+            [tool.ruff.cache]
+            enabled = true
+            directory = ".ruff_cache"' > pyproject.toml
             echo "Created pyproject.toml with default Ruff configuration."
           else
             echo "pyproject.toml already exists, skipping creation."
           fi
-          echo "Current pyproject.toml contents:"
           cat pyproject.toml || echo "No pyproject.toml found after creation."
 
+      # Run Ruff Linting and Auto-Fix
       - name: Run Ruff Linting and Auto-Fix
         id: ruff_lint
         run: |
           ruff format . || true
           ruff check . --fix --exit-non-zero-on-fix --output-format=full > ruff_output.txt || true
-          echo "Ruff exit code: $?"
-          echo "changes_detected=false" >> $GITHUB_OUTPUT
+          EXIT_CODE=$?
+          echo "Ruff exit code: $EXIT_CODE"
+          
+          # Handle different exit codes appropriately
+          case $EXIT_CODE in
+            0) echo "No issues found";;
+            1) echo "Issues found but fixed";;
+            2) echo "Unfixable issues found";;
+            *) echo "Unknown error occurred";;
+          esac
+
+          # Set output variable based on file size
           if [ -s ruff_output.txt ]; then
             echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
         continue-on-error: true
 
+      # Upload Ruff Output as Artifact
       - name: Upload Ruff Output as Artifact
         if: steps.ruff_lint.outputs.changes_detected == 'true'
         uses: actions/upload-artifact@v4
@@ -122,13 +161,14 @@ jobs:
           name: ruff-output
           path: ruff_output.txt
 
+      # Create Pull Request with Fixes
       - name: Create Pull Request with Fixes
         if: steps.ruff_lint.outputs.changes_detected == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: Apply Ruff linting and formatting fixes"
-          branch: ruff-fixes/${{ github.run_id }}-${{ github.run_attempt }}
+          commit-message: "chore: Apply Ruff linting and formatting fixes (${{ github.run_id }})"
+          branch: ruff-fixes/${{ github.actor }}-${{ github.run_id }}
           delete-branch: true
           title: 'chore: Auto Ruff linting and formatting fixes'
           body: |
@@ -151,6 +191,7 @@ jobs:
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}
 
+      # Summarize Workflow Outcome
       - name: Summarize Workflow Outcome
         if: always()
         run: |
