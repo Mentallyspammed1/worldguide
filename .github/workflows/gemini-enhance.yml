@@ -7,53 +7,93 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   gemini_code_review:
     name: Run Gemini AI Code Review
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # Prevent long-running workflows
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      id-token: write
 
     env:
-      GEMINI_MODEL: gemini-2.5-pro-exp-03-25 # Updated Gemini model version
-      INPUT_EXCLUDE: '' # Exclude specific files or directories if needed
+      GEMINI_MODEL: gemini-2.5-pro-exp-03-25
+      INPUT_EXCLUDE: |
+        **/node_modules
+        **/dist
+        **/build
+        **/coverage
+        **/*.log
+        **/*.tmp
+        .github/**
+      CACHE_VERSION: ${{ hashFiles('package.json') || hashFiles('package-lock.json') || '1' }}
+      GEMINI_CACHE_PATH: ${{ github.workspace }}/.cache/gemini
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history for accurate review
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Gemini cache directory
+        run: mkdir -p ${{ env.GEMINI_CACHE_PATH }}
 
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # Ensure compatibility with the action
+          node-version: '16'
+          cache: 'npm'
+          cache-key: "npm-${{ env.CACHE_VERSION }}"
 
-      - name: Install Dependencies (Optional)
-        run: npm install # Add if dependencies are required for code review
+      - name: Install Dependencies
+        if: steps.setup-node.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          npm_config_cache: ${{ env.GEMINI_CACHE_PATH }}/npm
 
       - name: Run Gemini AI Reviewer
         id: gemini_review
-        uses: HoangNguyen0403/gemini-ai-code-reviewer@v0.0.3
+        uses: HoangNguyen0403/gemini-ai-code-reviewer@v1.0.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ env.GEMINI_MODEL }}
           INPUT_EXCLUDE: ${{ env.INPUT_EXCLUDE }}
+          EXCLUDE: ${{ env.INPUT_EXCLUDE }}
+          WORKING_DIRECTORY: ${{ github.workspace }}
+          FAIL_ON_ERROR: true
+          REVIEW_THRESHOLD: MEDIUM
 
       - name: Handle Gemini Review Output
-        if: ${{ success() }}
+        if: success()
         run: |
-          echo "Gemini AI Review completed successfully."
-          # Add additional handling logic here if needed
+          echo "✨ Gemini AI Review completed successfully"
+          echo "📊 Review Statistics:"
+          echo "🔍 Files analyzed: ${{ steps.gemini_review.outputs.files_analyzed }}"
+          echo "📝 Suggestions provided: ${{ steps.gemini_review.outputs.suggestions_count }}"
 
       - name: Log Failure
-        if: ${{ failure() }}
+        if: failure()
         run: |
-          echo "Gemini AI Review failed. Check the logs for details."
+          echo "❌ Gemini AI Review failed"
+          echo "📋 Error details:"
+          cat ${{ github.workspace }}/gemini-error.log
 
-      - name: Upload Logs (Optional)
-        if: ${{ always() }}
+      - name: Upload Logs
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: gemini-review-logs
-          path: ./logs # Replace with your actual log path
+          path: ${{ github.workspace }}/gemini-error.log
+
+      - name: Upload Gemini Cache
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: gemini-cache
+          path: ${{ env.GEMINI_CACHE_PATH }}
