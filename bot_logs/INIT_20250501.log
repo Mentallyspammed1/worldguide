@@ -91,3 +91,52 @@ TypeError: string indices must be integers, not 'str'
 2025-05-01T04:09:13-0500 - INFO - INIT - Cached categories for 2603 markets.
 2025-05-01T04:09:13-0500 - INFO - INIT - Closed CCXT exchange connection.
 2025-05-01T04:09:13-0500 - INFO - INIT - Market data loaded successfully.
+2025-05-01T17:40:28-0500 - INFO - INIT - Application starting...
+2025-05-01T17:40:28-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-01T17:40:28-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-01T17:40:28-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-01T17:40:28-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-01T17:40:28-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T17:40:28-0500 - INFO - INIT - Attempting to load markets...
+2025-05-01T17:40:34-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:40:34-0500 - ERROR - INIT - Unexpected error loading markets (Attempt 1/5): 'NoneType' object has no attribute 'upper'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 582, in initialize_markets
+    self._cache_market_categories() # Populate category cache
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 617, in _cache_market_categories
+    settle_currency = details.get('settle', '').upper() # USDT, USD, BTC etc.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-05-01T17:40:44-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:40:44-0500 - ERROR - INIT - Unexpected error loading markets (Attempt 2/5): 'NoneType' object has no attribute 'upper'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 582, in initialize_markets
+    self._cache_market_categories() # Populate category cache
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 617, in _cache_market_categories
+    settle_currency = details.get('settle', '').upper() # USDT, USD, BTC etc.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-05-01T17:40:57-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:40:57-0500 - ERROR - INIT - Unexpected error loading markets (Attempt 3/5): 'NoneType' object has no attribute 'upper'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 582, in initialize_markets
+    self._cache_market_categories() # Populate category cache
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 617, in _cache_market_categories
+    settle_currency = details.get('settle', '').upper() # USDT, USD, BTC etc.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-05-01T17:41:09-0500 - INFO - INIT - Closed CCXT exchange connection.
+2025-05-01T17:51:08-0500 - INFO - INIT - Application starting...
+2025-05-01T17:51:08-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-01T17:51:08-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-01T17:51:08-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-01T17:51:08-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-01T17:51:08-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T17:51:08-0500 - INFO - INIT - Attempting to load markets...
+2025-05-01T17:51:15-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:51:15-0500 - INFO - INIT - Cached categories for 2605 markets (Spot/Linear/Inverse/Option).
+2025-05-01T17:51:15-0500 - INFO - INIT - Market data loaded successfully (2605 valid markets found).
+2025-05-01T17:51:15-0500 - INFO - INIT - Closed CCXT exchange connection.
