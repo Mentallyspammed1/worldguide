@@ -1,14 +1,7 @@
-            - name: Gemini AI Reviewer
-  # You may pin to the exact commit or the version.
-  # uses: HoangNguyen0403/gemini-ai-code-reviewer@1b846939f85b7e8d7ebda26662bbb7554e44c22f
-  uses: HoangNguyen0403/gemini-ai-code-reviewer@v0.0.3
-  with:
-    # GitHub token to interact with the repository
-    GITHUB_TOKEN: 
-    # Google Gemini API key
-    GEMINI_API_KEY:AIzaSyCy9Lby7bwCsL2YV_TM75AxXiqa1IhcPZ4
-    # The Gemini model to use for code review
-    GEMINI_MODEL: gemini-2.5-pro-exp-03-25
-    # Comma-separated list of file patterns to exclude
-    INPUT_EXCLUDE: # optional, default is 
-          
+name: Gemini AI Reviewer
+uses: HoangNguyen0403/gemini-ai-code-reviewer@v0.0.3
+with:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  GEMINI_MODEL: gemini-1.5-pro-latest
+  INPUT_EXCLUDE: ''
