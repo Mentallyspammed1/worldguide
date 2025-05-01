@@ -7,13 +7,13 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch:
 
 jobs:
   gemini_code_review:
     name: Run Gemini AI Code Review
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Prevent long-running workflows
+    timeout-minutes: 30
     permissions:
       contents: read
       actions: read
@@ -30,7 +30,7 @@ jobs:
         **/*.log
         **/*.tmp
         .github/**
-      CACHE_VERSION: ${{ hashFiles('package.json') || hashFiles('package-lock.json') || '1' }}
+      CACHE_VERSION: 1
       GEMINI_CACHE_PATH: ${{ github.workspace }}/.cache/gemini
 
     steps:
