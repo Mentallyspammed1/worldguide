@@ -2,11 +2,15 @@
 
 # Pyrmethus's Enhanced Repository Setup Spell for Gemini Code Review
 
+# Exit on errors
+set -e
+
 # --- Configuration ---
 LOG_FILE="pyrmethus_setup.log"
-PYTHON_VERSION="${PYTHON_VERSION:-3.10}"
+PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
 GEMINI_MODEL="${GEMINI_MODEL:-gemini-1.5-flash-latest}"
 BRANCH_NAME="add-gemini-code-review"
+WORKFLOW_FILENAME="${WORKFLOW_FILENAME:-gemini_code_review.yml}"
 
 # --- Color Codes for Enchantment ---
 C_RESET='\033[0m'
@@ -58,15 +62,20 @@ prompt_yes_no() {
 progress_bar() {
   local duration=$1
   local message=$2
-  local cols=$(tput cols)
-  local width=$((cols - 20))
-  for ((i=0; i<=duration; i++)); do
-    local progress=$((i * width / duration))
-    local bar=$(printf "%${progress}s" | tr ' ' '#')
-    printf "\r${C_CYAN}${message}: [${bar}%${width}s] %d%%" $((i * 100 / duration))
-    sleep 0.1
-  done
-  echo
+  if [[ -t 1 ]]; then
+    local cols=$(tput cols 2>/dev/null || echo 80)
+    local width=$((cols - 20))
+    for ((i=0; i<=duration; i++)); do
+      local progress=$((i * width / duration))
+      local percent=$((i * 100 / duration))
+      local bar=$(printf "%${progress}s" | tr ' ' '#')
+      printf "\r${C_CYAN}${message}: [${bar}%${width}s] %d%%" "$percent"
+      sleep 0.1
+    done
+    echo
+  else
+    wizard_echo "$message..."
+  fi
 }
 
 # --- Initialize Logging ---
@@ -75,10 +84,23 @@ wizard_echo "Initiating the Enhanced Gemini Code Review setup spell..."
 
 # --- Parse Arguments ---
 DRY_RUN=0
-if [[ "$1" == "--dry-run" ]]; then
-  DRY_RUN=1
-  wizard_echo "Casting in dry-run mode. No changes will be made."
-fi
+FORCE=0
+while [[ "$1" ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=1
+      wizard_echo "Casting in dry-run mode. No changes will be made."
+      ;;
+    --force)
+      FORCE=1
+      wizard_echo "Force mode enabled. Overwrite prompts will be skipped."
+      ;;
+    *)
+      error_echo "Unknown argument: $1"
+      ;;
+  esac
+  shift
+done
 
 # --- Spell Preparation ---
 wizard_echo "Verifying prerequisites..."
@@ -89,6 +111,18 @@ if ! command -v git &> /dev/null; then
 fi
 wizard_echo "Verified 'git' presence."
 
+# Check for curl
+if ! command -v curl &> /dev/null; then
+  error_echo "'curl' command not found. Please install it first: pkg install curl"
+fi
+wizard_echo "Verified 'curl' presence."
+
+# Check for gh
+if ! command -v gh &> /dev/null; then
+  warning_echo "'gh' (GitHub CLI) not found. Manual workflow triggering may require alternative methods."
+fi
+wizard_echo "Verified environment tools."
+
 # Check if inside a git repository
 if ! git rev-parse --is-inside-work-tree &> /dev/null; then
   error_echo "You must run this script from within your local git repository clone."
@@ -98,7 +132,7 @@ wizard_echo "Confirmed presence within a git repository."
 # Check for uncommitted changes
 if [[ -n $(git status --porcelain) ]]; then
   warning_echo "Uncommitted changes detected. Please commit or stash them before proceeding."
-  if ! prompt_yes_no "Continue anyway?"; then
+  if [[ $FORCE -eq 0 ]] && ! prompt_yes_no "Continue anyway?"; then
     error_echo "Aborted due to uncommitted changes."
   fi
 fi
@@ -111,6 +145,22 @@ prompt_input "Enter your GitHub Repository Name" GITHUB_REPO
 GITHUB_USER=$(echo "$GITHUB_USER" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 GITHUB_REPO=$(echo "$GITHUB_REPO" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 
+# Validate repository against git remote
+wizard_echo "Verifying repository alignment with git remote..."
+REMOTE_URL=$(git remote get-url origin 2>/dev/null)
+if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
+  REMOTE_USER=${BASH_REMATCH[1]}
+  REMOTE_REPO=${BASH_REMATCH[2]}
+  if [[ "$REMOTE_USER" != "$GITHUB_USER" || "$REMOTE_REPO" != "$GITHUB_REPO" ]]; then
+    warning_echo "Local repository is linked to https://github.com/$REMOTE_USER/$REMOTE_REPO RICH USER/$REMOTE_REPO, but you entered $GITHUB_USER/$GITHUB_REPO."
+    if [[ $FORCE -eq 0 ]] && ! prompt_yes_no "Continue with $GITHUB_USER/$GITHUB_REPO?"; then
+      error_echo "Aborted due to repository mismatch."
+    fi
+  fi
+else
+  warning_echo "Could not parse GitHub repository from remote URL: $REMOTE_URL"
+fi
+
 # Validate repository existence
 wizard_echo "Consulting the GitHub Oracle to verify repository..."
 if ! curl -s -o /dev/null -w "%{http_code}" "https://api.github.com/repos/$GITHUB_USER/$GITHUB_REPO" | grep -q "200"; then
@@ -118,10 +168,19 @@ if ! curl -s -o /dev/null -w "%{http_code}" "https://api.github.com/repos/$GITHU
 fi
 success_echo "Repository verified."
 
+# Check branch tracking
+wizard_echo "Verifying branch status..."
+if git show-ref --quiet "refs/heads/$BRANCH_NAME"; then
+  TRACKING_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name "$BRANCH_NAME@{upstream}" 2>/dev/null)
+  if [[ "$TRACKING_BRANCH" != "origin/main" && "$TRACKING_BRANCH" != "origin/$BRANCH_NAME" ]]; then
+    warning_echo "Branch $BRANCH_NAME is tracking $TRACKING_BRANCH, not origin/main or origin/$BRANCH_NAME."
+  fi
+fi
+
 # --- Define File Paths ---
 WORKFLOW_DIR=".github/workflows"
 SCRIPT_DIR=".github/scripts"
-WORKFLOW_FILE="$WORKFLOW_DIR/gemini_code_review.yml"
+WORKFLOW_FILE="$WORKFLOW_DIR/$WORKFLOW_FILENAME"
 SCRIPT_FILE="$SCRIPT_DIR/analyze_code.py"
 
 # --- Backup Existing Files ---
@@ -141,7 +200,7 @@ if [[ $DRY_RUN -eq 0 ]]; then
 fi
 
 # --- Prompt for Overwrite ---
-if [[ -f "$WORKFLOW_FILE" || -f "$SCRIPT_FILE" ]]; then
+if [[ $FORCE -eq 0 && (-f "$WORKFLOW_FILE" || -f "$SCRIPT_FILE") ]]; then
   warning_echo "Existing workflow or script files detected."
   if ! prompt_yes_no "Overwrite existing files?"; then
     error_echo "Aborted to preserve existing files."
@@ -155,7 +214,7 @@ if [[ $DRY_RUN -eq 0 ]]; then
 fi
 success_echo "Directories ${C_YELLOW}$WORKFLOW_DIR/${C_GREEN} and ${C_YELLOW}$SCRIPT_DIR/${C_GREEN} ensured."
 
-wizard_echo "Weaving the ${C_YELLOW}gemini_code_review.yml${C_CYAN} workflow spell..."
+wizard_echo "Weaving the ${C_YELLOW}$WORKFLOW_FILENAME${C_CYAN} workflow spell..."
 if [[ $DRY_RUN -eq 0 ]]; then
   progress_bar 10 "Inscribing workflow"
   cat << 'EOF' > "$WORKFLOW_FILE"
@@ -164,6 +223,12 @@ name: Gemini Code Review Spell
 on:
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: 'Base branch for diff comparison (default: main)'
+        required: false
+        default: 'main'
 
 jobs:
   gemini-review:
@@ -183,9 +248,17 @@ jobs:
         shell: bash
         run: |
           echo "Forging the diff..."
-          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-          git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
-          DIFF_CONTENT=$(git diff "origin/${{ github.event.pull_request.base.ref }}" "${{ github.event.pull_request.head.sha }}" -- . ':(exclude).github/*')
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BASE_BRANCH="${{ github.event.inputs.base_branch || 'main' }}"
+            echo "Manual run: Comparing HEAD with $BASE_BRANCH"
+            git fetch origin $BASE_BRANCH:$BASE_BRANCH
+            DIFF_CONTENT=$(git diff $BASE_BRANCH HEAD -- . ':(exclude).github/*')
+          else
+            echo "PR run: Comparing ${{ github.event.pull_request.base.ref }} with PR head"
+            git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
+            git fetch origin ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
+            DIFF_CONTENT=$(git diff "origin/${{ github.event.pull_request.base.ref }}" "${{ github.event.pull_request.head.sha }}" -- . ':(exclude).github/*')
+          fi
           if [ -z "$DIFF_CONTENT" ]; then
             echo "No code changes detected to analyze."
             echo "diff_content=" >> $GITHUB_OUTPUT
@@ -203,7 +276,7 @@ jobs:
         if: steps.get_diff.outputs.diff_content != ''
         uses: actions/setup-python@v5
         with:
-          python-version: '${PYTHON_VERSION}'
+          python-version: '3.12'
 
       - name: Install Dependencies
         if: steps.get_diff.outputs.diff_content != ''
@@ -219,15 +292,24 @@ jobs:
           REPO_NAME: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_DIFF: ${{ steps.get_diff.outputs.diff_content }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           python .github/scripts/analyze_code.py
-EOF
-fi
+          cat review_report.json
 
-# Verify workflow file creation
-if [[ $DRY_RUN -eq 0 && ! -f "$WORKFLOW_FILE" ]]; then
-  error_echo "Failed to create workflow file ${C_YELLOW}$WORKFLOW_FILE${C_RED}"
+      - name: Upload Review Report
+        if: steps.get_diff.outputs.diff_content != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: gemini-review-report
+          path: review_report.json
+          retention-days: 7
+EOF
+  # Verify workflow file integrity
+  if [[ ! -s "$WORKFLOW_FILE" ]]; then
+    error_echo "Workflow file ${C_YELLOW}$WORKFLOW_FILE${C_RED} is empty or not created."
+  fi
 fi
 success_echo "Workflow file ${C_YELLOW}$WORKFLOW_FILE${C_GREEN} inscribed."
 
@@ -245,14 +327,22 @@ from colorama import init, Fore, Style, Back
 init(autoreset=True)
 
 MAX_CHUNK_TOKENS = 3800
-GEMINI_MODEL_NAME = '${GEMINI_MODEL}'
+GEMINI_MODEL_NAME = 'gemini-1.5-flash-latest'
 GITHUB_API_BASE_URL = "https://api.github.com"
+REPORT_FILE = "review_report.json"
 
 def print_wizard_message(message, color=Fore.CYAN):
     print(color + Style.BRIGHT + "✨ Pyrmethus whispers: " + Style.RESET_ALL + color + message + Style.RESET_ALL)
 
 def print_error_message(message):
     print(Back.RED + Fore.WHITE + Style.BRIGHT + "⚠️ Arcane Anomaly: " + Style.RESET_ALL + Fore.RED + message + Style.RESET_ALL)
+
+def save_report(issues):
+    """Save analysis results to a report file."""
+    report = {"total_issues": len(issues), "issues": issues}
+    with open(REPORT_FILE, "w") as f:
+        json.dump(report, f, indent=2)
+    print_wizard_message(f"Review report saved to {REPORT_FILE}", Fore.GREEN)
 
 def chunk_diff(diff_text, max_tokens=MAX_CHUNK_TOKENS):
     print_wizard_message(f"Chunking the diff (max ~{max_tokens} tokens per chunk)...", Fore.MAGENTA)
@@ -326,15 +416,16 @@ def analyze_code_chunk_with_gemini(diff_chunk, model):
         print_wizard_message(f"Gemini identified {Fore.YELLOW}{len(issues)}{Fore.GREEN} potential issue(s) in this chunk.", Fore.GREEN)
         return issues
     except json.JSONDecodeError as json_err:
-        print_error_message(f"Failed to decode Gemini's JSON response.")
-        print(Fore.RED + f"Raw Response Text: {response.text[:500]}...")
-        print(Fore.RED + f"Error details: {json_err}")
-        return []
+        print_error_message(f"Failed to decode Gemini's JSON response: {json_err}")
+        return [{"error": "JSON decode error", "details": str(json_err), "raw_response": response.text[:500]}]
     except Exception as e:
-        print_error_message(f"An error occurred while querying Gemini: {e}")
-        return []
+        print_error_message(f"Gemini API error: {e}")
+        return [{"error": "API error", "details": str(e)}]
 
 def post_github_comment(repo_name, pr_number, commit_sha, github_token, issue_report):
+    if not pr_number:
+        print_wizard_message("No pull request number provided (manual workflow run?). Skipping comment posting.", Fore.YELLOW)
+        return
     api_url = f"{GITHUB_API_BASE_URL}/repos/{repo_name}/pulls/{pr_number}/comments"
     headers = {
         "Authorization": f"Bearer {github_token}",
@@ -376,7 +467,7 @@ def post_github_comment(repo_name, pr_number, commit_sha, github_token, issue_re
         response.raise_for_status()
         print_wizard_message(f"Comment posted successfully!", Fore.GREEN)
     except requests.exceptions.RequestException as e:
-        print_error_message(f"Failed to post GitHub comment for {file_path}:{line_number}.")
+        print_error_message(f"Failed to post GitHub comment for {file_path}:{line_number}: {e}")
         if e.response is not None:
             print(Fore.RED + f"Status Code: {e.response.status_code}")
             print(Fore.RED + f"Response Body: {e.response.text}")
@@ -389,18 +480,40 @@ def main():
     pr_number = os.getenv('PR_NUMBER')
     pr_diff = os.getenv('PR_DIFF')
     commit_sha = os.getenv('COMMIT_SHA')
-    if not all([gemini_api_key, github_token, repo_name, pr_number, pr_diff, commit_sha]):
-        print_error_message("One or more required environment variables are missing!")
+    event_name = os.getenv('EVENT_NAME')
+
+    if not gemini_api_key:
+        print_error_message("GEMINI_API_KEY is missing. Please set it in GitHub Secrets.")
+        save_report([{"error": "Missing GEMINI_API_KEY"}])
         exit(1)
+    if not github_token:
+        print_error_message("GITHUB_TOKEN is missing. Please ensure the workflow has permissions.")
+        save_report([{"error": "Missing GITHUB_TOKEN"}])
+        exit(1)
+    if not repo_name:
+        print_error_message("REPO_NAME is missing. Please ensure the workflow is run in a GitHub repository.")
+        save_report([{"error": "Missing REPO_NAME"}])
+        exit(1)
+    if not pr_diff:
+        print_error_message("PR_DIFF is missing. No code changes to analyze.")
+        save_report([{"error": "No code changes detected"}])
+        exit(1)
+    if event_name == 'workflow_dispatch':
+        print_wizard_message("Manual workflow run detected. Analysis will proceed, but comments require a pull request.", Fore.YELLOW)
+        pr_number = None
+        commit_sha = commit_sha or 'unknown'
+
     try:
         genai.configure(api_key=gemini_api_key)
         model = genai.GenerativeModel(GEMINI_MODEL_NAME)
         print_wizard_message("Gemini Oracle configured successfully.", Fore.GREEN)
     except Exception as e:
         print_error_message(f"Failed to configure Gemini API: {e}")
+        save_report([{"error": "Gemini API configuration failed", "details": str(e)}])
         exit(1)
+
     diff_chunks = chunk_diff(pr_diff)
-    total_issues_found = 0
+    all_issues = []
     for chunk, file_context in diff_chunks:
         if not chunk.strip():
             continue
@@ -409,18 +522,22 @@ def main():
         for issue in issues:
             if 'file_path' not in issue or not issue['file_path']:
                 issue['file_path'] = file_context if file_context else 'unknown_file'
+            all_issues.append(issue)
             post_github_comment(repo_name, pr_number, commit_sha, github_token, issue)
-            total_issues_found += 1
-    print_wizard_message(f"Code review spell complete. Found {Fore.YELLOW}{total_issues_found}{Fore.MAGENTA} potential issues.", Fore.MAGENTA + Style.BRIGHT)
+
+    save_report(all_issues)
+    print_wizard_message(f"Code review spell complete. Found {Fore.YELLOW}{len(all_issues)}{Fore.MAGENTA} potential issues.", Fore.MAGENTA + Style.BRIGHT)
 
 if __name__ == "__main__":
     main()
 EOF
-fi
-
-# Verify Python script creation
-if [[ $DRY_RUN -eq 0 && ! -f "$SCRIPT_FILE" ]]; then
-  error_echo "Failed to conjure Python script ${C_YELLOW}$SCRIPT_FILE${C_RED}"
+  # Verify Python script integrity
+  if [[ ! -s "$SCRIPT_FILE" ]]; then
+    error_echo "Python script ${C_YELLOW}$SCRIPT_FILE${C_RED} is empty or not created."
+  fi
+  if ! grep -q "def main():" "$SCRIPT_FILE"; then
+    error_echo "Python script ${C_YELLOW}$SCRIPT_FILE${C_RED} appears corrupted. Check $LOG_FILE for details."
+  fi
 fi
 success_echo "Python familiar ${C_YELLOW}$SCRIPT_FILE${C_GREEN} conjured."
 
@@ -428,19 +545,24 @@ success_echo "Python familiar ${C_YELLOW}$SCRIPT_FILE${C_GREEN} conjured."
 if [[ $DRY_RUN -eq 0 ]]; then
   wizard_echo "Binding the spell to your local repository..."
   
-  # Create new branch if desired
-  if prompt_yes_no "Create a new branch ($BRANCH_NAME) for these changes?"; then
-    wizard_echo "Crafting new branch ${C_YELLOW}$BRANCH_NAME${C_CYAN}..."
-    git checkout -b "$BRANCH_NAME" || error_echo "Failed to create branch $BRANCH_NAME."
-    success_echo "Switched to branch $BRANCH_NAME."
+  # Create or update branch
+  if [[ $FORCE -eq 0 ]] && prompt_yes_no "Create or update branch ($BRANCH_NAME) for these changes?"; then
+    wizard_echo "Crafting or updating branch ${C_YELLOW}$BRANCH_NAME${C_CYAN}..."
+    if git show-ref --quiet "refs/heads/$BRANCH_NAME"; then
+      git checkout "$BRANCH_NAME" || error_echo "Failed to switch to branch $BRANCH_NAME."
+    else
+      git checkout -b "$BRANCH_NAME" || error_echo "Failed to create branch $BRANCH_NAME."
+    fi
+    success_echo "On branch $BRANCH_NAME."
   fi
 
   git add "$WORKFLOW_DIR/" "$SCRIPT_DIR/" || error_echo "Failed to stage changes."
-  git commit -m "feat: Add Gemini Code Review GitHub Action workflow
+  git commit -m "feat: Enhance Gemini Code Review GitHub Action workflow
 
 Conjured by Pyrmethus's script:
-- Adds workflow file .github/workflows/gemini_code_review.yml
-- Adds Python script .github/scripts/analyze_code.py" || error_echo "Failed to commit changes."
+- Updates workflow file $WORKFLOW_FILE with workflow_dispatch inputs and artifact upload
+- Enhances Python script .github/scripts/analyze_code.py with report generation
+- Fixes here-document issues for Termux compatibility" || error_echo "Failed to commit changes."
   success_echo "Changes committed locally."
 fi
 
@@ -448,14 +570,18 @@ fi
 if [[ $DRY_RUN -eq 0 ]]; then
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
   wizard_echo "Dispatching the spell to the GitHub ether (origin/${C_YELLOW}${CURRENT_BRANCH}${C_CYAN})..."
-  git push origin "$CURRENT_BRANCH" || error_echo "Failed to push changes to remote 'origin'. Check your connection and permissions."
+  git push --set-upstream origin "$CURRENT_BRANCH" || error_echo "Failed to push changes to remote 'origin'. Check your connection and permissions."
   success_echo "Spell successfully dispatched to GitHub!"
 fi
 
 # --- Final Words of Power ---
-wizard_echo "The setup is complete! However, one crucial step remains:"
-warning_echo "You MUST manually add the ${C_YELLOW}GEMINI_API_KEY${C_YELLOW} secret to your repository settings on GitHub."
+wizard_echo "The setup is complete! Key steps to proceed:"
+warning_echo "Ensure the ${C_YELLOW}GEMINI_API_KEY${C_YELLOW} secret is set in your repository settings on GitHub."
 wizard_echo "Go to: ${C_BOLD}https://github.com/$GITHUB_USER/$GITHUB_REPO/settings/secrets/actions${C_RESET}"
-wizard_echo "Create a ${C_BOLD}'New repository secret'${C_RESET} ${C_CYAN}named ${C_YELLOW}GEMINI_API_KEY${C_CYAN} and paste your API key value.${C_RESET}"
+wizard_echo "Create or verify a ${C_BOLD}'New repository secret'${C_RESET} ${C_CYAN}named ${C_YELLOW}GEMINI_API_KEY${C_CYAN} with your API key value.${C_RESET}"
+wizard_echo "To manually trigger the workflow:"
+wizard_echo "${C_BOLD}gh workflow run $WORKFLOW_FILENAME --ref $BRANCH_NAME --field base_branch=main${C_RESET}"
+wizard_echo "To view the latest run: ${C_BOLD}gh run list --workflow=$WORKFLOW_FILENAME${C_RESET}"
+wizard_echo "To inspect a run: ${C_BOLD}gh run view <RUN_ID>${C_RESET}"
 wizard_echo "Log of this conjuration saved to ${C_YELLOW}$LOG_FILE${C_CYAN}."
 wizard_echo "May your code be ever insightful!"
