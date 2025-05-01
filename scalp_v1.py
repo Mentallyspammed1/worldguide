@@ -1,31 +1,81 @@
-import logging
+
+
+
+2025-05-01 04:01:41,044 - ScalpingBot - INFO - Loading configuration from config.yaml...
+2025-05-01 04:01:41,057 - ScalpingBot - INFO - Configuration file loaded successfully.                                                        2025-05-01 04:01:41,058 - ScalpingBot - INFO - Validating configuration...                                                                    2025-05-01 04:01:41,058 - ScalpingBot - ERROR - Initialization failed due to invalid configuration: Missing required parameter 'exchange_id' in section 'exchange'.
+%import logging
 import os
+import sys
 import time
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import ccxt
 import numpy as np
 import pandas as pd
 import yaml
-from colorama import Fore, Style
-from colorama import init as colorama_init
-from dotenv import load_dotenv
+from colorama import Fore, Style, init as colorama_init
 
+# --- Constants ---
+CONFIG_FILE_DEFAULT = "config.yaml"
+LOG_FILE = "scalping_bot.log"
+API_MAX_RETRIES = 3
+API_INITIAL_DELAY = 1.0  # seconds
+MIN_HISTORICAL_DATA_BUFFER = 10 # Minimum extra data points beyond strict requirement
+
+# Order Types
+MARKET_ORDER = "market"
+LIMIT_ORDER = "limit"
+
+# Order Sides
+BUY = "buy"
+SELL = "sell"
+
+# Configuration Keys (Example - can be expanded)
+EXCHANGE_SECTION = "exchange"
+TRADING_SECTION = "trading"
+ORDER_BOOK_SECTION = "order_book"
+INDICATORS_SECTION = "indicators"
+RISK_MANAGEMENT_SECTION = "risk_management"
+
+# --- Initialize Colorama ---
 colorama_init(autoreset=True)
 
-logger = logging.getLogger("ScalpingBot")
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-file_handler = logging.FileHandler("scalping_bot.log")
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+# --- Setup Logger ---
+# Use a function for cleaner setup and potential reuse
+def setup_logger(level: int = logging.DEBUG) -> logging.Logger:
+    """Configures and returns the main application logger."""
+    logger = logging.getLogger("ScalpingBot")
+    logger.setLevel(level)
 
-load_dotenv()
+    # Prevent adding multiple handlers if called again
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+    # Console Handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+    # File Handler
+    try:
+        file_handler = logging.FileHandler(LOG_FILE)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except IOError as e:
+        logger.error(f"Failed to create log file handler for {LOG_FILE}: {e}")
+
+    return logger
+
+logger = setup_logger()
 
 
-def retry_api_call(max_retries=3, initial_delay=1):
+# --- API Retry Decorator ---
+def retry_api_call(max_retries: int = API_MAX_RETRIES, initial_delay: float = API_INITIAL_DELAY):
+    """Decorator to retry CCXT API calls with exponential backoff."""
     def decorator(func):
         def wrapper(*args, **kwargs):
             retries = 0
@@ -33,909 +83,1128 @@ def retry_api_call(max_retries=3, initial_delay=1):
             while retries <= max_retries:
                 try:
                     return func(*args, **kwargs)
-                except ccxt.RateLimitExceeded:
+                except ccxt.RateLimitExceeded as e:
                     logger.warning(
-                        f"{Fore.YELLOW}Rate limit exceeded, retrying in {delay} seconds... (Retry {retries + 1}/{max_retries}){Style.RESET_ALL}"
+                        f"Rate limit exceeded for {func.__name__}. Retrying in {delay:.1f}s... "
+                        f"(Attempt {retries + 1}/{max_retries + 1})"
                     )
-                    time.sleep(delay)
-                    delay *= 2
-                    retries += 1
                 except ccxt.NetworkError as e:
                     logger.error(
-                        f"{Fore.RED}Network error during API call: {e}. Retrying in {delay} seconds... (Retry {retries + 1}/{max_retries}){Style.RESET_ALL}"
+                        f"Network error during {func.__name__}: {e}. Retrying in {delay:.1f}s... "
+                        f"(Attempt {retries + 1}/{max_retries + 1})"
                     )
-                    time.sleep(delay)
-                    delay *= 2
-                    retries += 1
                 except ccxt.ExchangeError as e:
-                    logger.error(
-                        f"{Fore.RED}Exchange error during API call: {e}. (Retry {retries + 1}/{max_retries}) {e}{Style.RESET_ALL}"
-                    )
-                    if "Order does not exist" in str(e):
+                    # Specific handling for non-critical exchange errors
+                    if "Order does not exist" in str(e) or "Order not found" in str(e):
+                        logger.warning(f"Order not found/does not exist for {func.__name__} (likely filled/cancelled): {e}. Returning None.")
                         return None
+                    elif "Insufficient balance" in str(e) or "insufficient margin" in str(e).lower():
+                         logger.error(f"Insufficient funds for {func.__name__}: {e}. Aborting call.")
+                         # Re-raise specific exception if needed upstream, otherwise return None
+                         # raise e # Option to propagate
+                         return None # Current behavior matches original
                     else:
-                        time.sleep(delay)
-                        delay *= 2
-                        retries += 1
-                except Exception as e:
-                    logger.error(
-                        f"{Fore.RED}Unexpected error during API call: {e}. (Retry {retries + 1}/{max_retries}){Style.RESET_ALL}"
+                        logger.error(
+                            f"Exchange error during {func.__name__}: {e}. Retrying in {delay:.1f}s... "
+                            f"(Attempt {retries + 1}/{max_retries + 1})"
+                        )
+                except Exception as e: # Catch any other unexpected exception
+                    logger.exception( # Use exception() to include traceback
+                        f"Unexpected error during {func.__name__}: {e}. Retrying in {delay:.1f}s... "
+                        f"(Attempt {retries + 1}/{max_retries + 1})"
                     )
+
+                # Only sleep and increment if we are going to retry
+                if retries < max_retries:
                     time.sleep(delay)
-                    delay *= 2
+                    delay *= 2  # Exponential backoff
                     retries += 1
-            logger.error(
-                f"{Fore.RED}Max retries reached for API call. Aborting.{Style.RESET_ALL}"
-            )
-            return None
+                else:
+                    break # Exit loop if max retries reached
+
+            logger.error(f"Max retries ({max_retries}) reached for API call {func.__name__}. Aborting call.")
+            return None # Indicate failure after all retries
 
         return wrapper
-
     return decorator
 
 
+# --- Configuration Validation Schema ---
+# Define expected structure, types, and constraints for config.yaml
+# This makes validation more declarative and easier to maintain.
+CONFIG_SCHEMA = {
+    EXCHANGE_SECTION: {
+        "required": True,
+        "params": {
+            "exchange_id": {"type": str, "required": True, "non_empty": True},
+            "api_key_env": {"type": str, "required": False, "default": "BYBIT_API_KEY"},
+            "api_secret_env": {"type": str, "required": False, "default": "BYBIT_API_SECRET"},
+        },
+    },
+    TRADING_SECTION: {
+        "required": True,
+        "params": {
+            "symbol": {"type": str, "required": True, "non_empty": True},
+            "simulation_mode": {"type": bool, "required": True},
+            "entry_order_type": {"type": str, "required": True, "allowed": [MARKET_ORDER, LIMIT_ORDER]},
+            "limit_order_offset_buy": {"type": (int, float), "required": True, "range": (0, float('inf'))},
+            "limit_order_offset_sell": {"type": (int, float), "required": True, "range": (0, float('inf'))},
+            "trade_loop_delay_seconds": {"type": (int, float), "required": False, "default": 10.0, "range": (0.1, float('inf'))},
+        },
+    },
+    ORDER_BOOK_SECTION: {
+        "required": True,
+        "params": {
+            "depth": {"type": int, "required": True, "range": (1, 1000)}, # Added practical upper limit
+            "imbalance_threshold": {"type": (int, float), "required": True, "range": (0, float('inf'))},
+        },
+    },
+    INDICATORS_SECTION: {
+        "required": True,
+        "params": {
+            "timeframe": {"type": str, "required": False, "default": "1m"}, # Added timeframe config
+            "volatility_window": {"type": int, "required": True, "range": (1, float('inf'))},
+            "volatility_multiplier": {"type": (int, float), "required": True, "range": (0, float('inf'))},
+            "ema_period": {"type": int, "required": True, "range": (1, float('inf'))},
+            "rsi_period": {"type": int, "required": True, "range": (1, float('inf'))},
+            "macd_short_period": {"type": int, "required": True, "range": (1, float('inf'))},
+            "macd_long_period": {"type": int, "required": True, "range": (1, float('inf'))},
+            "macd_signal_period": {"type": int, "required": True, "range": (1, float('inf'))},
+            "stoch_rsi_period": {"type": int, "required": True, "range": (1, float('inf'))},
+        },
+        "custom_validations": [
+            lambda cfg: cfg["macd_short_period"] < cfg["macd_long_period"] or "MACD short period must be less than long period"
+        ]
+    },
+    RISK_MANAGEMENT_SECTION: {
+        "required": True,
+        "params": {
+            "order_size_percentage": {"type": (int, float), "required": True, "range": (0.0, 1.0)}, # Range 0-1
+            "stop_loss_percentage": {"type": (int, float), "required": True, "range": (0.0, 1.0)}, # Range 0-1
+            "take_profit_percentage": {"type": (int, float), "required": True, "range": (0.0, 1.0)}, # Range 0-1
+            "max_open_positions": {"type": int, "required": True, "range": (1, float('inf'))},
+            "time_based_exit_minutes": {"type": int, "required": True, "range": (1, float('inf'))},
+            "trailing_stop_loss_percentage": {"type": (int, float), "required": True, "range": (0.0, 1.0)}, # Range 0-1
+        },
+    },
+    "logging_level": { # Optional top-level param
+        "required": False,
+        "type": str,
+        "allowed": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        "default": "DEBUG"
+    }
+}
+
+
 class ScalpingBot:
-    def __init__(self, config_file="config.yaml") -> None:
-        self.load_config(config_file)
-        self.validate_config()
-        self.api_key = os.getenv("BYBIT_API_KEY")
-        self.api_secret = os.getenv("BYBIT_API_SECRET")
-        self.exchange_id = self.config["exchange"]["exchange_id"]
-        self.symbol = self.config["trading"]["symbol"]
-        self.simulation_mode = self.config["trading"]["simulation_mode"]
-        self.entry_order_type = self.config["trading"]["entry_order_type"]  # New config
-        self.limit_order_offset_buy = self.config["trading"][
-            "limit_order_offset_buy"
-        ]  # New config
-        self.limit_order_offset_sell = self.config["trading"][
-            "limit_order_offset_sell"
-        ]  # New Config
+    """
+    A scalping bot using CCXT for trading on cryptocurrency exchanges,
+    based on technical indicators and order book analysis.
+    """
+    def __init__(self, config_file: Union[str, Path] = CONFIG_FILE_DEFAULT):
+        """
+        Initializes the ScalpingBot.
 
-        self.order_book_depth = self.config["order_book"]["depth"]
-        self.imbalance_threshold = self.config["order_book"]["imbalance_threshold"]
+        Args:
+            config_file: Path to the configuration file (YAML).
 
-        self.volatility_window = self.config["indicators"]["volatility_window"]
-        self.volatility_multiplier = self.config["indicators"]["volatility_multiplier"]
-        self.ema_period = self.config["indicators"]["ema_period"]
-        self.rsi_period = self.config["indicators"]["rsi_period"]
-        self.macd_short_period = self.config["indicators"]["macd_short_period"]
-        self.macd_long_period = self.config["indicators"]["macd_long_period"]
-        self.macd_signal_period = self.config["indicators"]["macd_signal_period"]
-        self.stoch_rsi_period = self.config["indicators"]["stoch_rsi_period"]
+        Raises:
+            FileNotFoundError: If the config file is not found.
+            yaml.YAMLError: If the config file is invalid YAML.
+            ValueError: If the configuration is invalid or incomplete.
+            AttributeError: If the specified exchange is not supported by CCXT.
+            ccxt.AuthenticationError: If API keys are invalid.
+            ccxt.ExchangeError: If there's an issue connecting to the exchange.
+            SystemExit: If initialization fails critically.
+        """
+        self.config_path = Path(config_file)
+        self.config = self._load_and_validate_config()
 
-        self.order_size_percentage = self.config["risk_management"][
-            "order_size_percentage"
-        ]
-        self.stop_loss_pct = self.config["risk_management"]["stop_loss_percentage"]
-        self.take_profit_pct = self.config["risk_management"]["take_profit_percentage"]
-        self.max_open_positions = self.config["risk_management"]["max_open_positions"]
-        self.time_based_exit_minutes = self.config["risk_management"][
-            "time_based_exit_minutes"
-        ]
-        self.trailing_stop_loss_percentage = self.config["risk_management"][
-            "trailing_stop_loss_percentage"
-        ]  # New config
+        # Apply logging level from config if specified
+        log_level_name = self.config.get("logging_level", "DEBUG").upper()
+        log_level = getattr(logging, log_level_name, logging.DEBUG)
+        setup_logger(level=log_level) # Reconfigure logger with potentially new level
+        logger.info(f"Logger level set to {log_level_name}")
 
-        self.iteration = 0
-        self.daily_pnl = 0.0
-        self.open_positions = []
+        # --- Assign validated config values to attributes ---
+        # Using .get() with defaults where applicable, though validation should ensure presence
+        # Exchange Config
+        exch_cfg = self.config[EXCHANGE_SECTION]
+        self.exchange_id: str = exch_cfg["exchange_id"]
+        self.api_key_env: str = exch_cfg["api_key_env"]
+        self.api_secret_env: str = exch_cfg["api_secret_env"]
 
-        if "logging_level" in self.config:
-            log_level = self.config["logging_level"].upper()
-            if log_level in ["DEBUG", "INFO", "WARNING", "ERROR"]:
-                logger.setLevel(getattr(logging, log_level))
-            else:
-                logger.warning(
-                    f"{Fore.YELLOW}Invalid logging level '{log_level}' in config. Using default (DEBUG).{Style.RESET_ALL}"
-                )
+        # Trading Config
+        trade_cfg = self.config[TRADING_SECTION]
+        self.symbol: str = trade_cfg["symbol"]
+        self.simulation_mode: bool = trade_cfg["simulation_mode"]
+        self.entry_order_type: str = trade_cfg["entry_order_type"]
+        self.limit_order_offset_buy: float = float(trade_cfg["limit_order_offset_buy"])
+        self.limit_order_offset_sell: float = float(trade_cfg["limit_order_offset_sell"])
+        self.trade_loop_delay: float = float(trade_cfg["trade_loop_delay_seconds"])
 
-        self.exchange = self._initialize_exchange()
+        # Order Book Config
+        ob_cfg = self.config[ORDER_BOOK_SECTION]
+        self.order_book_depth: int = ob_cfg["depth"]
+        self.imbalance_threshold: float = float(ob_cfg["imbalance_threshold"])
 
-    def load_config(self, config_file) -> None:
+        # Indicators Config
+        ind_cfg = self.config[INDICATORS_SECTION]
+        self.timeframe: str = ind_cfg["timeframe"]
+        self.volatility_window: int = ind_cfg["volatility_window"]
+        self.volatility_multiplier: float = float(ind_cfg["volatility_multiplier"])
+        self.ema_period: int = ind_cfg["ema_period"]
+        self.rsi_period: int = ind_cfg["rsi_period"]
+        self.macd_short_period: int = ind_cfg["macd_short_period"]
+        self.macd_long_period: int = ind_cfg["macd_long_period"]
+        self.macd_signal_period: int = ind_cfg["macd_signal_period"]
+        self.stoch_rsi_period: int = ind_cfg["stoch_rsi_period"]
+
+        # Risk Management Config
+        risk_cfg = self.config[RISK_MANAGEMENT_SECTION]
+        self.order_size_percentage: float = float(risk_cfg["order_size_percentage"])
+        self.stop_loss_pct: float = float(risk_cfg["stop_loss_percentage"])
+        self.take_profit_pct: float = float(risk_cfg["take_profit_percentage"])
+        self.max_open_positions: int = risk_cfg["max_open_positions"]
+        self.time_based_exit_minutes: int = risk_cfg["time_based_exit_minutes"]
+        self.trailing_stop_loss_percentage: float = float(risk_cfg["trailing_stop_loss_percentage"])
+        # --- End Config Assignment ---
+
+        self.exchange: ccxt.Exchange = self._initialize_exchange() # Raises exceptions on failure
+        self.market: Dict[str, Any] = self.exchange.market(self.symbol) # Get market details
+
+        # --- State Variables ---
+        self.open_positions: List[Dict[str, Any]] = [] # Store active positions/orders
+        self.iteration: int = 0
+        self.daily_pnl: float = 0.0 # Example metric, needs implementation
+        self.last_candle_ts: Optional[int] = None # Track last processed candle timestamp
+
+        logger.info(f"ScalpingBot initialized for {self.symbol} on {self.exchange_id}. Simulation Mode: {self.simulation_mode}")
+
+
+    def _load_and_validate_config(self) -> Dict[str, Any]:
+        """Loads and validates the configuration file using CONFIG_SCHEMA."""
+        logger.info(f"Loading configuration from {self.config_path}...")
+        if not self.config_path.is_file():
+            logger.error(f"Configuration file not found: {self.config_path}")
+            raise FileNotFoundError(f"Configuration file not found: {self.config_path}")
+
         try:
-            with open(config_file) as f:
-                self.config = yaml.safe_load(f)
-            logger.info(
-                f"{Fore.GREEN}Configuration loaded from {config_file}{Style.RESET_ALL}"
-            )
-        except FileNotFoundError:
-            logger.error(
-                f"{Fore.RED}Configuration file {config_file} not found. Exiting.{Style.RESET_ALL}"
-            )
-            exit()
+            with open(self.config_path, 'r') as f:
+                config = yaml.safe_load(f)
+            if not isinstance(config, dict):
+                raise ValueError("Config file is not a valid YAML dictionary.")
+            logger.info("Configuration file loaded successfully.")
         except yaml.YAMLError as e:
-            logger.error(
-                f"{Fore.RED}Error parsing configuration file {config_file}: {e}. Exiting.{Style.RESET_ALL}"
-            )
-            exit()
+            logger.error(f"Error parsing YAML configuration file: {e}")
+            raise # Re-raise the original error
 
-    def validate_config(self) -> None:
-        if "trading" not in self.config:
-            raise ValueError("Missing 'trading' section in config.yaml")
-        if "symbol" not in self.config["trading"]:
-            raise ValueError("Missing 'symbol' in config.yaml trading section")
-        if (
-            not isinstance(self.config["trading"]["symbol"], str)
-            or not self.config["trading"]["symbol"]
-        ):
-            raise ValueError("'symbol' must be a non-empty string")
-        if "simulation_mode" not in self.config["trading"]:
-            raise ValueError("Missing 'simulation_mode' in config.yaml trading section")
-        if not isinstance(self.config["trading"]["simulation_mode"], bool):
-            raise ValueError("'simulation_mode' must be a boolean")
-        if "entry_order_type" not in self.config["trading"]:  # New validation
-            raise ValueError(
-                "Missing 'entry_order_type' in config.yaml trading section"
-            )
-        if self.config["trading"]["entry_order_type"] not in ["market", "limit"]:
-            raise ValueError("'entry_order_type' must be 'market' or 'limit'")
-        if "limit_order_offset_buy" not in self.config["trading"]:  # New validation
-            raise ValueError(
-                "Missing 'limit_order_offset_buy' in config.yaml trading section"
-            )
-        if (
-            not isinstance(
-                self.config["trading"]["limit_order_offset_buy"], (int, float)
-            )
-            or self.config["trading"]["limit_order_offset_buy"] < 0
-        ):
-            raise ValueError("'limit_order_offset_buy' must be a non-negative number")
-        if "limit_order_offset_sell" not in self.config["trading"]:  # New validation
-            raise ValueError(
-                "Missing 'limit_order_offset_sell' in config.yaml trading section"
-            )
-        if (
-            not isinstance(
-                self.config["trading"]["limit_order_offset_sell"], (int, float)
-            )
-            or self.config["trading"]["limit_order_offset_sell"] < 0
-        ):
-            raise ValueError("'limit_order_offset_sell' must be a non-negative number")
+        logger.info("Validating configuration...")
+        validated_config = {}
+        for key, schema in CONFIG_SCHEMA.items():
+            is_section = isinstance(schema, dict) and "params" in schema
 
-        if "order_book" not in self.config:
-            raise ValueError("Missing 'order_book' section in config.yaml")
-        if "depth" not in self.config["order_book"]:
-            raise ValueError("Missing 'depth' in config.yaml order_book section")
-        if (
-            not isinstance(self.config["order_book"]["depth"], int)
-            or self.config["order_book"]["depth"] <= 0
-        ):
-            raise ValueError("'depth' must be a positive integer")
-        if "imbalance_threshold" not in self.config["order_book"]:
-            raise ValueError(
-                "Missing 'imbalance_threshold' in config.yaml order_book section"
-            )
-        if (
-            not isinstance(
-                self.config["order_book"]["imbalance_threshold"], (int, float)
-            )
-            or self.config["order_book"]["imbalance_threshold"] <= 0
-        ):
-            raise ValueError("'imbalance_threshold' must be a positive number")
+            if is_section:
+                section_name = key
+                section_schema = schema
+                if section_name not in config:
+                    if section_schema.get("required", False):
+                        raise ValueError(f"Missing required section '{section_name}' in config file.")
+                    else:
+                        logger.debug(f"Optional section '{section_name}' not found, skipping.")
+                        validated_config[section_name] = {} # Add empty dict if optional section is missing
+                        continue # Skip validation if section is missing but not required
 
-        if "indicators" not in self.config:
-            raise ValueError("Missing 'indicators' section in config.yaml")
-        indicator_params = [
-            ("volatility_window", int, 1, None),
-            ("volatility_multiplier", (int, float), 0, None),
-            ("ema_period", int, 1, None),
-            ("rsi_period", int, 1, None),
-            ("macd_short_period", int, 1, None),
-            ("macd_long_period", int, 1, None),
-            ("macd_signal_period", int, 1, None),
-            ("stoch_rsi_period", int, 1, None),
-        ]
-        for param, type_, min_val, max_val in indicator_params:
-            if param not in self.config["indicators"]:
-                raise ValueError(f"Missing '{param}' in config.yaml indicators section")
-            if not isinstance(self.config["indicators"][param], type_):
-                raise ValueError(f"'{param}' must be of type {type_}")
-            if min_val is not None and self.config["indicators"][param] < min_val:
-                raise ValueError(
-                    f"'{param}' must be greater than or equal to {min_val}"
-                )
-            if max_val is not None and self.config["indicators"][param] > max_val:
-                raise ValueError(f"'{param}' must be less than or equal to {max_val}")
+                if not isinstance(config[section_name], dict):
+                     raise ValueError(f"Section '{section_name}' must be a dictionary.")
 
-        if "risk_management" not in self.config:
-            raise ValueError("Missing 'risk_management' section in config.yaml")
+                validated_section = {}
+                section_config = config[section_name]
 
-        risk_params = [
-            ("order_size_percentage", (int, float), 0, 1),
-            ("stop_loss_percentage", (int, float), 0, 1),
-            ("take_profit_percentage", (int, float), 0, 1),
-            ("max_open_positions", int, 1, None),
-            ("time_based_exit_minutes", int, 1, None),
-            ("trailing_stop_loss_percentage", (int, float), 0, 1),  # New validation
-        ]
-        for param, type_, min_val, max_val in risk_params:
-            if param not in self.config["risk_management"]:
-                raise ValueError(
-                    f"Missing '{param}' in config.yaml risk_management section"
-                )
-            if not isinstance(self.config["risk_management"][param], type_):
-                raise ValueError(f"'{param}' must be of type {type_}")
-            if min_val is not None and self.config["risk_management"][param] < min_val:
-                raise ValueError(
-                    f"'{param}' must be greater than or equal to {min_val}"
-                )
-            if max_val is not None and self.config["risk_management"][param] > max_val:
-                raise ValueError(f"'{param}' must be less than or equal to {max_val}")
+                for param, param_schema in section_schema["params"].items():
+                    if param not in section_config:
+                        if param_schema.get("required", False):
+                            raise ValueError(f"Missing required parameter '{param}' in section '{section_name}'.")
+                        elif "default" in param_schema:
+                             validated_section[param] = param_schema["default"]
+                             logger.debug(f"Using default value for '{param}' in '{section_name}': {param_schema['default']}")
+                        else:
+                             validated_section[param] = None # Parameter is optional without default
+                             logger.debug(f"Optional parameter '{param}' not found in '{section_name}'.")
+                             continue # Skip further checks if optional and not present
 
-    def _initialize_exchange(self):
+                    else:
+                        value = section_config[param]
+                        # Type check
+                        expected_type = param_schema["type"]
+                        if not isinstance(value, expected_type):
+                            raise ValueError(f"Parameter '{param}' in '{section_name}' must be type {expected_type}, got {type(value)}.")
+
+                        # Non-empty check for strings
+                        if param_schema.get("non_empty", False) and isinstance(value, str) and not value.strip():
+                             raise ValueError(f"Parameter '{param}' in '{section_name}' cannot be empty.")
+
+                        # Allowed values check
+                        allowed = param_schema.get("allowed")
+                        if allowed and value not in allowed:
+                            raise ValueError(f"Parameter '{param}' in '{section_name}' must be one of {allowed}, got '{value}'.")
+
+                        # Range check
+                        value_range = param_schema.get("range")
+                        if value_range and not (value_range[0] <= value <= value_range[1]):
+                             raise ValueError(f"Parameter '{param}' in '{section_name}' must be between {value_range[0]} and {value_range[1]}, got {value}.")
+
+                        validated_section[param] = value # Assign validated value
+
+                # Custom validations for the section
+                custom_validations = section_schema.get("custom_validations", [])
+                for validation_func in custom_validations:
+                    result = validation_func(validated_section)
+                    if isinstance(result, str): # Expect error message string on failure
+                        raise ValueError(f"Custom validation failed for section '{section_name}': {result}")
+
+                validated_config[section_name] = validated_section
+
+            else: # Top-level parameter
+                param_schema = schema
+                if key not in config:
+                    if param_schema.get("required", False):
+                        raise ValueError(f"Missing required top-level parameter '{key}'.")
+                    elif "default" in param_schema:
+                        validated_config[key] = param_schema["default"]
+                        logger.debug(f"Using default value for top-level parameter '{key}': {param_schema['default']}")
+                    else:
+                        validated_config[key] = None
+                        logger.debug(f"Optional top-level parameter '{key}' not found.")
+                else:
+                    value = config[key]
+                    expected_type = param_schema["type"]
+                    if not isinstance(value, expected_type):
+                        raise ValueError(f"Top-level parameter '{key}' must be type {expected_type}, got {type(value)}.")
+                    allowed = param_schema.get("allowed")
+                    if allowed and value not in allowed:
+                        raise ValueError(f"Top-level parameter '{key}' must be one of {allowed}, got '{value}'.")
+                    validated_config[key] = value
+
+        logger.info("Configuration validated successfully.")
+        return validated_config
+
+
+    def _initialize_exchange(self) -> ccxt.Exchange:
+        """Initializes and returns the CCXT exchange instance."""
+        logger.info(f"Initializing exchange: {self.exchange_id.upper()}...")
         try:
-            exchange = getattr(ccxt, self.exchange_id)({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "options": {"defaultType": "future"},
-                "recvWindow": 60000,
-            })
+            exchange_class = getattr(ccxt, self.exchange_id)
+            api_key = os.getenv(self.api_key_env)
+            api_secret = os.getenv(self.api_secret_env)
+
+            if not self.simulation_mode and (not api_key or not api_secret):
+                 logger.warning(
+                     f"API Key ({self.api_key_env}) or Secret ({self.api_secret_env}) environment variables not set. "
+                     "Proceeding without authentication (public endpoints only)."
+                 )
+                 # Allow proceeding for public data access, but trading will fail later.
+
+            exchange_config = {
+                "enableRateLimit": True,
+                "options": {"defaultType": "linear"}, # Example option, specific to Bybit/some exchanges
+                "recvWindow": 10000, # Example option
+            }
+            # Only add credentials if they exist and not in simulation mode
+            if api_key and api_secret and not self.simulation_mode:
+                 exchange_config["apiKey"] = api_key
+                 exchange_config["secret"] = api_secret
+                 logger.info("API credentials loaded from environment variables.")
+            elif not self.simulation_mode:
+                 logger.warning("Running in live mode without API credentials.")
+            else:
+                 logger.info("Running in simulation mode. No API credentials needed.")
+
+
+            exchange = exchange_class(exchange_config)
+
+            logger.debug("Loading markets...")
             exchange.load_markets()
-            logger.info(
-                f"{Fore.GREEN}Connected to {self.exchange_id.upper()} successfully.{Style.RESET_ALL}"
-            )
+            logger.info(f"Connected to {self.exchange_id.upper()} successfully.")
+
+            # Validate symbol exists on the exchange
+            if self.symbol not in exchange.markets:
+                available_symbols = list(exchange.markets.keys())
+                logger.error(f"Symbol '{self.symbol}' not found on {self.exchange_id}.")
+                logger.info(f"Available symbols sample: {available_symbols[:20]}...") # Log a sample
+                raise ValueError(f"Symbol '{self.symbol}' not available on exchange '{self.exchange_id}'")
+
+            # Check required capabilities (example)
+            if not exchange.has['fetchOHLCV']:
+                logger.warning(f"Exchange {self.exchange_id} does not support fetchOHLCV.")
+            if not exchange.has['fetchOrderBook']:
+                 logger.warning(f"Exchange {self.exchange_id} does not support fetchOrderBook.")
+            # Add checks for createOrder, fetchBalance etc. if needed
+
             return exchange
+
+        except AttributeError:
+            logger.error(f"Exchange ID '{self.exchange_id}' is not a valid CCXT exchange.")
+            raise # Re-raise
+        except ccxt.AuthenticationError as e:
+            logger.error(f"Authentication Error with {self.exchange_id}: {e}. Check API keys ({self.api_key_env}, {self.api_secret_env}).")
+            raise # Re-raise
+        except ccxt.ExchangeNotAvailable as e:
+            logger.error(f"Exchange Not Available: {self.exchange_id} might be down or unreachable. {e}")
+            raise # Re-raise
+        except ccxt.NetworkError as e:
+             logger.error(f"Network error during exchange initialization: {e}")
+             raise # Re-raise
         except Exception as e:
-            logger.error(f"{Fore.RED}Error initializing exchange: {e}{Style.RESET_ALL}")
-            exit()
+            logger.exception(f"An unexpected error occurred during exchange initialization: {e}")
+            raise # Re-raise unexpected errors
+
 
     @retry_api_call()
-    def fetch_market_price(self):
+    def fetch_market_price(self) -> Optional[float]:
+        """Fetches the last traded price for the symbol."""
+        logger.debug(f"Fetching ticker for {self.symbol}...")
         ticker = self.exchange.fetch_ticker(self.symbol)
-        if ticker and "last" in ticker:
-            price = ticker["last"]
+        # Prefer 'last', fallback to 'close', then 'bid' as last resort
+        price = ticker.get("last") or ticker.get("close") or ticker.get("bid")
+        if price is not None:
             logger.debug(f"Fetched market price: {price}")
-            return price
+            return float(price)
         else:
-            logger.warning(f"{Fore.YELLOW}Market price unavailable.{Style.RESET_ALL}")
+            logger.warning(f"Market price ('last', 'close', 'bid') unavailable in ticker for {self.symbol}. Ticker: {ticker}")
             return None
 
     @retry_api_call()
-    def fetch_order_book(self):
-        orderbook = self.exchange.fetch_order_book(
-            self.symbol, limit=self.order_book_depth
+    def fetch_order_book(self) -> Optional[float]:
+        """Fetches order book and calculates the bid/ask volume imbalance ratio."""
+        logger.debug(f"Fetching order book for {self.symbol} (depth: {self.order_book_depth})...")
+        orderbook = self.exchange.fetch_order_book(self.symbol, limit=self.order_book_depth)
+        bids = orderbook.get("bids", [])
+        asks = orderbook.get("asks", [])
+
+        if not bids or not asks:
+            logger.warning(f"Order book data missing bids or asks for {self.symbol}. Bids: {len(bids)}, Asks: {len(asks)}")
+            return None
+
+        # Calculate total volume within the specified depth
+        bid_volume = sum(bid[1] for bid in bids)
+        ask_volume = sum(ask[1] for ask in asks)
+
+        if ask_volume <= 0:
+            # Handle division by zero: Infinite imbalance if bids exist, neutral (1.0) if neither exist (though checked above)
+            imbalance_ratio = float("inf") if bid_volume > 0 else 1.0
+        else:
+            imbalance_ratio = bid_volume / ask_volume
+
+        logger.debug(f"Order Book - Top {self.order_book_depth} levels: "
+                     f"Bid Vol: {bid_volume:.4f}, Ask Vol: {ask_volume:.4f}, "
+                     f"Bid/Ask Ratio: {imbalance_ratio:.2f}")
+        return imbalance_ratio
+
+
+    @retry_api_call()
+    def fetch_historical_data(self, limit: Optional[int] = None) -> Optional[pd.DataFrame]:
+        """Fetches historical OHLCV data."""
+        # Determine the minimum number of candles required for all indicators
+        min_required = max(
+            self.volatility_window,
+            self.ema_period,
+            self.rsi_period + 1, # RSI needs period + 1 for diff
+            self.macd_long_period + self.macd_signal_period, # MACD needs long + signal for full calculation
+            self.stoch_rsi_period + 6, # Stoch RSI needs period + 3 (k) + 3 (d)
+            MIN_HISTORICAL_DATA_BUFFER # Ensure a baseline minimum
         )
-        bids = orderbook["bids"]
-        asks = orderbook["asks"]
-        if bids and asks:
-            bid_volume = sum(bid[1] for bid in bids)
-            ask_volume = sum(ask[1] for ask in asks)
-            imbalance_ratio = (
-                ask_volume / bid_volume if bid_volume > 0 else float("inf")
-            )
-            logger.debug(
-                f"Order Book - Bid Vol: {bid_volume}, Ask Vol: {ask_volume}, Imbalance: {imbalance_ratio:.2f}"
-            )
-            return imbalance_ratio
-        else:
-            logger.warning(
-                f"{Fore.YELLOW}Order book data unavailable.{Style.RESET_ALL}"
-            )
+
+        fetch_limit = limit if limit is not None else min_required + MIN_HISTORICAL_DATA_BUFFER # Fetch slightly more than needed
+
+        logger.debug(f"Fetching {fetch_limit} historical {self.timeframe} candles for {self.symbol} (min required: {min_required})...")
+
+        if not self.exchange.has['fetchOHLCV']:
+             logger.error(f"Exchange {self.exchange_id} does not support fetchOHLCV. Cannot fetch historical data.")
+             return None
+
+        ohlcv = self.exchange.fetch_ohlcv(self.symbol, timeframe=self.timeframe, limit=fetch_limit)
+
+        if not ohlcv:
+            logger.warning(f"Historical OHLCV data unavailable for {self.symbol} with timeframe {self.timeframe}.")
             return None
 
-    @retry_api_call()
-    def fetch_historical_prices(self, limit=None):
-        if limit is None:
-            limit = (
-                max(
-                    self.volatility_window,
-                    self.ema_period,
-                    self.rsi_period + 1,
-                    self.macd_long_period,
-                    self.stoch_rsi_period,
-                )
-                + 1
-            )
-        ohlcv = self.exchange.fetch_ohlcv(self.symbol, timeframe="1m", limit=limit)
-        if ohlcv:
-            prices = [candle[4] for candle in ohlcv]
-            if len(prices) < limit:
-                logger.warning(
-                    f"{Fore.YELLOW}Insufficient historical data. Fetched {len(prices)}, needed {limit}.{Style.RESET_ALL}"
-                )
-                return []
-            logger.debug(f"Historical prices (last 5): {prices[-5:]}")
-            return prices
-        else:
-            logger.warning(
-                f"{Fore.YELLOW}Historical price data unavailable.{Style.RESET_ALL}"
-            )
-            return []
+        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+        df.set_index("timestamp", inplace=True)
 
-    def calculate_volatility(self):
-        prices = self.fetch_historical_prices(limit=self.volatility_window)
-        if not prices or len(prices) < self.volatility_window:
-            return None
-        returns = np.diff(prices) / prices[:-1]
-        volatility = np.std(returns)
-        logger.debug(f"Calculated volatility: {volatility}")
-        return volatility
+        # Drop potential duplicates just in case API returns overlapping data
+        df = df[~df.index.duplicated(keep='first')]
 
-    def calculate_ema(self, prices, period=None):
-        if period is None:
-            period = self.ema_period
-        if not prices or len(prices) < period:
+        if len(df) < min_required:
+            logger.error(f"Insufficient historical data fetched. Requested {fetch_limit}, got {len(df)}, minimum required {min_required}. Cannot proceed with calculations.")
             return None
-        weights = np.exp(np.linspace(-1.0, 0.0, period))
-        weights /= weights.sum()
-        ema = np.convolve(prices, weights, mode="valid")[-1]
-        logger.debug(f"Calculated EMA: {ema}")
-        return ema
 
-    def calculate_rsi(self, prices):
-        if not prices or len(prices) < self.rsi_period + 1:
+        logger.debug(f"Historical data fetched successfully. Shape: {df.shape}, Time Range: {df.index.min()} to {df.index.max()}")
+        return df
+
+    # --- Indicator Calculations ---
+
+    def _calculate_indicator(self, data: Optional[pd.Series], required_length: int, calc_func, name: str, **kwargs) -> Optional[Any]:
+        """Helper to check data length before calculating an indicator."""
+        if data is None or len(data) < required_length:
+            logger.warning(f"Insufficient data for {name} calculation (need {required_length}, got {len(data) if data is not None else 0})")
             return None
-        deltas = np.diff(prices)
-        gains = np.maximum(deltas, 0)
-        losses = -np.minimum(deltas, 0)
-        avg_gain = np.mean(gains[-self.rsi_period :])
-        avg_loss = np.mean(losses[-self.rsi_period :])
-        if avg_loss == 0:
-            rsi = 100
-        else:
-            rs = avg_gain / avg_loss
+        try:
+            result = calc_func(data, **kwargs)
+            if isinstance(result, pd.Series): # Get last value if series is returned
+                 result_val = result.iloc[-1]
+            else:
+                 result_val = result
+
+            if pd.isna(result_val):
+                logger.warning(f"{name} calculation resulted in NaN.")
+                return None
+            # Log scalar results, handle tuples separately if needed
+            if isinstance(result_val, (float, int)):
+                 logger.debug(f"Calculated {name}: {result_val:.4f}") # Adjust precision as needed
+            else:
+                 logger.debug(f"Calculated {name}: {result_val}")
+            return result_val
+        except Exception as e:
+            logger.error(f"Error calculating {name}: {e}")
+            return None
+
+
+    def calculate_volatility(self, data: pd.DataFrame) -> Optional[float]:
+        """Calculates the rolling log return standard deviation (volatility)."""
+        if data is None or 'close' not in data.columns: return None
+        required = self.volatility_window + 1 # Need one previous point for shift
+        return self._calculate_indicator(
+            data['close'], required,
+            lambda s: np.log(s / s.shift(1)).rolling(window=self.volatility_window).std(),
+            f"Volatility (window {self.volatility_window})"
+        )
+
+    def calculate_ema(self, data: pd.DataFrame, period: int) -> Optional[float]:
+        """Calculates the Exponential Moving Average (EMA)."""
+        if data is None or 'close' not in data.columns: return None
+        return self._calculate_indicator(
+            data['close'], period,
+            lambda s: s.ewm(span=period, adjust=False).mean(),
+            f"EMA (period {period})"
+        )
+
+    def calculate_rsi(self, data: pd.DataFrame) -> Optional[float]:
+        """Calculates the Relative Strength Index (RSI)."""
+        if data is None or 'close' not in data.columns: return None
+        required = self.rsi_period + 1 # For diff()
+        def _rsi_calc(series: pd.Series):
+            delta = series.diff()
+            gain = delta.where(delta > 0, 0).fillna(0)
+            loss = -delta.where(delta < 0, 0).fillna(0)
+            avg_gain = gain.ewm(alpha=1 / self.rsi_period, adjust=False).mean()
+            avg_loss = loss.ewm(alpha=1 / self.rsi_period, adjust=False).mean()
+            rs = avg_gain / avg_loss.replace(0, 1e-10) # Avoid division by zero
             rsi = 100 - (100 / (1 + rs))
-        logger.debug(f"Calculated RSI: {rsi}")
-        return rsi
+            return rsi
 
-    def calculate_macd(self, prices):
-        if not prices or len(prices) < self.macd_long_period:
-            return None, None, None
-        short_ema = self.calculate_ema(
-            prices[-self.macd_short_period :], self.macd_short_period
+        return self._calculate_indicator(
+            data['close'], required, _rsi_calc, f"RSI (period {self.rsi_period})"
         )
-        long_ema = self.calculate_ema(
-            prices[-self.macd_long_period :], self.macd_long_period
-        )
-        if short_ema is None or long_ema is None:
-            return None, None, None
-        macd = short_ema - long_ema
-        signal = self.calculate_ema([macd], self.macd_signal_period)
-        if signal is None:
-            return None, None, None
-        hist = macd - signal
-        logger.debug(f"MACD: {macd}, Signal: {signal}, Histogram: {hist}")
-        return macd, signal, hist
 
-    def calculate_stoch_rsi(self, prices, period=None):
-        if period is None:
-            period = self.stoch_rsi_period
-        if not prices or len(prices) < period:
-            return None, None
+    def calculate_macd(self, data: pd.DataFrame) -> Tuple[Optional[float], Optional[float], Optional[float]]:
+        """Calculates the Moving Average Convergence Divergence (MACD)."""
+        if data is None or 'close' not in data.columns: return None, None, None
+        required = self.macd_long_period + self.macd_signal_period # Rough estimate
 
-        close = pd.Series(prices)
-        min_val = close.rolling(window=period).min()
-        max_val = close.rolling(window=period).max()
-        stoch_rsi = 100 * (close - min_val) / (max_val - min_val)
-        k = stoch_rsi.rolling(window=3).mean()
-        d = k.rolling(window=3).mean()
+        close_series = data['close']
+        if len(close_series) < required:
+             logger.warning(f"Insufficient data for MACD calculation (need ~{required}, got {len(close_series)})")
+             return None, None, None
 
-        if k.empty or d.empty or pd.isna(k.iloc[-1]) or pd.isna(d.iloc[-1]):
-            return None, None
+        try:
+            ema_short = close_series.ewm(span=self.macd_short_period, adjust=False).mean()
+            ema_long = close_series.ewm(span=self.macd_long_period, adjust=False).mean()
+            macd_line = ema_short - ema_long
+            signal_line = macd_line.ewm(span=self.macd_signal_period, adjust=False).mean()
+            histogram = macd_line - signal_line
 
-        logger.debug(f"Calculated Stochastic RSI - K: {k.iloc[-1]}, D: {d.iloc[-1]}")
-        return k.iloc[-1], d.iloc[-1]
+            macd_val = macd_line.iloc[-1]
+            signal_val = signal_line.iloc[-1]
+            hist_val = histogram.iloc[-1]
+
+            if pd.isna(macd_val) or pd.isna(signal_val) or pd.isna(hist_val):
+                logger.warning("MACD calculation resulted in NaN values.")
+                return None, None, None
+
+            logger.debug(f"MACD: {macd_val:.4f}, Signal: {signal_val:.4f}, Histogram: {hist_val:.4f}")
+            return macd_val, signal_val, hist_val
+        except Exception as e:
+             logger.error(f"Error calculating MACD: {e}")
+             return None, None, None
+
+
+    def calculate_stoch_rsi(self, data: pd.DataFrame) -> Tuple[Optional[float], Optional[float]]:
+        """Calculates the Stochastic RSI."""
+        if data is None or 'close' not in data.columns: return None, None
+        # Stoch RSI needs RSI calculation + rolling window + k smoothing + d smoothing
+        required = self.rsi_period + self.stoch_rsi_period + 3 + 3 # rsi_period for RSI, stoch_rsi_period for rolling, 3 for k, 3 for d
+
+        close_series = data['close']
+        if len(close_series) < required:
+             logger.warning(f"Insufficient data for Stoch RSI calculation (need ~{required}, got {len(close_series)})")
+             return None, None
+
+        try:
+            # Calculate RSI first
+            delta = close_series.diff()
+            gain = delta.where(delta > 0, 0).fillna(0)
+            loss = -delta.where(delta < 0, 0).fillna(0)
+            avg_gain = gain.ewm(alpha=1 / self.rsi_period, adjust=False).mean()
+            avg_loss = loss.ewm(alpha=1 / self.rsi_period, adjust=False).mean()
+            rs = avg_gain / avg_loss.replace(0, 1e-10)
+            rsi_series = 100 - (100 / (1 + rs))
+
+            # Calculate Stoch RSI
+            min_rsi = rsi_series.rolling(window=self.stoch_rsi_period).min()
+            max_rsi = rsi_series.rolling(window=self.stoch_rsi_period).max()
+            stoch_rsi_k_raw = 100 * (rsi_series - min_rsi) / (max_rsi - min_rsi).replace(0, 1e-10) # Avoid div by zero
+
+            # Smooth K and D
+            k = stoch_rsi_k_raw.rolling(window=3).mean()
+            d = k.rolling(window=3).mean()
+
+            k_val = k.iloc[-1]
+            d_val = d.iloc[-1]
+
+            if pd.isna(k_val) or pd.isna(d_val):
+                logger.warning("Stochastic RSI calculation resulted in NaN.")
+                return None, None
+
+            logger.debug(f"Calculated Stochastic RSI (period {self.stoch_rsi_period}) - K: {k_val:.2f}, D: {d_val:.2f}")
+            return k_val, d_val
+        except Exception as e:
+             logger.error(f"Error calculating Stochastic RSI: {e}")
+             return None, None
+
+    # --- Balance and Order Sizing ---
 
     @retry_api_call()
-    def fetch_balance(self):
-        return self.exchange.fetch_balance().get("USDT", {}).get("free", 0)
+    def fetch_balance(self) -> Optional[float]:
+        """Fetches the free balance for the quote currency."""
+        if self.simulation_mode:
+            logger.debug("Simulation mode: Using simulated balance of 10000.")
+            return 10000.0 # Return a fixed balance for simulation
 
-    def calculate_order_size(self):
+        try:
+            balance = self.exchange.fetch_balance()
+            quote_currency = self.market.get("quote")
+            if not quote_currency:
+                 logger.error("Could not determine quote currency from market data.")
+                 return None
+
+            # Use 'free' balance for placing new orders
+            free_balance = balance.get("free", {}).get(quote_currency)
+
+            if free_balance is None:
+                 logger.warning(f"Could not find free balance for quote currency '{quote_currency}' in balance response: {balance}")
+                 # Fallback: try total balance if free is missing? Or return None?
+                 total_balance = balance.get("total", {}).get(quote_currency, 0.0)
+                 logger.warning(f"Attempting to use total balance: {total_balance}")
+                 free_balance = total_balance # Be cautious with this fallback
+
+            logger.debug(f"Fetched free balance for {quote_currency}: {free_balance}")
+            return float(free_balance)
+
+        except ccxt.AuthenticationError:
+             logger.error("Authentication required to fetch balance. Check API keys.")
+             return None
+        except Exception as e:
+            logger.error(f"Could not retrieve {self.market.get('quote', 'quote currency')} balance: {e}")
+            return None
+
+    def calculate_order_size(self, price: float, volatility: Optional[float]) -> Optional[float]:
+        """
+        Calculates the order size in the base currency, considering risk percentage,
+        volatility adjustment, and exchange minimums.
+
+        Args:
+            price: The current market price.
+            volatility: The calculated volatility (optional).
+
+        Returns:
+            The calculated order size in base currency, or None if calculation fails.
+        """
+        if price <= 0:
+            logger.error(f"Invalid price ({price}) for order size calculation.")
+            return None
+
         balance = self.fetch_balance()
-        if balance is None:
-            logger.warning(
-                f"{Fore.YELLOW}Could not retrieve USDT balance.{Style.RESET_ALL}"
-            )
-            return 0
+        if balance is None or balance <= 0:
+            logger.error(f"Could not calculate order size due to invalid or zero balance ({balance}).")
+            return None
 
-        volatility = self.calculate_volatility()
-        if volatility is None:
-            base_size = balance * self.order_size_percentage
-            logger.info(
-                f"{Fore.CYAN}Default order size (no volatility data): {base_size}{Style.RESET_ALL}"
-            )
-            return base_size
+        # 1. Calculate base size based on risk percentage of balance
+        base_size_quote = balance * self.order_size_percentage
+        logger.debug(f"Base order size (quote): {base_size_quote:.4f} ({self.order_size_percentage*100:.2f}% of {balance:.2f})")
 
-        adjusted_size = (
-            balance
-            * self.order_size_percentage
-            * (1 + (volatility * self.volatility_multiplier))
-        )
-        final_size = min(
-            adjusted_size, balance * 0.05
-        )  # Cap order size to 5% of balance
+        # 2. Adjust size based on volatility (optional)
+        if volatility is not None and volatility > 0 and self.volatility_multiplier > 0:
+            # Reduce size more in higher volatility; adjustment factor < 1
+            adjustment_factor = 1 / (1 + (volatility * self.volatility_multiplier))
+            adjusted_size_quote = base_size_quote * adjustment_factor
+            logger.debug(f"Volatility adjustment factor: {adjustment_factor:.4f} (Volatility: {volatility:.5f})")
+        else:
+            adjusted_size_quote = base_size_quote
+            logger.debug("No volatility adjustment applied (Volatility N/A or multiplier is 0).")
+
+        # 3. Apply a maximum capital cap per trade (e.g., 5% of balance - make configurable?)
+        # max_capital_per_trade_pct = 0.05 # Example: Hardcoded cap - consider adding to config
+        # max_size_quote = balance * max_capital_per_trade_pct
+        # final_size_quote = min(adjusted_size_quote, max_size_quote)
+        # logger.debug(f"Applied max capital cap ({max_capital_per_trade_pct*100}%). Size (quote): {final_size_quote:.4f}")
+
+        # Using adjusted size directly for now, as per original logic's effective cap via order_size_percentage
+        final_size_quote = adjusted_size_quote
+
+        # 4. Convert quote size to base size
+        final_size_base = final_size_quote / price
+        logger.debug(f"Calculated base size before precision/min checks: {final_size_base:.8f} {self.market['base']}")
+
+        # 5. Apply exchange precision and minimum order size constraints
+        amount_precision = self.market.get("precision", {}).get("amount")
+        min_amount = self.market.get("limits", {}).get("amount", {}).get("min")
+
+        # Apply amount precision first
+        if amount_precision is not None:
+            try:
+                precise_size_base_str = self.exchange.amount_to_precision(self.symbol, final_size_base)
+                precise_size_base = float(precise_size_base_str)
+                if precise_size_base <= 0:
+                    logger.warning(f"Order size became zero after applying amount precision. Initial base size: {final_size_base:.8f}")
+                    return None # Cannot place zero size order
+                logger.debug(f"Applied amount precision ({amount_precision}): {precise_size_base:.8f}")
+                final_size_base = precise_size_base
+            except Exception as e:
+                 logger.error(f"Failed to apply amount precision: {e}")
+                 # Decide whether to proceed with un-precised value or fail
+                 return None # Safer to fail
+
+        # Check against minimum order size
+        if min_amount is not None and final_size_base < min_amount:
+            logger.warning(f"Calculated order size {final_size_base:.8f} is below exchange minimum {min_amount}. Checking if minimum is within risk.")
+            min_size_quote = min_amount * price
+            # Check if using the minimum size exceeds our initial risk capital
+            if min_size_quote <= base_size_quote: # Compare against the initial risk budget
+                logger.info(f"Adjusting order size to exchange minimum: {min_amount} {self.market['base']}")
+                final_size_base = min_amount
+                # Re-apply precision just in case min_amount itself needs it (unlikely but possible)
+                if amount_precision is not None:
+                    final_size_base = float(self.exchange.amount_to_precision(self.symbol, final_size_base))
+
+            else:
+                logger.warning(f"Minimum order size ({min_amount} {self.market['base']} = ~{min_size_quote:.2f} {self.market['quote']}) "
+                               f"exceeds the allocated risk capital ({base_size_quote:.2f} {self.market['quote']}). Skipping trade.")
+                return None
+
+        # Final check for zero size
+        if final_size_base <= 0:
+             logger.error("Final calculated order size is zero or negative. Skipping trade.")
+             return None
+
         logger.info(
-            f"{Fore.CYAN}Calculated order size: {final_size:.2f} (Balance: {balance:.2f}, Volatility: {volatility:.5f}){Style.RESET_ALL}"
+            f"Final Calculated Order Size: {final_size_base:.8f} {self.market['base']} "
+            f"(Quote Value: ~{final_size_base * price:.2f} {self.market['quote']})"
         )
-        return final_size
+        return final_size_base
 
-    def compute_trade_signal_score(self, price, ema, rsi, orderbook_imbalance):
+
+    # --- Trade Execution Logic ---
+
+    def compute_trade_signal_score(self, price: float, indicators: dict, orderbook_imbalance: Optional[float]) -> Tuple[int, List[str]]:
+        """Computes a simple score based on indicator signals and order book imbalance."""
         score = 0
         reasons = []
 
-        macd, macd_signal, macd_hist = self.calculate_macd(
-            self.fetch_historical_prices()
-        )
-        stoch_rsi_k, stoch_rsi_d = self.calculate_stoch_rsi(
-            self.fetch_historical_prices()
-        )
+        # --- Extract Indicator Values ---
+        # Use .get() to handle potential None values gracefully
+        ema = indicators.get("ema")
+        rsi = indicators.get("rsi")
+        macd_line = indicators.get("macd_line")
+        macd_signal = indicators.get("macd_signal")
+        # macd_hist = indicators.get("macd_hist") # Histogram not used in original logic
+        stoch_rsi_k = indicators.get("stoch_rsi_k")
+        stoch_rsi_d = indicators.get("stoch_rsi_d")
 
+        # --- Order Book Imbalance ---
         if orderbook_imbalance is not None:
-            if orderbook_imbalance < (1 / self.imbalance_threshold):
+            if orderbook_imbalance > self.imbalance_threshold:
                 score += 1
-                reasons.append(
-                    f"{Fore.GREEN}Order book: strong bid-side pressure.{Style.RESET_ALL}"
-                )
-            elif orderbook_imbalance > self.imbalance_threshold:
+                reasons.append(f"OB Imbalance: Strong bid pressure (Ratio: {orderbook_imbalance:.2f} > {self.imbalance_threshold:.2f})")
+            elif self.imbalance_threshold > 0 and orderbook_imbalance < (1 / self.imbalance_threshold): # Avoid division by zero if threshold is 0
                 score -= 1
-                reasons.append(
-                    f"{Fore.RED}Order book: strong ask-side pressure.{Style.RESET_ALL}"
-                )
+                reasons.append(f"OB Imbalance: Strong ask pressure (Ratio: {orderbook_imbalance:.2f} < {1/self.imbalance_threshold:.2f})")
+            else:
+                reasons.append(f"OB Imbalance: Neutral pressure (Ratio: {orderbook_imbalance:.2f})")
+        else:
+             reasons.append("OB Imbalance: N/A")
 
+        # --- EMA Trend ---
         if ema is not None:
             if price > ema:
                 score += 1
-                reasons.append(
-                    f"{Fore.GREEN}Price above EMA (bullish).{Style.RESET_ALL}"
-                )
-            else:
+                reasons.append(f"Trend: Price > EMA ({price:.2f} > {ema:.2f}) (Bullish)")
+            elif price < ema:
                 score -= 1
-                reasons.append(f"{Fore.RED}Price below EMA (bearish).{Style.RESET_ALL}")
+                reasons.append(f"Trend: Price < EMA ({price:.2f} < {ema:.2f}) (Bearish)")
+            else:
+                reasons.append(f"Trend: Price == EMA ({price:.2f})")
+        else:
+             reasons.append("Trend: EMA N/A")
 
+        # --- RSI Overbought/Oversold ---
         if rsi is not None:
             if rsi < 30:
-                score += 1
-                reasons.append(f"{Fore.GREEN}RSI < 30 (oversold).{Style.RESET_ALL}")
+                score += 1 # Potential buy signal (oversold)
+                reasons.append(f"Momentum: RSI < 30 ({rsi:.2f}) (Oversold)")
             elif rsi > 70:
-                score -= 1
-                reasons.append(f"{Fore.RED}RSI > 70 (overbought).{Style.RESET_ALL}")
+                score -= 1 # Potential sell signal (overbought)
+                reasons.append(f"Momentum: RSI > 70 ({rsi:.2f}) (Overbought)")
             else:
-                reasons.append(f"{Fore.YELLOW}RSI neutral.{Style.RESET_ALL}")
+                reasons.append(f"Momentum: RSI Neutral ({rsi:.2f})")
+        else:
+             reasons.append("Momentum: RSI N/A")
 
-        if macd is not None and macd_signal is not None:
-            if macd > macd_signal:
-                score += 1
-                reasons.append(
-                    f"{Fore.GREEN}MACD above signal (bullish).{Style.RESET_ALL}"
-                )
+        # --- MACD Crossover ---
+        if macd_line is not None and macd_signal is not None:
+            if macd_line > macd_signal:
+                score += 1 # Bullish crossover
+                reasons.append(f"Momentum: MACD > Signal ({macd_line:.4f} > {macd_signal:.4f}) (Bullish)")
+            elif macd_line < macd_signal:
+                score -= 1 # Bearish crossover
+                reasons.append(f"Momentum: MACD < Signal ({macd_line:.4f} < {macd_signal:.4f}) (Bearish)")
             else:
-                score -= 1
-                reasons.append(
-                    f"{Fore.RED}MACD below signal (bearish).{Style.RESET_ALL}"
-                )
+                reasons.append(f"Momentum: MACD == Signal ({macd_line:.4f})")
+        else:
+             reasons.append("Momentum: MACD N/A")
 
+        # --- Stochastic RSI Overbought/Oversold ---
         if stoch_rsi_k is not None and stoch_rsi_d is not None:
+            # Simple check: both lines in extreme zones
             if stoch_rsi_k < 20 and stoch_rsi_d < 20:
-                score += 1
-                reasons.append(
-                    f"{Fore.GREEN}Stochastic RSI < 20 (bullish).{Style.RESET_ALL}"
-                )
+                score += 1 # Oversold
+                reasons.append(f"Momentum: Stoch RSI < 20 (K:{stoch_rsi_k:.2f}, D:{stoch_rsi_d:.2f}) (Oversold)")
             elif stoch_rsi_k > 80 and stoch_rsi_d > 80:
-                score -= 1
-                reasons.append(
-                    f"{Fore.RED}Stochastic RSI > 80 (bearish).{Style.RESET_ALL}"
-                )
+                score -= 1 # Overbought
+                reasons.append(f"Momentum: Stoch RSI > 80 (K:{stoch_rsi_k:.2f}, D:{stoch_rsi_d:.2f}) (Overbought)")
+            # Could add crossover logic here too (e.g., K crossing D)
             else:
-                reasons.append(f"{Fore.YELLOW}Stochastic RSI neutral.{Style.RESET_ALL}")
+                reasons.append(f"Momentum: Stoch RSI Neutral (K:{stoch_rsi_k:.2f}, D:{stoch_rsi_d:.2f})")
+        else:
+             reasons.append("Momentum: Stoch RSI N/A")
 
+        logger.debug(f"Signal Score: {score}, Reasons: {'; '.join(reasons)}")
         return score, reasons
+
 
     @retry_api_call()
     def place_order(
         self,
-        side,
-        order_size,
-        order_type="market",
-        price=None,
-        stop_loss_price=None,
-        take_profit_price=None,
-    ):
+        side: str, # Use constants BUY or SELL
+        order_size: float,
+        order_type: str = MARKET_ORDER, # Use constants MARKET_ORDER or LIMIT_ORDER
+        price: Optional[float] = None, # Required for limit orders
+        stop_loss_price: Optional[float] = None,
+        take_profit_price: Optional[float] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Places a trade order (simulated or live)."""
+
+        # --- Input Validation ---
+        if side not in [BUY, SELL]:
+            logger.error(f"Invalid order side: '{side}'. Must be '{BUY}' or '{SELL}'.")
+            return None
+        if order_type not in [MARKET_ORDER, LIMIT_ORDER]:
+            logger.error(f"Invalid order type: '{order_type}'. Must be '{MARKET_ORDER}' or '{LIMIT_ORDER}'.")
+            return None
+        if order_type == LIMIT_ORDER and price is None:
+            logger.error(f"Price is required for {LIMIT_ORDER} orders.")
+            return None
+        if order_size <= 0:
+            logger.error(f"Order size must be positive, got {order_size}.")
+            return None
+
+        # --- Prepare Order Parameters ---
         try:
-            params = {}
-            if stop_loss_price:
-                params["stopLoss"] = f"{stop_loss_price:.2f}"
-            if take_profit_price:
-                params["takeProfit"] = f"{take_profit_price:.2f}"
-
-            if self.simulation_mode:
-                if order_type == "limit" and price is None:
-                    logger.error(
-                        f"{Fore.RED}[SIMULATION] Limit price required for limit orders.{Style.RESET_ALL}"
-                    )
-                    return None
-                simulated_price = price if price else self.fetch_market_price()
-                trade_details = {
-                    "status": "simulated",
-                    "side": side,
-                    "type": order_type,
-                    "amount": order_size,
-                    "price": simulated_price,
-                    "stopLoss": stop_loss_price,
-                    "takeProfit": take_profit_price,
-                    "timestamp": time.time(),
-                }
-                logger.info(
-                    f"{Fore.CYAN}[SIMULATION] Order Placed: "
-                    f"Type: {trade_details['type']}, "
-                    f"Side: {trade_details['side'].upper()}, "
-                    f"Size: {trade_details['amount']:.2f}, "
-                    f"Price: {trade_details['price'] if trade_details['type'] == 'limit' else 'Market'}, "
-                    f"SL: {trade_details['stopLoss']}, "
-                    f"TP: {trade_details['takeProfit']}, "
-                    f"Status: {trade_details['status']}{Style.RESET_ALL}"
-                )
-                return trade_details
-            else:
-                if order_type == "market":
-                    order = self.exchange.create_market_order(
-                        self.symbol, side, order_size, params=params
-                    )
-                elif order_type == "limit":
-                    if price is None:
-                        logger.error(
-                            f"{Fore.RED}Limit price required for limit orders.{Style.RESET_ALL}"
-                        )
-                        return None
-                    order = self.exchange.create_limit_order(
-                        self.symbol, side, order_size, price, params=params
-                    )
-                elif order_type == "stop_market":
-                    if not stop_loss_price:
-                        logger.error(
-                            "{Fore.RED} Stop Loss Price is required for stop_market order"
-                        )
-                        return None
-                    order = self.exchange.create_market_order(
-                        self.symbol, side, order_size, params=params
-                    )
-                else:
-                    logger.error(
-                        f"{Fore.RED}Unsupported order type: {order_type}{Style.RESET_ALL}"
-                    )
-                    return None
-
-                logger.info(
-                    f"{Fore.CYAN}Order Placed: "
-                    f"ID: {order['id']}, "
-                    f"Type: {order['type']}, "
-                    f"Side: {order['side'].upper()}, "
-                    f"Amount: {order['amount']:.2f}, "
-                    f"Price: {order.get('price_requested', order.get('price', 'Market'))}, "
-                    f"StopLoss: {params.get('stopLoss', 'N/A')}, "
-                    f"TakeProfit: {params.get('takeProfit', 'N/A')}, "
-                    f"Status: {order['status']}{Style.RESET_ALL}"
-                )
-                return order
-
-        except ccxt.InsufficientFunds as e:
-            logger.error(
-                f"{Fore.RED}Insufficient funds to place {side} order: {e}{Style.RESET_ALL}"
-            )
-            return None
-        except ccxt.OrderNotFound as e:
-            logger.error(
-                f"{Fore.RED}Order not found (e.g., trying to cancel a non-existent order): {e}{Style.RESET_ALL}"
-            )
-            return None
-        except ccxt.InvalidOrder as e:
-            logger.error(f"{Fore.RED}Invalid order parameters: {e}{Style.RESET_ALL}")
-            return None
+            order_size_str = self.exchange.amount_to_precision(self.symbol, order_size)
+            price_str = self.exchange.price_to_precision(self.symbol, price) if price else None
+            sl_price_str = self.exchange.price_to_precision(self.symbol, stop_loss_price) if stop_loss_price else None
+            tp_price_str = self.exchange.price_to_precision(self.symbol, take_profit_price) if take_profit_price else None
         except Exception as e:
-            logger.error(f"{Fore.RED}Error placing {side} order: {e}{Style.RESET_ALL}")
-            return None
+             logger.error(f"Error formatting order parameters for precision: {e}")
+             return None
 
-    def manage_positions(self) -> None:
-        for position in list(self.open_positions):
-            time_elapsed = (time.time() - position["entry_time"]) / 60
-            if time_elapsed >= self.time_based_exit_minutes:
-                logger.info(
-                    f"{Fore.YELLOW}Time-based exit triggered for position: {position}{Style.RESET_ALL}"
-                )
-                if position["side"] == "buy":
-                    self.place_order("sell", position["size"])
-                else:
-                    self.place_order("buy", position["size"])
-                self.open_positions.remove(position)
-                continue  # Skip SL/TP check after time-based exit
+        # CCXT specific parameters for SL/TP (may vary by exchange)
+        params = {}
+        if self.exchange.id == 'bybit': # Example: Bybit uses specific params
+            if stop_loss_price:
+                params["stopLoss"] = sl_price_str
+            if take_profit_price:
+                params["takeProfit"] = tp_price_str
+        # Add other exchange-specific param structures here if needed
+        # else: # Generic attempt (might not work on all exchanges)
+        #     if stop_loss_price: params["stopLossPrice"] = sl_price_str
+        #     if take_profit_price: params["takeProfitPrice"] = tp_price_str
 
-            current_price = self.fetch_market_price()
-            if current_price is None:
-                logger.warning(
-                    f"{Fore.YELLOW}Could not fetch current price for position management.{Style.RESET_ALL}"
-                )
-                continue
+        # --- Simulation Mode ---
+        if self.simulation_mode:
+            simulated_fill_price = price if order_type == LIMIT_ORDER else self.fetch_market_price()
+            if simulated_fill_price is None and order_type == MARKET_ORDER:
+                logger.error("[SIMULATION] Could not fetch market price for simulated market order.")
+                return None
+            elif simulated_fill_price is None and order_type == LIMIT_ORDER:
+                 # Should not happen due to earlier check, but as safeguard
+                 logger.error("[SIMULATION] Price is None for simulated limit order.")
+                 return None
 
-            if position["side"] == "buy":
-                # Trailing Stop Loss Logic for Buy Positions
-                if (
-                    "trailing_stop_loss" in position
-                ):  # Check if trailing stop loss is active for this position
-                    position["trailing_stop_loss"] = max(
-                        position["trailing_stop_loss"],
-                        current_price * (1 - self.trailing_stop_loss_percentage),
-                    )  # Raise stop loss
-                    stop_loss_price = position["trailing_stop_loss"]
-                else:
-                    stop_loss_price = position["stop_loss"]
+            simulated_fill_price = float(simulated_fill_price) # Ensure float
+            order_size_float = float(order_size_str)
+            cost = order_size_float * simulated_fill_price
 
-                if current_price <= stop_loss_price:
-                    logger.info(
-                        f"{Fore.RED}Stop-loss triggered for LONG position.{Style.RESET_ALL}"
-                    )
-                    self.place_order("sell", position["size"])
-                    self.open_positions.remove(position)
-                elif current_price >= position["take_profit"]:
-                    logger.info(
-                        f"{Fore.GREEN}Take-profit triggered for LONG position.{Style.RESET_ALL}"
-                    )
-                    self.place_order("sell", position["size"])
-                    self.open_positions.remove(position)
-                # Activate trailing stoploss after take profit is reached or if price moves significantly up after entry
-                elif "trailing_stop_loss" not in position and (
-                    current_price >= position["take_profit"]
-                    or current_price
-                    >= position["entry_price"] * (1 + 2 * self.take_profit_pct)
-                ):  # Activate after TP or significant move
-                    position["trailing_stop_loss"] = current_price * (
-                        1 - self.trailing_stop_loss_percentage
-                    )  # Initialize trailing stop loss
-                    logger.info(
-                        f"{Fore.MAGENTA}Trailing stop-loss activated for LONG position at {position['trailing_stop_loss']:.2f}{Style.RESET_ALL}"
-                    )
+            # Simulate fees (example: 0.1%) - make configurable
+            simulated_fee_rate = 0.001
+            fee = cost * simulated_fee_rate
+            simulated_cost_with_fee = cost + fee if side == BUY else cost - fee # Adjust cost based on fee
 
-            elif position["side"] == "sell":
-                # Trailing Stop Loss Logic for Sell Positions
-                if (
-                    "trailing_stop_loss" in position
-                ):  # Check if trailing stop loss is active
-                    position["trailing_stop_loss"] = min(
-                        position["trailing_stop_loss"],
-                        current_price * (1 + self.trailing_stop_loss_percentage),
-                    )  # Lower stop loss
-                    stop_loss_price = position["trailing_stop_loss"]
-                else:
-                    stop_loss_price = position["stop_loss"]
-
-                if current_price >= stop_loss_price:
-                    logger.info(
-                        f"{Fore.RED}Stop-loss triggered for SHORT position.{Style.RESET_ALL}"
-                    )
-                    self.place_order("buy", position["size"])
-                    self.open_positions.remove(position)
-                elif current_price <= position["take_profit"]:
-                    logger.info(
-                        f"{Fore.GREEN}Take-profit triggered for SHORT position.{Style.RESET_ALL}"
-                    )
-                    self.place_order("buy", position["size"])
-                    self.open_positions.remove(position)
-                # Activate trailing stoploss for short position
-                elif "trailing_stop_loss" not in position and (
-                    current_price <= position["take_profit"]
-                    or current_price
-                    <= position["entry_price"] * (1 - 2 * self.take_profit_pct)
-                ):  # Activate after TP or significant move
-                    position["trailing_stop_loss"] = current_price * (
-                        1 + self.trailing_stop_loss_percentage
-                    )  # Initialize trailing stop loss
-                    logger.info(
-                        f"{Fore.MAGENTA}Trailing stop-loss activated for SHORT position at {position['trailing_stop_loss']:.2f}{Style.RESET_ALL}"
-                    )
-
-    @retry_api_call()
-    def cancel_orders(self) -> None:
-        open_orders = self.exchange.fetch_open_orders(self.symbol)
-        if open_orders:
+            trade_details = {
+                "id": f"sim_{int(time.time() * 1000)}_{side}",
+                "symbol": self.symbol,
+                "status": "closed", # Simulate immediate fill
+                "side": side,
+                "type": order_type,
+                "amount": order_size_float,
+                "price": simulated_fill_price, # For limit orders, this is the requested price
+                "average": simulated_fill_price, # Actual fill price
+                "cost": simulated_cost_with_fee, # Cost including simulated fee
+                "filled": order_size_float,
+                "remaining": 0.0,
+                "timestamp": int(time.time() * 1000),
+                "datetime": pd.Timestamp.now(tz='UTC').isoformat(),
+                "fee": {"cost": fee, "currency": self.market['quote']},
+                "info": { # Mimic structure of real order where possible
+                    "stopLoss": sl_price_str,
+                    "takeProfit": tp_price_str,
+                    "orderType": order_type.capitalize(),
+                    "execType": "Trade", # Simulate execution type
+                    "is_simulated": True,
+                },
+            }
+            log_price = price_str if order_type == LIMIT_ORDER else f"Market (~{simulated_fill_price:.{self.market['precision']['price']}f})"
             logger.info(
-                f"{Fore.MAGENTA}Cancelling Open Orders: {open_orders}{Style.RESET_ALL}"
+                f"{Fore.YELLOW}[SIMULATION] Order Placed: ID: {trade_details['id']}, Type: {trade_details['type']}, "
+                f"Side: {trade_details['side'].upper()}, Size: {trade_details['amount']:.{self.market['precision']['amount']}f} {self.market['base']}, "
+                f"Fill Price: {log_price}, SL: {sl_price_str or 'N/A'}, TP: {tp_price_str or 'N/A'}, "
+                f"Simulated Cost: {trade_details['cost']:.2f} {self.market['quote']} (Fee: {fee:.4f})"
             )
-            for order in open_orders:
-                cancelled = self.exchange.cancel_order(order["id"], self.symbol)
-                if cancelled:
-                    logger.info(
-                        f"{Fore.YELLOW}Cancelled order: {order['id']}{Style.RESET_ALL}"
-                    )
-                else:
-                    logger.warning(
-                        f"{Fore.YELLOW}Failed to cancel order: {order['id']}, might already be filled or cancelled.{Style.RESET_ALL}"
-                    )
+            return trade_details
 
-    def scalp_trade(self) -> None:
+        # --- Live Trading Mode ---
+        else:
+            order = None
+            order_size_float = float(order_size_str)
+            try:
+                if order_type == MARKET_ORDER:
+                    logger.info(f"{Fore.CYAN}Placing LIVE Market {side.upper()} order for {order_size_str} {self.market['base']} with params: {params}")
+                    order = self.exchange.create_market_order(self.symbol, side, order_size_float, params=params)
+                elif order_type == LIMIT_ORDER:
+                    price_float = float(price_str) # Ensure price is float
+                    logger.info(f"{Fore.CYAN}Placing LIVE Limit {side.upper()} order for {order_size_str} {self.market['base']} at {price_str} with params: {params}")
+                    order = self.exchange.create_limit_order(self.symbol, side, order_size_float, price_float, params=params)
+
+                if order:
+                    # Log details from the returned order structure
+                    order_id = order.get('id', 'N/A')
+                    order_status = order.get('status', 'N/A')
+                    avg_price = order.get('average')
+                    filled_amount = order.get('filled', 0.0)
+                    cost = order.get('cost') # Cost might include fees depending on exchange
+
+                    log_price_actual = avg_price or order.get('price') # Use average if available, else requested price
+                    log_price_display = f"{log_price_actual:.{self.market['precision']['price']}f}" if log_price_actual else (price_str if order_type == LIMIT_ORDER else 'Market')
+
+                    logger.info(
+                        f"{Fore.GREEN}LIVE Order Placed Successfully: ID: {order_id}, Type: {order.get('type')}, Side: {order.get('side', '').upper()}, "
+                        f"Amount: {order.get('amount'):.{self.market['precision']['amount']}f}, Filled: {filled_amount:.{self.market['precision']['amount']}f} {self.market['base']}, "
+                        f"Avg Price: {log_price_display}, Cost: {cost:.2f} {self.market['quote'] if cost else ''}, "
+                        f"SL: {params.get('stopLoss', 'N/A')}, TP: {params.get('takeProfit', 'N/A')}, Status: {order_status}"
+                    )
+                    # Add the placed order details (especially ID) to track open positions if needed
+                    # self.open_positions.append(order) # Manage this in the main loop
+                    return order
+                else:
+                    # This case might occur if the API call succeeded (no exception) but CCXT returned None/empty
+                    logger.error("LIVE Order placement call returned no result or an empty order structure.")
+                    return None
+
+            except ccxt.InsufficientFunds as e:
+                 logger.error(f"{Fore.RED}LIVE Order Failed: Insufficient funds. {e}")
+                 return None # Return None, retry decorator already handled retries if applicable
+            except ccxt.ExchangeError as e:
+                 logger.error(f"{Fore.RED}LIVE Order Failed: Exchange error. {e}")
+                 return None
+            except ccxt.NetworkError as e:
+                 logger.error(f"{Fore.RED}LIVE Order Failed: Network error. {e}")
+                 return None # Should have been caught by retry, but as a safeguard
+            except Exception as e:
+                 logger.exception(f"{Fore.RED}LIVE Order Failed: An unexpected error occurred during order placement.")
+                 return None
+
+
+    # --- Main Loop Logic (Example Structure) ---
+
+    def run(self):
+        """Main execution loop for the bot."""
+        logger.info(f"Starting Scalping Bot - {self.symbol} - Loop Delay: {self.trade_loop_delay}s")
+        if self.simulation_mode:
+             logger.warning("--- RUNNING IN SIMULATION MODE ---")
+
         while True:
             self.iteration += 1
-            logger.info(f"\n--- Iteration {self.iteration} ---")
+            logger.info(f"\n----- Iteration {self.iteration} -----")
+            start_time = time.time()
 
-            price = self.fetch_market_price()
-            orderbook_imbalance = self.fetch_order_book()
-            historical_prices = self.fetch_historical_prices()
+            try:
+                # 1. Fetch Data
+                current_price = self.fetch_market_price()
+                orderbook_imbalance = self.fetch_order_book()
+                historical_data = self.fetch_historical_data() # Fetches based on indicator needs
 
-            if price is None or orderbook_imbalance is None or not historical_prices:
-                logger.warning(
-                    f"{Fore.YELLOW}Insufficient data. Retrying in 10 seconds...{Style.RESET_ALL}"
-                )
-                time.sleep(10)
-                continue
+                if current_price is None or historical_data is None:
+                    logger.warning("Could not fetch required market data. Skipping iteration.")
+                    time.sleep(self.trade_loop_delay)
+                    continue
 
-            ema = self.calculate_ema(historical_prices)
-            rsi = self.calculate_rsi(historical_prices)
-            stoch_rsi_k, stoch_rsi_d = self.calculate_stoch_rsi(historical_prices)
-            volatility = self.calculate_volatility()
-
-            logger.info(
-                f"Price: {price:.2f} | EMA: {ema if ema is not None else 'N/A'} | RSI: {rsi if rsi is not None else 'N/A'} | Stoch RSI K: {stoch_rsi_k if stoch_rsi_k is not None else 'N/A'} | Stoch RSI D: {stoch_rsi_d if stoch_rsi_d is not None else 'N/A'} | Volatility: {volatility if volatility is not None else 'N/A'}"
-            )
-            logger.info(f"Order Book Imbalance: {orderbook_imbalance:.2f}")
-
-            order_size = self.calculate_order_size()
-            if order_size == 0:
-                logger.warning(
-                    f"{Fore.YELLOW}Order size is 0. Skipping this iteration.{Style.RESET_ALL}"
-                )
-                time.sleep(10)
-                continue
-
-            signal_score, reasons = self.compute_trade_signal_score(
-                price, ema, rsi, orderbook_imbalance
-            )
-            logger.info(f"Trade Signal Score: {signal_score}")
-            for reason in reasons:
-                logger.info(f"Reason: {reason}")
-
-            if len(self.open_positions) < self.max_open_positions:
-                if signal_score >= 2:
-                    stop_loss_price = price * (1 - self.stop_loss_pct)
-                    take_profit_price = price * (1 + self.take_profit_pct)
-                    limit_price = price * (
-                        1 - self.limit_order_offset_buy
-                    )  # Apply buy offset for limit order
-
-                    entry_order = self.place_order(
-                        "buy",
-                        order_size,
-                        order_type=self.entry_order_type,
-                        price=limit_price if self.entry_order_type == "limit" else None,
-                        stop_loss_price=stop_loss_price,
-                        take_profit_price=take_profit_price,
-                    )
-
-                    if entry_order:
-                        logger.info(
-                            f"{Fore.GREEN}Entering LONG position.{Style.RESET_ALL}"
-                        )
-                        self.open_positions.append({
-                            "side": "buy",
-                            "size": order_size,
-                            "entry_price": entry_order["price"]
-                            if not self.simulation_mode and "price" in entry_order
-                            else price
-                            if self.entry_order_type == "market"
-                            else limit_price,  # Use limit price if limit order in sim mode
-                            "entry_time": time.time(),
-                            "stop_loss": stop_loss_price,
-                            "take_profit": take_profit_price,
-                        })
-
-                elif signal_score <= -2:
-                    stop_loss_price = price * (1 + self.stop_loss_pct)
-                    take_profit_price = price * (1 - self.take_profit_pct)
-                    limit_price = price * (
-                        1 + self.limit_order_offset_sell
-                    )  # Apply sell offset for limit order
-
-                    entry_order = self.place_order(
-                        "sell",
-                        order_size,
-                        order_type=self.entry_order_type,
-                        price=limit_price if self.entry_order_type == "limit" else None,
-                        stop_loss_price=stop_loss_price,
-                        take_profit_price=take_profit_price,
-                    )
-
-                    if entry_order:
-                        logger.info(
-                            f"{Fore.RED}Entering SHORT position.{Style.RESET_ALL}"
-                        )
-                        self.open_positions.append({
-                            "side": "sell",
-                            "size": order_size,
-                            "entry_price": entry_order["price"]
-                            if not self.simulation_mode and "price" in entry_order
-                            else price
-                            if self.entry_order_type == "market"
-                            else limit_price,  # Use limit price if limit order in sim mode
-                            "entry_time": time.time(),
-                            "stop_loss": stop_loss_price,
-                            "take_profit": take_profit_price,
-                        })
-            else:
-                logger.info(
-                    f"{Fore.YELLOW}Max open positions reached ({self.max_open_positions}).  Not entering new trades.{Style.RESET_ALL}"
-                )
-
-            self.manage_positions()
-
-            if self.iteration % 60 == 0:
-                self.cancel_orders()
-
-            time.sleep(10)
+                # Check if new candle has arrived (optional, prevents redundant calculations)
+                current_candle_ts = historical_data.index[-1].value // 10**9 # Timestamp in seconds
+                if self.last_candle_ts is not None and current_candle_ts <= self.last_candle_ts:
+                     logger.debug(f"No new candle data since last iteration ({pd.Timestamp(self.last_candle_ts, unit='s', tz='UTC')}). Waiting...")
+                     time.sleep(self.trade_loop_delay) # Wait before retrying
+                     continue
+                self.last_candle_ts = current_candle_ts
 
 
+                # 2. Calculate Indicators
+                volatility = self.calculate_volatility(historical_data)
+                ema = self.calculate_ema(historical_data, self.ema_period)
+                rsi = self.calculate_rsi(historical_data)
+                macd_line, macd_signal, macd_hist = self.calculate_macd(historical_data)
+                stoch_rsi_k, stoch_rsi_d = self.calculate_stoch_rsi(historical_data)
+
+                indicators = {
+                    "volatility": volatility, "ema": ema, "rsi": rsi,
+                    "macd_line": macd_line, "macd_signal": macd_signal, "macd_hist": macd_hist,
+                    "stoch_rsi_k": stoch_rsi_k, "stoch_rsi_d": stoch_rsi_d,
+                }
+
+                # 3. Check Open Positions & Manage Exits (SL/TP/Trailing/Time)
+                # TODO: Implement position management logic here
+                # - Fetch open orders/positions from exchange (or track internally)
+                # - Check if SL/TP hit based on current_price
+                # - Check time-based exits
+                # - Update trailing stops
+
+                # 4. Generate Trade Signal
+                if len(self.open_positions) >= self.max_open_positions:
+                    logger.info(f"Max open positions ({self.max_open_positions}) reached. Holding.")
+                else:
+                    score, reasons = self.compute_trade_signal_score(current_price, indicators, orderbook_imbalance)
+
+                    # Define entry thresholds (example: require a strong signal)
+                    buy_threshold = 2
+                    sell_threshold = -2
+
+                    trade_side = None
+                    if score >= buy_threshold:
+                        trade_side = BUY
+                        logger.info(f"{Fore.GREEN}Potential BUY signal (Score: {score}). Reasons: {'; '.join(reasons)}")
+                    elif score <= sell_threshold:
+                        trade_side = SELL
+                        logger.info(f"{Fore.RED}Potential SELL signal (Score: {score}). Reasons: {'; '.join(reasons)}")
+                    else:
+                        logger.info(f"Neutral signal (Score: {score}). Holding.")
+
+                    # 5. Place Order if Signal Strong Enough
+                    if trade_side:
+                        order_size = self.calculate_order_size(current_price, volatility)
+
+                        if order_size is not None and order_size > 0:
+                            # Calculate SL/TP prices
+                            sl_price, tp_price = None, None
+                            if trade_side == BUY:
+                                if self.stop_loss_pct > 0:
+                                    sl_price = current_price * (1 - self.stop_loss_pct)
+                                if self.take_profit_pct > 0:
+                                    tp_price = current_price * (1 + self.take_profit_pct)
+                                # Adjust limit order price slightly below current for buys
+                                entry_price = current_price * (1 - self.limit_order_offset_buy) if self.entry_order_type == LIMIT_ORDER else None
+                            else: # SELL
+                                if self.stop_loss_pct > 0:
+                                    sl_price = current_price * (1 + self.stop_loss_pct)
+                                if self.take_profit_pct > 0:
+                                    tp_price = current_price * (1 - self.take_profit_pct)
+                                # Adjust limit order price slightly above current for sells
+                                entry_price = current_price * (1 + self.limit_order_offset_sell) if self.entry_order_type == LIMIT_ORDER else None
+
+                            # Place the order
+                            order_result = self.place_order(
+                                side=trade_side,
+                                order_size=order_size,
+                                order_type=self.entry_order_type,
+                                price=entry_price, # None for market orders
+                                stop_loss_price=sl_price,
+                                take_profit_price=tp_price,
+                            )
+
+                            if order_result:
+                                logger.info(f"Successfully placed {trade_side.upper()} order.")
+                                # TODO: Add order_result to self.open_positions for tracking
+                                # Need a robust way to track simulated vs real positions/orders
+                                # self.open_positions.append(order_result)
+                            else:
+                                logger.error(f"Failed to place {trade_side.upper()} order.")
+                        else:
+                             logger.warning("Order size calculation failed or resulted in zero. No order placed.")
+
+            except KeyboardInterrupt:
+                logger.info("Keyboard interrupt received. Shutting down...")
+                break
+            except ccxt.AuthenticationError as e:
+                 logger.critical(f"CRITICAL: Authentication failed during main loop: {e}. Check API keys. Exiting.")
+                 break # Exit loop on critical auth error
+            except Exception as e:
+                logger.exception("An unexpected error occurred in the main loop.")
+                # Decide whether to continue or break on general errors
+                # break # Option to stop on any error
+
+            # --- Loop Delay ---
+            end_time = time.time()
+            elapsed = end_time - start_time
+            sleep_time = max(0, self.trade_loop_delay - elapsed)
+            logger.debug(f"Iteration took {elapsed:.2f}s. Sleeping for {sleep_time:.2f}s...")
+            time.sleep(sleep_time)
+
+        logger.info("Scalping Bot stopped.")
+
+
+# --- Main Execution ---
 if __name__ == "__main__":
-    config_file = "config.yaml"
-    if not os.path.exists(config_file):
-        default_config = {
-            "logging_level": "DEBUG",
-            "exchange": {
-                "exchange_id": os.getenv(
-                    "EXCHANGE_ID", "bybit"
-                ),  # Exchange ID, e.g., 'bybit', 'binance'
-            },
-            "trading": {
-                "symbol": input("Enter the trading symbol (e.g., BTC/USDT): ")
-                .strip()
-                .upper(),  # Trading symbol
-                "simulation_mode": os.getenv("SIMULATION_MODE", "True").lower()
-                in ("true", "1", "yes"),  # Simulation mode (True/False)
-                "entry_order_type": os.getenv(
-                    "ENTRY_ORDER_TYPE", "limit"
-                ).lower(),  # Order type for entry: 'market' or 'limit'
-                "limit_order_offset_buy": float(
-                    os.getenv("LIMIT_ORDER_OFFSET_BUY", 0.001)
-                ),  # Offset for limit buy orders (e.g., 0.001 for 0.1%)
-                "limit_order_offset_sell": float(
-                    os.getenv("LIMIT_ORDER_OFFSET_SELL", 0.001)
-                ),  # Offset for limit sell orders (e.g., 0.001 for 0.1%)
-            },
-            "order_book": {
-                "depth": int(os.getenv("ORDER_BOOK_DEPTH", 10)),  # Order book depth
-                "imbalance_threshold": float(
-                    os.getenv("IMBALANCE_THRESHOLD", 1.5)
-                ),  # Order book imbalance threshold
-            },
-            "indicators": {
-                "volatility_window": int(
-                    os.getenv("VOLATILITY_WINDOW", 5)
-                ),  # Volatility window for calculation
-                "volatility_multiplier": float(
-                    os.getenv("VOLATILITY_MULTIPLIER", 0.02)
-                ),  # Volatility multiplier for order size
-                "ema_period": int(os.getenv("EMA_PERIOD", 10)),  # EMA period
-                "rsi_period": int(os.getenv("RSI_PERIOD", 14)),  # RSI period
-                "macd_short_period": int(
-                    os.getenv("MACD_SHORT_PERIOD", 12)
-                ),  # MACD short period
-                "macd_long_period": int(
-                    os.getenv("MACD_LONG_PERIOD", 26)
-                ),  # MACD long period
-                "macd_signal_period": int(
-                    os.getenv("MACD_SIGNAL_PERIOD", 9)
-                ),  # MACD signal period
-                "stoch_rsi_period": int(
-                    os.getenv("STOCH_RSI_PERIOD", 14)
-                ),  # Stochastic RSI period
-            },
-            "risk_management": {
-                "order_size_percentage": float(
-                    os.getenv("ORDER_SIZE_PERCENTAGE", 0.01)
-                ),  # Order size as a percentage of balance
-                "stop_loss_percentage": float(
-                    os.getenv("STOP_LOSS_PERCENTAGE", 0.015)
-                ),  # Stop loss percentage
-                "take_profit_percentage": float(
-                    os.getenv("TAKE_PROFIT_PERCENTAGE", 0.03)
-                ),  # Take profit percentage
-                "trailing_stop_loss_percentage": float(
-                    os.getenv("TRAILING_STOP_LOSS_PERCENTAGE", 0.005)
-                ),  # Trailing stop loss percentage (e.g., 0.005 for 0.5%)
-                "max_open_positions": int(
-                    os.getenv("MAX_OPEN_POSITIONS", 1)
-                ),  # Maximum number of open positions
-                "time_based_exit_minutes": int(
-                    os.getenv("TIME_BASED_EXIT_MINUTES", 15)
-                ),  # Time-based exit in minutes
-            },
-        }
-        with open(config_file, "w") as f:
-            yaml.dump(default_config, f, indent=4)
-    else:
-        bot = ScalpingBot(config_file=config_file)
-        bot.scalp_trade()
+    try:
+        bot = ScalpingBot(config_file=CONFIG_FILE_DEFAULT)
+        bot.run()
+    except FileNotFoundError as e:
+        logger.error(f"Initialization failed: {e}")
+        sys.exit(1)
+    except (ValueError, yaml.YAMLError) as e:
+        logger.error(f"Initialization failed due to invalid configuration: {e}")
+        sys.exit(1)
+    except (ccxt.AuthenticationError, ccxt.ExchangeError, ccxt.NetworkError) as e:
+         logger.error(f"Initialization failed due to exchange connection issue: {e}")
+         sys.exit(1)
+    except Exception as e:
+        logger.exception(f"An unexpected critical error occurred during initialization or runtime: {e}")
+        sys.exit(1)

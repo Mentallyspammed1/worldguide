@@ -1,99 +1,3 @@
-
-
-025-04-30 06:00:16,940 [INFO    ] (kbot4.5.py:265) Found ORDER_CHECK_DELAY_SECONDS: 2
-2025-04-30 06:00:16,940 [WARNING ] (kbot4.5.py:263) Using default for ORDER_FILL_TIMEOUT_SECONDS: 20
-2025-04-30 06:00:16,940 [INFO    ] (kbot4.5.py:265) Found MAX_FETCH_RETRIES: 5
-2025-04-30 06:00:16,941 [WARNING ] (kbot4.5.py:263) Using default for RETRY_DELAY_SECONDS: 3
-2025-04-30 06:00:16,941 [INFO    ] (kbot4.5.py:265) Found TRADE_ONLY_WITH_TREND: True
-2025-04-30 06:00:16,941 [WARNING ] (kbot4.5.py:263) Using default for JOURNAL_FILE_PATH: pyrmethus_trading_journal.csv
-2025-04-30 06:00:16,941 [WARNING ] (kbot4.5.py:263) Using default for ENABLE_JOURNALING: True
-2025-04-30 06:00:16,941 [WARNING ] (kbot4.5.py:248) TREND_EMA (12) <= SLOW_EMA (12). Consider increasing.
-2025-04-30 06:00:16,941 [WARNING ] (kbot4.5.py:250) TSL_ACT_MULT (1) < SL_MULT (1.5). TSL may activate early.
-2025-04-30 06:00:16,942 [INFO    ] (kbot4.5.py:322) Initializing Bybit exchange interface (V5)...
-2025-04-30 06:00:16,971 [INFO    ] (kbot4.5.py:341) Bybit V5 interface initialized successfully.
-2025-04-30 06:00:25,749 [INFO    ] (kbot4.5.py:369) Market info loaded: ID=FARTCOINUSDT, Precision(AmtDP=1, PriceDP=4), Limits(MinAmt=1)
- summoning Pyrmethus v2.4.1...
-Trading Symbol: FARTCOIN/USDT:USDT | Interval: 3m | Category: linear
-Risk: 1.000% | SL Mult: 1.5x | TP Mult: 3x
-TSL Act Mult: 1x | TSL %: 0.5%
-Trend Filter: ON | ATR Move Filter: 0.5x | ADX Filter: >2E+1
-Journaling: Enabled (pyrmethus_trading_journal.csv)
-Using V5 Position Stops (SLTrig:LastPrice, TSLTrig:LastPrice, PosIdx:0)
-2025-04-30 06:00:30,432 [INFO    ] (kbot4.5.py:1426)
---- Starting Cycle 1 ---
-2025-04-30 06:00:31,037 [INFO    ] (kbot4.5.py:539) # Weaving indicator patterns (EMA, Stoch, ATR, ADX)...
-/data/data/com.termux/files/home/worldguide/kbot4.5.py:548: FutureWarning: DataFrame.applymap has been deprecated. Use DataFrame.map instead.
-  df_calc = df_calc.applymap(lambda x: np.nan if isinstance(x, Decimal) and x.is_nan() else x)
-2025-04-30 06:00:31,155 [INFO    ] (kbot4.5.py:620) Indicator patterns woven successfully.
-2025-04-30 06:00:32,411 [WARNING ] (kbot4.5.py:456) Could not extract valid available balance for USDT. Defaulting to 0.
-2025-04-30 06:00:32,813 [ERROR   ] (kbot4.5.py:528) Failed to fetch/parse positions: [<class 'decimal.InvalidOperation'>]
-Traceback (most recent call last):
-  File "/data/data/com.termux/files/home/worldguide/kbot4.5.py", line 505, in get_current_position
-    'liq_price': liq_price if liq_price > 0 else Decimal('NaN'), # Use NaN if liq is 0
-                              ^^^^^^^^^^^^^
-decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
-2025-04-30 06:00:32,817 [ERROR   ] (kbot4.5.py:1457) Failed fetching positions. Trading logic skipped.
-╭───  Cycle 1 | FARTCOIN/USDT:USDT (3m) | 2025-04-30 11:00:00 UTC  ───╮
-│ Price: 1.1454 | Equity: 9.37 USDT                                   │
-│ ---                                                                 │
-│ Indicators: EMA(F/S/T): 1.1/1.1/1.1 | Stoch(K/D): 82.8/85.3  |      │
-│ ATR(5): 0.0040 | ADX(14): 17.0 [+DI:28.6 -DI:16.3]                  │
-│ ---                                                                 │
-│ Position: FLAT                                                      │
-│ ---                                                                 │
-│ Signal: Skipped: FAIL_POSITIONS                                     │
-╰─────────────────────────────────────────────────────────────────────╯
-2025-04-30 06:00:32,823 [INFO    ] (kbot4.5.py:1552) --- Cycle 1 Status: FAIL_POSITIONS (Duration: 2.39s) ---
-2025-04-30 06:00:47,832 [INFO    ] (kbot4.5.py:1426)
---- Starting Cycle 2 ---
-2025-04-30 06:00:48,370 [INFO    ] (kbot4.5.py:539) # Weaving indicator patterns (EMA, Stoch, ATR, ADX)...
-/data/data/com.termux/files/home/worldguide/kbot4.5.py:548: FutureWarning: DataFrame.applymap has been deprecated. Use DataFrame.map instead.
-  df_calc = df_calc.applymap(lambda x: np.nan if isinstance(x, Decimal) and x.is_nan() else x)
-2025-04-30 06:00:48,403 [INFO    ] (kbot4.5.py:620) Indicator patterns woven successfully.
-2025-04-30 06:00:48,821 [WARNING ] (kbot4.5.py:456) Could not extract valid available balance for USDT. Defaulting to 0.
-2025-04-30 06:00:49,217 [ERROR   ] (kbot4.5.py:528) Failed to fetch/parse positions: [<class 'decimal.InvalidOperation'>]
-Traceback (most recent call last):
-  File "/data/data/com.termux/files/home/worldguide/kbot4.5.py", line 505, in get_current_position
-    'liq_price': liq_price if liq_price > 0 else Decimal('NaN'), # Use NaN if liq is 0
-                              ^^^^^^^^^^^^^
-decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
-2025-04-30 06:00:49,221 [ERROR   ] (kbot4.5.py:1457) Failed fetching positions. Trading logic skipped.
-╭───  Cycle 2 | FARTCOIN/USDT:USDT (3m) | 2025-04-30 11:00:00 UTC  ───╮
-│ Price: 1.1431 | Equity: 9.37 USDT                                   │
-│ ---                                                                 │
-│ Indicators: EMA(F/S/T): 1.1/1.1/1.1 | Stoch(K/D): 76.3/83.1  |      │
-│ ATR(5): 0.0041 | ADX(14): 17.0 [+DI:28.2 -DI:16.0]                  │
-│ ---                                                                 │
-│ Position: FLAT                                                      │
-│ ---                                                                 │
-│ Signal: Skipped: FAIL_POSITIONS                                     │
-╰─────────────────────────────────────────────────────────────────────╯
-2025-04-30 06:00:49,225 [INFO    ] (kbot4.5.py:1552) --- Cycle 2 Status: FAIL_POSITIONS (Duration: 1.39s) ---
-2025-04-30 06:01:04,235 [INFO    ] (kbot4.5.py:1426)
---- Starting Cycle 3 ---
-2025-04-30 06:01:04,916 [INFO    ] (kbot4.5.py:539) # Weaving indicator patterns (EMA, Stoch, ATR, ADX)...
-/data/data/com.termux/files/home/worldguide/kbot4.5.py:548: FutureWarning: DataFrame.applymap has been deprecated. Use DataFrame.map instead.
-  df_calc = df_calc.applymap(lambda x: np.nan if isinstance(x, Decimal) and x.is_nan() else x)
-2025-04-30 06:01:04,952 [INFO    ] (kbot4.5.py:620) Indicator patterns woven successfully.
-2025-04-30 06:01:05,375 [WARNING ] (kbot4.5.py:456) Could not extract valid available balance for USDT. Defaulting to 0.
-2025-04-30 06:01:05,791 [ERROR   ] (kbot4.5.py:528) Failed to fetch/parse positions: [<class 'decimal.InvalidOperation'>]
-Traceback (most recent call last):
-  File "/data/data/com.termux/files/home/worldguide/kbot4.5.py", line 505, in get_current_position
-    'liq_price': liq_price if liq_price > 0 else Decimal('NaN'), # Use NaN if liq is 0
-                              ^^^^^^^^^^^^^
-decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
-2025-04-30 06:01:05,795 [ERROR   ] (kbot4.5.py:1457) Failed fetching positions. Trading logic skipped.
-╭───  Cycle 3 | FARTCOIN/USDT:USDT (3m) | 2025-04-30 11:00:00 UTC  ───╮
-│ Price: 1.1431 | Equity: 9.37 USDT                                   │
-│ ---                                                                 │
-│ Indicators: EMA(F/S/T): 1.1/1.1/1.1 | Stoch(K/D): 76.3/83.1  |      │
-│ ATR(5): 0.0041 | ADX(14): 17.0 [+DI:27.8 -DI:15.8]                  │
-│ ---                                                                 │
-│ Position: FLAT                                                      │
-│ ---                                                                 │
-│ Signal: Skipped: FAIL_POSITIONS                                     │
-╰─────────────────────────────────────────────────────────────────────╯
-2025-04-30 06:01:05,801 [INFO    ] (kbot4.5.py:1552) --- Cycle 3 Statu
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long, too-many-lines, logging-fstring-interpolation, too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods, invalid-name, unused-argument
@@ -123,6 +27,10 @@ Enhancements in v2.4.1:
 - Improved handling and display of potential NaN values.
 - Added trade exit journaling.
 - Minor logging and display refinements.
+- Corrected Decimal('NaN') comparison error in position fetching.
+- Replaced deprecated pandas `applymap` with `map`.
+- Simplified previous indicator value fetching.
+- Removed unused StatusDisplay method.
 
 Features:
 - Class-based architecture (Config, Exchange, Indicators, Signals, Orders, Display, Bot).
@@ -595,16 +503,22 @@ class ExchangeManager:
             tp_price = safe_decimal(pos_info.get('takeProfit', '0'))
             tsl_active_price = safe_decimal(pos_info.get('trailingStop', '0')) # Non-zero value often indicates active TSL trigger price
 
+            # CORRECTION: Check if liq_price is NaN before comparing with 0
+            liq_price_val = Decimal('NaN') # Default to NaN
+            if not liq_price.is_nan(): # Only compare if it's a valid number
+                if liq_price > 0:
+                    liq_price_val = liq_price
+
             position_details = {
                 'qty': qty if not qty.is_nan() else Decimal('0'), # Default 0 if NaN
-                'entry_price': entry_price if entry_price > 0 else Decimal('NaN'), # Use NaN if entry is 0
-                'liq_price': liq_price if liq_price > 0 else Decimal('NaN'), # Use NaN if liq is 0
+                'entry_price': entry_price if not entry_price.is_nan() and entry_price > 0 else Decimal('NaN'), # Use NaN if entry is 0 or NaN
+                'liq_price': liq_price_val, # Use the validated liq_price_val
                 'unrealized_pnl': unrealized_pnl if not unrealized_pnl.is_nan() else Decimal('0'),
                 'side': side,
                 'info': pos_info, # Store raw info
-                'stop_loss_price': sl_price if sl_price > 0 else None,
-                'take_profit_price': tp_price if tp_price > 0 else None,
-                'is_tsl_active': tsl_active_price > 0 # Check if trigger price is set
+                'stop_loss_price': sl_price if not sl_price.is_nan() and sl_price > 0 else None,
+                'take_profit_price': tp_price if not tp_price.is_nan() and tp_price > 0 else None,
+                'is_tsl_active': not tsl_active_price.is_nan() and tsl_active_price > 0 # Check if trigger price is set and valid
             }
 
             # Populate the correct side in the dictionary
@@ -641,7 +555,8 @@ class IndicatorCalculator:
             # Work with float copies for performance, convert back to Decimal at the end
             df_calc = df[req_cols].copy()
             # Convert Decimal NaNs back to np.nan for calculations if present
-            df_calc = df_calc.applymap(lambda x: np.nan if isinstance(x, Decimal) and x.is_nan() else x)
+            # CORRECTION: Use map instead of deprecated applymap
+            df_calc = df_calc.map(lambda x: np.nan if isinstance(x, Decimal) and x.is_nan() else x)
             df_calc.dropna(subset=["open", "high", "low", "close"], inplace=True) # Drop rows with NaN in OHLC
 
             if df_calc.empty: logger.error(f"{Fore.RED}DataFrame empty after NaN drop."); return None
@@ -693,9 +608,11 @@ class IndicatorCalculator:
 
             # Calculate Stochastic Cross Signals using latest Decimal values
             k_last=indicators_out['stoch_k']; d_last=indicators_out['stoch_d']
-            # Safe indexing for previous values
-            k_prev = get_latest_decimal(stoch_k_s.iloc[-2:-1], "stoch_k_prev") if len(stoch_k_s) >= 2 else Decimal('NaN')
-            d_prev = get_latest_decimal(stoch_d_s.iloc[-2:-1], "stoch_d_prev") if len(stoch_d_s) >= 2 else Decimal('NaN')
+            # CORRECTION: Simplify getting previous values
+            k_prev_val = stoch_k_s.iloc[-2] if len(stoch_k_s) >= 2 else None
+            d_prev_val = stoch_d_s.iloc[-2] if len(stoch_d_s) >= 2 else None
+            k_prev = safe_decimal(k_prev_val, Decimal('NaN'))
+            d_prev = safe_decimal(d_prev_val, Decimal('NaN'))
 
             stoch_kd_bullish = False; stoch_kd_bearish = False
             if not any(v.is_nan() for v in [k_last, d_last, k_prev, d_prev]):
@@ -980,7 +897,7 @@ class OrderManager:
         }
 
         action_desc = ""
-        if is_tsl and tsl_distance and tsl_distance > 0 and tsl_activation_price and tsl_activation_price > 0:
+        if is_tsl and tsl_distance and not tsl_distance.is_nan() and tsl_distance > 0 and tsl_activation_price and not tsl_activation_price.is_nan() and tsl_activation_price > 0:
             # --- Activate Trailing Stop ---
             # Note: 'trailingStop' in V5 API is the distance value (price difference)
             params['trailingStop'] = self.exchange_manager.format_price(tsl_distance) # Pass distance as formatted string
@@ -992,11 +909,11 @@ class OrderManager:
             self.protection_tracker[tracker_key] = "ACTIVE_TSL"
             logger.debug(f"TSL Params: trailingStop={params['trailingStop']}, activePrice={params['activePrice']}")
 
-        elif sl_price is not None or tp_price is not None:
+        elif (sl_price is not None and not sl_price.is_nan()) or (tp_price is not None and not tp_price.is_nan()):
             # --- Set Fixed SL/TP ---
             # Ensure SL/TP prices are valid Decimals > 0 before formatting
-            sl_str = self.exchange_manager.format_price(sl_price) if sl_price and sl_price > 0 else '0'
-            tp_str = self.exchange_manager.format_price(tp_price) if tp_price and tp_price > 0 else '0'
+            sl_str = self.exchange_manager.format_price(sl_price) if sl_price and not sl_price.is_nan() and sl_price > 0 else '0'
+            tp_str = self.exchange_manager.format_price(tp_price) if tp_price and not tp_price.is_nan() and tp_price > 0 else '0'
             params['stopLoss'] = sl_str
             params['takeProfit'] = tp_str
             # Ensure TSL is cleared if setting fixed stops
@@ -1305,89 +1222,16 @@ class StatusDisplay:
         if value is None or value.is_nan():
             return "[dim]N/A[/]"
         format_str = f"{{:,.{precision}f}}" if add_commas else f"{{:.{precision}f}}"
-        return format_str.format(value)
+        try:
+            return format_str.format(value)
+        except (ValueError, TypeError): # Handle potential formatting errors with unusual Decimal states
+            return "[dim]ERR[/]"
 
-    def print_status_panel(self, cycle: int, timestamp: Optional[pd.Timestamp], price: Optional[Decimal], indicators: Optional[Dict], positions: Optional[Dict], equity: Optional[Decimal], signals: Dict, protection_tracker: Dict):
-        """Prints the status panel to the console."""
-        panel_content = ""
-        title = f" Cycle {cycle} | {self.config.symbol} ({self.config.interval}) | {timestamp.strftime('%Y-%m-%d %H:%M:%S %Z') if timestamp else 'Timestamp N/A'} "
-
-        # --- Price & Equity ---
-        price_str = self._format_decimal(price, precision=self.market_info['precision_dp']['price'] if self.market_info else 4)
-        equity_str = self._format_decimal(equity, precision=2)
-        panel_content += f"[bold cyan]Price:[/] {price_str} | [bold cyan]Equity:[/] {equity_str} {self.config.symbol.split('/')[-1].split(':')[-1]}\n"
-        panel_content += "---\n"
-
-        # --- Indicators ---
-        if indicators:
-            ind_parts = []
-            def fmt_ind(key, prec=1): return self._format_decimal(indicators.get(key), precision=prec, add_commas=False)
-            ind_parts.append(f"EMA(F/S/T): {fmt_ind('fast_ema')}/{fmt_ind('slow_ema')}/{fmt_ind('trend_ema')}")
-            ind_parts.append(f"Stoch(K/D): {fmt_ind('stoch_k')}/{fmt_ind('stoch_d')} {'[bold green]BULL[/]' if indicators.get('stoch_kd_bullish') else ''}{'[bold red]BEAR[/]' if indicators.get('stoch_kd_bearish') else ''}")
-            ind_parts.append(f"ATR({indicators.get('atr_period', '?')}): {fmt_ind('atr', 4)}")
-            ind_parts.append(f"ADX({self.config.adx_period}): {fmt_ind('adx')} [+DI:{fmt_ind('pdi')} -DI:{fmt_ind('mdi')}]")
-            panel_content += "[bold cyan]Indicators:[/] " + " | ".join(ind_parts) + "\n"
-        else: panel_content += "[bold cyan]Indicators:[/] [dim]Calculating...[/]\n"
-        panel_content += "---\n"
-
-        # --- Positions ---
-        pos_str = "[bold green]FLAT[/]"
-        long_pos = positions.get('long') if positions else None
-        short_pos = positions.get('short') if positions else None
-        active_protection = None
-
-        position_data = None
-        position_side_str = ""
-        if long_pos and safe_decimal(long_pos.get('qty', '0')).copy_abs() >= self.config.position_qty_epsilon:
-             position_data = long_pos; position_side_str = "long"; pos_str_color = "green"
-        elif short_pos and safe_decimal(short_pos.get('qty', '0')).copy_abs() >= self.config.position_qty_epsilon:
-             position_data = short_pos; position_side_str = "short"; pos_str_color = "red"
-
-        if position_data:
-            qty = self._format_decimal(position_data.get('qty'), precision=self.market_info['precision_dp']['amount'] if self.market_info else 6, add_commas=False)
-            entry = self._format_decimal(position_data.get('entry_price'), precision=self.market_info['precision_dp']['price'] if self.market_info else 4)
-            pnl = self._format_decimal(position_data.get('unrealized_pnl'), precision=4)
-            sl = self._format_decimal(position_data.get('stop_loss_price'), precision=self.market_info['precision_dp']['price'] if self.market_info else 4)
-            tp = self._format_decimal(position_data.get('take_profit_price'), precision=self.market_info['precision_dp']['price'] if self.market_info else 4)
-            active_protection = protection_tracker.get(position_side_str)
-            prot_str = f"[magenta]{active_protection}[/]" if active_protection else "[dim]None[/]"
-            pos_str = (f"[bold {pos_str_color}]{position_side_str.upper()}:[/] Qty={qty} | Entry={entry} | "
-                       f"PnL={pnl} | Prot: {prot_str} (SL:{sl} TP:{tp})")
-
-        panel_content += f"[bold cyan]Position:[/] {pos_str}\n"
-        panel_content += "---\n"
-
-        # --- Signals ---
-        sig_reason = signals.get("reason", "[dim]No signal info[/]")
-        sig_style = "white"
-        if signals.get("long"): sig_style = "bold green"
-        elif signals.get("short"): sig_style = "bold red"
-        elif "Blocked" in sig_reason: sig_style = "yellow"
-        elif "Signal:" in sig_reason: sig_style = "white" # Explicit signal messages
-        else: sig_style = "dim" # Default/No signal
-
-        panel_content += f"[bold cyan]Signal:[/] [{sig_style}]{sig_reason}[/]"
-
-        # Print Panel
-        # Need market_info for the display instance
-        self.market_info = position_data.get('market_info') if position_data and 'market_info' in position_data else self.config # Quick hack
-        # TODO: Pass market_info properly to display instance during initialization
-
-        # Update: Pass market_info via __init__ or method call
-        # For now, we'll assume self.market_info exists via __init__
-        # Let's rely on TradingBot passing it during the call or Display having access via config/exchange_manager
-
-        # Re-check access: StatusDisplay has config, but not exchange_manager. Let's pass market_info directly.
-        # Refactor: Modify print_status_panel to accept market_info
-        self.print_status_panel_with_market_info(cycle, timestamp, price, indicators, positions, equity, signals, protection_tracker, self.config) # Assuming config holds basic info
-        # Better Refactor: StatusDisplay should be initialized with ExchangeManager or MarketInfo
+    # CORRECTION: Removed unused print_status_panel method.
+    # The correct method print_status_panel_with_market_info is used below.
 
     def print_status_panel_with_market_info(self, cycle: int, timestamp: Optional[pd.Timestamp], price: Optional[Decimal], indicators: Optional[Dict], positions: Optional[Dict], equity: Optional[Decimal], signals: Dict, protection_tracker: Dict, market_info: Optional[Dict]):
         """Prints the status panel to the console, explicitly using market_info."""
-        # NOTE: This is a refactored version assuming market_info is passed or accessible
-        # market_info is needed for precision formatting. Get it from ExchangeManager typically.
-        # This display class should ideally be initialized with access to it.
-
         # Get precision details safely from market_info
         price_dp = market_info.get('precision_dp', {}).get('price', 4) if market_info else 4
         amount_dp = market_info.get('precision_dp', {}).get('amount', 6) if market_info else 6
@@ -1398,7 +1242,8 @@ class StatusDisplay:
         # --- Price & Equity ---
         price_str = self._format_decimal(price, precision=price_dp)
         equity_str = self._format_decimal(equity, precision=2)
-        panel_content += f"[bold cyan]Price:[/] {price_str} | [bold cyan]Equity:[/] {equity_str} {self.config.symbol.split(':')[-1]}\n" # Use symbol settle currency
+        settle_curr = self.config.symbol.split(':')[-1] # Get settle currency from symbol
+        panel_content += f"[bold cyan]Price:[/] {price_str} | [bold cyan]Equity:[/] {equity_str} {settle_curr}\n"
         panel_content += "---\n"
 
         # --- Indicators ---
@@ -1526,7 +1371,7 @@ class TradingBot:
         df = self.exchange_manager.fetch_ohlcv()
         if df is None or df.empty:
             logger.error(f"{Fore.RED}Cycle Failed: Market data fetch failed."); cycle_status = "FAIL_FETCH_DATA"
-            end_time = time.time(); logger.info(f"{Fore.MAGENTA}--- Cycle {cycle_count} {cycle_status} ({end_time - start_time:.2f}s) ---"); return
+            end_time = time.time(); logger.info(f"{Fore.MAGENTA}--- Cycle {cycle_count} Status: {cycle_status} (Duration: {end_time - start_time:.2f}s) ---"); return
 
         try: # Extract Price & Timestamp
             last_candle = df.iloc[-1]; current_price = safe_decimal(last_candle["close"]); last_timestamp = df.index[-1]
@@ -1534,7 +1379,7 @@ class TradingBot:
             logger.debug(f"Latest Candle: {last_timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')}, Close={current_price.normalize()}")
         except (IndexError, KeyError, ValueError, InvalidOperation, TypeError) as e:
             logger.error(f"{Fore.RED}Cycle Failed: Price/Timestamp error: {e}", exc_info=False); cycle_status = "FAIL_PRICE_PROC"
-            end_time = time.time(); logger.info(f"{Fore.MAGENTA}--- Cycle {cycle_count} {cycle_status} ({end_time - start_time:.2f}s) ---"); return
+            end_time = time.time(); logger.info(f"{Fore.MAGENTA}--- Cycle {cycle_count} Status: {cycle_status} (Duration: {end_time - start_time:.2f}s) ---"); return
 
         # --- 2. Calculate Indicators ---
         indicators = self.indicator_calculator.calculate_indicators(df)
