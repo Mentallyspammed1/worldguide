@@ -1,0 +1,46 @@
+name: Code Enhancement Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      api-key:
+        description: 'Gemini API Key'
+        required: true
+        default: ${{ secrets.GEMINI_API_KEY }}
+      max-api-calls:
+        description: 'Maximum API calls per minute'
+        required: false
+        default: '59'
+
+jobs:
+  enhance-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # Setup Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      
+      # Install dependencies
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-auth google-auth-oauthlib google-auth-httplib2
+      
+      # Run the enhancement script
+      - name: Enhance code
+        env:
+          GEMINI_API_KEY: ${{ github.event.inputs.api-key }}
+          MAX_API_CALLS: ${{ github.event.inputs.max-api-calls }}
+        run: |
+          # Create service account credentials file
+          echo "$GEMINI_API_KEY" > ./service-account-key.json
+          
+          # Make the script executable
+          chmod +x ./process_files.py
+          
+          # Run the enhanced version of the script
+          ./process_files.py "$(pwd)"
