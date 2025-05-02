@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Script to set up the Pyrmethus Volumatic Trend + OB Bot directory and files
+# Script to set up the Pyrmethus Volumatic Trend + OB Bot directory and files (CCXT Async Version)
 
-PROJECT_DIR="pyrmethus_volumatic_bot"
+PROJECT_DIR="pyrmethus_volumatic_bot_ccxt"
 ENV_FILE=".env"
 CONFIG_FILE="config.json"
 STRATEGY_FILE="strategy.py"
@@ -17,7 +17,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}Setting up Pyrmethus Volumatic Bot in directory: ${YELLOW}${PROJECT_DIR}${NC}"
+echo -e "${BLUE}Setting up Pyrmethus Volumatic Bot (CCXT Async Version) in: ${YELLOW}${PROJECT_DIR}${NC}"
 
 # Create project directory
 mkdir -p "$PROJECT_DIR"
@@ -25,21 +25,21 @@ if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Could not create directory ${PROJECT_DIR}${NC}"
     exit 1
 fi
-cd "$PROJECT_DIR" || exit 1 # Change into the directory, exit if fails
+cd "$PROJECT_DIR" || exit 1
 
 echo -e "${GREEN}Directory created successfully.${NC}"
 
 # --- Create requirements.txt ---
 echo -e "${BLUE}Creating ${YELLOW}${REQ_FILE}${NC}..."
 cat << EOF > "$REQ_FILE"
-pybit
+ccxt>=4.1.60 # Use a recent version for stable Bybit V5 & asyncio support
 python-dotenv
 pandas
 pandas-ta
 numpy
 colorama
-websocket-client>=1.3.0 # Often needed by pybit WS
-requests # Good to have for potential health checks etc.
+# asyncio is built-in
+requests # Still useful for checks or other APIs
 EOF
 
 # --- Create .env file ---
@@ -58,25 +58,29 @@ EOF
 echo -e "${BLUE}Creating ${YELLOW}${CONFIG_FILE}${NC}..."
 cat << EOF > "$CONFIG_FILE"
 {
-  "symbol": "BTCUSDT",
-  "interval": "5",
-  "mode": "Live",
-  "log_level": "INFO",
+  "exchange": "bybit", // Specify exchange for CCXT
+  "symbol": "BTC/USDT", // CCXT standard symbol format
+  "timeframe": "5m", // CCXT standard timeframe format (e.g., 1m, 5m, 1h, 1d)
+  "account_type": "contract", // 'unified', 'contract', or 'spot' (adjust based on your Bybit setup & CCXT needs)
+  "mode": "Live", // "Live" or "Paper"
+  "log_level": "INFO", // DEBUG, INFO, WARNING, ERROR
 
   "order": {
-    "type": "Market",
-    "risk_per_trade_percent": 1.0,
-    "leverage": 5,
-    "tp_ratio": 2.0
+    "type": "Market", // "Market" or "Limit" (Limit orders require careful price handling)
+    "risk_per_trade_percent": 1.0, // e.g., 1.0 means risk 1% of equity per trade
+    "leverage": 5, // Desired leverage (Ensure it's set on Bybit manually or via API if supported)
+    "tp_ratio": 2.0, // Take Profit Risk:Reward ratio (e.g., 2.0 means TP is 2x SL distance)
+    "sl_trigger_type": "LastPrice", // Bybit trigger: LastPrice, IndexPrice, MarkPrice
+    "tp_trigger_type": "LastPrice"  // Bybit trigger: LastPrice, IndexPrice, MarkPrice
   },
 
   "strategy": {
-    "class": "VolumaticOBStrategy",
+    "class": "VolumaticOBStrategy", // Matches class name in strategy.py
     "params": {
       "length": 40,
       "vol_atr_period": 200,
       "vol_percentile_len": 1000,
-      "vol_percentile": 100,
+      "vol_percentile": 95, // Example: Use 95th percentile
       "ob_source": "Wicks",
       "pivot_left_h": 10,
       "pivot_right_h": 10,
@@ -85,20 +89,20 @@ cat << EOF > "$CONFIG_FILE"
       "max_boxes": 5
     },
     "stop_loss": {
-      "method": "ATR",
-      "atr_multiplier": 2.0
+      "method": "ATR", // "ATR" or "OB" (Use Order Block boundary)
+      "atr_multiplier": 1.5 // ATR multiplier for stop loss
     }
   },
 
   "data": {
-      "fetch_limit": 750,
-      "max_df_len": 2000
+      "fetch_limit": 750, // Candles for initial fetch
+      "max_df_len": 2000 // Max candles to keep in memory
   },
 
-  "websocket": {
-      "ping_interval": 20
-  },
-  "position_check_interval": 10
+  "checks": {
+      "position_check_interval": 30, // How often to fetch position via REST (seconds)
+      "health_check_interval": 60 // How often to run general health checks (seconds)
+  }
 }
 EOF
 
@@ -107,7 +111,7 @@ echo -e "${BLUE}Creating ${YELLOW}${STRATEGY_FILE}${NC}..."
 cat << 'EOF' > "$STRATEGY_FILE"
 # -*- coding: utf-8 -*-
 """
-Strategy Definition: Enhanced Volumatic Trend + OB
+Strategy Definition: Enhanced Volumatic Trend + OB (for CCXT Async Bot)
 """
 import numpy as np
 import pandas as pd
@@ -115,9 +119,10 @@ import pandas_ta as ta
 from colorama import Fore, Style
 from typing import List, Dict, Optional, Any, TypedDict, Tuple
 import logging
-from decimal import Decimal, ROUND_DOWN, ROUND_UP
+from decimal import Decimal, ROUND_DOWN, ROUND_UP, getcontext
 
 log = logging.getLogger(__name__) # Gets logger configured in main.py
+getcontext().prec = 18 # Set decimal precision
 
 # --- Type Definitions (consistent with main.py) ---
 class OrderBlock(TypedDict):
@@ -146,16 +151,16 @@ class VolumaticOBStrategy:
     """
     Encapsulates the logic from the 'Enhanced Volumatic Trend + OB' Pine Script.
     Calculates indicators and generates trading signals.
-    Accepts market_info for precision handling.
+    Accepts CCXT market structure for precision handling.
     """
-    def __init__(self, market_info: Dict[str, Any], **params):
+    def __init__(self, market: Dict[str, Any], **params):
         """
         Initializes the strategy.
         Args:
-            market_info: Dictionary containing instrument details from Bybit.
+            market: CCXT market structure dictionary.
             **params: Strategy parameters loaded from config.json.
         """
-        self.market_info = market_info
+        self.market = market
         self._parse_params(params)
         self._validate_params()
 
@@ -181,31 +186,34 @@ class VolumaticOBStrategy:
             self.pivot_left_l + self.pivot_right_l + 1
         )
 
-        # Get precision from market_info
-        self.tick_size = Decimal(self.market_info['priceFilter']['tickSize'])
-        self.qty_step = Decimal(self.market_info['lotSizeFilter']['qtyStep'])
-        self.price_precision = self._get_decimal_places(self.tick_size)
-        self.qty_precision = self._get_decimal_places(self.qty_step)
+        # Get precision from CCXT market structure
+        self.price_precision = int(market.get('precision', {}).get('price', 8)) # Default 8 if not found
+        self.amount_precision = int(market.get('precision', {}).get('amount', 8)) # Default 8
+        self.price_tick = Decimal(str(market.get('precision', {}).get('price', '0.00000001')))
+        self.amount_tick = Decimal(str(market.get('precision', {}).get('amount', '0.00000001')))
+
 
         log.info(f"{Fore.MAGENTA}Initializing VolumaticOB Strategy Engine...{Style.RESET_ALL}")
+        log.info(f"Symbol: {market['symbol']}")
         log.info(f"Params: TrendLen={self.length}, Pivots={self.pivot_left_h}/{self.pivot_right_h}, "
                  f"MaxBoxes={self.max_boxes}, OB Source={self.ob_source}")
         log.info(f"Minimum data points required: {self.min_data_len}")
-        log.debug(f"Tick Size: {self.tick_size}, Qty Step: {self.qty_step}")
-        log.debug(f"Price Precision: {self.price_precision}, Qty Precision: {self.qty_precision}")
+        log.debug(f"Price Precision: {self.price_precision}, Amount Precision: {self.amount_precision}")
+        log.debug(f"Price Tick: {self.price_tick}, Amount Tick: {self.amount_tick}")
+
 
     def _parse_params(self, params: Dict):
         """Load parameters from the config dict."""
         self.length = int(params.get('length', 40))
         self.vol_atr_period = int(params.get('vol_atr_period', 200))
         self.vol_percentile_len = int(params.get('vol_percentile_len', 1000))
-        self.vol_percentile = int(params.get('vol_percentile', 100))
+        self.vol_percentile = int(params.get('vol_percentile', 95))
         self.ob_source = str(params.get('ob_source', "Wicks"))
-        self.pivot_left_h = int(params.get('pivot_left_h', 25))
-        self.pivot_right_h = int(params.get('pivot_right_h', 25))
-        self.pivot_left_l = int(params.get('pivot_left_l', 25))
-        self.pivot_right_l = int(params.get('pivot_right_l', 25))
-        self.max_boxes = int(params.get('max_boxes', 10))
+        self.pivot_left_h = int(params.get('pivot_left_h', 10))
+        self.pivot_right_h = int(params.get('pivot_right_h', 10))
+        self.pivot_left_l = int(params.get('pivot_left_l', 10))
+        self.pivot_right_l = int(params.get('pivot_right_l', 10))
+        self.max_boxes = int(params.get('max_boxes', 5))
 
     def _validate_params(self):
         """Basic validation of strategy parameters."""
@@ -220,22 +228,28 @@ class VolumaticOBStrategy:
         if not 0 < self.vol_percentile <= 100:
              raise ValueError("vol_percentile must be between 1 and 100.")
 
-    def _get_decimal_places(self, decimal_val: Decimal) -> int:
-        """Calculates decimal places from a Decimal object."""
-        return abs(decimal_val.as_tuple().exponent) if decimal_val.as_tuple().exponent < 0 else 0
+    # --- Precision Handling using CCXT market data ---
+    def format_price(self, price: float) -> str:
+        """Formats price according to market precision."""
+        return format(Decimal(str(price)), f'.{self.price_precision}f')
+
+    def format_amount(self, amount: float) -> str:
+        """Formats amount according to market precision."""
+        return format(Decimal(str(amount)), f'.{self.amount_precision}f')
 
     def round_price(self, price: float) -> float:
-        """Rounds price according to tickSize (down for sell SL/TP, up for buy SL/TP if needed, default round half up)."""
-        # Simple rounding based on tick size decimal places
-        # For SL/TP, might need ROUND_DOWN or ROUND_UP depending on side
-        return float(Decimal(str(price)).quantize(self.tick_size)) # Default rounding mode
+        """Rounds price based on the tick size."""
+        price_decimal = Decimal(str(price))
+        rounded = (price_decimal / self.price_tick).quantize(Decimal('1'), rounding=ROUND_UP if price_decimal > 0 else ROUND_DOWN) * self.price_tick
+        return float(rounded)
 
-    def round_qty(self, qty: float) -> float:
-        """Rounds quantity DOWN according to qtyStep."""
-        # Use Decimal for precision and round down
-        qty_decimal = Decimal(str(qty))
-        rounded_qty = (qty_decimal // self.qty_step) * self.qty_step
-        return float(rounded_qty)
+    def round_amount(self, amount: float) -> float:
+        """Rounds amount DOWN based on the amount tick size (qtyStep)."""
+        amount_decimal = Decimal(str(amount))
+        rounded = (amount_decimal / self.amount_tick).quantize(Decimal('1'), rounding=ROUND_DOWN) * self.amount_tick
+        return float(rounded)
+    # --- End Precision Handling ---
+
 
     def _ema_swma(self, series: pd.Series, length: int) -> pd.Series:
         """Helper for smoothed EMA (weighted avg + EMA)."""
@@ -261,52 +275,45 @@ class VolumaticOBStrategy:
         source_series = df[source_col]
         pivots = pd.Series(np.nan, index=df.index)
 
-        # Iterate through possible pivot points (excluding boundaries where lookback/forward is not possible)
         for i in range(left, len(df) - right):
             pivot_val = source_series.iloc[i]
             if pd.isna(pivot_val): continue
 
             is_pivot = True
-            # Check left side (indices i-left to i-1)
             for j in range(1, left + 1):
                 left_val = source_series.iloc[i - j]
-                if pd.isna(left_val): continue # Skip comparison if neighbor is NaN (can happen with sparse data)
-                # Strict inequality on the left side
+                if pd.isna(left_val): continue
                 if (is_high and left_val > pivot_val) or \
                    (not is_high and left_val < pivot_val):
                     is_pivot = False; break
             if not is_pivot: continue
 
-            # Check right side (indices i+1 to i+right)
             for j in range(1, right + 1):
                 right_val = source_series.iloc[i + j]
                 if pd.isna(right_val): continue
-                # Pine Script logic: >= for high pivots, <= for low pivots on right side
                 if (is_high and right_val >= pivot_val) or \
                    (not is_high and right_val <= pivot_val):
                     is_pivot = False; break
 
             if is_pivot:
-                pivots.iloc[i] = pivot_val # Store the pivot value at the pivot index `i`
+                pivots.iloc[i] = pivot_val
         return pivots
 
     def update(self, df_input: pd.DataFrame) -> AnalysisResults:
         """
         Calculates indicators and generates signals based on the input DataFrame.
         Args:
-            df_input: pandas DataFrame with ['open', 'high', 'low', 'close', 'volume']
-                      index must be DatetimeIndex, sorted chronologically.
+            df_input: pandas DataFrame with OHLCV columns and DatetimeIndex.
         Returns:
             AnalysisResults dictionary.
         """
         required_len = self.min_data_len
         if df_input.empty or len(df_input) < required_len:
             log.warning(f"Not enough data ({len(df_input)}/{required_len}) for analysis.")
-            # Return default/previous state carefully
             return AnalysisResults(
-                dataframe=df_input, last_signal="HOLD", active_bull_boxes=self.bull_boxes, # Return existing boxes
+                dataframe=df_input, last_signal="HOLD", active_bull_boxes=self.bull_boxes,
                 active_bear_boxes=self.bear_boxes, last_close=np.nan, current_trend=self.current_trend,
-                trend_changed=False, last_atr=None # Need last ATR from previous run if possible? Complex. Setting None is safer.
+                trend_changed=False, last_atr=None
             )
 
         df = df_input.copy()
@@ -317,260 +324,157 @@ class VolumaticOBStrategy:
         df['ema1'] = self._ema_swma(df['close'], length=self.length)
         df['ema2'] = ta.ema(df['close'], length=self.length, fillna=np.nan)
 
-        # Determine trend, ffill to handle initial NaNs
         df['trend_up'] = np.where(df['ema1'] < df['ema2'], True,
                          np.where(df['ema1'] >= df['ema2'], False, np.nan))
         df['trend_up'] = df['trend_up'].ffill()
 
-        # Detect trend change, ignoring NaNs and initial state
         df['trend_changed'] = (df['trend_up'] != df['trend_up'].shift(1)) & df['trend_up'].notna() & df['trend_up'].shift(1).notna()
 
-        # --- Update Levels on Trend Change ---
         last_row = df.iloc[-1]
         current_trend_up = last_row['trend_up']
         trend_just_changed = last_row['trend_changed']
         last_atr_value = last_row['atr']
 
-        # Update persistent trend state if it's valid
         if pd.notna(current_trend_up):
-            if self.current_trend is None: # First valid trend detection
+            if self.current_trend is None or (trend_just_changed and current_trend_up != self.current_trend):
+                is_initial_trend = self.current_trend is None
                 self.current_trend = current_trend_up
-                log.info(f"Initial Trend detected: {'UP' if self.current_trend else 'DOWN'}")
-                # Trigger level calculation on first detection too
-                trend_just_changed = True # Force level update
+                log.info(f"{Fore.MAGENTA}{'Initial Trend Detected' if is_initial_trend else 'Trend Changed'}! New Trend: {'UP' if current_trend_up else 'DOWN'}. Updating levels...{Style.RESET_ALL}")
 
-            elif trend_just_changed and current_trend_up != self.current_trend:
-                self.current_trend = current_trend_up # Update trend state
-                log.info(f"{Fore.MAGENTA}Trend Changed! New Trend: {'UP' if current_trend_up else 'DOWN'}. Updating levels...{Style.RESET_ALL}")
-
-                # Find the row where the trend actually changed to get levels
-                # Need to handle case where trend_changed is True but current_trend_up hasn't updated yet? Check df.iloc[-2] trend?
-                # Simpler: use the latest values if trend just changed
                 current_ema1 = last_row['ema1']
                 current_atr = last_row['atr']
-
-                if pd.notna(current_ema1) and pd.notna(current_atr) and current_atr > 1e-9: # Ensure ATR is positive
+                if pd.notna(current_ema1) and pd.notna(current_atr) and current_atr > 1e-9:
                     self.upper = current_ema1 + current_atr * 3
                     self.lower = current_ema1 - current_atr * 3
                     self.lower_vol = self.lower + current_atr * 4
                     self.upper_vol = self.upper - current_atr * 4
-                    # Prevent levels from crossing due to large ATR
                     if self.lower_vol < self.lower: self.lower_vol = self.lower
                     if self.upper_vol > self.upper: self.upper_vol = self.upper
-
                     self.step_up = (self.lower_vol - self.lower) / 100 if self.lower_vol > self.lower else 0
                     self.step_dn = (self.upper - self.upper_vol) / 100 if self.upper > self.upper_vol else 0
-
                     log.info(f"Levels Updated @ {df.index[-1]}: U={self.upper:.{self.price_precision}f}, L={self.lower:.{self.price_precision}f}")
-
                 else:
-                     log.warning(f"Could not update levels at {df.index[-1]} due to NaN/zero values (EMA1={current_ema1}, ATR={current_atr}). Levels reset.")
+                     log.warning(f"Could not update levels @ {df.index[-1]} due to NaN/zero values. Levels reset.")
                      self.upper, self.lower, self.lower_vol, self.upper_vol, self.step_up, self.step_dn = [None] * 6
-            # else: Trend did not change, levels remain the same
 
         # --- Volume Normalization ---
-        roll_window = min(self.vol_percentile_len, len(df)) # Ensure window doesn't exceed data length
-        min_p = max(1, min(roll_window // 2, 50)) # Require reasonable number of periods
-        # Use np.nanpercentile for robustness against NaNs within the window
-        df['vol_percentile_val'] = df['volume'].rolling(window=roll_window,min_periods=min_p).apply(
-            lambda x: np.nanpercentile(x, self.vol_percentile) if np.any(~np.isnan(x) & (x > 0)) else np.nan,
-            raw=True
-        )
+        roll_window = min(self.vol_percentile_len, len(df))
+        min_p = max(1, min(roll_window // 2, 50))
+        df['vol_percentile_val'] = df['volume'].rolling(window=roll_window, min_periods=min_p).apply(
+            lambda x: np.nanpercentile(x, self.vol_percentile) if np.any(~np.isnan(x) & (x > 0)) else np.nan, raw=True)
 
         df['vol_norm'] = np.where(
-            (df['vol_percentile_val'].notna()) & (df['vol_percentile_val'] > 1e-9), # Avoid division by near-zero
-            (df['volume'] / df['vol_percentile_val'] * 100),
-            0 # Assign 0 if percentile is NaN or (near) zero
-        ).fillna(0).astype(float)
+            (df['vol_percentile_val'].notna()) & (df['vol_percentile_val'] > 1e-9),
+            (df['volume'] / df['vol_percentile_val'] * 100), 0).fillna(0).astype(float)
 
         # --- Pivot Order Block Calculations ---
         df['ph'] = self._find_pivots(df, self.pivot_left_h, self.pivot_right_h, is_high=True)
         df['pl'] = self._find_pivots(df, self.pivot_left_l, self.pivot_right_l, is_high=False)
 
         # --- Create and Manage Order Blocks ---
-        # Iterate only through bars where new pivots *could* have been confirmed
-        # A pivot at index `i` is confirmed `right` bars later.
-        # We only need to check bars from `max(right_h, right_l)` ago up to now.
-        check_start_idx = max(0, len(df) - max(self.pivot_right_h, self.pivot_right_l) - 5) # Add buffer
+        check_start_idx = max(0, len(df) - max(self.pivot_right_h, self.pivot_right_l) - 5)
         new_boxes_created_count = 0
-
-        # Create integer index mapping for box IDs
         df['int_index'] = range(len(df))
 
         for i in range(check_start_idx, len(df)):
-            # Use integer index for list management and box ID
             current_int_index = i
-
-            # Bearish Box from Pivot High confirmed at bar `i`
-            # The actual pivot occurred at `i - self.pivot_right_h`
+            # Bearish Box from Pivot High
             pivot_occur_int_idx = current_int_index - self.pivot_right_h
-            if pivot_occur_int_idx < 0: continue # Ensure pivot index is valid
-
-            # Check if a PH value exists at the pivot *occurrence* index
-            if pd.notna(df['ph'].iloc[pivot_occur_int_idx]):
-                # Check if a box for this pivot *occurrence* index already exists
+            if pivot_occur_int_idx >= 0 and pd.notna(df['ph'].iloc[pivot_occur_int_idx]):
                 if not any(b['id'] == pivot_occur_int_idx for b in self.bear_boxes):
-                    ob_candle = df.iloc[pivot_occur_int_idx] # Candle where OB is defined
-                    top_price, bottom_price = np.nan, np.nan
-
-                    if self.ob_source == "Wicks":
-                        top_price = ob_candle['high']
-                        bottom_price = ob_candle['close'] # Common definition uses close
-                    else: # Bodys
-                        top_price = ob_candle['close']
-                        bottom_price = ob_candle['open']
-
-                    # Ensure valid prices and top > bottom
+                    ob_candle = df.iloc[pivot_occur_int_idx]
+                    top_price = ob_candle['high'] if self.ob_source == "Wicks" else ob_candle['close']
+                    bottom_price = ob_candle['close'] if self.ob_source == "Wicks" else ob_candle['open']
                     if pd.notna(top_price) and pd.notna(bottom_price):
-                        if bottom_price > top_price: top_price, bottom_price = bottom_price, top_price # Swap if needed
-
-                        # Check for zero-range OB (can happen with dojis etc.)
-                        if abs(top_price - bottom_price) > 1e-9 * self.tick_size.to_eng_string(): # Compare against tick size order of magnitude
-                            new_box = OrderBlock(
-                                id=pivot_occur_int_idx, # Use integer index as ID
-                                type='bear', left_idx=pivot_occur_int_idx,
-                                right_idx=len(df)-1, # Extend to current bar initially
-                                top=top_price, bottom=bottom_price, active=True, closed_idx=None
-                            )
+                        if bottom_price > top_price: top_price, bottom_price = bottom_price, top_price
+                        if Decimal(str(abs(top_price - bottom_price))) > self.price_tick / 10: # Avoid zero-range relative to tick size
+                            new_box = OrderBlock(id=pivot_occur_int_idx, type='bear', left_idx=pivot_occur_int_idx,
+                                                 right_idx=len(df)-1, top=top_price, bottom=bottom_price, active=True, closed_idx=None)
                             self.bear_boxes.append(new_box)
                             new_boxes_created_count += 1
                             log.info(f"{Fore.RED}New Bear OB {pivot_occur_int_idx} @ {df.index[pivot_occur_int_idx]}: T={top_price:.{self.price_precision}f}, B={bottom_price:.{self.price_precision}f}{Style.RESET_ALL}")
 
-            # Bullish Box from Pivot Low confirmed at bar `i`
-            # The actual pivot occurred at `i - self.pivot_right_l`
+            # Bullish Box from Pivot Low
             pivot_occur_int_idx = current_int_index - self.pivot_right_l
-            if pivot_occur_int_idx < 0: continue
-
-            if pd.notna(df['pl'].iloc[pivot_occur_int_idx]):
-                if not any(b['id'] == pivot_occur_int_idx for b in self.bull_boxes):
+            if pivot_occur_int_idx >= 0 and pd.notna(df['pl'].iloc[pivot_occur_int_idx]):
+                 if not any(b['id'] == pivot_occur_int_idx for b in self.bull_boxes):
                     ob_candle = df.iloc[pivot_occur_int_idx]
-                    top_price, bottom_price = np.nan, np.nan
-
-                    if self.ob_source == "Wicks":
-                         top_price = ob_candle['open'] # Common definition uses open
-                         bottom_price = ob_candle['low']
-                    else: # Bodys
-                         top_price = ob_candle['open']
-                         bottom_price = ob_candle['close']
-
+                    top_price = ob_candle['open'] if self.ob_source == "Wicks" else ob_candle['open']
+                    bottom_price = ob_candle['low'] if self.ob_source == "Wicks" else ob_candle['close']
                     if pd.notna(top_price) and pd.notna(bottom_price):
                         if bottom_price > top_price: top_price, bottom_price = bottom_price, top_price
-
-                        if abs(top_price - bottom_price) > 1e-9 * self.tick_size.to_eng_string():
-                            new_box = OrderBlock(
-                                id=pivot_occur_int_idx, type='bull', left_idx=pivot_occur_int_idx,
-                                right_idx=len(df)-1,
-                                top=top_price, bottom=bottom_price, active=True, closed_idx=None
-                            )
+                        if Decimal(str(abs(top_price - bottom_price))) > self.price_tick / 10:
+                            new_box = OrderBlock(id=pivot_occur_int_idx, type='bull', left_idx=pivot_occur_int_idx,
+                                                 right_idx=len(df)-1, top=top_price, bottom=bottom_price, active=True, closed_idx=None)
                             self.bull_boxes.append(new_box)
                             new_boxes_created_count += 1
                             log.info(f"{Fore.GREEN}New Bull OB {pivot_occur_int_idx} @ {df.index[pivot_occur_int_idx]}: T={top_price:.{self.price_precision}f}, B={bottom_price:.{self.price_precision}f}{Style.RESET_ALL}")
 
-        if new_boxes_created_count > 0:
-             log.debug(f"Created {new_boxes_created_count} new order blocks.")
-
-        # --- Manage existing boxes (close or extend) ---
+        # Manage existing boxes
         current_close = last_row['close']
-        current_bar_int_idx = len(df) - 1 # Use simple integer index for management
-
-        if pd.notna(current_close): # Only manage boxes if close price is valid
-            closed_bull_count = 0
-            closed_bear_count = 0
+        current_bar_int_idx = len(df) - 1
+        if pd.notna(current_close):
+            closed_bull_count, closed_bear_count = 0, 0
             for box in self.bull_boxes:
                 if box['active']:
-                    if current_close < box['bottom']: # Price closed below bull box
-                        box['active'] = False
-                        box['closed_idx'] = current_bar_int_idx
-                        closed_bull_count += 1
-                    else:
-                        box['right_idx'] = current_bar_int_idx # Extend active box
-
+                    if current_close < box['bottom']:
+                        box['active'] = False; box['closed_idx'] = current_bar_int_idx; closed_bull_count += 1
+                    else: box['right_idx'] = current_bar_int_idx
             for box in self.bear_boxes:
                 if box['active']:
-                    if current_close > box['top']: # Price closed above bear box
-                        box['active'] = False
-                        box['closed_idx'] = current_bar_int_idx
-                        closed_bear_count +=1
-                    else:
-                        box['right_idx'] = current_bar_int_idx
+                    if current_close > box['top']:
+                        box['active'] = False; box['closed_idx'] = current_bar_int_idx; closed_bear_count += 1
+                    else: box['right_idx'] = current_bar_int_idx
+            if closed_bull_count: log.info(f"{Fore.YELLOW}Closed {closed_bull_count} Bull OBs.{Style.RESET_ALL}")
+            if closed_bear_count: log.info(f"{Fore.YELLOW}Closed {closed_bear_count} Bear OBs.{Style.RESET_ALL}")
 
-            if closed_bull_count > 0: log.info(f"{Fore.YELLOW}Closed {closed_bull_count} Bull OBs due to price violation.{Style.RESET_ALL}")
-            if closed_bear_count > 0: log.info(f"{Fore.YELLOW}Closed {closed_bear_count} Bear OBs due to price violation.{Style.RESET_ALL}")
-
-        # --- Prune Order Blocks ---
-        # Keep only the 'max_boxes' most recent *active* boxes of each type
-        # Also keep some recent inactive ones for potential debugging/display
+        # Prune Order Blocks
         active_bull = sorted([b for b in self.bull_boxes if b['active']], key=lambda x: x['id'], reverse=True)
         inactive_bull = sorted([b for b in self.bull_boxes if not b['active']], key=lambda x: x['id'], reverse=True)
-        initial_bull_len = len(self.bull_boxes)
         self.bull_boxes = inactive_bull[:self.max_boxes * 2] + active_bull[:self.max_boxes]
-        if len(self.bull_boxes) < initial_bull_len: log.debug(f"Pruned {initial_bull_len - len(self.bull_boxes)} Bull OBs.")
-
-
         active_bear = sorted([b for b in self.bear_boxes if b['active']], key=lambda x: x['id'], reverse=True)
         inactive_bear = sorted([b for b in self.bear_boxes if not b['active']], key=lambda x: x['id'], reverse=True)
-        initial_bear_len = len(self.bear_boxes)
         self.bear_boxes = inactive_bear[:self.max_boxes * 2] + active_bear[:self.max_boxes]
-        if len(self.bear_boxes) < initial_bear_len: log.debug(f"Pruned {initial_bear_len - len(self.bear_boxes)} Bear OBs.")
-
 
         # --- Signal Generation ---
         signal = "HOLD"
         active_bull_boxes = [b for b in self.bull_boxes if b['active']]
         active_bear_boxes = [b for b in self.bear_boxes if b['active']]
 
-        # Check conditions only if trend and close price are valid
         if self.current_trend is not None and pd.notna(current_close):
-            # Check for Trend Change Exit first
             if trend_just_changed:
-                # Check internal state to see if we were in a position that needs exiting
-                if not self.current_trend and self.last_signal_state == "BUY": # Trend flipped down while intended long
-                    signal = "EXIT_LONG"
-                    log.warning(f"{Fore.YELLOW}{Style.BRIGHT}*** EXIT LONG Signal (Trend Flip to DOWN) at {current_close:.{self.price_precision}f} ***{Style.RESET_ALL}")
-                elif self.current_trend and self.last_signal_state == "SELL": # Trend flipped up while intended short
-                    signal = "EXIT_SHORT"
-                    log.warning(f"{Fore.YELLOW}{Style.BRIGHT}*** EXIT SHORT Signal (Trend Flip to UP) at {current_close:.{self.price_precision}f} ***{Style.RESET_ALL}")
+                if not self.current_trend and self.last_signal_state == "BUY": signal = "EXIT_LONG"
+                elif self.current_trend and self.last_signal_state == "SELL": signal = "EXIT_SHORT"
 
-            # Check for Entries only if not exiting and not already in desired state
             if signal == "HOLD":
-                if self.current_trend: # Trend is UP, look for Long Entries
-                    if self.last_signal_state != "BUY": # Only enter if not already intending long
+                if self.current_trend: # Trend UP -> Look for Long
+                    if self.last_signal_state != "BUY":
                         for box in active_bull_boxes:
-                            # Check if close touches or is within the box range
-                            if box['bottom'] <= current_close <= box['top']:
-                                signal = "BUY"
-                                log.info(f"{Fore.GREEN}{Style.BRIGHT}*** BUY Signal (Trend UP + Price in Bull OB {box['id']}) at {current_close:.{self.price_precision}f} ***{Style.RESET_ALL}")
-                                break # Take first signal
-
-                elif not self.current_trend: # Trend is DOWN, look for Short Entries
-                    if self.last_signal_state != "SELL": # Only enter if not already intending short
+                            if box['bottom'] <= current_close <= box['top']: signal = "BUY"; break
+                elif not self.current_trend: # Trend DOWN -> Look for Short
+                    if self.last_signal_state != "SELL":
                         for box in active_bear_boxes:
-                            if box['bottom'] <= current_close <= box['top']:
-                                signal = "SELL"
-                                log.info(f"{Fore.RED}{Style.BRIGHT}*** SELL Signal (Trend DOWN + Price in Bear OB {box['id']}) at {current_close:.{self.price_precision}f} ***{Style.RESET_ALL}")
-                                break
+                            if box['bottom'] <= current_close <= box['top']: signal = "SELL"; break
 
-        # Update internal state *only* if signal implies a state change
-        if signal in ["BUY", "SELL"]:
-            self.last_signal_state = signal
-        elif signal in ["EXIT_LONG", "EXIT_SHORT"]:
-            self.last_signal_state = "HOLD" # After exit, we are neutral until new entry
+        # Update internal state
+        if signal in ["BUY", "SELL"]: self.last_signal_state = signal
+        elif signal in ["EXIT_LONG", "EXIT_SHORT"]: self.last_signal_state = "HOLD"
 
-        log.debug(f"Signal Generated: {signal} (Internal State: {self.last_signal_state})")
+        # Log signal if it's not just HOLD
+        if signal != "HOLD":
+             color = Fore.YELLOW if "EXIT" in signal else Fore.GREEN if signal == "BUY" else Fore.RED
+             log.warning(f"{color}{Style.BRIGHT}*** {signal} Signal generated at {current_close:.{self.price_precision}f} (Trend: {'UP' if self.current_trend else 'DOWN'}) ***{Style.RESET_ALL}")
+        else:
+            log.debug(f"Signal: HOLD (Internal State: {self.last_signal_state})")
 
-        # Drop the temporary integer index column before returning
-        df.drop(columns=['int_index'], inplace=True, errors='ignore')
+
+        df.drop(columns=['int_index'], inplace=True, errors='ignore') # Cleanup index column
 
         return AnalysisResults(
-            dataframe=df, # Return the DataFrame with calculated indicators
-            last_signal=signal, # The action signal for this candle
-            active_bull_boxes=active_bull_boxes,
-            active_bear_boxes=active_bear_boxes,
-            last_close=current_close,
-            current_trend=self.current_trend,
-            trend_changed=trend_just_changed,
-            last_atr=last_atr_value if pd.notna(last_atr_value) else None
-        )
+            dataframe=df, last_signal=signal, active_bull_boxes=active_bull_boxes,
+            active_bear_boxes=active_bear_boxes, last_close=current_close,
+            current_trend=self.current_trend, trend_changed=trend_just_changed,
+            last_atr=last_atr_value if pd.notna(last_atr_value) else None)
 EOF
 
 # --- Create main.py ---
@@ -578,7 +482,7 @@ echo -e "${BLUE}Creating ${YELLOW}${MAIN_FILE}${NC}..."
 cat << 'EOF' > "$MAIN_FILE"
 # -*- coding: utf-8 -*-
 """
-Pyrmethus Volumatic Trend + OB Trading Bot for Bybit V5 API (Enhanced)
+Pyrmethus Volumatic Trend + OB Trading Bot (CCXT Async Version - Enhanced)
 """
 import os
 import sys
@@ -587,20 +491,21 @@ import time
 import datetime
 import logging
 import signal
-import threading
-from decimal import Decimal, ROUND_DOWN, ROUND_UP, InvalidOperation
+import asyncio
+from decimal import Decimal, ROUND_DOWN, ROUND_UP, InvalidOperation, getcontext
 
 import pandas as pd
 import numpy as np
 from dotenv import load_dotenv
 from colorama import init, Fore, Style
-from pybit.unified_trading import HTTP, WebSocket
+import ccxt.async_support as ccxt
 
 # Import strategy class and type hints
 from strategy import VolumaticOBStrategy, AnalysisResults
 
 # --- Initialize Colorama ---
 init(autoreset=True)
+getcontext().prec = 18 # Set decimal precision early
 
 # --- Load Environment Variables ---
 load_dotenv()
@@ -610,44 +515,41 @@ TESTNET = os.getenv("BYBIT_TESTNET", "False").lower() == "true"
 
 # --- Global Variables ---
 config = {}
-session: Optional[HTTP] = None
-ws: Optional[WebSocket] = None
-ws_thread: Optional[threading.Thread] = None
-ws_connected = threading.Event()
-stop_event = threading.Event() # For graceful shutdown
-latest_dataframe: Optional[pd.DataFrame] = None
+exchange: Optional[ccxt.bybit] = None # Explicitly type hint exchange if possible
 strategy_instance: Optional[VolumaticOBStrategy] = None
-market_info: Optional[Dict[str, Any]] = None
-data_lock = threading.Lock() # Protect dataframe access
-position_lock = threading.Lock() # Protect position updates/checks
-order_lock = threading.Lock() # Protect order placement/closing logic
-last_position_check_time = 0
-POSITION_CHECK_INTERVAL = 10 # Default, overridden by config
+market: Optional[Dict[str, Any]] = None
+latest_dataframe: Optional[pd.DataFrame] = None
+current_position: Dict[str, Any] = {"size": Decimal(0), "side": "None", "entry_price": Decimal(0)} # Store position info
+last_position_check_time: float = 0.0
+last_health_check_time: float = 0.0
+last_ws_update_time: float = 0.0 # Track WebSocket health
+running_tasks = set() # Store running asyncio tasks for cancellation
+
+# --- Locks for Shared Resources ---
+# Use asyncio locks for async code
+data_lock = asyncio.Lock()
+position_lock = asyncio.Lock()
+order_lock = asyncio.Lock()
 
 # --- Logging Setup ---
-log = logging.getLogger("PyrmethusVolumaticBot")
-log_level = logging.INFO # Default, will be overridden by config
+log = logging.getLogger("PyrmethusVolumaticBotCCXT")
+log_level = logging.INFO # Default, overridden by config
 
 def setup_logging(level_str="INFO"):
     """Configures logging for the application."""
     global log_level
     log_level = getattr(logging, level_str.upper(), logging.INFO)
     log.setLevel(log_level)
-    # Prevent duplicate handlers if re-called
     if not log.handlers:
-        # Console Handler
         ch = logging.StreamHandler()
         ch.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         ch.setFormatter(formatter)
         log.addHandler(ch)
-        # Optional: File Handler
-        # log_filename = f"bot_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-        # fh = logging.FileHandler(log_filename)
-        # fh.setLevel(log_level)
-        # fh.setFormatter(formatter)
-        # log.addHandler(fh)
-    log.propagate = False # Prevent root logger from handling messages too
+        # Optional File Handler
+        # log_filename = f"bot_ccxt_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        # fh = logging.FileHandler(log_filename) ... add handler
+    log.propagate = False
 
 # --- Configuration Loading ---
 def load_config(path="config.json") -> Dict:
@@ -655,601 +557,606 @@ def load_config(path="config.json") -> Dict:
     try:
         with open(path, 'r') as f:
             conf = json.load(f)
-            # Update global interval if set in config
-            global POSITION_CHECK_INTERVAL
-            POSITION_CHECK_INTERVAL = conf.get("position_check_interval", 10)
+            # Basic validation
+            required_keys = ["exchange", "symbol", "timeframe", "order", "strategy", "data"]
+            if not all(key in conf for key in required_keys):
+                 raise ValueError("Config file missing required top-level keys.")
             return conf
     except FileNotFoundError:
         log.critical(f"CRITICAL: Configuration file '{path}' not found.")
         sys.exit(1)
-    except json.JSONDecodeError as e:
-        log.critical(f"CRITICAL: Configuration file '{path}' contains invalid JSON: {e}")
+    except (json.JSONDecodeError, ValueError) as e:
+        log.critical(f"CRITICAL: Error loading or validating configuration '{path}': {e}")
         sys.exit(1)
     except Exception as e:
-        log.critical(f"CRITICAL: Error loading configuration: {e}", exc_info=True)
+        log.critical(f"CRITICAL: Unexpected error loading configuration: {e}", exc_info=True)
         sys.exit(1)
 
-# --- Bybit Interaction ---
-def connect_bybit() -> Optional[HTTP]:
-    """Connects to Bybit HTTP API."""
-    if not API_KEY or not API_SECRET:
-        log.critical("CRITICAL: Bybit API Key or Secret not found in .env file.")
-        sys.exit(1)
+# --- CCXT Exchange Interaction (Async) ---
+async def connect_ccxt() -> Optional[ccxt.Exchange]:
+    """Initializes and connects to the CCXT exchange."""
+    global exchange
+    exchange_id = config.get('exchange', 'bybit').lower()
+    if not hasattr(ccxt, exchange_id):
+        log.critical(f"CRITICAL: Exchange '{exchange_id}' is not supported by CCXT.")
+        return None
+
     try:
-        log.info(f"Connecting to Bybit {'Testnet' if TESTNET else 'Mainnet'} HTTP API...")
-        s = HTTP(testnet=TESTNET, api_key=API_KEY, api_secret=API_SECRET)
-        # Test connection by getting server time
-        server_time = s.get_server_time()
-        log.info(f"Successfully connected. Server time: {datetime.datetime.fromtimestamp(int(server_time['result']['timeNano']) / 1e9)}")
-        return s
-    except Exception as e:
-        log.critical(f"CRITICAL: Failed to connect to Bybit HTTP API: {e}", exc_info=True)
-        return None
+        log.info(f"Connecting to CCXT exchange '{exchange_id}' ({'Testnet' if TESTNET else 'Mainnet'})...")
+        exchange = getattr(ccxt, exchange_id)({
+            'apiKey': API_KEY,
+            'secret': API_SECRET,
+            'enableRateLimit': True, # Enable CCXT's built-in rate limiter
+            'options': {
+                'defaultType': config.get('account_type', 'contract'), # contract (futures/swap) or spot
+                'adjustForTimeDifference': True,
+                 # Add Bybit specific options if needed, e.g., for Unified account V5
+                'accounts': {'unified': 'UNIFIED', 'contract': 'CONTRACT'}.get(config.get('account_type', 'contract')),
+                'recvWindow': 10000, # Increase recvWindow if timestamp errors occur
+            }
+        })
+        if TESTNET:
+            exchange.set_sandbox_mode(True)
 
-def get_market_info(symbol: str) -> Optional[Dict[str, Any]]:
-    """Fetches instrument information for the symbol."""
-    if not session:
-        log.error("HTTP session not available for get_market_info.")
+        # Test connection - fetch time or markets
+        await exchange.load_markets() # Also fetches time implicitly
+        log.info(f"Successfully connected to {exchange.name}. Loaded {len(exchange.markets)} markets.")
+        return exchange
+    except ccxt.AuthenticationError as e:
+        log.critical(f"CRITICAL: CCXT Authentication Error: {e}. Check API keys and permissions.")
         return None
-    try:
-        log.debug(f"Fetching market info for {symbol}...")
-        response = session.get_instruments_info(category="linear", symbol=symbol)
-        if response['retCode'] == 0 and response['result']['list']:
-            info = response['result']['list'][0]
-            log.info(f"Fetched market info for {symbol}.")
-            log.debug(f"Market Info Details: {json.dumps(info, indent=2)}")
-            # Validate required fields for precision
-            if not info.get('priceFilter', {}).get('tickSize') or \
-               not info.get('lotSizeFilter', {}).get('qtyStep') or \
-               not info.get('lotSizeFilter', {}).get('minOrderQty') or \
-               not info.get('lotSizeFilter', {}).get('maxOrderQty'):
-                log.error(f"Market info for {symbol} missing required price/lot filter details (tickSize, qtyStep, min/maxOrderQty).")
-                return None
-            return info
-        else:
-            log.error(f"Failed to get market info for {symbol}: {response.get('retMsg', 'Unknown Error')} (Code: {response.get('retCode', 'N/A')})")
-            return None
-    except Exception as e:
-        log.error(f"Exception fetching market info for {symbol}: {e}", exc_info=log_level <= logging.DEBUG)
-        return None
-
-def fetch_initial_data(symbol: str, interval: str, limit: int) -> Optional[pd.DataFrame]:
-    """Fetches historical Klines and ensures chronological order."""
-    if not session:
-         log.error("HTTP session not available for fetch_initial_data.")
+    except ccxt.NetworkError as e:
+         log.critical(f"CRITICAL: CCXT Network Error connecting to exchange: {e}")
          return None
-    log.info(f"Fetching initial {limit} candles for {symbol} ({interval})...")
-    try:
-        response = session.get_kline(
-            category="linear",
-            symbol=symbol,
-            interval=interval,
-            limit=limit
-        )
-        if response['retCode'] == 0 and response['result']['list']:
-            kline_list = response['result']['list']
-            if not kline_list:
-                 log.warning(f"Received empty kline list from Bybit for initial fetch.")
-                 return pd.DataFrame()
+    except Exception as e:
+        log.critical(f"CRITICAL: Failed to initialize CCXT exchange: {e}", exc_info=True)
+        return None
 
-            df = pd.DataFrame(kline_list, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'turnover'])
-            # Bybit V5 API returns klines oldest first, no need to reverse
-            # df = df.iloc[::-1]
-            df = df.astype({
-                'timestamp': 'int64', 'open': 'float64', 'high': 'float64',
-                'low': 'float64', 'close': 'float64', 'volume': 'float64', 'turnover': 'float64'
-            })
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            df = df.set_index('timestamp')
-            df = df.sort_index() # Ensure sort order just in case
-            log.info(f"Fetched {len(df)} initial candles. From {df.index.min()} to {df.index.max()}")
-            return df
+async def load_exchange_market(symbol: str) -> Optional[Dict[str, Any]]:
+    """Loads or re-loads market data for a specific symbol."""
+    global market
+    if not exchange: return None
+    try:
+        await exchange.load_markets(True) # Force reload
+        if symbol in exchange.markets:
+            market = exchange.markets[symbol]
+            # Validate market data needed by strategy/bot
+            if not market or not market.get('precision') or not market.get('limits'):
+                 log.error(f"Market data for {symbol} is incomplete.")
+                 return None
+            log.info(f"Market data loaded/updated for {symbol}.")
+            log.debug(f"Market Details ({symbol}): {json.dumps(market, indent=2)}")
+            return market
         else:
-            log.error(f"Failed to fetch initial klines: {response.get('retMsg', 'Unknown Error')} (Code: {response.get('retCode', 'N/A')})")
+            log.error(f"Symbol {symbol} not found in loaded markets for {exchange.name}.")
             return None
+    except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+        log.error(f"Failed to load market data for {symbol}: {e}")
+        return None
     except Exception as e:
-        log.error(f"Exception fetching initial klines: {e}", exc_info=log_level <= logging.DEBUG)
+        log.error(f"Unexpected error loading market data: {e}", exc_info=True)
         return None
 
-def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
-    """Fetches current position details, handling potential None session and rate limiting."""
-    global last_position_check_time
-    if not session:
-        log.error("HTTP session not available for get_current_position.")
-        return {"size": Decimal(0), "side": "None"} # Return a default "flat" state on error
-
-    # Rate limit position checks
-    now = time.time()
-    if now - last_position_check_time < POSITION_CHECK_INTERVAL:
-        #log.debug("Skipping position check due to rate limit.")
-        return None # Indicate check was skipped, calling function should handle this
-
-    log.debug(f"Fetching position for {symbol}...")
-    # Position lock not strictly needed here as it's read-only, but good practice if state was modified
-    # with position_lock:
+async def fetch_initial_data(symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
+    """Fetches historical OHLCV data using CCXT."""
+    if not exchange: return None
+    log.info(f"Fetching initial {limit} candles for {symbol} ({timeframe})...")
     try:
-        response = session.get_positions(category="linear", symbol=symbol)
-        # Update check time regardless of success/failure to prevent spamming on errors
-        last_position_check_time = time.time()
+        # CCXT fetch_ohlcv returns [[timestamp, open, high, low, close, volume]]
+        ohlcv = await exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+        if not ohlcv:
+            log.warning(f"Received empty list from fetch_ohlcv for {symbol}, {timeframe}.")
+            return pd.DataFrame()
 
-        if response['retCode'] == 0 and response['result']['list']:
-            # Bybit returns a list, even when filtering by symbol. Assume first entry is correct.
-            position = response['result']['list'][0]
-            # Convert relevant fields to Decimal/float for calculations
-            position['size'] = Decimal(position.get('size', '0'))
-            position['avgPrice'] = Decimal(position.get('avgPrice', '0'))
-            position['liqPrice'] = Decimal(position.get('liqPrice', '0')) if position.get('liqPrice') else Decimal(0)
-            position['unrealisedPnl'] = Decimal(position.get('unrealisedPnl', '0'))
-            position['curRealisedPnl'] = Decimal(position.get('curRealisedPnl', '0')) # Useful for tracking
-            # IMPORTANT: Bybit V5 uses side "Buy" or "Sell", size is always positive. Side "None" means flat.
-            log.debug(f"Position Data: Size={position['size']}, Side={position['side']}, AvgPrice={position['avgPrice']}")
-            return position
-        elif response['retCode'] == 110001: # Parameter error - likely invalid symbol if this happens late
-             log.error(f"Parameter error fetching position for {symbol}. Is symbol valid? {response.get('retMsg', '')}")
-             return {"size": Decimal(0), "side": "None"} # Assume flat on symbol error
-        else:
-            log.error(f"Failed to get position for {symbol}: {response.get('retMsg', 'Error')} (Code: {response.get('retCode', 'N/A')})")
-            # On persistent errors, returning a default "flat" might be dangerous.
-            # Consider stopping the bot or implementing retry logic here.
-            # For now, return flat to avoid placing orders based on stale/wrong info.
-            return {"size": Decimal(0), "side": "None"} # Return a default "flat" state on error
-    except Exception as e:
-        last_position_check_time = time.time() # Update time even on exception
-        log.error(f"Exception fetching position for {symbol}: {e}", exc_info=log_level <= logging.DEBUG)
-        return {"size": Decimal(0), "side": "None"} # Return a default "flat" state on error
-
-def get_wallet_balance(account_type="UNIFIED", coin="USDT") -> Optional[Decimal]:
-    """Fetches available balance (using equity as proxy for UNIFIED)."""
-    if not session:
-        log.error("HTTP session not available for get_wallet_balance.")
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df = df.set_index('timestamp')
+        df = df.astype(float) # Ensure all are floats
+        # Check for NaNs introduced? Should not happen with fetch_ohlcv usually
+        if df.isnull().values.any():
+            log.warning("NaN values found in fetched OHLCV data. Filling or dropping might be needed.")
+            # df = df.fillna(method='ffill') # Example: forward fill
+        log.info(f"Fetched {len(df)} initial candles. From {df.index.min()} to {df.index.max()}")
+        return df
+    except ccxt.NetworkError as e:
+        log.error(f"Network error fetching initial klines: {e}")
         return None
+    except ccxt.ExchangeError as e:
+         log.error(f"Exchange error fetching initial klines: {e}")
+         return None
+    except Exception as e:
+        log.error(f"Unexpected error fetching initial klines: {e}", exc_info=True)
+        return None
+
+async def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
+    """Fetches and updates the current position state asynchronously."""
+    global current_position, last_position_check_time
+    if not exchange or not market: return None # Need market for parsing
+
+    # Rate limit REST checks
+    now = time.monotonic()
+    check_interval = config.get('checks', {}).get('position_check_interval', 30)
+    if now - last_position_check_time < check_interval:
+        #log.debug("Position check skipped (rate limit).")
+        return current_position # Return last known state
+
+    log.debug(f"Fetching position for {symbol} via REST...")
+    async with position_lock: # Lock to prevent concurrent updates
+        try:
+            # fetch_position might return a list, need to find the right one
+            positions = await exchange.fetch_position(symbol) # Use fetch_position for single symbol
+
+            # CCXT position structure varies slightly by exchange. Need robust parsing.
+            # Common fields: 'info', 'symbol', 'contracts' (or 'contractSize'), 'side', 'entryPrice', 'leverage'
+            # Bybit V5 specific parsing might be needed if unified API has quirks
+            if positions:
+                 # Assuming fetch_position returns the direct dict for Bybit V5 linear when symbol is specified
+                pos = positions # Use the direct result if not a list
+                size = Decimal(pos.get('contracts', pos.get('contractSize', '0')) or '0')
+                side = pos.get('side', 'none').lower() # 'long', 'short', or 'none'
+                entry_price = Decimal(pos.get('entryPrice', '0') or '0')
+
+                # Update global state
+                current_position = {
+                    "size": size,
+                    "side": "Buy" if side == 'long' else "Sell" if side == 'short' else "None",
+                    "entry_price": entry_price,
+                    "timestamp": time.time() # Add timestamp of check
+                }
+                log.debug(f"Fetched Position: Size={size}, Side={side}, Entry={entry_price}")
+
+            else: # No position returned
+                 current_position = {"size": Decimal(0), "side": "None", "entry_price": Decimal(0), "timestamp": time.time()}
+                 log.debug(f"No position found for {symbol}.")
+
+            last_position_check_time = now # Update time on successful check
+            return current_position
+
+        except ccxt.NetworkError as e:
+            log.warning(f"Network error fetching position: {e}. Returning last known state.")
+            return current_position # Return last known state on temporary network error
+        except ccxt.ExchangeError as e:
+            log.error(f"Exchange error fetching position: {e}. Assuming flat.")
+            # Dangerous to assume flat on exchange error, could lead to wrong trades.
+            # Maybe stop or retry heavily? For now, assume flat and log error.
+            current_position = {"size": Decimal(0), "side": "None", "entry_price": Decimal(0), "timestamp": time.time()}
+            return current_position
+        except Exception as e:
+            log.error(f"Unexpected error fetching position: {e}", exc_info=True)
+            # Return last known state on unexpected errors
+            return current_position
+
+async def get_wallet_balance(quote_currency: str = "USDT") -> Optional[Decimal]:
+    """Fetches available equity/balance."""
+    if not exchange: return None
     try:
-        # V5 Unified Trading uses get_wallet_balance
-        response = session.get_wallet_balance(accountType=account_type, coin=coin)
-        if response['retCode'] == 0 and response['result']['list']:
-            balance_info = response['result']['list'][0] # Assuming only one list item for unified
-            # Using account equity as the basis for risk calculation in Unified account
-            if 'equity' in balance_info:
-                balance = Decimal(balance_info['equity'])
-                log.debug(f"Account Equity ({coin}): {balance}")
-                if balance < 0: log.warning(f"Account equity is negative: {balance}")
-                return balance
-            else:
-                log.warning(f"Could not find 'equity' field in wallet balance response for UNIFIED account.")
-                # Fallback: Try totalAvailableBalance? Might not reflect full risk potential.
-                if 'totalAvailableBalance' in balance_info:
-                     balance = Decimal(balance_info['totalAvailableBalance'])
-                     log.warning(f"Falling back to totalAvailableBalance: {balance}")
-                     return balance
-                return None
+        balance_data = await exchange.fetch_balance()
+        # Parsing balance data depends heavily on exchange and account type (spot, margin, futures)
+        # For Bybit Unified V5 ('contract' or 'unified' type): Look in total/free/used for the quote currency
+        quote_balance = balance_data.get(quote_currency, {})
+        total_equity = Decimal(balance_data.get('total', {}).get(quote_currency, '0')) # Try total first
+        free_balance = Decimal(quote_balance.get('free', '0'))
+
+        # Use total equity as the basis for risk calculation if available
+        if total_equity > 0:
+            log.debug(f"Using total equity for balance: {total_equity} {quote_currency}")
+            return total_equity
+        elif free_balance > 0:
+             log.warning(f"Total equity not found or zero, using free balance: {free_balance} {quote_currency}")
+             return free_balance
         else:
-            log.error(f"Failed to get wallet balance: {response.get('retMsg', 'Unknown Error')} (Code: {response.get('retCode', 'N/A')})")
-            return None
+             # Look in info structure for Bybit specific fields if needed
+             bybit_info = balance_data.get('info', {}).get('result', {}).get('list', [{}])[0]
+             equity_info = Decimal(bybit_info.get('equity', '0'))
+             if equity_info > 0:
+                  log.warning(f"Using 'equity' from Bybit info structure: {equity_info}")
+                  return equity_info
+
+             log.error(f"Could not determine suitable balance/equity for {quote_currency}.")
+             return Decimal(0) # Return 0 if no balance found
+
+    except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+        log.error(f"Could not fetch wallet balance: {e}")
+        return None
     except Exception as e:
-        log.error(f"Exception fetching wallet balance: {e}", exc_info=log_level <= logging.DEBUG)
+        log.error(f"Unexpected error fetching balance: {e}", exc_info=True)
         return None
 
-def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float) -> Optional[float]:
-    """Calculates order quantity based on risk percentage, SL distance, and equity."""
-    if not market_info or not strategy_instance:
-        log.error("Market info or strategy instance not available for qty calculation.")
-        return None
-    if abs(Decimal(str(sl_price)) - Decimal(str(entry_price))) < strategy_instance.tick_size:
-        log.error(f"Stop loss price {sl_price} is too close to entry price {entry_price}.")
+async def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float) -> Optional[float]:
+    """Calculates order quantity based on risk, SL distance, and equity."""
+    if not market or not strategy_instance: return None
+    sl_decimal = Decimal(str(sl_price))
+    entry_decimal = Decimal(str(entry_price))
+
+    if abs(sl_decimal - entry_decimal) < strategy_instance.price_tick:
+        log.error(f"SL price {sl_price} too close to entry price {entry_price}.")
         return None
 
-    balance = get_wallet_balance()
+    balance = await get_wallet_balance(market['quote'])
     if balance is None or balance <= 0:
         log.error(f"Cannot calculate order quantity: Invalid balance ({balance}).")
         return None
 
     try:
         risk_amount = balance * (Decimal(str(risk_percent)) / 100)
-        sl_distance = abs(Decimal(str(entry_price)) - Decimal(str(sl_price)))
+        sl_distance = abs(entry_decimal - sl_decimal)
 
-        if sl_distance == 0:
-             log.error("Stop loss distance is zero.")
-             return None
+        if sl_distance == 0: raise ZeroDivisionError("SL distance is zero")
 
-        # For Linear contracts (XXX/USDT), PnL is in USDT.
-        # Loss per contract = Qty (in Base) * SL_Distance (in Quote)
-        # We want: Qty * SL_Distance <= Risk Amount
-        # Qty (in Base Asset, e.g., BTC) = Risk Amount / SL_Distance
+        # Qty (in Base Asset, e.g., BTC for BTC/USDT) = Risk Amount (in Quote) / SL_Distance (in Quote)
         qty_base = risk_amount / sl_distance
 
     except (InvalidOperation, ZeroDivisionError, TypeError) as e:
         log.error(f"Error during quantity calculation math: {e}")
         return None
 
-    # Round down to the minimum quantity step
-    qty_rounded = strategy_instance.round_qty(float(qty_base))
+    # Round down to the minimum quantity step/tick size
+    qty_rounded = strategy_instance.round_amount(float(qty_base))
 
-    # Check against min/max order quantity from market_info
-    min_qty = float(market_info['lotSizeFilter']['minOrderQty'])
-    max_qty = float(market_info['lotSizeFilter']['maxOrderQty'])
+    # Check against min/max order quantity from market limits
+    min_qty = float(market.get('limits', {}).get('amount', {}).get('min', 0))
+    max_qty = float(market.get('limits', {}).get('amount', {}).get('max', float('inf')))
 
     if qty_rounded < min_qty:
-        log.warning(f"Calculated quantity {qty_rounded} is below minimum ({min_qty}). Risking more than planned.")
-        # Decide: Use min_qty (higher risk) or skip trade? For now, use min_qty.
+        log.warning(f"Calculated qty {qty_rounded} below minimum ({min_qty}). Risking more.")
         qty_final = min_qty
-        # Recalculate actual risk if using min_qty
         actual_risk_amount = Decimal(str(min_qty)) * sl_distance
         actual_risk_percent = (actual_risk_amount / balance) * 100 if balance > 0 else 0
-        log.warning(f"Using min qty {min_qty}. Actual Risk: {actual_risk_amount:.2f} USDT ({actual_risk_percent:.2f}%)")
-
+        log.warning(f"Using min qty {min_qty}. Actual Risk: {actual_risk_amount:.2f} {market['quote']} ({actual_risk_percent:.2f}%)")
     elif qty_rounded > max_qty:
-        log.warning(f"Calculated quantity {qty_rounded} exceeds maximum ({max_qty}). Using maximum.")
+        log.warning(f"Calculated qty {qty_rounded} exceeds maximum ({max_qty}). Using max.")
         qty_final = max_qty
     else:
         qty_final = qty_rounded
 
     if qty_final <= 0:
-        log.error(f"Final calculated quantity is zero or negative ({qty_final}). Cannot place order.")
+        log.error(f"Final calculated quantity is zero or negative ({qty_final}).")
         return None
 
-    log.info(f"Calculated Order Qty: {qty_final:.{strategy_instance.qty_precision}f} "
+    log.info(f"Calculated Order Qty: {qty_final:.{strategy_instance.amount_precision}f} "
              f"(Balance={balance:.2f}, Risk={risk_percent}%, RiskAmt={risk_amount:.2f}, SLDist={sl_distance:.{strategy_instance.price_precision}f})")
     return qty_final
 
-def place_order(symbol: str, side: str, qty: float, price: Optional[float]=None, sl_price: Optional[float]=None, tp_price: Optional[float]=None) -> Optional[Dict]:
-    """Places an order via Bybit API with SL/TP."""
-    if not session or not strategy_instance: return None
+async def place_order(symbol: str, side: str, qty: float, price: Optional[float]=None, sl_price: Optional[float]=None, tp_price: Optional[float]=None) -> Optional[Dict]:
+    """Places an order using CCXT create_order with SL/TP params."""
+    if not exchange or not strategy_instance or not market: return None
     if config.get("mode", "Live").lower() == "paper":
-        log.warning(f"[PAPER MODE] Would place {side} order for {qty} {symbol} at ~{price} SL={sl_price} TP={tp_price}")
-        # Simulate success for paper trading state management
-        return {"retCode": 0, "retMsg": "OK", "result": {"orderId": f"paper_{int(time.time())}"}, "paperTrade": True}
+        log.warning(f"[PAPER MODE] Would place {side} {config['order']['type']} order: {qty} {symbol} @{price} SL={sl_price} TP={tp_price}")
+        return {"id": f"paper_{int(time.time())}", "info": {"paperTrade": True}} # Simulate success
 
-    with order_lock: # Ensure only one order placement happens at a time
-        order_type = config['order']['type']
-        # Ensure quantity is correctly rounded *before* placing order
-        qty_rounded = strategy_instance.round_qty(qty)
-        if qty_rounded <= 0:
-             log.error(f"Attempted to place order with zero or negative rounded quantity ({qty_rounded}). Original qty: {qty}.")
+    async with order_lock: # Prevent concurrent order placements
+        order_type = config['order']['type'].lower()
+        amount = strategy_instance.round_amount(qty)
+        limit_price = strategy_instance.round_price(price) if price and order_type == 'limit' else None
+
+        if amount <= 0:
+             log.error(f"Attempted to place order with zero/negative amount: {amount}")
              return None
-        min_qty = float(market_info['lotSizeFilter']['minOrderQty'])
-        if qty_rounded < min_qty:
-            log.warning(f"Final quantity {qty_rounded} is less than min qty {min_qty}. Using min qty.")
-            qty_rounded = min_qty
+        min_qty = float(market.get('limits', {}).get('amount', {}).get('min', 0))
+        if amount < min_qty:
+             log.warning(f"Order amount {amount} below min {min_qty}. Using min.")
+             amount = min_qty
+
 
         params = {
-            "category": "linear",
-            "symbol": symbol,
-            "side": side, # "Buy" or "Sell"
-            "orderType": order_type,
-            "qty": str(qty_rounded), # API requires string quantity
-            "timeInForce": "GTC", # GoodTillCancel is common
-            "reduceOnly": False, # This is an entry order
-            "positionIdx": 0 # Required for one-way mode
+             # Bybit V5 specific parameters for SL/TP attached to Market/Limit orders
+             'positionIdx': 0, # Required for One-Way mode hedge=False
         }
-
-        if order_type == "Limit" and price:
-            limit_price_rounded = strategy_instance.round_price(price)
-            params["price"] = str(limit_price_rounded)
-        elif order_type == "Limit" and not price:
-            log.error("Limit order requires a price.")
-            return None
-
-        # Add SL/TP using Bybit's parameters
         if sl_price:
             sl_price_rounded = strategy_instance.round_price(sl_price)
-            # Check validity (SL should not cross entry for market order logic)
-            if (side == "Buy" and sl_price_rounded >= (price or 9999999)) or \
-               (side == "Sell" and sl_price_rounded <= (price or 0)):
-                log.error(f"Invalid SL price {sl_price_rounded} for {side} order at price {price}. SL skipped.")
-            else:
-                params["stopLoss"] = str(sl_price_rounded)
-                log.info(f"Setting StopLoss at: {sl_price_rounded}")
+            trigger_direction = 2 if side.lower() == 'buy' else 1 # 1: Sell trigger, 2: Buy trigger
+            params.update({
+                'stopLossPrice': sl_price_rounded,
+                'slTriggerDirection': trigger_direction,
+                'slOrderType': 'Market', # Or 'Limit'
+                'slTriggerBy': config['order'].get('sl_trigger_type', 'LastPrice')
+            })
+            log.info(f"Prepared SL: Price={sl_price_rounded}, Trigger={params['slTriggerBy']}")
 
         if tp_price:
-            tp_price_rounded = strategy_instance.round_price(tp_price)
-             # Check validity (TP should be profitable relative to entry)
-            if (side == "Buy" and tp_price_rounded <= (price or 0)) or \
-               (side == "Sell" and tp_price_rounded >= (price or 9999999)):
-                log.error(f"Invalid TP price {tp_price_rounded} for {side} order at price {price}. TP skipped.")
-            else:
-                params["takeProfit"] = str(tp_price_rounded)
-                log.info(f"Setting TakeProfit at: {tp_price_rounded}")
+             tp_price_rounded = strategy_instance.round_price(tp_price)
+             trigger_direction = 1 if side.lower() == 'buy' else 2 # Opposite of SL
+             params.update({
+                 'takeProfitPrice': tp_price_rounded,
+                 'tpTriggerDirection': trigger_direction,
+                 'tpOrderType': 'Market', # Or 'Limit'
+                 'tpTriggerBy': config['order'].get('tp_trigger_type', 'LastPrice')
+             })
+             log.info(f"Prepared TP: Price={tp_price_rounded}, Trigger={params['tpTriggerBy']}")
 
-        log.warning(f"Placing {side} {order_type} order: {params['qty']} {symbol} "
-                    f"{'@'+str(params.get('price')) if 'price' in params else ''} "
-                    f"SL={params.get('stopLoss', 'N/A')} TP={params.get('takeProfit', 'N/A')}")
+        log.warning(f"Placing {side.upper()} {order_type.upper()} order: {amount} {symbol} "
+                    f"{'@'+str(limit_price) if limit_price else ''} "
+                    f"SL={params.get('stopLossPrice', 'N/A')} TP={params.get('takeProfitPrice', 'N/A')}")
+
         try:
-            response = session.place_order(**params)
-            log.debug(f"Place Order Response: {response}")
-            if response['retCode'] == 0:
-                order_id = response['result'].get('orderId')
-                log.info(f"{Fore.GREEN}Order placed successfully! OrderID: {order_id}{Style.RESET_ALL}")
-                # Optional: Store order ID for tracking
-                return response
-            else:
-                # Log specific errors
-                error_msg = response.get('retMsg', 'Unknown Error')
-                error_code = response.get('retCode', 'N/A')
-                log.error(f"{Fore.RED}Failed to place order: {error_msg} (Code: {error_code}){Style.RESET_ALL}")
-                # Handle common errors explicitly if needed (e.g., margin, position mode)
-                if error_code == 110007: log.error("Insufficient margin error. Check balance and leverage.")
-                if "position mode not modified" in error_msg: log.error("Position mode mismatch? Ensure Bybit is in One-Way mode for this symbol.")
-                return response # Return error response
+            order = await exchange.create_order(
+                symbol=symbol,
+                type=order_type,
+                side=side,
+                amount=amount,
+                price=limit_price, # None for market orders
+                params=params
+            )
+            log.info(f"{Fore.GREEN}Order placed successfully! CCXT ID: {order.get('id')}{Style.RESET_ALL}")
+            log.debug(f"Order details: {order}")
+            # Update position state quickly after placing order (optional, REST check will confirm later)
+            # await get_current_position(symbol) # Can potentially call this to refresh state sooner
+            return order
+        except ccxt.InsufficientFunds as e:
+            log.error(f"{Fore.RED}Order failed: Insufficient funds. {e}{Style.RESET_ALL}")
+            # Check leverage, balance, maybe reduce risk?
+            return None
+        except ccxt.InvalidOrder as e:
+             log.error(f"{Fore.RED}Order failed: Invalid order parameters. Check config/calcs. {e}{Style.RESET_ALL}")
+             log.error(f"Params sent: symbol={symbol}, type={order_type}, side={side}, amount={amount}, price={limit_price}, params={params}")
+             return None
+        except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+            log.error(f"{Fore.RED}Order failed: {type(e).__name__} - {e}{Style.RESET_ALL}")
+            # Implement retry logic here if appropriate
+            return None
         except Exception as e:
-            log.error(f"Exception placing order: {e}", exc_info=log_level <= logging.DEBUG)
+            log.error(f"Unexpected error placing order: {e}", exc_info=True)
             return None
 
-def close_position(symbol: str, position_data: Dict) -> Optional[Dict]:
-    """Closes an existing position using a reduce-only market order."""
-    if not session or not strategy_instance: return None
+async def close_position(symbol: str, position_data: Dict) -> Optional[Dict]:
+    """Closes the position using a reduce-only market order."""
+    if not exchange or not strategy_instance or not market: return None
     if config.get("mode", "Live").lower() == "paper":
         log.warning(f"[PAPER MODE] Would close position for {symbol} (Size: {position_data['size']}, Side: {position_data['side']})")
-        # Simulate success
-        return {"retCode": 0, "retMsg": "OK", "result": {"orderId": f"paper_close_{int(time.time())}"}, "paperTrade": True}
+        return {"id": f"paper_close_{int(time.time())}", "info": {"paperTrade": True}} # Simulate success
 
-    with order_lock: # Ensure only one closing order happens at a time
-        side_to_close = "Buy" if position_data['side'] == "Sell" else "Sell"
-        qty_to_close = float(position_data['size']) # Close the full size fetched
+    async with order_lock: # Ensure only one closing order attempt
+        current_size = position_data.get('size', Decimal(0))
+        current_side = position_data.get('side', 'None') # Expect 'Buy' or 'Sell'
 
-        if qty_to_close <= 0:
-             log.warning(f"Attempting to close position for {symbol}, but fetched size is {qty_to_close}. Assuming already flat.")
-             return {"retCode": 0, "retMsg": "OK", "result": {}, "alreadyFlat": True}
+        if current_size <= 0 or current_side == 'None':
+            log.info(f"Attempted to close position for {symbol}, but it appears flat.")
+            return {"info": {"alreadyFlat": True}}
 
+        side_to_close = 'sell' if current_side == 'Buy' else 'buy'
+        amount_to_close = float(current_size) # Use the fetched size
 
-        log.warning(f"Closing {position_data['side']} position for {symbol} (Qty: {qty_to_close}). Placing {side_to_close} Market order...")
+        log.warning(f"Closing {current_side} position for {symbol} (Size: {amount_to_close}). Placing {side_to_close.upper()} Market order...")
+
         params = {
-            "category": "linear",
-            "symbol": symbol,
-            "side": side_to_close,
-            "orderType": "Market", # Use Market order to ensure closure
-            "qty": str(qty_to_close),
-            "reduceOnly": True, # Ensure this only closes position
-            "positionIdx": 0 # Required for one-way mode
+            'reduceOnly': True,
+             'positionIdx': 0 # Required for One-Way mode hedge=False
         }
         try:
-            # Cancel existing SL/TP orders before closing, if possible/necessary
-            # response_cancel = session.cancel_all_orders(category="linear", symbol=symbol, orderFilter="StopOrder")
-            # log.debug(f"Cancel SL/TP Response: {response_cancel}")
-            # time.sleep(0.5) # Brief pause after cancellation
+            # Optional: Cancel existing SL/TP orders first if using separate orders
+            # log.debug("Attempting to cancel associated SL/TP orders...")
+            # try:
+            #    await exchange.cancel_all_orders(symbol, params={'orderFilter': 'StopOrder'}) # Bybit specific? Check CCXT docs
+            # except Exception as cancel_e:
+            #    log.warning(f"Could not cancel SL/TP orders before closing: {cancel_e}")
+            # await asyncio.sleep(0.5) # Short delay
 
-            response = session.place_order(**params)
-            log.debug(f"Close Position Response: {response}")
-            if response['retCode'] == 0:
-                order_id = response['result'].get('orderId')
-                log.info(f"{Fore.YELLOW}Position close order placed successfully! OrderID: {order_id}{Style.RESET_ALL}")
-                return response
-            else:
-                error_msg = response.get('retMsg', 'Unknown Error')
-                error_code = response.get('retCode', 'N/A')
-                log.error(f"{Fore.RED}Failed to place close order: {error_msg} (Code: {error_code}){Style.RESET_ALL}")
-                # Handle reduce-only error (means position likely changed or closed already)
-                if error_code in [110043, 3400070]: # reduce-only quantity error codes
-                    log.warning("Reduce-only error suggests position size changed or already zero. Re-checking position on next cycle.")
-                    global last_position_check_time # Force re-check sooner
-                    last_position_check_time = 0
-                return response # Return error response
+            order = await exchange.create_order(
+                symbol=symbol,
+                type='market',
+                side=side_to_close,
+                amount=amount_to_close,
+                params=params
+            )
+            log.info(f"{Fore.YELLOW}Position close order placed successfully! CCXT ID: {order.get('id')}{Style.RESET_ALL}")
+            log.debug(f"Close Order details: {order}")
+            # Force position check soon after closing attempt
+            global last_position_check_time
+            last_position_check_time = 0
+            return order
+
+        except ccxt.InvalidOrder as e:
+             # Often happens if position already closed or size changed (reduceOnly error)
+             log.warning(f"Close order failed (likely position closed/changed): {e}")
+             last_position_check_time = 0 # Force check
+             return {"info": {"error": str(e), "alreadyFlatOrChanged": True}}
+        except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+            log.error(f"{Fore.RED}Close order failed: {type(e).__name__} - {e}{Style.RESET_ALL}")
+            return None
         except Exception as e:
-            log.error(f"Exception closing position: {e}", exc_info=log_level <= logging.DEBUG)
+            log.error(f"Unexpected error closing position: {e}", exc_info=True)
             return None
 
-def set_leverage(symbol: str, leverage: int):
-    """Sets leverage for the specified symbol."""
-    if not session:
-        log.error("HTTP session not available for set_leverage.")
-        return
-    # Ensure leverage is within Bybit's typical limits (e.g., 1-100)
-    if not 1 <= leverage <= 100:
-         log.error(f"Invalid leverage value: {leverage}. Must be between 1 and 100.")
+async def set_leverage(symbol: str, leverage: int):
+    """Sets leverage using CCXT (if supported by exchange)."""
+    if not exchange or not market: return
+    if not exchange.has.get('setLeverage'):
+         log.warning(f"Exchange {exchange.name} does not support setting leverage via CCXT.")
          return
 
-    log.info(f"Setting leverage for {symbol} to {leverage}x...")
+    # Validate leverage against market limits if available
+    max_leverage = market.get('limits', {}).get('leverage', {}).get('max', 100)
+    if not 1 <= leverage <= max_leverage:
+         log.error(f"Invalid leverage {leverage}. Must be between 1 and {max_leverage} for {symbol}.")
+         return
+
+    log.info(f"Attempting to set leverage for {symbol} to {leverage}x...")
     try:
-        response = session.set_leverage(
-            category="linear",
-            symbol=symbol,
-            buyLeverage=str(float(leverage)), # API expects string representation of float/int
-            sellLeverage=str(float(leverage))
-        )
-        log.debug(f"Set Leverage Response: {response}")
-        if response['retCode'] == 0:
-            log.info(f"Leverage for {symbol} set to {leverage}x successfully.")
-        else:
-            # Common error: 110044 means leverage not modified (already set)
-            if response['retCode'] == 110044:
-                 log.warning(f"Leverage for {symbol} already set to {leverage}x (Not modified).")
-            else:
-                 log.error(f"Failed to set leverage for {symbol}: {response.get('retMsg', 'Unknown Error')} (Code: {response.get('retCode', 'N/A')})")
+        # Note: Some exchanges require setting leverage for buy/sell separately or per position mode.
+        # CCXT's set_leverage tries to abstract this. Check Bybit specifics if needed.
+        await exchange.set_leverage(leverage, symbol)
+        log.info(f"Leverage for {symbol} set to {leverage}x request sent (confirmation may vary).")
+        # Verify leverage (requires fetching position data)
+        # pos = await get_current_position(symbol)
+        # if pos and int(pos.get('leverage', 0)) == leverage: log.info("Leverage confirmed.")
+
+    except ccxt.ExchangeError as e:
+         # Handle common errors like "leverage not modified"
+         if "not modified" in str(e).lower() or "110044" in str(e): # Bybit code
+              log.warning(f"Leverage for {symbol} already set to {leverage}x (Not modified).")
+         else:
+              log.error(f"Failed to set leverage for {symbol}: {e}")
     except Exception as e:
-        log.error(f"Exception setting leverage: {e}", exc_info=log_level <= logging.DEBUG)
+        log.error(f"Unexpected error setting leverage: {e}", exc_info=True)
 
-# --- WebSocket Handling ---
-def handle_ws_message(msg):
-    """Callback function to process incoming WebSocket messages."""
-    # log.debug(f"WS Recv: {msg}") # Too verbose for normal operation
-    global latest_dataframe
-    if stop_event.is_set(): return # Don't process if stopping
 
-    topic = msg.get("topic", "")
-    data = msg.get("data", [])
-
-    # Handle Kline Updates
-    if topic.startswith(f"kline.{config['interval']}.{config['symbol']}"):
-        if not data: return
-        kline_item = data[0] # Bybit V5 Kline usually sends one item per push
-        if not kline_item.get('confirm', False):
-            # log.debug("Ignoring unconfirmed kline update.")
-            return # Only process confirmed (closed) candles
-
+# --- WebSocket Watcher Loops ---
+async def watch_kline_loop(symbol: str, timeframe: str):
+    """Watches for new OHLCV candles via WebSocket."""
+    global latest_dataframe, last_ws_update_time
+    if not exchange: return
+    log.info(f"Starting Kline watcher for {symbol} ({timeframe})...")
+    while not stop_event.is_set():
         try:
-            ts_ms = int(kline_item['start'])
+            candles = await exchange.watch_ohlcv(symbol, timeframe)
+            # watch_ohlcv usually returns list of lists [[ts, o, h, l, c, v]]
+            if not candles: continue
+
+            last_ws_update_time = time.monotonic() # Update health check timestamp
+
+            # Process the *last* candle received from the batch (most recent closed one)
+            # Note: Some exchanges might push updates for the *current* candle.
+            # CCXT's watch_ohlcv aims to return *closed* candles, but behavior can vary.
+            # We only want confirmed/closed candles for strategy analysis.
+            # Assumption: The last candle in the list is the most recently closed one.
+            # Need verification based on exchange behavior.
+            last_candle_data = candles[-1]
+            ts_ms, o, h, l, c, v = last_candle_data
             ts = pd.to_datetime(ts_ms, unit='ms')
-            # Check if this candle is already processed (can happen on reconnect)
-            with data_lock:
-                 if latest_dataframe is not None and ts in latest_dataframe.index:
-                      # log.debug(f"Ignoring already processed candle: {ts}")
-                      return
 
-            log.debug(f"Confirmed Kline received: T={ts} C={kline_item['close']}")
+            new_data = {'open': o, 'high': h, 'low': l, 'close': c, 'volume': v}
+            log.debug(f"WS Candle Received: T={ts}, O={o}, H={h}, L={l}, C={c}, V={v}")
 
-            new_data = {
-                'open': float(kline_item['open']),
-                'high': float(kline_item['high']),
-                'low': float(kline_item['low']),
-                'close': float(kline_item['close']),
-                'volume': float(kline_item['volume']),
-                'turnover': float(kline_item.get('turnover', 0.0))
-            }
-        except (KeyError, ValueError) as e:
-            log.error(f"Error parsing kline data: {e} - Data: {kline_item}")
+            # --- Process the Confirmed Candle ---
+            await process_candle(ts, new_data) # Await the processing
+
+        except ccxt.NetworkError as e:
+            log.warning(f"Kline Watcher Network Error: {e}. Reconnecting...")
+            await asyncio.sleep(5) # Wait before retrying
+        except ccxt.ExchangeError as e:
+            log.warning(f"Kline Watcher Exchange Error: {e}. Retrying...")
+            await asyncio.sleep(5)
+        except asyncio.CancelledError:
+             log.info("Kline watcher task cancelled.")
+             break # Exit loop cleanly on cancellation
+        except Exception as e:
+            log.error(f"Unexpected error in Kline watcher: {e}", exc_info=True)
+            await asyncio.sleep(10) # Longer sleep on unexpected errors
+    log.info("Kline watcher loop finished.")
+
+async def process_candle(timestamp: pd.Timestamp, data: Dict):
+    """Adds candle data to DataFrame and triggers analysis."""
+    global latest_dataframe
+    async with data_lock: # Ensure exclusive access to the dataframe
+        if latest_dataframe is None:
+            log.warning("DataFrame not ready, skipping candle processing.")
             return
 
-        with data_lock:
-            if latest_dataframe is None:
-                log.warning("DataFrame not ready, skipping WS kline processing.")
-                return
+        # Check if timestamp already exists (e.g., from initial fetch overlap or duplicate WS msg)
+        if timestamp in latest_dataframe.index:
+             log.debug(f"Candle {timestamp} already exists in DataFrame. Updating...")
+             latest_dataframe.loc[timestamp, list(data.keys())] = list(data.values())
+        else:
+             log.debug(f"Adding new candle {timestamp} to DataFrame.")
+             new_row = pd.DataFrame([data], index=[timestamp])
+             latest_dataframe = pd.concat([latest_dataframe, new_row])
+             # Prune old data
+             max_len = config['data']['max_df_len']
+             if len(latest_dataframe) > max_len:
+                 latest_dataframe = latest_dataframe.iloc[-max_len:]
+                 # log.debug(f"DataFrame pruned to {len(latest_dataframe)} rows.")
 
-            # Create new row DataFrame
-            new_row = pd.DataFrame([new_data], index=[ts])
+        # --- Trigger Strategy Analysis ---
+        if strategy_instance:
+            log.info(f"Running analysis on confirmed candle: {timestamp}")
+            df_copy = latest_dataframe.copy() # Analyze a copy
+            try:
+                analysis_results = strategy_instance.update(df_copy)
+                # Process signals asynchronously without blocking the candle processing
+                asyncio.create_task(process_signals(analysis_results))
+            except Exception as e:
+                log.error(f"Error during strategy analysis: {e}", exc_info=True)
+        else:
+             log.warning("Strategy instance not available for analysis.")
 
-            # Append (already checked if exists)
-            latest_dataframe = pd.concat([latest_dataframe, new_row])
-            # Prune
-            if len(latest_dataframe) > config['data']['max_df_len']:
-                latest_dataframe = latest_dataframe.iloc[-(config['data']['max_df_len']):]
-                log.debug(f"DataFrame pruned to {len(latest_dataframe)} rows.")
 
-            # --- Trigger Analysis ---
-            if strategy_instance:
-                log.info(f"Running analysis on new confirmed candle: {ts}")
-                # Create a copy for analysis to avoid modification during processing
-                df_copy = latest_dataframe.copy()
-                try:
-                    analysis_results = strategy_instance.update(df_copy)
-                    process_signals(analysis_results)
-                except Exception as e:
-                    log.error(f"Error during strategy analysis: {e}", exc_info=True) # Log traceback
+async def watch_positions_loop(symbol: str):
+    """(Optional) Watches for position updates via WebSocket."""
+    global current_position, last_ws_update_time
+    if not exchange or not exchange.has.get('watchPositions'):
+        log.info("Position watcher skipped: Exchange does not support watchPositions.")
+        return
 
-    # Handle Position Updates (Optional but recommended for faster state awareness)
-    elif topic.startswith("position"):
-         if data:
-             for pos_update in data:
-                 if pos_update.get('symbol') == config['symbol']:
-                      log.info(f"{Fore.CYAN}Position update via WS: {pos_update}{Style.RESET_ALL}")
-                      # OPTIONAL: Update internal state faster than periodic check
-                      # Be very careful with locking and ensuring consistency if doing this
-                      # Force a check on next cycle might be safer:
+    log.info(f"Starting Position watcher for {symbol}...")
+    while not stop_event.is_set():
+        try:
+            positions = await exchange.watch_positions([symbol]) # Watch specific symbol
+            last_ws_update_time = time.monotonic()
+            if not positions: continue
+
+            # watch_positions often returns a list, find our symbol
+            pos_update = None
+            for p in positions:
+                if p.get('symbol') == symbol:
+                     pos_update = p
+                     break
+
+            if pos_update:
+                log.info(f"{Fore.CYAN}Position update via WS: {pos_update}{Style.RESET_ALL}")
+                # Update internal state cautiously - REST check is still source of truth before ordering
+                async with position_lock:
+                    size = Decimal(pos_update.get('contracts', pos_update.get('contractSize', '0')) or '0')
+                    side = pos_update.get('side', 'none').lower()
+                    entry_price = Decimal(pos_update.get('entryPrice', '0') or '0')
+                    # Only update if significantly different? Or just store? Let REST check confirm.
+                    # current_position = { "size": size, ... } # Potentially update here
+                    log.debug(f"WS Position Update: Size={size}, Side={side}, Entry={entry_price}")
+                    # Force REST check on next periodic run if significant change detected?
+                    # if abs(size - current_position['size']) > 0: last_position_check_time = 0
+            else:
+                 log.debug(f"Received position update via WS, but not for {symbol}.")
+
+
+        except ccxt.NetworkError as e: log.warning(f"Position Watcher Network Error: {e}. Reconnecting..."); await asyncio.sleep(5)
+        except ccxt.ExchangeError as e: log.warning(f"Position Watcher Exchange Error: {e}. Retrying..."); await asyncio.sleep(5)
+        except asyncio.CancelledError: log.info("Position watcher task cancelled."); break
+        except Exception as e: log.error(f"Unexpected error in Position watcher: {e}", exc_info=True); await asyncio.sleep(10)
+    log.info("Position watcher loop finished.")
+
+async def watch_orders_loop(symbol: str):
+    """(Optional) Watches for order updates via WebSocket."""
+    global last_ws_update_time
+    if not exchange or not exchange.has.get('watchOrders'):
+        log.info("Order watcher skipped: Exchange does not support watchOrders.")
+        return
+
+    log.info(f"Starting Order watcher for {symbol}...")
+    while not stop_event.is_set():
+        try:
+            orders = await exchange.watch_orders(symbol)
+            last_ws_update_time = time.monotonic()
+            if not orders: continue
+
+            for order_update in orders:
+                 # Process order updates - e.g., log fills, SL/TP triggers
+                 status = order_update.get('status')
+                 order_id = order_update.get('id')
+                 filled = order_update.get('filled')
+                 price = order_update.get('average', order_update.get('price'))
+                 log.info(f"{Fore.CYAN}Order Update via WS [{symbol}]: ID={order_id}, Status={status}, Filled={filled}, AvgPrice={price}{Style.RESET_ALL}")
+                 if status == 'closed' and filled > 0:
+                      log.warning(f"{Fore.GREEN}Order {order_id} FILLED/CLOSED via WS.{Style.RESET_ALL}")
+                      # Trigger position check maybe?
                       # global last_position_check_time
                       # last_position_check_time = 0
-                      pass
-
-    # Handle Order Updates (Optional)
-    elif topic.startswith("order"):
-        if data:
-             for order_update in data:
-                 if order_update.get('symbol') == config['symbol']:
-                     log.info(f"{Fore.CYAN}Order update via WS: Status={order_update.get('orderStatus')}, ID={order_update.get('orderId')}{Style.RESET_ALL}")
-                     # Can track fills, cancellations, SL/TP triggers here
-                     pass
-
-    # Handle Connection Status / Auth
-    elif msg.get("op") == "auth":
-        if msg.get("success"):
-            log.info(f"{Fore.GREEN}WebSocket authenticated successfully.{Style.RESET_ALL}")
-        else:
-            log.error(f"WebSocket authentication failed: {msg}")
-    elif msg.get("op") == "subscribe":
-         if msg.get("success"):
-            log.info(f"{Fore.GREEN}WebSocket subscribed successfully to: {msg.get('ret_msg')}{Style.RESET_ALL}")
-         else:
-            log.error(f"WebSocket subscription failed: {msg}")
-    elif msg.get("op") == "pong":
-        log.debug("WebSocket Pong received")
-
-def start_websocket_connection():
-    """Initializes and starts the WebSocket connection for private and public data."""
-    global ws, ws_thread, ws_connected
-    if not API_KEY or not API_SECRET:
-        log.error("Cannot start WebSocket: API credentials missing.")
-        return False
-    if ws_thread and ws_thread.is_alive():
-        log.warning("WebSocket thread already running.")
-        return True
-
-    log.info("Starting WebSocket connection...")
-    ws_connected.clear()
-    try:
-        # Need private channel type for positions/orders
-        ws = WebSocket(testnet=TESTNET, channel_type="private", api_key=API_KEY, api_secret=API_SECRET)
-
-        # --- Define Subscriptions ---
-        # Public Kline Topic
-        kline_topic = f"kline.{config['interval']}.{config['symbol']}"
-        # Private Topics
-        position_topic = f"position.{config['symbol']}" # Specific symbol for positions
-        order_topic = f"order" # Listen to all orders for the account
-
-        topics = [kline_topic, position_topic, order_topic]
-
-        # Register the message handler
-        ws.websocket_data.add_handler(handle_ws_message)
-
-        # Subscribe to topics
-        ws.subscribe(topics)
-
-        # Start the WebSocket connection loop in a separate thread
-        ws_thread = threading.Thread(target=ws.run_forever, daemon=True)
-        ws_thread.start()
-
-        # Give it a moment to establish connection and subscribe
-        # A more robust check would involve waiting for subscription confirmation messages
-        log.info("Waiting for WebSocket connection and initial messages...")
-        time.sleep(5) # Simple wait, adjust as needed
-
-        if ws_thread.is_alive():
-            log.info(f"{Fore.GREEN}WebSocket thread started. Monitoring topics: {topics}{Style.RESET_ALL}")
-            ws_connected.set() # Signal connection attempt is done
-            return True
-        else:
-             log.error("WebSocket thread failed to start.")
-             return False
-
-    except Exception as e:
-        log.critical(f"CRITICAL: Failed to initialize or start WebSocket: {e}", exc_info=True)
-        return False
-
-def stop_websocket_connection():
-    """Stops the WebSocket connection gracefully."""
-    global ws, ws_thread, ws_connected
-    if ws:
-        log.info("Stopping WebSocket connection...")
-        try:
-            # Unsubscribe first? Optional.
-            # ws.unsubscribe([...])
-            ws.exit()
-        except Exception as e:
-            log.error(f"Error closing WebSocket: {e}")
-    else:
-         log.info("WebSocket object not found, cannot stop.")
+                 elif status == 'canceled':
+                      log.warning(f"{Fore.YELLOW}Order {order_id} CANCELED via WS.{Style.RESET_ALL}")
 
 
-    if ws_thread and ws_thread.is_alive():
-        log.info("Waiting for WebSocket thread to join...")
-        ws_thread.join(timeout=10)
-        if ws_thread.is_alive():
-            log.warning("WebSocket thread did not stop gracefully after 10 seconds.")
-        else:
-            log.info("WebSocket thread joined.")
-    elif ws_thread:
-         log.info("WebSocket thread was already stopped.")
+        except ccxt.NetworkError as e: log.warning(f"Order Watcher Network Error: {e}. Reconnecting..."); await asyncio.sleep(5)
+        except ccxt.ExchangeError as e: log.warning(f"Order Watcher Exchange Error: {e}. Retrying..."); await asyncio.sleep(5)
+        except asyncio.CancelledError: log.info("Order watcher task cancelled."); break
+        except Exception as e: log.error(f"Unexpected error in Order watcher: {e}", exc_info=True); await asyncio.sleep(10)
+    log.info("Order watcher loop finished.")
 
-    ws = None
-    ws_thread = None
-    ws_connected.clear()
-    log.info("WebSocket stopped.")
-
-# --- Signal Processing & Execution ---
-def process_signals(results: AnalysisResults):
-    """Processes the strategy signals and decides on trade actions."""
-    if not results or not strategy_instance or not market_info:
-        log.warning("Signal processing skipped: Missing results, strategy instance, or market info.")
+# --- Signal Processing & Execution (Async) ---
+async def process_signals(results: AnalysisResults):
+    """Processes strategy signals and executes trades asynchronously."""
+    if not results or not strategy_instance or not market:
+        log.warning("Signal processing skipped: Missing data/setup.")
         return
     if stop_event.is_set():
-        log.warning("Signal processing skipped: Stop event is set.")
+        log.warning("Signal processing skipped: Stop event set.")
         return
 
     signal = results['last_signal']
@@ -1263,299 +1170,316 @@ def process_signals(results: AnalysisResults):
         log.warning("Cannot process signal: Last close price is NaN.")
         return
 
-    # --- Get Current Position ---
-    # This is crucial to avoid duplicate orders and manage exits correctly
-    # Rate limiting is handled inside get_current_position
-    position_data = get_current_position(symbol)
-    if position_data is None:
-        log.warning("Position check skipped due to rate limit. Re-evaluating on next candle.")
-        return # Wait for next candle if check was skipped
-    if not position_data: # Check if position fetch actually failed (returned Falsy)
-        log.error("Could not get current position data due to error. Skipping signal processing cycle.")
+    # --- Get Current Position State ---
+    # Fetch position state *before* making decisions based on the signal
+    pos_data = await get_current_position(symbol) # Use latest fetched state
+    if not pos_data: # Indicates fetch error or still rate limited
+        log.warning("Could not get reliable position data. Skipping signal action.")
         return
 
-    # Ensure size is Decimal for comparison
-    current_pos_size = position_data.get('size', Decimal(0))
-    current_pos_side = position_data.get('side', 'None') # 'Buy', 'Sell', or 'None'
-
+    current_pos_size = pos_data.get('size', Decimal(0))
+    current_pos_side = pos_data.get('side', 'None') # 'Buy', 'Sell', 'None'
     is_long = current_pos_side == 'Buy' and current_pos_size > 0
-    is_short = current_pos_side == 'Sell' and current_pos_size > 0 # Bybit V5 size is positive for short too
+    is_short = current_pos_side == 'Sell' and current_pos_size > 0
     is_flat = not is_long and not is_short
 
-    log.info(f"Current Position: {'Long' if is_long else 'Short' if is_short else 'Flat'} (Size: {current_pos_size})")
+    log.info(f"Processing signal '{signal}' | Current Position: {'Long' if is_long else 'Short' if is_short else 'Flat'} (Size: {current_pos_size})")
 
-    # --- Signal Actions ---
-    tp_ratio = Decimal(str(config['order'].get('tp_ratio', 2.0))) # Default R:R of 2 if not set
+    # --- Execute Actions based on Signal and State ---
+    tp_ratio = Decimal(str(config['order'].get('tp_ratio', 2.0)))
 
     # BUY Signal
     if signal == "BUY" and is_flat:
-        log.warning(f"{Fore.GREEN}{Style.BRIGHT}BUY Signal Received - Entering Long.{Style.RESET_ALL}")
-        # Calculate Stop Loss
+        log.warning(f"{Fore.GREEN}{Style.BRIGHT}BUY Signal - Attempting to Enter Long.{Style.RESET_ALL}")
         sl_price_raw = None
         sl_method = config['strategy']['stop_loss']['method']
         if sl_method == "ATR" and last_atr:
             sl_multiplier = float(config['strategy']['stop_loss']['atr_multiplier'])
             sl_price_raw = last_close - (last_atr * sl_multiplier)
         elif sl_method == "OB":
-             # Find the lowest point of active bull OBs below current price
              relevant_obs = [b for b in results['active_bull_boxes'] if b['bottom'] < last_close]
              if relevant_obs:
                   lowest_bottom = min(b['bottom'] for b in relevant_obs)
-                  # SL slightly below the lowest relevant OB bottom
-                  sl_buffer = (last_atr * 0.1) if last_atr else (last_close * 0.001) # Small buffer
+                  sl_buffer = (last_atr * 0.1) if last_atr else (last_close * 0.001)
                   sl_price_raw = lowest_bottom - sl_buffer
              else:
-                  log.warning("OB SL method chosen but no relevant Bull OB found below price. Falling back to ATR.")
-                  if last_atr: sl_price_raw = last_close - (last_atr * 2.0) # Fallback ATR SL
+                  log.warning("OB SL method: No relevant Bull OB found. Falling back to ATR.")
+                  if last_atr: sl_price_raw = last_close - (last_atr * 2.0)
 
-        if sl_price_raw is None:
-             log.error("Stop Loss price could not be calculated. Cannot place BUY order.")
+        if sl_price_raw is None or sl_price_raw >= last_close:
+             log.error(f"Invalid SL price for BUY ({sl_price_raw}). Order cancelled.")
              return
-
-        # Ensure SL is below entry
-        if sl_price_raw >= last_close:
-             log.error(f"Calculated SL price {sl_price_raw} is not below entry price {last_close}. Using fallback ATR SL.")
-             if last_atr: sl_price_raw = last_close - (last_atr * 2.0) # Fallback ATR SL
-             else: log.error("Cannot set SL: Fallback ATR is unavailable."); return
-
         sl_price = strategy_instance.round_price(sl_price_raw)
-        log.info(f"Calculated SL price for BUY: {sl_price}")
 
-        # Calculate Take Profit
         sl_distance = Decimal(str(last_close)) - Decimal(str(sl_price))
         tp_price_raw = float(Decimal(str(last_close)) + (sl_distance * tp_ratio)) if sl_distance > 0 else None
         tp_price = strategy_instance.round_price(tp_price_raw) if tp_price_raw else None
-        log.info(f"Calculated TP price for BUY: {tp_price} (Ratio: {tp_ratio})")
 
-        # Calculate Order Quantity
-        qty = calculate_order_qty(last_close, sl_price, config['order']['risk_per_trade_percent'])
+        qty = await calculate_order_qty(last_close, sl_price, config['order']['risk_per_trade_percent'])
         if qty and qty > 0:
-            place_order(symbol, "Buy", qty, price=last_close if config['order']['type'] == "Limit" else None, sl_price=sl_price, tp_price=tp_price)
-        else:
-            log.error("Order quantity calculation failed or resulted in zero/negative. Cannot place BUY order.")
+            await place_order(symbol, 'buy', qty, price=last_close if config['order']['type'] == 'limit' else None, sl_price=sl_price, tp_price=tp_price)
+        else: log.error("BUY order cancelled: Qty calculation failed.")
 
     # SELL Signal
     elif signal == "SELL" and is_flat:
-        log.warning(f"{Fore.RED}{Style.BRIGHT}SELL Signal Received - Entering Short.{Style.RESET_ALL}")
-        # Calculate Stop Loss
+        log.warning(f"{Fore.RED}{Style.BRIGHT}SELL Signal - Attempting to Enter Short.{Style.RESET_ALL}")
         sl_price_raw = None
         sl_method = config['strategy']['stop_loss']['method']
         if sl_method == "ATR" and last_atr:
              sl_multiplier = float(config['strategy']['stop_loss']['atr_multiplier'])
              sl_price_raw = last_close + (last_atr * sl_multiplier)
         elif sl_method == "OB":
-            # Find the highest point of active bear OBs above current price
             relevant_obs = [b for b in results['active_bear_boxes'] if b['top'] > last_close]
             if relevant_obs:
                   highest_top = max(b['top'] for b in relevant_obs)
-                  # SL slightly above the highest relevant OB top
-                  sl_buffer = (last_atr * 0.1) if last_atr else (last_close * 0.001) # Small buffer
+                  sl_buffer = (last_atr * 0.1) if last_atr else (last_close * 0.001)
                   sl_price_raw = highest_top + sl_buffer
             else:
-                  log.warning("OB SL method chosen but no relevant Bear OB found above price. Falling back to ATR.")
-                  if last_atr: sl_price_raw = last_close + (last_atr * 2.0) # Fallback ATR SL
+                  log.warning("OB SL method: No relevant Bear OB found. Falling back to ATR.")
+                  if last_atr: sl_price_raw = last_close + (last_atr * 2.0)
 
-        if sl_price_raw is None:
-             log.error("Stop Loss price could not be calculated. Cannot place SELL order.")
-             return
-
-        # Ensure SL is above entry
-        if sl_price_raw <= last_close:
-             log.error(f"Calculated SL price {sl_price_raw} is not above entry price {last_close}. Using fallback ATR SL.")
-             if last_atr: sl_price_raw = last_close + (last_atr * 2.0) # Fallback ATR SL
-             else: log.error("Cannot set SL: Fallback ATR is unavailable."); return
-
+        if sl_price_raw is None or sl_price_raw <= last_close:
+            log.error(f"Invalid SL price for SELL ({sl_price_raw}). Order cancelled.")
+            return
         sl_price = strategy_instance.round_price(sl_price_raw)
-        log.info(f"Calculated SL price for SELL: {sl_price}")
 
-        # Calculate Take Profit
         sl_distance = Decimal(str(sl_price)) - Decimal(str(last_close))
         tp_price_raw = float(Decimal(str(last_close)) - (sl_distance * tp_ratio)) if sl_distance > 0 else None
         tp_price = strategy_instance.round_price(tp_price_raw) if tp_price_raw else None
-        log.info(f"Calculated TP price for SELL: {tp_price} (Ratio: {tp_ratio})")
 
-        # Calculate Order Quantity
-        qty = calculate_order_qty(last_close, sl_price, config['order']['risk_per_trade_percent'])
+        qty = await calculate_order_qty(last_close, sl_price, config['order']['risk_per_trade_percent'])
         if qty and qty > 0:
-            place_order(symbol, "Sell", qty, price=last_close if config['order']['type'] == "Limit" else None, sl_price=sl_price, tp_price=tp_price)
-        else:
-            log.error("Order quantity calculation failed or resulted in zero/negative. Cannot place SELL order.")
+            await place_order(symbol, 'sell', qty, price=last_close if config['order']['type'] == 'limit' else None, sl_price=sl_price, tp_price=tp_price)
+        else: log.error("SELL order cancelled: Qty calculation failed.")
 
     # EXIT_LONG Signal
     elif signal == "EXIT_LONG" and is_long:
-        log.warning(f"{Fore.YELLOW}{Style.BRIGHT}EXIT_LONG Signal Received - Closing Long Position.{Style.RESET_ALL}")
-        close_position(symbol, position_data)
+        log.warning(f"{Fore.YELLOW}{Style.BRIGHT}EXIT_LONG Signal - Attempting to Close Long Position.{Style.RESET_ALL}")
+        await close_position(symbol, pos_data)
 
     # EXIT_SHORT Signal
     elif signal == "EXIT_SHORT" and is_short:
-        log.warning(f"{Fore.YELLOW}{Style.BRIGHT}EXIT_SHORT Signal Received - Closing Short Position.{Style.RESET_ALL}")
-        close_position(symbol, position_data)
+        log.warning(f"{Fore.YELLOW}{Style.BRIGHT}EXIT_SHORT Signal - Attempting to Close Short Position.{Style.RESET_ALL}")
+        await close_position(symbol, pos_data)
 
-    # HOLD Signal or signal matches current state -> Do Nothing
-    elif signal == "HOLD":
-        log.debug("HOLD Signal - No action.")
-    elif signal == "BUY" and is_long:
-        log.debug("BUY Signal - Already Long.")
-    elif signal == "SELL" and is_short:
-        log.debug("SELL Signal - Already Short.")
-    elif signal == "EXIT_LONG" and not is_long:
-         log.debug("EXIT_LONG Signal - Not Long.")
-    elif signal == "EXIT_SHORT" and not is_short:
-         log.debug("EXIT_SHORT Signal - Not Short.")
+    # No action needed signals
+    elif signal == "HOLD": log.debug("HOLD Signal - No action.")
+    elif signal == "BUY" and is_long: log.debug("BUY Signal - Already Long.")
+    elif signal == "SELL" and is_short: log.debug("SELL Signal - Already Short.")
+    elif signal == "EXIT_LONG" and not is_long: log.debug("EXIT_LONG Signal - Not Long.")
+    elif signal == "EXIT_SHORT" and not is_short: log.debug("EXIT_SHORT Signal - Not Short.")
+
+
+# --- Periodic Health Check ---
+async def periodic_check_loop():
+    """Runs periodic checks for WebSocket health and stale positions."""
+    global last_health_check_time, last_position_check_time
+    check_interval = config.get('checks', {}).get('health_check_interval', 60)
+    pos_check_interval = config.get('checks', {}).get('position_check_interval', 30)
+    ws_timeout = check_interval * 2 # Consider WS dead if no update for this long
+
+    log.info(f"Starting Periodic Check loop (Interval: {check_interval}s)")
+    while not stop_event.is_set():
+        try:
+            await asyncio.sleep(check_interval)
+            now = time.monotonic()
+            log.debug(f"Running periodic checks (Time: {now})...")
+            last_health_check_time = now
+
+            # 1. Check WebSocket Health (based on last message time)
+            time_since_last_ws = now - last_ws_update_time if last_ws_update_time > 0 else ws_timeout
+            if time_since_last_ws >= ws_timeout:
+                 log.warning(f"No WebSocket update received for {time_since_last_ws:.1f}s. Health check failed!")
+                 # Consider attempting to restart WS connection? More complex logic needed here.
+                 # For now, just log it. A dead WS thread check exists in main loop.
+            else:
+                 log.debug(f"WebSocket health check OK (last update {time_since_last_ws:.1f}s ago).")
+
+            # 2. Force Position Check if Stale (double check against WS updates)
+            time_since_last_pos_check = now - last_position_check_time if last_position_check_time > 0 else pos_check_interval
+            if time_since_last_pos_check >= pos_check_interval:
+                 log.info("Periodic check forcing position update...")
+                 await get_current_position(config['symbol'])
+
+            # Add other checks: balance low, API errors etc.
+
+        except asyncio.CancelledError:
+            log.info("Periodic check task cancelled.")
+            break
+        except Exception as e:
+            log.error(f"Error in periodic check loop: {e}", exc_info=True)
+            await asyncio.sleep(check_interval) # Wait before retrying after error
+
+    log.info("Periodic check loop finished.")
 
 
 # --- Graceful Shutdown ---
-def handle_shutdown_signal(signum, frame):
-    """Handles termination signals like SIGINT (Ctrl+C) and SIGTERM."""
-    if stop_event.is_set(): # Avoid running multiple times
-         return
-    log.warning(f"Shutdown signal {signal.Signals(signum).name} received. Initiating graceful shutdown...")
-    stop_event.set() # Signal loops and threads to stop
-    # Stop WS first to prevent processing more data
-    stop_websocket_connection()
+async def shutdown(signal_type):
+    """Cleans up resources and exits."""
+    log.warning(f"Shutdown initiated by signal {signal_type.name}...")
+    stop_event.set() # Signal all loops to stop
 
-    # --- Optional: Add logic here to manage open positions/orders on shutdown ---
-    # Example: Close open position? (Use with caution!)
-    # close_on_exit = False # Make this configurable
-    # if close_on_exit:
-    #     log.warning("Attempting to close open position on exit...")
-    #     pos_data = get_current_position(config['symbol'])
-    #     # Need to handle the 'None' return from rate limited check here
-    #     while pos_data is None: # Retry if rate limited
-    #          log.info("Waiting briefly to re-check position for exit closure...")
-    #          time.sleep(min(POSITION_CHECK_INTERVAL, 3)) # Wait a bit
-    #          pos_data = get_current_position(config['symbol'])
+    # Cancel all running asyncio tasks
+    tasks_to_cancel = list(running_tasks)
+    if tasks_to_cancel:
+        log.info(f"Cancelling {len(tasks_to_cancel)} running tasks...")
+        for task in tasks_to_cancel:
+            task.cancel()
+        # Wait for tasks to finish cancelling
+        await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
+        log.info("Tasks cancelled.")
 
-    #     if pos_data and pos_data.get('size', Decimal(0)) > 0:
-    #          close_position(config['symbol'], pos_data)
-    #     else:
-    #          log.info("No open position found to close on exit.")
+    # Close the CCXT exchange connection
+    if exchange and hasattr(exchange, 'close'):
+        log.info("Closing CCXT exchange connection...")
+        try:
+            await exchange.close()
+            log.info("Exchange connection closed.")
+        except Exception as e:
+            log.error(f"Error closing exchange connection: {e}", exc_info=True)
 
-    log.info("Shutdown complete. Exiting.")
-    # Give logs a moment to flush
-    time.sleep(1)
+    # Optional: Close open positions on exit? (Use with extreme caution)
+    # await close_open_position_on_exit() # Implement this function carefully if needed
+
+    log.warning("Shutdown complete. Exiting.")
+    # Allow logs to flush
+    await asyncio.sleep(0.5)
     sys.exit(0)
 
-# --- Main Execution ---
-if __name__ == "__main__":
-    print(Fore.MAGENTA + Style.BRIGHT + "\n~~~ Pyrmethus Volumatic+OB Trading Bot Starting ~~~")
+async def close_open_position_on_exit():
+     """Placeholder for logic to close position during shutdown."""
+     log.warning("Attempting to check/close position on exit (USE WITH CAUTION)...")
+     # Need to re-initialize exchange or ensure it's still valid? Risky.
+     # Best practice is usually to let existing SL/TP handle it or manage manually.
+     # If implementing: fetch position one last time and call close_position.
+     pass
 
-    # Load configuration
+
+# --- Main Application ---
+async def main():
+    """Main async function to run the bot."""
+    global config, exchange, market, strategy_instance, latest_dataframe, running_tasks
+
+    print(Fore.MAGENTA + Style.BRIGHT + "\n~~~ Pyrmethus Volumatic+OB Trading Bot Starting (CCXT Async) ~~~")
+
     config = load_config()
     setup_logging(config.get("log_level", "INFO"))
-    log.info(f"Configuration loaded from config.json")
+    log.info("Configuration loaded.")
     log.debug(f"Config: {json.dumps(config, indent=2)}")
 
-    # Register shutdown handlers
-    signal.signal(signal.SIGINT, handle_shutdown_signal)
-    signal.signal(signal.SIGTERM, handle_shutdown_signal)
+    # Connect to exchange
+    exchange = await connect_ccxt()
+    if not exchange: sys.exit(1)
 
-    # Connect to Bybit
-    session = connect_bybit()
-    if not session:
-        sys.exit(1) # Critical error, already logged
+    # Load market info
+    market = await load_exchange_market(config['symbol'])
+    if not market: sys.exit(1)
 
-    # Get Market Info
-    market_info = get_market_info(config['symbol'])
-    if not market_info:
-        log.critical("Could not retrieve market info. Check symbol and connection. Exiting.")
-        sys.exit(1)
-
-    # Set Leverage (Important!)
-    set_leverage(config['symbol'], config['order']['leverage'])
+    # Set leverage (if applicable)
+    await set_leverage(config['symbol'], config['order']['leverage'])
 
     # Initialize Strategy
     try:
-        strategy_instance = VolumaticOBStrategy(market_info=market_info, **config['strategy']['params'])
-    except (ValueError, KeyError, TypeError) as e:
-        log.critical(f"Failed to initialize strategy: {e}. Check config.json strategy params. Exiting.", exc_info=True)
+        strategy_instance = VolumaticOBStrategy(market=market, **config['strategy']['params'])
+    except Exception as e:
+        log.critical(f"Failed to initialize strategy: {e}. Check config.json.", exc_info=True)
+        await exchange.close() # Close connection before exiting
         sys.exit(1)
 
     # Fetch Initial Data
-    with data_lock:
-        latest_dataframe = fetch_initial_data(
+    async with data_lock: # Lock dataframe during initial fetch
+        latest_dataframe = await fetch_initial_data(
             config['symbol'],
-            config['interval'],
+            config['timeframe'],
             config['data']['fetch_limit']
         )
-
-    if latest_dataframe is None: # Check for None specifically (indicates fetch error)
-        log.critical("Failed to fetch initial data. Exiting.")
-        sys.exit(1)
-    if latest_dataframe.empty:
-        log.warning("Fetched initial data but the DataFrame is empty. Check symbol/interval on Bybit. Will attempt to continue with WS.")
-        # Allow continuing, WS might populate data, but strategy needs min_data_len
-    elif len(latest_dataframe) < strategy_instance.min_data_len:
-         log.warning(f"Fetched data ({len(latest_dataframe)}) is less than minimum required ({strategy_instance.min_data_len}). Strategy may need more data from WS.")
-         # Allow continuing
-
-    # Run Initial Analysis (only if enough data exists)
-    if latest_dataframe is not None and len(latest_dataframe) >= strategy_instance.min_data_len:
-        log.info("Running initial analysis on historical data...")
-        with data_lock:
-            initial_results = strategy_instance.update(latest_dataframe.copy())
-            # Display initial state but don't trade yet
-            log.info(f"Initial Analysis: Trend={initial_results['current_trend']}, Signal={initial_results['last_signal']}")
-    else:
-         log.info("Skipping initial analysis due to insufficient historical data.")
+        if latest_dataframe is None: # Indicates fetch error
+            log.critical("Failed to fetch initial market data. Exiting.")
+            await exchange.close()
+            sys.exit(1)
+        elif len(latest_dataframe) < strategy_instance.min_data_len:
+            log.warning(f"Initial data ({len(latest_dataframe)}) insufficient for strategy ({strategy_instance.min_data_len}). Waiting for WS data.")
+        else:
+            # Run initial analysis if enough data
+            log.info("Running initial analysis on historical data...")
+            try:
+                initial_results = strategy_instance.update(latest_dataframe.copy())
+                log.info(f"Initial Analysis Results: Trend={initial_results['current_trend']}, Signal={initial_results['last_signal']}")
+            except Exception as e:
+                 log.error(f"Error during initial analysis: {e}", exc_info=True)
 
 
-    # Start WebSocket
-    if not start_websocket_connection():
-        log.critical("Failed to start WebSocket connection. Exiting.")
-        sys.exit(1)
+    # Fetch initial position state
+    await get_current_position(config['symbol'])
+    log.info(f"Initial Position: {current_position['side']} (Size: {current_position['size']})")
 
-    log.info(f"{Fore.CYAN}Bot is running for {config['symbol']} ({config['interval']}). Waiting for confirmed candle updates...{Style.RESET_ALL}")
-    log.info(f"Trading Mode: {config['mode']}")
-    log.info("Press Ctrl+C to stop.")
+    log.info(f"{Fore.CYAN}Setup complete. Starting WebSocket watchers and main loops...{Style.RESET_ALL}")
+    log.info(f"Trading Mode: {config.get('mode', 'Live')}")
+    log.info(f"Symbol: {config['symbol']} | Timeframe: {config['timeframe']}")
 
-    # Main loop for periodic checks and keeping the script alive
+    # Start background tasks
+    tasks = [
+        asyncio.create_task(watch_kline_loop(config['symbol'], config['timeframe'])),
+        # Optional watchers (uncomment if needed):
+        # asyncio.create_task(watch_positions_loop(config['symbol'])),
+        # asyncio.create_task(watch_orders_loop(config['symbol'])),
+        asyncio.create_task(periodic_check_loop()),
+    ]
+    running_tasks.update(tasks) # Add tasks to the global set for cancellation
+
+    # Keep main running, tasks execute in background
+    # await asyncio.gather(*tasks) # This would block until *all* tasks finish (or one errors)
+
+    # Instead, keep main alive and let shutdown handler cancel tasks
     while not stop_event.is_set():
-        try:
-            # Periodically check WebSocket health (basic check on thread)
-            if ws_thread and not ws_thread.is_alive():
-                log.error("WebSocket thread appears to have died unexpectedly! Attempting restart...")
-                stop_websocket_connection() # Clean up first
-                time.sleep(10) # Wait before restarting
-                if not stop_event.is_set():
-                    if not start_websocket_connection():
-                        log.critical("Failed to restart WebSocket after failure. Stopping bot.")
-                        stop_event.set() # Trigger shutdown
-                    else:
-                         log.info("WebSocket connection restarted successfully.")
+         # Check if essential tasks (like kline watcher) are still running
+         kline_task = tasks[0] # Assuming kline is first
+         if kline_task.done():
+              log.critical("Kline watcher task has terminated unexpectedly!")
+              try:
+                   kline_task.result() # Raise exception if task failed
+              except Exception as e:
+                   log.critical(f"Kline watcher failed with error: {e}", exc_info=True)
+              log.critical("Attempting to stop bot gracefully due to essential task failure...")
+              # Signal shutdown without waiting for OS signal
+              await shutdown(signal.SIGTERM) # Simulate signal
+              break # Exit main loop
 
-            # Periodically ensure position data is recent (in case WS position updates fail)
-            now = time.time()
-            # Check slightly more often than the interval itself to ensure freshness
-            if now - last_position_check_time > POSITION_CHECK_INTERVAL:
-                log.debug("Periodic position check triggered.")
-                get_current_position(config['symbol']) # Force check (result ignored here, just updates time/logs)
+         await asyncio.sleep(10) # Heartbeat sleep for main loop
 
-            # Sleep until the next check or stop signal
-            stop_event.wait(timeout=5) # Sleep efficiently, checking stop_event periodically
 
-        except Exception as e:
-             log.error(f"An unexpected error occurred in the main loop: {e}", exc_info=True)
-             log.warning("Attempting to continue, but consider investigating the error.")
-             time.sleep(10) # Wait a bit longer after an unexpected error
+if __name__ == "__main__":
+    # Setup signal handlers for graceful shutdown
+    loop = asyncio.get_event_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, lambda s=sig: asyncio.create_task(shutdown(s)))
 
-    # Final cleanup (already handled by shutdown handler, but good practice)
-    log.info("Main loop finished.")
-    if ws_connected.is_set():
-        stop_websocket_connection()
-    log.info("Pyrmethus Bot has stopped.")
+    try:
+        loop.run_until_complete(main())
+    except asyncio.CancelledError:
+         log.info("Main task cancelled during shutdown.")
+    finally:
+         # Ensure exchange connection is closed even if main loop exits unexpectedly
+         if exchange and hasattr(exchange, 'close') and not exchange.is_closed:
+             loop.run_until_complete(exchange.close())
+         log.info("Application finished.")
+
 EOF
 
 echo -e "${GREEN}All files created successfully in ${YELLOW}${PROJECT_DIR}${NC}"
 echo -e "\n${YELLOW}--- Next Steps ---${NC}"
 echo -e "1. ${YELLOW}Edit the ${BLUE}${ENV_FILE}${YELLOW} file and add your actual Bybit API Key and Secret.${NC}"
 echo -e "   ${RED}IMPORTANT: Start with Testnet keys (BYBIT_TESTNET=\"True\")!${NC}"
-echo -e "2. Review ${YELLOW}${CONFIG_FILE}${NC} and adjust symbol, interval, risk, leverage, and strategy parameters as needed."
+echo -e "2. Review ${YELLOW}${CONFIG_FILE}${NC} carefully:"
+echo -e "   - Set your desired ${BLUE}symbol${NC} (e.g., BTC/USDT) and ${BLUE}timeframe${NC} (e.g., 5m)."
+echo -e "   - Adjust ${BLUE}risk_per_trade_percent${NC}, ${BLUE}leverage${NC}, ${BLUE}tp_ratio${NC}."
+echo -e "   - Configure strategy parameters under ${BLUE}strategy.params${NC}."
+echo -e "   - Ensure ${BLUE}account_type${NC} matches your Bybit account (usually 'contract' for linear perps)."
 echo -e "3. Install required Python packages:"
 echo -e "   ${GREEN}pip install -r ${REQ_FILE}${NC}"
 echo -e "4. Run the bot:"
 echo -e "   ${GREEN}python ${MAIN_FILE}${NC}"
-echo -e "\n${BLUE}Bot setup complete! Remember to test thoroughly on Testnet before using real funds.${NC}"
+echo -e "\n${BLUE}Bot setup complete! This is an asynchronous bot. Remember to test thoroughly on Testnet before using real funds.${NC}"
 
 # Make the setup script non-executable after running (optional)
 # chmod -x "$SETUP_SCRIPT_NAME" # Commented out, might want to re-run

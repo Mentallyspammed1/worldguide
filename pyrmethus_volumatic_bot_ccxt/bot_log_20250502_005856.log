@@ -1,0 +1,34 @@
+2025-05-02 00:58:56 - PyrmethusVolumaticBotCCXT - INFO - Logging to file: /data/data/com.termux/files/home/worldguide/pyrmethus_volumatic_bot_ccxt/bot_log_20250502_005856.log
+2025-05-02 00:58:56 - PyrmethusVolumaticBotCCXT - INFO - Logging configured.
+2025-05-02 00:58:56 - PyrmethusVolumaticBotCCXT - INFO - API Key found (ending with ...rKZ1)
+2025-05-02 00:58:56 - PyrmethusVolumaticBotCCXT - INFO - Connecting to CCXT exchange 'bybit' (Account: unified, Testnet: False)...
+2025-05-02 00:58:56 - PyrmethusVolumaticBotCCXT - INFO - Loading markets to test connection...
+2025-05-02 00:59:02 - PyrmethusVolumaticBotCCXT - INFO - [32mSuccessfully connected to Bybit. Loaded 2607 markets.[0m
+2025-05-02 00:59:02 - PyrmethusVolumaticBotCCXT - WARNING - Exchange Bybit might be missing required capabilities for this bot's configuration: watchOHLCV, watchPositions, watchOrders
+2025-05-02 00:59:07 - PyrmethusVolumaticBotCCXT - INFO - Market data loaded/updated for BTC/USDT:USDT.
+2025-05-02 00:59:07 - PyrmethusVolumaticBotCCXT - INFO - Attempting to set leverage for BTC/USDT:USDT to 10.0x...
+2025-05-02 00:59:08 - PyrmethusVolumaticBotCCXT - WARNING - Leverage for BTC/USDT:USDT likely already set to 10.0x (Exchange response: Not modified).
+2025-05-02 00:59:08 - PyrmethusVolumaticBotCCXT - INFO - Strategy 'VolumaticOBStrategy' initialized.
+2025-05-02 00:59:08 - PyrmethusVolumaticBotCCXT - INFO - Strategy requires minimum 1000 data points.
+2025-05-02 00:59:08 - PyrmethusVolumaticBotCCXT - WARNING - Configured fetch_limit (750) is less than required by strategy + buffer (1050). Increasing fetch limit.
+2025-05-02 00:59:08 - PyrmethusVolumaticBotCCXT - INFO - Fetching initial 1050 candles for BTC/USDT:USDT (15m)...
+2025-05-02 00:59:09 - PyrmethusVolumaticBotCCXT - INFO - Fetched 1000 initial candles. From 2025-04-21 20:00:00+00:00 to 2025-05-02 05:45:00+00:00
+2025-05-02 00:59:09 - PyrmethusVolumaticBotCCXT - INFO - Running initial analysis on historical data...
+2025-05-02 00:59:09 - PyrmethusVolumaticBotCCXT - INFO - Initial Analysis Complete: Trend=DOWN, Last Close=96671, Initial Signal=HOLD
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Initial Position State: None (Size: 0, Entry: 0)
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - [36mSetup complete. Starting WebSocket watchers and periodic checks...[0m
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Trading Mode: live
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Symbol: BTC/USDT:USDT | Timeframe: 15m
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Main loop running. Monitoring essential tasks... (Press Ctrl+C to stop)
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - ERROR - [31mKline watcher cannot start: Exchange 'Bybit' reports 'watchOHLCV' is not supported via CCXT for the current configuration.[0m
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - ERROR - The bot relies on WebSocket klines. Consider implementing polling with fetch_ohlcv as an alternative if WS is unavailable, or ensure your exchange/account supports WS klines.
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Position watcher skipped: Exchange does not support watchPositions.
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Order watcher skipped: Exchange does not support watchOrders.
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Starting Periodic Check loop (Health Interval: 60s, Position Interval: 30s, WS Timeout: 90.0s)
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - WARNING - [31mShutdown initiated by internal request...[0m
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Cancelling 4 running background tasks...
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Waiting up to 10 seconds for 1 tasks to cancel...
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Gather results received for cancelled tasks: 4
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Closing CCXT exchange connection...
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - INFO - Exchange connection closed.
+2025-05-02 00:59:10 - PyrmethusVolumaticBotCCXT - WARNING - Shutdown sequence complete. Exiting.

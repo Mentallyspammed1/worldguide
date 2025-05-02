@@ -1,7 +1,6 @@
 {
     "DOT/USDT:USDT": {
         "break_even_triggered": false,
-        "last_entry_price": "4.2393",
-        "last_signal": "SELL"
+        "last_entry_price": "4.2393"
     }
 }

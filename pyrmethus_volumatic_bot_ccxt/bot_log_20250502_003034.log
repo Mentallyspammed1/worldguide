@@ -1,0 +1,10 @@
+2025-05-02 00:30:34 - PyrmethusVolumaticBotCCXT - INFO - Logging to file: bot_log_20250502_003034.log
+2025-05-02 00:30:34 - PyrmethusVolumaticBotCCXT - INFO - Logging configured.
+2025-05-02 00:30:34 - PyrmethusVolumaticBotCCXT - INFO - API Key found (ending with ...rKZ1)
+2025-05-02 00:30:34 - PyrmethusVolumaticBotCCXT - INFO - Connecting to CCXT exchange 'bybit' (Account: contract, Testnet: False)...
+2025-05-02 00:30:41 - PyrmethusVolumaticBotCCXT - INFO - [32mSuccessfully connected to Bybit. Loaded 2607 markets.[0m
+2025-05-02 00:30:53 - PyrmethusVolumaticBotCCXT - ERROR - Failed to load market data for BTC/USDT:USDT: bybit GET https://api.bybit.com/v5/market/time
+2025-05-02 00:30:53 - PyrmethusVolumaticBotCCXT - CRITICAL - Failed to load market data for BTC/USDT:USDT. Exiting.
+2025-05-02 00:30:54 - PyrmethusVolumaticBotCCXT - INFO - Entering final cleanup phase...
+2025-05-02 00:30:54 - PyrmethusVolumaticBotCCXT - WARNING - Event loop unavailable, cannot perform final task cleanup.
+2025-05-02 00:30:54 - PyrmethusVolumaticBotCCXT - INFO - [35m~~~ Pyrmethus Volumatic+OB Trading Bot Finished ~~~[0m

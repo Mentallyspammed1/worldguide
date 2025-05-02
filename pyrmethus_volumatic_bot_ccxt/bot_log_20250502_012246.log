@@ -1,0 +1,13 @@
+2025-05-02 01:22:46 - PyrmethusVolumaticBotCCXT - INFO - Logging to file: /data/data/com.termux/files/home/worldguide/pyrmethus_volumatic_bot_ccxt/bot_log_20250502_012246.log
+2025-05-02 01:22:46 - PyrmethusVolumaticBotCCXT - INFO - Logging configured.
+2025-05-02 01:22:46 - PyrmethusVolumaticBotCCXT - INFO - API Key found (ending with ...rKZ1)
+2025-05-02 01:22:46 - PyrmethusVolumaticBotCCXT - INFO - Connecting to CCXT exchange 'bybit' (Account: unified, Testnet: False)...
+2025-05-02 01:22:46 - PyrmethusVolumaticBotCCXT - INFO - Loading markets to test connection...
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - INFO - [32mSuccessfully connected to Bybit. Loaded 2607 markets.[0m
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - WARNING - Exchange Bybit might be missing required capabilities for this bot's configuration: watchOHLCV, watchPositions, watchOrders
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - CRITICAL - CRITICAL: Exchange is missing essential methods: watchOHLCV. Cannot continue.
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - CRITICAL - Failed to connect to exchange. Exiting.
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - INFO - Entering final cleanup phase...
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - WARNING - Event loop unavailable, cannot perform final task cleanup.
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - INFO - Closing asyncio event loop.
+2025-05-02 01:22:55 - PyrmethusVolumaticBotCCXT - INFO - [35m~~~ Pyrmethus Volumatic+OB Trading Bot Finished ~~~[0m

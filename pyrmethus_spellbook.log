@@ -1,0 +1,295 @@
+2025-05-01 19:13:06 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:13:06 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:13:06 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:13:06 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:13:06 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:13:06 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:13:06 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:13:06 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:13:06 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:13:06 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:13:06 [INFO] [31mSummoned BYBIT_API_KEY: ****
+2025-05-01 19:13:06 [INFO] [31mSummoned BYBIT_API_SECRET: ****
+2025-05-01 19:13:06 [INFO] [33mSummoned OHLCV_LIMIT: 800
+2025-05-01 19:13:06 [INFO] [33mSummoned LOOP_SLEEP_SECONDS: 15
+2025-05-01 19:13:06 [INFO] [33mSummoned ORDER_CHECK_DELAY_SECONDS: 2
+2025-05-01 19:13:06 [WARNING] [33mUsing default value for ORDER_CHECK_TIMEOUT_SECONDS: 10
+2025-05-01 19:13:06 [INFO] [33mSummoned MAX_FETCH_RETRIES: 5
+2025-05-01 19:13:06 [INFO] [33mSummoned TRADE_ONLY_WITH_TREND: True
+2025-05-01 19:13:06 [INFO] [34mInitializing connection to Bybit Nexus...
+2025-05-01 19:13:08 [CRITICAL] [31m[1mAuthentication failed! Check your API keys in the .env scroll. Halting.
+2025-05-01 19:13:52 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:13:52 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:13:52 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:13:52 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:13:52 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:13:52 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:13:52 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:13:52 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:13:52 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:13:52 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:13:52 [INFO] [31mSummoned BYBIT_API_KEY: ****
+2025-05-01 19:13:52 [INFO] [31mSummoned BYBIT_API_SECRET: ****
+2025-05-01 19:13:52 [INFO] [33mSummoned OHLCV_LIMIT: 800
+2025-05-01 19:13:52 [INFO] [33mSummoned LOOP_SLEEP_SECONDS: 15
+2025-05-01 19:13:52 [INFO] [33mSummoned ORDER_CHECK_DELAY_SECONDS: 2
+2025-05-01 19:13:52 [WARNING] [33mUsing default value for ORDER_CHECK_TIMEOUT_SECONDS: 10
+2025-05-01 19:13:52 [INFO] [33mSummoned MAX_FETCH_RETRIES: 5
+2025-05-01 19:13:52 [INFO] [33mSummoned TRADE_ONLY_WITH_TREND: True
+2025-05-01 19:13:52 [INFO] [34mInitializing connection to Bybit Nexus...
+2025-05-01 19:13:53 [CRITICAL] [31m[1mAuthentication failed! Check your API keys in the .env scroll. Halting.
+2025-05-01 19:14:31 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:14:31 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:14:31 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:14:31 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:14:31 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:14:31 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:14:31 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:14:31 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:14:31 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:14:31 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:14:31 [INFO] [31mSummoned BYBIT_API_KEY: ****
+2025-05-01 19:14:31 [INFO] [31mSummoned BYBIT_API_SECRET: ****
+2025-05-01 19:14:31 [INFO] [33mSummoned OHLCV_LIMIT: 800
+2025-05-01 19:14:31 [INFO] [33mSummoned LOOP_SLEEP_SECONDS: 15
+2025-05-01 19:14:31 [INFO] [33mSummoned ORDER_CHECK_DELAY_SECONDS: 2
+2025-05-01 19:14:31 [WARNING] [33mUsing default value for ORDER_CHECK_TIMEOUT_SECONDS: 10
+2025-05-01 19:14:31 [INFO] [33mSummoned MAX_FETCH_RETRIES: 5
+2025-05-01 19:14:31 [INFO] [33mSummoned TRADE_ONLY_WITH_TREND: True
+2025-05-01 19:14:31 [INFO] [34mInitializing connection to Bybit Nexus...
+2025-05-01 19:14:33 [CRITICAL] [31m[1mAuthentication failed! Check your API keys in the .env scroll. Halting.
+2025-05-01 19:16:45 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:16:45 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:16:45 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:16:45 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:16:45 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:16:45 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:16:45 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:16:45 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:16:45 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:16:45 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:19:30 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:19:30 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:19:30 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:19:30 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:19:30 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:19:30 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:19:30 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:19:30 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:19:30 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:19:30 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:19:30 [INFO] [33mSummoned BYBIT_API_KEY: ****
+2025-05-01 19:19:30 [INFO] [33mSummoned BYBIT_API_SECRET: ****
+2025-05-01 19:19:30 [INFO] [33mSummoned OHLCV_LIMIT: 800
+2025-05-01 19:19:30 [INFO] [33mSummoned LOOP_SLEEP_SECONDS: 15
+2025-05-01 19:19:30 [INFO] [33mSummoned ORDER_CHECK_DELAY_SECONDS: 2
+2025-05-01 19:19:30 [WARNING] [33mUsing default value for ORDER_CHECK_TIMEOUT_SECONDS: 10
+2025-05-01 19:19:30 [INFO] [33mSummoned MAX_FETCH_RETRIES: 5
+2025-05-01 19:19:30 [INFO] [33mSummoned TRADE_ONLY_WITH_TREND: True
+2025-05-01 19:19:30 [INFO] [34mInitializing connection to Bybit Nexus...
+2025-05-01 19:19:32 [CRITICAL] [31m[1mAuthentication failed! Check your API keys in the .env scroll. Halting.
+2025-05-01 19:20:04 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:20:04 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:20:04 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:20:04 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:20:04 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:20:04 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:20:04 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:20:04 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:20:04 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:20:04 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:20:04 [INFO] [33mSummoned BYBIT_API_KEY: ****
+2025-05-01 19:20:04 [INFO] [33mSummoned BYBIT_API_SECRET: ****
+2025-05-01 19:20:04 [INFO] [33mSummoned OHLCV_LIMIT: 800
+2025-05-01 19:20:04 [INFO] [33mSummoned LOOP_SLEEP_SECONDS: 15
+2025-05-01 19:20:04 [INFO] [33mSummoned ORDER_CHECK_DELAY_SECONDS: 2
+2025-05-01 19:20:04 [WARNING] [33mUsing default value for ORDER_CHECK_TIMEOUT_SECONDS: 10
+2025-05-01 19:20:04 [INFO] [33mSummoned MAX_FETCH_RETRIES: 5
+2025-05-01 19:20:04 [INFO] [33mSummoned TRADE_ONLY_WITH_TREND: True
+2025-05-01 19:20:04 [INFO] [34mInitializing connection to Bybit Nexus...
+2025-05-01 19:20:04 [CRITICAL] [31m[1mAuthentication failed! Check your API keys in the .env scroll. Halting.
+2025-05-01 19:31:27 [INFO] [33mSummoned SYMBOL: FARTCOIN/USDT:USDT
+2025-05-01 19:31:27 [INFO] [33mSummoned MARKET_TYPE: linear
+2025-05-01 19:31:27 [INFO] [33mSummoned INTERVAL: 1m
+2025-05-01 19:31:27 [INFO] [33mSummoned RISK_PERCENTAGE: 0.01
+2025-05-01 19:31:27 [INFO] [33mSummoned SL_ATR_MULTIPLIER: 1.0
+2025-05-01 19:31:27 [INFO] [33mSummoned TSL_ACTIVATION_ATR_MULTIPLIER: 1.0
+2025-05-01 19:31:27 [INFO] [33mSummoned TRAILING_STOP_PERCENT: 0.2
+2025-05-01 19:31:27 [INFO] [33mSummoned SL_TRIGGER_BY: LastPrice
+2025-05-01 19:31:27 [INFO] [33mSummoned TSL_TRIGGER_BY: LastPrice
+2025-05-01 19:31:27 [WARNING] [33mUsing default value for POSITION_QTY_EPSILON: 0.000001
+2025-05-01 19:31:27 [INFO] [33mSummoned BYBIT_API_KEY: ****
+2025-05-01 19:31:27 [INFO] [33mSummoned BYBIT_API_SECRET: ****
+2025-05-01 19:31:27 [INFO] [33mSummoned OHLCV_LIMIT: 800
+2025-05-01 19:31:27 [INFO] [33mSummoned LOOP_SLEEP_SECONDS: 15
+2025-05-01 19:31:27 [INFO] [33mSummoned ORDER_CHECK_DELAY_SECONDS: 2
+2025-05-01 19:31:27 [WARNING] [33mUsing default value for ORDER_CHECK_TIMEOUT_SECONDS: 10
+2025-05-01 19:31:27 [INFO] [33mSummoned MAX_FETCH_RETRIES: 5
+2025-05-01 19:31:27 [INFO] [33mSummoned TRADE_ONLY_WITH_TREND: True
+2025-05-01 19:31:27 [INFO] [34mInitializing connection to Bybit Nexus...
+2025-05-01 19:31:33 [INFO] [32m[1mSuccessfully connected to Bybit Nexus (Linear Markets).
+2025-05-01 19:31:33 [INFO] [36mMarket spirit for FARTCOIN/USDT:USDT acknowledged.
+2025-05-01 19:31:33 [INFO] Successfully parsed market precision, limits, and contract size.
+2025-05-01 19:31:33 [INFO] [45m[37m[1m*** Pyrmethus Termux Trading Spell Activated (v2 Precision) ***
+2025-05-01 19:31:33 [INFO] Symbol: FARTCOIN/USDT:USDT (Linear)
+2025-05-01 19:31:33 [INFO] Timeframe: 1m
+2025-05-01 19:31:33 [INFO] Risk per trade: 1.00%
+2025-05-01 19:31:33 [INFO] SL Multiplier: 1.0 * ATR
+2025-05-01 19:31:33 [INFO] TSL Activation: 1.0 * ATR Profit
+2025-05-01 19:31:33 [INFO] TSL Trail Percent: 0.2%
+2025-05-01 19:31:33 [INFO] Trigger Prices: SL=LastPrice, TSL=LastPrice
+2025-05-01 19:31:33 [INFO] Trade Only With Trend (50 EMA): True
+2025-05-01 19:31:33 [INFO] Position Quantity Epsilon: 0.000001
+2025-05-01 19:31:33 [INFO] Log File: pyrmethus_spellbook.log
+2025-05-01 19:31:33 [INFO] [32m[1mNexus connection stable. Awaiting market whispers...
+2025-05-01 19:31:33 [INFO] [35m[1m
+--- Starting Cycle 1 ---
+2025-05-01 19:31:33 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:31:34 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:31:34 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:31:34 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:31:34 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:31:35 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:31:35 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:31:35 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:31:35 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:31:35 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:31:35 [INFO] No entry signals detected while flat.
+2025-05-01 19:31:35 [INFO] [35m--- Cycle 1 Complete (Duration: 2.01s) ---
+2025-05-01 19:31:35 [INFO] [34mCycle 1 finished. Resting for 15 seconds...
+2025-05-01 19:31:50 [INFO] [35m[1m
+--- Starting Cycle 2 ---
+2025-05-01 19:31:50 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:31:51 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:31:51 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:31:51 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:31:51 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:31:51 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:31:51 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:31:52 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:31:52 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:31:52 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:31:52 [INFO] No entry signals detected while flat.
+2025-05-01 19:31:52 [INFO] [35m--- Cycle 2 Complete (Duration: 1.21s) ---
+2025-05-01 19:31:52 [INFO] [34mCycle 2 finished. Resting for 15 seconds...
+2025-05-01 19:32:07 [INFO] [35m[1m
+--- Starting Cycle 3 ---
+2025-05-01 19:32:07 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:32:07 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:32:07 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:32:07 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:32:07 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:32:07 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:32:07 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:32:08 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:32:08 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:32:08 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:32:08 [INFO] No entry signals detected while flat.
+2025-05-01 19:32:08 [INFO] [35m--- Cycle 3 Complete (Duration: 1.17s) ---
+2025-05-01 19:32:08 [INFO] [34mCycle 3 finished. Resting for 15 seconds...
+2025-05-01 19:32:23 [INFO] [35m[1m
+--- Starting Cycle 4 ---
+2025-05-01 19:32:23 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:32:23 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:32:23 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:32:23 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:32:23 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:32:24 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:32:24 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:32:24 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:32:24 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:32:24 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:32:24 [INFO] No entry signals detected while flat.
+2025-05-01 19:32:24 [INFO] [35m--- Cycle 4 Complete (Duration: 1.20s) ---
+2025-05-01 19:32:24 [INFO] [34mCycle 4 finished. Resting for 15 seconds...
+2025-05-01 19:32:39 [INFO] [35m[1m
+--- Starting Cycle 5 ---
+2025-05-01 19:32:39 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:32:39 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:32:39 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:32:39 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:32:39 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:32:40 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:32:40 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:32:40 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:32:40 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:32:40 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:32:40 [INFO] No entry signals detected while flat.
+2025-05-01 19:32:40 [INFO] [35m--- Cycle 5 Complete (Duration: 1.24s) ---
+2025-05-01 19:32:40 [INFO] [34mCycle 5 finished. Resting for 15 seconds...
+2025-05-01 19:32:55 [INFO] [35m[1m
+--- Starting Cycle 6 ---
+2025-05-01 19:32:55 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:32:56 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:32:56 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:32:56 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:32:56 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:32:56 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:32:56 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:32:56 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:32:56 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:32:56 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:32:56 [INFO] No entry signals detected while flat.
+2025-05-01 19:32:56 [INFO] [35m--- Cycle 6 Complete (Duration: 1.15s) ---
+2025-05-01 19:32:56 [INFO] [34mCycle 6 finished. Resting for 15 seconds...
+2025-05-01 19:33:11 [INFO] [35m[1m
+--- Starting Cycle 7 ---
+2025-05-01 19:33:11 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:33:12 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:33:12 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:33:12 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:33:12 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:33:12 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:33:12 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:33:13 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:33:13 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:33:13 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:33:13 [INFO] No entry signals detected while flat.
+2025-05-01 19:33:13 [INFO] [35m--- Cycle 7 Complete (Duration: 1.20s) ---
+2025-05-01 19:33:13 [INFO] [34mCycle 7 finished. Resting for 15 seconds...
+2025-05-01 19:33:28 [INFO] [35m[1m
+--- Starting Cycle 8 ---
+2025-05-01 19:33:28 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:33:28 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:33:28 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:33:28 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:33:28 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:33:28 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:33:28 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:33:29 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:33:29 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:33:29 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:33:29 [INFO] No entry signals detected while flat.
+2025-05-01 19:33:29 [INFO] [35m--- Cycle 8 Complete (Duration: 1.17s) ---
+2025-05-01 19:33:29 [INFO] [34mCycle 8 finished. Resting for 15 seconds...
+2025-05-01 19:33:44 [INFO] [35m[1m
+--- Starting Cycle 9 ---
+2025-05-01 19:33:44 [INFO] [36mChanneling market whispers for FARTCOIN/USDT:USDT (1m, limit=800)...
+2025-05-01 19:33:44 [INFO] [32mMarket whispers received (800 candles).
+2025-05-01 19:33:44 [INFO] [36mWeaving indicator patterns...
+2025-05-01 19:33:44 [INFO] [32mIndicator patterns woven successfully.
+2025-05-01 19:33:44 [INFO] [36mQuerying the Vault of USDT...
+2025-05-01 19:33:45 [INFO] [32mVault contains 9.3356 free USDT (Total: 9.3356).
+2025-05-01 19:33:45 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:33:45 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:33:45 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:33:45 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:33:45 [INFO] No entry signals detected while flat.
+2025-05-01 19:33:45 [INFO] [35m--- Cycle 9 Complete (Duration: 1.22s) ---
+2025-05-01 19:33:45 [INFO] [34mCycle 9 finished. Resting for 15 seconds...
+2025-05-01 19:33:53 [WARNING] [33m
+Ctrl+C detected! Initiating shutdown...
+2025-05-01 19:33:53 [WARNING] [33m[1m
+=== Initiating Graceful Shutdown Sequence ===
+2025-05-01 19:33:53 [INFO] [36mDispelling all open orders for FARTCOIN/USDT:USDT...
+2025-05-01 19:33:53 [INFO] [32mNo open orders found for the symbol to cancel.
+2025-05-01 19:33:53 [INFO] Clearing local order tracker.
+2025-05-01 19:33:53 [INFO] Waiting briefly after order cancellation...
+2025-05-01 19:33:56 [INFO] [36mChecking for lingering positions to close...
+2025-05-01 19:33:56 [INFO] [36mConsulting position spirits for FARTCOIN/USDT:USDT...
+2025-05-01 19:33:57 [WARNING] [33mReceived position data with unexpected side 'None'. Ignoring.
+2025-05-01 19:33:57 [INFO] [34mNo active non-zero positions found for FARTCOIN/USDT:USDT after processing.
+2025-05-01 19:33:57 [INFO] [32mPosition spirits consulted.
+2025-05-01 19:33:57 [INFO] [32mNo open positions found requiring closure.
+2025-05-01 19:33:57 [WARNING] [33m[1m=== Graceful Shutdown Sequence Complete ===
+2025-05-01 19:33:57 [INFO] Flushing logs and shutting down logging system.

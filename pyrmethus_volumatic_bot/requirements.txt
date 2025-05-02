@@ -1,8 +1,13 @@
-pybit
+# Core dependencies
+pybit>=5.5.0 # Use a recent version of pybit V5
 python-dotenv
-pandas
-pandas-ta
+pandas>=1.5.0 # Ensure modern pandas features
 numpy
 colorama
+
+# Strategy specific
+pandas-ta
+
+# Optional but recommended
 websocket-client>=1.3.0 # Often needed by pybit WS
-requests # Good to have for potential health checks etc.
+requests # Good for potential health checks, external API calls etc.

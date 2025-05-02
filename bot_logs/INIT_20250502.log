@@ -1,0 +1,22 @@
+2025-05-02T00:17:16-0500 - INFO - INIT - Application starting...
+2025-05-02T00:17:16-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-02T00:17:16-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-02T00:17:16-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-02T00:17:16-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-02T00:17:16-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-02T00:17:16-0500 - INFO - INIT - Attempting to load markets...
+2025-05-02T00:17:24-0500 - INFO - INIT - Successfully loaded 2607 markets from Bybit.
+2025-05-02T00:17:24-0500 - INFO - INIT - Cached categories for 2607 markets (Spot/Linear/Inverse/Option).
+2025-05-02T00:17:24-0500 - INFO - INIT - Market data loaded successfully (2607 valid markets found).
+2025-05-02T00:17:24-0500 - INFO - INIT - Closed CCXT exchange connection.
+2025-05-02T00:51:14-0500 - INFO - INIT - Application starting...
+2025-05-02T00:51:14-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-02T00:51:14-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-02T00:51:14-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-02T00:51:14-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-02T00:51:14-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-02T00:51:14-0500 - INFO - INIT - Attempting to load markets...
+2025-05-02T00:51:20-0500 - INFO - INIT - Successfully loaded 2607 markets from Bybit.
+2025-05-02T00:51:20-0500 - INFO - INIT - Cached categories for 2607 markets (Spot/Linear/Inverse/Option).
+2025-05-02T00:51:20-0500 - INFO - INIT - Market data loaded successfully (2607 valid markets found).
+2025-05-02T00:51:20-0500 - INFO - INIT - Closed CCXT exchange connection.

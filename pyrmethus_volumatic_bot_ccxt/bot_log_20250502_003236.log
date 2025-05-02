@@ -1,0 +1,33 @@
+2025-05-02 00:32:36 - PyrmethusVolumaticBotCCXT - INFO - Logging to file: bot_log_20250502_003236.log
+2025-05-02 00:32:36 - PyrmethusVolumaticBotCCXT - INFO - Logging configured.
+2025-05-02 00:32:36 - PyrmethusVolumaticBotCCXT - INFO - API Key found (ending with ...rKZ1)
+2025-05-02 00:32:36 - PyrmethusVolumaticBotCCXT - INFO - Connecting to CCXT exchange 'bybit' (Account: unified, Testnet: False)...
+2025-05-02 00:32:43 - PyrmethusVolumaticBotCCXT - INFO - [32mSuccessfully connected to Bybit. Loaded 2607 markets.[0m
+2025-05-02 00:32:49 - PyrmethusVolumaticBotCCXT - INFO - Market data loaded/updated for BTC/USDT:USDT.
+2025-05-02 00:32:49 - PyrmethusVolumaticBotCCXT - INFO - Attempting to set leverage for BTC/USDT:USDT to 10.0x...
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - WARNING - Leverage for BTC/USDT:USDT likely already set to 10.0x (Exchange response: Not modified).
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - INFO - Strategy 'VolumaticOBStrategy' initialized.
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - INFO - Strategy requires minimum 1000 data points.
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - WARNING - Configured fetch_limit (750) is less than required by strategy + buffer (1050). Increasing fetch limit.
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - INFO - Fetching initial 1050 candles for BTC/USDT:USDT (15m)...
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - INFO - Fetched 1000 initial candles. From 2025-04-21 19:45:00+00:00 to 2025-05-02 05:30:00+00:00
+2025-05-02 00:32:50 - PyrmethusVolumaticBotCCXT - INFO - Running initial analysis on historical data...
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Initial Analysis Complete: Trend=UP, Last Close=96828, Initial Signal=HOLD
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Initial Position State: None (Size: 0, Entry: 0)
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - [36mSetup complete. Starting WebSocket watchers and periodic checks...[0m
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Trading Mode: live
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Symbol: BTC/USDT:USDT | Timeframe: 15m
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Main loop running. Monitoring essential tasks... (Press Ctrl+C to stop)
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - ERROR - [31mKline watcher cannot start: Exchange 'Bybit' reports 'watchOHLCV' is not supported via CCXT for the current configuration (symbol/account type/etc.).[0m
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - ERROR - The bot relies on WebSocket klines. Consider implementing polling with fetch_ohlcv as an alternative if WS is unavailable.
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Position watcher skipped: Exchange does not support watchPositions.
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Order watcher skipped: Exchange does not support watchOrders.
+2025-05-02 00:32:51 - PyrmethusVolumaticBotCCXT - INFO - Starting Periodic Check loop (Health Interval: 60s, Position Interval: 30s, WS Timeout: 90.0s)
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - CRITICAL - [31m[1mCRITICAL: Kline watcher task has terminated unexpectedly![0m
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - CRITICAL - Attempting to stop bot gracefully due to essential task failure...
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - INFO - Main loop finished.
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - WARNING - [31mShutdown initiated by internal request...[0m
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - INFO - Cancelling 4 running background tasks...
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - INFO - Entering final cleanup phase...
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - WARNING - Event loop unavailable, cannot perform final task cleanup.
+2025-05-02 00:32:56 - PyrmethusVolumaticBotCCXT - INFO - [35m~~~ Pyrmethus Volumatic+OB Trading Bot Finished ~~~[0m

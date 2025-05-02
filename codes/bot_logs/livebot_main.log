@@ -7997,3 +7997,100 @@ Request ID: gzY4f4XMQajFjE02mzorW8n9d-qqqQFN9P7jkUBuv-NPM_h9grt2DA==
 2025-04-24 23:40:35.081 UTC - DEBUG    - [livebot_main:839] - Saved current state successfully to bot_state.json
 2025-04-24 23:40:35.081 UTC - INFO     - [livebot_main:4804] - --- Bot Cycle Finished in 2.78 seconds ---
 2025-04-24 23:40:35.081 UTC - DEBUG    - [livebot_main:4807] - Waiting 12.22 seconds before next cycle...
+2025-05-02 03:19:23.879 UTC - INFO     - [livebot_main:353] - Logger 'livebot_main' initialized. Log file: 'livebot_main.log', Console Level: INFO
+2025-05-02 03:19:23.880 UTC - INFO     - [livebot_main:4063] - --- Enhanced Trading Bot v1.1.1 Starting ---
+2025-05-02 03:19:23.880 UTC - INFO     - [livebot_main:4064] - Using Python 3.12.10 (main, Apr  9 2025, 18:13:11) [Clang 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456
+2025-05-02 03:19:23.880 UTC - INFO     - [livebot_main:4065] - Using CCXT 4.4.72
+2025-05-02 03:19:23.880 UTC - INFO     - [livebot_main:4066] - Using Timezone: America/Chicago
+2025-05-02 03:19:23.881 UTC - INFO     - [livebot_main:4070] - Loading configuration from: config.json
+2025-05-02 03:19:23.882 UTC - INFO     - [livebot_main:801] - Configuration loaded and validated successfully.
+2025-05-02 03:19:23.882 UTC - INFO     - [livebot_main:937] - Using Quote Currency: USDT
+2025-05-02 03:19:23.911 UTC - WARNING  - [livebot_main:1016] - [91m--- USING LIVE TRADING MODE (Real Money) --- CAUTION ADVISED![0m
+2025-05-02 03:19:23.912 UTC - INFO     - [livebot_main:1021] - Connecting to bybit (Sandbox: False)...
+2025-05-02 03:19:23.912 UTC - INFO     - [livebot_main:1022] - Loading markets for bybit... (CCXT Version: 4.4.72)
+2025-05-02 03:19:32.153 UTC - INFO     - [livebot_main:1027] - Markets loaded successfully for bybit. Found 2605 markets.
+2025-05-02 03:19:32.154 UTC - INFO     - [livebot_main:1036] - Attempting initial balance fetch for USDT to test credentials and detect account type...
+2025-05-02 03:19:32.154 UTC - DEBUG    - [livebot_main:1118] - Checking balance with accountType=UNIFIED...
+2025-05-02 03:19:33.498 UTC - DEBUG    - [livebot_main:2194] - Parsed balance via standard CCXT structure ['USDT']['free']: 9.30074825
+2025-05-02 03:19:33.499 UTC - INFO     - [livebot_main:1127] - Detected UNIFIED account structure (Balance check successful).
+2025-05-02 03:19:33.500 UTC - INFO     - [livebot_main:1046] - Detected Account Type: UNIFIED
+2025-05-02 03:19:33.502 UTC - INFO     - [livebot_main:1063] - [92mSuccessfully connected. Initial USDT balance: 9.3007[0m
+2025-05-02 03:19:33.505 UTC - INFO     - [livebot_main:1084] - Exchange initialization checks passed.
+2025-05-02 03:19:33.518 UTC - INFO     - [livebot_main:823] - Loaded previous state from bot_state.json
+2025-05-02 03:19:33.519 UTC - INFO     - [livebot_main:4088] - Starting main trading loop...
+2025-05-02 03:19:33.520 UTC - INFO     - [livebot_main:4091] - --- New Bot Cycle ---
+2025-05-02 03:19:33.527 UTC - DEBUG    - [livebot_main:899] - Saved current state successfully to bot_state.json
+2025-05-02 03:19:33.527 UTC - INFO     - [livebot_main:4158] - Cycle finished in 0.01s. Sleeping for 14.99s...
+2025-05-02 03:19:48.521 UTC - INFO     - [livebot_main:4091] - --- New Bot Cycle ---
+2025-05-02 03:19:48.526 UTC - DEBUG    - [livebot_main:899] - Saved current state successfully to bot_state.json
+2025-05-02 03:19:48.527 UTC - INFO     - [livebot_main:4158] - Cycle finished in 0.01s. Sleeping for 14.99s...
+2025-05-02 03:20:03.521 UTC - INFO     - [livebot_main:4091] - --- New Bot Cycle ---
+2025-05-02 03:20:03.523 UTC - DEBUG    - [livebot_main:899] - Saved current state successfully to bot_state.json
+2025-05-02 03:20:03.523 UTC - INFO     - [livebot_main:4158] - Cycle finished in 0.00s. Sleeping for 15.00s...
+2025-05-02 03:20:15.728 UTC - INFO     - [livebot_main:4162] - KeyboardInterrupt received. Shutting down gracefully...
+2025-05-02 03:20:15.730 UTC - INFO     - [livebot_main:4167] - Saving final state and closing exchange...
+2025-05-02 03:20:15.732 UTC - DEBUG    - [livebot_main:899] - Saved current state successfully to bot_state.json
+2025-05-02 04:37:59.656 UTC - INFO     - [livebot_main:354] - Logger 'livebot_main' initialized. Log file: 'livebot_main.log', Console Level: INFO
+2025-05-02 04:37:59.656 UTC - INFO     - [livebot_main:4100] - --- Enhanced Trading Bot v1.1.3 Starting ---
+2025-05-02 04:37:59.657 UTC - INFO     - [livebot_main:4101] - Using Python 3.12.10 (main, Apr  9 2025, 18:13:11) [Clang 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456
+2025-05-02 04:37:59.657 UTC - INFO     - [livebot_main:4102] - Using CCXT 4.4.72
+2025-05-02 04:37:59.657 UTC - INFO     - [livebot_main:4103] - Using Timezone: America/Chicago
+2025-05-02 04:37:59.657 UTC - INFO     - [livebot_main:4107] - Loading configuration from: config.json
+2025-05-02 04:37:59.659 UTC - INFO     - [livebot_main:797] - Configuration loaded and validated successfully.
+2025-05-02 04:37:59.659 UTC - INFO     - [livebot_main:974] - Using Quote Currency: USDT
+2025-05-02 04:37:59.684 UTC - WARNING  - [livebot_main:1053] - [91m--- USING LIVE TRADING MODE (Real Money) --- CAUTION ADVISED![0m
+2025-05-02 04:37:59.684 UTC - INFO     - [livebot_main:1058] - Connecting to bybit (Sandbox: False)...
+2025-05-02 04:37:59.685 UTC - INFO     - [livebot_main:1059] - Loading markets for bybit... (CCXT Version: 4.4.72)
+2025-05-02 04:38:09.411 UTC - INFO     - [livebot_main:1064] - Markets loaded successfully for bybit. Found 2605 markets.
+2025-05-02 04:38:09.411 UTC - INFO     - [livebot_main:1073] - Attempting initial balance fetch for USDT to test credentials and detect account type...
+2025-05-02 04:38:09.411 UTC - DEBUG    - [livebot_main:1155] - Checking balance with accountType=UNIFIED...
+2025-05-02 04:38:10.764 UTC - DEBUG    - [livebot_main:2231] - Parsed balance via standard CCXT structure ['USDT']['free']: 9.30074825
+2025-05-02 04:38:10.764 UTC - INFO     - [livebot_main:1164] - Detected UNIFIED account structure (Balance check successful).
+2025-05-02 04:38:10.765 UTC - INFO     - [livebot_main:1083] - Detected Account Type: UNIFIED
+2025-05-02 04:38:10.765 UTC - INFO     - [livebot_main:1100] - [92mSuccessfully connected. Initial USDT balance: 9.3007[0m
+2025-05-02 04:38:10.765 UTC - INFO     - [livebot_main:1121] - Exchange initialization checks passed.
+2025-05-02 04:38:10.771 UTC - INFO     - [livebot_main:820] - Loaded previous state from bot_state.json
+2025-05-02 04:38:10.771 UTC - DEBUG    - [livebot_main:868] - State for symbol 'DOT/USDT:USDT' missing key 'position_size'. Initializing with default.
+2025-05-02 04:38:10.771 UTC - DEBUG    - [livebot_main:868] - State for symbol 'DOT/USDT:USDT' missing key 'position_side'. Initializing with default.
+2025-05-02 04:38:10.771 UTC - DEBUG    - [livebot_main:868] - State for symbol 'DOT/USDT:USDT' missing key 'initial_sl_price'. Initializing with default.
+2025-05-02 04:38:10.772 UTC - DEBUG    - [livebot_main:868] - State for symbol 'DOT/USDT:USDT' missing key 'initial_tp_price'. Initializing with default.
+2025-05-02 04:38:10.772 UTC - INFO     - [livebot_main:4139] - Starting main trading loop...
+2025-05-02 04:38:10.772 UTC - INFO     - [livebot_main:4142] - --- New Bot Cycle ---
+2025-05-02 04:38:10.779 UTC - DEBUG    - [livebot_main:936] - Saved current state successfully to bot_state.json
+2025-05-02 04:38:10.779 UTC - INFO     - [livebot_main:4209] - Cycle finished in 0.01s. Sleeping for 14.99s...
+2025-05-02 04:38:25.774 UTC - INFO     - [livebot_main:4142] - --- New Bot Cycle ---
+2025-05-02 04:38:25.783 UTC - DEBUG    - [livebot_main:936] - Saved current state successfully to bot_state.json
+2025-05-02 04:38:25.784 UTC - INFO     - [livebot_main:4209] - Cycle finished in 0.01s. Sleeping for 14.99s...
+2025-05-02 04:38:39.192 UTC - INFO     - [livebot_main:4213] - KeyboardInterrupt received. Shutting down gracefully...
+2025-05-02 04:38:39.193 UTC - INFO     - [livebot_main:4218] - Saving final state and closing exchange...
+2025-05-02 04:38:39.200 UTC - DEBUG    - [livebot_main:936] - Saved current state successfully to bot_state.json
+2025-05-02 04:39:02.384 UTC - INFO     - [livebot_main:355] - Logger 'livebot_main' initialized. Log file: 'livebot_main.log', Console Level: INFO
+2025-05-02 04:39:02.385 UTC - INFO     - [livebot_main:4101] - --- Enhanced Trading Bot v1.1.3 Starting ---
+2025-05-02 04:39:02.385 UTC - INFO     - [livebot_main:4102] - Using Python 3.12.10 (main, Apr  9 2025, 18:13:11) [Clang 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456
+2025-05-02 04:39:02.385 UTC - INFO     - [livebot_main:4103] - Using CCXT 4.4.72
+2025-05-02 04:39:02.386 UTC - INFO     - [livebot_main:4104] - Using Timezone: America/Chicago
+2025-05-02 04:39:02.386 UTC - INFO     - [livebot_main:4108] - Loading configuration from: config.json
+2025-05-02 04:39:02.387 UTC - INFO     - [livebot_main:798] - Configuration loaded and validated successfully.
+2025-05-02 04:39:02.387 UTC - INFO     - [livebot_main:975] - Using Quote Currency: USDT
+2025-05-02 04:39:02.526 UTC - WARNING  - [livebot_main:1054] - [91m--- USING LIVE TRADING MODE (Real Money) --- CAUTION ADVISED![0m
+2025-05-02 04:39:02.527 UTC - INFO     - [livebot_main:1059] - Connecting to bybit (Sandbox: False)...
+2025-05-02 04:39:02.527 UTC - INFO     - [livebot_main:1060] - Loading markets for bybit... (CCXT Version: 4.4.72)
+2025-05-02 04:39:13.333 UTC - INFO     - [livebot_main:1065] - Markets loaded successfully for bybit. Found 2605 markets.
+2025-05-02 04:39:13.333 UTC - INFO     - [livebot_main:1074] - Attempting initial balance fetch for USDT to test credentials and detect account type...
+2025-05-02 04:39:13.334 UTC - DEBUG    - [livebot_main:1156] - Checking balance with accountType=UNIFIED...
+2025-05-02 04:39:14.685 UTC - DEBUG    - [livebot_main:2232] - Parsed balance via standard CCXT structure ['USDT']['free']: 9.30074825
+2025-05-02 04:39:14.685 UTC - INFO     - [livebot_main:1165] - Detected UNIFIED account structure (Balance check successful).
+2025-05-02 04:39:14.686 UTC - INFO     - [livebot_main:1084] - Detected Account Type: UNIFIED
+2025-05-02 04:39:14.686 UTC - INFO     - [livebot_main:1101] - [92mSuccessfully connected. Initial USDT balance: 9.3007[0m
+2025-05-02 04:39:14.687 UTC - INFO     - [livebot_main:1122] - Exchange initialization checks passed.
+2025-05-02 04:39:14.693 UTC - INFO     - [livebot_main:821] - Loaded previous state from bot_state.json
+2025-05-02 04:39:14.694 UTC - INFO     - [livebot_main:4140] - Starting main trading loop...
+2025-05-02 04:39:14.694 UTC - INFO     - [livebot_main:4143] - --- New Bot Cycle ---
+2025-05-02 04:39:14.699 UTC - DEBUG    - [livebot_main:937] - Saved current state successfully to bot_state.json
+2025-05-02 04:39:14.699 UTC - INFO     - [livebot_main:4210] - Cycle finished in 0.01s. Sleeping for 14.99s...
+2025-05-02 04:39:29.695 UTC - INFO     - [livebot_main:4143] - --- New Bot Cycle ---
+2025-05-02 04:39:29.706 UTC - DEBUG    - [livebot_main:937] - Saved current state successfully to bot_state.json
+2025-05-02 04:39:29.708 UTC - INFO     - [livebot_main:4210] - Cycle finished in 0.01s. Sleeping for 14.99s...
+2025-05-02 04:39:34.947 UTC - INFO     - [livebot_main:4214] - KeyboardInterrupt received. Shutting down gracefully...
+2025-05-02 04:39:34.948 UTC - INFO     - [livebot_main:4219] - Saving final state and closing exchange...
+2025-05-02 04:39:34.949 UTC - DEBUG    - [livebot_main:937] - Saved current state successfully to bot_state.json

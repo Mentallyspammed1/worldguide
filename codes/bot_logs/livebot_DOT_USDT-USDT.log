@@ -23109,3 +23109,16 @@ Traceback (most recent call last):
 ccxt.base.errors.InvalidOrder: bybit {"retCode":110017,"retMsg":"reduce-only order has same side with current position","result":{},"retExtInfo":{},"time":1745538036207}
 2025-04-24 23:40:35.079 UTC - ERROR    - [livebot_DOT_USDT-USDT:4037] - [91mFailed to place market order to close position (DOT/USDT:USDT, Idx: 0). Check logs from create_order_ccxt.[0m
 2025-04-24 23:40:35.079 UTC - ERROR    - [livebot_DOT_USDT-USDT:4466] - [91mFailed to close position for DOT/USDT:USDT despite exit condition 'Adverse MA Cross (Short < Long)'. Manual check required![0m
+2025-05-02 03:19:33.523 UTC - INFO     - [livebot_DOT_USDT-USDT:353] - Logger 'livebot_DOT_USDT-USDT' initialized. Log file: 'livebot_DOT_USDT-USDT.log', Console Level: INFO
+2025-05-02 03:19:33.525 UTC - DEBUG    - [livebot_DOT_USDT-USDT:1705] - Market Info for DOT/USDT:USDT: Cat=linear, Tick=0.0001, AmtStep=0.1, ContSize=1.0
+2025-05-02 03:19:33.525 UTC - ERROR    - [livebot_DOT_USDT-USDT:4112] - Error fetching data for DOT/USDT:USDT: name 'asyncio' is not defined
+2025-05-02 03:19:48.523 UTC - ERROR    - [livebot_DOT_USDT-USDT:4112] - Error fetching data for DOT/USDT:USDT: name 'asyncio' is not defined
+2025-05-02 03:20:03.522 UTC - ERROR    - [livebot_DOT_USDT-USDT:4112] - Error fetching data for DOT/USDT:USDT: name 'asyncio' is not defined
+2025-05-02 04:38:10.774 UTC - INFO     - [livebot_DOT_USDT-USDT:354] - Logger 'livebot_DOT_USDT-USDT' initialized. Log file: 'livebot_DOT_USDT-USDT.log', Console Level: INFO
+2025-05-02 04:38:10.775 UTC - DEBUG    - [livebot_DOT_USDT-USDT:1742] - Market Info for DOT/USDT:USDT: Cat=linear, Tick=0.0001, AmtStep=0.1, ContSize=1.0
+2025-05-02 04:38:10.776 UTC - ERROR    - [livebot_DOT_USDT-USDT:4163] - Error fetching data for DOT/USDT:USDT: name 'asyncio' is not defined
+2025-05-02 04:38:25.777 UTC - ERROR    - [livebot_DOT_USDT-USDT:4163] - Error fetching data for DOT/USDT:USDT: name 'asyncio' is not defined
+2025-05-02 04:39:14.695 UTC - INFO     - [livebot_DOT_USDT-USDT:355] - Logger 'livebot_DOT_USDT-USDT' initialized. Log file: 'livebot_DOT_USDT-USDT.log', Console Level: INFO
+2025-05-02 04:39:14.696 UTC - DEBUG    - [livebot_DOT_USDT-USDT:1743] - Market Info for DOT/USDT:USDT: Cat=linear, Tick=0.0001, AmtStep=0.1, ContSize=1.0
+2025-05-02 04:39:14.698 UTC - ERROR    - [livebot_DOT_USDT-USDT:4164] - Error fetching data for DOT/USDT:USDT: name 'fetch_kline_data' is not defined
+2025-05-02 04:39:29.702 UTC - ERROR    - [livebot_DOT_USDT-USDT:4164] - Error fetching data for DOT/USDT:USDT: name 'fetch_kline_data' is not defined

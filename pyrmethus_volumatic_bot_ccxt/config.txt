@@ -1,0 +1,61 @@
+{
+  "//": "=== General Bot Configuration ===",
+  "exchange": "bybit", // Exchange identifier (must be supported by CCXT)
+  "symbol": "BTC/USDT:USDT", // CCXT unified symbol format (BASE/QUOTE:SETTLE). For spot, use BASE/QUOTE (e.g., BTC/USDT).
+  "timeframe": "5m", // CCXT standard timeframe (e.g., 1m, 5m, 15m, 1h, 4h, 1d)
+  "account_type": "contract", // Bybit account type: 'contract' (for USDT/USDC perpetuals), 'unified' (UTA), or 'spot'. Verify based on your Bybit account structure and API key permissions.
+  "mode": "Paper", // Trading mode: "Paper" (simulated trading, no real funds), "Testnet" (using exchange's testnet environment), "Live" (real funds, use with extreme caution).
+  "log_level": "INFO", // Logging verbosity: DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+  "//": "=== Order Execution Settings ===",
+  "order": {
+    "type": "Market", // Order type: "Market" (executes immediately at the best available price, subject to slippage) or "Limit" (executes at a specific price or better, may not fill). Limit orders require more complex handling (e.g., checking if filled, order book placement).
+    "risk_per_trade_percent": 1.0, // Percentage of *account equity* to risk on a single trade (e.g., 1.0 means 1%). Used to calculate position size.
+    "leverage": 5, // Desired leverage for contract trading. WARNING: High leverage significantly increases risk. Ensure this leverage is permissible on Bybit for the symbol and that your account is configured accordingly (the script may attempt to set it via API).
+    "tp_ratio": 2.0, // Take Profit target expressed as a Risk:Reward ratio. (e.g., 2.0 means the Take Profit distance from entry is 2 times the Stop Loss distance).
+    "sl_trigger_type": "MarkPrice", // Price type used by Bybit to trigger the Stop Loss order: "LastPrice" (last traded price), "IndexPrice" (underlying index price), "MarkPrice" (composite price, generally recommended for derivatives SL/TP to avoid unnecessary triggers from short-term wicks).
+    "tp_trigger_type": "MarkPrice"  // Price type used by Bybit to trigger the Take Profit order. Same options and recommendation as sl_trigger_type.
+  },
+
+  "//": "=== Trading Strategy Configuration ===",
+  "strategy": {
+    "class": "VolumaticOBStrategy", // The Python class name of the strategy implementation (must exist in your strategy file/module).
+    "params": {
+      "//": "-- Trend & Volume Parameters --",
+      "length": 40,           // Lookback period (in candles) for primary trend determination (e.g., moving average length).
+      "vol_atr_period": 200,    // Lookback period (in candles) for Average True Range (ATR) used in volume normalization/level calculation.
+      "vol_percentile_len": 1000, // Lookback period (in candles) for calculating the volume percentile.
+      "vol_percentile": 95,   // Volume threshold: only consider volume spikes above this percentile (1-99). E.g., 95 means volume must be in the top 5% of the lookback period.
+
+      "//": "-- Order Block (OB) Definition Parameters --",
+      "ob_source": "Wicks",     // Defines how OB price range is determined: "Wicks" (uses candle high/low) or "Bodys" (uses candle open/close).
+      "pivot_left_h": 10,       // Number of bars/candles to the left required for a pivot high confirmation.
+      "pivot_right_h": 10,      // Number of bars/candles to the right required for a pivot high confirmation.
+      "pivot_left_l": 10,       // Number of bars/candles to the left required for a pivot low confirmation.
+      "pivot_right_l": 10,      // Number of bars/candles to the right required for a pivot low confirmation.
+      "max_boxes": 5            // Maximum number of *active* order blocks of each type (bullish/bearish) to track simultaneously. Helps manage memory and focus on relevant zones.
+    },
+    "stop_loss": {
+      "method": "ATR", // Method for initial Stop Loss placement: "ATR" (uses a multiple of the Average True Range below/above entry) or "OB" (places SL just beyond the identified Order Block boundary).
+      "atr_multiplier": 1.5 // Multiplier for ATR calculation if method is "ATR". (e.g., Entry +/- ATR * atr_multiplier). Only used if method is "ATR".
+      // "fixed_pips": 100 // Example: Could add other methods like fixed pips/points (would need implementation in strategy code)
+      // "percentage": 0.5 // Example: Could add percentage-based SL (would need implementation)
+    }
+    // "//": "-- Optional Strategy Enhancements --",
+    // "cooldown_period_candles": 3 // Example: Number of candles to wait after a trade closes before looking for new entries. (Requires implementation)
+    // "max_concurrent_trades": 1 // Example: Limit the number of open trades for this strategy. (Requires implementation)
+  },
+
+  "//": "=== Data Handling Settings ===",
+  "data": {
+      "fetch_limit": 750,   // Initial number of historical candles to fetch on startup. Ensure this is sufficient for the longest lookback period used by indicators (e.g., vol_percentile_len). Consider exchange API limits.
+      "max_df_len": 2000    // Maximum number of candles/rows to keep in the primary data structure (e.g., pandas DataFrame) in memory. Balances memory usage against the need for historical data for ongoing calculations. Older data is typically dropped.
+  },
+
+  "//": "=== Bot Health & State Checks ===",
+  "checks": {
+      "position_check_interval": 30, // Frequency (in seconds) for checking the actual open position status via REST API. Crucial for ensuring bot state matches the exchange, especially after potential disconnects or external modifications.
+      "health_check_interval": 60    // Frequency (in seconds) for performing general health checks (e.g., API connectivity, websocket status if used, system resources).
+      // "websocket_timeout": 120 // Example: Timeout in seconds for websocket connections before attempting reconnect (if applicable).
+  }
+  

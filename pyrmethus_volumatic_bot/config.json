@@ -1,5 +1,5 @@
 {
-  "symbol": "BTCUSDT",
+  "symbol": "DOTUSDT",
   "interval": "5",
   "mode": "Live",
   "log_level": "INFO",
@@ -7,7 +7,7 @@
   "order": {
     "type": "Market",
     "risk_per_trade_percent": 1.0,
-    "leverage": 5,
+    "leverage": 25,
     "tp_ratio": 2.0
   },
 
@@ -32,12 +32,13 @@
   },
 
   "data": {
-      "fetch_limit": 750,
+      "fetch_limit": 1100,
       "max_df_len": 2000
   },
 
   "websocket": {
-      "ping_interval": 20
+      "ping_interval": 20,
+      "connect_timeout": 20
   },
   "position_check_interval": 10
 }

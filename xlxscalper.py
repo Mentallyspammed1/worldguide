@@ -1,4 +1,12 @@
-# xrscalper.py
+ntry action taken.                                                         2025-05-01 20:20:14 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:20:14 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:20:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1864): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=0.0006 (Threshold: +/-1.20) ==> HOLD                                                     2025-05-01 20:20:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1864                                               2025-05-01 20:20:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00202                                                        2025-05-01 20:20:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:20:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:20:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:20:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:20:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:20:24 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1879): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=0.7148 (Threshold: +/-1.20) ==> HOLD                                                     2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1879                                               2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00214                                                        2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:20:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Active SHORT position found (FARTCOIN/USDT:USDT): Size=11, Entry=1.1877, Liq=2.4257, Lev=50.0x, PnL=0.0099, SL=N/A, TP=N/A, TSL(Dist/Act): N/A/N/A                                                                2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Managing existing SHORT position for FARTCOIN/USDT:USDT. Size: 11.0, Entry: 1.1877                                                         2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal (HOLD) allows holding the existing short position. Performing position management checks...                                         2025-05-01 20:20:26 CDT - WARNING  - [xrscalper_bot_FARTCOIN_USDT-USDT] - *** TIME-BASED EXIT Triggered (164330.9 >= 5 min). Closing position... ***                                                                 2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Attempting to place Close/Reduce BUY MARKET order for FARTCOIN/USDT:USDT:                                                                  2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Size: 11.0 Contracts                                              2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   ReduceOnly: True                                                  2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Params: {'reduceOnly': True, 'timeInForce': 'IOC'}                2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Close/Reduce Trade Placed Successfully!                             2025-05-01 20:20:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Order ID: 7064bc54-feb1-4681-addf-0a4a40a964e3, Initial Status: None                                                                     2025-05-01 20:20:26 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - Unexpected error placing Close/Reduce order (FARTCOIN/USDT:USDT): '>' not supported between instances of 'NoneType' and 'int'              Traceback (most recent call last):                                       File "/data/data/com.termux/files/home/worldguide/xlxscalper.py", line 3092, in place_trade                                                     if filled_amount > 0: lg.info(f"  Filled Amount: {filled_amount}")        ^^^^^^^^^^^^^^^^^
+TypeError: '>' not supported between instances of 'NoneType' and 'int' 2025-05-01 20:20:26 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - Failed to place time-based CLOSE order for FARTCOIN/USDT:USDT. Manual check required!                                                      2025-05-01 20:20:34 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:20:34 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:20:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1888): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=0.6684 (Th
+
+
+[xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:12:36 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:12:36 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:12:36 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:12:44 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:12:44 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:12:45 CDT - WARNING  - [xrscalper_bot_FARTCOIN_USDT-USDT] - Error during volume confirmation check: unsupported operand type(s) for /: 'float' and 'decimal.Decimal'                                   2025-05-01 20:12:45 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1865): Set='scalping', Indicators=[Active:5, NaN:1], TotalWeight=1.90, FinalScore=-1.2100 (Threshold: +/-1.20) ==> SELL                                                    2025-05-01 20:12:45 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1865                                               2025-05-01 20:12:45 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00193                                                        2025-05-01 20:12:45 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): 1.1904                          2025-05-01 20:12:45 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): 1.1855                    2025-05-01 20:12:45 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:12:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:12:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - *** SELL Signal & No Position: Initiating Trade Sequence for FARTCOIN/USDT:USDT ***                                                        2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Available USDT balance: 9.3356                                      2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Attempting to set leverage for FARTCOIN/USDT:USDT to 20x...         2025-05-01 20:12:47 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - Exchange error setting leverage for FARTCOIN/USDT:USDT: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746148367101} (Code: None)                                   2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Leverage for FARTCOIN/USDT:USDT likely already set to 20x (Exchange confirmation).                                                         2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Sizing (FARTCOIN/USDT:USDT): Balance=9.34, Risk=0.50%, RiskAmt=0.0467 USDT                                                        2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Entry=1.1865, SL=1.1904, SL Dist=0.0039                           2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   ContractSize=1.0, Initial Calculated Size = 11.96874418 Contracts 2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Applied amount precision/step size: 11.96874418 -> 11 Contracts     2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Final calculated position size for FARTCOIN/USDT:USDT: 11 Contracts 2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Limit Entry Price for SELL: 1.1877
+2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ==> Placing SELL LIMIT order | Size: 11 <==                         2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Attempting to place Open/Increase SELL LIMIT order for FARTCOIN/USDT:USDT:                                                                 2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Size: 11.0 Contracts                                              2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Limit Price: 1.1877                                               2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   ReduceOnly: False                                                 2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Params: {'reduceOnly': False}                                     2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Open/Increase Trade Placed Successfully!                            2025-05-01 20:12:47 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Order ID: 9d18401b-4457-47e2-880b-40d39690b5a8, Initial Status: None                                                                     2025-05-01 20:12:47 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - Unexpected error placing Open/Increase order (FARTCOIN/USDT:USDT): '>' not supported between instances of 'NoneType' and 'int'             Traceback (most recent call last):                                       File "/data/data/com.termux/files/home/worldguide/xlxscalper.py", line 3092, in place_trade                                                     if filled_amount > 0: lg.info(f"  Filled Amount: {filled_amount}")        ^^^^^^^^^^^^^^^^^                                               TypeError: '>' not supported between instances of 'NoneType' and 'int' 2025-05-01 20:12:47 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - === TRADE EXECUTION FAILED (FARTCOIN/USDT:USDT SELL). Order placement function returned None. See previous logs. ===                       2025-05-01 20:12:54 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:12:54 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:12:56 CDT - WARNING  - [xrscalper_bot_FARTCOIN_USDT-USDT] - Error during volume confirmation check: unsupported operand type(s) for /: 'float' and 'decimal.Decimal'                                   2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1870): Set='scalping', Indicators=[Active:5, NaN:1], TotalWeight=1.90, FinalScore=-1.0689 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1870                                               2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00196                                                        2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:12:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:13:04 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1868): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-0.4915 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1868                                               2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00179                                                        2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:13:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:13:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:13:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:13:14 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:13:15 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1868): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-0.5278 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1868                                               2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00179                                                        2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:13:16 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:13:24 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:13:24 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:13:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1865): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-0.8346 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:13:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1865                                               2025-05-01 20:13:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00182                                                        2025-05-01 20:13:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:13:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:13:25 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:13:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:13:26 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:13:34 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:13:34 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:13:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1861): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-0.8061 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:13:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1861                                               2025-05-01 20:13:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00189                                                        2025-05-01 20:13:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:13:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:13:35 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:13:36 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:13:36 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:13:44 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:13:44 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1863): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-0.8776 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1863                                               2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00189                                                        2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): N/A                       2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min
+2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.
+2025-05-01 20:13:46 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal is HOLD and no open position for FARTCOIN/USDT:USDT. No entry action taken.                                                         2025-05-01 20:13:54 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1859): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-1.2707 (Threshold: +/-1.20) ==> SELL
+2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1859                                               2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00190                                                        2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): 1.1897                          2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial TP (potential target): 1.1849                    2025-05-01 20:13:55 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=5 min        2025-05-01 20:13:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - No active open position found for FARTCOIN/USDT:USDT.               2025-05-01 20:13:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - *** SELL Signal & No Position: Initiating Trade Sequence for FARTCOIN/USDT:USDT ***                                                        2025-05-01 20:13:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Available USDT balance: 8.6677                                      2025-05-01 20:13:56 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Attempting to set leverage for FARTCOIN/USDT:USDT to 20x...         2025-05-01 20:13:57 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - Exchange error setting leverage for FARTCOIN/USDT:USDT: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746148436980} (Code: None)                                   2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Leverage for FARTCOIN/USDT:USDT likely already set to 20x (Exchange confirmation).                                                         2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Position Sizing (FARTCOIN/USDT:USDT): Balance=8.67, Risk=0.50%, RiskAmt=0.0433 USDT                                                        2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Entry=1.1859, SL=1.1897, SL Dist=0.0038                           2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   ContractSize=1.0, Initial Calculated Size = 11.40480922 Contracts 2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Applied amount precision/step size: 11.40480922 -> 11 Contracts     2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Final calculated position size for FARTCOIN/USDT:USDT: 11 Contracts 2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Limit Entry Price for SELL: 1.1871                       2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ==> Placing SELL LIMIT order | Size: 11 <==                         2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Attempting to place Open/Increase SELL LIMIT order for FARTCOIN/USDT:USDT:                                                                 2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Size: 11.0 Contracts                                              2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Limit Price: 1.1871                                               2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   ReduceOnly: False                                                 2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Params: {'reduceOnly': False}                                     2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Open/Increase Trade Placed Successfully!                            2025-05-01 20:13:57 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] -   Order ID: a0a17be8-0e69-4286-b7b5-e1d49e647605, Initial Status: None                                                                     2025-05-01 20:13:57 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - Unexpected error placing Open/Increase order (FARTCOIN/USDT:USDT): '>' not supported between instances of 'NoneType' and 'int'             Traceback (most recent call last):                                       File "/data/data/com.termux/files/home/worldguide/xlxscalper.py", line 3092, in place_trade                                                     if filled_amount > 0: lg.info(f"  Filled Amount: {filled_amount}")        ^^^^^^^^^^^^^^^^^                                               TypeError: '>' not supported between instances of 'NoneType' and 'int' 2025-05-01 20:13:57 CDT - ERROR    - [xrscalper_bot_FARTCOIN_USDT-USDT] - === TRADE EXECUTION FAILED (FARTCOIN/USDT:USDT SELL). Order placement function returned None. See previous logs. ===                       2025-05-01 20:14:04 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ---== Analyzing FARTCOIN/USDT:USDT (1) Cycle Start ==---            2025-05-01 20:14:05 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT 1m                                                                    2025-05-01 20:14:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Signal Summary (FARTCOIN/USDT:USDT @ 1.1857): Set='scalping', Indicators=[Active:6, NaN:0], TotalWeight=2.15, FinalScore=-0.8931 (Threshold: +/-1.20) ==> HOLD                                                    2025-05-01 20:14:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Current Price: 1.1857                                               2025-05-01 20:14:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - ATR: 0.00172                                                        2025-05-01 20:14:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT] - Calculated Initial SL (for sizing): N/A                             2025-05-01 20:14:06 CDT - INFO     - [xrscalper_bot_FARTCOIN_USDT-USDT]# xrscalper.py
 # Merged and enhanced version derived from livexy.py and incorporating concepts from ScalpingBot,
 # focusing on robust stop-loss/take-profit mechanisms, including break-even and exchange-native trailing stops.
 
@@ -10,10 +18,9 @@ import math
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, ROUND_DOWN, ROUND_UP, getcontext, InvalidOperation
-from logging.handlers import RotatingFileHandler
-from typing import Any, Dict, Optional, Tuple, List, Union
+from logging.handlers import RotatingFileHandlerfrom typing import Any, Dict, Optional, Tuple, List, Union
 
 import ccxt
 import numpy as np
@@ -32,30 +39,39 @@ except ImportError:
     print("Error: 'zoneinfo' requires Python 3.9+ and potentially the 'tzdata' package.")
     print("Please install it if needed: pip install tzdata")
     # Fallback to a basic UTC representation if zoneinfo is unavailable
-    from datetime import timezone, timedelta
+    # Consider using pytz (pip install pytz) if older Python versions need proper timezone support.
+    print("Using basic UTC fallback for timezone handling.")
     class ZoneInfo: # Basic fallback implementation
-        def __init__(self, key):
+        def __init__(self, key: str):
             if key.lower() == 'utc':
                 self._offset = timedelta(0)
+                self._name = "UTC"
             else:
                 # This fallback doesn't handle timezones correctly, only UTC
-                # Consider using pytz if older Python versions need proper timezone support
                 print(f"Warning: Timezone '{key}' not supported by fallback. Using UTC.")
                 self._offset = timedelta(0)
+                self._name = "UTC"
+
         def __call__(self): # Make it callable like the real ZoneInfo
              return self
 
-        def fromutc(self, dt):
+        def fromutc(self, dt: datetime) -> datetime:
              return dt.replace(tzinfo=timezone(self._offset))
 
-        def utcoffset(self, dt):
+        def utcoffset(self, dt: Optional[datetime]) -> timedelta:
              return self._offset
 
-        def dst(self, dt):
+        def dst(self, dt: Optional[datetime]) -> timedelta:
              return timedelta(0)
 
-        def tzname(self, dt):
-             return "UTC"
+        def tzname(self, dt: Optional[datetime]) -> str:
+             return self._name
+
+        def __repr__(self) -> str:
+            return f"ZoneInfo(key='{self._name}')"
+
+        def __str__(self) -> str:
+            return self._name
 
 
 # Initialize colorama and set precision
@@ -76,17 +92,18 @@ RESET = Style.RESET_ALL
 API_KEY = os.getenv("BYBIT_API_KEY")
 API_SECRET = os.getenv("BYBIT_API_SECRET")
 if not API_KEY or not API_SECRET:
-    raise ValueError("BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env")
+    raise ValueError("BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env file")
 
 CONFIG_FILE = "config.json"
 LOG_DIRECTORY = "bot_logs"
-# Timezone for logging and display (Requires Python 3.9+ and 'tzdata' package)
-# Ensure 'tzdata' is installed: pip install tzdata
+# Timezone for logging and display
 DEFAULT_TIMEZONE = "America/Chicago" # Example, adjust as needed
 try:
-    TIMEZONE = ZoneInfo(os.getenv("TIMEZONE", DEFAULT_TIMEZONE))
+    # Use environment variable if set, otherwise use default
+    configured_timezone = os.getenv("TIMEZONE", DEFAULT_TIMEZONE)
+    TIMEZONE = ZoneInfo(configured_timezone)
 except Exception as tz_err:
-    print(f"Warning: Could not load timezone '{os.getenv('TIMEZONE', DEFAULT_TIMEZONE)}'. Using UTC. Error: {tz_err}")
+    print(f"Warning: Could not load timezone '{configured_timezone}'. Using UTC. Error: {tz_err}")
     TIMEZONE = ZoneInfo("UTC")
 
 MAX_API_RETRIES = 3 # Max retries for recoverable API errors
@@ -97,26 +114,29 @@ CCXT_INTERVAL_MAP = { # Map our intervals to ccxt's expected format
     "60": "1h", "120": "2h", "240": "4h", "D": "1d", "W": "1w", "M": "1M"
 }
 RETRY_ERROR_CODES = [429, 500, 502, 503, 504] # HTTP status codes considered retryable
+
 # Default periods (can be overridden by config.json)
-DEFAULT_ATR_PERIOD = 14
-DEFAULT_CCI_WINDOW = 20
-DEFAULT_WILLIAMS_R_WINDOW = 14
-DEFAULT_MFI_WINDOW = 14
-DEFAULT_STOCH_RSI_WINDOW = 14 # Window for Stoch RSI calculation itself
-DEFAULT_STOCH_WINDOW = 12     # Window for underlying RSI in StochRSI
-DEFAULT_K_WINDOW = 3          # K period for StochRSI
-DEFAULT_D_WINDOW = 3          # D period for StochRSI
-DEFAULT_RSI_WINDOW = 14
-DEFAULT_BOLLINGER_BANDS_PERIOD = 20
-DEFAULT_BOLLINGER_BANDS_STD_DEV = 2.0 # Ensure float
-DEFAULT_SMA_10_WINDOW = 10
-DEFAULT_EMA_SHORT_PERIOD = 9
-DEFAULT_EMA_LONG_PERIOD = 21
-DEFAULT_MOMENTUM_PERIOD = 7
-DEFAULT_VOLUME_MA_PERIOD = 15
-DEFAULT_FIB_WINDOW = 50
-DEFAULT_PSAR_AF = 0.02
-DEFAULT_PSAR_MAX_AF = 0.2
+DEFAULT_INDICATOR_PERIODS = {
+    "atr_period": 14,
+    "cci_window": 20,
+    "williams_r_window": 14,
+    "mfi_window": 14,
+    "stoch_rsi_window": 14, # Window for Stoch RSI calculation itself
+    "stoch_rsi_rsi_window": 12, # Window for underlying RSI in StochRSI
+    "stoch_rsi_k": 3, # K period for StochRSI
+    "stoch_rsi_d": 3, # D period for StochRSI
+    "rsi_period": 14,
+    "bollinger_bands_period": 20,
+    "bollinger_bands_std_dev": 2.0, # Ensure float
+    "sma_10_window": 10,
+    "ema_short_period": 9,
+    "ema_long_period": 21,
+    "momentum_period": 7,
+    "volume_ma_period": 15,
+    "fibonacci_window": 50,
+    "psar_af": 0.02,
+    "psar_max_af": 0.2,
+}
 
 FIB_LEVELS = [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0] # Standard Fibonacci levels
 LOOP_DELAY_SECONDS = 10 # Time between the end of one cycle and the start of the next
@@ -130,6 +150,7 @@ class SensitiveFormatter(logging.Formatter):
     """Formatter to redact sensitive information (API keys) from logs."""
     def format(self, record: logging.LogRecord) -> str:
         msg = super().format(record)
+        # Ensure keys exist before attempting replacement
         if API_KEY:
             msg = msg.replace(API_KEY, "***API_KEY***")
         if API_SECRET:
@@ -139,29 +160,11 @@ class SensitiveFormatter(logging.Formatter):
 
 def load_config(filepath: str) -> Dict[str, Any]:
     """Load configuration from JSON file, creating default if not found,
-       and ensuring all default keys are present."""
+       and ensuring all default keys are present with validation."""
     default_config = {
         "symbols_to_trade": ["FARTCOIN/USDT:USDT"], # List of symbols (e.g., "FARTCOIN/USDT:USDT" for Bybit linear)
         "interval": "5", # Default to '5' (map to 5m later)
-        "retry_delay": 5,
-        "atr_period": DEFAULT_ATR_PERIOD,
-        "ema_short_period": DEFAULT_EMA_SHORT_PERIOD,
-        "ema_long_period": DEFAULT_EMA_LONG_PERIOD,
-        "rsi_period": DEFAULT_RSI_WINDOW,
-        "bollinger_bands_period": DEFAULT_BOLLINGER_BANDS_PERIOD,
-        "bollinger_bands_std_dev": DEFAULT_BOLLINGER_BANDS_STD_DEV,
-        "cci_window": DEFAULT_CCI_WINDOW,
-        "williams_r_window": DEFAULT_WILLIAMS_R_WINDOW,
-        "mfi_window": DEFAULT_MFI_WINDOW,
-        "stoch_rsi_window": DEFAULT_STOCH_RSI_WINDOW,
-        "stoch_rsi_rsi_window": DEFAULT_STOCH_WINDOW,
-        "stoch_rsi_k": DEFAULT_K_WINDOW,
-        "stoch_rsi_d": DEFAULT_D_WINDOW,
-        "psar_af": DEFAULT_PSAR_AF,
-        "psar_max_af": DEFAULT_PSAR_MAX_AF,
-        "sma_10_window": DEFAULT_SMA_10_WINDOW,
-        "momentum_period": DEFAULT_MOMENTUM_PERIOD,
-        "volume_ma_period": DEFAULT_VOLUME_MA_PERIOD,
+        "retry_delay": RETRY_DELAY_SECONDS,
         "orderbook_limit": 25, # Depth of orderbook to fetch
         "signal_score_threshold": 1.5, # Score needed to trigger BUY/SELL signal
         "stoch_rsi_oversold_threshold": 25,
@@ -170,7 +173,6 @@ def load_config(filepath: str) -> Dict[str, Any]:
         "take_profit_multiple": 0.7, # ATR multiple for TP
         "volume_confirmation_multiplier": 1.5, # How much higher volume needs to be than MA
         "scalping_signal_threshold": 2.5, # Separate threshold for 'scalping' weight set
-        "fibonacci_window": DEFAULT_FIB_WINDOW,
         "enable_trading": True, # SAFETY FIRST: Default to True, enable consciously
         "use_sandbox": False,     # SAFETY FIRST: Default to False (testnet), disable consciously
         "risk_per_trade": 0.01, # Risk 1% of account balance per trade (0 to 1)
@@ -216,6 +218,8 @@ def load_config(filepath: str) -> Dict[str, Any]:
         },
         "active_weight_set": "default" # Choose which weight set to use ("default" or "scalping")
     }
+    # Add default indicator periods to the default config
+    default_config.update(DEFAULT_INDICATOR_PERIODS)
 
     if not os.path.exists(filepath):
         try:
@@ -257,34 +261,45 @@ def load_config(filepath: str) -> Dict[str, Any]:
              save_needed = True
 
         # Validate numeric ranges
-        def validate_numeric(key, min_val=None, max_val=None, is_int=False, allow_none=False):
+        def validate_numeric(key: str, min_val: Optional[Union[int, float]] = None, max_val: Optional[Union[int, float]] = None, is_int: bool = False, allow_none: bool = False):
             nonlocal save_needed
             value = updated_config.get(key)
             default_value = default_config.get(key)
             valid = False
+
             if allow_none and value is None:
                 valid = True
-            elif isinstance(value, (int, float)) and not isinstance(value, bool): # Exclude bool
+            # Explicitly check for bool type and exclude it from numeric validation
+            elif isinstance(value, bool):
+                 print(f"{NEON_RED}Config value '{key}' ({value}) has invalid type bool. Expected numeric.")
+            elif isinstance(value, (int, float)):
                 if is_int and not isinstance(value, int):
                      print(f"{NEON_RED}Config value '{key}' ({value}) must be an integer.")
                 else:
-                    val_decimal = Decimal(str(value)) # Use Decimal for comparison
-                    if (min_val is None or val_decimal >= Decimal(str(min_val))) and \
-                       (max_val is None or val_decimal <= Decimal(str(max_val))):
-                        valid = True
-                    else:
-                        range_str = ""
-                        if min_val is not None: range_str += f" >= {min_val}"
-                        if max_val is not None: range_str += f" <= {max_val}"
-                        print(f"{NEON_RED}Config value '{key}' ({value}) out of range ({range_str.strip()}).")
+                    try:
+                        val_decimal = Decimal(str(value)) # Use Decimal for comparison
+                        min_decimal = Decimal(str(min_val)) if min_val is not None else None
+                        max_decimal = Decimal(str(max_val)) if max_val is not None else None
+
+                        if (min_decimal is None or val_decimal >= min_decimal) and \
+                           (max_decimal is None or val_decimal <= max_decimal):
+                            valid = True
+                        else:
+                            range_str = ""
+                            if min_val is not None: range_str += f" >= {min_val}"
+                            if max_val is not None: range_str += f" <= {max_val}"
+                            print(f"{NEON_RED}Config value '{key}' ({value}) out of range ({range_str.strip()}).")
+                    except InvalidOperation:
+                         print(f"{NEON_RED}Config value '{key}' ({value}) could not be converted to Decimal for validation.")
             else:
-                 print(f"{NEON_RED}Config value '{key}' ({value}) has invalid type {type(value)}.")
+                 print(f"{NEON_RED}Config value '{key}' ({value}) has invalid type {type(value)}. Expected numeric.")
 
             if not valid:
                 print(f"{NEON_YELLOW}Using default value for '{key}': {default_value}{RESET}")
                 updated_config[key] = default_value
                 save_needed = True
 
+        # Validate core settings
         validate_numeric("retry_delay", min_val=0)
         validate_numeric("risk_per_trade", min_val=0, max_val=1)
         validate_numeric("leverage", min_val=1, is_int=True)
@@ -298,6 +313,17 @@ def load_config(filepath: str) -> Dict[str, Any]:
         validate_numeric("break_even_offset_ticks", min_val=0, is_int=True)
         validate_numeric("position_confirm_delay_seconds", min_val=0)
         validate_numeric("time_based_exit_minutes", min_val=1, allow_none=True) # Allow None, but min 1 if set
+        validate_numeric("orderbook_limit", min_val=1, is_int=True)
+        validate_numeric("limit_order_offset_buy", min_val=0)
+        validate_numeric("limit_order_offset_sell", min_val=0)
+        validate_numeric("bollinger_bands_std_dev", min_val=0) # Ensure std dev is non-negative
+
+        # Validate indicator periods (ensure positive integers/floats where applicable)
+        for key, default_val in DEFAULT_INDICATOR_PERIODS.items():
+             is_int_param = isinstance(default_val, int) or key in ["stoch_rsi_k", "stoch_rsi_d"] # K/D should be int
+             min_value = 1 if is_int_param else 1e-9 # Periods usually > 0, AF can be small float
+             validate_numeric(key, min_val=min_value, is_int=is_int_param)
+
 
         # Validate symbols_to_trade is a non-empty list of strings
         symbols = updated_config.get("symbols_to_trade")
@@ -340,13 +366,14 @@ def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any]) 
             # Recursively check nested dictionaries
             updated_config[key] = _ensure_config_keys(updated_config[key], default_value)
         # Optional: Check type consistency for non-dict items if needed
-        # elif not isinstance(updated_config.get(key), type(default_value)) and default_value is not None:
+        # elif default_value is not None and not isinstance(updated_config.get(key), type(default_value)):
         #     # Allow None to be overridden, but check other types
         #     print(f"Warning: Config type mismatch for key '{key}'. Expected {type(default_value)}, got {type(updated_config.get(key))}. Using default.")
         #     updated_config[key] = default_value
     return updated_config
 
 # Load initial config to get quote currency for logger setup
+# Use a temporary variable to avoid potential global scope issues before main()
 _initial_config_for_setup = load_config(CONFIG_FILE)
 QUOTE_CURRENCY = _initial_config_for_setup.get("quote_currency", "USDT")
 
@@ -359,12 +386,16 @@ def setup_logger(logger_name_suffix: str) -> logging.Logger:
     log_filename = os.path.join(LOG_DIRECTORY, f"{logger_name}.log")
     logger = logging.getLogger(logger_name)
 
-    # Prevent duplicate handlers if logger already exists
+    # Prevent duplicate handlers if logger already exists and has handlers
     if logger.hasHandlers():
         # Clear existing handlers to ensure fresh setup if called again
+        # This is useful if this function is called multiple times for the same suffix
         for handler in logger.handlers[:]:
-            logger.removeHandler(handler)
-            handler.close()
+            try:
+                handler.close()
+                logger.removeHandler(handler)
+            except Exception as e:
+                print(f"Warning: Error removing/closing handler for logger {logger_name}: {e}")
         # return logger # Option: return existing logger if preferred
 
     logger.setLevel(logging.DEBUG) # Set logger level to DEBUG to capture all messages
@@ -387,10 +418,11 @@ def setup_logger(logger_name_suffix: str) -> logging.Logger:
     # Use a simpler format for console, leverage colorama elsewhere if needed
     stream_formatter = SensitiveFormatter(
         "%(asctime)s - %(levelname)-8s - [%(name)s] - %(message)s",
-        datefmt='%Y-%m-%d %H:%M:%S %Z' # Include Timezone
+        datefmt='%Y-%m-%d %H:%M:%S %Z' # Include Timezone Abbreviation
     )
-    # Set converter to use the configured TIMEZONE
-    stream_formatter.converter = lambda *args: datetime.now(TIMEZONE).timetuple()
+    # Set converter to use the configured TIMEZONE for log record times
+    # Note: datefmt %Z might show offset like +0000 if tzname is not available/simple
+    logging.Formatter.converter = lambda *args: datetime.now(TIMEZONE).timetuple()
     stream_handler.setFormatter(stream_formatter)
     console_log_level = logging.INFO # Change to DEBUG for more verbose console output
     stream_handler.setLevel(console_log_level)
@@ -402,6 +434,7 @@ def setup_logger(logger_name_suffix: str) -> logging.Logger:
 # --- CCXT Exchange Setup ---
 def initialize_exchange(config: Dict[str, Any], logger: logging.Logger) -> Optional[ccxt.Exchange]:
     """Initializes the CCXT Bybit exchange object with error handling."""
+    lg = logger # Use shorter alias
     try:
         exchange_options = {
             'apiKey': API_KEY,
@@ -423,30 +456,38 @@ def initialize_exchange(config: Dict[str, Any], logger: logging.Logger) -> Optio
         # Dynamically select the exchange class based on config if needed, default Bybit
         exchange_id = config.get("exchange_id", "bybit").lower()
         if not hasattr(ccxt, exchange_id):
-             logger.error(f"Exchange ID '{exchange_id}' not found in CCXT.")
+             lg.error(f"Exchange ID '{exchange_id}' not found in CCXT.")
              return None
         exchange_class = getattr(ccxt, exchange_id)
         exchange = exchange_class(exchange_options)
 
         if config.get('use_sandbox'):
-            logger.warning(f"{NEON_YELLOW}USING SANDBOX MODE (Testnet){RESET}")
+            lg.warning(f"{NEON_YELLOW}USING SANDBOX MODE (Testnet){RESET}")
             # Check if the exchange supports sandbox mode setting
             if hasattr(exchange, 'set_sandbox_mode'):
-                exchange.set_sandbox_mode(True)
+                try:
+                    exchange.set_sandbox_mode(True)
+                except Exception as sandbox_err:
+                     lg.warning(f"Error calling set_sandbox_mode(True) for {exchange.id}: {sandbox_err}. Attempting manual URL override.")
+                     # Attempt manual override only if set_sandbox_mode failed
+                     if exchange.id == 'bybit':
+                          lg.info("Attempting manual Bybit testnet URL override...")
+                          exchange.urls['api'] = 'https://api-testnet.bybit.com'
             else:
-                logger.warning(f"{exchange.id} does not support set_sandbox_mode via ccxt. Ensure API keys are for Testnet.")
+                lg.warning(f"{exchange.id} does not support set_sandbox_mode via ccxt. Ensure API keys are for Testnet.")
                 # Attempt to set URLs manually if known (example for Bybit)
                 if exchange.id == 'bybit':
+                     lg.info("Attempting manual Bybit testnet URL override...")
                      exchange.urls['api'] = 'https://api-testnet.bybit.com'
 
 
-        logger.info(f"Loading markets for {exchange.id}...")
+        lg.info(f"Loading markets for {exchange.id}...")
         exchange.load_markets()
-        logger.info(f"CCXT exchange initialized ({exchange.id}). Sandbox: {config.get('use_sandbox')}")
+        lg.info(f"CCXT exchange initialized ({exchange.id}). Sandbox: {config.get('use_sandbox')}")
 
         # Test connection and API keys by fetching balance
         account_type_to_test = 'CONTRACT' # For Bybit V5, try CONTRACT or UNIFIED
-        logger.info(f"Attempting initial balance fetch (Account Type: {account_type_to_test})...")
+        lg.info(f"Attempting initial balance fetch (Account Type: {account_type_to_test})...")
         try:
             # Use params suitable for the specific exchange (e.g., Bybit V5)
             params = {}
@@ -456,37 +497,37 @@ def initialize_exchange(config: Dict[str, Any], logger: logging.Logger) -> Optio
             balance = exchange.fetch_balance(params=params)
             # Use the globally set QUOTE_CURRENCY
             available_quote = balance.get(QUOTE_CURRENCY, {}).get('free', 'N/A')
-            logger.info(f"{NEON_GREEN}Successfully connected and fetched initial balance.{RESET} (Example: {QUOTE_CURRENCY} available: {available_quote})")
+            lg.info(f"{NEON_GREEN}Successfully connected and fetched initial balance.{RESET} (Example: {QUOTE_CURRENCY} available: {available_quote})")
 
         except ccxt.AuthenticationError as auth_err:
-             logger.error(f"{NEON_RED}CCXT Authentication Error during initial balance fetch: {auth_err}{RESET}")
-             logger.error(f"{NEON_RED}>> Ensure API keys are correct, have necessary permissions (Read, Trade), match the account type (Real/Testnet), and IP whitelist is correctly set if enabled on the exchange.{RESET}")
+             lg.error(f"{NEON_RED}CCXT Authentication Error during initial balance fetch: {auth_err}{RESET}")
+             lg.error(f"{NEON_RED}>> Ensure API keys are correct, have necessary permissions (Read, Trade), match the account type (Real/Testnet), and IP whitelist is correctly set if enabled on the exchange.{RESET}")
              return None
         except ccxt.ExchangeError as balance_err:
-             logger.warning(f"{NEON_YELLOW}Exchange error during initial balance fetch ({account_type_to_test}): {balance_err}. Trying default fetch...{RESET}")
+             lg.warning(f"{NEON_YELLOW}Exchange error during initial balance fetch ({account_type_to_test}): {balance_err}. Trying default fetch...{RESET}")
              # Fallback to default fetch_balance call
              try:
                   balance = exchange.fetch_balance()
                   available_quote = balance.get(QUOTE_CURRENCY, {}).get('free', 'N/A')
-                  logger.info(f"{NEON_GREEN}Successfully fetched balance using default parameters.{RESET} (Example: {QUOTE_CURRENCY} available: {available_quote})")
+                  lg.info(f"{NEON_GREEN}Successfully fetched balance using default parameters.{RESET} (Example: {QUOTE_CURRENCY} available: {available_quote})")
              except Exception as fallback_err:
-                  logger.warning(f"{NEON_YELLOW}Default balance fetch also failed: {fallback_err}. Check API permissions/account type.{RESET}")
+                  lg.warning(f"{NEON_YELLOW}Default balance fetch also failed: {fallback_err}. Check API permissions/account type.{RESET}")
         except Exception as balance_err:
              # Catch other potential errors like network issues during balance fetch
-             logger.warning(f"{NEON_YELLOW}Could not perform initial balance fetch: {balance_err}. Check API permissions/account type/network.{RESET}")
+             lg.warning(f"{NEON_YELLOW}Could not perform initial balance fetch: {balance_err}. Check API permissions/account type/network.{RESET}")
 
         return exchange
 
     except ccxt.AuthenticationError as e:
         # This catches auth errors during the initial exchange class instantiation
-        logger.error(f"{NEON_RED}CCXT Authentication Error during initialization: {e}{RESET}")
-        logger.error(f"{NEON_RED}>> Check API Key/Secret format and validity in your .env file.{RESET}")
+        lg.error(f"{NEON_RED}CCXT Authentication Error during initialization: {e}{RESET}")
+        lg.error(f"{NEON_RED}>> Check API Key/Secret format and validity in your .env file.{RESET}")
     except ccxt.ExchangeError as e:
-        logger.error(f"{NEON_RED}CCXT Exchange Error initializing: {e}{RESET}")
+        lg.error(f"{NEON_RED}CCXT Exchange Error initializing: {e}{RESET}")
     except ccxt.NetworkError as e:
-        logger.error(f"{NEON_RED}CCXT Network Error initializing: {e}{RESET}")
+        lg.error(f"{NEON_RED}CCXT Network Error initializing: {e}{RESET}")
     except Exception as e:
-        logger.error(f"{NEON_RED}Failed to initialize CCXT exchange: {e}{RESET}", exc_info=True)
+        lg.error(f"{NEON_RED}Failed to initialize CCXT exchange: {e}{RESET}", exc_info=True)
 
     return None
 
@@ -508,12 +549,14 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
             bid_price = ticker.get('bid')
             ask_price = ticker.get('ask')
 
+            # Try 'last' price first
             if last_price is not None:
                 try:
                     p = Decimal(str(last_price))
                     if p > 0: price = p; lg.debug(f"Using 'last' price: {p}")
                 except (InvalidOperation, ValueError, TypeError): lg.warning(f"Invalid 'last' price format: {last_price}")
 
+            # Try bid/ask midpoint if 'last' failed or was invalid
             if price is None and bid_price is not None and ask_price is not None:
                 try:
                     bid = Decimal(str(bid_price))
@@ -574,7 +617,7 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
     lg.error(f"{NEON_RED}Failed to fetch a valid current price for {symbol} after {MAX_API_RETRIES + 1} attempts.{RESET}")
     return None
 
-def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int = 250, logger: logging.Logger = None) -> pd.DataFrame:
+def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int = 250, logger: Optional[logging.Logger] = None) -> pd.DataFrame:
     """Fetch OHLCV kline data using CCXT with retries and basic validation."""
     lg = logger or logging.getLogger(__name__) # Use provided logger or default
     try:
@@ -598,7 +641,7 @@ def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limi
                     else:
                        break # Success
                   else:
-                    lg.warning(f"fetch_ohlcv returned invalid data (None or not list) for {symbol} (Attempt {attempt+1}). Retrying...")
+                    lg.warning(f"fetch_ohlcv returned invalid data (type: {type(ohlcv)}) for {symbol} (Attempt {attempt+1}). Retrying...")
 
              except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
                   if attempt < MAX_API_RETRIES:
@@ -715,15 +758,7 @@ def fetch_orderbook_ccxt(exchange: ccxt.Exchange, symbol: str, limit: int, logge
             else:
                  # Basic validation passed
                  lg.debug(f"Successfully fetched orderbook for {symbol} with {len(orderbook['bids'])} bids, {len(orderbook['asks'])} asks.")
-                 # Optional: Deeper validation (check price/size format)
-                 # for i, bid in enumerate(orderbook['bids']):
-                 #     if not (isinstance(bid, list) and len(bid) == 2 and isinstance(bid[0], (float, int)) and isinstance(bid[1], (float, int))):
-                 #          lg.warning(f"Invalid bid format at index {i}: {bid}")
-                 #          # Handle error or continue
-                 # for i, ask in enumerate(orderbook['asks']):
-                 #      if not (isinstance(ask, list) and len(ask) == 2 and isinstance(ask[0], (float, int)) and isinstance(ask[1], (float, int))):
-                 #          lg.warning(f"Invalid ask format at index {i}: {ask}")
-                 #          # Handle error or continue
+                 # Optional: Deeper validation (check price/size format) can be added here if needed
                  return orderbook
 
         # Handle specific CCXT exceptions
@@ -826,41 +861,41 @@ class TradingAnalyzer:
         # Define expected patterns for pandas_ta column names
         # These might need adjustment based on pandas_ta version and parameters used
         expected_patterns = {
-            "ATR": [f"ATRr_{self.config.get('atr_period', DEFAULT_ATR_PERIOD)}"],
-            "EMA_Short": [f"EMA_{self.config.get('ema_short_period', DEFAULT_EMA_SHORT_PERIOD)}"],
-            "EMA_Long": [f"EMA_{self.config.get('ema_long_period', DEFAULT_EMA_LONG_PERIOD)}"],
-            "Momentum": [f"MOM_{self.config.get('momentum_period', DEFAULT_MOMENTUM_PERIOD)}"],
-            "CCI": [f"CCI_{self.config.get('cci_window', DEFAULT_CCI_WINDOW)}"], # May have suffix like _100.0
-            "Williams_R": [f"WILLR_{self.config.get('williams_r_window', DEFAULT_WILLIAMS_R_WINDOW)}"],
-            "MFI": [f"MFI_{self.config.get('mfi_window', DEFAULT_MFI_WINDOW)}"],
+            "ATR": [f"ATRr_{self.config.get('atr_period', DEFAULT_INDICATOR_PERIODS['atr_period'])}"],
+            "EMA_Short": [f"EMA_{self.config.get('ema_short_period', DEFAULT_INDICATOR_PERIODS['ema_short_period'])}"],
+            "EMA_Long": [f"EMA_{self.config.get('ema_long_period', DEFAULT_INDICATOR_PERIODS['ema_long_period'])}"],
+            "Momentum": [f"MOM_{self.config.get('momentum_period', DEFAULT_INDICATOR_PERIODS['momentum_period'])}"],
+            "CCI": [f"CCI_{self.config.get('cci_window', DEFAULT_INDICATOR_PERIODS['cci_window'])}"], # May have suffix like _100.0
+            "Williams_R": [f"WILLR_{self.config.get('williams_r_window', DEFAULT_INDICATOR_PERIODS['williams_r_window'])}"],
+            "MFI": [f"MFI_{self.config.get('mfi_window', DEFAULT_INDICATOR_PERIODS['mfi_window'])}"],
             "VWAP": ["VWAP_D"], # Often includes anchor like 'D' for daily
-            "PSAR_long": [f"PSARl_{self.config.get('psar_af', DEFAULT_PSAR_AF)}_{self.config.get('psar_max_af', DEFAULT_PSAR_MAX_AF)}"],
-            "PSAR_short": [f"PSARs_{self.config.get('psar_af', DEFAULT_PSAR_AF)}_{self.config.get('psar_max_af', DEFAULT_PSAR_MAX_AF)}"],
-            "SMA10": [f"SMA_{self.config.get('sma_10_window', DEFAULT_SMA_10_WINDOW)}"],
+            "PSAR_long": [f"PSARl_{self.config.get('psar_af', DEFAULT_INDICATOR_PERIODS['psar_af'])}_{self.config.get('psar_max_af', DEFAULT_INDICATOR_PERIODS['psar_max_af'])}"],
+            "PSAR_short": [f"PSARs_{self.config.get('psar_af', DEFAULT_INDICATOR_PERIODS['psar_af'])}_{self.config.get('psar_max_af', DEFAULT_INDICATOR_PERIODS['psar_max_af'])}"],
+            "SMA10": [f"SMA_{self.config.get('sma_10_window', DEFAULT_INDICATOR_PERIODS['sma_10_window'])}"],
             # StochRSI patterns can vary, try common ones
             "StochRSI_K": [
-                f"STOCHRSIk_{self.config.get('stoch_rsi_window', DEFAULT_STOCH_RSI_WINDOW)}_{self.config.get('stoch_rsi_rsi_window', DEFAULT_STOCH_WINDOW)}_{self.config.get('stoch_rsi_k', DEFAULT_K_WINDOW)}",
-                f"STOCHRSIk_{self.config.get('stoch_rsi_window', DEFAULT_STOCH_RSI_WINDOW)}" # Simpler fallback
+                f"STOCHRSIk_{self.config.get('stoch_rsi_window', DEFAULT_INDICATOR_PERIODS['stoch_rsi_window'])}_{self.config.get('stoch_rsi_rsi_window', DEFAULT_INDICATOR_PERIODS['stoch_rsi_rsi_window'])}_{self.config.get('stoch_rsi_k', DEFAULT_INDICATOR_PERIODS['stoch_rsi_k'])}",
+                f"STOCHRSIk_{self.config.get('stoch_rsi_window', DEFAULT_INDICATOR_PERIODS['stoch_rsi_window'])}" # Simpler fallback
             ],
             "StochRSI_D": [
-                f"STOCHRSId_{self.config.get('stoch_rsi_window', DEFAULT_STOCH_RSI_WINDOW)}_{self.config.get('stoch_rsi_rsi_window', DEFAULT_STOCH_WINDOW)}_{self.config.get('stoch_rsi_k', DEFAULT_K_WINDOW)}_{self.config.get('stoch_rsi_d', DEFAULT_D_WINDOW)}",
-                 f"STOCHRSId_{self.config.get('stoch_rsi_window', DEFAULT_STOCH_RSI_WINDOW)}" # Simpler fallback
+                f"STOCHRSId_{self.config.get('stoch_rsi_window', DEFAULT_INDICATOR_PERIODS['stoch_rsi_window'])}_{self.config.get('stoch_rsi_rsi_window', DEFAULT_INDICATOR_PERIODS['stoch_rsi_rsi_window'])}_{self.config.get('stoch_rsi_k', DEFAULT_INDICATOR_PERIODS['stoch_rsi_k'])}_{self.config.get('stoch_rsi_d', DEFAULT_INDICATOR_PERIODS['stoch_rsi_d'])}",
+                 f"STOCHRSId_{self.config.get('stoch_rsi_window', DEFAULT_INDICATOR_PERIODS['stoch_rsi_window'])}" # Simpler fallback
             ],
-            "RSI": [f"RSI_{self.config.get('rsi_period', DEFAULT_RSI_WINDOW)}"],
+            "RSI": [f"RSI_{self.config.get('rsi_period', DEFAULT_INDICATOR_PERIODS['rsi_period'])}"],
             # BBands patterns often include std dev
             "BB_Lower": [
-                f"BBL_{self.config.get('bollinger_bands_period', DEFAULT_BOLLINGER_BANDS_PERIOD)}_{float(self.config.get('bollinger_bands_std_dev', DEFAULT_BOLLINGER_BANDS_STD_DEV)):.1f}",
-                f"BBL_{self.config.get('bollinger_bands_period', DEFAULT_BOLLINGER_BANDS_PERIOD)}" # Simpler fallback
+                f"BBL_{self.config.get('bollinger_bands_period', DEFAULT_INDICATOR_PERIODS['bollinger_bands_period'])}_{float(self.config.get('bollinger_bands_std_dev', DEFAULT_INDICATOR_PERIODS['bollinger_bands_std_dev'])):.1f}",
+                f"BBL_{self.config.get('bollinger_bands_period', DEFAULT_INDICATOR_PERIODS['bollinger_bands_period'])}" # Simpler fallback
             ],
             "BB_Middle": [
-                f"BBM_{self.config.get('bollinger_bands_period', DEFAULT_BOLLINGER_BANDS_PERIOD)}_{float(self.config.get('bollinger_bands_std_dev', DEFAULT_BOLLINGER_BANDS_STD_DEV)):.1f}",
-                f"BBM_{self.config.get('bollinger_bands_period', DEFAULT_BOLLINGER_BANDS_PERIOD)}"
+                f"BBM_{self.config.get('bollinger_bands_period', DEFAULT_INDICATOR_PERIODS['bollinger_bands_period'])}_{float(self.config.get('bollinger_bands_std_dev', DEFAULT_INDICATOR_PERIODS['bollinger_bands_std_dev'])):.1f}",
+                f"BBM_{self.config.get('bollinger_bands_period', DEFAULT_INDICATOR_PERIODS['bollinger_bands_period'])}"
             ],
             "BB_Upper": [
-                f"BBU_{self.config.get('bollinger_bands_period', DEFAULT_BOLLINGER_BANDS_PERIOD)}_{float(self.config.get('bollinger_bands_std_dev', DEFAULT_BOLLINGER_BANDS_STD_DEV)):.1f}",
-                f"BBU_{self.config.get('bollinger_bands_period', DEFAULT_BOLLINGER_BANDS_PERIOD)}"
+                f"BBU_{self.config.get('bollinger_bands_period', DEFAULT_INDICATOR_PERIODS['bollinger_bands_period'])}_{float(self.config.get('bollinger_bands_std_dev', DEFAULT_INDICATOR_PERIODS['bollinger_bands_std_dev'])):.1f}",
+                f"BBU_{self.config.get('bollinger_bands_period', DEFAULT_INDICATOR_PERIODS['bollinger_bands_period'])}"
             ],
-            "Volume_MA": [f"VOL_SMA_{self.config.get('volume_ma_period', DEFAULT_VOLUME_MA_PERIOD)}"] # Custom name used in calc
+            "Volume_MA": [f"VOL_SMA_{self.config.get('volume_ma_period', DEFAULT_INDICATOR_PERIODS['volume_ma_period'])}"] # Custom name used in calc
         }
 
         patterns = expected_patterns.get(base_name, [])
@@ -895,26 +930,30 @@ class TradingAnalyzer:
         # Create a list of required periods based on enabled indicators in config
         required_periods = []
         indicators_config = self.config.get("indicators", {})
-        if indicators_config.get("atr_period"): required_periods.append(self.config.get("atr_period", DEFAULT_ATR_PERIOD))
+        # Use DEFAULT_INDICATOR_PERIODS as fallback if key missing in config
+        def get_period(key):
+            return self.config.get(key, DEFAULT_INDICATOR_PERIODS[key])
+
+        if indicators_config.get("atr_period"): required_periods.append(get_period("atr_period"))
         if indicators_config.get("ema_alignment"):
-            required_periods.append(self.config.get("ema_short_period", DEFAULT_EMA_SHORT_PERIOD))
-            required_periods.append(self.config.get("ema_long_period", DEFAULT_EMA_LONG_PERIOD))
-        if indicators_config.get("momentum"): required_periods.append(self.config.get("momentum_period", DEFAULT_MOMENTUM_PERIOD))
-        if indicators_config.get("cci"): required_periods.append(self.config.get("cci_window", DEFAULT_CCI_WINDOW))
-        if indicators_config.get("wr"): required_periods.append(self.config.get("williams_r_window", DEFAULT_WILLIAMS_R_WINDOW))
-        if indicators_config.get("mfi"): required_periods.append(self.config.get("mfi_window", DEFAULT_MFI_WINDOW))
+            required_periods.append(get_period("ema_short_period"))
+            required_periods.append(get_period("ema_long_period"))
+        if indicators_config.get("momentum"): required_periods.append(get_period("momentum_period"))
+        if indicators_config.get("cci"): required_periods.append(get_period("cci_window"))
+        if indicators_config.get("wr"): required_periods.append(get_period("williams_r_window"))
+        if indicators_config.get("mfi"): required_periods.append(get_period("mfi_window"))
         # VWAP doesn't have a standard period parameter in basic ta.vwap
         # PSAR doesn't have a length period
-        if indicators_config.get("sma_10"): required_periods.append(self.config.get("sma_10_window", DEFAULT_SMA_10_WINDOW))
+        if indicators_config.get("sma_10"): required_periods.append(get_period("sma_10_window"))
         if indicators_config.get("stoch_rsi"):
-            required_periods.append(self.config.get("stoch_rsi_window", DEFAULT_STOCH_RSI_WINDOW))
-            required_periods.append(self.config.get("stoch_rsi_rsi_window", DEFAULT_STOCH_WINDOW))
+            required_periods.append(get_period("stoch_rsi_window"))
+            required_periods.append(get_period("stoch_rsi_rsi_window"))
             # K and D periods are applied after StochRSI calc, so main windows are limiting factors
-        if indicators_config.get("rsi"): required_periods.append(self.config.get("rsi_period", DEFAULT_RSI_WINDOW))
-        if indicators_config.get("bollinger_bands"): required_periods.append(self.config.get("bollinger_bands_period", DEFAULT_BOLLINGER_BANDS_PERIOD))
-        if indicators_config.get("volume_confirmation"): required_periods.append(self.config.get("volume_ma_period", DEFAULT_VOLUME_MA_PERIOD))
+        if indicators_config.get("rsi"): required_periods.append(get_period("rsi_period"))
+        if indicators_config.get("bollinger_bands"): required_periods.append(get_period("bollinger_bands_period"))
+        if indicators_config.get("volume_confirmation"): required_periods.append(get_period("volume_ma_period"))
         # Fibonacci window for price range, not strictly an indicator period but needs data
-        required_periods.append(self.config.get("fibonacci_window", DEFAULT_FIB_WINDOW))
+        required_periods.append(get_period("fibonacci_window"))
 
         # Determine minimum data length needed (max period + some buffer)
         min_required_data = max(required_periods) + 20 if required_periods else 50 # Default min 50 if no periods found
@@ -928,38 +967,38 @@ class TradingAnalyzer:
             df_calc = self.df.copy()
 
             # --- Always calculate ATR as it's crucial for SL/TP/Sizing ---
-            atr_period = self.config.get("atr_period", DEFAULT_ATR_PERIOD)
+            atr_period = get_period("atr_period")
             # Use pandas_ta's atr method
             df_calc.ta.atr(length=atr_period, append=True)
             # Find and store the actual column name generated by ta.atr
             self.ta_column_names["ATR"] = self._get_ta_col_name("ATR", df_calc)
             # --- Calculate indicators based on config ---
             if indicators_config.get("ema_alignment", False):
-                ema_short = self.config.get("ema_short_period", DEFAULT_EMA_SHORT_PERIOD)
-                ema_long = self.config.get("ema_long_period", DEFAULT_EMA_LONG_PERIOD)
+                ema_short = get_period("ema_short_period")
+                ema_long = get_period("ema_long_period")
                 df_calc.ta.ema(length=ema_short, append=True)
                 self.ta_column_names["EMA_Short"] = self._get_ta_col_name("EMA_Short", df_calc)
                 df_calc.ta.ema(length=ema_long, append=True)
                 self.ta_column_names["EMA_Long"] = self._get_ta_col_name("EMA_Long", df_calc)
 
             if indicators_config.get("momentum", False):
-                mom_period = self.config.get("momentum_period", DEFAULT_MOMENTUM_PERIOD)
+                mom_period = get_period("momentum_period")
                 df_calc.ta.mom(length=mom_period, append=True)
                 self.ta_column_names["Momentum"] = self._get_ta_col_name("Momentum", df_calc)
 
             if indicators_config.get("cci", False):
-                cci_period = self.config.get("cci_window", DEFAULT_CCI_WINDOW)
+                cci_period = get_period("cci_window")
                 # Note: pandas_ta might add a constant suffix like '_100.0'
                 df_calc.ta.cci(length=cci_period, append=True)
                 self.ta_column_names["CCI"] = self._get_ta_col_name("CCI", df_calc)
 
             if indicators_config.get("wr", False):
-                wr_period = self.config.get("williams_r_window", DEFAULT_WILLIAMS_R_WINDOW)
+                wr_period = get_period("williams_r_window")
                 df_calc.ta.willr(length=wr_period, append=True)
                 self.ta_column_names["Williams_R"] = self._get_ta_col_name("Williams_R", df_calc)
 
             if indicators_config.get("mfi", False):
-                mfi_period = self.config.get("mfi_window", DEFAULT_MFI_WINDOW)
+                mfi_period = get_period("mfi_window")
                 df_calc.ta.mfi(length=mfi_period, append=True)
                 self.ta_column_names["MFI"] = self._get_ta_col_name("MFI", df_calc)
 
@@ -971,8 +1010,8 @@ class TradingAnalyzer:
                 self.ta_column_names["VWAP"] = self._get_ta_col_name("VWAP", df_calc)
 
             if indicators_config.get("psar", False):
-                psar_af = self.config.get("psar_af", DEFAULT_PSAR_AF)
-                psar_max_af = self.config.get("psar_max_af", DEFAULT_PSAR_MAX_AF)
+                psar_af = get_period("psar_af")
+                psar_max_af = get_period("psar_max_af")
                 # psar returns a DataFrame with multiple columns (long, short, af, reversal)
                 psar_result = df_calc.ta.psar(af=psar_af, max_af=psar_max_af)
                 if psar_result is not None and not psar_result.empty:
@@ -983,15 +1022,15 @@ class TradingAnalyzer:
                     self.ta_column_names["PSAR_short"] = self._get_ta_col_name("PSAR_short", df_calc)
 
             if indicators_config.get("sma_10", False):
-                sma10_period = self.config.get("sma_10_window", DEFAULT_SMA_10_WINDOW)
+                sma10_period = get_period("sma_10_window")
                 df_calc.ta.sma(length=sma10_period, append=True)
                 self.ta_column_names["SMA10"] = self._get_ta_col_name("SMA10", df_calc)
 
             if indicators_config.get("stoch_rsi", False):
-                stoch_rsi_len = self.config.get("stoch_rsi_window", DEFAULT_STOCH_RSI_WINDOW)
-                stoch_rsi_rsi_len = self.config.get("stoch_rsi_rsi_window", DEFAULT_STOCH_WINDOW)
-                stoch_rsi_k = self.config.get("stoch_rsi_k", DEFAULT_K_WINDOW)
-                stoch_rsi_d = self.config.get("stoch_rsi_d", DEFAULT_D_WINDOW)
+                stoch_rsi_len = get_period("stoch_rsi_window")
+                stoch_rsi_rsi_len = get_period("stoch_rsi_rsi_window")
+                stoch_rsi_k = get_period("stoch_rsi_k")
+                stoch_rsi_d = get_period("stoch_rsi_d")
                 # stochrsi returns a DataFrame with K and D columns
                 stochrsi_result = df_calc.ta.stochrsi(length=stoch_rsi_len, rsi_length=stoch_rsi_rsi_len, k=stoch_rsi_k, d=stoch_rsi_d)
                 if stochrsi_result is not None and not stochrsi_result.empty:
@@ -1001,14 +1040,14 @@ class TradingAnalyzer:
                      self.ta_column_names["StochRSI_D"] = self._get_ta_col_name("StochRSI_D", df_calc)
 
             if indicators_config.get("rsi", False):
-                rsi_period = self.config.get("rsi_period", DEFAULT_RSI_WINDOW)
+                rsi_period = get_period("rsi_period")
                 df_calc.ta.rsi(length=rsi_period, append=True)
                 self.ta_column_names["RSI"] = self._get_ta_col_name("RSI", df_calc)
 
             if indicators_config.get("bollinger_bands", False):
-                bb_period = self.config.get("bollinger_bands_period", DEFAULT_BOLLINGER_BANDS_PERIOD)
+                bb_period = get_period("bollinger_bands_period")
                 # Ensure std_dev is float for pandas_ta
-                bb_std = float(self.config.get("bollinger_bands_std_dev", DEFAULT_BOLLINGER_BANDS_STD_DEV))
+                bb_std = float(get_period("bollinger_bands_std_dev"))
                 # bbands returns a DataFrame with lower, middle, upper, bandwidth, percent
                 bbands_result = df_calc.ta.bbands(length=bb_period, std=bb_std)
                 if bbands_result is not None and not bbands_result.empty:
@@ -1020,7 +1059,7 @@ class TradingAnalyzer:
                     self.ta_column_names["BB_Upper"] = self._get_ta_col_name("BB_Upper", df_calc)
 
             if indicators_config.get("volume_confirmation", False):
-                vol_ma_period = self.config.get("volume_ma_period", DEFAULT_VOLUME_MA_PERIOD)
+                vol_ma_period = get_period("volume_ma_period")
                 # Use a distinct name for the volume MA column
                 vol_ma_col_name = f"VOL_SMA_{vol_ma_period}"
                 # Calculate SMA on the 'volume' column, filling potential NaNs with 0 for calculation
@@ -1042,6 +1081,9 @@ class TradingAnalyzer:
 
     def _update_latest_indicator_values(self):
         """Updates the indicator_values dict with the latest (most recent) values from self.df."""
+        # Define keys that should be stored as Decimal
+        decimal_keys = ["ATR", "Open", "High", "Low", "Close", "Volume"]
+
         if self.df.empty:
             self.logger.warning(f"Cannot update latest values: DataFrame empty for {self.symbol}.")
             # Initialize with NaNs if empty
@@ -1065,10 +1107,9 @@ class TradingAnalyzer:
                     # Check if the value is valid (not NaN)
                     if pd.notna(value):
                         try:
-                            # Store ATR as Decimal for precision in SL/TP calculations
-                            if key == "ATR":
+                            # Store specific keys as Decimal, others as float
+                            if key in decimal_keys:
                                 updated_values[key] = Decimal(str(value))
-                            # Store most other indicators as float for general use in scoring
                             else:
                                 updated_values[key] = float(value)
                         except (ValueError, TypeError, InvalidOperation) as conv_err:
@@ -1083,8 +1124,8 @@ class TradingAnalyzer:
                         self.logger.debug(f"Indicator column '{col_name}' for key '{key}' not found in latest data row for {self.symbol}. Storing NaN.")
                     updated_values[key] = np.nan
 
-            # --- Add essential price/volume data as Decimal for precision ---
-            # These are directly from the OHLCV data, not calculated indicators via TA
+            # --- Add essential price/volume data (potentially overwriting if also in ta_column_names) ---
+            # These are directly from the OHLCV data, ensure they are Decimal
             for base_col in ['open', 'high', 'low', 'close', 'volume']:
                  key_name = base_col.capitalize() # e.g., 'Open', 'Close'
                  value = latest.get(base_col) # Use .get() for safety if column might be missing
@@ -1109,7 +1150,7 @@ class TradingAnalyzer:
                      if isinstance(v, Decimal):
                           # Determine precision for logging (more for price/ATR, less for volume?)
                           # Use market price precision for price-related values
-                          prec = price_prec if k in ['Open','High','Low','Close','ATR'] else 6
+                          prec = price_prec if k in ['Open','High','Low','Close','ATR', 'BB_Lower', 'BB_Middle', 'BB_Upper', 'PSAR_long', 'PSAR_short'] else 6
                           # Avoid scientific notation for small numbers if possible, format nicely
                           valid_values_log[k] = f"{v:.{prec}f}"
                      elif isinstance(v, float):
@@ -1150,7 +1191,7 @@ class TradingAnalyzer:
             Returns an empty dictionary if calculation is not possible.
         """
         # Use provided window or get from config, falling back to default
-        window = window or self.config.get("fibonacci_window", DEFAULT_FIB_WINDOW)
+        window = window or self.config.get("fibonacci_window", DEFAULT_INDICATOR_PERIODS['fibonacci_window'])
 
         # Check if DataFrame is long enough for the window
         if len(self.df) < window:
@@ -1183,8 +1224,7 @@ class TradingAnalyzer:
             levels = {}
             # Get market price precision for rounding using static method
             price_precision = TradingAnalyzer.get_price_precision(self.market_info, self.logger)
-            # Create a Decimal quantizer based on precision (e.g., '0.01' for 2 decimal places)
-            rounding_factor = Decimal('1e-' + str(price_precision))
+            min_tick_size = TradingAnalyzer.get_min_tick_size(self.market_info, self.logger)
 
             # Check if there's a valid range (high > low)
             if diff > 0:
@@ -1192,16 +1232,24 @@ class TradingAnalyzer:
                 for level_pct in FIB_LEVELS:
                     level_name = f"Fib_{level_pct * 100:.1f}%"
                     # Calculate level price: High - (Range * Percentage)
-                    level_price = high - (diff * Decimal(str(level_pct)))
+                    level_price_raw = high - (diff * Decimal(str(level_pct)))
                     # Quantize the calculated price to the market's tick size/precision
                     # Use ROUND_DOWN for levels based on range from high (conservative support)
-                    level_price_quantized = level_price.quantize(rounding_factor, rounding=ROUND_DOWN)
+                    if min_tick_size > 0:
+                        level_price_quantized = (level_price_raw / min_tick_size).quantize(Decimal('1'), rounding=ROUND_DOWN) * min_tick_size
+                    else: # Fallback to decimal places
+                        rounding_factor = Decimal('1e-' + str(price_precision))
+                        level_price_quantized = level_price_raw.quantize(rounding_factor, rounding=ROUND_DOWN)
                     levels[level_name] = level_price_quantized
             else:
                  # Handle case where high == low (no range)
                  self.logger.debug(f"Fibonacci range is zero or negative (High={high}, Low={low}) for {self.symbol} over last {window} periods. All levels set to High/Low.")
                  # Quantize the single price level
-                 level_price_quantized = high.quantize(rounding_factor, rounding=ROUND_DOWN)
+                 if min_tick_size > 0:
+                     level_price_quantized = (high / min_tick_size).quantize(Decimal('1'), rounding=ROUND_DOWN) * min_tick_size
+                 else: # Fallback
+                     rounding_factor = Decimal('1e-' + str(price_precision))
+                     level_price_quantized = high.quantize(rounding_factor, rounding=ROUND_DOWN)
                  # Assign this price to all levels
                  for level_pct in FIB_LEVELS:
                      levels[f"Fib_{level_pct * 100:.1f}%"] = level_price_quantized
@@ -1880,13 +1928,22 @@ class TradingAnalyzer:
         # Calculate distance relative to band width for scaling
         band_width = bb_upper - bb_lower
         if band_width > 0: # Avoid division by zero if bands collapse
-            # Calculate position relative to middle band, scaled by half-width
-            # Score ranges from -1 (at lower band) to +1 (at upper band)
-            relative_position = (last_close_float - bb_middle) / (band_width / 2.0) if band_width > 0 else 0
-            # Clamp the score between -1 and 1 (should be already, but safety)
-            score = max(-1.0, min(1.0, relative_position))
-            # Scale the score to be less intense than touching the bands (e.g., max +/- 0.7)
-            return score * 0.7
+            try:
+                # Use Decimal for calculation consistency
+                last_close_dec = Decimal(str(last_close_float))
+                bb_middle_dec = Decimal(str(bb_middle))
+                band_width_dec = Decimal(str(band_width))
+
+                # Calculate position relative to middle band, scaled by half-width
+                # Score ranges from -1 (at lower band) to +1 (at upper band)
+                relative_position_dec = (last_close_dec - bb_middle_dec) / (band_width_dec / Decimal("2.0"))
+                # Clamp the score between -1 and 1
+                score_dec = max(Decimal("-1.0"), min(Decimal("1.0"), relative_position_dec))
+                # Scale the score to be less intense than touching the bands (e.g., max +/- 0.7)
+                return float(score_dec * Decimal("0.7"))
+            except (InvalidOperation, ValueError, TypeError):
+                 self.logger.warning("Error calculating relative position within Bollinger Bands.")
+                 return 0.0 # Neutral on error
         # If price is exactly on middle band or bands collapsed
         return 0.0
 
@@ -1917,8 +1974,8 @@ class TradingAnalyzer:
 
             # Sum the sizes (quantities) at these levels
             # Use Decimal for summation to maintain precision
-            bid_volume_sum = sum(Decimal(str(bid[1])) for bid in top_bids if len(bid) == 2)
-            ask_volume_sum = sum(Decimal(str(ask[1])) for ask in top_asks if len(ask) == 2)
+            bid_volume_sum = sum(Decimal(str(bid[1])) for bid in top_bids if len(bid) == 2 and isinstance(bid[1], (int, float, str)))
+            ask_volume_sum = sum(Decimal(str(ask[1])) for ask in top_asks if len(ask) == 2 and isinstance(ask[1], (int, float, str)))
 
             # Calculate total volume in the checked range
             total_volume = bid_volume_sum + ask_volume_sum
@@ -2005,9 +2062,6 @@ class TradingAnalyzer:
 
             # --- Get Market Precision Info ---
             price_precision = TradingAnalyzer.get_price_precision(self.market_info, self.logger)
-            # Quantizer for rounding to the correct number of decimal places
-            rounding_factor = Decimal('1e-' + str(price_precision))
-            # Minimum price increment (tick size) for validation/adjustments
             min_tick = TradingAnalyzer.get_min_tick_size(self.market_info, self.logger)
 
             # --- Calculate Offsets ---
@@ -2037,6 +2091,7 @@ class TradingAnalyzer:
                      tp_rounding = ROUND_UP if signal == "BUY" else ROUND_DOWN
                      take_profit_quantized = (take_profit_raw / min_tick).quantize(Decimal('1'), rounding=tp_rounding) * min_tick
                  else: # Fallback to decimal places if tick size invalid
+                     rounding_factor = Decimal('1e-' + str(price_precision))
                      tp_rounding = ROUND_UP if signal == "BUY" else ROUND_DOWN
                      take_profit_quantized = take_profit_raw.quantize(rounding_factor, rounding=tp_rounding)
 
@@ -2046,6 +2101,7 @@ class TradingAnalyzer:
                      sl_rounding = ROUND_DOWN if signal == "BUY" else ROUND_UP
                      stop_loss_quantized = (stop_loss_raw / min_tick).quantize(Decimal('1'), rounding=sl_rounding) * min_tick
                  else: # Fallback
+                     rounding_factor = Decimal('1e-' + str(price_precision))
                      sl_rounding = ROUND_DOWN if signal == "BUY" else ROUND_UP
                      stop_loss_quantized = stop_loss_raw.quantize(rounding_factor, rounding=sl_rounding)
 
@@ -2477,15 +2533,16 @@ def calculate_position_size(
              lg.warning(f"{NEON_YELLOW}Estimated cost {estimated_cost:.4f} is below min cost {min_cost}. Attempting to increase size.{RESET}")
              # Calculate the size needed to meet min cost
              required_size_for_min_cost: Optional[Decimal] = None
+             denominator = Decimal('0') # Initialize denominator
              if market_info.get('linear', True) or not is_contract:
                  denominator = entry_price * contract_size
                  if denominator > 0: required_size_for_min_cost = min_cost / denominator
              else: # Inverse placeholder
-                 if contract_size > 0: required_size_for_min_cost = min_cost * entry_price / contract_size
-                 else: denominator = 0 # Mark as invalid
+                 denominator = contract_size # Denominator for inverse size calc is contract_size
+                 if denominator > 0 and entry_price > 0: required_size_for_min_cost = min_cost * entry_price / contract_size
 
              if required_size_for_min_cost is None or denominator <= 0:
-                 lg.error("Cannot calculate required size for min cost: Denominator zero/negative.")
+                 lg.error("Cannot calculate required size for min cost: Denominator zero/negative or invalid price.")
                  return None
 
              lg.info(f"  Required size to meet min cost: {required_size_for_min_cost:.8f} {size_unit}")
@@ -2516,15 +2573,16 @@ def calculate_position_size(
              lg.warning(f"{NEON_YELLOW}Estimated cost {estimated_cost:.4f} exceeds max cost {max_cost}. Reducing size.{RESET}")
              # Calculate the maximum size allowed by max cost
              adjusted_size_for_max_cost: Optional[Decimal] = None
+             denominator = Decimal('0')
              if market_info.get('linear', True) or not is_contract:
                   denominator = entry_price * contract_size
                   if denominator > 0: adjusted_size_for_max_cost = max_cost / denominator
              else: # Inverse placeholder
-                  if contract_size > 0: adjusted_size_for_max_cost = max_cost * entry_price / contract_size
-                  else: denominator = 0
+                  denominator = contract_size
+                  if denominator > 0 and entry_price > 0: adjusted_size_for_max_cost = max_cost * entry_price / contract_size
 
              if adjusted_size_for_max_cost is None or denominator <= 0:
-                 lg.error("Cannot calculate max size for max cost: Denominator zero/negative.")
+                 lg.error("Cannot calculate max size for max cost: Denominator zero/negative or invalid price.")
                  return None
 
              lg.info(f"  Reduced size allowed by max cost: {adjusted_size_for_max_cost:.8f} {size_unit}")
@@ -2541,6 +2599,8 @@ def calculate_position_size(
 
         # 3. Apply Amount Precision/Step Size
         # Use ccxt's amount_to_precision for reliable formatting based on market info
+        final_size: Optional[Decimal] = None
+        formatted_size_str: Optional[str] = None
         try:
             # Convert Decimal to string for ccxt function (safer than float)
             amount_str = f"{adjusted_size:.{getcontext().prec}f}" # Format with high precision first
@@ -2575,7 +2635,7 @@ def calculate_position_size(
 
 
         # --- Final Validation ---
-        if final_size <= 0:
+        if final_size is None or final_size <= 0:
              lg.error(f"{NEON_RED}Position size became zero or negative ({final_size}) after adjustments. Aborted.{RESET}")
              return None
         # Final check against min amount after precision formatting
@@ -2627,6 +2687,7 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: Dict, l
                 if not market_id:
                      lg.error(f"Cannot fetch position: Market ID missing for {symbol}.")
                      return None
+                # Note: Some exchanges might require a list even for one symbol
                 positions = exchange.fetch_positions([market_id])
                 lg.debug(f"Fetched single symbol position data for {symbol} (ID: {market_id}). Count: {len(positions)}")
             except ccxt.ArgumentsRequired:
@@ -2676,16 +2737,18 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: Dict, l
         active_position = None
         # Define a small threshold to consider a position size non-zero
         # Use amount precision from market info if available
-        amount_prec_val = market_info.get('precision', {}).get('amount')
+        size_threshold = Decimal('1e-9') # Default fallback threshold
         try:
-            # Calculate threshold based on amount precision (e.g., half the smallest step)
-            if isinstance(amount_prec_val, (float, str)):
-                 amount_step = Decimal(str(amount_prec_val))
-                 size_threshold = amount_step / Decimal('2') if amount_step > 0 else Decimal('1e-9')
-            elif isinstance(amount_prec_val, int): # Decimal places
-                 size_threshold = Decimal('1e-' + str(amount_prec_val + 1)) # One smaller decimal place
-            else: size_threshold = Decimal('1e-9') # Fallback
-        except: size_threshold = Decimal('1e-9') # Fallback on error
+            amount_prec_val = market_info.get('precision', {}).get('amount')
+            if amount_prec_val is not None:
+                # Calculate threshold based on amount precision (e.g., half the smallest step)
+                if isinstance(amount_prec_val, (float, str)):
+                     amount_step = Decimal(str(amount_prec_val))
+                     if amount_step > 0: size_threshold = amount_step / Decimal('2')
+                elif isinstance(amount_prec_val, int): # Decimal places
+                     if amount_prec_val >= 0: size_threshold = Decimal('1e-' + str(amount_prec_val + 1)) # One smaller decimal place
+        except Exception as thresh_err:
+            lg.warning(f"Could not determine size threshold from market precision ({thresh_err}). Using default: {size_threshold}")
         lg.debug(f"Using position size threshold: {size_threshold} for {symbol}")
 
 
@@ -2760,23 +2823,24 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: Dict, l
                           d_val = Decimal(str(val))
                           if is_size:
                               # Get amount precision dynamically if possible, else default
+                              amt_prec = 8 # Default precision
                               try:
                                   amt_prec_val = market_info['precision']['amount']
                                   if isinstance(amt_prec_val, (float, str)):
                                        amt_step = Decimal(str(amt_prec_val))
-                                       amt_prec = abs(amt_step.normalize().as_tuple().exponent) if amt_step > 0 else 8
+                                       if amt_step > 0: amt_prec = abs(amt_step.normalize().as_tuple().exponent)
                                   elif isinstance(amt_prec_val, int): amt_prec = amt_prec_val
-                                  else: amt_prec = 8
-                              except: amt_prec = 8
+                              except Exception: pass # Ignore errors getting precision
                               return f"{abs(d_val):.{amt_prec}f}" # Show absolute size
                           elif is_price:
                               # Use market price precision
+                              price_prec = 6 # Fallback precision
                               try: price_prec = TradingAnalyzer.get_price_precision(market_info, lg)
-                              except: price_prec = 6 # Fallback precision
+                              except Exception: pass # Ignore errors getting precision
                               return f"{d_val:.{price_prec}f}"
                           else: # Other values like PNL
                               return f"{d_val:.4f}" # Default formatting
-                     except: return str(val) # Fallback to string if conversion fails
+                     except Exception: return str(val) # Fallback to string if conversion fails
 
                 entry_price_fmt = format_log_val(active_position.get('entryPriceDecimal'))
                 contracts_fmt = format_log_val(size_decimal, is_size=True)
@@ -2936,6 +3000,9 @@ def place_trade(
     is_contract = market_info.get('is_contract', False)
     size_unit = "Contracts" if is_contract else market_info.get('base', '')
     action_desc = "Close/Reduce" if reduce_only else "Open/Increase"
+    amount_for_api: Optional[float] = None # CCXT usually expects float
+    price_for_api: Optional[float] = None # CCXT usually expects float
+    price_str_formatted: Optional[str] = None # For logging
 
     # --- Validate Inputs ---
     try:
@@ -2947,8 +3014,8 @@ def place_trade(
         if amount_decimal <= 0:
             lg.error(f"Trade aborted ({symbol} {side} {action_desc}): Invalid or zero position size after formatting ({amount_decimal}). Original: {position_size}")
             return None
-        # Use the formatted string for the API call amount
-        amount_for_api = size_str_formatted
+        # Use the formatted string for the API call amount (convert to float)
+        amount_for_api = float(size_str_formatted)
     except (ccxt.ExchangeError, InvalidOperation, ValueError, TypeError) as e:
         lg.error(f"Trade aborted ({symbol} {side} {action_desc}): Failed to format/convert size {position_size}: {e}")
         return None
@@ -2987,10 +3054,10 @@ def place_trade(
              order_params['timeInForce'] = 'IOC' # ImmediateOrCancel
 
     # --- Log Order Details ---
-    log_price = f"Limit @ {price_str_formatted}" if order_type == 'limit' else "Market"
+    log_price = f"Limit @ {price_str_formatted}" if order_type == 'limit' and price_str_formatted else "Market"
     lg.info(f"Attempting to place {action_desc} {side.upper()} {order_type.upper()} order for {symbol}:")
     lg.info(f"  Size: {amount_for_api} {size_unit}") # Log the formatted size being sent
-    if order_type == 'limit': lg.info(f"  Limit Price: {price_str_formatted}") # Log formatted price
+    if order_type == 'limit' and price_str_formatted: lg.info(f"  Limit Price: {price_str_formatted}") # Log formatted price
     lg.info(f"  ReduceOnly: {reduce_only}")
     lg.info(f"  Params: {order_params}")
 
@@ -3003,7 +3070,7 @@ def place_trade(
                 symbol=symbol,
                 type='market',
                 side=side,
-                amount=float(amount_for_api), # CCXT often expects float amount
+                amount=amount_for_api, # Use float amount
                 price=None, # Market orders don't have a price argument
                 params=order_params
             )
@@ -3012,7 +3079,7 @@ def place_trade(
                 symbol=symbol,
                 type='limit',
                 side=side,
-                amount=float(amount_for_api), # CCXT often expects float amount
+                amount=amount_for_api, # Use float amount
                 price=price_for_api, # Use formatted float price
                 params=order_params
             )
@@ -3112,7 +3179,8 @@ def _set_position_protection(
     # Ensure it's a contract market
     if not market_info.get('is_contract', False):
         lg.warning(f"Protection setting skipped for {symbol} (Not a contract market).")
-        return False # Or True? If no action needed, maybe True. Let's use False as intent failed.
+        # If no action needed, maybe True. Let's use False as intent failed.
+        return False
     # Ensure we have position info
     if not position_info:
         lg.error(f"Cannot set protection for {symbol}: Missing position information.")
@@ -3254,10 +3322,10 @@ def _set_position_protection(
         lg.warning(f"No valid protection parameters could be formatted or remained after adjustments for {symbol} (PosIdx: {position_idx}). No API call made.")
         # If the intent was to set nothing (e.g., all inputs were invalid/None), return True.
         # If formatting failed for valid inputs, it should return False.
-        # Let's assume if we reach here with no params, it was due to formatting failures or intent=None.
         # We return False if any *initial* valid protection was requested but failed formatting.
         # If no initial protection was requested, we already returned True earlier.
-        return False if (stop_loss_price or take_profit_price or (trailing_stop_distance and tsl_activation_price)) else True
+        initial_protection_requested = (stop_loss_price or take_profit_price or (trailing_stop_distance and tsl_activation_price))
+        return False if initial_protection_requested else True
 
 
     # --- Make the API Call ---
@@ -3351,8 +3419,7 @@ def set_trailing_stop_loss(
     # Check if TSL is enabled in config
     if not config.get("enable_trailing_stop", False):
         lg.info(f"Trailing Stop Loss is disabled in config for {symbol}. Skipping TSL setup.")
-        # Return True because no action was intended, or False because TSL wasn't set?
-        # Let's return False to indicate TSL specifically was not actioned.
+        # Return False to indicate TSL specifically was not actioned.
         return False
 
     # --- Validate TSL Config Parameters ---
@@ -3398,7 +3465,6 @@ def set_trailing_stop_loss(
     try:
         # Need market helpers for precision and tick size
         price_precision = TradingAnalyzer.get_price_precision(market_info, lg)
-        price_rounding = Decimal('1e-' + str(price_precision)) # Quantizer for price
         min_tick_size = TradingAnalyzer.get_min_tick_size(market_info, lg)
 
         # 1. Calculate Activation Price
@@ -3413,7 +3479,8 @@ def set_trailing_stop_loss(
             if min_tick_size > 0:
                  activation_price = (raw_activation / min_tick_size).quantize(Decimal('1'), rounding=ROUND_UP) * min_tick_size
             else: # Fallback to decimal places
-                 activation_price = raw_activation.quantize(price_rounding, rounding=ROUND_UP)
+                 rounding_factor = Decimal('1e-' + str(price_precision))
+                 activation_price = raw_activation.quantize(rounding_factor, rounding=ROUND_UP)
 
             # Ensure activation is strictly > entry if percentage > 0 and tick size exists
             if activation_percentage > 0 and min_tick_size > 0 and activation_price <= entry_price:
@@ -3430,7 +3497,8 @@ def set_trailing_stop_loss(
             if min_tick_size > 0:
                  activation_price = (raw_activation / min_tick_size).quantize(Decimal('1'), rounding=ROUND_DOWN) * min_tick_size
             else: # Fallback
-                 activation_price = raw_activation.quantize(price_rounding, rounding=ROUND_DOWN)
+                 rounding_factor = Decimal('1e-' + str(price_precision))
+                 activation_price = raw_activation.quantize(rounding_factor, rounding=ROUND_DOWN)
 
             # Ensure activation is strictly < entry if percentage > 0 and tick size exists
             if activation_percentage > 0 and min_tick_size > 0 and activation_price >= entry_price:
@@ -3537,16 +3605,19 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
          lg.warning(f"{NEON_YELLOW}Failed to fetch current ticker price for {symbol}. Using last close from klines as fallback.{RESET}")
          try:
              # Ensure index is datetime and sorted
-             if isinstance(klines_df.index, pd.DatetimeIndex):
-                 last_close_val = klines_df['close'].iloc[-1]
-                 if pd.notna(last_close_val) and last_close_val > 0:
-                      current_price = Decimal(str(last_close_val))
-                      lg.info(f"Using last close price as current price: {current_price}")
-                 else:
-                     lg.error(f"{NEON_RED}Last close price from klines is invalid ({last_close_val}). Cannot proceed without current price.{RESET}")
-                     return
-             else:
+             if not isinstance(klines_df.index, pd.DatetimeIndex):
                  lg.error(f"{NEON_RED}Kline DataFrame index is not DatetimeIndex. Cannot reliably get last close.{RESET}"); return
+             if not klines_df.index.is_monotonic_increasing:
+                 lg.warning("Kline DataFrame index not sorted, sorting...")
+                 klines_df.sort_index(inplace=True)
+
+             last_close_val = klines_df['close'].iloc[-1]
+             if pd.notna(last_close_val) and last_close_val > 0:
+                  current_price = Decimal(str(last_close_val))
+                  lg.info(f"Using last close price as current price: {current_price}")
+             else:
+                 lg.error(f"{NEON_RED}Last close price from klines is invalid ({last_close_val}). Cannot proceed without current price.{RESET}")
+                 return
          except IndexError:
              lg.error(f"{NEON_RED}Kline DataFrame is empty or index error getting last close.{RESET}"); return
          except Exception as e:
@@ -3663,7 +3734,6 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
             if entry_order_type == "limit":
                  offset_buy = Decimal(str(config.get("limit_order_offset_buy", "0.0005")))
                  offset_sell = Decimal(str(config.get("limit_order_offset_sell", "0.0005")))
-                 rounding_factor = Decimal('1e-' + str(price_precision)) # Use price precision for rounding
 
                  if signal == "BUY":
                       raw_limit = current_price * (Decimal(1) - offset_buy)
@@ -3672,6 +3742,7 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
                       if min_tick_size > 0:
                            limit_entry_price = (raw_limit / min_tick_size).quantize(Decimal('1'), rounding=ROUND_DOWN) * min_tick_size
                       else: # Fallback
+                           rounding_factor = Decimal('1e-' + str(price_precision))
                            limit_entry_price = raw_limit.quantize(rounding_factor, rounding=ROUND_DOWN)
                  else: # SELL
                       raw_limit = current_price * (Decimal(1) + offset_sell)
@@ -3679,6 +3750,7 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
                       if min_tick_size > 0:
                            limit_entry_price = (raw_limit / min_tick_size).quantize(Decimal('1'), rounding=ROUND_UP) * min_tick_size
                       else: # Fallback
+                           rounding_factor = Decimal('1e-' + str(price_precision))
                            limit_entry_price = raw_limit.quantize(rounding_factor, rounding=ROUND_UP)
 
                  # Ensure limit price is positive
@@ -4022,6 +4094,8 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
                                  except: pass # Ignore parsing error for TP
 
                             # Call the protection function to update SL (and preserve TP)
+                            # Note: If TSL is enabled in config, this BE SL might be overridden later if TSL activates.
+                            # However, setting it here provides protection until TSL activates.
                             success = _set_position_protection(
                                 exchange=exchange, symbol=symbol, market_info=market_info,
                                 position_info=open_position, logger=lg,
@@ -4060,7 +4134,9 @@ def analyze_and_trade_symbol(exchange: ccxt.Exchange, symbol: str, config: Dict[
 
 def main() -> None:
     """Main function to initialize the bot and run the analysis loop."""
-    global CONFIG, QUOTE_CURRENCY # Allow modification of globals
+    # Use a global variable for config so it can be accessed by helper functions if needed,
+    # although passing it explicitly is generally preferred.
+    global CONFIG, QUOTE_CURRENCY
 
     # Use a general logger for initial setup
     init_logger = setup_logger("init") # Create logger for initialization phase
@@ -4072,7 +4148,7 @@ def main() -> None:
     init_logger.info(f"Config loaded from {CONFIG_FILE}. Quote Currency: {QUOTE_CURRENCY}")
     init_logger.info(f"Using Timezone: {TIMEZONE}")
     try:
-        pandas_ta_version = ta.version if hasattr(ta, 'version') else 'N/A'
+        pandas_ta_version = ta.version() if callable(getattr(ta, 'version', None)) else getattr(ta, 'version', 'N/A')
     except Exception:
         pandas_ta_version = 'Error getting version'
     init_logger.info(f"Versions: CCXT={ccxt.__version__}, Pandas={pd.__version__}, PandasTA={pandas_ta_version}, Python={sys.version.split()[0]}")
@@ -4094,6 +4170,7 @@ def main() -> None:
          init_logger.info(f"Critical Settings: Risk/Trade={risk_pct:.2f}%, Leverage={leverage}x, Symbols={symbols_to_trade}")
          init_logger.info(f"                     TSL Enabled={CONFIG.get('enable_trailing_stop')}, BE Enabled={CONFIG.get('enable_break_even')}")
          # Add a brief pause for user to review critical settings
+         init_logger.info("Starting in 5 seconds...")
          time.sleep(5)
     else:
         init_logger.info("Live trading is DISABLED in config. Running in analysis-only mode.")
@@ -4109,8 +4186,7 @@ def main() -> None:
     if not symbols_to_trade:
          init_logger.error(f"{NEON_RED}'symbols_to_trade' list is empty in config. Exiting bot.{RESET}")
          return
-
-    # --- Main Loop ---
+            # --- Main Loop ---
     init_logger.info(f"Starting main trading loop for symbols: {symbols_to_trade}")
     while True:
         loop_start_time = time.monotonic()
