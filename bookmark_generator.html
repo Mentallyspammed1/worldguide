@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark File Generator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 95%; /* Slightly less than 100% for padding */
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            resize: vertical; /* Allow vertical resizing */
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #downloadLinkContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #downloadLink {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        #downloadLink:hover {
+            background-color: #218838;
+        }
+        .instructions {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #495057;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Chrome Bookmark File</h1>
+
+        <div class="instructions">
+            <p>Paste your list of web addresses (URLs) into the text box below, one URL per line. Then click "Generate Bookmark File". A download link for the <code>bookmarks.html</code> file will appear.</p>
+            <p>You can then import this file into Chrome using: <br><code>Menu -> Bookmarks -> Bookmark Manager -> (Three dots menu) -> Import bookmarks</code></p>
+        </div>
+
+        <label for="urlInput">Enter URLs (one per line):</label>
+        <textarea id="urlInput" placeholder="https://www.google.com&#10;https://www.wikipedia.org&#10;https://github.com"></textarea>
+
+        <button id="generateButton">Generate Bookmark File</button>
+
+        <div id="downloadLinkContainer">
+            <!-- Download link will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const generateButton = document.getElementById('generateButton');
+        const urlInput = document.getElementById('urlInput');
+        const downloadLinkContainer = document.getElementById('downloadLinkContainer');
+        let objectUrl = null; // To keep track of the generated URL
+
+        generateButton.addEventListener('click', () => {
+            const urls = urlInput.value.split('\n') // Split by newline
+                                     .map(url => url.trim()) // Trim whitespace
+                                     .filter(url => url.length > 0 && (url.startsWith('http://') || url.startsWith('https://'))); // Filter empty lines and basic validation
+
+            if (urls.length === 0) {
+                alert('Please enter at least one valid URL (starting with http:// or https://).');
+                return;
+            }
+
+            // --- Generate Bookmark HTML Content ---
+            const timestamp = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+            let bookmarkItems = '';
+
+            urls.forEach(url => {
+                // Basic title generation (using the URL itself or trying to extract domain)
+                let title = url;
+                try {
+                    const urlObj = new URL(url);
+                    title = urlObj.hostname.replace(/^www\./, '') + (urlObj.pathname === '/' ? '' : urlObj.pathname);
+                } catch (e) {
+                   // Keep the original URL as title if parsing fails
+                }
+                // Escape HTML special characters in title (simple version)
+                title = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+                bookmarkItems += `            <DT><A HREF="${url}" ADD_DATE="${timestamp}" LAST_MODIFIED="${timestamp}">${title}</A>\n`;
+            });
+
+            // Full Netscape Bookmark File Format structure
+            const bookmarkHtmlContent = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Bookmarks</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>
+    <DT><H3 ADD_DATE="${timestamp}" LAST_MODIFIED="${timestamp}" PERSONAL_TOOLBAR_FOLDER="true">Generated Bookmarks</H3>
+    <DL><p>
+${bookmarkItems}        </DL><p>
+</DL><p>
+`;
+            // --- Create Download Link ---
+
+            // Revoke previous object URL if it exists, to free memory
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+
+            const blob = new Blob([bookmarkHtmlContent], { type: 'text/html' });
+            objectUrl = URL.createObjectURL(blob);
+
+            downloadLinkContainer.innerHTML = ''; // Clear previous link
+            const downloadLink = document.createElement('a');
+            downloadLink.id = 'downloadLink';
+            downloadLink.href = objectUrl;
+            downloadLink.download = 'bookmarks_generated.html'; // Suggested filename
+            downloadLink.textContent = 'Download Bookmarks File';
+
+            downloadLinkContainer.appendChild(downloadLink);
+        });
+
+        // Optional: Clean up object URL when the window is closed/unloaded
+        // Although modern browsers are better at this, it's good practice.
+        window.addEventListener('beforeunload', () => {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+        });
+
+    </script>
+</body>
+</html>
