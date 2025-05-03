@@ -29,7 +29,6 @@ Enhancements in this version (4.5.7+):
 - Improved Docstrings and Comments.
 - Ensured consistency in logging and variable names.
 - Optimized minor parts for clarity and robustness.
-- Addressed Pylint warnings/errors (indentation, multiple statements, etc.).
 
 Original v2.4.1 Base Features & Enhancements:
 - Robust configuration loading.
@@ -57,7 +56,7 @@ import copy
 import csv
 import logging
 import os
-# import platform # Removed unused import (W0611)
+import platform
 import signal
 import subprocess
 import sys
@@ -67,7 +66,7 @@ from datetime import datetime, timezone
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
-    # ROUND_UP, # Removed unused import (W0611)
+    ROUND_UP,
     Decimal,
     DivisionByZero,
     InvalidOperation,
@@ -90,7 +89,6 @@ try:
     from rich.table import Table
     from rich.text import Text
 
-    # Define COMMON_PACKAGES here, before potential use in except block (E0601)
     COMMON_PACKAGES = [
         "ccxt",
         "python-dotenv",
@@ -107,61 +105,37 @@ except ImportError as e:
         print("Attempting basic error message...")
         print(f"Missing essential spell component: {e.name}")
         print(f"To conjure it, cast: pip install {e.name}")
-        # Ensure COMMON_PACKAGES is defined for the next print statement
-        _fallback_common_packages = [ # Use a fallback list if import failed before definition
-            "ccxt", "python-dotenv", "pandas", "numpy", "rich", "colorama", "requests"
-        ]
         print("\nOr, to ensure all scrolls are present, cast:")
-        print(f"pip install {' '.join(_fallback_common_packages)}")
+        print(f"pip install {' '.join(COMMON_PACKAGES)}")
         sys.exit(1)
     else:
         # Attempt basic colorama init for the error message itself
         try:
-            # Check if colorama components were imported before trying to use them (E0601 fix)
-            if 'colorama_init' in locals() and 'Fore' in locals() and 'Style' in locals():
-                colorama_init(autoreset=True)
-                missing_pkg = e.name
+            colorama_init(autoreset=True)
+            missing_pkg = e.name
+            print(
+                f"{Fore.RED}{Style.BRIGHT}Missing essential spell component: {missing_pkg}{Style.RESET_ALL}"
+            )
+            print(
+                f"{Fore.YELLOW}To conjure it, cast: {Style.BRIGHT}pip install {missing_pkg}{Style.RESET_ALL}"
+            )
+            print(f"\n{Fore.CYAN}Or, to ensure all scrolls are present, cast:")
+            if os.getenv("TERMUX_VERSION"):
                 print(
-                    f"{Fore.RED}{Style.BRIGHT}Missing essential spell component: {missing_pkg}{Style.RESET_ALL}"
+                    f"{Style.BRIGHT}pkg install python python-pandas python-numpy && pip install {' '.join([p for p in COMMON_PACKAGES if p not in ['pandas', 'numpy']])}{Style.RESET_ALL}"
                 )
                 print(
-                    f"{Fore.YELLOW}To conjure it, cast: {Style.BRIGHT}pip install {missing_pkg}{Style.RESET_ALL}"
+                    f"{Fore.YELLOW}Note: pandas and numpy often installed via pkg in Termux.{Style.RESET_ALL}"
                 )
-                print(f"\n{Fore.CYAN}Or, to ensure all scrolls are present, cast:")
-                # Ensure COMMON_PACKAGES is defined
-                _packages_to_install = COMMON_PACKAGES if 'COMMON_PACKAGES' in locals() else [ # Use a fallback list
-                    "ccxt", "python-dotenv", "pandas", "numpy", "rich", "colorama", "requests"
-                ]
-                if os.getenv("TERMUX_VERSION"):
-                    print(
-                        f"{Style.BRIGHT}pkg install python python-pandas python-numpy && pip install {' '.join([p for p in _packages_to_install if p not in ['pandas', 'numpy']])}{Style.RESET_ALL}"
-                    )
-                    print(
-                        f"{Fore.YELLOW}Note: pandas and numpy often installed via pkg in Termux.{Style.RESET_ALL}"
-                    )
-                else:
-                    print(
-                        f"{Style.BRIGHT}pip install {' '.join(_packages_to_install)}{Style.RESET_ALL}"
-                    )
-            else: # Fallback to plain print if colorama wasn't imported
-                 print(f"Missing essential spell component: {e.name}")
-                 print(f"To conjure it, cast: pip install {e.name}")
-                 print("\nOr, to ensure all scrolls are present, cast:")
-                 # Ensure COMMON_PACKAGES is defined
-                 _packages_to_install_plain = COMMON_PACKAGES if 'COMMON_PACKAGES' in locals() else [ # Use a fallback list
-                    "ccxt", "python-dotenv", "pandas", "numpy", "rich", "colorama", "requests"
-                 ]
-                 print(f"pip install {' '.join(_packages_to_install_plain)}")
-        # Catching too general Exception here is acceptable for a fallback print (W0718)
+            else:
+                print(
+                    f"{Style.BRIGHT}pip install {' '.join(COMMON_PACKAGES)}{Style.RESET_ALL}"
+                )
         except Exception: # Fallback to plain print if colorama init failed even here
              print(f"Missing essential spell component: {e.name}")
              print(f"To conjure it, cast: pip install {e.name}")
              print("\nOr, to ensure all scrolls are present, cast:")
-             # Ensure COMMON_PACKAGES is defined
-             _packages_to_install_plain_err = COMMON_PACKAGES if 'COMMON_PACKAGES' in locals() else [ # Use a fallback list
-                "ccxt", "python-dotenv", "pandas", "numpy", "rich", "colorama", "requests"
-             ]
-             print(f"pip install {' '.join(_packages_to_install_plain_err)}")
+             print(f"pip install {' '.join(COMMON_PACKAGES)}")
         sys.exit(1)
 
 # --- Constants ---
@@ -275,7 +249,6 @@ def termux_notify(title: str, content: str) -> None:
         except subprocess.TimeoutExpired:
             # Log the timeout specifically
             logger.warning(f"Termux notify failed: command timed out after {TERMUX_NOTIFY_TIMEOUT} seconds.")
-        # Catching general Exception is okay here for external process interaction (W0718)
         except Exception as e:
             logger.warning(f"Termux notify failed unexpectedly: {e}")
     # else: logger.debug("Not in Termux, skipping notification.") # Optional debug
@@ -337,7 +310,6 @@ def fetch_with_retries(
             else:
                 logger.error(f"{Fore.RED}Max retries reached after exchange error for {func_name}.{Style.RESET_ALL}")
                 break
-        # Catching general Exception is acceptable here to log truly unexpected errors (W0718)
         except Exception as e: # Catch truly unexpected errors
             last_exception = e
             logger.error(f"{Fore.RED}Unexpected error during {func_name}: {e}{Style.RESET_ALL}", exc_info=True)
@@ -346,17 +318,15 @@ def fetch_with_retries(
     # If loop finished without returning, raise the last captured exception
     if last_exception:
         raise last_exception
-    # Removed unnecessary else after raise (R1720)
-    # This path should ideally not be hit if logic is correct
-    raise RuntimeError(f"Function {func_name} failed after {max_retries + 1} attempts without specific exception.")
+    else:
+        # This path should ideally not be hit if logic is correct
+        raise RuntimeError(f"Function {func_name} failed after {max_retries + 1} attempts without specific exception.")
 
 
 # --- Configuration Class ---
 class TradingConfig:
     """Loads, validates, and holds trading configuration parameters from .env."""
 
-    # Fixed method signature (R0917) - acceptable for config loading
-    # pylint: disable=too-many-arguments
     def __init__(self, env_file: str = ".env"):
         logger.debug(f"Loading configuration from environment variables / {env_file}...")
         # Use pathlib for robustness
@@ -496,20 +466,12 @@ class TradingConfig:
 
             if self.market_type == "inverse":
                 category = "inverse" # e.g., BTC/USD:BTC
-            # Removed unnecessary elif after return (R1705)
-            # elif self.market_type in ["linear", "swap"]:
-            #     # Linear includes USDT/USDC perpetuals/futures
-            #     category = "linear"
-            # else:
-            #     # This shouldn't happen due to _get_env validation, but as a safeguard:
-            #     raise ValueError(f"Unsupported MARKET_TYPE '{self.market_type}'")
-            if self.market_type in ["linear", "swap"]:
+            elif self.market_type in ["linear", "swap"]:
                 # Linear includes USDT/USDC perpetuals/futures
                 category = "linear"
             else:
                 # This shouldn't happen due to _get_env validation, but as a safeguard:
                 raise ValueError(f"Unsupported MARKET_TYPE '{self.market_type}'")
-
 
             logger.info(
                 f"Determined Bybit V5 API category: '{category}' for symbol '{self.symbol}' and type '{self.market_type}'"
@@ -558,28 +520,26 @@ class TradingConfig:
         try:
             if cast_type == bool:
                 return val_to_cast.lower() in ["true", "1", "yes", "y", "on"]
-            if cast_type == Decimal:
+            elif cast_type == Decimal:
                 # Check for common non-numeric strings before casting
                 if val_to_cast.lower() in ["nan", "none", "null"]:
                     raise ValueError("Non-numeric string cannot be cast to Decimal")
                 return Decimal(val_to_cast)
-            if cast_type == int:
+            elif cast_type == int:
                 # Use Decimal intermediary for robustness (handles "10.0")
                 dec_val = Decimal(val_to_cast)
                 if dec_val.as_tuple().exponent < 0: # Check if fractional part exists
                     raise ValueError("Non-integer Decimal cannot be cast to int")
                 return int(dec_val)
             # Add other specific casts if needed (e.g., float)
-            # Includes str type
-            return cast_type(val_to_cast) # Use constructor directly
+            else: # Includes str type
+                return cast_type(val_to_cast) # Use constructor directly
         except (ValueError, TypeError, InvalidOperation) as e:
             logger.error(
                 f"{Fore.RED}Cast failed for {key} ('{value_str}' -> {cast_type.__name__}): {e}. Using default '{default}'.{Style.RESET_ALL}"
             )
             return default
 
-    # Fixed method signature (R0917) - acceptable for config validation
-    # pylint: disable=too-many-arguments
     def _validate_value(self, key: str, value: Any, min_val: Optional[Union[int, float, Decimal]], max_val: Optional[Union[int, float, Decimal]], allowed_values: Optional[List[Any]]) -> bool:
         """Helper to validate value against constraints. Logs and returns False on failure."""
         # Type check for numeric comparison
@@ -606,8 +566,6 @@ class TradingConfig:
 
         return True # All checks passed
 
-    # Fixed method signature (R0917) - acceptable for config loading
-    # pylint: disable=too-many-arguments
     def _get_env(
         self,
         key: str,
@@ -674,8 +632,9 @@ class ExchangeManager:
         self._initialize_exchange()
         if self.exchange: # Load markets only if exchange initialized
              self.market_info = self._load_market_info()
-        # Removed unnecessary else after conditional return/exit (handled implicitly by init logic)
-
+        else:
+             # Critical failure already logged in _initialize_exchange, exiting handled there
+             pass # Exit already occurred
 
     def _initialize_exchange(self):
         """Initializes the CCXT exchange instance."""
@@ -719,7 +678,6 @@ class ExchangeManager:
                 exc_info=True,
             )
             sys.exit(1)
-        # Catching general Exception is acceptable here for critical init failure (W0718)
         except Exception as e:
             logger.critical(
                 f"{Fore.RED}{Style.BRIGHT}Unexpected error initializing exchange: {e}. Halting.{Style.RESET_ALL}",
@@ -750,23 +708,20 @@ class ExchangeManager:
             # Precision might be step size (e.g., 0.001) or decimal places (e.g., 3)
             # We want integer decimal places (dp)
             def get_dp_from_precision(precision_val: Optional[Union[str, float, int]], default_dp: int) -> int:
-                if precision_val is None:
-                    return default_dp # Fixed indentation (W0311)
+                if precision_val is None: return default_dp
                 prec_dec = safe_decimal(precision_val)
-                if prec_dec.is_nan():
-                    return default_dp # Fixed indentation (W0311)
-                if prec_dec == 0:
-                    return 0 # Fixed indentation (W0311) Handle case where precision is exactly 0
+                if prec_dec.is_nan(): return default_dp
+                if prec_dec == 0: return 0 # Handle case where precision is exactly 0
                 if prec_dec < 1: # Likely a step size (e.g., 0.01)
                      # Calculate dp from step size exponent
                      exponent = prec_dec.as_tuple().exponent
                      # Ensure exponent is integer before abs()
                      return abs(int(exponent)) if isinstance(exponent, int) else default_dp
-                # Likely number of decimal places directly
-                try:
-                    return int(prec_dec)
-                except (ValueError, TypeError):
-                    return default_dp
+                else: # Likely number of decimal places directly
+                    try:
+                        return int(prec_dec)
+                    except (ValueError, TypeError):
+                        return default_dp
 
             amount_dp = get_dp_from_precision(amount_precision_raw, DEFAULT_AMOUNT_DP)
             price_dp = get_dp_from_precision(price_precision_raw, DEFAULT_PRICE_DP)
@@ -798,7 +753,6 @@ class ExchangeManager:
                 f"ContractSize={contract_size_str}"
             )
             return market
-        # Catching general Exception acceptable for critical load failure (W0718)
         except (ccxt.ExchangeError, KeyError, ValueError, TypeError, Exception) as e:
             logger.critical(
                 f"{Fore.RED}{Style.BRIGHT}Failed to load or parse market info for {self.config.symbol}: {e}. Halting.{Style.RESET_ALL}",
@@ -871,7 +825,7 @@ class ExchangeManager:
            Returns None if the value is invalid or cannot be formatted positively (unless allow_zero=True).
         """
         if value is None:
-            # logger.debug("V5 Param Formatting: Input value is None.")
+            # logger.debug(f"V5 Param Formatting: Input value is None.")
             return None # None input results in None output
 
         # Convert to Decimal for unified handling, default to NaN if conversion fails
@@ -885,23 +839,21 @@ class ExchangeManager:
         is_zero = decimal_value.is_zero()
         if is_zero and allow_zero:
             # Format "0" using the appropriate precision
-            # Fixed indentation (W0311)
             formatter = self.format_price if param_type in ["price", "distance"] else self.format_amount
             # Format zero itself to ensure correct number of decimal places if needed by API
             formatted_zero = formatter(Decimal("0"))
             # Ensure it's not "ERR" or "NaN" after formatting zero
             return formatted_zero if formatted_zero not in ["ERR", "NaN"] else None
-        if is_zero and not allow_zero:
+        elif is_zero and not allow_zero:
             # logger.debug(f"V5 Param Formatting: Input value '{value}' is zero, but zero is not allowed.")
             return None # Zero not allowed, return None
-        if decimal_value < 0:
+        elif decimal_value < 0:
             logger.warning(f"V5 Param Formatting: Input value '{value}' is negative, which is usually invalid.")
             return None # Negative values usually invalid for price/amount/distance
 
         # Select appropriate formatter based on type
         formatter: Callable[[Union[Decimal, str, float, int]], str]
-        # Simplified comparison using 'in' (R1714)
-        if param_type in ("price", "distance"):
+        if param_type == "price" or param_type == "distance":
             formatter = self.format_price
         elif param_type == "amount":
             # Use ROUND_DOWN for amounts typically
@@ -912,7 +864,7 @@ class ExchangeManager:
 
         # Format the positive Decimal value
         # Apply ROUND_DOWN specifically for amount type here if needed, or rely on format_amount default
-        # rounding = ROUND_DOWN if param_type == "amount" else ROUND_HALF_EVEN # Removed unused variable (W0612)
+        rounding = ROUND_DOWN if param_type == "amount" else ROUND_HALF_EVEN
         formatted_str = formatter(decimal_value) # format_amount default is ROUND_DOWN
 
         # Final check: ensure the formatted string isn't an error/NaN indicator
@@ -979,7 +931,6 @@ class ExchangeManager:
                 f"Fetched and processed {len(df)} candles. Last timestamp: {df.index[-1]}"
             )
             return df
-        # Catching general Exception acceptable here for complex fetch/process failure (W0718)
         except Exception as e:
             # Catch exceptions from fetch_with_retries or DataFrame processing
             logger.error(f"Failed to fetch or process OHLCV data for {self.config.symbol}: {e}", exc_info=True)
@@ -1031,36 +982,28 @@ class ExchangeManager:
                 available_balance = safe_decimal(balance_data["free"].get(settle_currency))
 
             # Secondary check: Look inside `info` for more detailed V5 structure if primary failed.
-            # Simplified nesting (R1702) by checking 'info' existence first
             if (total_equity.is_nan() or available_balance.is_nan()) and "info" in balance_data:
                 logger.debug("Parsing balance from 'info' field as fallback...")
                 info_result = balance_data["info"].get("result", {})
                 account_list = info_result.get("list", [])
-                # Further reduced nesting
-                if isinstance(account_list, list) and account_list:
+                if account_list and isinstance(account_list, list):
                     # Find the Unified account details
                     unified_acc_info = next((item for item in account_list if item.get("accountType") == V5_UNIFIED_ACCOUNT_TYPE), None)
                     if unified_acc_info:
-                        # Update values if still NaN
                         if total_equity.is_nan():
                             total_equity = safe_decimal(unified_acc_info.get("totalEquity"))
                         if available_balance.is_nan():
                             available_balance = safe_decimal(unified_acc_info.get("totalAvailableBalance"))
 
                         # If still NaN, check the specific coin details within the account
-                        # Reduced nesting further
                         if available_balance.is_nan() and "coin" in unified_acc_info:
                              coin_list = unified_acc_info.get("coin", [])
-                             if isinstance(coin_list, list) and coin_list:
+                             if coin_list and isinstance(coin_list, list):
                                  settle_coin_info = next((c for c in coin_list if c.get("coin") == settle_currency), None)
                                  if settle_coin_info:
-                                      # Fixed indentation (W0311)
                                       available_balance = safe_decimal(settle_coin_info.get("availableToWithdraw"))
-                                      # Fixed indentation (W0311)
                                       if total_equity.is_nan():
-                                          # Fixed indentation (W0311)
                                           total_equity = safe_decimal(settle_coin_info.get("equity"))
-
 
             # Final Validation and Logging
             if total_equity.is_nan():
@@ -1079,7 +1022,6 @@ class ExchangeManager:
                 f"Balance Fetched: Equity={total_equity.normalize()}, Available={available_balance.normalize()} {settle_currency}"
             )
             return total_equity, available_balance
-        # Catching general Exception acceptable here for complex fetch/parse failure (W0718)
         except Exception as e:
             logger.error(f"Failed to fetch or parse balance: {e}", exc_info=True)
             return None, None
@@ -1174,14 +1116,10 @@ class ExchangeManager:
 
             # Determine position side based on API 'side' field or posIdx
             position_side_key = None
-            if side == "buy":
-                position_side_key = "long"
-            elif side == "sell":
-                position_side_key = "short"
-            elif side == "none" and self.config.position_idx == 1:
-                position_side_key = "long"
-            elif side == "none" and self.config.position_idx == 2:
-                position_side_key = "short"
+            if side == "buy": position_side_key = "long"
+            elif side == "sell": position_side_key = "short"
+            elif side == "none" and self.config.position_idx == 1: position_side_key = "long"
+            elif side == "none" and self.config.position_idx == 2: position_side_key = "short"
             # Add case for one-way mode (posIdx=0) where side 'None' might mean flat (already handled by qty check)
             # Or side 'Buy'/'Sell' indicates the one-way position direction.
             elif side in ["buy", "sell"] and self.config.position_idx == 0:
@@ -1212,7 +1150,6 @@ class ExchangeManager:
 
             return positions_dict
 
-        # Catching general Exception acceptable here for complex fetch/parse failure (W0718)
         except Exception as e:
             logger.error(
                 f"Failed to fetch or parse positions for {self.config.symbol}: {e}", exc_info=True
@@ -1227,33 +1164,7 @@ class IndicatorCalculator:
     def __init__(self, config: TradingConfig):
         self.config = config
 
-    # Moved helper function outside loop to avoid cell-var-from-loop (W0640)
-    @staticmethod
-    def _safe_to_float(x, col_name):
-        """Safely convert input to float, handling various types and logging issues."""
-        if isinstance(x, (float, int)):
-            return float(x)
-        if isinstance(x, Decimal):
-            return float('nan') if x.is_nan() else float(x)
-        if isinstance(x, str):
-            try:
-                # Try direct float conversion first
-                return float(x)
-            except ValueError:
-                # Handle common non-numeric strings
-                if x.strip().lower() in ["nan", "none", "null", ""]:
-                    return float('nan')
-                # If it's something else, log and return NaN
-                logger.debug(f"Could not convert string '{x}' in column '{col_name}' to float.")
-                return float('nan')
-        if x is None:
-            return float('nan')
-        # For other unexpected types, log and return NaN
-        logger.warning(f"Unexpected type {type(x)} in column '{col_name}', converting to NaN.")
-        return float('nan')
-
     # --- Enhanced calculate_indicators from Snippet 3 (with stoch_k_prev added) ---
-    # pylint: disable=too-many-statements # R0915: Acceptable complexity for indicator calculations
     def calculate_indicators(
         self, df: pd.DataFrame
     ) -> Optional[Dict[str, Union[Decimal, bool, int]]]:
@@ -1282,9 +1193,31 @@ class IndicatorCalculator:
                     df_calc[col] = pd.Series(dtype=float)
                     continue
 
+                # Define a safe conversion function
+                def safe_to_float(x):
+                    if isinstance(x, (float, int)):
+                        return float(x)
+                    if isinstance(x, Decimal):
+                        return float('nan') if x.is_nan() else float(x)
+                    if isinstance(x, str):
+                        try:
+                            # Try direct float conversion first
+                            return float(x)
+                        except ValueError:
+                            # Handle common non-numeric strings
+                            if x.strip().lower() in ["nan", "none", "null", ""]:
+                                return float('nan')
+                            # If it's something else, log and return NaN
+                            logger.debug(f"Could not convert string '{x}' in column '{col}' to float.")
+                            return float('nan')
+                    if x is None:
+                        return float('nan')
+                    # For other unexpected types, log and return NaN
+                    logger.warning(f"Unexpected type {type(x)} in column '{col}', converting to NaN.")
+                    return float('nan')
+
                 # Apply the safe conversion using map for efficiency
-                # Pass col name for better logging context
-                df_calc[col] = df_calc[col].map(lambda x: self._safe_to_float(x, col))
+                df_calc[col] = df_calc[col].map(safe_to_float)
 
                 # Ensure the final dtype is float after conversion
                 df_calc[col] = df_calc[col].astype(float)
@@ -1325,7 +1258,6 @@ class IndicatorCalculator:
             low_min = low_s.rolling(window=self.config.stoch_period).min()
             high_max = high_s.rolling(window=self.config.stoch_period).max()
             stoch_range = high_max - low_min
-            # Avoid division by zero or near-zero
             stoch_k_raw = np.where(stoch_range > 1e-12, 100 * (close_s - low_min) / stoch_range, 50.0)
             stoch_k_raw_s = pd.Series(stoch_k_raw, index=df_calc.index).fillna(50)
             stoch_k_s = stoch_k_raw_s.rolling(window=self.config.stoch_smooth_k).mean().fillna(50)
@@ -1348,11 +1280,9 @@ class IndicatorCalculator:
             def get_latest_decimal(series: pd.Series, name: str) -> Decimal:
                 """Safely get the last valid value from a Series and convert to Decimal."""
                 valid_series = series.dropna()
-                if valid_series.empty:
-                    return Decimal("NaN") # Fixed indentation (W0311)
+                if valid_series.empty: return Decimal("NaN")
                 last_valid = valid_series.iloc[-1]
-                try:
-                    return Decimal(str(last_valid))
+                try: return Decimal(str(last_valid))
                 except (InvalidOperation, TypeError, ValueError):
                     logger.error(f"Failed converting latest {name} value '{last_valid}' (type: {type(last_valid).__name__}) to Decimal.")
                     return Decimal("NaN")
@@ -1395,10 +1325,8 @@ class IndicatorCalculator:
                 prev_in_overbought = (k_prev >= self.config.stoch_overbought_threshold) or \
                                      (d_prev >= self.config.stoch_overbought_threshold)
 
-                if crossed_above and prev_in_oversold:
-                    stoch_kd_bullish = True # Fixed indentation (W0311)
-                if crossed_below and prev_in_overbought:
-                    stoch_kd_bearish = True # Fixed indentation (W0311)
+                if crossed_above and prev_in_oversold: stoch_kd_bullish = True
+                if crossed_below and prev_in_overbought: stoch_kd_bearish = True
 
             indicators_out["stoch_kd_bullish"] = stoch_kd_bullish
             indicators_out["stoch_kd_bearish"] = stoch_kd_bearish
@@ -1423,7 +1351,6 @@ class IndicatorCalculator:
             logger.info(f"{Fore.GREEN}{Style.BRIGHT}Indicator patterns woven successfully.{Style.RESET_ALL}")
             return indicators_out
 
-        # Catching general Exception acceptable here for complex calc failure (W0718)
         except Exception as e:
             logger.error(f"{Fore.RED}Error weaving indicator patterns: {e}{Style.RESET_ALL}", exc_info=True)
             return None
@@ -1460,7 +1387,6 @@ class IndicatorCalculator:
         minus_dm_s = pd.Series(minus_dm, index=high_s.index).ewm(alpha=alpha, adjust=False).mean().fillna(0)
 
         # Calculate Directional Indicators (+DI, -DI)
-        # Avoid division by zero or NaN in ATR
         pdi_s_raw = np.where((atr_s > 1e-12) & (~atr_s.isnull()), 100 * plus_dm_s / atr_s, 0.0)
         mdi_s_raw = np.where((atr_s > 1e-12) & (~atr_s.isnull()), 100 * minus_dm_s / atr_s, 0.0)
         pdi_s = pd.Series(pdi_s_raw, index=high_s.index).fillna(0)
@@ -1469,7 +1395,6 @@ class IndicatorCalculator:
         # Calculate Directional Movement Index (DX)
         di_diff_abs = (pdi_s - mdi_s).abs()
         di_sum = pdi_s + mdi_s
-        # Avoid division by zero
         dx_s_raw = np.where(di_sum > 1e-12, 100 * di_diff_abs / di_sum, 0.0)
         dx_s = pd.Series(dx_s_raw, index=high_s.index).fillna(0)
 
@@ -1486,7 +1411,6 @@ class SignalGenerator:
     def __init__(self, config: TradingConfig):
         self.config = config
 
-    # pylint: disable=too-many-branches # R0912: Acceptable for multi-condition signal logic
     def generate_signals(
         self,
         df_last_candles: pd.DataFrame,
@@ -1505,8 +1429,7 @@ class SignalGenerator:
             logger.debug(result["reason"])
             return result
         if df_last_candles is None or len(df_last_candles) < 2:
-            candle_count = len(df_last_candles) if df_last_candles is not None else 0
-            reason = f"No Signal: Insufficient candle data (<2, got {candle_count})"
+            reason = f"No Signal: Insufficient candle data (<2, got {len(df_last_candles) if df_last_candles is not None else 0})"
             result["reason"] = reason
             logger.debug(reason)
             return result
@@ -1530,29 +1453,25 @@ class SignalGenerator:
             nan_keys = []
             for key in required_indicator_keys:
                 val = indicators.get(key)
-                # Check if val is Decimal and NaN, or just None
-                if (isinstance(val, Decimal) and val.is_nan()) or val is None:
+                if isinstance(val, Decimal) and val.is_nan():
+                    nan_keys.append(key)
+                elif val is None: # Consider None as missing/invalid too
                     nan_keys.append(key)
                 else:
-                    ind_values[key] = val # type: ignore
+                    ind_values[key] = val
 
             if nan_keys:
                 result["reason"] = f"No Signal: Required indicator(s) NaN/Missing: {', '.join(nan_keys)}"
                 logger.warning(result["reason"])
                 return result
 
-            # Ensure Decimal type after checks for type hinting
-            k: Decimal = ind_values["stoch_k"] # type: ignore
-            fast_ema: Decimal = ind_values["fast_ema"] # type: ignore
-            slow_ema: Decimal = ind_values["slow_ema"] # type: ignore
-            trend_ema: Decimal = ind_values["trend_ema"] # type: ignore
-            atr: Decimal = ind_values["atr"] # type: ignore
-            adx: Decimal = ind_values["adx"] # type: ignore
-            pdi: Decimal = ind_values["pdi"] # type: ignore
-            mdi: Decimal = ind_values["mdi"] # type: ignore
-
-            kd_bull: bool = indicators.get("stoch_kd_bullish", False) # type: ignore
-            kd_bear: bool = indicators.get("stoch_kd_bearish", False) # type: ignore
+            k, fast_ema, slow_ema, trend_ema, atr, adx, pdi, mdi = (
+                ind_values["stoch_k"], ind_values["fast_ema"], ind_values["slow_ema"],
+                ind_values["trend_ema"], ind_values["atr"], ind_values["adx"],
+                ind_values["pdi"], ind_values["mdi"]
+            )
+            kd_bull = indicators.get("stoch_kd_bullish", False)
+            kd_bear = indicators.get("stoch_kd_bearish", False)
 
             # --- Define Conditions ---
             ema_bullish_cross = fast_ema > slow_ema
@@ -1563,34 +1482,33 @@ class SignalGenerator:
             price_below_trend_ema = current_price < (trend_ema + trend_buffer)
             trend_allows_long = price_above_trend_ema if self.config.trade_only_with_trend else True
             trend_allows_short = price_below_trend_ema if self.config.trade_only_with_trend else True
-            trend_reason_str = f"Trend(P:{current_price:.{DEFAULT_PRICE_DP}f} vs EMA:{trend_ema:.{DEFAULT_PRICE_DP}f})" if self.config.trade_only_with_trend else "TrendFilter OFF"
+            trend_reason = f"Trend(P:{current_price:.{DEFAULT_PRICE_DP}f} vs EMA:{trend_ema:.{DEFAULT_PRICE_DP}f})" if self.config.trade_only_with_trend else "TrendFilter OFF"
 
             stoch_long_cond = (k < self.config.stoch_oversold_threshold) or kd_bull
             stoch_short_cond = (k > self.config.stoch_overbought_threshold) or kd_bear
-            stoch_reason_str = f"Stoch(K:{k:.1f} {'BullX' if kd_bull else ''}{'BearX' if kd_bear else ''})"
+            stoch_reason = f"Stoch(K:{k:.1f} {'BullX' if kd_bull else ''}{'BearX' if kd_bear else ''})"
 
             significant_move = True
-            atr_reason_str = "ATR Filter OFF"
+            atr_reason = "ATR Filter OFF"
             if self.config.atr_move_filter_multiplier > 0:
                 if atr.is_nan() or atr <= 0:
-                    atr_reason_str = f"ATR Filter Skipped (Invalid ATR: {atr})"
+                    atr_reason = f"ATR Filter Skipped (Invalid ATR: {atr})"
                     significant_move = False
                 elif prev_close.is_nan():
-                    atr_reason_str = "ATR Filter Skipped (Prev Close NaN)"
+                    atr_reason = "ATR Filter Skipped (Prev Close NaN)"
                     significant_move = False
                 else:
                     atr_move_threshold = atr * self.config.atr_move_filter_multiplier
                     price_move = (current_price - prev_close).copy_abs()
                     significant_move = price_move > atr_move_threshold
-                    atr_reason_str = f"ATR Move({price_move:.{DEFAULT_PRICE_DP}f}) {'OK' if significant_move else 'LOW'} vs Thr({atr_move_threshold:.{DEFAULT_PRICE_DP}f})"
+                    atr_reason = f"ATR Move({price_move:.{DEFAULT_PRICE_DP}f}) {'OK' if significant_move else 'LOW'} vs Thr({atr_move_threshold:.{DEFAULT_PRICE_DP}f})"
 
             adx_is_trending = adx > self.config.min_adx_level
             adx_long_direction = pdi > mdi
             adx_short_direction = mdi > pdi
             adx_allows_long = adx_is_trending and adx_long_direction
             adx_allows_short = adx_is_trending and adx_short_direction
-            adx_dir_str = '+DI' if adx_long_direction else ('-DI' if adx_short_direction else 'NONE')
-            adx_reason_str = f"ADX({adx:.1f}) {'OK' if adx_is_trending else 'LOW'} vs {self.config.min_adx_level:.1f} | Dir({adx_dir_str})"
+            adx_reason = f"ADX({adx:.1f}) {'OK' if adx_is_trending else 'LOW'} vs {self.config.min_adx_level:.1f} | Dir({'+DI' if adx_long_direction else '-DI' if adx_short_direction else 'NONE'})"
 
             base_long_signal = ema_bullish_cross and stoch_long_cond
             base_short_signal = ema_bearish_cross and stoch_short_cond
@@ -1601,35 +1519,31 @@ class SignalGenerator:
             # --- Build Detailed Reason String ---
             if final_long_signal:
                 result["long"] = True
-                result["reason"] = f"Long Signal: EMA Bull | {stoch_reason_str} | {trend_reason_str} | {atr_reason_str} | {adx_reason_str}"
+                result["reason"] = f"Long Signal: EMA Bull | {stoch_reason} | {trend_reason} | {atr_reason} | {adx_reason}"
             elif final_short_signal:
                 result["short"] = True
-                result["reason"] = f"Short Signal: EMA Bear | {stoch_reason_str} | {trend_reason_str} | {atr_reason_str} | {adx_reason_str}"
+                result["reason"] = f"Short Signal: EMA Bear | {stoch_reason} | {trend_reason} | {atr_reason} | {adx_reason}"
             else:
                 reason_parts = ["No Signal:"]
                 if not base_long_signal and not base_short_signal:
-                     ema_status = '>' if ema_bullish_cross else ('<' if ema_bearish_cross else '=')
-                     stoch_status = f"L {'OK' if stoch_long_cond else '!OK'}/S {'OK' if stoch_short_cond else '!OK'}"
-                     reason_parts.append(f"Base EMA({ema_status}) Stoch({stoch_status})")
+                     reason_parts.append(f"Base EMA({'>' if ema_bullish_cross else '<' if ema_bearish_cross else '='}) Stoch({'L OK' if stoch_long_cond else 'L !OK'}/{'S OK' if stoch_short_cond else 'S !OK'})")
                 elif base_long_signal and not trend_allows_long:
-                    reason_parts.append(f"Long Blocked (Trend Filter: {trend_reason_str})")
+                    reason_parts.append(f"Long Blocked (Trend Filter: {trend_reason})")
                 elif base_short_signal and not trend_allows_short:
-                     reason_parts.append(f"Short Blocked (Trend Filter: {trend_reason_str})")
+                     reason_parts.append(f"Short Blocked (Trend Filter: {trend_reason})")
                 elif (base_long_signal or base_short_signal) and not significant_move:
-                     reason_parts.append(f"Blocked (ATR Filter: {atr_reason_str})")
+                     reason_parts.append(f"Blocked (ATR Filter: {atr_reason})")
                 elif base_long_signal and significant_move and not adx_allows_long:
-                     reason_parts.append(f"Long Blocked (ADX Filter: {adx_reason_str})")
+                     reason_parts.append(f"Long Blocked (ADX Filter: {adx_reason})")
                 elif base_short_signal and significant_move and not adx_allows_short:
-                     reason_parts.append(f"Short Blocked (ADX Filter: {adx_reason_str})")
+                     reason_parts.append(f"Short Blocked (ADX Filter: {adx_reason})")
                 else:
-                    # Generic fallback reason
                     reason_parts.append(f"Conditions unmet (EMA:{ema_bullish_cross}/{ema_bearish_cross}, Stoch:{stoch_long_cond}/{stoch_short_cond}, Trend:{trend_allows_long}/{trend_allows_short}, ATR:{significant_move}, ADX:{adx_allows_long}/{adx_allows_short})")
                 result["reason"] = " | ".join(reason_parts)
 
             log_level_sig = logging.INFO if result["long"] or result["short"] or "Blocked" in result["reason"] else logging.DEBUG
             logger.log(log_level_sig, f"Signal Check: {result['reason']}")
 
-        # Catching general Exception acceptable here for complex signal gen failure (W0718)
         except Exception as e:
             logger.error(f"{Fore.RED}Error generating signals: {e}{Style.RESET_ALL}", exc_info=True)
             result["reason"] = f"No Signal: Exception ({type(e).__name__})"
@@ -1639,7 +1553,6 @@ class SignalGenerator:
         return result
 
     # --- Updated check_exit_signals method from v4.5.7 ---
-    # pylint: disable=too-many-return-statements # R0911: Acceptable for multi-condition exit logic
     def check_exit_signals(
         self,
         position_side: str, # 'long' or 'short'
@@ -1661,17 +1574,16 @@ class SignalGenerator:
 
         # Assume EMA cross signals are calculated just before this block based on fast_ema and slow_ema
         # Example calculation (should happen before this snippet):
+        ema_bullish_cross = fast_ema > slow_ema
+        ema_bearish_cross = fast_ema < slow_ema
         # These variables are used below
-        # Check for NaN values in required indicators first
+
+        # Check for NaN values in required indicators
         if fast_ema.is_nan() or slow_ema.is_nan() or stoch_k.is_nan() or stoch_k_prev.is_nan():
             logger.warning(
                 "Cannot check exit signals due to NaN indicators (EMA/Stoch/StochPrev)."
             )
             return None # Cannot proceed without valid indicator values
-
-        # Calculate EMA crosses here for clarity
-        ema_bullish_cross = fast_ema > slow_ema
-        ema_bearish_cross = fast_ema < slow_ema
 
         exit_reason: Optional[str] = None
 
@@ -1686,46 +1598,33 @@ class SignalGenerator:
             if ema_bearish_cross:
                 exit_reason = "Exit Signal: EMA Bearish Cross"
                 logger.trade(f"{Fore.YELLOW}{exit_reason} detected for LONG position.{Style.RESET_ALL}") # Use TRADE level log
-                return exit_reason # Return immediately on priority 1
 
             # Priority 2: Stochastic Reversal Confirmation from Overbought
-            # Check condition: K was >= OB threshold and now is < OB threshold (crossed down)
-            # Simplified chained comparison (R1716) - kept original explicit check for clarity
-            if stoch_k_prev >= overbought_level and stoch_k < overbought_level:
+            elif stoch_k_prev >= overbought_level and stoch_k < overbought_level:
                 exit_reason = f"Exit Signal: Stoch Reversal Confirmation (K {stoch_k_prev:.1f} -> {stoch_k:.1f} crossed below {overbought_level})"
                 logger.trade(f"{Fore.YELLOW}{exit_reason} detected for LONG position.{Style.RESET_ALL}") # Use TRADE level log
-                return exit_reason # Return immediately
 
             # Informational Logging: Stochastic is in the zone but hasn't reversed yet
-            if stoch_k >= overbought_level:
+            elif stoch_k >= overbought_level:
                 logger.debug(f"Exit Check (Long): Stoch K ({stoch_k:.1f}) >= Overbought ({overbought_level}), awaiting cross below for exit signal.")
-            return None # No exit condition met for long
 
-        # Removed unnecessary elif after return (R1705)
-        # elif position_side == "short":
-        if position_side == "short":
+        elif position_side == "short":
             # Priority 1: EMA Bullish Cross
             if ema_bullish_cross:
                 exit_reason = "Exit Signal: EMA Bullish Cross"
                 logger.trade(f"{Fore.YELLOW}{exit_reason} detected for SHORT position.{Style.RESET_ALL}") # Use TRADE level log
-                return exit_reason # Return immediately
 
             # Priority 2: Stochastic Reversal Confirmation from Oversold
-            # Check condition: K was <= OS threshold and now is > OS threshold (crossed up)
-            # Simplified chained comparison (R1716) - kept original explicit check for clarity
-            if stoch_k_prev <= oversold_level and stoch_k > oversold_level:
+            elif stoch_k_prev <= oversold_level and stoch_k > oversold_level:
                 exit_reason = f"Exit Signal: Stoch Reversal Confirmation (K {stoch_k_prev:.1f} -> {stoch_k:.1f} crossed above {oversold_level})"
                 logger.trade(f"{Fore.YELLOW}{exit_reason} detected for SHORT position.{Style.RESET_ALL}") # Use TRADE level log
-                return exit_reason # Return immediately
 
             # Informational Logging: Stochastic is in the zone but hasn't reversed yet
-            if stoch_k <= oversold_level:
+            elif stoch_k <= oversold_level:
                 logger.debug(f"Exit Check (Short): Stoch K ({stoch_k:.1f}) <= Oversold ({oversold_level}), awaiting cross above for exit signal.")
-            return None # No exit condition met for short
 
-        # Should not be reached if position_side is 'long' or 'short'
-        logger.error(f"Invalid position_side '{position_side}' in check_exit_signals.")
-        return None
+        # Return the reason string if an exit condition was met, otherwise None
+        return exit_reason
     # --- End updated check_exit_signals ---
 
 
@@ -1747,7 +1646,6 @@ class OrderManager:
         # Tracks active protection STATUS (not order IDs) for V5 position stops
         self.protection_tracker: Dict[str, Optional[str]] = {"long": None, "short": None}
 
-    # pylint: disable=too-many-return-statements, too-many-branches, too-many-statements # R0911, R0912, R0915: Acceptable complexity for core calculation logic
     def _calculate_trade_parameters(
         self,
         side: str, # 'buy' or 'sell'
@@ -1777,10 +1675,8 @@ class OrderManager:
             risk_amount_per_trade = total_equity * self.config.risk_percentage
             sl_distance_atr = atr * self.config.sl_atr_multiplier
             sl_price: Decimal
-            if side == "buy":
-                sl_price = current_price - sl_distance_atr
-            else:
-                sl_price = current_price + sl_distance_atr
+            if side == "buy": sl_price = current_price - sl_distance_atr
+            else: sl_price = current_price + sl_distance_atr
 
             if sl_price <= 0:
                 logger.error(f"Calculated SL price ({sl_price:.{DEFAULT_PRICE_DP}f}) is invalid (<=0).")
@@ -1790,10 +1686,8 @@ class OrderManager:
             min_tick_size = self.market_info['tick_size']
             if sl_distance_price < min_tick_size:
                 sl_distance_price = min_tick_size
-                if side == "buy":
-                    sl_price = current_price - sl_distance_price
-                else:
-                    sl_price = current_price + sl_distance_price
+                if side == "buy": sl_price = current_price - sl_distance_price
+                else: sl_price = current_price + sl_distance_price
                 logger.warning(f"Initial SL distance < tick size. Adjusted SL price to {sl_price:.{DEFAULT_PRICE_DP}f} (dist {sl_distance_price}).")
                 if sl_price <= 0:
                      logger.error(f"Adjusted SL price ({sl_price:.{DEFAULT_PRICE_DP}f}) is still invalid (<=0).")
@@ -1840,21 +1734,16 @@ class OrderManager:
             tp_price: Optional[Decimal] = None
             if self.config.tp_atr_multiplier > 0:
                 tp_distance_atr = atr * self.config.tp_atr_multiplier
-                if side == "buy":
-                    tp_price = current_price + tp_distance_atr
-                else:
-                    tp_price = current_price - tp_distance_atr
+                if side == "buy": tp_price = current_price + tp_distance_atr
+                else: tp_price = current_price - tp_distance_atr
                 if tp_price <= 0:
                     logger.warning(f"Calculated TP price ({tp_price:.{DEFAULT_PRICE_DP}f}) invalid (<=0). Disabling TP.")
                     tp_price = None
 
             # --- Trailing Stop Calculation (Distance) ---
             tsl_distance_price = current_price * (self.config.trailing_stop_percent / 100)
-            # Simplified check using max (R1731)
-            tsl_distance_price = max(tsl_distance_price, min_tick_size)
-            # Fixed indentation (W0311)
-            # if tsl_distance_price < min_tick_size:
-            #      tsl_distance_price = min_tick_size
+            if tsl_distance_price < min_tick_size:
+                 tsl_distance_price = min_tick_size
             tsl_distance_str = self.exchange_manager.format_price(tsl_distance_price)
             tsl_distance_decimal = safe_decimal(tsl_distance_str)
             if tsl_distance_decimal.is_nan() or tsl_distance_decimal <= 0:
@@ -1892,12 +1781,8 @@ class OrderManager:
             )
             return params_out
 
-        except (InvalidOperation, DivisionByZero, TypeError) as e: # More specific exceptions
+        except (InvalidOperation, DivisionByZero, TypeError, Exception) as e:
             logger.error(f"Error calculating trade parameters for {side} side: {e}", exc_info=True)
-            return None
-        # Catching general Exception acceptable here for unexpected calc failure (W0718)
-        except Exception as e:
-            logger.error(f"Unexpected error calculating trade parameters for {side} side: {e}", exc_info=True)
             return None
 
     def _execute_market_order(
@@ -1977,13 +1862,11 @@ class OrderManager:
             logger.error(f"{Fore.RED}Order placement failed ({type(e).__name__}): {e}{Style.RESET_ALL}")
             termux_notify(f"{symbol} Order FAILED", f"Market {side.upper()} failed: {str(e)[:50]}")
             return None
-        # Catching general Exception acceptable here for unexpected order failure (W0718)
         except Exception as e:
             logger.error(f"{Fore.RED}Unexpected error placing market order: {e}{Style.RESET_ALL}", exc_info=True)
             termux_notify(f"{symbol} Order ERROR", f"Market {side.upper()} error.")
             return None
 
-    # pylint: disable=too-many-statements # R0915: Acceptable complexity for protection logic
     def _set_position_protection(
         self,
         position_side: str, # 'long' or 'short'
@@ -1997,24 +1880,16 @@ class OrderManager:
            Ensures numeric parameters are passed as formatted strings. Clears other stops when activating TSL.
            Updates internal protection_tracker on success.
         """
-        if not self.exchange:
-            logger.error("Cannot set protection: Exchange missing.")
-            return False # Fixed indentation (W0311)
-        if not self.market_info:
-            logger.error("Cannot set protection: Market info missing.")
-            return False # Fixed indentation (W0311)
+        if not self.exchange: logger.error("Cannot set protection: Exchange missing."); return False
+        if not self.market_info: logger.error("Cannot set protection: Market info missing."); return False
         market_id = self.market_info.get("id")
-        if not market_id:
-            logger.error("Cannot set protection: Market ID missing.")
-            return False # Fixed indentation (W0311)
+        if not market_id: logger.error("Cannot set protection: Market ID missing."); return False
 
         tracker_key = position_side.lower()
         if tracker_key not in self.protection_tracker:
-             logger.error(f"Invalid position_side '{position_side}' for protection tracker.")
-             return False
+             logger.error(f"Invalid position_side '{position_side}' for protection tracker."); return False
 
-        # Use the parameter formatting helper (protected access W0212 is acceptable within class)
-        # pylint: disable=protected-access
+        # Use the parameter formatting helper
         sl_str = self.exchange_manager._format_v5_param(sl_price, "price", allow_zero=True) or "0"
         tp_str = self.exchange_manager._format_v5_param(tp_price, "price", allow_zero=True) or "0"
         # TSL distance requires formatting as price difference, allow_zero depends on API clear logic (False safer)
@@ -2029,10 +1904,7 @@ class OrderManager:
             "symbol": market_id,
             "positionIdx": self.config.position_idx,
             "tpslMode": V5_TPSL_MODE_FULL,
-            "stopLoss": "0", # Default to clear
-            "takeProfit": "0", # Default to clear
-            "trailingStop": "0", # Default to clear
-            "activePrice": "0", # Default to clear
+            "stopLoss": "0", "takeProfit": "0", "trailingStop": "0", "activePrice": "0", # Defaults
             "slTriggerBy": self.config.sl_trigger_by,
             "tpTriggerBy": self.config.sl_trigger_by, # Use same trigger for TP as SL
             "tslTriggerBy": self.config.tsl_trigger_by,
@@ -2046,8 +1918,8 @@ class OrderManager:
             # _format_v5_param already handled validation/formatting
             params["trailingStop"] = tsl_distance_str
             params["activePrice"] = tsl_activation_price_str
-            params["stopLoss"] = "0" # Clear fixed SL/TP when setting TSL
-            params["takeProfit"] = "0" # Clear fixed SL/TP when setting TSL
+            params["stopLoss"] = "0" # Clear fixed SL/TP
+            params["takeProfit"] = "0"
             action_desc = f"ACTIVATE TSL (Dist: {tsl_distance_str}, ActPx: {tsl_activation_price_str})"
             new_tracker_state = "ACTIVE_TSL"
             logger.debug(f"TSL Params Prepared: {params}")
@@ -2056,8 +1928,8 @@ class OrderManager:
         elif not is_tsl and (sl_str != "0" or tp_str != "0"):
             params["stopLoss"] = sl_str
             params["takeProfit"] = tp_str
-            params["trailingStop"] = "0" # Clear TSL when setting fixed stops
-            params["activePrice"] = "0" # Clear TSL activation price
+            params["trailingStop"] = "0" # Clear TSL
+            params["activePrice"] = "0"
             action_desc = f"SET SL={params['stopLoss']} TP={params['takeProfit']}"
             new_tracker_state = "ACTIVE_SLTP"
 
@@ -2100,22 +1972,19 @@ class OrderManager:
                 termux_notify(f"{symbol} Protection Set", f"{action_desc} {position_side.upper()}")
                 self.protection_tracker[tracker_key] = new_tracker_state
                 return True
-            # Removed unnecessary else after return (R1705)
-            ret_code = response.get("retCode", "[N/A]") if response else "[No Response]"
-            ret_msg = response.get("retMsg", "[No error message]") if response else "[No Response]"
-            logger.error(f"{Fore.RED}{action_desc} failed for {position_side.upper()} {symbol}. API Response: Code={ret_code}, Msg='{ret_msg}'{Style.RESET_ALL}")
-            logger.debug(f"Failed SetTradingStop Full Response: {response}")
-            termux_notify(f"{symbol} Protection FAILED", f"{action_desc[:30]} {position_side.upper()} failed: {ret_msg[:50]}")
-            return False
-        # Catching general Exception acceptable here for unexpected API call failure (W0718)
+            else:
+                ret_code = response.get("retCode", "[N/A]") if response else "[No Response]"
+                ret_msg = response.get("retMsg", "[No error message]") if response else "[No Response]"
+                logger.error(f"{Fore.RED}{action_desc} failed for {position_side.upper()} {symbol}. API Response: Code={ret_code}, Msg='{ret_msg}'{Style.RESET_ALL}")
+                logger.debug(f"Failed SetTradingStop Full Response: {response}")
+                termux_notify(f"{symbol} Protection FAILED", f"{action_desc[:30]} {position_side.upper()} failed: {ret_msg[:50]}")
+                return False
         except Exception as e:
             logger.error(f"{Fore.RED}Unexpected error during {action_desc} for {position_side.upper()} {symbol}: {e}{Style.RESET_ALL}", exc_info=True)
             termux_notify(f"{symbol} Protection ERROR", f"{action_desc[:30]} {position_side.upper()} error.")
             return False
 
     # --- Enhanced Position Verification Method (Snippet 5) ---
-    # Fixed method signature (R0917) - acceptable for verification logic
-    # pylint: disable=too-many-arguments
     def _verify_position_state(
             self,
             expected_side: Optional[str], # 'long', 'short', or None (for expecting flat)
@@ -2140,9 +2009,9 @@ class OrderManager:
                 if attempt < max_attempts - 1:
                     time.sleep(delay_seconds)
                     continue
-                # Removed unnecessary else after continue (R1724)
-                logger.error(f"{Fore.RED}{action_context} Verification Failed: Could not fetch position state after {max_attempts} attempts.{Style.RESET_ALL}")
-                return False, last_known_position_state # Verification failed, return last attempt state (which is None here)
+                else:
+                    logger.error(f"{Fore.RED}{action_context} Verification Failed: Could not fetch position state after {max_attempts} attempts.{Style.RESET_ALL}")
+                    return False, last_known_position_state # Verification failed, return last attempt state (which is None here)
 
             # --- Check against expected state ---
             is_currently_flat = True
@@ -2159,33 +2028,28 @@ class OrderManager:
                      is_currently_flat = False
                      actual_side = "long"
                      actual_qty = long_qty
-                     # active_pos_data = long_pos_data # Not used later in this block
-
+                     active_pos_data = long_pos_data
             # Check short only if not actively long
-            if not actual_side and short_pos_data: # Check actual_side instead of active_pos_data
+            if not active_pos_data and short_pos_data:
                  short_qty = safe_decimal(short_pos_data.get("qty", "0"))
                  if short_qty.copy_abs() >= POSITION_QTY_EPSILON:
                      is_currently_flat = False
                      actual_side = "short"
                      actual_qty = short_qty
-                     # active_pos_data = short_pos_data # Not used later in this block
+                     active_pos_data = short_pos_data
 
             # --- Evaluate success based on expectation ---
             verification_met = False
-            log_msg = ""
             if expected_side is None: # Expecting flat
                 verification_met = is_currently_flat
-                actual_state_str = 'FLAT' if is_currently_flat else f'{actual_side.upper()} Qty={actual_qty.normalize()}' # type: ignore
-                log_msg = f"Expected FLAT, Actual: {actual_state_str}"
+                log_msg = f"Expected FLAT, Actual: {'FLAT' if is_currently_flat else f'{actual_side.upper()} Qty={actual_qty.normalize()}'}"
             elif expected_side == actual_side: # Expecting a specific side
                 qty_met = actual_qty.copy_abs() >= expected_qty_min
                 verification_met = qty_met
-                qty_status = 'OK' if qty_met else 'QTY MISMATCH'
-                log_msg = f"Expected {expected_side.upper()} (MinQty~{expected_qty_min}), Actual: {actual_side.upper()} Qty={actual_qty.normalize()} ({qty_status})"
+                log_msg = f"Expected {expected_side.upper()} (MinQty~{expected_qty_min}), Actual: {actual_side.upper()} Qty={actual_qty.normalize()} ({'OK' if qty_met else 'QTY MISMATCH'})"
             else: # Expecting a specific side, but actual side is different or flat
                  verification_met = False
-                 actual_state_str = 'FLAT' if is_currently_flat else (f"{actual_side.upper()} Qty={actual_qty.normalize()}" if actual_side else 'UNKNOWN')
-                 log_msg = f"Expected {expected_side.upper()}, Actual: {actual_state_str} (SIDE MISMATCH)"
+                 log_msg = f"Expected {expected_side.upper()}, Actual: {'FLAT' if is_currently_flat else (actual_side.upper() + ' Qty=' + actual_qty.normalize()) if actual_side else 'UNKNOWN'} (SIDE MISMATCH)"
 
 
             logger.debug(f"{action_context} Check {attempt + 1}: {log_msg}")
@@ -2209,8 +2073,6 @@ class OrderManager:
     # --- End Enhanced Position Verification Method ---
 
     # --- Updated place_risked_market_order using _verify_position_state ---
-    # Fixed method signature (R0917) - acceptable for core order placement
-    # pylint: disable=too-many-arguments
     def place_risked_market_order(
         self,
         side: str, # 'buy' or 'sell'
@@ -2219,20 +2081,11 @@ class OrderManager:
         current_price: Decimal,
     ) -> bool:
         """Calculates parameters, places market order, verifies position, and sets initial SL/TP."""
-        if not self.exchange or not self.market_info:
-            return False # Fixed indentation (W0311)
-        if side not in ["buy", "sell"]:
-            logger.error(f"Invalid side '{side}'.")
-            return False # Fixed indentation (W0311)
-        if atr.is_nan() or atr <= 0:
-            logger.error("Entry Aborted: Invalid ATR.")
-            return False # Fixed indentation (W0311)
-        if total_equity is None or total_equity.is_nan() or total_equity <= 0:
-            logger.error("Entry Aborted: Invalid Equity.")
-            return False # Fixed indentation (W0311)
-        if current_price.is_nan() or current_price <= 0:
-            logger.error("Entry Aborted: Invalid Price.")
-            return False # Fixed indentation (W0311)
+        if not self.exchange or not self.market_info: return False
+        if side not in ["buy", "sell"]: logger.error(f"Invalid side '{side}'."); return False
+        if atr.is_nan() or atr <= 0: logger.error("Entry Aborted: Invalid ATR."); return False
+        if total_equity is None or total_equity.is_nan() or total_equity <= 0: logger.error("Entry Aborted: Invalid Equity."); return False
+        if current_price.is_nan() or current_price <= 0: logger.error("Entry Aborted: Invalid Price."); return False
 
         position_side = "long" if side == "buy" else "short"
         logger.info(f"{Fore.MAGENTA}{Style.BRIGHT}--- Initiating Entry Sequence for {position_side.upper()} ---{Style.RESET_ALL}")
@@ -2240,15 +2093,12 @@ class OrderManager:
         # 1. Calculate Trade Parameters
         logger.debug("Calculating trade parameters...")
         trade_params = self._calculate_trade_parameters(side, atr, total_equity, current_price)
-        if not trade_params or "qty" not in trade_params: # Check qty exists and is not None
+        if not trade_params or not trade_params.get("qty"): # Check qty exists
             logger.error("Entry Aborted: Failed to calculate valid trade parameters (qty missing?).")
             return False
-        qty_to_order = trade_params["qty"] # Now we know qty exists
-        if qty_to_order is None or qty_to_order.is_nan() or qty_to_order <= 0:
-             logger.error(f"Entry Aborted: Invalid quantity ({qty_to_order}) calculated.")
-             return False
 
-        initial_sl_price = trade_params.get("sl_price") # Can be None if calc fails
+        qty_to_order = trade_params["qty"]
+        initial_sl_price = trade_params.get("sl_price") # Can be None if calc fails, though unlikely if qty valid
         initial_tp_price = trade_params.get("tp_price") # Can be None
 
         # Validate SL price before proceeding
@@ -2293,9 +2143,8 @@ class OrderManager:
         avg_entry_price = safe_decimal(active_pos_data.get("entry_price", "NaN"))
 
         # Log confirmation with verified details
-        avg_entry_price_str = avg_entry_price.normalize() if not avg_entry_price.is_nan() else '[N/A]'
         logger.info(
-            f"{Fore.GREEN}{Style.BRIGHT}Position {position_side.upper()} confirmed via verification: Qty={filled_qty.normalize()}, AvgEntry={avg_entry_price_str}{Style.RESET_ALL}"
+            f"{Fore.GREEN}{Style.BRIGHT}Position {position_side.upper()} confirmed via verification: Qty={filled_qty.normalize()}, AvgEntry={avg_entry_price.normalize() if not avg_entry_price.is_nan() else '[N/A]'}{Style.RESET_ALL}"
         )
 
         # Handle partial fill logging (already done in verification logic)
@@ -2331,9 +2180,7 @@ class OrderManager:
         atr: Decimal,
     ) -> None:
         """Checks if TSL activation conditions are met and activates it using V5 position TSL."""
-        if not self.exchange or not self.market_info:
-            return # Fixed indentation (W0311)
-
+        if not self.exchange or not self.market_info: return
         tracker_key = position_side.lower()
 
         current_protection_state = self.protection_tracker.get(tracker_key)
@@ -2342,55 +2189,35 @@ class OrderManager:
             logger.debug(f"TSL Check ({position_side.upper()}): {log_msg}")
             return
 
-        if atr.is_nan() or atr <= 0:
-            logger.debug("Invalid ATR for TSL.")
-            return # Fixed indentation (W0311)
-        if entry_price.is_nan() or entry_price <= 0:
-            logger.debug("Invalid entry price for TSL.")
-            return # Fixed indentation (W0311)
-        if current_price.is_nan() or current_price <= 0:
-            logger.debug("Invalid current price for TSL.")
-            return # Fixed indentation (W0311)
+        if atr.is_nan() or atr <= 0: logger.debug("Invalid ATR for TSL."); return
+        if entry_price.is_nan() or entry_price <= 0: logger.debug("Invalid entry price for TSL."); return
+        if current_price.is_nan() or current_price <= 0: logger.debug("Invalid current price for TSL."); return
 
         try:
             activation_distance_atr = atr * self.config.tsl_activation_atr_multiplier
             activation_price: Decimal
-            if position_side == "long":
-                activation_price = entry_price + activation_distance_atr
-            else:
-                activation_price = entry_price - activation_distance_atr
+            if position_side == "long": activation_price = entry_price + activation_distance_atr
+            else: activation_price = entry_price - activation_distance_atr
 
             if activation_price.is_nan() or activation_price <= 0:
-                logger.warning(f"Calculated invalid TSL activation price ({activation_price}). Skipping TSL.")
-                return
+                logger.warning(f"Calculated invalid TSL activation price ({activation_price}). Skipping TSL."); return
 
             tsl_distance_price = current_price * (self.config.trailing_stop_percent / 100)
             min_tick_size = self.market_info.get('tick_size', Decimal('1e-8'))
-            # Simplified check using max (R1731)
-            tsl_distance_price = max(tsl_distance_price, min_tick_size)
-            # Fixed indentation (W0311)
-            # if tsl_distance_price < min_tick_size:
-            #     logger.debug(f"TSL distance ({tsl_distance_price}) < min tick {min_tick_size}. Adjusting.")
-            #     tsl_distance_price = min_tick_size
+            if tsl_distance_price < min_tick_size:
+                logger.debug(f"TSL distance ({tsl_distance_price}) < min tick {min_tick_size}. Adjusting.")
+                tsl_distance_price = min_tick_size
             if tsl_distance_price <= 0:
-                 logger.warning(f"Invalid TSL distance ({tsl_distance_price}) after adjustment. Skipping TSL.")
-                 return
+                 logger.warning(f"Invalid TSL distance ({tsl_distance_price}) after adjustment. Skipping TSL."); return
 
             should_activate_tsl = False
-            if position_side == "long" and current_price >= activation_price:
-                should_activate_tsl = True
-            elif position_side == "short" and current_price <= activation_price:
-                should_activate_tsl = True
+            if position_side == "long" and current_price >= activation_price: should_activate_tsl = True
+            elif position_side == "short" and current_price <= activation_price: should_activate_tsl = True
 
             if should_activate_tsl:
                 logger.trade(f"{Fore.MAGENTA}TSL Activation condition met for {position_side.upper()}!{Style.RESET_ALL}")
-                entry_price_str = entry_price.normalize()
-                current_price_str = current_price.normalize()
-                act_target_str = activation_price.normalize().to_eng_string() # Use eng string for formatting
-                logger.trade(f"  Entry={entry_price_str}, Current={current_price_str}, ActTarget~={act_target_str:.{DEFAULT_PRICE_DP}f}")
-                tsl_dist_str = tsl_distance_price.normalize()
-                act_price_str = activation_price.normalize().to_eng_string() # Use eng string for formatting
-                logger.trade(f"Attempting TSL activation (Dist ~{tsl_dist_str}, ActPx {act_price_str:.{DEFAULT_PRICE_DP}f})...")
+                logger.trade(f"  Entry={entry_price.normalize()}, Current={current_price.normalize()}, ActTarget~={activation_price.normalize():.{DEFAULT_PRICE_DP}f}")
+                logger.trade(f"Attempting TSL activation (Dist ~{tsl_distance_price.normalize()}, ActPx {activation_price.normalize():.{DEFAULT_PRICE_DP}f})...")
 
                 activation_success = self._set_position_protection(
                     position_side,
@@ -2403,11 +2230,8 @@ class OrderManager:
                 else:
                     logger.error(f"{Fore.RED}Failed to activate TSL for {position_side.upper()} via API.{Style.RESET_ALL}")
             else:
-                current_price_str = current_price.normalize()
-                act_target_str = activation_price.normalize().to_eng_string()
-                logger.debug(f"TSL check ({position_side.upper()}): Condition not met (Current: {current_price_str}, Target: ~{act_target_str:.{DEFAULT_PRICE_DP}f})")
+                logger.debug(f"TSL check ({position_side.upper()}): Condition not met (Current: {current_price.normalize()}, Target: ~{activation_price.normalize():.{DEFAULT_PRICE_DP}f})")
 
-        # Catching general Exception acceptable here for complex TSL logic failure (W0718)
         except Exception as e:
             logger.error(f"Error managing TSL for {position_side.upper()}: {e}", exc_info=True)
 
@@ -2416,11 +2240,8 @@ class OrderManager:
         self, position_side: str, qty_to_close: Decimal, reason: str = "Signal"
     ) -> bool:
         """Closes the specified position: clears stops first, places closing order, verifies closure."""
-        if not self.exchange or not self.market_info:
-            return False # Fixed indentation (W0311)
-        if position_side not in ["long", "short"]:
-            logger.error(f"Invalid side '{position_side}'.")
-            return False # Fixed indentation (W0311)
+        if not self.exchange or not self.market_info: return False
+        if position_side not in ["long", "short"]: logger.error(f"Invalid side '{position_side}'."); return False
 
         if qty_to_close.is_nan() or qty_to_close.copy_abs() < POSITION_QTY_EPSILON:
             logger.warning(f"Close requested for zero/negligible qty ({qty_to_close}). Skipping close for {position_side}.")
@@ -2456,12 +2277,11 @@ class OrderManager:
         close_order_id = close_order_info.get("id", "[N/A]")
         avg_close_price_str = close_order_info.get("average")
         avg_close_price = safe_decimal(avg_close_price_str, default=Decimal("NaN"))
-        avg_close_price_log = avg_close_price.normalize() if not avg_close_price.is_nan() else '[Pending/N/A]'
-        logger.trade(f"{Fore.YELLOW}Closing market order ({close_order_id}) submitted for {position_side.upper()}. AvgClosePrice: {avg_close_price_log}{Style.RESET_ALL}")
+        logger.trade(f"{Fore.YELLOW}Closing market order ({close_order_id}) submitted for {position_side.upper()}. AvgClosePrice: {avg_close_price.normalize() if not avg_close_price.is_nan() else '[Pending/N/A]'}{Style.RESET_ALL}")
         termux_notify(f"{symbol} Position Closing", f"{position_side.upper()} close order {close_order_id} submitted.")
 
         # 3. Verify Position Closed using _verify_position_state
-        logger.info("Verifying position closure...")
+        logger.info(f"Verifying position closure...")
         verification_ok, final_pos_state = self._verify_position_state(
             expected_side=None, # Expecting flat
             max_attempts=5,
@@ -2480,25 +2300,20 @@ class OrderManager:
             lingering_side = None
             lingering_qty = Decimal(0)
             if final_pos_state: # Check the last known state if verification failed
-                long_data = final_pos_state.get("long")
-                short_data = final_pos_state.get("short")
-                if long_data and safe_decimal(long_data.get("qty")).copy_abs() >= POSITION_QTY_EPSILON:
-                    lingering_side = "long"
-                    lingering_qty = safe_decimal(long_data.get("qty")) # Fixed indentation (W0311)
-                elif short_data and safe_decimal(short_data.get("qty")).copy_abs() >= POSITION_QTY_EPSILON:
-                    lingering_side = "short"
-                    lingering_qty = safe_decimal(short_data.get("qty")) # Fixed indentation (W0311)
+                if final_pos_state.get("long") and safe_decimal(final_pos_state["long"].get("qty")).copy_abs() >= POSITION_QTY_EPSILON:
+                    lingering_side, lingering_qty = "long", safe_decimal(final_pos_state["long"].get("qty"))
+                elif final_pos_state.get("short") and safe_decimal(final_pos_state["short"].get("qty")).copy_abs() >= POSITION_QTY_EPSILON:
+                    lingering_side, lingering_qty = "short", safe_decimal(final_pos_state["short"].get("qty"))
 
-            final_state_log = 'FLAT' if not lingering_side else f'{lingering_side.upper()} Qty={lingering_qty.normalize()}'
             logger.error(
                 f"{Fore.RED}Position {position_side.upper()} closure verification FAILED. "
-                f"Last state showed: {final_state_log}. MANUAL CHECK REQUIRED!{Style.RESET_ALL}"
+                f"Last state showed: {'FLAT' if not lingering_side else f'{lingering_side.upper()} Qty={lingering_qty.normalize()}'}. MANUAL CHECK REQUIRED!{Style.RESET_ALL}"
             )
             termux_notify(f"{symbol} CLOSE VERIFY FAILED", f"{position_side.upper()} may still be open!")
             return False # Indicate closure verification failed
-        # Removed unnecessary else after return (R1705)
-        logger.trade(f"{Fore.GREEN}{Style.BRIGHT}Position {position_side.upper()} confirmed closed via verification.{Style.RESET_ALL}")
-        return True # Closure confirmed
+        else:
+            logger.trade(f"{Fore.GREEN}{Style.BRIGHT}Position {position_side.upper()} confirmed closed via verification.{Style.RESET_ALL}")
+            return True # Closure confirmed
     # --- End updated close_position ---
 
     def _handle_entry_failure(
@@ -2515,8 +2330,7 @@ class OrderManager:
         logger.debug(f"Checking position status after {failed_entry_side} entry failure...")
 
         # Use verification logic to check state robustly
-        # Removed unused variable verification_ok (W0612)
-        _, current_positions = self._verify_position_state(
+        verification_ok, current_positions = self._verify_position_state(
             expected_side=None, # We don't know what to expect, just get the state
             max_attempts=2, # Quick check
             delay_seconds=1,
@@ -2540,7 +2354,7 @@ class OrderManager:
                     logger.info(f"Emergency close order submitted/confirmed for lingering {position_side_to_check} position.")
                 else:
                     logger.critical(f"{Fore.RED}{Style.BRIGHT}EMERGENCY CLOSE FAILED for {position_side_to_check.upper()}. MANUAL INTERVENTION URGENT!{Style.RESET_ALL}")
-                    termux_notify(f"{self.config.symbol} URGENT CHECK", "Emergency close FAILED!")
+                    termux_notify(f"{self.config.symbol} URGENT CHECK", f"Emergency close FAILED!")
             else:
                 logger.info(f"Lingering pos ({position_side_to_check}) found but qty negligible ({current_qty}). No emergency close needed.")
                 self.protection_tracker[position_side_to_check] = None
@@ -2548,12 +2362,9 @@ class OrderManager:
             logger.info(f"No lingering {position_side_to_check} position detected after entry failure.")
             self.protection_tracker[position_side_to_check] = None
 
-    # Fixed method signature (R0917) - acceptable for journaling
-    # pylint: disable=too-many-arguments
     def _write_journal_row(self, data: Dict[str, Any]):
         """Helper function to write a row to the CSV journal."""
-        if not self.config.enable_journaling:
-            return # Fixed indentation (W0311)
+        if not self.config.enable_journaling: return
         file_path = Path(self.config.journal_file_path)
         file_exists = file_path.is_file()
         try:
@@ -2561,60 +2372,36 @@ class OrderManager:
             with file_path.open("a", newline="", encoding="utf-8") as csvfile:
                 fieldnames = ["TimestampUTC", "Symbol", "Action", "Side", "Quantity", "AvgPrice", "OrderID", "Reason", "Notes"]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL)
-                if not file_exists or file_path.stat().st_size == 0:
-                    writer.writeheader()
+                if not file_exists or file_path.stat().st_size == 0: writer.writeheader()
 
                 row_to_write = {}
                 for field in fieldnames:
                     value = data.get(field)
-                    if isinstance(value, Decimal):
-                        # Fixed indentation (W0311)
-                        row_to_write[field] = 'NaN' if value.is_nan() else value.normalize()
-                    elif value is None:
-                        # Fixed indentation (W0311)
-                        row_to_write[field] = 'N/A'
-                    else:
-                        # Fixed indentation (W0311)
-                        row_to_write[field] = str(value)
+                    if isinstance(value, Decimal): row_to_write[field] = 'NaN' if value.is_nan() else value.normalize()
+                    elif value is None: row_to_write[field] = 'N/A'
+                    else: row_to_write[field] = str(value)
                 row_to_write['Notes'] = data.get('Notes', '')
                 writer.writerow(row_to_write)
             logger.debug(f"Trade {data.get('Action', '').lower()} logged to {file_path}")
-        except IOError as e:
-            logger.error(f"I/O error writing {data.get('Action', '').lower()} to journal {file_path}: {e}")
-        # Catching general Exception acceptable here for file IO failure (W0718)
-        except Exception as e:
-            logger.error(f"Unexpected error writing {data.get('Action', '').lower()} to journal: {e}", exc_info=True)
+        except IOError as e: logger.error(f"I/O error writing {data.get('Action', '').lower()} to journal {file_path}: {e}")
+        except Exception as e: logger.error(f"Unexpected error writing {data.get('Action', '').lower()} to journal: {e}", exc_info=True)
 
-    # Fixed method signature (R0917) - acceptable for journaling
-    # pylint: disable=too-many-arguments
     def log_trade_entry_to_journal(self, side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str]):
         """Logs trade entry details to the CSV journal."""
         position_side = "long" if side == "buy" else "short"
         data = {
             "TimestampUTC": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
-            "Symbol": self.config.symbol,
-            "Action": "ENTRY",
-            "Side": position_side.upper(),
-            "Quantity": qty,
-            "AvgPrice": avg_price,
-            "OrderID": order_id,
-            "Reason": "Strategy Signal",
+            "Symbol": self.config.symbol, "Action": "ENTRY", "Side": position_side.upper(),
+            "Quantity": qty, "AvgPrice": avg_price, "OrderID": order_id, "Reason": "Strategy Signal",
         }
         self._write_journal_row(data)
 
-    # Fixed method signature (R0917) - acceptable for journaling
-    # pylint: disable=too-many-arguments
     def log_trade_exit_to_journal(self, position_side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str], reason: str):
         """Logs trade exit details to the CSV journal."""
         data = {
             "TimestampUTC": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
-            "Symbol": self.config.symbol,
-            "Action": "EXIT",
-            "Side": position_side.upper(),
-            "Quantity": qty,
-            "AvgPrice": avg_price,
-            "OrderID": order_id,
-            "Reason": reason,
+            "Symbol": self.config.symbol, "Action": "EXIT", "Side": position_side.upper(),
+            "Quantity": qty, "AvgPrice": avg_price, "OrderID": order_id, "Reason": reason,
         }
         self._write_journal_row(data)
 
@@ -2628,8 +2415,6 @@ class StatusDisplay:
         self._default_price_dp = DEFAULT_PRICE_DP
         self._default_amount_dp = DEFAULT_AMOUNT_DP
 
-    # Fixed method signature (R0917) - acceptable for formatting helper
-    # pylint: disable=too-many-arguments
     def _format_decimal(
         self, value: Optional[Decimal], precision: Optional[int] = None,
         default_precision: int = 2, add_commas: bool = False, highlight_negative: bool = False,
@@ -2647,183 +2432,20 @@ class StatusDisplay:
             display_str = format_spec.format(formatted_value)
 
             # Determine style
-            style = style_override # Default to override if provided
-            if not style: # Only check others if no override
-                if highlight_negative and formatted_value < 0:
-                    style = "bright_red" # Use Rich color name
-                elif highlight_negative and formatted_value > 0:
-                     style = "bright_green" # Use Rich color name
-                else:
-                    style = "white" # Default non-highlighted style
+            if style_override:
+                style = style_override
+            elif highlight_negative and formatted_value < 0:
+                style = "bright_red" # Use Rich color name
+            elif highlight_negative and formatted_value > 0:
+                 style = "bright_green" # Use Rich color name
+            else:
+                style = "white" # Default non-highlighted style
 
             return Text(display_str, style=style)
         except (ValueError, TypeError, InvalidOperation) as e:
             logger.error(f"Error formatting decimal {value}: {e}")
             return Text("ERR", style="bold bright_red") # Use Rich color name
 
-    def _add_price_equity_info(self, panel_content: Text, price: Optional[Decimal], equity: Optional[Decimal], price_dp: int):
-        """Helper to add price and equity info to the status panel."""
-        price_text = self._format_decimal(price, precision=price_dp, default_precision=self._default_price_dp, style_override="bright_white")
-        settle_curr = self.config.symbol.split(":")[-1] if ":" in self.config.symbol else "QUOTE"
-        equity_text = self._format_decimal(equity, precision=2, default_precision=2, add_commas=True, style_override="bright_yellow")
-        panel_content.append("Price: ", style="bold bright_cyan")
-        panel_content.append(price_text)
-        panel_content.append(" | ", style="dim")
-        panel_content.append("Equity: ", style="bold bright_yellow")
-        panel_content.append(equity_text)
-        panel_content.append(f" {settle_curr}\n", style="bright_yellow")
-        panel_content.append("---\n", style="dim")
-
-    def _add_indicator_info(self, panel_content: Text, indicators: Optional[Dict], price_dp: int):
-        """Helper to add indicator info to the status panel."""
-        panel_content.append("Indicators: ", style="bold bright_cyan")
-        if not indicators:
-            panel_content.append("[dim]Calculating...[/]\n", style="dim")
-            panel_content.append("---\n", style="dim")
-            return
-
-        ind_parts = []
-        def fmt_ind(key: str, prec: int = 1, default_prec: int = 1, style: str = "white") -> Text:
-            val = indicators.get(key)
-            # Ensure val is converted to Decimal safely before formatting
-            dec_val = safe_decimal(val) if isinstance(val, (Decimal, int, float, str, bool)) else Decimal('NaN')
-            return self._format_decimal(dec_val, precision=prec, default_precision=default_prec, style_override=style)
-
-        # EMAs
-        ema_text = Text("EMA(F/S/T): ")
-        ema_text.append(fmt_ind('fast_ema', prec=price_dp, default_prec=self._default_price_dp, style="cyan"))
-        ema_text.append("/")
-        ema_text.append(fmt_ind('slow_ema', prec=price_dp, default_prec=self._default_price_dp, style="magenta"))
-        ema_text.append("/")
-        ema_text.append(fmt_ind('trend_ema', prec=price_dp, default_prec=self._default_price_dp, style="yellow"))
-        ind_parts.append(ema_text)
-
-        # Stochastic
-        stoch_text = Text("Stoch(K/D/PrevK): ")
-        stoch_text.append(fmt_ind('stoch_k', prec=1, style="bright_blue"))
-        stoch_text.append("/")
-        stoch_text.append(fmt_ind('stoch_d', prec=1, style="blue"))
-        stoch_text.append("/")
-        stoch_text.append(fmt_ind('stoch_k_prev', prec=1, style="dim blue")) # Display Prev K
-        if indicators.get('stoch_kd_bullish'):
-            stoch_text.append(" [b green]▲[/]", style="green") # Fixed indentation (W0311)
-        elif indicators.get('stoch_kd_bearish'):
-            stoch_text.append(" [b red]▼[/]", style="red") # Fixed indentation (W0311)
-        ind_parts.append(stoch_text)
-
-        # ATR
-        atr_text = Text(f"ATR({indicators.get('atr_period', '?')}): ")
-        # More precision for ATR
-        atr_text.append(fmt_ind('atr', prec=price_dp + 1, default_prec=self._default_price_dp + 1, style="bright_magenta"))
-        ind_parts.append(atr_text)
-
-        # ADX
-        adx_val = indicators.get('adx', Decimal('NaN'))
-        adx_val_dec = safe_decimal(adx_val) # Ensure Decimal
-        adx_is_valid = not adx_val_dec.is_nan()
-        adx_style = "yellow" if adx_is_valid and adx_val_dec > self.config.min_adx_level else "dim yellow"
-        adx_text = Text(f"ADX({self.config.adx_period}): ")
-        adx_text.append(fmt_ind('adx', prec=1, style=adx_style))
-        adx_text.append(" [+DI:")
-        adx_text.append(fmt_ind('pdi', prec=1, style="bright_green"))
-        adx_text.append(" -DI:")
-        adx_text.append(fmt_ind('mdi', prec=1, style="bright_red"))
-        adx_text.append("]")
-        ind_parts.append(adx_text)
-
-        separator = Text(" | ", style="dim")
-        for i, part in enumerate(ind_parts):
-            panel_content.append(part)
-            if i < len(ind_parts) - 1:
-                panel_content.append(separator)
-        panel_content.append("\n")
-        panel_content.append("---\n", style="dim")
-
-    def _add_position_info(self, panel_content: Text, positions: Optional[Dict], protection_tracker: Dict, price_dp: int, amount_dp: int):
-        """Helper to add position info to the status panel."""
-        panel_content.append("Position: ", style="bold bright_cyan")
-        pos_text = Text("FLAT", style="bold bright_green")
-        active_position_data = None
-        position_side_str = None
-
-        if positions:
-             long_pos = positions.get("long")
-             short_pos = positions.get("short") # Fixed multiple statements (C0321)
-             if long_pos and long_pos.get('qty', Decimal(0)).copy_abs() >= POSITION_QTY_EPSILON:
-                 active_position_data = long_pos
-                 position_side_str = "long" # Fixed multiple statements (C0321)
-             elif short_pos and short_pos.get('qty', Decimal(0)).copy_abs() >= POSITION_QTY_EPSILON:
-                 active_position_data = short_pos
-                 position_side_str = "short" # Fixed multiple statements (C0321)
-
-        if active_position_data and position_side_str:
-            pos_style = "bold bright_green" if position_side_str == "long" else "bold bright_red"
-            pos_text = Text(f"{position_side_str.upper()}: ", style=pos_style)
-            qty_text = self._format_decimal(active_position_data.get("qty"), precision=amount_dp, default_precision=self._default_amount_dp)
-            pos_text.append("Qty=")
-            pos_text.append(qty_text) # Fixed multiple statements (C0321)
-            entry_text = self._format_decimal(active_position_data.get("entry_price"), precision=price_dp, default_precision=self._default_price_dp)
-            pos_text.append(" | Entry=", style="dim")
-            pos_text.append(entry_text) # Fixed multiple statements (C0321)
-            pnl_text = self._format_decimal(active_position_data.get("unrealized_pnl"), precision=4, default_precision=4, highlight_negative=True)
-            pos_text.append(" | PnL=", style="dim")
-            pos_text.append(pnl_text) # Fixed multiple statements (C0321)
-
-            # Protection Status
-            tracked_protection = protection_tracker.get(position_side_str)
-            sl_from_pos = active_position_data.get("stop_loss_price")
-            tp_from_pos = active_position_data.get("take_profit_price")
-            tsl_active_from_pos = active_position_data.get("is_tsl_active", False)
-            tsl_trigger_from_pos = active_position_data.get("tsl_trigger_price")
-
-            pos_text.append(" | Prot: ", style="dim")
-            prot_status_text = Text("None", style="dim")
-            prot_details = Text("") # Fixed multiple statements (C0321)
-
-            if tsl_active_from_pos:
-                 prot_status_text = Text("TSL", style="bright_magenta")
-                 tsl_trigger_text = self._format_decimal(tsl_trigger_from_pos, precision=price_dp, default_precision=self._default_price_dp)
-                 prot_details = Text(" (Trig:", style="dim").append(tsl_trigger_text).append(")", style="dim")
-                 if tracked_protection != "ACTIVE_TSL":
-                     prot_status_text.append("?", style="bright_yellow") # Fixed multiple statements (C0321)
-            elif sl_from_pos or tp_from_pos:
-                 prot_status_text = Text("SL/TP", style="bright_yellow")
-                 sl_text = self._format_decimal(sl_from_pos, precision=price_dp, default_precision=self._default_price_dp)
-                 tp_text = self._format_decimal(tp_from_pos, precision=price_dp, default_precision=self._default_price_dp)
-                 prot_details = Text(" (S:", style="dim").append(sl_text).append(" T:", style="dim").append(tp_text).append(")", style="dim")
-                 if tracked_protection != "ACTIVE_SLTP":
-                     prot_status_text.append("?", style="bright_yellow") # Fixed multiple statements (C0321)
-            elif tracked_protection:
-                 prot_status_text = Text(f"Tracked:{tracked_protection}", style="bright_yellow")
-                 prot_details = Text(" (Pos:None?)", style="dim")
-
-            pos_text.append(prot_status_text)
-            pos_text.append(prot_details) # Fixed multiple statements (C0321)
-
-        panel_content.append(pos_text)
-        panel_content.append("\n")
-        panel_content.append("---\n", style="dim")
-
-    def _add_signal_info(self, panel_content: Text, signals: Dict):
-        """Helper to add signal info to the status panel."""
-        panel_content.append("Signal: ", style="bold bright_cyan")
-        # Removed f-string without interpolation (W1309)
-        sig_reason = signals.get("reason", "[dim]No signal info[/]")
-        sig_style = "dim"
-        if signals.get("long"):
-            sig_style = "bold bright_green"
-        elif signals.get("short"):
-            sig_style = "bold bright_red"
-        elif "Blocked" in str(sig_reason):
-            sig_style = "yellow"
-        elif "No Signal:" not in str(sig_reason) and "Initializing" not in str(sig_reason):
-            sig_style = "white"
-
-        wrapped_reason = "\n        ".join(textwrap.wrap(str(sig_reason), width=100))
-        panel_content.append(Text(wrapped_reason, style=sig_style))
-
-    # Fixed method signature (R0917) - acceptable for display method
-    # pylint: disable=too-many-arguments
     def print_status_panel(
         self, cycle: int, timestamp: Optional[datetime], price: Optional[Decimal],
         indicators: Optional[Dict], positions: Optional[Dict], equity: Optional[Decimal],
@@ -2840,11 +2462,139 @@ class StatusDisplay:
         ts_str = timestamp.strftime("%Y-%m-%d %H:%M:%S %Z") if timestamp else "[dim]Timestamp N/A[/]"
         title_text = f" Cycle {cycle} | {self.config.symbol} ({self.config.interval}) | {ts_str} "
 
-        # Use helper methods to build the panel content
-        self._add_price_equity_info(panel_content, price, equity, price_dp)
-        self._add_indicator_info(panel_content, indicators, price_dp)
-        self._add_position_info(panel_content, positions, protection_tracker, price_dp, amount_dp)
-        self._add_signal_info(panel_content, signals)
+        # --- Price & Equity ---
+        price_text = self._format_decimal(price, precision=price_dp, default_precision=self._default_price_dp, style_override="bright_white")
+        settle_curr = self.config.symbol.split(":")[-1] if ":" in self.config.symbol else "QUOTE"
+        equity_text = self._format_decimal(equity, precision=2, default_precision=2, add_commas=True, style_override="bright_yellow")
+        panel_content.append("Price: ", style="bold bright_cyan")
+        panel_content.append(price_text)
+        panel_content.append(" | ", style="dim")
+        panel_content.append("Equity: ", style="bold bright_yellow")
+        panel_content.append(equity_text)
+        panel_content.append(f" {settle_curr}\n", style="bright_yellow")
+        panel_content.append("---\n", style="dim")
+
+        # --- Indicators ---
+        panel_content.append("Indicators: ", style="bold bright_cyan")
+        if indicators:
+            ind_parts = []
+            def fmt_ind(key: str, prec: int = 1, default_prec: int = 1, style: str = "white") -> Text:
+                 val = indicators.get(key)
+                 dec_val = safe_decimal(val) if isinstance(val, (Decimal, int, float, str)) else Decimal('NaN') # Added str
+                 return self._format_decimal(dec_val, precision=prec, default_precision=default_prec, style_override=style)
+
+            # EMAs
+            ema_text = Text("EMA(F/S/T): ")
+            ema_text.append(fmt_ind('fast_ema', prec=price_dp, default_prec=self._default_price_dp, style="cyan"))
+            ema_text.append("/")
+            ema_text.append(fmt_ind('slow_ema', prec=price_dp, default_prec=self._default_price_dp, style="magenta"))
+            ema_text.append("/")
+            ema_text.append(fmt_ind('trend_ema', prec=price_dp, default_prec=self._default_price_dp, style="yellow"))
+            ind_parts.append(ema_text)
+
+            # Stochastic
+            stoch_text = Text("Stoch(K/D/PrevK): ")
+            stoch_text.append(fmt_ind('stoch_k', prec=1, style="bright_blue"))
+            stoch_text.append("/")
+            stoch_text.append(fmt_ind('stoch_d', prec=1, style="blue"))
+            stoch_text.append("/")
+            stoch_text.append(fmt_ind('stoch_k_prev', prec=1, style="dim blue")) # Display Prev K
+            if indicators.get('stoch_kd_bullish'): stoch_text.append(" [b green]▲[/]", style="green")
+            elif indicators.get('stoch_kd_bearish'): stoch_text.append(" [b red]▼[/]", style="red")
+            ind_parts.append(stoch_text)
+
+            # ATR
+            atr_text = Text(f"ATR({indicators.get('atr_period', '?')}): ")
+            atr_text.append(fmt_ind('atr', prec=price_dp + 1, default_prec=self._default_price_dp + 1, style="bright_magenta")) # More precision for ATR
+            ind_parts.append(atr_text)
+
+            # ADX
+            adx_val = indicators.get('adx', Decimal('NaN'))
+            adx_val_dec = safe_decimal(adx_val) # Ensure Decimal
+            adx_is_valid = not adx_val_dec.is_nan()
+            adx_text = Text(f"ADX({self.config.adx_period}): ")
+            adx_text.append(fmt_ind('adx', prec=1, style="yellow" if adx_is_valid and adx_val_dec > self.config.min_adx_level else "dim yellow"))
+            adx_text.append(f" [+DI:")
+            adx_text.append(fmt_ind('pdi', prec=1, style="bright_green"))
+            adx_text.append(f" -DI:")
+            adx_text.append(fmt_ind('mdi', prec=1, style="bright_red"))
+            adx_text.append("]")
+            ind_parts.append(adx_text)
+
+            separator = Text(" | ", style="dim")
+            for i, part in enumerate(ind_parts):
+                panel_content.append(part)
+                if i < len(ind_parts) - 1: panel_content.append(separator)
+            panel_content.append("\n")
+        else:
+            panel_content.append("[dim]Calculating...[/]\n", style="dim")
+        panel_content.append("---\n", style="dim")
+
+        # --- Position ---
+        panel_content.append("Position: ", style="bold bright_cyan")
+        pos_text = Text("FLAT", style="bold bright_green")
+        active_position_data = None
+        position_side_str = None
+
+        if positions:
+             long_pos = positions.get("long"); short_pos = positions.get("short")
+             if long_pos and long_pos.get('qty', Decimal(0)).copy_abs() >= POSITION_QTY_EPSILON:
+                 active_position_data = long_pos; position_side_str = "long"
+             elif short_pos and short_pos.get('qty', Decimal(0)).copy_abs() >= POSITION_QTY_EPSILON:
+                 active_position_data = short_pos; position_side_str = "short"
+
+        if active_position_data and position_side_str:
+            pos_style = "bold bright_green" if position_side_str == "long" else "bold bright_red"
+            pos_text = Text(f"{position_side_str.upper()}: ", style=pos_style)
+            qty_text = self._format_decimal(active_position_data.get("qty"), precision=amount_dp, default_precision=self._default_amount_dp)
+            pos_text.append(f"Qty="); pos_text.append(qty_text)
+            entry_text = self._format_decimal(active_position_data.get("entry_price"), precision=price_dp, default_precision=self._default_price_dp)
+            pos_text.append(" | Entry=", style="dim"); pos_text.append(entry_text)
+            pnl_text = self._format_decimal(active_position_data.get("unrealized_pnl"), precision=4, default_precision=4, highlight_negative=True)
+            pos_text.append(" | PnL=", style="dim"); pos_text.append(pnl_text)
+
+            # Protection Status
+            tracked_protection = protection_tracker.get(position_side_str)
+            sl_from_pos = active_position_data.get("stop_loss_price")
+            tp_from_pos = active_position_data.get("take_profit_price")
+            tsl_active_from_pos = active_position_data.get("is_tsl_active", False)
+            tsl_trigger_from_pos = active_position_data.get("tsl_trigger_price")
+
+            pos_text.append(" | Prot: ", style="dim")
+            prot_status_text = Text("None", style="dim"); prot_details = Text("")
+
+            if tsl_active_from_pos:
+                 prot_status_text = Text("TSL", style="bright_magenta")
+                 tsl_trigger_text = self._format_decimal(tsl_trigger_from_pos, precision=price_dp, default_precision=self._default_price_dp)
+                 prot_details = Text(" (Trig:", style="dim").append(tsl_trigger_text).append(")", style="dim")
+                 if tracked_protection != "ACTIVE_TSL": prot_status_text.append("?", style="bright_yellow")
+            elif sl_from_pos or tp_from_pos:
+                 prot_status_text = Text("SL/TP", style="bright_yellow")
+                 sl_text = self._format_decimal(sl_from_pos, precision=price_dp, default_precision=self._default_price_dp)
+                 tp_text = self._format_decimal(tp_from_pos, precision=price_dp, default_precision=self._default_price_dp)
+                 prot_details = Text(" (S:", style="dim").append(sl_text).append(" T:", style="dim").append(tp_text).append(")", style="dim")
+                 if tracked_protection != "ACTIVE_SLTP": prot_status_text.append("?", style="bright_yellow")
+            elif tracked_protection:
+                 prot_status_text = Text(f"Tracked:{tracked_protection}", style="bright_yellow")
+                 prot_details = Text(" (Pos:None?)", style="dim")
+
+            pos_text.append(prot_status_text); pos_text.append(prot_details)
+
+        panel_content.append(pos_text)
+        panel_content.append("\n")
+        panel_content.append("---\n", style="dim")
+
+        # --- Signals ---
+        panel_content.append("Signal: ", style="bold bright_cyan")
+        sig_reason = signals.get("reason", "[dim]No signal info[/]")
+        sig_style = "dim"
+        if signals.get("long"): sig_style = "bold bright_green"
+        elif signals.get("short"): sig_style = "bold bright_red"
+        elif "Blocked" in str(sig_reason): sig_style = "yellow"
+        elif "No Signal:" not in str(sig_reason) and "Initializing" not in str(sig_reason): sig_style = "white"
+
+        wrapped_reason = "\n        ".join(textwrap.wrap(str(sig_reason), width=100))
+        panel_content.append(Text(wrapped_reason, style=sig_style))
 
         console.print(
             Panel(panel_content, title=f"[bold bright_magenta]{title_text}[/]",
@@ -2885,14 +2635,11 @@ class TradingBot:
             signal.signal(signal.SIGINT, self._signal_handler) # Handle Ctrl+C
             signal.signal(signal.SIGTERM, self._signal_handler) # Handle kill/system shutdown
             logger.debug("Signal handlers for SIGINT and SIGTERM set up.")
-        # Catching general Exception acceptable here for OS-level signal handling issues (W0718)
         except (ValueError, OSError, Exception) as e: # Catch more potential errors
              logger.warning(f"{Fore.YELLOW}Could not set signal handlers (OS/thread issue?): {e}{Style.RESET_ALL}")
 
     def _signal_handler(self, sig: int, frame: Optional[types.FrameType]):
         """Internal signal handler to initiate graceful shutdown."""
-        # Parameter 'frame' is unused, which is standard for signal handlers (W0613 ignored via disable)
-        # pylint: disable=unused-argument
         if not self.shutdown_requested:
             sig_name = signal.Signals(sig).name if isinstance(sig, int) and sig in signal.Signals else str(sig)
             console.print(f"\n[bold yellow]Signal {sig_name} received. Initiating graceful shutdown...[/]")
@@ -2904,7 +2651,7 @@ class TradingBot:
     def run(self):
         """Starts the main trading loop."""
         self._display_startup_info()
-        termux_notify("Pyrmethus Started", f"{self.config.symbol} @ {self.config.interval}")
+        termux_notify(f"Pyrmethus Started", f"{self.config.symbol} @ {self.config.interval}")
         cycle_count = 0
         while not self.shutdown_requested:
             cycle_count += 1
@@ -2926,7 +2673,6 @@ class TradingBot:
                  logger.warning(f"SystemExit called with code {e.code}. Terminating.")
                  self.shutdown_requested = True
                  break
-            # Catching general Exception acceptable here for main loop error handling (W0718)
             except Exception as e:
                 logger.error(f"{Fore.RED}{Style.BRIGHT}Unhandled exception in main trading cycle {cycle_count}: {e}{Style.RESET_ALL}", exc_info=True)
                 termux_notify("Pyrmethus Cycle Error", f"Exception cycle {cycle_count}. Check logs.")
@@ -2942,9 +2688,7 @@ class TradingBot:
                 sleep_end_time = time.monotonic() + sleep_duration
                 try:
                     while time.monotonic() < sleep_end_time and not self.shutdown_requested:
-                        # Sleep in small chunks to check shutdown flag frequently
-                        check_interval = min(0.5, sleep_duration)
-                        time.sleep(check_interval)
+                        time.sleep(min(0.5, sleep_duration)) # Sleep in small chunks to check flag
                 except KeyboardInterrupt:
                     logger.warning("\nCtrl+C detected during sleep.")
                     self.shutdown_requested = True
@@ -2957,242 +2701,194 @@ class TradingBot:
         console.print(f"\n[bold bright_cyan]Pyrmethus {self.config.symbol} has returned to the ether.[/]")
         sys.exit(0)
 
-    # --- Cycle Helper Methods ---
+    def trading_spell_cycle(self, cycle_count: int) -> None:
+        """Executes one cycle of the trading logic: fetch, analyze, act, display."""
+        start_time = time.monotonic()
+        cycle_status = "OK"
 
-    def _fetch_data_and_state(self, cycle_count: int) -> Tuple[Optional[pd.DataFrame], Optional[Decimal], Optional[datetime], Optional[Decimal], Optional[Dict], str]:
-        """Fetches OHLCV, price, timestamp, equity, and position state."""
-        logger.debug(f"Cycle {cycle_count}: Fetching data and state...")
+        # 1. Fetch Data & Basic Info
+        logger.debug("Fetching market data (OHLCV)...")
         df = self.exchange_manager.fetch_ohlcv()
         if df is None or df.empty:
             logger.error(f"{Fore.RED}Cycle Aborted (Cycle {cycle_count}): Market data fetch failed.{Style.RESET_ALL}")
-            return None, None, None, None, None, "FAIL:FETCH_OHLCV"
+            cycle_status = "FAIL:FETCH_OHLCV"
+            self.status_display.print_status_panel(cycle_count, None, None, None, None, None, {"reason": cycle_status}, {}, self.exchange_manager.market_info)
+            return
 
         try:
             last_candle = df.iloc[-1]
             current_price = safe_decimal(last_candle["close"])
             last_timestamp = df.index[-1].to_pydatetime()
-            if current_price.is_nan() or current_price <= 0:
-                raise ValueError(f"Invalid latest close: {current_price}")
+            if current_price.is_nan() or current_price <= 0: raise ValueError(f"Invalid latest close: {current_price}")
             logger.debug(f"Latest Candle: {last_timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')}, Close={current_price.normalize()}")
         except (IndexError, KeyError, ValueError, TypeError) as e:
             logger.error(f"{Fore.RED}Cycle Aborted (Cycle {cycle_count}): Error processing latest candle: {e}{Style.RESET_ALL}", exc_info=False)
-            return df, None, None, None, None, "FAIL:PROCESS_CANDLE"
+            cycle_status = "FAIL:PROCESS_CANDLE"
+            self.status_display.print_status_panel(cycle_count, None, None, None, None, None, {"reason": cycle_status}, {}, self.exchange_manager.market_info)
+            return
 
+        # 2. Calculate Indicators
+        logger.debug("Calculating indicators...")
+        indicators = self.indicator_calculator.calculate_indicators(df)
+        if indicators is None:
+            logger.warning(f"{Fore.YELLOW}Indicator calculation failed (Cycle {cycle_count}).{Style.RESET_ALL}")
+            cycle_status = "WARN:INDICATORS_FAILED"
+        current_atr = indicators.get("atr", Decimal("NaN")) if indicators else Decimal("NaN")
+
+        # 3. Get Current State
+        logger.debug("Fetching balance and position state...")
         total_equity, _ = self.exchange_manager.get_balance()
         current_positions = self.exchange_manager.get_current_position()
 
-        status = "OK"
+        # Validate State
+        can_run_trade_logic = True
         if total_equity is None or total_equity.is_nan() or total_equity <= 0:
-            logger.error(f"{Fore.RED}Invalid equity ({total_equity}). Logic might be skipped.{Style.RESET_ALL}")
-            status = "FAIL:FETCH_EQUITY"
+            logger.error(f"{Fore.RED}Invalid equity ({total_equity}). Logic skipped (Cycle {cycle_count}).{Style.RESET_ALL}")
+            cycle_status = "FAIL:FETCH_EQUITY"; can_run_trade_logic = False
         if current_positions is None:
-            logger.error(f"{Fore.RED}Failed fetching positions. Logic might be skipped.{Style.RESET_ALL}")
-            status = "FAIL:FETCH_POSITIONS" if status == "OK" else status + "|FETCH_POS"
+            logger.error(f"{Fore.RED}Failed fetching positions. Logic skipped (Cycle {cycle_count}).{Style.RESET_ALL}")
+            cycle_status = "FAIL:FETCH_POSITIONS"; can_run_trade_logic = False
+        if current_atr.is_nan() or current_atr <= 0:
+            # Only fail if indicators were expected to succeed
+            if cycle_status != "WARN:INDICATORS_FAILED":
+                logger.error(f"{Fore.RED}Invalid ATR ({current_atr}). Logic skipped (Cycle {cycle_count}).{Style.RESET_ALL}")
+                cycle_status = "FAIL:INVALID_ATR"; can_run_trade_logic = False
+            else:
+                logger.warning(f"{Fore.YELLOW}Invalid ATR ({current_atr}) due to indicator failure. Logic skipped.{Style.RESET_ALL}")
+                can_run_trade_logic = False
 
-        return df, current_price, last_timestamp, total_equity, current_positions, status
 
-    def _calculate_indicators_and_signals(self, df: pd.DataFrame, current_price: Decimal, cycle_status: str) -> Tuple[Optional[Dict], Decimal, Dict, str]:
-        """Calculates indicators and generates trading signals."""
-        logger.debug("Calculating indicators...")
-        indicators = self.indicator_calculator.calculate_indicators(df)
-        current_atr = indicators.get("atr", Decimal("NaN")) if indicators else Decimal("NaN")
-        signals: Dict[str, Union[bool, str]] = {"long": False, "short": False, "reason": "Not calculated yet"}
+        # Prepare Data Snapshots for display
+        protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker)
+        live_positions_state = current_positions if current_positions is not None else {"long": {}, "short": {}}
+        final_positions_for_panel = copy.deepcopy(live_positions_state) # Start with current state
+        signals: Dict[str, Union[bool, str]] = {"long": False, "short": False, "reason": f"Skipped ({cycle_status})"}
 
-        if indicators is None:
-            logger.warning(f"{Fore.YELLOW}Indicator calculation failed.{Style.RESET_ALL}")
-            cycle_status = "WARN:INDICATORS_FAILED" if cycle_status == "OK" else cycle_status + "|INDICATORS_FAILED"
-            signals["reason"] = "Skipped (Indicator Calc Failed)"
-        elif current_atr.is_nan() or current_atr <= 0:
-            logger.error(f"{Fore.RED}Invalid ATR ({current_atr}). Logic might be skipped.{Style.RESET_ALL}")
-            cycle_status = "FAIL:INVALID_ATR" if cycle_status == "OK" else cycle_status + "|INVALID_ATR"
-            signals["reason"] = f"Skipped (Invalid ATR: {current_atr})"
-        else:
-            # Generate Trading Signals (Entry) only if indicators and ATR are valid
-            can_gen_signals = not current_price.is_nan() and len(df) >= 2
+        # 4. Execute Core Trading Logic
+        if can_run_trade_logic:
+            logger.debug("Executing core trading logic...")
+            # Extract Current Position Details from live_positions_state
+            active_long_pos = live_positions_state.get("long", {}); active_short_pos = live_positions_state.get("short", {})
+            long_qty = safe_decimal(active_long_pos.get("qty", "0")); short_qty = safe_decimal(active_short_pos.get("qty", "0"))
+            long_entry = safe_decimal(active_long_pos.get("entry_price", "NaN")); short_entry = safe_decimal(active_short_pos.get("entry_price", "NaN"))
+            has_long_pos = long_qty.copy_abs() >= POSITION_QTY_EPSILON; has_short_pos = short_qty.copy_abs() >= POSITION_QTY_EPSILON
+            is_flat = not has_long_pos and not has_short_pos
+            current_pos_side = "long" if has_long_pos else "short" if has_short_pos else None
+            logger.debug(f"State Before Actions: Flat={is_flat}, Side={current_pos_side}, LongQty={long_qty.normalize()}, ShortQty={short_qty.normalize()}")
+
+            # Manage Trailing Stops
+            if current_pos_side and indicators:
+                entry_price = long_entry if current_pos_side == "long" else short_entry
+                if not entry_price.is_nan() and entry_price > 0:
+                     logger.debug(f"Managing TSL for {current_pos_side} position...")
+                     self.order_manager.manage_trailing_stop(current_pos_side, entry_price, current_price, current_atr)
+                     protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker) # Update snapshot after TSL
+                else: logger.warning(f"Cannot manage TSL for {current_pos_side}: Invalid entry price ({entry_price})")
+
+                # Re-fetch position state AFTER TSL check as it might change protection status
+                logger.debug("Re-fetching position state after TSL management...")
+                positions_after_tsl = self.exchange_manager.get_current_position()
+                if positions_after_tsl is None:
+                    logger.error(f"{Fore.RED}Failed re-fetching positions after TSL check (Cycle {cycle_count}). Using potentially stale state.{Style.RESET_ALL}")
+                    cycle_status = "WARN:POS_REFETCH_TSL_FAIL"
+                else:
+                    live_positions_state = positions_after_tsl # Update live state
+                    final_positions_for_panel = copy.deepcopy(live_positions_state) # Update panel state
+                    # Re-evaluate position state based on potentially updated info
+                    active_long_pos = live_positions_state.get("long", {}); active_short_pos = live_positions_state.get("short", {})
+                    long_qty = safe_decimal(active_long_pos.get("qty", "0")); short_qty = safe_decimal(active_short_pos.get("qty", "0"))
+                    has_long_pos = long_qty.copy_abs() >= POSITION_QTY_EPSILON; has_short_pos = short_qty.copy_abs() >= POSITION_QTY_EPSILON
+                    is_flat = not has_long_pos and not has_short_pos
+                    current_pos_side = "long" if has_long_pos else "short" if has_short_pos else None
+                    logger.debug(f"State After TSL Check: Flat={is_flat}, Side={current_pos_side}")
+                    if is_flat and any(self.order_manager.protection_tracker.values()):
+                        logger.warning(f"{Fore.YELLOW}Position became flat after TSL logic, clearing protection tracker.{Style.RESET_ALL}")
+                        self.order_manager.protection_tracker = {"long": None, "short": None}
+                        protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker)
+
+            # Generate Trading Signals (Entry)
+            can_gen_signals = indicators is not None and not current_price.is_nan() and len(df) >= 2
             if can_gen_signals:
                 logger.debug("Generating entry signals...")
                 signals = self.signal_generator.generate_signals(df.iloc[-2:], indicators)
             else:
                 reason = "Skipped Signal Gen: " + ("Indicators missing" if indicators is None else f"Need >=2 candles ({len(df)} found)")
-                signals = {"long": False, "short": False, "reason": reason}
-                logger.warning(reason)
-                cycle_status = "WARN:SIGNAL_GEN_SKIPPED" if cycle_status == "OK" else cycle_status + "|SIGNAL_SKIP"
+                signals = {"long": False, "short": False, "reason": reason}; logger.warning(reason)
 
-        return indicators, current_atr, signals, cycle_status
+            # Check for Signal-Based Exits
+            exit_triggered_by_signal = False; exit_side = None; qty_to_close_on_exit = Decimal(0)
+            if can_gen_signals and current_pos_side: # Only check exit if in position and signals are valid
+                logger.debug(f"Checking exit signals for {current_pos_side} position...")
+                exit_reason = self.signal_generator.check_exit_signals(current_pos_side, indicators)
+                if exit_reason:
+                    exit_side = current_pos_side
+                    qty_to_close_on_exit = long_qty if exit_side == "long" else short_qty
+                    logger.trade(f"{Fore.YELLOW}Attempting signal exit for {exit_side.upper()} (Qty: {qty_to_close_on_exit.normalize()}) | Reason: {exit_reason}{Style.RESET_ALL}")
+                    close_success = self.order_manager.close_position(exit_side, qty_to_close_on_exit, reason=exit_reason)
+                    exit_triggered_by_signal = close_success
+                    if not exit_triggered_by_signal:
+                        cycle_status = "FAIL:EXIT_ORDER_FAILED"
+                        logger.error(f"{Fore.RED}Failed to execute closing order for {exit_side} based on exit signal.{Style.RESET_ALL}")
+                    else:
+                        logger.info(f"Signal-based exit initiated/confirmed for {exit_side}.")
+                        # Re-fetch state AGAIN if an exit was triggered successfully
+                        logger.debug(f"Re-fetching state after signal exit attempt ({exit_side})...")
+                        positions_after_exit = self.exchange_manager.get_current_position()
+                        if positions_after_exit is None:
+                            logger.error(f"{Fore.RED}Failed re-fetching positions after signal exit (Cycle {cycle_count}).{Style.RESET_ALL}")
+                            cycle_status = "WARN:POS_REFETCH_EXIT_FAIL"
+                        else:
+                            live_positions_state = positions_after_exit # Update live state
+                            final_positions_for_panel = copy.deepcopy(live_positions_state) # Update panel state
+                            # Re-evaluate position state
+                            active_long_pos = live_positions_state.get("long", {}); active_short_pos = live_positions_state.get("short", {})
+                            long_qty = safe_decimal(active_long_pos.get("qty", "0")); short_qty = safe_decimal(active_short_pos.get("qty", "0"))
+                            has_long_pos = long_qty.copy_abs() >= POSITION_QTY_EPSILON; has_short_pos = short_qty.copy_abs() >= POSITION_QTY_EPSILON
+                            is_flat = not has_long_pos and not has_short_pos
+                            current_pos_side = "long" if has_long_pos else "short" if has_short_pos else None
+                            logger.debug(f"State After Signal Exit Attempt: Flat={is_flat}, Side={current_pos_side}")
+                            if is_flat: # Ensure tracker clear if flat
+                                logger.debug("Position became flat after signal exit, ensuring tracker clear.")
+                                self.order_manager.protection_tracker = {"long": None, "short": None}
+                                protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker)
 
-    def _manage_positions(self, current_positions: Dict, indicators: Optional[Dict], current_price: Decimal, current_atr: Decimal, total_equity: Decimal, signals: Dict, cycle_status: str) -> Tuple[Dict, str]:
-        """Manages TSL, exits, and entries based on current state and signals."""
-        live_positions_state = copy.deepcopy(current_positions) # Work with a mutable copy
-
-        # Extract Current Position Details
-        active_long_pos = live_positions_state.get("long", {})
-        active_short_pos = live_positions_state.get("short", {}) # Fixed multiple statements (C0321)
-        long_qty = safe_decimal(active_long_pos.get("qty", "0"))
-        short_qty = safe_decimal(active_short_pos.get("qty", "0")) # Fixed multiple statements (C0321)
-        long_entry = safe_decimal(active_long_pos.get("entry_price", "NaN"))
-        short_entry = safe_decimal(active_short_pos.get("entry_price", "NaN")) # Fixed multiple statements (C0321)
-        has_long_pos = long_qty.copy_abs() >= POSITION_QTY_EPSILON
-        has_short_pos = short_qty.copy_abs() >= POSITION_QTY_EPSILON # Fixed multiple statements (C0321)
-        is_flat = not has_long_pos and not has_short_pos
-        current_pos_side = "long" if has_long_pos else "short" if has_short_pos else None
-        logger.debug(f"State Before Actions: Flat={is_flat}, Side={current_pos_side}, LongQty={long_qty.normalize()}, ShortQty={short_qty.normalize()}")
-
-        # --- Manage Trailing Stops ---
-        if current_pos_side and indicators:
-            entry_price = long_entry if current_pos_side == "long" else short_entry
-            if not entry_price.is_nan() and entry_price > 0 and not current_atr.is_nan() and current_atr > 0:
-                 logger.debug(f"Managing TSL for {current_pos_side} position...")
-                 self.order_manager.manage_trailing_stop(current_pos_side, entry_price, current_price, current_atr)
-                 # Re-fetch position state AFTER TSL check as it might change protection status
-                 logger.debug("Re-fetching position state after TSL management...")
-                 positions_after_tsl = self.exchange_manager.get_current_position()
-                 if positions_after_tsl is None:
-                     logger.error(f"{Fore.RED}Failed re-fetching positions after TSL check. Using potentially stale state.{Style.RESET_ALL}")
-                     cycle_status = "WARN:POS_REFETCH_TSL_FAIL" if cycle_status == "OK" else cycle_status + "|TSL_REFETCH_FAIL"
-                 else:
-                     live_positions_state = positions_after_tsl # Update live state for subsequent logic
-                     # Re-evaluate position state based on potentially updated info
-                     active_long_pos = live_positions_state.get("long", {})
-                     active_short_pos = live_positions_state.get("short", {})
-                     long_qty = safe_decimal(active_long_pos.get("qty", "0"))
-                     short_qty = safe_decimal(active_short_pos.get("qty", "0"))
-                     has_long_pos = long_qty.copy_abs() >= POSITION_QTY_EPSILON
-                     has_short_pos = short_qty.copy_abs() >= POSITION_QTY_EPSILON
-                     is_flat = not has_long_pos and not has_short_pos
-                     current_pos_side = "long" if has_long_pos else "short" if has_short_pos else None
-                     logger.debug(f"State After TSL Check: Flat={is_flat}, Side={current_pos_side}")
-                     if is_flat and any(self.order_manager.protection_tracker.values()):
-                         logger.warning(f"{Fore.YELLOW}Position became flat after TSL logic, clearing protection tracker.{Style.RESET_ALL}")
-                         self.order_manager.protection_tracker = {"long": None, "short": None}
-            elif entry_price.is_nan() or entry_price <= 0:
-                 logger.warning(f"Cannot manage TSL for {current_pos_side}: Invalid entry price ({entry_price})")
-            else: # Invalid ATR
-                 logger.warning(f"Cannot manage TSL for {current_pos_side}: Invalid ATR ({current_atr})")
-
-
-        # --- Check for Signal-Based Exits ---
-        exit_triggered_by_signal = False
-        if indicators and current_pos_side: # Only check exit if in position and indicators are valid
-            logger.debug(f"Checking exit signals for {current_pos_side} position...")
-            exit_reason = self.signal_generator.check_exit_signals(current_pos_side, indicators)
-            if exit_reason:
-                exit_side = current_pos_side
-                qty_to_close_on_exit = long_qty if exit_side == "long" else short_qty
-                logger.trade(f"{Fore.YELLOW}Attempting signal exit for {exit_side.upper()} (Qty: {qty_to_close_on_exit.normalize()}) | Reason: {exit_reason}{Style.RESET_ALL}")
-                close_success = self.order_manager.close_position(exit_side, qty_to_close_on_exit, reason=exit_reason)
-                exit_triggered_by_signal = close_success
-                if not exit_triggered_by_signal:
-                    cycle_status = "FAIL:EXIT_ORDER_FAILED" if cycle_status == "OK" else cycle_status + "|EXIT_FAIL"
-                    logger.error(f"{Fore.RED}Failed to execute closing order for {exit_side} based on exit signal.{Style.RESET_ALL}")
+            # Execute Entry Trades (Only if flat and no exit was just triggered)
+            if is_flat and not exit_triggered_by_signal and can_gen_signals and (signals.get("long") or signals.get("short")):
+                # Double-check essential parameters
+                if total_equity is None or total_equity.is_nan() or total_equity <= 0 or current_atr.is_nan() or current_atr <= 0:
+                     logger.error("Entry skipped: Invalid equity/ATR detected pre-entry.")
+                     cycle_status = "FAIL:INVALID_STATE_PRE_ENTRY"
                 else:
-                    logger.info(f"Signal-based exit initiated/confirmed for {exit_side}.")
-                    # Re-fetch state AGAIN if an exit was triggered successfully
-                    logger.debug(f"Re-fetching state after signal exit attempt ({exit_side})...")
-                    positions_after_exit = self.exchange_manager.get_current_position()
-                    if positions_after_exit is None:
-                        logger.error(f"{Fore.RED}Failed re-fetching positions after signal exit.{Style.RESET_ALL}")
-                        cycle_status = "WARN:POS_REFETCH_EXIT_FAIL" if cycle_status == "OK" else cycle_status + "|EXIT_REFETCH_FAIL"
+                    entry_side = "buy" if signals.get("long") else "sell"; signal_reason = signals.get('reason', '')
+                    log_color = Fore.GREEN if entry_side == 'buy' else Fore.RED
+                    logger.trade(f"{log_color}{Style.BRIGHT}Entry Signal Detected: {entry_side.upper()}! {signal_reason}. Attempting entry...{Style.RESET_ALL}")
+                    entry_successful = self.order_manager.place_risked_market_order(entry_side, current_atr, total_equity, current_price)
+                    if entry_successful:
+                        logger.info(f"{Fore.GREEN}{Style.BRIGHT}Entry sequence completed successfully for {entry_side}.{Style.RESET_ALL}")
+                        logger.debug("Re-fetching state after successful entry...")
+                        positions_after_entry = self.exchange_manager.get_current_position()
+                        if positions_after_entry is not None:
+                            final_positions_for_panel = copy.deepcopy(positions_after_entry) # Update panel state
+                            protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker) # Update tracker snapshot
+                        else: logger.warning("Failed re-fetching positions post-entry."); cycle_status = "WARN:POS_REFETCH_ENTRY_FAIL"
                     else:
-                        live_positions_state = positions_after_exit # Update live state
-                        # Re-evaluate position state
-                        active_long_pos = live_positions_state.get("long", {}); active_short_pos = live_positions_state.get("short", {})
-                        long_qty = safe_decimal(active_long_pos.get("qty", "0")); short_qty = safe_decimal(active_short_pos.get("qty", "0"))
-                        has_long_pos = long_qty.copy_abs() >= POSITION_QTY_EPSILON; has_short_pos = short_qty.copy_abs() >= POSITION_QTY_EPSILON
-                        is_flat = not has_long_pos and not has_short_pos
-                        current_pos_side = "long" if has_long_pos else "short" if has_short_pos else None
-                        logger.debug(f"State After Signal Exit Attempt: Flat={is_flat}, Side={current_pos_side}")
-                        if is_flat: # Ensure tracker clear if flat
-                            logger.debug("Position became flat after signal exit, ensuring tracker clear.")
-                            self.order_manager.protection_tracker = {"long": None, "short": None}
+                        logger.error(f"{Fore.RED}Entry sequence failed for {entry_side}.{Style.RESET_ALL}")
+                        cycle_status = "FAIL:ENTRY_SEQUENCE"
+                        logger.debug("Re-fetching state after failed entry...")
+                        positions_after_failed_entry = self.exchange_manager.get_current_position()
+                        if positions_after_failed_entry is not None:
+                            final_positions_for_panel = copy.deepcopy(positions_after_failed_entry) # Update panel state
+                            if not (final_positions_for_panel.get("long") or final_positions_for_panel.get("short")):
+                                self.order_manager.protection_tracker = {"long": None, "short": None} # Ensure tracker clear if flat
+                            protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker) # Update tracker snapshot
+                        else: logger.warning("Failed re-fetching positions post-failed-entry."); cycle_status += "|POS_REFETCH_FAIL"
 
-        # --- Execute Entry Trades ---
-        # Conditions: Flat, no recent exit trigger, indicators/signals valid, entry signal present
-        if is_flat and not exit_triggered_by_signal and indicators and (signals.get("long") or signals.get("short")):
-            # Double-check essential parameters
-            if total_equity is None or total_equity.is_nan() or total_equity <= 0 or current_atr.is_nan() or current_atr <= 0:
-                 logger.error("Entry skipped: Invalid equity/ATR detected pre-entry.")
-                 cycle_status = "FAIL:INVALID_STATE_PRE_ENTRY" if cycle_status == "OK" else cycle_status + "|PRE_ENTRY_FAIL"
-            else:
-                entry_side = "buy" if signals.get("long") else "sell"
-                signal_reason = signals.get('reason', '')
-                log_color = Fore.GREEN if entry_side == 'buy' else Fore.RED
-                logger.trade(f"{log_color}{Style.BRIGHT}Entry Signal Detected: {entry_side.upper()}! {signal_reason}. Attempting entry...{Style.RESET_ALL}")
-                entry_successful = self.order_manager.place_risked_market_order(entry_side, current_atr, total_equity, current_price)
-                if entry_successful:
-                    logger.info(f"{Fore.GREEN}{Style.BRIGHT}Entry sequence completed successfully for {entry_side}.{Style.RESET_ALL}")
-                    logger.debug("Re-fetching state after successful entry...")
-                    positions_after_entry = self.exchange_manager.get_current_position()
-                    if positions_after_entry is not None:
-                        live_positions_state = positions_after_entry # Update state for panel
-                    else:
-                        logger.warning("Failed re-fetching positions post-entry.")
-                        cycle_status = "WARN:POS_REFETCH_ENTRY_FAIL" if cycle_status == "OK" else cycle_status + "|ENTRY_REFETCH_FAIL"
-                else:
-                    logger.error(f"{Fore.RED}Entry sequence failed for {entry_side}.{Style.RESET_ALL}")
-                    cycle_status = "FAIL:ENTRY_SEQUENCE" if cycle_status == "OK" else cycle_status + "|ENTRY_FAIL"
-                    logger.debug("Re-fetching state after failed entry...")
-                    positions_after_failed_entry = self.exchange_manager.get_current_position()
-                    if positions_after_failed_entry is not None:
-                        live_positions_state = positions_after_failed_entry # Update state for panel
-                        if not (live_positions_state.get("long") or live_positions_state.get("short")):
-                            self.order_manager.protection_tracker = {"long": None, "short": None} # Ensure tracker clear if flat
-                    else:
-                        logger.warning("Failed re-fetching positions post-failed-entry.")
-                        cycle_status += "|POS_REFETCH_FAIL" # Append failure status
+            elif is_flat: logger.debug("Position flat, no entry signal.")
+            elif current_pos_side: logger.debug(f"Position ({current_pos_side.upper()}) open, skipping entry.")
+        else:
+             logger.warning(f"Core logic skipped (Cycle {cycle_count}) due to earlier failure/invalid state ({cycle_status}).")
 
-        elif is_flat:
-            logger.debug("Position flat, no entry signal.")
-        elif current_pos_side:
-            logger.debug(f"Position ({current_pos_side.upper()}) open, skipping entry.")
-
-        # Return the potentially updated position state and cycle status
-        return live_positions_state, cycle_status
-
-    # pylint: disable=too-many-statements, too-many-branches # R0915, R0912: Reduced by helpers, but main cycle logic remains complex
-    def trading_spell_cycle(self, cycle_count: int) -> None:
-        """Executes one cycle of the trading logic: fetch, analyze, act, display."""
-        start_time = time.monotonic()
-
-        # 1. Fetch Data & Basic Info
-        df, current_price, last_timestamp, total_equity, current_positions, cycle_status = self._fetch_data_and_state(cycle_count)
-
-        # Abort early if basic data fetching failed
-        if cycle_status.startswith("FAIL:FETCH_OHLCV") or cycle_status.startswith("FAIL:PROCESS_CANDLE"):
-            self.status_display.print_status_panel(cycle_count, None, None, None, None, None, {"reason": cycle_status}, {}, self.exchange_manager.market_info)
-            return
-
-        # 2. Calculate Indicators and Signals
-        indicators, current_atr, signals, cycle_status = self._calculate_indicators_and_signals(
-            df, current_price, cycle_status # type: ignore
-        )
-
-        # 3. Determine if Core Logic Can Run
-        can_run_trade_logic = cycle_status == "OK" or cycle_status.startswith("WARN")
-        if not can_run_trade_logic:
-            logger.warning(f"Core logic skipped (Cycle {cycle_count}) due to earlier failure/invalid state ({cycle_status}).")
-
-        # Initialize final state for display
-        final_positions_for_panel = copy.deepcopy(current_positions) if current_positions is not None else {"long": {}, "short": {}}
-        protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker)
-
-        # 4. Execute Core Trading Logic (Manage Positions)
-        if can_run_trade_logic and current_positions is not None and total_equity is not None:
-            # Pass necessary data to the position management helper
-            final_positions_for_panel, cycle_status = self._manage_positions(
-                current_positions, indicators, current_price, current_atr, total_equity, signals, cycle_status # type: ignore
-            )
-            protection_tracker_snapshot = copy.deepcopy(self.order_manager.protection_tracker) # Update snapshot after management
-        elif can_run_trade_logic:
-            # Log why logic wasn't run if it wasn't due to status
-            if current_positions is None:
-                 logger.error("Core logic skipped: Position data unavailable.")
-                 cycle_status = "FAIL:POS_UNAVAILABLE" if cycle_status == "OK" else cycle_status + "|POS_UNAVAILABLE"
-            if total_equity is None:
-                 logger.error("Core logic skipped: Equity data unavailable.")
-                 cycle_status = "FAIL:EQUITY_UNAVAILABLE" if cycle_status == "OK" else cycle_status + "|EQUITY_UNAVAILABLE"
-
-
-        # 5. Display Status Panel (using final state after all actions)
+        # 5. Display Status Panel (using final_positions_for_panel and protection_tracker_snapshot)
         logger.debug("Displaying status panel...")
         self.status_display.print_status_panel(
             cycle_count, last_timestamp, current_price, indicators,
@@ -3203,58 +2899,14 @@ class TradingBot:
         end_time = time.monotonic()
         logger.info(f"{Fore.BLUE}--- Cycle {cycle_count} Status: {cycle_status} (Duration: {end_time - start_time:.2f}s) ---{Style.RESET_ALL}")
 
-    def _close_lingering_positions(self) -> int:
-        """Checks for and attempts to close any lingering positions during shutdown. Returns number closed."""
-        closed_count = 0
-        positions_to_close: List[Tuple[str, Decimal]] = []
-        try:
-            final_positions = self.exchange_manager.get_current_position()
-            if final_positions is not None:
-                for side in ["long", "short"]:
-                    pos_data = final_positions.get(side)
-                    if pos_data:
-                        qty = safe_decimal(pos_data.get('qty', '0'))
-                        if qty.copy_abs() >= POSITION_QTY_EPSILON:
-                            logger.warning(f"{Fore.YELLOW}Lingering {side.upper()} position (Qty: {qty.normalize()}) found during shutdown.{Style.RESET_ALL}")
-                            positions_to_close.append((side, qty))
-
-                if not positions_to_close:
-                    logger.info(f"{Fore.GREEN}No lingering positions found to close.{Style.RESET_ALL}")
-                    return 0
-
-                logger.warning(f"Attempting emergency close for {len(positions_to_close)} lingering position(s)...")
-                for side, qty in positions_to_close:
-                    logger.info(f"Closing {side.upper()} (Qty: {qty.normalize()})...")
-                    # Note: close_position already clears stops and verifies
-                    close_success = self.order_manager.close_position(side, qty, reason="GracefulShutdown")
-                    if close_success:
-                        closed_count += 1
-                        logger.info(f"{Fore.GREEN}{Style.BRIGHT}Closure initiated/confirmed for lingering {side.upper()}.{Style.RESET_ALL}")
-                    else:
-                        logger.error(f"{Fore.RED}Closure FAILED for lingering {side.upper()}. MANUAL INTERVENTION REQUIRED.{Style.RESET_ALL}")
-
-            else: # Failed to get positions
-                logger.error(f"{Fore.RED}Failed fetching positions during shutdown check. MANUAL CHECK REQUIRED for {self.config.symbol}!{Style.RESET_ALL}")
-                termux_notify(f"{self.config.symbol} Shutdown Issue", "Failed pos check! Manual verify.")
-                return 0 # Indicate failure to check/close
-
-        # Catching general Exception acceptable here for critical shutdown step (W0718)
-        except Exception as e:
-            logger.error(f"{Fore.RED}{Style.BRIGHT}Error during position closure shutdown: {e}. MANUAL CHECK REQUIRED.{Style.RESET_ALL}", exc_info=True)
-            termux_notify(f"{self.config.symbol} Shutdown Issue", f"Error closing pos: {e}")
-            return closed_count # Return count successfully closed before error
-
-        return closed_count
-
-    # pylint: disable=too-many-statements # R0915: Acceptable for shutdown sequence
     def graceful_shutdown(self) -> None:
         """Handles cleaning up: cancelling orders and closing positions before exiting."""
-        console.print("\n[bold yellow]Initiating Graceful Shutdown Sequence...[/]")
+        console.print(f"\n[bold yellow]Initiating Graceful Shutdown Sequence...[/]")
         logger.warning(f"{Fore.YELLOW}{Style.BRIGHT}Initiating Graceful Shutdown Sequence...{Style.RESET_ALL}")
         termux_notify("Pyrmethus Shutdown", f"Closing {self.config.symbol}...")
 
         if not self.exchange_manager or not self.exchange_manager.exchange or not self.exchange_manager.market_info:
-            logger.error(f"{Fore.RED}Cannot shutdown cleanly: Exchange Manager/Instance/Market Info missing.{Style.RESET_ALL}")
+            logger.error(f"{Fore.RED}Cannot shutdown: Exchange Manager/Instance/Market Info missing.{Style.RESET_ALL}")
             termux_notify("Shutdown Warning!", f"{self.config.symbol}: Cannot shutdown cleanly!")
             return
 
@@ -3264,29 +2916,19 @@ class TradingBot:
         # --- 1. Cancel All Open Non-Positional Orders ---
         logger.info(f"{Fore.CYAN}Cancelling active non-positional orders for {symbol} (Category: {self.config.bybit_v5_category})...{Style.RESET_ALL}")
         try:
-            # V5 cancelAllOrders might need category and symbol/settleCoin
-            params = {"category": self.config.bybit_v5_category, "symbol": symbol}
-            # Attempt cancel with retries (short timeout)
+            params = {"category": self.config.bybit_v5_category, "symbol": symbol} # V5 might need symbol too
             cancel_resp = fetch_with_retries(
                 exchange.cancel_all_orders, symbol=symbol, params=params, max_retries=1, delay_seconds=1
             )
-            logger.info(f"Cancel all orders response snippet: {str(cancel_resp)[:200]}...")
-            # Interpret response based on potential structures
+            logger.info(f"Cancel all orders response: {str(cancel_resp)[:200]}...")
             if isinstance(cancel_resp, dict) and cancel_resp.get('retCode') == V5_SUCCESS_RETCODE:
                  cancelled_list = cancel_resp.get('result', {}).get('list', [])
-                 logger.info(f"Cancel all orders command successful (API V5). Found {len(cancelled_list)} items in response list.")
+                 logger.info(f"Cancel all orders command successful (API). Found {len(cancelled_list)} items in response.")
             elif isinstance(cancel_resp, list):
                  logger.info(f"Cancelled {len(cancel_resp)} active orders (CCXT list response).")
-            # Add check for other success indicators if needed, e.g., empty dict might be success
-            elif isinstance(cancel_resp, dict) and not cancel_resp:
-                 logger.info("Cancel all orders returned empty dict, assuming success (no active orders?).")
-            else:
-                 logger.warning("Cancel all orders response format unexpected or indicated failure.")
-        except ccxt.NotSupported:
-            logger.warning("Exchange does not support cancel_all_orders with specified params. Skipping.")
-        # Catching general Exception acceptable here for non-critical cancel step (W0718)
-        except Exception as e:
-            logger.error(f"{Fore.RED}Error cancelling orders: {e}{Style.RESET_ALL}", exc_info=False)
+            else: logger.warning("Cancel all orders response format unexpected/failed.")
+        except ccxt.NotSupported: logger.warning(f"Exchange does not support cancel_all_orders w/ params. Skipping.")
+        except Exception as e: logger.error(f"{Fore.RED}Error cancelling orders: {e}{Style.RESET_ALL}", exc_info=False)
 
         logger.info("Clearing local protection tracker state...")
         self.order_manager.protection_tracker = {"long": None, "short": None}
@@ -3295,12 +2937,40 @@ class TradingBot:
 
         # --- 2. Check and Close Any Lingering Positions ---
         logger.info(f"{Fore.CYAN}Checking for lingering positions for {symbol} to close...{Style.RESET_ALL}")
-        closed_count = self._close_lingering_positions()
-        # Logging within _close_lingering_positions provides details
+        closed_count = 0; positions_to_close: List[Tuple[str, Decimal]] = []
+        try:
+            final_positions = self.exchange_manager.get_current_position()
+            if final_positions is not None:
+                for side in ["long", "short"]:
+                    pos_data = final_positions.get(side)
+                    if pos_data:
+                        qty = safe_decimal(pos_data.get('qty', '0'))
+                        if qty.copy_abs() >= POSITION_QTY_EPSILON:
+                            logger.warning(f"{Fore.YELLOW}Lingering {side.upper()} position (Qty: {qty.normalize()}) found.{Style.RESET_ALL}")
+                            positions_to_close.append((side, qty))
 
-        console.print("[bold yellow]Graceful Shutdown Sequence Complete.[/]")
+                if not positions_to_close: logger.info(f"{Fore.GREEN}No lingering positions found.{Style.RESET_ALL}")
+                else:
+                    logger.warning(f"Attempting emergency close for {len(positions_to_close)} position(s)...")
+                    for side, qty in positions_to_close:
+                        logger.info(f"Closing {side.upper()} (Qty: {qty.normalize()})...")
+                        # Note: close_position already clears stops and verifies
+                        close_success = self.order_manager.close_position(side, qty, reason="GracefulShutdown")
+                        if close_success: closed_count += 1; logger.info(f"{Fore.GREEN}{Style.BRIGHT}Closure initiated/confirmed for {side.upper()}.{Style.RESET_ALL}")
+                        else: logger.error(f"{Fore.RED}Closure FAILED for {side.upper()}. MANUAL INTERVENTION REQUIRED.{Style.RESET_ALL}")
+
+                    if closed_count == len(positions_to_close): logger.info(f"{Fore.GREEN}{Style.BRIGHT}All detected positions ({closed_count}) closed/initiated.{Style.RESET_ALL}")
+                    else: logger.warning(f"{Fore.YELLOW}Attempted {len(positions_to_close)} closures, {closed_count} succeeded/initiated. MANUAL CHECK NEEDED.{Style.RESET_ALL}")
+            else:
+                logger.error(f"{Fore.RED}Failed fetching positions during shutdown check. MANUAL CHECK REQUIRED for {symbol}!{Style.RESET_ALL}")
+                termux_notify(f"{symbol} Shutdown Issue", "Failed pos check! Manual verify.")
+        except Exception as e:
+            logger.error(f"{Fore.RED}{Style.BRIGHT}Error during position closure shutdown: {e}. MANUAL CHECK REQUIRED.{Style.RESET_ALL}", exc_info=True)
+            termux_notify(f"{symbol} Shutdown Issue", f"Error closing pos: {e}")
+
+        console.print(f"[bold yellow]Graceful Shutdown Sequence Complete.[/]")
         logger.warning(f"{Fore.YELLOW}{Style.BRIGHT}Graceful Shutdown Complete. Pyrmethus rests.{Style.RESET_ALL}")
-        termux_notify("Shutdown Complete", f"{self.config.symbol} shutdown finished ({closed_count} pos closed).")
+        termux_notify("Shutdown Complete", f"{self.config.symbol} shutdown finished.")
 
     def _display_startup_info(self):
         """Prints initial configuration details using Rich."""
@@ -3316,15 +2986,12 @@ class TradingBot:
         table.add_row("---", "---", style="dim")
         table.add_row("Risk %:", f"{self.config.risk_percentage:.3%}")
         table.add_row("SL ATR Mult:", f"{self.config.sl_atr_multiplier.normalize()}x")
-        tp_display = f"{self.config.tp_atr_multiplier.normalize()}x" if self.config.tp_atr_multiplier > 0 else "[dim]Disabled[/]"
-        table.add_row("TP ATR Mult:", tp_display)
+        table.add_row("TP ATR Mult:", f"{self.config.tp_atr_multiplier.normalize()}x" if self.config.tp_atr_multiplier > 0 else "[dim]Disabled[/]")
         table.add_row("TSL Act Mult:", f"{self.config.tsl_activation_atr_multiplier.normalize()}x")
         table.add_row("TSL Trail %:", f"{self.config.trailing_stop_percent.normalize()}%")
         table.add_row("---", "---", style="dim")
-        trend_filter_display = "[bright_green]ON[/]" if self.config.trade_only_with_trend else "[dim]OFF[/]"
-        table.add_row("Trend Filter:", trend_filter_display)
-        atr_filter_display = f"{self.config.atr_move_filter_multiplier.normalize()}x" if self.config.atr_move_filter_multiplier > 0 else "[dim]Disabled[/]"
-        table.add_row("ATR Move Filter:", atr_filter_display)
+        table.add_row("Trend Filter:", f"[bright_green]ON[/]" if self.config.trade_only_with_trend else "[dim]OFF[/]")
+        table.add_row("ATR Move Filter:", f"{self.config.atr_move_filter_multiplier.normalize()}x" if self.config.atr_move_filter_multiplier > 0 else "[dim]Disabled[/]")
         table.add_row("ADX Filter Lvl:", f">{self.config.min_adx_level.normalize()}")
         table.add_row("---", "---", style="dim")
         journal_status = f"[bright_green]Enabled[/] ([dim]{self.config.journal_file_path}[/])" if self.config.enable_journaling else "[dim]Disabled[/]"
@@ -3346,14 +3013,11 @@ if __name__ == "__main__":
     except SystemExit as e:
         log_level_exit = logging.INFO if e.code == 0 else logging.WARNING
         logger.log(log_level_exit, f"Pyrmethus process terminated (Exit Code: {e.code}).")
-    # Catching general Exception acceptable here for top-level failure (W0718)
     except Exception as main_exception:
         # Corrected color usage here
         logger.critical(f"{Fore.RED}{Style.BRIGHT}CRITICAL UNHANDLED ERROR during bot execution: {main_exception}{Style.RESET_ALL}", exc_info=True)
-        try:
-            termux_notify("Pyrmethus CRITICAL ERROR", f"Bot failed: {str(main_exception)[:100]}")
-        # Catching general Exception acceptable here for fallback notification failure (W0718)
-        except Exception as notify_exc:
-            logger.error(f"Failed to send critical error notification: {notify_exc}")
+        try: termux_notify("Pyrmethus CRITICAL ERROR", f"Bot failed: {str(main_exception)[:100]}")
+        except Exception as notify_exc: logger.error(f"Failed to send critical error notification: {notify_exc}")
         sys.exit(1) # Ensure non-zero exit code on critical failure
+
 

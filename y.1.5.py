@@ -266,19 +266,19 @@ class BybitV5Wrapper:
     def __init__(self, config: Dict[str, Any], logger: logging.Logger):
         self.logger = logger
         self.config = config
-        self.exchange_id = config['exchange'].get('id', 'bybit')
+        self.exchange = config['exchange'].get('id', 'bybit')
         self.category = config['trading_settings'].get('category', 'linear') # linear, inverse, spot
         self.hedge_mode = config['trading_settings'].get('hedge_mode', False) # Bybit hedge mode
         self.max_retries = config['exchange'].get('max_retries', 3)
         self.retry_delay = config['exchange'].get('retry_delay_seconds', 5)
 
-        if self.exchange_id != 'bybit':
-             self.logger.warning(f"This wrapper is optimized for Bybit V5, but exchange ID is set to '{self.exchange_id}'. Some features might not work as expected.")
+        if self.exchange != 'bybit':
+             self.logger.warning(f"This wrapper is optimized for Bybit V5, but exchange ID is set to '{self.exchange}'. Some features might not work as expected.")
 
         try:
-            exchange_class = getattr(ccxt, self.exchange_id)
+            exchange_class = getattr(ccxt, self.exchange)
         except AttributeError:
-             self.logger.critical(f"CCXT exchange class not found for ID: '{self.exchange_id}'. Exiting.")
+             self.logger.critical(f"CCXT exchange class not found for ID: '{self.exchange}'. Exiting.")
              raise # Re-raise critical error
 
         self.exchange = exchange_class({
@@ -304,7 +304,7 @@ class BybitV5Wrapper:
         # Load markets to get precision details, contract sizes, limits etc.
         try:
             self.exchange.load_markets()
-            self.logger.info(f"Markets loaded successfully for {self.exchange_id}.")
+            self.logger.info(f"Markets loaded successfully for {self.exchange}.")
         except ccxt.AuthenticationError:
             self.logger.exception("Authentication failed loading markets. Check API keys.")
             raise # Re-raise critical error
@@ -344,7 +344,7 @@ class BybitV5Wrapper:
                  return None
             return market
         except ccxt.BadSymbol:
-            self.logger.error(f"Symbol '{symbol}' not found on {self.exchange_id}.")
+            self.logger.error(f"Symbol '{symbol}' not found on {self.exchange}.")
             return None
         except ccxt.ExchangeError as e: # Catch errors during market loading/fetching within this method
              self.logger.error(f"Exchange error fetching market data for {symbol}: {e}", exc_info=True)
@@ -368,7 +368,7 @@ class BybitV5Wrapper:
                 # Clone params to avoid modifying the original kwargs dict directly if retrying
                 params = kwargs.get('params', {}).copy()
                 # Check if it's Bybit and the method likely requires 'category' for V5 Unified/Contract accounts
-                if self.exchange_id == 'bybit' and self.category in ['linear', 'inverse'] and 'category' not in params:
+                if self.exchange == 'bybit' and self.category in ['linear', 'inverse'] and 'category' not in params:
                      # List of methods known or likely to require 'category' for V5 derivatives
                      methods_requiring_category = [
                          'create_order', 'edit_order', 'cancel_order', 'cancel_all_orders',
@@ -522,7 +522,7 @@ class BybitV5Wrapper:
             # CCXT unified structure: balance_data['total'][ASSET]
             # Bybit V5 structure is nested within 'info'
 
-            if self.exchange_id == 'bybit' and self.category in ['linear', 'inverse', 'spot']:
+            if self.exchange == 'bybit' and self.category in ['linear', 'inverse', 'spot']:
                 # --- Bybit V5 Parsing ---
                 account_list = balance_data.get('info', {}).get('result', {}).get('list', [])
                 if not account_list:
@@ -624,7 +624,7 @@ class BybitV5Wrapper:
         symbols_arg = [symbol] if symbol else None # CCXT standard way to filter by symbol
 
         # Bybit V5 specific: Can filter by symbol directly in params, and requires category
-        if self.exchange_id == 'bybit':
+        if self.exchange == 'bybit':
             params['category'] = self.category
             if symbol:
                 params['symbol'] = symbol
@@ -835,7 +835,7 @@ class BybitV5Wrapper:
         order_params = params.copy() if params else {}
 
         # --- Bybit V5 Specific Parameters ---
-        if self.exchange_id == 'bybit':
+        if self.exchange == 'bybit':
             # 'category' is handled by safe_ccxt_call
 
             # Determine positionIdx for hedge mode entries/exits
@@ -898,7 +898,7 @@ class BybitV5Wrapper:
         params = {}
         # Bybit V5 requires setting buyLeverage and sellLeverage separately in params
         # And requires the symbol argument within the main call
-        if self.exchange_id == 'bybit':
+        if self.exchange == 'bybit':
             # 'category' handled by safe_ccxt_call
             params['buyLeverage'] = leverage_str
             params['sellLeverage'] = leverage_str
@@ -2158,7 +2158,7 @@ class TradingBot:
 
 
         # Set Hedge Mode vs One-Way Mode (Bybit specific)
-        if self.exchange_id == 'bybit' and self.exchange.category in ['linear', 'inverse']:
+        if self.exchange == 'bybit' and self.exchange.category in ['linear', 'inverse']:
              try:
                   # 0: One-way, 3: Hedge Mode (Both Long & Short)
                   target_mode = 3 if self.hedge_mode else 0
