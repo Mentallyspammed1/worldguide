@@ -1,491 +1,490 @@
 # File: utils.py
 """
-Utility functions and constants for the application.
+Utility functions, constants, and shared classes for the trading bot.
 
-This module includes:
-- Configuration constants (file paths, API settings, default values).
-- Timezone handling with a fallback for older Python versions.
-- Custom logging formatter for redacting sensitive information.
-- Helper functions for determining price precision and minimum tick size from market data.
-- Color constants for terminal output using Colorama.
-- Formatting utilities for application-specific data types (e.g., signals).
+Includes:
+- Configuration constants (file paths, default values).
+- API behavior constants (retries, delays).
+- Trading constants (intervals, Fibonacci levels).
+- Default indicator periods.
+- Timezone handling (using zoneinfo or fallback).
+- Custom logging formatter for redacting sensitive data.
+- Helper functions for market data (precision, tick size).
+- Color constants for terminal output.
+- Formatting utilities (signals).
+- Exponential backoff utility.
 """
 
 import logging
 import os
-import datetime as dt # Use dt alias for datetime module
+import datetime as dt  # Use dt alias for datetime module
+import random
 from decimal import Decimal, getcontext, InvalidOperation
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, List  # Added List, Union
 
-from colorama import Fore, Style, init
+# --- Attempt to import zoneinfo (Python 3.9+) ---
+_ZoneInfo: Optional[Type[dt.tzinfo]] = None
+_ZoneInfoNotFoundError: Optional[Type[Exception]] = None
+try:
+    from zoneinfo import ZoneInfo as _ZI, ZoneInfoNotFoundError as _ZINF
+
+    _ZoneInfo = _ZI
+    _ZoneInfoNotFoundError = _ZINF
+    _zoneinfo_available = True
+except ImportError:
+    _zoneinfo_available = False
+    # Fallback: Try importing pytz if zoneinfo is not available
+    try:
+        import pytz  # type: ignore
+
+        # Create a wrapper that mimics ZoneInfo constructor
+        class PytzZoneInfoWrapper:
+            def __init__(self, key: str):
+                try:
+                    self._tz = pytz.timezone(key)
+                except pytz.UnknownTimeZoneError:
+                    raise ZoneInfoNotFoundError(f"pytz: Unknown timezone '{key}'") from None  # Mimic ZoneInfo error
+                except Exception as e:
+                    raise ZoneInfoNotFoundError(f"pytz error for '{key}': {e}") from e
+
+            def __getattr__(self, name):
+                return getattr(self._tz, name)  # Delegate methods
+
+            def __str__(self):
+                return self._tz.zone
+
+        _ZoneInfo = PytzZoneInfoWrapper
+
+        # Define a compatible error type for the except block in set_timezone
+        class ZoneInfoNotFoundError(Exception):
+            pass  # Define if pytz is used
+
+        _ZoneInfoNotFoundError = ZoneInfoNotFoundError
+        print("Warning: 'zoneinfo' not found. Using 'pytz' for timezone support.", file=sys.stderr)
+    except ImportError:
+        print("Warning: Neither 'zoneinfo' nor 'pytz' found. Using basic UTC fallback only.", file=sys.stderr)
+
+        # Define a basic UTC tzinfo class if both fail
+        class _UTCFallback(dt.tzinfo):
+            def utcoffset(self, d: Optional[dt.datetime]) -> Optional[dt.timedelta]:
+                return dt.timedelta(0)
+
+            def dst(self, d: Optional[dt.datetime]) -> Optional[dt.timedelta]:
+                return dt.timedelta(0)
+
+            def tzname(self, d: Optional[dt.datetime]) -> Optional[str]:
+                return "UTC"
+
+            def __repr__(self) -> str:
+                return "<UTCFallback tzinfo>"
+
+        _ZoneInfo = _UTCFallback
+
+        # Define a dummy error class for the except block consistency
+        class ZoneInfoNotFoundError(Exception):
+            pass
+
+        _ZoneInfoNotFoundError = ZoneInfoNotFoundError
+
+
+# --- Attempt to initialize Colorama ---
+try:
+    from colorama import Fore, Style, init
+
+    init(autoreset=True)  # Initialize Colorama for cross-platform colored output
+    # Color constants using Colorama
+    NEON_GREEN = Fore.LIGHTGREEN_EX
+    NEON_BLUE = Fore.LIGHTBLUE_EX
+    NEON_PURPLE = Fore.LIGHTMAGENTA_EX
+    NEON_YELLOW = Fore.LIGHTYELLOW_EX
+    NEON_RED = Fore.LIGHTRED_EX
+    NEON_CYAN = Fore.LIGHTCYAN_EX
+    RESET_ALL_STYLE = Style.RESET_ALL
+except ImportError:
+    print("Warning: 'colorama' not installed. Colored output will be disabled.", file=sys.stderr)
+    # Define fallback empty strings if colorama is not available
+    NEON_GREEN = NEON_BLUE = NEON_PURPLE = NEON_YELLOW = NEON_RED = NEON_CYAN = RESET_ALL_STYLE = ""
 
 # --- Module-level logger ---
-_module_logger = logging.getLogger(__name__)
-
-# --- Timezone Handling ---
-_ActualZoneInfo: Type[dt.tzinfo] # This will hold the class to use for timezones (zoneinfo.ZoneInfo or FallbackZoneInfo)
-
-class FallbackZoneInfo(dt.tzinfo):
-    """
-    A basic, UTC-only fallback implementation for timezone handling,
-    mimicking zoneinfo.ZoneInfo for the 'UTC' timezone.
-    It is used if the 'zoneinfo' module (Python 3.9+) is not available.
-    This class only truly supports 'UTC'; other timezone keys will default to UTC.
-    """
-    _offset: dt.timedelta
-    _name: str
-
-    def __init__(self, key: str):
-        super().__init__() # Call tzinfo's __init__
-
-        # For this fallback, we only truly support "UTC".
-        # key is expected to be a string as per type hint.
-        if key.upper() == 'UTC':
-            self._offset = dt.timedelta(0)
-            self._name = "UTC"
-        else:
-            _module_logger.warning(
-                f"FallbackZoneInfo initialized with key '{key}' which is not 'UTC'. "
-                f"This fallback only supports UTC. Effective timezone will be UTC."
-            )
-            self._offset = dt.timedelta(0)
-            self._name = "UTC" # Effective name is UTC
-
-    def fromutc(self, dt_obj: dt.datetime) -> dt.datetime:
-        """
-        Called by datetime.astimezone() after adjusting dt_obj to UTC.
-        Since this class represents UTC, no further adjustment is needed.
-        dt_obj.tzinfo is self when this method is called.
-        """
-        if not isinstance(dt_obj, dt.datetime):
-            raise TypeError("fromutc() requires a datetime argument")
-        # dt_obj is already in UTC wall time, with tzinfo=self.
-        return dt_obj.replace(tzinfo=self) # Ensure tzinfo is correctly self
-
-    def utcoffset(self, dt_obj: Optional[dt.datetime]) -> dt.timedelta:
-        """Returns the UTC offset for this timezone."""
-        # dt_obj can be None as per tzinfo.utcoffset signature
-        return self._offset
-
-    def dst(self, dt_obj: Optional[dt.datetime]) -> Optional[dt.timedelta]:
-        """Returns the Daylight Saving Time offset (always 0 for UTC)."""
-        # dt_obj can be None as per tzinfo.dst signature
-        return dt.timedelta(0)
-
-    def tzname(self, dt_obj: Optional[dt.datetime]) -> Optional[str]:
-        """Returns the name of the timezone."""
-        # dt_obj can be None as per tzinfo.tzname signature
-        return self._name
-
-    def __repr__(self) -> str:
-        return f"<FallbackZoneInfo name='{self._name}'>"
-
-    def __str__(self) -> str:
-        return self._name
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, FallbackZoneInfo):
-            return NotImplemented
-        # All FallbackZoneInfo instances are effectively UTC and thus equal
-        # if they have the same _name and _offset (which they will, by construction).
-        return self._name == other._name and self._offset == other._offset
-
-    def __hash__(self) -> int:
-        # All FallbackZoneInfo instances hash the same if _name is always "UTC".
-        return hash((self._name, self._offset))
-
-try:
-    from zoneinfo import ZoneInfo as _ZoneInfo_FromModule # Import with a temporary name (Python 3.9+)
-    _ActualZoneInfo = _ZoneInfo_FromModule # Assign to the variable with the correct type hint
-except ImportError:
-    _module_logger.warning(
-        "Module 'zoneinfo' not found (requires Python 3.9+ and possibly 'tzdata' package). "
-        "Using a basic UTC-only fallback for timezone handling. "
-        "For full timezone support on older Python, consider installing 'pytz'."
-    )
-    _ActualZoneInfo = FallbackZoneInfo # FallbackZoneInfo is Type[dt.tzinfo]
-
-# Global timezone object, lazily initialized
-TIMEZONE: Optional[dt.tzinfo] = None
+# It's generally better for utils to not log directly unless necessary,
+# or to accept a logger instance. For now, keep it simple.
+_module_logger = logging.getLogger(__name__)  # Use standard dunder name
 
 # --- Decimal Context ---
-getcontext().prec = 38 # Set precision for Decimal calculations
-
-# --- Colorama Initialization ---
-init(autoreset=True) # Initialize Colorama for cross-platform colored output
+# Set precision early, affects all subsequent Decimal operations in this context
+try:
+    getcontext().prec = 38  # High precision for financial calculations
+except Exception as e:
+    _module_logger.error(f"Failed to set Decimal precision: {e}")
 
 # --- Configuration Constants ---
 CONFIG_FILE = "config.json"
 LOG_DIRECTORY = "bot_logs"
-DEFAULT_TIMEZONE = "America/Chicago" # Default if TIMEZONE env var is not set
+DEFAULT_TIMEZONE = "America/Chicago"  # Default timezone if not set in env or config
 
 # --- API and Bot Behavior Constants ---
-MAX_API_RETRIES = 3
-RETRY_DELAY_SECONDS = 5
-RETRY_ERROR_CODES = (429, 500, 502, 503, 504) # Tuple for immutability
-RETRY_HTTP_STATUS_CODES = (408, 429, 500, 502, 503, 504) # For HTTP specific retries
-LOOP_DELAY_SECONDS = 10
-POSITION_CONFIRM_DELAY_SECONDS = 8
+MAX_API_RETRIES = 3  # Default max retries (can be overridden by config)
+RETRY_DELAY_SECONDS = 5.0  # Default base delay for non-rate-limit retries (use float)
+MAX_RETRY_DELAY_SECONDS = 60.0  # Default max delay cap for exponential backoff (use float)
+# POSITION_CONFIRM_DELAY_SECONDS is now defined in config_loader defaults
 
 # --- Trading Constants ---
-VALID_INTERVALS = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"]
-CCXT_INTERVAL_MAP = {
-    "1": "1m", "3": "3m", "5": "5m", "15": "15m", "30": "30m",
-    "60": "1h", "120": "2h", "240": "4h", "D": "1d", "W": "1w", "M": "1M"
+VALID_INTERVALS = [
+    "1",
+    "3",
+    "5",
+    "15",
+    "30",
+    "60",
+    "120",
+    "240",
+    "360",
+    "720",
+    "D",
+    "W",
+    "M",
+]  # Added more common intervals
+CCXT_INTERVAL_MAP = {  # Map user-friendly intervals to CCXT timeframe codes
+    "1": "1m",
+    "3": "3m",
+    "5": "5m",
+    "15": "15m",
+    "30": "30m",
+    "60": "1h",
+    "120": "2h",
+    "240": "4h",
+    "360": "6h",
+    "720": "12h",
+    "D": "1d",
+    "W": "1w",
+    "M": "1M",
 }
 FIB_LEVELS = [
-    Decimal("0.0"), Decimal("0.236"), Decimal("0.382"), Decimal("0.5"),
-    Decimal("0.618"), Decimal("0.786"), Decimal("1.0")
-]
+    Decimal(str(f)) for f in [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]
+]  # Standard Fibonacci levels as Decimals
 
-# --- Indicator Default Periods ---
+# --- Indicator Default Periods (Centralized Source of Truth) ---
+# These are loaded by config_loader and can be overridden in config.json
 DEFAULT_INDICATOR_PERIODS = {
-    "atr_period": 14,
-    "cci_window": 20,
-    "cci_constant": 0.015,  # Added default for cci_constant as per common usage
-    "williams_r_window": 14,
-    "mfi_window": 14,
-    "stoch_rsi_window": 14,
-    "stoch_rsi_rsi_window": 12,
-    "stoch_rsi_k": 3,
-    "stoch_rsi_d": 3,
-    "rsi_period": 14,
-    "bollinger_bands_period": 20,
-    "bollinger_bands_std_dev": 2.0,
-    "sma_10_window": 10,
+    # Moving Averages & Trend
     "ema_short_period": 9,
     "ema_long_period": 21,
-    "momentum_period": 7,
-    "volume_ma_period": 15,
-    "fibonacci_window": 50,
-    "psar_initial_af": 0.02, # Added default for psar_initial_af
-    "psar_af_step": 0.02,    # Added default for psar_af_step (using value previously assigned to psar_af)
-    "psar_max_af": 0.2,
-    # Removed "psar_af" as it is replaced by psar_af_step according to analysis.py params_map
+    "sma_10_window": 10,
+    "psar_initial_af": Decimal("0.02"),
+    "psar_af_step": Decimal("0.02"),
+    "psar_max_af": Decimal("0.2"),
+    "vwap_anchor": "D",  # Default VWAP anchor (Daily) - Note: pandas_ta vwap might not use anchor directly
+    # Oscillators
+    "rsi_period": 14,
+    "stoch_rsi_window": 14,
+    "stoch_rsi_rsi_window": 14,  # Often same as rsi_period
+    "stoch_rsi_k": 3,
+    "stoch_rsi_d": 3,
+    "cci_window": 20,
+    "cci_constant": Decimal("0.015"),
+    "williams_r_window": 14,
+    "mfi_window": 14,
+    "momentum_period": 10,  # Common default
+    # Volatility
+    "atr_period": 14,
+    "bollinger_bands_period": 20,
+    "bollinger_bands_std_dev": Decimal("2.0"),
+    # Volume
+    "volume_ma_period": 20,
+    # Other / Strategy Specific
+    "fibonacci_window": 50,  # Window for high/low used in Fib calculation
+    # --- Thresholds moved to default_config in config_loader.py ---
+    # These are strategy parameters rather than indicator calculation periods.
+    # Keeping them in config_loader allows easier user tuning without touching utils.py.
+    # Example threshold keys that would now live ONLY in config_loader's default_config:
+    # "stoch_rsi_oversold_threshold": 25,
+    # "stoch_rsi_overbought_threshold": 75,
+    # "rsi_oversold_threshold": 30,
+    # ... etc ...
+    # "default_atr_percentage_of_price": Decimal("0.01")
 }
 
-# --- Colorama Color Constants ---
-NEON_GREEN = Fore.LIGHTGREEN_EX
-NEON_BLUE = Fore.LIGHTBLUE_EX
-NEON_PURPLE = Fore.LIGHTMAGENTA_EX
-NEON_YELLOW = Fore.LIGHTYELLOW_EX
-NEON_RED = Fore.LIGHTRED_EX
-NEON_CYAN = Fore.LIGHTCYAN_EX
-RESET_ALL_STYLE = Style.RESET_ALL
-# Alias RESET for backward compatibility if other modules expect it
-RESET = RESET_ALL_STYLE
+# Global timezone object, lazily initialized by get_timezone()
+_TIMEZONE: Optional[dt.tzinfo] = None
+
+
+def _exponential_backoff(
+    attempt: int,
+    base_delay: float = RETRY_DELAY_SECONDS,  # Use constant from this module
+    max_delay: float = MAX_RETRY_DELAY_SECONDS,  # Use constant from this module
+    jitter: bool = True,
+) -> float:
+    """
+    Calculates the delay for an exponential backoff strategy with jitter.
+
+    Args:
+        attempt (int): The current retry attempt number (0-indexed).
+        base_delay (float): The starting delay in seconds.
+        max_delay (float): The maximum delay cap in seconds.
+        jitter (bool): Whether to add random jitter (+/- 30%).
+
+    Returns:
+        float: The calculated delay in seconds.
+    """
+    if attempt < 0:
+        _module_logger.error("Exponential backoff attempt must be non-negative.")
+        return base_delay  # Return base delay on invalid input
+    try:
+        # Calculate exponential delay: base * 2^attempt
+        delay = base_delay * (2**attempt)
+        # Apply jitter: random value between 70% and 130% of the calculated delay
+        if jitter:
+            delay = random.uniform(delay * 0.7, delay * 1.3)
+        # Cap the delay at the maximum allowed value
+        return min(delay, max_delay)
+    except OverflowError:
+        # Handle potential overflow if attempt number is excessively large
+        _module_logger.warning(f"Exponential backoff calculation overflowed for attempt {attempt}. Using max_delay.")
+        return max_delay
 
 
 def set_timezone(tz_str: str) -> None:
     """
-    Sets the global timezone for the application.
-
-    If the specified timezone string is invalid or 'zoneinfo' is unavailable
-    for non-UTC timezones, it defaults to UTC.
+    Sets the global timezone object used by the application.
+    Uses zoneinfo (Python 3.9+) or pytz if available, falls back to basic UTC.
 
     Args:
-        tz_str: The timezone string (e.g., "America/Chicago", "UTC").
+        tz_str (str): The timezone string (e.g., "America/Chicago", "UTC", "Europe/London").
     """
-    global TIMEZONE
+    global _TIMEZONE
+    if _ZoneInfo is None:  # If neither zoneinfo nor pytz was available
+        _module_logger.error("No valid timezone implementation available. Cannot set timezone.")
+        _TIMEZONE = None
+        return
     try:
-        TIMEZONE = _ActualZoneInfo(tz_str)
-        _module_logger.info(f"Timezone successfully set to: {str(TIMEZONE)}")
-        # Warn if fallback is active (i.e., _ActualZoneInfo is FallbackZoneInfo)
-        # and a non-UTC zone was requested, as FallbackZoneInfo will default to UTC.
-        if _ActualZoneInfo is FallbackZoneInfo and tz_str.upper() != 'UTC':
-            _module_logger.warning(
-                f"'zoneinfo' module is not available and timezone '{tz_str}' was requested. "
-                f"Effective timezone is UTC due to FallbackZoneInfo limitations."
-            )
-    except Exception as tz_err:
-        # This handles errors from _ActualZoneInfo(tz_str) constructor,
-        # e.g., zoneinfo.ZoneInfoNotFoundError if tz_str is invalid.
-        _module_logger.warning(
-            f"Could not load timezone '{tz_str}'. Defaulting to UTC. Error: {tz_err}",
-            exc_info=True # Log full traceback for the timezone loading error
+        _TIMEZONE = _ZoneInfo(tz_str)  # Use the detected ZoneInfo class (zoneinfo or pytz wrapper)
+        _module_logger.info(f"Timezone successfully set using '{tz_str}'. Effective timezone: {str(_TIMEZONE)}")
+    except _ZoneInfoNotFoundError:  # Catch the specific error type
+        _module_logger.error(
+            f"Timezone '{tz_str}' not found by the available provider ({'zoneinfo' if _zoneinfo_available else 'pytz' if _ZoneInfo.__name__ == 'PytzZoneInfoWrapper' else 'fallback'}). Using UTC."
         )
-        # Ensure TIMEZONE is always set, defaulting to UTC
-        if _ActualZoneInfo is not FallbackZoneInfo: # _ActualZoneInfo is zoneinfo.ZoneInfo
-            try:
-                TIMEZONE = _ActualZoneInfo("UTC") # Try real zoneinfo.ZoneInfo("UTC")
-            except Exception as utc_load_err: # Should be extremely rare
-                _module_logger.error(
-                    f"Critical: Could not load 'UTC' with available 'zoneinfo' module: {utc_load_err}. "
-                    "Forcing FallbackZoneInfo for UTC.",
-                    exc_info=True
-                )
-                TIMEZONE = FallbackZoneInfo("UTC") # Ultimate fallback
-        else: # zoneinfo not available, _ActualZoneInfo is FallbackZoneInfo
-            # FallbackZoneInfo("UTC") is robust and should not fail.
-            TIMEZONE = _ActualZoneInfo("UTC") # This is FallbackZoneInfo("UTC")
+        _TIMEZONE = _ZoneInfo("UTC")  # Fallback to UTC using the available provider
+    except Exception as tz_err:
+        _module_logger.error(f"Unexpected error loading timezone '{tz_str}'. Using UTC. Error: {tz_err}", exc_info=True)
+        try:
+            _TIMEZONE = _ZoneInfo("UTC")  # Attempt UTC with available provider
+        except:
+            _TIMEZONE = dt.timezone.utc  # Absolute fallback if even UTC fails with provider
+
 
 def get_timezone() -> dt.tzinfo:
     """
-    Retrieves the global timezone object.
-
-    Initializes it from the TIMEZONE environment variable or `DEFAULT_TIMEZONE`
-    if not already set.
+    Retrieves the global timezone object, initializing it from environment
+    variable 'TIMEZONE' or DEFAULT_TIMEZONE if called for the first time.
 
     Returns:
-        A datetime.tzinfo object representing the configured timezone.
+        datetime.tzinfo: The configured timezone object (defaults to UTC on error).
     """
-    global TIMEZONE
-    if TIMEZONE is None:
+    global _TIMEZONE
+    if _TIMEZONE is None:
+        # Initialize timezone if it hasn't been set yet
         env_tz = os.getenv("TIMEZONE")
-        chosen_tz_str: str
+        chosen_tz_str = env_tz if env_tz else DEFAULT_TIMEZONE
+        _module_logger.info(
+            f"Initializing timezone. Env='{env_tz}', Default='{DEFAULT_TIMEZONE}', Chosen='{chosen_tz_str}'"
+        )
+        set_timezone(chosen_tz_str)
+        # Ensure _TIMEZONE is not None after initialization attempt
+        if _TIMEZONE is None:
+            _module_logger.critical("Timezone initialization failed critically. Forcing basic UTC.")
+            _TIMEZONE = dt.timezone.utc  # Provide a basic UTC object if all else fails
 
-        if env_tz:
-            _module_logger.info(f"TIMEZONE environment variable found: '{env_tz}'. Attempting to use it.")
-            chosen_tz_str = env_tz
-        else:
-            _module_logger.info(
-                f"TIMEZONE environment variable not set. "
-                f"Using default timezone: '{DEFAULT_TIMEZONE}'."
-            )
-            chosen_tz_str = DEFAULT_TIMEZONE
+    return _TIMEZONE
 
-        set_timezone(chosen_tz_str) # This will initialize TIMEZONE
-
-    # At this point, TIMEZONE must be set by set_timezone.
-    # An assert helps catch unexpected None states during development.
-    assert TIMEZONE is not None, "TIMEZONE should have been initialized by set_timezone."
-    return TIMEZONE
 
 class SensitiveFormatter(logging.Formatter):
     """
-    Custom logging formatter that redacts sensitive information (API key and secret)
-    from log messages.
+    Custom logging formatter that redacts sensitive strings (API keys/secrets).
+    Uses partial redaction for longer secrets if configured.
     """
-    # Store sensitive data as class attributes.
-    # This assumes one set of credentials for the application instance using this formatter.
-    _api_key: Optional[str] = None
-    _api_secret: Optional[str] = None
+
+    _secrets_to_redact: List[tuple[str, str]] = []  # Store tuples of (original, placeholder)
 
     @classmethod
-    def set_sensitive_data(cls, api_key: Optional[str], api_secret: Optional[str]) -> None:
-        """Sets the API key and secret to be redacted."""
-        cls._api_key = api_key
-        cls._api_secret = api_secret
+    def set_sensitive_data(cls, *args: Optional[str]) -> None:
+        """
+        Registers sensitive strings to be redacted in log messages.
+
+        Args:
+            *args (Optional[str]): Variable number of sensitive strings (e.g., API key, secret).
+                                     None or empty strings are ignored.
+        """
+        cls._secrets_to_redact = []
+        for s in args:
+            if s and isinstance(s, str):  # Only process non-empty strings
+                # Simple placeholder: "***KEY***" or "***SECRET***" etc.
+                placeholder = f"***{s.__class__.__name__.upper()}***"
+                # More secure placeholder (shows start/end, hides middle)
+                # if len(s) > 8:
+                #     placeholder = f"{s[:3]}...{s[-3:]}"
+                # else: # Too short to partially redact meaningfully
+                #     placeholder = "***REDACTED***"
+                cls._secrets_to_redact.append((s, placeholder))
+        if cls._secrets_to_redact:
+            _module_logger.debug(f"Sensitive data registered for redaction: {len(cls._secrets_to_redact)} items.")
+        else:
+            _module_logger.debug("No sensitive data provided for redaction.")
 
     def format(self, record: logging.LogRecord) -> str:
-        """Formats the log record, redacting sensitive data."""
-        # Get the formatted message from the base class.
-        msg = super().format(record)
+        """Formats the log record, applying redaction to the message."""
+        # Format the message using the standard Formatter first
+        formatted_message = super().format(record)
+        # Apply redaction using the stored secrets
+        temp_message = formatted_message
+        try:
+            # Use the class attribute directly if available
+            secrets = getattr(SensitiveFormatter, "_secrets_to_redact", [])
+            for original, placeholder in secrets:
+                # Check if original string exists before replacing
+                if original in temp_message:
+                    temp_message = temp_message.replace(original, placeholder)
+            return temp_message
+        except Exception as e:
+            # Avoid crashing the logger if redaction fails
+            _module_logger.error(f"Error during log message redaction: {e}", exc_info=False)
+            # Return the original formatted message or a generic error string
+            return formatted_message  # Safest fallback
 
-        # Redact API key if it's set and present in the message.
-        # Ensure _api_key is not None and not an empty string before replacing.
-        if SensitiveFormatter._api_key:
-            msg = msg.replace(SensitiveFormatter._api_key, "***API_KEY***")
 
-        # Redact API secret if it's set and present in the message.
-        # Ensure _api_secret is not None and not an empty string.
-        if SensitiveFormatter._api_secret:
-            msg = msg.replace(SensitiveFormatter._api_secret, "***API_SECRET***")
-        return msg
-
-def get_price_precision(market_info: Dict[str, Any], logger: logging.Logger) -> int:
+def get_price_precision(market_info: Dict[str, Any], logger: Optional[logging.Logger] = None) -> int:
     """
-    Determines the number of decimal places for price formatting for a given market.
-
-    It tries to extract this information from `market_info['precision']['price']`
-    (interpreting int as places, float/str as tick size) or
-    `market_info['limits']['price']['min']` as a fallback heuristic.
+    Determines price precision (decimal places) from CCXT market info.
+    Handles various ways precision might be specified (int, float/str tick size).
 
     Args:
-        market_info: A dictionary containing market data from CCXT.
-        logger: Logger instance for logging warnings or debug information.
+        market_info: Market dictionary from CCXT.
+        logger: Optional logger instance.
 
     Returns:
-        The determined price precision (number of decimal places). Defaults to 4.
+        Price precision (number of decimal places), defaulting to 8.
     """
-    symbol = market_info.get('symbol', 'UNKNOWN_SYMBOL')
-    default_precision = 4 # Define default early for clarity
+    lg = logger or _module_logger
+    symbol = market_info.get("symbol", "?")
+    default_prec = 8  # Default if extraction fails
 
-    # 1. Try 'precision'.'price'
-    precision_data = market_info.get('precision', {})
-    price_precision_value = precision_data.get('price')
+    try:
+        precision_dict = market_info.get("precision", {})
+        price_precision_info = precision_dict.get("price")
 
-    if price_precision_value is not None:
-        if isinstance(price_precision_value, int):
-            if price_precision_value >= 0:
-                logger.debug(f"Using integer price precision for {symbol}: {price_precision_value}")
-                return price_precision_value
+        if isinstance(price_precision_info, int):  # Explicit decimal places
+            if price_precision_info >= 0:
+                return price_precision_info
             else:
-                logger.warning(
-                    f"Invalid negative integer price precision for {symbol}: {price_precision_value}. "
-                    "Proceeding to next check."
-                )
+                lg.warning(f"Negative integer precision {price_precision_info} for {symbol}. Ignoring.")
+        elif price_precision_info is not None:  # Treat as tick size (str/float/Decimal)
+            tick_size = Decimal(str(price_precision_info))
+            if tick_size > Decimal("0"):
+                # Calculate decimal places from tick size exponent
+                # normalize() removes trailing zeros, exponent gives position of last digit
+                return abs(tick_size.normalize().as_tuple().exponent)
+            else:
+                lg.warning(f"Non-positive tick size '{price_precision_info}' in precision for {symbol}.")
+        else:  # price precision info is None or missing
+            lg.debug(f"No 'precision.price' info for {symbol}. Checking limits.")
 
-        elif isinstance(price_precision_value, (str, float)):
-            try:
-                # Assume this value represents the tick size
-                tick_size = Decimal(str(price_precision_value))
-                if tick_size > Decimal('0'):
-                    # Precision is the number of decimal places in the tick size
-                    # .normalize() removes trailing zeros, .as_tuple().exponent gives num decimal places (negative)
-                    precision = abs(tick_size.normalize().as_tuple().exponent)
-                    logger.debug(f"Derived price precision for {symbol} from tick size {tick_size}: {precision}")
-                    return precision
-                else: # tick_size is zero or negative
-                    logger.warning(
-                        f"Invalid non-positive tick size '{price_precision_value}' from market_info.precision.price "
-                        f"for {symbol}. Proceeding to next check."
-                    )
-            except (ValueError, TypeError, InvalidOperation) as e:
-                logger.warning(
-                    f"Could not parse market_info.precision.price '{price_precision_value}' "
-                    f"as Decimal for {symbol}: {e}. Proceeding to next check."
-                )
-        else:
-            logger.warning(
-                f"Unsupported type for market_info.precision.price for {symbol}: {type(price_precision_value)}. "
-                "Proceeding to next check."
-            )
-
-    # 2. Try 'limits'.'price'.'min' as a heuristic for tick size to derive precision
-    price_limits = market_info.get('limits', {}).get('price', {})
-    min_price_str = price_limits.get('min')
-
-    if min_price_str is not None:
-        try:
+        # Fallback 1: Check limits.price.min
+        min_price_str = market_info.get("limits", {}).get("price", {}).get("min")
+        if min_price_str:
             min_price_tick = Decimal(str(min_price_str))
-            if min_price_tick > Decimal('0'):
-                # If min_price is positive, assume it can represent the tick size or a value
-                # from which precision can be derived.
-                precision = abs(min_price_tick.normalize().as_tuple().exponent)
-                logger.debug(
-                    f"Derived price precision for {symbol} from min_price_limit {min_price_tick} "
-                    f"(parsed from '{min_price_str}'): {precision}"
-                )
-                return precision
-            # else: min_price_tick is zero or negative, not useful for precision.
-        except (ValueError, TypeError, InvalidOperation) as e:
-            logger.warning(
-                f"Could not parse market_info.limits.price.min '{min_price_str}' "
-                f"as Decimal for {symbol}: {e}. Falling back to default."
-            )
+            if min_price_tick > Decimal("0"):
+                lg.debug(f"Using precision from limits.price.min ({min_price_tick}) for {symbol}.")
+                return abs(min_price_tick.normalize().as_tuple().exponent)
 
-    # 3. Default precision
-    logger.warning(
-        f"Could not determine price precision for {symbol} from market_info. "
-        f"Using default: {default_precision}."
-    )
-    return default_precision
+        # Fallback 2: If market info has 'decimal_places' or 'price_decimals' (less common CCXT fields)
+        places = market_info.get("decimal_places") or market_info.get("price_decimals")
+        if isinstance(places, int) and places >= 0:
+            lg.debug(f"Using explicit decimal_places/price_decimals field for {symbol}: {places}")
+            return places
 
-def get_min_tick_size(market_info: Dict[str, Any], logger: logging.Logger) -> Decimal:
+    except (InvalidOperation, TypeError, ValueError, AttributeError) as e:
+        lg.warning(
+            f"Could not reliably determine price precision for {symbol} from market info: {e}. Using default {default_prec}."
+        )
+    except Exception as e:
+        lg.error(f"Unexpected error getting price precision for {symbol}: {e}", exc_info=True)
+
+    lg.warning(f"Could not determine price precision for {symbol}, using default: {default_prec}")
+    return default_prec
+
+
+def get_min_tick_size(market_info: Dict[str, Any], logger: Optional[logging.Logger] = None) -> Decimal:
     """
-    Determines the minimum tick size (price increment) for a given market.
-
-    It tries to extract this from `market_info['precision']['price']`
-    (interpreting float/str as tick size, int as precision for 10^-n) or
-    `market_info['limits']['price']['min']`. Falls back to a value derived
-    from `get_price_precision`.
+    Determines minimum price increment (tick size) as Decimal from market info.
+    Handles various ways tick size might be specified.
 
     Args:
-        market_info: A dictionary containing market data from CCXT.
-        logger: Logger instance for logging warnings or debug information.
+        market_info: Market dictionary from CCXT.
+        logger: Optional logger instance.
 
     Returns:
-        The minimum tick size as a Decimal.
+        Minimum tick size as Decimal, defaulting to Decimal('1e-8').
     """
-    symbol = market_info.get('symbol', 'UNKNOWN_SYMBOL')
+    lg = logger or _module_logger
+    symbol = market_info.get("symbol", "?")
+    default_tick = Decimal("1e-8")  # Match default precision
 
-    # 1. Try 'precision'.'price'
-    precision_data = market_info.get('precision', {})
-    price_precision_value = precision_data.get('price')
+    try:
+        precision_dict = market_info.get("precision", {})
+        price_precision_info = precision_dict.get("price")
 
-    if price_precision_value is not None:
-        if isinstance(price_precision_value, (str, float)): # Typically, this is the tick size itself
-            try:
-                tick_size = Decimal(str(price_precision_value))
-                if tick_size > Decimal('0'):
-                    logger.debug(f"Using tick size from precision.price for {symbol}: {tick_size}")
-                    return tick_size
-                else: # tick_size is zero or negative
-                    logger.warning(
-                        f"Invalid non-positive value '{price_precision_value}' from market_info.precision.price "
-                        f"for {symbol}. Proceeding to next check."
-                    )
-            except (ValueError, TypeError, InvalidOperation) as e:
-                logger.warning(
-                    f"Could not parse market_info.precision.price '{price_precision_value}' "
-                    f"as Decimal for {symbol}: {e}. Proceeding to next check."
-                )
-
-        elif isinstance(price_precision_value, int): # Often number of decimal places
-            if price_precision_value >= 0:
-                # If 'precision'.'price' is an int, it's often number of decimal places for price
-                tick_size = Decimal('1e-' + str(price_precision_value))
-                logger.debug(f"Calculated tick size from integer precision for {symbol}: {tick_size}")
+        # Case 1: Precision info is explicitly the tick size (float/str)
+        if isinstance(price_precision_info, (str, float)):
+            tick_size = Decimal(str(price_precision_info))
+            if tick_size > 0:
                 return tick_size
-            else:
-                logger.warning(
-                    f"Invalid negative integer for precision.price for {symbol}: {price_precision_value}. "
-                    "Proceeding to next check."
-                )
+        # Case 2: Precision info is integer decimal places
+        elif isinstance(price_precision_info, int) and price_precision_info >= 0:
+            return Decimal("1e-" + str(price_precision_info))
+
+        # Fallback 1: Check limits.price.min (often represents tick size)
+        min_price_str = market_info.get("limits", {}).get("price", {}).get("min")
+        if min_price_str:
+            min_price_tick = Decimal(str(min_price_str))
+            if min_price_tick > 0:
+                return min_price_tick
+
+        # Fallback 2: Derive from calculated precision places (less accurate but better than fixed default)
+        price_prec_places = get_price_precision(market_info, lg)  # Use the helper
+        derived_tick = Decimal("1e-" + str(price_prec_places))
+        lg.debug(f"Derived min tick size {derived_tick} from precision places for {symbol}.")
+        return derived_tick
+
+    except (InvalidOperation, TypeError, ValueError, AttributeError) as e:
+        lg.warning(f"Could not reliably determine min tick size for {symbol}: {e}. Using default {default_tick}.")
+    except Exception as e:
+        lg.error(f"Unexpected error getting min tick size for {symbol}: {e}", exc_info=True)
+
+    lg.warning(f"Could not determine min tick size for {symbol}, using default: {default_tick}")
+    return default_tick
+
+
+def format_signal(signal_text: Any, success: bool = True) -> str:
+    """Formats trading signals (BUY, SELL, HOLD) or other statuses with color."""
+    signal_str = str(signal_text).upper()
+    color = RESET_ALL_STYLE  # Default to no color
+
+    if success:
+        if signal_str == "BUY":
+            color = NEON_GREEN
+        elif signal_str == "SELL":
+            color = NEON_RED
+        elif signal_str == "HOLD":
+            color = NEON_YELLOW
+        elif signal_str in ["ACTIVE", "CONFIRMED", "OK"]:
+            color = NEON_GREEN
+        elif signal_str in ["PENDING", "WAITING"]:
+            color = NEON_YELLOW
         else:
-            logger.warning(
-                f"Unsupported type for market_info.precision.price for {symbol}: {type(price_precision_value)}. "
-                "Proceeding to next check."
-            )
+            color = NEON_CYAN  # Neutral/Informational color
+    else:  # Not success (error, failure, warning)
+        color = NEON_RED
 
-    # 2. Try 'limits'.'price'.'min'
-    # This is sometimes the tick size, or at least related.
-    price_limits = market_info.get('limits', {}).get('price', {})
-    min_price_str = price_limits.get('min')
+    return f"{color}{signal_text}{RESET_ALL_STYLE}"  # Use original casing in output
 
-    if min_price_str is not None:
-        try:
-            min_tick_from_limit = Decimal(str(min_price_str))
-            # If min_price from limits is positive, it might be the tick size.
-            if min_tick_from_limit > Decimal('0'):
-                logger.debug(
-                    f"Using min_price from limits ('{min_price_str}') as tick size for {symbol}: {min_tick_from_limit}"
-                )
-                return min_tick_from_limit
-            # else: min_tick_from_limit is zero or negative, not a valid tick size.
-        except (ValueError, TypeError, InvalidOperation) as e:
-            logger.warning(
-                f"Could not parse market_info.limits.price.min '{min_price_str}' "
-                f"as Decimal for {symbol}: {e}. Falling back."
-            )
-
-    # 3. Fallback: derive tick size from calculated price precision
-    # This re-uses get_price_precision, which has its own logging for defaults.
-    price_prec_places = get_price_precision(market_info, logger) # This call might log a warning if it defaults
-    fallback_tick_size = Decimal('1e-' + str(price_prec_places))
-    logger.warning(
-        f"Could not determine specific min_tick_size for {symbol} from market_info. "
-        f"Using fallback based on derived price precision ({price_prec_places} places): {fallback_tick_size}"
-    )
-    return fallback_tick_size
-
-def format_signal(signal_payload: Any, *, success: bool = True, detail: Optional[str] = None) -> str:
-    """
-    Formats a trading signal or related message for display, potentially with color.
-    This is a placeholder to resolve the import error and can be customized
-    based on the actual structure and requirements for signal formatting.
-
-    Args:
-        signal_payload: The content of the signal (e.g., "BUY", "SELL", a dictionary).
-        success: If True, formats as a success/neutral message. If False, as an error/warning.
-        detail: Optional additional detail string.
-
-    Returns:
-        A formatted string representation of the signal.
-    """
-    base_color = NEON_GREEN if success else NEON_RED
-    prefix = "Signal" if success else "Signal Alert"
-
-    signal_str = str(signal_payload)
-    # Basic truncation for very long signal payloads to keep logs readable
-    if len(signal_str) > 100:
-        signal_str = signal_str[:97] + "..."
-
-    message = f"{base_color}{prefix}: {signal_str}{RESET_ALL_STYLE}"
-    if detail:
-        message += f" ({base_color}{detail}{RESET_ALL_STYLE})" # Color detail similarly
-
-    return message
 
 # --- End of utils.py ---
