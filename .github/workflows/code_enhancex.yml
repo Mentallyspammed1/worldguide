@@ -71,9 +71,15 @@ jobs:
           FILE_PATTERN: ${{ github.event.inputs.file-pattern }}
         run: |
           ./process_files.py "$(pwd)" "$FILE_PATTERN" > enhancement_log.txt 2>&1 || {
-            cat enhancement_log.txt
+            cat enhancement_log.txt || echo "No log generated"
             exit 1
           }
+
+      - name: Ensure Enhancement Log Exists
+        run: |
+          if [ ! -f enhancement_log.txt ]; then
+            echo "No enhancement log generated, creating empty log" > enhancement_log.txt
+          fi
 
       - name: Create New Branch and Commit Changes
         run: |
@@ -86,15 +92,16 @@ jobs:
             git commit -m "Apply code enhancements to Python files"
           else
             echo "No changes to commit"
-            exit 0
           fi
 
       - name: Push Branch
+        if: success() && steps.create-branch.outputs.changes_made == 'true'
         run: |
           BRANCH_NAME="enhance-$(date +%s)"
           git push origin "$BRANCH_NAME"
 
       - name: Create Pull Request
+        if: success() && steps.create-branch.outputs.changes_made == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
