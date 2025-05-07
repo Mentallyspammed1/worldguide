@@ -86,9 +86,6 @@ def main():
         print_error_message(f"Failed to configure Gemini API: {e}")
         sys.exit(1)
 
-    output_dir = repo_path / "enhanced"
-    output_dir.mkdir(exist_ok=True)
-
     try:
         python_files = glob.glob(file_pattern, root_dir=repo_path, recursive=True)
         print_wizard_message(f"Found {len(python_files)} files matching pattern.", Fore.CYAN)
@@ -98,8 +95,6 @@ def main():
 
     if not python_files:
         print_wizard_message("No files found to enhance.", Fore.YELLOW)
-        with open(output_dir / "no_files.txt", "w") as f:
-            f.write("No files matched the pattern.")
         sys.exit(0)
 
     calls_made = 0
@@ -118,11 +113,9 @@ def main():
         )
 
         if enhanced_code and enhanced_code != content:
-            output_path = output_dir / file_path
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, "w", encoding="utf-8") as f:
+            with open(abs_file_path, "w", encoding="utf-8") as f:
                 f.write(enhanced_code)
-            print_wizard_message(f"Enhanced {file_path} saved to {output_path}", Fore.GREEN)
+            print_wizard_message(f"Enhanced {file_path}", Fore.GREEN)
             print_wizard_message(f"Explanation: {explanation}", Fore.CYAN)
         else:
             print_wizard_message(f"No enhancements needed for {file_path}", Fore.YELLOW)
