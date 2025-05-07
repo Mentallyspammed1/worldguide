@@ -130,10 +130,29 @@ jobs:
           git commit -m "Apply code enhancements to Python files"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
+      - name: Check for Existing Branch
+        if: steps.check-changes.outputs.changes_detected == 'true'
+        id: check-branch
+        run: |
+          BRANCH_NAME="${{ steps.commit-changes.outputs.branch_name }}"
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "Branch $BRANCH_NAME already exists on remote"
+            echo "branch_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Branch $BRANCH_NAME does not exist on remote"
+            echo "branch_exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Push Branch
         if: steps.check-changes.outputs.changes_detected == 'true'
         run: |
-          git push origin ${{ steps.commit-changes.outputs.branch_name }}
+          BRANCH_NAME="${{ steps.commit-changes.outputs.branch_name }}"
+          echo "Pushing branch $BRANCH_NAME to origin"
+          git push origin "$BRANCH_NAME"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push branch $BRANCH_NAME"
+            exit 1
+          fi
 
       - name: Create Pull Request
         if: steps.check-changes.outputs.changes_detected == 'true'
