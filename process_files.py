@@ -3,32 +3,53 @@ import os
 import sys
 import time
 import glob
+import logging
+import re
+from datetime import datetime
+from typing import Tuple, Optional, List
+from pathlib import Path
 import google.generativeai as genai
 from colorama import init, Fore, Style
-from pathlib import Path
 
 init(autoreset=True)
 
-def print_wizard_message(message, color=Fore.CYAN):
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("enhancement_log.txt", mode="w", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+logger = logging.getLogger(__name__)
+
+def print_wizard_message(message: str, color: str = Fore.CYAN) -> None:
+    """Print a styled message to console."""
+    logger.info(f"✨ Pyrmethus whispers: {message}")
     print(color + Style.BRIGHT + "✨ Pyrmethus whispers: " + Style.RESET_ALL + color + message)
 
-def print_error_message(message):
+def print_error_message(message: str) -> None:
+    """Print an error message to console and log."""
+    logger.error(f"❌ Arcane Anomaly: {message}")
     print(Fore.RED + Style.BRIGHT + "❌ Arcane Anomaly: " + Style.RESET_ALL + Fore.RED + message)
 
-def enhance_code_with_gemini(file_path, content, model, max_api_calls, calls_made):
-    """Enhance a single file's content using Gemini API with rate limiting."""
+def enhance_code_with_gemini(
+    file_path: str, content: str, model: genai.GenerativeModel, max_api_calls: int, calls_made: int
+) -> Tuple[str, str, int]:
+    """Enhance a single Python file's content using Gemini API with rate limiting."""
     if calls_made >= max_api_calls:
         print_wizard_message(f"Rate limit of {max_api_calls} calls/min reached. Pausing...", Fore.YELLOW)
         time.sleep(60 - (time.time() % 60))
         calls_made = 0
 
     prompt = f"""
-    You are an expert code enhancer, Pyrmethus's familiar. Analyze the following Python code and suggest improvements such as:
+    You are an expert Python code enhancer, Pyrmethus's familiar. Analyze the following Python code and suggest improvements such as:
     - Adding docstrings and type hints
     - Optimizing performance
     - Improving readability
     - Fixing potential bugs
-    Provide the enhanced code in a code block (```python\n...\n```) and a brief explanation of changes.
+    Provide the enhanced code in a code block (```python\n...\n```) and a brief explanation of changes after the code block.
 
     File: {file_path}
     ```python
@@ -39,21 +60,35 @@ def enhance_code_with_gemini(file_path, content, model, max_api_calls, calls_mad
     try:
         response = model.generate_content(prompt)
         response_text = response.text.strip()
-        enhanced_code = ""
-        explanation = ""
-        if response_text.startswith("```python"):
-            parts = response_text.split("```python\n", 1)[1].split("```\n", 1)
-            enhanced_code = parts[0]
-            explanation = parts[1].strip() if len(parts) > 1 else "No explanation provided."
+        
+        # Robust parsing for code block
+        code_pattern = r"```python\n([\s\S]*?)\n```"
+        match = re.search(code_pattern, response_text)
+        enhanced_code = content
+        explanation = "No explanation provided."
+        
+        if match:
+            enhanced_code = match.group(1)
+            explanation_start = match.end()
+            explanation = response_text[explanation_start:].strip() or "No explanation provided."
         else:
             explanation = response_text
+
+        logger.info(f"Enhanced {file_path}\nExplanation: {explanation}")
         return enhanced_code, explanation, calls_made + 1
     except Exception as e:
-        print_error_message(f"Failed to enhance {file_path}: {e}")
-        return content, f"Error: {e}", calls_made + 1
+        import traceback
+        error_message = f"Failed to enhance {file_path}: {str(e)}\n{traceback.format_exc()}"
+        print_error_message(error_message)
+        logger.error(error_message)
+        return content, f"Error: {str(e)}", calls_made + 1
 
-def main():
-    print_wizard_message("Starting Code Enhancement Spell...", Fore.MAGENTA)
+def main() -> None:
+    """Main function to enhance Python (.py) files."""
+    # Ensure log file is created at startup
+    logger.info("Initializing enhancement log")
+    
+    print_wizard_message("Starting Code Enhancement Spell for Python Files...", Fore.MAGENTA)
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print_error_message(f"Usage: {sys.argv[0]} <repository_path> [file_pattern]")
         sys.exit(2)
@@ -61,8 +96,14 @@ def main():
     repo_path = Path(sys.argv[1])
     file_pattern = sys.argv[2] if len(sys.argv) == 3 else os.getenv("FILE_PATTERN", "**/*.py")
     
+    if not file_pattern.endswith(".py"):
+        print_error_message("File pattern must target .py files (e.g., '*.py', 'src/*.py')")
+        sys.exit(1)
+
     print_wizard_message(f"Repository path: {repo_path}", Fore.CYAN)
     print_wizard_message(f"File pattern: {file_pattern}", Fore.CYAN)
+    logger.info(f"Repository path: {repo_path}")
+    logger.info(f"File pattern: {file_pattern}")
 
     if not repo_path.is_dir():
         print_error_message(f"Invalid repository path: {repo_path}")
@@ -82,19 +123,24 @@ def main():
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-1.5-flash-latest")
         print_wizard_message("Gemini Oracle configured successfully.", Fore.GREEN)
+        logger.info("Gemini Oracle configured successfully.")
     except Exception as e:
         print_error_message(f"Failed to configure Gemini API: {e}")
         sys.exit(1)
 
     try:
         python_files = glob.glob(file_pattern, root_dir=repo_path, recursive=True)
-        print_wizard_message(f"Found {len(python_files)} files matching pattern.", Fore.CYAN)
+        print_wizard_message(f"Found {len(python_files)} Python files matching pattern.", Fore.CYAN)
+        logger.info(f"Found {len(python_files)} Python files matching pattern.")
     except Exception as e:
-        print_error_message(f"Failed to find files with pattern {file_pattern}: {e}")
+        print_error_message(f"Failed to find Python files with pattern {file_pattern}: {e}")
         sys.exit(1)
 
     if not python_files:
-        print_wizard_message("No files found to enhance.", Fore.YELLOW)
+        print_wizard_message("No Python files found to enhance.", Fore.YELLOW)
+        logger.warning("No Python files found to enhance.")
+        with open("enhancement_log.txt", "a", encoding="utf-8") as f:
+            f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f')[:-3]} [WARNING] No Python files found to enhance.\n")
         sys.exit(0)
 
     calls_made = 0
@@ -106,6 +152,7 @@ def main():
                 content = f.read()
         except Exception as e:
             print_error_message(f"Failed to read {file_path}: {e}")
+            logger.error(f"Failed to read {file_path}: {e}")
             continue
 
         enhanced_code, explanation, calls_made = enhance_code_with_gemini(
@@ -116,16 +163,21 @@ def main():
             with open(abs_file_path, "w", encoding="utf-8") as f:
                 f.write(enhanced_code)
             print_wizard_message(f"Enhanced {file_path}", Fore.GREEN)
-            print_wizard_message(f"Explanation: {explanation}", Fore.CYAN)
+            logger.info(f"Enhanced {file_path}")
         else:
             print_wizard_message(f"No enhancements needed for {file_path}", Fore.YELLOW)
+            logger.info(f"No enhancements needed for {file_path}")
 
     elapsed = time.time() - start_time
-    print_wizard_message(f"Enhancement complete. Processed {len(python_files)} files in {elapsed:.2f} seconds.", Fore.MAGENTA)
+    print_wizard_message(f"Enhancement complete. Processed {len(python_files)} Python files in {elapsed:.2f} seconds.", Fore.MAGENTA)
+    logger.info(f"Enhancement complete. Processed {len(python_files)} Python files in {elapsed:.2f} seconds.")
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print_error_message(f"Unexpected error: {e}")
+        import traceback
+        error_message = f"Unexpected error: {str(e)}\n{traceback.format_exc()}"
+        print_error_message(error_message)
+        logger.error(error_message)
         sys.exit(1)
