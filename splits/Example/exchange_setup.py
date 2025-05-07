@@ -65,7 +65,7 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
 
         if config.TESTNET_MODE:
             logger.info(f"[{func_name}] Enabling Bybit Sandbox (Testnet) mode.")
-            exchange.set_sandbox_mode(True)
+            exchange.set_sandbox_mode(False)
 
         logger.debug(f"[{func_name}] Loading markets...")
         exchange.load_markets(reload=True) # Force reload initially

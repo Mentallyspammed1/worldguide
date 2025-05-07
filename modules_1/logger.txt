@@ -1,0 +1,409 @@
+# File: logger_setup.py
+"""
+Configures the application's logging system.
+
+Sets up handlers for console (stdout/stderr) and rotating files,
+using a custom formatter for timezone-aware timestamps and sensitive data masking.
+"""
+
+import logging
+import os
+import sys
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
+import pytz  # Using pytz for robust timezone handling
+
+# Import utility functions and classes
+# Assumes utils.py provides:
+# - LOG_DIRECTORY: Path to the directory where log files should be stored.
+# - SensitiveFormatter: A logging.Formatter subclass that masks sensitive data.
+# - get_timezone(): A function that returns a timezone object (e.g., from pytz).
+try:
+    from utils import LOG_DIRECTORY, SensitiveFormatter, get_timezone
+except ImportError:
+    print("ERROR: Failed to import required components from 'utils'. Ensure 'utils.py' exists and contains "
+          "LOG_DIRECTORY, SensitiveFormatter, and get_timezone.", file=sys.stderr)
+    # Define fallbacks to allow basic script execution, though logging will be limited/incorrect
+    LOG_DIRECTORY = os.path.join(os.getcwd(), 'logs')
+    get_timezone = lambda: pytz.utc # Default to UTC if utils unavailable
+    # Define a basic SensitiveFormatter if not available
+    try:
+        # Check if SensitiveFormatter was already defined or imported
+        SensitiveFormatter
+    except NameError:
+        class SensitiveFormatter(logging.Formatter):
+            """Basic fallback formatter if SensitiveFormatter cannot be imported."""
+            def format(self, record):
+                # Basic formatting without sensitive data handling
+                return super().format(record)
+        print("Warning: Using fallback basic Formatter instead of SensitiveFormatter.", file=sys.stderr)
+
+# --- Custom Formatter to Handle Timezone ---
+class TimezoneAwareFormatter(SensitiveFormatter):
+    """
+    A logging formatter that includes timezone information in timestamps.
+
+    This formatter uses a specified timezone object to convert log record
+    creation times (which are UTC timestamps) into localized datetime objects
+    before formatting. It avoids modifying the global `logging.Formatter.converter`
+    state. It also inherits sensitive data masking capabilities from
+    `SensitiveFormatter`.
+    """
+    def __init__(self, fmt: str = None, datefmt: str = None, style: str = '%', timezone=None):
+        """
+        Initializes the formatter.
+
+        Args:
+            fmt (str, optional): The main log format string. Defaults to None.
+            datefmt (str, optional): The format string for timestamps. Defaults to None.
+            style (str, optional): The formatting style ('%', '{', '$'). Defaults to '%'.
+            timezone (datetime.tzinfo, optional): The timezone object (e.g., from pytz)
+                to use for timestamp conversion. If None, defaults to the timezone
+                returned by `utils.get_timezone()`.
+        """
+        super().__init__(fmt, datefmt, style)
+        # Ensure a valid timezone object is set
+        try:
+            self.timezone = timezone or get_timezone()
+            if not isinstance(self.timezone, datetime.tzinfo):
+                 raise TypeError("Timezone must be a datetime.tzinfo subclass instance.")
+        except Exception as e:
+            print(f"Warning: Error obtaining/validating timezone: {e}. Defaulting to UTC.", file=sys.stderr)
+            self.timezone = pytz.utc # Fallback timezone
+
+    def formatTime(self, record: logging.LogRecord, datefmt: str = None) -> str:
+        """
+        Formats the log record's creation time using the configured timezone.
+
+        Overrides the default `formatTime` to ensure timezone localization.
+
+        Args:
+            record (logging.LogRecord): The log record to format.
+            datefmt (str, optional): A specific date format string to use. If None,
+                the `datefmt` specified during formatter initialization is used.
+
+        Returns:
+            str: The formatted timestamp string, including timezone information
+                 if specified in the `datefmt`.
+        """
+        # record.created is a Unix timestamp (seconds since epoch, UTC)
+        # Convert the UTC timestamp to a naive datetime object
+        dt_utc_naive = datetime.utcfromtimestamp(record.created)
+        # Make the naive UTC datetime timezone-aware using pytz.utc
+        dt_utc_aware = pytz.utc.localize(dt_utc_naive)
+        # Convert the UTC-aware datetime to the target timezone
+        dt_local_aware = dt_utc_aware.astimezone(self.timezone)
+
+        # Use the effective date format string
+        effective_datefmt = datefmt or self.datefmt
+
+        if effective_datefmt:
+            # Format using the specified date format string.
+            # strftime works correctly with timezone-aware datetime objects for %Z/%z.
+            s = dt_local_aware.strftime(effective_datefmt)
+        else:
+            # Default format if no datefmt is provided (consistent with logging default)
+            # Includes milliseconds and timezone offset.
+            s = dt_local_aware.strftime('%Y-%m-%d %H:%M:%S')
+            # Append milliseconds (manually formatted from microseconds)
+            ms = int(dt_local_aware.microsecond / 1000)
+            s = f"{s},{ms:03d}"
+            # Append timezone offset (e.g., +0100, -0500)
+            s = f"{s} {dt_local_aware.strftime('%z')}"
+
+        return s
+
+
+# --- Global Logging Configuration Function ---
+_logging_configured = False # Module-level flag to prevent reconfiguration
+
+def configure_logging(config: dict):
+    """
+    Configures the root logger based on application configuration.
+
+    Sets up console (stdout for INFO+, stderr for WARNING+) and rotating file
+    handlers (DEBUG+). Uses TimezoneAwareFormatter for all handlers.
+    Clears existing handlers on the root logger before applying new configuration.
+
+    Args:
+        config (dict): A dictionary containing logging configuration, expected
+                       to have keys like 'log_level' (e.g., "INFO", "DEBUG").
+    """
+    global _logging_configured
+    if _logging_configured:
+        logging.getLogger(__name__).warning("Logging already configured. Skipping reconfiguration.")
+        return
+
+    # Get desired log level from config, default to INFO
+    log_level_str = config.get("log_level", "INFO").upper()
+    log_level = getattr(logging, log_level_str, logging.INFO)
+
+    # Get the configured timezone object
+    try:
+        tz = get_timezone()
+        if not isinstance(tz, datetime.tzinfo):
+            raise TypeError("get_timezone() must return a datetime.tzinfo subclass instance.")
+    except Exception as e:
+        print(f"CRITICAL: Failed to get a valid timezone: {e}. Using UTC as fallback.", file=sys.stderr)
+        tz = pytz.utc
+
+    # Get the root logger
+    root_logger = logging.getLogger()
+    # Set root logger level to lowest possible (DEBUG) to capture all messages.
+    # Handlers will filter based on their own levels.
+    root_logger.setLevel(logging.DEBUG)
+
+    # Clear existing handlers from root logger to prevent duplicates if this
+    # function is called multiple times or if default handlers exist.
+    if root_logger.hasHandlers():
+        print("Clearing existing root logger handlers...", file=sys.stderr)
+        for handler in root_logger.handlers[:]: # Iterate over a copy
+            try:
+                handler.close()
+                root_logger.removeHandler(handler)
+            except Exception as e:
+                 # Use basic logging config temporarily if available, else print
+                 logging.warning(f"Error removing/closing existing handler {handler}: {e}", exc_info=True)
+                 print(f"Warning: Error removing/closing existing handler {handler}: {e}", file=sys.stderr)
+
+
+    # Ensure log directory exists
+    try:
+        os.makedirs(LOG_DIRECTORY, exist_ok=True)
+    except OSError as e:
+        print(f"CRITICAL: Could not create log directory '{LOG_DIRECTORY}': {e}. File logging disabled.", file=sys.stderr)
+        # Proceed without file logging if directory creation fails
+
+    # --- Console Handler (stdout) ---
+    # Logs messages at the configured level (e.g., INFO) or higher to standard output.
+    try:
+        console_handler_stdout = logging.StreamHandler(sys.stdout)
+        # Format includes level, logger name, message, and timestamp with TZ name.
+        stdout_formatter = TimezoneAwareFormatter(
+            fmt="%(asctime)s - %(levelname)-8s - [%(name)s] - %(message)s",
+            datefmt='%Y-%m-%d %H:%M:%S %Z', # Include Timezone Name/Abbreviation
+            timezone=tz
+        )
+        console_handler_stdout.setFormatter(stdout_formatter)
+        console_handler_stdout.setLevel(log_level) # Set console level from config
+        # Add a filter to prevent messages below the configured level from reaching stdout
+        # (even though root is DEBUG, this handler only shows log_level+)
+        # Note: setLevel already does this filtering, but an explicit filter can be clearer
+        # class LevelFilter:
+        #     def __init__(self, level): self.level = level
+        #     def filter(self, record): return record.levelno >= self.level
+        # console_handler_stdout.addFilter(LevelFilter(log_level))
+        root_logger.addHandler(console_handler_stdout)
+    except Exception as e:
+        print(f"CRITICAL: Failed to set up stdout console handler: {e}", file=sys.stderr)
+
+
+    # --- Console Handler (stderr) ---
+    # Logs WARNING level and above to standard error for high visibility.
+    try:
+        console_handler_stderr = logging.StreamHandler(sys.stderr)
+        # Use the same formatter settings as stdout for consistency
+        stderr_formatter = TimezoneAwareFormatter(
+            fmt="%(asctime)s - %(levelname)-8s - [%(name)s] - %(message)s",
+            datefmt='%Y-%m-%d %H:%M:%S %Z', # Include Timezone Name/Abbreviation
+            timezone=tz
+        )
+        console_handler_stderr.setFormatter(stderr_formatter)
+        console_handler_stderr.setLevel(logging.WARNING) # Only show warnings/errors/critical on stderr
+        root_logger.addHandler(console_handler_stderr)
+    except Exception as e:
+        print(f"CRITICAL: Failed to set up stderr console handler: {e}", file=sys.stderr)
+
+
+    # --- Main Rotating File Handler ---
+    # Logs DEBUG level and above to a rotating log file.
+    main_log_filename = os.path.join(LOG_DIRECTORY, "app.log") # More generic name perhaps?
+    try:
+        # Check if directory exists before attempting to create handler
+        if os.path.isdir(LOG_DIRECTORY):
+            file_handler = RotatingFileHandler(
+                main_log_filename,
+                maxBytes=10 * 1024 * 1024, # 10 MB
+                backupCount=5,
+                encoding='utf-8',
+                delay=True # Defer file opening until first log message
+            )
+            # Format includes timestamp with ms, level, logger name, line number, message.
+            file_formatter = TimezoneAwareFormatter(
+                fmt="%(asctime)s - %(levelname)-8s - [%(name)s:%(lineno)d] - %(message)s",
+                datefmt='%Y-%m-%d %H:%M:%S,%f', # Include milliseconds
+                timezone=tz
+            )
+            file_handler.setFormatter(file_formatter)
+            file_handler.setLevel(logging.DEBUG) # Log everything (DEBUG and above) to file
+            root_logger.addHandler(file_handler)
+        else:
+             # Log this warning via already configured console handlers (if any)
+             logging.warning(f"Log directory '{LOG_DIRECTORY}' does not exist. Skipping file logging.")
+
+    except Exception as e:
+        # Log this critical error using already configured console handlers (if any)
+        logging.critical(f"Failed to set up main file logger {main_log_filename}: {e}", exc_info=True)
+        print(f"CRITICAL ERROR: Could not set up main file logger {main_log_filename}: {e}", file=sys.stderr)
+
+
+    # --- Optional: Configure levels for chatty third-party libraries ---
+    # Helps reduce log noise from libraries unless debugging them specifically.
+    # These could also be driven by the 'config' dictionary for flexibility.
+    # Example: Read from config['library_log_levels'] = {'ccxt': 'WARNING', 'urllib3': 'INFO'}
+    library_log_levels = config.get('library_log_levels', {})
+    for lib_name, level_str in library_log_levels.items():
+        lib_level = getattr(logging, level_str.upper(), None)
+        if lib_level:
+            logging.getLogger(lib_name).setLevel(lib_level)
+            logging.info(f"Set log level for library '{lib_name}' to {level_str.upper()}")
+        else:
+            logging.warning(f"Invalid log level '{level_str}' specified for library '{lib_name}'")
+
+    # Example default suppressions (if not configured via dict):
+    if not library_log_levels:
+         logging.getLogger('urllib3').setLevel(logging.WARNING)
+         # logging.getLogger('asyncio').setLevel(logging.INFO) # Be cautious with asyncio level
+         # logging.getLogger('ccxt').setLevel(logging.INFO) # Adjust based on needs
+
+
+    # Log that configuration is complete using a distinct logger name
+    init_logger = logging.getLogger("App.Initialization") # Use a hierarchical name
+    init_logger.info(f"Logging configured successfully. Root level: DEBUG, Console level: {logging.getLevelName(log_level)}")
+
+    _logging_configured = True # Set flag to indicate successful configuration
+
+
+# --- Optional: Function for Symbol-Specific File Logging ---
+# (Keep commented out unless explicitly needed, as it adds complexity)
+# def setup_symbol_file_logger(symbol_name: str, config: dict):
+#     """
+#     Sets up a dedicated rotating file handler for a specific symbol logger.
+#
+#     Logs from this specific logger (e.g., logging.getLogger(f"App.Symbol.{symbol_name}"))
+#     will go to its own file (`logs/App.Symbol.{safe_symbol_name}.log`) in addition
+#     to the main log file and console if propagation is enabled (default).
+#
+#     Args:
+#         symbol_name (str): The symbol name (e.g., "BTC/USDT").
+#         config (dict): The application configuration dictionary (unused here, but
+#                        could be used for symbol-specific log levels).
+#     """
+#     # Sanitize symbol name for use in filename and logger name
+#     safe_symbol_name = symbol_name.replace('/', '_').replace(':', '-')
+#     logger_name = f"App.Symbol.{safe_symbol_name}" # Hierarchical logger name
+#     log_filename = os.path.join(LOG_DIRECTORY, f"{logger_name}.log")
+#
+#     symbol_logger = logging.getLogger(logger_name)
+#
+#     # Set level for this specific logger if needed (e.g., from config)
+#     # If not set, it inherits the level from its parent (ultimately the root logger)
+#     # symbol_logger.setLevel(logging.DEBUG) # Example: Ensure it captures DEBUG
+#
+#     # Check if a file handler for this specific path already exists for this logger
+#     handler_exists = any(
+#         isinstance(h, RotatingFileHandler) and getattr(h, 'baseFilename', None) == os.path.abspath(log_filename)
+#         for h in symbol_logger.handlers
+#     )
+#
+#     if not handler_exists:
+#         try:
+#             # Ensure log directory exists (might be redundant if configure_logging ran)
+#             os.makedirs(LOG_DIRECTORY, exist_ok=True)
+#
+#             # Create the rotating file handler for the symbol
+#             symbol_file_handler = RotatingFileHandler(
+#                 log_filename,
+#                 maxBytes=5 * 1024 * 1024, # Smaller size for symbol logs? (e.g., 5MB)
+#                 backupCount=3,
+#                 encoding='utf-8',
+#                 delay=True
+#             )
+#
+#             # Use the same timezone-aware formatter (or a specific one if needed)
+#             tz = get_timezone() # Get current timezone setting
+#             file_formatter = TimezoneAwareFormatter(
+#                 fmt="%(asctime)s - %(levelname)-8s - [%(name)s:%(lineno)d] - %(message)s",
+#                 datefmt='%Y-%m-%d %H:%M:%S,%f', # Include milliseconds
+#                 timezone=tz
+#             )
+#             symbol_file_handler.setFormatter(file_formatter)
+#             symbol_file_handler.setLevel(logging.DEBUG) # Capture all levels in this file
+#
+#             symbol_logger.addHandler(symbol_file_handler)
+#             symbol_logger.info(f"Symbol-specific file logging enabled: {log_filename}")
+#
+#         except Exception as e:
+#             # Log error using the logger itself (will go to root handlers)
+#             symbol_logger.error(f"Failed to set up symbol file logger '{log_filename}': {e}", exc_info=True)
+#             # Also print to stderr as a fallback during setup issues
+#             print(f"ERROR: Failed to set up symbol file logger for {symbol_name}: {e}", file=sys.stderr)
+#
+#     # Control propagation:
+#     # - symbol_logger.propagate = True (Default): Messages go to this file AND root handlers (main file, console).
+#     # - symbol_logger.propagate = False: Messages ONLY go to this symbol-specific file.
+#     # Decide based on whether you want symbol logs duplicated in the main log.
+#     # Keeping propagate=True is often simpler.
+#     # symbol_logger.propagate = False
+
+
+# --- Usage Example (in your main script) ---
+# import logging
+# from logger_setup import configure_logging
+# # from logger_setup import setup_symbol_file_logger # Uncomment if using symbol files
+# from utils import load_config # Assume you have a function to load config
+#
+# if __name__ == "__main__":
+#     CONFIG = load_config()
+#     configure_logging(CONFIG)
+#
+#     # Get loggers using hierarchical names
+#     main_logger = logging.getLogger("App.Main")
+#     trade_logger = logging.getLogger("App.Trading")
+#     symbol_logger_btc = logging.getLogger("App.Symbol.BTC_USDT") # Example symbol logger name
+#
+#     main_logger.info("Application starting...")
+#     trade_logger.warning("This is a trade warning.")
+#     symbol_logger_btc.debug("Debug message specific to BTC/USDT.")
+#     main_logger.error("An error occurred.", exc_info=True) # Include stack trace
+#
+#     # If using symbol-specific files:
+#     # setup_symbol_file_logger("BTC/USDT", CONFIG)
+#     # symbol_logger_btc.info("This should go to the BTC_USDT specific log file (and possibly others).")
+#
+#     main_logger.info("Application finished.")
+```
+
+**Key Enhancements and Changes:**
+
+1.  **Module Docstring:** Added a docstring explaining the file's purpose.
+2.  **Robust Imports:** Added a `try...except ImportError` block around the `utils` import with basic fallbacks and error messages, making the module slightly more resilient or informative if `utils.py` is missing/broken.
+3.  **`TimezoneAwareFormatter` Improvements:**
+    *   Added a detailed docstring explaining purpose and parameters.
+    *   Added basic validation for the `timezone` object during initialization with a fallback to UTC.
+    *   Refined the `formatTime` method:
+        *   Clearer conversion steps using `pytz.utc.localize` and `astimezone`.
+        *   Improved default formatting logic when `datefmt` is not provided (now includes timezone offset `%z`).
+        *   Added type hints (`record: logging.LogRecord`, `datefmt: str`, return type `str`).
+4.  **`configure_logging` Improvements:**
+    *   **Reconfiguration Prevention:** Added a module-level flag (`_logging_configured`) to prevent the function from running multiple times and duplicating handlers unintentionally.
+    *   **Clearer Docstring:** Improved the docstring explaining parameters, actions, and handler setup. Added type hint `config: dict`.
+    *   **Root Logger Level:** Explicitly set to `DEBUG` with a comment explaining why (capture everything, filter at handler level).
+    *   **Handler Clearing:** Improved the error message when clearing handlers fails, using `logging.warning` if possible and including `exc_info=True`. Iterates over a copy (`handlers[:]`) which is safer if removing items. Added `root_logger.hasHandlers()` check.
+    *   **Directory Creation:** Added check *after* `makedirs` to handle potential race conditions or permission errors gracefully, logging a warning if the directory still doesn't exist before attempting file handler setup.
+    *   **Handler Setup Error Handling:** Wrapped each handler setup (`stdout`, `stderr`, `file`) in its own `try...except` block to make setup more robust. If one handler fails (e.g., file permissions), others can still be configured. Critical errors are logged and printed to `stderr`.
+    *   **File Handler:** Uses `delay=True` in `RotatingFileHandler` to defer file opening until the first message, which can prevent issues with log rotation in multi-process scenarios or if the directory isn't immediately writable. Changed default filename to `app.log` (more generic).
+    *   **Stderr Handler:** Simplified logic – removed the check for existing stderr handlers, relying on the initial clearing step to prevent duplicates. Always adds a `WARNING` level handler for stderr.
+    *   **Library Log Levels:** Made the configuration of third-party library log levels more explicit and suggested driving it from the `config` dictionary for better flexibility. Added logging messages indicating which levels were set.
+    *   **Completion Log:** Uses a more descriptive, hierarchical logger name (`App.Initialization`). Message clarifies the configured console level.
+5.  **Symbol-Specific Logger Function (Commented):**
+    *   Improved docstring.
+    *   Added `try...except` block around file handler creation within the function.
+    *   Uses hierarchical logger names (e.g., `App.Symbol.BTC_USDT`).
+    *   Sanitizes symbol name more robustly for filenames/logger names.
+    *   Added `exc_info=True` to the error log.
+    *   Clarified the `propagate` setting explanation.
+6.  **Usage Example:** Added a basic `if __name__ == "__main__":` block demonstrating how to use `configure_logging` and obtain loggers with hierarchical names.
+7.  **Readability:** Used f-strings consistently, added type hints, and improved comments.
+
+This enhanced version is more robust, configurable, and provides better feedback during setup and in case of errors. Remember to ensure your `utils.py` file correctly provides the necessary `LOG_DIRECTORY`, `SensitiveFormatter`, and `get_timezone` components.

@@ -2,362 +2,521 @@
 # -*- coding: utf-8 -*-
 
 """
-Functions for Configuring Bybit Account Settings (Leverage, Margin, Position Mode)
+Functions for Configuring Bybit Account Settings (Leverage, Margin, Position Mode).
+
+This module provides functions to interact with the Bybit V5 API (via ccxt)
+to configure critical account and position settings like leverage,
+margin mode (isolated/cross), and position mode (one-way/hedge).
+It includes error handling, specific Bybit API code interpretation,
+and leverages a retry mechanism for API calls.
 """
 
 import logging
 import sys
 from decimal import Decimal
-from typing import Optional, Literal
+from typing import Optional, Literal, Dict, Any
 
+# Standard Library Imports
+# (None needed beyond core types used in typing)
+
+# Third-Party Imports
 try:
     import ccxt
+    from ccxt.base.errors import (
+        ExchangeError, NetworkError, AuthenticationError, BadSymbol,
+        InvalidOrder, OrderNotFound # Import more specific errors if needed
+    )
 except ImportError:
-    print("Error: CCXT library not found. Please install it: pip install ccxt")
+    print("ERROR: CCXT library not found. Please install it: pip install ccxt")
     sys.exit(1)
+
 try:
     from colorama import Fore, Style, Back
+    COLORAMA_AVAILABLE = True
 except ImportError:
-    print("Warning: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print("WARNING: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    COLORAMA_AVAILABLE = False
+    # Define a dummy class to avoid errors if colorama is not installed
     class DummyColor:
-        def __getattr__(self, name: str) -> str: return ""
-    Fore = Style = Back = DummyColor()
+        """Acts as a no-op placeholder if colorama is not installed."""
+        def __getattr__(self, name: str) -> str:
+            """Return empty string for any color attribute."""
+            return ""
+    Fore = Style = Back = DummyColor() # type: ignore
 
-from config import Config
+# Local Application/Library Specific Imports
+from config import Config  # Assuming Config is a Pydantic model or dataclass
 from utils import retry_api_call, _get_v5_category, safe_decimal_conversion, send_sms_alert
 
-logger = logging.getLogger(__name__)
+# --- Constants ---
+logger = logging.getLogger(__name__) # Best practice: get logger at module level
 
+# Bybit V5 API Response Codes (Informational)
+# See: https://bybit-exchange.github.io/docs/v5/error_code
+BYBIT_RET_CODE_OK = 0
+# Leverage Specific
+BYBIT_ERR_LEVERAGE_NOT_MODIFIED = 110044
+# Position Mode Specific
+BYBIT_ERR_POS_MODE_NOT_MODIFIED = 110021
+BYBIT_ERR_POS_MODE_HAS_POS_ORDER = 110020
+# Margin Mode Specific
+BYBIT_ERR_MARGIN_MODE_NOT_MODIFIED = 110026
+BYBIT_ERR_MARGIN_MODE_HAS_POS_ORDER = 110020 # Same code as position mode switch
 
-# Snippet 2 / Function 2: Set Leverage
+# Bybit V5 API Parameter Values
+BYBIT_POS_MODE_ONE_WAY = '0' # Merged Single Position Mode
+BYBIT_POS_MODE_HEDGE = '3'   # Both Sides Position Mode (Hedge Mode)
+BYBIT_TRADE_MODE_CROSS = 0   # Cross Margin (Default for category-level setting)
+BYBIT_TRADE_MODE_ISOLATED = 1 # Isolated Margin (Used in switch_isolated endpoint)
+
+# --- Helper Functions ---
+
+def _log_prefix(func_name: str) -> str:
+    """Generates a standardized log prefix."""
+    return f"[{func_name}]"
+
+# --- Core Configuration Functions ---
+
 @retry_api_call(max_retries=3, initial_delay=1.0)
 def set_leverage(exchange: ccxt.bybit, symbol: str, leverage: int, config: Config) -> bool:
     """
     Sets the leverage for a specific symbol on Bybit V5 (Linear/Inverse).
 
-    Validates the requested leverage against the market's limits. Handles the
-    'leverage not modified' case gracefully. Applies to both buy and sell leverage.
+    Validates the requested leverage against the market's limits and handles the
+    'leverage not modified' case gracefully. Applies to both buy and sell leverage
+    simultaneously.
 
     Args:
         exchange: The initialized ccxt.bybit exchange instance.
         symbol: The market symbol (e.g., 'BTC/USDT:USDT').
-        leverage: The desired integer leverage level.
-        config: The configuration object.
+        leverage: The desired integer leverage level (must be positive).
+        config: The application configuration object.
 
     Returns:
-        True if leverage was set successfully or already set to the desired value, False otherwise.
+        True if leverage was set successfully or already set to the desired value.
+        False if validation failed, or an unexpected non-retryable error occurred.
 
     Raises:
-        Reraises CCXT exceptions for the retry decorator. ValueError for invalid leverage input.
+        ccxt.NetworkError: If a network issue occurs (for retry decorator).
+        ccxt.AuthenticationError: If authentication fails (for retry decorator).
+        ccxt.ExchangeError: For other API errors not handled internally (for retry decorator).
+        ValueError: If leverage is not positive.
     """
     func_name = "set_leverage"
-    logger.info(f"{Fore.CYAN}[{func_name}] Setting leverage to {leverage}x for {symbol}...{Style.RESET_ALL}")
+    log_prefix = _log_prefix(func_name)
+    logger.info(f"{Fore.CYAN}{log_prefix} Attempting to set leverage to {leverage}x for {symbol}...{Style.RESET_ALL}")
 
-    if leverage <= 0:
-        logger.error(f"{Fore.RED}[{func_name}] Leverage must be positive. Received: {leverage}{Style.RESET_ALL}")
-        return False # Invalid input, don't call API
+    if not isinstance(leverage, int) or leverage <= 0:
+        logger.error(f"{Fore.RED}{log_prefix} Invalid leverage value: {leverage}. Leverage must be a positive integer.{Style.RESET_ALL}")
+        # Raise ValueError for fundamentally incorrect input, distinguishing from API errors.
+        raise ValueError("Leverage must be a positive integer.")
 
     try:
-        market = exchange.market(symbol)
+        # Fetch market data to validate leverage and get category
+        market = exchange.load_markets([symbol])[symbol]
         category = _get_v5_category(market)
+
         if not category or category not in ['linear', 'inverse']:
-            logger.error(f"{Fore.RED}[{func_name}] Invalid market type for leverage setting: {symbol} (Category: {category}).{Style.RESET_ALL}")
+            logger.error(f"{Fore.RED}{log_prefix} Invalid market type for leverage setting: {symbol} (Category: {category}). Only Linear/Inverse supported.{Style.RESET_ALL}")
             return False
 
-        # Validate leverage against market limits from `market['info']`
-        leverage_filter = market.get('info', {}).get('leverageFilter', {})
-        max_leverage_str = leverage_filter.get('maxLeverage')
-        min_leverage_str = leverage_filter.get('minLeverage', '1') # Default min is 1
+        # Validate leverage against market limits (safer access using .get)
+        limits = market.get('limits', {})
+        leverage_limits = limits.get('leverage', {})
+        min_leverage = leverage_limits.get('min', 1.0) # Default min 1x
+        max_leverage = leverage_limits.get('max', 100.0) # Default max 100x if not found
 
-        # Use safe decimal conversion for robustness
-        max_leverage = int(safe_decimal_conversion(max_leverage_str, default=Decimal('100'))) # Assume 100x if parsing fails
-        min_leverage = int(safe_decimal_conversion(min_leverage_str, default=Decimal('1')))   # Assume 1x if parsing fails
-
-        if not (min_leverage <= leverage <= max_leverage):
-            logger.error(f"{Fore.RED}[{func_name}] Invalid leverage requested: {leverage}x. Allowed range for {symbol}: {min_leverage}x - {max_leverage}x.{Style.RESET_ALL}")
+        # Allow floating point comparison initially, then cast if needed
+        if not (min_leverage <= float(leverage) <= max_leverage):
+            logger.error(f"{Fore.RED}{log_prefix} Invalid leverage requested: {leverage}x. Allowed range for {symbol}: {min_leverage}x - {max_leverage}x.{Style.RESET_ALL}")
             return False
 
-        # V5 requires category and string values for buy/sellLeverage
+        # Prepare V5 specific parameters
         params = {
             'category': category,
-            'buyLeverage': str(leverage),
+            'buyLeverage': str(leverage), # API expects string representation
             'sellLeverage': str(leverage)
         }
 
-        logger.debug(f"[{func_name}] Calling exchange.set_leverage with symbol='{symbol}', leverage={leverage}, params={params}")
+        logger.debug(f"{log_prefix} Calling exchange.set_leverage with symbol='{symbol}', leverage={leverage}, params={params}")
         response = exchange.set_leverage(leverage, symbol, params=params)
+        logger.debug(f"{log_prefix} Raw API response: {response}") # Raw response can be large, consider truncating if needed
 
-        logger.debug(f"[{func_name}] Leverage API call response (raw): {response}")
-        # Use logger.info for success
-        logger.info(f"{Fore.GREEN}[{func_name}] Leverage set/confirmed to {leverage}x for {symbol} (Category: {category}).{Style.RESET_ALL}")
+        # Assuming success if no exception is raised by ccxt after the call
+        logger.info(f"{Fore.GREEN}{log_prefix} Leverage set/confirmed to {leverage}x for {symbol} (Category: {category}).{Style.RESET_ALL}")
         return True
 
-    except ccxt.ExchangeError as e:
-        error_str = str(e).lower()
-        # Bybit V5 specific error codes/messages for "already set" or "not modified"
-        # 110044: Leverage not modified
-        # Check for common phrases and the code
-        if "leverage not modified" in error_str or "same as input" in error_str or "110044" in str(e):
-            logger.info(f"{Fore.CYAN}[{func_name}] Leverage for {symbol} is already set to {leverage}x.{Style.RESET_ALL}")
-            return True
+    except ExchangeError as e:
+        error_code_str = str(e) # Check the string representation for codes/messages
+        # Check if the error indicates leverage was already set
+        if f"ret_code={BYBIT_ERR_LEVERAGE_NOT_MODIFIED}" in error_code_str or "leverage not modified" in error_code_str.lower():
+            logger.info(f"{Fore.CYAN}{log_prefix} Leverage for {symbol} is already set to {leverage}x.{Style.RESET_ALL}")
+            return True # Treat as success
         else:
-            logger.error(f"{Fore.RED}[{func_name}] ExchangeError setting leverage for {symbol} to {leverage}x: {e}{Style.RESET_ALL}")
-            raise # Re-raise for retry decorator
+            logger.error(f"{Fore.RED}{log_prefix} ExchangeError setting leverage for {symbol} to {leverage}x: {e}{Style.RESET_ALL}")
+            raise # Re-raise for the retry decorator
 
-    except (ccxt.NetworkError, ccxt.AuthenticationError, ccxt.BadSymbol) as e:
-        logger.error(f"{Fore.RED}[{func_name}] API/Symbol error setting leverage for {symbol}: {e}{Style.RESET_ALL}")
-        raise # Re-raise for retry decorator
+    except (NetworkError, AuthenticationError) as e:
+        # These are typically retryable or indicate configuration issues
+        logger.warning(f"{Fore.YELLOW}{log_prefix} Network/Auth error setting leverage for {symbol}: {e}{Style.RESET_ALL}")
+        raise # Re-raise for the retry decorator
+
+    except BadSymbol as e:
+        logger.error(f"{Fore.RED}{log_prefix} Invalid symbol error setting leverage: {symbol}. Details: {e}{Style.RESET_ALL}")
+        # BadSymbol is usually not retryable with the same input
+        return False
 
     except Exception as e:
-        logger.error(f"{Fore.RED}[{func_name}] Unexpected error setting leverage for {symbol} to {leverage}x: {e}{Style.RESET_ALL}", exc_info=True)
-        send_sms_alert(f"[{symbol.split('/')[0]}] ERROR: Failed set leverage {leverage}x (Unexpected)", config)
+        # Catch unexpected errors
+        logger.error(f"{Fore.RED}{log_prefix} Unexpected error setting leverage for {symbol} to {leverage}x: {e}{Style.RESET_ALL}", exc_info=True)
+        # Consider sending an alert for unexpected issues
+        send_sms_alert(f"[{symbol.split('/')[0]}] ERROR: Failed set leverage {leverage}x (Unexpected: {type(e).__name__})", config)
         return False
 
 
-# Snippet 12 / Function 12: Set Position Mode (One-Way / Hedge)
 @retry_api_call(max_retries=2, initial_delay=1.0)
 def set_position_mode_bybit_v5(exchange: ccxt.bybit, symbol_or_category: str, mode: Literal['one-way', 'hedge'], config: Config) -> bool:
     """
-    Sets the position mode (One-Way or Hedge) for a specific category (Linear/Inverse) on Bybit V5.
-    Uses the `private_post_v5_position_switch_mode` endpoint. Handles specific V5 errors.
-    Note: This affects the entire category (e.g., all linear contracts), not just one symbol.
+    Sets the position mode (One-Way or Hedge) for a Bybit V5 category (Linear/Inverse).
+
+    Uses the `private_post_v5_position_switch_mode` endpoint. This setting applies
+    to the entire category (e.g., all linear contracts) derived from the input.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol_or_category: A market symbol (e.g., 'BTC/USDT:USDT') or category name ('linear', 'inverse').
+        mode: The desired position mode: 'one-way' or 'hedge'.
+        config: The application configuration object.
+
+    Returns:
+        True if the mode was set successfully or already set to the target mode.
+        False if the category is invalid, input mode is wrong, switching failed due to
+              existing positions/orders, or an unexpected non-retryable error occurred.
+
+    Raises:
+        ccxt.NetworkError: If a network issue occurs (for retry decorator).
+        ccxt.AuthenticationError: If authentication fails (for retry decorator).
+        ccxt.ExchangeError: For API errors not handled internally (for retry decorator).
     """
     func_name = "set_position_mode_bybit_v5"
-    logger.info(f"{Fore.CYAN}[{func_name}] Setting position mode to '{mode}' for category derived from '{symbol_or_category}'...{Style.RESET_ALL}")
+    log_prefix = _log_prefix(func_name)
+    mode_str = mode.lower() # Normalize input mode
 
-    # Map user-friendly mode to Bybit API code (0: Merged Single/One-Way, 3: Both Sides/Hedge)
-    mode_map = {'one-way': '0', 'hedge': '3'}
-    target_mode_code = mode_map.get(mode.lower())
+    logger.info(f"{Fore.CYAN}{log_prefix} Attempting to set position mode to '{mode_str}' for category derived from '{symbol_or_category}'...{Style.RESET_ALL}")
+
+    # Map user-friendly mode name to Bybit API code
+    mode_map = {'one-way': BYBIT_POS_MODE_ONE_WAY, 'hedge': BYBIT_POS_MODE_HEDGE}
+    target_mode_code = mode_map.get(mode_str)
 
     if target_mode_code is None:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid mode specified: '{mode}'. Use 'one-way' or 'hedge'.{Style.RESET_ALL}")
+        logger.error(f"{Fore.RED}{log_prefix} Invalid mode specified: '{mode}'. Must be 'one-way' or 'hedge'.{Style.RESET_ALL}")
         return False
 
-    # Determine the target category (linear or inverse)
+    # Determine the target category
     target_category: Optional[Literal['linear', 'inverse']] = None
-    if symbol_or_category.lower() in ['linear', 'inverse']:
-        target_category = symbol_or_category.lower() # type: ignore
+    input_lower = symbol_or_category.lower()
+    if input_lower in ['linear', 'inverse']:
+        target_category = input_lower # type: ignore
     else:
         try:
-            market = exchange.market(symbol_or_category)
-            target_category = _get_v5_category(market)
-            if target_category not in ['linear', 'inverse']:
-                target_category = None # Only applicable to linear/inverse contracts
-        except (ccxt.BadSymbol, Exception):
-            logger.warning(f"[{func_name}] Could not load market for '{symbol_or_category}' to determine category.")
-            target_category = None # Fallback
+            # Attempt to load market to infer category
+            market = exchange.load_markets([symbol_or_category])[symbol_or_category]
+            category = _get_v5_category(market)
+            if category in ['linear', 'inverse']:
+                target_category = category
+        except BadSymbol:
+            logger.warning(f"{Fore.YELLOW}{log_prefix} Input '{symbol_or_category}' is not a valid symbol. Cannot determine category from it.{Style.RESET_ALL}")
+        except Exception as e:
+            # Catch potential errors during market loading besides BadSymbol
+            logger.warning(f"{Fore.YELLOW}{log_prefix} Could not load market for '{symbol_or_category}' to determine category: {e}{Style.RESET_ALL}")
 
     if not target_category:
-        logger.error(f"{Fore.RED}[{func_name}] Could not determine a valid contract category (linear/inverse) from input '{symbol_or_category}'. Cannot set position mode.{Style.RESET_ALL}")
+        logger.error(f"{Fore.RED}{log_prefix} Could not determine a valid contract category (linear/inverse) from input '{symbol_or_category}'. Cannot set position mode.{Style.RESET_ALL}")
         return False
 
-    logger.debug(f"[{func_name}] Target Category: {target_category}, Target Mode Code: {target_mode_code} (representing '{mode}')")
+    logger.debug(f"{log_prefix} Target Category: {target_category}, Target Mode Code: {target_mode_code} (representing '{mode_str}')")
 
     try:
-        # Check if the specific V5 method exists in the CCXT version
-        if not hasattr(exchange, 'private_post_v5_position_switch_mode'):
-            logger.error(f"{Fore.RED}[{func_name}] CCXT version does not support 'private_post_v5_position_switch_mode'. Cannot set position mode via this function.{Style.RESET_ALL}")
+        # Check if the required implicit API method exists in the ccxt instance
+        method_name = 'private_post_v5_position_switch_mode'
+        if not hasattr(exchange, method_name):
+            logger.error(f"{Fore.RED}{log_prefix} CCXT version or exchange instance does not support '{method_name}'. Cannot set position mode.{Style.RESET_ALL}")
+            # This is a setup issue, not retryable.
             return False
 
         # Prepare parameters for the V5 endpoint
         params = {
             'category': target_category,
             'mode': target_mode_code
-            # 'symbol' is NOT used for this endpoint, it applies to the category
+            # 'symbol' is NOT applicable for this endpoint
         }
-        logger.debug(f"[{func_name}] Calling 'private_post_v5_position_switch_mode' with params: {params}")
+        logger.debug(f"{log_prefix} Calling '{method_name}' with params: {params}")
 
-        # Make the API call
-        response = exchange.private_post_v5_position_switch_mode(params)
-        logger.debug(f"[{func_name}] Raw response from position mode switch: {response}")
+        # Make the API call using the implicit method
+        response: Dict[str, Any] = getattr(exchange, method_name)(params)
+        logger.debug(f"{log_prefix} Raw response from position mode switch: {response}")
 
         # Process the response
         ret_code = response.get('retCode')
-        ret_msg = response.get('retMsg', '').lower()
+        ret_msg = response.get('retMsg', '').lower() # Use lower for case-insensitive checks
 
-        # Success
-        if ret_code == 0:
-            logger.info(f"{Fore.GREEN}[{func_name}] Position mode successfully set to '{mode}' for category '{target_category}'.{Style.RESET_ALL}")
+        # Check for success
+        if ret_code == BYBIT_RET_CODE_OK:
+            logger.info(f"{Fore.GREEN}{log_prefix} Position mode successfully set to '{mode_str}' for category '{target_category}'.{Style.RESET_ALL}")
             return True
-        # Already set to the desired mode
-        elif ret_code == 110021 or "position mode is not modified" in ret_msg:
-            logger.info(f"{Fore.CYAN}[{func_name}] Position mode for category '{target_category}' is already set to '{mode}'.{Style.RESET_ALL}")
-            return True
-        # Cannot switch due to existing position or orders
-        elif ret_code == 110020 or "have position" in ret_msg or "active order" in ret_msg:
-            logger.error(f"{Fore.RED}[{func_name}] Cannot switch position mode for '{target_category}': Active positions or orders exist. Clear them first. API Msg: '{response.get('retMsg')}'{Style.RESET_ALL}")
-            return False
-        # Other API errors
+        # Check if already set to the desired mode
+        elif ret_code == BYBIT_ERR_POS_MODE_NOT_MODIFIED or "position mode is not modified" in ret_msg:
+            logger.info(f"{Fore.CYAN}{log_prefix} Position mode for category '{target_category}' is already set to '{mode_str}'.{Style.RESET_ALL}")
+            return True # Treat as success
+        # Check if switching is blocked by positions or orders
+        elif ret_code == BYBIT_ERR_POS_MODE_HAS_POS_ORDER or "have position" in ret_msg or "active order" in ret_msg:
+            logger.error(f"{Fore.RED}{log_prefix} Cannot switch position mode for '{target_category}' to '{mode_str}': Active positions or orders exist. Clear them first. API Msg: '{response.get('retMsg')}'{Style.RESET_ALL}")
+            return False # Not retryable without user action
+        # Handle other specific API errors if known, otherwise raise a generic ExchangeError
         else:
-            raise ccxt.ExchangeError(f"Bybit API error setting position mode: Code={ret_code}, Msg='{response.get('retMsg', 'N/A')}'")
+            # Raise an error that the retry decorator might catch
+            raise ExchangeError(f"{log_prefix} Bybit API error setting position mode: Code={ret_code}, Msg='{response.get('retMsg', 'N/A')}'")
 
-    except (ccxt.NetworkError, ccxt.ExchangeError, ccxt.AuthenticationError) as e:
-        # Avoid logging duplicate errors if already handled specific codes above
-        if not (isinstance(e, ccxt.ExchangeError) and ret_code in [110020]):
-            logger.warning(f"{Fore.YELLOW}[{func_name}] API Error setting position mode: {e}{Style.RESET_ALL}")
-        # Re-raise network/auth errors for retry decorator
-        if isinstance(e, (ccxt.NetworkError, ccxt.AuthenticationError)):
-            raise e
-        return False # Return False for handled ExchangeErrors like position exists
+    except (NetworkError, AuthenticationError) as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix} Network/Auth error setting position mode: {e}{Style.RESET_ALL}")
+        raise # Re-raise for the retry decorator
+
+    except ExchangeError as e:
+        # Catch errors raised from the checks above or other ccxt issues
+        # Avoid logging duplicate errors if already logged specific codes
+        if str(BYBIT_ERR_POS_MODE_HAS_POS_ORDER) not in str(e): # Check if it's the "has position/order" error we already logged
+             logger.warning(f"{Fore.YELLOW}{log_prefix} ExchangeError setting position mode: {e}{Style.RESET_ALL}")
+        # Decide whether to re-raise based on whether it's potentially retryable
+        # For now, assume most ExchangeErrors caught here (except the handled ones) might be worth retrying once.
+        raise e
 
     except Exception as e:
-        logger.error(f"{Fore.RED}[{func_name}] Unexpected error setting position mode: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(f"{Fore.RED}{log_prefix} Unexpected error setting position mode: {e}{Style.RESET_ALL}", exc_info=True)
         return False
 
 
-# Snippet 19 / Function 19: Fetch Account Info (UTA Status, Margin Mode)
 @retry_api_call(max_retries=2, initial_delay=1.0)
 def fetch_account_info_bybit_v5(exchange: ccxt.bybit, config: Config) -> Optional[Dict[str, Any]]:
     """
     Fetches general account information from Bybit V5 API (`/v5/account/info`).
-    Provides insights into UTA status, margin mode settings, etc.
+
+    Provides insights into Unified Trading Account (UTA) status, margin mode settings,
+    disconnect protection (DCP) status, etc.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        config: The application configuration object (potentially used for logging/alerts).
+
+    Returns:
+        A dictionary containing parsed account information (including UTA status,
+        margin mode, etc.) if successful.
+        None if the API call fails after retries or encounters an unexpected error.
+
+    Raises:
+        ccxt.NetworkError: If a network issue occurs (for retry decorator).
+        ccxt.AuthenticationError: If authentication fails (for retry decorator).
+        ccxt.ExchangeError: For API errors not handled internally (for retry decorator).
     """
     func_name = "fetch_account_info_bybit_v5"
-    logger.debug(f"[{func_name}] Fetching Bybit V5 account info...")
+    log_prefix = _log_prefix(func_name)
+    logger.debug(f"{log_prefix} Fetching Bybit V5 account info...")
 
     try:
-        # Check if the specific V5 method exists
-        if not hasattr(exchange, 'private_get_v5_account_info'):
-            logger.error(f"{Fore.RED}[{func_name}] CCXT version does not support 'private_get_v5_account_info'. Cannot fetch detailed account info.{Style.RESET_ALL}")
-            return None
+        # Check if the required implicit API method exists
+        method_name = 'private_get_v5_account_info'
+        if not hasattr(exchange, method_name):
+            logger.error(f"{Fore.RED}{log_prefix} CCXT version or exchange instance does not support '{method_name}'. Cannot fetch account info.{Style.RESET_ALL}")
+            return None # Setup issue
 
-        logger.debug(f"[{func_name}] Calling private_get_v5_account_info endpoint.")
-        account_info_raw = exchange.private_get_v5_account_info()
-        logger.debug(f"[{func_name}] Raw Account Info response: {str(account_info_raw)[:400]}...") # Log truncated response
+        logger.debug(f"{log_prefix} Calling '{method_name}' endpoint.")
+        account_info_raw: Dict[str, Any] = getattr(exchange, method_name)()
+        # Log only a portion of the raw response to avoid overly verbose logs
+        logger.debug(f"{log_prefix} Raw Account Info response (truncated): {str(account_info_raw)[:500]}...")
 
         ret_code = account_info_raw.get('retCode')
-        ret_msg = account_info_raw.get('retMsg')
+        ret_msg = account_info_raw.get('retMsg', 'N/A')
 
-        if ret_code == 0 and 'result' in account_info_raw:
+        if ret_code == BYBIT_RET_CODE_OK and 'result' in account_info_raw:
             result = account_info_raw['result']
-            # Extract key fields
-            parsed_info = {
-                'unifiedMarginStatus': result.get('unifiedMarginStatus'), # 1: Regular Account; 2: Unified Margin Account; 3: Unified Trade Account
-                'marginMode': result.get('marginMode'), # REGULAR_MARGIN, PORTFOLIO_MARGIN (Unified accounts only)
-                'dcpStatus': result.get('dcpStatus'), # Disconnect protection status
-                'timeWindow': result.get('timeWindow'), # Disconnect protection time window
-                'smtCode': result.get('smtCode'), # SMP group ID
-                'isMasterTrader': result.get('isMasterTrader'), # Whether the account is a master trader account
-                'updateTime': result.get('updateTime'), # Last update time (string ms)
-                'rawInfo': result # Include the raw result dict for full details
+            # Define a mapping for unifiedMarginStatus for better logging
+            status_map = {
+                1: "Regular Account",
+                2: "Unified Margin Account (UMA)",
+                3: "Unified Trade Account (UTA)",
+                4: "Classic Account" # Added based on potential API values
             }
-            status_map = {1: "Regular", 2: "Unified Margin", 3: "Unified Trade"}
-            uta_status_str = status_map.get(parsed_info['unifiedMarginStatus'], 'Unknown')
+            unified_status_code = result.get('unifiedMarginStatus')
+            uta_status_str = status_map.get(unified_status_code, f"Unknown ({unified_status_code})")
 
-            logger.info(f"[{func_name}] Account Info Fetched: UTA Status={uta_status_str} ({parsed_info.get('unifiedMarginStatus', 'N/A')}), "
-                        f"MarginMode={parsed_info.get('marginMode', 'N/A')}, DCP Status={parsed_info.get('dcpStatus', 'N/A')}")
+            # Extract key fields into a structured dictionary
+            parsed_info = {
+                'unifiedMarginStatus': unified_status_code,
+                'unifiedMarginStatusStr': uta_status_str,
+                'marginMode': result.get('marginMode'), # e.g., 'REGULAR_MARGIN', 'PORTFOLIO_MARGIN'
+                'dcpStatus': result.get('dcpStatus'),   # e.g., 'OFF', 'ON'
+                'timeWindow': result.get('timeWindow'), # DCP time window in seconds
+                'smtCode': result.get('smtCode'),       # SMP group ID (if applicable)
+                'isMasterTrader': result.get('isMasterTrader'), # Boolean
+                'updateTime': result.get('updateTime'), # Timestamp string (ms)
+                # Include the raw 'result' dict for access to all fields if needed later
+                'rawResult': result
+            }
+
+            logger.info(f"{log_prefix} Account Info Fetched Successfully: Status={uta_status_str}, "
+                        f"MarginMode={parsed_info.get('marginMode', 'N/A')}, "
+                        f"DCP Status={parsed_info.get('dcpStatus', 'N/A')}")
             return parsed_info
         else:
-            raise ccxt.ExchangeError(f"Failed to fetch/parse account info from Bybit API. Code={ret_code}, Msg='{ret_msg}'")
+            # Raise an error if the API call was not successful
+            raise ExchangeError(f"{log_prefix} Failed to fetch account info from Bybit API. Code={ret_code}, Msg='{ret_msg}'")
 
-    except (ccxt.NetworkError, ccxt.ExchangeError, ccxt.AuthenticationError) as e:
-        logger.warning(f"{Fore.YELLOW}[{func_name}] API Error fetching account info: {e}{Style.RESET_ALL}")
+    except (NetworkError, AuthenticationError) as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix} Network/Auth error fetching account info: {e}{Style.RESET_ALL}")
         raise # Re-raise for retry decorator
+
+    except ExchangeError as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix} ExchangeError fetching account info: {e}{Style.RESET_ALL}")
+        raise # Re-raise for retry decorator
+
     except Exception as e:
-        logger.error(f"{Fore.RED}[{func_name}] Unexpected error fetching account info: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(f"{Fore.RED}{log_prefix} Unexpected error fetching account info: {e}{Style.RESET_ALL}", exc_info=True)
         return None
 
 
-# Snippet 24 / Function 24: Set Isolated Margin (Bybit V5 Specific)
 @retry_api_call(max_retries=2, initial_delay=1.0)
 def set_isolated_margin_bybit_v5(exchange: ccxt.bybit, symbol: str, leverage: int, config: Config) -> bool:
     """
-    Sets margin mode to ISOLATED for a specific symbol on Bybit V5 and sets leverage for it.
+    Sets margin mode to ISOLATED for a specific symbol on Bybit V5 and sets its leverage.
 
-    Uses V5 endpoint 'private_post_v5_position_switch_isolated'. Cannot be done if there's
-    an existing position or active orders for the symbol.
+    Uses the V5 endpoint `private_post_v5_position_switch_isolated`. This operation
+    cannot be performed if there is an existing position or active orders for the symbol.
+    If the symbol is already in isolated mode, it proceeds to set/confirm the leverage.
 
     Args:
         exchange: Initialized ccxt.bybit instance.
         symbol: Market symbol (e.g., 'BTC/USDT:USDT') to set isolated margin for.
-        leverage: The desired leverage (buy and sell) to set for the isolated position.
-        config: Configuration object.
+        leverage: The desired leverage (applied to both buy and sell sides) for the
+                  isolated position. Must be a positive integer.
+        config: The application configuration object.
 
     Returns:
-        True if isolated mode was set successfully (or already set) and leverage was applied,
-        False otherwise.
+        True if isolated mode was set/confirmed successfully AND leverage was applied/confirmed.
+        False otherwise (e.g., validation failure, blocked by position/order, leverage setting failed,
+              or unexpected non-retryable error).
 
     Raises:
-        Reraises CCXT exceptions for the retry decorator. Handles specific V5 errors internally.
-        ValueError for invalid leverage.
+        ccxt.NetworkError: If a network issue occurs (for retry decorator).
+        ccxt.AuthenticationError: If authentication fails (for retry decorator).
+        ccxt.ExchangeError: For API errors not handled internally (for retry decorator).
+        ccxt.BadSymbol: If the provided symbol is invalid.
+        ValueError: If the provided leverage is not a positive integer.
     """
     func_name = "set_isolated_margin_bybit_v5"
-    logger.info(f"{Fore.CYAN}[{func_name}] Attempting to set ISOLATED margin mode for {symbol} with {leverage}x leverage...{Style.RESET_ALL}")
+    log_prefix = _log_prefix(func_name)
+    logger.info(f"{Fore.CYAN}{log_prefix} Attempting to set ISOLATED margin for {symbol} with {leverage}x leverage...{Style.RESET_ALL}")
 
-    if leverage <= 0:
-        logger.error(f"[{func_name}] Invalid leverage provided: {leverage}. Must be positive.")
-        # Raise ValueError for invalid input to signal incorrect usage
-        raise ValueError("Leverage must be positive.")
+    # --- Input Validation ---
+    if not isinstance(leverage, int) or leverage <= 0:
+        logger.error(f"{Fore.RED}{log_prefix} Invalid leverage value: {leverage}. Must be a positive integer.{Style.RESET_ALL}")
+        raise ValueError("Leverage must be a positive integer.")
 
+    # Need market info for category and market ID
     try:
-        market = exchange.market(symbol)
+        market = exchange.load_markets([symbol])[symbol]
         category = _get_v5_category(market)
+        market_id = market['id'] # Use the exchange-specific market ID
+
         if not category or category not in ['linear', 'inverse']:
-            logger.error(f"{Fore.RED}[{func_name}] Cannot set isolated margin for non-contract symbol: {symbol} (Category: {category}).{Style.RESET_ALL}")
+            logger.error(f"{Fore.RED}{log_prefix} Cannot set isolated margin for non-contract symbol: {symbol} (Category: {category}).{Style.RESET_ALL}")
             return False
 
-        # Check if the required V5 method exists
-        if not hasattr(exchange, 'private_post_v5_position_switch_isolated'):
-            logger.error(f"{Fore.RED}[{func_name}] CCXT version does not support 'private_post_v5_position_switch_isolated'. Cannot set isolated margin via this function.{Style.RESET_ALL}")
-            return False
+    except BadSymbol as e:
+        logger.error(f"{Fore.RED}{log_prefix} Invalid symbol provided: {symbol}. Error: {e}{Style.RESET_ALL}")
+        raise # Re-raise BadSymbol as it's a fundamental input error
 
-        # Attempt to switch to Isolated Margin Mode using V5 endpoint
-        # tradeMode=1 means Isolated Margin
+    except Exception as e:
+        # Catch errors during market loading
+        logger.error(f"{Fore.RED}{log_prefix} Failed to load market info for {symbol}: {e}{Style.RESET_ALL}", exc_info=True)
+        return False
+
+    # --- API Call to Switch Mode ---
+    mode_switched_or_confirmed = False
+    try:
+        # Check if the required implicit API method exists
+        method_name = 'private_post_v5_position_switch_isolated'
+        if not hasattr(exchange, method_name):
+            logger.error(f"{Fore.RED}{log_prefix} CCXT version or exchange instance does not support '{method_name}'. Cannot set isolated margin.{Style.RESET_ALL}")
+            return False # Setup issue
+
+        # Prepare parameters for the switch_isolated endpoint
         params_switch = {
             'category': category,
-            'symbol': market['id'],
-            'tradeMode': 1,
-            'buyLeverage': str(leverage),
+            'symbol': market_id,
+            'tradeMode': BYBIT_TRADE_MODE_ISOLATED, # 1 for Isolated Margin
+            'buyLeverage': str(leverage),          # API expects string
             'sellLeverage': str(leverage)
         }
-        logger.debug(f"[{func_name}] Calling 'private_post_v5_position_switch_isolated' with params: {params_switch}")
-        response = exchange.private_post_v5_position_switch_isolated(params_switch)
-        logger.debug(f"[{func_name}] Raw response from switch_isolated endpoint: {response}")
+        logger.debug(f"{log_prefix} Calling '{method_name}' with params: {params_switch}")
+
+        response: Dict[str, Any] = getattr(exchange, method_name)(params_switch)
+        logger.debug(f"{log_prefix} Raw response from {method_name}: {response}")
 
         ret_code = response.get('retCode')
         ret_msg = response.get('retMsg', '').lower()
-        already_isolated_or_ok = False
 
-        # Success
-        if ret_code == 0:
-            logger.info(f"{Fore.GREEN}[{func_name}] Successfully switched {symbol} to ISOLATED with {leverage}x leverage.{Style.RESET_ALL}")
-            already_isolated_or_ok = True
-        # Already isolated (V5 specific code)
-        elif ret_code == 110026 or "margin mode is not modified" in ret_msg:
-            logger.info(f"{Fore.CYAN}[{func_name}] {symbol} is already in ISOLATED mode. Verifying leverage...{Style.RESET_ALL}")
-            already_isolated_or_ok = True
-        # Cannot switch due to existing position or orders
-        elif ret_code == 110020 or "have position" in ret_msg or "active order" in ret_msg:
-            logger.error(f"{Fore.RED}[{func_name}] Cannot switch {symbol} to ISOLATED: active positions or orders exist. API Msg: '{response.get('retMsg')}'{Style.RESET_ALL}")
-            return False
-        # Other API errors during switch attempt
+        # Process response for the switch attempt
+        if ret_code == BYBIT_RET_CODE_OK:
+            logger.info(f"{Fore.GREEN}{log_prefix} Successfully switched {symbol} to ISOLATED mode (leverage setting pending confirmation).{Style.RESET_ALL}")
+            mode_switched_or_confirmed = True
+        elif ret_code == BYBIT_ERR_MARGIN_MODE_NOT_MODIFIED or "margin mode is not modified" in ret_msg:
+            logger.info(f"{Fore.CYAN}{log_prefix} {symbol} is already in ISOLATED mode. Proceeding to verify/set leverage...{Style.RESET_ALL}")
+            mode_switched_or_confirmed = True
+        elif ret_code == BYBIT_ERR_MARGIN_MODE_HAS_POS_ORDER or "have position" in ret_msg or "active order" in ret_msg:
+            logger.error(f"{Fore.RED}{log_prefix} Cannot switch {symbol} to ISOLATED: Active positions or orders exist. API Msg: '{response.get('retMsg')}'{Style.RESET_ALL}")
+            return False # Not retryable without user action
         else:
-            raise ccxt.ExchangeError(f"Bybit API error switching to isolated mode: Code={ret_code}, Msg='{response.get('retMsg', 'N/A')}'")
+            # Raise an error for unexpected API responses during the switch
+            raise ExchangeError(f"{log_prefix} Bybit API error switching {symbol} to isolated mode: Code={ret_code}, Msg='{response.get('retMsg', 'N/A')}'")
 
-        # If mode is now isolated (or was already), ensure leverage is set correctly using the standard set_leverage function
-        if already_isolated_or_ok:
-            logger.debug(f"[{func_name}] Explicitly calling set_leverage to confirm/set leverage {leverage}x for ISOLATED {symbol}...")
-            # Call the set_leverage function (defined earlier in this module)
-            leverage_set_success = set_leverage(exchange, symbol, leverage, config)
-            if leverage_set_success:
-                logger.info(f"{Fore.GREEN}[{func_name}] Leverage confirmed/set to {leverage}x for ISOLATED {symbol}. Overall success.{Style.RESET_ALL}")
-                return True
-            else:
-                # This indicates the mode switch might have succeeded (or was already set), but setting leverage failed.
-                logger.error(f"{Fore.RED}[{func_name}] Failed to set/confirm leverage {leverage}x after ISOLATED mode switch/check for {symbol}. Overall failure.{Style.RESET_ALL}")
-                return False
+    except (NetworkError, AuthenticationError) as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix} Network/Auth error switching to isolated margin for {symbol}: {e}{Style.RESET_ALL}")
+        raise # Re-raise for retry decorator
 
-        return False # Should not be reached if logic is correct
-
-    except (ccxt.NetworkError, ccxt.ExchangeError, ccxt.AuthenticationError, ccxt.BadSymbol, ValueError) as e:
-        # Avoid raising again if it's an error code handled explicitly above or a ValueError
-        if not (isinstance(e, ccxt.ExchangeError) and ret_code in [110020]) and not isinstance(e, ValueError):
-            logger.warning(f"{Fore.YELLOW}[{func_name}] API/Input Error setting isolated margin: {e}{Style.RESET_ALL}")
-            raise e # Re-raise other errors for retry decorator
-        return False # Return False for handled errors like position exists or invalid input
+    except ExchangeError as e:
+        # Catch errors raised from checks above or other ccxt issues during switch
+        # Avoid duplicate logging if already handled
+        if str(BYBIT_ERR_MARGIN_MODE_HAS_POS_ORDER) not in str(e):
+             logger.warning(f"{Fore.YELLOW}{log_prefix} ExchangeError switching to isolated margin for {symbol}: {e}{Style.RESET_ALL}")
+        raise e # Re-raise for retry
 
     except Exception as e:
-        logger.error(f"{Fore.RED}[{func_name}] Unexpected error setting isolated margin for {symbol}: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(f"{Fore.RED}{log_prefix} Unexpected error during isolated margin switch for {symbol}: {e}{Style.RESET_ALL}", exc_info=True)
+        return False
+
+    # --- Set/Confirm Leverage (if mode switch was successful or already set) ---
+    if mode_switched_or_confirmed:
+        logger.debug(f"{log_prefix} Mode is ISOLATED. Now explicitly calling set_leverage to ensure {leverage}x for {symbol}...")
+        try:
+            # Call the standard set_leverage function (defined earlier)
+            # This handles validation, API call, and "already set" messages for leverage itself.
+            leverage_set_success = set_leverage(exchange, symbol, leverage, config)
+
+            if leverage_set_success:
+                # Final success log only if both steps (mode + leverage) are confirmed
+                logger.info(f"{Fore.GREEN}{log_prefix} ISOLATED margin mode and {leverage}x leverage successfully confirmed/set for {symbol}.{Style.RESET_ALL}")
+                return True
+            else:
+                # Mode switch might have worked, but leverage setting failed.
+                logger.error(f"{Fore.RED}{log_prefix} Mode for {symbol} is ISOLATED, but failed to set/confirm leverage to {leverage}x. Overall operation failed.{Style.RESET_ALL}")
+                return False
+        except Exception as e:
+            # Catch any exception from the set_leverage call itself
+            logger.error(f"{Fore.RED}{log_prefix} Error occurred during the final leverage setting step for {symbol} (already in isolated mode): {e}{Style.RESET_ALL}", exc_info=True)
+            return False
+    else:
+        # This path should theoretically not be reached if the logic above is correct,
+        # but serves as a fallback.
+        logger.error(f"{Fore.RED}{log_prefix} Failed to switch or confirm ISOLATED mode for {symbol}. Cannot proceed to set leverage.{Style.RESET_ALL}")
         return False
 
 

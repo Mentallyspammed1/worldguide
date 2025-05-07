@@ -1,0 +1,284 @@
+# File: utils.py
+import logging
+import os
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal, getcontext, InvalidOperation
+from typing import Any, Dict, Optional
+
+from colorama import Fore, Style, init
+
+# Attempt to import zoneinfo, handle potential ImportError and suggest install
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    print("Error: 'zoneinfo' requires Python 3.9+ and potentially the 'tzdata' package.")
+    print("Please install it if needed: pip install tzdata")
+    # Fallback to a basic UTC representation if zoneinfo is unavailable
+    # Consider using pytz (pip install pytz) if older Python versions need proper timezone support.
+    print("Using basic UTC fallback for timezone handling.")
+    class ZoneInfo: # Basic fallback implementation
+        def __init__(self, key: str):
+            if key.lower() == 'utc':
+                self._offset = timedelta(0)
+                self._name = "UTC"
+            else:
+                # This fallback doesn't handle timezones correctly, only UTC
+                print(f"Warning: Timezone '{key}' not supported by fallback. Using UTC.")
+                self._offset = timedelta(0)
+                self._name = "UTC"
+
+        def __call__(self): # Make it callable like the real ZoneInfo
+             return self
+
+        def fromutc(self, dt: datetime) -> datetime:
+             return dt.replace(tzinfo=timezone(self._offset))
+
+        def utcoffset(self, dt: Optional[datetime]) -> timedelta:
+             return self._offset
+
+        def dst(self, dt: Optional[datetime]) -> timedelta:
+             return timedelta(0)
+
+        def tzname(self, dt: Optional[datetime]) -> str:
+             return self._name
+
+        def __repr__(self) -> str:
+            return f"ZoneInfo(key='{self._name}')"
+
+        def __str__(self) -> str:
+            return self._name
+
+# Initialize colorama and set precision
+getcontext().prec = 38  # Increased precision for financial calculations
+init(autoreset=True)
+
+# --- Constants ---
+CONFIG_FILE = "config.json"
+LOG_DIRECTORY = "bot_logs"
+DEFAULT_TIMEZONE = "America/Chicago" # Example, adjust as needed
+MAX_API_RETRIES = 3 # Max retries for recoverable API errors
+RETRY_DELAY_SECONDS = 5 # Delay between retries
+VALID_INTERVALS = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"] # Intervals supported by the bot's logic
+CCXT_INTERVAL_MAP = { # Map our intervals to ccxt's expected format
+    "1": "1m", "3": "3m", "5": "5m", "15": "15m", "30": "30m",
+    "60": "1h", "120": "2h", "240": "4h", "D": "1d", "W": "1w", "M": "1M"
+}
+RETRY_ERROR_CODES = [429, 500, 502, 503, 504] # HTTP status codes considered retryable
+LOOP_DELAY_SECONDS = 10 # Time between the end of one cycle and the start of the next
+POSITION_CONFIRM_DELAY_SECONDS = 8 # Wait time after placing order before confirming position
+FIB_LEVELS = [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0] # Standard Fibonacci levels
+
+# Default periods (can be overridden by config.json)
+DEFAULT_INDICATOR_PERIODS = {
+    "atr_period": 14,
+    "cci_window": 20,
+    "williams_r_window": 14,
+    "mfi_window": 14,
+    "stoch_rsi_window": 14, # Window for Stoch RSI calculation itself
+    "stoch_rsi_rsi_window": 12, # Window for underlying RSI in StochRSI
+    "stoch_rsi_k": 3, # K period for StochRSI
+    "stoch_rsi_d": 3, # D period for StochRSI
+    "rsi_period": 14,
+    "bollinger_bands_period": 20,
+    "bollinger_bands_std_dev": 2.0, # Ensure float
+    "sma_10_window": 10,
+    "ema_short_period": 9,
+    "ema_long_period": 21,
+    "momentum_period": 7,
+    "volume_ma_period": 15,
+    "fibonacci_window": 50,
+    "psar_af": 0.02,
+    "psar_max_af": 0.2,
+}
+
+# Neon Color Scheme
+NEON_GREEN = Fore.LIGHTGREEN_EX
+NEON_BLUE = Fore.CYAN
+NEON_PURPLE = Fore.MAGENTA
+NEON_YELLOW = Fore.YELLOW
+NEON_RED = Fore.LIGHTRED_EX
+NEON_CYAN = Fore.CYAN
+RESET = Style.RESET_ALL
+
+# Global Timezone Variable (set during initialization)
+TIMEZONE = None
+
+def set_timezone(tz_str: str):
+    """Sets the global TIMEZONE variable."""
+    global TIMEZONE
+    try:
+        TIMEZONE = ZoneInfo(tz_str)
+    except Exception as tz_err:
+        print(f"Warning: Could not load timezone '{tz_str}'. Using UTC. Error: {tz_err}")
+        TIMEZONE = ZoneInfo("UTC")
+
+def get_timezone() -> ZoneInfo:
+    """Gets the global TIMEZONE variable."""
+    if TIMEZONE is None:
+        # Initialize with default if not set (should be set by main)
+        set_timezone(os.getenv("TIMEZONE", DEFAULT_TIMEZONE))
+    return TIMEZONE
+
+class SensitiveFormatter(logging.Formatter):
+    """Formatter to redact sensitive information (API keys) from logs."""
+    # Store API Key/Secret values within the class instance if needed for redaction
+    # Alternatively, access them via os.getenv directly if they remain environment variables
+    _api_key = None
+    _api_secret = None
+
+    @classmethod
+    def set_sensitive_data(cls, api_key: Optional[str], api_secret: Optional[str]):
+        cls._api_key = api_key
+        cls._api_secret = api_secret
+
+    def format(self, record: logging.LogRecord) -> str:
+        msg = super().format(record)
+        # Use class-level stored keys or fetch from env again
+        api_key_to_redact = self._api_key or os.getenv("BYBIT_API_KEY")
+        api_secret_to_redact = self._api_secret or os.getenv("BYBIT_API_SECRET")
+
+        if api_key_to_redact:
+            msg = msg.replace(api_key_to_redact, "***API_KEY***")
+        if api_secret_to_redact:
+            msg = msg.replace(api_secret_to_redact, "***API_SECRET***")
+        return msg
+
+def get_price_precision(market_info: Dict[str, Any], logger: logging.Logger) -> int:
+    """
+    Determines the number of decimal places required for price values
+    based on the market information provided by the exchange. (Static Method)
+
+    Uses 'precision' and 'limits' fields from the market info.
+    Falls back to a default value.
+
+    Args:
+        market_info: Dictionary containing market details (precision, limits, etc.).
+        logger: Logger instance for logging messages.
+
+    Returns:
+        The number of decimal places (integer).
+    """
+    symbol = market_info.get('symbol', 'UNKNOWN')
+    try:
+        # 1. Check 'precision.price' (most common field)
+        precision_info = market_info.get('precision', {})
+        price_precision_val = precision_info.get('price')
+
+        if price_precision_val is not None:
+             # If it's an integer, it usually represents decimal places directly
+             if isinstance(price_precision_val, int):
+                  if price_precision_val >= 0:
+                       logger.debug(f"Using price precision (decimal places) from market_info.precision.price: {price_precision_val} for {symbol}")
+                       return price_precision_val
+             # If it's float/str, it often represents the tick size
+             elif isinstance(price_precision_val, (float, str)):
+                  try:
+                       tick_size = Decimal(str(price_precision_val))
+                       # Ensure tick size is positive
+                       if tick_size > 0:
+                            # Calculate decimal places from tick size
+                            # normalize() removes trailing zeros, as_tuple().exponent gives the exponent
+                            precision = abs(tick_size.normalize().as_tuple().exponent)
+                            logger.debug(f"Calculated price precision from market_info.precision.price (tick size {tick_size}): {precision} for {symbol}")
+                            return precision
+                  except (InvalidOperation, ValueError, TypeError) as e:
+                       logger.warning(f"Could not parse precision.price '{price_precision_val}' as tick size for {symbol}: {e}")
+
+        # 2. Fallback: Check 'limits.price.min' (sometimes represents tick size)
+        limits_info = market_info.get('limits', {})
+        price_limits = limits_info.get('price', {})
+        min_price_val = price_limits.get('min')
+
+        if min_price_val is not None:
+             try:
+                  min_price_tick = Decimal(str(min_price_val))
+                  if min_price_tick > 0:
+                       # Heuristic: Check if min_price looks like a tick size (small value)
+                       # rather than just a minimum orderable price (e.g., 0.1).
+                       # Tick sizes are usually << 1. Adjust threshold if needed.
+                       if min_price_tick < Decimal('0.1'):
+                            precision = abs(min_price_tick.normalize().as_tuple().exponent)
+                            logger.debug(f"Inferred price precision from limits.price.min ({min_price_tick}): {precision} for {symbol}")
+                            return precision
+                       else:
+                            logger.debug(f"limits.price.min ({min_price_tick}) for {symbol} seems too large for tick size, likely minimum order price. Ignoring for precision.")
+             except (InvalidOperation, ValueError, TypeError) as e:
+                  logger.warning(f"Could not parse limits.price.min '{min_price_val}' for precision inference for {symbol}: {e}")
+
+        # 3. Fallback: Infer from the last known close price's decimal places (REMOVED)
+        # This was deemed unreliable as prices fluctuate (e.g., 10.0 vs 10.123)
+        # Relying on market info is safer.
+
+    except Exception as e:
+        logger.warning(f"Error determining price precision for {symbol} from market info: {e}. Falling back.")
+
+    # --- Final Fallback ---
+    # Use a reasonable default if no other method worked
+    default_precision = 4 # Common default, adjust if needed for your typical markets
+    logger.warning(f"Could not determine price precision for {symbol}. Using default: {default_precision}.")
+    return default_precision
+
+def get_min_tick_size(market_info: Dict[str, Any], logger: logging.Logger) -> Decimal:
+    """
+    Gets the minimum price increment (tick size) from market info using Decimal. (Static Method)
+
+    Args:
+        market_info: Dictionary containing market details (precision, limits, etc.).
+        logger: Logger instance for logging messages.
+
+    Returns:
+        The minimum tick size as a Decimal object. Falls back based on precision.
+    """
+    symbol = market_info.get('symbol', 'UNKNOWN')
+    try:
+        # 1. Try precision.price (often the tick size as float/str)
+        precision_info = market_info.get('precision', {})
+        price_precision_val = precision_info.get('price')
+        if price_precision_val is not None:
+             if isinstance(price_precision_val, (float, str)):
+                  try:
+                       tick_size = Decimal(str(price_precision_val))
+                       if tick_size > 0:
+                            logger.debug(f"Using tick size from precision.price: {tick_size} for {symbol}")
+                            return tick_size
+                  except (InvalidOperation, ValueError, TypeError) as e:
+                        logger.warning(f"Could not parse precision.price '{price_precision_val}' as tick size for {symbol}: {e}")
+             # If it's an integer (decimal places), calculate tick size
+             elif isinstance(price_precision_val, int) and price_precision_val >= 0:
+                  tick_size = Decimal('1e-' + str(price_precision_val))
+                  logger.debug(f"Calculated tick size from precision.price (decimal places {price_precision_val}): {tick_size} for {symbol}")
+                  return tick_size
+
+        # 2. Fallback: Try limits.price.min (sometimes represents tick size)
+        limits_info = market_info.get('limits', {})
+        price_limits = limits_info.get('price', {})
+        min_price_val = price_limits.get('min')
+        if min_price_val is not None:
+            try:
+                min_tick_from_limit = Decimal(str(min_price_val))
+                if min_tick_from_limit > 0:
+                    # Heuristic check: if it's very small, assume it's the tick size
+                    if min_tick_from_limit < Decimal('0.1'):
+                         logger.debug(f"Using tick size from limits.price.min: {min_tick_from_limit} for {symbol}")
+                         return min_tick_from_limit
+                    else:
+                         logger.debug(f"limits.price.min ({min_tick_from_limit}) for {symbol} seems too large for tick size, potentially min order price.")
+            except (InvalidOperation, ValueError, TypeError) as e:
+                logger.warning(f"Could not parse limits.price.min '{min_price_val}' for tick size inference for {symbol}: {e}")
+
+    except Exception as e:
+         logger.warning(f"Could not determine min tick size for {symbol} from market info: {e}. Using precision fallback.")
+
+    # --- Final Fallback: Calculate from get_price_precision (decimal places) ---
+    price_precision_places = get_price_precision(market_info, logger) # Call the utility function
+    fallback_tick = Decimal('1e-' + str(price_precision_places))
+    logger.debug(f"Using fallback tick size based on derived precision places ({price_precision_places}): {fallback_tick} for {symbol}")
+    return fallback_tick
+
+
+RETRY_HTTP_STATUS_CODES = (408, 429, 500, 502, 503, 504)
+NEON_GREEN_PRINT = "[1;92m"
+NEON_RED_PRINT = "[1;91m"
+NEON_YELLOW_PRINT = "[1;93m"
+RESET_PRINT = "[0m"
+

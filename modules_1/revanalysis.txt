@@ -1,0 +1,991 @@
+# File: analysis.py
+"""Module for analyzing trading data, calculating technical indicators, and generating signals."""
+
+import logging
+from decimal import Decimal, ROUND_DOWN, ROUND_UP, InvalidOperation
+from typing import Any, Dict, Optional, Tuple # Callable removed as not used
+
+import numpy as np
+import pandas as pd
+import pandas_ta as ta
+
+from utils import (
+    CCXT_INTERVAL_MAP,
+    DEFAULT_INDICATOR_PERIODS,
+    FIB_LEVELS,
+    get_min_tick_size,
+    get_price_precision,
+    NEON_RED, NEON_YELLOW, NEON_GREEN, RESET, NEON_PURPLE, NEON_BLUE, NEON_CYAN,
+    _format_signal # Assuming _format_signal is in utils for logging
+)
+
+class TradingAnalyzer:
+    INDICATOR_CONFIG = {
+        "ATR": {"func_name": "atr", "params_map": {"length": "atr_period"}, "main_col_pattern": "ATRr_{length}", "type": "decimal", "min_data_param_key": "length", "concat": False},
+        "EMA_Short": {"func_name": "ema", "params_map": {"length": "ema_short_period"}, "main_col_pattern": "EMA_{length}", "type": "decimal", "pass_close_only": True, "min_data_param_key": "length", "concat": False},
+        "EMA_Long": {"func_name": "ema", "params_map": {"length": "ema_long_period"}, "main_col_pattern": "EMA_{length}", "type": "decimal", "pass_close_only": True, "min_data_param_key": "length", "concat": False},
+        "Momentum": {"func_name": "mom", "params_map": {"length": "momentum_period"}, "main_col_pattern": "MOM_{length}", "type": "float", "pass_close_only": True, "min_data_param_key": "length", "concat": False},
+        "CCI": {"func_name": "cci", "params_map": {"length": "cci_window", "c": "cci_constant"}, "main_col_pattern": "CCI_{length}_{c:.3f}", "type": "float", "min_data_param_key": "length", "concat": False},
+        "Williams_R": {"func_name": "willr", "params_map": {"length": "williams_r_window"}, "main_col_pattern": "WILLR_{length}", "type": "float", "min_data_param_key": "length", "concat": False},
+        "MFI": {"func_name": "mfi", "params_map": {"length": "mfi_window"}, "main_col_pattern": "MFI_{length}", "type": "float", "concat": True, "min_data_param_key": "length"},
+        "VWAP": {"func_name": "vwap", "params_map": {}, "main_col_pattern": "VWAP_D", "type": "decimal", "concat": True, "min_data": 1}, # VWAP usually needs typical price (HLC/3) which pandas-ta handles
+        "PSAR": {
+            "func_name": "psar",
+            "params_map": {"af": "psar_af", "max_af": "psar_max_af"}, # pandas-ta uses 'initial', 'step', 'max'
+            "multi_cols": { "PSAR_long": "PSARl_{af}_{max_af}", "PSAR_short": "PSARs_{af}_{max_af}" }, # Check pandas-ta actual output col names for PSAR
+            "type": "decimal", "concat": True, "min_data": 2
+        },
+        "StochRSI": {
+            "func_name": "stochrsi",
+            "params_map": {"length": "stoch_rsi_window", "rsi_length": "stoch_rsi_rsi_window", "k": "stoch_rsi_k", "d": "stoch_rsi_d"},
+            "multi_cols": { "StochRSI_K": "STOCHRSIk_{length}_{rsi_length}_{k}_{d}", "StochRSI_D": "STOCHRSId_{length}_{rsi_length}_{k}_{d}"},
+            "type": "float", "concat": True, "min_data_param_key": "length"
+        },
+        "Bollinger_Bands": {
+            "func_name": "bbands",
+            "params_map": {"length": "bollinger_bands_period", "std": "bollinger_bands_std_dev"},
+            "multi_cols": {"BB_Lower": "BBL_{length}_{std:.1f}", "BB_Middle": "BBM_{length}_{std:.1f}", "BB_Upper": "BBU_{length}_{std:.1f}"}, # BBB_ and BBP_ also available from bbands
+            "type": "decimal", "concat": True, "min_data_param_key": "length"
+        },
+        "Volume_MA": {"func_name": "_calculate_volume_ma", "params_map": {"length": "volume_ma_period"}, "main_col_pattern": "VOL_SMA_{length}", "type": "decimal", "min_data_param_key": "length", "concat": False},
+        "SMA10": {"func_name": "sma", "params_map": {"length": "sma_10_window"}, "main_col_pattern": "SMA_{length}", "type": "decimal", "pass_close_only": True, "min_data_param_key": "length", "concat": False},
+        "RSI": {"func_name": "rsi", "params_map": {"length": "rsi_period"}, "main_col_pattern": "RSI_{length}", "type": "float", "pass_close_only": True, "min_data_param_key": "length", "concat": False},
+    }
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        logger: logging.Logger,
+        config: Dict[str, Any],
+        market_info: Dict[str, Any],
+    ) -> None:
+        self.logger = logger
+        self.config = config
+        self.market_info = market_info
+        self.symbol = market_info.get('symbol', 'UNKNOWN_SYMBOL')
+        # Ensure interval is a string key for CCXT_INTERVAL_MAP
+        self.interval = str(config.get("interval", "5m")) # Default to a common interval string like "5m"
+        self.ccxt_interval = CCXT_INTERVAL_MAP.get(self.interval)
+
+        self.indicator_values: Dict[str, Any] = {}
+        self.signals: Dict[str, int] = {"BUY": 0, "SELL": 0, "HOLD": 1} # HOLD=1 indicates it's the default state
+        self.active_weight_set_name = config.get("active_weight_set", "default")
+        self.weights = config.get("weight_sets", {}).get(self.active_weight_set_name, {})
+        self.fib_levels_data: Dict[str, Decimal] = {}
+        self.ta_column_names: Dict[str, str] = {}
+        self.df_calculated: pd.DataFrame = pd.DataFrame()
+
+        if not isinstance(df, pd.DataFrame) or df.empty:
+            self.logger.error(f"{NEON_RED}Input DataFrame for {self.symbol} is invalid or empty.{RESET}")
+            raise ValueError("Input DataFrame must be a non-empty pandas DataFrame.")
+        if not self.ccxt_interval:
+            self.logger.error(f"{NEON_RED}Invalid interval '{self.interval}' for {self.symbol}. Not found in CCXT_INTERVAL_MAP.{RESET}")
+            raise ValueError(f"Interval '{self.interval}' not in CCXT_INTERVAL_MAP.")
+        if not self.weights:
+            self.logger.warning(f"{NEON_YELLOW}Weight set '{self.active_weight_set_name}' missing or empty for {self.symbol}. Scoring may be ineffective.{RESET}")
+
+        required_ohlcv_cols = ['open', 'high', 'low', 'close', 'volume']
+        if not all(col in df.columns for col in required_ohlcv_cols):
+            missing_cols = [col for col in required_ohlcv_cols if col not in df.columns]
+            self.logger.error(f"{NEON_RED}DataFrame for {self.symbol} missing required OHLCV columns: {missing_cols}.{RESET}")
+            raise ValueError(f"DataFrame must contain all OHLCV columns. Missing: {missing_cols}")
+
+        # Keep a copy of the original OHLCV data, especially if it contains Decimals
+        self.df_original_ohlcv = df.copy()
+        # Standardize index by removing timezone information if present, for broader compatibility
+        if self.df_original_ohlcv.index.tz is not None:
+            self.df_original_ohlcv.index = self.df_original_ohlcv.index.tz_localize(None)
+
+        self._validate_and_prepare_df_calculated()
+        self._calculate_all_indicators()
+        self._update_latest_indicator_values()
+        self.calculate_fibonacci_levels()
+
+    def _validate_and_prepare_df_calculated(self) -> None:
+        """Validates OHLCV, prepares df_calculated with float types for pandas-ta."""
+        self.df_calculated = self.df_original_ohlcv.copy()
+        required_cols = ['open', 'high', 'low', 'close', 'volume']
+
+        for col in required_cols:
+            if col not in self.df_calculated.columns:
+                self.logger.critical(f"{NEON_RED}Critical column '{col}' missing for {self.symbol}. Analysis cannot proceed.{RESET}")
+                raise ValueError(f"Column '{col}' is missing from DataFrame.")
+
+            try:
+                # Convert column to numeric, coercing errors. Decimals will become floats.
+                self.df_calculated[col] = pd.to_numeric(self.df_calculated[col], errors='coerce')
+
+                # Ensure the column is float type, as pandas-ta expects floats.
+                if not pd.api.types.is_float_dtype(self.df_calculated[col]):
+                    self.df_calculated[col] = self.df_calculated[col].astype(float) # Raises error if conversion fails
+
+            except (ValueError, TypeError, AttributeError) as e:
+                self.logger.error(f"{NEON_RED}Failed to convert column '{col}' to numeric/float for {self.symbol}: {e}{RESET}", exc_info=True)
+                raise ValueError(f"Column '{col}' could not be converted to a suitable numeric type for TA calculations.")
+
+            nan_count = self.df_calculated[col].isna().sum()
+            if nan_count > 0:
+                self.logger.warning(f"{NEON_YELLOW}{nan_count} NaN values in '{col}' for {self.symbol} after prep. Total rows: {len(self.df_calculated)}{RESET}")
+
+            if not pd.api.types.is_numeric_dtype(self.df_calculated[col]): # Final check
+                self.logger.error(
+                    f"{NEON_RED}Column '{col}' is still not numeric after all processing for {self.symbol}. Type: {self.df_calculated[col].dtype}{RESET}"
+                )
+                raise ValueError(f"Column '{col}' must be numeric for TA calculations.")
+
+        max_lookback = 1
+        enabled_indicators_cfg = self.config.get("indicators", {})
+        for ind_key_cfg_loop, ind_cfg_details_loop in self.INDICATOR_CONFIG.items():
+            if enabled_indicators_cfg.get(ind_key_cfg_loop.lower(), False):
+                period_param_key_for_min_data = ind_cfg_details_loop.get("min_data_param_key")
+
+                if period_param_key_for_min_data and period_param_key_for_min_data in ind_cfg_details_loop["params_map"]:
+                    config_key_for_period = ind_cfg_details_loop["params_map"][period_param_key_for_min_data]
+                    period_val = self.get_period(config_key_for_period)
+                    if isinstance(period_val, (int, float)) and period_val > 0: # Ensure period_val is numeric
+                        max_lookback = max(max_lookback, int(period_val))
+                elif isinstance(ind_cfg_details_loop.get("min_data"), int):
+                     max_lookback = max(max_lookback, ind_cfg_details_loop.get("min_data", 1))
+
+        # Ensure sufficient rows after dropping any NaNs in essential OHLCV columns for lookback calculation
+        # This dropna is for the check, not modifying self.df_calculated here
+        min_required_rows = max_lookback + self.config.get("indicator_buffer_candles", 20)
+        valid_ohlcv_rows = len(self.df_calculated.dropna(subset=required_cols))
+        if valid_ohlcv_rows < min_required_rows :
+            self.logger.warning(
+                f"{NEON_YELLOW}Insufficient valid data rows ({valid_ohlcv_rows}) for {self.symbol} "
+                f"(max lookback: {max_lookback}, min needed: {min_required_rows}). Some indicators may be all NaN.{RESET}"
+            )
+
+    def get_period(self, key: str) -> Any:
+        """Safely retrieves a config value for an indicator period/parameter, falling back to defaults."""
+        config_val = self.config.get(key)
+        default_val = DEFAULT_INDICATOR_PERIODS.get(key)
+        # Prioritize config_val if it's explicitly set (even if None, to override default)
+        # However, usually, if config_val is None, we want the default.
+        if config_val is not None:
+            return config_val
+        return default_val
+
+    def _format_ta_column_name(self, pattern: str, params: Dict[str, Any]) -> str:
+        """Formats a technical analysis column name based on a pattern and parameters."""
+        fmt_params = {}
+        for k, v_param in params.items():
+            if v_param is None:
+                fmt_params[k] = "DEF" # Placeholder for None parameters
+                self.logger.debug(f"Param '{k}' for column pattern '{pattern}' was None. Using placeholder 'DEF'.")
+            elif isinstance(v_param, float):
+                # If pattern has specific float formatting (e.g., :.1f), let f-string handle it
+                if f"{{{k}:." in pattern:
+                    fmt_params[k] = v_param
+                else: # General float to string conversion
+                    fmt_params[k] = str(v_param).replace('.', '_') # Ensure standard representation
+            elif isinstance(v_param, Decimal): # Convert Decimal for formatting
+                 if f"{{{k}:." in pattern: fmt_params[k] = float(v_param) # f-string float format
+                 else: fmt_params[k] = str(v_param).replace('.', '_')
+            else: # int, str, etc.
+                fmt_params[k] = v_param
+        try:
+            return pattern.format(**fmt_params)
+        except (KeyError, ValueError, TypeError) as e:
+            self.logger.error(f"Error formatting TA column pattern '{pattern}' with params {fmt_params}: {e}")
+            base_pattern_part = pattern.split("{")[0].rstrip('_') if pattern else "UNKNOWN_IND"
+            param_keys_str = "_".join(map(str,params.values()))
+            return f"{base_pattern_part}_{param_keys_str}_FORMAT_ERROR"
+
+
+    def _calculate_volume_ma(self, df: pd.DataFrame, length: int) -> Optional[pd.Series]:
+        """Calculates Simple Moving Average of volume."""
+        if 'volume' not in df.columns:
+            self.logger.warning(f"Volume MA calculation failed for {self.symbol}: 'volume' column missing.")
+            return None
+        if not (isinstance(length, int) and length > 0):
+            self.logger.warning(f"Volume MA calculation failed for {self.symbol}: Invalid length {length}.")
+            return None
+
+        volume_series = df['volume'].fillna(0).astype(float) # Fill NaNs in volume with 0 for MA calc
+        if len(volume_series) < length:
+            self.logger.debug(f"Not enough data points ({len(volume_series)}) for Volume MA with length {length} on {self.symbol}.")
+            return pd.Series([np.nan] * len(df), index=df.index) # Return Series of NaNs matching df length
+        return ta.sma(volume_series, length=length)
+
+    def _calculate_all_indicators(self) -> None:
+        """Calculates all configured technical indicators and stores them in df_calculated."""
+        if self.df_calculated.empty:
+            self.logger.warning(f"df_calculated is empty for {self.symbol}. Skipping indicator calculations."); return
+
+        df_ta = self.df_calculated.copy() # Work on a copy to build up indicator columns
+        enabled_cfg = self.config.get("indicators", {})
+
+        for ind_key_cfg, ind_details in self.INDICATOR_CONFIG.items():
+            cfg_check_key = ind_key_cfg.lower()
+            if not enabled_cfg.get(cfg_check_key, False):
+                continue # Skip indicator if not enabled in config
+
+            current_params = {}
+            valid_params = True
+            for param_func_key, cfg_key_for_val in ind_details["params_map"].items():
+                param_val = self.get_period(cfg_key_for_val)
+                if param_val is None:
+                    self.logger.warning(f"Parameter '{cfg_key_for_val}' for {ind_key_cfg} on {self.symbol} is None. Skipping this indicator.")
+                    valid_params = False; break
+                try:
+                    # Convert Decimal/str to float/int for pandas-ta
+                    if isinstance(param_val, Decimal): current_params[param_func_key] = float(param_val)
+                    elif isinstance(param_val, str): current_params[param_func_key] = float(param_val) if '.' in param_val else int(param_val)
+                    elif isinstance(param_val, (int, float)): current_params[param_func_key] = param_val
+                    else: raise TypeError(f"Unsupported parameter type {type(param_val)} for {cfg_key_for_val}")
+                except (ValueError, TypeError) as e:
+                    self.logger.error(f"Cannot convert parameter {cfg_key_for_val}='{param_val}' for {ind_key_cfg} on {self.symbol}: {e}"); valid_params=False; break
+            if not valid_params: continue
+
+            try:
+                ta_func_name = ind_details["func_name"]
+                ta_func_obj = getattr(ta, ta_func_name) if hasattr(ta, ta_func_name) else getattr(self, ta_func_name, None)
+                if ta_func_obj is None:
+                    self.logger.error(f"TA function '{ta_func_name}' for {ind_key_cfg} not found in pandas_ta or self."); continue
+
+                # Determine minimum data needed for this specific indicator
+                lookback_key_for_min_data = ind_details.get("min_data_param_key", "length") # Default to 'length'
+                min_data_points = int(current_params.get(lookback_key_for_min_data, ind_details.get("min_data", 1)))
+
+                # Check if enough valid OHLCV data rows exist
+                if len(df_ta.dropna(subset=['open','high','low','close'])) < min_data_points:
+                    self.logger.debug(f"Insufficient data for {ind_key_cfg} ({len(df_ta.dropna(subset=['open','high','low','close']))} rows vs {min_data_points} needed) for {self.symbol}. Skipping.")
+                    continue
+
+                # Prepare arguments for the TA function (high, low, close, volume, open)
+                ta_input_args = {}
+                if ta_func_name != "_calculate_volume_ma": # Custom functions might have different signature
+                    # Inspect function signature to pass only relevant series
+                    # This is robust but relies on consistent naming in pandas-ta
+                    # For simplicity, can pass all and let pandas-ta pick.
+                    # However, explicit passing based on signature is safer.
+                    import inspect
+                    sig_params = inspect.signature(ta_func_obj).parameters
+                    if 'high' in sig_params: ta_input_args['high'] = df_ta['high']
+                    if 'low' in sig_params: ta_input_args['low'] = df_ta['low']
+                    if 'close' in sig_params: ta_input_args['close'] = df_ta['close']
+                    if 'volume' in sig_params and 'volume' in df_ta: ta_input_args['volume'] = df_ta['volume']
+                    if 'open' in sig_params and 'open' in df_ta: ta_input_args['open'] = df_ta['open']
+
+                result = None
+                if ta_func_name == "_calculate_volume_ma":
+                    result = ta_func_obj(df_ta, **current_params) # Pass df_ta for custom funcs needing it
+                elif ind_details.get("pass_close_only", False):
+                    result = ta_func_obj(close=df_ta['close'], **current_params)
+                else:
+                    result = ta_func_obj(**ta_input_args, **current_params)
+
+                if result is None:
+                    self.logger.warning(f"{ind_key_cfg} calculation returned None for {self.symbol}."); continue
+
+                is_concat = ind_details.get("concat", False)
+
+                if is_concat:
+                    df_piece_to_add = None
+                    col_name_for_series_concat = None # Used if result is Series and concat=True
+
+                    if isinstance(result, pd.Series):
+                        if "main_col_pattern" not in ind_details:
+                            self.logger.error(f"Indicator {ind_key_cfg} (Series, concat=True) lacks main_col_pattern. Skipping.")
+                            continue
+                        col_name_for_series_concat = self._format_ta_column_name(ind_details["main_col_pattern"], current_params)
+                        df_piece_to_add = result.to_frame(name=col_name_for_series_concat)
+                    elif isinstance(result, pd.DataFrame):
+                        df_piece_to_add = result.copy()
+                    else:
+                        self.logger.warning(f"Result for {ind_key_cfg} (concat=True) is not Series/DataFrame. Type: {type(result)}. Skipping.")
+                        continue
+                    
+                    try: df_piece_to_add = df_piece_to_add.astype('float64')
+                    except Exception:
+                        self.logger.warning(f"Could not cast all columns of piece for {ind_key_cfg} to float64. Trying column by column.")
+                        valid_cols_df = {}
+                        for col in df_piece_to_add.columns:
+                            try: valid_cols_df[col] = pd.to_numeric(df_piece_to_add[col], errors='raise').astype('float64')
+                            except Exception as e_col: self.logger.error(f"Failed to convert column {col} for {ind_key_cfg} to float64: {e_col}. Dropping this column.")
+                        df_piece_to_add = pd.DataFrame(valid_cols_df, index=df_piece_to_add.index)
+                        if df_piece_to_add.empty: self.logger.error(f"Piece for {ind_key_cfg} became empty. Skipping."); continue
+                    
+                    cols_to_drop_in_dfta = [col for col in df_piece_to_add.columns if col in df_ta.columns]
+                    if cols_to_drop_in_dfta: df_ta.drop(columns=cols_to_drop_in_dfta, inplace=True, errors='ignore')
+                    
+                    df_ta = pd.concat([df_ta, df_piece_to_add], axis=1)
+
+                    if "multi_cols" in ind_details:
+                        for internal_key, col_pattern_template in ind_details["multi_cols"].items():
+                            actual_col_name = self._format_ta_column_name(col_pattern_template, current_params)
+                            if actual_col_name in df_ta.columns: self.ta_column_names[internal_key] = actual_col_name
+                            else: self.logger.warning(f"Multi-col '{actual_col_name}' (for {internal_key} of {ind_key_cfg}) not found in df_ta. Avail: {df_ta.columns.tolist()}")
+                    elif col_name_for_series_concat: # For MFI, VWAP (Series, concat=True)
+                        if col_name_for_series_concat in df_ta.columns: self.ta_column_names[ind_key_cfg] = col_name_for_series_concat
+                        else: self.logger.error(f"Internal: Column {col_name_for_series_concat} for {ind_key_cfg} not found after concat.")
+                
+                else: # Not concat (is_concat is False). For ATR, EMAs, etc.
+                    if "main_col_pattern" not in ind_details:
+                        self.logger.error(f"Indicator {ind_key_cfg} (concat=False) lacks main_col_pattern. Skipping.")
+                        continue
+                    actual_col_name = self._format_ta_column_name(ind_details["main_col_pattern"], current_params)
+                    if isinstance(result, pd.Series):
+                        if actual_col_name in df_ta.columns: self.logger.debug(f"Overwriting column '{actual_col_name}' for {ind_key_cfg} in df_ta.")
+                        df_ta[actual_col_name] = result.astype('float64')
+                        self.ta_column_names[ind_key_cfg] = actual_col_name
+                    else:
+                        self.logger.warning(f"Result for {ind_key_cfg} (concat=False, col '{actual_col_name}') not pd.Series. Type: {type(result)}. Skipping.")
+
+            except Exception as e:
+                self.logger.error(f"Error calculating indicator {ind_key_cfg} for {self.symbol} with params {current_params}: {e}", exc_info=True)
+
+        self.df_calculated = df_ta # Assign the DataFrame with all calculated indicators
+        self.logger.debug(f"Indicator calculation complete for {self.symbol}. Columns: {self.df_calculated.columns.tolist()}")
+        self.logger.debug(f"Mapped TA columns for {self.symbol}: {self.ta_column_names}")
+
+
+    def _update_latest_indicator_values(self) -> None:
+        """Updates self.indicator_values with the latest calculated indicator and OHLCV data."""
+        df_indicators_source = self.df_calculated
+        df_ohlcv_source = self.df_original_ohlcv # Use original for OHLCV to preserve Decimal type if present
+
+        ohlcv_keys_map = {'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}
+
+        if df_indicators_source.empty:
+            self.logger.warning(f"Cannot update latest values for {self.symbol}: Indicator DataFrame is empty.")
+            # Initialize all potential keys to NaN
+            all_expected_keys = set(self.ta_column_names.keys())
+            for ind_cfg_key, ind_cfg_details in self.INDICATOR_CONFIG.items():
+                all_expected_keys.add(ind_cfg_key) # e.g. "ATR"
+                if "multi_cols" in ind_cfg_details:
+                    all_expected_keys.update(ind_cfg_details["multi_cols"].keys()) # e.g. "PSAR_long"
+            all_expected_keys.update(ohlcv_keys_map.keys())
+            self.indicator_values = {k: np.nan for k in all_expected_keys}
+            return
+
+        try:
+            if df_indicators_source.index.empty or df_ohlcv_source.index.empty:
+                self.logger.error(f"Cannot get latest row for {self.symbol}: DataFrame index is empty.")
+                self.indicator_values = {k: np.nan for k in list(self.ta_column_names.keys()) + list(ohlcv_keys_map.keys())}
+                return
+
+            latest_indicator_row = df_indicators_source.iloc[-1]
+            latest_ohlcv_row = df_ohlcv_source.iloc[-1]
+            updated_values: Dict[str, Any] = {}
+
+            self.logger.debug(f"Updating latest values for {self.symbol} from indicator row dated: {latest_indicator_row.name}, OHLCV row dated: {latest_ohlcv_row.name}")
+
+            # Process TA indicators
+            for internal_key, actual_col_name in self.ta_column_names.items():
+                if actual_col_name and actual_col_name in latest_indicator_row.index:
+                    value = latest_indicator_row[actual_col_name]
+                    # Determine target type (Decimal or float) from INDICATOR_CONFIG
+                    indicator_type = "float" # Default
+                    for cfg_ind_name_iter, cfg_details_iter in self.INDICATOR_CONFIG.items():
+                        # Check if internal_key matches main indicator key or a sub-key in multi_cols
+                        if internal_key == cfg_ind_name_iter or internal_key in cfg_details_iter.get("multi_cols", {}):
+                            indicator_type = cfg_details_iter.get("type", "float"); break
+                    
+                    if pd.notna(value):
+                        try:
+                            if indicator_type == "decimal": updated_values[internal_key] = Decimal(str(value))
+                            else: updated_values[internal_key] = float(value)
+                        except (ValueError, TypeError, InvalidOperation) as e:
+                            self.logger.warning(f"Conversion error for {internal_key} ('{actual_col_name}':{value}): {e}. Storing as NaN."); updated_values[internal_key] = np.nan
+                    else: updated_values[internal_key] = np.nan
+                else:
+                    updated_values[internal_key] = np.nan # Key was mapped but column not found in latest row
+
+            # Process OHLCV values from original DataFrame (preferring Decimals)
+            for display_key, source_col_name in ohlcv_keys_map.items():
+                value_ohlcv = latest_ohlcv_row.get(source_col_name)
+                if pd.notna(value_ohlcv):
+                    try:
+                        if isinstance(value_ohlcv, Decimal): updated_values[display_key] = value_ohlcv
+                        else: updated_values[display_key] = Decimal(str(value_ohlcv)) # Convert if not already Decimal
+                    except InvalidOperation:
+                        self.logger.warning(f"Failed to convert original OHLCV value '{source_col_name}' ({value_ohlcv}) to Decimal for {self.symbol}. Storing as NaN.")
+                        updated_values[display_key] = np.nan
+                else: updated_values[display_key] = np.nan
+
+            # Ensure all configured indicator keys exist in indicator_values, defaulting to NaN
+            for ind_cfg_key_init, ind_cfg_details_init in self.INDICATOR_CONFIG.items():
+                updated_values.setdefault(ind_cfg_key_init, np.nan)
+                if "multi_cols" in ind_cfg_details_init:
+                    for multi_col_key_init in ind_cfg_details_init["multi_cols"]:
+                        updated_values.setdefault(multi_col_key_init, np.nan)
+            for ohlcv_disp_key in ohlcv_keys_map.keys():
+                updated_values.setdefault(ohlcv_disp_key, np.nan)
+
+            self.indicator_values = updated_values
+
+            # Debug logging for ATR specifically if it's present and valid
+            if "ATR" in self.indicator_values and pd.notna(self.indicator_values.get("ATR")):
+                 self.logger.info(f"DEBUG ATR for {self.symbol}: Final ATR in self.indicator_values: {self.indicator_values.get('ATR')}, Type: {type(self.indicator_values.get('ATR'))}")
+
+            price_prec_log = get_price_precision(self.market_info, self.logger)
+            log_output_details = {}
+            decimal_like_keys = ['Open','High','Low','Close','ATR','EMA_Short','EMA_Long','VWAP','PSAR_long','PSAR_short','SMA10','BB_Lower','BB_Middle','BB_Upper']
+            volume_like_keys = ['Volume','Volume_MA']
+            for k_log, v_val_log in self.indicator_values.items():
+                if isinstance(v_val_log, (Decimal, float)) and pd.notna(v_val_log):
+                    if k_log in decimal_like_keys: fmt_str = f"{v_val_log:.{price_prec_log}f}"
+                    elif k_log in volume_like_keys: fmt_str = f"{v_val_log:.8f}" # Volume often needs more precision
+                    else: fmt_str = f"{v_val_log:.4f}" # Default for other floats
+                    log_output_details[k_log] = fmt_str
+                else:
+                    log_output_details[k_log] = str(v_val_log) # NaN or other types
+            self.logger.debug(f"Latest indicator values updated for {self.symbol}: {log_output_details}")
+
+        except IndexError:
+            self.logger.error(f"IndexError accessing latest row for {self.symbol}. Check DataFrame integrity and length.")
+            # Fallback to NaN for all expected keys
+            all_expected_keys_fallback = set(self.ta_column_names.keys()) | set(ohlcv_keys_map.keys())
+            for ind_cfg_key_fb, ind_cfg_details_fb in self.INDICATOR_CONFIG.items():
+                all_expected_keys_fallback.add(ind_cfg_key_fb)
+                if "multi_cols" in ind_cfg_details_fb: all_expected_keys_fallback.update(ind_cfg_details_fb["multi_cols"].keys())
+            self.indicator_values = {k: np.nan for k in all_expected_keys_fallback}
+
+        except Exception as e:
+            self.logger.error(f"Unexpected error updating latest indicators for {self.symbol}: {e}", exc_info=True)
+            # Fallback in case of any other error
+            if not self.indicator_values: # If it's still empty
+                self.indicator_values = {k: np.nan for k in list(self.ta_column_names.keys()) + list(ohlcv_keys_map.keys())}
+
+
+    def calculate_fibonacci_levels(self, window: Optional[int] = None) -> Dict[str, Decimal]:
+        """Calculates Fibonacci retracement levels based on high/low over a window."""
+        cfg_window = self.get_period("fibonacci_window")
+        window_val = window if isinstance(window, int) and window > 0 else cfg_window
+
+        if not (isinstance(window_val, int) and window_val > 0):
+            self.logger.warning(f"Invalid Fibonacci window ({window_val}) for {self.symbol}. No levels calculated.")
+            self.fib_levels_data = {}; return {}
+        if len(self.df_original_ohlcv) < window_val:
+            self.logger.debug(f"Not enough data ({len(self.df_original_ohlcv)} rows) for Fibonacci window {window_val} on {self.symbol}.")
+            self.fib_levels_data = {}; return {}
+
+        df_slice = self.df_original_ohlcv.tail(window_val)
+        try:
+            # Ensure 'high' and 'low' are numeric before max/min, handling potential non-numeric data
+            h_series = pd.to_numeric(df_slice["high"], errors='coerce').dropna()
+            l_series = pd.to_numeric(df_slice["low"], errors='coerce').dropna()
+
+            if h_series.empty or l_series.empty:
+                self.logger.warning(f"No valid high/low data for Fibonacci calculation in window for {self.symbol}.")
+                self.fib_levels_data = {}; return {}
+
+            period_high, period_low = Decimal(str(h_series.max())), Decimal(str(l_series.min()))
+            diff = period_high - period_low
+            levels: Dict[str, Decimal] = {}
+
+            price_precision = get_price_precision(self.market_info, self.logger)
+            min_tick_size = get_min_tick_size(self.market_info, self.logger)
+            # Quantization factor: use min_tick_size if valid, else use precision-based factor
+            quantize_factor = min_tick_size if min_tick_size and min_tick_size > Decimal('0') else Decimal(f'1e-{price_precision}')
+
+            if diff > Decimal('0'):
+                for level_pct_val in FIB_LEVELS: # Assumes FIB_LEVELS are like [0.236, 0.382, ...]
+                    level_price_raw = period_high - (diff * Decimal(str(level_pct_val)))
+                    # Quantize the calculated level price
+                    levels[f"Fib_{level_pct_val * 100:.1f}%"] = (level_price_raw / quantize_factor).quantize(Decimal('1'), rounding=ROUND_DOWN) * quantize_factor
+            else: # If high and low are the same, or low > high (data error)
+                level_price_quantized = (period_high / quantize_factor).quantize(Decimal('1'), rounding=ROUND_DOWN) * quantize_factor
+                for level_pct_val in FIB_LEVELS:
+                    levels[f"Fib_{level_pct_val * 100:.1f}%"] = level_price_quantized
+
+            self.fib_levels_data = levels
+            log_levels_str = {k_val: f"{v_val:.{price_precision}f}" for k_val, v_val in levels.items()}
+            self.logger.debug(f"Calculated Fibonacci levels for {self.symbol} (Window: {window_val}, High: {period_high}, Low: {period_low}): {log_levels_str}")
+            return levels
+        except Exception as e:
+            self.logger.error(f"Fibonacci calculation error for {self.symbol}: {e}", exc_info=True)
+            self.fib_levels_data = {}; return {}
+
+    def get_nearest_fibonacci_levels(
+        self, current_price: Decimal, num_levels: int = 5
+    ) -> list[Tuple[str, Decimal]]:
+        """Finds the N nearest Fibonacci levels to the current price."""
+        if not self.fib_levels_data:
+            self.logger.debug(f"No Fibonacci levels available for {self.symbol} to find nearest."); return []
+        if not (isinstance(current_price, Decimal) and pd.notna(current_price) and current_price > Decimal('0')):
+            self.logger.warning(f"Invalid current_price ({current_price}) for Fibonacci comparison on {self.symbol}."); return []
+        if num_levels <= 0: return []
+
+        try:
+            # Calculate distances from current_price to each valid Fibonacci level
+            distances = []
+            for name, level_price in self.fib_levels_data.items():
+                if isinstance(level_price, Decimal) and level_price > Decimal('0'):
+                    distances.append({'name': name, 'level': level_price, 'distance': abs(current_price - level_price)})
+
+            # Sort by distance and take the top N
+            distances.sort(key=lambda x: x['distance'])
+            return [(item['name'], item['level']) for item in distances[:num_levels]]
+        except Exception as e:
+            self.logger.error(f"Error finding nearest Fibonacci levels for {self.symbol}: {e}", exc_info=True); return []
+
+    def calculate_ema_alignment_score(self) -> float:
+        """Calculates a score based on EMA alignment and price position."""
+        ema_s = self.indicator_values.get("EMA_Short")
+        ema_l = self.indicator_values.get("EMA_Long")
+        close_price = self.indicator_values.get("Close")
+
+        # Ensure all values are valid Decimals
+        if not all(isinstance(val, Decimal) and pd.notna(val) for val in [ema_s, ema_l, close_price]):
+            self.logger.debug(f"EMA alignment score skipped for {self.symbol}: one or more values are invalid/NaN.")
+            return np.nan # Return NaN if data is missing
+
+        # Type hinting for Mypy after check
+        ema_s, ema_l, close_price = ema_s, ema_l, close_price
+
+        if close_price > ema_s and ema_s > ema_l: return 1.0  # Strong bullish alignment
+        if close_price < ema_s and ema_s < ema_l: return -1.0 # Strong bearish alignment
+        # Add more nuanced scores for partial alignments if needed
+        return 0.0 # Neutral or mixed alignment
+
+    def generate_trading_signal(self, current_price: Decimal, orderbook_data: Optional[Dict]) -> str:
+        """Generates a trading signal (BUY, SELL, HOLD) based on weighted indicator scores."""
+        self.signals = {"BUY":0,"SELL":0,"HOLD":1} # Reset signals, default to HOLD
+        current_score, total_weight, active_checks, nan_checks = Decimal("0"), Decimal("0"), 0, 0
+        debug_scores: Dict[str, str] = {}
+
+        if not self.indicator_values:
+            self.logger.warning(f"No indicator values available for {self.symbol}. Defaulting to HOLD signal.")
+            return "HOLD"
+
+        # Pre-check ATR validity, as it's often crucial for risk management (though not directly in score here)
+        atr_val = self.indicator_values.get("ATR")
+        if not (isinstance(atr_val, Decimal) and pd.notna(atr_val) and atr_val > Decimal('0')):
+            self.logger.warning(f"Signal generation for {self.symbol}: ATR is invalid ({atr_val}). This might affect subsequent TP/SL calculations.")
+
+        # Count valid core indicators (those defined in INDICATOR_CONFIG and successfully calculated)
+        valid_core_indicator_count = 0
+        for ind_key_from_config in self.INDICATOR_CONFIG.keys():
+            # Check if the main key or any of its multi_cols sub-keys have valid values
+            if "multi_cols" in self.INDICATOR_CONFIG[ind_key_from_config]:
+                if any(pd.notna(self.indicator_values.get(sub_key)) for sub_key in self.INDICATOR_CONFIG[ind_key_from_config]["multi_cols"]):
+                    valid_core_indicator_count += 1
+            elif pd.notna(self.indicator_values.get(ind_key_from_config)):
+                valid_core_indicator_count += 1
+        
+        num_configured_inds = sum(1 for enabled in self.config.get("indicators", {}).values() if enabled)
+        min_active_for_signal = self.config.get("min_active_indicators_for_signal", max(1, int(num_configured_inds * 0.6))) # Default to 60% or at least 1
+
+        if valid_core_indicator_count < min_active_for_signal:
+            self.logger.warning(f"Signal for {self.symbol}: Only {valid_core_indicator_count}/{num_configured_inds} core indicators are valid (min required: {min_active_for_signal}). Defaulting to HOLD.")
+            return "HOLD"
+        if not(isinstance(current_price, Decimal) and pd.notna(current_price) and current_price > Decimal('0')):
+            self.logger.warning(f"Invalid current_price ({current_price}) for {self.symbol} signal generation. Defaulting to HOLD.")
+            return "HOLD"
+
+        active_weights = self.weights
+        if not active_weights:
+            self.logger.error(f"Weight set '{self.active_weight_set_name}' is empty for {self.symbol}. Cannot generate signal. Defaulting to HOLD.")
+            return "HOLD"
+
+        # Iterate through configured indicators to calculate weighted score
+        for ind_cfg_name_loop, _ in self.INDICATOR_CONFIG.items():
+            indicator_config_key = ind_cfg_name_loop.lower() # e.g. "ema_alignment"
+
+            # Skip if indicator is not enabled in strategy config
+            if not self.config.get("indicators",{}).get(indicator_config_key, False):
+                continue
+            
+            weight_str = active_weights.get(indicator_config_key)
+            if weight_str is None: continue # No weight assigned for this indicator
+            try:
+                weight_val = Decimal(str(weight_str))
+            except InvalidOperation:
+                self.logger.warning(f"Invalid weight '{weight_str}' for {indicator_config_key} for {self.symbol}. Skipping this check."); continue
+            if weight_val == Decimal('0'): continue # Zero weight, no contribution
+
+            check_method_name = f"_check_{indicator_config_key}"
+            if not hasattr(self, check_method_name) or not callable(getattr(self, check_method_name)):
+                if weight_val != Decimal('0'): self.logger.warning(f"No check method '{check_method_name}' found for enabled indicator {indicator_config_key} ({self.symbol}).");
+                continue
+
+            method_to_call = getattr(self, check_method_name)
+            indicator_score_float = np.nan # Default to NaN
+            try:
+                if indicator_config_key == "orderbook": # Special case for orderbook
+                    indicator_score_float = method_to_call(orderbook_data, current_price)
+                else:
+                    indicator_score_float = method_to_call()
+            except Exception as e_check:
+                self.logger.error(f"Error in check method {check_method_name} for {self.symbol}: {e_check}", exc_info=True)
+
+            debug_scores[indicator_config_key] = f"{indicator_score_float:.3f}" if pd.notna(indicator_score_float) else "NaN"
+            if pd.notna(indicator_score_float):
+                try:
+                    indicator_score_decimal = Decimal(str(indicator_score_float))
+                    # Clamp score between -1 and 1 before applying weight
+                    clamped_score = max(Decimal("-1"), min(Decimal("1"), indicator_score_decimal))
+                    current_score += clamped_score * weight_val
+                    total_weight += abs(weight_val) # Sum of absolute weights for normalization or thresholding if needed
+                    active_checks += 1
+                except InvalidOperation:
+                    nan_checks +=1; self.logger.error(f"Error processing score for {indicator_config_key} (value: {indicator_score_float}).")
+            else:
+                nan_checks += 1
+
+        final_signal_str = "HOLD"
+        # Use a configurable threshold for BUY/SELL signals
+        signal_threshold = Decimal(str(self.config.get("signal_score_threshold", "0.7")))
+
+        if total_weight == Decimal('0') and active_checks == 0: # No active, weighted checks contributed
+            self.logger.warning(f"No weighted indicators contributed to the score for {self.symbol}. Defaulting to HOLD.")
+        elif current_score >= signal_threshold: final_signal_str = "BUY"
+        elif current_score <= -signal_threshold: final_signal_str = "SELL"
+        
+        price_prec = get_price_precision(self.market_info, self.logger)
+        self.logger.info(
+            f"Signal ({self.symbol} @ {current_price:.{price_prec}f}): "
+            f"Set='{self.active_weight_set_name}', Checks[Act:{active_checks},NaN:{nan_checks}], "
+            f"TotalWeight={total_weight:.2f}, Score={current_score:.4f} (Threshold:{signal_threshold:.2f}) "
+            f"==> {_format_signal(final_signal_str)}" # Use utility for colored signal output
+        )
+        self.logger.debug(f"Individual Scores ({self.symbol}): {debug_scores}")
+        
+        # Update signals dictionary based on the final decision
+        self.signals = {"BUY": int(final_signal_str=="BUY"), "SELL": int(final_signal_str=="SELL"), "HOLD": int(final_signal_str=="HOLD")}
+        return final_signal_str
+
+    # --- Individual Indicator Check Methods (_check_...) ---
+    # These methods return a float score, typically between -1.0 and 1.0, or np.nan.
+    def _check_ema_alignment(self) -> float: return self.calculate_ema_alignment_score()
+
+    def _check_momentum(self) -> float:
+        momentum_val = self.indicator_values.get("Momentum") # This is raw momentum value
+        last_close = self.indicator_values.get("Close")
+        if pd.isna(momentum_val) or not (isinstance(last_close, Decimal) and last_close > Decimal('0')): return np.nan
+        
+        try:
+            # Calculate momentum as a percentage of price for normalization
+            mom_pct = (Decimal(str(momentum_val)) / last_close) * Decimal('100') # As percentage
+            threshold_pct = Decimal(str(self.get_period("momentum_threshold_pct") or "0.1")) # e.g., 0.1%
+        except (ZeroDivisionError, InvalidOperation, TypeError): return 0.0 # Neutral on error
+
+        if threshold_pct == Decimal('0'): return 0.0 # Avoid division by zero if threshold is zero
+
+        # Scale score: Full score at threshold_pct * 5, linear in between
+        scaling_factor = threshold_pct * Decimal("5")
+        if mom_pct > threshold_pct: return min(1.0, float(mom_pct / scaling_factor))
+        if mom_pct < -threshold_pct: return max(-1.0, float(mom_pct / scaling_factor))
+        # For momentum within +/- threshold_pct, scale it relative to the threshold
+        try: return float(mom_pct / threshold_pct)
+        except (ZeroDivisionError, InvalidOperation, TypeError): return 0.0
+
+    def _check_volume_confirmation(self) -> float:
+        current_volume = self.indicator_values.get("Volume")
+        volume_ma = self.indicator_values.get("Volume_MA")
+        try:
+            multiplier = Decimal(str(self.get_period("volume_confirmation_multiplier") or "1.5"))
+        except (InvalidOperation, TypeError): return np.nan
+
+        if not all(isinstance(v,Decimal) and pd.notna(v) for v in [current_volume, volume_ma, multiplier]): return np.nan
+        if current_volume < Decimal('0') or volume_ma <= Decimal('0') or multiplier <= Decimal('0'): return np.nan
+
+        try:
+            ratio = current_volume / volume_ma
+            if ratio > multiplier: # Significantly higher volume
+                # Scale score: starts at 0.5 for ratio=multiplier, up to 1.0 for ratio=multiplier*5
+                base_score, scale_denominator = Decimal("0.5"), multiplier * Decimal("4") # (mult*5 - mult)
+                additional_score = (ratio - multiplier) / scale_denominator if scale_denominator != Decimal('0') else Decimal("0.5")
+                return min(1.0, float(base_score + additional_score))
+            # Consider low volume (e.g., less than 1/multiplier of MA) as a slight negative
+            if ratio < (Decimal("1") / multiplier): return -0.4
+            return 0.0 # Neutral volume
+        except (ZeroDivisionError, InvalidOperation, TypeError): return np.nan
+
+    def _check_stoch_rsi(self) -> float:
+        k_val = self.indicator_values.get("StochRSI_K")
+        d_val = self.indicator_values.get("StochRSI_D")
+        if pd.isna(k_val) or pd.isna(d_val): return np.nan
+
+        k_float, d_float = float(k_val), float(d_val)
+        oversold_thresh = float(self.get_period("stoch_rsi_oversold_threshold") or 20)
+        overbought_thresh = float(self.get_period("stoch_rsi_overbought_threshold") or 80)
+        
+        cross_thresh_period = self.get_period("stoch_rsi_cross_threshold")
+        cross_thresh = float(cross_thresh_period) if isinstance(cross_thresh_period, (int,float)) and cross_thresh_period > 0 else 5.0
+
+        score = 0.0
+        # Basic Oversold/Overbought
+        if k_float < oversold_thresh and d_float < oversold_thresh: score = 1.0
+        elif k_float > overbought_thresh and d_float > overbought_thresh: score = -1.0
+        
+        # Consider K/D cross
+        diff = k_float - d_float
+        if score == 1.0 and diff > 0: score = 1.0 # K crossing up D in oversold is stronger buy
+        elif score == -1.0 and diff < 0: score = -1.0 # K crossing down D in overbought is stronger sell
+        elif abs(diff) > cross_thresh: # Significant cross outside OB/OS
+            score = 0.6 if diff > 0 else -0.6
+        elif k_float > d_float : score = max(score, 0.2) # K above D
+        elif k_float < d_float : score = min(score, -0.2) # K below D
+            
+        # Dampen signal if StochRSI is in neutral zone (e.g., 40-60)
+        if 40 < k_float < 60 and 40 < d_float < 60: score *= 0.5
+        return score
+
+    def _check_rsi(self) -> float:
+        rsi_val = self.indicator_values.get("RSI")
+        if pd.isna(rsi_val): return np.nan
+        rsi_float = float(rsi_val)
+
+        oversold = float(self.get_period("rsi_oversold_threshold") or 30)
+        overbought = float(self.get_period("rsi_overbought_threshold") or 70)
+        near_oversold = float(self.get_period("rsi_near_oversold_threshold") or 40) # e.g. RSI < 40
+        near_overbought = float(self.get_period("rsi_near_overbought_threshold") or 60) # e.g. RSI > 60
+
+        if rsi_float <= oversold: return 1.0
+        if rsi_float >= overbought: return -1.0
+        if rsi_float < near_oversold: return 0.5 # Approaching oversold
+        if rsi_float > near_overbought: return -0.5 # Approaching overbought
+        
+        # Scaled score for mid-range (between near_os and near_ob)
+        mid_point = (near_overbought + near_oversold) / 2.0
+        span = (near_overbought - near_oversold) / 2.0
+        if span > 0 and near_oversold <= rsi_float <= near_overbought:
+            return (rsi_float - mid_point) / span * -0.3 # Max score of +/-0.3 in this range
+        return 0.0 # Neutral
+
+    def _check_cci(self) -> float:
+        cci_val = self.indicator_values.get("CCI")
+        if pd.isna(cci_val): return np.nan
+        cci_float = float(cci_val)
+
+        strong_os = float(self.get_period("cci_strong_oversold") or -150)
+        strong_ob = float(self.get_period("cci_strong_overbought") or 150)
+        moderate_os = float(self.get_period("cci_moderate_oversold") or -80) # Standard CCI buy signal often at -100
+        moderate_ob = float(self.get_period("cci_moderate_overbought") or 80) # Standard CCI sell signal often at +100
+
+        if cci_float <= strong_os: return 1.0    # Strong buy
+        if cci_float >= strong_ob: return -1.0   # Strong sell
+        if cci_float < moderate_os: return 0.6   # Moderate buy
+        if cci_float > moderate_ob: return -0.6  # Moderate sell
+        # Slight bias if crossing zero or in moderate zones but not yet strong
+        if moderate_os <= cci_float < 0: return 0.1 # Moving up towards zero from oversold
+        if 0 < cci_float <= moderate_ob: return -0.1# Moving down towards zero from overbought
+        return 0.0 # Neutral
+
+    def _check_wr(self) -> float: # Williams %R
+        wr_val = self.indicator_values.get("Williams_R")
+        if pd.isna(wr_val): return np.nan
+        wr_float = float(wr_val) # Typically -100 to 0
+
+        oversold = float(self.get_period("wr_oversold_threshold") or -80) # e.g., -80 to -100 is oversold
+        overbought = float(self.get_period("wr_overbought_threshold") or -20) # e.g., -20 to 0 is overbought
+        midpoint = float(self.get_period("wr_midpoint_threshold") or -50) # Midpoint of the range
+
+        if wr_float <= oversold: return 1.0   # Oversold, potential buy
+        if wr_float >= overbought: return -1.0 # Overbought, potential sell
+        # Gradual score for values between strong OB/OS and midpoint
+        if oversold < wr_float < midpoint : return 0.4 # Approaching midpoint from oversold
+        if midpoint < wr_float < overbought : return -0.4 # Approaching midpoint from overbought
+        return 0.0 # Neutral (around midpoint)
+
+    def _check_psar(self) -> float:
+        psar_long_val = self.indicator_values.get("PSAR_long") # Value if in uptrend (PSAR dot below price)
+        psar_short_val = self.indicator_values.get("PSAR_short") # Value if in downtrend (PSAR dot above price)
+        close_price = self.indicator_values.get("Close")
+
+        if not isinstance(close_price, Decimal) or pd.isna(close_price): return np.nan
+
+        # PSAR indicates trend direction.
+        # A long signal is when price is above the PSAR dot (psar_long_val is not NaN, psar_short_val is NaN).
+        # A short signal is when price is below the PSAR dot (psar_short_val is not NaN, psar_long_val is NaN).
+        
+        is_long_trend_indicated = isinstance(psar_long_val, Decimal) and pd.notna(psar_long_val)
+        is_short_trend_indicated = isinstance(psar_short_val, Decimal) and pd.notna(psar_short_val)
+
+        if is_long_trend_indicated and not is_short_trend_indicated and close_price > psar_long_val:
+            return 1.0 # Bullish trend confirmed by price
+        if is_short_trend_indicated and not is_long_trend_indicated and close_price < psar_short_val:
+            return -1.0 # Bearish trend confirmed by price
+        
+        # Ambiguous or NaN states
+        if not is_long_trend_indicated and not is_short_trend_indicated:
+            return np.nan # PSAR values are NaN (e.g., at the start of data)
+        
+        # If state is conflicting (e.g. both psar_long and psar_short have values, or price is on wrong side of active PSAR)
+        self.logger.debug(f"PSAR ambiguous state for {self.symbol}: PSARl={psar_long_val}, PSARs={psar_short_val}, Close={close_price}")
+        return 0.0 # Neutral for ambiguous states
+
+
+    def _check_sma_10(self) -> float: # Example for a generic SMA
+        sma_val = self.indicator_values.get("SMA10")
+        last_close = self.indicator_values.get("Close")
+        if not all(isinstance(v,Decimal) and pd.notna(v) for v in [sma_val, last_close]): return np.nan
+        
+        # Type check passed, can use them directly
+        sma_val, last_close = sma_val, last_close
+
+        if last_close > sma_val: return 0.6 # Price above SMA (bullish)
+        if last_close < sma_val: return -0.6# Price below SMA (bearish)
+        return 0.0 # Price is at SMA
+
+    def _check_vwap(self) -> float:
+        vwap_val = self.indicator_values.get("VWAP")
+        last_close = self.indicator_values.get("Close")
+        if not all(isinstance(v,Decimal) and pd.notna(v) for v in [vwap_val, last_close]): return np.nan
+
+        vwap_val, last_close = vwap_val, last_close
+
+        if last_close > vwap_val: return 0.7 # Price above VWAP (bullish sentiment for the period)
+        if last_close < vwap_val: return -0.7 # Price below VWAP (bearish sentiment)
+        return 0.0
+
+    def _check_mfi(self) -> float: # Money Flow Index
+        mfi_val = self.indicator_values.get("MFI")
+        if pd.isna(mfi_val): return np.nan
+        mfi_float = float(mfi_val)
+
+        oversold = float(self.get_period("mfi_oversold_threshold") or 20)
+        overbought = float(self.get_period("mfi_overbought_threshold") or 80)
+        near_os = float(self.get_period("mfi_near_oversold_threshold") or 35) # MFI specific levels
+        near_ob = float(self.get_period("mfi_near_overbought_threshold") or 65)
+
+        if mfi_float <= oversold: return 1.0
+        if mfi_float >= overbought: return -1.0
+        if mfi_float < near_os: return 0.4
+        if mfi_float > near_ob: return -0.4
+        return 0.0 # Neutral
+
+    def _check_bollinger_bands(self) -> float:
+        lower_bb = self.indicator_values.get("BB_Lower")
+        middle_bb = self.indicator_values.get("BB_Middle") # Usually an SMA
+        upper_bb = self.indicator_values.get("BB_Upper")
+        last_close = self.indicator_values.get("Close")
+
+        if not all(isinstance(v,Decimal) and pd.notna(v) for v in [lower_bb, middle_bb, upper_bb, last_close]): return np.nan
+
+        lower_bb, middle_bb, upper_bb, last_close = lower_bb, middle_bb, upper_bb, last_close
+
+        if last_close <= lower_bb: return 1.0  # Price touched or below lower band (potential reversal buy)
+        if last_close >= upper_bb: return -1.0 # Price touched or above upper band (potential reversal sell)
+
+        # Score based on position within the bands
+        band_width = upper_bb - lower_bb
+        if band_width > Decimal('0'):
+            try:
+                # Normalize position: -1 (at lower) to +1 (at upper), 0 at middle. Max score of +/-0.7 within bands.
+                position_score = (last_close - middle_bb) / (band_width / Decimal('2'))
+                return float(max(Decimal("-1"), min(Decimal("1"), position_score)) * Decimal("0.7"))
+            except (ZeroDivisionError, InvalidOperation, TypeError): return 0.0
+        return 0.0 # Flat bands or error
+
+    def _check_orderbook(self, orderbook_data: Optional[Dict], current_price: Decimal) -> float:
+        """Analyzes order book depth to gauge short-term pressure. Returns score -1 to 1."""
+        if not orderbook_data: return np.nan
+        try:
+            bids = orderbook_data.get('bids', []) # List of [price, quantity]
+            asks = orderbook_data.get('asks', []) # List of [price, quantity]
+            if not bids or not asks: return np.nan
+
+            num_levels_to_check = self.config.get("orderbook_check_levels", 10) # How many levels deep to sum
+
+            # Sum total quantity for bids and asks within the specified levels
+            total_bid_volume = sum(Decimal(str(b[1])) for b in bids[:num_levels_to_check] if len(b)==2 and pd.notna(b[1]))
+            total_ask_volume = sum(Decimal(str(a[1])) for a in asks[:num_levels_to_check] if len(a)==2 and pd.notna(a[1]))
+
+            total_volume_in_levels = total_bid_volume + total_ask_volume
+            if total_volume_in_levels == Decimal('0'): return 0.0 # No volume or error
+
+            # Order Book Imbalance (OBI)
+            obi = (total_bid_volume - total_ask_volume) / total_volume_in_levels
+            return float(obi) # Score is directly the OBI, ranges -1 to 1
+        except (TypeError, ValueError, InvalidOperation, IndexError) as e:
+            self.logger.warning(f"Order book analysis error for {self.symbol}: {e}", exc_info=False); return np.nan
+
+    def calculate_entry_tp_sl(
+        self, entry_price_estimate: Decimal, signal: str
+    ) -> Tuple[Optional[Decimal], Optional[Decimal], Optional[Decimal]]:
+        """Calculates Take Profit (TP) and Stop Loss (SL) levels based on ATR and multipliers."""
+        if signal not in ["BUY", "SELL"]:
+            return entry_price_estimate, None, None # No TP/SL for HOLD or invalid signal
+
+        atr_value = self.indicator_values.get("ATR")
+        default_atr_pct_of_price_str = str(self.config.get("default_atr_percentage_of_price", "0.01")) # e.g., 1%
+
+        # Validate or calculate fallback ATR
+        if not (isinstance(atr_value, Decimal) and pd.notna(atr_value) and atr_value > Decimal('0')):
+            self.logger.warning(f"TP/SL Calc ({self.symbol} {signal}): ATR invalid ({atr_value}). Using default ATR based on price percentage.")
+            if not (isinstance(entry_price_estimate, Decimal) and entry_price_estimate > Decimal('0')):
+                 self.logger.error(f"Cannot calculate fallback ATR for {self.symbol}: entry_price_estimate invalid ({entry_price_estimate}). No TP/SL.")
+                 return entry_price_estimate, None, None
+            try:
+                atr_value = entry_price_estimate * Decimal(default_atr_pct_of_price_str)
+            except InvalidOperation:
+                self.logger.error(f"Invalid 'default_atr_percentage_of_price': {default_atr_pct_of_price_str}. No TP/SL."); return entry_price_estimate,None,None
+            if not (atr_value > Decimal('0')):
+                self.logger.error(f"Default ATR calculation failed for {self.symbol} (resulted in {atr_value}). Cannot set TP/SL.")
+                return entry_price_estimate, None, None
+            self.logger.debug(f"Using price-percentage based ATR for {self.symbol} TP/SL: {atr_value}")
+
+        if not (isinstance(entry_price_estimate, Decimal) and pd.notna(entry_price_estimate) and entry_price_estimate > Decimal('0')):
+            self.logger.warning(f"Cannot calculate TP/SL for {self.symbol} {signal}: Entry price estimate invalid ({entry_price_estimate}).")
+            return entry_price_estimate, None, None
+
+        try:
+            tp_multiplier_str = str(self.config.get("take_profit_multiple", "1.5"))
+            sl_multiplier_str = str(self.config.get("stop_loss_multiple", "1.0"))
+            tp_multiplier = Decimal(tp_multiplier_str)
+            sl_multiplier = Decimal(sl_multiplier_str)
+
+            price_precision = get_price_precision(self.market_info, self.logger)
+            min_tick = get_min_tick_size(self.market_info, self.logger)
+            
+            # Quantization factor: use min_tick_size if valid, else use precision-based factor
+            quantize_unit = min_tick if min_tick and min_tick > Decimal('0') else Decimal(f'1e-{price_precision}')
+            if not (quantize_unit > Decimal('0')): # Final fallback if min_tick was zero or negative
+                quantize_unit = Decimal(f'1e-{price_precision}')
+
+
+            tp_offset = atr_value * tp_multiplier
+            sl_offset = atr_value * sl_multiplier
+
+            raw_tp: Decimal
+            raw_sl: Decimal
+            if signal == "BUY":
+                raw_tp = entry_price_estimate + tp_offset
+                raw_sl = entry_price_estimate - sl_offset
+            else: # SELL
+                raw_tp = entry_price_estimate - tp_offset
+                raw_sl = entry_price_estimate + sl_offset
+
+            # Quantize TP and SL according to market's tick size / precision
+            # For BUY: TP rounds UP (more profit), SL rounds DOWN (wider stop)
+            # For SELL: TP rounds DOWN (more profit), SL rounds UP (wider stop)
+            quantized_tp = (raw_tp / quantize_unit).quantize(Decimal('1'), rounding=ROUND_UP if signal == "BUY" else ROUND_DOWN) * quantize_unit
+            quantized_sl = (raw_sl / quantize_unit).quantize(Decimal('1'), rounding=ROUND_DOWN if signal == "BUY" else ROUND_UP) * quantize_unit
+            
+            # Sanity checks for SL and TP
+            # Ensure SL is not through the entry price due to large tick size or small offset
+            if min_tick and min_tick > Decimal('0'):
+                if signal == "BUY" and quantized_sl >= entry_price_estimate:
+                    quantized_sl = ( (entry_price_estimate - min_tick) / quantize_unit).quantize(Decimal('1'), rounding=ROUND_DOWN) * quantize_unit
+                elif signal == "SELL" and quantized_sl <= entry_price_estimate:
+                    quantized_sl = ( (entry_price_estimate + min_tick) / quantize_unit).quantize(Decimal('1'), rounding=ROUND_UP) * quantize_unit
+            
+            # Ensure TP is profitable relative to entry
+            if (signal == "BUY" and quantized_tp <= entry_price_estimate) or \
+               (signal == "SELL" and quantized_tp >= entry_price_estimate):
+                self.logger.warning(f"{signal} TP ({quantized_tp}) is not profitable relative to entry ({entry_price_estimate}) for {self.symbol}. Setting TP to None.")
+                quantized_tp = None
+            
+            # Ensure SL and TP are positive prices
+            if quantized_sl is not None and quantized_sl <= Decimal('0'):
+                self.logger.error(f"Calculated SL ({quantized_sl}) is not positive for {self.symbol}. Setting SL to None."); quantized_sl = None
+            if quantized_tp is not None and quantized_tp <= Decimal('0'):
+                self.logger.warning(f"Calculated TP ({quantized_tp}) is not positive for {self.symbol}. Setting TP to None."); quantized_tp = None
+            
+            tp_log = f"{quantized_tp:.{price_precision}f}" if quantized_tp else "None"
+            sl_log = f"{quantized_sl:.{price_precision}f}" if quantized_sl else "None"
+            self.logger.debug(
+                f"Calculated TP/SL for {self.symbol} ({signal}): Entry={entry_price_estimate:.{price_precision}f}, "
+                f"ATR={atr_value:.{price_precision+2}f}, TP={tp_log}, SL={sl_log}"
+            )
+            return entry_price_estimate, quantized_tp, quantized_sl
+
+        except (InvalidOperation, TypeError, Exception) as e: # Catch broader exceptions during calculation
+            self.logger.error(f"Error calculating TP/SL for {self.symbol} ({signal}): {e}", exc_info=True)
+            return entry_price_estimate, None, None

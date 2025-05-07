@@ -20,12 +20,13 @@ class Config:
 
     # Position / Order settings
     POSITION_QTY_EPSILON: Decimal = Decimal("1e-9") # Threshold for treating qty as zero
+    QUOTE_PRECISION: int = 2 # Assumed precision for quote currency (e.g., USDT)
     DEFAULT_SLIPPAGE_PCT: Decimal = Decimal("0.005") # Default max slippage for market orders
     ORDER_BOOK_FETCH_LIMIT: int = 25 # Default depth for fetch_l2_order_book
     SHALLOW_OB_FETCH_DEPTH: int = 5 # Depth used for slippage check analysis
 
     # Symbol / Market settings
-    SYMBOL: str = "BTC/USDT:USDT" # Default symbol
+    SYMBOL: str = "DOT/USDT:USDT" # Default symbol
     USDT_SYMBOL: str = "USDT" # Quote currency symbol for balance checks
     EXPECTED_MARKET_TYPE: Literal['swap', 'future', 'spot', 'option'] = 'swap'
     EXPECTED_MARKET_LOGIC: Optional[Literal['linear', 'inverse']] = 'linear'
@@ -35,7 +36,7 @@ class Config:
     API_KEY: Optional[str] = os.getenv("BYBIT_API_KEY") # Load from environment
     API_SECRET: Optional[str] = os.getenv("BYBIT_API_SECRET") # Load from environment
     DEFAULT_RECV_WINDOW: int = 10000
-    TESTNET_MODE: bool = True # Set to False for production
+    TESTNET_MODE: bool = False # Set to False for production
 
     # Account settings
     DEFAULT_LEVERAGE: int = 10

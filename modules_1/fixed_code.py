@@ -1,0 +1,113 @@
+import logging
+# import time # Can be removed if only used for time.monotonic() or replaced by asyncio for sleeps
+import asyncio # <<< ADDED
+from decimal import Decimal, ROUND_DOWN, ROUND_UP, InvalidOperation
+from typing import Any, Dict, Optional
+import sys
+
+# ... (other imports remain the same, ensure exchange_api functions are imported correctly)
+# from exchange_api import (fetch_balance, fetch_current_price_ccxt, # etc.
+#                           place_trade, get_open_position, # etc.
+#                           _set_position_protection, set_trailing_stop_loss) # etc.
+
+# ... (helper functions like _format_signal remain synchronous)
+
+async def _execute_close_position( # <<< CHANGED to async
+    exchange: ccxt.Exchange, symbol: str, market_info: Dict[str, Any],
+    open_position: Dict[str, Any], logger: logging.Logger, reason: str = "exit signal"
+) -> bool:
+    # ...
+    # Inside _execute_close_position:
+    close_order = await place_trade( # <<< CHANGED to await
+        exchange=exchange, symbol=symbol, trade_signal=close_side_signal,
+        position_size=pos_size, market_info=market_info, logger=lg,
+        order_type='market', reduce_only=True
+    )
+    # ...
+    return True # or False based on logic
+
+
+async def analyze_and_trade_symbol( # <<< CHANGED to async
+    exchange: ccxt.Exchange, symbol: str, config: Dict[str, Any],
+    logger: logging.Logger, enable_trading: bool
+) -> None:
+    lg = logger
+    # cycle_start_time = time.monotonic() # time.monotonic() is fine here
+    cycle_start_time = asyncio.get_event_loop().time() # Alternative for async contexts
+
+    market_info = await get_market_info(exchange, symbol, lg) # <<< AWAITED
+    # ...
+    klines_df = await fetch_klines_ccxt(exchange, symbol, ccxt_interval, limit=kline_limit, logger=lg) # <<< AWAITED
+    # ...
+    current_price_fetch = await fetch_current_price_ccxt(exchange, symbol, lg) # <<< AWAITED
+    # ...
+    if config.get("indicators",{}).get("orderbook", False) and Decimal(str(active_weights.get("orderbook", "0"))) != 0:
+         orderbook_data = await fetch_orderbook_ccxt(exchange, symbol, config.get("orderbook_limit", 100), lg) # <<< AWAITED
+    # ...
+
+    if not enable_trading:
+        # lg.info(f"{NEON_BLUE}---== Analysis Cycle End ({symbol}, {time.monotonic() - cycle_start_time:.2f}s) ==---{RESET}\n")
+        lg.info(f"{NEON_BLUE}---== Analysis Cycle End ({symbol}, {asyncio.get_event_loop().time() - cycle_start_time:.2f}s) ==---{RESET}\n")
+        return
+
+    open_position = await get_open_position(exchange, symbol, market_info, lg) # <<< AWAITED
+
+    # --- Scenario 1: No Open Position ---
+    if open_position is None:
+        if signal in ["BUY", "SELL"]:
+            # ...
+            balance = await fetch_balance(exchange, config.get("quote_currency", "USDT"), lg) # <<< AWAITED
+            # ...
+            if not market_info.get('spot', True) :
+                lev = int(config.get("leverage", 1))
+                if lev > 0:
+                    if not await set_leverage_ccxt(exchange, symbol, lev, market_info, lg): # <<< AWAITED
+                         # ...
+            # ...
+            trade_order = await place_trade(exchange,symbol,signal,pos_size_dec,market_info,lg,entry_type,limit_px,False) # <<< AWAITED
+
+            if trade_order and trade_order.get('id'):
+                # ...
+                if entry_type == 'market' or (entry_type == 'limit' and order_status == 'closed'):
+                    confirm_delay = config.get("position_confirm_delay_seconds", POSITION_CONFIRM_DELAY_SECONDS)
+                    lg.info(f"Waiting {confirm_delay}s for position confirmation ({symbol})...")
+                    await asyncio.sleep(confirm_delay) # <<< CHANGED to asyncio.sleep
+                    confirmed_pos = await get_open_position(exchange, symbol, market_info, lg) # <<< AWAITED
+
+                    if confirmed_pos:
+                        # ...
+                            if tsl_enabled_config:
+                                 prot_ok = await set_trailing_stop_loss(exchange,symbol,market_info,confirmed_pos,config,lg,tp_f) # <<< AWAITED
+                            elif (sl_f and isinstance(sl_f, Decimal) and sl_f > 0) or \
+                                 (tp_f and isinstance(tp_f, Decimal) and tp_f > 0):
+                                 prot_ok = await _set_position_protection(exchange,symbol,market_info,confirmed_pos,lg,sl_f,tp_f) # <<< AWAITED
+                        # ...
+    else: # --- Scenario 2: Existing Open Position ---
+        # ...
+        if (pos_side == 'long' and signal == "SELL") or (pos_side == 'short' and signal == "BUY"):
+            # ...
+            await _execute_close_position(exchange, symbol, market_info, open_position, lg, "opposing signal"); return # <<< AWAITED
+        # ...
+        if isinstance(time_exit_minutes_config, (int, float)) and time_exit_minutes_config > 0:
+            if pos_ts_ms and isinstance(pos_ts_ms, int):
+                try:
+                    # elapsed_min = (int(time.time()*1000) - pos_ts_ms) / 60000.0 # time.time() is okay but asyncio.get_event_loop().time() is alternative
+                    current_loop_time_ms = int(asyncio.get_event_loop().time() * 1000)
+                    elapsed_min = (current_loop_time_ms - pos_ts_ms) / 60000.0
+                    # ...
+                    if elapsed_min >= time_exit_minutes_config:
+                        # ...
+                        await _execute_close_position(exchange, symbol, market_info, open_position, lg, "time-based exit"); return # <<< AWAITED
+                # ...                                                          # ...
+                                if upd_be_sl:
+                                    # ...                                                                  if await _set_position_protection(exchange,symbol,market_info,open_position,lg,be_px,cur_tp_dec): # <<< AWAITED
+                                        # ...
+        # ...
+        if tsl_enabled_config and not is_tsl_exch_active:
+            # ...
+            if await set_trailing_stop_loss(exchange, symbol, market_info, open_position, config, lg, tsl_tp_target): # <<< AWAITED
+                # ...
+        # ...
+    # lg.info(f"{NEON_BLUE}---== Analysis Cycle End ({symbol}, {time.monotonic() - cycle_start_time:.2f}s) ==---{RESET}\n")
+    lg.info(f"{NEON_BLUE}---== Analysis Cycle End ({symbol}, {asyncio.get_event_loop().time() - cycle_start_time:.2f}s) ==---{RESET}\n")
+
