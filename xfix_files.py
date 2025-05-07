@@ -10,7 +10,7 @@ def configure_gemini(api_key):
     """Configure the Gemini API with the provided API key."""
     try:
         genai.configure(api_key=api_key)
-        return genai.GenerativeModel('gemini-pro')
+        return genai.GenerativeModel('gemini-2.5-pro-exp-03-25')
     except Exception as e:
         print(f"Error configuring Gemini API: {e}")
         sys.exit(1)
