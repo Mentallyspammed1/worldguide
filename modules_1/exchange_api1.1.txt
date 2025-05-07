@@ -1,0 +1,410 @@
+```python
+# File: exchange_api.py
+"""
+Asynchronous Bybit API client module using CCXT async support within a class structure.
+
+Provides methods for:
+- Connecting and initializing the Bybit exchange instance.
+- Fetching market data (ticker, klines, orderbook) with retries and validation.
+- Managing orders (create, cancel, edit, query, batch ops) and positions.
+- Retrieving account balance.
+- Setting leverage, position mode, and protection (SL/TP/TSL) using Bybit V5 specifics.
+"""
+
+import os
+import sys # Added for stderr in ImportError fallback
+import time
+import asyncio
+import logging
+import importlib.metadata  # For getting package version
+import random  # For retry jitter
+from decimal import Decimal, InvalidOperation, ROUND_DOWN, ROUND_UP
+from typing import Any, Dict, List, Optional, Union, Tuple, Callable # Callable was already present
+
+import ccxt.async_support as ccxt_async
+import pandas as pd
+
+# Import constants and utility functions
+try:
+    from utils import (
+        NEON_GREEN, NEON_RED, NEON_YELLOW, RESET_ALL_STYLE,
+        RETRY_DELAY_SECONDS,
+        get_min_tick_size,
+        get_price_precision,
+        _exponential_backoff,
+    )
+except ImportError:
+    print("Error importing from utils in exchange_api.py", file=sys.stderr)
+    NEON_GREEN = NEON_RED = NEON_YELLOW = RESET_ALL_STYLE = ""
+    RETRY_DELAY_SECONDS = 5.0
+    # Fallback definitions matching expected signatures
+    def get_price_precision(market: Dict[str, Any], logger: logging.Logger) -> int: return 4
+    def get_min_tick_size(market: Dict[str, Any], logger: logging.Logger) -> Decimal: return Decimal('0.0001')
+    def _exponential_backoff(attempt: int, base_delay: float = 5.0, max_cap: float = 60.0) -> float:
+        return min(base_delay * (2**attempt), max_cap)
+
+
+# Module-level logger (can be used for messages before class instance exists or for utility functions)
+module_logger = logging.getLogger(__name__)
+
+
+class BybitAPI:
+    """
+    Asynchronous Bybit API client using CCXT async support.
+
+    Encapsulates exchange interaction, providing methods for market data,
+    trading operations, and account information retrieval with built-in
+    retry logic and Bybit V5 parameter handling. Includes caching,
+    circuit breaker, and configurable options.
+    """
+
+    def __init__(self, config: Dict[str, Any], logger: logging.Logger):
+        """
+        Initializes the Bybit API client configuration and CCXT exchange object.
+
+        Args:
+            config: Configuration dictionary with keys like 'exchange_id', 'api_key',
+                    'api_secret', 'use_sandbox', 'default_market_type', 'quote_currency',
+                    'max_api_retries', 'api_timeout_ms', 'market_cache_duration_seconds',
+                    'circuit_breaker_cooldown_seconds', 'log_level', 'order_rate_limit_per_second',
+                    various default parameter dicts ('exchange_options', 'market_load_params', etc.).
+            logger: Logger instance for logging API client activities.
+
+        Raises:
+            ValueError: If API keys are missing or the specified exchange_id is invalid.
+        """
+        self.logger = logger
+        self._config = config
+
+        # --- Configure Logging Level ---
+        log_level_str = config.get('log_level', 'INFO').upper()
+        log_level_int = getattr(logging, log_level_str, logging.INFO)
+        self.logger.setLevel(log_level_int)
+        self.logger.info(f"API Client log level set to: {log_level_str}")
+
+        # --- Credentials ---
+        api_key = self._config.get("api_key") or os.environ.get("BYBIT_API_KEY")
+        api_secret = self._config.get("api_secret") or os.environ.get("BYBIT_API_SECRET")
+        if not api_key or not api_secret:
+            self.logger.critical(f"{NEON_RED}API keys not found.{RESET_ALL_STYLE}")
+            raise ValueError("API Key and Secret must be provided.")
+        self.api_key = api_key
+        self.api_secret = api_secret
+
+        # --- Core Config ---
+        self.testnet = self._config.get("use_sandbox", False)
+        self.exchange_id = self._config.get("exchange_id", "bybit").lower()
+        self.quote_currency = self._config.get("quote_currency", "USDT")
+
+        # --- Operational Parameters ---
+        self.max_api_retries = self._config.get('max_api_retries', 3)
+        self.api_timeout_ms = self._config.get('api_timeout_ms', 15000)
+        self.market_cache_duration_seconds = self._config.get('market_cache_duration_seconds', 3600)
+        self.order_rate_limit = self._config.get('order_rate_limit_per_second', 10.0)
+        self.last_order_time = 0.0
+
+        # --- Circuit Breaker ---
+        self.circuit_breaker_cooldown = self._config.get('circuit_breaker_cooldown_seconds', 300.0)
+        self.circuit_breaker_tripped = False
+        self.circuit_breaker_failure_count = 0
+        self.circuit_breaker_max_failures = 5
+        self.circuit_breaker_reset_time = 0.0
+
+        if self.exchange_id != 'bybit':
+            self.logger.warning(
+                f"{NEON_YELLOW}Class optimized for 'bybit', but config uses '{self.exchange_id}'. Functionality may vary.{RESET_ALL_STYLE}")
+
+        # --- Initialize CCXT Exchange Object ---
+        try:
+            if not hasattr(ccxt_async, self.exchange_id):
+                raise ValueError(f"Exchange ID '{self.exchange_id}' is not supported by CCXT async.")
+            exchange_class = getattr(ccxt_async, self.exchange_id)
+            
+            # Consolidate default parameters for CCXT exchange instantiation
+            default_options = self._config.get('exchange_options', {}).get('options', {}).copy()
+            default_options.setdefault('defaultType', self._config.get('default_market_type', 'unified').lower())
+            if self.exchange_id == 'bybit':
+                default_options.setdefault('createOrderRequiresPrice', False)
+                default_options.setdefault('recvWindow', 5000)
+
+            exchange_params = {
+                'apiKey': self.api_key,
+                'secret': self.api_secret,
+                'enableRateLimit': True, # CCXT's internal rate limiter
+                'timeout': self.api_timeout_ms,
+                'options': default_options,
+                # Store default method-specific params directly in exchange.options for ccxt's safe_value access
+                # These allow overriding CCXT defaults or providing required params for specific methods
+                'loadMarketsParams': self._config.get('market_load_params', {}),
+                'balanceFetchParams': self._config.get('balance_fetch_params', {}),
+                'fetchPositionsParams': self._config.get('fetch_positions_params', {}),
+                'createOrderParams': self._config.get('create_order_params', {}),
+                'editOrderParams': self._config.get('edit_order_params', {}),
+                'cancelOrderParams': self._config.get('cancel_order_params', {}),
+                'cancelAllOrdersParams': self._config.get('cancel_all_orders_params', {}),
+                'fetchOrderParams': self._config.get('fetch_order_params', {}),
+                'fetchOpenOrdersParams': self._config.get('fetch_open_orders_params', {}),
+                'fetchClosedOrdersParams': self._config.get('fetch_closed_orders_params', {}),
+                'fetchMyTradesParams': self._config.get('fetch_my_trades_params', {}),
+                'setLeverageParams': self._config.get('set_leverage_params', {}),
+                'setTradingStopParams': self._config.get('set_trading_stop_params', {}), # For Bybit V5 specific SL/TP
+                'setPositionModeParams': self._config.get('set_position_mode_params', {}), # For Bybit V5 specific position mode
+            }
+
+            self.exchange: ccxt_async.Exchange = exchange_class(exchange_params)
+            self.markets_cache: Dict[str, Any] = {}
+            self.last_markets_update_time: float = 0.0
+            self.logger.info(
+                f"API client configured (ID: {self.exchange.id}, Sandbox: {self.testnet}). Call initialize() to connect and load markets.")
+        except ValueError as ve:
+            self.logger.critical(f"{NEON_RED}Configuration error: {ve}{RESET_ALL_STYLE}")
+            raise
+        except Exception as e:
+            self.logger.critical(f"{NEON_RED}Failed to initialize CCXT exchange object: {e}{RESET_ALL_STYLE}", exc_info=True)
+            raise
+
+    async def initialize(self) -> bool:
+        """Completes exchange initialization: set sandbox, load markets, and perform connection checks."""
+        try:
+            ccxt_version = importlib.metadata.version('ccxt')
+            self.logger.info(f"Using CCXT version: {ccxt_version}")
+        except importlib.metadata.PackageNotFoundError:
+            self.logger.warning("Could not determine CCXT version. 'ccxt' package may not be installed correctly.")
+        except Exception as e: # General exception for other metadata issues
+            self.logger.warning(f"Could not get CCXT version due to an unexpected error: {e}")
+
+        try:
+            # Set Sandbox Mode if configured
+            if self.testnet:
+                self.logger.warning(
+                    f"{NEON_YELLOW}USING SANDBOX MODE (Testnet) for {self.exchange.id}{RESET_ALL_STYLE}")
+                if hasattr(self.exchange, 'set_sandbox_mode') and callable(self.exchange.set_sandbox_mode):
+                    try:
+                        # Await if it's a coroutine, otherwise call directly
+                        if asyncio.iscoroutinefunction(self.exchange.set_sandbox_mode):
+                            await self.exchange.set_sandbox_mode(True)
+                        else:
+                            self.exchange.set_sandbox_mode(True)
+                        self.logger.info("Sandbox mode enabled via exchange.set_sandbox_mode(True).")
+                    except Exception as e:
+                        self.logger.warning(
+                            f"Call to exchange.set_sandbox_mode(True) failed: {e}. Will attempt manual URL override if applicable.")
+                
+                # Manual URL override for Bybit if set_sandbox_mode didn't work or as a primary method
+                if self.exchange.id == 'bybit':
+                    testnet_url = self.exchange.urls.get('test') # Standard CCXT testnet URL key
+                    if not testnet_url: # Fallback if 'test' key is missing
+                        testnet_url = 'https://api-testnet.bybit.com' 
+                        self.logger.info(f"Using default Bybit testnet URL: {testnet_url}")
+
+                    current_api_url = self.exchange.urls.get('api')
+                    # Check if already set to testnet (can be complex if 'api' is a dict for different services)
+                    is_already_testnet = False
+                    if isinstance(current_api_url, dict):
+                        is_already_testnet = any(url == testnet_url for url in current_api_url.values())
+                    elif isinstance(current_api_url, str):
+                        is_already_testnet = (current_api_url == testnet_url)
+
+                    if not is_already_testnet:
+                        self.exchange.urls['api'] = testnet_url
+                        self.logger.info(f"Manually set Bybit API URL to testnet: {testnet_url}")
+                    else:
+                        self.logger.info("Bybit API URL appears to be already configured for testnet.")
+
+            # Load Markets
+            if not await self.load_markets(reload=True): # Force reload during initialization
+                raise ccxt_async.ExchangeError("Initial market data load failed.")
+            
+            # Connection & Initial Balance Check
+            if not await self.check_connection():
+                raise ccxt_async.NetworkError("Initial API connection check failed.")
+            
+            balance_data = await self.fetch_balance(self.quote_currency) # Fetch for the primary quote currency
+            if balance_data is None:
+                self.logger.error(
+                    f"{NEON_RED}Initial balance fetch FAILED for {self.quote_currency}.{RESET_ALL_STYLE}")
+                # Depending on strictness, one might raise an error here
+            elif isinstance(balance_data, Decimal): # Specific currency balance
+                self.logger.info(
+                    f"{NEON_GREEN}Initial balance check OK: {balance_data:.4f} {self.quote_currency}{RESET_ALL_STYLE}")
+            else: # Full balance dictionary
+                self.logger.info(
+                    f"{NEON_GREEN}Initial full balance data fetch OK.{RESET_ALL_STYLE}")
+            
+            self.logger.info(f"{NEON_GREEN}API Client initialized successfully for {self.exchange.id}.{RESET_ALL_STYLE}")
+            return True
+        
+        except Exception as e:
+            log_msg = f"{NEON_RED}API Client initialization failed: {e}{RESET_ALL_STYLE}"
+            if isinstance(e, (ccxt_async.NetworkError, ccxt_async.ExchangeNotAvailable)):
+                # Check for common network-related keywords in the error message
+                err_str_lower = str(e).lower()
+                if any(keyword in err_str_lower for keyword in ["dns", "resolve", "connect", "timeout"]):
+                    log_msg += f"\n{NEON_YELLOW}Hint: This might be a network connectivity issue (DNS, firewall, or internet connection problem).{RESET_ALL_STYLE}"
+            elif isinstance(e, ccxt_async.AuthenticationError):
+                log_msg += f"\n{NEON_RED}Hint: Authentication failed. Please check your API key and secret.{RESET_ALL_STYLE}"
+            
+            self.logger.critical(log_msg, exc_info=True)
+            await self.close() # Attempt to clean up resources
+            return False
+
+    async def close(self):
+        """Closes the underlying CCXT exchange connection gracefully."""
+        if hasattr(self, 'exchange') and self.exchange and hasattr(self.exchange, 'close') and callable(self.exchange.close):
+            try:
+                await self.exchange.close()
+                self.logger.info("Exchange connection closed successfully.")
+            except Exception as e:
+                self.logger.error(f"Error encountered while closing exchange connection: {e}", exc_info=True)
+        else:
+            self.logger.info("No active exchange connection to close or close method not available.")
+
+    async def check_connection(self) -> bool:
+        """Checks API server connectivity by fetching the server time."""
+        try:
+            # Fetch server time; a lightweight call to check connectivity and authentication
+            server_time_ms = await self.exchange.fetch_time()
+            if server_time_ms and server_time_ms > 0:
+                server_time_iso = self.exchange.iso8601(server_time_ms)
+                self.logger.info(
+                    f"{NEON_GREEN}API connection check successful. Server Time: {server_time_iso}{RESET_ALL_STYLE}")
+                
+                # If circuit breaker was tripped, reset it upon successful connection
+                if self.circuit_breaker_tripped:
+                    self.logger.info(f"{NEON_GREEN}Connection re-established. Resetting circuit breaker.{RESET_ALL_STYLE}")
+                    self.circuit_breaker_tripped = False
+                    self.circuit_breaker_failure_count = 0
+                    self.circuit_breaker_reset_time = 0.0
+                return True
+            else:
+                # This case should ideally be caught by ccxt exceptions if the call fails
+                raise ccxt_async.ExchangeError(f"fetch_time returned an invalid or empty response: {server_time_ms}")
+        
+        except Exception as e:
+            self.logger.error(
+                f"{NEON_RED}API connection check FAILED: {e}{RESET_ALL_STYLE}", exc_info=False) # exc_info=False for brevity in repeated checks
+            
+            self.circuit_breaker_failure_count += 1
+            if not self.circuit_breaker_tripped and self.circuit_breaker_failure_count >= self.circuit_breaker_max_failures:
+                self.circuit_breaker_tripped = True
+                self.circuit_breaker_reset_time = time.monotonic() + self.circuit_breaker_cooldown
+                self.logger.critical(
+                    f"{NEON_RED}Circuit breaker TRIPPED for {self.circuit_breaker_cooldown:.0f} seconds due to repeated connection failures.{RESET_ALL_STYLE}")
+            return False
+
+    async def _handle_fetch_exception(self, e: Exception, attempt: int, total_attempts: int, item_desc: str, context_info: Optional[str] = None) -> bool:
+        """
+        Internal helper to log API request exceptions, determine retry eligibility,
+        manage circuit breaker state, and apply appropriate delays.
+
+        Args:
+            e: The exception instance.
+            attempt: Current retry attempt number (0-indexed).
+            total_attempts: Maximum number of attempts.
+            item_desc: Description of the item/operation being fetched (e.g., "market data for BTC/USDT").
+            context_info: Additional context, like a symbol or ID.
+
+        Returns:
+            bool: True if a retry should be attempted, False otherwise.
+        """
+        # If circuit breaker is tripped and cooldown period is active, do not retry
+        if self.circuit_breaker_tripped and time.monotonic() < self.circuit_breaker_reset_time:
+            self.logger.error(
+                f"{NEON_RED}Circuit breaker ACTIVE. Skipping retry for {item_desc}. Cooldown ends in {self.circuit_breaker_reset_time - time.monotonic():.1f}s.{RESET_ALL_STYLE}")
+            return False
+        # If circuit breaker was tripped but cooldown has elapsed, reset it
+        elif self.circuit_breaker_tripped:
+            self.logger.info(
+                f"{NEON_YELLOW}Circuit breaker cooldown period elapsed. Resetting circuit breaker.{RESET_ALL_STYLE}")
+            self.circuit_breaker_tripped = False
+            self.circuit_breaker_failure_count = 0
+            self.circuit_breaker_reset_time = 0.0
+
+        is_retryable = False
+        delay_seconds = RETRY_DELAY_SECONDS # Base delay from constants
+        exception_details = str(e)
+        log_method = self.logger.error # Default log level for errors
+
+        # Extract exchange-specific error code if available (prefer Bybit's retCode)
+        error_code_info = getattr(e, 'info', {})
+        exchange_specific_code = self.exchange.safe_string(error_code_info, 'retCode') # Bybit V5
+        if not exchange_specific_code and isinstance(e, ccxt_async.ExchangeError): # General CCXT error code
+             exchange_specific_code = getattr(e, 'code', None)
+
+        # Determine retry eligibility and delay based on exception type
+        if isinstance(e, ccxt_async.AuthenticationError):
+            message = f"Authentication error while fetching {item_desc}"
+            # Typically, auth errors are not retryable unless it's a transient issue.
+            # Retry once, as sometimes a temporary glitch or IP restriction change might occur.
+            is_retryable = (attempt == 0) 
+            delay_seconds = _exponential_backoff(attempt, base_delay=RETRY_DELAY_SECONDS * 2)
+        elif isinstance(e, (ccxt_async.RateLimitExceeded, ccxt_async.DDoSProtection)):
+            log_method = self.logger.warning
+            message = f"Rate limit exceeded while fetching {item_desc}"
+            is_retryable = True
+            # Use 'retry-after' header if present, otherwise exponential backoff
+            retry_after_header = self.exchange.safe_integer(getattr(e, 'headers', {}), 'Retry-After') # Case-sensitive
+            if retry_after_header:
+                delay_seconds = float(retry_after_header) + random.uniform(0.1, 1.0) # Add jitter
+            else:
+                delay_seconds = _exponential_backoff(attempt, base_delay=RETRY_DELAY_SECONDS * 3, max_cap=300.0)
+        elif isinstance(e, (ccxt_async.NetworkError, ccxt_async.RequestTimeout, asyncio.TimeoutError, ccxt_async.ExchangeNotAvailable)):
+            log_method = self.logger.warning
+            message = f"Network/Timeout error while fetching {item_desc}"
+            is_retryable = True
+            delay_seconds = _exponential_backoff(attempt, base_delay=RETRY_DELAY_SECONDS, max_cap=120.0)
+        elif isinstance(e, ccxt_async.ExchangeError): # General exchange errors
+            message = f"Exchange error while fetching {item_desc}"
+            err_lower = exception_details.lower()
+            
+            if self.exchange_id == 'bybit' and exchange_specific_code:
+                try:
+                    code_int = int(exchange_specific_code)
+                    # Bybit V5 specific error codes (non-exhaustive examples)
+                    # Codes that indicate a non-retryable client-side or state issue
+                    non_retryable_bybit_codes = [
+                        10001, # Parameter error
+                        110009, # Price is too high/low than the liquidation price
+                        110045, # Position status is not normal
+                        110013, # OrderLinkedID is duplicate
+                        10003,  # Invalid API key
+                        10004,  # Authentication failure / IP not whitelisted
+                        130021, # Insufficient balance
+                        110032, # Risk limit cannot be adjusted due to existing position or active order
+                        110017, # Order quantity exceeds the lower limit
+                        110018, # Order quantity exceeds the upper limit
+                        # Add more as identified...
+                    ]
+                    # Codes that might indicate a temporary server-side issue or state that might change
+                    retryable_bybit_codes = [
+                        10002, # System busy / Server error
+                        10006, # Too many visits / Rate limit related (though should be caught by RateLimitExceeded)
+                        10016, # Service data exception (can be temporary)
+                        30034, # Order not found (could be due to replication lag if checking immediately after creation)
+                        30035, # No need to cancel order (if already cancelled/filled)
+                        10005, # Permission denied (sometimes transient if permissions are updating)
+                        # Standard HTTP error codes often wrapped by Bybit
+                        500, 502, 503, 504 
+                    ]
+
+                    if code_int in non_retryable_bybit_codes or 'accounttype' in err_lower or 'invalid parameter' in err_lower:
+                        message = f"Bybit Non-Retryable Error ({exchange_specific_code}) for {item_desc}"
+                        is_retryable = False
+                    elif code_int == 110025 and 'position' in item_desc.lower(): # "position is not exists"
+                        self.logger.info(f"Bybit: Position not found for {context_info or item_desc} (Code: {exchange_specific_code}). Not an error if expecting no position.")
+                        return False # Not an error to retry, but a state (no position)
+                    elif code_int in retryable_bybit_codes:
+                        log_method = self.logger.warning
+                        is_retryable = True
+                        message = f"Bybit Temporary Error ({exchange_specific_code}) for {item_desc}"
+                        delay_seconds = _exponential_backoff(attempt, base_delay=RETRY_DELAY_SECONDS * 2)
+                    else: # Unknown Bybit code, default to retry with caution
+                        log_method = self.logger.warning
+                        is_retryable = True 
+                        message = f"Bybit Exchange Error ({exchange_specific_code}) for {item_desc} (retrying as precaution)"
+                        delay_seconds = _exponential_backoff(attempt)
+                except ValueError: # Non-integer code
+                    log_method = self.logger.warning
+                    is_retryable = True # Default retry if code parsing fails
+                    message = f"Bybit Exchange Error (Non-integer code: {exchange_specific_code}) for {item_desc}"
+            # General checks
