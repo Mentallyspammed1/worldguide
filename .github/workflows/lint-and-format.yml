@@ -27,6 +27,8 @@ on:
 jobs:
   validate-and-init:
     runs-on: ubuntu-latest
+    outputs:
+      repo_access: ${{ steps.validate-repo.outputs.repo_access }}
     steps:
       - name: Initialize Lint Report
         run: |
@@ -146,9 +148,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff mypy
           if [ -f pyproject.toml ]; then
+            echo "Found pyproject.toml, installing..." >> lint_report.txt
             pip install . >> lint_report.txt 2>&1
           elif [ -f requirements.txt ]; then
+            echo "Found requirements.txt, installing..." >> lint_report.txt
             pip install -r requirements.txt >> lint_report.txt 2>&1
+          else
+            echo "Warning: Neither pyproject.toml nor requirements.txt found, proceeding with only ruff and mypy" >> lint_report.txt
           fi
 
       - name: Validate Inputs
@@ -288,7 +294,7 @@ jobs:
 
   upload-artifact:
     runs-on: ubuntu-latest
-    needs: validate-and-init
+    needs: [validate-and-init, lint-and-format]
     if: always()
     steps:
       - name: Download Lint Report
@@ -305,10 +311,25 @@ jobs:
             touch lint_report.txt
           fi
 
-      - name: Upload Lint Report
+      - name: Upload Lint Report (Retry on Failure)
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
           path: lint_report.txt
           retention-days: 7
           if-no-files-found: warn
+        continue-on-error: true
+        id: upload-artifact
+
+      - name: Check Upload Result
+        if: steps.upload-artifact.outcome != 'success'
+        run: |
+          echo "Warning: Failed to upload lint_report.txt, retrying..." >> lint_report.txt
+          # Retry upload
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: multipart/form-data" \
+            --data-binary @lint_report.txt \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
+            || echo "Error: Retry failed to upload lint_report.txt" >> lint_report.txt
