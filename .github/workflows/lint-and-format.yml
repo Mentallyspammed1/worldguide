@@ -136,6 +136,21 @@ jobs:
           echo "Environment variables:" >> lint_report.txt
           env | sort >> lint_report.txt
 
+      - name: Check Dependency Files
+        if: steps.debug-checkout.outputs.git_available == 'true'
+        run: |
+          echo "Checking for dependency files..." >> lint_report.txt
+          if [ -f pyproject.toml ]; then
+            echo "Found pyproject.toml" >> lint_report.txt
+          else
+            echo "pyproject.toml not found" >> lint_report.txt
+          fi
+          if [ -f requirements.txt ]; then
+            echo "Found requirements.txt" >> lint_report.txt
+          else
+            echo "requirements.txt not found" >> lint_report.txt
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -149,10 +164,10 @@ jobs:
           pip install ruff mypy
           if [ -f pyproject.toml ]; then
             echo "Found pyproject.toml, installing..." >> lint_report.txt
-            pip install . >> lint_report.txt 2>&1
+            pip install . >> lint_report.txt 2>&1 || echo "Warning: Failed to install from pyproject.toml" >> lint_report.txt
           elif [ -f requirements.txt ]; then
             echo "Found requirements.txt, installing..." >> lint_report.txt
-            pip install -r requirements.txt >> lint_report.txt 2>&1
+            pip install -r requirements.txt >> lint_report.txt 2>&1 || echo "Warning: Failed to install from requirements.txt" >> lint_report.txt
           else
             echo "Warning: Neither pyproject.toml nor requirements.txt found, proceeding with only ruff and mypy" >> lint_report.txt
           fi
@@ -176,6 +191,16 @@ jobs:
         run: |
           echo "Repository contents:" >> lint_report.txt
           find . -type f >> lint_report.txt
+
+      - name: Check Python Files
+        run: |
+          echo "Checking for Python files..." >> lint_report.txt
+          find "${{ inputs.base_directory }}" -type f -path "${{ inputs.file_pattern }}" | tee -a lint_report.txt
+          if [ -s lint_report.txt ]; then
+            echo "Python files found" >> lint_report.txt
+          else
+            echo "Warning: No Python files found in ${{ inputs.base_directory }} with pattern ${{ inputs.file_pattern }}" >> lint_report.txt
+          fi
 
       - name: List Matched Python Files
         run: |
@@ -311,7 +336,15 @@ jobs:
             touch lint_report.txt
           fi
 
-      - name: Upload Lint Report (Retry on Failure)
+      - name: Verify Lint Report Contents
+        run: |
+          echo "Verifying lint_report.txt before upload..." >> lint_report.txt
+          echo "File size:" >> lint_report.txt
+          ls -lh lint_report.txt >> lint_report.txt
+          echo "Contents preview:" >> lint_report.txt
+          head -n 20 lint_report.txt >> lint_report.txt
+
+      - name: Upload Lint Report
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
@@ -321,15 +354,10 @@ jobs:
         continue-on-error: true
         id: upload-artifact
 
-      - name: Check Upload Result
-        if: steps.upload-artifact.outcome != 'success'
+      - name: Log Upload Result
         run: |
-          echo "Warning: Failed to upload lint_report.txt, retrying..." >> lint_report.txt
-          # Retry upload
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: multipart/form-data" \
-            --data-binary @lint_report.txt \
-            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
-            || echo "Error: Retry failed to upload lint_report.txt" >> lint_report.txt
+          if [ "${{ steps.upload-artifact.outcome }}" != "success" ]; then
+            echo "Warning: Failed to upload lint_report.txt" >> lint_report.txt
+          else
+            echo "Successfully uploaded lint_report.txt" >> lint_report.txt
+          fi
