@@ -1,5 +1,4 @@
 import requests
-import datetime
 from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__)
@@ -8,9 +7,18 @@ app = Flask(__name__)
 ASTRO_API_URL = "https://aztro.sameerkumar.website/"
 # List of valid signs for validation
 VALID_SIGNS = [
-    "aries", "taurus", "gemini", "cancer", "leo", "virgo",
-    "libra", "scorpio", "sagittarius", "capricorn",
-    "aquarius", "pisces"
+    "aries",
+    "taurus",
+    "gemini",
+    "cancer",
+    "leo",
+    "virgo",
+    "libra",
+    "scorpio",
+    "sagittarius",
+    "capricorn",
+    "aquarius",
+    "pisces",
 ]
 
 # --- HTML, CSS, and JavaScript for the Front-End ---
@@ -245,77 +253,85 @@ HTML_TEMPLATE = """
 
 # --- Flask Routes ---
 
-@app.route('/')
+
+@app.route("/")
 def index():
     """Serves the main HTML page."""
-    return Response(HTML_TEMPLATE, mimetype='text/html')
+    return Response(HTML_TEMPLATE, mimetype="text/html")
 
-@app.route('/get_horoscope')
+
+@app.route("/get_horoscope")
 def get_horoscope_api():
     """API endpoint to fetch horoscope data from Aztro."""
-    sign = request.args.get('sign')
+    sign = request.args.get("sign")
 
     # --- Input Validation ---
     if not sign:
-        return jsonify({"error": "Zodiac sign parameter ('sign') is required"}), 400 # Bad Request
+        return jsonify({"error": "Zodiac sign parameter ('sign') is required"}), 400  # Bad Request
 
-    sign = sign.lower() # Convert to lowercase for comparison
+    sign = sign.lower()  # Convert to lowercase for comparison
     if sign not in VALID_SIGNS:
-         return jsonify({"error": f"Invalid sign: '{sign}'. Please provide a valid sign."}), 400 # Bad Request
+        return jsonify({"error": f"Invalid sign: '{sign}'. Please provide a valid sign."}), 400  # Bad Request
 
     # --- Fetch data from External API ---
     try:
         # Aztro API requires a POST request, passing sign and day
-        api_params = {'sign': sign, 'day': 'today'}
-        response = requests.post(ASTRO_API_URL, params=api_params, timeout=10) # Added timeout
+        api_params = {"sign": sign, "day": "today"}
+        response = requests.post(ASTRO_API_URL, params=api_params, timeout=10)  # Added timeout
 
         # Check if the external API call failed
-        response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
 
         horoscope_data = response.json()
 
         # --- Return relevant data to our front-end ---
         # Select specific fields we want to send back
-        return jsonify({
-            "description": horoscope_data.get("description"),
-            "mood": horoscope_data.get("mood"),
-            "color": horoscope_data.get("color"),
-            "lucky_number": horoscope_data.get("lucky_number"),
-            "lucky_time": horoscope_data.get("lucky_time"),
-            "compatibility": horoscope_data.get("compatibility"),
-            "date_range": horoscope_data.get("date_range"),
-            "current_date": horoscope_data.get("current_date")
-            # Add/remove fields as needed
-        })
+        return jsonify(
+            {
+                "description": horoscope_data.get("description"),
+                "mood": horoscope_data.get("mood"),
+                "color": horoscope_data.get("color"),
+                "lucky_number": horoscope_data.get("lucky_number"),
+                "lucky_time": horoscope_data.get("lucky_time"),
+                "compatibility": horoscope_data.get("compatibility"),
+                "date_range": horoscope_data.get("date_range"),
+                "current_date": horoscope_data.get("current_date"),
+                # Add/remove fields as needed
+            }
+        )
 
     # --- Error Handling ---
     except requests.exceptions.Timeout:
         print(f"Error: Timeout connecting to Aztro API for sign: {sign}")
-        return jsonify({"error": "The horoscope provider took too long to respond. Please try again later."}), 504 # Gateway Timeout
+        return jsonify(
+            {"error": "The horoscope provider took too long to respond. Please try again later."}
+        ), 504  # Gateway Timeout
     except requests.exceptions.HTTPError as http_err:
-         # Handle HTTP errors (like 404 Not Found, 500 Internal Server Error from Aztro)
-         print(f"HTTP error occurred fetching from Aztro API for sign {sign}: {http_err}") # Server-side log
-         # Try to give a more specific error if possible
-         status_code = http_err.response.status_code
-         if status_code == 404:
-             error_msg = "Horoscope data not found for the specified sign or day from the provider."
-         elif status_code >= 500:
-              error_msg = "The horoscope provider is experiencing technical difficulties. Please try again later."
-         else:
-              error_msg = "An error occurred communicating with the horoscope provider."
-         return jsonify({"error": error_msg}), 502 # Bad Gateway (indicates problem with upstream server)
+        # Handle HTTP errors (like 404 Not Found, 500 Internal Server Error from Aztro)
+        print(f"HTTP error occurred fetching from Aztro API for sign {sign}: {http_err}")  # Server-side log
+        # Try to give a more specific error if possible
+        status_code = http_err.response.status_code
+        if status_code == 404:
+            error_msg = "Horoscope data not found for the specified sign or day from the provider."
+        elif status_code >= 500:
+            error_msg = "The horoscope provider is experiencing technical difficulties. Please try again later."
+        else:
+            error_msg = "An error occurred communicating with the horoscope provider."
+        return jsonify({"error": error_msg}), 502  # Bad Gateway (indicates problem with upstream server)
     except requests.exceptions.RequestException as req_err:
         # Handle other network-related errors (DNS failure, connection refused, etc.)
-        print(f"Network error fetching from Aztro API for sign {sign}: {req_err}") # Server-side log
-        return jsonify({"error": "Could not connect to the horoscope provider. Check your network connection."}), 503 # Service Unavailable
+        print(f"Network error fetching from Aztro API for sign {sign}: {req_err}")  # Server-side log
+        return jsonify(
+            {"error": "Could not connect to the horoscope provider. Check your network connection."}
+        ), 503  # Service Unavailable
     except Exception as e:
         # Catch any other unexpected errors
-        print(f"An unexpected error occurred on the server: {e}") # Server-side log
-        return jsonify({"error": "An internal server error occurred."}), 500 # Internal Server Error
+        print(f"An unexpected error occurred on the server: {e}")  # Server-side log
+        return jsonify({"error": "An internal server error occurred."}), 500  # Internal Server Error
 
 
 # --- Run the Flask App ---
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Runs the development server.
     # For production, use a proper WSGI server like Gunicorn or Waitress.
     # host='0.0.0.0' makes it accessible on your network, not just localhost.
@@ -323,4 +339,4 @@ if __name__ == '__main__':
     # Use port 5000 by default, you can change it if needed.
     print("Starting Flask server...")
     print("Access the app at: http://127.0.0.1:5000/ (or your local IP)")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

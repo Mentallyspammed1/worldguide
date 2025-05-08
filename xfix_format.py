@@ -6,14 +6,16 @@ import time
 import google.generativeai as genai
 from datetime import datetime
 
+
 def configure_gemini(api_key):
     """Configure the Gemini API with the provided API key."""
     try:
         genai.configure(api_key=api_key)
-        return genai.GenerativeModel('gemini-pro')
+        return genai.GenerativeModel("gemini-pro")
     except Exception as e:
         print(f"Error configuring Gemini API: {e}")
         sys.exit(1)
+
 
 def format_and_fix_code(content, model, max_attempts=3):
     """Format Python code to PEP 8 standards and fix common issues."""
@@ -36,6 +38,7 @@ def format_and_fix_code(content, model, max_attempts=3):
                 time.sleep(2)
     print("Failed to format code after maximum attempts")
     return content
+
 
 def process_files(directory, file_pattern, api_key, max_calls):
     """Process Python files to format and fix code."""
@@ -68,7 +71,7 @@ def process_files(directory, file_pattern, api_key, max_calls):
         processed_files += 1
 
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 original_content = f.read()
         except Exception as e:
             print(f"Error reading {filepath}: {e}")
@@ -83,7 +86,7 @@ def process_files(directory, file_pattern, api_key, max_calls):
             continue
 
         try:
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 f.write(formatted_content)
             print(f"Successfully formatted and fixed {filepath}")
             modified_files.append(filepath)
@@ -98,6 +101,7 @@ def process_files(directory, file_pattern, api_key, max_calls):
         for filepath in modified_files:
             print(f"  - {filepath}")
     return modified_files
+
 
 def main():
     """Main function to process command-line arguments and run the formatter."""
@@ -126,6 +130,7 @@ def main():
         print("No files were modified")
         sys.exit(0)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

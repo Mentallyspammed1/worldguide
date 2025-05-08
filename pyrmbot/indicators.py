@@ -21,7 +21,7 @@ and a datetime index (UTC).
 
 import logging
 import sys
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 
@@ -43,6 +43,7 @@ if not logger.hasHandlers():
 # --- Constants ---
 MIN_PERIODS_DEFAULT = 50
 
+
 # --- Pivot Point Calculations ---
 def calculate_standard_pivot_points(high: float, low: float, close: float) -> Dict[str, float]:
     """Calculate standard pivot points for the next period."""
@@ -60,11 +61,12 @@ def calculate_standard_pivot_points(high: float, low: float, close: float) -> Di
             "S2": pivot - (high - low),
             "R2": pivot + (high - low),
             "S3": low - 2 * (high - pivot),
-            "R3": high + 2 * (pivot - low)
+            "R3": high + 2 * (pivot - low),
         }
     except Exception as e:
         logger.error(f"Error calculating standard pivot points: {e}", exc_info=True)
         return {}
+
 
 def calculate_fib_pivot_points(high: float, low: float, close: float) -> Dict[str, float]:
     """Calculate Fibonacci pivot points for the next period."""
@@ -86,11 +88,12 @@ def calculate_fib_pivot_points(high: float, low: float, close: float) -> Dict[st
             "S2": pivot - (0.618 * fib_range),
             "R2": pivot + (0.618 * fib_range),
             "S3": pivot - (1.000 * fib_range),
-            "R3": pivot + (1.000 * fib_range)
+            "R3": pivot + (1.000 * fib_range),
         }
     except Exception as e:
         logger.error(f"Error calculating Fibonacci pivot points: {e}", exc_info=True)
         return {}
+
 
 # --- Support/Resistance Levels ---
 def calculate_levels(df_period: pd.DataFrame, current_price: Optional[float] = None) -> Dict[str, Any]:
@@ -101,7 +104,7 @@ def calculate_levels(df_period: pd.DataFrame, current_price: Optional[float] = N
         "pivot": None,
         "fib_retracements": {},
         "standard_pivots": {},
-        "fib_pivots": {}
+        "fib_pivots": {},
     }
     required_cols = ["high", "low", "close"]
     if not all(col in df_period.columns for col in required_cols) or df_period.empty:
@@ -127,14 +130,14 @@ def calculate_levels(df_period: pd.DataFrame, current_price: Optional[float] = N
                 "Fib 50.0%": period_low + period_diff * 0.5,
                 "Fib 38.2%": period_low + period_diff * 0.382,
                 "Fib 23.6%": period_low + period_diff * 0.236,
-                "Low": period_low
+                "Low": period_low,
             }
 
         if current_price is not None:
             all_levels = {
                 **{f"Std {k}": v for k, v in levels["standard_pivots"].items()},
                 **{f"Fib {k}": v for k, v in levels["fib_pivots"].items() if k != "PP"},
-                **levels["fib_retracements"]
+                **levels["fib_retracements"],
             }
             for label, value in all_levels.items():
                 if isinstance(value, (int, float)):
@@ -149,6 +152,7 @@ def calculate_levels(df_period: pd.DataFrame, current_price: Optional[float] = N
     except Exception as e:
         logger.error(f"Error calculating levels: {e}", exc_info=True)
         return levels
+
 
 # --- Custom Indicators ---
 def calculate_vwma(close: pd.Series, volume: pd.Series, length: int) -> Optional[pd.Series]:
@@ -167,6 +171,7 @@ def calculate_vwma(close: pd.Series, volume: pd.Series, length: int) -> Optional
     except Exception as e:
         logger.error(f"Error calculating VWMA(length={length}): {e}", exc_info=True)
         return None
+
 
 def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float) -> pd.DataFrame:
     """Calculate Ehlers Volumetric Trend with VWMA and SuperSmoother."""
@@ -194,8 +199,8 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float) ->
         vwma_vals = df_out[vwma_col].values
         for i in range(2, len(df_out)):
             if not np.isnan(vwma_vals[i]):
-                sm1 = smoothed.iloc[i-1] if pd.notna(smoothed.iloc[i-1]) else vwma_vals[i-1]
-                sm2 = smoothed.iloc[i-2] if pd.notna(smoothed.iloc[i-2]) else vwma_vals[i-2]
+                sm1 = smoothed.iloc[i - 1] if pd.notna(smoothed.iloc[i - 1]) else vwma_vals[i - 1]
+                sm2 = smoothed.iloc[i - 2] if pd.notna(smoothed.iloc[i - 2]) else vwma_vals[i - 2]
                 smoothed.iloc[i] = c1 * vwma_vals[i] + c2 * sm1 + c3 * sm2
         df_out[smooth_col] = smoothed
 
@@ -203,10 +208,14 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float) ->
         mult_h, mult_l = 1.0 + multiplier / 100.0, 1.0 - multiplier / 100.0
         shifted_smooth = df_out[smooth_col].shift(1)
         trend = pd.Series(0, index=df_out.index, dtype=int)
-        up_trend = (df_out[smooth_col] > shifted_smooth * mult_h) & pd.notna(df_out[smooth_col]) & pd.notna(shifted_smooth)
-        down_trend = (df_out[smooth_col] < shifted_smooth * mult_l) & pd.notna(df_out[smooth_col]) & pd.notna(shifted_smooth)
+        up_trend = (
+            (df_out[smooth_col] > shifted_smooth * mult_h) & pd.notna(df_out[smooth_col]) & pd.notna(shifted_smooth)
+        )
+        down_trend = (
+            (df_out[smooth_col] < shifted_smooth * mult_l) & pd.notna(df_out[smooth_col]) & pd.notna(shifted_smooth)
+        )
         for i in range(len(df_out)):
-            trend.iloc[i] = 1 if up_trend.iloc[i] else -1 if down_trend.iloc[i] else trend.iloc[i-1] if i > 0 else 0
+            trend.iloc[i] = 1 if up_trend.iloc[i] else -1 if down_trend.iloc[i] else trend.iloc[i - 1] if i > 0 else 0
         df_out[trend_col] = trend
         df_out[buy_col] = (df_out[trend_col] == 1) & (df_out[trend_col].shift(1).fillna(0) != 1)
         df_out[sell_col] = (df_out[trend_col] == -1) & (df_out[trend_col].shift(1).fillna(0) != -1)
@@ -218,7 +227,10 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float) ->
         df_out[vwma_col] = df_out[smooth_col] = df_out[trend_col] = df_out[buy_col] = df_out[sell_col] = np.nan
         return df_out
 
-def update_indicators_incrementally(df: pd.DataFrame, config: Dict[str, Any], prev_df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+
+def update_indicators_incrementally(
+    df: pd.DataFrame, config: Dict[str, Any], prev_df: Optional[pd.DataFrame] = None
+) -> pd.DataFrame:
     """Update indicators incrementally for the latest data point."""
     if df.empty or not all(col in df.columns for col in ["open", "high", "low", "close", "volume"]):
         logger.warning("Invalid DataFrame for incremental update.")
@@ -233,18 +245,18 @@ def update_indicators_incrementally(df: pd.DataFrame, config: Dict[str, Any], pr
             evt_len = strategy_params.get("evt_length", settings.get("evt_length", 7))
             evt_mult = strategy_params.get("evt_multiplier", settings.get("evt_multiplier", 2.5))
             if prev_df is not None and len(prev_df) >= evt_len:
-                df_combined = pd.concat([prev_df.iloc[-(evt_len-1):], df_out], ignore_index=True)
+                df_combined = pd.concat([prev_df.iloc[-(evt_len - 1) :], df_out], ignore_index=True)
                 df_combined = ehlers_volumetric_trend(df_combined, evt_len, float(evt_mult))
-                df_out = df_combined.iloc[-len(df_out):].copy()
+                df_out = df_combined.iloc[-len(df_out) :].copy()
             else:
                 df_out = ehlers_volumetric_trend(df_out, evt_len, float(evt_mult))
 
         if flags.get("use_atr"):
             atr_len = settings.get("atr_period", 14)
             if prev_df is not None and len(prev_df) >= atr_len:
-                df_combined = pd.concat([prev_df.iloc[-(atr_len-1):], df_out], ignore_index=True)
+                df_combined = pd.concat([prev_df.iloc[-(atr_len - 1) :], df_out], ignore_index=True)
                 atr_result = ta.atr(df_combined["high"], df_combined["low"], df_combined["close"], length=atr_len)
-                df_out[f"ATRr_{atr_len}"] = atr_result.iloc[-len(df_out):]
+                df_out[f"ATRr_{atr_len}"] = atr_result.iloc[-len(df_out) :]
             else:
                 df_out[f"ATRr_{atr_len}"] = ta.atr(df_out["high"], df_out["low"], df_out["close"], length=atr_len)
 
@@ -252,6 +264,7 @@ def update_indicators_incrementally(df: pd.DataFrame, config: Dict[str, Any], pr
     except Exception as e:
         logger.error(f"Error in incremental indicator update: {e}", exc_info=True)
         return df_out
+
 
 # --- Master Indicator Calculation ---
 def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
@@ -295,6 +308,7 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
         logger.error(f"Error calculating indicators: {e}", exc_info=True)
         return df_out
 
+
 # --- Standalone Demo ---
 if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
@@ -308,32 +322,23 @@ if __name__ == "__main__":
             "rsi_period": 14,
             "atr_period": 14,
             "evt_length": 7,
-            "evt_multiplier": 2.5
+            "evt_multiplier": 2.5,
         },
-        "analysis_flags": {
-            "use_sma": True,
-            "use_ema": True,
-            "use_rsi": True,
-            "use_atr": True,
-            "use_evt": True
-        },
-        "strategy_params": {
-            "ehlers_volumetric": {
-                "evt_length": 7,
-                "evt_multiplier": 2.5
-            }
-        }
+        "analysis_flags": {"use_sma": True, "use_ema": True, "use_rsi": True, "use_atr": True, "use_evt": True},
+        "strategy_params": {"ehlers_volumetric": {"evt_length": 7, "evt_multiplier": 2.5}},
     }
     periods = 200
     prices = 1000 * np.exp(np.cumsum(np.random.normal(loc=0.0001, scale=0.01, size=periods)))
-    df_test = pd.DataFrame({
-        "timestamp": pd.date_range(start="2025-01-01", periods=periods, freq="5min"),
-        "open": prices[:-1],
-        "close": prices[1:],
-        "high": prices[1:] * (1 + np.random.uniform(0, 0.01, periods-1)),
-        "low": prices[1:] * (1 - np.random.uniform(0, 0.01, periods-1)),
-        "volume": np.random.uniform(100, 2000, periods-1)
-    }).set_index("timestamp")
+    df_test = pd.DataFrame(
+        {
+            "timestamp": pd.date_range(start="2025-01-01", periods=periods, freq="5min"),
+            "open": prices[:-1],
+            "close": prices[1:],
+            "high": prices[1:] * (1 + np.random.uniform(0, 0.01, periods - 1)),
+            "low": prices[1:] * (1 - np.random.uniform(0, 0.01, periods - 1)),
+            "volume": np.random.uniform(100, 2000, periods - 1),
+        }
+    ).set_index("timestamp")
     df_test["high"] = np.maximum.reduce([df_test["open"], df_test["close"], df_test["high"]])
     df_test["low"] = np.minimum.reduce([df_test["open"], df_test["close"], df_test["low"]])
     df_results = calculate_all_indicators(df_test, test_config)

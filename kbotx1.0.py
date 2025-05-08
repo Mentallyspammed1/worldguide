@@ -6,7 +6,7 @@
 #  | |_) | | | | __/ _ \ | | |/ _` |\ V / _` | __/ _ \/ __| __| '_ \| '_ \ / _ \ '_ ` _ \| '_ \
 #  |  __/| |_| | ||  __/ | | | (_| |\ V / (_| | ||  __/\__ \ |_| |_) | | | |  __/ | | | | | |_) |
 #  |_|    \__,_|\__\___|_|_|_|\__,_| \_/ \__,_|\__\___||___/\__| .__/|_| |_| \___|_| |_| |_| .__/
-#                                                              |_|                       |_| 
+#                                                              |_|                       |_|
 # fmt: on
 """
 Pyrmethus - Termux Trading Spell (v4.6.0 - Quantum Nexus Edition)
@@ -41,28 +41,24 @@ from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
     Decimal,
-    DivisionByZero,
     InvalidOperation,
     getcontext,
 )
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, Callable, Type
+from typing import Any, Dict, List, Optional, Tuple, Union
 import types
 
 # Third-Party Imports
 import ccxt.async_support as ccxt_async
 import numpy as np
 import pandas as pd
-import requests
 from colorama import Fore, Style, init as colorama_init
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 from sklearn.linear_model import LogisticRegression
-from telegram.ext import Application
 from telegram import Bot
 
 # Constants
@@ -103,15 +99,16 @@ getcontext().prec = DECIMAL_PRECISION
 TRADE_LEVEL_NUM = 25
 if not hasattr(logging.Logger, "trade"):
     logging.addLevelName(TRADE_LEVEL_NUM, "TRADE")
+
     def trade_log(self, message, *args, **kws):
         if self.isEnabledFor(TRADE_LEVEL_NUM):
             self._log(TRADE_LEVEL_NUM, message, args, **kws)
+
     logging.Logger.trade = trade_log
 
 logger = logging.getLogger(__name__)
 log_formatter = logging.Formatter(
-    "%(asctime)s [%(levelname)-8s] (%(filename)s:%(lineno)d) %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    "%(asctime)s [%(levelname)-8s] (%(filename)s:%(lineno)d) %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
 log_level_str = os.getenv("LOG_LEVEL", "INFO").upper()
 log_level = getattr(logging, log_level_str, logging.INFO)
@@ -121,6 +118,7 @@ if not logger.hasHandlers():
     stream_handler.setFormatter(log_formatter)
     logger.addHandler(stream_handler)
 logger.propagate = False
+
 
 # Utility Functions
 def safe_decimal(value: Any, default: Decimal = Decimal("NaN")) -> Decimal:
@@ -133,6 +131,7 @@ def safe_decimal(value: Any, default: Decimal = Decimal("NaN")) -> Decimal:
         return Decimal(str_value)
     except (InvalidOperation, ValueError, TypeError):
         return default
+
 
 def termux_notify(title: str, content: str) -> None:
     if "com.termux" in os.environ.get("PREFIX", ""):
@@ -150,6 +149,7 @@ def termux_notify(title: str, content: str) -> None:
         except (FileNotFoundError, subprocess.TimeoutExpired, Exception) as e:
             logger.warning(f"Termux notify failed: {e}")
 
+
 async def telegram_notify(bot: Bot, chat_id: str, message: str) -> None:
     try:
         if len(message) > TELEGRAM_MAX_MESSAGE_LEN:
@@ -158,6 +158,7 @@ async def telegram_notify(bot: Bot, chat_id: str, message: str) -> None:
         logger.debug(f"Telegram notification sent: {message[:50]}...")
     except Exception as e:
         logger.error(f"Telegram notify failed: {e}")
+
 
 # Configuration Class
 class TradingConfig:
@@ -186,19 +187,44 @@ class TradingConfig:
         self.interval: str = self._get_env("INTERVAL", "1m", Style.DIM)
         self.confirmation_interval: str = self._get_env("CONFIRMATION_INTERVAL", "15m", Style.DIM)
         self.risk_percentage: Decimal = self._get_env(
-            "RISK_PERCENTAGE", DEFAULT_RISK_PERCENT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.00001"), max_val=Decimal("0.5")
+            "RISK_PERCENTAGE",
+            DEFAULT_RISK_PERCENT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.00001"),
+            max_val=Decimal("0.5"),
         )
         self.sl_atr_multiplier: Decimal = self._get_env(
-            "SL_ATR_MULTIPLIER", DEFAULT_SL_MULT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")
+            "SL_ATR_MULTIPLIER",
+            DEFAULT_SL_MULT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.1"),
+            max_val=Decimal("20.0"),
         )
         self.tp_atr_multiplier: Decimal = self._get_env(
-            "TP_ATR_MULTIPLIER", DEFAULT_TP_MULT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.0"), max_val=Decimal("50.0")
+            "TP_ATR_MULTIPLIER",
+            DEFAULT_TP_MULT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.0"),
+            max_val=Decimal("50.0"),
         )
         self.tsl_activation_atr_multiplier: Decimal = self._get_env(
-            "TSL_ACTIVATION_ATR_MULTIPLIER", DEFAULT_TSL_ACT_MULT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")
+            "TSL_ACTIVATION_ATR_MULTIPLIER",
+            DEFAULT_TSL_ACT_MULT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.1"),
+            max_val=Decimal("20.0"),
         )
         self.trailing_stop_percent: Decimal = self._get_env(
-            "TRAILING_STOP_PERCENT", DEFAULT_TSL_PERCENT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.01"), max_val=Decimal("10.0")
+            "TRAILING_STOP_PERCENT",
+            DEFAULT_TSL_PERCENT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.01"),
+            max_val=Decimal("10.0"),
         )
         self.sl_trigger_by: str = self._get_env(
             "SL_TRIGGER_BY", "LastPrice", Style.DIM, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"]
@@ -209,28 +235,63 @@ class TradingConfig:
         self.position_idx: int = self._get_env(
             "POSITION_IDX", V5_HEDGE_MODE_POSITION_IDX, Style.DIM, cast_type=int, allowed_values=[0, 1, 2]
         )
-        self.trend_ema_period: int = self._get_env("TREND_EMA_PERIOD", 12, Style.DIM, cast_type=int, min_val=5, max_val=500)
-        self.fast_ema_period: int = self._get_env("FAST_EMA_PERIOD", 9, Style.DIM, cast_type=int, min_val=1, max_val=200)
-        self.slow_ema_period: int = self._get_env("SLOW_EMA_PERIOD", 21, Style.DIM, cast_type=int, min_val=2, max_val=500)
+        self.trend_ema_period: int = self._get_env(
+            "TREND_EMA_PERIOD", 12, Style.DIM, cast_type=int, min_val=5, max_val=500
+        )
+        self.fast_ema_period: int = self._get_env(
+            "FAST_EMA_PERIOD", 9, Style.DIM, cast_type=int, min_val=1, max_val=200
+        )
+        self.slow_ema_period: int = self._get_env(
+            "SLOW_EMA_PERIOD", 21, Style.DIM, cast_type=int, min_val=2, max_val=500
+        )
         self.stoch_period: int = self._get_env("STOCH_PERIOD", 7, Style.DIM, cast_type=int, min_val=1, max_val=100)
         self.stoch_smooth_k: int = self._get_env("STOCH_SMOOTH_K", 3, Style.DIM, cast_type=int, min_val=1, max_val=10)
         self.stoch_smooth_d: int = self._get_env("STOCH_SMOOTH_D", 3, Style.DIM, cast_type=int, min_val=1, max_val=10)
         self.atr_period: int = self._get_env("ATR_PERIOD", 5, Style.DIM, cast_type=int, min_val=1, max_val=100)
         self.adx_period: int = self._get_env("ADX_PERIOD", 14, Style.DIM, cast_type=int, min_val=2, max_val=100)
         self.bb_period: int = self._get_env("BB_PERIOD", 20, Style.DIM, cast_type=int, min_val=5, max_val=100)
-        self.bb_std_dev: Decimal = self._get_env("BB_STD_DEV", Decimal("2.0"), Style.DIM, cast_type=Decimal, min_val=Decimal("1.0"), max_val=Decimal("5.0"))
-        self.min_bb_width: Decimal = self._get_env("MIN_BB_WIDTH", DEFAULT_BB_WIDTH_MIN, Style.DIM, cast_type=Decimal, min_val=Decimal("0.0"), max_val=Decimal("0.1"))
+        self.bb_std_dev: Decimal = self._get_env(
+            "BB_STD_DEV", Decimal("2.0"), Style.DIM, cast_type=Decimal, min_val=Decimal("1.0"), max_val=Decimal("5.0")
+        )
+        self.min_bb_width: Decimal = self._get_env(
+            "MIN_BB_WIDTH",
+            DEFAULT_BB_WIDTH_MIN,
+            Style.DIM,
+            cast_type=Decimal,
+            min_val=Decimal("0.0"),
+            max_val=Decimal("0.1"),
+        )
         self.stoch_oversold_threshold: Decimal = self._get_env(
-            "STOCH_OVERSOLD_THRESHOLD", DEFAULT_STOCH_OVERSOLD, Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("45")
+            "STOCH_OVERSOLD_THRESHOLD",
+            DEFAULT_STOCH_OVERSOLD,
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("45"),
         )
         self.stoch_overbought_threshold: Decimal = self._get_env(
-            "STOCH_OVERBOUGHT_THRESHOLD", DEFAULT_STOCH_OVERBOUGHT, Fore.CYAN, cast_type=Decimal, min_val=Decimal("55"), max_val=Decimal("100")
+            "STOCH_OVERBOUGHT_THRESHOLD",
+            DEFAULT_STOCH_OVERBOUGHT,
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("55"),
+            max_val=Decimal("100"),
         )
         self.trend_filter_buffer_percent: Decimal = self._get_env(
-            "TREND_FILTER_BUFFER_PERCENT", Decimal("0.5"), Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("5")
+            "TREND_FILTER_BUFFER_PERCENT",
+            Decimal("0.5"),
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("5"),
         )
         self.atr_move_filter_multiplier: Decimal = self._get_env(
-            "ATR_MOVE_FILTER_MULTIPLIER", Decimal("0.5"), Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("5")
+            "ATR_MOVE_FILTER_MULTIPLIER",
+            Decimal("0.5"),
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("5"),
         )
         self.min_adx_level: Decimal = self._get_env(
             "MIN_ADX_LEVEL", DEFAULT_MIN_ADX, Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("90")
@@ -239,12 +300,24 @@ class TradingConfig:
         self.api_secret: str = self._get_env("BYBIT_API_SECRET", None, Fore.RED, is_secret=True)
         self.telegram_token: str = self._get_env("TELEGRAM_TOKEN", None, Fore.RED, is_secret=True)
         self.telegram_chat_id: str = self._get_env("TELEGRAM_CHAT_ID", None, Fore.RED, is_secret=True)
-        self.ohlcv_limit: int = self._get_env("OHLCV_LIMIT", DEFAULT_OHLCV_LIMIT, Style.DIM, cast_type=int, min_val=50, max_val=1000)
-        self.loop_sleep_seconds: int = self._get_env("LOOP_SLEEP_SECONDS", DEFAULT_LOOP_SLEEP, Style.DIM, cast_type=int, min_val=1)
-        self.order_check_delay_seconds: int = self._get_env("ORDER_CHECK_DELAY_SECONDS", 2, Style.DIM, cast_type=int, min_val=1)
-        self.order_fill_timeout_seconds: int = self._get_env("ORDER_FILL_TIMEOUT_SECONDS", 20, Style.DIM, cast_type=int, min_val=5)
-        self.max_fetch_retries: int = self._get_env("MAX_FETCH_RETRIES", DEFAULT_MAX_RETRIES, Style.DIM, cast_type=int, min_val=0, max_val=10)
-        self.retry_delay_seconds: int = self._get_env("RETRY_DELAY_SECONDS", DEFAULT_RETRY_DELAY, Style.DIM, cast_type=int, min_val=1)
+        self.ohlcv_limit: int = self._get_env(
+            "OHLCV_LIMIT", DEFAULT_OHLCV_LIMIT, Style.DIM, cast_type=int, min_val=50, max_val=1000
+        )
+        self.loop_sleep_seconds: int = self._get_env(
+            "LOOP_SLEEP_SECONDS", DEFAULT_LOOP_SLEEP, Style.DIM, cast_type=int, min_val=1
+        )
+        self.order_check_delay_seconds: int = self._get_env(
+            "ORDER_CHECK_DELAY_SECONDS", 2, Style.DIM, cast_type=int, min_val=1
+        )
+        self.order_fill_timeout_seconds: int = self._get_env(
+            "ORDER_FILL_TIMEOUT_SECONDS", 20, Style.DIM, cast_type=int, min_val=5
+        )
+        self.max_fetch_retries: int = self._get_env(
+            "MAX_FETCH_RETRIES", DEFAULT_MAX_RETRIES, Style.DIM, cast_type=int, min_val=0, max_val=10
+        )
+        self.retry_delay_seconds: int = self._get_env(
+            "RETRY_DELAY_SECONDS", DEFAULT_RETRY_DELAY, Style.DIM, cast_type=int, min_val=1
+        )
         self.trade_only_with_trend: bool = self._get_env("TRADE_ONLY_WITH_TREND", True, Style.DIM, cast_type=bool)
         self.journal_file_path: str = self._get_env("JOURNAL_FILE_PATH", DEFAULT_JOURNAL_FILE, Style.DIM)
         self.telemetry_file_path: str = self._get_env("TELEMETRY_FILE_PATH", DEFAULT_TELEMETRY_FILE, Style.DIM)
@@ -255,7 +328,9 @@ class TradingConfig:
             logger.critical(f"{Fore.RED}Missing BYBIT_API_KEY or BYBIT_API_SECRET. Halting.{Style.RESET_ALL}")
             sys.exit(1)
         if not self.telegram_token or not self.telegram_chat_id:
-            logger.warning(f"{Fore.YELLOW}Telegram notifications disabled: Missing TELEGRAM_TOKEN or TELEGRAM_CHAT_ID.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}Telegram notifications disabled: Missing TELEGRAM_TOKEN or TELEGRAM_CHAT_ID.{Style.RESET_ALL}"
+            )
             self.telegram_token = None
             self.telegram_chat_id = None
 
@@ -268,10 +343,16 @@ class TradingConfig:
 
     def _validate_config(self):
         if self.fast_ema_period >= self.slow_ema_period:
-            logger.critical(f"{Fore.RED}FAST_EMA ({self.fast_ema_period}) must be < SLOW_EMA ({self.slow_ema_period}). Halting.{Style.RESET_ALL}")
+            logger.critical(
+                f"{Fore.RED}FAST_EMA ({self.fast_ema_period}) must be < SLOW_EMA ({self.slow_ema_period}). Halting.{Style.RESET_ALL}"
+            )
             sys.exit(1)
         if self.trend_ema_period <= self.slow_ema_period:
-            logger.warning(f"{Fore.YELLOW}TREND_EMA ({self.trend_ema_period}) <= SLOW_EMA ({self.slow_ema_period}). Consider adjusting periods.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}TREND_EMA ({self.trend_ema_period}) <= SLOW_EMA ({self.slow_ema_period}). Consider adjusting periods.{Style.RESET_ALL}"
+            )
+
+
 class ExchangeManager:
     def __init__(self, config: TradingConfig):
         self.config = config
@@ -423,15 +504,20 @@ class ExchangeManager:
             await self.exchange.close()
             logger.info("Exchange connection closed.")
 
+
 class OrderManager:
     def __init__(self, config: TradingConfig, exchange_manager: ExchangeManager):
         self.config = config
         self.exchange_manager = exchange_manager
-        self.protection_tracker: Dict[str, Dict[str, Optional[str]]] = {s: {"long": None, "short": None} for s in config.symbols}
+        self.protection_tracker: Dict[str, Dict[str, Optional[str]]] = {
+            s: {"long": None, "short": None} for s in config.symbols
+        }
         self.exchange = exchange_manager.exchange
         self.markets_cache = exchange_manager.markets_cache
 
-    async def _verify_position_state(self, symbol: str, expected_side: Optional[str], max_attempts: int, delay_seconds: float) -> Tuple[bool, Optional[Dict]]:
+    async def _verify_position_state(
+        self, symbol: str, expected_side: Optional[str], max_attempts: int, delay_seconds: float
+    ) -> Tuple[bool, Optional[Dict]]:
         for attempt in range(max_attempts):
             positions = await self.exchange_manager.get_current_position(symbol)
             if positions is None:
@@ -443,14 +529,28 @@ class OrderManager:
             is_flat = long_qty.copy_abs() < POSITION_QTY_EPSILON and short_qty.copy_abs() < POSITION_QTY_EPSILON
             if expected_side is None:
                 return is_flat, positions
-            current_side = "long" if long_qty.copy_abs() >= POSITION_QTY_EPSILON else "short" if short_qty.copy_abs() >= POSITION_QTY_EPSILON else None
+            current_side = (
+                "long"
+                if long_qty.copy_abs() >= POSITION_QTY_EPSILON
+                else "short"
+                if short_qty.copy_abs() >= POSITION_QTY_EPSILON
+                else None
+            )
             if current_side == expected_side:
                 return True, positions
             await asyncio.sleep(delay_seconds)
         logger.error(f"Verification failed for {symbol}")
         return False, await self.exchange_manager.get_current_position(symbol)
 
-    async def _set_position_stops(self, symbol: str, position_side: str, qty: Decimal, entry_price: Decimal, sl_price: Decimal, tp_price: Optional[Decimal]) -> bool:
+    async def _set_position_stops(
+        self,
+        symbol: str,
+        position_side: str,
+        qty: Decimal,
+        entry_price: Decimal,
+        sl_price: Decimal,
+        tp_price: Optional[Decimal],
+    ) -> bool:
         logger.debug(f"Setting SL/TP for {symbol} {position_side.upper()} (Qty: {qty}, Entry: {entry_price})")
         sl_str = self.exchange_manager.format_price(symbol, sl_price)
         tp_str = self.exchange_manager.format_price(symbol, tp_price) if tp_price else ""
@@ -471,7 +571,9 @@ class OrderManager:
             try:
                 response = await self.exchange.private_post_v5_position_trading_stop(params=params)
                 if response.get("retCode") == V5_SUCCESS_RETCODE:
-                    logger.info(f"{Fore.GREEN}SL/TP set for {symbol} {position_side.upper()}: SL={sl_str}, TP={tp_str or 'N/A'}{Style.RESET_ALL}")
+                    logger.info(
+                        f"{Fore.GREEN}SL/TP set for {symbol} {position_side.upper()}: SL={sl_str}, TP={tp_str or 'N/A'}{Style.RESET_ALL}"
+                    )
                     self.protection_tracker[symbol][position_side] = "ACTIVE_SLTP"
                     return True
                 logger.warning(f"SL/TP attempt {attempt + 1} failed: {response.get('retMsg')}")
@@ -494,15 +596,21 @@ class OrderManager:
                 "positionIdx": self.config.position_idx,
                 "reduceOnly": True,
             }
-            sl_response = await self.exchange.create_order(symbol, "limit", sl_order_side.lower(), qty, sl_price, sl_order_params)
-            logger.info(f"{Fore.GREEN}Fallback SL order placed for {symbol} {position_side.upper()}: {sl_response.get('id')}{Style.RESET_ALL}")
+            sl_response = await self.exchange.create_order(
+                symbol, "limit", sl_order_side.lower(), qty, sl_price, sl_order_params
+            )
+            logger.info(
+                f"{Fore.GREEN}Fallback SL order placed for {symbol} {position_side.upper()}: {sl_response.get('id')}{Style.RESET_ALL}"
+            )
             self.protection_tracker[symbol][position_side] = "ACTIVE_SLTP"
             return True
         except Exception as e:
             logger.error(f"{Fore.RED}Fallback SL failed for {symbol}: {e}{Style.RESET_ALL}")
             return False
 
-    async def place_risked_market_order(self, symbol: str, side: str, atr: Decimal, total_equity: Decimal, current_price: Decimal, confidence: Decimal) -> bool:
+    async def place_risked_market_order(
+        self, symbol: str, side: str, atr: Decimal, total_equity: Decimal, current_price: Decimal, confidence: Decimal
+    ) -> bool:
         position_side = "long" if side == "buy" else "short"
         risk_factor = min(Decimal("1.5"), max(Decimal("0.5"), confidence))  # Scale risk by confidence
         risk_amount = total_equity * self.config.risk_percentage * risk_factor
@@ -532,20 +640,28 @@ class OrderManager:
                 logger.error(f"Filled qty {filled_qty} below min for {symbol}")
                 await self._handle_entry_failure(symbol, side, filled_qty)
                 return False
-            logger.info(f"{Fore.GREEN}Order filled for {symbol}: {side.upper()}, Qty={filled_qty}, Price={avg_entry_price}, Fees={fees}{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Order filled for {symbol}: {side.upper()}, Qty={filled_qty}, Price={avg_entry_price}, Fees={fees}{Style.RESET_ALL}"
+            )
             if self.config.enable_journaling:
                 self.log_trade_entry_to_journal(symbol, side, filled_qty, avg_entry_price, order.get("id"))
-            verification_ok, _ = await self._verify_position_state(symbol, position_side, 3, self.config.order_check_delay_seconds)
+            verification_ok, _ = await self._verify_position_state(
+                symbol, position_side, 3, self.config.order_check_delay_seconds
+            )
             if not verification_ok:
                 logger.error(f"Position verification failed for {symbol}")
                 await self._handle_entry_failure(symbol, side, filled_qty)
                 return False
-            success = await self._set_position_stops(symbol, position_side, filled_qty, avg_entry_price, sl_price, tp_price)
+            success = await self._set_position_stops(
+                symbol, position_side, filled_qty, avg_entry_price, sl_price, tp_price
+            )
             if not success:
                 logger.error(f"SL/TP set failed for {symbol}")
                 await self._handle_entry_failure(symbol, side, filled_qty)
                 return False
-            logger.trade(f"{Fore.GREEN}Entry successful for {symbol} {position_side.upper()}: Qty={filled_qty}, Entry={avg_entry_price}{Style.RESET_ALL}")
+            logger.trade(
+                f"{Fore.GREEN}Entry successful for {symbol} {position_side.upper()}: Qty={filled_qty}, Entry={avg_entry_price}{Style.RESET_ALL}"
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to place order for {symbol}: {e}")
@@ -569,7 +685,9 @@ class OrderManager:
             logger.info(f"Close order for {symbol}: Price={avg_close_price}, Fees={fees}")
             if self.config.enable_journaling:
                 self.log_trade_exit_to_journal(symbol, position_side, qty, avg_close_price, order.get("id"), reason)
-            verification_ok, _ = await self._verify_position_state(symbol, None, 5, self.config.order_check_delay_seconds + 1.0)
+            verification_ok, _ = await self._verify_position_state(
+                symbol, None, 5, self.config.order_check_delay_seconds + 1.0
+            )
             if not verification_ok:
                 logger.error(f"Closure verification failed for {symbol}")
                 termux_notify(f"{symbol} CLOSE FAILED", f"{position_side.upper()} may still be open!")
@@ -620,7 +738,9 @@ class OrderManager:
             logger.info(f"No lingering position for {symbol}")
             self.protection_tracker[symbol][position_side] = None
 
-    def log_trade_entry_to_journal(self, symbol: str, side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str]):
+    def log_trade_entry_to_journal(
+        self, symbol: str, side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str]
+    ):
         position_side = "long" if side == "buy" else "short"
         data = {
             "TimestampUTC": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
@@ -634,7 +754,9 @@ class OrderManager:
         }
         self._write_journal_row(data)
 
-    def log_trade_exit_to_journal(self, symbol: str, position_side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str], reason: str):
+    def log_trade_exit_to_journal(
+        self, symbol: str, position_side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str], reason: str
+    ):
         data = {
             "TimestampUTC": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
             "Symbol": symbol,
@@ -654,15 +776,26 @@ class OrderManager:
         try:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open("a", newline="", encoding="utf-8") as csvfile:
-                fieldnames = ["TimestampUTC", "Symbol", "Action", "Side", "Quantity", "AvgPrice", "OrderID", "Reason", "Notes"]
+                fieldnames = [
+                    "TimestampUTC",
+                    "Symbol",
+                    "Action",
+                    "Side",
+                    "Quantity",
+                    "AvgPrice",
+                    "OrderID",
+                    "Reason",
+                    "Notes",
+                ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL)
                 if not file_path.exists() or file_path.stat().st_size == 0:
                     writer.writeheader()
-                row = {field: str(data.get(field, "N/A")).replace('NaN', 'N/A') for field in fieldnames}
+                row = {field: str(data.get(field, "N/A")).replace("NaN", "N/A") for field in fieldnames}
                 writer.writerow(row)
             logger.debug(f"Trade {data['Action'].lower()} logged for {data['Symbol']}")
         except Exception as e:
             logger.error(f"Failed to write journal: {e}")
+
 
 class IndicatorCalculator:
     def __init__(self, config: TradingConfig):
@@ -677,7 +810,14 @@ class IndicatorCalculator:
         indicators["adx"] = self._adx(df["high"], df["low"], df["close"], self.config.adx_period)
         indicators["pdi"] = self._plus_di(df["high"], df["low"], df["close"], self.config.adx_period)
         indicators["mdi"] = self._minus_di(df["high"], df["low"], df["close"], self.config.adx_period)
-        stoch_k, stoch_d = self._stochastic(df["high"], df["low"], df["close"], self.config.stoch_period, self.config.stoch_smooth_k, self.config.stoch_smooth_d)
+        stoch_k, stoch_d = self._stochastic(
+            df["high"],
+            df["low"],
+            df["close"],
+            self.config.stoch_period,
+            self.config.stoch_smooth_k,
+            self.config.stoch_smooth_d,
+        )
         indicators["stoch_k"] = stoch_k
         indicators["stoch_d"] = stoch_d
         bb_upper, bb_lower = self._bollinger_bands(df["close"], self.config.bb_period, self.config.bb_std_dev)
@@ -715,7 +855,9 @@ class IndicatorCalculator:
         tr = self._atr(high, low, close, period)
         return 100 * minus_dm.rolling(window=period).mean() / tr
 
-    def _stochastic(self, high: pd.Series, low: pd.Series, close: pd.Series, k_period: int, smooth_k: int, smooth_d: int) -> Tuple[np.ndarray, np.ndarray]:
+    def _stochastic(
+        self, high: pd.Series, low: pd.Series, close: pd.Series, k_period: int, smooth_k: int, smooth_d: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
         lowest_low = low.rolling(window=k_period).min()
         highest_high = high.rolling(window=k_period).max()
         stoch_k = 100 * (close - lowest_low) / (highest_high - lowest_low)
@@ -730,6 +872,7 @@ class IndicatorCalculator:
         lower = sma - float(std_dev) * std
         return upper.values, lower.values
 
+
 class SignalGenerator:
     def __init__(self, config: TradingConfig):
         self.config = config
@@ -740,13 +883,15 @@ class SignalGenerator:
         if len(df) < 50:
             logger.warning("Insufficient data for ML training")
             return
-        X = pd.DataFrame({
-            "trend_ema_diff": (df["close"] - indicators["trend_ema"]) / df["close"],
-            "fast_ema_diff": (indicators["fast_ema"] - indicators["slow_ema"]) / df["close"],
-            "stoch_k": indicators["stoch_k"],
-            "adx": indicators["adx"],
-            "bb_width": indicators["bb_width"],
-        }).dropna()
+        X = pd.DataFrame(
+            {
+                "trend_ema_diff": (df["close"] - indicators["trend_ema"]) / df["close"],
+                "fast_ema_diff": (indicators["fast_ema"] - indicators["slow_ema"]) / df["close"],
+                "stoch_k": indicators["stoch_k"],
+                "adx": indicators["adx"],
+                "bb_width": indicators["bb_width"],
+            }
+        ).dropna()
         y = (df["close"].shift(-5) > df["close"]).astype(int)  # Predict price increase in 5 candles
         if len(X) < 10:
             logger.warning("Not enough valid samples for ML training")
@@ -755,7 +900,9 @@ class SignalGenerator:
         self.is_model_trained = True
         logger.info("ML model trained for signal confidence")
 
-    def generate_signals(self, recent_candles: pd.DataFrame, indicators: Dict, confirmation_indicators: Dict) -> Dict[str, Union[bool, str, Decimal]]:
+    def generate_signals(
+        self, recent_candles: pd.DataFrame, indicators: Dict, confirmation_indicators: Dict
+    ) -> Dict[str, Union[bool, str, Decimal]]:
         signals = {"long": False, "short": False, "reason": "No Signal", "confidence": Decimal("0.5")}
         if len(recent_candles) < 2:
             signals["reason"] = "Insufficient candles"
@@ -772,14 +919,21 @@ class SignalGenerator:
         mdi = safe_decimal(indicators.get("mdi", "NaN"))
         bb_width = safe_decimal(indicators.get("bb_width", "NaN"))
         conf_trend_ema = safe_decimal(confirmation_indicators.get("trend_ema", "NaN"))
-        if any(v.is_nan() for v in [current_price, trend_ema, fast_ema, stoch_k, stoch_d, atr, adx, bb_width, conf_trend_ema]):
+        if any(
+            v.is_nan()
+            for v in [current_price, trend_ema, fast_ema, stoch_k, stoch_d, atr, adx, bb_width, conf_trend_ema]
+        ):
             signals["reason"] = "Invalid indicator data"
             return signals
         price_move = abs(current_price - prev_price)
         atr_move_threshold = atr * self.config.atr_move_filter_multiplier
         trend_buffer = trend_ema * self.config.trend_filter_buffer_percent / Decimal("100")
-        is_bullish_trend = current_price > (trend_ema + trend_buffer) and fast_ema > trend_ema and current_price > conf_trend_ema
-        is_bearish_trend = current_price < (trend_ema - trend_buffer) and fast_ema < trend_ema and current_price < conf_trend_ema
+        is_bullish_trend = (
+            current_price > (trend_ema + trend_buffer) and fast_ema > trend_ema and current_price > conf_trend_ema
+        )
+        is_bearish_trend = (
+            current_price < (trend_ema - trend_buffer) and fast_ema < trend_ema and current_price < conf_trend_ema
+        )
         stoch_oversold = self.config.stoch_oversold_threshold + (atr / current_price) * 10  # Adaptive threshold
         stoch_overbought = self.config.stoch_overbought_threshold - (atr / current_price) * 10
         is_stoch_long_ok = stoch_k < stoch_oversold and stoch_k > stoch_d
@@ -791,13 +945,17 @@ class SignalGenerator:
         is_direction_ok = pdi > mdi if is_bullish_trend else mdi > pdi
         confidence = Decimal("0.5")
         if self.is_model_trained:
-            X = np.array([[
-                (current_price - trend_ema) / current_price,
-                (fast_ema - indicators["slow_ema"]) / current_price,
-                stoch_k,
-                adx,
-                bb_width,
-            ]])
+            X = np.array(
+                [
+                    [
+                        (current_price - trend_ema) / current_price,
+                        (fast_ema - indicators["slow_ema"]) / current_price,
+                        stoch_k,
+                        adx,
+                        bb_width,
+                    ]
+                ]
+            )
             confidence = Decimal(str(self.ml_model.predict_proba(X)[0][1]))
             confidence = max(Decimal("0.3"), min(Decimal("0.7"), confidence))
         if is_trend_ok and is_atr_move_ok and is_adx_ok and is_volatility_ok and is_direction_ok:
@@ -817,6 +975,7 @@ class SignalGenerator:
                 f"ADX({is_adx_ok}) | Volatility({is_volatility_ok}) | Dir({is_direction_ok})"
             )
         return signals
+
 
 class TelemetryManager:
     def __init__(self, config: TradingConfig):
@@ -848,16 +1007,18 @@ class TelemetryManager:
         pnl -= fees
         self.metrics["total_pnl"] += pnl
         self.metrics["wins" if pnl > 0 else "losses"] += 1
-        self.trade_history.append({
-            "timestamp": trade.get("timestamp", datetime.now(timezone.utc)),
-            "symbol": trade.get("symbol", ""),
-            "side": side,
-            "pnl": pnl,
-            "entry_price": entry_price,
-            "exit_price": exit_price,
-            "qty": qty,
-            "fees": fees,
-        })
+        self.trade_history.append(
+            {
+                "timestamp": trade.get("timestamp", datetime.now(timezone.utc)),
+                "symbol": trade.get("symbol", ""),
+                "side": side,
+                "pnl": pnl,
+                "entry_price": entry_price,
+                "exit_price": exit_price,
+                "qty": qty,
+                "fees": fees,
+            }
+        )
         self._write_telemetry()
 
     def update_equity(self, equity: Decimal):
@@ -884,9 +1045,10 @@ class TelemetryManager:
     def get_summary(self) -> Dict:
         win_rate = self.metrics["wins"] / self.metrics["trades"] if self.metrics["trades"] > 0 else 0
         profit_factor = (
-            sum(t["pnl"] for t in self.trade_history if t["pnl"] > 0) /
-            abs(sum(t["pnl"] for t in self.trade_history if t["pnl"] < 0))
-            if any(t["pnl"] < 0 for t in self.trade_history) else float("inf")
+            sum(t["pnl"] for t in self.trade_history if t["pnl"] > 0)
+            / abs(sum(t["pnl"] for t in self.trade_history if t["pnl"] < 0))
+            if any(t["pnl"] < 0 for t in self.trade_history)
+            else float("inf")
         )
         return {
             "trades": self.metrics["trades"],
@@ -897,8 +1059,15 @@ class TelemetryManager:
             "current_equity": self.metrics["current_equity"],
         }
 
+
 class BacktestEngine:
-    def __init__(self, config: TradingConfig, exchange_manager: ExchangeManager, signal_generator: SignalGenerator, indicator_calculator: IndicatorCalculator):
+    def __init__(
+        self,
+        config: TradingConfig,
+        exchange_manager: ExchangeManager,
+        signal_generator: SignalGenerator,
+        indicator_calculator: IndicatorCalculator,
+    ):
         self.config = config
         self.exchange_manager = exchange_manager
         self.signal_generator = signal_generator
@@ -919,7 +1088,7 @@ class BacktestEngine:
         trades = []
         positions = {"long": None, "short": None}
         for i in range(len(df) - 1):
-            recent_candles = df.iloc[:i + 1]
+            recent_candles = df.iloc[: i + 1]
             indicators = self.indicator_calculator.calculate_indicators(recent_candles)
             signals = self.signal_generator.generate_signals(recent_candles, indicators, indicators)
             current_price = safe_decimal(recent_candles.iloc[-1]["close"])
@@ -927,7 +1096,9 @@ class BacktestEngine:
             if signals["long"] and not positions["long"]:
                 qty = (equity * self.config.risk_percentage) / (atr * self.config.sl_atr_multiplier)
                 sl_price = current_price - atr * self.config.sl_atr_multiplier
-                tp_price = current_price + atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+                tp_price = (
+                    current_price + atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+                )
                 positions["long"] = {
                     "qty": qty,
                     "entry_price": current_price,
@@ -937,7 +1108,9 @@ class BacktestEngine:
             elif signals["short"] and not positions["short"]:
                 qty = (equity * self.config.risk_percentage) / (atr * self.config.sl_atr_multiplier)
                 sl_price = current_price + atr * self.config.sl_atr_multiplier
-                tp_price = current_price - atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+                tp_price = (
+                    current_price - atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+                )
                 positions["short"] = {
                     "qty": qty,
                     "entry_price": current_price,
@@ -952,37 +1125,42 @@ class BacktestEngine:
                         if next_price <= pos["sl_price"] or (pos["tp_price"] and next_price >= pos["tp_price"]):
                             pnl = (next_price - pos["entry_price"]) * pos["qty"]
                             equity += pnl
-                            trades.append({
-                                "timestamp": df.index[i + 1],
-                                "symbol": symbol,
-                                "side": side,
-                                "pnl": pnl,
-                                "entry_price": pos["entry_price"],
-                                "exit_price": next_price,
-                                "qty": pos["qty"],
-                                "fees": Decimal("0"),
-                            })
+                            trades.append(
+                                {
+                                    "timestamp": df.index[i + 1],
+                                    "symbol": symbol,
+                                    "side": side,
+                                    "pnl": pnl,
+                                    "entry_price": pos["entry_price"],
+                                    "exit_price": next_price,
+                                    "qty": pos["qty"],
+                                    "fees": Decimal("0"),
+                                }
+                            )
                             positions[side] = None
                     else:
                         if next_price >= pos["sl_price"] or (pos["tp_price"] and next_price <= pos["tp_price"]):
                             pnl = (pos["entry_price"] - next_price) * pos["qty"]
                             equity += pnl
-                            trades.append({
-                                "timestamp": df.index[i + 1],
-                                "symbol": symbol,
-                                "side": side,
-                                "pnl": pnl,
-                                "entry_price": pos["entry_price"],
-                                "exit_price": next_price,
-                                "qty": pos["qty"],
-                                "fees": Decimal("0"),
-                            })
+                            trades.append(
+                                {
+                                    "timestamp": df.index[i + 1],
+                                    "symbol": symbol,
+                                    "side": side,
+                                    "pnl": pnl,
+                                    "entry_price": pos["entry_price"],
+                                    "exit_price": next_price,
+                                    "qty": pos["qty"],
+                                    "fees": Decimal("0"),
+                                }
+                            )
                             positions[side] = None
         telemetry = TelemetryManager(self.config)
         for trade in trades:
             telemetry.update_metrics(trade)
         telemetry.update_equity(equity)
         return telemetry.get_summary()
+
 
 class StatusDisplay:
     def __init__(self, config: TradingConfig, telemetry: TelemetryManager):
@@ -1014,9 +1192,12 @@ class StatusDisplay:
             for side in ["long", "short"]:
                 pos = positions.get(side, {})
                 if pos.get("qty", Decimal("0")).copy_abs() >= POSITION_QTY_EPSILON:
-                    table.add_row(f"{symbol} {side.capitalize()} Pos", f"Qty: {pos['qty']}, Entry: {pos['entry_price']}")
+                    table.add_row(
+                        f"{symbol} {side.capitalize()} Pos", f"Qty: {pos['qty']}, Entry: {pos['entry_price']}"
+                    )
         self.live.update(Panel(table, title="Pyrmethus Dashboard", border_style="bright_magenta"))
         self.live.refresh()
+
 
 class TradingBot:
     def __init__(self):
@@ -1028,7 +1209,9 @@ class TradingBot:
         self.order_manager = OrderManager(self.config, self.exchange_manager)
         self.telemetry = TelemetryManager(self.config)
         self.status_display = StatusDisplay(self.config, self.telemetry)
-        self.backtest_engine = BacktestEngine(self.config, self.exchange_manager, self.signal_generator, self.indicator_calculator)
+        self.backtest_engine = BacktestEngine(
+            self.config, self.exchange_manager, self.signal_generator, self.indicator_calculator
+        )
         self.shutdown_requested = False
         self.telegram_bot = Bot(self.config.telegram_token) if self.config.telegram_token else None
         self._setup_signal_handlers()
@@ -1099,7 +1282,9 @@ class TradingBot:
             logger.error(f"Max drawdown exceeded: {drawdown:.2%}")
             state["status"] = "FAIL:MAX_DRAWDOWN"
             if self.telegram_bot:
-                await telegram_notify(self.telegram_bot, self.config.telegram_chat_id, f"<b>Max Drawdown Exceeded</b>: {drawdown:.2%}")
+                await telegram_notify(
+                    self.telegram_bot, self.config.telegram_chat_id, f"<b>Max Drawdown Exceeded</b>: {drawdown:.2%}"
+                )
             self.shutdown_requested = True
             return state
         positions = await self.exchange_manager.get_current_position(symbol)
@@ -1115,16 +1300,24 @@ class TradingBot:
         current_price = safe_decimal(df.iloc[-1]["close"])
         atr = indicators.get("atr", Decimal("0.001"))
         if signals["long"]:
-            await self.order_manager.place_risked_market_order(symbol, "buy", atr, total_equity, current_price, signals["confidence"])
+            await self.order_manager.place_risked_market_order(
+                symbol, "buy", atr, total_equity, current_price, signals["confidence"]
+            )
         elif signals["short"]:
-            await self.order_manager.place_risked_market_order(symbol, "sell", atr, total_equity, current_price, signals["confidence"])
+            await self.order_manager.place_risked_market_order(
+                symbol, "sell", atr, total_equity, current_price, signals["confidence"]
+            )
         return state
 
     async def run(self):
         self._display_startup_info()
         termux_notify("Pyrmethus Started", f"Trading {', '.join(self.config.symbols)}")
         if self.telegram_bot:
-            await telegram_notify(self.telegram_bot, self.config.telegram_chat_id, f"<b>Pyrmethus Started</b>: Trading {', '.join(self.config.symbols)}")
+            await telegram_notify(
+                self.telegram_bot,
+                self.config.telegram_chat_id,
+                f"<b>Pyrmethus Started</b>: Trading {', '.join(self.config.symbols)}",
+            )
         self.status_display.start()
         cycle_count = 0
         last_config_reload = time.monotonic()
@@ -1150,5 +1343,5 @@ class TradingBot:
             if sleep_duration > 0:
                 await asyncio.sleep(sleep_duration)
         await self.graceful_shutdown()
-        console.print(f"\n[bold bright_cyan]Pyrmethus terminated.[/]")
-        sys.exit();
+        console.print("\n[bold bright_cyan]Pyrmethus terminated.[/]")
+        sys.exit()

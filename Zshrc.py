@@ -658,23 +658,25 @@ files_to_create = {
     os.path.join(config_dir, ".p10k.zsh"): p10k_zsh_content,
 }
 
-console.print(Panel(
-    Markdown(
-        "# ✨ Pyrmethus's Grand ZSH Grimoire for Termux ✨\n\n"
-        "Behold! A masterfully woven ZSH configuration, optimized and imbued with arcane energies for the Termux realm. This Grimoire utilizes a modular structure (`~/.config/zsh/`) and the swift **Zinit** familiar for potent plugin management.\n\n"
-        "**[bold red]WARNING, ADEPT:[/bold red] The Arcane Key (`AICHA_API_KEY`) is potent and must be guarded! **NEVER** commit it to version control. Draw its power securely from a hidden vault (`~/.secrets/`) or environment variables, as instructed within the scrolls.\n\n"
-        "**The Ritual of Summoning:**\n"
-        "1. **Gather Reagents:** `pkg install zsh git curl aichat fzf eza bat fd-find gnupg coreutils ncurses-utils stow -y`\n"
-        "2. **Attune Shell:** `chsh -s zsh`\n"
-        "3. **Prepare Sanctum:** `mkdir -p ~/.config/zsh ~/.cache/zsh ~/.local/bin ~/bin ~/.secrets`\n"
-        "4. **Inscribe Scrolls:** Place/Symlink (`stow`) the following scrolls into `~/.config/zsh/` (and `.zshenv` into `~/`).\n"
-        "5. **Secure Arcane Key:** Place your key in `~/.secrets/aichat_api_key` (or similar) and ensure `.zshenv` draws power from it.\n"
-        "6. **Awaken:** Start a new Termux session. Zinit will conjure the required spirits."
-    ),
-    title="[bold cyan]The Grand Conjuration: Setup Guide[/bold cyan]",
-    border_style="cyan",
-    padding=(1, 2)
-))
+console.print(
+    Panel(
+        Markdown(
+            "# ✨ Pyrmethus's Grand ZSH Grimoire for Termux ✨\n\n"
+            "Behold! A masterfully woven ZSH configuration, optimized and imbued with arcane energies for the Termux realm. This Grimoire utilizes a modular structure (`~/.config/zsh/`) and the swift **Zinit** familiar for potent plugin management.\n\n"
+            "**[bold red]WARNING, ADEPT:[/bold red] The Arcane Key (`AICHA_API_KEY`) is potent and must be guarded! **NEVER** commit it to version control. Draw its power securely from a hidden vault (`~/.secrets/`) or environment variables, as instructed within the scrolls.\n\n"
+            "**The Ritual of Summoning:**\n"
+            "1. **Gather Reagents:** `pkg install zsh git curl aichat fzf eza bat fd-find gnupg coreutils ncurses-utils stow -y`\n"
+            "2. **Attune Shell:** `chsh -s zsh`\n"
+            "3. **Prepare Sanctum:** `mkdir -p ~/.config/zsh ~/.cache/zsh ~/.local/bin ~/bin ~/.secrets`\n"
+            "4. **Inscribe Scrolls:** Place/Symlink (`stow`) the following scrolls into `~/.config/zsh/` (and `.zshenv` into `~/`).\n"
+            "5. **Secure Arcane Key:** Place your key in `~/.secrets/aichat_api_key` (or similar) and ensure `.zshenv` draws power from it.\n"
+            "6. **Awaken:** Start a new Termux session. Zinit will conjure the required spirits."
+        ),
+        title="[bold cyan]The Grand Conjuration: Setup Guide[/bold cyan]",
+        border_style="cyan",
+        padding=(1, 2),
+    )
+)
 
 for file_path, content in files_to_create.items():
     relative_path = file_path.replace(home_dir, "~")
@@ -683,7 +685,7 @@ for file_path, content in files_to_create.items():
     if relative_path.endswith((".zsh", ".zshenv", ".zshrc")):
         lang = "bash"  # Rich uses 'bash' for zsh highlighting
     elif relative_path.endswith(".p10k.zsh"):
-         lang = "bash"  # Still shell script based
+        lang = "bash"  # Still shell script based
 
     syntax = Syntax(content, lang, theme="monokai", line_numbers=True, word_wrap=False)
     panel = Panel(
@@ -691,28 +693,30 @@ for file_path, content in files_to_create.items():
         title=f"[bold blue]📜 Scroll: {relative_path}[/bold blue]",
         subtitle=f"[dim]Etch this content into {relative_path}[/dim]",
         border_style="blue",
-        padding=(1, 1)  # Add padding inside panel
+        padding=(1, 1),  # Add padding inside panel
     )
     console.print(panel)
     console.print("\n---\n")  # Separator for copy-pasting
 
 
 # --- Final Incantations ---
-console.print(Panel(
-    Markdown(
-        "**Final Attunements:**\n"
-        "1. **Initiate:** Launch a new Termux session.\n"
-        "2. **Witness:** Zinit shall conjure the plugin spirits.\n"
-        "3. **Reforge Prompt:** If P10k is unconfigured, invoke `p10k configure`.\n"
-        "4. **Test the Weave:** Try AI spells (`Alt+S`, `Alt+C`), aliases (`ll`, `cat`), and functions (`jpr`, `weather`).\n"
-        "5. **Heed Warnings:** Observe any messages during startup regarding missing spirits or insecure keys.\n"
-        "6. **[bold yellow]Master's Advice:[/bold yellow] Archive these scrolls in a Git sanctum (`~/dotfiles`) and use `stow` to manage them. Shield your vault (`~/.secrets/`, `.zshenv` if it holds secrets) with `.gitignore`!\n\n"
-        "***Your Termux ZSH Grimoire is now imbued with potent, optimized magic! Wield it wisely!***"
-    ),
-    title="[bold green]✨ Awakening the Power ✨[/bold green]",
-    border_style="green",
-    padding=(1, 2)
-))
+console.print(
+    Panel(
+        Markdown(
+            "**Final Attunements:**\n"
+            "1. **Initiate:** Launch a new Termux session.\n"
+            "2. **Witness:** Zinit shall conjure the plugin spirits.\n"
+            "3. **Reforge Prompt:** If P10k is unconfigured, invoke `p10k configure`.\n"
+            "4. **Test the Weave:** Try AI spells (`Alt+S`, `Alt+C`), aliases (`ll`, `cat`), and functions (`jpr`, `weather`).\n"
+            "5. **Heed Warnings:** Observe any messages during startup regarding missing spirits or insecure keys.\n"
+            "6. **[bold yellow]Master's Advice:[/bold yellow] Archive these scrolls in a Git sanctum (`~/dotfiles`) and use `stow` to manage them. Shield your vault (`~/.secrets/`, `.zshenv` if it holds secrets) with `.gitignore`!\n\n"
+            "***Your Termux ZSH Grimoire is now imbued with potent, optimized magic! Wield it wisely!***"
+        ),
+        title="[bold green]✨ Awakening the Power ✨[/bold green]",
+        border_style="green",
+        padding=(1, 2),
+    )
+)
 
 
 """

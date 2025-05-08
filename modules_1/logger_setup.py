@@ -28,11 +28,13 @@ except ImportError:
     try:
         from zoneinfo import ZoneInfo
 
-        get_timezone = lambda: ZoneInfo("UTC")  # Python 3.9+
+        def get_timezone():
+            return ZoneInfo("UTC")  # Python 3.9+
     except ImportError:
         from datetime import timezone as dt_tz
 
-        get_timezone = lambda: dt_tz.utc  # Fallback UTC
+        def get_timezone():
+            return dt_tz.utc  # Fallback UTC
 
     # Define a basic SensitiveFormatter if not available
     try:

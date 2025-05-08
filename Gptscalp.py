@@ -72,9 +72,7 @@ def retry_api_call(max_retries=3, initial_delay=1):
                 time.sleep(delay + random.uniform(0, 1))
                 delay *= 2  # Exponential backoff
                 retries += 1
-            logger.error(
-                f"{Fore.RED}Max retries reached for API call. Aborting.{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Max retries reached for API call. Aborting.{Style.RESET_ALL}")
             return None  # Indicate failure
 
         return wrapper
@@ -101,14 +99,10 @@ class EnhancedTradingBot:
 
         # --- Trading Parameters ---
         self.symbol = symbol.upper()
-        self.order_size_percentage = self.config["risk_management"][
-            "order_size_percentage"
-        ]
+        self.order_size_percentage = self.config["risk_management"]["order_size_percentage"]
         self.take_profit_pct = self.config["risk_management"]["take_profit_percentage"]
         self.stop_loss_pct = self.config["risk_management"]["stop_loss_percentage"]
-        self.dynamic_position_sizing = self.config["trading"].get(
-            "dynamic_position_sizing", False
-        )
+        self.dynamic_position_sizing = self.config["trading"].get("dynamic_position_sizing", False)
 
         # --- Technical Indicator Parameters ---
         self.ema_period = self.config["indicators"]["ema_period"]
@@ -125,21 +119,13 @@ class EnhancedTradingBot:
         # --- Order Book Analysis Parameters ---
         self.order_book_depth = self.config["order_book"]["depth"]
         self.imbalance_threshold = self.config["order_book"]["imbalance_threshold"]
-        self.volume_cluster_threshold = self.config["order_book"][
-            "volume_cluster_threshold"
-        ]
+        self.volume_cluster_threshold = self.config["order_book"]["volume_cluster_threshold"]
         self.ob_delta_lookback = self.config["order_book"]["ob_delta_lookback"]
-        self.cluster_proximity_threshold_pct = self.config["order_book"][
-            "cluster_proximity_threshold_pct"
-        ]
+        self.cluster_proximity_threshold_pct = self.config["order_book"]["cluster_proximity_threshold_pct"]
 
         # --- Trailing Stop Loss Parameters ---
-        self.trailing_stop_loss_active = self.config["trailing_stop"][
-            "trailing_stop_active"
-        ]
-        self.trailing_stop_callback = self.config["trailing_stop"][
-            "trailing_stop_callback"
-        ]
+        self.trailing_stop_loss_active = self.config["trailing_stop"]["trailing_stop_active"]
+        self.trailing_stop_callback = self.config["trailing_stop"]["trailing_stop_callback"]
         self.high_since_entry = -np.inf
         self.low_since_entry = np.inf
 
@@ -149,17 +135,11 @@ class EnhancedTradingBot:
         self.macd_weight = self.config["signal_weights"]["macd_weight"]
         self.stoch_rsi_weight = self.config["signal_weights"]["stoch_rsi_weight"]
         self.imbalance_weight = self.config["signal_weights"]["imbalance_weight"]
-        self.ob_delta_change_weight = self.config["signal_weights"][
-            "ob_delta_change_weight"
-        ]
+        self.ob_delta_change_weight = self.config["signal_weights"]["ob_delta_change_weight"]
         self.spread_weight = self.config["signal_weights"]["spread_weight"]
-        self.cluster_proximity_weight = self.config["signal_weights"][
-            "cluster_proximity_weight"
-        ]
+        self.cluster_proximity_weight = self.config["signal_weights"]["cluster_proximity_weight"]
         # New: Historical order flow signal weight
-        self.historical_order_flow_weight = self.config["signal_weights"].get(
-            "historical_order_flow_weight", 0
-        )
+        self.historical_order_flow_weight = self.config["signal_weights"].get("historical_order_flow_weight", 0)
 
         # --- Position Tracking ---
         self.open_positions = []  # Track open positions
@@ -170,15 +150,11 @@ class EnhancedTradingBot:
         # --- Historical Order Flow Tracking ---
         self.order_flow_history = []  # List of recent order flow deltas
         self.order_flow_lock = threading.Lock()
-        self.historical_window = self.config["trading"].get(
-            "historical_order_flow_window", 30
-        )  # seconds
+        self.historical_window = self.config["trading"].get("historical_order_flow_window", 30)  # seconds
 
         # Start background thread for historical order flow data if enabled
         if self.config["trading"].get("historical_order_flow_enabled", False):
-            threading.Thread(
-                target=self._update_order_flow_history, daemon=True
-            ).start()
+            threading.Thread(target=self._update_order_flow_history, daemon=True).start()
             logger.info("Historical order flow thread started.")
 
         # Initialize exchange connection
@@ -192,18 +168,12 @@ class EnhancedTradingBot:
         try:
             with open(config_file) as f:
                 self.config = yaml.safe_load(f)
-            logger.info(
-                f"{Fore.GREEN}Configuration loaded from {config_file}{Style.RESET_ALL}"
-            )
+            logger.info(f"{Fore.GREEN}Configuration loaded from {config_file}{Style.RESET_ALL}")
         except FileNotFoundError:
-            logger.error(
-                f"{Fore.RED}Configuration file {config_file} not found. Exiting.{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Configuration file {config_file} not found. Exiting.{Style.RESET_ALL}")
             exit()
         except yaml.YAMLError as e:
-            logger.error(
-                f"{Fore.RED}Error parsing configuration file {config_file}: {e}. Exiting.{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Error parsing configuration file {config_file}: {e}. Exiting.{Style.RESET_ALL}")
             exit()
 
     def _validate_config(self) -> None:
@@ -238,16 +208,16 @@ class EnhancedTradingBot:
         """Initializes the exchange connection using ccxt."""
         logger.info(f"Initializing exchange: {self.exchange_id.upper()}...")
         try:
-            exchange = getattr(ccxt, self.exchange_id)({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "options": {"defaultType": "future"},
-                "recvWindow": 60000,
-            })
-            exchange.load_markets()
-            logger.info(
-                f"{Fore.GREEN}Connected to {self.exchange_id.upper()} successfully.{Style.RESET_ALL}"
+            exchange = getattr(ccxt, self.exchange_id)(
+                {
+                    "apiKey": self.api_key,
+                    "secret": self.api_secret,
+                    "options": {"defaultType": "future"},
+                    "recvWindow": 60000,
+                }
             )
+            exchange.load_markets()
+            logger.info(f"{Fore.GREEN}Connected to {self.exchange_id.upper()} successfully.{Style.RESET_ALL}")
             return exchange
         except Exception as e:
             logger.error(f"{Fore.RED}Error initializing exchange: {e}{Style.RESET_ALL}")
@@ -269,9 +239,7 @@ class EnhancedTradingBot:
     def fetch_order_book(self):
         """Fetches the order book for the symbol."""
         try:
-            orderbook = self.exchange.fetch_order_book(
-                self.symbol, limit=self.order_book_depth
-            )
+            orderbook = self.exchange.fetch_order_book(self.symbol, limit=self.order_book_depth)
             logger.debug("Order book fetched successfully.")
             return orderbook
         except Exception as e:
@@ -378,11 +346,7 @@ class EnhancedTradingBot:
 
         bid_volume = sum(bid[1] for bid in orderbook["bids"])
         ask_volume = sum(ask[1] for ask in orderbook["asks"])
-        imbalance = (
-            (bid_volume - ask_volume) / (bid_volume + ask_volume)
-            if (bid_volume + ask_volume) > 0
-            else 0
-        )
+        imbalance = (bid_volume - ask_volume) / (bid_volume + ask_volume) if (bid_volume + ask_volume) > 0 else 0
         logger.debug(f"Order Book Imbalance: {imbalance:.2f}")
         return imbalance
 
@@ -397,9 +361,7 @@ class EnhancedTradingBot:
         top_bid_cluster_price = bid_clusters[0][0] if bid_clusters else None
         top_ask_cluster_price = ask_clusters[0][0] if ask_clusters else None
 
-        logger.debug(
-            f"Top Bid Cluster Price: {top_bid_cluster_price}, Top Ask Cluster Price: {top_ask_cluster_price}"
-        )
+        logger.debug(f"Top Bid Cluster Price: {top_bid_cluster_price}, Top Ask Cluster Price: {top_ask_cluster_price}")
         return top_bid_cluster_price, top_ask_cluster_price
 
     def analyze_order_book_delta(self, orderbook):
@@ -407,14 +369,8 @@ class EnhancedTradingBot:
         if not orderbook or not orderbook.get("bids") or not orderbook.get("asks"):
             return 0
 
-        current_ob_delta = sum(bid[1] for bid in orderbook["bids"]) - sum(
-            ask[1] for ask in orderbook["asks"]
-        )
-        delta_change = (
-            current_ob_delta - self.last_ob_delta
-            if self.last_ob_delta is not None
-            else 0
-        )
+        current_ob_delta = sum(bid[1] for bid in orderbook["bids"]) - sum(ask[1] for ask in orderbook["asks"])
+        delta_change = current_ob_delta - self.last_ob_delta if self.last_ob_delta is not None else 0
         self.last_ob_delta = current_ob_delta
         logger.debug(f"Order Book Delta Change: {delta_change:.2f}")
         return delta_change
@@ -436,9 +392,7 @@ class EnhancedTradingBot:
         spread = weighted_ask - weighted_bid
         spread_percentage = (spread / weighted_bid) * 100 if weighted_bid > 0 else 0
         self.last_spread = spread_percentage
-        logger.debug(
-            f"Volume Weighted Spread: {spread:.4f}, Spread Percentage: {spread_percentage:.2f}%"
-        )
+        logger.debug(f"Volume Weighted Spread: {spread:.4f}, Spread Percentage: {spread_percentage:.2f}%")
         return spread_percentage
 
     # ---------------------------
@@ -512,9 +466,7 @@ class EnhancedTradingBot:
     def _get_spread_signal(self, orderbook):
         spread_percentage = self.analyze_spread(orderbook)
         if spread_percentage is not None:
-            signal_value = (
-                -spread_percentage * self.spread_weight
-            )  # Wider spread is negative
+            signal_value = -spread_percentage * self.spread_weight  # Wider spread is negative
             logger.debug(f"Spread Signal: {signal_value:.2f}")
             return signal_value
         return 0
@@ -523,25 +475,13 @@ class EnhancedTradingBot:
         current_price = self.fetch_market_price()
         bid_cluster_price, ask_cluster_price = self.analyze_volume_clusters(orderbook)
         if current_price and bid_cluster_price and ask_cluster_price:
-            bid_proximity = (
-                abs(current_price - bid_cluster_price) / current_price
-                if current_price > 0
-                else 0
-            )
-            ask_proximity = (
-                abs(current_price - ask_cluster_price) / current_price
-                if current_price > 0
-                else 0
-            )
+            bid_proximity = abs(current_price - bid_cluster_price) / current_price if current_price > 0 else 0
+            ask_proximity = abs(current_price - ask_cluster_price) / current_price if current_price > 0 else 0
             if bid_proximity <= (self.cluster_proximity_threshold_pct / 100):
-                logger.debug(
-                    f"Bid Cluster Proximity Bullish Signal: +{self.cluster_proximity_weight}"
-                )
+                logger.debug(f"Bid Cluster Proximity Bullish Signal: +{self.cluster_proximity_weight}")
                 return self.cluster_proximity_weight
             if ask_proximity <= (self.cluster_proximity_threshold_pct / 100):
-                logger.debug(
-                    f"Ask Cluster Proximity Bearish Signal: -{self.cluster_proximity_weight}"
-                )
+                logger.debug(f"Ask Cluster Proximity Bearish Signal: -{self.cluster_proximity_weight}")
                 return -self.cluster_proximity_weight
         return 0
 
@@ -553,9 +493,7 @@ class EnhancedTradingBot:
             if not self.order_flow_history:
                 return 0
             # Calculate the average order flow delta
-            avg_flow = sum(flow for timestamp, flow in self.order_flow_history) / len(
-                self.order_flow_history
-            )
+            avg_flow = sum(flow for timestamp, flow in self.order_flow_history) / len(self.order_flow_history)
         # Multiply by the configured weight
         logger.debug(
             f"Historical Order Flow Signal (avg flow): {avg_flow:.2f}, Weighted: {avg_flow * self.historical_order_flow_weight:.2f}"
@@ -679,9 +617,7 @@ class EnhancedTradingBot:
                 logger.info(f"Open positions count: {len(self.open_positions)}")
                 return order
             else:
-                logger.error(
-                    f"{Fore.RED}Order placement failed or order not open. Details: {order}{Style.RESET_ALL}"
-                )
+                logger.error(f"{Fore.RED}Order placement failed or order not open. Details: {order}{Style.RESET_ALL}")
                 return None
         except Exception as e:
             logger.error(f"{Fore.RED}Error placing order: {e}{Style.RESET_ALL}")
@@ -691,25 +627,17 @@ class EnhancedTradingBot:
     def cancel_order(self, order_id) -> bool | None:
         """Cancels an open order."""
         if self.simulation_mode:
-            logger.info(
-                f"{NEON_YELLOW}[SIMULATION MODE] - Cancelling order with ID: {order_id}{RESET_COLOR}"
-            )
+            logger.info(f"{NEON_YELLOW}[SIMULATION MODE] - Cancelling order with ID: {order_id}{RESET_COLOR}")
             return True
         try:
             self.exchange.cancel_order(order_id, self.symbol)
-            logger.info(
-                f"{NEON_GREEN}Order {order_id} cancelled successfully.{RESET_COLOR}"
-            )
+            logger.info(f"{NEON_GREEN}Order {order_id} cancelled successfully.{RESET_COLOR}")
             return True
         except ccxt.OrderNotFound:
-            logger.warning(
-                f"{Fore.YELLOW}Order {order_id} not found, possibly already closed.{Style.RESET_ALL}"
-            )
+            logger.warning(f"{Fore.YELLOW}Order {order_id} not found, possibly already closed.{Style.RESET_ALL}")
             return True
         except Exception as e:
-            logger.error(
-                f"{Fore.RED}Error cancelling order {order_id}: {e}{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Error cancelling order {order_id}: {e}{Style.RESET_ALL}")
             return False
 
     @retry_api_call()
@@ -721,9 +649,7 @@ class EnhancedTradingBot:
             logger.debug(f"Fetched open positions: {open_positions}")
             return open_positions
         except Exception as e:
-            logger.error(
-                f"{Fore.RED}Error fetching open positions: {e}{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Error fetching open positions: {e}{Style.RESET_ALL}")
             return None
 
     @retry_api_call()
@@ -736,14 +662,10 @@ class EnhancedTradingBot:
                 logger.debug(f"Account Balance: USDT {usdt_balance:.2f}")
                 return usdt_balance
             else:
-                logger.warning(
-                    f"{Fore.YELLOW}USDT balance not found in account balance data.{Style.RESET_ALL}"
-                )
+                logger.warning(f"{Fore.YELLOW}USDT balance not found in account balance data.{Style.RESET_ALL}")
                 return None
         except Exception as e:
-            logger.error(
-                f"{Fore.RED}Error fetching account balance: {e}{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Error fetching account balance: {e}{Style.RESET_ALL}")
             return None
 
     @retry_api_call()
@@ -762,20 +684,14 @@ class EnhancedTradingBot:
     def set_leverage(self, leverage_value) -> bool | None:
         """Sets leverage for the trading symbol."""
         if self.simulation_mode:
-            logger.info(
-                f"{NEON_YELLOW}[SIMULATION MODE] - Setting leverage to {leverage_value}x{RESET_COLOR}"
-            )
+            logger.info(f"{NEON_YELLOW}[SIMULATION MODE] - Setting leverage to {leverage_value}x{RESET_COLOR}")
             return True
         try:
             self.exchange.set_leverage(leverage_value, self.symbol)
-            logger.info(
-                f"{NEON_GREEN}Leverage set to {leverage_value}x successfully.{RESET_COLOR}"
-            )
+            logger.info(f"{NEON_GREEN}Leverage set to {leverage_value}x successfully.{RESET_COLOR}")
             return True
         except Exception as e:
-            logger.error(
-                f"{Fore.RED}Error setting leverage to {leverage_value}x: {e}{Style.RESET_ALL}"
-            )
+            logger.error(f"{Fore.RED}Error setting leverage to {leverage_value}x: {e}{Style.RESET_ALL}")
             return False
 
     def check_trailing_stop_loss(self, position, current_price) -> bool:
@@ -789,9 +705,7 @@ class EnhancedTradingBot:
         if side == "BUY":
             if current_price > position["high_since_entry"]:
                 position["high_since_entry"] = current_price
-                new_trailing_stop = position["high_since_entry"] * (
-                    1 - trailing_stop_callback / 100
-                )
+                new_trailing_stop = position["high_since_entry"] * (1 - trailing_stop_callback / 100)
                 if new_trailing_stop > position.get("stop_loss_price", 0):
                     position["stop_loss_price"] = new_trailing_stop
                     logger.info(
@@ -801,9 +715,7 @@ class EnhancedTradingBot:
         elif side == "SELL":
             if current_price < position["low_since_entry"]:
                 position["low_since_entry"] = current_price
-                new_trailing_stop = position["low_since_entry"] * (
-                    1 + trailing_stop_callback / 100
-                )
+                new_trailing_stop = position["low_since_entry"] * (1 + trailing_stop_callback / 100)
                 if new_trailing_stop < position.get("stop_loss_price", np.inf):
                     position["stop_loss_price"] = new_trailing_stop
                     logger.info(
@@ -822,19 +734,13 @@ class EnhancedTradingBot:
 
         if side == "BUY" and current_price > position["high_since_entry"]:
             position["high_since_entry"] = current_price
-            new_stop_loss = position["high_since_entry"] * (
-                1 - trailing_stop_callback / 100
-            )
+            new_stop_loss = position["high_since_entry"] * (1 - trailing_stop_callback / 100)
             position["stop_loss_price"] = new_stop_loss
-            logger.info(
-                f"Trailing stop loss adjusted upwards to {position['stop_loss_price']:.2f} for BUY position."
-            )
+            logger.info(f"Trailing stop loss adjusted upwards to {position['stop_loss_price']:.2f} for BUY position.")
             return True
         elif side == "SELL" and current_price < position["low_since_entry"]:
             position["low_since_entry"] = current_price
-            new_stop_loss = position["low_since_entry"] * (
-                1 + trailing_stop_callback / 100
-            )
+            new_stop_loss = position["low_since_entry"] * (1 + trailing_stop_callback / 100)
             position["stop_loss_price"] = new_stop_loss
             logger.info(
                 f"Trailing stop loss adjusted downwards to {position['stop_loss_price']:.2f} for SELL position."
@@ -858,26 +764,14 @@ class EnhancedTradingBot:
             sl_hit = False
 
             if position["side"] == "BUY":
-                if (
-                    position.get("take_profit_price")
-                    and current_price >= position["take_profit_price"]
-                ):
+                if position.get("take_profit_price") and current_price >= position["take_profit_price"]:
                     tp_hit = True
-                elif (
-                    position.get("stop_loss_price")
-                    and current_price <= position["stop_loss_price"]
-                ):
+                elif position.get("stop_loss_price") and current_price <= position["stop_loss_price"]:
                     sl_hit = True
             elif position["side"] == "SELL":
-                if (
-                    position.get("take_profit_price")
-                    and current_price <= position["take_profit_price"]
-                ):
+                if position.get("take_profit_price") and current_price <= position["take_profit_price"]:
                     tp_hit = True
-                elif (
-                    position.get("stop_loss_price")
-                    and current_price >= position["stop_loss_price"]
-                ):
+                elif position.get("stop_loss_price") and current_price >= position["stop_loss_price"]:
                     sl_hit = True
 
             if tp_hit:
@@ -887,9 +781,7 @@ class EnhancedTradingBot:
                 self.close_position(position, "take_profit")
                 positions_to_remove.append(position)
             elif sl_hit:
-                logger.info(
-                    f"{NEON_RED}Stop loss hit for {position['side']} position. Closing position.{RESET_COLOR}"
-                )
+                logger.info(f"{NEON_RED}Stop loss hit for {position['side']} position. Closing position.{RESET_COLOR}")
                 self.close_position(position, "stop_loss")
                 positions_to_remove.append(position)
 
@@ -928,9 +820,7 @@ class EnhancedTradingBot:
                     self.order_flow_history.append((timestamp, flow_delta))
                     # Remove entries older than the historical window (in seconds)
                     self.order_flow_history = [
-                        (ts, flow)
-                        for ts, flow in self.order_flow_history
-                        if timestamp - ts <= self.historical_window
+                        (ts, flow) for ts, flow in self.order_flow_history if timestamp - ts <= self.historical_window
                     ]
             time.sleep(1)  # Adjust frequency as needed
 
@@ -940,9 +830,7 @@ class EnhancedTradingBot:
         while True:
             try:
                 # Fetch market data
-                ohlcv = self.exchange.fetch_ohlcv(
-                    self.symbol, timeframe="1m", limit=100
-                )
+                ohlcv = self.exchange.fetch_ohlcv(self.symbol, timeframe="1m", limit=100)
                 indicators = self.calculate_indicators(ohlcv)
                 orderbook = self.fetch_order_book()
 
@@ -957,9 +845,7 @@ class EnhancedTradingBot:
                         entry_price = self.fetch_market_price()
                         tp = self.calculate_take_profit(entry_price, signal)
                         sl = self.calculate_stop_loss(entry_price, signal)
-                        self.place_order(
-                            signal, amount, take_profit_price=tp, stop_loss_price=sl
-                        )
+                        self.place_order(signal, amount, take_profit_price=tp, stop_loss_price=sl)
 
                 # Monitor open positions for exit conditions
                 self.monitor_positions()

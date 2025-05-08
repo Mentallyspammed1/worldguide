@@ -90,8 +90,8 @@ async def run_trading_cycle(exchange: ccxt_async.Exchange, config: Dict[str, Any
     Executes a single trading cycle: iterates through symbols, analyzes, and trades.
     """
     symbols: List[str] = config.get("trading", {}).get("symbols", [])
-    timeframe: str = config.get("trading", {}).get("timeframe", "1m")
-    ohlcv_limit: int = config.get("trading", {}).get("ohlcv_limit", 100)
+    config.get("trading", {}).get("timeframe", "1m")
+    config.get("trading", {}).get("ohlcv_limit", 100)
 
     if not symbols:
         main_logger.warning("No symbols configured for trading in this cycle.")

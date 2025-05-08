@@ -27,9 +27,7 @@ if "logger" not in globals():
     logger = logging.getLogger(__name__)
     if not logger.hasHandlers():
         handler = logging.StreamHandler()
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
@@ -45,9 +43,7 @@ ConfigPlaceholder = TypeVar("ConfigPlaceholder")
 # --- Utility Functions ---
 
 
-def safe_decimal_conversion(
-    value: Any, default: Decimal | None = None
-) -> Decimal | None:
+def safe_decimal_conversion(value: Any, default: Decimal | None = None) -> Decimal | None:
     """Convert various inputs to Decimal, returning default or None on failure.
 
     Args:
@@ -92,9 +88,7 @@ def format_price(exchange: ccxt.Exchange, symbol: str, price: Any) -> str:
         )
         # Fallback formatting
         price_dec = safe_decimal_conversion(price)
-        return (
-            f"{price_dec:.8f}" if price_dec is not None else "Invalid"
-        )  # Use more decimals as fallback
+        return f"{price_dec:.8f}" if price_dec is not None else "Invalid"  # Use more decimals as fallback
     except Exception as e:
         logger.critical(
             f"{Fore.RED}Error formatting price '{price}' for {symbol}: {e}{Style.RESET_ALL}",
@@ -124,9 +118,7 @@ def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Any) -> str:
             f"{Fore.YELLOW}Market data or precision method not found for symbol '{symbol}' in format_amount. Using fallback.{Style.RESET_ALL}"
         )
         amount_dec = safe_decimal_conversion(amount)
-        return (
-            f"{amount_dec:.8f}" if amount_dec is not None else "Invalid"
-        )  # Use more decimals as fallback
+        return f"{amount_dec:.8f}" if amount_dec is not None else "Invalid"  # Use more decimals as fallback
     except Exception as e:
         logger.critical(
             f"{Fore.RED}Error formatting amount '{amount}' for {symbol}: {e}{Style.RESET_ALL}",
@@ -150,9 +142,7 @@ def format_order_id(order_id: Any) -> str:
             return "UNKNOWN"
         return "..." + id_str[-6:] if len(id_str) > 6 else id_str  # Add ellipsis
     except Exception as e:
-        logger.error(
-            f"{Fore.RED}Error formatting order ID {order_id}: {e}{Style.RESET_ALL}"
-        )
+        logger.error(f"{Fore.RED}Error formatting order ID {order_id}: {e}{Style.RESET_ALL}")
         return "UNKNOWN"
 
 
@@ -202,14 +192,10 @@ def send_sms_alert(message: str, config: ConfigPlaceholder | None = None) -> boo
         )
         return False
     except subprocess.TimeoutExpired:
-        logger.error(
-            f"{Fore.RED}Termux SMS command timed out after {timeout} seconds.{Style.RESET_ALL}"
-        )
+        logger.error(f"{Fore.RED}Termux SMS command timed out after {timeout} seconds.{Style.RESET_ALL}")
         return False
     except subprocess.CalledProcessError as e:
-        logger.error(
-            f"{Fore.RED}Termux SMS command failed with exit code {e.returncode}.{Style.RESET_ALL}"
-        )
+        logger.error(f"{Fore.RED}Termux SMS command failed with exit code {e.returncode}.{Style.RESET_ALL}")
         logger.error(f"Command: {' '.join(e.cmd)}")
         logger.error(f"Stderr: {e.stderr.strip() if e.stderr else '(No stderr)'}")
         return False
@@ -264,12 +250,7 @@ def retry_api_call(
         def wrapper(*args: Any, **kwargs: Any) -> T:
             # Find the config object passed to the decorated function
             config = kwargs.get("config") or next(
-                (
-                    arg
-                    for arg in args
-                    if hasattr(arg, "RETRY_COUNT")
-                    and hasattr(arg, "RETRY_DELAY_SECONDS")
-                ),
+                (arg for arg in args if hasattr(arg, "RETRY_COUNT") and hasattr(arg, "RETRY_DELAY_SECONDS")),
                 None,
             )
             if not config:
@@ -280,27 +261,17 @@ def retry_api_call(
                 raise ValueError("Config object required for retry_api_call")
 
             # Determine effective retry parameters
-            effective_max_retries = (
-                max_retries
-                if max_retries is not None
-                else getattr(config, "RETRY_COUNT", 3)
-            )
+            effective_max_retries = max_retries if max_retries is not None else getattr(config, "RETRY_COUNT", 3)
             effective_base_delay = (
-                initial_delay
-                if initial_delay is not None
-                else getattr(config, "RETRY_DELAY_SECONDS", 1.0)
+                initial_delay if initial_delay is not None else getattr(config, "RETRY_DELAY_SECONDS", 1.0)
             )
 
             func_name = func.__name__  # For logging
             attempt = 0
-            while (
-                attempt <= effective_max_retries
-            ):  # Allow up to max_retries total retries (max_retries + 1 attempts)
+            while attempt <= effective_max_retries:  # Allow up to max_retries total retries (max_retries + 1 attempts)
                 try:
                     if attempt > 0:
-                        logger.debug(
-                            f"Retrying {func_name} (Attempt {attempt}/{effective_max_retries})"
-                        )
+                        logger.debug(f"Retrying {func_name} (Attempt {attempt}/{effective_max_retries})")
                     return func(*args, **kwargs)
                 except handled_exceptions as e:
                     attempt += 1
@@ -317,9 +288,7 @@ def retry_api_call(
                     delay = effective_base_delay
                     if isinstance(e, ccxt.RateLimitExceeded):
                         # Exponential backoff for rate limits
-                        delay *= 2 ** (
-                            attempt - 1
-                        )  # Start with base delay on first retry
+                        delay *= 2 ** (attempt - 1)  # Start with base delay on first retry
                         logger.warning(
                             f"{Fore.YELLOW}Rate limit exceeded in {func_name}. Retry {attempt}/{effective_max_retries} after {delay:.2f}s: {e}{Style.RESET_ALL}"
                         )
@@ -344,9 +313,7 @@ def retry_api_call(
                         f"{Back.RED}{Fore.WHITE}Unexpected critical error in {func_name}: {type(e).__name__} - {e}{Style.RESET_ALL}",
                         exc_info=True,
                     )
-                    send_sms_alert(
-                        f"CRITICAL Error in {func_name}: {type(e).__name__}", config
-                    )
+                    send_sms_alert(f"CRITICAL Error in {func_name}: {type(e).__name__}", config)
                     raise e  # Re-raise unexpected exceptions
 
             # Should only be reached if loop completes without success or raising exception
@@ -387,9 +354,7 @@ def analyze_order_book(
               'bid_volume_depth', 'ask_volume_depth', 'bid_ask_ratio_depth'.
     """
     func_name = "analyze_order_book"
-    logger.debug(
-        f"[{func_name}] Analyzing OB for {symbol} (Fetch Limit: {fetch_limit}, Analysis Depth: {depth})"
-    )
+    logger.debug(f"[{func_name}] Analyzing OB for {symbol} (Fetch Limit: {fetch_limit}, Analysis Depth: {depth})")
 
     # Default return structure
     analysis_result = {
@@ -409,11 +374,7 @@ def analyze_order_book(
         effective_fetch_limit = max(depth, fetch_limit)
         order_book = exchange.fetch_order_book(symbol, limit=effective_fetch_limit)
 
-        if (
-            not isinstance(order_book, dict)
-            or "bids" not in order_book
-            or "asks" not in order_book
-        ):
+        if not isinstance(order_book, dict) or "bids" not in order_book or "asks" not in order_book:
             raise ValueError("Invalid order book structure received.")
 
         bids_raw = order_book["bids"]
@@ -423,9 +384,7 @@ def analyze_order_book(
             raise ValueError("Order book 'bids' or 'asks' data is not a list.")
 
         if not bids_raw or not asks_raw:
-            logger.warning(
-                f"[{func_name}] Order book for {symbol} is empty (no bids or asks)."
-            )
+            logger.warning(f"[{func_name}] Order book for {symbol} is empty (no bids or asks).")
             return analysis_result  # Return default empty result
 
         # Convert and validate fetched levels (up to fetch_limit)
@@ -443,9 +402,7 @@ def analyze_order_book(
                 asks.append((price, amount))
 
         if not bids or not asks:
-            logger.warning(
-                f"[{func_name}] Order book for {symbol} has empty validated bids or asks."
-            )
+            logger.warning(f"[{func_name}] Order book for {symbol} has empty validated bids or asks.")
             return analysis_result
 
         # Perform analysis using the validated bids/asks
@@ -464,24 +421,16 @@ def analyze_order_book(
         analysis_result["mid_price"] = (best_bid + best_ask) / Decimal("2")
         analysis_result["spread"] = best_ask - best_bid
         analysis_result["spread_pct"] = (
-            (analysis_result["spread"] / best_bid) * Decimal("100")
-            if best_bid > 0
-            else Decimal("0")
+            (analysis_result["spread"] / best_bid) * Decimal("100") if best_bid > 0 else Decimal("0")
         )
 
         # Calculate cumulative volume within the specified *analysis* depth
-        bid_vol_depth = sum(
-            b[1] for b in bids[:depth] if b[1] is not None
-        )  # Ensure amount is not None
-        ask_vol_depth = sum(
-            a[1] for a in asks[:depth] if a[1] is not None
-        )  # Ensure amount is not None
+        bid_vol_depth = sum(b[1] for b in bids[:depth] if b[1] is not None)  # Ensure amount is not None
+        ask_vol_depth = sum(a[1] for a in asks[:depth] if a[1] is not None)  # Ensure amount is not None
         analysis_result["bid_volume_depth"] = bid_vol_depth
         analysis_result["ask_volume_depth"] = ask_vol_depth
         analysis_result["bid_ask_ratio_depth"] = (
-            (bid_vol_depth / ask_vol_depth)
-            if ask_vol_depth and ask_vol_depth > 0
-            else None
+            (bid_vol_depth / ask_vol_depth) if ask_vol_depth and ask_vol_depth > 0 else None
         )
 
         logger.debug(
@@ -503,7 +452,5 @@ def analyze_order_book(
             f"{Back.RED}{Fore.WHITE}[{func_name}] Unexpected error analyzing order book for {symbol}: {e}{Style.RESET_ALL}",
             exc_info=True,
         )
-        send_sms_alert(
-            f"CRITICAL: OB Analysis failed for {symbol}", config
-        )  # Use send_sms_alert here
+        send_sms_alert(f"CRITICAL: OB Analysis failed for {symbol}", config)  # Use send_sms_alert here
         return analysis_result  # Return default structure on critical failure

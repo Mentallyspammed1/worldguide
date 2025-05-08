@@ -25,6 +25,7 @@ from decimal import Decimal
 import pandas as pd
 from bybit_trading_enchanced import BybitHelper, load_config
 
+
 class EhlersVolumetricStrategy:
     """Trading strategy using Ehlers Volumetric Trend indicator."""
 
@@ -91,7 +92,7 @@ class EhlersVolumetricStrategy:
                 self.helper.place_market_order(
                     side="Sell" if self.position_side == "Buy" else "Buy",
                     qty=float(self.position_qty),
-                    reduce_only=True
+                    reduce_only=True,
                 )
                 self.logger.info(f"Closed {self.position_side} position: {self.position_qty}")
                 self.position_side = None
@@ -106,16 +107,10 @@ class EhlersVolumetricStrategy:
                 sl_price = price - (atr * self.atr_multiplier) if side == "Buy" else price + (atr * self.atr_multiplier)
                 tp_price = price + (atr * self.atr_multiplier) if side == "Buy" else price - (atr * self.atr_multiplier)
                 self.helper.place_limit_order(
-                    side="Sell" if side == "Buy" else "Buy",
-                    qty=float(qty),
-                    price=float(sl_price),
-                    reduce_only=True
+                    side="Sell" if side == "Buy" else "Buy", qty=float(qty), price=float(sl_price), reduce_only=True
                 )
                 self.helper.place_limit_order(
-                    side="Sell" if side == "Buy" else "Buy",
-                    qty=float(qty),
-                    price=float(tp_price),
-                    reduce_only=True
+                    side="Sell" if side == "Buy" else "Buy", qty=float(qty), price=float(tp_price), reduce_only=True
                 )
                 self.logger.info(f"Set SL: {sl_price}, TP: {tp_price}")
         except Exception as e:
@@ -131,11 +126,13 @@ class EhlersVolumetricStrategy:
             self.logger.info("Strategy stopped by user.")
             self.helper.stop()
 
+
 def main():
     config = load_config()
     helper = BybitHelper(config)
     strategy = EhlersVolumetricStrategy(helper)
     strategy.run()
+
 
 if __name__ == "__main__":
     main()

@@ -20,11 +20,9 @@ Usage:
 - Run: `python ehlers_volumetric_strategy.py`
 """
 
-import logging
 import time
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
-from typing import Optional, Dict, Tuple, List, Literal
-from datetime import datetime
+from typing import Optional, Dict, Tuple, Literal
 import pandas as pd
 
 try:
@@ -39,6 +37,7 @@ try:
 except ImportError:
     print("Error: pandas library not found. Install: pip install pandas", file=sys.stderr)
     sys.exit(1)
+
 
 # --- Strategy Class ---
 class EhlersStrategy:
@@ -89,9 +88,9 @@ class EhlersStrategy:
             if not market:
                 self.logger.critical(f"Market {self.symbol} not found.")
                 return False
-            self.min_qty = Decimal(str(market['limits']['amount']['min']))
-            self.qty_step = Decimal(str(market['precision']['amount']))
-            self.price_tick = Decimal(str(market['precision']['price']))
+            self.min_qty = Decimal(str(market["limits"]["amount"]["min"]))
+            self.qty_step = Decimal(str(market["precision"]["amount"]))
+            self.price_tick = Decimal(str(market["precision"]["price"]))
             self.logger.info(
                 f"Market Details: Min Qty={self.min_qty}, Qty Step={self.qty_step}, Price Tick={self.price_tick}"
             )
@@ -106,7 +105,7 @@ class EhlersStrategy:
                     self._process_kline(df_updated)
 
             def order_callback(data: Dict):
-                order = data.get('data', [{}])[0]
+                order = data.get("data", [{}])[0]
                 if order:
                     self.logger.info(
                         f"Order update: {order['orderId']} - {order['side']} {order['qty']} @ {order['price']}"
@@ -135,18 +134,13 @@ class EhlersStrategy:
 
     def _fetch_data(self, timeframe: str) -> Optional[pd.DataFrame]:
         """Fetch or use cached OHLCV data with indicators."""
-        if (
-            timeframe in self.helper.ohlcv_cache
-            and time.time() - self.last_kline_time.get(timeframe, 0) < 300
-        ):
+        if timeframe in self.helper.ohlcv_cache and time.time() - self.last_kline_time.get(timeframe, 0) < 300:
             return self.helper.ohlcv_cache[timeframe]
         ohlcv = self.helper.fetch_ohlcv(timeframe, limit=200)
         if not ohlcv:
             self.logger.warning(f"Could not fetch {timeframe} OHLCV data")
             return None
-        df = pd.DataFrame(
-            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
-        )
+        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
         df = self.helper.calculate_indicators(df)
         self.helper.ohlcv_cache[timeframe] = df
@@ -183,7 +177,9 @@ class EhlersStrategy:
             self.logger.error(f"Error generating signals: {e}", exc_info=True)
             return None
 
-    def _calculate_sl_tp(self, df_ind: pd.DataFrame, side: Literal["Buy", "Sell"], entry_price: Decimal) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+    def _calculate_sl_tp(
+        self, df_ind: pd.DataFrame, side: Literal["Buy", "Sell"], entry_price: Decimal
+    ) -> Tuple[Optional[Decimal], Optional[Decimal]]:
         """Calculate stop-loss and take-profit prices."""
         if df_ind is None or df_ind.empty:
             return None, None
@@ -207,7 +203,9 @@ class EhlersStrategy:
                 sl_price = (sl_price / self.price_tick).quantize(Decimal("1"), rounding=rounding_sl) * self.price_tick
                 if tp_price:
                     rounding_tp = ROUND_DOWN if side == "Buy" else ROUND_UP
-                    tp_price = (tp_price / self.price_tick).quantize(Decimal("1"), rounding=rounding_tp) * self.price_tick
+                    tp_price = (tp_price / self.price_tick).quantize(
+                        Decimal("1"), rounding=rounding_tp
+                    ) * self.price_tick
 
             if side == "Buy" and (sl_price >= entry_price or (tp_price and tp_price <= entry_price)):
                 self.logger.warning("Invalid SL/TP for Buy")
@@ -297,7 +295,9 @@ class EhlersStrategy:
         except Exception as e:
             self.logger.error(f"Error updating state: {e}", exc_info=True)
 
-    def _place_sl_tp_orders(self, side: Literal["Buy", "Sell"], qty: Decimal, sl_price: Decimal, tp_price: Optional[Decimal]):
+    def _place_sl_tp_orders(
+        self, side: Literal["Buy", "Sell"], qty: Decimal, sl_price: Decimal, tp_price: Optional[Decimal]
+    ):
         """Place SL/TP as reduce-only limit orders."""
         try:
             if sl_price:
@@ -311,7 +311,7 @@ class EhlersStrategy:
                     price=str(sl_price),
                     reduceOnly=True,
                     triggerPrice=str(sl_price),
-                    orderFilter="StopOrder"
+                    orderFilter="StopOrder",
                 )
                 if sl_result.get("retCode") == 0:
                     self.sl_order_id = sl_result["result"]["orderId"]
@@ -329,7 +329,7 @@ class EhlersStrategy:
                     orderType="Limit",
                     qty=str(qty),
                     price=str(tp_price),
-                    reduceOnly=True
+                    reduceOnly=True,
                 )
                 if tp_result.get("retCode") == 0:
                     self.tp_order_id = tp_result["result"]["orderId"]
@@ -398,8 +398,7 @@ class EhlersStrategy:
                         self.logger.info("Position timeout reached. Closing position.")
                         self._cancel_open_orders("Position Timeout")
                         self.helper.place_market_order(
-                            "Sell" if self.current_side == "long" else "Buy",
-                            float(self.current_qty)
+                            "Sell" if self.current_side == "long" else "Buy", float(self.current_qty)
                         )
                         self._update_state()
                         self.position_start_time = 0
@@ -416,8 +415,8 @@ class EhlersStrategy:
                         should_exit = True
                         exit_reason = "EVT Trend flipped Long"
                     elif self.trailing_stop_price and (
-                        (self.current_side == "long" and current_price <= self.trailing_stop_price) or
-                        (self.current_side == "short" and current_price >= self.trailing_stop_price)
+                        (self.current_side == "long" and current_price <= self.trailing_stop_price)
+                        or (self.current_side == "short" and current_price >= self.trailing_stop_price)
                     ):
                         should_exit = True
                         exit_reason = "Trailing Stop Hit"
@@ -426,8 +425,7 @@ class EhlersStrategy:
                         self.logger.info(f"Exiting position: {exit_reason}")
                         self._cancel_open_orders(exit_reason)
                         self.helper.place_market_order(
-                            "Sell" if self.current_side == "long" else "Buy",
-                            float(self.current_qty)
+                            "Sell" if self.current_side == "long" else "Buy", float(self.current_qty)
                         )
                         self._update_state()
                         self.position_start_time = 0
@@ -465,8 +463,7 @@ class EhlersStrategy:
                         self._update_state()
                         self.position_start_time = time.time()
                         self.helper.send_sms_alert(
-                            f"Entered {signal} position: {qty} {self.symbol} @ {current_price}",
-                            priority="normal"
+                            f"Entered {signal} position: {qty} {self.symbol} @ {current_price}", priority="normal"
                         )
 
                 time.sleep(self.config.strategy_config.loop_delay_seconds)
@@ -481,11 +478,9 @@ class EhlersStrategy:
         self.is_running = False
         self._cancel_open_orders("Strategy Stop")
         if self.current_side != "none":
-            self.helper.place_market_order(
-                "Sell" if self.current_side == "long" else "Buy",
-                float(self.current_qty)
-            )
+            self.helper.place_market_order("Sell" if self.current_side == "long" else "Buy", float(self.current_qty))
         self.logger.info("Ehlers Strategy stopped")
+
 
 def main():
     """Main entry point."""
@@ -497,6 +492,7 @@ def main():
     except KeyboardInterrupt:
         strategy.stop()
         helper.stop()
+
 
 if __name__ == "__main__":
     main()

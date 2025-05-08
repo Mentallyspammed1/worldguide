@@ -24,20 +24,15 @@ import argparse
 import logging
 import os
 import sys
-import time
-from datetime import datetime
 from typing import Any, Dict, Optional, List
 from decimal import Decimal
 from pathlib import Path
 import pandas as pd
-import numpy as np
 from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from colorama import Fore, Style, init
 from pybit.unified_trading import HTTP, WebSocket
 import ccxt
-import websocket
-import requests
 
 try:
     from indicators import calculate_all_indicators, update_indicators_incrementally
@@ -48,6 +43,7 @@ except ImportError:
 # --- Initialize Colorama ---
 init(autoreset=True)
 
+
 # --- Configuration Models ---
 class ApiConfig(BaseModel):
     api_key: SecretStr
@@ -55,37 +51,30 @@ class ApiConfig(BaseModel):
     symbol: str = "BTCUSDT"
     testnet_mode: bool = True
 
+
 class StrategyConfig(BaseModel):
     timeframe: str = "5m"
     risk_per_trade: Decimal = Decimal("0.01")
     loop_delay_seconds: float = 5.0
-    indicator_settings: Dict[str, Any] = {
-        "evt_length": 7,
-        "evt_multiplier": 2.5,
-        "atr_period": 14
-    }
+    indicator_settings: Dict[str, Any] = {"evt_length": 7, "evt_multiplier": 2.5, "atr_period": 14}
+
 
 class SmsConfig(BaseModel):
     enable_sms_alerts: bool = False
     termux_phone_number: Optional[str] = None
-    priority_levels: Dict[str, int] = {
-        "critical": 1,
-        "normal": 2,
-        "low": 3
-    }
+    priority_levels: Dict[str, int] = {"critical": 1, "normal": 2, "low": 3}
+
 
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        env_nested_delimiter="__",
-        case_sensitive=False
+        env_file=".env", env_file_encoding="utf-8", env_nested_delimiter="__", case_sensitive=False
     )
     api_config: ApiConfig
     strategy_config: StrategyConfig
     sms_config: SmsConfig
     log_directory: str = "logs"
     log_level: str = "INFO"
+
 
 # --- Logger Setup ---
 def setup_logger(log_dir: str, log_level: str) -> logging.Logger:
@@ -95,14 +84,13 @@ def setup_logger(log_dir: str, log_level: str) -> logging.Logger:
     log_file = Path(log_dir) / "trading_bot.log"
     file_handler = logging.FileHandler(log_file)
     stream_handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
     stream_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     logger.addHandler(stream_handler)
     return logger
+
 
 # --- Load Configuration ---
 def load_config() -> AppConfig:
@@ -112,6 +100,7 @@ def load_config() -> AppConfig:
     except Exception as e:
         print(f"{Fore.RED}Error loading configuration: {e}{Style.RESET_ALL}", file=sys.stderr)
         sys.exit(1)
+
 
 # --- Bybit Helper Class ---
 class BybitHelper:
@@ -128,11 +117,7 @@ class BybitHelper:
 
         # Initialize pybit HTTP session
         try:
-            self.session = HTTP(
-                testnet=self.testnet,
-                api_key=self.api_key,
-                api_secret=self.api_secret
-            )
+            self.session = HTTP(testnet=self.testnet, api_key=self.api_key, api_secret=self.api_secret)
             self.logger.info("Initialized pybit HTTP session")
         except Exception as e:
             self.logger.critical(f"Failed to initialize pybit session: {e}", exc_info=True)
@@ -140,11 +125,7 @@ class BybitHelper:
 
         # Initialize ccxt exchange
         try:
-            self.exchange = ccxt.bybit({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "enableRateLimit": True
-            })
+            self.exchange = ccxt.bybit({"apiKey": self.api_key, "secret": self.api_secret, "enableRateLimit": True})
             if self.testnet:
                 self.exchange.set_sandbox_mode(True)
             self.exchange.load_markets()
@@ -160,12 +141,7 @@ class BybitHelper:
     def _initialize_websocket(self):
         """Initialize WebSocket connection."""
         try:
-            ws_endpoint = "wss://stream-testnet.bybit.com/v5/public/linear" if self.testnet else "wss://stream.bybit.com/v5/public/linear"
-            self.ws = WebSocket(
-                api_key=self.api_key,
-                api_secret=self.api_secret,
-                testnet=self.testnet
-            )
+            self.ws = WebSocket(api_key=self.api_key, api_secret=self.api_secret, testnet=self.testnet)
             self.logger.info("Initialized WebSocket")
         except Exception as e:
             self.logger.error(f"Failed to initialize WebSocket: {e}", exc_info=True)
@@ -193,7 +169,7 @@ class BybitHelper:
         try:
             priority_level = self.config.sms_config.priority_levels.get(priority, 3)
             if priority_level <= 2:  # Only send for normal or critical
-                cmd = f"termux-sms-send -n {self.config.sms_config.termux_phone_number} \"{message}\""
+                cmd = f'termux-sms-send -n {self.config.sms_config.termux_phone_number} "{message}"'
                 result = os.system(cmd)
                 if result == 0:
                     self.logger.info(f"Sent SMS alert: {message}")
@@ -236,7 +212,9 @@ class BybitHelper:
             self.logger.error(f"Error fetching OHLCV: {e}", exc_info=True)
             return []
 
-    def calculate_indicators(self, df: pd.DataFrame, incremental: bool = False, prev_df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def calculate_indicators(
+        self, df: pd.DataFrame, incremental: bool = False, prev_df: Optional[pd.DataFrame] = None
+    ) -> pd.DataFrame:
         """Calculate indicators using indicators.py."""
         try:
             config = {
@@ -244,18 +222,15 @@ class BybitHelper:
                     "min_data_periods": 50,
                     "atr_period": self.config.strategy_config.indicator_settings.get("atr_period", 14),
                     "evt_length": self.config.strategy_config.indicator_settings.get("evt_length", 7),
-                    "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5)
+                    "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5),
                 },
-                "analysis_flags": {
-                    "use_atr": True,
-                    "use_evt": True
-                },
+                "analysis_flags": {"use_atr": True, "use_evt": True},
                 "strategy_params": {
                     "ehlers_volumetric": {
                         "evt_length": self.config.strategy_config.indicator_settings.get("evt_length", 7),
-                        "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5)
+                        "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5),
                     }
-                }
+                },
             }
             if incremental and prev_df is not None:
                 return update_indicators_incrementally(df, config, prev_df)
@@ -277,13 +252,15 @@ class BybitHelper:
                 "high": float(kline_data["high"]),
                 "low": float(kline_data["low"]),
                 "close": float(kline_data["close"]),
-                "volume": float(kline_data["volume"])
+                "volume": float(kline_data["volume"]),
             }
             df_new = pd.DataFrame([kline])
             prev_df = self.ohlcv_cache.get(timeframe)
             df_updated = self.calculate_indicators(df_new, incremental=True, prev_df=prev_df)
             if prev_df is not None:
-                self.ohlcv_cache[timeframe] = pd.concat([prev_df, df_updated]).drop_duplicates(subset="timestamp").tail(200)
+                self.ohlcv_cache[timeframe] = (
+                    pd.concat([prev_df, df_updated]).drop_duplicates(subset="timestamp").tail(200)
+                )
             else:
                 self.ohlcv_cache[timeframe] = df_updated
             return df_updated
@@ -319,12 +296,7 @@ class BybitHelper:
         """Place a market order."""
         try:
             response = self.session.place_order(
-                category="linear",
-                symbol=self.symbol,
-                side=side,
-                orderType="Market",
-                qty=str(qty),
-                reduceOnly=False
+                category="linear", symbol=self.symbol, side=side, orderType="Market", qty=str(qty), reduceOnly=False
             )
             if response.get("retCode") == 0:
                 self.logger.info(f"Placed market order: {side} {qty} {self.symbol}")
@@ -339,15 +311,9 @@ class BybitHelper:
         """Subscribe to WebSocket stream."""
         try:
             if channel_type == "public":
-                self.ws.public_stream(
-                    topics=topics,
-                    callback=callback
-                )
+                self.ws.public_stream(topics=topics, callback=callback)
             elif channel_type == "private":
-                self.ws.private_stream(
-                    topics=topics,
-                    callback=callback
-                )
+                self.ws.private_stream(topics=topics, callback=callback)
             self.logger.info(f"Subscribed to {topics} ({channel_type})")
         except Exception as e:
             self.logger.error(f"Error subscribing to stream: {e}", exc_info=True)
@@ -359,13 +325,10 @@ class BybitHelper:
             "ticker": self.fetch_ticker(),
             "position": self.get_position_info(),
             "open_orders": self.get_open_orders(),
-            "ohlcv": self.fetch_ohlcv(self.config.strategy_config.timeframe)
+            "ohlcv": self.fetch_ohlcv(self.config.strategy_config.timeframe),
         }
         if context.get("ohlcv"):
-            df = pd.DataFrame(
-                context["ohlcv"],
-                columns=["timestamp", "open", "high", "low", "close", "volume"]
-            )
+            df = pd.DataFrame(context["ohlcv"], columns=["timestamp", "open", "high", "low", "close", "volume"])
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             df = self.calculate_indicators(df)
             context["indicators"] = df
@@ -381,6 +344,7 @@ class BybitHelper:
             self.logger.info("HTTP session closed")
         except Exception as e:
             self.logger.error(f"Error during cleanup: {e}", exc_info=True)
+
 
 # --- CLI Setup ---
 def setup_env():
@@ -412,13 +376,13 @@ def setup_env():
     phone = input("Enter phone number for SMS alerts (or leave blank): ").strip() if enable_sms else ""
     env_content.append(f"BOT_SMS_CONFIG__ENABLE_SMS_ALERTS={str(enable_sms).lower()}")
     env_content.append(f"BOT_SMS_CONFIG__TERMUX_PHONE_NUMBER={phone}")
-    env_content.append('BOT_SMS_CONFIG__PRIORITY_LEVELS__CRITICAL=1')
-    env_content.append('BOT_SMS_CONFIG__PRIORITY_LEVELS__NORMAL=2')
-    env_content.append('BOT_SMS_CONFIG__PRIORITY_LEVELS__LOW=3')
+    env_content.append("BOT_SMS_CONFIG__PRIORITY_LEVELS__CRITICAL=1")
+    env_content.append("BOT_SMS_CONFIG__PRIORITY_LEVELS__NORMAL=2")
+    env_content.append("BOT_SMS_CONFIG__PRIORITY_LEVELS__LOW=3")
 
     env_content.append("\n# Logging Configuration")
-    env_content.append('LOG_DIRECTORY=logs')
-    env_content.append('LOG_LEVEL=INFO')
+    env_content.append("LOG_DIRECTORY=logs")
+    env_content.append("LOG_LEVEL=INFO")
 
     try:
         with open(".env", "w") as f:
@@ -427,6 +391,7 @@ def setup_env():
     except Exception as e:
         print(f"{Fore.RED}Error writing .env file: {e}{Style.RESET_ALL}", file=sys.stderr)
         sys.exit(1)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Bybit Trading Bot")
@@ -453,6 +418,7 @@ def main():
         return
 
     helper.logger.info("BybitHelper ready. Run strategy separately.")
+
 
 if __name__ == "__main__":
     main()

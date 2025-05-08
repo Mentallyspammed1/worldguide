@@ -1857,3 +1857,1282 @@ TypeError: unhashable type: 'list'
 2025-05-07 20:37:52.816 INFO     [App.Symbol.FARTCOIN_USDT-USDT:893] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.36s) ==---[0m
 
 2025-05-07 20:37:52.817 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:221] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:02:46.135 INFO     [App.Init:195] MainThread - Logging configured. Console Level: INFO, File Level: DEBUG
+2025-05-07 21:02:46.138 INFO     [App.Init:123] MainThread - --- [95mInitializing XR Scalper Bot (Async Version)[0m ---
+2025-05-07 21:02:46.139 INFO     [utils:261] MainThread - Timezone successfully set using 'America/Chicago'. Effective timezone: America/Chicago
+2025-05-07 21:02:46.139 INFO     [App.Init:129] MainThread - Using Timezone: America/Chicago
+2025-05-07 21:02:46.140 DEBUG    [utils:329] MainThread - Sensitive data registered for redaction: 2 items.
+2025-05-07 21:02:46.140 DEBUG    [App.Init:138] MainThread - Sensitive data masking configured.
+2025-05-07 21:02:46.141 INFO     [App.Init:148] MainThread - Startup Time: 2025-05-07 16:02:46 CDT
+2025-05-07 21:02:46.141 INFO     [App.Init:151] MainThread - Quote Currency: USDT
+2025-05-07 21:02:46.198 INFO     [App.Init:173] MainThread - Versions: Python=3.12.10, CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0
+2025-05-07 21:02:46.199 INFO     [App.Init:182] MainThread - Trading Enabled: [92mTrue[0m
+2025-05-07 21:02:46.199 INFO     [App.Init:183] MainThread - Using Sandbox: [91mFalse[0m
+2025-05-07 21:02:46.200 WARNING  [App.Init:187] MainThread - [91m!!! CAUTION: REAL MONEY !!![0m
+2025-05-07 21:02:46.200 INFO     [App.Init:219] MainThread - --- Critical Trading Settings ---
+2025-05-07 21:02:46.201 INFO     [App.Init:220] MainThread -   Symbols: ['FARTCOIN/USDT:USDT']
+2025-05-07 21:02:46.201 INFO     [App.Init:221] MainThread -   Interval: 5 (5m)
+2025-05-07 21:02:46.201 INFO     [App.Init:222] MainThread -   Entry Type: market
+2025-05-07 21:02:46.201 INFO     [App.Init:223] MainThread -   Risk/Trade: 1.00%
+2025-05-07 21:02:46.202 INFO     [App.Init:224] MainThread -   Leverage: 20x
+2025-05-07 21:02:46.202 INFO     [App.Init:225] MainThread -   TSL: True
+2025-05-07 21:02:46.202 INFO     [App.Init:226] MainThread -   BE: True
+2025-05-07 21:02:46.202 INFO     [App.Init:227] MainThread -   Time Exit: Disabled
+2025-05-07 21:02:46.203 INFO     [App.Init:228] MainThread - ---------------------------------
+2025-05-07 21:02:46.203 INFO     [App.Init:229] MainThread - Starting trading loop in 5 seconds...
+2025-05-07 21:02:51.209 INFO     [App.Init:247] MainThread - Initializing API Client...
+2025-05-07 21:02:51.210 INFO     [App.Init:82] MainThread - API Client log level set to: INFO
+2025-05-07 21:02:51.239 INFO     [App.Init:156] MainThread - API client configured (ID: bybit, Sandbox: False). Call initialize() to connect and load markets.
+2025-05-07 21:02:51.249 INFO     [App.Init:169] MainThread - Using CCXT version: 4.4.72
+2025-05-07 21:02:51.250 INFO     [App.Init:481] MainThread - Loading markets (Attempt 1/4)...
+2025-05-07 21:02:57.346 INFO     [App.Init:491] MainThread - [92mSuccessfully loaded 2530 markets for bybit.[0m
+2025-05-07 21:02:57.958 INFO     [App.Init:268] MainThread - [92mAPI connection check successful. Server Time: 2025-05-07T21:02:56.972Z[0m
+2025-05-07 21:02:59.327 INFO     [App.Init:1000] MainThread - Successfully fetched free balance for USDT: 7.40236808
+2025-05-07 21:02:59.329 INFO     [App.Init:227] MainThread - [92mInitial balance check OK: 7.4024 USDT[0m
+2025-05-07 21:02:59.331 INFO     [App.Init:233] MainThread - [92mAPI Client initialized successfully for bybit.[0m
+2025-05-07 21:02:59.334 INFO     [App.Init:253] MainThread - API Client 'bybit' initialized.
+2025-05-07 21:02:59.341 INFO     [App.Init:266] MainThread - Signal handlers registered using loop.
+2025-05-07 21:02:59.343 INFO     [App.Init:289] MainThread - Starting main processing loop for: ['FARTCOIN/USDT:USDT']. Interval: 60.00s
+2025-05-07 21:02:59.345 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:02:59.347 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:02:59.348 WARNING  [App.Init:603] MainThread - Market FARTCOIN/USDT:USDT found in cache but lacks processed fields. Re-processing.
+2025-05-07 21:03:00.054 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:03:00.726 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9596 (invalid)[0m
+2025-05-07 21:03:01.423 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:03:01.645 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:03:01.645 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:03:01.646 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:03:01.646 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:03:01.774 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:03:01.775 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:03:01.776 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9596, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=48.4729, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:03:01.783 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:03:01.784 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:03:01.785 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:03:01.785 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9596 (invalid)[0m
+2025-05-07 21:03:01.786 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:03:01.786 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:03:01.786 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:03:01.786 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:03:01.787 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:03:01.787 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:03:02.426 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:03:02.427 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:03:02.429 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 3.08s) ==---[0m
+
+2025-05-07 21:03:02.433 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:03:59.404 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:03:59.415 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:04:01.116 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:04:01.763 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9589 (invalid)[0m
+2025-05-07 21:04:02.484 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:04:02.725 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:04:02.726 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:04:02.727 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:04:02.728 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:04:02.897 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:04:02.898 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:04:02.900 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9592, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=48.2538, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:04:02.909 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:04:02.910 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:04:02.910 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:04:02.911 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9589 (invalid)[0m
+2025-05-07 21:04:02.911 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:04:02.912 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:04:02.912 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:04:02.912 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:04:02.913 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:04:02.913 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:04:03.652 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:04:03.653 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:04:03.654 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.24s) ==---[0m
+
+2025-05-07 21:04:03.657 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:04:59.553 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:04:59.558 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:05:01.689 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:05:02.393 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9613 (invalid)[0m
+2025-05-07 21:05:03.075 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:05:03.327 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:05:03.328 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:05:03.329 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:05:03.329 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:05:03.573 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:05:03.573 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:05:03.576 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9620, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=49.8303, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:05:03.584 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:05:03.585 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:05:03.586 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:05:03.587 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9613 (invalid)[0m
+2025-05-07 21:05:03.587 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:05:03.588 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:05:03.588 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:05:03.588 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:05:03.589 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:05:03.589 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:05:04.239 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:05:04.240 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:05:04.241 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.68s) ==---[0m
+
+2025-05-07 21:05:04.242 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:05:59.567 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:05:59.573 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:06:01.451 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:06:02.087 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9608 (invalid)[0m
+2025-05-07 21:06:02.769 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:06:03.003 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:06:03.004 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:06:03.004 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:06:03.005 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:06:03.155 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:06:03.156 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:06:03.158 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9605, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=48.9688, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:06:03.163 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:06:03.164 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:06:03.164 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:06:03.165 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9608 (invalid)[0m
+2025-05-07 21:06:03.165 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:06:03.165 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:06:03.166 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:06:03.166 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:06:03.166 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:06:03.166 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:06:03.814 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:06:03.815 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:06:03.815 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.24s) ==---[0m
+
+2025-05-07 21:06:03.817 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:06:59.609 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:06:59.617 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:07:01.553 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:07:02.215 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9626 (invalid)[0m
+2025-05-07 21:07:02.912 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:07:03.185 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:07:03.187 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:07:03.187 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:07:03.188 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:07:03.385 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:07:03.386 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:07:03.387 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9630, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=50.4982, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:07:03.394 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:07:03.394 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:07:03.395 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:07:03.396 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9626 (invalid)[0m
+2025-05-07 21:07:03.396 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:07:03.397 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:07:03.397 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:07:03.397 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:07:03.398 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:07:03.398 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:07:04.058 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:07:04.059 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:07:04.062 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.44s) ==---[0m
+
+2025-05-07 21:07:04.064 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:07:59.628 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:07:59.634 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:08:01.305 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:08:01.953 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9654 (invalid)[0m
+2025-05-07 21:08:02.630 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:08:02.859 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:08:02.860 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:08:02.860 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:08:02.861 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:08:02.995 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:08:02.996 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:08:02.997 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9653, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=51.8286, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:08:03.002 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:08:03.003 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:08:03.003 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:08:03.004 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9654 (invalid)[0m
+2025-05-07 21:08:03.004 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:08:03.004 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:08:03.004 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:08:03.005 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:08:03.005 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:08:03.005 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:08:03.659 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:08:03.660 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:08:03.660 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.03s) ==---[0m
+
+2025-05-07 21:08:03.661 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:08:59.656 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:08:59.663 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:09:01.415 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:09:02.071 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9669 (invalid)[0m
+2025-05-07 21:09:02.790 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:09:03.073 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:09:03.074 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:09:03.075 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:09:03.075 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:09:03.242 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:09:03.243 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:09:03.244 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9670, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=52.7668, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:09:03.249 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:09:03.250 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:09:03.251 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:09:03.251 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9669 (invalid)[0m
+2025-05-07 21:09:03.252 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:09:03.252 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:09:03.252 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:09:03.253 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:09:03.253 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:09:03.253 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:09:03.932 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:09:03.933 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:09:03.933 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.27s) ==---[0m
+
+2025-05-07 21:09:03.934 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:09:59.717 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:09:59.727 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:10:01.604 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:10:02.287 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.967 (invalid)[0m
+2025-05-07 21:10:03.013 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:10:03.682 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:10:03.683 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:10:03.684 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:10:03.685 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:10:03.969 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:10:03.971 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:10:03.974 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9670, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=52.7668, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:10:03.984 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:10:03.985 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:10:03.987 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:10:03.988 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.967 (invalid)[0m
+2025-05-07 21:10:03.989 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:10:03.989 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:10:03.990 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:10:03.990 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:10:03.991 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:10:03.991 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:10:04.660 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:10:04.662 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:10:04.663 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.94s) ==---[0m
+
+2025-05-07 21:10:04.664 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:10:59.781 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:10:59.787 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:11:01.713 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:11:02.383 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9686 (invalid)[0m
+2025-05-07 21:11:03.084 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:11:03.432 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:11:03.433 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:11:03.433 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:11:03.434 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:11:03.657 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:11:03.658 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:11:03.661 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9684, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=53.5689, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:11:03.672 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:11:03.673 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:11:03.674 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:11:03.674 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9686 (invalid)[0m
+2025-05-07 21:11:03.675 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:11:03.675 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:11:03.676 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:11:03.676 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:11:03.677 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:11:03.677 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:11:04.447 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:11:04.448 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:11:04.449 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.66s) ==---[0m
+
+2025-05-07 21:11:04.451 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:11:59.835 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:11:59.842 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:12:01.584 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:12:02.240 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9702 (invalid)[0m
+2025-05-07 21:12:02.935 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:12:03.226 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:12:03.227 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:12:03.228 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:12:03.228 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:12:03.408 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:12:03.409 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:12:03.410 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9701, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=54.5069, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:12:03.416 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:12:03.417 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:12:03.418 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:12:03.419 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9702 (invalid)[0m
+2025-05-07 21:12:03.419 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:12:03.420 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:12:03.420 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:12:03.420 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:12:03.421 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:12:03.421 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:12:04.443 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:12:04.444 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:12:04.444 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.60s) ==---[0m
+
+2025-05-07 21:12:04.445 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:12:59.898 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:12:59.906 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:13:02.355 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:13:03.077 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9775 (invalid)[0m
+2025-05-07 21:13:03.857 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:13:04.832 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:13:04.833 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:13:04.835 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:13:04.836 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:13:05.332 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:13:05.333 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:13:05.337 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9774, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=58.1385, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:13:05.351 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:13:05.353 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:13:05.355 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:13:05.357 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9775 (invalid)[0m
+2025-05-07 21:13:05.358 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:13:05.358 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:13:05.359 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:13:05.360 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:13:05.361 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:13:05.362 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:13:06.082 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:13:06.086 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:13:06.089 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 6.18s) ==---[0m
+
+2025-05-07 21:13:06.093 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:13:59.952 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:13:59.961 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:14:01.945 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:14:02.586 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.98 (invalid)[0m
+2025-05-07 21:14:03.283 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:14:03.660 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:14:03.661 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:14:03.662 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:14:03.663 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:14:03.898 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:14:03.898 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:14:03.901 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9799, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=59.2525, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:14:03.909 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:14:03.910 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:14:03.911 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:14:03.912 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.98 (invalid)[0m
+2025-05-07 21:14:03.913 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:14:03.913 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:14:03.914 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:14:03.914 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:14:03.915 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:14:03.915 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:14:04.581 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:14:04.584 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:14:04.586 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.62s) ==---[0m
+
+2025-05-07 21:14:04.587 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:15:00.002 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:15:00.016 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:15:01.806 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:15:02.450 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9821 (invalid)[0m
+2025-05-07 21:15:03.156 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:15:03.526 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:15:03.527 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:15:03.528 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:15:03.529 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:15:03.722 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:15:03.722 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:15:03.725 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9823, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=60.2675, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:15:03.731 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:15:03.732 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:15:03.733 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:15:03.733 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9821 (invalid)[0m
+2025-05-07 21:15:03.734 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:15:03.734 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:15:03.735 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:15:03.735 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:15:03.736 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:15:03.736 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:15:04.379 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:15:04.381 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:15:04.383 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.37s) ==---[0m
+
+2025-05-07 21:15:04.386 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:16:00.036 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:16:00.039 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:16:01.740 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:16:02.402 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9778 (invalid)[0m
+2025-05-07 21:16:03.097 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:16:03.377 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:16:03.378 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:16:03.378 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:16:03.379 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:16:03.558 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:16:03.558 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:16:03.560 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9774, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=57.1380, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:16:03.569 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:16:03.570 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:16:03.571 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:16:03.571 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9778 (invalid)[0m
+2025-05-07 21:16:03.571 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:16:03.572 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:16:03.572 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:16:03.572 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:16:03.573 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:16:03.573 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:16:04.225 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:16:04.225 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:16:04.226 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.19s) ==---[0m
+
+2025-05-07 21:16:04.227 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:17:00.095 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:17:00.099 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:17:01.898 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:17:02.607 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9765 (invalid)[0m
+2025-05-07 21:17:03.296 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:17:03.579 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:17:03.580 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:17:03.581 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:17:03.581 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:17:03.742 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:17:03.743 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:17:03.744 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9766, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=56.6577, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:17:03.749 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:17:03.750 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:17:03.751 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:17:03.751 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9765 (invalid)[0m
+2025-05-07 21:17:03.751 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:17:03.752 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:17:03.752 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:17:03.753 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:17:03.753 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:17:03.753 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:17:04.406 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:17:04.406 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:17:04.407 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.31s) ==---[0m
+
+2025-05-07 21:17:04.408 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:18:00.114 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:18:00.116 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:18:01.712 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:18:02.356 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9761 (invalid)[0m
+2025-05-07 21:18:03.059 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:18:03.274 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:18:03.275 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:18:03.275 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:18:03.276 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:18:03.355 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:18:03.355 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:18:03.356 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9763, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=56.4797, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:18:03.359 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:18:03.359 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:18:03.359 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:18:03.360 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9761 (invalid)[0m
+2025-05-07 21:18:03.360 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:18:03.360 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:18:03.360 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:18:03.361 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:18:03.361 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:18:03.361 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:18:04.001 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:18:04.003 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:18:04.005 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 3.89s) ==---[0m
+
+2025-05-07 21:18:04.009 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:19:00.138 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:19:00.142 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:19:01.899 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:19:02.533 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9812 (invalid)[0m
+2025-05-07 21:19:03.193 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:19:03.408 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:19:03.408 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:19:03.409 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:19:03.409 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:19:03.484 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:19:03.485 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:19:03.486 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9805, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=59.0788, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:19:03.488 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:19:03.489 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:19:03.489 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:19:03.490 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9812 (invalid)[0m
+2025-05-07 21:19:03.490 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:19:03.490 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:19:03.490 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:19:03.491 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:19:03.491 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:19:03.491 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:19:04.182 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:19:04.183 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:19:04.185 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.04s) ==---[0m
+
+2025-05-07 21:19:04.187 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:20:00.194 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:20:00.199 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:20:01.962 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:20:02.619 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9821 (invalid)[0m
+2025-05-07 21:20:03.325 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:20:03.785 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:20:03.786 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:20:03.787 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:20:03.788 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:20:04.023 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:20:04.024 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:20:04.029 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9820, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=60.0661, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:20:04.037 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:20:04.038 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:20:04.039 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:20:04.039 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9821 (invalid)[0m
+2025-05-07 21:20:04.040 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:20:04.040 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:20:04.041 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:20:04.041 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:20:04.041 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:20:04.042 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:20:04.710 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:20:04.714 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:20:04.717 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.52s) ==---[0m
+
+2025-05-07 21:20:04.722 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:21:00.252 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:21:00.257 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:21:02.735 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:21:03.392 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9866 (invalid)[0m
+2025-05-07 21:21:04.070 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:21:04.346 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:21:04.348 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:21:04.348 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:21:04.349 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:21:04.573 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:21:04.574 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:21:04.581 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9872, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=62.4110, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:21:04.588 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:21:04.589 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:21:04.590 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:21:04.591 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9866 (invalid)[0m
+2025-05-07 21:21:04.591 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:21:04.592 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:21:04.592 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:21:04.592 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:21:04.593 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:21:04.593 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:21:05.243 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:21:05.245 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:21:05.246 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.99s) ==---[0m
+
+2025-05-07 21:21:05.247 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:22:00.304 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:22:00.307 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:22:02.025 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:22:02.691 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9901 (invalid)[0m
+2025-05-07 21:22:03.371 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:22:03.621 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:22:03.623 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:22:03.624 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:22:03.624 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:22:03.784 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:22:03.784 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:22:03.786 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9904, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=63.7220, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:22:03.790 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:22:03.791 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:22:03.792 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:22:03.792 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9901 (invalid)[0m
+2025-05-07 21:22:03.792 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:22:03.793 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:22:03.793 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:22:03.793 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:22:03.794 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:22:03.794 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:22:04.459 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:22:04.460 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:22:04.460 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.15s) ==---[0m
+
+2025-05-07 21:22:04.461 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:23:00.488 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:23:00.494 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:23:02.242 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:23:02.880 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9909 (invalid)[0m
+2025-05-07 21:23:03.570 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:23:03.871 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:23:03.873 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:23:03.873 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:23:03.874 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:23:04.087 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:23:04.087 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:23:04.090 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9906, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=63.8009, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:23:04.097 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:23:04.098 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:23:04.099 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:23:04.100 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9909 (invalid)[0m
+2025-05-07 21:23:04.100 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:23:04.101 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:23:04.101 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:23:04.101 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:23:04.102 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:23:04.102 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:23:04.734 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:23:04.735 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:23:04.735 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.24s) ==---[0m
+
+2025-05-07 21:23:04.737 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:24:00.482 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:24:00.485 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:24:02.017 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:24:02.647 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9917 (invalid)[0m
+2025-05-07 21:24:03.322 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:24:03.538 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:24:03.539 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:24:03.539 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:24:03.540 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:24:03.622 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:24:03.622 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:24:03.623 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9918, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=64.2672, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:24:03.626 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:24:03.626 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:24:03.627 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:24:03.627 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9917 (invalid)[0m
+2025-05-07 21:24:03.627 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:24:03.628 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:24:03.628 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:24:03.628 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:24:03.628 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:24:03.629 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:24:04.255 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:24:04.256 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:24:04.256 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 3.77s) ==---[0m
+
+2025-05-07 21:24:04.257 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:25:00.571 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:25:00.579 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:25:04.219 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:25:04.875 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9946 (invalid)[0m
+2025-05-07 21:25:05.678 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:25:06.157 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:25:06.158 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:25:06.159 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:25:06.159 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:25:06.543 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:25:06.545 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:25:06.548 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9932, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=64.8135, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:25:06.579 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:25:06.580 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:25:06.581 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:25:06.582 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9946 (invalid)[0m
+2025-05-07 21:25:06.582 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:25:06.582 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:25:06.583 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:25:06.583 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:25:06.583 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:25:06.583 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:25:07.356 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:25:07.357 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:25:07.358 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 6.78s) ==---[0m
+
+2025-05-07 21:25:07.359 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:26:00.615 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:26:00.621 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:26:02.263 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:26:02.897 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9923 (invalid)[0m
+2025-05-07 21:26:03.599 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:26:03.908 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:26:03.910 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:26:03.911 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:26:03.912 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:26:04.104 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:26:04.105 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:26:04.107 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9921, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=64.2035, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:26:04.115 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:26:04.116 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:26:04.117 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:26:04.117 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9923 (invalid)[0m
+2025-05-07 21:26:04.118 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:26:04.118 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:26:04.118 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:26:04.119 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:26:04.119 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:26:04.119 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:26:04.763 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:26:04.764 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:26:04.765 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.14s) ==---[0m
+
+2025-05-07 21:26:04.766 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:27:00.667 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:27:00.673 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:27:02.342 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:27:02.979 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9914 (invalid)[0m
+2025-05-07 21:27:03.651 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:27:03.911 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:27:03.912 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:27:03.913 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:27:03.913 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:27:04.096 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:27:04.096 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:27:04.098 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9909, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=63.3373, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:27:04.105 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:27:04.105 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:27:04.106 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:27:04.107 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9914 (invalid)[0m
+2025-05-07 21:27:04.107 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:27:04.107 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:27:04.108 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:27:04.108 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:27:04.108 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:27:04.109 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:27:04.772 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:27:04.773 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:27:04.774 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.10s) ==---[0m
+
+2025-05-07 21:27:04.775 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:28:00.694 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:28:00.697 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:28:02.393 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:28:03.044 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9933 (invalid)[0m
+2025-05-07 21:28:03.726 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:28:03.957 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:28:03.958 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:28:03.958 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:28:03.958 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:28:04.128 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:28:04.129 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:28:04.131 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9932, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=64.8135, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:28:04.135 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:28:04.136 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:28:04.137 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:28:04.137 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9933 (invalid)[0m
+2025-05-07 21:28:04.137 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:28:04.138 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:28:04.138 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:28:04.138 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:28:04.138 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:28:04.139 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:28:04.782 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:28:04.783 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:28:04.783 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.09s) ==---[0m
+
+2025-05-07 21:28:04.784 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:29:00.760 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:29:00.766 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:29:02.446 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:29:03.083 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9961 (invalid)[0m
+2025-05-07 21:29:03.773 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:29:04.010 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:29:04.011 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:29:04.012 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:29:04.012 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:29:04.165 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:29:04.165 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:29:04.167 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9953, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=65.6350, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:29:04.172 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:29:04.173 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:29:04.174 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:29:04.174 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9961 (invalid)[0m
+2025-05-07 21:29:04.175 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:29:04.175 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:29:04.175 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:29:04.176 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:29:04.176 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:29:04.176 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:29:04.801 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:29:04.802 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:29:04.803 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.04s) ==---[0m
+
+2025-05-07 21:29:04.804 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:30:00.783 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:30:00.788 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:30:02.628 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:30:03.287 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.998 (invalid)[0m
+2025-05-07 21:30:03.959 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:30:04.198 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:30:04.199 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:30:04.199 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:30:04.200 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:30:04.400 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:30:04.401 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:30:04.402 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9981, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=66.7250, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:30:04.413 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:30:04.414 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:30:04.415 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:30:04.415 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.998 (invalid)[0m
+2025-05-07 21:30:04.415 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:30:04.415 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:30:04.416 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:30:04.416 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:30:04.416 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:30:04.417 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:30:05.079 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:30:05.080 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:30:05.081 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.29s) ==---[0m
+
+2025-05-07 21:30:05.082 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:31:00.887 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:31:00.894 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:31:02.816 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:31:03.462 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0025 (invalid)[0m
+2025-05-07 21:31:04.170 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:31:04.608 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:31:04.609 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:31:04.610 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:31:04.611 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:31:04.882 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:31:04.883 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:31:04.887 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0024, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=68.3050, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:31:04.895 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:31:04.897 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:31:04.898 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:31:04.898 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0025 (invalid)[0m
+2025-05-07 21:31:04.899 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:31:04.899 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:31:04.899 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:31:04.900 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:31:04.900 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:31:04.900 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:31:05.537 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:31:05.538 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:31:05.539 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.64s) ==---[0m
+
+2025-05-07 21:31:05.540 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:32:00.933 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:32:00.940 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:32:02.806 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:32:03.489 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9932 (invalid)[0m
+2025-05-07 21:32:04.202 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:32:04.531 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:32:04.532 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:32:04.533 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:32:04.533 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:32:04.792 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:32:04.793 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:32:04.796 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9938, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=64.1503, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:32:04.803 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:32:04.804 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:32:04.805 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:32:04.806 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9932 (invalid)[0m
+2025-05-07 21:32:04.807 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:32:04.807 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:32:04.807 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:32:04.808 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:32:04.809 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:32:04.809 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:32:05.458 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:32:05.459 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:32:05.460 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.52s) ==---[0m
+
+2025-05-07 21:32:05.461 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:33:00.963 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:33:00.969 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:33:02.775 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:33:03.426 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.991 (invalid)[0m
+2025-05-07 21:33:04.145 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:33:04.529 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:33:04.530 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:33:04.531 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:33:04.532 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:33:04.743 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:33:04.743 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:33:04.747 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9910, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=62.1446, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:33:04.755 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:33:04.757 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:33:04.758 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:33:04.759 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.991 (invalid)[0m
+2025-05-07 21:33:04.759 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:33:04.760 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:33:04.761 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:33:04.761 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:33:04.762 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:33:04.762 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:33:05.440 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:33:05.442 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:33:05.443 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.47s) ==---[0m
+
+2025-05-07 21:33:05.445 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:34:01.008 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:34:01.012 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:34:03.163 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:34:03.796 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.991 (invalid)[0m
+2025-05-07 21:34:05.368 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:34:05.973 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:34:05.974 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:34:05.975 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:34:05.976 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:34:06.198 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:34:06.198 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:34:06.202 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9913, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=62.3534, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:34:06.211 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:34:06.212 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:34:06.213 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:34:06.214 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.991 (invalid)[0m
+2025-05-07 21:34:06.214 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:34:06.215 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:34:06.215 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:34:06.215 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:34:06.216 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:34:06.217 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:34:06.903 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:34:06.904 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:34:06.905 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 5.89s) ==---[0m
+
+2025-05-07 21:34:06.907 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:35:01.069 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:35:01.077 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:35:02.883 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:35:03.525 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9965 (invalid)[0m
+2025-05-07 21:35:04.598 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:35:04.971 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:35:04.972 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:35:04.972 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:35:04.973 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:35:05.188 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:35:05.188 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:35:05.191 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9956, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=65.2155, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:35:05.203 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:35:05.204 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:35:05.205 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:35:05.206 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9965 (invalid)[0m
+2025-05-07 21:35:05.207 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:35:05.207 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:35:05.208 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:35:05.208 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:35:05.209 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:35:05.209 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:35:05.863 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:35:05.867 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:35:05.870 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.79s) ==---[0m
+
+2025-05-07 21:35:05.872 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:36:01.089 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:36:01.095 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:36:02.747 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:36:03.383 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9992 (invalid)[0m
+2025-05-07 21:36:04.081 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:36:04.462 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:36:04.463 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:36:04.464 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:36:04.465 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:36:04.686 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:36:04.687 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:36:04.690 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9992, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=66.7023, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:36:04.700 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:36:04.701 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:36:04.703 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:36:04.703 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9992 (invalid)[0m
+2025-05-07 21:36:04.704 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:36:04.705 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:36:04.705 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:36:04.706 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:36:04.706 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:36:04.707 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:36:05.353 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:36:05.354 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:36:05.355 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.26s) ==---[0m
+
+2025-05-07 21:36:05.356 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:37:01.119 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:37:01.122 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:37:02.648 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:37:03.279 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0017 (invalid)[0m
+2025-05-07 21:37:04.078 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:37:04.450 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:37:04.451 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:37:04.452 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:37:04.453 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:37:04.597 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:37:04.598 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:37:04.600 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0013, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=67.5124, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:37:04.606 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:37:04.607 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:37:04.608 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:37:04.609 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0017 (invalid)[0m
+2025-05-07 21:37:04.609 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:37:04.610 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:37:04.610 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:37:04.611 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:37:04.611 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:37:04.611 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:37:05.296 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:37:05.297 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:37:05.297 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.18s) ==---[0m
+
+2025-05-07 21:37:05.298 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:38:01.182 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:38:01.189 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:38:03.050 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:38:03.700 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9973 (invalid)[0m
+2025-05-07 21:38:04.399 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:38:04.820 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:38:04.822 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:38:04.823 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:38:04.825 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:38:05.064 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:38:05.065 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:38:05.071 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9981, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=66.2617, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:38:05.080 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:38:05.082 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:38:05.083 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:38:05.084 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9973 (invalid)[0m
+2025-05-07 21:38:05.085 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:38:05.085 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:38:05.086 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:38:05.087 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:38:05.089 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:38:05.090 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:38:05.740 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:38:05.742 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:38:05.743 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.55s) ==---[0m
+
+2025-05-07 21:38:05.744 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:39:01.239 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:39:01.245 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:39:03.042 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:39:03.727 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9957 (invalid)[0m
+2025-05-07 21:39:04.435 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:39:04.818 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:39:04.819 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:39:04.820 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:39:04.821 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:39:05.026 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:39:05.027 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:39:05.030 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9955, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=65.1723, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:39:05.037 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:39:05.038 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:39:05.039 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:39:05.040 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9957 (invalid)[0m
+2025-05-07 21:39:05.040 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:39:05.041 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:39:05.041 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:39:05.042 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:39:05.042 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:39:05.043 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:39:05.695 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:39:05.696 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:39:05.696 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.45s) ==---[0m
+
+2025-05-07 21:39:05.698 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:40:01.298 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:40:01.305 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:40:03.077 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:40:03.747 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.994 (invalid)[0m
+2025-05-07 21:40:04.471 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:40:04.918 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:40:04.919 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:40:04.920 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:40:04.921 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:40:05.192 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:40:05.194 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:40:05.198 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9938, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=63.9127, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:40:05.211 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:40:05.212 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:40:05.213 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:40:05.214 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.994 (invalid)[0m
+2025-05-07 21:40:05.215 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:40:05.215 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:40:05.216 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:40:05.217 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:40:05.217 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:40:05.218 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:40:05.861 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:40:05.862 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:40:05.863 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.56s) ==---[0m
+
+2025-05-07 21:40:05.865 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:41:01.310 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:41:01.321 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:41:03.311 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:41:03.957 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.998 (invalid)[0m
+2025-05-07 21:41:04.686 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:41:05.226 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:41:05.228 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:41:05.230 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:41:05.231 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:41:05.645 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:41:05.646 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:41:05.651 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9979, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=65.7594, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:41:05.669 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:41:05.673 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:41:05.674 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:41:05.674 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.998 (invalid)[0m
+2025-05-07 21:41:05.675 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:41:05.676 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:41:05.677 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:41:05.678 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:41:05.679 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:41:05.680 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:41:06.335 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:41:06.337 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:41:06.338 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 5.02s) ==---[0m
+
+2025-05-07 21:41:06.341 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:42:01.369 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:42:01.376 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:42:03.133 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:42:03.786 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m0.9943 (invalid)[0m
+2025-05-07 21:42:04.494 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:42:04.878 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:42:04.879 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:42:04.880 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:42:04.881 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:42:05.093 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:42:05.094 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:42:05.096 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=0.9943, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=64.1485, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:42:05.104 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:42:05.105 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:42:05.106 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:42:05.107 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m0.9943 (invalid)[0m
+2025-05-07 21:42:05.108 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:42:05.108 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:42:05.109 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:42:05.109 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:42:05.110 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:42:05.110 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:42:05.774 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:42:05.775 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:42:05.775 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.40s) ==---[0m
+
+2025-05-07 21:42:05.777 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:43:01.429 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:43:01.434 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:43:03.279 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:43:03.919 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0007 (invalid)[0m
+2025-05-07 21:43:04.660 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:43:05.263 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:43:05.265 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:43:05.266 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:43:05.267 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:43:05.528 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:43:05.529 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:43:05.532 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0014, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=67.1926, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:43:05.543 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:43:05.545 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:43:05.547 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:43:05.547 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0007 (invalid)[0m
+2025-05-07 21:43:05.548 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:43:05.549 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:43:05.549 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:43:05.550 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:43:05.550 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:43:05.551 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:43:06.241 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:43:06.242 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:43:06.243 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.81s) ==---[0m
+
+2025-05-07 21:43:06.245 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:44:01.479 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:44:01.485 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:44:03.407 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:44:04.064 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0003 (invalid)[0m
+2025-05-07 21:44:04.791 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:44:05.248 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:44:05.249 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:44:05.250 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:44:05.251 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:44:05.574 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:44:05.575 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:44:05.578 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0010, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=67.0349, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:44:05.586 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:44:05.588 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:44:05.589 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:44:05.589 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0003 (invalid)[0m
+2025-05-07 21:44:05.590 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:44:05.591 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:44:05.591 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:44:05.592 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:44:05.593 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:44:05.593 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:44:06.241 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:44:06.242 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:44:06.243 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.76s) ==---[0m
+
+2025-05-07 21:44:06.244 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:45:01.512 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:45:01.520 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:45:03.298 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:45:03.919 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0052 (invalid)[0m
+2025-05-07 21:45:04.605 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:45:04.998 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:45:04.999 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:45:05.000 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:45:05.001 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:45:05.213 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:45:05.213 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:45:05.216 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0051, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=68.5883, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:45:05.225 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:45:05.226 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:45:05.227 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:45:05.228 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0052 (invalid)[0m
+2025-05-07 21:45:05.228 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:45:05.229 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:45:05.229 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:45:05.230 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:45:05.230 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:45:05.231 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:45:05.867 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:45:05.868 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:45:05.869 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.35s) ==---[0m
+
+2025-05-07 21:45:05.870 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:46:01.551 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:46:01.557 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:46:03.507 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:46:04.159 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0065 (invalid)[0m
+2025-05-07 21:46:04.897 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:46:05.781 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:46:05.785 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:46:05.786 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:46:05.787 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:46:06.147 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:46:06.148 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:46:06.151 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0069, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=69.2703, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:46:06.167 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:46:06.168 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:46:06.170 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:46:06.171 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0065 (invalid)[0m
+2025-05-07 21:46:06.171 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:46:06.172 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:46:06.173 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:46:06.174 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:46:06.174 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:46:06.175 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:46:06.830 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:46:06.831 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:46:06.832 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 5.27s) ==---[0m
+
+2025-05-07 21:46:06.833 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:47:01.590 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:47:01.601 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:47:03.908 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:47:04.603 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0087 (invalid)[0m
+2025-05-07 21:47:05.339 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:47:05.770 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:47:05.771 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:47:05.772 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:47:05.773 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:47:06.053 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:47:06.057 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:47:06.061 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0084, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=69.8165, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:47:06.070 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:47:06.071 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:47:06.073 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:47:06.074 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0087 (invalid)[0m
+2025-05-07 21:47:06.074 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:47:06.075 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:47:06.076 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:47:06.076 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:47:06.077 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:47:06.077 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:47:06.743 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:47:06.747 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:47:06.750 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 5.15s) ==---[0m
+
+2025-05-07 21:47:06.755 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---
+2025-05-07 21:48:01.640 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:302] MainThread - --- Processing: FARTCOIN/USDT:USDT ---
+2025-05-07 21:48:01.644 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:924] MainThread - --- Start Cycle: FARTCOIN/USDT:USDT ---
+2025-05-07 21:48:03.468 INFO     [App.Init:804] MainThread - Successfully fetched and processed 500 klines for FARTCOIN/USDT:USDT [5m].
+2025-05-07 21:48:04.122 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:258] MainThread - Current price FARTCOIN/USDT:USDT: [93m1.0052 (invalid)[0m
+2025-05-07 21:48:04.816 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:409] MainThread - Data length (500) sufficient for indicators (Min required: 40).
+2025-05-07 21:48:05.215 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARl_0_02_0_02_0_2' for 'PSAR_long' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:48:05.216 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARl_0.02_0.2'. Using this column.
+2025-05-07 21:48:05.217 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:640] MainThread - Mapped column 'PSARs_0_02_0_02_0_2' for 'PSAR_short' of PSAR not found in DataFrame. Check ta version/column names.
+2025-05-07 21:48:05.217 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:654] MainThread -     --> Found partial match: 'PSARs_0.02_0.2'. Using this column.
+2025-05-07 21:48:05.418 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:666] MainThread - Indicator calculation complete FARTCOIN/USDT:USDT. Final columns: ['open', 'high', 'low', 'close', 'volume', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VWAP_D', 'MOM_7', 'CCI_20_0.015', 'RSI_14', 'MFI_14']
+2025-05-07 21:48:05.419 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:669] MainThread - TA Column Map: {'PSAR_long': 'PSARl_0.02_0.2', 'PSAR_short': 'PSARs_0.02_0.2', 'BB_Lower': 'BBL_20_2.0', 'BB_Middle': 'BBM_20_2.0', 'BB_Upper': 'BBU_20_2.0', 'VWAP': 'VWAP_D', 'Momentum': 'MOM_7', 'CCI': 'CCI_20_0.015', 'RSI': 'RSI_14', 'MFI': 'MFI_14'}
+2025-05-07 21:48:05.421 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:730] MainThread - Latest values FARTCOIN/USDT:USDT: Close=1.0048, ATR=N/A, EMA_Short=N/A, EMA_Long=N/A, RSI=68.4260, StochRSI_K=N/A, StochRSI_D=N/A
+2025-05-07 21:48:05.426 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:777] MainThread - Calculated 7 Fib levels FARTCOIN/USDT:USDT.
+2025-05-07 21:48:05.427 WARNING  [App.Symbol.FARTCOIN_USDT-USDT:841] MainThread - Signal FARTCOIN/USDT:USDT: Only 5 valid indicators < req 7. HOLD.
+2025-05-07 21:48:05.428 INFO     [App.Symbol.FARTCOIN_USDT-USDT:312] MainThread - --- [95mAnalysis Summary (FARTCOIN/USDT:USDT)[0m ---
+2025-05-07 21:48:05.429 INFO     [App.Symbol.FARTCOIN_USDT-USDT:313] MainThread -   Price: [93m1.0052 (invalid)[0m
+2025-05-07 21:48:05.429 INFO     [App.Symbol.FARTCOIN_USDT-USDT:315] MainThread -   ATR (14): [93mN/A[0m
+2025-05-07 21:48:05.430 INFO     [App.Symbol.FARTCOIN_USDT-USDT:318] MainThread -   Init SL (sizing): [93mN/A[0m
+2025-05-07 21:48:05.430 INFO     [App.Symbol.FARTCOIN_USDT-USDT:319] MainThread -   Init TP (target): [93mN/A[0m
+2025-05-07 21:48:05.431 INFO     [App.Symbol.FARTCOIN_USDT-USDT:324] MainThread -   Config: TSL=True, BE=True, TimeExit=Disabled
+2025-05-07 21:48:05.432 INFO     [App.Symbol.FARTCOIN_USDT-USDT:325] MainThread -   Signal: [93mHOLD[0m
+2025-05-07 21:48:05.432 INFO     [App.Symbol.FARTCOIN_USDT-USDT:326] MainThread - -----------------------------
+2025-05-07 21:48:06.097 INFO     [App.Init:1240] MainThread - No active, significantly sized position found for FARTCOIN/USDT:USDT after checking 1 structure(s).
+2025-05-07 21:48:06.100 INFO     [App.Symbol.FARTCOIN_USDT-USDT:351] MainThread - Signal [93mHOLD[0m, no pos FARTCOIN/USDT:USDT. No entry.
+2025-05-07 21:48:06.103 INFO     [App.Symbol.FARTCOIN_USDT-USDT:971] MainThread - [94m---== Cycle End (FARTCOIN/USDT:USDT, Duration: 4.46s) ==---[0m
+
+2025-05-07 21:48:06.111 DEBUG    [App.Symbol.FARTCOIN_USDT-USDT:320] MainThread - --- Finished: FARTCOIN/USDT:USDT ---

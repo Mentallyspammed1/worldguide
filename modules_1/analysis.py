@@ -543,7 +543,6 @@ class TradingAnalyzer:
                     continue
 
                 # Prepare inputs (OHLCV Series) required by the function
-                inputs = {}
                 required_ta_cols = ["open", "high", "low", "close", "volume"]  # Potential cols needed by TA funcs
                 input_df = df_work[required_ta_cols].copy()  # Pass relevant columns as DataFrame if func allows
                 close_series = df_work["close"]  # Always have close series available

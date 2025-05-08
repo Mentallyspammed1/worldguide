@@ -105,12 +105,7 @@ for line in code_lines:
         pass  # Channeling the ether...
     elif "downloader.download" in line:
         pass  # Highlight the core spell
-    elif (
-        "query_string" in line
-        or "limit" in line
-        or "output_dir" in line
-        or "safe_search_off" in line
-    ):
+    elif "query_string" in line or "limit" in line or "output_dir" in line or "safe_search_off" in line:
         pass  # Highlight configuration variables
     else:
         pass  # Standard incantation text

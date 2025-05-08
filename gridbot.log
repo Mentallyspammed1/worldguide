@@ -1,0 +1,116 @@
+[2025-05-07 22:51:34] [INFO] --- Grid Bot Started (Version 7.0) ---
+[2025-05-07 22:51:34] [INFO] Paper Trading Mode: true, SMS Notifications: true
+[2025-05-07 22:51:34] [INFO] Symbol: TRUMPUSDT, Grid Levels: 7, Base Interval: 80, Order Size: 0.1, Leverage: 50
+[2025-05-07 22:51:34] [INFO] Profit Target: 2 USD, Loss Limit: 2 USD, Max Open Orders: 20
+[2025-05-07 22:51:34] [INFO] Checking market conditions, volatility and trend before placing initial grid...
+[2025-05-07 22:51:34] [INFO] [PAPER TRADING] Initial market condition, volatility, and trend checks skipped.
+[2025-05-07 22:51:34] [INFO] [PAPER TRADING] Market condition and volatility checks skipped.
+[2025-05-07 22:51:34] [INFO] [PAPER TRADING] Trend check skipped.
+[2025-05-07 22:51:34] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676294274&recv_window=5000&sign=b349572df880f9ab548fa7fed75da6157639b07ea8f60859b4dc4083709e73b9
+[2025-05-07 22:51:34] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676294274&recv_window=5000&sign=b349572df880f9ab548fa7fed75da6157639b07ea8f60859b4dc4083709e73b9"
+[2025-05-07 22:51:34] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:51:39] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676299455&recv_window=5000&sign=9e0af1a9894875fd429c0cdf38c5ad5a6e5fa5001c218c77ca30aad86c8011fc
+[2025-05-07 22:51:39] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676299455&recv_window=5000&sign=9e0af1a9894875fd429c0cdf38c5ad5a6e5fa5001c218c77ca30aad86c8011fc"
+[2025-05-07 22:51:39] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:51:44] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676304702&recv_window=5000&sign=56fb6a0facf98ecb418b9b003070e6eeadd6da32b2ec656131310e6bab0df03f
+[2025-05-07 22:51:44] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676304702&recv_window=5000&sign=56fb6a0facf98ecb418b9b003070e6eeadd6da32b2ec656131310e6bab0df03f"
+[2025-05-07 22:51:44] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:51:44] [ERROR] API Request failed after multiple retries. Endpoint: /v5/market/tickers?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:51:48] [INFO] Current Price: 
+[2025-05-07 22:51:48] [INFO] [PAPER TRADING] Leverage setting skipped.
+[2025-05-07 22:51:48] [INFO] Placing grid orders around price: , Levels: 7, Base Interval: 80, Dynamic Interval: 80, Size: 0.1
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:48] [WARNING] Invalid sell price calculated: ''. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-80'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-160'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-240'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-320'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-400'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-480'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [WARNING] Invalid buy price calculated: '-560'. Skipping order placement at this level.
+[2025-05-07 22:51:49] [INFO] Grid order placement complete. Placed 0 new orders.
+[2025-05-07 22:51:49] [INFO] Initial grid orders placed successfully. Starting main loop...
+[2025-05-07 22:51:52] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676312443&recv_window=5000&sign=7cdccb1e29de4a0fb47b43e89c04b3918f7bb631b740e54d41b9dff5ad711fcd
+[2025-05-07 22:51:52] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676312443&recv_window=5000&sign=7cdccb1e29de4a0fb47b43e89c04b3918f7bb631b740e54d41b9dff5ad711fcd"
+[2025-05-07 22:51:52] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:51:57] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676317695&recv_window=5000&sign=b251689d16a55959bb98b18f9bcb090c1af1f9e22fcda1b72e948e69b0091660
+[2025-05-07 22:51:57] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676317695&recv_window=5000&sign=b251689d16a55959bb98b18f9bcb090c1af1f9e22fcda1b72e948e69b0091660"
+[2025-05-07 22:51:57] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:52:02] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676322884&recv_window=5000&sign=f6ffeac696180f69d0ddeece0de32f77ac781c3f0645b06a23c759153d72c6b4
+[2025-05-07 22:52:02] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676322884&recv_window=5000&sign=f6ffeac696180f69d0ddeece0de32f77ac781c3f0645b06a23c759153d72c6b4"
+[2025-05-07 22:52:02] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:52:02] [ERROR] API Request failed after multiple retries. Endpoint: /v5/position/list?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:52:06] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676326488&recv_window=5000&sign=49749f4969f27bbfc6f1778c9733486039859087158bf77fb300178af200fd62
+[2025-05-07 22:52:06] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676326488&recv_window=5000&sign=49749f4969f27bbfc6f1778c9733486039859087158bf77fb300178af200fd62"
+[2025-05-07 22:52:06] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:52:11] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676331714&recv_window=5000&sign=9e1f8249d843264c052a09465bdca3747086c9c7f049c7f49072832ffeaa5e63
+[2025-05-07 22:52:11] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676331714&recv_window=5000&sign=9e1f8249d843264c052a09465bdca3747086c9c7f049c7f49072832ffeaa5e63"
+[2025-05-07 22:52:11] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:52:17] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676336937&recv_window=5000&sign=79d2e582220a3483528c155bb817ea2fecd4ad708567ad95aaca87436b45c132
+[2025-05-07 22:52:17] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676336937&recv_window=5000&sign=79d2e582220a3483528c155bb817ea2fecd4ad708567ad95aaca87436b45c132"
+[2025-05-07 22:52:17] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:52:17] [ERROR] API Request failed after multiple retries. Endpoint: /v5/market/tickers?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:52:23] [INFO] --- PNL & Metrics ---
+[2025-05-07 22:52:23] [INFO] Current Price: , Position Size: , Entry Price: 
+[2025-05-07 22:52:23] [INFO] Unrealized PNL: 0.0000 USD, Realized PNL: 0.0000 USD, Total PNL: 0.0000 USD
+[2025-05-07 22:52:23] [INFO] Approx. Order Fill Rate (last cycle): 0.00%
+[2025-05-07 22:52:23] [INFO] Volatility Multiplier: 1, Trend Bias: 0
+[2025-05-07 22:52:23] [INFO] -----------------------
+[2025-05-07 22:52:58] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676378280&recv_window=5000&sign=74741e4fa730b9c8a6f01e7f5e7a282483c7785a343444e05cca43ca99e45926
+[2025-05-07 22:52:58] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676378280&recv_window=5000&sign=74741e4fa730b9c8a6f01e7f5e7a282483c7785a343444e05cca43ca99e45926"
+[2025-05-07 22:52:58] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:53:03] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676383514&recv_window=5000&sign=d77763a2ab8bd466271e6f52151fa748f6d4c5f04f3e0da2a35a8ff48cb88a51
+[2025-05-07 22:53:03] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676383514&recv_window=5000&sign=d77763a2ab8bd466271e6f52151fa748f6d4c5f04f3e0da2a35a8ff48cb88a51"
+[2025-05-07 22:53:03] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:53:08] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676388667&recv_window=5000&sign=44483f279789530209f0710a32f85faa6edc72056031fef98ddafbf682d4b8e5
+[2025-05-07 22:53:08] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676388667&recv_window=5000&sign=44483f279789530209f0710a32f85faa6edc72056031fef98ddafbf682d4b8e5"
+[2025-05-07 22:53:08] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:53:08] [ERROR] API Request failed after multiple retries. Endpoint: /v5/position/list?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:53:13] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676393214&recv_window=5000&sign=65d1c5bf82c2aab5fe5c9a3a66ec4dea36ad3e1e38991e1a5b648b93ebb8d930
+[2025-05-07 22:53:13] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676393214&recv_window=5000&sign=65d1c5bf82c2aab5fe5c9a3a66ec4dea36ad3e1e38991e1a5b648b93ebb8d930"
+[2025-05-07 22:53:13] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:53:18] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676398472&recv_window=5000&sign=5a3b30fc424057227ed97034dc08dcef73925d4b66183057ee66437928bad32e
+[2025-05-07 22:53:18] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676398472&recv_window=5000&sign=5a3b30fc424057227ed97034dc08dcef73925d4b66183057ee66437928bad32e"
+[2025-05-07 22:53:18] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:53:23] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676403748&recv_window=5000&sign=3462166fd43dcb61d8800eaa14f1b5edebdd8d08d73c36e0ead8ea3548ce25b6
+[2025-05-07 22:53:23] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676403748&recv_window=5000&sign=3462166fd43dcb61d8800eaa14f1b5edebdd8d08d73c36e0ead8ea3548ce25b6"
+[2025-05-07 22:53:24] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:53:24] [ERROR] API Request failed after multiple retries. Endpoint: /v5/market/tickers?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:53:29] [INFO] --- PNL & Metrics ---
+[2025-05-07 22:53:29] [INFO] Current Price: , Position Size: , Entry Price: 
+[2025-05-07 22:53:29] [INFO] Unrealized PNL: 0.0000 USD, Realized PNL: 0.0000 USD, Total PNL: 0.0000 USD
+[2025-05-07 22:53:29] [INFO] Approx. Order Fill Rate (last cycle): 0.00%
+[2025-05-07 22:53:29] [INFO] Volatility Multiplier: 1, Trend Bias: 0
+[2025-05-07 22:53:29] [INFO] -----------------------
+[2025-05-07 22:54:03] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676443324&recv_window=5000&sign=7dca6edcc288058548a1e0e4c7936b40a08be1bfa45cb1062eb2f56053023113
+[2025-05-07 22:54:03] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676443324&recv_window=5000&sign=7dca6edcc288058548a1e0e4c7936b40a08be1bfa45cb1062eb2f56053023113"
+[2025-05-07 22:54:03] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:54:08] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676448653&recv_window=5000&sign=b39a2144c412432fb4d9dc5f8e27398adbdb65df53a9c5927efb7c5a75f0c3e7
+[2025-05-07 22:54:08] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676448653&recv_window=5000&sign=b39a2144c412432fb4d9dc5f8e27398adbdb65df53a9c5927efb7c5a75f0c3e7"
+[2025-05-07 22:54:08] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:54:13] [DEBUG] API Request URL: https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676453843&recv_window=5000&sign=3ed8658e48aa7e669d2f2156b9dc2a2d54212aef129bc0e6deda3174aca1404d
+[2025-05-07 22:54:13] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/position/list?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676453843&recv_window=5000&sign=3ed8658e48aa7e669d2f2156b9dc2a2d54212aef129bc0e6deda3174aca1404d"
+[2025-05-07 22:54:13] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:54:13] [ERROR] API Request failed after multiple retries. Endpoint: /v5/position/list?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:54:17] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676457617&recv_window=5000&sign=78e07d23114764f548ef6bb11019d400a2f4f01eb8a20541be007213967d3b0a
+[2025-05-07 22:54:17] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676457617&recv_window=5000&sign=78e07d23114764f548ef6bb11019d400a2f4f01eb8a20541be007213967d3b0a"
+[2025-05-07 22:54:17] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 3)
+[2025-05-07 22:54:22] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676462818&recv_window=5000&sign=13803db2708d172cb93145f23e84e2bf2b2cff63d1add2d9d49de65e4cfd8ae9
+[2025-05-07 22:54:22] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676462818&recv_window=5000&sign=13803db2708d172cb93145f23e84e2bf2b2cff63d1add2d9d49de65e4cfd8ae9"
+[2025-05-07 22:54:22] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 2)
+[2025-05-07 22:54:28] [DEBUG] API Request URL: https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676468093&recv_window=5000&sign=c33e76b1cb07f92f525e5958fef6b7133214b6a7852f94d69f461033af01bc0d
+[2025-05-07 22:54:28] [DEBUG] Full curl command: curl -s -X GET -H 'Content-Type: application/json' "https://api.bybit.com/v5/market/tickers?symbol=TRUMPUSDT?api_key=I9iTUO2iaVFK1NjNo1&timestamp=1746676468093&recv_window=5000&sign=c33e76b1cb07f92f525e5958fef6b7133214b6a7852f94d69f461033af01bc0d"
+[2025-05-07 22:54:28] [WARNING] curl command failed with exit code: 127. Response: . Retrying... (Retries left: 1)
+[2025-05-07 22:54:28] [ERROR] API Request failed after multiple retries. Endpoint: /v5/market/tickers?symbol=TRUMPUSDT, Method: GET, Data: , Response: 
+[2025-05-07 22:54:32] [INFO] --- PNL & Metrics ---
+[2025-05-07 22:54:32] [INFO] Current Price: , Position Size: , Entry Price: 
+[2025-05-07 22:54:32] [INFO] Unrealized PNL: 0.0000 USD, Realized PNL: 0.0000 USD, Total PNL: 0.0000 USD
+[2025-05-07 22:54:32] [INFO] Approx. Order Fill Rate (last cycle): 0.00%
+[2025-05-07 22:54:32] [INFO] Volatility Multiplier: 1, Trend Bias: 0
+[2025-05-07 22:54:32] [INFO] -----------------------
+[2025-05-07 22:54:48] [INFO] --- Grid Bot Shutting Down (Signal Received) ---

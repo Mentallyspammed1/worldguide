@@ -30,14 +30,12 @@ import functools
 import json
 import logging
 import os
-import subprocess
 import sys
 import time
 from collections.abc import Callable
-from contextlib import contextmanager
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional
 
 import ccxt
 import pandas as pd
@@ -61,9 +59,11 @@ COLORAMA_AVAILABLE = True
 SUCCESS_LEVEL = 25
 logging.addLevelName(SUCCESS_LEVEL, "SUCCESS")
 
+
 def log_success(self: logging.Logger, message: str, *args: Any, **kwargs: Any) -> None:
     if self.isEnabledFor(SUCCESS_LEVEL):
         self._log(SUCCESS_LEVEL, message, args, **kwargs)
+
 
 if not hasattr(logging.Logger, "success"):
     logging.Logger.success = log_success  # type: ignore[attr-defined]
@@ -77,6 +77,7 @@ LOG_LEVEL_COLORS: Dict[int, str] = {
     logging.CRITICAL: Back.RED + Fore.WHITE + Style.BRIGHT,
 }
 
+
 class ColoredConsoleFormatter(logging.Formatter):
     def __init__(self, fmt: Optional[str] = None, datefmt: Optional[str] = None):
         super().__init__(fmt=fmt, datefmt=datefmt)
@@ -85,16 +86,20 @@ class ColoredConsoleFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         original_levelname = record.levelname
         color = LOG_LEVEL_COLORS.get(record.levelno, Fore.WHITE)
-        record.levelname = f"{color}{original_levelname:<8}{Style.RESET_ALL}" if self.use_colors else f"{original_levelname:<8}"
+        record.levelname = (
+            f"{color}{original_levelname:<8}{Style.RESET_ALL}" if self.use_colors else f"{original_levelname:<8}"
+        )
         formatted_message = super().format(record)
         record.levelname = original_levelname
         return formatted_message
+
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s [%(module)s:%(funcName)s:%(lineno)d] - %(message)s"
 LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 console_formatter = ColoredConsoleFormatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
 file_formatter = logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
+
 
 def setup_logger(
     logger_name: str = "BybitTrading",
@@ -134,6 +139,7 @@ def setup_logger(
 
     return logger
 
+
 # --- Configuration Models (Adapted from config_models.py) ---
 class ApiConfig(BaseModel):
     api_key: str = Field(..., description="Bybit API Key")
@@ -142,6 +148,7 @@ class ApiConfig(BaseModel):
     testnet_mode: bool = Field(True, description="Use testnet")
     retry_count: PositiveInt = Field(3, description="API retry attempts")
     retry_delay_seconds: PositiveFloat = Field(1.0, description="Delay between retries")
+
 
 class StrategyConfig(BaseModel):
     timeframe: str = Field("5m", description="Kline timeframe")
@@ -163,7 +170,7 @@ class StrategyConfig(BaseModel):
             "macd_slow": 26,
             "macd_signal": 9,
         },
-        description="Indicator parameters"
+        description="Indicator parameters",
     )
     analysis_flags: Dict[str, bool] = Field(
         default_factory=lambda: {
@@ -174,26 +181,24 @@ class StrategyConfig(BaseModel):
             "use_evt": True,
             "use_atr": True,
         },
-        description="Enable/disable indicators"
+        description="Enable/disable indicators",
     )
+
 
 class SmsConfig(BaseModel):
     enable_sms_alerts: bool = Field(False, description="Enable SMS alerts")
     termux_phone_number: Optional[str] = Field(None, description="Phone number for SMS alerts")
     sms_cooldown_seconds: PositiveInt = Field(60, description="Cooldown for non-critical SMS")
 
+
 class AppConfig(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_nested_delimiter="__",
-        case_sensitive=False,
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="__", case_sensitive=False, extra="ignore")
     api_config: ApiConfig
     strategy_config: StrategyConfig
     sms_config: SmsConfig
     log_directory: str = Field("logs", description="Log directory")
     log_level: str = Field("INFO", description="Log level")
+
 
 # --- Utility Functions (Adapted from bybit_utils.py) ---
 def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Optional[Decimal]:
@@ -204,6 +209,7 @@ def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Op
     except (ValueError, InvalidOperation):
         return default
 
+
 def format_price(exchange: ccxt.Exchange, symbol: str, price: Any) -> str:
     try:
         return exchange.price_to_precision(symbol, price)
@@ -213,6 +219,7 @@ def format_price(exchange: ccxt.Exchange, symbol: str, price: Any) -> str:
         price_dec = safe_decimal_conversion(price)
         return f"{price_dec:.8f}" if price_dec is not None else "Invalid"
 
+
 def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Any) -> str:
     try:
         return exchange.amount_to_precision(symbol, amount)
@@ -221,6 +228,7 @@ def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Any) -> str:
         logger.warning(f"Error formatting amount for {symbol}: {e}")
         amount_dec = safe_decimal_conversion(amount)
         return f"{amount_dec:.8f}" if amount_dec is not None else "Invalid"
+
 
 def retry_api_call(max_retries: int = 3, initial_delay: float = 1.0):
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -252,8 +260,11 @@ def retry_api_call(max_retries: int = 3, initial_delay: float = 1.0):
                     logger.critical(f"Unexpected error in {func.__name__}: {e}", exc_info=True)
                     return {"retCode": -1, "retMsg": str(e)}
             return {"retCode": -1, "retMsg": "Max retries exceeded"}
+
         return wrapper
+
     return decorator
+
 
 # --- Bybit Helper Class ---
 class BybitHelper:
@@ -265,7 +276,7 @@ class BybitHelper:
             logger_name="BybitTrading",
             log_file=os.path.join(config.log_directory, "trading_bot.log"),
             console_level=getattr(logging, config.log_level.upper(), logging.INFO),
-            file_level=logging.DEBUG
+            file_level=logging.DEBUG,
         )
         self.api_key = config.api_config.api_key
         self.api_secret = config.api_config.api_secret
@@ -277,11 +288,7 @@ class BybitHelper:
 
         # Initialize pybit HTTP session
         try:
-            self.session = HTTP(
-                testnet=self.testnet,
-                api_key=self.api_key,
-                api_secret=self.api_secret
-            )
+            self.session = HTTP(testnet=self.testnet, api_key=self.api_key, api_secret=self.api_secret)
             self.logger.info("Initialized pybit HTTP session")
         except Exception as e:
             self.logger.critical(f"Failed to initialize pybit session: {e}", exc_info=True)
@@ -289,11 +296,7 @@ class BybitHelper:
 
         # Initialize ccxt exchange
         try:
-            self.exchange = ccxt.bybit({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "enableRateLimit": True
-            })
+            self.exchange = ccxt.bybit({"apiKey": self.api_key, "secret": self.api_secret, "enableRateLimit": True})
             if self.testnet:
                 self.exchange.set_sandbox_mode(True)
             self.exchange.load_markets()
@@ -314,7 +317,7 @@ class BybitHelper:
                 api_key=self.api_key,
                 api_secret=self.api_secret,
                 ping_interval=20,
-                ping_timeout=10
+                ping_timeout=10,
             )
             self.ws_connected = True
             self.logger.info("Initialized WebSocket")
@@ -350,7 +353,7 @@ class BybitHelper:
             self.logger.debug(f"SMS alert skipped due to cooldown: {message}")
             return False
         try:
-            cmd = f"termux-sms-send -n {self.config.sms_config.termux_phone_number} \"{message}\""
+            cmd = f'termux-sms-send -n {self.config.sms_config.termux_phone_number} "{message}"'
             result = os.system(cmd)
             if result == 0:
                 self.last_sms_time[priority] = current_time
@@ -396,7 +399,9 @@ class BybitHelper:
             self.logger.error(f"Error fetching OHLCV: {e}", exc_info=True)
             return []
 
-    def calculate_indicators(self, df: pd.DataFrame, incremental: bool = False, prev_df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def calculate_indicators(
+        self, df: pd.DataFrame, incremental: bool = False, prev_df: Optional[pd.DataFrame] = None
+    ) -> pd.DataFrame:
         """Calculate indicators using indicators.py."""
         try:
             config = {
@@ -405,9 +410,9 @@ class BybitHelper:
                 "strategy_params": {
                     "ehlers_volumetric": {
                         "evt_length": self.config.strategy_config.indicator_settings.get("evt_length", 7),
-                        "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5)
+                        "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5),
                     }
-                }
+                },
             }
             if incremental and prev_df is not None:
                 return update_indicators_incrementally(df, config, prev_df)
@@ -429,13 +434,15 @@ class BybitHelper:
                 "high": float(kline_data["high"]),
                 "low": float(kline_data["low"]),
                 "close": float(kline_data["close"]),
-                "volume": float(kline_data["volume"])
+                "volume": float(kline_data["volume"]),
             }
             df_new = pd.DataFrame([kline])
             prev_df = self.ohlcv_cache.get(timeframe)
             df_updated = self.calculate_indicators(df_new, incremental=True, prev_df=prev_df)
             if prev_df is not None:
-                self.ohlcv_cache[timeframe] = pd.concat([prev_df, df_updated]).drop_duplicates(subset="timestamp").tail(200)
+                self.ohlcv_cache[timeframe] = (
+                    pd.concat([prev_df, df_updated]).drop_duplicates(subset="timestamp").tail(200)
+                )
             else:
                 self.ohlcv_cache[timeframe] = df_updated
             return df_updated
@@ -480,7 +487,7 @@ class BybitHelper:
                 side=side,
                 orderType="Market",
                 qty=qty_str,
-                reduceOnly=reduce_only
+                reduceOnly=reduce_only,
             )
             if response.get("retCode") == 0:
                 self.logger.info(f"Placed market order: {side} {qty_str} {self.symbol}")
@@ -506,7 +513,7 @@ class BybitHelper:
                 orderType="Limit",
                 qty=qty_str,
                 price=price_str,
-                reduceOnly=reduce_only
+                reduceOnly=reduce_only,
             )
             if response.get("retCode") == 0:
                 self.logger.info(f"Placed limit order: {side} {qty_str} @ {price_str} {self.symbol}")
@@ -519,6 +526,7 @@ class BybitHelper:
 
     def subscribe_to_stream(self, topics: List[str], callback: Callable, channel_type: str = "public"):
         """Subscribe to WebSocket stream with reconnection handling."""
+
         def on_error(ws, error):
             self.logger.error(f"WebSocket error: {error}")
             self.ws_connected = False
@@ -553,13 +561,10 @@ class BybitHelper:
             "ticker": self.fetch_ticker(),
             "position": self.get_position_info(),
             "open_orders": self.get_open_orders(),
-            "ohlcv": self.fetch_ohlcv(self.config.strategy_config.timeframe)
+            "ohlcv": self.fetch_ohlcv(self.config.strategy_config.timeframe),
         }
         if context.get("ohlcv"):
-            df = pd.DataFrame(
-                context["ohlcv"],
-                columns=["timestamp", "open", "high", "low", "close", "volume"]
-            )
+            df = pd.DataFrame(context["ohlcv"], columns=["timestamp", "open", "high", "low", "close", "volume"])
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             df = self.calculate_indicators(df)
             context["indicators"] = df
@@ -575,6 +580,7 @@ class BybitHelper:
             self.logger.info("HTTP session closed")
         except Exception as e:
             self.logger.error(f"Error during cleanup: {e}", exc_info=True)
+
 
 # --- CLI Setup ---
 def setup_env():
@@ -636,6 +642,7 @@ def setup_env():
         print(f"{Fore.RED}Error writing .env file: {e}{Style.RESET_ALL}", file=sys.stderr)
         sys.exit(1)
 
+
 def load_config() -> AppConfig:
     """Load configuration from .env."""
     try:
@@ -643,6 +650,7 @@ def load_config() -> AppConfig:
     except Exception as e:
         print(f"{Fore.RED}Error loading configuration: {e}{Style.RESET_ALL}", file=sys.stderr)
         sys.exit(1)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Bybit Trading Bot")
@@ -675,6 +683,7 @@ def main():
         return
 
     helper.logger.info("BybitHelper initialized. Run strategy separately (e.g., ehlers_volumetric_strategy.py).")
+
 
 if __name__ == "__main__":
     main()

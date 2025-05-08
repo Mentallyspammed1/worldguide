@@ -6,5 +6,11 @@
     "DOT/USDT:USDT": {
         "break_even_triggered": false,
         "last_entry_price": null
-    }
+    },
+    "active_position": null,
+    "stop_loss_price": null,
+    "take_profit_price": null,
+    "break_even_achieved": false,
+    "last_order_id": null,
+    "last_sync_time": null
 }

@@ -5,14 +5,14 @@ import requests
 # --- WARNING: Hardcoded API Key - Significant Security Risk! ---
 # This key is exposed directly in the code. Avoid this in production
 # or shared environments. Consider environment variables instead.
-API_KEY = '7a99e9cdebfa2bb28f57a6f6da095b96f14651a44ab38fe92a56d9ff027c20ee'
+API_KEY = "7a99e9cdebfa2bb28f57a6f6da095b96f14651a44ab38fe92a56d9ff027c20ee"
 # --- End Warning ---
 
 URL = "https://api.scraperx.com/api/v1/country/industry"
 
 headers = {
-  'Accept': 'application/json',
-  'x-api-key': API_KEY  # Using the hardcoded key
+    "Accept": "application/json",
+    "x-api-key": API_KEY,  # Using the hardcoded key
 }
 
 
@@ -31,7 +31,7 @@ try:
 # Handle potential errors during the request (network issues, DNS errors, etc.)
 except requests.exceptions.RequestException:
     # If an error occurred, the response object might exist but contain error details
-    if 'response' in locals() and response is not None:
+    if "response" in locals() and response is not None:
         pass  # Print raw text if JSON parsing failed or wasn't attempted
 
 # Handle potential errors if the response is not valid JSON

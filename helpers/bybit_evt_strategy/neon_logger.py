@@ -26,14 +26,19 @@ from typing import Any
 try:
     from colorama import Back, Fore, Style
     from colorama import init as colorama_init
+
     # Initialize colorama (autoreset=True ensures colors reset after each print)
     colorama_init(autoreset=True)
     COLORAMA_AVAILABLE = True
 except ImportError:
     # Define dummy color objects if colorama is not installed
     class DummyColor:
-        def __getattr__(self, name: str) -> str: return ""  # Return empty string
-    Fore = DummyColor(); Back = DummyColor(); Style = DummyColor()
+        def __getattr__(self, name: str) -> str:
+            return ""  # Return empty string
+
+    Fore = DummyColor()
+    Back = DummyColor()
+    Style = DummyColor()
     COLORAMA_AVAILABLE = False
     print("Warning: 'colorama' library not found. Neon console logging disabled.", file=sys.stderr)
     print("         Install using: pip install colorama", file=sys.stderr)
@@ -51,7 +56,7 @@ def log_success(self: logging.Logger, message: str, *args: Any, **kwargs: Any) -
 
 
 # Add the method to the Logger class dynamically
-if not hasattr(logging.Logger, 'success'):
+if not hasattr(logging.Logger, "success"):
     logging.Logger.success = log_success  # type: ignore[attr-defined]
 
 
@@ -71,9 +76,10 @@ class ColoredConsoleFormatter(logging.Formatter):
     """A custom logging formatter that adds colors to console output based on log level,
     only if colorama is available and output is a TTY.
     """
-    def __init__(self, fmt: str | None = None, datefmt: str | None = None, style: str = '%', validate: bool = True):
+
+    def __init__(self, fmt: str | None = None, datefmt: str | None = None, style: str = "%", validate: bool = True):
         super().__init__(fmt=fmt, datefmt=datefmt, style=style, validate=validate)
-        self.use_colors = COLORAMA_AVAILABLE and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+        self.use_colors = COLORAMA_AVAILABLE and hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the record and applies colors to the level name."""
@@ -113,7 +119,7 @@ def setup_logger(
     log_rotation_bytes: int = 5 * 1024 * 1024,  # 5 MB default max size
     log_backup_count: int = 5,  # Keep 5 backup files
     propagate: bool = False,
-    third_party_log_level_str: str = "WARNING"  # Changed to string input
+    third_party_log_level_str: str = "WARNING",  # Changed to string input
 ) -> logging.Logger:
     """Sets up and configures a logger instance with neon console, clean file output,
     optional rotation, and control over third-party library logging.
@@ -142,17 +148,29 @@ def setup_logger(
         third_party_log_level = logging.getLevelName(third_party_log_level_str.upper())
 
         if not isinstance(console_level, int):
-            print(f"\033[93mWarning [{func_name}]: Invalid console log level string '{console_level_str}'. Using INFO.\033[0m", file=sys.stderr)
+            print(
+                f"\033[93mWarning [{func_name}]: Invalid console log level string '{console_level_str}'. Using INFO.\033[0m",
+                file=sys.stderr,
+            )
             console_level = logging.INFO
         if not isinstance(file_level, int):
-            print(f"\033[93mWarning [{func_name}]: Invalid file log level string '{file_level_str}'. Using DEBUG.\033[0m", file=sys.stderr)
+            print(
+                f"\033[93mWarning [{func_name}]: Invalid file log level string '{file_level_str}'. Using DEBUG.\033[0m",
+                file=sys.stderr,
+            )
             file_level = logging.DEBUG
         if not isinstance(third_party_log_level, int):
-             print(f"\033[93mWarning [{func_name}]: Invalid third-party log level string '{third_party_log_level_str}'. Using WARNING.\033[0m", file=sys.stderr)
-             third_party_log_level = logging.WARNING
+            print(
+                f"\033[93mWarning [{func_name}]: Invalid third-party log level string '{third_party_log_level_str}'. Using WARNING.\033[0m",
+                file=sys.stderr,
+            )
+            third_party_log_level = logging.WARNING
 
     except Exception as e:
-        print(f"\033[91mError [{func_name}]: Failed converting log level strings: {e}. Using defaults.\033[0m", file=sys.stderr)
+        print(
+            f"\033[91mError [{func_name}]: Failed converting log level strings: {e}. Using defaults.\033[0m",
+            file=sys.stderr,
+        )
         console_level, file_level, third_party_log_level = logging.INFO, logging.DEBUG, logging.WARNING
 
     # --- Get Logger and Set Base Level/Propagation ---
@@ -162,13 +180,16 @@ def setup_logger(
 
     # --- Clear Existing Handlers (if re-configuring) ---
     if logger.hasHandlers():
-        print(f"\033[94mInfo [{func_name}]: Logger '{logger_name}' already configured. Clearing handlers.\033[0m", file=sys.stderr)
+        print(
+            f"\033[94mInfo [{func_name}]: Logger '{logger_name}' already configured. Clearing handlers.\033[0m",
+            file=sys.stderr,
+        )
         for handler in logger.handlers[:]:  # Iterate a copy
             try:
                 handler.close()  # Close file handles etc.
                 logger.removeHandler(handler)
             except Exception as e:
-                 print(f"\033[93mWarning [{func_name}]: Error removing/closing handler: {e}\033[0m", file=sys.stderr)
+                print(f"\033[93mWarning [{func_name}]: Error removing/closing handler: {e}\033[0m", file=sys.stderr)
 
     # --- Console Handler ---
     if console_level is not None and console_level >= 0:
@@ -177,9 +198,11 @@ def setup_logger(
             console_h.setLevel(console_level)
             console_h.setFormatter(console_formatter)  # Use the colored formatter
             logger.addHandler(console_h)
-            print(f"\033[94m[{func_name}] Console logging active at level [{logging.getLevelName(console_level)}].\033[0m")
+            print(
+                f"\033[94m[{func_name}] Console logging active at level [{logging.getLevelName(console_level)}].\033[0m"
+            )
         except Exception as e:
-             print(f"\033[91mError [{func_name}] setting up console handler: {e}\033[0m", file=sys.stderr)
+            print(f"\033[91mError [{func_name}] setting up console handler: {e}\033[0m", file=sys.stderr)
     else:
         print(f"\033[94m[{func_name}] Console logging disabled.\033[0m")
 
@@ -189,7 +212,7 @@ def setup_logger(
             log_file_path = os.path.abspath(log_file)  # Use absolute path
             log_dir = os.path.dirname(log_file_path)
             if log_dir and not os.path.exists(log_dir):
-                 os.makedirs(log_dir, exist_ok=True)  # Ensure directory exists
+                os.makedirs(log_dir, exist_ok=True)  # Ensure directory exists
 
             if log_rotation_bytes > 0 and log_backup_count >= 0:
                 # Use Rotating File Handler
@@ -197,32 +220,42 @@ def setup_logger(
                     log_file_path,  # Use absolute path
                     maxBytes=log_rotation_bytes,
                     backupCount=log_backup_count,
-                    encoding='utf-8'
+                    encoding="utf-8",
                 )
                 log_type = "Rotating file"
                 log_details = f"(Max: {log_rotation_bytes / 1024 / 1024:.1f} MB, Backups: {log_backup_count})"
             else:
                 # Use basic File Handler (no rotation)
-                file_h = logging.FileHandler(log_file_path, mode='a', encoding='utf-8')
+                file_h = logging.FileHandler(log_file_path, mode="a", encoding="utf-8")
                 log_type = "Basic file"
                 log_details = "(Rotation disabled)"
 
             file_h.setLevel(file_level)
             file_h.setFormatter(file_formatter)  # Use the plain (non-colored) formatter
             logger.addHandler(file_h)
-            print(f"\033[94m[{func_name}] {log_type} logging active at level [{logging.getLevelName(file_level)}] to '{log_file_path}' {log_details}.\033[0m")
+            print(
+                f"\033[94m[{func_name}] {log_type} logging active at level [{logging.getLevelName(file_level)}] to '{log_file_path}' {log_details}.\033[0m"
+            )
 
         except OSError as e:
-            print(f"\033[91mFATAL [{func_name}] Error configuring log file '{log_file}': {e}. File logging disabled.\033[0m", file=sys.stderr)
+            print(
+                f"\033[91mFATAL [{func_name}] Error configuring log file '{log_file}': {e}. File logging disabled.\033[0m",
+                file=sys.stderr,
+            )
         except Exception as e:
-             print(f"\033[91mError [{func_name}] Unexpected error setting up file logging: {e}. File logging disabled.\033[0m", file=sys.stderr)
+            print(
+                f"\033[91mError [{func_name}] Unexpected error setting up file logging: {e}. File logging disabled.\033[0m",
+                file=sys.stderr,
+            )
     else:
         print(f"\033[94m[{func_name}] File logging disabled.\033[0m")
 
     # --- Configure Third-Party Log Levels ---
     if third_party_log_level is not None and third_party_log_level >= 0:
         noisy_libraries = ["ccxt", "urllib3", "requests", "asyncio", "websockets"]  # Add others if needed
-        print(f"\033[94m[{func_name}] Setting third-party library log level to [{logging.getLevelName(third_party_log_level)}].\033[0m")
+        print(
+            f"\033[94m[{func_name}] Setting third-party library log level to [{logging.getLevelName(third_party_log_level)}].\033[0m"
+        )
         for lib_name in noisy_libraries:
             try:
                 lib_logger = logging.getLogger(lib_name)
@@ -230,10 +263,13 @@ def setup_logger(
                     lib_logger.setLevel(third_party_log_level)
                     lib_logger.propagate = False  # Stop noisy logs from reaching our handlers
             except Exception as e_lib:
-                 # Non-critical error
-                 print(f"\033[93mWarning [{func_name}]: Could not set level for lib '{lib_name}': {e_lib}\033[0m", file=sys.stderr)
+                # Non-critical error
+                print(
+                    f"\033[93mWarning [{func_name}]: Could not set level for lib '{lib_name}': {e_lib}\033[0m",
+                    file=sys.stderr,
+                )
     else:
-         print(f"\033[94m[{func_name}] Third-party library log level control disabled.\033[0m")
+        print(f"\033[94m[{func_name}] Third-party library log level control disabled.\033[0m")
 
     # --- Log Test Messages ---
     # logger.debug("--- Logger Setup Complete (DEBUG Test) ---")
@@ -263,7 +299,7 @@ if __name__ == "__main__":
         log_file="example_app.log",
         console_level_str="INFO",  # Use string levels
         file_level_str="DEBUG",
-        third_party_log_level_str="WARNING"
+        third_party_log_level_str="WARNING",
     )
 
     # Log messages at different levels
@@ -280,7 +316,8 @@ if __name__ == "__main__":
     # Test third-party level suppression (if ccxt installed)
     try:
         import ccxt
-        ccxt_logger = logging.getLogger('ccxt')
+
+        ccxt_logger = logging.getLogger("ccxt")
         print(f"CCXT logger level: {logging.getLevelName(ccxt_logger.getEffectiveLevel())}")
         ccxt_logger.info("This CCXT INFO message should be suppressed by default.")
         ccxt_logger.warning("This CCXT WARNING message should appear.")

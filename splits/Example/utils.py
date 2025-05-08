@@ -16,25 +16,20 @@ robust implementations in a production environment.
 
 import logging
 import sys
-import time
-import traceback
-import random
-from decimal import Decimal, InvalidOperation, getcontext, ROUND_HALF_UP
-from typing import (
-    Optional, Dict, List, Tuple, Any, Literal, TypeVar, Callable, Union,
-    TYPE_CHECKING
-)
+from decimal import Decimal, InvalidOperation, getcontext
+from typing import Optional, Dict, Tuple, Any, Literal, TypeVar, Callable, Union, TYPE_CHECKING
 from functools import wraps
 
 # Conditional import for type checking to avoid circular dependencies
 if TYPE_CHECKING:
-    from config import Config # Assuming 'config.py' defines a Config class
+    from config import Config  # Assuming 'config.py' defines a Config class
 
 # --- Dependencies Handling ---
 try:
     import ccxt
+
     # Specific check for bybit class to ensure it's available
-    if not hasattr(ccxt, 'bybit'):
+    if not hasattr(ccxt, "bybit"):
         print("Error: ccxt library is installed, but 'bybit' exchange class is missing.")
         print("Ensure you have a compatible version of ccxt.")
         sys.exit(1)
@@ -45,23 +40,26 @@ except ImportError:
 
 try:
     from colorama import Fore, Style, Back, init as colorama_init
-    colorama_init(autoreset=True) # Initialize colorama for automatic style reset
+
+    colorama_init(autoreset=True)  # Initialize colorama for automatic style reset
 except ImportError:
     print("Warning: colorama library not found. Log messages will not be colored.")
     print("Install it using: pip install colorama")
+
     # Create a dummy class that returns empty strings for color attributes
     class DummyColor:
         def __getattr__(self, name: str) -> str:
             """Return empty string for any color attribute."""
             return ""
+
     Fore = Style = Back = DummyColor()
 
 # --- Constants ---
 DEFAULT_DECIMAL_PRECISION = 28
 # Common Bybit V5 categories
-BybitV5Category = Literal['linear', 'inverse', 'spot', 'option']
+BybitV5Category = Literal["linear", "inverse", "spot", "option"]
 # Common CCXT market types
-MarketType = Literal['swap', 'future', 'spot', 'option']
+MarketType = Literal["swap", "future", "spot", "option"]
 
 # --- Configuration ---
 # Set Decimal context precision for calculations
@@ -80,7 +78,8 @@ logger = logging.getLogger(__name__)
 # --- Critical Placeholders ---
 
 # Define a generic TypeVar for decorator return types
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 # Placeholder: Retry Decorator
 # IMPORTANT: Replace this with a robust implementation using libraries like 'tenacity'
@@ -89,10 +88,8 @@ def retry_api_call(
     max_retries: int = 3,
     initial_delay: float = 1.0,
     backoff_factor: float = 2.0,
-    exceptions_to_retry: Tuple[type[Exception], ...] = (
-        ccxt.NetworkError, ccxt.ExchangeError, ccxt.RateLimitExceeded
-    ),
-    **decorator_kwargs: Any # Allow passing extra args if needed by real decorator
+    exceptions_to_retry: Tuple[type[Exception], ...] = (ccxt.NetworkError, ccxt.ExchangeError, ccxt.RateLimitExceeded),
+    **decorator_kwargs: Any,  # Allow passing extra args if needed by real decorator
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """
     **PLACEHOLDER** Decorator to retry a function call on specific exceptions.
@@ -117,6 +114,7 @@ def retry_api_call(
         f"{Fore.YELLOW}Using PLACEHOLDER retry_api_call decorator. "
         f"NO RETRY LOGIC IS ACTIVE. Implement a real retry mechanism!{Style.RESET_ALL}"
     )
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
@@ -124,18 +122,20 @@ def retry_api_call(
             # logger.debug(f"Placeholder retry decorator executing for {func.__name__}")
             try:
                 return func(*args, **kwargs)
-            except Exception as e:
+            except Exception:
                 # logger.error(f"Placeholder retry caught unhandled exception in {func.__name__}: {e}", exc_info=False) # Set exc_info=True for full traceback
                 # In a real implementation, check if e is in exceptions_to_retry
                 # and implement the retry loop here.
-                raise # Re-raise immediately in this placeholder
+                raise  # Re-raise immediately in this placeholder
+
         return wrapper
+
     return decorator
 
 
 # Placeholder: SMS Alert Function
 # IMPORTANT: Replace this with a real SMS sending implementation (e.g., Twilio, Termux API).
-def send_sms_alert(message: str, config: Optional['Config'] = None) -> bool:
+def send_sms_alert(message: str, config: Optional["Config"] = None) -> bool:
     """
     **PLACEHOLDER/SIMULATION** Sends an SMS alert.
 
@@ -159,24 +159,27 @@ def send_sms_alert(message: str, config: Optional['Config'] = None) -> bool:
     if config is None:
         try:
             from config import Config as ConfigClass
-            cfg: 'Config' = ConfigClass()
+
+            cfg: "Config" = ConfigClass()
         except ImportError:
             logger.error("send_sms_alert: Default Config class could not be imported.")
             return False
     else:
         cfg = config
 
-    is_enabled: bool = getattr(cfg, 'ENABLE_SMS_ALERTS', False)
+    is_enabled: bool = getattr(cfg, "ENABLE_SMS_ALERTS", False)
 
     if not is_enabled:
         # logger.debug(f"SMS alert suppressed (disabled): {message[:50]}...") # Log less verbosely if disabled
-        return True # Consider disabled as a "success" in terms of execution flow
+        return True  # Consider disabled as a "success" in terms of execution flow
 
-    recipient: Optional[str] = getattr(cfg, 'SMS_RECIPIENT_NUMBER', None)
-    timeout: int = getattr(cfg, 'SMS_TIMEOUT_SECONDS', 30)
+    recipient: Optional[str] = getattr(cfg, "SMS_RECIPIENT_NUMBER", None)
+    timeout: int = getattr(cfg, "SMS_TIMEOUT_SECONDS", 30)
 
     if not recipient:
-        logger.warning(f"{Fore.YELLOW}SMS alerts enabled, but no recipient number found in config (SMS_RECIPIENT_NUMBER).{Style.RESET_ALL}")
+        logger.warning(
+            f"{Fore.YELLOW}SMS alerts enabled, but no recipient number found in config (SMS_RECIPIENT_NUMBER).{Style.RESET_ALL}"
+        )
         return False
 
     # --- Simulation Logic ---
@@ -184,7 +187,7 @@ def send_sms_alert(message: str, config: Optional['Config'] = None) -> bool:
     logger.info(f"Recipient: {recipient}")
     logger.info(f"Timeout:   {timeout}s")
     logger.info(f"Message:   {message}")
-    print(f"{Back.GREEN}{Fore.BLACK}SIMULATED SMS: {message}{Style.RESET_ALL}") # Also print to console for visibility
+    print(f"{Back.GREEN}{Fore.BLACK}SIMULATED SMS: {message}{Style.RESET_ALL}")  # Also print to console for visibility
 
     # Placeholder for actual API call (e.g., Termux, Twilio)
     # try:
@@ -198,15 +201,13 @@ def send_sms_alert(message: str, config: Optional['Config'] = None) -> bool:
     #     return False
     # --- End Simulation ---
 
-    return True # Simulation considered successful
+    return True  # Simulation considered successful
 
 
 # --- Core Utility Functions ---
 
-def safe_decimal_conversion(
-    value: Any,
-    default: Optional[Decimal] = None
-) -> Optional[Decimal]:
+
+def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Optional[Decimal]:
     """
     Safely converts various types (str, int, float) to a Decimal object.
 
@@ -235,16 +236,12 @@ def safe_decimal_conversion(
     try:
         # Convert to string first to handle floats more predictably
         return Decimal(str(value))
-    except (InvalidOperation, ValueError, TypeError) as e:
+    except (InvalidOperation, ValueError, TypeError):
         # logger.debug(f"safe_decimal_conversion failed for value '{value}' (type: {type(value)}): {e}")
         return default
 
-def format_price(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    price: Any,
-    fallback_precision: int = 4
-) -> str:
+
+def format_price(exchange: ccxt.Exchange, symbol: str, price: Any, fallback_precision: int = 4) -> str:
     """
     Formats a price value according to the exchange's precision rules for a symbol.
 
@@ -267,16 +264,16 @@ def format_price(
     try:
         # Attempt to use CCXT's built-in precision formatting
         return exchange.price_to_precision(symbol, price)
-    except (ccxt.ExchangeError, ccxt.BadSymbol, AttributeError, TypeError, ValueError) as e:
+    except (ccxt.ExchangeError, ccxt.BadSymbol, AttributeError, TypeError, ValueError):
         # Log the reason for fallback if needed
         # logger.warning(f"Could not format price using exchange precision for {symbol}: {e}. Using fallback.")
         # Fallback 1: Try converting to Decimal and formatting
         try:
             price_decimal = safe_decimal_conversion(price)
             if price_decimal is not None:
-                 # Create format string dynamically, e.g., "{:.4f}"
-                 format_spec = f":.{fallback_precision}f"
-                 return f"{price_decimal:{format_spec}}"
+                # Create format string dynamically, e.g., "{:.4f}"
+                format_spec = f":.{fallback_precision}f"
+                return f"{price_decimal:{format_spec}}"
             else:
                 raise ValueError("Decimal conversion failed in fallback.")
         except (InvalidOperation, ValueError, TypeError):
@@ -284,12 +281,8 @@ def format_price(
             logger.warning(f"Fallback decimal formatting failed for price '{price}' of {symbol}. Returning raw string.")
             return str(price)
 
-def format_amount(
-    exchange: ccxt.Exchange,
-    symbol: str,
-    amount: Any,
-    fallback_precision: int = 8
-) -> str:
+
+def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Any, fallback_precision: int = 8) -> str:
     """
     Formats an amount (quantity) value according to the exchange's precision rules.
 
@@ -310,20 +303,23 @@ def format_amount(
     try:
         # Attempt to use CCXT's built-in precision formatting
         return exchange.amount_to_precision(symbol, amount)
-    except (ccxt.ExchangeError, ccxt.BadSymbol, AttributeError, TypeError, ValueError) as e:
+    except (ccxt.ExchangeError, ccxt.BadSymbol, AttributeError, TypeError, ValueError):
         # logger.warning(f"Could not format amount using exchange precision for {symbol}: {e}. Using fallback.")
         # Fallback 1: Try converting to Decimal and formatting
         try:
             amount_decimal = safe_decimal_conversion(amount)
             if amount_decimal is not None:
-                 format_spec = f":.{fallback_precision}f"
-                 return f"{amount_decimal:{format_spec}}"
+                format_spec = f":.{fallback_precision}f"
+                return f"{amount_decimal:{format_spec}}"
             else:
                 raise ValueError("Decimal conversion failed in fallback.")
         except (InvalidOperation, ValueError, TypeError):
             # Fallback 2: Convert to string
-            logger.warning(f"Fallback decimal formatting failed for amount '{amount}' of {symbol}. Returning raw string.")
+            logger.warning(
+                f"Fallback decimal formatting failed for amount '{amount}' of {symbol}. Returning raw string."
+            )
             return str(amount)
+
 
 def format_order_id(order_id: Optional[Union[str, int]]) -> str:
     """
@@ -342,7 +338,9 @@ def format_order_id(order_id: Optional[Union[str, int]]) -> str:
     # Return last 6 characters if long enough, otherwise the whole ID
     return id_str[-6:] if len(id_str) > 6 else id_str
 
+
 # --- Internal Helper Functions ---
+
 
 def _get_v5_category(market: Dict[str, Any]) -> Optional[BybitV5Category]:
     """
@@ -362,25 +360,31 @@ def _get_v5_category(market: Dict[str, Any]) -> Optional[BybitV5Category]:
         return None
 
     # 1. Check explicit flags (most reliable if present)
-    if market.get('linear'): return 'linear'
-    if market.get('inverse'): return 'inverse'
-    if market.get('spot'): return 'spot'
-    if market.get('option'): return 'option'
+    if market.get("linear"):
+        return "linear"
+    if market.get("inverse"):
+        return "inverse"
+    if market.get("spot"):
+        return "spot"
+    if market.get("option"):
+        return "option"
 
     # 2. Fallback based on market 'type' (less reliable, makes assumptions)
-    market_type: Optional[MarketType] = market.get('type')
-    if market_type == 'spot': return 'spot'
-    if market_type == 'option': return 'option'
-    if market_type == 'swap' or market_type == 'future':
+    market_type: Optional[MarketType] = market.get("type")
+    if market_type == "spot":
+        return "spot"
+    if market_type == "option":
+        return "option"
+    if market_type == "swap" or market_type == "future":
         # Assumption: If not explicitly inverse, assume linear for swaps/futures.
         # This might be incorrect for some exchanges or symbols.
         # Bybit usually distinguishes via 'linear'/'inverse' flags or symbol naming conventions.
         # A safer approach might involve checking settle currency (e.g., USDT vs BTC).
-        settle_currency = market.get('settle')
-        if settle_currency == market.get('base'): # e.g., settle=BTC for BTC/USD inverse
-            return 'inverse'
-        else: # Assume linear if settle is quote (USDT, USDC) or unknown
-             return 'linear'
+        settle_currency = market.get("settle")
+        if settle_currency == market.get("base"):  # e.g., settle=BTC for BTC/USD inverse
+            return "inverse"
+        else:  # Assume linear if settle is quote (USDT, USDC) or unknown
+            return "linear"
 
     # 3. If type is unknown or doesn't fit, log a warning
     logger.warning(
@@ -390,7 +394,9 @@ def _get_v5_category(market: Dict[str, Any]) -> Optional[BybitV5Category]:
     )
     return None
 
+
 # --- Market Validation ---
+
 
 # No API call needed here *if* markets are already loaded, so no retry decorator needed directly.
 # However, the `load_markets` call *inside* this function might benefit from retries
@@ -398,12 +404,12 @@ def _get_v5_category(market: Dict[str, Any]) -> Optional[BybitV5Category]:
 def validate_market(
     exchange: ccxt.bybit,
     symbol: str,
-    config: Optional['Config'] = None,
+    config: Optional["Config"] = None,
     expected_type: Optional[MarketType] = None,
-    expected_logic: Optional[BybitV5Category] = None, # For Bybit V5 category ('linear', 'inverse')
+    expected_logic: Optional[BybitV5Category] = None,  # For Bybit V5 category ('linear', 'inverse')
     check_active: bool = True,
     require_contract: bool = True,
-    reload_markets: bool = False
+    reload_markets: bool = False,
 ) -> Optional[Dict[str, Any]]:
     """
     Validates if a symbol exists, is active, and optionally matches expected criteria.
@@ -436,27 +442,28 @@ def validate_market(
         The market dictionary if validation passes, otherwise None.
         Logs errors or warnings detailing the validation outcome.
     """
-    func_name = "validate_market" # For logging context
+    func_name = "validate_market"  # For logging context
 
     # Import default config if specific config is not provided
     if config is None:
         try:
             from config import Config as ConfigClass
-            cfg: 'Config' = ConfigClass()
+
+            cfg: "Config" = ConfigClass()
         except ImportError:
             logger.warning(f"[{func_name}] Default Config class not found, cannot get default expectations.")
-            cfg = None # type: ignore # Assign None explicitly
+            cfg = None  # type: ignore # Assign None explicitly
     else:
         cfg = config
 
     # Determine effective expectations (use args if provided, else config defaults)
     eff_expected_type = expected_type
     if eff_expected_type is None and cfg:
-        eff_expected_type = getattr(cfg, 'EXPECTED_MARKET_TYPE', None)
+        eff_expected_type = getattr(cfg, "EXPECTED_MARKET_TYPE", None)
 
     eff_expected_logic = expected_logic
     if eff_expected_logic is None and cfg:
-        eff_expected_logic = getattr(cfg, 'EXPECTED_MARKET_LOGIC', None)
+        eff_expected_logic = getattr(cfg, "EXPECTED_MARKET_LOGIC", None)
 
     logger.debug(
         f"[{func_name}] Validating '{symbol}'. Checks: Type='{eff_expected_type or 'Any'}', "
@@ -467,13 +474,15 @@ def validate_market(
     try:
         # Load or reload markets if necessary
         # Check both attributes as their presence might vary slightly across ccxt versions/states
-        needs_load = reload_markets or not getattr(exchange, 'markets', None) or not getattr(exchange, 'markets_by_id', None)
+        needs_load = (
+            reload_markets or not getattr(exchange, "markets", None) or not getattr(exchange, "markets_by_id", None)
+        )
         if needs_load:
             logger.info(f"[{func_name}] Loading/Reloading markets for validation...")
             # This call might raise NetworkError, ExchangeError etc.
             # Consider adding retries around load_markets if needed elsewhere too.
             exchange.load_markets(reload=reload_markets)
-            if not getattr(exchange, 'markets', None): # Verify load was successful
+            if not getattr(exchange, "markets", None):  # Verify load was successful
                 logger.error(f"{Fore.RED}[{func_name}] Failed to load markets.{Style.RESET_ALL}")
                 return None
             logger.info(f"[{func_name}] Markets loaded successfully.")
@@ -486,7 +495,7 @@ def validate_market(
         error_messages = []
 
         # 1. Check Active Status
-        is_active = market.get('active', False)
+        is_active = market.get("active", False)
         if check_active and not is_active:
             # Log as warning, doesn't necessarily fail validation unless required by caller logic
             logger.warning(
@@ -497,15 +506,14 @@ def validate_market(
             # validation_passed = False
 
         # 2. Check Market Type
-        actual_type: Optional[MarketType] = market.get('type')
+        actual_type: Optional[MarketType] = market.get("type")
         if eff_expected_type and actual_type != eff_expected_type:
-            msg = (f"Type mismatch for '{symbol}'. Expected '{eff_expected_type}', "
-                   f"Got '{actual_type}'.")
+            msg = f"Type mismatch for '{symbol}'. Expected '{eff_expected_type}', Got '{actual_type}'."
             error_messages.append(msg)
             validation_passed = False
 
         # 3. Check if Contract Market (if required)
-        is_contract = market.get('contract', False)
+        is_contract = market.get("contract", False)
         if require_contract and not is_contract:
             msg = f"Market '{symbol}' is not a contract market, but contract was required."
             error_messages.append(msg)
@@ -514,22 +522,23 @@ def validate_market(
         # 4. Check Contract Logic (Linear/Inverse) - only if it's a contract and logic is specified
         actual_logic_str: Optional[BybitV5Category] = None
         if is_contract and eff_expected_logic:
-            actual_logic_str = _get_v5_category(market) # Use internal helper
+            actual_logic_str = _get_v5_category(market)  # Use internal helper
             if actual_logic_str != eff_expected_logic:
-                msg = (f"Contract logic mismatch for '{symbol}'. Expected '{eff_expected_logic}', "
-                       f"Got '{actual_logic_str or 'Undetermined'}'.")
+                msg = (
+                    f"Contract logic mismatch for '{symbol}'. Expected '{eff_expected_logic}', "
+                    f"Got '{actual_logic_str or 'Undetermined'}'."
+                )
                 error_messages.append(msg)
                 validation_passed = False
-        elif is_contract: # Get logic even if not checking, for logging
-             actual_logic_str = _get_v5_category(market)
-
+        elif is_contract:  # Get logic even if not checking, for logging
+            actual_logic_str = _get_v5_category(market)
 
         # --- Final Verdict ---
         if validation_passed:
             logger.info(
                 f"{Fore.GREEN}[{func_name}] Market OK: '{symbol}' "
                 f"(Type: {actual_type or 'N/A'}, "
-                f"Logic: {actual_logic_str or 'N/A'}, " # Display N/A if not contract or undetermined
+                f"Logic: {actual_logic_str or 'N/A'}, "  # Display N/A if not contract or undetermined
                 f"Active: {is_active}).{Style.RESET_ALL}"
             )
             return market
@@ -539,18 +548,27 @@ def validate_market(
             return None
 
     except ccxt.BadSymbol as e:
-        logger.error(f"{Fore.RED}[{func_name}] Validation Failed: Symbol '{symbol}' not found on exchange. CCXT Error: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Validation Failed: Symbol '{symbol}' not found on exchange. CCXT Error: {e}{Style.RESET_ALL}"
+        )
         return None
     except ccxt.NetworkError as e:
-        logger.error(f"{Fore.RED}[{func_name}] Network error during market validation/loading for '{symbol}': {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Network error during market validation/loading for '{symbol}': {e}{Style.RESET_ALL}"
+        )
         # Depending on application logic, you might want to retry here or raise
         return None
     except ccxt.ExchangeError as e:
-         logger.error(f"{Fore.RED}[{func_name}] Exchange error during market validation/loading for '{symbol}': {e}{Style.RESET_ALL}")
-         return None
+        logger.error(
+            f"{Fore.RED}[{func_name}] Exchange error during market validation/loading for '{symbol}': {e}{Style.RESET_ALL}"
+        )
+        return None
     except Exception as e:
-        logger.error(f"{Fore.RED}[{func_name}] Unexpected error validating market '{symbol}': {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}[{func_name}] Unexpected error validating market '{symbol}': {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         return None
 
-# --- END OF FILE utils.py ---
 
+# --- END OF FILE utils.py ---

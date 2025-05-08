@@ -243,3 +243,156 @@ ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist",
 2025-04-24 03:30:09 - INFO - [livexy_bot_TRUMP_USDT-USDT:3853] - Keyboard interrupt received. Shutting down gracefully...
 2025-04-24 03:30:09 - INFO - [livexy_bot_TRUMP_USDT-USDT:3865] - --- LiveXY Trading Bot for TRUMP/USDT:USDT Stopping ---
 2025-04-24 03:30:09 - INFO - [livexy_bot_TRUMP_USDT-USDT:3881] - Bot stopped.
+2025-05-07 21:28:13,407 - INFO - [livexy_bot_TRUMP_USDT-USDT:3547] - ---=== Starting Trading Loop for TRUMP/USDT:USDT (5) ===---
+2025-05-07 21:28:13,409 - INFO - [livexy_bot_TRUMP_USDT-USDT:3548] - Using Configuration: Risk=1.00%, Lev=20x, TSL=ON, BE=OFF, Trading=ENABLED
+2025-05-07 21:28:13,409 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:3554] - >>> New Loop Cycle Starting at 2025-05-07 21:28:13
+2025-05-07 21:28:13,410 - INFO - [livexy_bot_TRUMP_USDT-USDT:2919] - ---== Analyzing TRUMP/USDT:USDT (5) Cycle Start ==---
+2025-05-07 21:28:13,410 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1735] - Market Info for TRUMP/USDT:USDT: ID=TRUMPUSDT, Type=swap, Contract=Linear, Precision(Price/Amount/Tick): 0.001/0.1/N/A, Limits(Amount Min/Max): 0.1/40000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-07 21:28:13,410 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:442] - Fetching klines for TRUMP/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-07 21:28:13,973 - INFO - [livexy_bot_TRUMP_USDT-USDT:506] - Successfully fetched and processed 500 klines for TRUMP/USDT:USDT 5m
+2025-05-07 21:28:13,975 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:352] - Fetching ticker for TRUMP/USDT:USDT...
+2025-05-07 21:28:14,453 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:354] - Ticker data for TRUMP/USDT:USDT: {'symbol': 'TRUMP/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 11.323, 'low': 10.658, 'bid': 11.202, 'bidVolume': 1867.3, 'ask': 11.203, 'askVolume': 1288.0, 'vwap': 10.914394209602037, 'open': 11.038, 'close': 11.202, 'last': 11.202, 'previousClose': None, 'change': 0.164, 'percentage': 1.4857, 'average': 11.12, 'baseVolume': 14656705.9, 'quoteVolume': 159969066.0068, 'markPrice': 11.202, 'indexPrice': 11.206, 'info': {'symbol': 'TRUMPUSDT', 'lastPrice': '11.202', 'indexPrice': '11.206', 'markPrice': '11.202', 'prevPrice24h': '11.038', 'price24hPcnt': '0.014857', 'highPrice24h': '11.323', 'lowPrice24h': '10.658', 'prevPrice1h': '11.236', 'openInterest': '8823531.9', 'openInterestValue': '98841204.34', 'turnover24h': '159969066.0068', 'volume24h': '14656705.9000', 'fundingRate': '-0.00001527', 'nextFundingTime': '1746676800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1288.0', 'bid1Price': '11.202', 'ask1Price': '11.203', 'bid1Size': '1867.3', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': 'Finished'}}
+2025-05-07 21:28:14,454 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:367] - Using 'last' price for TRUMP/USDT:USDT: 11.202
+2025-05-07 21:28:14,454 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:528] - Fetching order book for TRUMP/USDT:USDT, limit=30 (Attempt 1/4)
+2025-05-07 21:28:14,933 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:544] - Successfully fetched orderbook for TRUMP/USDT:USDT with 30 bids, 30 asks.
+2025-05-07 21:28:15,546 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:822] - Finished indicator calculations for TRUMP/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_5', 'EMA_12', 'MOM_7', 'CCI_10_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_12', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_15']
+2025-05-07 21:28:15,574 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:884] - Latest indicator float values updated for TRUMP/USDT:USDT: {'ATR': '0.05526', 'EMA_Short': '11.15157', 'EMA_Long': '11.13221', 'Momentum': '0.14000', 'CCI': '147.21536', 'Williams_R': '-21.05263', 'MFI': '37.79692', 'VWAP': '11.14039', 'PSAR_long': '11.04006', 'SMA10': '11.11100', 'StochRSI_K': '56.55924', 'StochRSI_D': '39.34909', 'RSI': '63.40806', 'BB_Lower': '10.94917', 'BB_Middle': '11.10547', 'BB_Upper': '11.26176', 'Volume_MA': '66957.63333', 'Close': '11.20200', 'Volume': '78102.10000', 'High': '11.23000', 'Low': '11.17000'}
+2025-05-07 21:28:15,579 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:941] - Calculated Fibonacci levels for TRUMP/USDT:USDT: {'Fib_0.0%': '11.323', 'Fib_23.6%': '11.217', 'Fib_38.2%': '11.152', 'Fib_50.0%': '11.099', 'Fib_61.8%': '11.046', 'Fib_78.6%': '10.971', 'Fib_100.0%': '10.876'}
+2025-05-07 21:28:15,580 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1467] - Orderbook check (TRUMP/USDT:USDT): Top 10 Levels: BidVol=9839.2000, AskVol=11863.6000, OBI=-0.0933, Score=-0.0933
+2025-05-07 21:28:15,584 - INFO - [livexy_bot_TRUMP_USDT-USDT:1199] - Signal Calculation Summary (TRUMP/USDT:USDT @ 11.202):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: 1.0313
+  Signal Threshold: +/- 1.000
+  ==> Final Signal: [92mBUY[0m
+2025-05-07 21:28:15,585 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1563] - Calculated TP/SL for TRUMP/USDT:USDT BUY: Entry=11.202, TP=11.258, SL=11.119, ATR=0.0553
+2025-05-07 21:28:15,585 - INFO - [livexy_bot_TRUMP_USDT-USDT:2991] - ATR: 0.0553
+2025-05-07 21:28:15,586 - INFO - [livexy_bot_TRUMP_USDT-USDT:2992] - Potential Initial SL (for new trade sizing): 11.119
+2025-05-07 21:28:15,586 - INFO - [livexy_bot_TRUMP_USDT-USDT:2993] - Potential Initial TP (for new trade): 11.258
+2025-05-07 21:28:15,586 - INFO - [livexy_bot_TRUMP_USDT-USDT:2997] - Trailing Stop: Enabled | Break Even: Disabled
+2025-05-07 21:28:15,586 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2051] - Fetching positions for symbol: TRUMP/USDT:USDT
+2025-05-07 21:28:15,587 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2074] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'TRUMP/USDT:USDT'}
+2025-05-07 21:28:16,081 - ERROR - [livexy_bot_TRUMP_USDT-USDT:2092] - Exchange error fetching single position for TRUMP/USDT:USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1746671295236}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot1.1.2.py", line 2076, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params)  # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1746671295236}
+2025-05-07 21:28:16,113 - INFO - [livexy_bot_TRUMP_USDT-USDT:3014] - *** BUY Signal & No Open Position: Initiating Trade Sequence for TRUMP/USDT:USDT ***
+2025-05-07 21:28:16,114 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1584] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-05-07 21:28:16,593 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1589] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-05-07 21:28:16,594 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1640] - Found balance via standard ccxt structure ['USDT']['free']: 7.40236808
+2025-05-07 21:28:16,594 - INFO - [livexy_bot_TRUMP_USDT-USDT:1692] - Available USDT balance: 7.4024
+2025-05-07 21:28:16,594 - INFO - [livexy_bot_TRUMP_USDT-USDT:2291] - Attempting to set leverage for TRUMP/USDT:USDT to 20x...
+2025-05-07 21:28:16,595 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2051] - Fetching positions for symbol: TRUMP/USDT:USDT
+2025-05-07 21:28:16,595 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2074] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'TRUMP/USDT:USDT'}
+2025-05-07 21:28:17,064 - ERROR - [livexy_bot_TRUMP_USDT-USDT:2092] - Exchange error fetching single position for TRUMP/USDT:USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1746671296220}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot1.1.2.py", line 2076, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params)  # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1746671296220}
+2025-05-07 21:28:17,070 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2315] - No existing position for TRUMP/USDT:USDT, cannot detect margin mode automatically. Assuming Isolated/Cross based on account default.
+2025-05-07 21:28:17,070 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2330] - Using Bybit V5 specific params for set_leverage: {'buyLeverage': '20', 'sellLeverage': '20', 'category': 'linear'}
+2025-05-07 21:28:17,543 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2337] - Set leverage raw response for TRUMP/USDT:USDT: {'retCode': '0', 'retMsg': 'OK', 'result': {}, 'retExtInfo': {}, 'time': '1746671296700'}
+2025-05-07 21:28:17,544 - WARNING - [livexy_bot_TRUMP_USDT-USDT:2356] - Set leverage call for TRUMP/USDT:USDT returned non-zero retCode 0. Treating as failure despite no exception.
+2025-05-07 21:28:17,545 - ERROR - [livexy_bot_TRUMP_USDT-USDT:2375] - [91mLeverage setting failed for TRUMP/USDT:USDT based on response analysis.[0m
+2025-05-07 21:28:17,545 - ERROR - [livexy_bot_TRUMP_USDT-USDT:3037] - [91mTrade Aborted (TRUMP/USDT:USDT BUY): Failed to set/confirm leverage to 20x. Cannot proceed safely.[0m
+2025-05-07 21:28:17,546 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:3594] - <<< Loop cycle finished in 4.14s. Waiting 10.86s for next cycle...
+2025-05-07 21:28:28,410 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:3554] - >>> New Loop Cycle Starting at 2025-05-07 21:28:28
+2025-05-07 21:28:28,411 - INFO - [livexy_bot_TRUMP_USDT-USDT:2919] - ---== Analyzing TRUMP/USDT:USDT (5) Cycle Start ==---
+2025-05-07 21:28:28,412 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1735] - Market Info for TRUMP/USDT:USDT: ID=TRUMPUSDT, Type=swap, Contract=Linear, Precision(Price/Amount/Tick): 0.001/0.1/N/A, Limits(Amount Min/Max): 0.1/40000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-07 21:28:28,413 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:442] - Fetching klines for TRUMP/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-07 21:28:29,002 - INFO - [livexy_bot_TRUMP_USDT-USDT:506] - Successfully fetched and processed 500 klines for TRUMP/USDT:USDT 5m
+2025-05-07 21:28:29,003 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:352] - Fetching ticker for TRUMP/USDT:USDT...
+2025-05-07 21:28:29,485 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:354] - Ticker data for TRUMP/USDT:USDT: {'symbol': 'TRUMP/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 11.323, 'low': 10.658, 'bid': 11.192, 'bidVolume': 287.0, 'ask': 11.193, 'askVolume': 2064.0, 'vwap': 10.914416423019553, 'open': 11.031, 'close': 11.192, 'last': 11.192, 'previousClose': None, 'change': 0.161, 'percentage': 1.4595, 'average': 11.111, 'baseVolume': 14653877.7, 'quoteVolume': 159938523.4298, 'markPrice': 11.193, 'indexPrice': 11.195, 'info': {'symbol': 'TRUMPUSDT', 'lastPrice': '11.192', 'indexPrice': '11.195', 'markPrice': '11.193', 'prevPrice24h': '11.031', 'price24hPcnt': '0.014595', 'highPrice24h': '11.323', 'lowPrice24h': '10.658', 'prevPrice1h': '11.222', 'openInterest': '8823853', 'openInterestValue': '98765386.63', 'turnover24h': '159938523.4298', 'volume24h': '14653877.7000', 'fundingRate': '-0.00001527', 'nextFundingTime': '1746676800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '2064.0', 'bid1Price': '11.192', 'ask1Price': '11.193', 'bid1Size': '287.0', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': 'Finished'}}
+2025-05-07 21:28:29,486 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:367] - Using 'last' price for TRUMP/USDT:USDT: 11.192
+2025-05-07 21:28:29,487 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:528] - Fetching order book for TRUMP/USDT:USDT, limit=30 (Attempt 1/4)
+2025-05-07 21:28:29,977 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:544] - Successfully fetched orderbook for TRUMP/USDT:USDT with 30 bids, 30 asks.
+2025-05-07 21:28:31,042 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:822] - Finished indicator calculations for TRUMP/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_5', 'EMA_12', 'MOM_7', 'CCI_10_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_12', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_15']
+2025-05-07 21:28:31,048 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:884] - Latest indicator float values updated for TRUMP/USDT:USDT: {'ATR': '0.05526', 'EMA_Short': '11.14857', 'EMA_Long': '11.13082', 'Momentum': '0.13100', 'CCI': '143.83637', 'Williams_R': '-25.35885', 'MFI': '38.04559', 'VWAP': '11.14039', 'PSAR_long': '11.04006', 'SMA10': '11.11010', 'StochRSI_K': '55.47323', 'StochRSI_D': '38.98709', 'RSI': '62.47020', 'BB_Lower': '10.94958', 'BB_Middle': '11.10517', 'BB_Upper': '11.26075', 'Volume_MA': '67212.14000', 'Close': '11.19300', 'Volume': '81919.70000', 'High': '11.23000', 'Low': '11.17000'}
+2025-05-07 21:28:31,058 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:941] - Calculated Fibonacci levels for TRUMP/USDT:USDT: {'Fib_0.0%': '11.323', 'Fib_23.6%': '11.217', 'Fib_38.2%': '11.152', 'Fib_50.0%': '11.099', 'Fib_61.8%': '11.046', 'Fib_78.6%': '10.971', 'Fib_100.0%': '10.876'}
+2025-05-07 21:28:31,059 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:1467] - Orderbook check (TRUMP/USDT:USDT): Top 10 Levels: BidVol=7363.2000, AskVol=15460.3000, OBI=-0.3548, Score=-0.3548
+2025-05-07 21:28:31,060 - INFO - [livexy_bot_TRUMP_USDT-USDT:1199] - Signal Calculation Summary (TRUMP/USDT:USDT @ 11.192):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: 0.9889
+  Signal Threshold: +/- 1.000
+  ==> Final Signal: [33mHOLD[0m
+2025-05-07 21:28:31,061 - INFO - [livexy_bot_TRUMP_USDT-USDT:2991] - ATR: 0.0553
+2025-05-07 21:28:31,062 - INFO - [livexy_bot_TRUMP_USDT-USDT:2992] - Potential Initial SL (for new trade sizing): N/A
+2025-05-07 21:28:31,063 - INFO - [livexy_bot_TRUMP_USDT-USDT:2993] - Potential Initial TP (for new trade): N/A
+2025-05-07 21:28:31,063 - INFO - [livexy_bot_TRUMP_USDT-USDT:2997] - Trailing Stop: Enabled | Break Even: Disabled
+2025-05-07 21:28:31,063 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2051] - Fetching positions for symbol: TRUMP/USDT:USDT
+2025-05-07 21:28:31,064 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:2074] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'TRUMP/USDT:USDT'}
+2025-05-07 21:28:31,566 - ERROR - [livexy_bot_TRUMP_USDT-USDT:2092] - Exchange error fetching single position for TRUMP/USDT:USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1746671310705}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot1.1.2.py", line 2076, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params)  # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1746671310705}
+2025-05-07 21:28:31,588 - INFO - [livexy_bot_TRUMP_USDT-USDT:3173] - Signal is HOLD and no open position for TRUMP/USDT:USDT. No trade action taken.
+2025-05-07 21:28:31,588 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:3387] - ---== Analysis Cycle End for TRUMP/USDT:USDT (3.18s) ==---
+2025-05-07 21:28:31,589 - DEBUG - [livexy_bot_TRUMP_USDT-USDT:3594] - <<< Loop cycle finished in 3.18s. Waiting 11.82s for next cycle...

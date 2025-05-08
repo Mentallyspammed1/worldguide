@@ -57,23 +57,27 @@ EXCHANGE: ccxt.Exchange | None = None
 # --- Decorators for Pre-checks ---
 def require_api_keys(func: Callable) -> Callable:
     """Decorator to ensure API keys are loaded before executing a function."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not BYBIT_API_KEY or not BYBIT_API_SECRET:
             pause_terminal()
             return None  # Indicate failure or inability to proceed
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def require_exchange(func: Callable) -> Callable:
     """Decorator to ensure the CCXT EXCHANGE object is initialized."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not EXCHANGE:
             pause_terminal()
             return None  # Indicate failure or inability to proceed
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -95,7 +99,7 @@ def initialize_exchange() -> bool:
             EXCHANGE.load_markets()
             return True
         except (ccxt.AuthenticationError, ccxt.ExchangeNotAvailable, ccxt.RequestTimeout):
-             pass
+            pass
         except ccxt.ExchangeError:
             pass
         except Exception:
@@ -130,9 +134,7 @@ def generate_signature(api_secret: str, params: dict[str, Any]) -> str:
     params_str = {k: str(v) for k, v in params.items()}
     query_string = urllib.parse.urlencode(sorted(params_str.items()))
     # print(f"DEBUG: Signature Base String: {query_string}") # Uncomment for debugging signature issues
-    signature = hmac.new(
-        api_secret.encode("utf-8"), query_string.encode("utf-8"), hashlib.sha256
-    ).hexdigest()
+    signature = hmac.new(api_secret.encode("utf-8"), query_string.encode("utf-8"), hashlib.sha256).hexdigest()
     return signature
 
 
@@ -157,12 +159,14 @@ def send_bybit_request(method: str, endpoint: str, params: dict[str, Any] | None
     signature_payload = {**request_params, **auth_params} if method == "POST" else {**auth_params}
     # If GET request has parameters, they should also be included in the signature base string
     if method == "GET" and params:
-         signature_payload.update(params)
+        signature_payload.update(params)
 
     auth_params["sign"] = generate_signature(BYBIT_API_SECRET, signature_payload)
 
     # Add auth headers/params to the actual request
-    headers.update({f"X-BAPI-{k.replace('_', '').upper()}": str(v) for k, v in auth_params.items()})  # Bybit V5 uses headers for auth
+    headers.update(
+        {f"X-BAPI-{k.replace('_', '').upper()}": str(v) for k, v in auth_params.items()}
+    )  # Bybit V5 uses headers for auth
 
     try:
         # print(f"DEBUG: Sending {method} to {api_url}") # Debugging
@@ -172,7 +176,9 @@ def send_bybit_request(method: str, endpoint: str, params: dict[str, Any] | None
         if method == "POST":
             response = requests.post(api_url, headers=headers, json=request_params, timeout=DEFAULT_TIMEOUT)
         elif method == "GET":
-            response = requests.get(api_url, headers=headers, params=request_params, timeout=DEFAULT_TIMEOUT)  # Use request_params for GET query
+            response = requests.get(
+                api_url, headers=headers, params=request_params, timeout=DEFAULT_TIMEOUT
+            )  # Use request_params for GET query
         else:
             return None
 
@@ -198,7 +204,9 @@ def send_bybit_request(method: str, endpoint: str, params: dict[str, Any] | None
 
 # --- 交易操作 (Trading Actions - Direct Requests) ---
 @require_api_keys
-def place_order_requests(symbol: str, side: str, order_type: str, qty: float, price: float | None = None) -> dict[str, Any] | None:
+def place_order_requests(
+    symbol: str, side: str, order_type: str, qty: float, price: float | None = None
+) -> dict[str, Any] | None:
     """Places an order using direct requests."""
     endpoint = "order/create"
     params = {
@@ -221,7 +229,7 @@ def place_order_requests(symbol: str, side: str, order_type: str, qty: float, pr
         return order_info if order_info else {}  # Return result dict or empty dict
     else:
         # Failure
-        order_data.get('retMsg', 'Unknown error') if order_data else "No response data"
+        order_data.get("retMsg", "Unknown error") if order_data else "No response data"
         return None
 
 
@@ -229,12 +237,15 @@ def place_order_requests(symbol: str, side: str, order_type: str, qty: float, pr
 def place_market_order_requests() -> None:
     """🛒 Places a market order via direct requests."""
     details = get_order_details_from_user("market")
-    if not details: return
+    if not details:
+        return
 
     symbol, side, amount = details
     order_result = place_order_requests(symbol, side, "market", amount)
     if order_result:
-        display_order_execution_message("MARKET ORDER EXECUTED", symbol, side, amount, order_id=order_result.get('orderId'))
+        display_order_execution_message(
+            "MARKET ORDER EXECUTED", symbol, side, amount, order_id=order_result.get("orderId")
+        )
     else:
         pass
     pause_terminal()
@@ -244,12 +255,15 @@ def place_market_order_requests() -> None:
 def place_limit_order_requests() -> None:
     """🚧 Places a limit order via direct requests."""
     details = get_order_details_from_user("limit")
-    if not details: return
+    if not details:
+        return
 
     symbol, side, amount, price = details
     order_result = place_order_requests(symbol, side, "limit", amount, price)
     if order_result:
-        display_order_execution_message("LIMIT ORDER PLACED", symbol, side, amount, price=price, order_id=order_result.get('orderId'))
+        display_order_execution_message(
+            "LIMIT ORDER PLACED", symbol, side, amount, price=price, order_id=order_result.get("orderId")
+        )
     else:
         pass
     pause_terminal()
@@ -260,7 +274,8 @@ def place_limit_order_requests() -> None:
 def cancel_single_order_requests() -> None:
     """✨ Cancels a single order using direct requests."""
     order_id, symbol = get_order_id_symbol_from_user("Cancel Single Order")
-    if not order_id or not symbol: return  # Symbol is mandatory for V5 cancel
+    if not order_id or not symbol:
+        return  # Symbol is mandatory for V5 cancel
 
     endpoint = "order/cancel"
     params = {
@@ -271,16 +286,18 @@ def cancel_single_order_requests() -> None:
 
     result = send_bybit_request("POST", endpoint, params)
     if result and result["retCode"] == 0:
-        result.get('result', {}).get('orderId', order_id)  # Confirm ID from response
+        result.get("result", {}).get("orderId", order_id)  # Confirm ID from response
     else:
-        result.get('retMsg', 'Unknown error') if result else "No response data"
+        result.get("retMsg", "Unknown error") if result else "No response data"
     pause_terminal()
 
 
 @require_api_keys
 def cancel_all_orders_requests() -> None:
     """💥 Cancels ALL open orders for a symbol or all symbols using direct requests."""
-    symbol = get_symbol_input("Enter symbol to cancel ALL orders for (e.g., BTCUSDT, leave blank for ALL symbols): ", allow_blank=True)
+    symbol = get_symbol_input(
+        "Enter symbol to cancel ALL orders for (e.g., BTCUSDT, leave blank for ALL symbols): ", allow_blank=True
+    )
     target = f"symbol {symbol}" if symbol else "ALL symbols"
 
     if not get_confirmation(f"⚠️ Confirm mass cancellation for {target}?"):
@@ -294,10 +311,10 @@ def cancel_all_orders_requests() -> None:
 
     result = send_bybit_request("POST", endpoint, params)
     if result and result["retCode"] == 0:
-        cancelled_list = result.get('result', {}).get('list', [])
+        cancelled_list = result.get("result", {}).get("list", [])
         len(cancelled_list) if isinstance(cancelled_list, list) else 0
     else:
-        result.get('retMsg', 'Unknown error') if result else "No response data"
+        result.get("retMsg", "Unknown error") if result else "No response data"
     pause_terminal()
 
 
@@ -305,17 +322,18 @@ def cancel_all_orders_requests() -> None:
 def cancel_futures_order_ccxt() -> None:
     """Cancels a Futures order using CCXT."""
     order_id, symbol = get_order_id_symbol_from_user("Cancel Order (CCXT)")
-    if not order_id: return  # Order ID is mandatory
+    if not order_id:
+        return  # Order ID is mandatory
 
     try:
         # CCXT often requires the symbol for cancellation on Bybit
         if not symbol:
-             pass
+            pass
         EXCHANGE.cancel_order(order_id, symbol=symbol)  # Pass symbol even if None, CCXT might handle it
     except ccxt.OrderNotFound:
         pass
     except ccxt.InvalidOrder:
-         pass
+        pass
     except ccxt.ExchangeError:
         pass
     except Exception:
@@ -326,7 +344,9 @@ def cancel_futures_order_ccxt() -> None:
 @require_exchange
 def view_open_futures_orders_ccxt() -> None:
     """Views open Futures orders using CCXT."""
-    symbol = get_symbol_input("Enter symbol to view open orders (e.g., BTCUSDT, or leave blank for all): ", allow_blank=True)
+    symbol = get_symbol_input(
+        "Enter symbol to view open orders (e.g., BTCUSDT, or leave blank for all): ", allow_blank=True
+    )
 
     try:
         open_orders = EXCHANGE.fetch_open_orders(symbol=symbol if symbol else None)
@@ -334,14 +354,17 @@ def view_open_futures_orders_ccxt() -> None:
         if open_orders:
             df = pd.DataFrame(open_orders)
             # Ensure necessary columns exist, adding them with None if missing
-            required_cols = ['datetime', 'id', 'symbol', 'type', 'side', 'amount', 'price', 'status']
+            required_cols = ["datetime", "id", "symbol", "type", "side", "amount", "price", "status"]
             for col in required_cols:
                 if col not in df.columns:
                     df[col] = None
-            df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')  # Convert timestamp to datetime
-            display_dataframe("OPEN FUTURES ORDERS", df,
-                              required_cols,
-                              formatters={'price': "{:.4f}".format, 'amount': "{:.4f}".format})  # Adjust price format
+            df["datetime"] = pd.to_datetime(df["timestamp"], unit="ms")  # Convert timestamp to datetime
+            display_dataframe(
+                "OPEN FUTURES ORDERS",
+                df,
+                required_cols,
+                formatters={"price": "{:.4f}".format, "amount": "{:.4f}".format},
+            )  # Adjust price format
         else:
             pass
 
@@ -357,24 +380,24 @@ def view_open_futures_positions_ccxt() -> None:
     """Views open Futures positions using CCXT."""
     try:
         # Bybit needs the market type for positions
-        positions = EXCHANGE.fetch_positions(params={'category': CATEGORY})
+        positions = EXCHANGE.fetch_positions(params={"category": CATEGORY})
         # Filter out positions with zero contracts/size
-        positions = [p for p in positions if p.get('contracts') is not None and float(p['contracts']) != 0]
+        positions = [p for p in positions if p.get("contracts") is not None and float(p["contracts"]) != 0]
 
         if positions:
             df = pd.DataFrame(positions)
-             # Select and rename columns for better readability
+            # Select and rename columns for better readability
             col_map = {
-                'symbol': 'Symbol',
-                'entryPrice': 'Entry Price',
-                'markPrice': 'Mark Price',  # Often more relevant than liq price alone
-                'liquidationPrice': 'Liq. Price',
-                'contracts': 'Contracts',
-                'side': 'Side',
-                'unrealizedPnl': 'Unrealized PNL',
-                'percentage': 'PNL %',
-                'leverage': 'Leverage',
-                'initialMargin': 'Margin'
+                "symbol": "Symbol",
+                "entryPrice": "Entry Price",
+                "markPrice": "Mark Price",  # Often more relevant than liq price alone
+                "liquidationPrice": "Liq. Price",
+                "contracts": "Contracts",
+                "side": "Side",
+                "unrealizedPnl": "Unrealized PNL",
+                "percentage": "PNL %",
+                "leverage": "Leverage",
+                "initialMargin": "Margin",
             }
             # Ensure columns exist before selecting/renaming
             display_cols_raw = [k for k in col_map if k in df.columns]
@@ -383,14 +406,19 @@ def view_open_futures_positions_ccxt() -> None:
             df_display = df[display_cols_raw].copy()  # Create a copy to avoid SettingWithCopyWarning
             df_display.columns = display_cols_renamed
 
-            display_dataframe("OPEN FUTURES POSITIONS", df_display,
-                              formatters={'Entry Price': "{:.4f}".format,
-                                          'Mark Price': "{:.4f}".format,
-                                          'Liq. Price': "{:.4f}".format,
-                                          'Contracts': "{:.4f}".format,
-                                          'Unrealized PNL': "{:.4f}".format,
-                                          'PNL %': "{:.2f}%".format,
-                                          'Margin': "{:.4f}".format})
+            display_dataframe(
+                "OPEN FUTURES POSITIONS",
+                df_display,
+                formatters={
+                    "Entry Price": "{:.4f}".format,
+                    "Mark Price": "{:.4f}".format,
+                    "Liq. Price": "{:.4f}".format,
+                    "Contracts": "{:.4f}".format,
+                    "Unrealized PNL": "{:.4f}".format,
+                    "PNL %": "{:.2f}%".format,
+                    "Margin": "{:.4f}".format,
+                },
+            )
         else:
             pass
 
@@ -407,22 +435,27 @@ def view_account_balance() -> None:
     """💰 Fetches and displays Futures account balance using CCXT."""
     try:
         # Fetch balance for the specific account type (Unified Trading Account - Contract)
-        balance = EXCHANGE.fetch_balance(params={'accountType': 'CONTRACT'})
+        balance = EXCHANGE.fetch_balance(params={"accountType": "CONTRACT"})
 
-        if balance and balance.get('info', {}).get('result', {}).get('list'):
-            account_info = balance['info']['result']['list'][0]  # Assuming one contract account
-            equity = account_info.get('equity', 'N/A')
-            unrealized_pnl = account_info.get('unrealisedPnl', 'N/A')
-            available_balance = account_info.get('availableToWithdraw', 'N/A')  # Or 'availableBalance'
-            total_margin = account_info.get('totalInitialMargin', 'N/A')
+        if balance and balance.get("info", {}).get("result", {}).get("list"):
+            account_info = balance["info"]["result"]["list"][0]  # Assuming one contract account
+            equity = account_info.get("equity", "N/A")
+            unrealized_pnl = account_info.get("unrealisedPnl", "N/A")
+            available_balance = account_info.get("availableToWithdraw", "N/A")  # Or 'availableBalance'
+            total_margin = account_info.get("totalInitialMargin", "N/A")
 
             balance_data = {
                 "Metric": ["Equity", "Available Balance", "Unrealized PNL", "Total Initial Margin"],
-                "Value": [equity, available_balance, unrealized_pnl, total_margin]
+                "Value": [equity, available_balance, unrealized_pnl, total_margin],
             }
             df = pd.DataFrame(balance_data)
-            display_dataframe("ACCOUNT BALANCE (CONTRACT)", df,
-                              formatters={"Value": lambda x: f"{float(x):.4f}" if isinstance(x, (str, int, float)) and x != 'N/A' else x})
+            display_dataframe(
+                "ACCOUNT BALANCE (CONTRACT)",
+                df,
+                formatters={
+                    "Value": lambda x: f"{float(x):.4f}" if isinstance(x, (str, int, float)) and x != "N/A" else x
+                },
+            )
 
         else:
             pass
@@ -439,7 +472,8 @@ def view_account_balance() -> None:
 def view_order_history() -> None:
     """📜 Fetches and displays Futures order history using CCXT."""
     symbol = get_symbol_input("Enter Futures symbol (e.g., BTCUSDT): ")
-    if not symbol: return
+    if not symbol:
+        return
 
     try:
         # Fetch both closed and canceled orders
@@ -449,19 +483,24 @@ def view_order_history() -> None:
 
         if orders:
             df = pd.DataFrame(orders)
-            required_cols = ['datetime', 'id', 'symbol', 'type', 'side', 'amount', 'average', 'price', 'status', 'fee']
+            required_cols = ["datetime", "id", "symbol", "type", "side", "amount", "average", "price", "status", "fee"]
             for col in required_cols:
                 if col not in df.columns:
                     df[col] = None  # Add missing columns
 
-            df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
-            df_display = df[required_cols].sort_values(by='datetime', ascending=False)  # Sort by time
+            df["datetime"] = pd.to_datetime(df["timestamp"], unit="ms")
+            df_display = df[required_cols].sort_values(by="datetime", ascending=False)  # Sort by time
 
-            display_dataframe(f"ORDER HISTORY FOR {symbol}", df_display,
-                              formatters={"price": "{:.4f}".format,
-                                          "average": "{:.4f}".format,  # Filled price
-                                          "amount": "{:.4f}".format,
-                                          "fee": lambda x: f"{x['cost']:.4f} {x['currency']}" if x and isinstance(x, dict) else 'N/A'})
+            display_dataframe(
+                f"ORDER HISTORY FOR {symbol}",
+                df_display,
+                formatters={
+                    "price": "{:.4f}".format,
+                    "average": "{:.4f}".format,  # Filled price
+                    "amount": "{:.4f}".format,
+                    "fee": lambda x: f"{x['cost']:.4f} {x['currency']}" if x and isinstance(x, dict) else "N/A",
+                },
+            )
         else:
             pass
 
@@ -477,7 +516,8 @@ def view_order_history() -> None:
 def fetch_symbol_price() -> None:
     """💰 Fetches and displays the current price of a Futures symbol."""
     symbol = get_symbol_input("Enter Futures symbol (e.g., BTCUSDT): ")
-    if not symbol: return
+    if not symbol:
+        return
 
     try:
         ticker = EXCHANGE.fetch_ticker(symbol)
@@ -486,7 +526,7 @@ def fetch_symbol_price() -> None:
         else:
             pass
     except ccxt.BadSymbol:
-         pass
+        pass
     except ccxt.ExchangeError:
         pass
     except Exception:
@@ -498,7 +538,8 @@ def fetch_symbol_price() -> None:
 def get_order_book() -> None:
     """📖 Fetches and displays the order book for a Futures symbol."""
     symbol = get_symbol_input("Enter Futures symbol (e.g., BTCUSDT): ")
-    if not symbol: return
+    if not symbol:
+        return
 
     try:
         orderbook = EXCHANGE.fetch_order_book(symbol, limit=10)  # Limit depth
@@ -508,12 +549,16 @@ def get_order_book() -> None:
 
             # Display side-by-side if possible, otherwise sequentially
             # Simple sequential display for terminal:
-            display_dataframe(f"ORDER BOOK - BIDS ({symbol})", bid_df, color=Fore.GREEN, formatters={"Price": "{:.4f}".format})
-            display_dataframe(f"ORDER BOOK - ASKS ({symbol})", ask_df, color=Fore.RED, formatters={"Price": "{:.4f}".format})
+            display_dataframe(
+                f"ORDER BOOK - BIDS ({symbol})", bid_df, color=Fore.GREEN, formatters={"Price": "{:.4f}".format}
+            )
+            display_dataframe(
+                f"ORDER BOOK - ASKS ({symbol})", ask_df, color=Fore.RED, formatters={"Price": "{:.4f}".format}
+            )
         else:
             pass
     except ccxt.BadSymbol:
-         pass
+        pass
     except ccxt.ExchangeError:
         pass
     except Exception:
@@ -528,8 +573,9 @@ def list_available_symbols() -> None:
         markets = EXCHANGE.load_markets()
         # Filter for linear perpetuals and futures
         futures_symbols = [
-            symbol for symbol, market in markets.items()
-            if market.get('type') in ['swap', 'future'] and market.get('linear')
+            symbol
+            for symbol, market in markets.items()
+            if market.get("type") in ["swap", "future"] and market.get("linear")
         ]
         futures_symbols.sort()  # Sort alphabetically
 
@@ -550,35 +596,40 @@ def list_available_symbols() -> None:
 @require_exchange
 def display_funding_rates() -> None:
     """💸 Fetches and displays funding rates for symbols."""
-    symbol = get_symbol_input("Enter symbol for funding rate (e.g., BTCUSDT, or leave blank for multiple): ", allow_blank=True)
+    symbol = get_symbol_input(
+        "Enter symbol for funding rate (e.g., BTCUSDT, or leave blank for multiple): ", allow_blank=True
+    )
 
     try:
         if symbol:
             rates = [EXCHANGE.fetch_funding_rate(symbol)]
         else:
             # Fetch for a few popular symbols as an example, fetching all can be slow/rate-limited
-            popular_symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT']  # Example list
+            popular_symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "XRP/USDT"]  # Example list
             rates = EXCHANGE.fetch_funding_rates(symbols=popular_symbols)
             rates = list(rates.values())  # Convert dict to list
 
         if rates:
             df = pd.DataFrame(rates)
-            required_cols = ['symbol', 'fundingRate', 'fundingTimestamp', 'fundingTime']
+            required_cols = ["symbol", "fundingRate", "fundingTimestamp", "fundingTime"]
             for col in required_cols:
-                 if col not in df.columns:
-                     df[col] = None
+                if col not in df.columns:
+                    df[col] = None
 
-            df['fundingTime'] = pd.to_datetime(df['fundingTimestamp'], unit='ms')  # Convert timestamp
-            df['fundingRate'] = df['fundingRate'] * 100  # Display as percentage
+            df["fundingTime"] = pd.to_datetime(df["fundingTimestamp"], unit="ms")  # Convert timestamp
+            df["fundingRate"] = df["fundingRate"] * 100  # Display as percentage
 
-            display_dataframe("FUNDING RATES", df[['symbol', 'fundingRate', 'fundingTime']],
-                              column_names=['Symbol', 'Funding Rate (%)', 'Next Funding Time'],
-                              formatters={'Funding Rate (%)': "{:.4f}%".format})
+            display_dataframe(
+                "FUNDING RATES",
+                df[["symbol", "fundingRate", "fundingTime"]],
+                column_names=["Symbol", "Funding Rate (%)", "Next Funding Time"],
+                formatters={"Funding Rate (%)": "{:.4f}%".format},
+            )
         else:
             pass
 
     except ccxt.BadSymbol:
-         pass
+        pass
     except ccxt.ExchangeError:
         pass
     except Exception:
@@ -591,20 +642,22 @@ def display_funding_rates() -> None:
 def display_rsi_indicator() -> None:
     """📈 Calculates and displays RSI for a given symbol."""
     params = get_indicator_params_from_user("RSI")
-    if not params: return
+    if not params:
+        return
 
     symbol, period, timeframe = params
     try:
         ohlcv = fetch_ohlcv_data(symbol, timeframe, period + 150)  # Fetch more data for stability
-        if ohlcv is None: return
+        if ohlcv is None:
+            return
 
-        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['close'] = pd.to_numeric(df['close'])  # Ensure numeric type
+        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df["close"] = pd.to_numeric(df["close"])  # Ensure numeric type
 
-        rsi_series = rsi(df['close'], period)  # Assuming rsi is from indicators.py using pandas_ta
+        rsi_series = rsi(df["close"], period)  # Assuming rsi is from indicators.py using pandas_ta
 
         if rsi_series is None or rsi_series.isna().all():
-             return
+            return
 
         last_rsi = rsi_series.iloc[-1]
         if pd.isna(last_rsi):
@@ -625,22 +678,24 @@ def display_rsi_indicator() -> None:
 def display_atr_indicator() -> None:
     """📈 Calculates and displays ATR for a given symbol."""
     params = get_indicator_params_from_user("ATR")
-    if not params: return
+    if not params:
+        return
 
     symbol, period, timeframe = params
     try:
         ohlcv = fetch_ohlcv_data(symbol, timeframe, period + 150)  # Fetch more data
-        if ohlcv is None: return
+        if ohlcv is None:
+            return
 
-        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['high'] = pd.to_numeric(df['high'])
-        df['low'] = pd.to_numeric(df['low'])
-        df['close'] = pd.to_numeric(df['close'])
+        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df["high"] = pd.to_numeric(df["high"])
+        df["low"] = pd.to_numeric(df["low"])
+        df["close"] = pd.to_numeric(df["close"])
 
-        atr_series = ATR(df['high'], df['low'], df['close'], period)  # Assuming ATR from indicators.py
+        atr_series = ATR(df["high"], df["low"], df["close"], period)  # Assuming ATR from indicators.py
 
         if atr_series is None or atr_series.isna().all():
-             return
+            return
 
         last_atr = atr_series.iloc[-1]
         if pd.isna(last_atr):
@@ -659,7 +714,8 @@ def display_atr_indicator() -> None:
 def display_fibonacci_pivot_points_indicator() -> None:
     """📐 Displays Fibonacci Pivot Points for a given symbol."""
     params = get_indicator_params_from_user("Fibonacci Pivot Points", need_period=False)
-    if not params: return
+    if not params:
+        return
 
     symbol, _, timeframe = params  # Period is None here
     try:
@@ -679,13 +735,13 @@ def display_fibonacci_pivot_points_indicator() -> None:
 
         os.system("clear")
         print_indicator_header("FIBONACCI PIVOT POINTS")
-        print_pivot_level("Resistance 3 (R3)", pivots['R3'], Fore.RED)
-        print_pivot_level("Resistance 2 (R2)", pivots['R2'], Fore.RED)
-        print_pivot_level("Resistance 1 (R1)", pivots['R1'], Fore.RED)
-        print_pivot_level("Pivot (P)", pivots['Pivot'], Fore.YELLOW)  # Pivot often yellow/white
-        print_pivot_level("Support 1 (S1)", pivots['S1'], Fore.GREEN)
-        print_pivot_level("Support 2 (S2)", pivots['S2'], Fore.GREEN)
-        print_pivot_level("Support 3 (S3)", pivots['S3'], Fore.GREEN)
+        print_pivot_level("Resistance 3 (R3)", pivots["R3"], Fore.RED)
+        print_pivot_level("Resistance 2 (R2)", pivots["R2"], Fore.RED)
+        print_pivot_level("Resistance 1 (R1)", pivots["R1"], Fore.RED)
+        print_pivot_level("Pivot (P)", pivots["Pivot"], Fore.YELLOW)  # Pivot often yellow/white
+        print_pivot_level("Support 1 (S1)", pivots["S1"], Fore.GREEN)
+        print_pivot_level("Support 2 (S2)", pivots["S2"], Fore.GREEN)
+        print_pivot_level("Support 3 (S3)", pivots["S3"], Fore.GREEN)
         print_indicator_footer()
 
     except Exception:
@@ -694,9 +750,14 @@ def display_fibonacci_pivot_points_indicator() -> None:
 
 
 # --- Display Functions ---
-def display_dataframe(title: str, df: pd.DataFrame, columns: list[str] | None = None,
-                      column_names: list[str] | None = None, color: str = Fore.WHITE,
-                      formatters: dict[str, Callable] | None = None) -> None:
+def display_dataframe(
+    title: str,
+    df: pd.DataFrame,
+    columns: list[str] | None = None,
+    column_names: list[str] | None = None,
+    color: str = Fore.WHITE,
+    formatters: dict[str, Callable] | None = None,
+) -> None:
     """Displays a Pandas DataFrame in a stylized format."""
     os.system("clear")
     if df.empty:
@@ -733,10 +794,12 @@ def print_pivot_level(level_name: str, level_value: float, color: str) -> None:
     """Prints a formatted pivot level."""
 
 
-def display_order_execution_message(order_type_text: str, symbol: str, side: str, amount: float, price: float | None = None, order_id: str | None = None) -> None:
+def display_order_execution_message(
+    order_type_text: str, symbol: str, side: str, amount: float, price: float | None = None, order_id: str | None = None
+) -> None:
     """Displays a stylized order execution/placement message."""
     os.system("clear")
-    Fore.GREEN if side.lower() == 'buy' else Fore.RED
+    Fore.GREEN if side.lower() == "buy" else Fore.RED
     if price is not None:
         pass
     if order_id:
@@ -756,7 +819,7 @@ def display_trading_menu() -> str:
     options = {
         "1": "Place Market Order (市价单)",
         "2": "Place Limit Order (限价单)",
-        "3": "Back to Main Menu (返回主菜单)"
+        "3": "Back to Main Menu (返回主菜单)",
     }
     prompt = "⚔️ Enter your choice (1-3): "
     valid_choices = r"^[1-3]$"
@@ -774,7 +837,7 @@ def display_order_management_menu() -> str:
         "4": "View Open Futures Orders (CCXT)",
         "5": "View Open Futures Positions (CCXT)",
         "6": "Place Trailing Stop (Simulated) - WIP",
-        "7": "Back to Main Menu"
+        "7": "Back to Main Menu",
     }
     prompt = "🗂️ Enter your choice (1-7): "
     valid_choices = r"^[1-7]$"
@@ -790,7 +853,7 @@ def display_account_menu() -> str:
         "2": "View Order History",
         "3": "Deposit Funds (Simulated) - WIP",
         "4": "Withdraw Funds (Simulated) - WIP",
-        "5": "Back to Main Menu"
+        "5": "Back to Main Menu",
     }
     prompt = "🏦 Enter your choice (1-5): "
     valid_choices = r"^[1-5]$"
@@ -809,7 +872,7 @@ def display_market_menu() -> str:
         "5": "Display ATR",
         "6": "Display Fibonacci Pivot Points",
         "7": "Display Funding Rates",  # New Option
-        "8": "Back to Main Menu"
+        "8": "Back to Main Menu",
     }
     prompt = "📊 Enter your choice (1-8): "
     valid_choices = r"^[1-8]$"
@@ -817,7 +880,9 @@ def display_market_menu() -> str:
     return display_menu_template(header, options, prompt, valid_choices, subtitle)
 
 
-def display_menu_template(header: str, options: dict[str, str], prompt: str, valid_choices_regex: str, subtitle: str | None = None) -> str:
+def display_menu_template(
+    header: str, options: dict[str, str], prompt: str, valid_choices_regex: str, subtitle: str | None = None
+) -> str:
     """Generic function to display a formatted menu."""
     os.system("clear")
     if subtitle:
@@ -838,6 +903,7 @@ def get_validated_input(prompt: str, validation_regex: str) -> str:
     while True:
         user_input = input(Fore.YELLOW + Style.BRIGHT + prompt + Style.RESET_ALL).strip()
         import re  # Import regex module here
+
         if re.match(validation_regex, user_input):
             return user_input
         else:
@@ -857,7 +923,7 @@ def get_positive_float(prompt: str) -> float | None:
         except ValueError:
             pass
         except EOFError:  # Handle Ctrl+D
-             return None
+            return None
 
 
 def get_symbol_input(prompt: str, allow_blank: bool = False) -> str | None:
@@ -868,10 +934,10 @@ def get_symbol_input(prompt: str, allow_blank: bool = False) -> str | None:
             # Basic validation: Check if it looks like a crypto pair (e.g., ends with USDT, BTC, etc.)
             # This is a loose check, CCXT/API will do the real validation
             if len(symbol) > 3:  # Simple length check
-                 # Optional: More specific regex like r"^[A-Z0-9]{2,}/?[A-Z]{2,}$"
-                 return symbol
+                # Optional: More specific regex like r"^[A-Z0-9]{2,}/?[A-Z]{2,}$"
+                return symbol
             else:
-                 pass
+                pass
         elif allow_blank:
             return None  # Return None if blank is allowed
         else:
@@ -881,16 +947,19 @@ def get_symbol_input(prompt: str, allow_blank: bool = False) -> str | None:
 def get_order_details_from_user(order_type: str) -> tuple[str, str, float] | tuple[str, str, float, float] | None:
     """Collects and validates common order details from user."""
     symbol = get_symbol_input("🪙 Enter symbol (e.g., BTCUSDT): ")
-    if not symbol: return None
+    if not symbol:
+        return None
 
     side = get_validated_input("Buy/Sell (向/卖): ", r"^(buy|sell)$")
 
     amount = get_positive_float("⚖️ Enter quantity: ")
-    if amount is None: return None
+    if amount is None:
+        return None
 
     if order_type == "limit":
         price = get_positive_float("💰 Enter price: ")
-        if price is None: return None
+        if price is None:
+            return None
         return symbol, side, amount, price
     else:  # Market order
         return symbol, side, amount
@@ -910,9 +979,9 @@ def get_confirmation(prompt: str) -> bool:
     """Gets a yes/no confirmation from the user."""
     while True:
         choice = input(Fore.YELLOW + Style.BRIGHT + prompt + " (yes/no): " + Style.RESET_ALL).lower().strip()
-        if choice == 'yes':
+        if choice == "yes":
             return True
-        elif choice == 'no':
+        elif choice == "no":
             return False
         else:
             pass
@@ -961,10 +1030,13 @@ def handle_account_menu() -> None:
     }
     while True:
         choice = display_account_menu()
-        if choice == "5": break
+        if choice == "5":
+            break
         action = actions.get(choice)
-        if action: action()
-        else: display_invalid_choice_message()
+        if action:
+            action()
+        else:
+            display_invalid_choice_message()
 
 
 def handle_market_data_menu() -> None:
@@ -980,10 +1052,13 @@ def handle_market_data_menu() -> None:
     }
     while True:
         choice = display_market_menu()
-        if choice == "8": break  # Updated exit option
+        if choice == "8":
+            break  # Updated exit option
         action = actions.get(choice)
-        if action: action()
-        else: display_invalid_choice_message()
+        if action:
+            action()
+        else:
+            display_invalid_choice_message()
 
 
 def handle_trading_menu() -> None:
@@ -994,10 +1069,13 @@ def handle_trading_menu() -> None:
     }
     while True:
         choice = display_trading_menu()
-        if choice == "3": break
+        if choice == "3":
+            break
         action = actions.get(choice)
-        if action: action()
-        else: display_invalid_choice_message()
+        if action:
+            action()
+        else:
+            display_invalid_choice_message()
 
 
 def handle_order_management_menu() -> None:
@@ -1012,10 +1090,13 @@ def handle_order_management_menu() -> None:
     }
     while True:
         choice = display_order_management_menu()
-        if choice == "7": break
+        if choice == "7":
+            break
         action = actions.get(choice)
-        if action: action()
-        else: display_invalid_choice_message()
+        if action:
+            action()
+        else:
+            display_invalid_choice_message()
 
 
 def print_wip(feature_name: str) -> None:
