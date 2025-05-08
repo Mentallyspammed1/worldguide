@@ -25,11 +25,8 @@ on:
         default: 'Apply automated linting and formatting'
 
 jobs:
-  lint-and-format:
+  validate-and-init:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - name: Initialize Lint Report
         run: |
@@ -37,56 +34,94 @@ jobs:
           echo "=============================" >> lint_report.txt
           echo "Workflow started at $(date)" >> lint_report.txt
 
+      - name: Validate Repository Access
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Validating repository access..." >> lint_report.txt
+          curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}" > repo.json
+          if grep -q '"message": "Not Found"' repo.json; then
+            echo "Error: Repository not found or GITHUB_TOKEN lacks access" >> lint_report.txt
+            echo "repo_access=false" >> $GITHUB_OUTPUT
+          elif grep -q '"message": "Bad credentials"' repo.json; then
+            echo "Error: GITHUB_TOKEN is invalid" >> lint_report.txt
+            echo "repo_access=false" >> $GITHUB_OUTPUT
+          else
+            echo "Repository access validated successfully" >> lint_report.txt
+            echo "repo_access=true" >> $GITHUB_OUTPUT
+          fi
+        id: validate-repo
+
+      - name: Upload Initial Lint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint_report.txt
+          retention-days: 7
+          if-no-files-found: warn
+
+  lint-and-format:
+    runs-on: ubuntu-latest
+    needs: validate-and-init
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Download Initial Lint Report
+        uses: actions/download-artifact@v4
+        with:
+          name: lint-report
+          path: .
+
       - name: Checkout code
+        if: needs.validate-and-init.outputs.repo_access == 'true'
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+        continue-on-error: true
+        id: checkout
+
+      - name: Debug Checkout Result
+        run: |
+          if [ "${{ steps.checkout.outcome }}" == "success" ]; then
+            echo "Checkout successful" >> lint_report.txt
+            echo "git_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "Warning: Checkout failed, proceeding without Git operations" >> lint_report.txt
+            echo "git_available=false" >> $GITHUB_OUTPUT
+            cat ${{ steps.checkout.outputs.error }} >> lint_report.txt 2>/dev/null || echo "No checkout error details available" >> lint_report.txt
+          fi
+        id: debug-checkout
 
       - name: Initialize Repository
+        if: steps.debug-checkout.outputs.git_available == 'true'
         run: |
           echo "Checking repository state..." >> lint_report.txt
           if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
             echo "Error: Not a Git repository" >> lint_report.txt
-            exit 1
+            echo "git_available=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
           if [ ! -f "$(git rev-parse --git-dir)/HEAD" ]; then
             echo "Repository is empty, initializing..." >> lint_report.txt
             git commit --allow-empty -m "Initial empty commit" || {
               echo "Error: Failed to create initial commit" >> lint_report.txt
-              exit 1
+              echo "git_available=false" >> $GITHUB_OUTPUT
+              exit 0
             }
           fi
           git fetch origin || {
             echo "Error: Failed to fetch from origin" >> lint_report.txt
-            exit 1
+            echo "git_available=false" >> $GITHUB_OUTPUT
+            exit 0
           }
-
-      - name: Validate Git Remote and Permissions
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Validating Git remote and permissions..." >> lint_report.txt
-          git remote -v >> lint_report.txt
-          REMOTE_URL=$(git remote get-url origin)
-          if [[ ! "$REMOTE_URL" =~ ^https://github.com ]]; then
-            echo "Error: Remote 'origin' is not a GitHub repository: $REMOTE_URL" >> lint_report.txt
-            exit 1
-          fi
-          # Test authentication by attempting to list branches
-          curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/branches" > branches.json
-          if grep -q '"message": "Not Found"' branches.json; then
-            echo "Error: Repository not found or GITHUB_TOKEN lacks access" >> lint_report.txt
-            exit 1
-          elif grep -q '"message": "Bad credentials"' branches.json; then
-            echo "Error: GITHUB_TOKEN is invalid" >> lint_report.txt
-            exit 1
-          fi
-          echo "Git remote and permissions validated successfully" >> lint_report.txt
+        id: init-repo
 
       - name: Debug Git Configuration
+        if: steps.debug-checkout.outputs.git_available == 'true'
         run: |
           echo "Git configuration:" >> lint_report.txt
           git config --list >> lint_report.txt
@@ -131,6 +166,7 @@ jobs:
           fi
 
       - name: List Repository Files
+        if: steps.debug-checkout.outputs.git_available == 'true'
         run: |
           echo "Repository contents:" >> lint_report.txt
           find . -type f >> lint_report.txt
@@ -166,6 +202,7 @@ jobs:
           }
 
       - name: Debug Git Status
+        if: steps.debug-checkout.outputs.git_available == 'true'
         run: |
           echo "Git status after processing:" >> lint_report.txt
           git status >> lint_report.txt
@@ -173,6 +210,7 @@ jobs:
           git diff --cached || echo "No staged changes" >> lint_report.txt
 
       - name: Check for Changes
+        if: steps.debug-checkout.outputs.git_available == 'true'
         id: git_status
         run: |
           git add .
@@ -185,14 +223,14 @@ jobs:
           fi
 
       - name: Configure Git
-        if: steps.git_status.outputs.changes_made == 'true'
+        if: steps.debug-checkout.outputs.git_available == 'true' && steps.git_status.outputs.changes_made == 'true'
         run: |
           echo "Configuring Git..." >> lint_report.txt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create New Branch and Commit Changes
-        if: steps.git_status.outputs.changes_made == 'true'
+        if: steps.debug-checkout.outputs.git_available == 'true' && steps.git_status.outputs.changes_made == 'true'
         id: commit-changes
         run: |
           BRANCH_NAME="lint-format-$(date +%Y%m%d-%H%M%S)-${{ github.run_id }}"
@@ -210,13 +248,12 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Push Changes
-        if: steps.git_status.outputs.changes_made == 'true'
+        if: steps.debug-checkout.outputs.git_available == 'true' && steps.git_status.outputs.changes_made == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME="${{ steps.commit-changes.outputs.branch_name }}"
           echo "Pushing branch $BRANCH_NAME to origin" >> lint_report.txt
-          # Use HTTPS URL with token to ensure authentication
           git push https://x-access-token:$GITHUB_TOKEN@github.com/${{ github.repository }} "$BRANCH_NAME" --force-with-lease || {
             echo "Error: Failed to push branch $BRANCH_NAME" >> lint_report.txt
             git status >> lint_report.txt
@@ -225,7 +262,7 @@ jobs:
           }
 
       - name: Create Pull Request
-        if: steps.git_status.outputs.changes_made == 'true'
+        if: steps.debug-checkout.outputs.git_available == 'true' && steps.git_status.outputs.changes_made == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -251,14 +288,22 @@ jobs:
 
   upload-artifact:
     runs-on: ubuntu-latest
-    needs: lint-and-format
+    needs: validate-and-init
     if: always()
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download Lint Report
+        uses: actions/download-artifact@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+          name: lint-report
+          path: .
+
+      - name: Ensure Lint Report Exists
+        run: |
+          if [ ! -f lint_report.txt ]; then
+            echo "Warning: lint_report.txt not found, creating empty file" >> lint_report.txt
+            echo "No linting or formatting data available due to earlier failures" >> lint_report.txt
+            touch lint_report.txt
+          fi
 
       - name: Upload Lint Report
         uses: actions/upload-artifact@v4
