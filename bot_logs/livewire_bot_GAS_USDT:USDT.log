@@ -1,0 +1,80 @@
+2025-04-18 16:19:41,079 - INFO - [livewire_bot_GAS_USDT:USDT] - --- Analyzing GAS/USDT:USDT (1) ---
+2025-04-18 16:19:42,780 - INFO - [livewire_bot_GAS_USDT:USDT] - Signal Score: -0.3400 (Threshold: +/-0.2) from 10 indicators (2 NaN)
+2025-04-18 16:19:42,781 - INFO - [livewire_bot_GAS_USDT:USDT] - 
+[36m--- Analysis Results for GAS/USDT:USDT (1) ---[0m
+Timestamp: 2025-04-18 16:19:42 CDT
+Current Price: [92m3.42200[0m
+Generated Signal: [91mSELL[0m
+Potential Entry: [33m3.42200[0m (based on current price)
+Potential Take Profit: [92m3.41948[0m
+Initial Stop Loss: [91m3.42849[0m (ATR Multiple: 1.8)
+RSI: 42.40 StochRSI_K: 43.56 StochRSI_D: 54.60 MFI: 55.09 CCI: -84.19 Williams_R: -78.57 ATR: 0.00360
+Trailing Stop: [36mEnabled (Rate: 0.500%, Activation: 0.300%)[0m
+
+2025-04-18 16:19:42,781 - INFO - [livewire_bot_GAS_USDT:USDT] - *** SELL Signal Triggered - Proceeding to Trade Execution ***
+2025-04-18 16:19:43,182 - INFO - [livewire_bot_GAS_USDT:USDT] - No active open position found for GAS/USDT:USDT.
+2025-04-18 16:19:44,643 - INFO - [livewire_bot_GAS_USDT:USDT] - Attempting to set leverage for GAS/USDT:USDT to 20x...
+2025-04-18 16:19:46,148 - INFO - [livewire_bot_GAS_USDT:USDT] - Leverage for GAS/USDT:USDT set/requested to 20x. Verify on exchange if needed.
+2025-04-18 16:19:46,148 - INFO - [livewire_bot_GAS_USDT:USDT] - Risk Amount: 0.1277 USDT, SL Distance: 0.00649, Initial Size: 19.68886964 GAS
+2025-04-18 16:19:46,149 - WARNING - [livewire_bot_GAS_USDT:USDT] - Could not use exchange.amount_to_precision (name 'exchange' is not defined). Using manual rounding.
+2025-04-18 16:19:46,149 - INFO - [livewire_bot_GAS_USDT:USDT] - Applied manual amount precision (0.1 decimals): 19.68886964 -> 19.00000000
+2025-04-18 16:19:46,149 - INFO - [livewire_bot_GAS_USDT:USDT] - Final calculated position size: 19.00000000 GAS
+2025-04-18 16:19:46,180 - ERROR - [livewire_bot_GAS_USDT:USDT] - [91mAn uncaught error occurred in the main loop: invalid format string[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/lwx.py", line 1772, in main
+    analyze_and_trade_symbol(exchange, symbol_ccxt, CONFIG, symbol_logger)
+  File "/data/data/com.termux/files/home/worldguide/lwx.py", line 1625, in analyze_and_trade_symbol
+    logger.info(f"Attempting to place {signal} trade for {symbol} | Size: {position_size} | Entry: ~{current_price:.5f} | Initial TP: {tp_calc:.5f if tp_calc else 'N/A'} | Initial SL: {sl_calc:.5f}")
+                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid format string
+2025-04-18 16:19:46,184 - INFO - [livewire_bot_GAS_USDT:USDT] - Attempting to continue after 15s delay...
+2025-04-18 16:20:01,185 - INFO - [livewire_bot_GAS_USDT:USDT] - Cycle took 20.11s. Waiting 0.00s...
+2025-04-18 16:20:01,186 - INFO - [livewire_bot_GAS_USDT:USDT] - --- Analyzing GAS/USDT:USDT (1) ---
+2025-04-18 16:20:04,136 - INFO - [livewire_bot_GAS_USDT:USDT] - Signal Score: -0.0500 (Threshold: +/-0.2) from 10 indicators (2 NaN)
+2025-04-18 16:20:04,140 - INFO - [livewire_bot_GAS_USDT:USDT] - 
+[36m--- Analysis Results for GAS/USDT:USDT (1) ---[0m
+Timestamp: 2025-04-18 16:20:04 CDT
+Current Price: [92m3.42100[0m
+Generated Signal: [33mHOLD[0m
+Potential Entry: [33m3.42100[0m (based on current price)
+Potential Take Profit: N/A
+Initial Stop Loss: N/A (ATR Multiple: 1.8)
+RSI: 41.09 StochRSI_K: 26.74 StochRSI_D: 41.75 MFI: 59.33 CCI: -106.18 Williams_R: -85.71 ATR: 0.00341
+Trailing Stop: [36mEnabled (Rate: 0.500%, Activation: 0.300%)[0m
+
+2025-04-18 16:20:04,141 - INFO - [livewire_bot_GAS_USDT:USDT] - Signal is HOLD for GAS/USDT:USDT. Checking existing position status...
+2025-04-18 16:20:04,542 - INFO - [livewire_bot_GAS_USDT:USDT] - No active open position found for GAS/USDT:USDT.
+2025-04-18 16:20:04,542 - INFO - [livewire_bot_GAS_USDT:USDT] - No action taken (HOLD signal and no open position found for GAS/USDT:USDT).
+2025-04-18 16:20:04,543 - INFO - [livewire_bot_GAS_USDT:USDT] - Cycle took 3.36s. Waiting 11.64s...
+2025-04-18 16:20:16,187 - INFO - [livewire_bot_GAS_USDT:USDT] - --- Analyzing GAS/USDT:USDT (1) ---
+2025-04-18 16:20:17,976 - INFO - [livewire_bot_GAS_USDT:USDT] - Signal Score: -0.2000 (Threshold: +/-0.2) from 10 indicators (2 NaN)
+2025-04-18 16:20:17,977 - INFO - [livewire_bot_GAS_USDT:USDT] - 
+[36m--- Analysis Results for GAS/USDT:USDT (1) ---[0m
+Timestamp: 2025-04-18 16:20:17 CDT
+Current Price: [92m3.42200[0m
+Generated Signal: [91mSELL[0m
+Potential Entry: [33m3.42200[0m (based on current price)
+Potential Take Profit: [92m3.41961[0m
+Initial Stop Loss: [91m3.42814[0m (ATR Multiple: 1.8)
+RSI: 41.09 StochRSI_K: 26.74 StochRSI_D: 41.75 MFI: 59.33 CCI: -106.18 Williams_R: -85.71 ATR: 0.00341
+Trailing Stop: [36mEnabled (Rate: 0.500%, Activation: 0.300%)[0m
+
+2025-04-18 16:20:17,977 - INFO - [livewire_bot_GAS_USDT:USDT] - *** SELL Signal Triggered - Proceeding to Trade Execution ***
+2025-04-18 16:20:18,354 - INFO - [livewire_bot_GAS_USDT:USDT] - No active open position found for GAS/USDT:USDT.
+2025-04-18 16:20:18,774 - INFO - [livewire_bot_GAS_USDT:USDT] - Attempting to set leverage for GAS/USDT:USDT to 20x...
+2025-04-18 16:20:19,180 - WARNING - [livewire_bot_GAS_USDT:USDT] - [33mLeverage for GAS/USDT:USDT already set to 20x or no change needed.[0m
+2025-04-18 16:20:19,181 - INFO - [livewire_bot_GAS_USDT:USDT] - Risk Amount: 0.1277 USDT, SL Distance: 0.00614, Initial Size: 20.79140404 GAS
+2025-04-18 16:20:19,181 - WARNING - [livewire_bot_GAS_USDT:USDT] - Could not use exchange.amount_to_precision (name 'exchange' is not defined). Using manual rounding.
+2025-04-18 16:20:19,181 - INFO - [livewire_bot_GAS_USDT:USDT] - Applied manual amount precision (0.1 decimals): 20.79140404 -> 20.00000000
+2025-04-18 16:20:19,182 - INFO - [livewire_bot_GAS_USDT:USDT] - Final calculated position size: 20.00000000 GAS
+2025-04-18 16:20:19,182 - ERROR - [livewire_bot_GAS_USDT:USDT] - [91mAn uncaught error occurred in the main loop: invalid format string[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/lwx.py", line 1772, in main
+    analyze_and_trade_symbol(exchange, symbol_ccxt, CONFIG, symbol_logger)
+  File "/data/data/com.termux/files/home/worldguide/lwx.py", line 1625, in analyze_and_trade_symbol
+    logger.info(f"Attempting to place {signal} trade for {symbol} | Size: {position_size} | Entry: ~{current_price:.5f} | Initial TP: {tp_calc:.5f if tp_calc else 'N/A'} | Initial SL: {sl_calc:.5f}")
+                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid format string
+2025-04-18 16:20:19,185 - INFO - [livewire_bot_GAS_USDT:USDT] - Attempting to continue after 15s delay...
+2025-04-18 16:20:23,567 - INFO - [livewire_bot_GAS_USDT:USDT] - Keyboard interrupt received. Shutting down...
+2025-04-18 16:20:23,568 - INFO - [livewire_bot_GAS_USDT:USDT] - Livewire Trading Bot (lwx.py) stopped.

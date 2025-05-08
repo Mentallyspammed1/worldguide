@@ -1,0 +1,93 @@
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Logger initialized for symbol TRUMP/USDT.
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - CCXT Client initialized for TRUMP/USDT. Markets assigned.
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Trading Analyzer initialized.
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - --- Starting Analysis ---
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Symbol: TRUMP/USDT (Spot)
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Interval: 5 (CCXT: 5m)
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - API Env: PROD (URL: {'spot': 'https://api.{hostname}', 'futures': 'https://api.{hostname}', 'v2': 'https://api.{hostname}', 'public': 'https://api.{hostname}', 'private': 'https://api.{hostname}'})
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Loop Interval: 30 seconds
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Kline Limit: 200 candles
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Orderbook Limit: 50 levels
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Timezone: America/Chicago
+2025-05-01T04:09:31-0500 - INFO - TRUMP/USDT - Starting analysis loop for TRUMP/USDT with interval 5...
+2025-05-01T04:09:47-0500 - INFO - TRUMP/USDT - 
+--- Analysis Report for TRUMP/USDT --- (2025-05-01 04:09:46 CDT)
+Interval: 0 days 00:05:00    Current Price: $13.1700
+EMA Align (12/26): Bullish (S:13.16 < L:13.15)
+ADX Trend (14) (12.17): Ranging (ADX < 25)
+PSAR (13.0976): Bullish
+RSI (14) (52.28): Neutral
+MFI (14) (62.10): Neutral
+CCI (20) (80.63): Neutral
+Williams %R (14) (-35.71): Neutral
+StochRSI (3/3) (K:74.70 D:83.06): Bearish (Crossed Down)
+MACD (12/26/9) (L:0.0104 S:0.0056): Above Signal (Line > Signal)
+BBands (20/2.0) (13.17): Within Bands (L:13.08 M:13.14 U:13.21)
+Volume vs MA(20) (2816): Low Volume (Vol:2816 MA:7167)
+OBV Trend (219458): Flat
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $13.0700
+Nearest Support:
+  > Fib 38.2% (Retrace Down): $13.1286
+  > Fib 50.0% (Retrace Down): $13.0200
+  > Fib 61.8% (Retrace Down): $12.9114
+Nearest Resistance:
+  > Fib 23.6% (Retrace Down): $13.2629
+  > Period High: $13.4800
+  > R1: $13.5800
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $916614
+OB Value (Asks): $763740
+Significant OB Clusters (Top 5):
+  Support near Pivot ($13.0700) - Value: $114843
+  Support near Fib 38.2% (Retrace Down) ($13.1286) - Value: $104736
+  Resistance near Fib 23.6% (Retrace Down) ($13.2629) - Value: $71663
+  Support near Fib 50.0% (Retrace Down) ($13.0200) - Value: $32166
+  Support near Fib 61.8% (Retrace Down) ($12.9114) - Value: $25123
+
+2025-05-01T04:10:07-0500 - INFO - TRUMP/USDT - 
+--- Analysis Report for TRUMP/USDT --- (2025-05-01 04:10:06 CDT)
+Interval: 0 days 00:05:00    Current Price: $13.1600
+EMA Align (12/26): Bullish (S:13.16 < L:13.15)
+ADX Trend (14) (12.56): Ranging (ADX < 25)
+PSAR (13.1025): Bullish
+RSI (14) (51.08): Neutral
+MFI (14) (63.98): Neutral
+CCI (20) (46.82): Neutral
+Williams %R (14) (-42.86): Neutral
+StochRSI (3/3) (K:57.30 D:72.32): Below Signal (K < D)
+MACD (12/26/9) (L:0.0088 S:0.0061): Above Signal (Line > Signal)
+BBands (20/2.0) (13.16): Within Bands (L:13.08 M:13.14 U:13.21)
+Volume vs MA(20) (0): Low Volume (Vol:0 MA:6836)
+OBV Trend (209188): Flat
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $13.0667
+Nearest Support:
+  > Fib 38.2% (Retrace Down): $13.1286
+  > Fib 50.0% (Retrace Down): $13.0200
+  > Fib 61.8% (Retrace Down): $12.9114
+Nearest Resistance:
+  > Fib 23.6% (Retrace Down): $13.2629
+  > Period High: $13.4800
+  > R1: $13.5733
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $901797
+OB Value (Asks): $769812
+Significant OB Clusters (Top 5):
+  Support near Pivot ($13.0667) - Value: $104972
+  Support near Fib 38.2% (Retrace Down) ($13.1286) - Value: $84059
+  Resistance near Fib 23.6% (Retrace Down) ($13.2629) - Value: $71860
+  Support near Fib 50.0% (Retrace Down) ($13.0200) - Value: $33639
+  Support near Fib 61.8% (Retrace Down) ($12.9114) - Value: $25123
+
+2025-05-01T04:10:11-0500 - INFO - TRUMP/USDT - Main analysis task was cancelled.
+2025-05-01T04:10:11-0500 - INFO - TRUMP/USDT - Initiating shutdown sequence...
+2025-05-01T04:10:11-0500 - INFO - TRUMP/USDT - Closed CCXT exchange connection.
+2025-05-01T04:10:11-0500 - INFO - TRUMP/USDT - Application finished.

@@ -1,0 +1,361 @@
+Okay, let's refine the introductory text for improved clarity, impact, and flow, and then present the complete, enhanced version including the bash script.
+
+---
+
+### **Enhanced Project Setup Script for Bybit EVT Strategy (v1.1)**
+
+This document details an enhanced bash script meticulously crafted to rapidly scaffold a Python project environment for developing a trading bot. It specifically targets the Bybit exchange's V5 API and implements a foundational trading strategy based on the Ehlers Volumetric Trend (EVT) indicator.
+
+**Core Purpose:** Eliminate the repetitive and time-consuming initial setup phase. This automation empowers developers to immediately dive into refining the trading strategy, customizing the core bot logic, and implementing unique features.
+
+**Automated Setup Actions:**
+
+*   **Organized Structure:** Creates a clean, logically structured project directory named `bybit_evt_strategy`.
+*   **Essential Modules:** Generates core Python files (`config_models.py`, `neon_logger.py`, `bybit_utils.py`, `bybit_helper_functions.py`, `indicators.py`, `ehlers_volumetric_strategy.py`, `main.py`), pre-populated with robust, production-ready starting code.
+*   **Configuration Scaffolding:** Sets up necessary configuration files: `.env` for secure API key management, `.gitignore` for maintaining version control hygiene, and `requirements.txt` for defining project dependencies.
+*   **Initial Documentation:** Generates a basic `README.md` file to serve as a starting point for project documentation.
+*   **Version Control Ready:** Initializes a local Git repository and performs an initial commit, capturing the generated project structure.
+
+**Prerequisites:**
+
+*   **Operating System:** A Unix-like environment (Linux, macOS, or WSL on Windows) with the Bash shell.
+*   **Git:** Must be installed and accessible via the system's PATH environment variable.
+*   **Python 3.x:** Required only for *running* the generated Python bot later, not for executing this setup script. Python 3.8 or higher is recommended to fully leverage the type hinting features used in the generated code.
+
+**Key Features of the Generated Project Skeleton:**
+
+*   **Robust Configuration (Pydantic V2):** Employs Pydantic V2 via `pydantic-settings` for defining, validating, and loading application settings from environment variables and the `.env` file. This ensures type safety, clear defaults, and easy management of configuration parameters.
+*   **Modular & Maintainable Design:** Promotes clean code and easier maintenance by separating concerns into distinct, well-defined Python modules (configuration, logging, exchange utilities, API helpers, indicators, strategy logic, main execution).
+*   **Asynchronous Core (`asyncio`):** Built upon Python's native `asyncio` library, enabling efficient handling of I/O-bound operations such as network requests (API calls) and potential future WebSocket integrations.
+*   **EVT Strategy Foundation:** Provides a functional, albeit basic, implementation of the Ehlers Volumetric Trend strategy within `ehlers_volumetric_strategy.py`, ready for analysis and extension.
+*   **Resilient Exchange Interaction (`ccxt`):** Includes well-structured helper functions in `bybit_helper_functions.py` for interacting reliably with the Bybit V5 API via the `ccxt` library. Features include automatic retries with exponential backoff for transient errors and comprehensive error handling.
+*   **Customizable & Informative Logging:** Utilizes a dedicated `neon_logger.py` module offering flexible, colorized console logging (for TTY environments) and optional file logging with rotation capabilities, making debugging and monitoring significantly easier.
+*   **Git Ready:** Initializes the project as a local Git repository from the outset, facilitating immediate version tracking, branching, and collaboration.
+
+**<0xF0><0x9F><0x9A><0xA7> Crucial Steps & Critical Warnings <0xF0><0x9F><0x9A><0xA7>**
+
+1.  <0xE2><0x9A><0xA0><0xEF><0xB8><0x8F> **API Key Security (UTMOST IMPORTANCE):**
+    *   The generated `.env` file contains **PLACEHOLDER** values: `YOUR_API_KEY_PLACEHOLDER` and `YOUR_API_SECRET_PLACEHOLDER`.
+    *   **YOU ABSOLUTELY MUST EDIT the `.env` file and replace these placeholders with your ACTUAL Bybit API Key and Secret** before attempting to run the Python bot code.
+    *   Generate new API keys via the Bybit website. **Strongly recommended:** Start development using **Testnet** keys.
+    *   Ensure the generated keys possess the necessary permissions for `Orders` and `Positions` (both Read & Write) under the **Unified Trading Account (UTA)** scope for full functionality with the V5 API.
+    *   **NEVER COMMIT YOUR ACTUAL API KEYS OR `.env` FILE TO VERSION CONTROL (e.g., Git).** The provided `.gitignore` file correctly excludes `.env` by default – **DO NOT ALTER OR REMOVE THIS EXCLUSION**. Sharing secrets accidentally can lead to catastrophic financial loss.
+
+2.  <0xF0><0x9F><0x9A><0xAB> **Execution Context & Overwriting Prevention:**
+    *   Run this setup script (`create_project.sh`) **only** within the parent directory where you intend the new `bybit_evt_strategy` project folder to be created. For example, if you want the project at `~/dev/bybit_evt_strategy`, run the script from `~/dev/`.
+    *   The script incorporates a safety check: It will **exit immediately** if the target project directory (`bybit_evt_strategy`) already exists in the current location to prevent accidental data deletion or overwriting. You must manually remove or rename any pre-existing conflicting directory before execution.
+
+3.  <0xF0><0x9F><0xAA><0xB0> **Python Virtual Environment (Highly Recommended):**
+    *   Once the script successfully completes, navigate (`cd`) into the newly created `bybit_evt_strategy` directory.
+    *   **Before installing any Python packages**, create and activate a Python virtual environment. This isolates the project's dependencies from your global Python installation, preventing version conflicts and ensuring reproducibility. The necessary commands are provided in the script's final output messages and the generated `README.md`.
+
+4.  <0xF0><0x9F><0x93><0x9D> **Local Git Repository Configuration:**
+    *   The script initializes a *local* Git repository within the project directory.
+    *   It includes commented-out example commands in its final output showing how to configure your Git user name and email *specifically for this repository*, if they differ from your global Git settings. Setting this correctly ensures proper attribution on your commits.
+
+5.  <0xE2><0x9A><0xA1><0xEF><0xB8><0x8F> **Remote Git Repository (Manual Step):**
+    *   This setup script **does not** automatically create or link to a remote repository (e.g., on platforms like GitHub, GitLab, Bitbucket).
+    *   You will need to manually create a new, empty repository on your preferred hosting service.
+    *   Follow the example commands provided in the script's final output messages to connect your local repository to the newly created remote and push the initial commit.
+
+---
+
+### **The Complete Bash Script (`create_project.sh`)**
+
+```bash
+#!/bin/bash
+# Script to create the directory structure, populate files for the Bybit EVT strategy bot,
+# and initialize a new Git repository.
+# Version: 1.1
+
+# --- Safety Settings ---
+# Exit immediately if a command exits with a non-zero status. Crucial for preventing partial setup on error.
+set -e
+# Treat unset variables as an error when substituting. Uncomment cautiously if needed, ensure all vars are defined.
+# set -u
+
+# --- Configuration ---
+PROJECT_DIR="bybit_evt_strategy"
+# These GIT variables are primarily used for generating instructions in the final output.
+# Replace placeholders here OR update the final instructions manually if preferred.
+GIT_USER_NAME="YourGitHubUsername"       # Example: Replace with your actual GitHub/GitLab username
+GIT_USER_EMAIL="your_email@example.com"  # Example: Replace with your actual email used for Git commits
+GIT_REMOTE_EXAMPLE="git@github.com:${GIT_USER_NAME}/${PROJECT_DIR}.git" # Example SSH URL (Adapt for HTTPS if needed)
+
+# --- ANSI Color Codes for Output ---
+C_RESET='\033[0m'
+C_BOLD='\033[1m'
+C_INFO='\033[36m'    # Cyan
+C_SUCCESS='\033[32m' # Green
+C_WARN='\033[33m'    # Yellow
+C_ERROR='\033[91m'   # Bright Red
+C_DIM='\033[2m'      # Dim text
+
+# --- Helper Function for Progress ---
+step_counter=0
+total_steps=12 # Approximate number of major steps (Update if adding/removing steps)
+progress() {
+    step_counter=$((step_counter + 1))
+    echo -e "\n${C_INFO}${C_BOLD}[Step ${step_counter}/${total_steps}] $1${C_RESET}"
+}
+
+# --- Pre-flight Checks ---
+echo -e "${C_INFO}${C_BOLD}🚀 Starting Project Setup: ${PROJECT_DIR}${C_RESET}"
+echo -e "${C_DIM}--------------------------------------------------${C_RESET}"
+
+progress "Checking Prerequisites..."
+
+# Check if Git is installed
+if ! command -v git &> /dev/null; then
+  echo -e "${C_ERROR}❌ Error: 'git' command not found. Please install Git.${C_RESET}"
+  exit 1
+else
+  echo -e "${C_SUCCESS}✅ Git found: $(git --version)${C_RESET}"
+fi
+
+# Safety Check: Prevent overwriting existing directory
+if [ -d "$PROJECT_DIR" ]; then
+  echo -e "${C_ERROR}❌ Error: Directory '${PROJECT_DIR}' already exists in the current location ($(pwd)).${C_RESET}"
+  echo -e "${C_WARN}👉 Please remove or rename the existing directory before running this script.${C_RESET}"
+  exit 1
+else
+  echo -e "${C_SUCCESS}✅ Target directory '${PROJECT_DIR}' is available.${C_RESET}"
+fi
+
+# --- Directory Creation ---
+progress "Creating Project Directory Structure..."
+mkdir -p "$PROJECT_DIR"
+echo -e "${C_SUCCESS}✅ Created directory: ${PROJECT_DIR}${C_RESET}"
+cd "$PROJECT_DIR" # Change into the project directory for subsequent file creation
+echo -e "${C_DIM}   -> Changed working directory to: $(pwd)${C_RESET}"
+
+
+# --- File Generation ---
+# Use single quotes around 'EOF' in cat << 'EOF' to prevent shell variable expansion inside the heredoc blocks.
+# This is crucial for preserving the Python code exactly as written.
+
+progress "Generating Python Source Files..."
+
+# --- Create config_models.py ---
+echo -e "${C_DIM}   -> Generating config_models.py${C_RESET}"
+cat << 'EOF' > config_models.py
+# config_models.py
+"""
+Pydantic Models for Application Configuration using pydantic-settings (v2).
+
+Loads configuration from environment variables and/or a .env file.
+Provides type validation, default values, and structure for the trading bot settings.
+"""
+
+import logging
+import os # For environment variable access during load
+from decimal import Decimal
+from enum import Enum
+from typing import Any, Dict, List, Literal, Optional, Union, Tuple # Added Tuple
+
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationError,
+    field_validator,
+    PositiveInt,
+    PositiveFloat,
+    NonNegativeInt,
+    FilePath, # Consider if needed later
+    DirectoryPath, # Consider if needed later
+    model_validator,
+)
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# --- Define Enums for Bybit V5 API parameters (improves type safety) ---
+# These can be used directly in type hints and validated by Pydantic.
+
+class Category(str, Enum):
+    LINEAR = "linear"
+    INVERSE = "inverse"
+    SPOT = "spot"
+    OPTION = "option"
+
+class PositionIdx(int, Enum):
+    """ 0: One-Way Mode, 1: Buy side of Hedge Mode, 2: Sell side of Hedge Mode """
+    ONE_WAY = 0
+    HEDGE_BUY = 1
+    HEDGE_SELL = 2
+
+class OrderFilter(str, Enum):
+    ORDER = "Order"
+    STOP_ORDER = "StopOrder"
+    TP_SL_ORDER = "tpslOrder" # Unified TP/SL order type
+    TAKE_PROFIT = "TakeProfit" # Can be used in stopOrderType
+    STOP_LOSS = "StopLoss"     # Can be used in stopOrderType
+    # Add other potential filters if needed
+
+class Side(str, Enum):
+    BUY = "Buy"
+    SELL = "Sell"
+
+class TimeInForce(str, Enum):
+    GTC = "GTC" # GoodTillCancel
+    IOC = "IOC" # ImmediateOrCancel
+    FOK = "FOK" # FillOrKill
+    POST_ONLY = "PostOnly" # For Limit orders only
+
+class TriggerBy(str, Enum):
+    LAST_PRICE = "LastPrice"
+    MARK_PRICE = "MarkPrice"
+    INDEX_PRICE = "IndexPrice"
+
+class TriggerDirection(int, Enum):
+    """ Trigger direction for conditional orders: 1: Rise, 2: Fall """
+    RISE = 1
+    FALL = 2
+
+class OrderType(str, Enum):
+    LIMIT = "Limit"
+    MARKET = "Market"
+
+class StopLossTakeProfitMode(str, Enum):
+    """ Position TP/SL mode: Full takes the entire position size """
+    FULL = "Full"
+    PARTIAL = "Partial" # Not typically used for bot's TP/SL orders, more for position setting
+
+class AccountType(str, Enum):
+    UNIFIED = "UNIFIED"
+    CONTRACT = "CONTRACT" # Deprecated/Legacy
+    SPOT = "SPOT" # Legacy Spot
+
+# --- Configuration Models ---
+
+class APIConfig(BaseModel):
+    """Configuration for Bybit API Connection and Market Defaults."""
+    exchange_id: Literal["bybit"] = Field("bybit", description="CCXT Exchange ID (fixed)")
+    api_key: Optional[str] = Field(None, description="Bybit API Key (Loaded from env/file)")
+    api_secret: Optional[str] = Field(None, description="Bybit API Secret (Loaded from env/file)")
+    testnet_mode: bool = Field(True, description="Use Bybit Testnet environment")
+    default_recv_window: PositiveInt = Field(
+        10000, ge=100, le=60000, description="API request validity window in milliseconds (100-60000)"
+    )
+
+    # Market & Symbol Defaults
+    symbol: str = Field("BTC/USDT:USDT", description="Primary trading symbol (e.g., BTC/USDT:USDT for linear swap)")
+    category: Category = Field(Category.LINEAR, description="Primary symbol category (linear, inverse, spot, option)")
+    usdt_symbol: str = Field("USDT", description="Quote currency for balance reporting (usually USDT)")
+    # expected_market_type: Literal["swap", "spot", "option", "future"] = Field(
+    #     "swap", description="Expected CCXT market type for validation (e.g., 'swap')"
+    # ) # Less critical with explicit category
+    # expected_market_logic: Literal["linear", "inverse"] = Field(
+    #     "linear", description="Expected market logic for derivative validation ('linear' or 'inverse')"
+    # ) # Less critical with explicit category
+
+    # Retry & Rate Limit Defaults
+    retry_count: NonNegativeInt = Field(
+        3, description="Default number of retries for API calls (0 disables retries)"
+    )
+    retry_delay_seconds: PositiveFloat = Field(
+        2.0, gt=0, description="Default base delay (seconds) for API retries (exponential backoff applies)"
+    )
+
+    # Fee Rates (Important for accurate calculations, **VERIFY THESE FOR YOUR ACCOUNT TIER**)
+    maker_fee_rate: Decimal = Field(
+        Decimal("0.0002"), ge=0, description="Maker fee rate (e.g., 0.0002 for 0.02%)"
+    )
+    taker_fee_rate: Decimal = Field(
+        Decimal("0.00055"), ge=0, description="Taker fee rate (e.g., 0.00055 for 0.055%)"
+    )
+
+    # Order Execution Defaults & Helpers
+    default_slippage_pct: Decimal = Field(
+        Decimal("0.005"), # 0.5%
+        gt=0,
+        le=Decimal("0.1"), # Max 10% sanity check
+        description="Default max allowable slippage % for market order pre-flight checks vs OB spread (e.g., 0.005 for 0.5%)",
+    )
+    position_qty_epsilon: Decimal = Field(
+        Decimal("1e-9"), # Small value for comparing position sizes near zero
+        gt=0,
+        description="Small tolerance value for floating point quantity comparisons (e.g., treating size < epsilon as zero)",
+    )
+    shallow_ob_fetch_depth: PositiveInt = Field(
+        5, ge=1, le=50, description="Order book depth for quick spread/slippage check (e.g., 5)"
+    )
+    order_book_fetch_limit: PositiveInt = Field(
+        25, ge=1, le=1000, description="Default depth for fetching L2 order book (e.g., 25, 50)"
+    )
+
+    # Internal Constants (Mapped to Enums for consistency)
+    pos_none: Literal["NONE"] = "NONE"
+    pos_long: Literal["LONG"] = "LONG"
+    pos_short: Literal["SHORT"] = "SHORT"
+    side_buy: Side = Side.BUY
+    side_sell: Side = Side.SELL
+
+    @field_validator('api_key', 'api_secret', mode='before') # mode='before' to catch env var directly
+    @classmethod
+    def check_not_placeholder(cls, v: Optional[str], info) -> Optional[str]:
+        """Warns if API key/secret looks like a placeholder."""
+        placeholder_key = "YOUR_API_KEY_PLACEHOLDER"
+        placeholder_secret = "YOUR_API_SECRET_PLACEHOLDER"
+        field_name = info.field_name
+
+        if v and isinstance(v, str):
+            if field_name == 'api_key' and v == placeholder_key:
+                print(f"\033[93mWarning [APIConfig]: Field '{field_name}' is using the default placeholder value. Please update in '.env'.\033[0m")
+            elif field_name == 'api_secret' and v == placeholder_secret:
+                 print(f"\033[93mWarning [APIConfig]: Field '{field_name}' is using the default placeholder value. Please update in '.env'.\033[0m")
+            elif "PLACEHOLDER" in v.upper(): # Catch other potential placeholders
+                 print(f"\033[93mWarning [APIConfig]: Field '{field_name}' might contain a placeholder: '{v[:10]}...'\033[0m")
+        return v
+
+    @field_validator('symbol', mode='before')
+    @classmethod
+    def check_and_format_symbol(cls, v: Any) -> str:
+        """Validates and standardizes the symbol format."""
+        if not isinstance(v, str) or not v:
+             raise ValueError("Symbol must be a non-empty string")
+        # Basic check for common derivative format (e.g., BTC/USDT:USDT) or spot (BTC/USDT)
+        symbol_upper = v.strip().upper()
+        if ":" not in symbol_upper and "/" not in symbol_upper:
+            raise ValueError(f"Potentially invalid symbol format: '{v}'. Expected format like 'BTC/USDT:USDT' or 'BTC/USDT'.")
+        # CCXT handles exact format, but uppercase is standard
+        return symbol_upper
+
+    @model_validator(mode='after')
+    def check_api_keys_if_not_testnet(self) -> 'APIConfig':
+        """Warns if API keys are missing when not in testnet mode."""
+        if not self.testnet_mode and (not self.api_key or not self.api_secret or "PLACEHOLDER" in str(self.api_key) or "PLACEHOLDER" in str(self.api_secret)):
+            print("\033[91mCRITICAL [APIConfig]: API Key/Secret missing or placeholders detected while Testnet mode is DISABLED. Live trading likely impossible.\033[0m")
+            # Consider raising ValueError here if keys are strictly mandatory for any operation
+        return self
+
+    @model_validator(mode='after')
+    def check_symbol_category_consistency(self) -> 'APIConfig':
+        """Basic check for potential symbol/category mismatch."""
+        symbol = self.symbol
+        category = self.category
+
+        is_spot = "/" in symbol and ":" not in symbol
+        is_linear = ":USDT" in symbol or ":USDC" in symbol
+        is_inverse = ":" in symbol and not is_linear and not is_spot # Basic guess
+
+        if category == Category.SPOT and not is_spot:
+             print(f"\033[93mWarning [APIConfig]: Category is SPOT, but symbol '{symbol}' doesn't look like a typical spot symbol (e.g., BTC/USDT).\033[0m")
+        elif category == Category.LINEAR and not is_linear:
+             print(f"\033[93mWarning [APIConfig]: Category is LINEAR, but symbol '{symbol}' doesn't look like a typical linear contract (e.g., BTC/USDT:USDT).\033[0m")
+        elif category == Category.INVERSE and not is_inverse:
+             print(f"\033[93mWarning [APIConfig]: Category is INVERSE, but symbol '{symbol}' doesn't look like a typical inverse contract.\033[0m")
+        # Option check is omitted for brevity
+
+        return self
+
+
+class IndicatorSettings(BaseModel):
+    """Parameters for Technical Indicator Calculations."""
+    min_data_periods: PositiveInt = Field(
+        100, ge=20, description="Minimum historical candles needed for reliable indicator calculations (e.g., 100)"
+    )
+    # Ehlers Volumetric specific
+    evt_length: PositiveInt = Field(
+        7, gt=1, description="Period length for EVT indicator (must be > 1)"
+    )
+    evt_multiplier: PositiveFloat = Field(
+        2.5, gt=0, description="Multiplier for EVT bands calculation (must be > 0, represents percentage, e.g., 2.5 means 2.5%)

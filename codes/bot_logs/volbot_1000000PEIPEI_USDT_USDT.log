@@ -1,0 +1,196 @@
+2025-04-24 03:51:42 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2391] - --- Starting analysis cycle for 1000000PEIPEI/USDT:USDT ---
+2025-04-24 03:51:42 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1598] - Market Info 1000000PEIPEI/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-05, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:51:42 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000PEIPEI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:42 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000PEIPEI/USDT:USDT.[0m
+2025-04-24 03:51:42 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000PEIPEI/USDT:USDT.
+2025-04-24 03:51:42 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:2426] - Fetching 1100 klines for 1000000PEIPEI/USDT:USDT 5m...
+2025-04-24 03:51:42 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:509] - Fetching klines for 1000000PEIPEI/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:51:44 - INFO - [volbot_1000000PEIPEI_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000PEIPEI/USDT:USDT 5m
+2025-04-24 03:51:44 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000PEIPEI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:44 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000PEIPEI/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:51:44 - INFO - [volbot_1000000PEIPEI_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:51:44 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 03:51:44 - INFO - [volbot_1000000PEIPEI_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:51:44 - INFO - [volbot_1000000PEIPEI_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:51:44 - INFO - [volbot_1000000PEIPEI_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 01:05:00, Candle: 2025-04-20 23:00:00, Range: [0.03944, 0.03949])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.04137 > Top 0.03949)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 06:15:00, Candle: 2025-04-21 04:10:00, Range: [0.04127, 0.04134])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.04188 > Top 0.04134)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 08:55:00, Candle: 2025-04-21 06:50:00, Range: [0.04127, 0.04132])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.04136 > Top 0.04132)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 09:50:00, Candle: 2025-04-21 07:45:00, Range: [0.04118, 0.04132])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.03970 < Bottom 0.04118)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-21 11:30:00, Candle: 2025-04-21 09:25:00, Range: [0.04090, 0.04101])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 14:00:00, Candle: 2025-04-21 11:55:00, Range: [0.04028, 0.04043])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.04013 < Bottom 0.04028)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 0.04105 > Top 0.04101)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-21 16:30:00, Candle: 2025-04-21 14:25:00, Range: [0.04105, 0.04105])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 0.04141 > Top 0.04105)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-21 17:00:00, Candle: 2025-04-21 14:55:00, Range: [0.04108, 0.04108])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.04015 < Bottom 0.04108)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_9 (Pivot: 2025-04-21 19:45:00, Candle: 2025-04-21 17:40:00, Range: [0.04051, 0.04079])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_9 (Close 0.04009 < Bottom 0.04051)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-21 22:10:00, Candle: 2025-04-21 20:05:00, Range: [0.04017, 0.04023])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.04001 < Bottom 0.04017)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-21 22:25:00, Candle: 2025-04-21 20:20:00, Range: [0.04000, 0.04021])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.04039 > Top 0.04021)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.04029, 0.04039])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.03993 < Bottom 0.04029)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-22 03:45:00, Candle: 2025-04-22 01:40:00, Range: [0.04080, 0.04086])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.04111 > Top 0.04086)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-22 09:35:00, Candle: 2025-04-22 07:30:00, Range: [0.04005, 0.04005])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.04164 > Top 0.04005)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-22 12:45:00, Candle: 2025-04-22 10:40:00, Range: [0.04062, 0.04062])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.04116 > Top 0.04062)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-22 14:15:00, Candle: 2025-04-22 12:10:00, Range: [0.04071, 0.04071])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-22 15:10:00, Candle: 2025-04-22 13:05:00, Range: [0.04098, 0.04107])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.04298 > Top 0.04107)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-22 19:30:00, Candle: 2025-04-22 17:25:00, Range: [0.04196, 0.04196])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.04099 < Bottom 0.04196)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-22 21:50:00, Candle: 2025-04-22 19:45:00, Range: [0.04122, 0.04122])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.04219 > Top 0.04122)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 00:55:00, Candle: 2025-04-22 22:50:00, Range: [0.04168, 0.04168])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.04127 < Bottom 0.04168)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_21 (Pivot: 2025-04-23 04:50:00, Candle: 2025-04-23 02:45:00, Range: [0.04294, 0.04301])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_21 (Close 0.04538 > Top 0.04301)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-23 08:15:00, Candle: 2025-04-23 06:10:00, Range: [0.04501, 0.04554])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.04348 < Bottom 0.04501)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-23 09:25:00, Candle: 2025-04-23 07:20:00, Range: [0.04364, 0.04364])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.04453 > Top 0.04364)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_24 (Pivot: 2025-04-23 13:30:00, Candle: 2025-04-23 11:25:00, Range: [0.04353, 0.04365])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_24 (Close 0.04469 > Top 0.04365)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_25 (Pivot: 2025-04-23 15:20:00, Candle: 2025-04-23 13:15:00, Range: [0.04429, 0.04432])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_25 (Close 0.04252 < Bottom 0.04429)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_26 (Pivot: 2025-04-23 20:05:00, Candle: 2025-04-23 18:00:00, Range: [0.04349, 0.04390])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_26 (Close 0.04391 > Top 0.04390)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_27 (Pivot: 2025-04-23 22:10:00, Candle: 2025-04-23 20:05:00, Range: [0.04383, 0.04399])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_27 (Close 0.04367 < Bottom 0.04383)
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_28 (Pivot: 2025-04-24 04:10:00, Candle: 2025-04-24 02:05:00, Range: [0.04495, 0.04498])
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_28 (Close 0.04298 < Bottom 0.04495)
+2025-04-24 03:51:44 - INFO - [volbot_1000000PEIPEI_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 13, Bear OBs: 15
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1143] - Indicator calculations complete for 1000000PEIPEI/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1198] - Latest strategy state updated for 1000000PEIPEI/USDT:USDT: {'open': '0.0428', 'high': '0.0429', 'low': '0.0428', 'close': '0.0429', 'volume': Decimal('26447.0'), 'atr_risk': '0.0003'}
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1872] - Fetching position for symbol: 1000000PEIPEI/USDT:USDT
+2025-04-24 03:51:44 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:51:45 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2024] - No active position found for 1000000PEIPEI/USDT:USDT.
+2025-04-24 03:51:45 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:432] - Fetching ticker for 1000000PEIPEI/USDT:USDT...
+2025-04-24 03:51:45 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:441] - Ticker data received for 1000000PEIPEI/USDT:USDT: {'symbol': '1000000PEIPEI/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.04564, 'low': 0.04224, 'bid': 0.04284, 'bidVolume': 1245.0, 'ask': 0.04294, 'askVolume': 9001.0, 'vwap': 0.04387412264873083, 'open': 0.0435, 'close': 0.04287, 'last': 0.04287, 'previousClose': None, 'change': -0.00063, 'percentage': -1.4482, 'average': 0.04318, 'baseVolume': 14148210.0, 'quoteVolume': 620740.3008, 'markPrice': 0.04286, 'indexPrice': 0.04277, 'info': {'symbol': '1000000PEIPEIUSDT', 'lastPrice': '0.04287', 'indexPrice': '0.04277', 'markPrice': '0.04286', 'prevPrice24h': '0.04350', 'price24hPcnt': '-0.014482', 'highPrice24h': '0.04564', 'lowPrice24h': '0.04224', 'prevPrice1h': '0.04339', 'openInterest': '13426130', 'openInterestValue': '575443.93', 'turnover24h': '620740.3008', 'volume24h': '14148210.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '9001', 'bid1Price': '0.04284', 'ask1Price': '0.04294', 'bid1Size': '1245', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:51:45 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:447] - Using 'last' price: 0.04287
+2025-04-24 03:51:45 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:51:45 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2611] - No open position for 1000000PEIPEI/USDT:USDT. Checking for entry signals.
+2025-04-24 03:51:45 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:51:45 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2708] - --- Finished analysis cycle for 1000000PEIPEI/USDT:USDT (2.76s) ---
+2025-04-24 03:53:58 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2391] - --- Starting analysis cycle for 1000000PEIPEI/USDT:USDT ---
+2025-04-24 03:53:58 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1598] - Market Info 1000000PEIPEI/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-05, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:53:58 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000PEIPEI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:53:58 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000PEIPEI/USDT:USDT.[0m
+2025-04-24 03:53:58 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000PEIPEI/USDT:USDT.
+2025-04-24 03:53:58 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:2426] - Fetching 1150 klines for 1000000PEIPEI/USDT:USDT 5m...
+2025-04-24 03:53:58 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:509] - Fetching klines for 1000000PEIPEI/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:53:59 - INFO - [volbot_1000000PEIPEI_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000000PEIPEI/USDT:USDT 5m
+2025-04-24 03:53:59 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000PEIPEI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:53:59 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000000PEIPEI/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:53:59 - INFO - [volbot_1000000PEIPEI_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:53:59 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:53:59 - INFO - [volbot_1000000PEIPEI_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:53:59 - INFO - [volbot_1000000PEIPEI_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:53:59 - INFO - [volbot_1000000PEIPEI_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 01:05:00, Candle: 2025-04-20 23:00:00, Range: [0.03944, 0.03949])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.04137 > Top 0.03949)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 06:15:00, Candle: 2025-04-21 04:10:00, Range: [0.04127, 0.04134])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.04188 > Top 0.04134)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 08:55:00, Candle: 2025-04-21 06:50:00, Range: [0.04127, 0.04132])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.04136 > Top 0.04132)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 09:50:00, Candle: 2025-04-21 07:45:00, Range: [0.04118, 0.04132])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.03970 < Bottom 0.04118)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-21 11:30:00, Candle: 2025-04-21 09:25:00, Range: [0.04090, 0.04101])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 14:00:00, Candle: 2025-04-21 11:55:00, Range: [0.04028, 0.04043])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.04013 < Bottom 0.04028)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 0.04105 > Top 0.04101)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_7 (Pivot: 2025-04-21 16:30:00, Candle: 2025-04-21 14:25:00, Range: [0.04105, 0.04105])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_7 (Close 0.04141 > Top 0.04105)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-21 17:00:00, Candle: 2025-04-21 14:55:00, Range: [0.04108, 0.04108])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.04015 < Bottom 0.04108)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_9 (Pivot: 2025-04-21 19:45:00, Candle: 2025-04-21 17:40:00, Range: [0.04051, 0.04079])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_9 (Close 0.04009 < Bottom 0.04051)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-21 22:10:00, Candle: 2025-04-21 20:05:00, Range: [0.04017, 0.04023])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.04001 < Bottom 0.04017)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-21 22:25:00, Candle: 2025-04-21 20:20:00, Range: [0.04000, 0.04021])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.04039 > Top 0.04021)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.04029, 0.04039])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.03993 < Bottom 0.04029)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-22 03:45:00, Candle: 2025-04-22 01:40:00, Range: [0.04080, 0.04086])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.04111 > Top 0.04086)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-22 09:35:00, Candle: 2025-04-22 07:30:00, Range: [0.04005, 0.04005])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.04164 > Top 0.04005)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-22 12:45:00, Candle: 2025-04-22 10:40:00, Range: [0.04062, 0.04062])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.04116 > Top 0.04062)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-22 14:15:00, Candle: 2025-04-22 12:10:00, Range: [0.04071, 0.04071])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-22 15:10:00, Candle: 2025-04-22 13:05:00, Range: [0.04098, 0.04107])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.04298 > Top 0.04107)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-22 19:30:00, Candle: 2025-04-22 17:25:00, Range: [0.04196, 0.04196])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.04099 < Bottom 0.04196)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-22 21:50:00, Candle: 2025-04-22 19:45:00, Range: [0.04122, 0.04122])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.04219 > Top 0.04122)
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 00:55:00, Candle: 2025-04-22 22:50:00, Range: [0.04168, 0.04168])
+2025-04-24 03:53:59 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.04127 < Bottom 0.04168)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_21 (Pivot: 2025-04-23 04:50:00, Candle: 2025-04-23 02:45:00, Range: [0.04294, 0.04301])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_21 (Close 0.04538 > Top 0.04301)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-23 08:15:00, Candle: 2025-04-23 06:10:00, Range: [0.04501, 0.04554])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.04348 < Bottom 0.04501)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-23 09:25:00, Candle: 2025-04-23 07:20:00, Range: [0.04364, 0.04364])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.04453 > Top 0.04364)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_24 (Pivot: 2025-04-23 13:30:00, Candle: 2025-04-23 11:25:00, Range: [0.04353, 0.04365])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_24 (Close 0.04469 > Top 0.04365)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_25 (Pivot: 2025-04-23 15:20:00, Candle: 2025-04-23 13:15:00, Range: [0.04429, 0.04432])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_25 (Close 0.04252 < Bottom 0.04429)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:918] - Created Bearish OB: BearOB_26 (Pivot: 2025-04-23 20:05:00, Candle: 2025-04-23 18:00:00, Range: [0.04349, 0.04390])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:970] - Closed Bearish OB: BearOB_26 (Close 0.04391 > Top 0.04390)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_27 (Pivot: 2025-04-23 22:10:00, Candle: 2025-04-23 20:05:00, Range: [0.04383, 0.04399])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_27 (Close 0.04367 < Bottom 0.04383)
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:947] - Created Bullish OB: BullOB_28 (Pivot: 2025-04-24 04:10:00, Candle: 2025-04-24 02:05:00, Range: [0.04495, 0.04498])
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:957] - Closed Bullish OB: BullOB_28 (Close 0.04298 < Bottom 0.04495)
+2025-04-24 03:54:00 - INFO - [volbot_1000000PEIPEI_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 13, Bear OBs: 15
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1143] - Indicator calculations complete for 1000000PEIPEI/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1198] - Latest strategy state updated for 1000000PEIPEI/USDT:USDT: {'open': '0.0428', 'high': '0.0429', 'low': '0.0428', 'close': '0.0429', 'volume': Decimal('26447.0'), 'atr_risk': '0.0003'}
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1872] - Fetching position for symbol: 1000000PEIPEI/USDT:USDT
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:54:00 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2024] - No active position found for 1000000PEIPEI/USDT:USDT.
+2025-04-24 03:54:00 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:432] - Fetching ticker for 1000000PEIPEI/USDT:USDT...
+2025-04-24 03:54:01 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:441] - Ticker data received for 1000000PEIPEI/USDT:USDT: {'symbol': '1000000PEIPEI/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.04564, 'low': 0.04224, 'bid': 0.04286, 'bidVolume': 649.0, 'ask': 0.04293, 'askVolume': 1166.0, 'vwap': 0.04387509365896334, 'open': 0.04329, 'close': 0.04287, 'last': 0.04287, 'previousClose': None, 'change': -0.00042, 'percentage': -0.9702, 'average': 0.04308, 'baseVolume': 14114506.0, 'quoteVolume': 619275.2727, 'markPrice': 0.04287, 'indexPrice': 0.04282, 'info': {'symbol': '1000000PEIPEIUSDT', 'lastPrice': '0.04287', 'indexPrice': '0.04282', 'markPrice': '0.04287', 'prevPrice24h': '0.04329', 'price24hPcnt': '-0.009702', 'highPrice24h': '0.04564', 'lowPrice24h': '0.04224', 'prevPrice1h': '0.04336', 'openInterest': '13426130', 'openInterestValue': '575578.19', 'turnover24h': '619275.2727', 'volume24h': '14114506.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1166', 'bid1Price': '0.04286', 'ask1Price': '0.04293', 'bid1Size': '649', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:54:01 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:447] - Using 'last' price: 0.04287
+2025-04-24 03:54:01 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:54:01 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2611] - No open position for 1000000PEIPEI/USDT:USDT. Checking for entry signals.
+2025-04-24 03:54:01 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:54:01 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2708] - --- Finished analysis cycle for 1000000PEIPEI/USDT:USDT (2.20s) ---
+2025-04-24 16:19:50 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2391] - --- Starting analysis cycle for 1000000PEIPEI/USDT:USDT ---
+2025-04-24 16:19:50 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1598] - Market Info 1000000PEIPEI/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-05, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 16:19:50 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1045] - Could not determine price precision from tick size for 1000000PEIPEI/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 16:19:50 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000000PEIPEI/USDT:USDT.[0m
+2025-04-24 16:19:50 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000000PEIPEI/USDT:USDT.
+2025-04-24 16:19:50 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:2426] - Fetching 1100 klines for 1000000PEIPEI/USDT:USDT 3m...
+2025-04-24 16:19:50 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:509] - Fetching klines for 1000000PEIPEI/USDT:USDT, 3m, limit=1100 (Attempt 1/4)
+2025-04-24 16:19:50 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2708] - --- Finished analysis cycle for 1000000PEIPEI/USDT:USDT (0.06s) ---
+2025-04-24 16:27:31 - INFO - [volbot_1000000PEIPEI_USDT_USDT:2521] - --- Starting analysis cycle for 1000000PEIPEI/USDT:USDT ---
+2025-04-24 16:27:31 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1653] - Market Info for 1000000PEIPEI/USDT:USDT: ID=1000000PEIPEIUSDT, Type=swap, Contract=Linear, IsContract=True, Precision(Price/Amount/Tick): 1e-05/1.0/N/A, Limits(Amount Min/Max): 1.0/250000.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 16:27:31 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:483] - Fetching klines for 1000000PEIPEI/USDT:USDT, 3m, limit=1100 (Attempt 1/4)
+2025-04-24 16:27:32 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:489] - Received 1000 klines from API.
+2025-04-24 16:27:32 - INFO - [volbot_1000000PEIPEI_USDT_USDT:548] - Successfully fetched and processed 1000 klines for 1000000PEIPEI/USDT:USDT 3m
+2025-04-24 16:27:32 - WARNING - [volbot_1000000PEIPEI_USDT_USDT:1053] - [33mInsufficient data (1000 points) for 1000000PEIPEI/USDT:USDT to calculate all indicators reliably (recommend min: ~1050). Results may be inaccurate or contain NaNs.[0m
+2025-04-24 16:27:32 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:1069] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 16:27:32 - INFO - [volbot_1000000PEIPEI_USDT_USDT:1073] - Calculating Volbot strategy indicators...
+2025-04-24 16:27:32 - INFO - [volbot_1000000PEIPEI_USDT_USDT:611] - Calculating Volumatic Trend Levels...
+2025-04-24 16:27:32 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:577] - Calculating Smoothed Weighted EMA (SWMA) with length: 40...
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 65. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 67. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 71. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 87. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 89. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 90. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 93. Propagating previous levels.
+2025-04-24 16:27:33 - DEBUG - [volbot_1000000PEIPEI_USDT_USDT:672] - NaN encountered for EMA/ATR at trend change index 113. Propagating previous levels.

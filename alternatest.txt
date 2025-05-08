@@ -1,0 +1,471 @@
+```javascript
+#!/usr/bin/env node                                                                                         import { cyan, green, yellow, red, bold, reset } from 'nanocolors';                                         
+// :: Pyrmethus's JavaScript Enchantment for Enhanced Ehlers Supertrend ::
+// Channeling the wisdom of Ehlers, we weave a Supertrend spell with enhanced clarity.
+                                                      /**
+ * @function gaussianFilter                            * @description Applies a simple Gaussian filter (approximated by cascaded SMAs) to smooth data.
+ * @param {number[]} data - Array of numerical data to filter.
+ * @param {number} length - Length of the moving average window (determines filter smoothness).              * @returns {number[]} - Array of filtered data.       */                                                   function gaussianFilter(data, length) {
+    if (!Array.isArray(data) || data.length === 0 || length <= 0) {
+        console.error(red(bold("Error:")) + yellow(" Invalid input for Gaussian filter."));                         return [];                                        }                                                 
+    const sma1 = [];
+    let sum1 = 0;
+    for (let i = 0; i < data.length; i++) {                   sum1 += data[i];                                      if (i >= length) {
+            sum1 -= data[i - length];                         }
+        sma1[i] = sum1 / Math.min(i + 1, length);         }                                                                                                           const sma2 = [];
+    let sum2 = 0;                                         for (let i = 0; i < sma1.length; i++) {
+        sum2 += sma1[i];                                      if (i >= length) {                                        sum2 -= sma1[i - length];                         }
+        sma2[i] = sum2 / Math.min(i + 1, length);
+    }                                                     return sma2;
+}
+                                                                                                            /**                                                    * @function calculateATR
+ * @description Calculates Average True Range (ATR) for a given period.                                      * @param {number[]} high - Array of high prices.
+ * @param {number[]} low - Array of low prices.        * @param {number[]} close - Array of closing prices.  * @param {number} period - Period for ATR calculation.
+ * @returns {number[]} - Array of ATR values.
+ */
+function calculateATR(high, low, close, period) {         if (!Array.isArray(high) || !Array.isArray(low) || !Array.isArray(close) ||
+        high.length !== low.length || high.length !== close.length || period <= 0) {
+        console.error(red(bold("Error:")) + yellow(" Invalid input for ATR calculation."));                         return [];                                        }                                                                                                           const tr = [];
+    for (let i = 0; i < high.length; i++) {                   const highLow = high[i] - low[i];                     const highClosePrev = i > 0 ? Math.abs(high[i] - close[i - 1]) : highLow;
+        const lowClosePrev = i > 0 ? Math.abs(low[i] - close[i - 1]) : highLow;                                     tr.push(Math.max(highLow, highClosePrev, lowClosePrev));
+    }                                                                                                           const atr = [];
+    let sumATR = 0;
+    for (let i = 0; i < tr.length; i++) {
+        sumATR += tr[i];                                      if (i >= period) {                                        sumATR -= tr[i - period];                         }                                                     atr[i] = sumATR / Math.min(i + 1, period);        }
+    return atr;
+}
+                                                      /**
+ * @function ehlersSupertrend
+ * @description Calculates the enhanced Ehlers Supertrend indicator.
+ * @param {number[]} high - Array of high prices.
+ * @param {number[]} low - Array of low prices.        * @param {number[]} close - Array of closing prices.
+ * @param {number} period - Period for ATR and Supertrend calculation.                                       * @param {number} multiplier - Multiplier for ATR in Supertrend calculation.                                * @param {number} gaussianLength - Length for the Gaussian filter to enhance prices.                        * @returns {object[]} - Array of Supertrend objects with 'trend' (1 for bullish, -1 for bearish, 0 for neutral) and 'value'.                                      */                                                   function ehlersSupertrend(high, low, close, period, multiplier, gaussianLength) {                               if (!Array.isArray(high) || !Array.isArray(low) || !Array.isArray(close) ||
+        high.length !== low.length || high.length !== close.length || period <= 0 || multiplier <= 0 || gaussianLength <= 0) {                                            console.error(red(bold("Error:")) + yellow(" Invalid input for Ehlers Supertrend calculation."));           return [];                                        }                                                 
+    const filteredHigh = gaussianFilter(high, gaussianLength);
+    const filteredLow = gaussianFilter(low, gaussianLength);                                                
+    if (filteredHigh.length === 0 || filteredLow.length === 0) {                                                    console.error(red(bold("Error:")) + yellow(" Gaussian filter failed, cannot calculate Supertrend."));                                                             return [];                                        }                                                 
+    const atr = calculateATR(filteredHigh, filteredLow, close, period);                                         if (atr.length === 0) {                                   console.error(red(bold("Error:")) + yellow(" ATR calculation failed, cannot calculate Supertrend."));                                                             return [];                                        }
+                                                          const upperBand = [];                                 const lowerBand = [];
+    for (let i = 0; i < close.length; i++) {
+        upperBand[i] = (filteredHigh[i] + filteredLow[i]) / 2 + multiplier * atr[i];                                lowerBand[i] = (filteredHigh[i] + filteredLow[i]) / 2 - multiplier * atr[i];                            }                                                                                                           const supertrend = [];
+    let trend = 0; // 0: Neutral, 1: Bullish, -1: Bearish
+                                                          for (let i = 0; i < close.length; i++) {                  if (i === 0) {
+            trend = 1; // Initial trend is bullish
+        } else if (supertrend[i - 1].trend === 1) {               if (close[i] <= lowerBand[i]) {                           trend = -1;                                       } else {
+                trend = 1;                                        }                                                 } else if (supertrend[i - 1].trend === -1) {
+            if (close[i] >= upperBand[i]) {                           trend = 1;                                        } else {                                                  trend = -1;
+            }
+        }                                                                                                           let stValue;
+        if (trend === 1) {                                        stValue = lowerBand[i];
+             if (i > 0 && stValue < supertrend[i-1].value && supertrend[i-1].trend === 1) {
+                stValue = supertrend[i-1].value; // Supertrend value should not fall in bullish trend
+             }                                                } else { // trend === -1                                  stValue = upperBand[i];                               if (i > 0 && stValue > supertrend[i-1].value && supertrend[i-1].trend === -1) {
+                stValue = supertrend[i-1].value; // Supertrend value should not rise in bearish trend
+            }                                                 }                                             
+        supertrend[i] = { trend: trend, value: stValue };                                                       }                                                     return supertrend;
+}
+                                                      
+// :: Sample Price Data (Conjured for demonstration) ::                                                     const highPrices = [102, 105, 104, 106, 108, 110, 109, 112, 115, 114, 116, 118, 120, 119, 122];             const lowPrices =  [100, 102, 101, 103, 105, 107, 106, 109, 112, 111, 113, 115, 117, 116, 119];
+const closePrices = [101, 103, 102, 105, 107, 109, 108, 111, 114, 113, 115, 117, 119, 118, 121];            
+// :: Supertrend Parameters (Tune these mystical constants) ::
+const period = 10;
+const multiplier = 3;
+const gaussianLength = 5; // Length of the Gaussian filter, adjust for desired smoothing
+                                                                                                            // :: Invoke the Enhanced Ehlers Supertrend Spell ::  const supertrendResults = ehlersSupertrend(highPrices, lowPrices, closePrices, period, multiplier, gaussianLength);                                               
+                                                      // :: Display the Enchanted Results in Vibrant Hues ::console.log(cyan(bold("\n:: Enhanced Ehlers Supertrend Analysis ::")));                                     console.log(yellow(`Parameters: Period = ${period}, Multiplier = ${multiplier}, Gaussian Length = ${gaussianLength}`));
+
+if (supertrendResults.length > 0) {
+    console.log(cyan(bold("\nDate  | Close | Supertrend | Signal")));                                           console.log(cyan("------|-------|------------|---------"));                                                                                                       for (let i = 0; i < closePrices.length; i++) {            const trend = supertrendResults[i].trend;
+        const stValue = supertrendResults[i].value.toFixed(2);                                                      const closePrice = closePrices[i];
+        let signalColor = reset;                              let signalText = "Neutral";
+
+        if (trend === 1) {                                        signalColor = green;                                  signalText = "Buy";
+        } else if (trend === -1) {                                signalColor = red;                                    signalText = "Sell";                              }                                                                                                           const date = `Day ${i+1}`; // Simple date for demonstration
+        console.log(`${cyan(date.padEnd(5))} | ${closePrice.toString().padEnd(5)} | ${stValue.padEnd(10)} | ${signalColor(bold(signalText))}`);                       }                                                 } else {                                                  console.log(red(bold("No Supertrend results calculated. Check for errors.")));
+}
+
+console.log(cyan(bold("\n:: Enchantment Complete ::")));                                                    ```                                                                                                         **To wield this JavaScript enchantment in your Termux:**
+                                                      1.  **Save:** Save the code above as a file named `ehlers_supertrend.js` in your Termux home directory (`/data/data/com.termux/files/home`).
+2.  **Install `nanocolors`:** If you haven't already, cast the spell to install `nanocolors` using npm:
+    ```bash                                               npm install nanocolors                                ```
+3.  **Execute:**  Invoke the script with Node.js:         ```bash                                               node ehlers_supertrend.js                             ```
+                                                      **Explanation of the Enchantment:**                                                                         *   **`nanocolors` Import:** We begin by importing the vibrant colors from the `nanocolors` library, our mystical pigments for the terminal.                      *   **`gaussianFilter(data, length)`:** This function is the heart of the Ehlers enhancement. It applies a simple Gaussian filter to the input `data`.  A Gaussian filter smooths the price data, reducing noise and potentially improving the Supertrend's signal quality by reducing whipsaws.  Here, we use a cascaded Simple Moving Average (SMA) approach as a computationally efficient approximation of a Gaussian filter. You can adjust the `gaussianLength` parameter to control the degree of smoothing.                                         *   **`calculateATR(high, low, close, period)`:** This function calculates the Average True Range (ATR), a measure of volatility. It's a standard component of the Supertrend indicator.                                *   **`ehlersSupertrend(high, low, close, period, multiplier, gaussianLength)`:** This is the main function that orchestrates the Enhanced Ehlers Supertrend calculation:                                                   *   **Gaussian Filtering:** It first applies the `gaussianFilter` to the `high` and `low` price series to smooth them.                                            *   **ATR Calculation:** It calculates the ATR using the *filtered* high and low prices.
+    *   **Band Calculation:** It then calculates the Upper Band and Lower Band, which are based on the average of the filtered high and low, plus or minus the ATR multiplied by the `multiplier`.                          *   **Supertrend Logic:** The core Supertrend logic is implemented to determine the trend direction (bullish or bearish) and the Supertrend value based on price crossing the bands and the previous trend.  The Supertrend value itself is adjusted to remain flat during a trend, a key characteristic of the indicator.      *   **Sample Data and Parameters:**  We provide sample price data and set default parameters for the Supertrend (`period`, `multiplier`, `gaussianLength`). You can replace the sample data with your own price data.
+*   **Output Colorization:** The script iterates through the results and prints them to the console, colorizing the output using `nanocolors`.  "Buy" signals are in `green`, "Sell" signals in `red`, and informational text in `cyan` and `yellow`, making the output visually clear and informative within the Termux terminal.                                                        **Customization and Further Enchantments:**
+                                                      *   **Data Input:**  To make this script truly potent, you can modify it to read price data from a file (e.g., CSV) or fetch it from an online source using Node.js libraries like `node-fetch`.                        *   **Parameter Tuning:** Experiment with different values for `period`, `multiplier`, and `gaussianLength` to optimize the Supertrend for your specific trading style and the assets you are analyzing.  A higher `gaussianLength` will result in more smoothing.            *   **Advanced Ehlers Techniques:**  For even more advanced enhancements, you could explore incorporating other Ehlers indicators, such as the Homodyne Discriminator for cycle analysis, to dynamically adjust the Supertrend parameters or refine the filtering process.    *   **Real-time Updates:**  With Node.js, you could potentially adapt this script to process real-time price data streams and provide live Supertrend signals in your Termux session.                                                                                         May this enhanced Ehlers Supertrend script illuminate your path in the markets, apprentice!alternatest.txt
+**Key Changes & Considerations for JavaScript:**      
+1.  **State Management:** We'll use Classes (`class`) to encapsulate the state for each SuperTrend instance, just like the Python dataclasses.
+2.  **No Built-in Libraries:** We'll implement helper functions (SMA, EMA, StdDev, SuperSmoother) in pure JavaScript, assuming no external libraries like `technicalindicators` or `pandas-js`. This makes the code self-contained but less performant than library-based solutions.                                                3.  **Types:** JavaScript is dynamically typed. We'll use JSDoc comments (`/** ... */`) to indicate expected types for better readability and potential tooling support.                                                4.  **`null` vs. `undefined`:** We'll generally use `null` to represent the absence of a value where Python used `None`.                                          5.  **Range Filter:** We'll add a simple range filter logic. A common method is to check if the ATR is below a certain percentage of the current price. If it is, the market might be considered too choppy or ranging for clear trend signals. We'll add a parameter for this threshold.
+                                                      ---
+
+**1. Helper Functions (Pure JavaScript)**
+                                                      ```javascript
+/**                                                    * Calculates the Simple Moving Average (SMA) for the last 'period' elements.                                * @param {number[]} data - Array of numbers.
+ * @param {number} period - The lookback period.
+ * @returns {number | null} The SMA value or null if not enough data.
+ */                                                   function calculateSma(data, period) {                     if (period <= 0 || !data || data.length < period) {
+        return null;                                      }                                                     const relevantData = data.slice(-period);             const sum = relevantData.reduce((acc, val) => acc + val, 0);
+    return sum / period;
+}
+                                                      /**                                                    * Calculates the Exponential Moving Average (EMA).    * Requires the previous EMA value for subsequent calculations after bootstrapping.
+ * @param {number[]} data - Array of numbers (only needs the latest value if previousEma is provided).       * @param {number} period - The lookback period.
+ * @param {number | null} [previousEma=null] - The EMA value from the previous step.
+ * @param {number | null} [smoothingFactor=null] - Optional smoothing factor (alpha). Calculated if null.
+ * @returns {number | null} The EMA value or null if initialization isn't possible.
+ */                                                   function calculateEma(data, period, previousEma = null, smoothingFactor = null) {                               if (period <= 0 || !data || data.length === 0) return null;
+                                                          const k = smoothingFactor !== null ? smoothingFactor : 2 / (period + 1);
+    const currentPrice = data[data.length - 1];
+
+    if (previousEma !== null) {
+        // Standard EMA formula using previous EMA            return (currentPrice * k) + (previousEma * (1 - k));
+    } else {
+        // Need to bootstrap EMA, often using SMA of the first 'period' values
+        if (data.length < period) {                               return null; // Not enough data for initial SMA
+        }
+        // Calculate initial SMA for the first EMA value (using the first 'period' elements)
+        const initialSma = calculateSma(data.slice(0, period), period);                                             if (initialSma === null) return null;
+                                                              // Calculate EMA iteratively from the initial SMA for the rest of the data provided
+        let currentEma = initialSma;
+        for (let i = period; i < data.length; i++) {              currentEma = (data[i] * k) + (currentEma * (1 - k));                                                    }                                                     return currentEma;
+    }                                                 }
+                                                      
+/**
+ * Calculates the Population Standard Deviation for the last 'period' elements.
+ * @param {number[]} data - Array of numbers.          * @param {number} period - The lookback period.       * @returns {number | null} The standard deviation or null if not enough data.
+ */
+function calculateStdDev(data, period) {
+    if (period <= 0 || !data || data.length < period) {                                                             return null;
+    }                                                     const relevantData = data.slice(-period);
+    if (relevantData.length < 1) return 0; // Or null? StdDev of empty is undefined. Let's return 0.
+
+    const mean = relevantData.reduce((acc, val) => acc + val, 0) / relevantData.length;
+    const variance = relevantData.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / relevantData.length; // Population variance (N)
+                                                          if (variance < 0) return 0; // Avoid issues with floating point errors leading to negative variance
+
+    return Math.sqrt(variance);                       }
+                                                      // console.log for simple logging, replace with a proper logger in a real bot                               const logger = {
+    debug: (msg) => console.debug(`DEBUG: ${msg}`),
+    info: (msg) => console.info(`INFO: ${msg}`),          warn: (msg) => console.warn(`WARN: ${msg}`),          error: (msg) => console.error(`ERROR: ${msg}`),   };                                                    
+```
+
+---
+
+**2. SuperTrend with EMA-Smoothed ATR (Stateful Class)**                                                                                                          ```javascript
+class SuperTrendEmaAtrState {
+    /**                                                    * @param {number} period - The ATR period.
+     * @param {number} multiplier - The ATR multiplier.
+     * @param {number} rangeThresholdAtrRatio - ATR as a ratio of close price below which the market is considered ranging (e.g., 0.005 for 0.5%). Set to 0 to disable.                                                      */
+    constructor(period, multiplier, rangeThresholdAtrRatio = 0.005) {
+        if (period <= 0 || multiplier <= 0 || rangeThresholdAtrRatio < 0) {
+            throw new Error("Invalid parameters for SuperTrendEmaAtrState");                                        }
+        this.period = period;
+        this.multiplier = multiplier;
+        this.rangeThresholdAtrRatio = rangeThresholdAtrRatio;                                                       this.atrSmoothingFactor = 2 / (this.period + 1);                                                    
+        // State variables
+        this.prevTrueRanges = [];
+        this.prevAtr = null;
+        this.prevSupertrendValue = null;
+        this.prevTrendUp = null; // true = Up, false = Down, null = Initial/Indeterminate                           this.prevFinalUpperBand = null;
+        this.prevFinalLowerBand = null;                       this.prevClose = null;
+        this.isRanging = false; // State for the range filter
+    }                                                 
+    /**                                                    * Updates the SuperTrend state with a new candle's data.                                                    * @param {number} high
+     * @param {number} low
+     * @param {number} close
+     * @returns {{value: number | null, trendUp: boolean | null, atr: number | null, isRanging: boolean}} The current SuperTrend value, trend direction, ATR, and ranging status.
+     */                                                   update(high, low, close) {
+        if (this.prevClose === null) {
+            this.prevClose = close;
+            logger.debug(`ST_EMA_ATR(${this.period}): Initializing, prev_close set to ${close}. Need more data.`);                                                            return { value: null, trendUp: null, atr: null, isRanging: this.isRanging };
+        }
+
+        // 1. Calculate True Range (TR)
+        const tr1 = high - low;
+        const tr2 = Math.abs(high - this.prevClose);
+        const tr3 = Math.abs(low - this.prevClose);           const trueRange = Math.max(tr1, tr2, tr3);
+                                                              // 2. Calculate ATR using EMA
+        let currentAtr = null;                                if (this.prevAtr === null) {
+            this.prevTrueRanges.push(trueRange);                  if (this.prevTrueRanges.length >= this.period) {                                                                this.prevAtr = calculateSma(this.prevTrueRanges, this.period);
+                currentAtr = this.prevAtr;
+                logger.debug(`ST_EMA_ATR(${this.period}): Initial ATR (SMA) calculated: ${currentAtr?.toFixed(4)}`);
+            } else {
+                logger.debug(`ST_EMA_ATR(${this.period}): Collecting TRs (${this.prevTrueRanges.length}/${this.period}) for initial ATR.`);
+            }
+        } else {
+            currentAtr = (trueRange * this.atrSmoothingFactor) + (this.prevAtr * (1 - this.atrSmoothingFactor));                                                              this.prevAtr = currentAtr; // Update state        }
+
+        // 3. Range Filter Check
+        this.isRanging = false; // Default to not ranging                                                           if (this.rangeThresholdAtrRatio > 0 && currentAtr !== null && close > 0) {
+             const atrRatio = currentAtr / close;
+             if (atrRatio < this.rangeThresholdAtrRatio) {                                                                   this.isRanging = true;                            }                                                }
+        // Log range status change                            // logger.debug(`ST_EMA_ATR(${this.period}): ATR=${currentAtr?.toFixed(4)}, Close=${close}, Ratio=${(currentAtr / close)?.toFixed(4)}, Threshold=${this.rangeThresholdAtrRatio}, IsRanging=${this.isRanging}`);
+
+
+        if (currentAtr === null || isNaN(currentAtr) || currentAtr <= 1e-12) {
+            logger.warn(`ST_EMA_ATR(${this.period}): Invalid ATR calculated (${currentAtr}). Cannot update SuperTrend.`);                                                     this.prevClose = close;
+            return { value: this.prevSupertrendValue, trendUp: this.prevTrendUp, atr: currentAtr, isRanging: this.isRanging };                                            }
+                                                              // 4. Calculate Basic Upper/Lower Bands               const hl2 = (high + low) / 2;                         const basicUpper = hl2 + this.multiplier * currentAtr;
+        const basicLower = hl2 - this.multiplier * currentAtr;                                              
+        // 5. Calculate Final Bands and SuperTrend Value using State
+        let finalUpper = basicUpper;
+        let finalLower = basicLower;
+        let currentSupertrend = null;                         let currentTrendUp = this.prevTrendUp;
+                                                              if (this.prevTrendUp === null) {                          if (close > basicUpper) currentTrendUp = true;
+            else if (close < basicLower) currentTrendUp = false;
+        } else if (this.prevTrendUp === true) {
+            if (this.prevFinalLowerBand !== null) finalLower = Math.max(basicLower, this.prevFinalLowerBand);
+            if (close < finalLower) {
+                currentTrendUp = false;                               finalUpper = basicUpper; // Reset upper band on flip
+            }
+        } else { // prevTrendUp === false
+            if (this.prevFinalUpperBand !== null) finalUpper = Math.min(basicUpper, this.prevFinalUpperBand);                                                                 if (close > finalUpper) {                                 currentTrendUp = true;                                finalLower = basicLower; // Reset lower band on flip
+            }
+        }                                             
+        // 6. Determine the SuperTrend line value
+        if (currentTrendUp === true) currentSupertrend = finalLower;
+        else if (currentTrendUp === false) currentSupertrend = finalUpper;                                  
+        // 7. Update State                                    this.prevClose = close;                               this.prevTrendUp = currentTrendUp;
+        this.prevSupertrendValue = currentSupertrend;         // Store the band level that *would* be the stop if the trend continues                                     this.prevFinalUpperBand = finalUpper;                 this.prevFinalLowerBand = finalLower;
+
+        // logger.debug(`ST_EMA_ATR(${this.period}): C=${close}, ATR=${currentAtr.toFixed(4)}, TrendUp=${currentTrendUp}, ST=${currentSupertrend?.toFixed(4)}, Ranging=${this.isRanging}`);
+
+        return { value: currentSupertrend, trendUp: currentTrendUp, atr: currentAtr, isRanging: this.isRanging };
+    }                                                 }
+```                                                   
+---
+                                                      **3. SuperTrend with Standard Deviation Bands (Stateful Class)**                                                                                                  ```javascript
+class SuperTrendStdDevState {
+    /**                                                    * @param {number} period - The period for basis (SMA/EMA) and StdDev.
+     * @param {number} multiplier - The StdDev multiplier.                                                       * @param {string} [basisType='SMA'] - Type of basis ('SMA' or 'EMA').
+     * @param {number} rangeThresholdAtrRatio - Requires separate ATR calculation for range filter. Pass 0 if using StdDev for range or disabled.                      */
+    constructor(period, multiplier, basisType = 'SMA', rangeThresholdAtrRatio = 0) {                                if (period <= 0 || multiplier <= 0 || !['SMA', 'EMA'].includes(basisType)) {
+            throw new Error("Invalid parameters for SuperTrendStdDevState");
+        }
+        this.period = period;
+        this.multiplier = multiplier;                         this.basisType = basisType;
+        this.rangeThresholdAtrRatio = rangeThresholdAtrRatio; // Note: Range filter here still uses ATR logic for consistency                                     
+        // State
+        this.priceData = []; // Store historical close prices
+        this.prevBasis = null;                                this.prevStddev = null;                               this.prevSupertrendValue = null;
+        this.prevTrendUp = null;
+        this.prevFinalUpperBand = null;                       this.prevFinalLowerBand = null;                       this.prevEmaBasis = null; // EMA specific state
+        this.basisSmoothingFactor = (basisType === 'EMA') ? (2 / (this.period + 1)) : null;
+        this.isRanging = false;
+        // Requires separate ATR state if using ATR-based range filter                                              this.atrStateForRange = rangeThresholdAtrRatio > 0 ? new SuperTrendEmaAtrState(period, 1, 0) : null; // Use dummy multiplier=1, rangeThreshold=0
+    }                                                                                                           /**
+     * Updates the SuperTrend state with a new candle's data.
+     * @param {number} high - Needed for optional ATR range filter
+     * @param {number} low - Needed for optional ATR range filter
+     * @param {number} close                               * @returns {{value: number | null, trendUp: boolean | null, stdDev: number | null, isRanging: boolean}} The current SuperTrend value, trend direction, StdDev, and ranging status.
+     */                                                   update(high, low, close) {
+        this.priceData.push(close);
+        // Optional: Trim priceData
+        if (this.priceData.length > this.period * 2 + 10) {
+            this.priceData = this.priceData.slice(-(this.period * 2 + 5));                                          }
+
+        let currentAtrForRange = null;
+        if (this.atrStateForRange) {
+            const atrResult = this.atrStateForRange.update(high, low, close);                                           currentAtrForRange = atrResult.atr;
+            this.isRanging = false;
+            if (this.rangeThresholdAtrRatio > 0 && currentAtrForRange !== null && close > 0) {
+                 if ((currentAtrForRange / close) < this.rangeThresholdAtrRatio) {                                               this.isRanging = true;
+                 }                                                }
+        } else {
+            this.isRanging = false; // Range filter disabled if threshold is 0                                      }
+                                                                                                                    if (this.priceData.length < this.period) {
+            logger.debug(`ST_StdDev(${this.period}): Collecting price data (${this.priceData.length}/${this.period}).`);                                                      return { value: null, trendUp: null, stdDev: null, isRanging: this.isRanging };
+        }
+
+        // 1. Calculate Basis (SMA or EMA)                    let currentBasis = null;                              if (this.basisType === 'SMA') {
+            currentBasis = calculateSma(this.priceData, this.period);
+        } else { // EMA
+            if (this.prevEmaBasis === null) {                         if (this.priceData.length >= this.period) {
+                    this.prevEmaBasis = calculateSma(this.priceData.slice(-this.period), this.period);
+                    currentBasis = this.prevEmaBasis;                 }
+            } else {
+                currentBasis = (close * this.basisSmoothingFactor) + (this.prevEmaBasis * (1 - this.basisSmoothingFactor));
+            }
+            if (currentBasis !== null) this.prevEmaBasis = currentBasis;                                            }
+
+        if (currentBasis === null || isNaN(currentBasis)) {                                                             logger.warn(`ST_StdDev(${this.period}): Invalid basis calculated. Cannot update.`);                         return { value: this.prevSupertrendValue, trendUp: this.prevTrendUp, stdDev: this.prevStddev, isRanging: this.isRanging };
+        }
+                                                              // 2. Calculate Standard Deviation                    const currentStddev = calculateStdDev(this.priceData, this.period);                                         if (currentStddev === null || isNaN(currentStddev) || currentStddev < 0) { // Allow 0 StdDev
+             logger.warn(`ST_StdDev(${this.period}): Invalid StdDev calculated (${currentStddev}). Using previous state.`);
+             this.prevBasis = currentBasis; // Update basis state anyway                                                 return { value: this.prevSupertrendValue, trendUp: this.prevTrendUp, stdDev: this.prevStddev, isRanging: this.isRanging };
+        }                                             
+                                                              // 3. Calculate Basic Upper/Lower Bands
+        const basicUpper = currentBasis + this.multiplier * currentStddev;
+        const basicLower = currentBasis - this.multiplier * currentStddev;                                  
+        // 4. Calculate Final Bands and SuperTrend Value using State (logic is identical)
+        let finalUpper = basicUpper;                          let finalLower = basicLower;
+        let currentSupertrend = null;                         let currentTrendUp = this.prevTrendUp;        
+        if (this.prevTrendUp === null) {
+            if (close > basicUpper) currentTrendUp = true;                                                              else if (close < basicLower) currentTrendUp = false;                                                    } else if (this.prevTrendUp === true) {                   if (this.prevFinalLowerBand !== null) finalLower = Math.max(basicLower, this.prevFinalLowerBand);
+            if (close < finalLower) {
+                currentTrendUp = false;
+                finalUpper = basicUpper;
+            }                                                 } else { // prevTrendUp === false
+            if (this.prevFinalUpperBand !== null) finalUpper = Math.min(basicUpper, this.prevFinalUpperBand);                                                                 if (close > finalUpper) {
+                currentTrendUp = true;                                finalLower = basicLower;
+            }                                                 }
+                                                              if (currentTrendUp === true) currentSupertrend = finalLower;
+        else if (currentTrendUp === false) currentSupertrend = finalUpper;
+
+        // 5. Update State
+        this.prevBasis = currentBasis;
+        this.prevStddev = currentStddev;                      this.prevTrendUp = currentTrendUp;
+        this.prevSupertrendValue = currentSupertrend;
+        this.prevFinalUpperBand = finalUpper;
+        this.prevFinalLowerBand = finalLower;
+                                                              // logger.debug(`ST_StdDev(${this.period}): C=${close}, Basis=${currentBasis.toFixed(4)}, StdD=${currentStddev.toFixed(4)}, TrendUp=${currentTrendUp}, ST=${currentSupertrend?.toFixed(4)}, Ranging=${this.isRanging}`);
+
+        return { value: currentSupertrend, trendUp: currentTrendUp, stdDev: currentStddev, isRanging: this.isRanging };                                               }
+}                                                     ```
+                                                      ---
+                                                      **4. Ehlers-Smoothed SuperTrend (Stateful Class - Conceptual)**                                             
+```javascript
+class SuperSmootherState {
+    /**
+     * @param {number} period - Cutoff period (related to alpha). Must be > 1.
+     */
+    constructor(period) {                                     if (period <= 1) throw new Error("SuperSmoother period must be > 1");
+        this.period = period;
+
+        // Filter coefficients
+        const a1 = Math.exp(-Math.sqrt(2) * Math.PI / this.period);                                                 const b1 = 2 * a1 * Math.cos(Math.sqrt(2) * Math.PI / this.period);
+        this.c2 = b1;
+        this.c3 = -a1 * a1;
+        this.c1 = 1 - this.c2 - this.c3;
+                                                              // State variables                                    this.prevInput1 = 0.0;
+        this.prevInput2 = 0.0;
+        this.prevOutput1 = 0.0;
+        this.prevOutput2 = 0.0;                               this.initialized = false;                         }                                                 
+    /**                                                    * Applies the Super Smoother filter step.
+     * @param {number} currentInput
+     * @returns {number} Smoothed value                    */
+    update(currentInput) {
+        // Simple initialization: Output equals Input until filter engages                                          if (!this.initialized) {
+            // Need at least two previous values for the filter recursion                                               if (this.prevInput1 === 0.0) { // First call
+                this.prevInput1 = currentInput;                       this.prevOutput1 = currentInput; // Seed first output                                                       return currentInput; // Return unsmoothed                                                               } else if (this.prevInput2 === 0.0) { // Second call                                                             this.prevInput2 = this.prevInput1;
+                 this.prevInput1 = currentInput;
+                 this.prevOutput2 = this.prevOutput1;
+                 this.prevOutput1 = currentInput; // Seed second output
+                 this.initialized = true; // Ready to calculate properly next time
+                 return currentInput; // Return unsmoothed
+            }                                                      // Should not be reached if logic is correct                                                           }                                             
+
+        // Apply the filter formula: Filt = c1*(Price + Price[1])/2 + c2*Filt[1] + c3*Filt[2]
+        const currentOutput = (this.c1 * (currentInput + this.prevInput1) / 2) +
+                              (this.c2 * this.prevOutput1) +
+                              (this.c3 * this.prevOutput2);                                                                                                               // Update state for next iteration
+        this.prevInput2 = this.prevInput1;
+        this.prevInput1 = currentInput;                       this.prevOutput2 = this.prevOutput1;                  this.prevOutput1 = currentOutput;                                                                           return currentOutput;                             }                                                 }                                                     
+
+class SuperTrendEhlersSmoothedState {                     /**
+     * @param {number} period - ATR Period.
+     * @param {number} multiplier - ATR Multiplier.
+     * @param {number} smootherPeriod - Period for the Super Smoother filter (> 1).                              * @param {number} rangeThresholdAtrRatio - ATR ratio threshold for range filter. Set 0 to disable.
+     */                                                   constructor(period, multiplier, smootherPeriod, rangeThresholdAtrRatio = 0.005) {
+        if (period <= 0 || multiplier <= 0 || smootherPeriod <= 1 || rangeThresholdAtrRatio < 0) {
+            throw new Error("Invalid parameters for SuperTrendEhlersSmoothedState");                                }
+        this.period = period;                                 this.multiplier = multiplier;
+        this.smootherPeriod = smootherPeriod;
+        this.rangeThresholdAtrRatio = rangeThresholdAtrRatio;
+                                                              // Internal states
+        this.smoother = new SuperSmootherState(smootherPeriod);
+        // Use the EMA ATR state class internally for ATR calculation and range filter
+        this.atrState = new SuperTrendEmaAtrState(period, multiplier, rangeThresholdAtrRatio);              
+        // Own state for combining                            this.prevSupertrendValue = null;
+        this.prevTrendUp = null;                              this.prevFinalUpperBand = null;                       this.prevFinalLowerBand = null;
+        this.prevSmoothedPrice = null;
+        this.isRanging = false; // Range state from atrState                                                    }                                                 
+    /**                                                    * Updates the Ehlers-Smoothed SuperTrend state.       * @param {number} high
+     * @param {number} low                                 * @param {number} close                               * @returns {{value: number | null, trendUp: boolean | null, atr: number | null, smoothedPrice: number | null, isRanging: boolean}} Current SuperTrend value, trend, ATR, smoothed price, and ranging status.            */                                                   update(high, low, close) {
+        // 1. Calculate Smoothed Price (using average price hlc3)
+        const avgPrice = (high + low + close) / 3;
+        const currentSmoothedPrice = this.smoother.update(avgPrice);                                        
+        // 2. Calculate ATR and Check Range (using the internal EMA ATR state logic)                                const atrResult = this.atrState.update(high, low, close);
+        const currentAtr = atrResult.atr;
+        this.isRanging = atrResult.isRanging; // Get range status from atrState
+                                                              if (isNaN(currentSmoothedPrice)) {                         logger.warn(`ST_Ehlers(${this.period},${this.smootherPeriod}): Smoothed price is NaN.`);
+             return { value: this.prevSupertrendValue, trendUp: this.prevTrendUp, atr: currentAtr, smoothedPrice: currentSmoothedPrice, isRanging: this.isRanging };
+        }                                                     if (currentAtr === null || isNaN(currentAtr) || currentAtr <= 1e-12) {
+            logger.warn(`ST_Ehlers(${this.period},${this.smootherPeriod}): Invalid ATR calculated (${currentAtr}). Cannot update SuperTrend.`);                               this.prevSmoothedPrice = currentSmoothedPrice; // Update smoother state
+            return { value: this.prevSupertrendValue, trendUp: this.prevTrendUp, atr: currentAtr, smoothedPrice: currentSmoothedPrice, isRanging: this.isRanging };                                                             }
+
+        // 3. Calculate Basic Upper/Lower Bands using Smoothed Price as basis                                       const basicUpper = currentSmoothedPrice + this.multiplier * currentAtr;                                     const basicLower = currentSmoothedPrice - this.multiplier * currentAtr;                                                                                           // 4. Calculate Final Bands and SuperTrend Value (State logic is the same, uses actual close for flips)
+        let finalUpper = basicUpper;                          let finalLower = basicLower;                          let currentSupertrend = null;
+        let currentTrendUp = this.prevTrendUp;
+                                                              if (this.prevTrendUp === null) {                          if (close > basicUpper) currentTrendUp = true;
+            else if (close < basicLower) currentTrendUp = false;
+        } else if (this.prevTrendUp === true) {                   if (this.prevFinalLowerBand !== null) finalLower = Math.max(basicLower, this.prevFinalLowerBand);                                                                 if (close < finalLower) {
+                currentTrendUp = false;
+                finalUpper = basicUpper;                          }                                                 } else { // prevTrendUp === false
+            if (this.prevFinalUpperBand !== null) finalUpper = Math.min(basicUpper, this.prevFinalUpperBand);
+            if (close > finalUpper) {
+                currentTrendUp = true;                                finalLower = basicLower;
+            }                                                 }                                                                                                           if (currentTrendUp === true) currentSupertrend = finalLower;
+        else if (currentTrendUp === false) currentSupertrend = finalUpper;
+
+        // 5. Update State
+        this.prevSmoothedPrice = currentSmoothedPrice;
+        this.prevTrendUp = currentTrendUp;
+        this.prevSupertrendValue = currentSupertrend;         this.prevFinalUpperBand = finalUpper;                 this.prevFinalLowerBand = finalLower;
+
+        // logger.debug(`ST_Ehlers(${this.period},${this.smootherPeriod}): C=${close}, SmoothP=${currentSmoothedPrice.toFixed(4)}, ATR=${currentAtr.toFixed(4)}, TrendUp=${currentTrendUp}, ST=${currentSupertrend?.toFixed(4)}, Ranging=${this.isRanging}`);                 
+        return { value: currentSupertrend, trendUp: currentTrendUp, atr: currentAtr, smoothedPrice: currentSmoothedPrice, isRanging: this.isRanging };                }                                                 }
+```                                                   
+---
+                                                      **How to Use in a JavaScript Bot:**
+
+1.  **Include Helpers:** Make sure the helper functions (`calculateSma`, `calculateEma`, `calculateStdDev`) are defined and accessible.
+2.  **Choose Class:** Select the SuperTrend state class you want to use (e.g., `SuperTrendEmaAtrState`).    3.  **Initialization:** Create instances for your short and long SuperTrends within your bot's initialization logic.
+    ```javascript                                         // Example initialization
+    const config = {                                          shortStPeriod: 7,                                     longStPeriod: 14,
+        stMultiplier: 2.0,
+        stRangeThresholdRatio: 0.005, // 0.5% ATR/Close threshold for ranging market
+        // For Ehlers version:
+        // stSmootherPeriod: 20                           };                                                                                                          // Using EMA ATR version
+    const stShortState = new SuperTrendEmaAtrState(config.shortStPeriod, config.stMultiplier, config.stRangeThresholdRatio);
+    const stLongState = new SuperTrendEmaAtrState(config.longStPeriod, config.stMultiplier, config.stRangeThresholdRatio);                                        
+    // Or using StdDev version (needs separate ATR calc if using ATR range filter)                              // const stShortState = new SuperTrendStdDevState(config.shortStPeriod, config.stMultiplier, 'SMA', config.stRangeThresholdRatio);
+    // const stLongState = new SuperTrendStdDevState(config.longStPeriod, config.stMultiplier, 'SMA', config.stRangeThresholdRatio);                                                                                        // Or using Ehlers version                            // const stShortState = new SuperTrendEhlersSmoothedState(config.shortStPeriod, config.stMultiplier, config.stSmootherPeriod, config.stRangeThresholdRatio);      // const stLongState = new SuperTrendEhlersSmoothedState(config.longStPeriod, config.stMultiplier, config.stSmootherPeriod, config.stRangeThresholdRatio);    
+    let historicalOhlcv = []; // Populate with historical data for warm-up
+    ```
+4.  **Update Loop:** In your bot's main loop (e.g., after fetching a new candle):                               ```javascript                                         function processNewCandle(candle) { // Assuming candle = { timestamp, open, high, low, close, volume }          const { high, low, close } = candle;
+                                                              // Update the stateful SuperTrend objects
+        const shortResult = stShortState.update(high, low, close);
+        const longResult = stLongState.update(high, low, close);
+                                                              // Extract values for logic                           const shortStVal = shortResult.value;
+        const shortStUp = shortResult.trendUp;
+        const shortStRanging = shortResult.isRanging; // Check if short ST thinks it's ranging
+        const shortStAtr = shortResult.atr; // ATR from short ST calc                                                                                                     const longStVal = longResult.value;
+        const longStUp = longResult.trendUp;
+        const longStRanging = longResult.isRanging; // Check if long ST thinks it's ranging                         const longStAtr = longResult.atr; // ATR from long ST calc (often used for sizing/TSL)                                                                    
+        logger.info(`Short ST: Val=${shortStVal?.toFixed(4)}, Up=${shortStUp}, Ranging=${shortStRanging}, ATR=${shortStAtr?.toFixed(4)}`);
+        logger.info(`Long ST: Val=${longStVal?.toFixed(4)}, Up=${longStUp}, Ranging=${longStRanging}, ATR=${longStAtr?.toFixed(4)}`);                             
+        // --- Apply Trading Logic ---                        // Check if indicators are ready (not null)
+        if (shortStUp !== null && longStUp !== null && longStAtr !== null) {
+             // Use the 'isRanging' flags in your entry conditions
+             const marketIsRanging = shortStRanging || longStRanging; // Example: consider ranging if either ST detects it                                        
+             // Example Long Entry: Both UP, AND market is NOT ranging                                                   const longSignal = shortStUp === true && longStUp === true && !marketIsRanging;
+                                                                   // Example Short Entry: Both DOWN, AND market is NOT ranging                                                const shortSignal = shortStUp === false && longStUp === false && !marketIsRanging;
+
+             // Example Exit: Short ST flips (don't necessarily need range check for exit)                               // const longExit = currentPosition === 'LONG' && shortStUp === false;
+             // const shortExit = currentPosition === 'SHORT' && shortStUp === true;
+
+             if (longSignal) {                                         logger.info("Long Entry Signal (Not Ranging)");
+                 // Place buy order using longStAtr for sizing/SL/TP
+             } else if (shortSignal) {                                 logger.info("Short Entry Signal (Not Ranging)");                                                            // Place sell order using longStAtr for sizing/SL/TP                                                    }
+             // else if (longExit) { ... }                         // else if (shortExit) { ... }           
+             // TSL logic would use longStAtr and current price
+        } else {                                                   logger.info("SuperTrend indicators not ready yet (warming up).");
+        }                                                 }                                                 
+    // --- In your bot's main loop ---
+    // Fetch new candle data...
+    // const latestCandle = ...                           // Add latest candle to historical data if needed for helpers                                               // historicalOhlcv.push(latestCandle);                // processNewCandle(latestCandle);                    // Wait for next candle...
+    ```
+
+Remember to handle the initial warm-up phase where the `update` methods return `null` values until enough data has been processed.
+
+

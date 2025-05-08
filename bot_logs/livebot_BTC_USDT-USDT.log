@@ -1,0 +1,341 @@
+2025-04-28 16:14:15.059 UTC - INFO     - [livebot_BTC_USDT-USDT:330] - Logger 'livebot_BTC_USDT-USDT' initialized. Log file: 'livebot_BTC_USDT-USDT.log', Console Level: INFO
+2025-04-28 16:14:15.060 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1586] - Fetching ticker for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 16:14:16.313 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1628] - Parsed price from standard CCXT 'last' field for BTC/USDT:USDT
+2025-04-28 16:14:16.314 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1638] - Current price for BTC/USDT:USDT: 93521.5
+2025-04-28 16:14:16.314 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1684] - Fetching 200 klines for BTC/USDT:USDT (5m, MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 16:14:19.523 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1744] - Fetched and processed 200 klines for BTC/USDT:USDT.
+2025-04-28 16:14:19.523 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:14:19.524 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1786] - Fetching order book (limit 1) for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT', 'limit': 1}
+2025-04-28 16:14:20.269 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1809] - Fetched order book for BTC/USDT:USDT: 1 bids, 1 asks.
+2025-04-28 16:14:20.270 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2147] - Converting columns ['open', 'high', 'low', 'close', 'volume'] to float64 for TA...
+2025-04-28 16:14:20.285 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2165] - DataFrame dtypes prepared for TA: {'open': dtype('float64'), 'high': dtype('float64'), 'low': dtype('float64'), 'close': dtype('float64'), 'volume': dtype('float64')}
+2025-04-28 16:14:20.285 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:14:20.286 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2377] - TA Column Map: {'ATR': 'ATRr_14', 'EMA_Short': 'EMA_9', 'EMA_Long': 'EMA_21', 'Momentum': 'MOM_7', 'Volume_MA': 'VOL_SMA_15', 'StochRSI_K': 'STOCHRSIk_14_12_3_3', 'StochRSI_D': 'STOCHRSId_14_12_3_3', 'RSI': 'RSI_14', 'BB_Lower': 'BBL_20_2_0', 'BB_Middle': 'BBM_20_2_0', 'BB_Upper': 'BBU_20_2_0', 'VWAP': 'VWAP_D', 'CCI': 'CCI_20_0.015', 'WR': 'WILLR_14', 'PSAR_Long': 'PSARl_0.02_0.2', 'PSAR_Short': 'PSARs_0.02_0.2', 'SMA10': 'SMA_10', 'MFI': 'MFI_14'}
+2025-04-28 16:14:20.286 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2399] - Running pandas_ta strategy calculation for BTC/USDT:USDT on 200 rows...
+2025-04-28 16:14:20.531 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2408] - Finished indicator calculations for BTC/USDT:USDT in 0.245s.
+2025-04-28 16:14:20.534 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARl_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Long' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 16:14:20.534 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARs_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Short' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 16:14:20.535 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2477] - Latest indicator Decimal values updated for BTC/USDT:USDT: Found 21/23 valid values.
+2025-04-28 16:14:20.539 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2660] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50, High: 95564.8, Low: 93451.8): {'Fib_0.0%': '95564.8', 'Fib_23.6%': '95066.1', 'Fib_38.2%': '94757.6', 'Fib_50.0%': '94508.3', 'Fib_61.8%': '94258.9', 'Fib_78.6%': '93903.9', 'Fib_100.0%': '93451.8'}
+2025-04-28 16:14:20.539 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3431] - Fetching positions for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 16:14:21.020 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3532] - No active non-zero position found for BTC/USDT:USDT.
+2025-04-28 16:14:21.021 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4522] - No active position found for BTC/USDT:USDT. Evaluating entry signals...
+2025-04-28 16:14:21.021 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2783] - PSAR state ambiguous/neutral for BTC/USDT:USDT: PSARl=None, PSARs=None
+2025-04-28 16:14:21.021 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2899] - OBI Calc (BTC/USDT:USDT): BidVol=1.6430, AskVol=10.0880, OBI=-0.7199 -> Score=-0.720
+2025-04-28 16:14:21.022 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93521.5): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.1640, NormScore: -0.0565, Thresh: +/-0.500 -> Signal: [33mHOLD[0m
+2025-04-28 16:14:21.022 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3046] -   Contributing Scores: ema_alignment: -1.00 (x0.30) = -0.300, momentum: -1.00 (x0.20) = -0.200, volume_confirmation: 0.00 (x0.10) = 0.000, stoch_rsi: -0.30 (x0.40) = -0.120, rsi: 0.39 (x0.30) = 0.116, bollinger_bands: 0.62 (x0.20) = 0.124, vwap: -0.60 (x0.30) = -0.180, cci: 0.95 (x0.20) = 0.190, wr: 0.95 (x0.20) = 0.190, psar: 0.00 (x0.30) = 0.000, sma_10: -0.50 (x0.10) = -0.050, mfi: 0.69 (x0.20) = 0.138, orderbook: -0.72 (x0.10) = -0.072
+2025-04-28 16:14:21.022 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4566] - Holding BTC/USDT:USDT. Signal: HOLD, Can Open: False
+2025-04-28 16:14:31.269 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:14:31.933 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:14:32.625 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93530.8): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.2003, NormScore: -0.0691, Thresh: +/-0.500 -> Signal: [33mHOLD[0m
+2025-04-28 16:40:52.948 UTC - INFO     - [livebot_BTC_USDT-USDT:330] - Logger 'livebot_BTC_USDT-USDT' initialized. Log file: 'livebot_BTC_USDT-USDT.log', Console Level: INFO
+2025-04-28 16:40:52.949 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1586] - Fetching ticker for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 16:40:53.996 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1628] - Parsed price from standard CCXT 'last' field for BTC/USDT:USDT
+2025-04-28 16:40:53.997 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1638] - Current price for BTC/USDT:USDT: 93838.4
+2025-04-28 16:40:53.999 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1684] - Fetching 200 klines for BTC/USDT:USDT (5m, MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 16:40:54.488 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1744] - Fetched and processed 200 klines for BTC/USDT:USDT.
+2025-04-28 16:40:54.489 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:40:54.489 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1786] - Fetching order book (limit 1) for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT', 'limit': 1}
+2025-04-28 16:40:55.014 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1809] - Fetched order book for BTC/USDT:USDT: 1 bids, 1 asks.
+2025-04-28 16:40:55.015 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2147] - Converting columns ['open', 'high', 'low', 'close', 'volume'] to float64 for TA...
+2025-04-28 16:40:55.028 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2165] - DataFrame dtypes prepared for TA: {'open': dtype('float64'), 'high': dtype('float64'), 'low': dtype('float64'), 'close': dtype('float64'), 'volume': dtype('float64')}
+2025-04-28 16:40:55.029 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:40:55.029 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2377] - TA Column Map: {'ATR': 'ATRr_14', 'EMA_Short': 'EMA_9', 'EMA_Long': 'EMA_21', 'Momentum': 'MOM_7', 'Volume_MA': 'VOL_SMA_15', 'StochRSI_K': 'STOCHRSIk_14_12_3_3', 'StochRSI_D': 'STOCHRSId_14_12_3_3', 'RSI': 'RSI_14', 'BB_Lower': 'BBL_20_2_0', 'BB_Middle': 'BBM_20_2_0', 'BB_Upper': 'BBU_20_2_0', 'VWAP': 'VWAP_D', 'CCI': 'CCI_20_0.015', 'WR': 'WILLR_14', 'PSAR_Long': 'PSARl_0.02_0.2', 'PSAR_Short': 'PSARs_0.02_0.2', 'SMA10': 'SMA_10', 'MFI': 'MFI_14'}
+2025-04-28 16:40:55.030 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2399] - Running pandas_ta strategy calculation for BTC/USDT:USDT on 200 rows...
+2025-04-28 16:40:55.244 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2408] - Finished indicator calculations for BTC/USDT:USDT in 0.214s.
+2025-04-28 16:40:55.246 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARl_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Long' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 16:40:55.246 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARs_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Short' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 16:40:55.247 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2477] - Latest indicator Decimal values updated for BTC/USDT:USDT: Found 21/23 valid values.
+2025-04-28 16:40:55.250 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2660] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50, High: 95564.8, Low: 93381.9): {'Fib_0.0%': '95564.8', 'Fib_23.6%': '95049.6', 'Fib_38.2%': '94730.9', 'Fib_50.0%': '94473.3', 'Fib_61.8%': '94215.7', 'Fib_78.6%': '93849.0', 'Fib_100.0%': '93381.9'}
+2025-04-28 16:40:55.250 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3431] - Fetching positions for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 16:40:55.659 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3532] - No active non-zero position found for BTC/USDT:USDT.
+2025-04-28 16:40:55.659 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4522] - No active position found for BTC/USDT:USDT. Evaluating entry signals...
+2025-04-28 16:40:55.659 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2783] - PSAR state ambiguous/neutral for BTC/USDT:USDT: PSARl=None, PSARs=None
+2025-04-28 16:40:55.660 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2899] - OBI Calc (BTC/USDT:USDT): BidVol=15.1860, AskVol=0.4810, OBI=0.9386 -> Score=0.939
+2025-04-28 16:40:55.660 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93838.4): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.6555, NormScore: -0.2260, Thresh: +/-0.500 -> Signal: [91mSELL[0m
+2025-04-28 16:40:55.660 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3046] -   Contributing Scores: ema_alignment: -1.00 (x0.30) = -0.300, momentum: 1.00 (x0.20) = 0.200, volume_confirmation: 0.00 (x0.10) = 0.000, stoch_rsi: -0.80 (x0.40) = -0.320, rsi: 0.07 (x0.30) = 0.020, bollinger_bands: -0.27 (x0.20) = -0.053, vwap: -0.60 (x0.30) = -0.180, cci: -0.49 (x0.20) = -0.099, wr: -0.61 (x0.20) = -0.123, psar: 0.00 (x0.30) = 0.000, sma_10: 0.50 (x0.10) = 0.050, mfi: 0.28 (x0.20) = 0.055, orderbook: 0.94 (x0.10) = 0.094
+2025-04-28 16:40:55.660 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1844] - Fetching balance specifically for UNIFIED account (USDT).
+2025-04-28 16:40:55.660 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1865] - Fetching balance with params={'accountType': 'UNIFIED', 'coin': 'USDT'} (Overall Attempt 1)
+2025-04-28 16:40:56.070 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2022] - Parsed balance via standard CCXT structure ['USDT']['free']: 10.50191335
+2025-04-28 16:40:56.070 UTC - INFO     - [livebot_BTC_USDT-USDT:1931] - Available USDT balance (UNIFIED): 10.5019
+2025-04-28 16:40:56.070 UTC - INFO     - [livebot_BTC_USDT-USDT:4032] - Attempting new SELL entry for BTC/USDT:USDT...
+2025-04-28 16:40:56.071 UTC - INFO     - [livebot_BTC_USDT-USDT:3198] - Calc TP/SL (SELL): EntryRef=93838.4, TP=93706.5, SL=94177.5 (ATR=188.39, SLx=1.8, TPx=0.7)
+2025-04-28 16:40:56.071 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3312] - Size Calc (BTC/USDT:USDT): Bal=10.50, Risk=1.00%, RiskAmt=0.1050, SLDist=339.1, RiskPerUnit=339.10000000, UnquantSize=0.00030970 contracts (BTC base)
+2025-04-28 16:40:56.072 UTC - ERROR    - [livebot_BTC_USDT-USDT:4585] - Unhandled exception in main loop for BTC/USDT:USDT: name 'DivisionByZeroError' is not defined
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+2025-04-28 16:40:56.159 UTC - ERROR    - [livebot_BTC_USDT-USDT:4586] - Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+
+2025-04-28 16:41:09.125 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:41:09.732 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:41:10.380 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93865.1): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.7100, NormScore: -0.2448, Thresh: +/-0.500 -> Signal: [91mSELL[0m
+2025-04-28 16:41:10.847 UTC - INFO     - [livebot_BTC_USDT-USDT:1931] - Available USDT balance (UNIFIED): 10.5019
+2025-04-28 16:41:10.847 UTC - INFO     - [livebot_BTC_USDT-USDT:4032] - Attempting new SELL entry for BTC/USDT:USDT...
+2025-04-28 16:41:10.848 UTC - INFO     - [livebot_BTC_USDT-USDT:3198] - Calc TP/SL (SELL): EntryRef=93865.1, TP=93733.2, SL=94204.2 (ATR=188.39, SLx=1.8, TPx=0.7)
+2025-04-28 16:41:10.849 UTC - ERROR    - [livebot_BTC_USDT-USDT:4585] - Unhandled exception in main loop for BTC/USDT:USDT: name 'DivisionByZeroError' is not defined
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+2025-04-28 16:41:10.938 UTC - ERROR    - [livebot_BTC_USDT-USDT:4586] - Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+
+2025-04-28 16:41:23.992 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:41:24.591 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:41:25.256 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93874.2): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.8293, NormScore: -0.2860, Thresh: +/-0.500 -> Signal: [91mSELL[0m
+2025-04-28 16:41:25.734 UTC - INFO     - [livebot_BTC_USDT-USDT:1931] - Available USDT balance (UNIFIED): 10.5019
+2025-04-28 16:41:25.735 UTC - INFO     - [livebot_BTC_USDT-USDT:4032] - Attempting new SELL entry for BTC/USDT:USDT...
+2025-04-28 16:41:25.735 UTC - INFO     - [livebot_BTC_USDT-USDT:3198] - Calc TP/SL (SELL): EntryRef=93874.2, TP=93742.3, SL=94213.3 (ATR=188.39, SLx=1.8, TPx=0.7)
+2025-04-28 16:41:25.737 UTC - ERROR    - [livebot_BTC_USDT-USDT:4585] - Unhandled exception in main loop for BTC/USDT:USDT: name 'DivisionByZeroError' is not defined
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+2025-04-28 16:41:25.837 UTC - ERROR    - [livebot_BTC_USDT-USDT:4586] - Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+
+2025-04-28 16:41:38.974 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:41:39.568 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:41:40.150 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93887.4): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.7461, NormScore: -0.2573, Thresh: +/-0.500 -> Signal: [91mSELL[0m
+2025-04-28 16:41:40.639 UTC - INFO     - [livebot_BTC_USDT-USDT:1931] - Available USDT balance (UNIFIED): 10.5019
+2025-04-28 16:41:40.639 UTC - INFO     - [livebot_BTC_USDT-USDT:4032] - Attempting new SELL entry for BTC/USDT:USDT...
+2025-04-28 16:41:40.640 UTC - INFO     - [livebot_BTC_USDT-USDT:3198] - Calc TP/SL (SELL): EntryRef=93887.4, TP=93755.5, SL=94226.5 (ATR=188.39, SLx=1.8, TPx=0.7)
+2025-04-28 16:41:40.641 UTC - ERROR    - [livebot_BTC_USDT-USDT:4585] - Unhandled exception in main loop for BTC/USDT:USDT: name 'DivisionByZeroError' is not defined
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+2025-04-28 16:41:40.727 UTC - ERROR    - [livebot_BTC_USDT-USDT:4586] - Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+
+2025-04-28 16:41:54.621 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 16:41:55.076 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 16:41:55.646 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 93892.6): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.9484, NormScore: -0.3270, Thresh: +/-0.500 -> Signal: [91mSELL[0m
+2025-04-28 16:41:56.042 UTC - INFO     - [livebot_BTC_USDT-USDT:1931] - Available USDT balance (UNIFIED): 10.5019
+2025-04-28 16:41:56.042 UTC - INFO     - [livebot_BTC_USDT-USDT:4032] - Attempting new SELL entry for BTC/USDT:USDT...
+2025-04-28 16:41:56.042 UTC - INFO     - [livebot_BTC_USDT-USDT:3198] - Calc TP/SL (SELL): EntryRef=93892.6, TP=93760.7, SL=94231.7 (ATR=188.39, SLx=1.8, TPx=0.7)
+2025-04-28 16:41:56.044 UTC - ERROR    - [livebot_BTC_USDT-USDT:4585] - Unhandled exception in main loop for BTC/USDT:USDT: name 'DivisionByZeroError' is not defined
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+2025-04-28 16:41:56.135 UTC - ERROR    - [livebot_BTC_USDT-USDT:4586] - Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3317, in calculate_position_size
+    temp_analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info, {})  # Minimal valid init
+                                                        ^^^^^^
+NameError: name 'config' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4554, in run_bot_for_symbol
+    entry_successful = attempt_new_entry(
+                       ^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 4046, in attempt_new_entry
+    position_size = calculate_position_size(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.0.py", line 3387, in calculate_position_size
+    except (InvalidOperation, ValueError, TypeError, DivisionByZeroError) as e:
+                                                     ^^^^^^^^^^^^^^^^^^^
+NameError: name 'DivisionByZeroError' is not defined
+
+2025-04-28 19:57:21.093 UTC - INFO     - [livebot_BTC_USDT-USDT:330] - Logger 'livebot_BTC_USDT-USDT' initialized. Log file: 'livebot_BTC_USDT-USDT.log', Console Level: INFO
+2025-04-28 19:57:21.095 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1586] - Fetching ticker for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 19:57:21.760 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1628] - Parsed price from standard CCXT 'last' field for BTC/USDT:USDT
+2025-04-28 19:57:21.761 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1638] - Current price for BTC/USDT:USDT: 94770.8
+2025-04-28 19:57:21.761 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1684] - Fetching 200 klines for BTC/USDT:USDT (5m, MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 19:57:22.482 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1744] - Fetched and processed 200 klines for BTC/USDT:USDT.
+2025-04-28 19:57:22.482 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 19:57:22.483 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1786] - Fetching order book (limit 1) for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT', 'limit': 1}
+2025-04-28 19:57:23.673 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1809] - Fetched order book for BTC/USDT:USDT: 1 bids, 1 asks.
+2025-04-28 19:57:23.674 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2147] - Converting columns ['open', 'high', 'low', 'close', 'volume'] to float64 for TA...
+2025-04-28 19:57:23.700 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2165] - DataFrame dtypes prepared for TA: {'open': dtype('float64'), 'high': dtype('float64'), 'low': dtype('float64'), 'close': dtype('float64'), 'volume': dtype('float64')}
+2025-04-28 19:57:23.701 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 19:57:23.701 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2377] - TA Column Map: {'ATR': 'ATRr_14', 'EMA_Short': 'EMA_9', 'EMA_Long': 'EMA_21', 'Momentum': 'MOM_7', 'Volume_MA': 'VOL_SMA_15', 'StochRSI_K': 'STOCHRSIk_14_12_3_3', 'StochRSI_D': 'STOCHRSId_14_12_3_3', 'RSI': 'RSI_14', 'BB_Lower': 'BBL_20_2_0', 'BB_Middle': 'BBM_20_2_0', 'BB_Upper': 'BBU_20_2_0', 'VWAP': 'VWAP_D', 'CCI': 'CCI_20_0.015', 'WR': 'WILLR_14', 'PSAR_Long': 'PSARl_0.02_0.2', 'PSAR_Short': 'PSARs_0.02_0.2', 'SMA10': 'SMA_10', 'MFI': 'MFI_14'}
+2025-04-28 19:57:23.702 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2399] - Running pandas_ta strategy calculation for BTC/USDT:USDT on 200 rows...
+2025-04-28 19:57:23.918 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2408] - Finished indicator calculations for BTC/USDT:USDT in 0.216s.
+2025-04-28 19:57:23.919 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARl_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Long' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 19:57:23.919 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARs_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Short' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 19:57:23.920 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2477] - Latest indicator Decimal values updated for BTC/USDT:USDT: Found 21/23 valid values.
+2025-04-28 19:57:23.922 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2660] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50, High: 94874.3, Low: 93381.9): {'Fib_0.0%': '94874.3', 'Fib_23.6%': '94522.0', 'Fib_38.2%': '94304.2', 'Fib_50.0%': '94128.1', 'Fib_61.8%': '93951.9', 'Fib_78.6%': '93701.2', 'Fib_100.0%': '93381.9'}
+2025-04-28 19:57:23.923 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3431] - Fetching positions for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 19:57:24.914 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3532] - No active non-zero position found for BTC/USDT:USDT.
+2025-04-28 19:57:24.914 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4522] - No active position found for BTC/USDT:USDT. Evaluating entry signals...
+2025-04-28 19:57:24.914 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2783] - PSAR state ambiguous/neutral for BTC/USDT:USDT: PSARl=None, PSARs=None
+2025-04-28 19:57:24.915 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2899] - OBI Calc (BTC/USDT:USDT): BidVol=24.6670, AskVol=3.5470, OBI=0.7486 -> Score=0.749
+2025-04-28 19:57:24.915 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 94770.8): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: 0.0346, NormScore: 0.0119, Thresh: +/-0.500 -> Signal: [33mHOLD[0m
+2025-04-28 19:57:24.915 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3046] -   Contributing Scores: ema_alignment: 1.00 (x0.30) = 0.300, momentum: 1.00 (x0.20) = 0.200, volume_confirmation: 0.00 (x0.10) = 0.000, stoch_rsi: -0.30 (x0.40) = -0.120, rsi: -0.37 (x0.30) = -0.111, bollinger_bands: -0.52 (x0.20) = -0.104, vwap: 0.60 (x0.30) = 0.180, cci: -0.80 (x0.20) = -0.160, wr: -0.74 (x0.20) = -0.148, psar: 0.00 (x0.30) = 0.000, sma_10: 0.50 (x0.10) = 0.050, mfi: -0.64 (x0.20) = -0.127, orderbook: 0.75 (x0.10) = 0.075
+2025-04-28 19:57:24.915 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4566] - Holding BTC/USDT:USDT. Signal: HOLD, Can Open: False
+2025-04-28 20:00:47.231 UTC - INFO     - [livebot_BTC_USDT-USDT:330] - Logger 'livebot_BTC_USDT-USDT' initialized. Log file: 'livebot_BTC_USDT-USDT.log', Console Level: INFO
+2025-04-28 20:00:47.233 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1586] - Fetching ticker for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 20:00:47.823 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1628] - Parsed price from standard CCXT 'last' field for BTC/USDT:USDT
+2025-04-28 20:00:47.823 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1638] - Current price for BTC/USDT:USDT: 94752.2
+2025-04-28 20:00:47.823 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1684] - Fetching 200 klines for BTC/USDT:USDT (5m, MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 20:00:48.746 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1744] - Fetched and processed 200 klines for BTC/USDT:USDT.
+2025-04-28 20:00:48.747 UTC - WARNING  - [livebot_BTC_USDT-USDT:1781] - Invalid orderbook limit requested. Adjusted to nearest valid Bybit V5 limit: 1
+2025-04-28 20:00:48.748 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1786] - Fetching order book (limit 1) for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT', 'limit': 1}
+2025-04-28 20:00:49.132 UTC - DEBUG    - [livebot_BTC_USDT-USDT:1809] - Fetched order book for BTC/USDT:USDT: 1 bids, 1 asks.
+2025-04-28 20:00:49.132 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2147] - Converting columns ['open', 'high', 'low', 'close', 'volume'] to float64 for TA...
+2025-04-28 20:00:49.148 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2165] - DataFrame dtypes prepared for TA: {'open': dtype('float64'), 'high': dtype('float64'), 'low': dtype('float64'), 'close': dtype('float64'), 'volume': dtype('float64')}
+2025-04-28 20:00:49.149 UTC - INFO     - [livebot_BTC_USDT-USDT:2376] - Defined TA Strategy for BTC/USDT:USDT with 14 indicator groups.
+2025-04-28 20:00:49.150 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2377] - TA Column Map: {'ATR': 'ATRr_14', 'EMA_Short': 'EMA_9', 'EMA_Long': 'EMA_21', 'Momentum': 'MOM_7', 'Volume_MA': 'VOL_SMA_15', 'StochRSI_K': 'STOCHRSIk_14_12_3_3', 'StochRSI_D': 'STOCHRSId_14_12_3_3', 'RSI': 'RSI_14', 'BB_Lower': 'BBL_20_2_0', 'BB_Middle': 'BBM_20_2_0', 'BB_Upper': 'BBU_20_2_0', 'VWAP': 'VWAP_D', 'CCI': 'CCI_20_0.015', 'WR': 'WILLR_14', 'PSAR_Long': 'PSARl_0.02_0.2', 'PSAR_Short': 'PSARs_0.02_0.2', 'SMA10': 'SMA_10', 'MFI': 'MFI_14'}
+2025-04-28 20:00:49.150 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2399] - Running pandas_ta strategy calculation for BTC/USDT:USDT on 200 rows...
+2025-04-28 20:00:49.372 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2408] - Finished indicator calculations for BTC/USDT:USDT in 0.222s.
+2025-04-28 20:00:49.374 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARl_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Long' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 20:00:49.375 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2466] - Column 'PSARs_0.02_0.2' not found in TA DataFrame for indicator 'PSAR_Short' (BTC/USDT:USDT). Setting value to None.
+2025-04-28 20:00:49.375 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2477] - Latest indicator Decimal values updated for BTC/USDT:USDT: Found 21/23 valid values.
+2025-04-28 20:00:49.380 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2660] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50, High: 94874.3, Low: 93381.9): {'Fib_0.0%': '94874.3', 'Fib_23.6%': '94522.0', 'Fib_38.2%': '94304.2', 'Fib_50.0%': '94128.1', 'Fib_61.8%': '93951.9', 'Fib_78.6%': '93701.2', 'Fib_100.0%': '93381.9'}
+2025-04-28 20:00:49.380 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3431] - Fetching positions for BTC/USDT:USDT (MarketID: BTCUSDT) with params: {'category': 'linear', 'symbol': 'BTCUSDT'}
+2025-04-28 20:00:49.781 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3532] - No active non-zero position found for BTC/USDT:USDT.
+2025-04-28 20:00:49.782 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4522] - No active position found for BTC/USDT:USDT. Evaluating entry signals...
+2025-04-28 20:00:49.782 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2783] - PSAR state ambiguous/neutral for BTC/USDT:USDT: PSARl=None, PSARs=None
+2025-04-28 20:00:49.783 UTC - DEBUG    - [livebot_BTC_USDT-USDT:2899] - OBI Calc (BTC/USDT:USDT): BidVol=2.1210, AskVol=7.3880, OBI=-0.5539 -> Score=-0.554
+2025-04-28 20:00:49.783 UTC - INFO     - [livebot_BTC_USDT-USDT:3041] - Signal Calc (BTC/USDT:USDT @ 94752.2): Set='default', Indis(Actv/NaN): 13/0, WtSum: 2.900, RawScore: -0.0123, NormScore: -0.0042, Thresh: +/-0.500 -> Signal: [33mHOLD[0m
+2025-04-28 20:00:49.784 UTC - DEBUG    - [livebot_BTC_USDT-USDT:3046] -   Contributing Scores: ema_alignment: 1.00 (x0.30) = 0.300, momentum: 1.00 (x0.20) = 0.200, volume_confirmation: 0.00 (x0.10) = 0.000, stoch_rsi: -0.30 (x0.40) = -0.120, rsi: -0.34 (x0.30) = -0.101, bollinger_bands: -0.45 (x0.20) = -0.091, vwap: 0.60 (x0.30) = 0.180, cci: -0.68 (x0.20) = -0.137, wr: -0.69 (x0.20) = -0.137, psar: 0.00 (x0.30) = 0.000, sma_10: 0.50 (x0.10) = 0.050, mfi: -0.51 (x0.20) = -0.101, orderbook: -0.55 (x0.10) = -0.055
+2025-04-28 20:00:49.784 UTC - DEBUG    - [livebot_BTC_USDT-USDT:4566] - Holding BTC/USDT:USDT. Signal: HOLD, Can Open: False

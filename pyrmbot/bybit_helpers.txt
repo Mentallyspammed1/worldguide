@@ -1,0 +1,2986 @@
+#!/usr/bin/env python
+"""
+Bybit Trading Enhanced (v5.3 - Grand Arcanum)
+
+The central arcanum managing interactions with the Bybit realm.
+Supports HTTP/WebSocket, market data, order management, real-time indicators.
+Incorporates Colorama enchantment, robust error handling, managed reconnections,
+and utilities including Termux SMS whispers.
+Includes logic to fetch Daily data needed for Pivot Point runes.
+"""
+
+import argparse
+import json
+import logging
+import logging.handlers
+import os
+import subprocess
+import sys
+import time
+# import hmac # Not used in this version
+# import hashlib # Not used in this version
+import threading
+from decimal import Decimal, ROUND_DOWN, InvalidOperation
+from typing import Any, Dict, List, Optional, Tuple, Callable
+
+# Third-party imports - Summoning the libraries
+import ccxt
+import pandas as pd
+import numpy as np # Added for potential indicator calculations (e.g., NaN handling)
+import websocket # Direct import for type hints if needed, though pybit uses it
+from colorama import Back, Fore, Style, init as colorama_init
+from pydantic import (BaseModel, Field, PositiveFloat, PositiveInt,
+                      ValidationError, field_validator, model_validator)
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# pybit imports
+try:
+    from pybit.unified_trading import HTTP, WebSocket
+except ImportError:
+    print(f"{Fore.RED + Style.BRIGHT}Fatal Error: pybit library not found.{Style.RESET_ALL}", file=sys.stderr)
+    print(f"{Fore.YELLOW}Ensure pybit is installed: pip install pybit{Style.RESET_ALL}", file=sys.stderr)
+    sys.exit(1)
+
+
+# Local imports - Channeling local wisdom
+try:
+    # Attempt to import the necessary functions from indicators.py
+    # AppConfig is expected to be defined here (bybit_trading_enhanced),
+    # but indicators.py might try to import it.
+    from indicators import calculate_indicators, update_indicators
+    # from indicators import AppConfig as IndicatorConfig # If needed by indicators
+except ImportError:
+    print(f"{Fore.RED + Style.BRIGHT}Fatal Error: The sacred scroll 'indicators.py' is missing or incomplete.{Style.RESET_ALL}", file=sys.stderr)
+    print(f"{Fore.YELLOW}Ensure indicators.py resides in the same mystical plane (directory) or within your PYTHONPATH.{Style.RESET_ALL}")
+    sys.exit(1)
+
+
+# Initialize Colorama - Igniting the terminal's inner light
+colorama_init(autoreset=True)
+
+# --- Custom Logging Setup - Crafting the Oracle's Voice ---
+SUCCESS_LEVEL = 25 # A level between INFO and WARNING for successful actions
+logging.addLevelName(SUCCESS_LEVEL, "SUCCESS")
+
+def log_success(self: logging.Logger, message: str, *args: Any, **kwargs: Any) -> None:
+    """Adds a .success() method to the logger, echoing triumphs."""
+    if self.isEnabledFor(SUCCESS_LEVEL):
+        self._log(SUCCESS_LEVEL, message, args, **kwargs)
+
+# Add the custom method to the Logger class
+if not hasattr(logging.Logger, 'success'): # Prevent adding multiple times
+    logging.Logger.success = log_success # type: ignore[attr-defined]
+
+
+# Defining the spectral hues for log levels
+LOG_LEVEL_COLORS = {
+    logging.DEBUG: Fore.CYAN + Style.DIM,
+    logging.INFO: Fore.BLUE + Style.BRIGHT,
+    SUCCESS_LEVEL: Fore.MAGENTA + Style.BRIGHT, # A triumphant magenta
+    logging.WARNING: Fore.YELLOW + Style.BRIGHT,
+    logging.ERROR: Fore.RED + Style.BRIGHT,
+    logging.CRITICAL: Back.RED + Fore.WHITE + Style.BRIGHT,
+}
+
+class ColoredFormatter(logging.Formatter):
+    """Formats log records with vibrant colors, illuminating the console."""
+    def format(self, record: logging.LogRecord) -> str:
+        log_color = LOG_LEVEL_COLORS.get(record.levelno, Fore.WHITE)
+        levelname_color = f"{log_color}{record.levelname:<8}{Style.RESET_ALL}"
+        # Weave color into the message itself
+        # Use self.formatMessage to correctly handle msg, args, and exception info
+        message_color = f"{log_color}{self.formatMessage(record)}{Style.RESET_ALL}"
+
+        # The pattern of the log spell
+        # Ensure the datefmt matches what's used in logger setup
+        log_fmt = f"%(asctime)s - {Fore.GREEN}%(name)s{Style.RESET_ALL} - {levelname_color} [%(filename)s:%(lineno)d] - {message_color}"
+
+        # Use a temporary formatter to weave standard elements like timestamp
+        # Note: Standard Formatter already handles message, args, and exc_info
+        # We are wrapping the output of the standard formatter's formatMessage
+        # It's simpler to just build the string with color codes directly
+        # Let's rebuild the record's msg part with color and use the parent format
+        original_msg = record.getMessage()
+        record.message = f"{log_color}{original_msg}{Style.RESET_ALL}"
+
+        # Use the base formatter to handle the rest (date, name, levelname etc)
+        # But we've already colored levelname and message above, so let's just build the string
+        # Revert record.message so standard formatters don't double-process it if we ever chain
+        record.message = original_msg # Restore original message
+
+        # Manually construct the final formatted string
+        # This approach gives full control over color placement
+        formatted_time = self.formatTime(record, self.datefmt)
+        formatted_string = f"{formatted_time} - {Fore.GREEN}{record.name}{Style.RESET_ALL} - {levelname_color} [{record.filename}:{record.lineno}] - {log_color}{record.getMessage()}{Style.RESET_ALL}"
+
+        # Handle exception information manually to ensure it's colored with the message color
+        if record.exc_info:
+             # Use parent's formatException to get the traceback string
+             exc_text = self.formatException(record.exc_info)
+             formatted_string += f"\n{log_color}{exc_text}{Style.RESET_ALL}"
+
+        if record.stack_info:
+             # Use parent's formatStack to get the stack trace string
+             stack_text = self.formatStack(record.stack_info)
+             formatted_string += f"\n{log_color}{stack_text}{Style.RESET_ALL}"
+
+        return formatted_string
+
+
+# --- Configuration Model (Aligned with .env) - The Spellbook's Core ---
+class AppConfig(BaseSettings):
+    """Loads and validates the arcane constants from .env file or environment variables."""
+    # Pydantic V2 Settings Configuration - Binding the environment
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_prefix='BOT_',
+        case_sensitive=False,
+        extra='ignore', # Ignore unknown runes
+        env_file_encoding='utf-8'
+    )
+
+    # API Credentials & Connection - Keys to the Bybit Citadel
+    api_key: str = Field(..., description="Bybit API Key - The First Key")
+    api_secret: str = Field(..., description="Bybit API Secret - The Second Key")
+    testnet_mode: bool = Field(True, description="Engage the Testnet Simulacrum? (true/false)")
+    retry_count: PositiveInt = Field(3, description="Attempts to re-invoke API on failure")
+    retry_delay: PositiveFloat = Field(2.0, ge=0.5, description="Pause between retries (seconds)")
+
+    # Trading Symbol & Market - The Focus of our Intent
+    symbol: str = Field("BTCUSDT", description="Target symbol (e.g., BTCUSDT)")
+    leverage: PositiveInt = Field(5, ge=1, le=100, description="Leverage multiplier (1-100)")
+
+    # Strategy Core Settings - The Rhythm of the Ritual
+    timeframe: str = Field("5m", description="Kline timeframe (e.g., 1m, 5m, 1h)")
+    risk_per_trade: PositiveFloat = Field(0.01, ge=0.001, le=0.1, description="Equity fraction risked per venture")
+    loop_delay: PositiveFloat = Field(5.0, ge=1.0, description="Pause in the main strategy cycle (seconds)")
+
+    # --- Indicator Parameters - Runes of Foresight ---
+    # These must align with the incantations in indicators.py
+    # Added specific types and default values aligning with the description and common use
+    evt_length: PositiveInt = Field(7, description="Ehlers Volatility Transformer Length")
+    evt_multiplier: PositiveFloat = Field(2.5, description="Ehlers Volatility Transformer Multiplier")
+    atr_period: PositiveInt = Field(14, description="Average True Range Period")
+    sl_atr_multiplier: PositiveFloat = Field(1.5, ge=0.1, description="Stop Loss Distance as ATR Multiplier")
+    tp_atr_multiplier: PositiveFloat = Field(2.0, ge=0.1, description="Take Profit Distance as ATR Multiplier")
+    trailing_stop_atr_multiplier: PositiveFloat = Field(1.5, ge=0.1, description="Trailing Stop Distance as ATR Multiplier")
+    sma_short: PositiveInt = Field(10, description="Short Simple Moving Average Period")
+    sma_long: PositiveInt = Field(50, description="Long Simple Moving Average Period")
+    hma_period: PositiveInt = Field(9, description="Hull Moving Average Period")
+    zema_period: PositiveInt = Field(14, description="Zero-Lag EMA Period")
+    supertrend_period: PositiveInt = Field(10, description="Supertrend Period")
+    supertrend_multiplier: PositiveFloat = Field(3.0, description="Supertrend Multiplier")
+    macd_fast: PositiveInt = Field(12, description="MACD Fast Period")
+    macd_slow: PositiveInt = Field(26, description="MACD Slow Period")
+    macd_signal: PositiveInt = Field(9, description="MACD Signal Period")
+    rsi_period: PositiveInt = Field(14, description="RSI Period")
+    fisher_rsi_period: PositiveInt = Field(9, description="Fisher RSI Period")
+    momentum_period: PositiveInt = Field(10, description="Momentum Period")
+    stochrsi_length: PositiveInt = Field(14, description="Stoch RSI Length")
+    stochrsi_rsi_length: PositiveInt = Field(14, description="Stoch RSI RSI Length")
+    stochrsi_k: PositiveInt = Field(3, description="Stoch RSI %K Period")
+    stochrsi_d: PositiveInt = Field(3, description="Stoch RSI %D Period")
+    adx_period: PositiveInt = Field(14, description="ADX Period")
+    adx_threshold: PositiveFloat = Field(20.0, ge=0, description="ADX Threshold for Trend Strength")
+    volume_sma_period: PositiveInt = Field(20, description="Volume Simple Moving Average Period")
+    # Pivot periods are handled by specifying Daily data, not separate periods in config
+
+    # Notifications & Logging - Echoes in the Ether
+    sms_enabled: bool = Field(False, description="Activate Termux SMS whispers? (true/false)")
+    sms_phone: Optional[str] = Field(None, description="Recipient phone number for SMS (e.g., +1234567890)")
+    sms_cooldown: PositiveInt = Field(60, description="Minimum silence between SMS whispers (seconds)")
+    log_dir: str = Field("logs", description="Sanctum for log scrolls")
+    log_level: str = Field("INFO", description="Logging verbosity (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
+
+    # --- Validators - Wards against Configuration Errors ---
+    @field_validator("symbol")
+    @classmethod
+    def validate_symbol(cls, v: str) -> str:
+        """Ensure the symbol speaks the language of USDT perpetuals."""
+        if not v.endswith("USDT"): # A basic sigil check
+            raise ValueError(f"Symbol '{v}' must be a USDT perpetual contract (e.g., BTCUSDT)")
+        return v.upper() # Standardize to uppercase runes
+
+    @field_validator("timeframe")
+    @classmethod
+    def validate_timeframe(cls, v: str) -> str:
+        """Verify the timeframe aligns with Bybit's known intervals."""
+        # Bybit's sacred intervals (per pybit/API scrolls)
+        valid_timeframes = ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d", "1W", "1M"]
+        if v not in valid_timeframes:
+            raise ValueError(f"Invalid timeframe '{v}'. Must be one of: {', '.join(valid_timeframes)}")
+        return v
+
+    @field_validator("sms_phone")
+    @classmethod
+    def validate_sms_phone(cls, v: Optional[str], info: Any) -> Optional[str]:
+        """Check SMS phone format and necessity based on sms_enabled."""
+        values = info.data # Access other fields via info.data in Pydantic v2
+        if values.get("sms_enabled") and not v:
+            raise ValueError("SMS phone number rune is required when SMS whispers are enabled.")
+        if v and not v.startswith('+'):
+            # Basic check for the international '+ sign' sigil
+            raise ValueError("SMS phone number must begin with '+' and include country code (e.g., +1234567890).")
+        # Optional: Add more robust regex validation here if needed
+        return v
+
+    @field_validator("log_level")
+    @classmethod
+    def validate_log_level(cls, v: str) -> str:
+        """Ensure the log level is a known incantation."""
+        valid_levels = ["DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"] # Include SUCCESS level
+        level_upper = v.upper()
+        if level_upper not in valid_levels:
+            raise ValueError(f"Invalid log level '{v}'. Must be one of: {', '.join(valid_levels)}")
+        return level_upper
+
+    @model_validator(mode='after')
+    def check_indicator_periods(cls, values):
+        """Verify the harmony between related indicator periods."""
+        # Use getattr with default in case fields were added to indicators but not config
+        sma_short = getattr(values, 'sma_short', 10)
+        sma_long = getattr(values, 'sma_long', 50)
+        macd_fast = getattr(values, 'macd_fast', 12)
+        macd_slow = getattr(values, 'macd_slow', 26)
+
+        if sma_long <= sma_short:
+            raise ValueError(f"SMA long period ({sma_long}) must exceed SMA short period ({sma_short}) for crossover magic.")
+        if macd_slow <= macd_fast:
+             raise ValueError(f"MACD slow period ({macd_slow}) must exceed MACD fast period ({macd_fast}) for proper calculation.")
+        # Add other cross-indicator validations here as needed
+        return values
+
+
+# --- Bybit API Helper Class - The Core Arcanum ---
+class BybitHelper:
+    """
+    The central conduit to Bybit's realm. Manages API interactions (HTTP & WebSocket),
+    configuration, logging, data caching, and fundamental trading operations.
+    Leverages pybit for streaming and core requests, ccxt for market wisdom.
+    Handles fetching data for multiple timeframes (e.g., Daily for Pivots).
+    """
+    def __init__(self, config: AppConfig):
+        self.config = config
+        self.logger = self._setup_logger()
+        self.logger.info(f"{Fore.GREEN}Initializing BybitHelper | Symbol: {Style.BRIGHT}{config.symbol}{Style.NORMAL}, TF: {config.timeframe}, Testnet: {config.testnet_mode}{Style.RESET_ALL}")
+
+        # Caches and State - The Helper's Memory Crystals
+        self.ohlcv_cache: Dict[str, pd.DataFrame] = {} # Key: timeframe rune, Value: DataFrame scroll with indicators
+        self.daily_ohlcv_cache: Optional[pd.DataFrame] = None # Cache for Daily OHLCV specifically
+        self.max_ohlcv_cache_size = 1000 # Limit memory scroll size per timeframe
+        # Cache enough daily data for pivots (needs at least 1 day, maybe more for lookbacks)
+        self.max_daily_ohlcv_cache_size = 365 * 2 # Cache ~2 years of daily data
+        self.last_sms_time: float = 0 # Timestamp of the last SMS whisper
+
+        # API Clients (Summoned in _initialize_clients)
+        self.session: Optional[HTTP] = None # pybit HTTP conduit
+        self.exchange: Optional[ccxt.bybit] = None # ccxt Oracle
+        self.market_info: Optional[Dict[str, Any]] = None # Crystal ball for symbol details
+
+        # WebSocket State (Managed by WS methods)
+        self.ws: Optional[WebSocket] = None # The ethereal WebSocket link
+        self.ws_connected = False # Is the link active?
+        self.ws_connecting = False # Is the link being forged?
+        self.ws_reconnect_attempt = 0 # Counter for re-forging attempts
+        self.max_ws_reconnect_attempts = 10 # Limit on re-forging attempts
+        self.ws_user_callbacks: Dict[str, Optional[Callable]] = {} # Stored user incantations for WS events
+        self.ws_topics: List[str] = [] # Store subscribed topics for reconnect
+
+        # Perform initial summoning rituals
+        if not self._initialize_clients():
+             # A critical failure during summoning. The ritual cannot proceed.
+             self.logger.critical(f"{Back.RED}{Fore.WHITE}FATAL: Failed to initialize essential API clients. Aborting invocation.{Style.RESET_ALL}")
+             raise RuntimeError("Failed to initialize essential API clients. Cannot continue.")
+        self._load_market_info() # Gaze into the market crystal early
+
+    def _setup_logger(self) -> logging.Logger:
+        """Configures the application's oracle (logger) with console and rotating file scrolls."""
+        logger = logging.getLogger("BybitTrading")
+        logger.setLevel(logging.DEBUG) # Capture all whispers at the source
+
+        # Prevent duplicate handlers if re-invoked (e.g., in tests or re-init)
+        # Check if handlers of the correct types already exist
+        existing_console_handler = any(isinstance(h, logging.StreamHandler) for h in logger.handlers)
+        existing_file_handler = any(isinstance(h, logging.handlers.RotatingFileHandler) for h in logger.handlers)
+
+        # --- Console Handler - The Oracle's Public Voice ---
+        if not existing_console_handler:
+            log_level_console_str = self.config.log_level
+            try:
+                log_level_console = getattr(logging, log_level_console_str.upper()) # Use upper() for safety
+                if not isinstance(log_level_console, int): # Handle case where getattr gets something unexpected
+                     raise AttributeError
+            except AttributeError:
+                print(f"{Fore.YELLOW}Warning: Invalid BOT_LOG_LEVEL '{log_level_console_str}'. Defaulting to INFO.{Style.RESET_ALL}", file=sys.stderr)
+                log_level_console = logging.INFO
+
+            console_formatter = ColoredFormatter(datefmt='%Y-%m-%d %H:%M:%S') # Pass datefmt here
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setFormatter(console_formatter)
+            console_handler.setLevel(log_level_console)
+            logger.addHandler(console_handler)
+            self.logger.debug("Console logger handler added.")
+        else:
+             self.logger.debug("Console logger handler already exists.")
+
+
+        # --- Rotating File Handler - The Oracle's Private Scrolls ---
+        if not existing_file_handler:
+            log_dir = self.config.log_dir
+            try:
+                # Ensure the log sanctum exists
+                os.makedirs(log_dir, exist_ok=True)
+                log_file = os.path.join(log_dir, "trading.log") # The main scroll
+
+                file_formatter = logging.Formatter(
+                    fmt="%(asctime)s - %(name)s - %(levelname)s [%(filename)s:%(funcName)s:%(lineno)d] - %(message)s",
+                    datefmt='%Y-%m-%d %H:%M:%S'
+                )
+                # Rotate scrolls: 5 files, 5MB each
+                file_handler = logging.handlers.RotatingFileHandler(
+                    log_file, maxBytes=5*1024*1024, backupCount=5, encoding='utf-8'
+                )
+                file_handler.setFormatter(file_formatter)
+                file_handler.setLevel(logging.DEBUG) # Record all whispers to the scroll
+                logger.addHandler(file_handler)
+                self.logger.debug("Rotating file logger handler added.")
+
+            except Exception as e:
+                # If the sanctum cannot be prepared, log error but continue
+                logger.error(f"Failed to set up file logging to '{log_dir}': {e}", exc_info=True)
+        else:
+             self.logger.debug("Rotating file logger handler already exists.")
+
+
+        # --- Silence Verbose Libraries - Quieting background noise ---
+        # Only configure if this is the first time setup_logger is run for this logger name
+        if not hasattr(logger, '_configured_silence'):
+             for lib_name in ["ccxt", "pybit", "urllib3", "websocket"]:
+                 logging.getLogger(lib_name).setLevel(logging.WARNING)
+             logger._configured_silence = True # Mark as configured
+
+        self.logger.info(f"Logging configured. Console: {self.config.log_level.upper()}, File: DEBUG")
+        return logger
+
+    def _initialize_clients(self) -> bool:
+        """Summons the pybit HTTP and ccxt clients."""
+        self.logger.info(f"{Fore.CYAN}# Summoning API clients (pybit HTTP, ccxt)...{Style.RESET_ALL}")
+        try:
+            # pybit HTTP Session (Primary for orders, balance, positions)
+            self.session = HTTP(
+                testnet=self.config.testnet_mode,
+                api_key=self.config.api_key,
+                api_secret=self.config.api_secret,
+                # Known retryable Bybit error runes
+                retry_codes={10002, 10006, 30034, 30035, 130021, 130150, 10016, 130071},
+                retries=self.config.retry_count,
+                retry_delay=int(self.config.retry_delay * 1000), # pybit expects milliseconds
+                referral_id=None # Optional: Inscribe your referral rune if desired
+            )
+            self.logger.info(f"pybit HTTP session conjured (Testnet: {self.config.testnet_mode})")
+
+            # ccxt Exchange (Primary for market data, symbol info, fallbacks)
+            self.exchange = ccxt.bybit({
+                'apiKey': self.config.api_key,
+                'secret': self.config.api_secret,
+                'enableRateLimit': True, # Respect the exchange's tempo
+                'options': {
+                    'adjustForTimeDifference': True, # Harmonize clocks
+                     'defaultType': 'swap', # Focus on perpetual swaps
+                     'defaultSubType': 'linear', # Focus on USDT/USDC margined
+                     # 'brokerId': 'YOUR_BROKER_ID' # Inscribe if using a broker portal
+                },
+            })
+            if self.config.testnet_mode:
+                self.exchange.set_sandbox_mode(True) # Enter the simulacrum
+
+            # Awaken the market knowledge within ccxt
+            self.exchange.load_markets()
+            self.logger.info(f"ccxt exchange awakened (Testnet: {self.config.testnet_mode})")
+
+            # Prepare the WebSocket vessel (but do not yet open the connection)
+            self._init_websocket_instance() # Creates self.ws
+
+            return True # Summoning successful
+
+        except ccxt.AuthenticationError as e:
+            self.logger.critical(f"{Back.RED}{Fore.WHITE}CCXT Authentication Error: {e}. Check API key/secret and permissions.{Style.RESET_ALL}", exc_info=True)
+            return False # Cannot proceed without the keys
+        except ccxt.ExchangeError as e:
+            self.logger.critical(f"CCXT Exchange Error during initialization: {e}", exc_info=True)
+            return False # The exchange itself resists connection
+        except ImportError as e:
+             self.logger.critical(f"Import error during client summoning: {e}. Ensure all required libraries are installed.", exc_info=True)
+             return False
+        except Exception as e:
+            # Catch unexpected disturbances during summoning
+            self.logger.critical(f"Unexpected error initializing API clients: {e}", exc_info=True)
+            return False
+
+    def _load_market_info(self):
+        """Gazes into the ccxt oracle to retrieve market details for the chosen symbol."""
+        if not self.exchange:
+            self.logger.error("CCXT oracle not initialized. Cannot perceive market info.")
+            return
+        try:
+            self.logger.debug(f"Seeking market wisdom for symbol: {self.config.symbol}")
+            # Consult the oracle
+            market = self.exchange.market(self.config.symbol)
+            if market:
+                 self.market_info = market
+                 # Log the revealed truths
+                 self.logger.info(f"{Fore.GREEN}Market wisdom received for {self.config.symbol}:{Style.RESET_ALL}")
+                 self.logger.info(f"  Min Qty : {Style.BRIGHT}{self.get_min_order_qty()}{Style.RESET_ALL}")
+                 self.logger.info(f"  Qty Step: {Style.BRIGHT}{self.get_qty_step()}{Style.RESET_ALL}")
+                 self.logger.info(f"  Price Step: {Style.BRIGHT}{self.get_price_step()}{Style.RESET_ALL}")
+                 # Attempt to set leverage after gaining market insight
+                 self._set_leverage()
+            else:
+                 # This should be rare if load_markets succeeded, but we guard against it
+                 self.logger.error(f"Market wisdom for {self.config.symbol} remains elusive after consulting the oracle.")
+                 self.market_info = None
+
+        except ccxt.BadSymbol:
+            self.logger.critical(f"{Back.RED}{Fore.WHITE}Symbol '{self.config.symbol}' is unknown to the Bybit oracle (via ccxt). Check BOT_SYMBOL.{Style.RESET_ALL}")
+            self.market_info = None
+        except ccxt.NetworkError as e:
+             self.logger.error(f"Network disturbance while seeking market wisdom for {self.config.symbol}: {e}")
+             self.market_info = None # Mark as unknown on error
+        except Exception as e:
+            self.logger.exception(f"Unexpected interference while seeking market wisdom for {self.config.symbol}: {e}")
+            self.market_info = None
+
+    def _set_leverage(self):
+        """Attempts to set the leverage for the symbol using pybit's incantation."""
+        if not self.session or not self.market_info:
+            self.logger.warning("Cannot set leverage: pybit session or market wisdom unavailable.")
+            return False
+
+        leverage_val = str(self.config.leverage) # pybit requires the rune as a string
+        symbol = self.config.symbol
+        self.logger.info(f"Attempting to imbue {symbol} with {leverage_val}x leverage...")
+
+        try:
+            # The leverage incantation
+            response = self.session.set_leverage(
+                category="linear", # For USDT perpetuals
+                symbol=symbol,
+                buyLeverage=leverage_val,
+                sellLeverage=leverage_val
+            )
+
+            # Interpret the response runes
+            if response and response.get("retCode") == 0:
+                self.logger.success(f"Successfully imbued {symbol} with {leverage_val}x leverage.")
+                return True
+            elif response and response.get("retCode") == 110043: # Leverage not modified rune
+                 self.logger.info(f"Leverage for {symbol} already set to {leverage_val}x (Rune: 110043).")
+                 return True
+            elif response and response.get("retCode") == 110025: # Hedge mode + Portfolio Margin conflict rune
+                 self.logger.warning(f"Cannot set leverage for {symbol}: Hedge mode with Portfolio Margin detected (Rune: 110025). Adjust manually on Bybit if needed.")
+                 return False # Indicate failure to set automatically
+            else:
+                # Handle other Bybit response runes
+                err_code = response.get('retCode')
+                err_msg = response.get('retMsg', 'Unknown disturbance')
+                self.logger.error(f"Failed to set leverage for {symbol} to {leverage_val}x. Rune: {err_code}, Msg: {err_msg}")
+                # Advise the user about potential manual adjustments needed
+                self.logger.warning("Ensure Margin Mode (Isolated/Cross) and Position Mode (One-Way/Hedge) are correctly set on the Bybit interface.")
+                return False
+
+        except Exception as e:
+            self.logger.exception(f"Unexpected interference while setting leverage for {symbol}: {e}")
+            return False
+
+    def _init_websocket_instance(self):
+         """Creates or recreates the pybit WebSocket vessel cleanly."""
+         try:
+             # Gently dismiss the old vessel if it exists and is active
+             if self.ws:
+                 self.logger.debug("Attempting to dismiss existing WebSocket vessel...")
+                 try:
+                      # pybit's WebSocket object has an `exit()` method
+                      if hasattr(self.ws, 'exit') and callable(self.ws.exit):
+                           self.ws.exit()
+                      # Give the underlying threads a moment to terminate
+                      time.sleep(0.5)
+                      self.logger.info("Previous WebSocket vessel dismissed.")
+                 except Exception as e:
+                      self.logger.warning(f"Error dismissing previous WebSocket vessel: {e}")
+                 finally:
+                      self.ws = None # Ensure the old reference vanishes
+
+             # Conjure a new WebSocket vessel
+             # Note: pybit's WebSocket v5 uses a single instance for public/private streams
+             # You pass topics via subscribe() later.
+             self.ws = WebSocket(
+                 testnet=self.config.testnet_mode,
+                 # API keys are passed here for the *instance*, needed for private topics
+                 api_key=self.config.api_key,
+                 api_secret=self.config.api_secret,
+                 channel_type="linear", # Specify category for v5 streams
+                 ping_interval=20, # Send heartbeat ping every 20 seconds
+                 ping_timeout=10, # Expect pong response within 10 seconds
+                 retries=0, # Disable pybit's auto-retry, we handle it manually
+                 restart_on_error=False # Disable pybit's auto-restart, we manage it
+             )
+             self.logger.info("Conjured new pybit WebSocket vessel.")
+
+         except Exception as e:
+             self.logger.critical(f"Fatal error conjuring WebSocket vessel: {e}", exc_info=True)
+             self.ws = None # Ensure vessel is None if conjuration fails
+
+
+    # --- WebSocket Connection Handling - Weaving the Ethereal Link ---
+
+    def connect_websocket(self, topics: List[str], message_callback: Callable,
+                         error_callback: Optional[Callable] = None,
+                         open_callback: Optional[Callable] = None,
+                         close_callback: Optional[Callable] = None):
+        """
+        Establishes the WebSocket link, subscribes to topics, and manages reconnection.
+
+        Args:
+            topics: List of channels to listen to (e.g., ["kline.5m.BTCUSDT", "order"]).
+            message_callback: Incantation called upon receiving a message. Signature: func(message: dict)
+            error_callback: Incantation called upon WebSocket errors. Signature: func(error: Exception)
+            open_callback: Incantation called when the link is established. Signature: func()
+            close_callback: Incantation called when the link is severed. Signature: func(status_code: int, message: str)
+        """
+        if not self.ws:
+            self.logger.error("WebSocket vessel not initialized. Cannot connect.")
+            return
+
+        if self.ws_connecting or self.ws_connected:
+            self.logger.warning(f"WebSocket link already {'being forged' if self.ws_connecting else 'active'}. Ignoring connect request.")
+            # If topics changed, you might want to send a new subscribe message here.
+            # For simplicity, we assume topics are set once per connection cycle.
+            return
+
+        self.ws_connecting = True
+        self.ws_topics = topics # Store topics for reconnect
+        self.ws_user_callbacks = { # Store user incantations for potential re-forging
+             'message': message_callback,
+             'error': error_callback,
+             'open': open_callback,
+             'close': close_callback
+        }
+        self.logger.info(f"{Fore.CYAN}# Forging WebSocket link and preparing subscriptions: {topics}{Style.RESET_ALL}")
+
+        # --- Define Internal Handlers for pybit's Callbacks ---
+        def internal_on_message(message):
+            # Log raw messages only in deep debug states if needed
+            # self.logger.debug(f"WS Raw Whisper: {message}")
+            try:
+                # Decode the whisper if it's a JSON string
+                # pybit callback should handle JSON parsing, but defensive check
+                data = json.loads(message) if isinstance(message, str) else message
+
+                if isinstance(data, dict):
+                    # Check for standard Bybit v5 WS message structure
+                    if "topic" in data and "data" in data:
+                        # This is a topic-based whisper (kline, order, etc.)
+                        # Pass the full data dict to the user callback
+                        self.ws_user_callbacks['message'](data)
+                    elif "op" in data:
+                        # Handle control whispers (pong, subscribe confirmations, auth)
+                        op = data.get("op")
+                        if op == "pong":
+                            self.logger.debug("WebSocket Pong received (heartbeat echo).")
+                        elif op == "subscribe":
+                            if data.get("success"):
+                                self.logger.success(f"WebSocket subscribed successfully: {data.get('ret_msg', '')} | Args: {data.get('args', [])}")
+                            else:
+                                self.logger.error(f"WebSocket subscription FAILED: {data.get('ret_msg', '')} | Args: {data.get('args', [])}")
+                                # Consider alerting if critical subscriptions fail
+                        elif op == "auth":
+                             if data.get("success"):
+                                 self.logger.success("WebSocket authenticated successfully.")
+                             else:
+                                 auth_msg = data.get('ret_msg', 'Unknown auth error')
+                                 self.logger.critical(f"{Back.RED}{Fore.WHITE}WebSocket authentication FAILED: {auth_msg}{Style.RESET_ALL}")
+                                 # This is critical! Can't receive private whispers.
+                                 self.send_sms(f"CRITICAL: Bybit WS Auth FAILED! Msg: {auth_msg[:50]}")
+                                 # Decide if this should terminate the bot or just disable private features
+                                 # For now, just log and alert.
+                        else:
+                             # Handle other 'op' messages if necessary
+                             self.logger.debug(f"WS Control Whisper: {data}")
+                    elif "success" in data and not data.get("success"):
+                         # Handle general API failure whispers (less common on stream)
+                         self.logger.error(f"WebSocket operation failed: {data.get('ret_msg', '')}")
+                    else:
+                         # Unhandled dictionary structure
+                         self.logger.debug(f"WS Unhandled Dict Whisper: {data}")
+                else:
+                     # Non-dictionary message (shouldn't happen often with pybit/Bybit v5)
+                     self.logger.warning(f"Received non-dict WebSocket whisper: {message}")
+
+            except json.JSONDecodeError:
+                self.logger.error(f"WebSocket received non-JSON whisper: {message}") # Should not happen with pybit
+            except Exception as e:
+                # Catch errors within the whisper processing itself
+                self.logger.exception(f"Error processing WebSocket message: {e}")
+
+        def internal_on_error(ws_app, error):
+            # Log the disturbance and trigger re-forging logic
+            self.logger.error(f"{Fore.RED}WebSocket Error: {error}{Style.RESET_ALL}")
+            self.ws_connected = False
+            self.ws_connecting = False # Reset connecting flag as the attempt failed
+
+            if self.ws_user_callbacks.get('error'):
+                try:
+                    self.ws_user_callbacks['error'](error)
+                except Exception as user_cb_error:
+                     self.logger.error(f"Error in user WS error callback: {user_cb_error}")
+
+            # Check error type to decide on reconnection
+            # pybit wraps websocket-client errors, so check the underlying type
+            if isinstance(error, (websocket.WebSocketConnectionClosedException, ConnectionRefusedError, ConnectionResetError, TimeoutError, websocket.WebSocketTimeoutException)):
+                self.logger.warning("WebSocket connection disturbance detected. Scheduling re-forging.")
+                self._schedule_reconnect() # Use stored topics
+            else:
+                self.logger.error(f"Unhandled WebSocket error type encountered: {type(error)}. Re-forging might not be attempted.")
+                self.send_sms(f"ALERT: Unhandled WS Error: {str(error)[:100]}")
+
+
+        def internal_on_open(ws_app):
+            # Link successfully forged
+            self.logger.success(f"{Fore.GREEN + Style.BRIGHT}WebSocket link established.{Style.RESET_ALL}")
+            self.ws_connected = True
+            self.ws_connecting = False
+            self.ws_reconnect_attempt = 0 # Reset counter on success
+
+            # Subscribe to topics *after* the link is open
+            try:
+                 if self.ws: # Check if ws still exists
+                     self.logger.info(f"Sending subscription request for: {self.ws_topics}")
+                     # pybit v5 uses a single `subscribe` method for all topics (public/private)
+                     # It handles routing internally based on the topic prefix.
+                     self.ws.subscribe(self.ws_topics) # Use stored topics
+                 else:
+                     self.logger.warning("WebSocket vessel vanished before subscription could occur in on_open.")
+
+            except Exception as e:
+                 self.logger.error(f"Failed to send subscribe request on WebSocket open: {e}")
+                 # Consider closing/reconnecting if critical subscriptions fail
+
+            if self.ws_user_callbacks.get('open'):
+                try:
+                    self.ws_user_callbacks['open']()
+                except Exception as user_cb_error:
+                     self.logger.error(f"Error in user WS open callback: {user_cb_error}")
+
+        def internal_on_close(ws_app, close_status_code, close_msg):
+             # Link severed
+             self.logger.warning(f"{Fore.YELLOW}WebSocket link severed: Code={close_status_code}, Msg='{close_msg}'{Style.RESET_ALL}")
+             was_connected = self.ws_connected # Remember state before resetting
+             self.ws_connected = False
+             self.ws_connecting = False
+
+             if self.ws_user_callbacks.get('close'):
+                 try:
+                     self.ws_user_callbacks['close'](close_status_code, close_msg)
+                 except Exception as user_cb_error:
+                      self.logger.error(f"Error in user WS close callback: {user_cb_error}")
+
+             # Decide whether to re-forge based on close code and previous state
+             # Avoid re-forging if severed intentionally (code 1000) or if never truly connected
+             # Normal closure runes: 1000 (Normal), 1001 (Going Away)
+             # Abnormal closure runes: 1006 (Abnormal Closure) is common on network issues
+             if was_connected and close_status_code not in [1000, 1001]:
+                 self.logger.info(f"Unexpected WebSocket closure (Rune: {close_status_code}). Scheduling re-forging.")
+                 self._schedule_reconnect() # Use stored topics
+             elif not was_connected:
+                  self.logger.info("WebSocket closed before link was fully established.")
+             else:
+                  self.logger.info("WebSocket closed normally. No automatic re-forging scheduled.")
+
+
+        # --- Start the WebSocket Stream - Unleash the Listener ---
+        # pybit's `websocket_stream` starts the connection and listener threads in the background
+        try:
+            if not self.ws:
+                 self.logger.error("Cannot start stream: WebSocket vessel is None.")
+                 self.ws_connecting = False
+                 return
+
+            # The pybit v5 WebSocket class handles public and private streams internally
+            # based on the topics passed to `subscribe`. We just need to start the stream.
+            # The `websocket_stream` method itself doesn't take `ws_public` or `ws_private` flags in v5
+            # (unlike older versions). It just needs the callbacks.
+
+            self.logger.debug("Starting pybit WebSocket stream process...")
+            # pybit websocket_stream method typically runs in a separate thread.
+            # It manages the underlying websocket-client connection and reconnection attempts (if enabled in init).
+            # However, we disabled pybit's internal retries/restarts (`retries=0`, `restart_on_error=False`)
+            # to handle reconnection logic ourselves in `internal_on_error` and `internal_on_close`.
+            self.ws.websocket_stream(
+                callback=internal_on_message,
+                on_open_ext=internal_on_open,
+                on_error_ext=internal_on_error,
+                on_close_ext=internal_on_close
+            )
+
+        except Exception as e:
+            self.logger.exception(f"Failed to start WebSocket stream process: {e}")
+            self.ws_connecting = False
+            # Attempt initial re-forge if startup fails critically
+            self._schedule_reconnect()
+
+    def _schedule_reconnect(self):
+        """Schedules a WebSocket re-forging attempt with exponential backoff."""
+        if self.ws_connecting: # Prevent scheduling multiple re-forges concurrently
+             self.logger.debug("Re-forging already in progress or scheduled.")
+             return
+
+        # Ensure current connection state is marked as disconnected
+        self.ws_connected = False
+        self.ws_connecting = True # Mark that we are now trying to reconnect
+
+        if self.ws_reconnect_attempt < self.max_ws_reconnect_attempts:
+            self.ws_reconnect_attempt += 1
+            # Exponential backoff: 2, 4, 8, 16, 32, 60, 60... seconds
+            delay = min(2 ** self.ws_reconnect_attempt, 60)
+            self.logger.info(f"{Fore.YELLOW}Scheduling WebSocket re-forge attempt {self.ws_reconnect_attempt}/{self.max_ws_reconnect_attempts} in {delay} seconds...{Style.RESET_ALL}")
+
+            # Use threading.Timer or similar for a non-blocking delay if this method
+            # is called from a main loop. If called from a WS callback thread,
+            # time.sleep is okay as it happens off the main thread.
+            # Assuming this is called from a WS callback thread:
+            time.sleep(delay)
+
+            self.logger.info(f"{Fore.CYAN}# Attempting WebSocket re-forging now...{Style.RESET_ALL}")
+            self._init_websocket_instance() # Re-conjure the vessel cleanly
+            if self.ws:
+                # Re-initiate connection using the stored user incantations and topics
+                self.connect_websocket(
+                    self.ws_topics,
+                    self.ws_user_callbacks['message'],
+                    self.ws_user_callbacks.get('error'),
+                    self.ws_user_callbacks.get('open'),
+                    self.ws_user_callbacks.get('close')
+                )
+            else:
+                 self.logger.error("Failed to re-conjure WebSocket vessel for reconnection.")
+                 self.ws_connecting = False # Reset flag if instance creation failed
+        else:
+            # Max attempts reached, abandon the link
+            self.logger.critical(f"{Back.RED}{Fore.WHITE}WebSocket re-forging failed after {self.max_ws_reconnect_attempts} attempts. Link abandoned.{Style.RESET_ALL}")
+            self.ws_connecting = False # Reset flag
+            self.send_sms("CRITICAL: Bybit WebSocket disconnected permanently. Bot requires restart.")
+            # Consider triggering a shutdown or safe mode for the application
+            # raise ConnectionError("WebSocket permanently disconnected")
+
+
+    def disconnect_websocket(self):
+        """Intentionally severs the WebSocket link."""
+        self.logger.info(f"{Fore.YELLOW}Disconnecting WebSocket intentionally...{Style.RESET_ALL}")
+        # Prevent automatic re-forging after intentional severing
+        self.ws_reconnect_attempt = self.max_ws_reconnect_attempts + 1 # Set attempt counter beyond max
+
+        if self.ws:
+            try:
+                # Use pybit's method to close the stream and threads
+                if hasattr(self.ws, 'exit') and callable(self.ws.exit):
+                     self.ws.exit()
+                self.logger.success("WebSocket exit command sent.")
+            except Exception as e:
+                self.logger.error(f"Error sending WebSocket exit command: {e}")
+        else:
+            self.logger.info("WebSocket vessel already dismissed.")
+
+        # Reset state regardless of exit command success
+        self.ws_connected = False
+        self.ws_connecting = False
+        self.ws = None # Banish the vessel reference
+        self.ws_topics = [] # Clear topics
+
+
+    # --- Market Data Helpers - Consulting the Oracles ---
+
+    def get_server_time(self) -> Optional[int]:
+        """Fetches Bybit server time (milliseconds UTC) using pybit session."""
+        if not self.session:
+             self.logger.error("pybit session not initialized. Cannot synchronize time.")
+             return None
+        self.logger.debug(f"{Fore.CYAN}# Consulting Bybit time oracle...{Style.RESET_ALL}")
+        try:
+            # Bybit v5 time endpoint might be different, check pybit docs or API docs
+            # Assuming get_server_time still works for v5 as a general endpoint check
+            response = self.session.get_server_time()
+            if response and response.get("retCode") == 0:
+                # timeNano is nanoseconds in v5, convert to milliseconds
+                time_nano_str = response['result']['timeNano']
+                # Ensure it's a string and has enough digits for nanoseconds
+                if isinstance(time_nano_str, str) and len(time_nano_str) >= 9:
+                     server_time_ms = int(time_nano_str[:-6]) # Drop last 6 digits for ms
+                else:
+                     # Fallback if timeNano is not as expected, assume it's ms or seconds
+                     # Try casting to int and check scale (seconds vs ms)
+                     try:
+                          ts = int(time_nano_str)
+                          if ts > 1_000_000_000_000: # Likely ms
+                              server_time_ms = ts
+                          elif ts < 1_000_000_000_000 and ts > 1_000_000_000: # Likely seconds
+                              server_time_ms = ts * 1000
+                          else: # Unsure, maybe old ns format or unexpected
+                              self.logger.warning(f"Unexpected timeNano format or scale: {time_nano_str}. Treating as ms.")
+                              server_time_ms = ts
+                     except (ValueError, TypeError):
+                          self.logger.error(f"Failed to parse server timeNano: {time_nano_str}")
+                          return None
+
+
+                local_time_ms = int(time.time() * 1000)
+                time_diff = local_time_ms - server_time_ms
+                self.logger.debug(f"Server Time (MS): {server_time_ms}, Local Time (MS): {local_time_ms}, Diff: {time_diff} ms")
+                # Warn if clocks diverge significantly (> 5 seconds)
+                if abs(time_diff) > 5000:
+                    self.logger.warning(f"{Fore.YELLOW}Significant time divergence ({time_diff} ms) detected between local clock and Bybit server. Check system time synchronization (NTP).{Style.RESET_ALL}")
+                return server_time_ms
+            else:
+                self.logger.error(f"Failed to get server time: {response.get('retMsg')} (Rune: {response.get('retCode')})")
+                return None
+        except Exception as e:
+            self.logger.error(f"Error consulting Bybit time oracle via pybit: {e}", exc_info=True)
+            return None
+
+    def fetch_ohlcv(self, timeframe: Optional[str] = None, limit: int = 200, symbol: Optional[str] = None, since: Optional[int] = None, limit_per_request: int = 1000) -> pd.DataFrame:
+        """
+        Fetches historical OHLCV data using ccxt, handling pagination if needed,
+        with retries, returning a DataFrame scroll.
+
+        Args:
+            timeframe: Timeframe rune (e.g., '5m', '1h', '1d'). Defaults to config.timeframe.
+            limit: Total number of candles to fetch. Can be > limit_per_request.
+            symbol: Symbol rune (e.g., 'BTCUSDT'). Defaults to config.symbol.
+            since: Start timestamp rune in milliseconds (optional).
+            limit_per_request: Max candles per single API call (Bybit max is usually 1000 for klines).
+
+        Returns:
+            Pandas DataFrame scroll with ['timestamp', 'open', 'high', 'low', 'close', 'volume'],
+            or an empty DataFrame on failure. Timestamp is converted to datetime objects.
+        """
+        target_symbol = symbol or self.config.symbol
+        target_timeframe = timeframe or self.config.timeframe
+
+        # Translate timeframe rune if needed for ccxt (e.g., '1W' -> '1w')
+        # ccxt usually handles common formats, but explicit map is safer if needed
+        # Bybit v5 API docs use "1", "3", "5", "15", "30", "60", "120", "240", "360", "720", "D", "W", "M"
+        # ccxt maps these: '1m' -> '1', '5m' -> '5', '1h' -> '60', '1d' -> 'D' etc.
+        # ccxt's `fetch_ohlcv` handles the mapping automatically.
+        ccxt_timeframe = target_timeframe # Let ccxt handle the mapping
+
+        self.logger.debug(f"{Fore.CYAN}# Fetching {limit} OHLCV candles for {target_symbol} (TF: {ccxt_timeframe}, Oracle: ccxt)...{Style.RESET_ALL}")
+        if not self.exchange:
+            self.logger.error("CCXT oracle not initialized. Cannot fetch OHLCV.")
+            return pd.DataFrame()
+
+        all_ohlcv = []
+        fetch_count = 0
+        # 'since' in ccxt usually means "fetch candles *since* this timestamp".
+        # To get the *last* N candles, you typically don't provide 'since' and use 'limit'.
+        # If 'since' is provided, it fetches from there up to 'limit' candles.
+        # To get the *latest* N candles using pagination, we need to calculate the start time.
+        # A simpler approach for the *latest* N is to just call fetch_ohlcv once with limit N.
+        # Pagination is primarily needed to fetch *deep* history.
+        # Let's adjust this logic to handle both cases: fetching from 'since' or fetching latest 'limit'.
+
+        # If 'since' is provided, fetch *from* that point.
+        # If 'since' is NOT provided, calculate the approximate 'since' to get the last 'limit' candles.
+        # Bybit's API `get_kline` fetches the *latest* candles up to `limit` if `start` is not specified.
+        # ccxt's `fetch_ohlcv` without `since` *also* fetches the latest candles up to `limit`.
+        # So, for fetching the *latest* `limit` candles, one call is usually enough if limit <= 1000.
+        # If limit > 1000, we need to paginate *backwards* from the current time.
+
+        effective_since = since
+        if since is None and limit > 1000:
+             # Calculate a rough start time to fetch at least `limit` candles backwards
+             # Get timeframe duration in milliseconds
+             timeframe_ms = self.exchange.parse_timeframe(target_timeframe) * 1000 if self.exchange else (60 * 1000)
+             now_ms = int(time.time() * 1000)
+             # Rough estimate: fetch N candles backwards from now
+             estimated_start_ms = now_ms - (limit * timeframe_ms * 1.1) # Add 10% buffer
+
+             # Bybit's `get_kline` uses `start` and `end`. ccxt's `fetch_ohlcv` uses `since`.
+             # `since` in ccxt maps to Bybit's `start`. To get latest N, we need to set `start`
+             # to (latest_candle_time - N*timeframe_duration).
+             # A simpler way with Bybit/ccxt is often just `fetch_ohlcv(..., limit=N)`.
+             # If N > 1000, we must loop. The loop needs to fetch `limit_per_request` candles
+             # at a time, going backwards. We need an `end` time for Bybit API.
+             # ccxt's `fetch_ohlcv` with `since` fetches *forward*. To paginate backwards,
+             # we need to fetch the *latest* `limit_per_request` candles, record the timestamp
+             # of the *first* candle, and use that as the `end` time for the next request backwards.
+
+             # Let's refine for fetching latest `limit` candles when limit > 1000.
+             # We'll fetch chunks backwards from 'now'.
+             all_ohlcv = []
+             end_time_ms = int(time.time() * 1000) # Start fetching backwards from now
+             fetch_count = 0
+
+             self.logger.debug(f"Fetching latest {limit} candles backwards from {pd.to_datetime(end_time_ms, unit='ms')}...")
+
+             for attempt in range(self.config.retry_count * 5): # Allow more attempts for paginated fetches
+                  try:
+                       # Determine how many candles to fetch in this chunk
+                       current_limit = min(limit_per_request, limit - fetch_count)
+                       if current_limit <= 0:
+                            break # Fetched enough candles
+
+                       # Bybit API `get_kline` uses `start` and `end`. ccxt `fetch_ohlcv` maps `since` to `start`.
+                       # To fetch backwards from `end_time_ms`, we need to set `end` parameter in Bybit's call.
+                       # We need to use ccxt's underlying `fetch` method or modify its params.
+                       # The standard `fetch_ohlcv` with `since` fetches forward. Let's try to use `params` to set `end`.
+                       # Check Bybit v5 docs for `get_kline`: 'end' parameter.
+                       # ccxt `fetch_ohlcv` params: https://github.com/ccxt/ccxt/wiki/Manual#ohlcv-how-to-fetch-historical-ohlcv-data
+                       # 'params' can override standard parameters. Bybit v5 uses 'end' for get-kline.
+                       params = {'limit': current_limit, 'end': end_time_ms}
+                       # Note: Bybit API `get_kline` requires EITHER start OR end, not both, when fetching latest N.
+                       # If fetching backwards, we provide `end` and `limit`.
+                       # If fetching forwards (with `since`), we provide `start` and `limit`.
+
+                       # If a specific `since` was originally requested, prioritize fetching forward from there.
+                       if since is not None:
+                            # If original request had 'since', use standard forward pagination logic
+                            self.logger.debug(f"  Fetching {current_limit} candles since {pd.to_datetime(effective_since, unit='ms')} (Total fetched: {fetch_count})...")
+                            params = {'limit': current_limit, 'start': effective_since} # Use 'start' for forward fetch
+
+                            ohlcv_chunk = self.exchange.fetch_ohlcv(target_symbol, ccxt_timeframe, since=effective_since, params={'limit': current_limit})
+                            # Update effective_since to the timestamp of the last candle in the chunk + 1ms
+                            if ohlcv_chunk:
+                                effective_since = ohlcv_chunk[-1][0] + 1
+
+                       else:
+                            # If no 'since' was requested, fetch backwards from 'end_time_ms'
+                            self.logger.debug(f"  Fetching {current_limit} candles ending by {pd.to_datetime(end_time_ms, unit='ms')} (Total fetched: {fetch_count})...")
+                            # Use `exchange.fetch` with specific path/method to pass 'end' param if fetch_ohlcv doesn't support it directly
+                            # Check ccxt Bybit implementation: `fetch_ohlcv` supports `since` (start) and `params['end']`.
+                            # If `since` is None and `params['end']` is set, it should fetch backwards.
+                            ohlcv_chunk = self.exchange.fetch_ohlcv(target_symbol, ccxt_timeframe, limit=current_limit, params={'end': end_time_ms})
+                            # Update `end_time_ms` for the next request to the timestamp of the *first* candle in the chunk - 1ms
+                            if ohlcv_chunk:
+                                end_time_ms = ohlcv_chunk[0][0] - 1
+
+
+                       if not ohlcv_chunk:
+                           self.logger.info(f"Oracle returned no more data for {target_symbol} ({ccxt_timeframe}).")
+                           break # No more data available
+
+                       # For backwards fetch, prepend the new data to maintain chronological order
+                       if since is None:
+                            all_ohlcv = ohlcv_chunk + all_ohlcv # Prepend
+                       else:
+                            all_ohlcv.extend(ohlcv_chunk) # Append for forward fetch
+
+                       fetch_count += len(ohlcv_chunk)
+
+                       # If the chunk returned is smaller than the requested limit, it means we've reached the beginning of available data
+                       if len(ohlcv_chunk) < current_limit:
+                            self.logger.debug(f"Fetched less than requested ({len(ohlcv_chunk)} < {current_limit}). Reached end of available data.")
+                            break # Reached the beginning/end of available data
+
+                  # --- Handle Specific CCXT Errors with Retries ---
+                  except ccxt.RateLimitExceeded as e:
+                      self.logger.warning(f"{Fore.YELLOW}Rate limit hit fetching OHLCV (Attempt {attempt+1}): {e}{Style.RESET_ALL}")
+                      if attempt >= (self.config.retry_count * 5) - 1: raise # Re-raise after max attempts
+                      wait_time = self.config.retry_delay * (attempt // self.config.retry_count + 1) # Linear backoff based on groups of retries
+                      self.logger.info(f"Retrying OHLCV fetch in {wait_time:.2f}s...")
+                      time.sleep(wait_time)
+                  except (ccxt.NetworkError, ccxt.ExchangeNotAvailable, ccxt.RequestTimeout, ccxt.DDoSProtection) as e:
+                      self.logger.warning(f"{Fore.YELLOW}Network/Exchange disturbance fetching OHLCV (Attempt {attempt+1}): {e}{Style.RESET_ALL}")
+                      if attempt >= (self.config.retry_count * 5) - 1: raise
+                      wait_time = self.config.retry_delay * (attempt // self.config.retry_count + 1)
+                      self.logger.info(f"Retrying OHLCV fetch in {wait_time:.2f}s...")
+                      time.sleep(wait_time)
+                  except ccxt.ExchangeError as e:
+                      # Non-retryable exchange errors (e.g., BadSymbol handled earlier, maybe InvalidNonce?)
+                      self.logger.error(f"{Fore.RED}Non-retryable CCXT ExchangeError fetching OHLCV for {target_symbol} ({ccxt_timeframe}): {e}{Style.RESET_ALL}")
+                      raise # Re-raise immediately
+                  except Exception as e:
+                      # Catch any other unexpected interferences
+                      self.logger.exception(f"Unexpected error during fetch_ohlcv (Attempt {attempt+1}): {e}")
+                      raise # Re-raise unexpected errors immediately
+
+
+        if not all_ohlcv:
+            self.logger.warning(f"No OHLCV data collected after all attempts for {target_symbol} ({ccxt_timeframe}).")
+            return pd.DataFrame()
+
+        # Convert to DataFrame
+        df = pd.DataFrame(all_ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        # Convert timestamp rune to datetime object (crucial!)
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        # Ensure numeric types (use float for price/volume)
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+             df[col] = pd.to_numeric(df[col])
+
+        # Sort by timestamp and remove potential duplicates (defensive warding)
+        df = df.sort_values(by='timestamp').drop_duplicates(subset='timestamp', keep='last').reset_index(drop=True)
+
+        self.logger.info(f"Successfully fetched and processed {len(df)} OHLCV candles for {target_symbol} ({ccxt_timeframe}). Last: {df['timestamp'].iloc[-1]}")
+        return df # Success
+
+
+    def get_or_fetch_daily_ohlcv(self, symbol: Optional[str] = None, limit: int = 365*2) -> pd.DataFrame:
+        """
+        Gets Daily OHLCV data from cache if fresh, otherwise fetches and caches it.
+        Needed for Daily Pivot Point calculations.
+        """
+        target_symbol = symbol or self.config.symbol
+        daily_timeframe = '1d' # Pivots use daily data
+
+        cached_df = self.daily_ohlcv_cache
+        fetch_needed = False
+
+        if cached_df is not None and not cached_df.empty:
+             try:
+                 now_ms = int(time.time() * 1000)
+                 last_candle_time_ms = int(cached_df['timestamp'].iloc[-1].timestamp() * 1000)
+                 # Get timeframe duration in milliseconds using ccxt helper
+                 # Add a buffer (e.g., 2 hours) to consider the daily candle "stale"
+                 # after it's finished and new pivots should theoretically be available.
+                 daily_timeframe_ms = self.exchange.parse_timeframe(daily_timeframe) * 1000 if self.exchange else (24 * 60 * 60 * 1000)
+                 staleness_buffer_ms = 2 * 60 * 60 * 1000 # 2 hours
+
+                 # Check if the last Daily candle in cache is from the current day or very recently from yesterday
+                 # The daily candle ends at 00:00 UTC. We need data up to the *previous* day's close for today's pivots.
+                 # If the last candle timestamp + timeframe duration is less than now, it's stale.
+                 # e.g., last candle ends at 2023-10-27 00:00:00 UTC. Current time 2023-10-27 03:00:00 UTC.
+                 # The last candle is from 2023-10-26. We need the 2023-10-27 candle to calculate pivots for 2023-10-28.
+                 # This logic is tricky. A simpler check: is the last candle from *today*? If not, fetch.
+                 last_candle_date_utc = cached_df['timestamp'].iloc[-1].tz_localize('UTC').date()
+                 now_date_utc = datetime.utcnow().date()
+
+                 if last_candle_date_utc == now_date_utc:
+                      self.logger.debug(f"Using cached Daily OHLCV data for {target_symbol} (Last candle is from today: {cached_df['timestamp'].iloc[-1]}).")
+                      # Ensure index is datetime for pivot calculation
+                      cached_df = cached_df.set_index('timestamp').sort_index()
+                      return cached_df.copy() # Return a copy
+                 else:
+                     self.logger.info(f"Cached Daily OHLCV for {target_symbol} is stale (Last candle: {cached_df['timestamp'].iloc[-1]}, Today: {now_date_utc}). Fetching fresh data.")
+                     fetch_needed = True
+             except Exception as e:
+                  self.logger.warning(f"Error checking Daily cache freshness for {target_symbol}: {e}. Fetching new data.")
+                  fetch_needed = True
+        else:
+            self.logger.info(f"No cached Daily OHLCV data for {target_symbol}. Fetching initial data.")
+            fetch_needed = True
+
+        if fetch_needed:
+            self.logger.debug(f"{Fore.CYAN}# Fetching Daily OHLCV data for {target_symbol}...{Style.RESET_ALL}")
+            # Fetch raw daily data using the robust fetch_ohlcv method
+            # Need enough history for indicators potentially used on Daily data, plus pivots need previous day
+            fetch_limit = max(limit, 200) # Ensure minimum for indicators/pivots
+            df_raw = self.fetch_ohlcv(timeframe=daily_timeframe, limit=fetch_limit, symbol=target_symbol)
+
+            if not df_raw.empty:
+                # Cache the raw daily data
+                self.daily_ohlcv_cache = df_raw.tail(self.max_daily_ohlcv_cache_size).reset_index(drop=True)
+                self.logger.info(f"Fetched and cached {len(self.daily_ohlcv_cache)} Daily OHLCV candles for {target_symbol}.")
+                # Return a copy with datetime index for pivot calculation
+                return self.daily_ohlcv_cache.copy().set_index('timestamp').sort_index()
+            else:
+                self.logger.error(f"Failed to fetch Daily OHLCV data for {target_symbol}. Daily cache not updated.")
+                # Return the old (stale) cache if it exists (with datetime index), otherwise empty
+                if cached_df is not None:
+                     cached_df = cached_df.set_index('timestamp').sort_index()
+                     return cached_df.copy()
+                return pd.DataFrame()
+
+        # Should only be reached if fetch_needed is false (used cache)
+        # Return the cached data with datetime index
+        return cached_df.copy().set_index('timestamp').sort_index()
+
+
+    def get_or_fetch_ohlcv(self, timeframe: str, limit: int = 500, include_daily_pivots: bool = True) -> pd.DataFrame:
+        """
+        Gets OHLCV data from cache if recent, otherwise fetches, calculates indicators,
+        updates cache, and returns the DataFrame with indicators. Can optionally
+        include Daily Pivot Points.
+
+        Args:
+            timeframe: The timeframe rune (e.g., '5m').
+            limit: The number of candles to fetch if cache is empty or stale.
+            include_daily_pivots: If True, attempts to fetch Daily data and calculate pivots.
+
+        Returns:
+            Pandas DataFrame scroll with OHLCV data and calculated indicators, or empty if fails.
+        """
+        cached_df = self.ohlcv_cache.get(timeframe)
+        fetch_needed = False
+
+        if cached_df is not None and not cached_df.empty:
+             try:
+                 now_ms = int(time.time() * 1000)
+                 last_candle_time_ms = int(cached_df['timestamp'].iloc[-1].timestamp() * 1000)
+                 # Get timeframe duration in milliseconds using ccxt helper
+                 timeframe_ms = self.exchange.parse_timeframe(timeframe) * 1000 if self.exchange else (60 * 1000) # Default to 1m if exchange fails
+
+                 # Check if the last candle in cache is reasonably recent
+                 # If current time is within the timeframe duration of the last candle, it's likely still forming.
+                 # If current time is more than timeframe duration + buffer past the last candle, it's stale.
+                 staleness_buffer_ms = 5000 # 5 seconds buffer
+                 if (now_ms - last_candle_time_ms) < (timeframe_ms + staleness_buffer_ms):
+                     self.logger.debug(f"Using cached OHLCV data for {timeframe} (Last candle: {cached_df['timestamp'].iloc[-1]}).")
+                     return cached_df.copy() # Return a copy to prevent modifying cache directly
+                 else:
+                     self.logger.info(f"Cached OHLCV for {timeframe} is stale (Last candle: {cached_df['timestamp'].iloc[-1]}). Fetching fresh data.")
+                     fetch_needed = True
+             except Exception as e:
+                  self.logger.warning(f"Error checking cache freshness for {timeframe}: {e}. Fetching new data.")
+                  fetch_needed = True
+        else:
+            self.logger.info(f"No cached OHLCV data for {timeframe}. Fetching initial data.")
+            fetch_needed = True
+
+        # --- If fetching is needed ---
+        if fetch_needed:
+            # --- Fetch Daily Data for Pivots (if requested) ---
+            daily_df = None
+            if include_daily_pivots:
+                 # get_or_fetch_daily_ohlcv handles its own caching
+                 daily_df = self.get_or_fetch_daily_ohlcv()
+                 if daily_df is None or daily_df.empty:
+                     self.logger.warning("Failed to fetch Daily OHLCV data for pivots. Indicators will be calculated without pivots.")
+                     daily_df = None # Ensure None if fetch failed
+
+            # --- Fetch Primary Timeframe Data ---
+            self.logger.debug(f"{Fore.CYAN}# Fetching new {timeframe} OHLCV data...{Style.RESET_ALL}")
+            # Fetch raw data using the robust fetch_ohlcv method
+            # Fetch more than requested limit to ensure enough history for lookbacks
+            # A rule of thumb: fetch at least max(limit, longest_indicator_period + some_buffer)
+            # Hardcoding a minimum or a buffer based on a typical longest period (e.g., SMA 50, MACD 26)
+            # is a pragmatic approach if indicator periods aren't dynamically introspected.
+            min_fetch_for_indicators = max(limit, 150) # e.g., need ~50+ for SMA/MACD, 100+ is safer
+            fetch_count = max(limit, min_fetch_for_indicators)
+
+            df_raw = self.fetch_ohlcv(timeframe=timeframe, limit=fetch_count)
+
+            if not df_raw.empty:
+                self.logger.debug(f"Calculating indicators for freshly fetched {timeframe} data...")
+                try:
+                    # Calculate indicators using the function from indicators.py
+                    # Pass the application config object and the daily_df (if fetched)
+                    # The indicators.py function must be designed to accept AppConfig and daily_df
+                    df_with_indicators = calculate_indicators(df_raw.copy(), self.config, daily_df)
+
+                    if df_with_indicators is not None and not df_with_indicators.empty:
+                        # Update cache with the new data + indicators
+                        self.ohlcv_cache[timeframe] = df_with_indicators.tail(self.max_ohlcv_cache_size).reset_index(drop=True)
+                        self.logger.info(f"Fetched and cached {len(self.ohlcv_cache[timeframe])} {timeframe} candles with indicators.")
+                        return self.ohlcv_cache[timeframe].copy()
+                    else:
+                        # Indicator calculation failed, cache raw data? Or return empty?
+                        self.logger.error(f"Indicator calculation failed for {timeframe} data. Caching raw data.")
+                        # It's often better to cache raw data than nothing, so subsequent calls have something
+                        # to work with, even if indicators are missing.
+                        self.ohlcv_cache[timeframe] = df_raw.tail(self.max_ohlcv_cache_size).reset_index(drop=True)
+                        # Return the raw data dataframe
+                        return self.ohlcv_cache[timeframe].copy()
+
+                except Exception as e:
+                    self.logger.exception(f"Error calculating indicators on fetched {timeframe} data: {e}")
+                    # Cache the raw data anyway to avoid re-fetching immediately
+                    self.ohlcv_cache[timeframe] = df_raw.tail(self.max_ohlcv_cache_size).reset_index(drop=True)
+                    # Return the raw data dataframe
+                    return self.ohlcv_cache[timeframe].copy()
+            else:
+                self.logger.error(f"Failed to fetch OHLCV data for {timeframe}. Cache not updated.")
+                # Return the old (stale) cache if it exists, otherwise empty
+                return cached_df.copy() if cached_df is not None else pd.DataFrame()
+
+        # This path should only be reached if fetch_needed is false (used cache)
+        return cached_df.copy() if cached_df is not None else pd.DataFrame()
+
+
+    def update_ohlcv_cache(self, kline_data: Dict[str, Any]) -> Optional[pd.DataFrame]:
+        """
+        Processes a single Kline whisper from WebSocket, updates indicators incrementally,
+        and manages the OHLCV cache scroll. Automatically includes Daily Pivots if daily
+        data is available in the cache.
+
+        Args:
+            kline_data: Whisper dictionary from Bybit WS (e.g., {'topic': 'kline.5m.BTCUSDT', 'data': [...]}).
+
+        Returns:
+            A single-row DataFrame for the updated/new candle with indicators, or None if no update occurred.
+        """
+        try:
+            # --- Basic Whisper Validation ---
+            if not isinstance(kline_data, dict) or "data" not in kline_data or not kline_data.get("data"):
+                self.logger.warning(f"Received invalid kline whisper format: {kline_data}")
+                return None
+
+            # Bybit v5 kline topic format: kline.<interval>.<symbol>
+            topic = kline_data.get("topic", "")
+            topic_parts = topic.split('.')
+            if len(topic_parts) < 3 or topic_parts[0] != "kline":
+                 self.logger.warning(f"Received whisper for unexpected topic: {topic}")
+                 return None
+
+            # interval in topic vs interval in data field? Use data field if available, safer.
+            candle_data_list = kline_data.get("data", [])
+            if not candle_data_list:
+                 self.logger.warning(f"Kline whisper data list is empty for topic {topic}.")
+                 return None
+
+            # Usually only one candle per update message
+            candle = candle_data_list[0]
+
+            # Extract timeframe and symbol from the candle data itself (usually more reliable)
+            # Or rely on the topic structure which was validated? Let's use the topic structure
+            # as it defines *which* cache we are updating.
+            timeframe = topic_parts[1]
+            symbol = topic_parts[2]
+
+            # Ignore whispers for symbols not matching our focus
+            if symbol != self.config.symbol:
+                 # self.logger.debug(f"Ignoring kline update for other symbol: {symbol}") # Too noisy
+                 return None
+
+            # Ensure cache exists for this timeframe. If not, attempt an initial fetch.
+            # This is CRITICAL because indicator calculation needs historical context.
+            if timeframe not in self.ohlcv_cache or self.ohlcv_cache[timeframe].empty:
+                 self.logger.warning(f"No cache found for {timeframe} upon WS update. Attempting initial fetch (without pivots)...")
+                 # Fetch synchronously - might block callback briefly but ensures context
+                 # Don't force pivots here in the WS thread to avoid potential blocking on Daily fetch if it fails.
+                 # Pivots will be calculated in update_indicators if daily_df is passed.
+                 init_df = self.get_or_fetch_ohlcv(timeframe=timeframe, limit=200, include_daily_pivots=False) # Fetch reasonable history
+                 if init_df.empty:
+                      self.logger.error(f"Failed to initialize cache for {timeframe}. Cannot process WS update.")
+                      return None
+                 # Cache is now populated by get_or_fetch_ohlcv, retrieve it.
+                 prev_df = self.ohlcv_cache.get(timeframe)
+                 if prev_df is None: # Should not happen if get_or_fetch_ohlcv succeeded
+                      self.logger.error(f"Cache for {timeframe} unexpectedly None after initialization attempt.")
+                      return None
+            else:
+                 prev_df = self.ohlcv_cache[timeframe] # Get the existing cache
+
+            # --- Get Daily Data for Pivots (if available) ---
+            # This call will use the cache if fresh, or fetch/update if needed.
+            # We pass the resulting daily_df to update_indicators.
+            daily_df = self.get_or_fetch_daily_ohlcv() # Handles its own caching
+
+            # --- Process Kline Whisper Data ---
+            is_confirmed = candle.get("confirm", False) # Is this the final state of the bar?
+            timestamp_ms = int(candle["start"])
+            timestamp = pd.to_datetime(timestamp_ms, unit='ms')
+
+            # Create DataFrame for the new/updated row's raw data
+            new_row_data = {
+                "timestamp": timestamp,
+                "open": float(candle["open"]),
+                "high": float(candle["high"]),
+                "low": float(candle["low"]),
+                "close": float(candle["close"]),
+                "volume": float(candle["volume"]),
+                # Ensure other necessary columns (like 'close_prev' for ATR) are handled if needed by indicators.py
+                # update_indicators should handle creating/updating these based on input
+            }
+            new_raw_df = pd.DataFrame([new_row_data])
+
+
+            # --- Determine if updating last candle or adding new candle ---
+            last_cached_timestamp = prev_df['timestamp'].iloc[-1] if not prev_df.empty else None
+
+            if last_cached_timestamp is not None and last_cached_timestamp == timestamp:
+                 # --- Updating the last candle (still forming) ---
+                 log_prefix = f"{Fore.GREEN}Confirmed" if is_confirmed else f"{Fore.YELLOW}Updating"
+                 self.logger.debug(f"{log_prefix} candle in cache: {timeframe} {symbol} @ {timestamp}{Style.RESET_ALL}")
+
+                 # Temporarily replace the last row in a copy of the cache with the updated raw data
+                 # Then pass this modified copy to update_indicators to recalculate the last row's indicators
+                 temp_df_for_calc = prev_df.copy()
+                 # Find the index of the row to update (should be the last one)
+                 last_row_index_in_cache = temp_df_for_calc.index[temp_df_for_calc['timestamp'] == timestamp].tolist()
+
+                 if not last_row_index_in_cache:
+                      self.logger.error(f"Timestamp {timestamp} not found in cache for update. Cache last timestamp: {last_cached_timestamp}.")
+                      # Fallback: If not found, treat as a new candle? No, likely cache is messed up.
+                      # Just log and return None.
+                      return None
+
+                 idx_to_update = last_row_index_in_cache[0]
+
+                 # Update OHLCV columns in the temporary DataFrame
+                 for col in ['open', 'high', 'low', 'close', 'volume']:
+                      temp_df_for_calc.loc[idx_to_update, col] = new_raw_df.loc[0, col]
+
+
+                 # Recalculate indicators for the updated row and potentially preceding rows
+                 # update_indicators should be able to recalculate indicators for the tail end
+                 # of the DataFrame, using the full history available in temp_df_for_calc.
+                 # Pass the temp_df_for_calc (which has the updated raw data) and the daily_df.
+                 # update_indicators is expected to return a DataFrame slice covering the recalculated rows.
+                 try:
+                     # Pass the dataframe slice ending with the updated candle to the update function
+                     # Need enough lookback for indicators, so pass sufficient tail
+                     lookback_buffer = 200 # A buffer greater than typical indicator periods
+                     slice_start_idx = max(0, idx_to_update - lookback_buffer)
+                     df_slice_to_recalc = temp_df_for_calc.iloc[slice_start_idx:].copy()
+
+                     updated_slice_df = update_indicators(df_slice_to_recalc, self.config, daily_df)
+
+                     if updated_slice_df is not None and not updated_slice_df.empty:
+                        # Find the row(s) in the result that correspond to the updated timestamp(s)
+                        # Assuming update_indicators returns a dataframe indexed by time or with a timestamp column
+                        updated_row_from_slice = updated_slice_df[updated_slice_df['timestamp'] == timestamp]
+
+                        if not updated_row_from_slice.empty:
+                            # Update the main cache (`prev_df` which is a reference)
+                            # Use the index `idx_to_update` found earlier
+                            # Update all columns from the updated_row_from_slice into the cache's row
+                            for col in updated_row_from_slice.columns:
+                                # Only update columns that exist in the cache DataFrame
+                                if col in prev_df.columns:
+                                    prev_df.loc[idx_to_update, col] = updated_row_from_slice[col].iloc[0]
+                                else:
+                                     # If update_indicators added a new column, add it to the cache DF first
+                                     self.logger.debug(f"Adding new column '{col}' to {timeframe} cache.")
+                                     prev_df[col] = np.nan # Initialize with NaN
+                                     prev_df.loc[idx_to_update, col] = updated_row_from_slice[col].iloc[0]
+
+
+                            # Cache is updated in-place via the prev_df reference.
+                            # Return the single row corresponding to the updated timestamp from the updated cache.
+                            final_processed_row = prev_df[prev_df['timestamp'] == timestamp].copy()
+                            return final_processed_row
+
+                        else:
+                             self.logger.error(f"Update_indicators did not return data for timestamp {timestamp} when updating.")
+                             return None # Cannot update cache if updated data is missing
+                     else:
+                          self.logger.error(f"Indicator update spell failed (returned empty) for updated candle @ {timestamp}.")
+                          # Even if indicators failed, the raw data is updated in temp_df_for_calc.
+                          # Copy the updated raw data back to the cache as a fallback.
+                          for col in ['open', 'high', 'low', 'close', 'volume']:
+                                prev_df.loc[idx_to_update, col] = new_raw_df.loc[0, col]
+                          self.logger.warning(f"Updated raw data for {timestamp} in cache despite indicator failure.")
+                          # Return None as indicators failed
+                          return None
+
+                 except Exception as e:
+                    self.logger.exception(f"Error recalculating indicators for updated candle @ {timestamp}: {e}")
+                    # As a fallback, just update the raw data in the cache
+                    for col in ['open', 'high', 'low', 'close', 'volume']:
+                         prev_df.loc[idx_to_update, col] = new_raw_df.loc[0, col]
+                    self.logger.warning(f"Updated raw data for {timestamp} in cache despite indicator calculation exception.")
+                    return None # Indicate indicator calculation failed
+
+
+            elif last_cached_timestamp is None or timestamp > last_cached_timestamp:
+                 # --- Adding a new candle ---
+                 self.logger.debug(f"{Fore.BLUE}New candle received: {timeframe} {symbol} @ {timestamp}{Style.RESET_ALL}")
+
+                 # Append the new raw data row to a copy of the cache for calculation context.
+                 # update_indicators needs the history to calculate indicators for the new last row.
+                 temp_df_for_calc = pd.concat([prev_df.copy(), new_raw_df], ignore_index=True)
+
+                 # Calculate indicators for the new row using previous data + new raw data, pass daily_df
+                 # update_indicators is expected to return a DataFrame slice covering the recalculated rows (at least the last one).
+                 try:
+                     # Pass the tail including the new candle for calculation
+                     lookback_buffer = 200 # Ensure enough history is passed
+                     df_slice_to_recalc = temp_df_for_calc.iloc[max(0, len(temp_df_for_calc) - lookback_buffer -1):].copy() # -1 to include the very last row
+
+                     updated_slice_df = update_indicators(df_slice_to_recalc, self.config, daily_df)
+
+                     if updated_slice_df is not None and not updated_slice_df.empty:
+                          # Append the newly calculated row(s) to the main cache
+                          # Find the row(s) in the result that correspond to the new timestamp(s)
+                          # Assuming update_indicators returns a dataframe indexed by time or with a timestamp column
+                          newly_processed_row = updated_slice_df[updated_slice_df['timestamp'] == timestamp]
+
+                          if not newly_processed_row.empty:
+                              # Ensure all columns from the new row exist in the cache DataFrame before appending
+                              for col in newly_processed_row.columns:
+                                   if col not in prev_df.columns:
+                                        self.logger.debug(f"Adding new column '{col}' to {timeframe} cache before appending.")
+                                        prev_df[col] = np.nan # Initialize with NaN
+
+                              # Append the new processed row to the main cache
+                              self.ohlcv_cache[timeframe] = pd.concat([prev_df, newly_processed_row], ignore_index=True)
+
+                          else:
+                               self.logger.error(f"Update_indicators did not return data for timestamp {timestamp} when adding new candle.")
+                               # Fallback: Append raw data if indicator calculation for the new row fails
+                               # Ensure raw data DF has indicator columns with NaNs
+                               cols_to_add = set(prev_df.columns) - set(new_raw_df.columns) - {'timestamp'}
+                               for col in cols_to_add:
+                                    new_raw_df[col] = np.nan # Add indicator columns with NaN
+                               self.ohlcv_cache[timeframe] = pd.concat([prev_df, new_raw_df], ignore_index=True)
+                               self.logger.warning(f"Appended raw data for {timestamp} due to indicator failure.")
+                               # Return None as indicators failed
+                               return None
+
+                     else:
+                          self.logger.error(f"Indicator update spell failed (returned empty) for new candle @ {timestamp}. Appending raw data only.")
+                          # Fallback: Append raw data if indicator calculation fails
+                          # Ensure raw data DF has indicator columns with NaNs
+                          cols_to_add = set(prev_df.columns) - set(new_raw_df.columns) - {'timestamp'}
+                          for col in cols_to_add:
+                               new_raw_df[col] = np.nan # Add indicator columns with NaN
+                          self.ohlcv_cache[timeframe] = pd.concat([prev_df, new_raw_df], ignore_index=True)
+                          # Return None as indicators failed
+                          return None
+
+                 except Exception as e:
+                      self.logger.exception(f"Error calculating indicators for new candle @ {timestamp}: {e}. Appending raw data only.")
+                      # Fallback: Append raw data if indicator calculation fails
+                      # Ensure raw data DF has indicator columns with NaNs
+                      cols_to_add = set(prev_df.columns) - set(new_raw_df.columns) - {'timestamp'}
+                      for col in cols_to_add:
+                           new_raw_df[col] = np.nan # Add indicator columns with NaN
+                      self.ohlcv_cache[timeframe] = pd.concat([prev_df, new_raw_df], ignore_index=True)
+                      # Return None as indicators failed
+                      return None
+
+
+                 # Trim cache scroll to size limit after adding/updating
+                 self.ohlcv_cache[timeframe] = self.ohlcv_cache[timeframe] \
+                                                     .drop_duplicates(subset=['timestamp'], keep='last') \
+                                                     .tail(self.max_ohlcv_cache_size) \
+                                                     .reset_index(drop=True)
+
+                 # Find the row corresponding to the newly added candle in the updated cache
+                 final_processed_row = self.ohlcv_cache[timeframe][self.ohlcv_cache[timeframe]['timestamp'] == timestamp]
+                 if final_processed_row.empty:
+                     self.logger.error(f"Could not find newly added processed row for timestamp {timestamp} in cache after concat/trim.")
+                     return None # Cannot return the processed row if it's not found
+
+
+            else:
+                 # Received out-of-order data? A temporal anomaly!
+                 # If timestamp < last_cached_timestamp, it's old data. Ignore unless it's just before the last one (rare).
+                 # For simplicity, ignore data older than the last cached candle.
+                 self.logger.warning(f"{Fore.YELLOW}Received kline update with timestamp {timestamp} older than last cached {last_cached_timestamp}. Ignoring anomaly.{Style.RESET_ALL}")
+                 return None
+
+
+            # --- Return the Processed Row(s) ---
+            # Find the row corresponding to the processed timestamp in the updated cache
+            # This finds the row whether it was updated in place or newly added
+            # Note: If update_indicators returned multiple rows (e.g., for lookback calculation),
+            # the cache was updated with the tail. We should return *only* the row(s)
+            # that were *new* or *updated* by this specific whisper.
+            # The logic above is simplified to just get the row matching the whisper timestamp.
+            # If indicators.py returns >1 row from update_indicators, this needs refinement.
+            # Assuming update_indicators is designed to return just the latest row or rows affected by the update/append.
+
+            final_processed_row = self.ohlcv_cache[timeframe][self.ohlcv_cache[timeframe]['timestamp'] == timestamp]
+
+            if not final_processed_row.empty:
+                 self.logger.debug(f"Cache scroll for {timeframe} updated. Size: {len(self.ohlcv_cache[timeframe])}. Returning processed row.")
+                 return final_processed_row.copy() # Return a copy
+            else:
+                 # Should not happen if update logic is correct for new candles
+                 self.logger.error(f"Could not find processed row for timestamp {timestamp} in cache after update/append.")
+                 return None
+
+        except (IndexError, KeyError, ValueError, TypeError, InvalidOperation) as e:
+             # Catch common data transcription errors
+             self.logger.exception(f"Error processing kline whisper data: {e}. Data: {kline_data}")
+             return None
+        except Exception as e:
+            # Catch any unexpected interferences
+            self.logger.exception(f"Unexpected error in update_ohlcv_cache: {e}. Data: {kline_data}")
+            return None
+
+
+    # --- Account & Position Helpers - Peering into the Treasury ---
+
+    def fetch_balance(self, coin: str = "USDT") -> Optional[Decimal]:
+        """Fetches the *available* balance for a specific coin in the UNIFIED account using pybit."""
+        self.logger.debug(f"{Fore.CYAN}# Fetching available balance for {coin}...{Style.RESET_ALL}")
+        if not self.session:
+            self.logger.error("pybit session not available for balance fetch.")
+            return None
+        try:
+            # Bybit v5: get_wallet_balance requires accountType. UNIFIED is common.
+            response = self.session.get_wallet_balance(accountType="UNIFIED") # Fetch overall unified balance first
+            # The coin parameter in get_wallet_balance is optional, fetching overall is often better
+            # then filtering the result.
+            if response and response.get("retCode") == 0:
+                result = response.get("result", {})
+                account_list = result.get("list", [])
+                if account_list:
+                    account_info = account_list[0] # Unified account info is usually the first/only entry
+                    coin_info_list = account_info.get("coin", [])
+                    coin_data = next((c for c in coin_info_list if c.get("coin") == coin), None)
+                    if coin_data:
+                        # 'availableToTrade' seems most relevant for placing new orders
+                        balance_str = coin_data.get("availableToTrade", "0")
+                        try:
+                            balance = Decimal(balance_str)
+                            self.logger.info(f"Available {coin} balance to trade: {Style.BRIGHT}{balance}{Style.RESET_ALL}")
+                            return balance
+                        except InvalidOperation:
+                             self.logger.error(f"Could not parse availableToTrade balance '{balance_str}' for {coin}.")
+                             return Decimal("0") # Treat unparseable as zero
+                    else:
+                         self.logger.warning(f"Coin rune '{coin}' not found in wallet balance response list.")
+                         return Decimal("0") # Assume zero if coin not listed
+                else:
+                    self.logger.warning(f"No account list found in balance response: {response}")
+                    return None # Indicates API call was successful but result structure unexpected
+            else:
+                self.logger.error(f"API Error fetching balance: {response.get('retMsg')} (Rune: {response.get('retCode')})")
+                return None # Indicates API call failed
+        except Exception as e:
+            self.logger.exception(f"Exception fetching balance: {e}")
+            return None
+
+    def get_equity(self, coin: str = "USDT") -> Optional[Decimal]:
+        """Fetches the total equity for the UNIFIED account (using coin context) via pybit."""
+        self.logger.debug(f"{Fore.CYAN}# Fetching total account equity (using {coin} context)...{Style.RESET_ALL}")
+        if not self.session:
+             self.logger.error("pybit session not available for equity fetch.")
+             return None
+        try:
+            # Fetch balance for the whole unified account
+            response = self.session.get_wallet_balance(accountType="UNIFIED") # Fetch overall unified balance
+            if response and response.get("retCode") == 0:
+                result = response.get("result", {})
+                account_list = result.get("list", [])
+                if account_list:
+                    account_info = account_list[0]
+                    # 'totalEquity' reflects the overall account value
+                    equity_str = account_info.get("totalEquity", "0")
+                    try:
+                         equity = Decimal(equity_str)
+                         # Note: Bybit might report equity in USD. Verify API docs if precise USDT equity is critical.
+                         self.logger.info(f"Total Account Equity (reported): {Style.BRIGHT}{equity}{Style.RESET_ALL}")
+                         return equity
+                    except InvalidOperation:
+                         self.logger.error(f"Could not parse totalEquity balance '{equity_str}'.")
+                         return Decimal("0") # Treat unparseable as zero
+                else:
+                    self.logger.warning(f"No account list found in equity response: {response}")
+                    return None
+            else:
+                self.logger.error(f"API Error fetching equity: {response.get('retMsg')} (Rune: {response.get('retCode')})")
+                return None
+        except Exception as e:
+            self.logger.exception(f"Exception fetching equity: {e}")
+            return None
+
+    def get_position(self, symbol: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """
+        Fetches position details for the specified symbol using pybit.
+
+        Returns:
+            Dictionary with standardized position details (Decimal types for numbers)
+            or None if no position exists or an error occurs.
+        """
+        target_symbol = symbol or self.config.symbol
+        self.logger.debug(f"{Fore.CYAN}# Fetching position for {target_symbol}...{Style.RESET_ALL}")
+        if not self.session:
+             self.logger.error("pybit session not available for position fetch.")
+             return None
+        try:
+            # Bybit v5: get_positions requires category. 'linear' for USDT perpetuals.
+            response = self.session.get_positions(category="linear", symbol=target_symbol)
+            if response and response.get("retCode") == 0:
+                result = response.get("result", {})
+                position_list = result.get("list", [])
+                if position_list:
+                    # In One-Way mode, there's typically one entry. In Hedge mode, two (Buy/Sell).
+                    # We need to find the entry with a non-zero size that matches the desired side
+                    # if we were tracking side explicitly, or just the non-zero one in One-Way.
+                    # The simplest is to return the first non-zero size position found.
+                    active_position_data = None
+                    for pos_data in position_list:
+                        try:
+                             pos_size = Decimal(pos_data.get("size", "0"))
+                             # Use Decimal's is_zero() or compare to Decimal(0)
+                             if pos_size != Decimal("0"):
+                                 active_position_data = pos_data
+                                 break # Found the active position
+
+                        except (InvalidOperation, ValueError, TypeError) as parse_error:
+                            self.logger.error(f"Error parsing position data rune for {target_symbol}: {parse_error}. Data: {pos_data}")
+                            # Continue loop to check other entries if one fails parsing
+
+                    if active_position_data:
+                         # Found an active position, transcribe and standardize
+                         try:
+                              entry_price = Decimal(active_position_data.get("avgPrice", "0")) # avgPrice is the entry price rune
+                              # Handle potentially empty runes for SL/TP/Liq/TS before converting
+                              sl_str = active_position_data.get("stopLoss", "")
+                              tp_str = active_position_data.get("takeProfit", "")
+                              liq_str = active_position_data.get("liqPrice", "")
+                              ts_str = active_position_data.get("trailingStop", "") # Activation price if set
+
+                              position_info = {
+                                 "symbol": active_position_data.get("symbol"),
+                                 "side": active_position_data.get("side"), # "Buy", "Sell", or "None"
+                                 "size": Decimal(active_position_data.get("size", "0")),
+                                 "entry_price": entry_price,
+                                 "mark_price": Decimal(active_position_data.get("markPrice", "0")),
+                                 "liq_price": Decimal(liq_str) if liq_str else None,
+                                 "unrealised_pnl": Decimal(active_position_data.get("unrealisedPnl", "0")),
+                                 "leverage": Decimal(active_position_data.get("leverage", "0")),
+                                 "position_value": Decimal(active_position_data.get("positionValue", "0")),
+                                 "take_profit": Decimal(tp_str) if tp_str else None,
+                                 "stop_loss": Decimal(sl_str) if sl_str else None,
+                                 "trailing_stop_activation": Decimal(ts_str) if ts_str else None,
+                                 "created_time": pd.to_datetime(int(active_position_data.get("createdTime", 0)), unit='ms') if active_position_data.get("createdTime") else None,
+                                 "updated_time": pd.to_datetime(int(active_position_data.get("updatedTime", 0)), unit='ms') if active_position_data.get("updatedTime") else None,
+                                 "position_idx": int(active_position_data.get("positionIdx", 0)), # 0=One-Way, 1=Buy Hedge, 2=Sell Hedge
+                                 "risk_limit_value": active_position_data.get("riskLimitValue"),
+                                 # Add other relevant runes as needed, e.g., curRealisedPnl, positionIM, positionMM
+                              }
+                              side_color = Fore.GREEN if position_info['side'] == "Buy" else Fore.RED if position_info['side'] == "Sell" else Fore.YELLOW
+                              self.logger.info(f"Active position found for {target_symbol}: Side={side_color}{position_info['side']}{Style.RESET_ALL}, Size={Style.BRIGHT}{position_info['size']}{Style.RESET_ALL}, Entry={position_info['entry_price']}")
+                              return position_info
+                         except (InvalidOperation, ValueError, TypeError) as parse_error:
+                             self.logger.error(f"Error parsing position data into standardized format for {target_symbol}: {parse_error}. Raw data: {active_position_data}")
+                             return None # Parsing to Decimal failed for a crucial field
+
+                    # If loop finishes without finding a non-zero position
+                    self.logger.info(f"No active position found for {target_symbol} (all entries had size 0).")
+                    return None
+                else:
+                    # API returned success but the list was empty (e.g., no positions ever)
+                    self.logger.info(f"No position data returned in list for {target_symbol}.")
+                    return None
+            else:
+                self.logger.error(f"API Error fetching positions: {response.get('retMsg')} (Rune: {response.get('retCode')})")
+                return None
+        except Exception as e:
+            self.logger.exception(f"Exception fetching position for {target_symbol}: {e}")
+            return None
+
+    def get_open_orders(self, symbol: Optional[str] = None, order_type: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        Fetches open orders for the specified symbol using pybit.
+
+        Args:
+            symbol (str, optional): Symbol rune. Defaults to config.symbol.
+            order_type (str, optional): Filter by order type rune (e.g., "Limit", "Market", "Stop").
+                                        Note: Bybit uses orderFilter="Order" for Limit/Market,
+                                        "StopOrder" for conditional, "tpslOrder" for standalone TP/SL.
+            limit (int): Max number of orders to fetch.
+
+        Returns:
+            List of open order dictionaries (raw API response format), or empty list on error/no orders.
+        """
+        target_symbol = symbol or self.config.symbol
+        self.logger.debug(f"{Fore.CYAN}# Fetching open orders for {target_symbol} (Type Filter: {order_type or 'Any'})...{Style.RESET_ALL}")
+        if not self.session:
+             self.logger.error("pybit session not available for open orders fetch.")
+             return []
+        try:
+            params = {
+                 "category": "linear",
+                 "symbol": target_symbol,
+                 "limit": limit,
+                 # openOnly=0 includes conditional (Untriggered), openOnly=1 only active (New, PartiallyFilled)
+                 # Use openOnly=0 to see Stop/TP/SL orders which are "Untriggered"
+                 "openOnly": 0,
+            }
+            # Map user-friendly filter ('Stop', 'TP/SL', 'Limit/Market') to Bybit's 'orderFilter'
+            if order_type:
+                 filter_map = {
+                      "stop": "StopOrder",
+                      "conditional": "StopOrder",
+                      "stoporder": "StopOrder",
+                      "tpsl": "tpslOrder",
+                      "tpslorder": "tpslOrder",
+                      "limit": "Order", # "Order" filter includes Limit and Market
+                      "market": "Order",
+                      "order": "Order"
+                 }
+                 bybit_filter = filter_map.get(order_type.lower())
+                 if bybit_filter:
+                      params["orderFilter"] = bybit_filter
+                      self.logger.debug(f"Applying orderFilter: {bybit_filter} for type '{order_type}'")
+                 else:
+                      self.logger.warning(f"Unknown order_type filter '{order_type}'. Fetching all types.")
+
+
+            response = self.session.get_open_orders(**params)
+
+            if response and response.get("retCode") == 0:
+                result = response.get("result", {})
+                order_list = result.get("list", [])
+                if order_list:
+                    self.logger.info(f"Found {Style.BRIGHT}{len(order_list)}{Style.RESET_ALL} open order(s) for {target_symbol}.")
+                    # Return the raw list of order dictionaries
+                    return order_list
+                else:
+                    self.logger.info(f"No open orders found for {target_symbol} matching filter.")
+                    return []
+            else:
+                self.logger.error(f"API Error fetching open orders: {response.get('retMsg')} (Rune: {response.get('retCode')})")
+                return []
+        except Exception as e:
+            self.logger.exception(f"Exception fetching open orders for {target_symbol}: {e}")
+            return []
+
+    # --- Order Execution Helpers - Weaving the Trading Spells ---
+
+    def format_quantity(self, quantity: Decimal) -> str:
+        """Formats quantity according to the symbol's minimum step size (lot size) using ROUND_DOWN."""
+        if self.market_info is None:
+            self.logger.warning("Market wisdom unavailable, cannot format quantity precisely. Using default formatting.")
+            # Fallback to a reasonable default precision (e.g., 6 decimal places for BTC/USDT)
+            return str(quantity.quantize(Decimal("0.000001"), rounding=ROUND_DOWN))
+
+        try:
+            # 'precision': {'amount': '0.001'} -> step is 0.001
+            qty_step_str = self.market_info.get('precision', {}).get('amount')
+            if qty_step_str is None:
+                 raise ValueError("Quantity step size rune ('precision.amount') not found in market wisdom.")
+
+            qty_step = Decimal(qty_step_str)
+            if qty_step <= 0:
+                 raise ValueError(f"Invalid quantity step size rune: {qty_step}")
+
+            # Floor the quantity to the nearest valid step using ROUND_DOWN
+            # Formula: (quantity // qty_step) * qty_step using Decimal integer division //
+            formatted_qty = (quantity // qty_step) * qty_step
+            # Need to quantize to the precision of the step size to avoid floating point issues in Decimal arithmetic
+            formatted_qty = formatted_qty.quantize(qty_step, rounding=ROUND_DOWN)
+
+            # self.logger.debug(f"Formatting Qty: Input={quantity}, Step={qty_step}, Output={formatted_qty}")
+            return str(formatted_qty)
+
+        except (KeyError, ValueError, TypeError, InvalidOperation) as e:
+            self.logger.error(f"Error formatting quantity {quantity}: {e}. MarketInfo Precision: {self.market_info.get('precision')}")
+            # Fallback on error
+            return str(quantity.quantize(Decimal("0.000001"), rounding=ROUND_DOWN))
+
+
+    def format_price(self, price: Optional[Decimal]) -> Optional[str]:
+        """Formats price according to the symbol's minimum step size (tick size). Returns None if input is None."""
+        if price is None:
+             return None
+
+        if self.market_info is None:
+            self.logger.warning("Market wisdom unavailable, cannot format price precisely. Using default formatting.")
+            # Fallback (adjust precision based on typical symbol, e.g., USDT pairs)
+            return str(price.quantize(Decimal("0.01"))) # Example: 2 decimal places
+
+        try:
+             # 'precision': {'price': '0.01'} -> step is 0.01
+            price_step_str = self.market_info.get('precision', {}).get('price')
+            if price_step_str is None:
+                 raise ValueError("Price step size rune ('precision.price') not found in market wisdom.")
+
+            price_step = Decimal(price_step_str)
+            if price_step <= 0:
+                 raise ValueError(f"Invalid price step size rune: {price_step}")
+
+            # Quantize rounds to the nearest multiple of the step size
+            # Default rounding (ROUND_HALF_UP) is usually appropriate for prices
+            formatted_price = price.quantize(price_step)
+            # self.logger.debug(f"Formatting Price: Input={price}, Step={price_step}, Output={formatted_price}")
+            return str(formatted_price)
+
+        except (KeyError, ValueError, TypeError, InvalidOperation) as e:
+            self.logger.error(f"Error formatting price {price}: {e}. MarketInfo Precision: {self.market_info.get('precision')}")
+             # Fallback on error
+            return str(price.quantize(Decimal("0.01")))
+
+    def get_min_order_qty(self) -> Optional[Decimal]:
+        """Retrieves the minimum order quantity rune from loaded market wisdom."""
+        if self.market_info:
+            try:
+                min_qty_str = self.market_info.get('limits', {}).get('amount', {}).get('min')
+                if min_qty_str is not None:
+                    return Decimal(str(min_qty_str)) # Ensure Decimal conversion
+            except (KeyError, ValueError, TypeError, InvalidOperation) as e:
+                 self.logger.error(f"Could not parse min order quantity rune from market wisdom: {e}")
+        return None # Return None if unavailable or error
+
+    def get_qty_step(self) -> Optional[Decimal]:
+        """Retrieves the quantity step size rune (lot size) from loaded market wisdom."""
+        if self.market_info:
+            try:
+                step_str = self.market_info.get('precision', {}).get('amount')
+                if step_str is not None:
+                    return Decimal(str(step_str)) # Ensure Decimal conversion
+            except (KeyError, ValueError, TypeError, InvalidOperation) as e:
+                self.logger.error(f"Could not parse quantity step size rune from market wisdom: {e}")
+        return None
+
+    def get_price_step(self) -> Optional[Decimal]:
+        """Retrieves the price step size rune (tick size) from loaded market wisdom."""
+        if self.market_info:
+            try:
+                step_str = self.market_info.get('precision', {}).get('price')
+                if step_str is not None:
+                    return Decimal(str(step_str)) # Ensure Decimal conversion
+            except (KeyError, ValueError, TypeError, InvalidOperation) as e:
+                self.logger.error(f"Could not parse price step size rune from market wisdom: {e}")
+        return None
+
+    def place_order(self, side: str, qty: Decimal, order_type: str = "Market", price: Optional[Decimal] = None,
+                    sl: Optional[Decimal] = None, tp: Optional[Decimal] = None,
+                    reduce_only: bool = False, time_in_force: str = "GTC",
+                    position_idx: int = 0, # 0=One-Way, 1=Buy Hedge, 2=Sell Hedge
+                    trigger_price: Optional[Decimal] = None, # For conditional/stop orders
+                    trigger_direction: Optional[int] = None, # 1=Rise to trigger, 2=Fall to trigger
+                    stop_loss_type: str = "Market", # Type of SL order ("Market"/"Limit")
+                    take_profit_type: str = "Market", # Type of TP order ("Market"/"Limit")
+                    order_link_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """
+        Weaves an order spell using pybit session with formatting, validation, and SL/TP wards.
+
+        Args:
+            side (str): "Buy" or "Sell".
+            qty (Decimal): Order quantity (positive value).
+            order_type (str): "Market", "Limit". Use trigger_price for conditional variants (Stop/TakeProfit/etc).
+            price (Decimal, optional): Required for Limit spells.
+            sl (Decimal, optional): Stop loss trigger price ward.
+            tp (Decimal, optional): Take profit trigger price ward.
+            reduce_only (bool): If true, spell only reduces position size.
+            time_in_force (str): "GTC", "IOC", "FOK", "PostOnly" (for Limit).
+            position_idx (int): For Hedge Mode (0 for One-Way).
+            trigger_price (Decimal, optional): Price rune for conditional stop/trigger spells.
+            trigger_direction (int, optional): 1 (rising trigger >=), 2 (falling trigger <=). Required if trigger_price set.
+            stop_loss_type (str): Underlying order type for SL ward ("Market" or "Limit").
+            take_profit_type (str): Underlying order type for TP ward ("Market" or "Limit").
+            order_link_id (str, optional): Custom client order rune (max 36 chars).
+
+        Returns:
+            The API response dictionary ('result' part) on success, None on failure.
+        """
+        if not self.session or self.market_info is None:
+            self.logger.error("Cannot weave order spell: pybit session or market wisdom not initialized.")
+            return None
+
+        symbol = self.config.symbol
+        category = "linear" # Assuming USDT perpetuals
+
+        # --- Input Validation Wards ---
+        if side not in ["Buy", "Sell"]:
+            self.logger.error(f"Invalid order side rune: {side}")
+            return None
+        if qty <= Decimal("0"): # Use Decimal comparison
+            self.logger.error(f"Invalid order quantity rune: {qty}. Must be positive.")
+            return None
+        if order_type not in ["Market", "Limit"]:
+             self.logger.error(f"Invalid order_type rune: {order_type}. Base type must be Market or Limit. Use trigger_price for conditional.")
+             return None
+        if order_type == "Limit" and price is None:
+             self.logger.error("Price rune is required for Limit spells.")
+             return None
+        if trigger_price is not None and trigger_direction not in [1, 2]:
+             self.logger.error("trigger_direction rune (1 for rise, 2 for fall) is required when trigger_price is set.")
+             return None
+        if time_in_force not in ["GTC", "IOC", "FOK", "PostOnly"]:
+             self.logger.warning(f"Invalid time_in_force rune '{time_in_force}'. Defaulting based on order type.")
+             # Bybit v5: Market orders only support IOC or FOK. Limit orders support GTC, IOC, FOK, PostOnly.
+             time_in_force = "IOC" if order_type == "Market" else "GTC" # Sensible defaults
+        if order_type == "Market" and time_in_force not in ["IOC", "FOK"]:
+             self.logger.warning(f"Market spells usually use IOC or FOK. Forcing IOC for timeInForce '{time_in_force}'.")
+             time_in_force = "IOC"
+        if order_type == "Limit" and time_in_force == "PostOnly" and trigger_price is not None:
+             self.logger.warning("PostOnly combined with trigger_price might not be supported or behave unexpectedly. Using GTC.")
+             time_in_force = "GTC" # PostOnly typically for standard limit orders
+
+        # --- Quantity and Price Formatting & Validation ---
+        qty_str = self.format_quantity(qty)
+        if Decimal(qty_str) <= Decimal("0"): # Use Decimal comparison
+            self.logger.error(f"Quantity {qty} became zero or negative after formatting ({qty_str}). Cannot cast spell.")
+            return None
+
+        min_qty = self.get_min_order_qty()
+        if min_qty is not None and Decimal(qty_str) < min_qty:
+            self.logger.error(f"Formatted quantity {qty_str} is below minimum required {min_qty} for {symbol}. Cannot cast spell.")
+            # Option: Adjust to min_qty? For now, reject the spell to avoid unexpected size.
+            # qty_str = self.format_quantity(min_qty)
+            return None
+
+        price_str = self.format_price(price)
+        sl_str = self.format_price(sl)
+        tp_str = self.format_price(tp)
+        trigger_price_str = self.format_price(trigger_price)
+
+        # --- Assemble Order Spell Parameters ---
+        params: Dict[str, Any] = {
+            "category": category,
+            "symbol": symbol,
+            "side": side,
+            "qty": qty_str,
+            "orderType": order_type, # "Market" or "Limit"
+            "reduceOnly": reduce_only,
+            "positionIdx": position_idx,
+            "timeInForce": time_in_force, # Include time_in_force for all types as per v5 docs
+            # Optional: Add 'orderLinkId' if provided, else generate a unique one
+            # Generate a simple timestamp-based ID, truncated to max 36 chars
+            "orderLinkId": order_link_id if order_link_id else f"pyr_{int(time.time()*1000)}_{os.getpid()}"[-36:]
+        }
+
+        # Add price for Limit orders
+        if order_type == "Limit" and price_str is not None:
+             params["price"] = price_str
+        elif order_type == "Market" and price is not None:
+             # Price is optional for Market orders but can be used as a limit (limit_by_price)
+             # Bybit v5 place-order doc doesn't explicitly mention price for market orders.
+             # It's generally best practice *not* to provide a price for Market orders unless
+             # using features like "optimal_5" or "limit_by_price", which aren't standard.
+             # If you need price control, use a Limit order.
+             self.logger.warning("Price provided for Market order. Ignoring price as it's typically not used.")
+
+
+        # Add conditional spell runes (trigger)
+        if trigger_price_str is not None and trigger_direction is not None:
+             params["triggerPrice"] = trigger_price_str
+             params["triggerDirection"] = trigger_direction
+             # Bybit v5 Unified uses trigger fields directly on the main order placement.
+             # Note: This means a "Stop Limit" order is placed as orderType="Limit" with triggerPrice/triggerDirection.
+             # A "Stop Market" is placed as orderType="Market" with triggerPrice/triggerDirection.
+             self.logger.info(f"Weaving a conditional {order_type} spell triggered at {trigger_price_str} (Direction: {trigger_direction}).")
+             # Optional: Add triggerBy ('IndexPrice', 'MarkPrice', 'LastPrice'). Default is usually MarkPrice.
+             # params["triggerBy"] = "MarkPrice"
+
+
+        # Add SL/TP ward runes
+        # These are attached to the *position* or the *order* depending on context.
+        # When placing an order, you can attach TP/SL that apply *if* the order fills.
+        # These are OTO (One-Triggers-Other) or OCO (One-Cancels-Other) variants depending on TP/SL setup.
+        # Bybit v5 API place-order supports `stopLoss` and `takeProfit` fields directly.
+        if sl_str is not None:
+             params["stopLoss"] = sl_str
+             # Specify the type of order created when SL ward is triggered
+             params["slOrderType"] = stop_loss_type # "Market" or "Limit"
+             # If slOrderType is Limit, slLimitPrice is required
+             # params["slLimitPrice"] = self.format_price(sl_limit_price) # Need to calculate/provide this if using Limit SL
+             # Optional: slTriggerBy ('IndexPrice', 'MarkPrice', 'LastPrice'). Default usually MarkPrice.
+             # params["slTriggerBy"] = "MarkPrice"
+
+        if tp_str is not None:
+             params["takeProfit"] = tp_str
+             # Specify the type of order created when TP ward is triggered
+             params["tpOrderType"] = take_profit_type # "Market" or "Limit"
+              # If tpOrderType is Limit, tpLimitPrice is required
+             # params["tpLimitPrice"] = self.format_price(tp_limit_price) # Need to calculate/provide this if using Limit TP
+             # Optional: tpTriggerBy ('IndexPrice', 'MarkPrice', 'LastPrice'). Default usually MarkPrice.
+             # params["tpTriggerBy"] = "MarkPrice"
+
+        # --- Log and Cast the Spell ---
+        side_color = Fore.GREEN if side == "Buy" else Fore.RED
+        log_details = f"{side_color}{side}{Style.RESET_ALL} {Style.BRIGHT}{qty_str}{Style.RESET_ALL} {symbol} {order_type}"
+        if price_str: log_details += f" @{Fore.YELLOW}{price_str}{Style.RESET_ALL}"
+        if trigger_price_str: log_details += f" Trigger@{Fore.CYAN}{trigger_price_str}{Style.RESET_ALL}"
+        if sl_str: log_details += f" SL@{Fore.RED}{sl_str}{Style.RESET_ALL} ({stop_loss_type})"
+        if tp_str: log_details += f" TP@{Fore.GREEN}{tp_str}{Style.RESET_ALL} ({take_profit_type})"
+        if reduce_only: log_details += f" {Fore.MAGENTA}(ReduceOnly){Style.RESET_ALL}"
+        log_details += f" TIF:{params['timeInForce']}" # Always include TimeInForce
+
+        self.logger.info(f"Casting Order Spell: {log_details}")
+        self.logger.debug(f"Spell Parameters: {params}")
+
+        try:
+            # Cast the spell via pybit
+            response = self.session.place_order(**params)
+
+            # --- Interpret the Response Runes ---
+            if response and response.get("retCode") == 0:
+                order_result = response.get("result", {})
+                order_id = order_result.get("orderId")
+                order_link_id_resp = order_result.get("orderLinkId") # Get the ID from response
+                self.logger.success(f"{Fore.GREEN}Order spell cast successfully! OrderID: {order_id}. LinkID: {order_link_id_resp}{Style.RESET_ALL}")
+                # Send SMS notification whisper
+                sms_msg = f"ORDER: {side} {qty_str} {symbol} {order_type} OK. ID:{order_id[-6:] if order_id else 'N/A'}"
+                self.send_sms(sms_msg)
+                return order_result # Return the nested 'result' dictionary
+
+            else:
+                # Spell casting failed at API level
+                err_code = response.get('retCode', 'N/A')
+                err_msg = response.get('retMsg', 'Unknown disturbance')
+                self.logger.error(f"{Back.RED}{Fore.WHITE}Order spell FAILED! Rune: {err_code}, Msg: {err_msg}{Style.RESET_ALL}")
+                self.logger.debug(f"Failed Spell Parameters: {params}") # Log params that failed
+
+                # Send SMS alert whisper on failure
+                sms_msg = f"ORDER FAIL: {side} {qty_str} {symbol}. Code:{err_code}, Msg:{err_msg[:40]}"
+                self.send_sms(sms_msg)
+
+                # Handle specific common failure runes
+                if err_code == 110007: # Insufficient balance rune
+                    self.logger.error("Reason: Insufficient available balance.")
+                elif err_code in [130021, 130071, 130072]: # Risk limit or position size issues
+                     self.logger.error(f"Reason: Risk limit or position size issue. ({err_msg})")
+                elif err_code == 10001: # Parameter error
+                     self.logger.error(f"Reason: Parameter error in request. Check formatting/values. ({err_msg})")
+
+                return None # Indicate failure
+
+        except Exception as e:
+            # Catch unexpected interferences during spell casting
+            self.logger.exception(f"Exception during order spell casting: {e}")
+            self.send_sms(f"ORDER EXCEPTION: {side} {qty_str} {symbol}. {str(e)[:50]}")
+            return None
+
+
+    def cancel_order(self, order_id: Optional[str] = None, order_link_id: Optional[str] = None, symbol: Optional[str] = None) -> bool:
+        """
+        Dispels a specific order spell by its Bybit Order ID or the Client Order ID (orderLinkId).
+
+        Args:
+            order_id (str, optional): The Bybit system Order ID rune.
+            order_link_id (str, optional): The custom Client Order ID rune.
+            symbol (str, optional): The symbol rune. Defaults to config.symbol.
+
+        Returns:
+            True if dispelling was successful or spell was already gone, False otherwise.
+        """
+        if not order_id and not order_link_id:
+            self.logger.error("Cannot dispel order: Either order_id or order_link_id rune must be provided.")
+            return False
+        if not self.session:
+             self.logger.error("pybit session not available for order dispelling.")
+             return False
+
+        target_symbol = symbol or self.config.symbol
+        cancel_ref = order_id if order_id else order_link_id
+        ref_type = "OrderID" if order_id else "LinkID"
+        self.logger.info(f"{Fore.YELLOW}Attempting to dispel order '{cancel_ref}' ({ref_type}) for {target_symbol}...{Style.RESET_ALL}")
+
+        params = {
+            "category": "linear",
+            "symbol": target_symbol,
+        }
+        if order_id:
+            params["orderId"] = order_id
+        elif order_link_id:
+            params["orderLinkId"] = order_link_id
+
+        try:
+            response = self.session.cancel_order(**params)
+
+            if response and response.get("retCode") == 0:
+                 # Successful dispelling reported by API
+                 result_id = response.get("result", {}).get("orderId", "N/A")
+                 self.logger.success(f"Order '{cancel_ref}' dispelled successfully (Response ID: {result_id}).")
+                 return True
+            else:
+                # Dispelling failed or order didn't exist
+                err_code = response.get('retCode')
+                err_msg = response.get('retMsg', 'Unknown disturbance')
+
+                # Check for common "Order not found" runes (codes might vary)
+                # Bybit v5 runes: 110001 (order not found or state is not cancellable), 10001 (parameter error, maybe ID format)
+                # Check message string as well for clarity
+                if err_code in [110001] or "order not found" in err_msg.lower() or "order is not cancellable" in err_msg.lower():
+                     self.logger.warning(f"Order '{cancel_ref}' not found or already inactive/non-cancellable (Rune: {err_code}, Msg: {err_msg}). Considered dispelled.")
+                     return True # Treat as success because the order is not open/cancellable
+                else:
+                     self.logger.error(f"Failed to dispel order '{cancel_ref}'. Rune: {err_code}, Msg: {err_msg}")
+                     return False # Genuine dispelling failure
+
+        except Exception as e:
+            self.logger.exception(f"Exception dispelling order '{cancel_ref}': {e}")
+            return False
+
+
+    def cancel_all_orders(self, symbol: Optional[str] = None, order_filter: Optional[str] = None) -> bool:
+        """
+        Dispels all open order spells for the specified symbol, with optional filters.
+
+        Args:
+            symbol (str, optional): Symbol rune. Defaults to config.symbol.
+            order_filter (str, optional): Bybit orderFilter: "Order" (Limit/Market), "StopOrder" (conditional), "tpslOrder" (standalone TP/SL). If None, dispels all types.
+
+        Returns:
+            True if the API call was successful (doesn't guarantee orders were cancelled if none existed), False on API error.
+        """
+        target_symbol = symbol or self.config.symbol
+        self.logger.info(f"{Fore.RED + Style.BRIGHT}Attempting to dispel ALL orders for {target_symbol} (Filter: {order_filter or 'All'})...{Style.RESET_ALL}")
+        if not self.session:
+             self.logger.error("pybit session not available for mass dispelling.")
+             return False
+        try:
+            params: Dict[str, Any] = {
+                "category": "linear",
+                "symbol": target_symbol,
+                # settleCoin is not typically required for cancel-all-orders on v5 linear
+            }
+            if order_filter:
+                 # Validate order_filter against known Bybit values
+                 valid_filters = ["Order", "StopOrder", "tpslOrder"]
+                 if order_filter not in valid_filters:
+                      self.logger.warning(f"Invalid order_filter '{order_filter}'. Must be one of {valid_filters}. Proceeding without filter.")
+                 else:
+                      params["orderFilter"] = order_filter
+
+
+            response = self.session.cancel_all_orders(**params)
+
+            # Response structure for cancel_all typically includes a list of cancelled IDs
+            if response and response.get("retCode") == 0:
+                 cancelled_list = response.get("result", {}).get("list", [])
+                 count = len(cancelled_list)
+                 if count > 0:
+                      # Log up to a few IDs for verification
+                      ids_short = [item.get('orderId', 'N/A')[-6:] for item in cancelled_list[:5]] # Show last 6 chars of first 5 IDs
+                      self.logger.success(f"Successfully dispelled {count} order(s) for {target_symbol}. Example IDs ending in: {ids_short}...")
+                 else:
+                      self.logger.info(f"Mass dispel request successful, but no matching open orders found for {target_symbol}.")
+                 return True
+            else:
+                # API call failed
+                err_code = response.get('retCode')
+                err_msg = response.get('retMsg', 'Unknown disturbance')
+                self.logger.error(f"Failed to dispel all orders for {target_symbol}. Rune: {err_code}, Msg: {err_msg}")
+                # Specific error for no orders found (e.g., 110001) might be returned by cancel_all too
+                if err_code == 110001 or "order not found" in err_msg.lower():
+                     self.logger.info(f"No matching orders found to cancel for {target_symbol} (Rune: {err_code}, Msg: {err_msg}).")
+                     return True # Treat as success if the goal was to ensure no orders exist
+                return False # Genuine dispelling failure
+
+        except Exception as e:
+            self.logger.exception(f"Exception during mass dispel for {target_symbol}: {e}")
+            return False
+
+
+    # --- Utilities - Lesser Incantations ---
+
+    def send_sms(self, message: str) -> bool:
+        """Sends an SMS whisper using Termux API, respecting cooldown and length limits."""
+        if not self.config.sms_enabled or not self.config.sms_phone:
+            # self.logger.debug("SMS whispers disabled or phone number rune missing.") # Too noisy for debug
+            return False
+
+        current_time = time.time()
+        if current_time - self.last_sms_time < self.config.sms_cooldown:
+            # self.logger.debug(f"SMS cooldown active ({self.config.sms_cooldown}s). Whisper suppressed: {message[:50]}...") # Too noisy
+            return False
+
+        try:
+            # Truncate message to prevent exceeding SMS limits (160 chars is standard)
+            max_len = 155 # Leave room for "..."
+            truncated_message = message[:max_len] + "..." if len(message) > max_len else message
+
+            # Use JSON encoding for the message to handle special characters safely in the shell command
+            # subprocess.run with text=True handles encoding, but shell=True needs careful quoting.
+            # Using json.dumps ensures the string is properly quoted and escaped for the shell.
+            safe_message = json.dumps(truncated_message)
+
+            # Construct the Termux command spell
+            # Ensure phone number doesn't contain shell metacharacters (basic check)
+            # Only allow digits and the leading plus sign
+            safe_phone = '+' + ''.join(c for c in self.config.sms_phone if c.isdigit()) if self.config.sms_phone.startswith('+') else ''.join(c for c in self.config.sms_phone if c.isdigit())
+
+            if not safe_phone:
+                 self.logger.error("SMS phone number formatting failed or resulted in empty number.")
+                 return False
+
+            cmd = f"termux-sms-send -n {safe_phone} {safe_message}"
+            self.logger.debug(f"Executing SMS command: termux-sms-send -n {safe_phone} {safe_message[:50]}...") # Log partial message
+
+            # Run the command with timeout, capture output, don't raise error on non-zero exit
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10, check=False) # Reduced timeout to 10s
+
+            if result.returncode == 0:
+                self.last_sms_time = current_time # Update timestamp only on success
+                self.logger.info(f"{Fore.GREEN}SMS whisper sent successfully to {safe_phone}: {truncated_message}{Style.RESET_ALL}")
+                return True
+            else:
+                # Log error details if the command failed
+                error_output = result.stderr.strip() if result.stderr else result.stdout.strip()
+                self.logger.error(f"{Fore.RED}Termux SMS command failed! Return Code: {result.returncode}. Output: {error_output}{Style.RESET_ALL}")
+                # Check if the error indicates termux-sms-send is not installed/configured
+                if "command not found" in error_output.lower() or "usage: termux-sms-send" in error_output.lower():
+                     self.logger.error(f"{Fore.RED}Hint: 'termux-sms-send' command not found or not configured. Is Termux:API package installed?{Style.RESET_ALL}")
+                return False
+
+        except subprocess.TimeoutExpired:
+             self.logger.error(f"{Fore.RED}Termux SMS command timed out after 10 seconds.{Style.RESET_ALL}")
+             return False
+        except FileNotFoundError:
+            self.logger.error(f"{Fore.RED}'termux-sms-send' command not found. Is Termux:API package installed and configured?{Style.RESET_ALL}")
+            # Consider disabling SMS temporarily to avoid repeated errors
+            # self.config.sms_enabled = False # Config is immutable after loading
+            return False
+        except Exception as e:
+            # Catch any other unexpected interferences
+            self.logger.exception(f"Unexpected error sending SMS whisper: {e}")
+            return False
+
+
+    def diagnose(self) -> bool:
+        """Runs diagnostic checks for API connectivity, configuration, and basic functionality."""
+        self.logger.info(f"\n{Fore.MAGENTA + Style.BRIGHT}--- Running Diagnostics ---{Style.RESET_ALL}")
+        passed_checks = 0
+        total_checks = 0
+        results = [] # Store results for summary
+
+        # Check 1: Server Time Sync
+        total_checks += 1
+        check_name = "Server Time Sync"
+        server_time = self.get_server_time()
+        if server_time:
+            results.append((check_name, True, "Server time check successful."))
+            passed_checks += 1
+        else:
+            results.append((check_name, False, "Server time check failed."))
+
+        # Check 2: Market Info Load
+        total_checks += 1
+        check_name = f"Market Info Load ({self.config.symbol})"
+        if not self.market_info: self._load_market_info() # Attempt load if missing
+        if self.market_info and self.market_info.get('symbol') == self.config.symbol:
+            results.append((check_name, True, f"Market info load successful. Precision/Limits available."))
+            passed_checks += 1
+        else:
+            results.append((check_name, False, f"Market info load failed or symbol mismatch. Check BOT_SYMBOL."))
+
+        # Check 3: Balance Fetch (Checks API auth/permission)
+        total_checks += 1
+        check_name = "Balance Fetch (API Auth)"
+        balance = self.fetch_balance() # Use default USDT
+        if balance is not None: # Check if fetch API call succeeded, not the value itself
+            results.append((check_name, True, f"API call OK. Available USDT Balance: {balance}"))
+            passed_checks += 1
+        else:
+            results.append((check_name, False, "Balance fetch check failed (API call failed or returned error). Check API keys/permissions."))
+
+        # Check 4: Leverage Setting (Informational)
+        # Leverage setting can fail legitimately (e.g., hedge mode), so don't count failure against overall status
+        self.logger.info(f"{Fore.CYAN}# Checking leverage setting (informational)...{Style.RESET_ALL}")
+        self._set_leverage() # Logs success/warning/error internally
+        # Note: _set_leverage returns bool, could capture and report here if desired, but logging is sufficient.
+
+        # Check 5: WebSocket Instance Creation
+        total_checks += 1
+        check_name = "WebSocket Instance Creation"
+        if not self.ws: self._init_websocket_instance() # Attempt init if missing
+        if self.ws:
+            results.append((check_name, True, "WebSocket instance created successfully."))
+            passed_checks += 1
+        else:
+             results.append((check_name, False, "WebSocket instance creation failed."))
+
+        # Check 6: Quick WebSocket Connection Test (Requires threading)
+        total_checks += 1
+        check_name = "WebSocket Connection Test"
+        self.logger.info(f"{Fore.CYAN}# Attempting quick WebSocket connection test...{Style.RESET_ALL}")
+        ws_test_passed = False
+        ws_test_error_msg = ""
+        # Use a public topic that is expected to be available
+        test_topic = f"kline.1m.{self.config.symbol}"
+        # Need a unique topic for the test to avoid interfering with actual subscriptions
+        test_topic_unique = f"{test_topic}_{int(time.time())}" # Append timestamp
+
+        # Store original WS state/callbacks to restore them after test
+        original_ws = self.ws
+        original_ws_connected = self.ws_connected
+        original_ws_connecting = self.ws_connecting
+        original_ws_topics = self.ws_topics[:]
+        original_ws_user_callbacks = self.ws_user_callbacks.copy()
+
+        # Re-initialize WS cleanly for the test
+        self._init_websocket_instance()
+        if not self.ws:
+             results.append((check_name, False, "Failed to initialize WebSocket instance for test."))
+        else:
+            try:
+                 # Use threading.Event for synchronization between threads
+                 is_connected_event = threading.Event()
+
+                 def test_open(ws_app):
+                     nonlocal ws_test_passed
+                     self.logger.debug("WS Test: Open callback received.")
+                     ws_test_passed = True
+                     is_connected_event.set() # Signal success
+
+                 def test_error(ws_app, err):
+                     nonlocal ws_test_error_msg
+                     self.logger.debug(f"WS Test: Error callback received: {err}")
+                     ws_test_error_msg = str(err)
+                     # Signal failure if not already signalled by success
+                     if not is_connected_event.is_set():
+                        is_connected_event.set()
+
+                 def test_close(ws_app, code, msg):
+                      self.logger.debug(f"WS Test: Close callback received. Code: {code}, Msg: {msg}")
+                      # Signal failure if connection wasn't successful before close
+                      if not ws_test_passed and not is_connected_event.is_set():
+                          nonlocal ws_test_error_msg
+                          ws_test_error_msg = f"Closed before open (Code: {code}, Msg: {msg})"
+                          is_connected_event.set() # Signal failure
+
+                 # Provide dummy callbacks for message
+                 dummy_msg_cb = lambda msg: None
+
+                 # Connect with specific test callbacks
+                 # Use the internal connect_websocket method, passing test callbacks
+                 # Note: This starts the stream in a thread within connect_websocket
+                 self.connect_websocket([test_topic_unique], dummy_msg_cb,
+                                        open_callback=test_open,
+                                        error_callback=test_error,
+                                        close_callback=test_close)
+
+
+                 # Wait for the connection attempt to complete (or timeout)
+                 if not is_connected_event.wait(timeout=15): # Wait up to 15 seconds
+                      if not ws_test_passed: # If event timed out and connection wasn't successful
+                           ws_test_error_msg = "Connection attempt timed out."
+
+                 # Clean up immediately after test
+                 self.disconnect_websocket() # This should trigger the close callback
+
+                 if ws_test_passed:
+                     results.append((check_name, True, "WebSocket connection test successful."))
+                     passed_checks += 1
+                 else:
+                     results.append((check_name, False, f"WebSocket connection test failed: {ws_test_error_msg}"))
+
+            except Exception as e:
+                 results.append((check_name, False, f"Exception during WebSocket test: {e}"))
+                 self.disconnect_websocket() # Ensure cleanup
+            finally:
+                 # Attempt to restore original WS state (important if the bot was already running WS)
+                 # This might be complex and could lead to issues if the test WS thread is not fully stopped.
+                 # A safer approach might be to just ensure the test WS is cleaned up
+                 # and let the main application re-establish its WS if needed.
+                 # For a CLI diagnostic, cleaning up the test WS is sufficient.
+                 pass
+
+
+        # Check 7: Basic OHLCV Fetch
+        total_checks += 1
+        check_name = f"OHLCV Fetch ({self.config.timeframe})"
+        try:
+             # Fetch a small number of recent candles
+             test_ohlcv_df = self.fetch_ohlcv(timeframe=self.config.timeframe, limit=10)
+             if not test_ohlcv_df.empty:
+                  results.append((check_name, True, f"OHLCV fetch successful ({len(test_ohlcv_df)} candles)."))
+                  passed_checks += 1
+             else:
+                  results.append((check_name, False, "OHLCV fetch returned empty data."))
+        except Exception as e:
+             results.append((check_name, False, f"Exception during OHLCV fetch: {e}"))
+
+        # Check 8: Daily OHLCV Fetch for Pivots
+        total_checks += 1
+        check_name = "Daily OHLCV Fetch (Pivots)"
+        try:
+             # Fetch a small number of recent daily candles
+             test_daily_ohlcv_df = self.get_or_fetch_daily_ohlcv(limit=5) # Uses cache if fresh, or fetches
+             if not test_daily_ohlcv_df.empty:
+                  results.append((check_name, True, f"Daily OHLCV fetch successful ({len(test_daily_ohlcv_df)} candles)."))
+                  passed_checks += 1
+             else:
+                  results.append((check_name, False, "Daily OHLCV fetch returned empty data."))
+        except Exception as e:
+             results.append((check_name, False, f"Exception during Daily OHLCV fetch: {e}"))
+
+
+        # Check 9: Indicators Calculation Test
+        total_checks += 1
+        check_name = "Indicators Calculation"
+        try:
+             # Use the OHLCV data fetched in Check 7 (if successful)
+             if 'test_ohlcv_df' in locals() and not test_ohlcv_df.empty:
+                  # Need enough data for indicators, refetch if test_ohlcv_df was too small
+                  if len(test_ohlcv_df) < 100: # Arbitrary threshold for sufficient data
+                       self.logger.debug("Fetching more OHLCV data for indicator test...")
+                       test_ohlcv_df = self.fetch_ohlcv(timeframe=self.config.timeframe, limit=200)
+
+                  if not test_ohlcv_df.empty:
+                       # Need Daily data too if pivots are calculated
+                       test_daily_df = None
+                       if 'test_daily_ohlcv_df' in locals() and not test_daily_ohlcv_df.empty:
+                            test_daily_df = test_daily_ohlcv_df
+
+                       # Calculate indicators on the test data
+                       test_indicators_df = calculate_indicators(test_ohlcv_df.copy(), self.config, test_daily_df)
+
+                       # Check if indicator columns were added and are not all NaN (for a few key ones)
+                       if test_indicators_df is not None and not test_indicators_df.empty:
+                            indicator_cols = [col for col in test_indicators_df.columns if col not in ['timestamp', 'open', 'high', 'low', 'close', 'volume']]
+                            if indicator_cols:
+                                 # Check a few expected columns are present and have non-NaN values in the tail
+                                 sample_cols = ['ATR', 'EVT_long', 'SMA_short', 'SMA_long', 'MACD', 'RSI', 'Pivot_Point']
+                                 present_sample_cols = [col for col in sample_cols if col in test_indicators_df.columns]
+
+                                 has_non_nan = False
+                                 if not present_sample_cols:
+                                     # If no expected sample columns found, just check if any indicator columns were added
+                                     if indicator_cols: has_non_nan = True # Assume success if columns added
+                                     else: has_non_nan = False # No indicator columns found
+                                 else:
+                                     # Check non-NaN in the last few rows for sample columns
+                                     tail_check = test_indicators_df.tail(10)
+                                     for col in present_sample_cols:
+                                          if col in tail_check.columns and tail_check[col].notna().any():
+                                               has_non_nan = True
+                                               break # Found at least one column with non-NaN in the tail
+
+                                 if has_non_nan:
+                                      results.append((check_name, True, f"Indicators calculated successfully. Found {len(indicator_cols)} indicator columns (e.g., {', '.join(present_sample_cols or indicator_cols[:3])})."))
+                                      passed_checks += 1
+                                 else:
+                                      results.append((check_name, False, f"Indicators calculated but results are all NaN or no indicator columns added. Check indicator config/data sufficiency."))
+                            else:
+                                results.append((check_name, False, "No indicator columns were added by calculate_indicators."))
+                       else:
+                           results.append((check_name, False, "calculate_indicators returned empty or None."))
+                 else:
+                      results.append((check_name, False, "Not enough OHLCV data fetched for indicator test."))
+
+        except ImportError:
+             results.append((check_name, False, "Indicators module (indicators.py) not found or failed to import."))
+        except Exception as e:
+             results.append((check_name, False, f"Exception during indicator calculation: {e}"))
+
+
+        # Check 10: SMS Sending (if enabled)
+        if self.config.sms_enabled:
+            total_checks += 1
+            check_name = "Termux SMS Send"
+            # Attempt to send a test SMS, but respect cooldown if recently sent
+            # Temporarily bypass cooldown for this test? No, respect it.
+            # The send_sms method handles cooldown internally.
+            test_message = f"Bybit Bot Diagnostics Test SMS @ {datetime.now().strftime('%H:%M:%S')}"
+            self.logger.info(f"{Fore.CYAN}# Attempting test SMS (respects cooldown)...{Style.RESET_ALL}")
+            if self.send_sms(test_message):
+                 results.append((check_name, True, "Test SMS queued successfully (check phone)."))
+                 passed_checks += 1
+            else:
+                 # send_sms logs errors internally, just report failure here
+                 results.append((check_name, False, "Test SMS failed or cooldown active. Check Termux setup/logs."))
+
+
+        # --- Diagnostics Summary ---
+        self.logger.info(f"\n{Fore.MAGENTA + Style.BRIGHT}--- Diagnostics Summary ---{Style.RESET_ALL}")
+        for name, success, msg in results:
+             status_color = Fore.GREEN if success else Fore.RED
+             status_icon = "[PASS]" if success else "[FAIL]"
+             self.logger.info(f"{status_color}{status_icon:<6} {name:<30}: {msg}{Style.RESET_ALL}")
+
+        essential_passed = all(success for name, success, msg in results if name not in ["Leverage Setting (informational)", "Termux SMS Send"])
+
+        if essential_passed:
+            self.logger.success(f"\n{Fore.GREEN + Style.BRIGHT}All essential diagnostics PASSED ({passed_checks}/{total_checks} total checks).{Style.RESET_ALL}")
+            return True
+        else:
+            self.logger.error(f"\n{Fore.RED + Style.BRIGHT}Diagnostics FAILED. {passed_checks}/{total_checks} total checks PASSED.{Style.RESET_ALL}")
+            self.logger.error(f"{Fore.RED}Review the [FAIL] items above and consult the logs for details.{Style.RESET_ALL}")
+            return False
+
+
+    def stop(self):
+        """Gracefully stops the helper: disconnects WebSocket and performs cleanup."""
+        self.logger.info(f"{Fore.YELLOW}Stopping BybitHelper... Dismissing connections.{Style.RESET_ALL}")
+        self.disconnect_websocket()
+        # pybit HTTP session using requests doesn't strictly need explicit closing,
+        # but good practice if using persistent sessions in future.
+        # if self.session and hasattr(self.session, 'exit') and callable(self.session.exit):
+        #      try:
+        #          self.session.exit() # If pybit adds an explicit close method
+        #      except Exception as e:
+        #           self.logger.warning(f"Error closing HTTP session: {e}")
+
+        self.logger.info("BybitHelper stopped.")
+
+
+# --- CLI Functions - The User Interface Spells ---
+
+def setup_env_interactive():
+    """Guides the user through creating or updating the sacred .env scroll interactively."""
+    print(f"\n{Fore.CYAN + Style.BRIGHT}--- Bybit Bot .env Configuration Setup ---{Style.RESET_ALL}")
+    print(f"{Fore.BLUE}Let us inscribe the necessary runes onto the .env scroll.")
+    print(f"Press Enter to keep the current value {Fore.YELLOW}[shown in brackets]{Style.RESET_ALL} if available, or the default.{Style.RESET_ALL}")
+
+    current_config_dict = {}
+    env_file_path = ".env"
+    # Attempt to load existing config to show current values
+    if os.path.exists(env_file_path):
+        print(f"\n{Fore.YELLOW}Reading existing runes from {env_file_path}...{Style.RESET_ALL}")
+        try:
+            # Use pydantic's BaseSettings to load existing values respecting prefixes etc.
+            # This is a temporary instance just for loading existing values
+            class TempConfigLoader(AppConfig):
+                 # Override model_config to not validate strictly during loading existing values
+                 # so we can read potentially incomplete files
+                 model_config = SettingsConfigDict(
+                      env_file=env_file_path,
+                      env_prefix='BOT_',
+                      case_sensitive=False,
+                      extra='ignore', # Ignore unknown runes
+                      env_file_encoding='utf-8',
+                      validate_assignment=False # Do not validate field values during assignment from env
+                 )
+            temp_config = TempConfigLoader()
+            # Get a dictionary representation, handling SecretStr
+            current_config_dict = temp_config.model_dump(mode='json', exclude_unset=True) # exclude_unset skips defaults not in env
+            # For SecretStr, model_dump(mode='json') reveals the secret.
+            # We need to manually handle secrets if we don't want to reveal them during setup.
+            # Let's just get the dictionary and handle secrets in get_input.
+
+            # Alternative: Read .env manually and parse key=value pairs with prefix
+            print(f"{Fore.YELLOW}Manually parsing existing {env_file_path} for values...{Style.RESET_ALL}")
+            manual_config = {}
+            env_prefix = AppConfig.model_config.get('env_prefix', '').upper()
+            try:
+                with open(env_file_path, 'r', encoding='utf-8') as f:
+                     for line in f:
+                          line = line.strip()
+                          if line and not line.startswith('#'):
+                               parts = line.split('=', 1)
+                               if len(parts) == 2:
+                                    key = parts[0].strip().upper()
+                                    value = parts[1].strip()
+                                    if key.startswith(env_prefix):
+                                         # Store as prefix__KEY format temporarily
+                                         nested_key = key[len(env_prefix):].replace('_', '__').lower()
+                                         manual_config[nested_key] = value
+                                    else:
+                                         # Handle non-prefixed top-level fields like LOG_LEVEL
+                                         manual_config[key.lower()] = value
+                current_config_dict = manual_config
+                print(f"{Fore.YELLOW}Successfully parsed existing values.{Style.RESET_ALL}")
+            except Exception as e:
+                print(f"{Fore.RED + Style.BRIGHT}Error manually reading {env_file_path}: {e}. Starting with defaults.{Style.RESET_ALL}")
+
+
+        except Exception as e:
+            print(f"{Fore.RED + Style.BRIGHT}Error reading existing {env_file_path}: {e}. Starting with defaults.{Style.RESET_ALL}")
+
+
+    # Helper to get input with defaults and color
+    def get_input(prompt: str, config_key: str, current_value: Any, default_value: Any, is_secret: bool = False) -> str:
+        """Gets user input, showing current/default, hides secret runes."""
+        # Look up value using the potentially nested config_key
+        current_val = current_config_dict
+        for part in config_key.split('__'):
+             current_val = current_val.get(part, None)
+             if current_val is None: break # Stop if nested key not found
+
+        display_val = f"{Fore.YELLOW}[current/default hidden]{Style.RESET_ALL}" if is_secret and (current_val is not None and str(current_val).strip() != '') else \
+                      f"{Fore.YELLOW}[{current_val}]{Style.RESET_ALL}" if current_val is not None and str(current_val).strip() != '' else \
+                      f"{Fore.YELLOW}[{default_value}]{Style.RESET_ALL}"
+
+        prompt_msg = f"{Fore.BLUE}{prompt}{Style.RESET_ALL} {display_val}: "
+
+        if is_secret:
+            import getpass
+            try:
+                user_input = getpass.getpass(prompt_msg).strip()
+            except Exception: # Fallback for environments where getpass might fail
+                 user_input = input(f"{prompt} (input hidden) [{display_val}]: ").strip()
+        else:
+            user_input = input(prompt_msg).strip()
+
+        # Return user input if provided, otherwise current value, otherwise default
+        # Convert current_val back to string for consistency
+        return user_input if user_input else str(current_val) if current_val is not None and str(current_val).strip() != '' else str(default_value)
+
+    # Get field defaults from the AppConfig model itself
+    # Use model_json_schema to get structure and defaults
+    schema = AppConfig.model_json_schema()
+    properties = schema.get('properties', {})
+
+    # Function to recursively extract flat key paths and defaults
+    def extract_defaults(props: Dict, prefix: str = "") -> Dict:
+        extracted = {}
+        for name, details in props.items():
+            full_key = f"{prefix}{name}" if prefix else name
+            if 'properties' in details:
+                # Nested model
+                extracted.update(extract_defaults(details['properties'], prefix=f"{full_key}__"))
+            else:
+                # Simple field
+                extracted[full_key] = details.get('default')
+        return extracted
+
+    defaults = extract_defaults(properties)
+    env_prefix = AppConfig.model_config.get('env_prefix', '').upper()
+
+
+    # --- Gather Configuration Runes ---
+    config_values = {}
+    print(f"\n{Fore.MAGENTA}--- API Credentials & Connection ---{Style.RESET_ALL}")
+    config_values['api_key'] = get_input("Bybit API Key", "api_config__api_key", None, defaults.get('api_config__api_key'), is_secret=True)
+    config_values['api_secret'] = get_input("Bybit API Secret", "api_config__api_secret", None, defaults.get('api_config__api_secret'), is_secret=True)
+    config_values['testnet_mode'] = get_input("Use Testnet? (true/false)", "api_config__testnet_mode", None, defaults.get('api_config__testnet_mode')).lower()
+    config_values['retry_count'] = get_input("API Retry Count", "retry_count", None, defaults.get('retry_count')) # Top level field
+    config_values['retry_delay'] = get_input("API Retry Delay (sec)", "retry_delay", None, defaults.get('retry_delay')) # Top level field
+
+
+    print(f"\n{Fore.MAGENTA}--- Trading Symbol & Market ---{Style.RESET_ALL}")
+    config_values['symbol'] = get_input("Trading Symbol (e.g., BTCUSDT)", "symbol", None, defaults.get('symbol')).upper() # Top level field
+    config_values['leverage'] = get_input("Leverage (e.g., 5)", "leverage", None, defaults.get('leverage')) # Top level field
+
+
+    print(f"\n{Fore.MAGENTA}--- Strategy Core Settings ---{Style.RESET_ALL}")
+    config_values['timeframe'] = get_input("Kline Timeframe (e.g., 5m, 1h)", "timeframe", None, defaults.get('timeframe')) # Top level field
+    config_values['risk_per_trade'] = get_input("Risk Per Trade (fraction, e.g., 0.01)", "risk_per_trade", None, defaults.get('risk_per_trade')) # Top level field
+    config_values['loop_delay'] = get_input("Strategy Loop Delay (sec)", "loop_delay", None, defaults.get('loop_delay')) # Top level field
+
+
+    print(f"\n{Fore.MAGENTA}--- Indicator Settings ---{Style.RESET_ALL}")
+    # Dynamically get indicator fields from the AppConfig schema's top level properties
+    # Exclude fields that are not indicator parameters or are covered above/below
+    exclude_fields = {
+        'api_key', 'api_secret', 'testnet_mode', 'retry_count', 'retry_delay', 'symbol',
+        'leverage', 'timeframe', 'risk_per_trade', 'loop_delay', 'sms_enabled',
+        'sms_phone', 'sms_cooldown', 'log_dir', 'log_level',
+        'sl_atr_multiplier', 'tp_atr_multiplier', 'trailing_stop_atr_multiplier'
+    }
+    indicator_fields = [prop for prop in properties.keys() if prop not in exclude_fields and 'properties' not in properties[prop]]
+
+    for field in indicator_fields:
+        prompt_text = field.replace('_', ' ').title()
+        config_values[field] = get_input(f"{prompt_text}", field, None, defaults.get(field))
+
+
+    print(f"\n{Fore.MAGENTA}--- Exit/Management Settings ---{Style.RESET_ALL}")
+    exit_fields = ['sl_atr_multiplier', 'tp_atr_multiplier', 'trailing_stop_atr_multiplier']
+    for field in exit_fields:
+        prompt_text = field.replace('_', ' ').title()
+        config_values[field] = get_input(f"{prompt_text}", field, None, defaults.get(field))
+
+
+    print(f"\n{Fore.MAGENTA}--- Notifications & Logging ---{Style.RESET_ALL}")
+    config_values['sms_enabled'] = get_input("Enable Termux SMS? (true/false)", "sms_enabled", None, defaults.get('sms_enabled')).lower()
+    # Conditionally ask for phone number
+    sms_phone_key = "sms_phone"
+    sms_phone_default = defaults.get(sms_phone_key, '') # Use empty string default for phone
+    if config_values['sms_enabled'] == 'true':
+         config_values[sms_phone_key] = get_input("SMS Phone Number (e.g., +1234567890)", sms_phone_key, None, sms_phone_default)
+    else:
+         # If disabled, keep the existing value if any, or default empty
+         # Look up existing value manually as get_input logic might default if not found
+         existing_phone = current_config_dict.get(sms_phone_key, '')
+         config_values[sms_phone_key] = existing_phone if existing_phone else sms_phone_default
+
+    config_values['sms_cooldown'] = get_input("SMS Cooldown (sec)", "sms_cooldown", None, defaults.get('sms_cooldown'))
+    config_values['log_dir'] = get_input("Log Directory", "log_dir", None, defaults.get('log_dir'))
+    config_values['log_level'] = get_input("Log Level (DEBUG, INFO, SUCCESS, WARNING, ERROR, CRITICAL)", "log_level", None, defaults.get('log_level')).upper()
+
+
+    # --- Write Runes to .env scroll ---
+    env_lines = [f"# --- Bybit Bot Configuration Scroll ---", f"# Generated by Pyrmethus Setup Spell on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC\n"]
+
+    # API Credentials & Connection (nested under api_config)
+    env_lines.append(f"# API Credentials & Connection")
+    env_lines.append(f"{env_prefix}API_KEY={config_values['api_key']}")
+    env_lines.append(f"{env_prefix}API_SECRET={config_values['api_secret']}")
+    env_lines.append(f"{env_prefix}TESTNET_MODE={config_values['testnet_mode']}")
+    env_lines.append("\n# Retry Settings (Top Level)")
+    env_lines.append(f"{env_prefix}RETRY_COUNT={config_values['retry_count']}")
+    env_lines.append(f"{env_prefix}RETRY_DELAY={config_values['retry_delay']}")
+
+    # Trading Symbol & Market (Top Level)
+    env_lines.append("\n# Trading Symbol & Market")
+    env_lines.append(f"{env_prefix}SYMBOL={config_values['symbol']}")
+    env_lines.append(f"{env_prefix}LEVERAGE={config_values['leverage']}")
+
+    # Strategy Core Settings (Top Level)
+    env_lines.append("\n# Strategy Core Settings")
+    env_lines.append(f"{env_prefix}TIMEFRAME={config_values['timeframe']}")
+    env_lines.append(f"{env_prefix}RISK_PER_TRADE={config_values['risk_per_trade']}")
+    env_lines.append(f"{env_prefix}LOOP_DELAY={config_values['loop_delay']}")
+
+    # Indicator Settings (Top Level)
+    env_lines.append("\n# Indicator Settings")
+    for field in indicator_fields:
+         env_lines.append(f"{env_prefix}{field.upper()}={config_values[field]}")
+
+    # Exit/Management Settings (Top Level)
+    env_lines.append("\n# Exit/Management Settings")
+    for field in exit_fields:
+         env_lines.append(f"{env_prefix}{field.upper()}={config_values[field]}")
+
+    # Notifications & Logging (Top Level)
+    env_lines.append("\n# Notifications & Logging")
+    env_lines.append(f"{env_prefix}SMS_ENABLED={config_values['sms_enabled']}")
+    env_lines.append(f"{env_prefix}SMS_PHONE={config_values['sms_phone']}") # Write even if empty/disabled
+    env_lines.append(f"{env_prefix}SMS_COOLDOWN={config_values['sms_cooldown']}")
+    env_lines.append(f"{env_prefix}LOG_DIR={config_values['log_dir']}")
+    env_lines.append(f"{env_prefix}LOG_LEVEL={config_values['log_level']}")
+
+
+    try:
+        with open(env_file_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(env_lines))
+        print(f"\n{Fore.GREEN + Style.BRIGHT}Configuration scroll inscribed successfully at {env_file_path}{Style.RESET_ALL}")
+        # Set permissions for security - Ward the scroll
+        try:
+             # Set read/write for owner only, deny all others
+             os.chmod(env_file_path, 0o600)
+             print(f"{Fore.YELLOW}Applied security ward (permissions 600) to {env_file_path}.{Style.RESET_ALL}")
+        except Exception as perm_e:
+             print(f"{Fore.RED + Style.BRIGHT}Warning: Failed to apply security ward to {env_file_path}: {perm_e}{Style.RESET_ALL}")
+
+    except IOError as e:
+        print(f"\n{Fore.RED + Style.BRIGHT}Error inscribing {env_file_path}: {e}{Style.RESET_ALL}")
+        sys.exit(1)
+
+
+def load_config() -> AppConfig:
+    """Loads configuration runes from .env scroll using Pydantic, handles validation disturbances."""
+    try:
+        config = AppConfig()
+        # Optionally log loaded config (excluding secrets) for verification
+        # print(f"{Fore.BLUE}Configuration runes loaded successfully:{Style.RESET_ALL}")
+        # print(config.model_dump(exclude={'api_key', 'api_secret'}))
+        return config
+    except ValidationError as e:
+        print(f"\n{Fore.RED + Style.BRIGHT}--- Configuration Error ---{Style.RESET_ALL}")
+        # Print validation errors in a readable format
+        print(f"{Fore.RED}{e}{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW}Please check your .env scroll or environment variables against the required format.")
+        print(f"You can invoke '{os.path.basename(__file__)} --setup' to re-inscribe the .env scroll.{Style.RESET_ALL}")
+        sys.exit(1) # Exit if config is invalid
+    except Exception as e:
+         # Catch other potential errors during config loading
+         print(f"\n{Fore.RED + Style.BRIGHT}An unexpected disturbance occurred while loading configuration: {e}{Style.RESET_ALL}")
+         sys.exit(1)
+
+
+# --- Main CLI Execution - The Grand Invocation ---
+def main():
+    """Handles Command Line Interface spells for setup, diagnostics, and information."""
+    parser = argparse.ArgumentParser(
+        description=f"{Fore.CYAN + Style.BRIGHT}Bybit Trading Bot Helper & Diagnostics Tool (v5.3 - Grand Arcanum){Style.RESET_ALL}\n"
+                    f"{Fore.YELLOW}Manages API interaction, data, orders, and configuration for your strategy.{Style.RESET_ALL}",
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog=f"""{Fore.MAGENTA}Example Invocations:{Style.RESET_ALL}
+  {Fore.GREEN}python {os.path.basename(__file__)} --setup{Style.RESET_ALL}       # Interactive configuration ritual
+  {Fore.GREEN}python {os.path.basename(__file__)} --diagnose{Style.RESET_ALL}    # Run connection & setup diagnostics
+  {Fore.GREEN}python {os.path.basename(__file__)} --balance{Style.RESET_ALL}     # Reveal USDT balance/equity
+  {Fore.GREEN}python {os.path.basename(__file__)} --position{Style.RESET_ALL}    # Reveal current position state
+  {Fore.GREEN}python {os.path.basename(__file__)} --orders{Style.RESET_ALL}      # Reveal open order spells
+  {Fore.GREEN}python {os.path.basename(__file__)} --candles 10{Style.RESET_ALL}  # Reveal last 10 candles & indicators
+  {Fore.GREEN}python {os.path.basename(__file__)} --cancel-all{Style.RESET_ALL}  # Dispel all open orders (requires confirmation!)
+
+{Fore.CYAN}To unleash the full trading strategy:{Style.RESET_ALL}
+  {Fore.GREEN}python your_strategy_script.py{Style.RESET_ALL}"""
+    )
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help="Perform the interactive setup ritual to create/update the .env configuration scroll."
+    )
+    parser.add_argument(
+        "--diagnose",
+        action="store_true",
+        help="Invoke diagnostic spells to check connections and configuration."
+    )
+    parser.add_argument(
+        "--balance",
+        action="store_true",
+        help="Reveal account equity and available USDT balance from the treasury."
+    )
+    parser.add_argument(
+        "--position",
+        action="store_true",
+        help="Reveal the current position state for the configured symbol."
+    )
+    parser.add_argument(
+        "--orders",
+        action="store_true",
+        help="Reveal open order spells for the configured symbol."
+    )
+    parser.add_argument(
+        "--candles", type=int, metavar="N", default=0,
+        help="Reveal the last N historical candles with indicator runes (e.g., --candles 10)."
+    )
+    parser.add_argument(
+        "--cancel-all", action="store_true",
+        help="Invoke the mass dispel spell for ALL open orders on the configured symbol (Use with extreme caution!)."
+    )
+
+    args = parser.parse_args()
+
+    # --- Execute Actions ---
+    if args.setup:
+        setup_env_interactive()
+        return # Exit after setup ritual
+
+    # Load config runes for all other operations
+    config = load_config()
+    # Initialize the helper arcanum *after* config is loaded and validated
+    helper: Optional[BybitHelper] = None
+    try:
+         print(f"{Fore.CYAN}# Initializing the Bybit Helper Arcanum...{Style.RESET_ALL}")
+         helper = BybitHelper(config)
+    except RuntimeError as e:
+         # Catch critical init failures from BybitHelper.__init__
+         print(f"{Back.RED}{Fore.WHITE}FATAL: Failed to initialize Bybit Helper: {e}{Style.RESET_ALL}")
+         sys.exit(1)
+    except Exception as e:
+         print(f"{Back.RED}{Fore.WHITE}Unexpected error initializing Bybit Helper: {e}{Style.RESET_ALL}")
+         sys.exit(1)
+
+
+    # --- Handle Specific Command Spells ---
+    try:
+        if args.diagnose:
+            helper.diagnose()
+
+        elif args.balance:
+            print(f"\n{Fore.MAGENTA + Style.BRIGHT}--- Account Balance ---{Style.RESET_ALL}")
+            equity = helper.get_equity()
+            balance = helper.fetch_balance() # Fetches USDT by default
+            print(f"{Fore.CYAN}Total Account Equity :{Style.RESET_ALL} {Fore.YELLOW}{equity if equity is not None else f'{Fore.RED}Error fetching'}{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}Available USDT Balance:{Style.RESET_ALL} {Fore.YELLOW}{balance if balance is not None else f'{Fore.RED}Error fetching'}{Style.RESET_ALL}")
+            print(f"{Fore.MAGENTA}-----------------------{Style.RESET_ALL}")
+
+        elif args.position:
+            print(f"\n{Fore.MAGENTA + Style.BRIGHT}--- Current Position ({config.symbol}) ---{Style.RESET_ALL}")
+            position = helper.get_position()
+            if position:
+                # Pretty print the position details with colors
+                # Get symbol precision for formatting
+                price_precision = 8
+                amount_precision = 8
+                if helper.market_info:
+                     try:
+                          price_precision = int(abs(Decimal(helper.market_info.get('precision', {}).get('price', '0.01')).log10())) if Decimal(helper.market_info.get('precision', {}).get('price', '0.01')) > 0 else 8
+                     except Exception: pass
+                     try:
+                          amount_precision = int(abs(Decimal(helper.market_info.get('precision', {}).get('amount', '0.000001')).log10())) if Decimal(helper.market_info.get('precision', {}).get('amount', '0.000001')) > 0 else 8
+                     except Exception: pass
+
+                for key, value in position.items():
+                     label = f"{Fore.CYAN}{key.replace('_', ' ').title():<25}:{Style.RESET_ALL}"
+                     if isinstance(value, Decimal):
+                          # Format decimals nicely based on type
+                          if 'price' in key or 'liq' in key or 'stop' in key or 'profit' in key or 'activation' in key:
+                               # Prices related
+                               formatted_value = f"{Fore.YELLOW}{value:.{price_precision}f}{Style.RESET_ALL}"
+                          elif 'size' in key or 'qty' in key or 'value' in key:
+                               # Quantities/Amounts
+                               formatted_value = f"{Fore.YELLOW}{value:.{amount_precision}f}{Style.RESET_ALL}"
+                          elif 'pnl' in key:
+                               # PnL
+                               pnl_color = Fore.GREEN if value >= 0 else Fore.RED
+                               formatted_value = f"{pnl_color}{value:.4f}{Style.RESET_ALL}" # PnL usually shown with 4 decimals
+                          elif 'leverage' in key:
+                               formatted_value = f"{Fore.MAGENTA}{value}x{Style.RESET_ALL}"
+                          else:
+                               formatted_value = f"{Fore.YELLOW}{value}{Style.RESET_ALL}" # Keep other decimals as is
+                     elif isinstance(value, pd.Timestamp):
+                          # Handle NaT (Not a Time) if timestamp was None
+                          if pd.isna(value):
+                              formatted_value = f"{Fore.DIM}N/A{Style.RESET_ALL}"
+                          else:
+                              formatted_value = f"{Fore.BLUE}{value.strftime('%Y-%m-%d %H:%M:%S %Z')}{Style.RESET_ALL}"
+                     elif key == 'side':
+                          side_color = Fore.GREEN if value == "Buy" else Fore.RED if value == "Sell" else Fore.YELLOW
+                          formatted_value = f"{side_color}{value}{Style.RESET_ALL}"
+                     else:
+                          formatted_value = f"{Fore.WHITE}{value}{Style.RESET_ALL}"
+                     print(f"{label} {formatted_value}")
+            else:
+                print(f"{Fore.YELLOW}No active position found for {config.symbol} or error fetching.{Style.RESET_ALL}")
+            print(f"{Fore.MAGENTA}------------------------------------{Style.RESET_ALL}")
+
+        elif args.orders:
+            print(f"\n{Fore.MAGENTA + Style.BRIGHT}--- Open Orders ({config.symbol}) ---{Style.RESET_ALL}")
+            # Fetch all types of open orders
+            orders = helper.get_open_orders(order_type=None) # Fetch all using None filter
+            if orders:
+                for i, order in enumerate(orders):
+                    print(f"{Fore.CYAN}-- Order {i+1} --{Style.RESET_ALL}")
+                    # Handle potential None values for times
+                    created_time = pd.to_datetime(int(order.get('createdTime', 0)), unit='ms') if order.get('createdTime') else None
+                    updated_time = pd.to_datetime(int(order.get('updatedTime', 0)), unit='ms') if order.get('updatedTime') else None
+
+                    side = order.get('side', 'N/A')
+                    side_color = Fore.GREEN if side == "Buy" else Fore.RED if side == "Sell" else Fore.WHITE
+                    status = order.get('orderStatus', 'N/A')
+                    # Map common statuses to colors
+                    status_color = Fore.GREEN if status in ["New", "PartiallyFilled", "Filled"] else \
+                                   Fore.YELLOW if status in ["Untriggered", "Active", "Pending"] else \
+                                   Fore.RED if status in ["Cancelled", "Rejected", "Deactivated"] else \
+                                   Fore.WHITE # Default color
+
+                    print(f"  {Fore.BLUE}OrderID          :{Style.RESET_ALL} {Fore.WHITE}{order.get('orderId')}{Style.RESET_ALL} ({Fore.DIM}LinkID: {order.get('orderLinkId')}{Style.RESET_ALL})")
+                    print(f"  {Fore.BLUE}Status           :{Style.RESET_ALL} {status_color}{status}{Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Side             :{Style.RESET_ALL} {side_color}{side}{Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Type             :{Style.RESET_ALL} {Fore.YELLOW}{order.get('orderType')}{Style.RESET_ALL} ({Fore.DIM}StopType: {order.get('stopOrderType', 'N/A')}{Style.RESET_ALL})")
+                    print(f"  {Fore.BLUE}Qty              :{Style.RESET_ALL} {Fore.YELLOW}{order.get('qty')}{Style.RESET_ALL} (Filled: {order.get('cumExecQty', '0')})")
+                    print(f"  {Fore.BLUE}Price            :{Style.RESET_ALL} {Fore.YELLOW}{order.get('price', 'N/A')}{Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Trigger Price    :{Style.RESET_ALL} {Fore.CYAN}{order.get('triggerPrice', 'N/A')}{Style.RESET_ALL} ({Fore.DIM}Dir: {order.get('triggerDirection', 'N/A')}, TriggerBy: {order.get('triggerBy', 'N/A')}){Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Stop Loss        :{Style.RESET_ALL} {Fore.RED}{order.get('stopLoss', 'N/A')}{Style.RESET_ALL} ({Fore.DIM}Type: {order.get('slOrderType', 'N/A')}){Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Take Profit      :{Style.RESET_ALL} {Fore.GREEN}{order.get('takeProfit', 'N/A')}{Style.RESET_ALL} ({Fore.DIM}Type: {order.get('tpOrderType', 'N/A')}){Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Reduce Only      :{Style.RESET_ALL} {Fore.MAGENTA if order.get('reduceOnly') else Fore.WHITE}{order.get('reduceOnly')}{Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Created Time     :{Style.RESET_ALL} {Fore.DIM}{created_time.strftime('%Y-%m-%d %H:%M:%S %Z') if created_time else 'N/A'}{Style.RESET_ALL}")
+                    print(f"  {Fore.BLUE}Updated Time     :{Style.RESET_ALL} {Fore.DIM}{updated_time.strftime('%Y-%m-%d %H:%M:%S %Z') if updated_time else 'N/A'}{Style.RESET_ALL}")
+
+            else:
+                print(f"{Fore.YELLOW}No open orders found for {config.symbol} or error fetching.{Style.RESET_ALL}")
+            print(f"{Fore.MAGENTA}----------------------------{Style.RESET_ALL}")
+
+        elif args.candles > 0:
+            print(f"\n{Fore.MAGENTA + Style.BRIGHT}--- Last {args.candles} Candles ({config.timeframe}) with Indicators ---{Style.RESET_ALL}")
+            # Fetch without necessarily using cache to get the very latest historical + recalculate indicators
+            # get_or_fetch_ohlcv with fetch_needed=True logic handles this.
+            print(f"{Fore.CYAN}# Fetching historical data and calculating indicators...{Style.RESET_ALL}")
+            # Fetch more than requested for indicator accuracy lookback
+            fetch_count = max(args.candles + 150, 200) # Ensure ample lookback history for indicators
+            # Fetch primary data, request including daily pivots
+            # This will fetch data and calculate indicators, including pivots if Daily data is available/fetched
+            df_with_indicators = helper.get_or_fetch_ohlcv(timeframe=config.timeframe, limit=fetch_count, include_daily_pivots=True)
+
+            if df_with_indicators is not None and not df_with_indicators.empty:
+                print(f"{Fore.GREEN}Data and indicators calculated.{Style.RESET_ALL}")
+                # Display the last N rows requested, using pandas string representation
+                # Ensure timestamp is formatted nicely
+                df_display = df_with_indicators.tail(args.candles).copy()
+                df_display['timestamp'] = df_display['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+                print(f"{Fore.WHITE}{df_display.to_string()}{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.RED}Could not fetch candle data or calculate indicators for {config.symbol}.{Style.RESET_ALL}")
+            print(f"{Fore.MAGENTA}-------------------------------------------------{Style.RESET_ALL}")
+
+        elif args.cancel_all:
+            print(f"\n{Back.RED + Fore.WHITE + Style.BRIGHT}--- WARNING: MASS DISPEL ---{Style.RESET_ALL}")
+            env_name = f"{Fore.RED}LIVE ACCOUNT{Style.RESET_ALL}" if not config.testnet_mode else f"{Fore.YELLOW}TESTNET{Style.RESET_ALL}"
+            print(f"This will attempt to dispel {Fore.RED}ALL{Style.RED_ALL} open orders (including SL/TP and conditional)")
+            print(f"for the symbol {Fore.YELLOW}{config.symbol}{Style.RESET_ALL} on the {env_name} environment.")
+            confirm = input(f"{Fore.YELLOW}Are you absolutely sure you wish to proceed? (yes/no): {Style.RESET_ALL}").strip().lower()
+            if confirm == 'yes':
+                print(f"{Fore.RED}Proceeding with mass dispel...{Style.RESET_ALL}")
+                # Invoke the mass dispel spell without filter to cancel all types
+                success = helper.cancel_all_orders(order_filter=None)
+                if success:
+                    print(f"{Fore.GREEN}Mass dispel request sent successfully.{Style.RESET_ALL}")
+                    print(f"{Fore.YELLOW}Invoke '--orders' again to confirm the results.{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}Mass dispel request failed. Consult the logs.{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.GREEN}Mass dispel aborted by user.{Style.RESET_ALL}")
+            print(f"{Fore.MAGENTA}-----------------------------{Style.RESET_ALL}")
+
+        else:
+            # Default action if no specific command spell is given
+            print(f"\n{Fore.GREEN}Bybit Helper Arcanum Initialized.{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}Symbol:{Style.RESET_ALL} {Fore.YELLOW}{config.symbol}{Style.RESET_ALL}, {Fore.CYAN}Timeframe:{Style.RESET_ALL} {Fore.YELLOW}{config.timeframe}{Style.RESET_ALL}, {Fore.CYAN}Testnet:{Style.RESET_ALL} {Fore.YELLOW}{config.testnet_mode}{Style.RESET_ALL}")
+            print(f"\n{Fore.BLUE}Invoke '{os.path.basename(__file__)} --help' to see available command spells.{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}To unleash your trading strategy, invoke its main script (e.g., {Fore.GREEN}python your_strategy_script.py{Style.RESET_ALL}).")
+
+    except Exception as e:
+         # Catch any unexpected errors during CLI command execution
+         if helper:
+              helper.logger.exception(f"An unexpected error occurred during CLI execution: {e}")
+         else:
+              # If helper initialization failed, log to basic stderr
+              print(f"{Back.RED}{Fore.WHITE}An unexpected error occurred during CLI execution before helper was fully initialized: {e}{Style.RESET_ALL}", file=sys.stderr)
+
+    finally:
+         # Ensure resources are released regardless of the spell cast
+         if helper:
+              helper.stop()
+
+
+if __name__ == "__main__":
+    # Set a basic logger config in case helper init fails very early
+    # This will be replaced by the helper's logger setup if initialization succeeds
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', stream=sys.stderr)
+    # Ensure threading is imported if diagnose uses it - already done at the top
+    main()
+

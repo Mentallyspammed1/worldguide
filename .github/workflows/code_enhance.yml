@@ -1,0 +1,90 @@
+name: Code Enhancement Workflow
+on:
+  workflow_dispatch:
+    inputs:
+      api-key:
+        description: 'Gemini API Key (leave blank to use repository secret)'
+        required: false
+      max-api-calls:
+        description: 'Maximum API calls per minute (1-60)'
+        required: false
+        default: '59'
+      file-pattern:
+        description: 'File pattern to enhance (e.g., "*.py", "src/*.py")'
+        required: false
+        default: '**/*.py'
+
+jobs:
+  enhance-code:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: List Repository Files
+        run: |
+          echo "Repository contents:"
+          find . -type f
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-generativeai colorama
+
+      - name: Validate Inputs
+        run: |
+          MAX_CALLS="${{ github.event.inputs.max-api-calls }}"
+          if ! [[ "$MAX_CALLS" =~ ^[0-9]+$ ]] || [ "$MAX_CALLS" -lt 1 ] || [ "$MAX_CALLS" -gt 60 ]; then
+            echo "Error: max-api-calls must be a number between 1 and 60"
+            exit 1
+          fi
+          if [ -z "${{ github.event.inputs.api-key || secrets.GEMINI_API_KEY }}" ]; then
+            echo "Error: API key not provided and GEMINI_API_KEY secret not set"
+            exit 1
+          fi
+
+      - name: Ensure Enhancement Script
+        run: |
+          if [ ! -f xfix_files.py ]; then
+            echo "Error: xfix_files.py not found in repository root"
+            exit 1
+          fi
+          chmod +x xfix_files.py
+
+      - name: Create Output Directory
+        run: |
+          mkdir -p enhanced
+
+      - name: Enhance Code
+        env:
+          GOOGLE_API_KEY: ${{ github.event.inputs.api-key || secrets.GEMINI_API_KEY }}
+          MAX_API_CALLS: ${{ github.event.inputs.max-api-calls }}
+          FILE_PATTERN: ${{ github.event.inputs.file-pattern }}
+        run: |
+          ./xfix_files.py "$(pwd)" "$FILE_PATTERN" > enhancement_log.txt 2>&1 || {
+            cat enhancement_log.txt
+            exit 1
+          }
+
+      - name: Upload Enhancement Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enhancement-log
+          path: enhancement_log.txt
+          retention-days: 7
+
+      - name: Upload Enhanced Files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enhanced-files
+          path: enhanced/
+          retention-days: 7

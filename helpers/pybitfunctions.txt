@@ -1,0 +1,467 @@
+
+The `pybit` library provides a robust interface for interacting with Bybit's WebSocket API, offering advanced features for real-time trading and data streaming. Below, I outline key advanced WebSocket features in `pybit` (based on Bybit's V5 API) and provide concise code snippets to demonstrate their usage. These features are particularly useful for algorithmic trading, real-time market monitoring, and private account management. All snippets assume you have initialized the WebSocket client with the `pybit.unified_trading` module and valid API credentials. I'll focus on features beyond basic subscriptions (e.g., kline, order, position streams) and include practical examples.
+
+### **Advanced WebSocket Features in Pybit**
+
+1. **Dynamic Subscription/Unsubscription**
+   - **Description**: Bybit's WebSocket API allows you to subscribe or unsubscribe from topics (e.g., orderbook, trade, kline) dynamically without closing the connection. This is useful for adjusting data streams based on trading strategy changes.
+   - **Usage**: Use the `subscribe` and `unsubscribe` operations to manage topics in real-time.
+   ```python
+   from pybit.unified_trading import WebSocket
+   import time
+
+   ws = WebSocket(testnet=True, channel_type="linear")
+
+   def handle_message(msg):
+       print(msg)
+
+   # Subscribe to orderbook
+   ws.subscribe(["orderbook.50.BTCUSDT"], callback=handle_message)
+   time.sleep(5)  # Wait to receive data
+
+   # Unsubscribe dynamically
+   ws.unsubscribe(["orderbook.50.BTCUSDT"])
+   time.sleep(5)
+
+   # Subscribe to a new topic
+   ws.subscribe(["publicTrade.BTCUSDT"], callback=handle_message)
+   while True:
+       time.sleep(1)
+   ```
+   - **Note**: The `req_id` parameter can be used to track subscription requests for debugging (`{"req_id": "custom_id", "op": "subscribe", "args": ["orderbook.50.BTCUSDT"]}`).
+
+2. **Custom Heartbeat Management**
+   - **Description**: To maintain a stable WebSocket connection, Bybit recommends sending a `ping` heartbeat every 20 seconds. Pybit automates this but allows customization of the ping interval and timeout for advanced control.
+   - **Usage**: Configure `ping_interval` and `ping_timeout` when initializing the WebSocket.
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="linear",
+       ping_interval=20,  # Send ping every 20 seconds
+       ping_timeout=10   # Timeout if no pong received
+   )
+
+   def handle_kline(msg):
+       print(msg)
+
+   ws.kline_stream(handle_kline, symbol="BTCUSDT", interval="1")
+   while True:
+       time.sleep(1)
+   ```
+   - **Advanced Tip**: Use the `max_active_time` parameter in the WebSocket URL (e.g., `wss://stream-testnet.bybit.com/v5/private?max_active_time=1m`) to set a custom connection duration (30s to 10m). This is useful for testing or managing server-side disconnections.[](https://bybit-exchange.github.io/docs/v5/ws/connect)
+
+3. **Authenticated Private Streams**
+   - **Description**: Private streams (e.g., `order`, `position`, `wallet`) require authentication using API keys. Pybit handles authentication automatically when `api_key` and `api_secret` are provided, supporting real-time updates for account-specific data.
+   - **Usage**: Connect to private streams with authentication.
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="private",
+       api_key="your_key",
+       api_secret="your_secret"
+   )
+
+   def handle_wallet(msg):
+       print("Wallet Update:", msg)
+
+   ws.wallet_stream(handle_wallet)
+   while True:
+       time.sleep(1)
+   ```
+   - **Advanced Feature**: Pybit supports **RSA authentication** for enhanced security. Set `rsa_authentication=True` and use RSA-generated API keys (public key as `api_key`, private key as `api_secret`).[](https://data.safetycli.com/packages/pypi/pybit/changelog)
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="private",
+       api_key="rsa_public_key",
+       api_secret="rsa_private_key",
+       rsa_authentication=True
+   )
+   ```
+
+4. **Multi-Symbol/Topic Subscriptions**
+   - **Description**: Subscribe to multiple symbols or topics in a single WebSocket connection to optimize resource usage and reduce latency. This is ideal for monitoring multiple markets simultaneously.
+   - **Usage**: Pass a list of topics to the `subscribe` method.
+   ```python
+   ws = WebSocket(testnet=True, channel_type="linear")
+
+   def handle_message(msg):
+       print(msg)
+
+   topics = ["orderbook.50.BTCUSDT", "orderbook.50.ETHUSDT", "publicTrade.BTCUSDT"]
+   ws.subscribe(topics, callback=handle_message)
+   while True:
+       time.sleep(1)
+   ```
+   - **Note**: Bybit supports up to 10 topics per subscription request. Use `req_id` to differentiate responses for complex strategies.[](https://bybit-exchange.github.io/docs/v5/ws/connect)
+
+5. **Automatic Reconnection and Resubscription**
+   - **Description**: Pybit includes built-in reconnection logic to handle network disruptions, with automatic resubscription to topics after reconnecting. This ensures continuous data flow for critical trading applications.
+   - **Usage**: Enable reconnection with `restart_on_error=True`.
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="linear",
+       restart_on_error=True,
+       trace_logging=True  # Log reconnection events
+   )
+
+   def handle_trade(msg):
+       print("Trade:", msg)
+
+   ws.public_trade_stream(handle_trade, symbol="BTCUSDT")
+   while True:
+       time.sleep(1)
+   ```
+   - **Advanced Tip**: Monitor reconnection events by checking logs or implementing custom callbacks for `on_open`, `on_close`, or `on_error` (requires extending the WebSocket class).
+
+6. **Custom Ping/Pong Handling**
+   - **Description**: Beyond automated heartbeats, you can send custom ping messages to ensure connection stability, especially for long-running bots. Pybit allows manual ping sends via the underlying WebSocket client.
+   - **Usage**: Send a custom ping message.
+   ```python
+   ws = WebSocket(testnet=True, channel_type="linear")
+
+   def handle_kline(msg):
+       print(msg)
+
+   ws.kline_stream(handle_kline, symbol="BTCUSDT", interval="1")
+   time.sleep(10)
+   ws.ws.send('{"op": "ping"}')  # Manual ping
+   while True:
+       time.sleep(1)
+   ```
+   - **Note**: The server responds with a `pong` message. Use this for custom connection health checks.[](https://github.com/bybit-exchange/pybit/blob/master/pybit/_websocket_stream.py)
+
+7. **Order Placement via WebSocket**
+   - **Description**: Bybit's WebSocket API supports sending, amending, and canceling orders directly, reducing latency compared to HTTP requests. Pybit's WebSocket client can send these commands using the `sendWSAPIRequest` method (though not explicitly documented in `pybit`, it's supported via raw WebSocket messages).
+   - **Usage**: Place an order via WebSocket (requires private channel authentication).
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="private",
+       api_key="your_key",
+       api_secret="your_secret"
+   )
+
+   def handle_response(msg):
+       print("Order Response:", msg)
+
+   # Place a market order
+   order_request = {
+       "op": "order.create",
+       "args": [{
+           "category": "linear",
+           "symbol": "BTCUSDT",
+           "side": "Buy",
+           "orderType": "Market",
+           "qty": "0.001"
+       }]
+   }
+   ws.ws.send(json.dumps(order_request))
+   ws.order_stream(handle_response)
+   while True:
+       time.sleep(1)
+   ```
+   - **Note**: Ensure proper authentication and validate parameters against Bybit’s WebSocket API documentation.[](https://www.npmjs.com/package/bybit-api)
+
+8. **Trace Logging for Debugging**
+   - **Description**: Pybit supports trace logging to debug WebSocket connections, capturing detailed events like connection status, errors, and subscription responses. This is critical for diagnosing issues in production.
+   - **Usage**: Enable `trace_logging` during initialization.
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="linear",
+       trace_logging=True
+   )
+
+   def handle_kline(msg):
+       print(msg)
+
+   ws.kline_stream(handle_kline, symbol="BTCUSDT", interval="1")
+   while True:
+       time.sleep(1)
+   ```
+   - **Output**: Logs are written to a file (e.g., `pybit.log`) or console, showing connection events, pings, and errors.[](https://dev.to/kylefoo/pybit-v5-how-to-subscribe-to-websocket-topics-1iem)
+
+9. **Conditional Order Streams**
+   - **Description**: Subscribe to streams for conditional orders (e.g., stop orders, take-profit/stop-loss triggers) to monitor their status in real-time. This is useful for advanced risk management.
+   - **Usage**: Subscribe to the `stopOrder` stream.
+   ```python
+   ws = WebSocket(
+       testnet=True,
+       channel_type="private",
+       api_key="your_key",
+       api_secret="your_secret"
+   )
+
+   def handle_stop_order(msg):
+       print("Stop Order Update:", msg)
+
+   ws.stop_order_stream(handle_stop_order)
+   while True:
+       time.sleep(1)
+   ```
+
+10. **Custom Connection Timeout**
+    - **Description**: Bybit allows configuring the maximum active time for a WebSocket connection using the `max_active_time` parameter in the URL. This is useful for testing or forcing periodic reconnections.
+    - **Usage**: Append `max_active_time` to the WebSocket URL (not directly supported in `pybit` but can be passed via custom endpoint).
+    ```python
+    ws = WebSocket(
+        endpoint="wss://stream-testnet.bybit.com/v5/private?max_active_time=1m",
+        channel_type="private",
+        api_key="your_key",
+        api_secret="your_secret"
+    )
+
+    def handle_wallet(msg):
+        print(msg)
+
+    ws.wallet_stream(handle_wallet)
+    while True:
+        time.sleep(1)
+    ```
+    - **Note**: Valid values range from `30s` to `600s`. The connection may close slightly after the specified time due to server-side scanning (every 30s).[](https://bybit-exchange.github.io/docs/v5/ws/connect)
+
+### **Additional Notes**
+- **Error Handling**: Always wrap WebSocket operations in `try-except` blocks to handle `WebSocketTimeoutException` or SSL errors, especially on virtual machines.[](https://stackoverflow.com/questions/78354761/problem-with-bybit-websocket-connection-on-vm)
+  ```python
+  try:
+      ws.kline_stream(handle_kline, symbol="BTCUSDT", interval="1")
+  except websocket.WebSocketTimeoutException:
+      print("Connection timed out, retrying...")
+  ```
+- **Performance**: WebSocket requests don’t count against HTTP rate limits, making them ideal for high-frequency data retrieval.[](https://www.bybit.com/future-activity/en/developer)
+- **Documentation**: Refer to Bybit’s [WebSocket API Docs](https://bybit-exchange.github.io/docs/v5/websocket/public/orderbook) and Pybit’s [GitHub examples](https://github.com/bybit-exchange/pybit/tree/master/examples) for comprehensive topic lists and parameters.[](https://github.com/bybit-exchange/pybit/blob/master/examples/websocket_example_explanatory.py)
+- **Testnet**: Use `testnet=True` and testnet API keys for development to avoid risking real funds. Request testnet credits via Bybit’s live chat.[](https://dev.to/kylefoo/bybits-pybit-how-to-subscribe-to-kline-websocket-stream-5c2f)
+- **Limitations**: The demo trading environment does not support WebSocket API as of January 2025.[](https://www.npmjs.com/package/bybit-api)
+
+### **Critical Considerations**
+While Bybit’s WebSocket API and `pybit` are powerful, the documentation can occasionally be outdated or unclear, requiring trial-and-error or community support (e.g., BybitAPI Telegram group). Always validate topic names (e.g., `orderbook.50.BTCUSDT` vs. `orderbook.25.BTCUSD`) against the latest API docs, as mismatches can cause errors. Additionally, ensure your IP is not from a restricted region (e.g., USA), as this can trigger connection bans.[](https://dev.to/kylefoo/bybits-pybit-how-to-subscribe-to-kline-websocket-stream-5c2f)[](https://stackoverflow.com/questions/73984183/cannot-subscribe-websocket-for-inverse-contract-in-bybit-unified-v3-api)[](https://data.safetycli.com/packages/pypi/pybit/changelog)
+
+If you need a specific feature implemented (e.g., a trading bot with conditional orders or multi-symbol monitoring), let me know, and I can provide a tailored script or further details!
+
+Below are 25 concise function snippets for interacting with Bybit's `pybit` library, focusing on the Unified Trading API (V5) for various trading and account management tasks. These snippets assume you're using the `pybit.unified_trading` module and have initialized an HTTP session or WebSocket connection with valid API credentials. Each snippet includes a brief description and example usage. Note: Replace `"your_key"` and `"your_secret"` with your actual Bybit API key and secret, and use `testnet=True` for testing.
+
+```python
+from pybit.unified_trading import HTTP, WebSocket
+import time
+
+# Initialize HTTP session (use testnet=True for testing)
+session = HTTP(api_key="your_key", api_secret="your_secret", testnet=True)
+
+# Initialize WebSocket (for real-time data)
+ws = WebSocket(testnet=True, channel_type="linear")
+```
+
+### **1. Get Order Book**
+Retrieve the order book for a symbol.
+```python
+def get_orderbook(symbol="BTCUSDT", category="linear"):
+    return session.get_orderbook(category=category, symbol=symbol)
+# Usage: print(get_orderbook())
+```
+
+### **2. Place Market Order**
+Place a market buy/sell order.
+```python
+def place_market_order(symbol="BTCUSDT", side="Buy", qty=0.001, category="linear"):
+    return session.place_order(category=category, symbol=symbol, side=side, orderType="Market", qty=qty)
+# Usage: print(place_market_order(side="Buy", qty=0.002))
+```
+
+### **3. Place Limit Order**
+Place a limit buy/sell order with a specified price.
+```python
+def place_limit_order(symbol="BTCUSDT", side="Buy", qty=0.001, price=50000, category="linear"):
+    return session.place_order(category=category, symbol=symbol, side=side, orderType="Limit", qty=qty, price=price)
+# Usage: print(place_limit_order(price=51000, qty=0.001))
+```
+
+### **4. Cancel Order**
+Cancel an open order by order ID.
+```python
+def cancel_order(symbol="BTCUSDT", orderId="order_id", category="linear"):
+    return session.cancel_order(category=category, symbol=symbol, orderId=orderId)
+# Usage: print(cancel_order(orderId="12345-abcde"))
+```
+
+### **5. Get Open Orders**
+Retrieve all open orders for a symbol.
+```python
+def get_open_orders(symbol="BTCUSDT", category="linear"):
+    return session.get_open_orders(category=category, symbol=symbol)
+# Usage: print(get_open_orders())
+```
+
+### **6. Get Kline Data**
+Fetch historical kline (OHLC) data.
+```python
+def get_kline(symbol="BTCUSDT", interval="1", limit=200, category="linear"):
+    return session.get_kline(category=category, symbol=symbol, interval=interval, limit=limit)
+# Usage: print(get_kline(interval="5", limit=100))
+```
+
+### **7. Get Ticker**
+Get real-time ticker information for a symbol.
+```python
+def get_ticker(symbol="BTCUSDT", category="linear"):
+    return session.get_ticker(category=category, symbol=symbol)
+# Usage: print(get_ticker())
+```
+
+### **8. Get Account Balance**
+Retrieve account balance for unified trading account.
+```python
+def get_account_balance(accountType="UNIFIED"):
+    return session.get_wallet_balance(accountType=accountType)
+# Usage: print(get_account_balance())
+```
+
+### **9. Get Position Info**
+Fetch current position details for a symbol.
+```python
+def get_position_info(symbol="BTCUSDT", category="linear"):
+    return session.get_positions(category=category, symbol=symbol)
+# Usage: print(get_position_info())
+```
+
+### **10. Set Leverage**
+Set leverage for a symbol.
+```python
+def set_leverage(symbol="BTCUSDT", leverage=10, category="linear"):
+    return session.set_leverage(category=category, symbol=symbol, leverage=str(leverage))
+# Usage: print(set_leverage(leverage=20))
+```
+
+### **11. Get Trade History**
+Retrieve recent trade history for a symbol.
+```python
+def get_trade_history(symbol="BTCUSDT", category="linear", limit=50):
+    return session.get_closed_pnl(category=category, symbol=symbol, limit=limit)
+# Usage: print(get_trade_history(limit=20))
+```
+
+### **12. Get Funding Rate**
+Fetch the current funding rate for a symbol.
+```python
+def get_funding_rate(symbol="BTCUSDT", category="linear"):
+    return session.get_funding_rate(category=category, symbol=symbol)
+# Usage: print(get_funding_rate())
+```
+
+### **13. Get Server Time**
+Retrieve the current server time from Bybit.
+```python
+def get_server_time():
+    return session.get_server_time()
+# Usage: print(get_server_time())
+```
+
+### **14. Get Symbols List**
+List all available trading symbols.
+```python
+def get_symbols_list(category="linear"):
+    return session.get_instruments_info(category=category)
+# Usage: print(get_symbols_list())
+```
+
+### **15. Close Position**
+Close an open position for a symbol.
+```python
+def close_position(symbol="BTCUSDT", category="linear"):
+    return session.place_order(category=category, symbol=symbol, side="Sell" if "Long" in session.get_positions(category=category, symbol=symbol)["result"]["list"][0]["side"] else "Buy", orderType="Market", qty=0, reduceOnly=True)
+# Usage: print(close_position())
+```
+
+### **16. Get Margin Mode**
+Check the current margin mode for a symbol.
+```python
+def get_margin_mode(symbol="BTCUSDT", category="linear"):
+    return session.get_position_info(category=category, symbol=symbol)["result"]["list"][0]["marginMode"]
+# Usage: print(get_margin_mode())
+```
+
+### **17. Set Take-Profit/Stop-Loss**
+Set TP/SL for an open position.
+```python
+def set_tp_sl(symbol="BTCUSDT", takeProfit=55000, stopLoss=45000, category="linear"):
+    return session.set_trading_stop(category=category, symbol=symbol, takeProfit=str(takeProfit), stopLoss=str(stopLoss))
+# Usage: print(set_tp_sl(takeProfit=56000, stopLoss=44000))
+```
+
+### **18. Get Transaction Log**
+Fetch transaction history (deposits/withdrawals).
+```python
+def get_transaction_log(coin="USDT", limit=50):
+    return session.get_wallet_balance(accountType="UNIFIED", coin=coin, limit=limit)
+# Usage: print(get_transaction_log())
+```
+
+### **19. Get Mark Price**
+Retrieve the mark price for a symbol.
+```python
+def get_mark_price(symbol="BTCUSDT", category="linear"):
+    return session.get_ticker(category=category, symbol=symbol)["result"]["list"][0]["markPrice"]
+# Usage: print(get_mark_price())
+```
+
+### **20. Get Liquidation Info**
+Fetch liquidation order details for a symbol.
+```python
+def get_liquidation_info(symbol="BTCUSDT", category="linear", limit=50):
+    return session.get_closed_pnl(category=category, symbol=symbol, limit=limit)
+# Usage: print(get_liquidation_info())
+```
+
+### **21. WebSocket: Subscribe to Order Updates**
+Subscribe to real-time order updates.
+```python
+def subscribe_order_updates():
+    def handle_order(message): print(message)
+    ws.order_stream(handle_order)
+# Usage: subscribe_order_updates(); while True: time.sleep(1)
+```
+
+### **22. WebSocket: Subscribe to Kline Data**
+Subscribe to real-time kline data.
+```python
+def subscribe_kline(symbol="BTCUSDT", interval="1"):
+    def handle_kline(message): print(message)
+    ws.kline_stream(handle_kline, symbol=symbol, interval=interval)
+# Usage: subscribe_kline(interval="5"); while True: time.sleep(1)
+```
+
+### **23. WebSocket: Subscribe to Position Updates**
+Subscribe to real-time position updates.
+```python
+def subscribe_position_updates():
+    def handle_position(message): print(message)
+    ws.position_stream(handle_position)
+# Usage: subscribe_position_updates(); while True: time.sleep(1)
+```
+
+### **24. WebSocket: Subscribe to Wallet Updates**
+Subscribe to real-time wallet balance updates.
+```python
+def subscribe_wallet_updates():
+    def handle_wallet(message): print(message)
+    ws.wallet_stream(handle_wallet)
+# Usage: subscribe_wallet_updates(); while True: time.sleep(1)
+```
+
+### **25. Get Risk Limit**
+Retrieve the risk limit for a symbol.
+```python
+def get_risk_limit(symbol="BTCUSDT", category="linear"):
+    return session.get_instruments_info(category=category, symbol=symbol)["result"]["list"][0]["riskLimitValue"]
+# Usage: print(get_risk_limit())
+```
+
+### **Notes**:
+- **Authentication**: For private endpoints (e.g., `place_order`, `get_account_balance`), ensure valid API key and secret are provided.
+- **Error Handling**: Wrap calls in `try-except` blocks for production use to handle rate limits, connection errors, or invalid parameters.
+- **WebSocket**: WebSocket functions require a running loop (`while True: time.sleep(1)`) to keep the connection alive.
+- **Testnet**: Use `testnet=True` for testing to avoid real funds. Testnet API keys are separate from mainnet keys.
+- **Rate Limits**: Bybit enforces IP-based rate limits. Use WebSocket for frequent data updates to avoid hitting HTTP limits.
+
+For more details, check the [Pybit GitHub](https://github.com/bybit-exchange/pybit) or [Bybit API Docs](https://bybit-exchange.github.io/docs/v5/intro). If you need a specific function expanded or a custom trading script, let me know!

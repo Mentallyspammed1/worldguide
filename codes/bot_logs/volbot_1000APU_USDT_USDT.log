@@ -1,0 +1,74 @@
+2025-04-24 03:54:23 - INFO - [volbot_1000APU_USDT_USDT:2391] - --- Starting analysis cycle for 1000APU/USDT:USDT ---
+2025-04-24 03:54:23 - DEBUG - [volbot_1000APU_USDT_USDT:1598] - Market Info 1000APU/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:54:23 - WARNING - [volbot_1000APU_USDT_USDT:1045] - Could not determine price precision from tick size for 1000APU/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:23 - WARNING - [volbot_1000APU_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 1000APU/USDT:USDT.[0m
+2025-04-24 03:54:23 - WARNING - [volbot_1000APU_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 1000APU/USDT:USDT.
+2025-04-24 03:54:23 - DEBUG - [volbot_1000APU_USDT_USDT:2426] - Fetching 1150 klines for 1000APU/USDT:USDT 5m...
+2025-04-24 03:54:23 - DEBUG - [volbot_1000APU_USDT_USDT:509] - Fetching klines for 1000APU/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:54:24 - INFO - [volbot_1000APU_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 1000APU/USDT:USDT 5m
+2025-04-24 03:54:24 - WARNING - [volbot_1000APU_USDT_USDT:1045] - Could not determine price precision from tick size for 1000APU/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:24 - WARNING - [volbot_1000APU_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 1000APU/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:54:24 - INFO - [volbot_1000APU_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:54:24 - WARNING - [volbot_1000APU_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:54:24 - INFO - [volbot_1000APU_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:54:24 - INFO - [volbot_1000APU_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:54:24 - INFO - [volbot_1000APU_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-21 04:00:00, Candle: 2025-04-21 01:55:00, Range: [0.16270, 0.16270])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 0.16090 < Bottom 0.16270)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_2 (Pivot: 2025-04-21 06:15:00, Candle: 2025-04-21 04:10:00, Range: [0.16140, 0.16150])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_2 (Close 0.16350 > Top 0.16150)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 08:20:00, Candle: 2025-04-21 06:15:00, Range: [0.16330, 0.16420])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.16320 < Bottom 0.16330)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 09:25:00, Candle: 2025-04-21 07:20:00, Range: [0.16270, 0.16270])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.16430 > Top 0.16270)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 14:00:00, Candle: 2025-04-21 11:55:00, Range: [0.15920, 0.15930])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.15580 < Bottom 0.15920)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.15810, 0.15820])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.15120 < Bottom 0.15810)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-21 22:15:00, Candle: 2025-04-21 20:10:00, Range: [0.14930, 0.14990])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.14720 < Bottom 0.14930)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.14790, 0.14820])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.14630 < Bottom 0.14790)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 01:55:00, Candle: 2025-04-21 23:50:00, Range: [0.14790, 0.14790])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.15640 > Top 0.14790)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_10 (Pivot: 2025-04-22 08:10:00, Candle: 2025-04-22 06:05:00, Range: [0.15270, 0.15340])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_10 (Close 0.16120 > Top 0.15340)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_11 (Pivot: 2025-04-22 12:40:00, Candle: 2025-04-22 10:35:00, Range: [0.15700, 0.15700])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_11 (Close 0.15530 < Bottom 0.15700)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 15:00:00, Candle: 2025-04-22 12:55:00, Range: [0.15640, 0.15710])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.16470 > Top 0.15710)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-22 15:55:00, Candle: 2025-04-22 13:50:00, Range: [0.15870, 0.15880])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 0.15770 < Bottom 0.15870)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-22 20:25:00, Candle: 2025-04-22 18:20:00, Range: [0.16180, 0.16200])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 0.16070 < Bottom 0.16180)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-22 23:45:00, Candle: 2025-04-22 21:40:00, Range: [0.16460, 0.16470])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.17460 > Top 0.16470)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 05:10:00, Candle: 2025-04-23 03:05:00, Range: [0.17870, 0.18010])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.18270 > Top 0.18010)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 10:05:00, Candle: 2025-04-23 08:00:00, Range: [0.17770, 0.17820])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.17570 < Bottom 0.17770)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 13:30:00, Candle: 2025-04-23 11:25:00, Range: [0.18040, 0.18100])
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.18830 > Top 0.18100)
+2025-04-24 03:54:24 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 15:35:00, Candle: 2025-04-23 13:30:00, Range: [0.18320, 0.18370])
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.17550 < Bottom 0.18320)
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 18:30:00, Candle: 2025-04-23 16:25:00, Range: [0.17390, 0.17460])
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.18500 > Top 0.17460)
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 22:10:00, Candle: 2025-04-23 20:05:00, Range: [0.18180, 0.18220])
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-23 23:35:00, Candle: 2025-04-23 21:30:00, Range: [0.18700, 0.18760])
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.19900 > Top 0.18760)
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.17670 < Bottom 0.18180)
+2025-04-24 03:54:25 - INFO - [volbot_1000APU_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 12, Bear OBs: 10
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:1143] - Indicator calculations complete for 1000APU/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:1198] - Latest strategy state updated for 1000APU/USDT:USDT: {'open': '0.1696', 'high': '0.1711', 'low': '0.1696', 'close': '0.1707', 'volume': Decimal('10574.0'), 'atr_risk': '0.0022'}
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:1872] - Fetching position for symbol: 1000APU/USDT:USDT
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:54:25 - INFO - [volbot_1000APU_USDT_USDT:2024] - No active position found for 1000APU/USDT:USDT.
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:432] - Fetching ticker for 1000APU/USDT:USDT...
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:441] - Ticker data received for 1000APU/USDT:USDT: {'symbol': '1000APU/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.2012, 'low': 0.1695, 'bid': 0.1711, 'bidVolume': 2195.0, 'ask': 0.1714, 'askVolume': 278.0, 'vwap': 0.18462653176609473, 'open': 0.1795, 'close': 0.1712, 'last': 0.1712, 'previousClose': None, 'change': -0.0083, 'percentage': -4.6239, 'average': 0.1753, 'baseVolume': 9046910.0, 'quoteVolume': 1670299.6165, 'markPrice': 0.1707, 'indexPrice': 0.1704, 'info': {'symbol': '1000APUUSDT', 'lastPrice': '0.1712', 'indexPrice': '0.1704', 'markPrice': '0.1707', 'prevPrice24h': '0.1795', 'price24hPcnt': '-0.046239', 'highPrice24h': '0.2012', 'lowPrice24h': '0.1695', 'prevPrice1h': '0.1741', 'openInterest': '4248851', 'openInterestValue': '725278.87', 'turnover24h': '1670299.6165', 'volume24h': '9046910.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '278', 'bid1Price': '0.1711', 'ask1Price': '0.1714', 'bid1Size': '2195', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:447] - Using 'last' price: 0.1712
+2025-04-24 03:54:25 - DEBUG - [volbot_1000APU_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:54:25 - INFO - [volbot_1000APU_USDT_USDT:2611] - No open position for 1000APU/USDT:USDT. Checking for entry signals.
+2025-04-24 03:54:25 - INFO - [volbot_1000APU_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:54:25 - INFO - [volbot_1000APU_USDT_USDT:2708] - --- Finished analysis cycle for 1000APU/USDT:USDT (2.19s) ---

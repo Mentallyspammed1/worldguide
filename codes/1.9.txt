@@ -1,0 +1,191 @@
+
+ # Ensure it's None if invalid
+        else
+        {
+            log_level = logging.INFO;
+        }
+
+        console_log_level = log_level;
+        main_logger = setup_logger("main", is_symbol_logger=False); // Setup main logger with determined level
+        main_logger.info(f"Console log level set to: {logging.getLevelName(console_log_level)}");
+    }
+
+    # --- Load Configuration ---
+    main_logger = get_logger("main"); # Get main logger instance
+    config_path = args.config if args.config else CONFIG_FILE;
+    config = load_config(config_path, main_logger);
+    if not config:
+        main_logger.critical("Failed to load or validate configuration. Exiting.")
+        sys.exit(1);
+
+    # Override config with command-line args if provided
+    if args.symbol:
+        main_logger.info(f"Overriding config symbols with command-line symbol: {args.symbol}");
+        config["symbols"] = [args.symbol];
+    if args.interval:
+        if args.interval in CCXT_INTERVAL_MAP:
+            main_logger.info(f"Overriding config interval with command-line interval: {args.interval}");
+            config["interval"] = args.interval;
+        else:
+            main_logger.warning(f"Invalid command-line interval '{args.interval}'. Using config value '{config['interval']}'. Valid: {VALID_INTERVALS}");
+    if args.amount:
+        main_logger.warning("Command-line '--amount' override is deprecated. Use 'risk_per_trade' in config.json for dynamic sizing.")
+        # Note: Logic relying on a fixed 'amount' is removed, this arg is now informational only.
+
+    # --- Update Global Variables from Config ---
+    global LOOP_DELAY_SECONDS;
+    LOOP_DELAY_SECONDS = config.get("loop_delay", DEFAULT_LOOP_DELAY_SECONDS);
+    main_logger.info(f"Using loop delay: {LOOP_DELAY_SECONDS} seconds");
+
+    # --- Load Bot State ---
+    state = load_state(STATE_FILE, main_logger);
+
+    # --- Initialize Exchange ---
+    exchange = initialize_exchange(config, main_logger);
+    if not exchange:
+        main_logger.critical("Failed to initialize exchange. Exiting.")
+        sys.exit(1);
+
+    # --- Initialize Analyzers and Market Info ---
+    # Store market info and analyzers per symbol
+    market_info_map: Dict[str, Dict] = {};
+    analyzers: Dict[str, TradingAnalyzer] = {};
+    # Initialize state for each symbol if not present
+    for sym in config["symbols"]:
+        if sym not in state:
+            state[sym] = {
+                "in_position": False,
+                "position_data": None, # Store full position details when in position
+                "last_entry_price": None, # Store as string for JSON serialization
+                "break_even_triggered": False,
+                "last_signal": "HOLD",
+                "last_run_timestamp": None,
+            };
+        # Ensure symbol state has necessary keys even if loaded from old state file
+        state[sym].setdefault("in_position", False);
+        state[sym].setdefault("position_data", None);
+        state[sym].setdefault("last_entry_price", None);
+        state[sym].setdefault("break_even_triggered", False);
+        state[sym].setdefault("last_signal", "HOLD");
+        state[sym].setdefault("last_run_timestamp", None);
+
+        # Get logger for the symbol
+        symbol_logger = get_logger(sym, is_symbol_logger=True);
+
+        # Get market info
+        market_info = get_market_info(exchange, sym, symbol_logger);
+        if not market_info:
+            main_logger.critical(f"Failed to get market info for {sym}. Cannot proceed with this symbol. Exiting.")
+            # Consider if you want to exit entirely or just skip this symbol
+            sys.exit(1); # Exit if critical market info is missing
+        market_info_map[sym] = market_info;
+
+        # Initialize Analyzer (will be updated in the loop)
+        # Create a placeholder analyzer for now, will be updated with fresh data each loop
+        analyzers[sym] = None; # Placeholder
+
+    # --- Main Bot Loop ---
+    main_logger.info(f"{NEON_GREEN}--- Enhanced Trading Bot v{BOT_VERSION} Starting ---{RESET}");
+    main_logger.info(f"Trading Enabled: {config.get('enable_trading', False)}");
+    main_logger.info(f"Symbols: {config['symbols']}");
+    main_logger.info(f"Interval: {config['interval']} ({CCXT_INTERVAL_MAP.get(config['interval'])})");
+    main_logger.info(f"Active Weight Set: {config.get('active_weight_set', 'default')}");
+    main_logger.info(f"Risk Per Trade: {config.get('risk_per_trade', 0.0)*100:.2f}%");
+    main_logger.info(f"Account Type Detected: {'UNIFIED' if IS_UNIFIED_ACCOUNT else 'Non-UTA'}");
+
+    # --- Main Loop Execution ---
+    try:
+        while True:
+            loop_start_time = time.monotonic();
+            main_logger.info(f"----- New Bot Cycle | {datetime.now(tz=TIMEZONE).strftime('%Y-%m-%d %H:%M:%S %Z')} -----");
+
+            # --- Refresh Markets Periodically ---
+            if time.time() - getattr(exchange, 'last_load_markets_timestamp', 0) > MARKET_RELOAD_INTERVAL_SECONDS:
+                main_logger.info("Reloading exchange markets...");
+                try:
+                    exchange.load_markets(True); # Force reload
+                    exchange.last_load_markets_timestamp = time.time();
+                    main_logger.info("Markets reloaded successfully.");
+                    # Re-fetch market info for all symbols after reload
+                    for sym in config["symbols"]:
+                        sym_logger = get_logger(sym, is_symbol_logger=True);
+                        market_info = get_market_info(exchange, sym, sym_logger);
+                        if not market_info:
+                             main_logger.warning(f"Failed to re-fetch market info for {sym} after reload. Using old info.");
+                        else:
+                             market_info_map[sym] = market_info;
+                             # Update market info in existing analyzer if it exists
+                             if analyzers.get(sym):
+                                 analyzers[sym].market_info = market_info;
+                                 sym_logger.debug(f"Updated market info in analyzer for {sym}.");
+                except Exception as market_reload_err:
+                    main_logger.error(f"Error reloading markets: {market_reload_err}. Continuing with old market data.", exc_info=True);
+
+            # --- Fetch Current Balance ---
+            # Fetch balance once per loop iteration
+            current_balance: Optional[Decimal] = None
+            # Only fetch balance if trading is enabled or needed for analysis
+            if config.get("enable_trading"):
+                 current_balance = fetch_balance(exchange, QUOTE_CURRENCY, main_logger);
+                 if current_balance is None:
+                     main_logger.error(f"Failed to fetch {QUOTE_CURRENCY} balance. Trading actions will be skipped this cycle.");
+                     # Continue the loop, but trading functions will likely fail or skip
+
+            # --- Process Each Symbol ---
+            active_positions_count = 0
+            for sym in config["symbols"]:
+                symbol_logger = get_logger(sym, is_symbol_logger=True);
+                symbol_state = state[sym]; # Get the mutable state dict for this symbol
+                market_info = market_info_map[sym];
+
+                symbol_logger.info(f"--- Processing Symbol: {sym} ---");
+                symbol_state['last_run_timestamp'] = datetime.now(tz=TIMEZONE).isoformat();
+
+                # --- Fetch Data ---
+                # Fetch klines (adjust limit based on max indicator period + buffer)
+                # Example: find max period from config (e.g., max(ema_l, rsi_p, bb_p, ...))
+                # For simplicity, fetch a reasonable amount like 200 + longest period
+                max_period_guess = max(
+                    config.get("ema_long_period", 50), config.get("rsi_period", 14),
+                    config.get("bollinger_bands_period", 20), config.get("fibonacci_window", 50),
+                    config.get("stoch_rsi_window", 14), config.get("mfi_window", 14),
+                    config.get("cci_window", 20), config.get("williams_r_window", 14),
+                    config.get("sma_10_window", 10), config.get("momentum_period", 7),
+                    config.get("volume_ma_period", 15)
+                )
+                kline_limit = max_period_guess + 100 # Fetch enough data + buffer
+                kline_df_raw = fetch_klines_ccxt(exchange, sym, config["interval"], kline_limit, symbol_logger, market_info);
+
+                # Fetch current price (needed for signal generation context and checks)
+                current_price = fetch_current_price_ccxt(exchange, sym, symbol_logger, market_info);
+                if current_price is None:
+                    symbol_logger.error(f"Could not fetch current price for {sym}. Skipping analysis and trading actions.");
+                    continue; # Skip to next symbol
+
+                # Fetch order book if enabled/needed for analysis
+                orderbook_data = None
+                if config.get("indicators", {}).get("orderbook"):
+                     ob_limit = config.get("orderbook_limit", 25)
+                     orderbook_data = fetch_orderbook_ccxt(exchange, sym, ob_limit, symbol_logger, market_info);
+                     if orderbook_data is None:
+                         symbol_logger.warning(f"Could not fetch order book for {sym}. OBI check will be skipped.");
+
+                # --- Analyze Data ---
+                if kline_df_raw.empty:
+                    symbol_logger.warning(f"Kline data is empty for {sym}. Cannot analyze.");
+                    continue; # Skip to next symbol
+
+                try:
+                    analyzer = TradingAnalyzer(kline_df_raw, symbol_logger, config, market_info, symbol_state);
+                    analyzers[sym] = analyzer # Store the updated analyzer
+                except ValueError as analyze_init_err:
+                     symbol_logger.error(f"Failed to initialize TradingAnalyzer for {sym}: {analyze_init_err}. Skipping.")
+                     continue
+                except Exception as analyze_err:
+                    symbol_logger.error(f"Unexpected error during analysis initialization for {sym}: {analyze_err}", exc_info=True)
+                    continue
+
+                # --- Check Position Status ---
+                current_position = None
+                if market_info.get('is_contract'): # Only check positions for derivatives
+                    current_position = fetch_

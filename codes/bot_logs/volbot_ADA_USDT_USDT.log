@@ -1,0 +1,76 @@
+2025-04-24 03:55:32 - INFO - [volbot_ADA_USDT_USDT:2391] - --- Starting analysis cycle for ADA/USDT:USDT ---
+2025-04-24 03:55:32 - DEBUG - [volbot_ADA_USDT_USDT:1598] - Market Info ADA/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:55:32 - WARNING - [volbot_ADA_USDT_USDT:1045] - Could not determine price precision from tick size for ADA/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:55:32 - WARNING - [volbot_ADA_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for ADA/USDT:USDT.[0m
+2025-04-24 03:55:32 - WARNING - [volbot_ADA_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for ADA/USDT:USDT.
+2025-04-24 03:55:32 - DEBUG - [volbot_ADA_USDT_USDT:2426] - Fetching 1150 klines for ADA/USDT:USDT 5m...
+2025-04-24 03:55:32 - DEBUG - [volbot_ADA_USDT_USDT:509] - Fetching klines for ADA/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:55:32 - DEBUG - [volbot_ADA_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:55:32 - INFO - [volbot_ADA_USDT_USDT:585] - Successfully fetched and processed 1000 klines for ADA/USDT:USDT 5m
+2025-04-24 03:55:32 - WARNING - [volbot_ADA_USDT_USDT:1045] - Could not determine price precision from tick size for ADA/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:55:32 - WARNING - [volbot_ADA_USDT_USDT:1120] - [33mInsufficient data (1000 points) for ADA/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:55:32 - DEBUG - [volbot_ADA_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:55:32 - INFO - [volbot_ADA_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:55:32 - WARNING - [volbot_ADA_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:55:32 - INFO - [volbot_ADA_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:55:32 - INFO - [volbot_ADA_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:55:32 - INFO - [volbot_ADA_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 09:05:00, Candle: 2025-04-21 07:00:00, Range: [0.64390, 0.64440])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.64760 > Top 0.64440)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_2 (Pivot: 2025-04-21 11:20:00, Candle: 2025-04-21 09:15:00, Range: [0.64420, 0.64580])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_2 (Close 0.63800 < Bottom 0.64420)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 14:30:00, Candle: 2025-04-21 12:25:00, Range: [0.64170, 0.64220])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.64770 > Top 0.64220)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.64070, 0.64360])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.61980 < Bottom 0.64070)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_5 (Pivot: 2025-04-21 19:55:00, Candle: 2025-04-21 17:50:00, Range: [0.62120, 0.62160])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_5 (Close 0.62350 > Top 0.62160)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 22:15:00, Candle: 2025-04-21 20:10:00, Range: [0.61990, 0.62110])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.61840 < Bottom 0.61990)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.61880, 0.61890])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.61850 < Bottom 0.61880)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_8 (Pivot: 2025-04-22 01:20:00, Candle: 2025-04-21 23:15:00, Range: [0.62080, 0.62080])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_8 (Close 0.62860 > Top 0.62080)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_9 (Pivot: 2025-04-22 03:10:00, Candle: 2025-04-22 01:05:00, Range: [0.62120, 0.62220])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 12:40:00, Candle: 2025-04-22 10:35:00, Range: [0.63780, 0.63800])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 15:10:00, Candle: 2025-04-22 13:05:00, Range: [0.64340, 0.64450])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.66430 > Top 0.64450)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 18:50:00, Candle: 2025-04-22 16:45:00, Range: [0.65380, 0.65600])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.65910 > Top 0.65600)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-22 19:40:00, Candle: 2025-04-22 17:35:00, Range: [0.65640, 0.65680])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 0.65480 < Bottom 0.65640)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-23 01:55:00, Candle: 2025-04-22 23:50:00, Range: [0.68030, 0.68210])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 0.67760 < Bottom 0.68030)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 05:10:00, Candle: 2025-04-23 03:05:00, Range: [0.68690, 0.68920])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.69880 > Top 0.68920)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 09:50:00, Candle: 2025-04-23 07:45:00, Range: [0.69780, 0.69820])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.70920 > Top 0.69820)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 10:15:00, Candle: 2025-04-23 08:10:00, Range: [0.69980, 0.70000])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.69740 < Bottom 0.69980)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 13:35:00, Candle: 2025-04-23 11:30:00, Range: [0.70420, 0.70610])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.70790 > Top 0.70610)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 15:25:00, Candle: 2025-04-23 13:20:00, Range: [0.71140, 0.71250])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.68680 < Bottom 0.71140)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_20 (Pivot: 2025-04-23 16:35:00, Candle: 2025-04-23 14:30:00, Range: [0.69830, 0.70120])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_20 (Close 0.70780 > Top 0.70120)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_21 (Pivot: 2025-04-23 19:30:00, Candle: 2025-04-23 17:25:00, Range: [0.70110, 0.70220])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_21 (Close 0.69750 < Bottom 0.70110)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-23 22:10:00, Candle: 2025-04-23 20:05:00, Range: [0.69600, 0.69710])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.69460 < Bottom 0.69600)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:947] - Created Bullish OB: BullOB_23 (Pivot: 2025-04-24 04:10:00, Candle: 2025-04-24 02:05:00, Range: [0.69110, 0.69330])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:957] - Closed Bullish OB: BullOB_23 (Close 0.68230 < Bottom 0.69110)
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:918] - Created Bearish OB: BearOB_24 (Pivot: 2025-04-24 06:30:00, Candle: 2025-04-24 04:25:00, Range: [0.68240, 0.68440])
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:970] - Closed Bearish OB: BearOB_24 (Close 0.68770 > Top 0.68440)
+2025-04-24 03:55:33 - INFO - [volbot_ADA_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 13, Bear OBs: 11
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:1143] - Indicator calculations complete for ADA/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:1198] - Latest strategy state updated for ADA/USDT:USDT: {'open': '0.6718', 'high': '0.6732', 'low': '0.6717', 'close': '0.6732', 'volume': Decimal('100065.0'), 'atr_risk': '0.0028'}
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:1872] - Fetching position for symbol: ADA/USDT:USDT
+2025-04-24 03:55:33 - DEBUG - [volbot_ADA_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:55:33 - INFO - [volbot_ADA_USDT_USDT:2024] - No active position found for ADA/USDT:USDT.
+2025-04-24 03:55:34 - DEBUG - [volbot_ADA_USDT_USDT:432] - Fetching ticker for ADA/USDT:USDT...
+2025-04-24 03:55:34 - DEBUG - [volbot_ADA_USDT_USDT:441] - Ticker data received for ADA/USDT:USDT: {'symbol': 'ADA/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.7181, 'low': 0.6697, 'bid': 0.6732, 'bidVolume': 1378.0, 'ask': 0.6733, 'askVolume': 31380.0, 'vwap': 0.697891384641274, 'open': 0.7037, 'close': 0.6733, 'last': 0.6733, 'previousClose': None, 'change': -0.0304, 'percentage': -4.32, 'average': 0.6885, 'baseVolume': 345529791.0, 'quoteVolume': 241142264.2758, 'markPrice': 0.6734, 'indexPrice': 0.6736, 'info': {'symbol': 'ADAUSDT', 'lastPrice': '0.6733', 'indexPrice': '0.6736', 'markPrice': '0.6734', 'prevPrice24h': '0.7037', 'price24hPcnt': '-0.0432', 'highPrice24h': '0.7181', 'lowPrice24h': '0.6697', 'prevPrice1h': '0.6781', 'openInterest': '142090005', 'openInterestValue': '95683409.37', 'turnover24h': '241142264.2758', 'volume24h': '345529791.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '31380', 'bid1Price': '0.6732', 'ask1Price': '0.6733', 'bid1Size': '1378', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:55:34 - DEBUG - [volbot_ADA_USDT_USDT:447] - Using 'last' price: 0.6733
+2025-04-24 03:55:34 - DEBUG - [volbot_ADA_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:55:34 - INFO - [volbot_ADA_USDT_USDT:2611] - No open position for ADA/USDT:USDT. Checking for entry signals.
+2025-04-24 03:55:34 - INFO - [volbot_ADA_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:55:34 - INFO - [volbot_ADA_USDT_USDT:2708] - --- Finished analysis cycle for ADA/USDT:USDT (2.38s) ---

@@ -1,0 +1,52 @@
+{
+  "exchange": {
+    "id": "bybit",
+    "category": "linear",
+    "max_retries": 3,
+    "retry_delay_seconds": 5,
+    "sandbox_mode": false
+  },
+  "api_credentials": {
+    "api_key": "NRrb4Biggi3sO7rKZ1",
+    "api_secret": "TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ"
+  },
+  "trading_settings": {
+    "symbol": "FARTCOINUSDT",
+    "timeframe": "1m",
+    "leverage": "25.0",
+    "quote_asset": "USDT",
+    "category": "linear",
+    "hedge_mode": false,
+    "poll_interval_seconds": 60,
+    "post_order_verify_delay_seconds": 5,
+    "exit_on_opposing_signal": true
+  },
+  "indicator_settings": {
+    "ema_short_period": 2,
+    "ema_long_period": 5,
+    "rsi_period": 12,
+    "rsi_overbought": 60,
+    "rsi_oversold": 40,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "ohlcv_fetch_limit": 250,
+    "signal_weights": {
+      "rsi": "0.3",
+      "macd": "0.4",
+      "ema_cross": "0.3"
+    }
+  },
+  "risk_management": {
+    "risk_per_trade_percent": "1.0",
+    "stop_loss_atr_multiplier": "2.0",
+    "take_profit_atr_multiplier": "4.0",
+    "atr_period": 14
+  },
+  "logging": {
+    "level": "INFO",
+    "log_file": "trading_bot.log",
+    "max_log_size_bytes": 5242880,
+    "backup_count": 3
+  }
+}

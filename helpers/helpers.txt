@@ -1,0 +1,3024 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Bybit V5 CCXT Helper Functions (v3.0)
+
+A robust, modular, and enhanced collection of helper functions for interacting with
+the Bybit V5 API (Unified Trading Account) using the CCXT library.
+
+Key Features:
+- Logically grouped functions (can be split into submodules).
+- Enhanced type safety with TypedDict, Enums, and precise hints.
+- Performance optimizations via MarketCache for market data.
+- Centralized asynchronous error handling and retry logic via decorator.
+- Structured logging with conditional color support.
+- Implemented features: Batch order placement, WebSocket streaming.
+- Increased robustness and handling of Bybit V5 specifics.
+
+Version: 3.0
+"""
+
+# Standard Library Imports
+import logging
+import os
+import sys
+import time
+import random
+import json
+from decimal import Decimal, ROUND_HALF_UP, getcontext, InvalidOperation
+from typing import (Optional, Dict, List, Tuple, Any, Literal, Union,
+                    TypedDict, Callable, Coroutine)
+from enum import Enum
+import asyncio
+import math
+
+# Third-party Libraries
+try:
+    import ccxt.async_support as ccxt
+    from ccxt.base.errors import (
+        ExchangeError, NetworkError, RateLimitExceeded, AuthenticationError,
+        OrderNotFound, InvalidOrder, InsufficientFunds, ExchangeNotAvailable,
+        NotSupported
+    )
+except ImportError:
+    print("FATAL ERROR: CCXT library not found.")
+    print("Please install it: pip install ccxt>=2.0.0") # Specify a recent version
+    sys.exit(1)
+try:
+    import pandas as pd
+except ImportError:
+    print("ERROR: pandas library not found.")
+    print("Please install it: pip install pandas>=2.0.0")
+    # Depending on usage, pandas might be optional, but fetch_ohlcv uses it.
+    # Consider making OHLCV return list of lists if pandas is optional.
+    pd = None # Allow script to run, but OHLCV will fail if called.
+    # sys.exit(1) # Or exit if pandas is mandatory
+try:
+    from colorama import Fore, Style, Back, init
+    # Initialize colorama on Windows
+    if os.name == 'nt':
+        init()
+except ImportError:
+    print("Warning: colorama not found. Logs will be uncolored.")
+    print("Install for colored logs: pip install colorama")
+    # Create dummy classes/objects if colorama is not found
+    class DummyColor:
+        def __getattr__(self, name: str) -> str: return ""
+    Fore = Style = Back = DummyColor()
+try:
+    import websockets
+    from websockets.exceptions import WebSocketException, ConnectionClosed, ConnectionClosedOK, ConnectionClosedError, InvalidURI
+except ImportError:
+    print("Warning: websockets library not found. WebSocket features disabled.")
+    print("Install for WebSocket support: pip install websockets>=10.0")
+    websockets = None # Set to None if not installed
+    # Define dummy exception classes if websockets is None
+    class DummyWebSocketException(Exception): pass
+    WebSocketException = ConnectionClosed = ConnectionClosedOK = ConnectionClosedError = InvalidURI = DummyWebSocketException
+
+
+# --- Configuration & Constants ---
+
+# Set Decimal context precision (adjust if higher precision is needed)
+getcontext().prec = 28
+
+# Default configuration structure type
+class Config(TypedDict):
+    EXCHANGE_ID: Literal['bybit'] # Force 'bybit'
+    API_KEY: str
+    API_SECRET: str
+    TESTNET_MODE: bool
+    SYMBOL: str             # Default symbol, e.g., 'BTC/USDT:USDT'
+    USDT_SYMBOL: str        # Typically 'USDT'
+    DEFAULT_MARGIN_MODE: Literal['isolated', 'cross'] # Maps to Bybit's modes
+    DEFAULT_RECV_WINDOW: int # Milliseconds for API request validity
+    DEFAULT_SLIPPAGE_PCT: Decimal # e.g., Decimal('0.005') for 0.5%
+    POSITION_QTY_EPSILON: Decimal # Small value for float comparisons, e.g., Decimal('1E-8')
+    SHALLOW_OB_FETCH_DEPTH: int   # Depth for quick slippage check in analyze_order_book
+    ORDER_BOOK_FETCH_LIMIT: int   # Max depth for full order book fetch (e.g., 50, 100, 200, 500)
+    EXPECTED_MARKET_TYPE: Literal['swap', 'spot', 'option', 'future'] # Default expected type
+    EXPECTED_MARKET_LOGIC: Literal['linear', 'inverse'] # Default expected logic for derivatives
+    RETRY_COUNT: int # Number of retries for API calls
+    # Optional fields can be added here if needed later
+
+# Enums for type safety and clarity
+class Side(str, Enum):
+    BUY = "buy"
+    SELL = "sell"
+
+class Category(str, Enum):
+    LINEAR = "linear"   # USDT Perpetual, USDC Perpetual, USDC Futures
+    INVERSE = "inverse" # Inverse Contracts
+    SPOT = "spot"       # Spot
+    OPTION = "option"   # USDC Options
+
+class OrderFilter(str, Enum):
+    ORDER = "Order"             # Active Order (spot, linear, inverse)
+    STOP_ORDER = "StopOrder"    # Conditional Order (spot, linear, inverse)
+    TPSL_ORDER = "tpslOrder"    # TP/SL Order (UTA specific)
+    # Add more filters if Bybit V5 introduces them (e.g., OCO, BatchOrder)
+
+class TimeInForce(str, Enum):
+    GTC = "GTC"         # Good Til Canceled
+    IOC = "IOC"         # Immediate Or Cancel
+    FOK = "FOK"         # Fill Or Kill
+    POST_ONLY = "PostOnly" # Only Maker
+
+class TriggerDirection(int, Enum):
+    RISE = 1 # Trigger when price rises to triggerPrice
+    FALL = 2 # Trigger when price falls to triggerPrice
+
+class PositionIdx(int, Enum):
+    ONE_WAY = 0
+    BUY_SIDE = 1 # Hedge mode long
+    SELL_SIDE = 2 # Hedge mode short
+
+# --- Logger Setup ---
+logger = logging.getLogger(__name__)
+if not logger.hasHandlers():
+    logger.setLevel(logging.DEBUG) # Set default level
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] {%(filename)s:%(lineno)d:%(funcName)s} - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    # logger.propagate = False # Uncomment if you don't want logs going to root logger
+
+
+# --- Market Cache ---
+class MarketCache:
+    """ Caches market data fetched from the exchange to reduce API calls. """
+    def __init__(self):
+        self._markets: Dict[str, Dict[str, Any]] = {}
+        self._categories: Dict[str, Optional[Category]] = {}
+        self._lock = asyncio.Lock() # Lock for async safety when loading markets
+
+    async def load_markets(self, exchange: ccxt.bybit, reload: bool = False):
+        """ Loads or reloads all markets into the cache asynchronously and safely. """
+        async with self._lock:
+            if not self._markets or reload:
+                logger.info(f"{Fore.BLUE}[MarketCache] {'Reloading' if reload else 'Loading'} markets...{Style.RESET_ALL}")
+                try:
+                    all_markets = await exchange.load_markets(reload=reload)
+                    if not all_markets:
+                         # This case indicates a severe issue with exchange connection or API response
+                         logger.critical(f"{Back.RED}[MarketCache] Failed to load markets - Received empty market data from CCXT.{Style.RESET_ALL}")
+                         # Decide on behavior: keep old cache (if any), clear, or raise error.
+                         # Keeping old cache might be dangerous. Clearing is safer.
+                         self._markets = {}
+                         self._categories = {}
+                         # Consider raising an exception here if market data is critical for operation
+                         # raise ExchangeError("Failed to load markets: received empty data.")
+                         return # Or simply return if non-critical
+
+                    self._markets = all_markets
+                    self._categories.clear() # Clear categories when markets reload
+                    logger.success(f"{Fore.GREEN}[MarketCache] Loaded {len(self._markets)} markets successfully.{Style.RESET_ALL}")
+                except (NetworkError, ExchangeNotAvailable) as e:
+                    logger.error(f"{Fore.RED}[MarketCache] Network/Availability error loading markets: {e}{Style.RESET_ALL}")
+                    # Don't clear cache here, retry might work later.
+                except ExchangeError as e:
+                    logger.error(f"{Fore.RED}[MarketCache] Exchange error loading markets: {e}{Style.RESET_ALL}", exc_info=True)
+                    # Consider clearing cache on certain exchange errors if data becomes invalid
+                except Exception as e:
+                    logger.critical(f"{Back.RED}[MarketCache] Unexpected critical error loading markets: {e}{Style.RESET_ALL}", exc_info=True)
+                    self._markets = {} # Clear cache on critical failure
+                    self._categories = {}
+                    # raise # Re-raise critical errors?
+
+    def get_market(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """ Retrieves market data for a symbol from the cache. """
+        market = self._markets.get(symbol)
+        # if not market:
+        #      logger.warning(f"[MarketCache] Market data for '{symbol}' not found in cache. Was load_markets called successfully?")
+        return market
+
+    def get_category(self, symbol: str) -> Optional[Category]:
+        """ Retrieves the V5 category for a symbol from the cache. """
+        if symbol not in self._categories:
+            market = self.get_market(symbol)
+            if market:
+                category_str = _get_v5_category(market)
+                try:
+                    self._categories[symbol] = Category(category_str) if category_str else None
+                except ValueError: # Handle case where _get_v5_category returns unexpected string
+                     logger.error(f"[MarketCache] Invalid category value '{category_str}' returned for symbol '{symbol}'. Setting category to None.")
+                     self._categories[symbol] = None
+            else:
+                self._categories[symbol] = None # Mark as None if market not found
+        return self._categories[symbol]
+
+    def get_all_symbols(self) -> List[str]:
+        """ Returns a list of all symbols currently loaded in the cache. """
+        return list(self._markets.keys())
+
+# Initialize a global cache instance
+market_cache = MarketCache()
+
+
+# --- Utility Functions ---
+# ============================
+# MODULE: utils.py (Potential Split)
+# ============================
+
+def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Optional[Decimal]:
+    """ Safely converts a value to Decimal, handling None, strings, ints, floats. """
+    if value is None or value == '':
+        return default
+    try:
+        # Ensure conversion via string to handle floats accurately
+        d = Decimal(str(value))
+        # Check for NaN or Infinity which are invalid in many contexts
+        if d.is_nan() or d.is_infinite():
+            logger.warning(f"[safe_decimal_conversion] Value '{value}' results in NaN or Infinity.")
+            return default
+        # Optional: Quantize to a reasonable precision if needed globally
+        # return d.quantize(Decimal('1E-8'), rounding=ROUND_HALF_UP)
+        return d
+    except (ValueError, TypeError, InvalidOperation):
+        # logger.warning(f"[safe_decimal_conversion] Could not convert '{value}' (type: {type(value)}) to Decimal.") # Can be noisy
+        return default
+
+def format_price(exchange: ccxt.bybit, symbol: str, price: Optional[Union[Decimal, float, str]]) -> Optional[str]:
+    """ Formats a price according to the market's precision using the cache. """
+    if price is None: return None
+    market = market_cache.get_market(symbol)
+    if not market:
+        logger.warning(f"[format_price] Market data for {symbol} not found. Cannot determine precision.")
+        return str(price) # Return as string, potentially imprecise
+
+    price_decimal = safe_decimal_conversion(price)
+    if price_decimal is None:
+        logger.error(f"[format_price] Invalid price value '{price}' for {symbol}.")
+        return None
+
+    try:
+        # Use CCXT's price_to_precision for correct formatting rules
+        return exchange.price_to_precision(symbol, float(price_decimal))
+    except Exception as e:
+        logger.error(f"[format_price] Error formatting price {price_decimal} for {symbol}: {e}", exc_info=True)
+        # Fallback to simple string formatting if CCXT method fails unexpectedly
+        prec = market.get('precision', {}).get('price', 8) # Default 8 decimals
+        try:
+             return f"{price_decimal:.{prec}f}"
+        except Exception:
+             return str(price_decimal) # Absolute fallback
+
+def format_amount(exchange: ccxt.bybit, symbol: str, amount: Optional[Union[Decimal, float, str]]) -> Optional[str]:
+    """ Formats an amount according to the market's precision using the cache. """
+    if amount is None: return None
+    market = market_cache.get_market(symbol)
+    if not market:
+        logger.warning(f"[format_amount] Market data for {symbol} not found. Cannot determine precision.")
+        return str(amount)
+
+    amount_decimal = safe_decimal_conversion(amount)
+    if amount_decimal is None:
+        logger.error(f"[format_amount] Invalid amount value '{amount}' for {symbol}.")
+        return None
+
+    try:
+        # Use CCXT's amount_to_precision
+        return exchange.amount_to_precision(symbol, float(amount_decimal))
+    except Exception as e:
+        logger.error(f"[format_amount] Error formatting amount {amount_decimal} for {symbol}: {e}", exc_info=True)
+        prec = market.get('precision', {}).get('amount', 8) # Default 8 decimals
+        try:
+             return f"{amount_decimal:.{prec}f}"
+        except Exception:
+             return str(amount_decimal)
+
+def format_order_id(order_id: Optional[str]) -> str:
+    """ Returns a truncated version of the order ID for cleaner logging. """
+    if not order_id: return "N/A"
+    return order_id[-8:] if len(order_id) > 8 else order_id
+
+def send_sms_alert(message: str, config: Optional[Config] = None) -> None:
+    """ Placeholder for sending SMS alerts via a service (e.g., Twilio). """
+    logger.warning(f"{Back.YELLOW}{Fore.BLACK}[SMS Alert Placeholder]{Style.RESET_ALL} >> {message}")
+    # Add actual SMS integration here if needed, using config for credentials/numbers
+
+def _get_v5_category(market: Dict[str, Any]) -> Optional[str]:
+    """
+    Internal helper to determine the Bybit V5 API 'category' based on CCXT market info.
+    Prioritizes explicit CCXT flags, then infers from type and naming conventions.
+    Returns the category string (e.g., 'linear', 'spot') or None if indeterminable.
+    """
+    if not market:
+        # logger.warning("[_get_v5_category] Received empty market data.") # Can be noisy
+        return None
+
+    # 1. Check explicit CCXT flags (most reliable)
+    if market.get('spot', False): return Category.SPOT.value
+    if market.get('option', False): return Category.OPTION.value
+    if market.get('linear', False): return Category.LINEAR.value
+    if market.get('inverse', False): return Category.INVERSE.value
+
+    # 2. Infer from 'type' and other info if explicit flags are missing
+    market_type = market.get('type')
+    symbol = market.get('symbol', 'N/A')
+    # logger.debug(f"[_get_v5_category] Inferring category for '{symbol}'. Type: {market_type}, Info: {market.get('info', {})}")
+
+    if market_type == 'spot':
+        return Category.SPOT.value
+    elif market_type == 'option':
+        # Ensure it's USDC option as Bybit V5 primarily supports that
+        if market.get('settle', '').upper() == 'USDC':
+            return Category.OPTION.value
+        else:
+            logger.warning(f"[_get_v5_category] Unsupported option type for {symbol} (settle: {market.get('settle')}). V5 expects USDC options.")
+            return None
+    elif market_type in ['swap', 'future']:
+        # For derivatives, determine linear vs inverse
+        settle_asset = market.get('settle', '').upper()
+        base_asset = market.get('base', '').upper()
+        quote_asset = market.get('quote', '').upper()
+        info = market.get('info', {})
+
+        # Check info fields that might explicitly state it
+        contract_type = str(info.get('contractType', '')).lower()
+        if contract_type == 'linear': return Category.LINEAR.value
+        if contract_type == 'inverse': return Category.INVERSE.value
+
+        # Infer based on settle currency (common convention)
+        if settle_asset in ['USDT', 'USDC'] or info.get('settleCoin') in ['USDT', 'USDC']:
+            return Category.LINEAR.value
+        # Infer if settle is base (characteristic of inverse)
+        # Caution: This might not hold for all exchanges/contracts
+        elif settle_asset == base_asset and settle_asset:
+             return Category.INVERSE.value
+        # Final guess based on quote currency containing USDT/USD (less reliable)
+        elif 'USD' in quote_asset: # Includes USDT, USDC, USD pairs
+             logger.debug(f"[_get_v5_category] Assuming LINEAR for {symbol} based on 'USD' in quote asset.")
+             return Category.LINEAR.value
+        else:
+            logger.warning(f"[_get_v5_category] Could not reliably determine category for derivative {symbol} (Type: {market_type}, Settle: {settle_asset}). Needs verification.")
+            return None # Cannot determine
+    else:
+        logger.warning(f"[_get_v5_category] Unknown or unsupported market type '{market_type}' for symbol {symbol}.")
+        return None
+
+
+# --- Asynchronous Retry Decorator ---
+def retry_api_call(
+    max_retries: int = 3,
+    initial_delay: float = 1.0, # seconds
+    backoff_factor: float = 2.0,
+    jitter: float = 0.1, # +/- 10% jitter
+    retry_on_exceptions: Tuple[type[Exception], ...] = (
+        NetworkError, RateLimitExceeded, ExchangeNotAvailable, # Common transient errors
+        # Add specific exchange errors if they are known to be retryable
+        # e.g., Bybit specific temporary system errors if identifiable by code/message
+    )
+):
+    """
+    Asynchronous decorator to automatically retry a function call on specific exceptions
+    with exponential backoff and jitter.
+
+    Args:
+        max_retries: Maximum number of retries (default: 3). 0 means no retries.
+        initial_delay: Delay before the first retry in seconds (default: 1.0).
+        backoff_factor: Multiplier for the delay in each subsequent retry (default: 2.0).
+        jitter: Factor for randomizing delay (+/- jitter * delay) (default: 0.1).
+        retry_on_exceptions: Tuple of exception types to catch and retry on.
+    """
+    def decorator(func: Callable[..., Coroutine[Any, Any, Any]]):
+        async def async_wrapper(*args, **kwargs):
+            retries = kwargs.pop('retries', max_retries) # Allow overriding retries per call if needed
+            current_delay = initial_delay
+            last_exception: Optional[Exception] = None
+
+            for attempt in range(retries + 1): # Total attempts = 1 initial + max_retries
+                try:
+                    # logger.debug(f"Attempt {attempt + 1}/{retries + 1} calling {func.__name__}")
+                    return await func(*args, **kwargs)
+                except retry_on_exceptions as e:
+                    last_exception = e
+                    if attempt == retries:
+                        logger.error(f"{Fore.RED}[{func.__name__}] Max retries ({retries}) reached. Last error: {type(e).__name__}: {e}{Style.RESET_ALL}")
+                        raise # Re-raise the last caught retryable exception
+                    else:
+                        # Calculate delay with backoff and jitter
+                        actual_jitter = random.uniform(-jitter, jitter)
+                        wait_time = current_delay + (current_delay * actual_jitter)
+                        logger.warning(f"{Fore.YELLOW}[{func.__name__}] Attempt {attempt+1}/{retries+1} failed: {type(e).__name__}. Retrying in {wait_time:.2f}s...{Style.RESET_ALL}")
+                        await asyncio.sleep(wait_time)
+                        current_delay *= backoff_factor # Increase delay for next potential retry
+                except Exception as e:
+                    # Catch other unexpected exceptions, log, and re-raise immediately (don't retry)
+                    logger.error(f"{Fore.RED}[{func.__name__}] Unhandled exception during attempt {attempt+1}: {type(e).__name__}: {e}{Style.RESET_ALL}", exc_info=True)
+                    raise # Re-raise unexpected exceptions
+
+            # Should only be reached if max_retries is 0 and the first attempt failed with a retryable exception
+            if last_exception:
+                 raise last_exception
+            # Fallback if logic somehow allows reaching here without an exception (should not happen)
+            return None
+
+        # Preserve original function signature etc. for introspection
+        async_wrapper.__name__ = func.__name__
+        async_wrapper.__doc__ = func.__doc__
+        # Consider using functools.wraps if preserving more metadata is needed
+        return async_wrapper
+    return decorator
+
+
+# --- Exchange Initialization & Configuration ---
+# ============================
+# MODULE: exchange.py (Potential Split)
+# ============================
+
+@retry_api_call(max_retries=2, initial_delay=3.0, retry_on_exceptions=(NetworkError, ExchangeNotAvailable)) # Retry init on network issues
+async def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
+    """
+    Initializes the Bybit CCXT exchange instance for V5 API.
+
+    Args:
+        config: Configuration dictionary adhering to the Config TypedDict structure.
+
+    Returns:
+        Configured `ccxt.async_support.bybit` instance or None if initialization fails.
+    """
+    func_name = "initialize_bybit"
+    logger.info(f"{Fore.BLUE}[{func_name}] Initializing Bybit V5 ({'Testnet' if config['TESTNET_MODE'] else 'Mainnet'})...{Style.RESET_ALL}")
+    exchange: Optional[ccxt.bybit] = None # Define exchange variable outside try block
+
+    try:
+        if not config.get('API_KEY') or not config.get('API_SECRET'):
+             logger.warning(f"{Fore.YELLOW}[{func_name}] API Key or Secret not provided. Initializing in public-only mode.{Style.RESET_ALL}")
+             # Allow initialization without keys for public endpoints, but log clearly.
+             # Authenticated calls will fail later if keys are missing.
+
+        exchange_options = {
+            'apiKey': config.get('API_KEY'), # Use .get() to handle missing keys gracefully
+            'secret': config.get('API_SECRET'),
+            'enableRateLimit': True,
+            'options': {
+                'defaultType': config['EXPECTED_MARKET_TYPE'],
+                'adjustForTimeDifference': True,
+                'recvWindow': config['DEFAULT_RECV_WINDOW'],
+                'brokerId': 'PB_PyrmethusV3', # Unique ID for tracking via Bybit Broker program
+                # V5 Specific options if needed (though CCXT usually handles defaults)
+                # 'api-expires': str(int(time.time() * 1000 + config['DEFAULT_RECV_WINDOW'])), # Sometimes needed? CCXT handles usually.
+                # 'verbose': True, # Uncomment for very detailed CCXT logging
+            }
+        }
+
+        # Instantiate the exchange using ccxt.async_support
+        exchange = ccxt.bybit(exchange_options)
+
+        if config['TESTNET_MODE']:
+            exchange.set_sandbox_mode(True)
+            logger.info(f"[{func_name}] Sandbox mode enabled (API endpoint: {exchange.urls['api']}).")
+        else:
+             logger.info(f"[{func_name}] Mainnet mode enabled (API endpoint: {exchange.urls['api']}).")
+
+
+        # --- Load markets and perform checks ---
+        # Load markets into exchange instance and our cache
+        await market_cache.load_markets(exchange, reload=True) # Force reload on init
+        if not market_cache.get_market(config['SYMBOL']): # Check if default symbol loaded
+            logger.critical(f"{Back.RED}[{func_name}] Failed to load market data for default symbol '{config['SYMBOL']}'. Check symbol format and connectivity.{Style.RESET_ALL}")
+            # Attempt to close exchange if partially initialized
+            if exchange: await exchange.close()
+            return None
+
+        # Perform connectivity check ONLY if API keys are present
+        if config.get('API_KEY') and config.get('API_SECRET'):
+            logger.info(f"[{func_name}] Performing authenticated connectivity check (fetching balance)...")
+            try:
+                # Fetch balance for UNIFIED account type. Adjust if using SPOT/CONTRACT.
+                await exchange.fetch_balance(params={'accountType': 'UNIFIED'})
+                logger.info(f"[{func_name}] Authenticated connectivity check passed.")
+            except AuthenticationError as auth_err:
+                 logger.critical(f"{Back.RED}[{func_name}] Authentication failed during connectivity check: {auth_err}. Check API key/secret.{Style.RESET_ALL}")
+                 send_sms_alert(f"[BybitHelper] CRITICAL: Auth failed during init check!", config)
+                 if exchange: await exchange.close()
+                 return None
+            except ExchangeError as bal_err: # Catch other errors during balance fetch
+                 logger.warning(f"{Fore.YELLOW}[{func_name}] Connectivity check warning (fetch_balance failed): {bal_err}. Proceeding, but account access might be limited.{Style.RESET_ALL}")
+                 # Decide if this should be a critical failure depending on requirements
+        else:
+             logger.info(f"[{func_name}] Skipping authenticated connectivity check (API keys not provided).")
+
+        # --- Set default margin mode/leverage for the primary symbol ---
+        default_symbol = config['SYMBOL']
+        category = market_cache.get_category(default_symbol)
+        if category in [Category.LINEAR, Category.INVERSE] and config.get('API_KEY'):
+            logger.info(f"[{func_name}] Attempting to configure default margin/leverage for {default_symbol}...")
+            try:
+                if config['DEFAULT_MARGIN_MODE'] == 'isolated':
+                    # Setting leverage implicitly sets isolated mode for the symbol in V5
+                    initial_leverage = 10 # Default leverage, consider adding to Config
+                    logger.info(f"[{func_name}] Setting isolated margin via leverage ({initial_leverage}x) for {default_symbol}.")
+                    await set_leverage(exchange, default_symbol, initial_leverage, config)
+                else: # cross margin ('REGULAR_MARGIN' in V5)
+                    # Cross margin is often account-wide for UTA, less direct control per symbol.
+                    # We might ensure leverage isn't explicitly set (which implies isolated)
+                    # or try to switch account mode if an API exists (less common via CCXT)
+                    logger.info(f"[{func_name}] Cross margin ('{config['DEFAULT_MARGIN_MODE']}') selected. Mode is typically account-level for UTA.")
+                    # Verify if any specific action needed for cross mode setup. Often it's the default.
+                    # Example: Check if set_margin_mode works for V5 cross
+                    # try:
+                    #     await exchange.set_margin_mode('cross', symbol=default_symbol, params={'category': category.value})
+                    # except Exception as mm_err:
+                    #     logger.warning(f"Could not explicitly set cross margin mode via set_margin_mode: {mm_err}")
+            except Exception as e:
+                logger.warning(f"{Fore.YELLOW}[{func_name}] Could not pre-set margin mode/leverage for {default_symbol}: {type(e).__name__}. Manual setup or config adjustment might be needed.{Style.RESET_ALL}")
+        elif not config.get('API_KEY'):
+             logger.info(f"[{func_name}] Skipping default margin/leverage setup (API keys not provided).")
+
+
+        logger.success(f"{Fore.GREEN}[{func_name}] Bybit V5 exchange initialized successfully.{Style.RESET_ALL}")
+        return exchange
+
+    # --- Exception Handling for Initialization ---
+    except AuthenticationError as e:
+        # This might happen if keys are wrong during initial class instantiation too
+        logger.critical(f"{Back.RED}[{func_name}] Authentication failed during initialization: {e}. Check API key and secret.{Style.RESET_ALL}")
+        send_sms_alert(f"[BybitHelper] CRITICAL: Auth failed!", config)
+    except (NetworkError, ExchangeNotAvailable) as e:
+         # These were already handled by retry, so if they reach here, retries failed.
+         logger.critical(f"{Back.RED}[{func_name}] Network error during initialization after retries: {e}. Check connection.{Style.RESET_ALL}")
+    except ExchangeError as e:
+        # Catch other CCXT exchange errors
+        logger.critical(f"{Back.RED}[{func_name}] Exchange error during initialization: {e}{Style.RESET_ALL}", exc_info=True)
+        send_sms_alert(f"[BybitHelper] CRITICAL: Init ExchangeError: {type(e).__name__}", config)
+    except Exception as e:
+        # Catch any other unexpected Python errors
+        logger.critical(f"{Back.RED}[{func_name}] Unexpected critical error during initialization: {e}{Style.RESET_ALL}", exc_info=True)
+        send_sms_alert(f"[BybitHelper] CRITICAL: Init Unexpected Error: {type(e).__name__}", config)
+
+    # Ensure cleanup if initialization failed after instance creation
+    if exchange:
+        try:
+            logger.info(f"[{func_name}] Closing potentially partially initialized exchange instance due to error.")
+            await exchange.close()
+        except Exception as close_err:
+             logger.error(f"[{func_name}] Error closing exchange instance during cleanup: {close_err}")
+    return None
+
+
+# --- Account Functions ---
+# ============================
+# MODULE: account.py (Potential Split)
+# ============================
+
+@retry_api_call(max_retries=3, initial_delay=1.0)
+async def set_leverage(exchange: ccxt.bybit, symbol: str, leverage: int, config: Config) -> bool:
+    """
+    Sets the leverage for a specific symbol (Linear or Inverse contracts).
+
+    Args:
+        exchange: Initialized `ccxt.async_support.bybit` instance.
+        symbol: Market symbol (e.g., 'BTC/USDT:USDT').
+        leverage: Desired integer leverage level (e.g., 10 for 10x).
+        config: Configuration object.
+
+    Returns:
+        True if leverage was set successfully or was already set to the desired value.
+        False otherwise.
+
+    Note:
+        Bybit V5 requires `buyLeverage` and `sellLeverage` parameters.
+        Setting leverage implicitly sets the margin mode to ISOLATED for that symbol.
+    """
+    func_name = "set_leverage"
+    log_prefix = f"[{func_name}] Set Leverage ({symbol} -> {leverage}x)"
+
+    if leverage <= 0:
+        logger.error(f"{Fore.RED}{log_prefix}: Invalid leverage value: {leverage}. Must be > 0.{Style.RESET_ALL}")
+        return False
+
+    category = market_cache.get_category(symbol)
+    if not category or category not in [Category.LINEAR, Category.INVERSE]:
+        logger.error(f"{Fore.RED}{log_prefix}: Leverage can only be set for LINEAR or INVERSE contracts. Category for {symbol} is {category}.{Style.RESET_ALL}")
+        return False
+
+    market = market_cache.get_market(symbol)
+    if not market:
+         logger.error(f"{Fore.RED}{log_prefix}: Market data for {symbol} not found. Cannot validate or set leverage.{Style.RESET_ALL}")
+         return False
+
+    # Validate against market limits if available in cache info
+    try:
+        limits_leverage = market.get('limits', {}).get('leverage', {})
+        max_leverage = safe_decimal_conversion(limits_leverage.get('max'), Decimal('100')) # Default reasonable max
+        min_leverage = safe_decimal_conversion(limits_leverage.get('min'), Decimal('1'))   # Default 1
+        if max_leverage is None or min_leverage is None:
+             raise ValueError("Leverage limits not found or invalid in market data.")
+
+        if not (min_leverage <= leverage <= max_leverage):
+            logger.error(f"{Fore.RED}{log_prefix}: Leverage {leverage}x is outside the allowed range [{min_leverage}x - {max_leverage}x] for {symbol}.{Style.RESET_ALL}")
+            return False
+    except Exception as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: Could not reliably parse leverage limits for {symbol}: {e}. Proceeding with caution.{Style.RESET_ALL}")
+
+    # Bybit V5 requires buyLeverage and sellLeverage
+    params = {
+        'category': category.value,
+        'buyLeverage': str(leverage),
+        'sellLeverage': str(leverage)
+    }
+    logger.info(f"{Fore.CYAN}{log_prefix}: Sending request with params: {params}...{Style.RESET_ALL}")
+
+    try:
+        response = await exchange.set_leverage(leverage, symbol, params=params)
+        logger.debug(f"{log_prefix}: Raw response: {response}")
+        logger.success(f"{Fore.GREEN}{log_prefix}: Leverage successfully set to {leverage}x. (Implicitly ISOLATED mode).{Style.RESET_ALL}")
+        return True
+    except ExchangeError as e:
+        error_str = str(e).lower()
+        # Bybit error codes: 110043 (Leverage not modified), 110025 (Leverage invalid range)
+        if "leverage not modified" in error_str or "110043" in str(e):
+            logger.info(f"{Fore.YELLOW}{log_prefix}: Leverage for {symbol} is already {leverage}x.{Style.RESET_ALL}")
+            return True
+        elif "position idx" in error_str or "110021" in str(e):
+             logger.error(f"{Fore.RED}{log_prefix}: Failed: {e}. This might relate to position mode (Hedge/One-way). Ensure consistency.{Style.RESET_ALL}")
+             return False
+        else:
+            logger.error(f"{Fore.RED}{log_prefix}: Failed with ExchangeError: {e}{Style.RESET_ALL}", exc_info=True)
+            return False
+    except NetworkError as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: Network error: {e}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Let decorator handle retry
+    except Exception as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Failed with Unexpected Error: {e}{Style.RESET_ALL}", exc_info=True)
+        return False
+
+
+@retry_api_call(max_retries=3, initial_delay=1.0)
+async def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+    """
+    Fetches USDT equity and available balance from the Bybit V5 UNIFIED account.
+
+    Args:
+        exchange: Initialized `ccxt.async_support.bybit` instance.
+        config: Configuration object (used for USDT symbol).
+
+    Returns:
+        Tuple of (total_equity, available_balance) as Decimals, or (None, None) on critical failure.
+        Returns (Decimal(0), Decimal(0)) if balance is zero or USDT info not found but call succeeded.
+    """
+    func_name = "fetch_usdt_balance"
+    log_prefix = f"[{func_name}] Fetch USDT Balance"
+    usdt_symbol = config['USDT_SYMBOL'] # e.g., 'USDT'
+
+    logger.debug(f"{log_prefix}: Fetching balance for UNIFIED account...")
+    try:
+        balance_data = await exchange.fetch_balance(params={'accountType': 'UNIFIED'})
+        # logger.debug(f"{log_prefix}: Raw balance data: {balance_data}")
+
+        total_equity: Optional[Decimal] = None
+        available_balance: Optional[Decimal] = None
+
+        # --- Parsing Logic ---
+        # Primary Method: Use 'info' structure from V5 response
+        info_list = balance_data.get('info', {}).get('result', {}).get('list', [])
+        if info_list:
+            unified_account_info = next((acc for acc in info_list if acc.get('accountType') == 'UNIFIED'), None)
+            if unified_account_info:
+                total_equity = safe_decimal_conversion(unified_account_info.get('totalEquity'))
+                logger.debug(f"{log_prefix}: Equity from info.totalEquity: {total_equity}")
+
+                coin_list = unified_account_info.get('coin', [])
+                usdt_coin_info = next((coin for coin in coin_list if coin.get('coin') == usdt_symbol), None)
+                if usdt_coin_info:
+                    # V5 fields: availableToWithdraw, walletBalance
+                    available_str = usdt_coin_info.get('availableToWithdraw') # Preferred field
+                    if available_str is None:
+                         available_str = usdt_coin_info.get('availableBalance') # Fallback - check if this exists
+                    if available_str is None:
+                        available_str = usdt_coin_info.get('walletBalance') # Alternative fallback
+
+                    available_balance = safe_decimal_conversion(available_str)
+                    logger.debug(f"{log_prefix}: Available from info.coin ('{available_str}'): {available_balance}")
+                else:
+                    logger.warning(f"{log_prefix}: '{usdt_symbol}' coin data not found within UNIFIED account info.")
+            else:
+                 logger.warning(f"{log_prefix}: UNIFIED account details not found in info.result.list.")
+        else:
+            logger.warning(f"{log_prefix}: info.result.list is empty or not present in balance response.")
+
+
+        # Fallback Method: Use top-level CCXT structure if 'info' parsing failed
+        if total_equity is None:
+            if usdt_symbol in balance_data:
+                 total_equity = safe_decimal_conversion(balance_data[usdt_symbol].get('total'))
+                 logger.debug(f"{log_prefix}: Equity from top-level '{usdt_symbol}'.total: {total_equity}")
+
+        if available_balance is None:
+             if usdt_symbol in balance_data:
+                 available_balance = safe_decimal_conversion(balance_data[usdt_symbol].get('free'))
+                 logger.debug(f"{log_prefix}: Available from top-level '{usdt_symbol}'.free: {available_balance}")
+
+        # --- Final Validation and Return ---
+        if total_equity is None:
+             logger.warning(f"{log_prefix}: Could not determine total USDT equity after parsing attempts.")
+             total_equity = Decimal("0.0") # Default to 0 if completely unavailable but call succeeded
+
+        if available_balance is None:
+             logger.warning(f"{log_prefix}: Could not determine available USDT balance after parsing attempts.")
+             available_balance = Decimal("0.0") # Default to 0
+
+        # Ensure non-negative values
+        total_equity = max(Decimal("0.0"), total_equity)
+        available_balance = max(Decimal("0.0"), available_balance)
+
+        logger.info(f"{Fore.GREEN}{log_prefix}: Success - Equity: {total_equity:.4f} {usdt_symbol}, Available: {available_balance:.4f} {usdt_symbol}{Style.RESET_ALL}")
+        return total_equity, available_balance
+
+    except AuthenticationError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Authentication error: {e}{Style.RESET_ALL}")
+         return None, None # Critical failure
+    except (NetworkError, ExchangeNotAvailable) as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: Network/Availability error: {e}. Retry handled by decorator.{Style.RESET_ALL}")
+        raise # Let decorator handle retry
+    except ExchangeError as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Exchange error: {e}{Style.RESET_ALL}", exc_info=True)
+        return None, None # Treat as critical failure for balance check
+    except Exception as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+        return None, None # Critical failure
+
+# --- Market Data Functions ---
+# ============================
+# MODULE: market_data.py (Potential Split)
+# ============================
+
+@retry_api_call()
+async def fetch_ohlcv_paginated(
+    exchange: ccxt.bybit,
+    symbol: str,
+    timeframe: str,
+    since: Optional[int] = None, # Timestamp in milliseconds
+    limit: Optional[int] = None, # Number of candles per request
+    config: Config = None # Pass config for retry count etc.
+) -> Optional[pd.DataFrame]:
+    """
+    Fetches OHLCV data for a given symbol and timeframe, handling pagination.
+
+    Args:
+        exchange: Initialized `ccxt.async_support.bybit` instance.
+        symbol: Market symbol (e.g., 'BTC/USDT:USDT').
+        timeframe: Timeframe string (e.g., '1m', '5m', '1h', '1d').
+        since: Start time timestamp in milliseconds (optional).
+        limit: Number of candles per API request (Bybit V5 max is 1000, default here 1000).
+        config: Configuration object (used for retry settings).
+
+    Returns:
+        A pandas DataFrame containing OHLCV data sorted by timestamp,
+        or None if fetching fails critically or pandas is not installed.
+    """
+    func_name = "fetch_ohlcv_paginated"
+    log_prefix = f"[{func_name} ({symbol}, {timeframe})]"
+
+    if pd is None:
+        logger.error(f"{Fore.RED}{log_prefix}: 'pandas' library is not installed. Cannot return DataFrame.{Style.RESET_ALL}")
+        return None
+
+    market = market_cache.get_market(symbol)
+    if not market:
+        logger.error(f"{Fore.RED}{log_prefix}: Market '{symbol}' not found in cache.{Style.RESET_ALL}")
+        return None
+
+    category = market_cache.get_category(symbol)
+    if not category:
+        logger.error(f"{Fore.RED}{log_prefix}: Category not found for '{symbol}'.{Style.RESET_ALL}")
+        return None
+
+    fetch_limit = min(limit, 1000) if limit is not None else 1000 # Ensure limit <= 1000
+    all_candles = []
+    current_since = since
+    max_loops = 200 # Safety break to prevent infinite loops in unexpected scenarios
+    loops = 0
+    retries = config['RETRY_COUNT'] if config else 3
+
+    logger.info(f"{Fore.BLUE}{log_prefix}: Fetching OHLCV, Limit per call: {fetch_limit}...{Style.RESET_ALL}")
+
+    params = {'category': category.value}
+    # Determine if market is inverse for potential volume adjustment (optional)
+    is_inverse = category == Category.INVERSE
+
+    try:
+        while loops < max_loops:
+            loops += 1
+            logger.debug(f"{log_prefix}: Loop {loops}/{max_loops}, Fetching since={current_since} (datetime: {pd.to_datetime(current_since, unit='ms', errors='coerce') if current_since else 'None'}), limit={fetch_limit}")
+
+            # Define the inner fetch function for the retry decorator
+            @retry_api_call(max_retries=retries, initial_delay=1.5)
+            async def fetch_candles_with_retry(since_ts):
+                 # logger.debug(f"Calling exchange.fetch_ohlcv(symbol={symbol}, timeframe={timeframe}, since={since_ts}, limit={fetch_limit}, params={params})")
+                 return await exchange.fetch_ohlcv(symbol, timeframe, since=since_ts, limit=fetch_limit, params=params)
+
+            candles = await fetch_candles_with_retry(current_since)
+
+            if not candles: # No more data returned or initial fetch failed after retries
+                logger.info(f"{log_prefix}: No more candles returned from API. Fetch complete.")
+                break
+
+            # Filter out potential duplicates if 'since' logic isn't perfect
+            if all_candles and candles[0][0] <= all_candles[-1][0]:
+                 candles = [c for c in candles if c[0] > all_candles[-1][0]]
+                 if not candles:
+                     logger.debug(f"{log_prefix}: All fetched candles were duplicates or older. Stopping.")
+                     break # Stop if only duplicates were received
+
+            all_candles.extend(candles)
+            last_timestamp = candles[-1][0]
+            first_timestamp = candles[0][0]
+            logger.info(f"{log_prefix}: Fetched {len(candles)} candles. Range: {pd.to_datetime(first_timestamp, unit='ms')} to {pd.to_datetime(last_timestamp, unit='ms')}")
+
+            # Calculate 'since' for the next iteration (start from the timestamp AFTER the last received candle)
+            current_since = last_timestamp + 1 # Millisecond precision needed? Check timeframe granularity
+
+            # Optional: Add delay between paginated requests to respect rate limits further
+            await asyncio.sleep(exchange.rateLimit / 1000 if exchange.enableRateLimit else 0.2) # Use CCXT rateLimit or default
+
+            # Stop if we fetched less than the limit asked for (usually indicates end of data)
+            if len(candles) < fetch_limit:
+                logger.info(f"{log_prefix}: Fetched less than limit ({len(candles)} < {fetch_limit}). Assuming end of available data.")
+                break
+
+        logger.info(f"{log_prefix}: Total raw candles fetched: {len(all_candles)}")
+
+        if not all_candles:
+            logger.warning(f"{log_prefix}: No candles found for the specified parameters.")
+            return pd.DataFrame()
+
+        # --- Convert to DataFrame and Process ---
+        df = pd.DataFrame(all_candles, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('datetime', inplace=True)
+
+        # Convert columns to appropriate numeric types (prefer Decimal via object, fallback float)
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+             try:
+                 # Attempt direct conversion to float first (often sufficient)
+                 df[col] = pd.to_numeric(df[col], errors='coerce')
+                 # Optional: Convert to Decimal if high precision needed
+                 # df[col] = df[col].apply(lambda x: safe_decimal_conversion(x) if pd.notna(x) else None)
+             except Exception as conv_err:
+                  logger.warning(f"{log_prefix}: Error converting column '{col}' to numeric: {conv_err}. Leaving as object.")
+
+        # Handle potential volume differences for inverse contracts (Volume is in Base currency)
+        # if is_inverse:
+        #     logger.debug(f"{log_prefix}: Adjusting volume for inverse contract (volume is in base currency).")
+            # If caller expects volume in Quote currency, calculation needed: volume_quote = volume_base * average_price
+            # This is complex and might be better handled by the caller. Sticking to raw volume for now.
+
+        # Remove exact duplicates based on index (timestamp)
+        initial_len = len(df)
+        df = df[~df.index.duplicated(keep='first')]
+        if len(df) < initial_len:
+             logger.debug(f"{log_prefix}: Removed {initial_len - len(df)} duplicate timestamp entries.")
+
+        # Ensure DataFrame is sorted chronologically
+        df.sort_index(inplace=True)
+
+        logger.success(f"{Fore.GREEN}{log_prefix}: Successfully processed {len(df)} unique OHLCV candles.{Style.RESET_ALL}")
+        return df
+
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.error(f"{Fore.RED}{log_prefix}: API communication error after retries: {type(e).__name__}: {e}{Style.RESET_ALL}", exc_info=True)
+         # Return partial data if any was fetched
+    except ExchangeError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Exchange error during fetch: {e}{Style.RESET_ALL}", exc_info=True)
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+
+    # If errors occurred, try to return partial data
+    if all_candles:
+        logger.warning(f"{log_prefix}: Returning partial data ({len(all_candles)} candles) due to error.")
+        try:
+            df = pd.DataFrame(all_candles, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+            df.set_index('datetime', inplace=True)
+            for col in ['open', 'high', 'low', 'close', 'volume']:
+                 df[col] = pd.to_numeric(df[col], errors='coerce')
+            df = df[~df.index.duplicated(keep='first')]
+            df.sort_index(inplace=True)
+            return df
+        except Exception as final_proc_err:
+             logger.error(f"{Fore.RED}{log_prefix}: Error processing partial data: {final_proc_err}{Style.RESET_ALL}")
+             return None # Cannot even process partial data
+    else:
+        return None # No data fetched or processed
+
+@retry_api_call()
+async def fetch_ticker_validated(exchange: ccxt.bybit, symbol: str, config: Config) -> Optional[Dict]:
+    """ Fetches ticker data and performs basic validation on timestamp and key fields. """
+    func_name = "fetch_ticker_validated"
+    log_prefix = f"[{func_name} ({symbol})]"
+    logger.debug(f"{log_prefix}: Fetching ticker...")
+
+    category = market_cache.get_category(symbol)
+    if not category:
+         logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category.{Style.RESET_ALL}")
+         return None
+
+    params = {'category': category.value}
+    try:
+        ticker = await exchange.fetch_ticker(symbol, params=params)
+
+        # --- Validation ---
+        required_keys = ['symbol', 'timestamp', 'datetime', 'high', 'low', 'bid', 'ask', 'last', 'change', 'percentage', 'average', 'quoteVolume']
+        missing_keys = [key for key in required_keys if key not in ticker or ticker[key] is None]
+        if missing_keys:
+             logger.warning(f"{Fore.YELLOW}{log_prefix}: Fetched ticker is missing keys: {missing_keys}. Data: {ticker}{Style.RESET_ALL}")
+             # Decide if this is critical - maybe allow if 'last', 'bid', 'ask' are present?
+             if not all(k in ticker for k in ['last', 'bid', 'ask']): return None
+
+
+        # Timestamp validation (check if reasonably recent)
+        current_time_ms = int(time.time() * 1000)
+        ticker_time_ms = ticker.get('timestamp')
+        max_allowed_diff_ms = 60 * 1000 # 60 seconds tolerance
+
+        if ticker_time_ms and isinstance(ticker_time_ms, int):
+             time_diff = abs(current_time_ms - ticker_time_ms)
+             if time_diff > max_allowed_diff_ms:
+                  logger.warning(f"{Fore.YELLOW}{log_prefix}: Ticker timestamp ({ticker.get('datetime')}) seems stale. Difference: {time_diff/1000:.1f}s (Max allowed: {max_allowed_diff_ms/1000}s).{Style.RESET_ALL}")
+                  # Decide if stale data should be returned or treated as error
+                  # return None # Option: Return None if stale
+        elif ticker_time_ms is None:
+             logger.warning(f"{Fore.YELLOW}{log_prefix}: Ticker timestamp is missing.{Style.RESET_ALL}")
+
+
+        logger.info(f"{Fore.GREEN}{log_prefix}: Fetched: Last={ticker.get('last')}, Bid={ticker.get('bid')}, Ask={ticker.get('ask')}{Style.RESET_ALL}")
+        return ticker
+
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Exchange error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+
+
+@retry_api_call()
+async def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config, fetch_next: bool = False) -> Optional[Decimal]:
+    """
+    Fetches the current or predicted next funding rate for a perpetual swap.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol (must be a perpetual swap).
+        config: Configuration object.
+        fetch_next: If True, attempts to fetch the predicted rate for the *next* interval.
+                    If False (default), fetches the rate for the *current* interval.
+
+    Returns:
+        The funding rate as a Decimal, or None if not applicable or fetch fails.
+    """
+    func_name = "fetch_funding_rate"
+    rate_type = "Next Predicted" if fetch_next else "Current"
+    log_prefix = f"[{func_name} ({symbol} - {rate_type})]"
+
+    # Validate market is a swap
+    market = market_cache.get_market(symbol)
+    if not market or not market.get('swap', False): # Check CCXT 'swap' flag
+        logger.error(f"{Fore.RED}{log_prefix}: Symbol '{symbol}' is not a perpetual swap market.{Style.RESET_ALL}")
+        return None
+
+    category = market_cache.get_category(symbol)
+    if category not in [Category.LINEAR, Category.INVERSE]:
+        logger.error(f"{Fore.RED}{log_prefix}: Funding rates only apply to LINEAR or INVERSE contracts. Category: {category}{Style.RESET_ALL}")
+        return None
+
+    params = {'category': category.value, 'symbol': symbol}
+    logger.debug(f"{log_prefix}: Fetching with params: {params}")
+
+    try:
+        if fetch_next:
+            # Bybit V5 Ticker ('fundingRate' field) usually shows the predicted rate for the next interval.
+            logger.debug(f"{log_prefix}: Fetching ticker data for next funding rate...")
+            ticker = await exchange.fetch_ticker(symbol, params=params)
+            # logger.debug(f"{log_prefix}: Ticker raw info: {ticker.get('info')}")
+
+            # The 'fundingRate' in the ticker is the predicted rate for the next interval.
+            next_rate_str = ticker.get('info', {}).get('fundingRate')
+            next_time_ms = ticker.get('info', {}).get('nextFundingTime')
+
+            if next_rate_str is not None:
+                rate_decimal = safe_decimal_conversion(next_rate_str)
+                next_dt_str = pd.to_datetime(int(next_time_ms), unit='ms', errors='coerce') if next_time_ms else "N/A"
+                logger.info(f"{Fore.GREEN}{log_prefix}: Success - Next Rate: {rate_decimal:.8f} (Effective at: {next_dt_str}){Style.RESET_ALL}")
+                return rate_decimal
+            else:
+                 logger.error(f"{Fore.RED}{log_prefix}: Could not find 'fundingRate' in ticker info for next rate.{Style.RESET_ALL}")
+                 return None
+        else:
+            # Fetch the rate for the current funding interval.
+            # CCXT's fetch_funding_rate might return current or previous, depending on timing.
+            # Using fetch_funding_history(limit=1) might be more reliable for the *last settled* rate.
+            logger.debug(f"{log_prefix}: Fetching funding history (limit=1) for last settled rate...")
+            history = await exchange.fetch_funding_history(symbol=symbol, limit=1, params=params)
+            # logger.debug(f"{log_prefix}: Funding history raw: {history}")
+
+            if history:
+                last_interval = history[0] # Get the most recent interval
+                rate_str = last_interval.get('info', {}).get('fundingRate') # Get rate from raw info
+                timestamp_ms = last_interval.get('timestamp')
+                dt_str = last_interval.get('datetime')
+
+                if rate_str is not None:
+                     rate_decimal = safe_decimal_conversion(rate_str)
+                     logger.info(f"{Fore.GREEN}{log_prefix}: Success - Last Settled Rate: {rate_decimal:.8f} (Timestamp: {dt_str}){Style.RESET_ALL}")
+                     return rate_decimal
+                else:
+                     logger.error(f"{Fore.RED}{log_prefix}: Could not find 'fundingRate' in last history interval.{Style.RESET_ALL}")
+                     return None
+            else:
+                 logger.error(f"{Fore.RED}{log_prefix}: Failed to fetch funding history.{Style.RESET_ALL}")
+                 return None
+
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+        raise # Re-raise for retry
+    except ExchangeError as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Exchange error: {e}{Style.RESET_ALL}", exc_info=True)
+        return None
+    except Exception as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+        return None
+
+
+@retry_api_call()
+async def fetch_l2_order_book_validated(exchange: ccxt.bybit, symbol: str, limit: int, config: Config) -> Optional[Dict]:
+    """ Fetches L2 order book with basic validation. """
+    func_name = "fetch_l2_order_book_validated"
+    log_prefix = f"[{func_name} ({symbol}, limit={limit})]"
+    logger.debug(f"{log_prefix}: Fetching...")
+
+    category = market_cache.get_category(symbol)
+    if not category:
+         logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category.{Style.RESET_ALL}")
+         return None
+
+    # Bybit V5 limits: spot (50, 200), linear/inverse (50, 200, 500), option (25, 100, 200)
+    # CCXT might handle mapping, but good to be aware. Clamp limit if needed.
+    # valid_limits = [25, 50, 100, 200, 500] # Combine all possible
+    # if limit not in valid_limits: logger.warning(f"{log_prefix}: Limit {limit} may not be optimal for Bybit V5.")
+
+    params = {'category': category.value}
+    try:
+        # fetch_l2_order_book is preferred over fetch_order_book for depth=L2
+        order_book = await exchange.fetch_l2_order_book(symbol, limit=limit, params=params)
+
+        # --- Validation ---
+        if not order_book:
+            logger.error(f"{Fore.RED}{log_prefix}: Received empty order book response.{Style.RESET_ALL}")
+            return None
+        if not order_book.get('bids') or not order_book.get('asks'):
+             logger.warning(f"{Fore.YELLOW}{log_prefix}: Fetched order book has empty bids or asks. May be thin market.{Style.RESET_ALL}")
+             # Return empty book? Or None? Returning the book allows caller to decide.
+        if not order_book.get('timestamp') or not order_book.get('datetime'):
+             logger.warning(f"{Fore.YELLOW}{log_prefix}: Order book missing timestamp/datetime.{Style.RESET_ALL}")
+
+        # Optional: Check spread? (analyze_order_book does this)
+        # Optional: Check price ordering? (CCXT usually handles)
+
+        logger.info(f"{Fore.GREEN}{log_prefix}: Fetched successfully at {order_book.get('datetime')}. Top Bid: {order_book['bids'][0][0] if order_book.get('bids') else 'N/A'}, Top Ask: {order_book['asks'][0][0] if order_book.get('asks') else 'N/A'}{Style.RESET_ALL}")
+        return order_book
+
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+        raise # Re-raise for retry
+    except ExchangeError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Exchange error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+
+
+@retry_api_call()
+async def fetch_recent_trades(exchange: ccxt.bybit, symbol: str, limit: int, config: Config) -> List[Dict]:
+    """ Fetches recent public market trades. """
+    func_name = "fetch_recent_trades"
+    log_prefix = f"[{func_name} ({symbol}, limit={limit})]"
+    logger.debug(f"{log_prefix}: Fetching...")
+
+    category = market_cache.get_category(symbol)
+    if not category:
+        logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category.{Style.RESET_ALL}")
+        return []
+
+    # Bybit V5 limit: spot (60), linear/inverse (1000), option (?)
+    effective_limit = limit
+    if category == Category.SPOT and limit > 60:
+         logger.warning(f"{log_prefix}: Limit capped at 60 for SPOT trades.")
+         effective_limit = 60
+    elif category in [Category.LINEAR, Category.INVERSE] and limit > 1000:
+         logger.warning(f"{log_prefix}: Limit capped at 1000 for LINEAR/INVERSE trades.")
+         effective_limit = 1000
+
+    params = {'category': category.value, 'limit': effective_limit}
+    try:
+        trades = await exchange.fetch_trades(symbol, limit=effective_limit, params=params)
+        logger.info(f"{Fore.GREEN}{log_prefix}: Fetched {len(trades)} recent trades.{Style.RESET_ALL}")
+        return trades
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Exchange error: {e}{Style.RESET_ALL}", exc_info=True)
+         return []
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+         return []
+
+
+# --- Order Management Functions ---
+# ============================
+# MODULE: orders.py (Potential Split)
+# ============================
+
+@retry_api_call(max_retries=1, initial_delay=0) # Typically don't retry market orders unless specific error
+async def place_market_order_slippage_check(
+    exchange: ccxt.bybit,
+    symbol: str,
+    side: Side,
+    amount: Decimal,
+    config: Config,
+    max_slippage_pct: Optional[Decimal] = None,
+    is_reduce_only: bool = False,
+    time_in_force: TimeInForce = TimeInForce.IOC, # IOC default for market
+    client_order_id: Optional[str] = None,
+    position_idx: Optional[PositionIdx] = None # For Hedge Mode
+) -> Optional[Dict]:
+    """
+    Places a market order with a pre-execution spread check.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol.
+        side: Side.BUY or Side.SELL.
+        amount: Order quantity (positive Decimal).
+        config: Configuration object.
+        max_slippage_pct: Overrides config['DEFAULT_SLIPPAGE_PCT'] if provided. Check is based on spread.
+        is_reduce_only: If True, sets 'reduceOnly' flag.
+        time_in_force: Time in force (IOC or FOK recommended for market).
+        client_order_id: Optional client order ID (max 36 chars).
+        position_idx: Required for Hedge Mode positions (BUY_SIDE or SELL_SIDE).
+
+    Returns:
+        CCXT order dictionary if successfully placed, None otherwise.
+    """
+    func_name = "place_market_order_slippage_check"
+    action = "Close" if is_reduce_only else "Open/Increase"
+    log_prefix = f"[{func_name} ({symbol}, {side.value.upper()}, {amount}, {action})]"
+
+    # --- Input Validation ---
+    if amount <= config['POSITION_QTY_EPSILON']:
+        logger.error(f"{Fore.RED}{log_prefix}: Invalid amount: {amount}. Must be positive.{Style.RESET_ALL}")
+        return None
+    if time_in_force not in [TimeInForce.IOC, TimeInForce.FOK]:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: Recommended TIF for market orders is IOC or FOK. Using '{time_in_force.value}'.{Style.RESET_ALL}")
+
+    category = market_cache.get_category(symbol)
+    if not category:
+        logger.error(f"{Fore.RED}{log_prefix}: Cannot determine market category. Order cancelled.{Style.RESET_ALL}")
+        return None
+    market = market_cache.get_market(symbol)
+    if not market:
+        logger.error(f"{Fore.RED}{log_prefix}: Market data not found. Order cancelled.{Style.RESET_ALL}")
+        return None
+
+    # Format amount
+    formatted_amount_str = format_amount(exchange, symbol, amount)
+    if formatted_amount_str is None:
+         logger.error(f"{Fore.RED}{log_prefix}: Failed to format amount {amount}. Order cancelled.{Style.RESET_ALL}")
+         return None
+    formatted_amount_float = float(formatted_amount_str)
+
+    effective_max_slippage = max_slippage_pct if max_slippage_pct is not None else config['DEFAULT_SLIPPAGE_PCT']
+    logger.info(f"{Fore.BLUE}{log_prefix}: Placing order. Amount: {formatted_amount_str}, TIF: {time_in_force.value}, Max Spread Check: {effective_max_slippage:.4%}{Style.RESET_ALL}")
+
+    # --- Spread/Slippage Check (Pre-execution) ---
+    logger.debug(f"{log_prefix}: Performing pre-execution spread check...")
+    # Use analyze_order_book to get best bid/ask (fetches shallow OB)
+    ob_analysis = await analyze_order_book(exchange, symbol, config['SHALLOW_OB_FETCH_DEPTH'], config)
+    best_bid = ob_analysis.get('best_bid')
+    best_ask = ob_analysis.get('best_ask')
+
+    if best_bid and best_ask and best_bid > 0:
+        spread = (best_ask - best_bid) / best_bid
+        logger.debug(f"{log_prefix}: Current Spread: {spread:.4%} (Bid: {best_bid}, Ask: {best_ask})")
+        if spread > effective_max_slippage:
+            logger.error(f"{Back.RED}{log_prefix}: ABORTED. Spread {spread:.4%} > Max Allowed {effective_max_slippage:.4%}.{Style.RESET_ALL}")
+            return None
+    elif best_bid is None or best_ask is None:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: Could not get valid bid/ask for spread check. Proceeding without check.{Style.RESET_ALL}")
+    # else: best_bid is likely 0, proceed without check
+
+    # --- Prepare Order Parameters ---
+    params: Dict[str, Any] = {
+        'category': category.value,
+        'reduceOnly': is_reduce_only,
+        'timeInForce': time_in_force.value,
+    }
+    if client_order_id:
+        clean_cid = ''.join(filter(lambda c: c.isalnum() or c in ['-', '_'], client_order_id))[:36]
+        params['clientOrderId'] = clean_cid
+        logger.debug(f"{log_prefix}: Using clientOrderId: {clean_cid}")
+    if position_idx is not None:
+        params['positionIdx'] = position_idx.value
+        logger.debug(f"{log_prefix}: Using positionIdx: {position_idx.value} (Hedge Mode)")
+
+    # --- Place Order ---
+    try:
+        logger.info(f"{log_prefix}: Sending create_market_order request...")
+        order = await exchange.create_market_order(
+            symbol=symbol,
+            side=side.value,
+            amount=formatted_amount_float,
+            params=params
+        )
+        # --- Post-Placement Log ---
+        order_id = order.get('id')
+        status = order.get('status', 'N/A')
+        filled_amount = safe_decimal_conversion(order.get('filled', '0'))
+        avg_price = safe_decimal_conversion(order.get('average'))
+        log_color = Fore.GREEN if status in ['closed', 'filled'] else Fore.YELLOW
+
+        logger.success(f"{log_color}{log_prefix}: SUCCESS - ID: ...{format_order_id(order_id)}, Status: {status}, Filled: {format_amount(exchange, symbol, filled_amount)} @ Avg Price: {format_price(exchange, symbol, avg_price)}{Style.RESET_ALL}")
+
+        # Check partial fills for IOC/FOK
+        if time_in_force in [TimeInForce.IOC, TimeInForce.FOK] and filled_amount < amount * (Decimal(1) - config['POSITION_QTY_EPSILON']):
+             logger.warning(f"{Fore.YELLOW}{log_prefix}: Order {order_id} ({time_in_force.value}) filled partially ({filled_amount}/{amount}). Check details.{Style.RESET_ALL}")
+
+        return order
+
+    except InsufficientFunds as e:
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Insufficient Funds: {e}{Style.RESET_ALL}")
+         # send_sms_alert(...) # Optional alert
+         return None
+    except InvalidOrder as e: # e.g., quantity/price precision error, below min size
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Invalid Order Parameters: {e}{Style.RESET_ALL}")
+         return None
+    except ExchangeError as e:
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Exchange Error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         # Should be caught by retry decorator, but log if it somehow gets here
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - API Communication Error: {type(e).__name__}: {e}{Style.RESET_ALL}")
+         return None # Don't raise here as retry decorator handles raising
+    except Exception as e:
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Unexpected Error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+
+
+@retry_api_call(max_retries=1) # Don't retry limit order placement usually
+async def place_limit_order_tif(
+    exchange: ccxt.bybit,
+    symbol: str,
+    side: Side,
+    amount: Decimal,
+    price: Decimal,
+    config: Config,
+    time_in_force: TimeInForce = TimeInForce.GTC,
+    is_reduce_only: bool = False,
+    is_post_only: bool = False, # Specific flag for post-only
+    client_order_id: Optional[str] = None,
+    position_idx: Optional[PositionIdx] = None # For Hedge Mode
+) -> Optional[Dict]:
+    """
+    Places a limit order with specified time-in-force and optional post-only.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol.
+        side: Side.BUY or Side.SELL.
+        amount: Order quantity (positive Decimal).
+        price: Order price (positive Decimal).
+        config: Configuration object.
+        time_in_force: Time in force (GTC, IOC, FOK). PostOnly handled by `is_post_only`.
+        is_reduce_only: If True, sets 'reduceOnly' flag.
+        is_post_only: If True, ensures the order is only accepted if it's a maker order.
+        client_order_id: Optional client order ID (max 36 chars).
+        position_idx: Required for Hedge Mode positions.
+
+    Returns:
+        CCXT order dictionary if successfully placed, None otherwise.
+    """
+    func_name = "place_limit_order_tif"
+    action = "Close" if is_reduce_only else "Open/Increase"
+    tif_str = f"{time_in_force.value}{' PostOnly' if is_post_only else ''}"
+    log_prefix = f"[{func_name} ({symbol}, {side.value.upper()}, {amount} @ {price}, {action}, TIF:{tif_str})]"
+
+     # --- Input Validation ---
+    if amount <= config['POSITION_QTY_EPSILON']:
+        logger.error(f"{Fore.RED}{log_prefix}: Invalid amount: {amount}.{Style.RESET_ALL}")
+        return None
+    if price <= Decimal('0'):
+         logger.error(f"{Fore.RED}{log_prefix}: Invalid price: {price}.{Style.RESET_ALL}")
+         return None
+    if is_post_only and time_in_force != TimeInForce.GTC:
+        # Bybit V5 PostOnly is a specific TIF value, not compatible with IOC/FOK.
+        # CCXT might handle this mapping. Let's use Bybit's logic: TIF should be PostOnly.
+        # logger.warning(f"{Fore.YELLOW}{log_prefix}: PostOnly is usually used with GTC TIF. Adjusting TIF to PostOnly.")
+        time_in_force = TimeInForce.POST_ONLY # Use the specific PostOnly TIF value
+
+    category = market_cache.get_category(symbol)
+    if not category:
+        logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category.{Style.RESET_ALL}")
+        return None
+    market = market_cache.get_market(symbol)
+    if not market:
+        logger.error(f"{Fore.RED}{log_prefix}: Market data not found.{Style.RESET_ALL}")
+        return None
+
+    # Format amount and price
+    formatted_amount_str = format_amount(exchange, symbol, amount)
+    formatted_price_str = format_price(exchange, symbol, price)
+    if formatted_amount_str is None or formatted_price_str is None:
+         logger.error(f"{Fore.RED}{log_prefix}: Failed to format amount/price.{Style.RESET_ALL}")
+         return None
+    formatted_amount_float = float(formatted_amount_str)
+    formatted_price_float = float(formatted_price_str)
+
+    logger.info(f"{Fore.BLUE}{log_prefix}: Placing order...{Style.RESET_ALL}")
+
+    # --- Prepare Order Parameters ---
+    params: Dict[str, Any] = {
+        'category': category.value,
+        'reduceOnly': is_reduce_only,
+        'timeInForce': time_in_force.value, # Pass GTC, IOC, FOK, or PostOnly
+        # 'postOnly': is_post_only, # CCXT might use this param instead of TIF for postOnly
+    }
+    if client_order_id:
+        clean_cid = ''.join(filter(lambda c: c.isalnum() or c in ['-', '_'], client_order_id))[:36]
+        params['clientOrderId'] = clean_cid
+        logger.debug(f"{log_prefix}: Using clientOrderId: {clean_cid}")
+    if position_idx is not None:
+        params['positionIdx'] = position_idx.value
+        logger.debug(f"{log_prefix}: Using positionIdx: {position_idx.value} (Hedge Mode)")
+
+    # --- Place Order ---
+    try:
+        logger.info(f"{log_prefix}: Sending create_limit_order request...")
+        # CCXT create_limit_order should map parameters correctly
+        order = await exchange.create_limit_order(
+            symbol=symbol,
+            side=side.value,
+            amount=formatted_amount_float,
+            price=formatted_price_float,
+            params=params
+        )
+        # --- Post-Placement Log ---
+        order_id = order.get('id')
+        status = order.get('status', 'N/A')
+        order_price = safe_decimal_conversion(order.get('price'))
+        log_color = Fore.GREEN if status == 'open' else Fore.YELLOW if status in ['triggered', 'new'] else Fore.RED
+
+        logger.success(f"{log_color}{log_prefix}: SUCCESS - ID: ...{format_order_id(order_id)}, Status: {status}, Price: {format_price(exchange, symbol, order_price)}, Amount: {format_amount(exchange, symbol, order.get('amount'))}{Style.RESET_ALL}")
+        return order
+
+    except InsufficientFunds as e:
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Insufficient Funds: {e}{Style.RESET_ALL}")
+         return None
+    except InvalidOrder as e: # Catches post-only failures, precision errors, etc.
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Invalid Order Parameters or Rejected (e.g., PostOnly failed): {e}{Style.RESET_ALL}")
+         return None
+    except ExchangeError as e: # Catch other specific exchange rejections
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Exchange Error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - API Communication Error: {type(e).__name__}: {e}{Style.RESET_ALL}")
+         return None # Let retry decorator handle raising if applicable
+    except Exception as e:
+         logger.error(f"{Back.RED}{log_prefix}: FAILED - Unexpected Error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+
+
+@retry_api_call(max_retries=1) # No retry for batch placement logic itself
+async def place_batch_orders(
+    exchange: ccxt.bybit,
+    orders: List[Dict[str, Any]],
+    config: Config,
+    category_override: Optional[Category] = None
+) -> Tuple[List[Optional[Dict]], List[Optional[Dict]]]:
+    """
+    Places multiple orders in a single batch request using Bybit V5's batch order endpoint.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        orders: List of order request dictionaries. Required keys per order:
+                'symbol', 'side' (Side enum or 'buy'/'sell'), 'type' ('Limit', 'Market'),
+                'amount' (Decimal or float/str). Optional: 'price' (for Limit), etc.
+                (See Bybit V5 API docs for POST /v5/order/create-batch `request` object).
+        config: Configuration object.
+        category_override: Force this category for ALL orders in the batch. If None,
+                           category is determined per order, and all must match.
+
+    Returns:
+        Tuple: (success_orders, error_details)
+            - success_orders: List mirroring input `orders`. Contains CCXT-like order dict
+                              for successful orders, None otherwise.
+            - error_details: List mirroring input `orders`. Contains error dict
+                             {'code': ..., 'msg': ...} for failed orders, None otherwise.
+    """
+    func_name = "place_batch_orders"
+    num_orders = len(orders)
+    log_prefix = f"[{func_name} ({num_orders} orders)]"
+    logger.info(f"{Fore.BLUE}{log_prefix}: Preparing batch order request...{Style.RESET_ALL}")
+
+    if not orders:
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: No orders provided in the batch.{Style.RESET_ALL}")
+        return [], []
+
+    # Bybit V5 limits: Linear/Inverse (10), Spot (10), Option (?)
+    # Enforce limit here
+    limit = 10 # Default limit, adjust if needed for spot/option based on docs
+    if num_orders > limit:
+        logger.error(f"{Fore.RED}{log_prefix}: Batch size ({num_orders}) exceeds the limit ({limit}). Aborting.{Style.RESET_ALL}")
+        # Return error details indicating the batch size issue
+        return [None] * num_orders, [{'code': -100, 'msg': f'Batch size {num_orders} exceeds limit {limit}'}] * num_orders
+
+
+    # --- Prepare and Validate Individual Orders ---
+    batch_requests: List[Optional[Dict]] = [None] * num_orders # Pre-fill with None
+    category_to_use: Optional[str] = category_override.value if category_override else None
+    initial_errors: List[Optional[Dict]] = [None] * num_orders
+    valid_request_count = 0
+
+    for i, order_req in enumerate(orders):
+        error_msg: Optional[str] = None
+        symbol = order_req.get('symbol')
+        side_raw = order_req.get('side')
+        order_type_raw = order_req.get('type') # Expect 'Limit' or 'Market'
+        amount_raw = order_req.get('amount')
+
+        # Basic field validation
+        if not all([symbol, side_raw, order_type_raw, amount_raw]):
+            error_msg = "Missing required fields (symbol, side, type, amount)."
+        elif not isinstance(symbol, str): error_msg = "Symbol must be a string."
+        elif not isinstance(side_raw, (Side, str)): error_msg = "Side must be Side enum or string."
+        elif not isinstance(order_type_raw, str): error_msg = "Type must be a string ('Limit' or 'Market')."
+        elif order_type_raw.capitalize() not in ['Limit', 'Market']: error_msg = "Invalid order type."
+        elif safe_decimal_conversion(amount_raw, Decimal(-1)) <= config['POSITION_QTY_EPSILON']: error_msg = "Amount must be positive."
+
+        if error_msg:
+            logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} Invalid Input: {error_msg}{Style.RESET_ALL}")
+            initial_errors[i] = {'code': -101, 'msg': f"Input Validation Error: {error_msg}"}
+            continue # Skip this order
+
+        # Determine and validate category
+        current_category_enum = market_cache.get_category(symbol)
+        if not current_category_enum:
+            error_msg = f"Cannot determine category for symbol '{symbol}'."
+            logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+            initial_errors[i] = {'code': -102, 'msg': error_msg}
+            continue
+        current_category_str = current_category_enum.value
+
+        if category_override:
+            if current_category_str != category_override.value:
+                error_msg = f"Symbol '{symbol}' category '{current_category_str}' does not match override '{category_override.value}'."
+                logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} Error: {error_msg}{Style.RESET_ALL}")
+                initial_errors[i] = {'code': -103, 'msg': error_msg}
+                continue
+            effective_category = category_override.value
+        else:
+            if category_to_use is None: # First valid order sets the batch category
+                category_to_use = current_category_str
+            elif current_category_str != category_to_use:
+                error_msg = f"Category '{current_category_str}' differs from batch category '{category_to_use}'. Mixing categories not allowed."
+                logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+                initial_errors[i] = {'code': -104, 'msg': error_msg}
+                continue
+            effective_category = category_to_use
+
+        # Format amount and price
+        market = market_cache.get_market(symbol)
+        if not market:
+             error_msg = f"Market data not found for symbol '{symbol}'."
+             logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+             initial_errors[i] = {'code': -105, 'msg': error_msg}
+             continue
+
+        amount_str = format_amount(exchange, symbol, amount_raw)
+        if amount_str is None:
+              error_msg = f"Invalid amount format for value '{amount_raw}'."
+              logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+              initial_errors[i] = {'code': -106, 'msg': error_msg}
+              continue
+
+        price_str: Optional[str] = None
+        if order_type_raw.capitalize() == 'Limit':
+            price_raw = order_req.get('price')
+            if price_raw is None or safe_decimal_conversion(price_raw, Decimal(-1)) <= Decimal(0):
+                 error_msg = f"Limit order requires a valid positive 'price'."
+                 logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+                 initial_errors[i] = {'code': -107, 'msg': error_msg}
+                 continue
+            price_str = format_price(exchange, symbol, price_raw)
+            if price_str is None:
+                 error_msg = f"Invalid price format for value '{price_raw}'."
+                 logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+                 initial_errors[i] = {'code': -108, 'msg': error_msg}
+                 continue
+
+        # Normalize side ('buy'/'sell' -> 'Buy'/'Sell')
+        side_val = side_raw.value if isinstance(side_raw, Side) else str(side_raw).lower()
+        if side_val not in ['buy', 'sell']:
+            error_msg = f"Invalid side value '{side_raw}'."
+            logger.error(f"{Fore.RED}{log_prefix}: Order #{i+1} ({symbol}) Error: {error_msg}{Style.RESET_ALL}")
+            initial_errors[i] = {'code': -109, 'msg': error_msg}
+            continue
+        bybit_side = side_val.capitalize()
+
+        # --- Build the V5 request object for this order ---
+        # Keys must match Bybit V5 API spec: POST /v5/order/create-batch `request` object items
+        v5_order_req = {
+            "symbol": symbol,
+            "side": bybit_side,
+            "orderType": order_type_raw.capitalize(),
+            "qty": amount_str,
+            "category": effective_category, # Include category within each order object too
+            # Add other optional parameters passed in order_req, mapping names if necessary
+            **{k: v for k, v in order_req.items() if k not in ['symbol', 'side', 'type', 'amount', 'price', 'category'] and v is not None}
+        }
+        # Add price only for Limit orders
+        if price_str:
+            v5_order_req["price"] = price_str
+        # Handle clientOrderId specifically
+        if order_req.get("clientOrderId"):
+             cid = str(order_req["clientOrderId"])
+             clean_cid = ''.join(filter(lambda c: c.isalnum() or c in ['-', '_'], cid))[:36]
+             v5_order_req["clientOrderId"] = clean_cid
+        # Handle boolean flags (ensure they are bool, not string 'true'/'false')
+        if "reduceOnly" in v5_order_req: v5_order_req["reduceOnly"] = bool(v5_order_req["reduceOnly"])
+        if "postOnly" in v5_order_req: v5_order_req["postOnly"] = bool(v5_order_req["postOnly"]) # V5 might use TIF=PostOnly instead
+        # Handle enums like positionIdx
+        if "positionIdx" in v5_order_req and isinstance(v5_order_req["positionIdx"], PositionIdx):
+            v5_order_req["positionIdx"] = v5_order_req["positionIdx"].value
+        # Add mappings for TP/SL, conditional params if passed in order_req...
+
+        batch_requests[i] = v5_order_req # Store the valid request at the correct index
+        valid_request_count += 1
+        logger.debug(f"{log_prefix}: Prepared Order #{i+1}: {v5_order_req}")
+
+    # --- Filter out invalid requests ---
+    valid_v5_requests = [req for req in batch_requests if req is not None]
+
+    if not valid_v5_requests:
+         logger.error(f"{Fore.RED}{log_prefix}: No valid orders found in the batch to send.{Style.RESET_ALL}")
+         # Return lists matching the original input length, populated with initial errors
+         return [None] * num_orders, initial_errors
+
+    # --- Execute Batch Request ---
+    final_batch_category = category_to_use # The determined consistent category
+    if not final_batch_category:
+         # This should not happen if valid_requests is not empty, but safeguard anyway
+         logger.error(f"{Fore.RED}{log_prefix}: Could not determine final batch category. Aborting.{Style.RESET_ALL}")
+         initial_errors[0] = initial_errors[0] or {'code': -199, 'msg': 'Internal error: Batch category missing'} # Mark first order?
+         return [None] * num_orders, initial_errors
+
+
+    final_success_orders: List[Optional[Dict]] = [None] * num_orders
+    final_error_details: List[Optional[Dict]] = list(initial_errors) # Start with pre-validation errors
+
+    try:
+        logger.info(f"{log_prefix}: Sending batch create request for {len(valid_v5_requests)} valid orders (Category: {final_batch_category})...")
+        params = {
+            'category': final_batch_category,
+            'request': valid_v5_requests
+        }
+        response = await exchange.private_post_v5_order_create_batch(params)
+        logger.debug(f"{log_prefix}: Raw response: {response}")
+
+        # --- Process Batch Response ---
+        ret_code = response.get('retCode')
+        ret_msg = response.get('retMsg', 'N/A')
+
+        if ret_code == 0: # Batch request syntax OK, check individual results
+            result_data = response.get('result', {})
+            success_results_raw = result_data.get('list', []) # List of successful order creations
+            error_info_raw = result_data.get('errInfo', [])   # List of failures within the batch
+
+            logger.info(f"{Fore.GREEN}{log_prefix}: Batch processed. Success results: {len(success_results_raw)}, Failures reported: {len(error_info_raw)}{Style.RESET_ALL}")
+
+            # --- Map results back to original indices ---
+            # Use a map for efficient lookup of successful orders by clientOrderId if available
+            success_by_cid = {str(o.get('clientOrderId')): o for o in success_results_raw if o.get('clientOrderId')}
+
+            # Process errors first using the index provided by Bybit
+            processed_indices = set()
+            for err in error_info_raw:
+                original_req_idx = err.get('idx') # 0-based index in the *sent* valid_v5_requests list
+                if original_req_idx is None or original_req_idx >= len(valid_v5_requests):
+                     logger.error(f"{log_prefix}: Invalid error index {original_req_idx} received from Bybit.")
+                     continue
+
+                # Find the corresponding index in the *original* batch_requests list
+                original_list_idx = -1
+                valid_count = -1
+                for k, req in enumerate(batch_requests):
+                     if req is not None: # Count only valid requests sent
+                         valid_count += 1
+                         if valid_count == original_req_idx:
+                              original_list_idx = k
+                              break
+
+                if original_list_idx != -1:
+                     err_code = err.get('code', -1)
+                     err_msg = err.get('msg', 'Unknown error')
+                     logger.error(f"{Fore.RED}{log_prefix}: Order #{original_list_idx+1} ({batch_requests[original_list_idx].get('symbol')}) FAILED in batch. Code: {err_code}, Msg: {err_msg}{Style.RESET_ALL}")
+                     final_error_details[original_list_idx] = {'code': err_code, 'msg': err_msg}
+                     processed_indices.add(original_list_idx)
+                else:
+                     logger.error(f"{log_prefix}: Could not map error index {original_req_idx} back to original order list.")
+
+
+            # Process successes
+            success_idx_counter = 0 # Track index within success_results_raw
+            for i, original_req in enumerate(batch_requests):
+                if original_req is None or i in processed_indices:
+                    continue # Skip initially invalid or already processed as error
+
+                # Try matching success by clientOrderId first
+                matched = False
+                cid = original_req.get('clientOrderId')
+                if cid and str(cid) in success_by_cid:
+                     raw_order = success_by_cid[str(cid)]
+                     # Parse the raw order into CCXT format
+                     try:
+                         # Ensure exchange has markets loaded for parsing
+                          if not exchange.markets: await market_cache.load_markets(exchange)
+                          parsed_order = exchange.parse_order(raw_order)
+                          final_success_orders[i] = parsed_order
+                          logger.success(f"{Fore.GREEN}{log_prefix}: Order #{i+1} ({original_req.get('symbol')}, CID: {cid}) PLACED successfully. ID: ...{format_order_id(parsed_order.get('id'))}{Style.RESET_ALL}")
+                          matched = True
+                     except Exception as parse_err:
+                          logger.error(f"{log_prefix}: Failed to parse successful order #{i+1} (CID: {cid}): {parse_err}. Storing raw.")
+                          final_success_orders[i] = raw_order # Store raw if parse fails
+                          matched = True # Still mark as matched success
+
+                # Fallback: Assume order in success list corresponds if CID doesn't match
+                # This is less reliable and should only be used if CIDs are inconsistent.
+                if not matched and success_idx_counter < len(success_results_raw):
+                    raw_order = success_results_raw[success_idx_counter]
+                    # Double check symbol to improve chances
+                    if raw_order.get('symbol') == original_req.get('symbol'):
+                        try:
+                             if not exchange.markets: await market_cache.load_markets(exchange)
+                             parsed_order = exchange.parse_order(raw_order)
+                             final_success_orders[i] = parsed_order
+                             logger.success(f"{Fore.GREEN}{log_prefix}: Order #{i+1} ({original_req.get('symbol')}) PLACED successfully (matched by order). ID: ...{format_order_id(parsed_order.get('id'))}{Style.RESET_ALL}")
+                             matched = True
+                        except Exception as parse_err:
+                             logger.error(f"{log_prefix}: Failed to parse successful order #{i+1} (matched by order): {parse_err}. Storing raw.")
+                             final_success_orders[i] = raw_order
+                             matched = True
+                        success_idx_counter += 1 # Consume this success result
+
+                if not matched:
+                     # Should not happen if Bybit response is consistent
+                     logger.warning(f"{Fore.YELLOW}{log_prefix}: Order #{i+1} ({original_req.get('symbol')}) was not found in success or error list mapping. Status uncertain.{Style.RESET_ALL}")
+                     final_error_details[i] = {'code': -200, 'msg': 'Status uncertain, response mapping failed'}
+
+            return final_success_orders, final_error_details
+
+        else: # Batch request itself failed (e.g., auth, parameter error)
+            logger.error(f"{Back.RED}{log_prefix}: Entire batch request FAILED. Code: {ret_code}, Msg: {ret_msg}{Style.RESET_ALL}")
+            error_detail = {'code': ret_code, 'msg': f"Batch Request Failed: {ret_msg}"}
+            # Populate errors, respecting initial validation failures
+            for i in range(num_orders):
+                 if final_error_details[i] is None: # Only overwrite if not already an initial error
+                      final_error_details[i] = error_detail
+            return final_success_orders, final_error_details
+
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+        logger.error(f"{Back.RED}{log_prefix}: FAILED - API Communication Error: {type(e).__name__}: {e}{Style.RESET_ALL}")
+        # Assume all orders failed if the batch request itself failed network-wise
+        comm_error = {'code': -300, 'msg': f"API Communication Error: {type(e).__name__}"}
+        for i in range(num_orders):
+            if final_error_details[i] is None: final_error_details[i] = comm_error
+        return final_success_orders, final_error_details
+    except ExchangeError as e:
+        logger.error(f"{Back.RED}{log_prefix}: FAILED - Exchange Error on Batch Request: {e}{Style.RESET_ALL}", exc_info=True)
+        exc_error = {'code': -400, 'msg': f"ExchangeError: {str(e)}"}
+        for i in range(num_orders):
+            if final_error_details[i] is None: final_error_details[i] = exc_error
+        return final_success_orders, final_error_details
+    except Exception as e:
+        logger.error(f"{Back.RED}{log_prefix}: FAILED - Unexpected Error: {e}{Style.RESET_ALL}", exc_info=True)
+        unexp_error = {'code': -500, 'msg': f"Unexpected Error: {str(e)}"}
+        for i in range(num_orders):
+             if final_error_details[i] is None: final_error_details[i] = unexp_error
+        return final_success_orders, final_error_details
+
+
+@retry_api_call(max_retries=2, initial_delay=1.0)
+async def cancel_all_orders(
+    exchange: ccxt.bybit,
+    symbol: Optional[str] = None,
+    config: Optional[Config] = None, # For logging/context
+    category: Optional[Category] = None,
+    order_filter: Optional[OrderFilter] = None,
+    reason: str = "General Cleanup"
+) -> bool:
+    """
+    Cancels open orders using Bybit V5's cancelAll endpoint.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Optional: Market symbol filter.
+        config: Optional configuration object.
+        category: Optional: Explicitly specify category. Required if symbol is None.
+        order_filter: Optional: Filter by order type (Order, StopOrder, tpslOrder).
+        reason: Logging description for the cancellation.
+
+    Returns:
+        True if the cancellation request was accepted by the API (retCode=0).
+        False if the request failed.
+
+    WARNING: If `symbol` is None, this cancels ALL orders in the specified `category`
+             that match the `order_filter`. Use with extreme caution.
+    """
+    func_name = "cancel_all_orders"
+    log_prefix = f"[{func_name} ({reason})]"
+
+    # --- Determine Category ---
+    effective_category: Optional[str] = None
+    if category:
+        effective_category = category.value
+        log_prefix += f" | Category: {effective_category}"
+    elif symbol:
+        cached_category = market_cache.get_category(symbol)
+        if cached_category:
+            effective_category = cached_category.value
+            log_prefix += f" | Symbol: {symbol} (Cat: {effective_category})"
+        else:
+             logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category for symbol '{symbol}'. Cancellation aborted.{Style.RESET_ALL}")
+             return False
+    else:
+        logger.error(f"{Fore.RED}{log_prefix}: Must provide either 'symbol' or 'category'. Cancellation aborted.{Style.RESET_ALL}")
+        return False
+
+    # --- Prepare Parameters ---
+    params: Dict[str, Any] = {'category': effective_category}
+    target_desc = ""
+    if symbol:
+        params['symbol'] = symbol
+        target_desc = f"for {symbol}"
+    else:
+        logger.warning(f"{Back.YELLOW}{Fore.BLACK}{log_prefix}: No symbol provided. Attempting to cancel ALL orders in category '{effective_category}'.{Style.RESET_ALL}")
+        target_desc = f"ALL in category {effective_category}"
+
+    if order_filter:
+        params['orderFilter'] = order_filter.value
+        log_prefix += f" | Filter: {order_filter.value}"
+        target_desc += f" matching filter {order_filter.value}"
+    # else: Bybit defaults to 'Order' if filter omitted
+
+    logger.info(f"{Fore.CYAN}{log_prefix}: Sending cancelAll request {target_desc}...{Style.RESET_ALL}")
+
+    # --- Execute Cancellation using V5 specific endpoint ---
+    try:
+        # Use private_post_v5_order_cancel_all for direct control over V5 features
+        response = await exchange.private_post_v5_order_cancel_all(params=params)
+        logger.debug(f"{log_prefix}: Raw response: {response}")
+
+        ret_code = response.get('retCode')
+        ret_msg = response.get('retMsg', 'N/A')
+
+        if ret_code == 0:
+            cancelled_list = response.get('result', {}).get('list', [])
+            count = len(cancelled_list)
+            if count > 0:
+                 logger.success(f"{Fore.GREEN}{log_prefix}: Successfully cancelled {count} order(s) {target_desc}.{Style.RESET_ALL}")
+            else:
+                 logger.info(f"{Fore.YELLOW}{log_prefix}: Cancellation request successful, but no matching open orders found {target_desc}.{Style.RESET_ALL}")
+            return True
+        else:
+            logger.error(f"{Fore.RED}{log_prefix}: Cancellation request FAILED {target_desc}. Code: {ret_code}, Msg: {ret_msg}{Style.RESET_ALL}")
+            # Provide hints for common errors
+            if ret_code == 10001: logger.error(f"{log_prefix}: Hint: Check parameters (category, symbol format, filter value).")
+            elif ret_code == 170101: logger.error(f"{log_prefix}: Hint: Authentication error (check API keys/permissions).")
+            return False
+
+    except AuthenticationError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Authentication error: {e}{Style.RESET_ALL}")
+         return False # Don't retry auth errors usually
+    except NotSupported as e:
+        logger.error(f"{Fore.RED}{log_prefix}: CCXT method private_post_v5_order_cancel_all seems unsupported? Error: {e}{Style.RESET_ALL}")
+        return False # Cannot proceed if method missing
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Exchange error during cancellation: {e}{Style.RESET_ALL}", exc_info=True)
+        return False
+    except Exception as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Unexpected error during cancellation: {e}{Style.RESET_ALL}", exc_info=True)
+        return False
+
+
+@retry_api_call(max_retries=2, initial_delay=0.5)
+async def cancel_order(
+    exchange: ccxt.bybit,
+    symbol: str, # Required by CCXT method signature usually
+    order_id: Optional[str] = None,
+    client_order_id: Optional[str] = None,
+    config: Optional[Config] = None,
+    order_filter: Optional[OrderFilter] = None # Needed for conditional V5
+) -> bool:
+    """
+    Cancels a single specific order by its exchange ID or client order ID.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol associated with the order.
+        order_id: Exchange's unique order ID. Provide EITHER order_id OR client_order_id.
+        client_order_id: Client-provided order ID.
+        config: Optional configuration object.
+        order_filter: Specify if cancelling conditional/stop (STOP_ORDER, TPSL_ORDER).
+
+    Returns:
+        True if successfully cancelled or already not found/closed. False on failure.
+    """
+    func_name = "cancel_order"
+
+    if not order_id and not client_order_id:
+        logger.error(f"{Fore.RED}[{func_name}] Must provide 'order_id' or 'client_order_id'.{Style.RESET_ALL}")
+        return False
+    # Prioritize order_id if both are given
+    primary_id = order_id if order_id else client_order_id
+    id_type = "Order ID" if order_id else "Client Order ID"
+    id_value_log = format_order_id(order_id) if order_id else client_order_id # Log truncated ID
+    log_prefix = f"[{func_name} ({symbol}, {id_type}: ...{id_value_log})]"
+
+    category = market_cache.get_category(symbol)
+    if not category:
+        logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category. Cancellation aborted.{Style.RESET_ALL}")
+        return False
+
+    # --- Prepare Parameters ---
+    # Bybit V5 Cancel Order: POST /v5/order/cancel
+    # Requires category, symbol, and EITHER orderId OR clientOrderId
+    params: Dict[str, Any] = {
+        'category': category.value,
+        'symbol': symbol,
+        # CCXT's cancel_order handles passing the ID argument to the correct parameter
+        # 'orderId': order_id, # Let CCXT handle mapping `id` arg
+        # 'clientOrderId': client_order_id, # Let CCXT handle mapping `id` arg if `order_id` is None
+    }
+    # V5 cancel endpoint might need orderFilter for conditional orders
+    if order_filter:
+        params['orderFilter'] = order_filter.value
+        log_prefix += f" Filter:{order_filter.value}"
+
+    logger.info(f"{Fore.CYAN}{log_prefix}: Sending cancel request...{Style.RESET_ALL}")
+
+    # --- Execute Cancellation ---
+    try:
+        # Use CCXT's unified cancel_order method. It should map `id` to orderId/clientOrderId.
+        response = await exchange.cancel_order(id=primary_id, symbol=symbol, params=params)
+
+        logger.debug(f"{log_prefix}: Raw response: {response}") # Raw response varies by exchange/method
+        # Successful cancellation often doesn't raise an exception, may return None or order data.
+        logger.success(f"{Fore.GREEN}{log_prefix}: Cancellation request sent successfully.{Style.RESET_ALL}")
+        return True
+
+    except OrderNotFound as e:
+        # This is often a success case - the order is already gone.
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: Order not found. Assumed already cancelled or filled. ({e}){Style.RESET_ALL}")
+        return True
+    except InvalidOrder as e: # e.g., trying to cancel a filled/rejected order
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: Invalid order state for cancellation (already filled/cancelled/rejected?). ({e}){Style.RESET_ALL}")
+         # Check specific Bybit codes if InvalidOrder wraps them
+         error_str = str(e).lower()
+         # 170145: Order has been filled / 170146: Order has been cancelled / 170131: order not exists
+         if "170145" in error_str or "170146" in error_str or "170131" in error_str or "order not exists" in error_str:
+             return True # Treat as success
+         else:
+             logger.error(f"{Fore.RED}{log_prefix}: InvalidOrder encountered: {e}{Style.RESET_ALL}")
+             return False # Treat other invalid states as failure
+    except AuthenticationError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Authentication error: {e}{Style.RESET_ALL}")
+         return False
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+         # Check for specific Bybit errors that mean "already gone"
+         error_str = str(e).lower()
+         if "170145" in error_str or "170146" in error_str or "170131" in error_str or "order not exists" in error_str:
+              logger.warning(f"{Fore.YELLOW}{log_prefix}: ExchangeError indicates order already filled/cancelled/non-existent ({e}). Considered success.{Style.RESET_ALL}")
+              return True
+         else:
+              logger.error(f"{Fore.RED}{log_prefix}: Exchange error during cancellation: {e}{Style.RESET_ALL}", exc_info=True)
+              return False
+    except Exception as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Unexpected error during cancellation: {e}{Style.RESET_ALL}", exc_info=True)
+        return False
+
+
+@retry_api_call()
+async def fetch_order(
+    exchange: ccxt.bybit,
+    symbol: str, # Symbol often needed for context, esp. with clientOrderId
+    order_id: Optional[str] = None,
+    client_order_id: Optional[str] = None,
+    config: Optional[Config] = None,
+    order_filter: Optional[OrderFilter] = None # Needed for conditional V5
+) -> Optional[Dict]:
+    """
+    Fetches a single order's details by its exchange ID or client order ID.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol (may provide context).
+        order_id: Exchange's unique order ID. Provide EITHER order_id OR client_order_id.
+        client_order_id: Client-provided order ID.
+        config: Optional configuration object.
+        order_filter: Specify if fetching conditional/stop (STOP_ORDER, TPSL_ORDER).
+
+    Returns:
+        CCXT order dictionary if found, None otherwise.
+    """
+    func_name = "fetch_order"
+    if not order_id and not client_order_id:
+        logger.error(f"{Fore.RED}[{func_name}] Must provide 'order_id' or 'client_order_id'.{Style.RESET_ALL}")
+        return None
+    primary_id = order_id if order_id else client_order_id
+    id_type = "Order ID" if order_id else "Client Order ID"
+    id_value_log = format_order_id(order_id) if order_id else client_order_id
+    log_prefix = f"[{func_name} ({symbol}, {id_type}: ...{id_value_log})]"
+
+    category = market_cache.get_category(symbol)
+    if not category:
+        logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category. Fetch aborted.{Style.RESET_ALL}")
+        return None
+
+    # --- Prepare Parameters ---
+    # Bybit V5 Fetch Order: GET /v5/order/history requires category
+    # Can filter by orderId or clientOrderId. Needs orderFilter for conditional.
+    params: Dict[str, Any] = {'category': category.value}
+    # Let CCXT handle mapping ID to correct parameter in fetch_order
+    # if order_id: params['orderId'] = order_id # CCXT should handle this
+    # if client_order_id: params['clientOrderId'] = client_order_id # CCXT should handle this
+
+    if order_filter:
+        params['orderFilter'] = order_filter.value
+        log_prefix += f" Filter:{order_filter.value}"
+
+    logger.debug(f"{log_prefix}: Sending fetch request with params {params}...")
+
+    # --- Execute Fetch ---
+    try:
+        # Use CCXT's unified fetch_order method.
+        order_data = await exchange.fetch_order(id=primary_id, symbol=symbol, params=params)
+
+        status = order_data.get('status', 'N/A')
+        returned_id = order_data.get('id')
+        log_color = Fore.GREEN if status in ['closed', 'filled', 'canceled'] else Fore.YELLOW if status == 'open' else Fore.CYAN
+        logger.info(f"{log_color}{log_prefix}: Fetched successfully. Status: {status}, ID: ...{format_order_id(returned_id)}{Style.RESET_ALL}")
+        return order_data
+
+    except OrderNotFound as e:
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: Order not found. ({e}){Style.RESET_ALL}")
+        return None
+    except AuthenticationError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Authentication error: {e}{Style.RESET_ALL}")
+         return None
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+         # Check if error indicates wrong orderFilter needed
+         error_str = str(e).lower()
+         # Bybit: 170131 Order does not exist / 170214 Order does not exist or status has been changed
+         if "170131" in error_str or "170214" in error_str or "order does not exist" in error_str:
+              logger.warning(f"{Fore.YELLOW}{log_prefix}: ExchangeError indicates Order not found ({e}).{Style.RESET_ALL}")
+              return None
+         elif "order_filter" in error_str: # Generic hint
+              logger.warning(f"{log_prefix}: Fetch might require specific 'orderFilter' param (StopOrder, tpslOrder?). Error: {e}")
+              return None # Don't retry if params likely wrong
+         else:
+              logger.error(f"{Fore.RED}{log_prefix}: Exchange error fetching order: {e}{Style.RESET_ALL}", exc_info=True)
+              return None # Treat other exchange errors as failure
+    except Exception as e:
+        logger.error(f"{Fore.RED}{log_prefix}: Unexpected error fetching order: {e}{Style.RESET_ALL}", exc_info=True)
+        return None
+
+
+@retry_api_call()
+async def fetch_open_orders_filtered(
+    exchange: ccxt.bybit,
+    symbol: Optional[str] = None,
+    config: Optional[Config] = None,
+    category: Optional[Category] = None,
+    order_filter: Optional[OrderFilter] = None,
+    limit: Optional[int] = None # V5 supports limit (default 50, max 50)
+) -> List[Dict]:
+    """
+    Fetches open orders, allowing filtering by V5 parameters.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Optional: Filter by market symbol.
+        config: Optional configuration object.
+        category: Optional: Filter by category. Required if symbol is None.
+        order_filter: Optional: Filter by order type (Order, StopOrder, tpslOrder).
+        limit: Optional: Max number of orders to return (Bybit V5 default/max is 50).
+
+    Returns:
+        List of open order dictionaries (CCXT format), or empty list on failure/no orders.
+    """
+    func_name = "fetch_open_orders_filtered"
+    log_prefix = f"[{func_name}]"
+
+    # --- Determine Category ---
+    effective_category: Optional[str] = None
+    if category:
+        effective_category = category.value
+        log_prefix += f" | Category: {effective_category}"
+    elif symbol:
+        cached_category = market_cache.get_category(symbol)
+        if cached_category:
+            effective_category = cached_category.value
+            log_prefix += f" | Symbol: {symbol} (Cat: {effective_category})"
+        else:
+             logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category for symbol '{symbol}'. Fetch aborted.{Style.RESET_ALL}")
+             return []
+    else:
+        # Attempt to get category from config if available, otherwise fail
+        default_symbol = config.get('SYMBOL') if config else None
+        if default_symbol:
+             cached_category = market_cache.get_category(default_symbol)
+             if cached_category:
+                  effective_category = cached_category.value
+                  logger.warning(f"{log_prefix}: No symbol/category provided, using category '{effective_category}' from default symbol '{default_symbol}'.")
+             else:
+                  logger.error(f"{Fore.RED}{log_prefix}: Cannot determine category from default symbol '{default_symbol}'. Provide symbol or category.{Style.RESET_ALL}")
+                  return []
+        else:
+            logger.error(f"{Fore.RED}{log_prefix}: Must provide 'symbol' or 'category' (or have a usable default symbol in config). Fetch aborted.{Style.RESET_ALL}")
+            return []
+
+
+    # --- Prepare Parameters ---
+    # Bybit V5: GET /v5/order/realtime requires category
+    # Can filter by: symbol, baseCoin, orderId, clientOrderId, orderFilter, limit
+    params: Dict[str, Any] = {'category': effective_category}
+    target_desc = f"category {effective_category}"
+    if symbol:
+        params['symbol'] = symbol
+        target_desc = f"symbol {symbol}"
+    if order_filter:
+        params['orderFilter'] = order_filter.value
+        log_prefix += f" | Filter: {order_filter.value}"
+        target_desc += f", filter {order_filter.value}"
+    if limit:
+        params['limit'] = min(limit, 50) # Clamp limit to V5 max
+        target_desc += f", limit {params['limit']}"
+
+    logger.info(f"{Fore.CYAN}{log_prefix}: Fetching open orders for {target_desc}...{Style.RESET_ALL}")
+
+    # --- Execute Fetch ---
+    try:
+        # Use CCXT's fetch_open_orders, passing V5 params
+        open_orders = await exchange.fetch_open_orders(symbol=symbol, params=params)
+        logger.info(f"{Fore.GREEN}{log_prefix}: Found {len(open_orders)} open order(s).{Style.RESET_ALL}")
+        return open_orders
+    except AuthenticationError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Authentication error: {e}{Style.RESET_ALL}")
+         return []
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Exchange error fetching open orders: {e}{Style.RESET_ALL}", exc_info=True)
+         return []
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Unexpected error fetching open orders: {e}{Style.RESET_ALL}", exc_info=True)
+         return []
+
+
+# --- Position Management Functions ---
+# ============================
+# MODULE: positions.py (Potential Split)
+# ============================
+
+@retry_api_call()
+async def get_current_position_bybit_v5(
+    exchange: ccxt.bybit,
+    symbol: str,
+    config: Config
+) -> Optional[Union[Dict, List[Dict]]]:
+    """
+    Fetches the current position details for a specific symbol using Bybit V5 endpoint.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol.
+        config: Configuration object.
+
+    Returns:
+        - A single CCXT-like position dictionary if in One-Way mode with an open position.
+        - A list of CCXT-like position dictionaries if in Hedge mode with open position(s).
+        - None if no position exists or the symbol is SPOT/OPTION (or fetch fails).
+    """
+    func_name = "get_current_position_bybit_v5"
+    log_prefix = f"[{func_name} ({symbol})]"
+    logger.debug(f"{log_prefix}: Fetching position...")
+
+    category = market_cache.get_category(symbol)
+    if not category or category in [Category.SPOT, Category.OPTION]:
+        logger.debug(f"{log_prefix}: Positions not applicable for category '{category}'.")
+        return None
+    # if category == Category.OPTION: logger.warning(f"{log_prefix}: Option position structure might differ.")
+
+    params = {'category': category.value, 'symbol': symbol}
+
+    try:
+        # Use V5 specific endpoint GET /v5/position/list
+        response = await exchange.private_get_v5_position_list(params=params)
+        # logger.debug(f"{log_prefix}: Raw response: {response}")
+
+        ret_code = response.get('retCode')
+        if ret_code != 0:
+            ret_msg = response.get('retMsg', 'N/A')
+            logger.error(f"{Fore.RED}{log_prefix}: API error. Code: {ret_code}, Msg: {ret_msg}{Style.RESET_ALL}")
+            # Handle specific errors if needed (e.g., 170001: Internal error)
+            return None
+
+        position_list_raw = response.get('result', {}).get('list', [])
+
+        if not position_list_raw:
+            logger.info(f"{log_prefix}: No active position found.")
+            return None
+
+        # Filter out positions with zero size (within epsilon)
+        epsilon = config.get('POSITION_QTY_EPSILON', Decimal('1E-8'))
+        open_positions_raw = [
+            p for p in position_list_raw
+            if abs(safe_decimal_conversion(p.get('size', '0'), Decimal(0))) > epsilon
+        ]
+
+        if not open_positions_raw:
+            logger.info(f"{log_prefix}: Position(s) found but size is zero.")
+            return None
+
+        # --- Parse and Format Positions ---
+        parsed_positions = []
+        for pos_data in open_positions_raw:
+             try:
+                 # Use CCXT's parser for consistency
+                 # Ensure markets are loaded in the exchange instance for parsing
+                  if not exchange.markets: await market_cache.load_markets(exchange)
+                  parsed = exchange.parse_position(pos_data)
+                  # Add V5 specific info not in standard parse_position
+                  parsed['info'] = pos_data # Keep raw V5 data
+                  parsed['misc'] = {
+                      'positionIdx': pos_data.get('positionIdx'),
+                      'riskId': pos_data.get('riskId'),
+                      'riskLimitValue': pos_data.get('riskLimitValue'),
+                      'takeProfit': pos_data.get('takeProfit'),
+                      'stopLoss': pos_data.get('stopLoss'),
+                      'trailingStop': pos_data.get('trailingStop'),
+                      'tpslMode': pos_data.get('tpslMode'), # 'Full' or 'Partial'
+                      'adlRankIndicator': pos_data.get('adlRankIndicator'),
+                      'createdTime': pos_data.get('createdTime'),
+                      'updatedTime': pos_data.get('updatedTime'),
+                  }
+                  parsed_positions.append(parsed)
+             except Exception as parse_err:
+                  logger.error(f"{log_prefix}: Failed to parse position data: {pos_data}. Error: {parse_err}", exc_info=True)
+                  # Optionally return raw data or skip
+                  # parsed_positions.append({'info': pos_data, 'error': str(parse_err)})
+
+
+        if not parsed_positions:
+             logger.error(f"{log_prefix}: Failed to parse any valid open positions from raw data.")
+             return None
+
+        # --- Determine Return Type (Single Dict or List) ---
+        position_indices = {p['misc'].get('positionIdx') for p in parsed_positions}
+
+        if len(parsed_positions) == 1:
+             pos = parsed_positions[0]
+             idx = pos['misc'].get('positionIdx')
+             mode = "One-Way" if idx == PositionIdx.ONE_WAY else "Hedge" # Determine mode from index
+             logger.info(f"{Fore.GREEN}{log_prefix}: Found position ({mode} Mode): Side: {pos.get('side')}, Size: {pos.get('contracts')}, Entry: {pos.get('entryPrice')}{Style.RESET_ALL}")
+             return pos # Return single dict for one-way or single hedge side
+        else:
+             # Multiple entries usually mean Hedge Mode (Buy and Sell sides)
+             logger.info(f"{Fore.GREEN}{log_prefix}: Found {len(parsed_positions)} position entries (Hedge Mode). Returning list.{Style.RESET_ALL}")
+             for pos in parsed_positions:
+                  logger.info(f"  - Side: {pos.get('side')}, Size: {pos.get('contracts')}, Entry: {pos.get('entryPrice')}, Idx: {pos['misc'].get('positionIdx')}")
+             return parsed_positions # Return list for hedge mode
+
+    except AuthenticationError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Authentication error: {e}{Style.RESET_ALL}")
+         return None
+    except (NetworkError, ExchangeNotAvailable, RateLimitExceeded) as e:
+         logger.warning(f"{Fore.YELLOW}{log_prefix}: API communication error: {type(e).__name__}. Retry handled by decorator.{Style.RESET_ALL}")
+         raise # Re-raise for retry
+    except ExchangeError as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Exchange error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Unexpected error: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+
+
+async def close_position_reduce_only(exchange: ccxt.bybit, symbol: str, config: Config) -> bool:
+    """
+    Closes the entire current position(s) for a symbol using reduceOnly market order(s).
+    Handles both One-Way and Hedge modes.
+
+    Args:
+        exchange: Initialized ccxt.bybit instance.
+        symbol: Market symbol.
+        config: Configuration object.
+
+    Returns:
+        True if all open positions for the symbol were successfully closed (or none existed).
+        False if fetching the position or placing closing orders failed.
+    """
+    func_name = "close_position_reduce_only"
+    log_prefix = f"[{func_name} ({symbol})]"
+    logger.info(f"{Fore.YELLOW}{log_prefix}: Attempting to close position(s) via reduceOnly market order...{Style.RESET_ALL}")
+
+    # 1. Get current position details
+    position_data = await get_current_position_bybit_v5(exchange, symbol, config)
+
+    if position_data is None:
+        logger.info(f"{log_prefix}: No open position found. Nothing to close.")
+        return True # Success, no position existed
+
+    # Ensure position_data is a list for consistent handling
+    positions_to_close = position_data if isinstance(position_data, list) else [position_data]
+
+    # 2. Prepare closing orders for each position entry
+    close_orders_placed = []
+    all_orders_successful = True
+
+    for position in positions_to_close:
+        position_size = position.get('contracts') # Size from formatted position
+        entry_price = position.get('entryPrice')
+        position_side = position.get('side') # 'buy' or 'sell'
+        position_idx_val = position.get('misc', {}).get('positionIdx')
+        position_idx_enum = PositionIdx(position_idx_val) if position_idx_val is not None else None
+
+        if not position_size or not position_side:
+            logger.error(f"{Fore.RED}{log_prefix}: Invalid position data entry: {position}. Cannot determine size/side. Skipping closure for this entry.{Style.RESET_ALL}")
+            all_orders_successful = False
+            continue
+
+        close_side = Side.SELL if position_side == 'buy' else Side.BUY
+        close_amount = Decimal(str(position_size)) # Ensure Decimal amount
+
+        mode_desc = f"(Idx: {position_idx_val})" if position_idx_enum != PositionIdx.ONE_WAY else ""
+        logger.info(f"{log_prefix}: Current Position {mode_desc}: {position_side} {close_amount} @ {entry_price}. Preparing {close_side.value} reduceOnly market order.")
+
+        # 3. Place the reduceOnly market order for this position entry
+        close_order = await place_market_order_slippage_check(
+            exchange=exchange,
+            symbol=symbol,
+            side=close_side,
+            amount=close_amount,
+            config=config,
+            is_reduce_only=True,
+            client_order_id=f"close_{symbol}_{position_idx_val}_{int(time.time()*1000)}", # Unique ID per side
+            position_idx=position_idx_enum # Pass the correct index for hedge mode
+        )
+
+        close_orders_placed.append(close_order)
+
+        if close_order and close_order.get('status') in ['closed', 'filled']:
+            logger.success(f"{Fore.GREEN}{log_prefix}: Position entry {mode_desc} successfully closed by order ID ...{format_order_id(close_order.get('id'))}.{Style.RESET_ALL}")
+        elif close_order:
+            logger.warning(f"{Fore.YELLOW}{log_prefix}: Close order placed for entry {mode_desc} (ID ...{format_order_id(close_order.get('id'))}) but status is '{close_order.get('status')}'. Position might not be fully closed.{Style.RESET_ALL}")
+            all_orders_successful = False
+        else:
+            logger.error(f"{Fore.RED}{log_prefix}: Failed to place closing market order for position entry {mode_desc}.{Style.RESET_ALL}")
+            all_orders_successful = False
+
+        # Small delay between closing orders if in hedge mode might be prudent
+        if len(positions_to_close) > 1:
+            await asyncio.sleep(0.3)
+
+    # 4. Final Verification (Optional but recommended)
+    if all_orders_successful:
+        logger.info(f"{log_prefix}: All closing orders sent successfully. Verifying position state...")
+        await asyncio.sleep(config.get('DEFAULT_RECV_WINDOW', 5000) / 1000 + 1.0) # Wait for API to settle
+        final_position = await get_current_position_bybit_v5(exchange, symbol, config)
+        if final_position is None:
+            logger.success(f"{Fore.GREEN}{log_prefix}: Position confirmed closed for {symbol}.{Style.RESET_ALL}")
+            return True
+        else:
+            logger.warning(f"{Fore.YELLOW}{log_prefix}: Verification failed - position still shows open after closure attempt. Details: {final_position}{Style.RESET_ALL}")
+            return False # Closure did not result in zero position
+    else:
+        logger.error(f"{Fore.RED}{log_prefix}: One or more closing orders failed or were not confirmed filled. Position closure failed.{Style.RESET_ALL}")
+        return False
+
+
+# --- WebSocket Functionality ---
+# ============================
+# MODULE: websocket.py (Potential Split)
+# ============================
+
+# Global dictionary to keep track of active WebSocket connections/subscriptions
+# Key: Unique URL, Value: WebSocketClientProtocol instance
+_active_websockets: Dict[str, Any] = {} # Use 'Any' due to websockets potentially being None
+# Global dictionary to track background message handling tasks
+# Key: Unique URL, Value: asyncio.Task instance
+_websocket_tasks: Dict[str, asyncio.Task] = {}
+# Lock for managing access to the global tracking dicts
+_ws_manage_lock = asyncio.Lock()
+
+async def _handle_websocket_message(
+    ws: websockets.WebSocketClientProtocol, # Pass type hint directly
+    url: str,
+    callback: Callable[[Dict], Coroutine[Any, Any, None]], # Callback should be async
+    ping_interval: Optional[float] = 20.0 # Bybit requires sending pings
+):
+    """ Internal handler to process messages, send pings, and manage connection state. """
+    func_name = "_handle_websocket_message"
+    logger.info(f"[{func_name}] Starting message handler for {url}")
+    last_ping_time = time.monotonic()
+    is_private = '/private' in url # Check if it's a private stream
+
+    while not ws.closed:
+        try:
+            # Wait for message with a timeout to allow sending pings
+            recv_timeout = ping_interval / 2 if ping_interval else 10.0
+            message_str = await asyncio.wait_for(ws.recv(), timeout=recv_timeout)
+
+            try:
+                message_data = json.loads(message_str)
+                # logger.debug(f"[{func_name} ({url})] Received: {message_data}") # Very verbose
+
+                # Handle PING from server (Bybit public doesn't use server ping, but good practice)
+                if message_data.get("op") == "ping":
+                    pong_payload = {"op": "pong"}
+                    if "req_id" in message_data: pong_payload["req_id"] = message_data["req_id"]
+                    await ws.send(json.dumps(pong_payload))
+                    logger.debug(f"[{func_name} ({url})] Sent PONG response.")
+                    continue
+
+                # Handle AUTH response for private streams
+                if is_private and message_data.get("op") == "auth":
+                    if message_data.get("success"):
+                        logger.success(f"{Fore.GREEN}[{func_name} ({url})] WebSocket authentication successful.{Style.RESET_ALL}")
+                    else:
+                        auth_err_msg = message_data.get("ret_msg", "Unknown auth error")
+                        logger.error(f"{Back.RED}[{func_name} ({url})] WebSocket authentication FAILED: {auth_err_msg}{Style.RESET_ALL}")
+                        # Close connection on auth failure?
+                        await ws.close(code=1008, reason="Authentication failed")
+                        break # Exit handler loop
+                    continue # Don't pass auth response to main callback
+
+                 # Handle SUBSCRIBE response
+                if message_data.get("op") == "subscribe":
+                    if message_data.get("success"):
+                         sub_args = message_data.get("req", {}).get("args", message_data.get("args", [])) # V5 response structure varies
+                         logger.info(f"{Fore.GREEN}[{func_name} ({url})] Subscription successful for: {sub_args}{Style.RESET_ALL}")
+                    else:
+                         sub_err_msg = message_data.get("ret_msg", "Unknown subscription error")
+                         logger.error(f"{Back.RED}[{func_name} ({url})] Subscription FAILED: {sub_err_msg}{Style.RESET_ALL}")
+                    continue # Don't pass subscription response to main callback
+
+                # Pass data message to the user's callback function
+                # Ensure callback is awaited if it's an async function
+                await callback(message_data)
+
+            except json.JSONDecodeError:
+                logger.warning(f"[{func_name} ({url})] Received non-JSON message: {message_str[:100]}...")
+            except Exception as cb_err:
+                logger.error(f"[{func_name} ({url})] Error in user callback function: {cb_err}", exc_info=True)
+                # Continue processing other messages
+
+        except asyncio.TimeoutError:
+            # No message received within timeout, check if ping needed
+            if ping_interval and (time.monotonic() - last_ping_time > ping_interval):
+                 try:
+                      ping_payload = {"req_id": f"ping_{int(time.time()*1000)}", "op": "ping"}
+                      await ws.send(json.dumps(ping_payload))
+                      last_ping_time = time.monotonic()
+                      logger.debug(f"[{func_name} ({url})] Sent PING request.")
+                 except ConnectionClosed:
+                      logger.warning(f"[{func_name} ({url})] Connection closed while trying to send ping.")
+                      break # Exit handler loop
+                 except Exception as ping_err:
+                      logger.error(f"[{func_name} ({url})] Error sending ping: {ping_err}")
+                      # Decide whether to break or continue
+            continue # Continue loop after timeout or ping
+        except ConnectionClosedOK:
+            logger.info(f"[{func_name} ({url})] Connection closed normally.")
+            break
+        except ConnectionClosedError as e:
+            logger.warning(f"[{func_name} ({url})] Connection closed with error: {e}. Code: {e.code}, Reason: {e.reason}")
+            break # Exit handler loop, reconnection handled elsewhere if needed
+        except WebSocketException as e:
+             logger.error(f"[{func_name} ({url})] WebSocket exception: {e}", exc_info=True)
+             break # Exit on other WS errors
+        except Exception as e:
+            logger.error(f"[{func_name} ({url})] Unexpected error in message handler loop: {e}", exc_info=True)
+            break # Exit on unexpected errors
+
+    logger.info(f"[{func_name}] Message handler stopped for {url}.")
+    # Clean up global tracking when handler exits
+    async with _ws_manage_lock:
+        if url in _active_websockets:
+            del _active_websockets[url]
+        if url in _websocket_tasks:
+            # Check if task is already done to avoid errors cancelling a completed task
+            if not _websocket_tasks[url].done():
+                 _websocket_tasks[url].cancel() # Attempt cancellation
+            del _websocket_tasks[url]
+    logger.debug(f"[{func_name}] Cleaned up tracking for {url}.")
+
+
+async def subscribe_to_websocket(
+    topics: List[str],
+    config: Config,
+    callback: Callable[[Dict], Coroutine[Any, Any, None]], # Async callback expected
+    endpoint_type: Literal['public', 'private'] = 'public',
+    market_category: Category = Category.LINEAR,
+    connect_timeout: float = 10.0, # Seconds
+    ping_interval: Optional[float] = 20.0 # Seconds, None to disable client pings
+) -> bool:
+    """
+    Subscribes to Bybit V5 WebSocket streams. Manages connection and message handling.
+
+    Args:
+        topics: List of subscription topic strings (e.g., "tickers.BTCUSDT").
+        config: Configuration object (API keys needed for private).
+        callback: Async function called with each received data message (dict).
+        endpoint_type: 'public' or 'private'.
+        market_category: Market category (linear, inverse, spot, option) for endpoint URL.
+        connect_timeout: Timeout for establishing the connection.
+        ping_interval: Interval in seconds to send PING messages to keep connection alive.
+                       Set to None to disable client-side pings.
+
+    Returns:
+        True if subscription request was successfully sent, False otherwise.
+    """
+    func_name = "subscribe_to_websocket"
+    log_prefix = f"[{func_name}]"
+
+    if not websockets:
+        logger.error(f"{Fore.RED}{log_prefix}: 'websockets' library not installed. Cannot subscribe.{Style.RESET_ALL}")
+        return False
+    if not topics:
+        logger.warning(f"{Fore.YELLOW}{log_prefix}: No topics provided.{Style.RESET_ALL}")
+        return False
+    if endpoint_type == 'private' and (not config.get('API_KEY') or not config.get('API_SECRET')):
+         logger.error(f"{Fore.RED}{log_prefix}: Private endpoint requires API_KEY and API_SECRET.{Style.RESET_ALL}")
+         return False
+
+    # Determine WebSocket URL
+    base_url = "wss://stream-testnet.bybit.com/v5" if config['TESTNET_MODE'] else "wss://stream.bybit.com/v5"
+    url = f"{base_url}/{endpoint_type}/{market_category.value}"
+
+    logger.info(f"{Fore.CYAN}{log_prefix}: Initiating subscription to {url} for topics: {topics}{Style.RESET_ALL}")
+
+    ws: Optional[Any] = None # Define ws variable
+
+    async with _ws_manage_lock: # Ensure atomic check/creation of connection
+        if url in _active_websockets and not _active_websockets[url].closed:
+            ws = _active_websockets[url]
+            logger.info(f"{log_prefix}: Reusing existing WebSocket connection to {url}")
+        else:
+            # Establish new connection
+            logger.info(f"{log_prefix}: Establishing new connection to {url}...")
+            try:
+                # Add extra headers if needed (e.g., User-Agent)
+                extra_headers = {"User-Agent": f"PyrmethusV3-Helper"}
+                ws = await asyncio.wait_for(
+                    websockets.connect(url, extra_headers=extra_headers, ping_interval=None), # Disable automatic pings if handling manually
+                    timeout=connect_timeout
+                )
+                _active_websockets[url] = ws
+                logger.info(f"{log_prefix}: Connection established to {url}. Starting message handler...")
+
+                # Start background message handler task
+                task = asyncio.create_task(
+                    _handle_websocket_message(ws, url, callback, ping_interval=ping_interval)
+                )
+                _websocket_tasks[url] = task
+                # Optional: Add callback for task completion/error
+                task.add_done_callback(lambda t: logger.info(f"WS task for {url} finished. Result/Exception: {t.result() if not t.cancelled() else 'Cancelled'}"))
+
+            except asyncio.TimeoutError:
+                 logger.error(f"{Back.RED}{log_prefix}: Timed out connecting to WebSocket: {url}{Style.RESET_ALL}")
+                 return False
+            except (InvalidURI, WebSocketException) as e:
+                 logger.error(f"{Back.RED}{log_prefix}: WebSocket connection failed: {e}{Style.RESET_ALL}")
+                 return False
+            except Exception as e:
+                 logger.error(f"{Back.RED}{log_prefix}: Unexpected error during WebSocket connection: {e}{Style.RESET_ALL}", exc_info=True)
+                 return False
+
+        # --- Authenticate if Private ---
+        if ws and endpoint_type == 'private':
+            try:
+                # Check if already authenticated (e.g., reusing connection) - requires state tracking if needed
+                # For simplicity, re-authenticate if needed or assume handler manages state.
+                logger.info(f"{log_prefix}: Sending authentication request for private stream...")
+                # Use a temporary CCXT instance for signing if main exchange instance not readily available
+                temp_exchange = ccxt.bybit({'apiKey': config['API_KEY'], 'secret': config['API_SECRET']})
+                expires = int((time.time() + 10) * 1000) # Expires in 10 seconds
+                signature = temp_exchange.hmac(f'GET/realtime{expires}'.encode(), config['API_SECRET'].encode(), 'sha256')
+                auth_payload = {
+                    "op": "auth",
+                    "args": [config['API_KEY'], expires, signature]
+                }
+                await ws.send(json.dumps(auth_payload))
+                # Auth success/failure is handled in the message handler loop
+            except Exception as auth_err:
+                 logger.error(f"{log_prefix}: Failed to send authentication payload: {auth_err}")
+                 # Consider closing the connection if auth sending fails critically
+                 # await unsubscribe_from_websocket(url) # Might be needed
+                 return False
+
+        # --- Send Subscription Request ---
+        if ws:
+            try:
+                sub_payload = {
+                    "req_id": f"sub_{int(time.time()*1000)}", # Add unique req_id
+                    "op": "subscribe",
+                    "args": topics
+                }
+                await ws.send(json.dumps(sub_payload))
+                logger.info(f"{log_prefix}: Subscription request sent for topics: {topics}")
+                # Success/failure handled in message handler loop
+                return True
+            except ConnectionClosed:
+                 logger.error(f"{log_prefix}: Connection closed before subscription could be sent.")
+                 return False
+            except Exception as sub_err:
+                logger.error(f"{log_prefix}: Failed to send subscription payload: {sub_err}")
+                return False
+        else:
+            # Should not happen if logic above is correct
+            logger.error(f"{log_prefix}: WebSocket connection not available for subscription.")
+            return False
+
+
+async def unsubscribe_from_websocket(url: str, topics: Optional[List[str]] = None) -> bool:
+    """
+    Unsubscribes from topics or closes a specific WebSocket connection managed by this helper.
+
+    Args:
+        url: The unique URL of the WebSocket connection (e.g., wss://stream.../public/linear).
+        topics: Optional list of topics to unsubscribe from. If None, closes the entire connection for the URL.
+
+    Returns:
+        True if unsubscribe/close was successful or connection already closed, False otherwise.
+    """
+    func_name = "unsubscribe_from_websocket"
+    log_prefix = f"[{func_name} ({url})]"
+
+    if not websockets: return True # Nothing to do if websockets not installed
+
+    async with _ws_manage_lock:
+        if url not in _active_websockets:
+            logger.warning(f"{Fore.YELLOW}{log_prefix}: No active WebSocket connection found to manage.{Style.RESET_ALL}")
+            # Ensure task is also cleaned up if somehow orphaned
+            if url in _websocket_tasks: del _websocket_tasks[url]
+            return True # No connection exists, so it's effectively "unsubscribed"
+
+        ws = _active_websockets[url]
+        if ws.closed:
+             logger.warning(f"{Fore.YELLOW}{log_prefix}: Connection was already closed.{Style.RESET_ALL}")
+             del _active_websockets[url]
+             if url in _websocket_tasks:
+                  if not _websocket_tasks[url].done(): _websocket_tasks[url].cancel()
+                  del _websocket_tasks[url]
+             return True
+
+        try:
+            if topics:
+                # Send unsubscribe message
+                unsub_payload = {
+                    "req_id": f"unsub_{int(time.time()*1000)}",
+                    "op": "unsubscribe",
+                    "args": topics
+                }
+                await ws.send(json.dumps(unsub_payload))
+                logger.info(f"{log_prefix}: Unsubscribe request sent for topics: {topics}")
+                # Note: We don't explicitly wait for confirmation here.
+            else:
+                # Close the entire connection
+                logger.info(f"{log_prefix}: Closing WebSocket connection...")
+                await ws.close(code=1000, reason="Client requested close")
+                logger.info(f"{log_prefix}: WebSocket connection closed by request.")
+                 # Task cancellation and dict cleanup happens in _handle_websocket_message finally block
+
+            return True
+        except ConnectionClosed:
+             logger.warning(f"{log_prefix}: Connection closed unexpectedly during operation.")
+             # Cleanup handled by the message handler task's finally block
+             return True
+        except WebSocketException as e:
+             logger.error(f"{Fore.RED}{log_prefix}: WebSocket error during unsubscribe/close: {e}{Style.RESET_ALL}")
+             return False
+        except Exception as e:
+            logger.error(f"{Fore.RED}{log_prefix}: Unexpected error during unsubscribe/close: {e}{Style.RESET_ALL}", exc_info=True)
+            return False
+
+# --- Placeholder Implementations for Less Common Functions ---
+# These require careful reading of Bybit V5 docs and testing.
+
+async def set_position_mode_bybit_v5(exchange: ccxt.bybit, config: Config, mode: Literal['one-way', 'hedge'], category: Optional[Category] = None, symbol: Optional[str] = None) -> bool:
+    """ Sets account position mode (One-way or Hedge) per category. """
+    func_name = "set_position_mode_bybit_v5"
+    log_prefix = f"[{func_name}]"
+    logger.warning(f"{Fore.YELLOW}{log_prefix}: Basic implementation. Verify category/symbol requirements from V5 docs.{Style.RESET_ALL}")
+
+    # V5 endpoint: POST /v5/position/switch-mode
+    # Requires category, mode (0 for One-Way, 3 for Hedge). Symbol might be optional or required.
+    target_category: Optional[str] = None
+    if category:
+        target_category = category.value
+    elif symbol:
+        cat_enum = market_cache.get_category(symbol)
+        if cat_enum: target_category = cat_enum.value
+    elif config.get('SYMBOL'):
+         cat_enum = market_cache.get_category(config['SYMBOL'])
+         if cat_enum: target_category = cat_enum.value
+
+    if not target_category or target_category == Category.SPOT.value: # Mode doesn't apply to Spot
+         logger.error(f"{log_prefix}: Invalid or missing category for setting position mode. Category: {target_category}")
+         return False
+
+    bybit_mode = 3 if mode == 'hedge' else 0 # 0: Merged Single (One-Way), 3: Both Sides (Hedge)
+
+    params = {
+        'category': target_category,
+        'mode': bybit_mode
+    }
+    # Symbol might be needed depending on API version/category, add if required by testing/docs
+    # if symbol: params['symbol'] = symbol
+
+    logger.info(f"{Fore.CYAN}{log_prefix}: Setting position mode to '{mode}' ({bybit_mode}) for category {target_category}...{Style.RESET_ALL}")
+
+    try:
+        response = await exchange.private_post_v5_position_switch_mode(params=params)
+        logger.debug(f"{log_prefix}: Raw response: {response}")
+        ret_code = response.get('retCode')
+        if ret_code == 0:
+             logger.success(f"{Fore.GREEN}{log_prefix}: Position mode successfully set to '{mode}'.{Style.RESET_ALL}")
+             return True
+        else:
+             # Common errors: 170021 (Cannot switch mode if positions/orders exist)
+             ret_msg = response.get('retMsg', 'N/A')
+             logger.error(f"{Fore.RED}{log_prefix}: Failed to set position mode. Code: {ret_code}, Msg: {ret_msg}{Style.RESET_ALL}")
+             return False
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Error setting position mode: {e}{Style.RESET_ALL}", exc_info=True)
+         return False
+
+
+async def place_native_stop_loss(
+    exchange: ccxt.bybit, symbol: str, side: Side, amount: Decimal, stop_price: Decimal, config: Config,
+    base_price: Optional[Decimal] = None, trigger_direction: Optional[TriggerDirection] = None,
+    is_reduce_only: bool = True, order_type: Literal['Market', 'Limit'] = 'Market',
+    limit_price: Optional[Decimal] = None, position_idx: Optional[PositionIdx] = None
+) -> Optional[Dict]:
+    """ Places a native stop-loss order using conditional order endpoint. (Basic Implementation) """
+    func_name = "place_native_stop_loss"
+    log_prefix = f"[{func_name} ({symbol}, {side.value}, SL:{stop_price})]"
+    logger.warning(f"{Fore.YELLOW}{log_prefix}: Basic V5 conditional SL implementation. Verify all parameters and test carefully.{Style.RESET_ALL}")
+
+    category = market_cache.get_category(symbol)
+    if not category or category == Category.SPOT: # Conditional orders usually for derivatives
+         logger.error(f"{Fore.RED}{log_prefix}: Invalid category '{category}'.{Style.RESET_ALL}")
+         return None
+
+    # Determine trigger direction if not specified
+    if trigger_direction is None:
+        # If placing a sell stop (for a long position), trigger on price FALL
+        # If placing a buy stop (for a short position), trigger on price RISE
+        trigger_direction = TriggerDirection.FALL if side == Side.SELL else TriggerDirection.RISE
+        logger.debug(f"{log_prefix}: Auto-determined triggerDirection: {trigger_direction.name}")
+
+    # Base price (mandatory for Bybit V5 conditional orders)
+    # Usually use current mark or last price if not provided
+    if base_price is None:
+        ticker = await fetch_ticker_validated(exchange, symbol, config)
+        if ticker and ticker.get('mark'): base_price = safe_decimal_conversion(ticker['mark'])
+        elif ticker and ticker.get('last'): base_price = safe_decimal_conversion(ticker['last'])
+        if base_price is None:
+            logger.error(f"{Fore.RED}{log_prefix}: Cannot determine base_price automatically. Please provide it.{Style.RESET_ALL}")
+            return None
+        logger.debug(f"{log_prefix}: Using auto-determined base_price: {base_price}")
+
+    # Format inputs
+    amount_str = format_amount(exchange, symbol, amount)
+    stop_price_str = format_price(exchange, symbol, stop_price)
+    base_price_str = format_price(exchange, symbol, base_price)
+    limit_price_str = format_price(exchange, symbol, limit_price) if order_type == 'Limit' else None
+
+    if not all([amount_str, stop_price_str, base_price_str]):
+        logger.error(f"{Fore.RED}{log_prefix}: Failed to format required inputs.{Style.RESET_ALL}")
+        return None
+    if order_type == 'Limit' and not limit_price_str:
+        logger.error(f"{Fore.RED}{log_prefix}: Limit price required for Limit stop order.{Style.RESET_ALL}")
+        return None
+
+    # --- Prepare V5 Conditional Order Params ---
+    params = {
+        'category': category.value,
+        'symbol': symbol,
+        'side': side.value.capitalize(),
+        'orderType': order_type.capitalize(),
+        'qty': amount_str,
+        'triggerPrice': stop_price_str,
+        'triggerDirection': trigger_direction.value,
+        'basePrice': base_price_str,
+        'orderFilter': OrderFilter.STOP_ORDER.value, # Crucial: Identify as conditional
+        'reduceOnly': is_reduce_only,
+        'closeOnTrigger': False, # Usually false for SL, unless it's the only exit
+        # 'slOrderType': 'Market', # Part of the main order TP/SL mechanism, not separate conditional
+        # 'stopLoss': stop_price_str, # This is for TP/SL on main order, not separate conditional
+    }
+    if order_type == 'Limit' and limit_price_str:
+        params['price'] = limit_price_str
+    if position_idx is not None:
+        params['positionIdx'] = position_idx.value
+
+    logger.info(f"{Fore.CYAN}{log_prefix}: Placing conditional stop order with params: {params}...{Style.RESET_ALL}")
+
+    try:
+        # Use the standard create_order endpoint with specific params for conditional orders
+        order = await exchange.create_order(
+            symbol=symbol,
+            type=order_type, # Market or Limit (type of triggered order)
+            side=side.value, # Buy or Sell (direction of triggered order)
+            amount=float(amount_str),
+            price=float(limit_price_str) if order_type == 'Limit' and limit_price_str else None,
+            params=params
+        )
+        logger.success(f"{Fore.GREEN}{log_prefix}: Successfully placed conditional stop order. ID: ...{format_order_id(order.get('id'))}, Status: {order.get('status')}{Style.RESET_ALL}")
+        return order
+    except Exception as e:
+         logger.error(f"{Fore.RED}{log_prefix}: Failed to place conditional stop order: {e}{Style.RESET_ALL}", exc_info=True)
+         return None
+
+
+# --- Standalone Testing / Example Usage ---
+# =======================================
+
+if __name__ == "__main__":
+    print(f"{Style.BRIGHT}{Fore.YELLOW}--- Bybit V5 Helpers v3.0 Standalone Execution ---{Style.RESET_ALL}")
+
+    # --- Configuration ---
+    # Load sensitive data from environment variables for security
+    API_KEY = os.getenv("BYBIT_API_KEY")
+    API_SECRET = os.getenv("BYBIT_API_SECRET")
+    # Default to Testnet if variable not set or not 'false'
+    USE_TESTNET = os.getenv("BYBIT_USE_TESTNET", "True").lower() != "false"
+
+    if not API_KEY or not API_SECRET:
+         print(f"{Fore.RED}------------------------------------------------------------")
+         print(f" WARNING: API_KEY or API_SECRET environment variable not set.")
+         print(f"          Using PLACEHOLDER values. Most functions WILL FAIL.")
+         print(f"          Set environment variables for authenticated tests.")
+         print(f"------------------------------------------------------------{Style.RESET_ALL}")
+         API_KEY = "PLACEHOLDER_KEY"
+         API_SECRET = "PLACEHOLDER_SECRET"
+
+    # Example configuration using loaded variables
+    example_config: Config = {
+        'EXCHANGE_ID': 'bybit',
+        'API_KEY': API_KEY,
+        'API_SECRET': API_SECRET,
+        'TESTNET_MODE': USE_TESTNET,
+        'SYMBOL': 'BTC/USDT:USDT',       # Default linear perpetual
+        'USDT_SYMBOL': 'USDT',
+        'DEFAULT_MARGIN_MODE': 'isolated', # Or 'cross'
+        'DEFAULT_RECV_WINDOW': 10000,    # Increased window can help with timing issues
+        'DEFAULT_SLIPPAGE_PCT': Decimal('0.005'), # 0.5%
+        'POSITION_QTY_EPSILON': Decimal('1E-8'), # Precision for comparing quantities
+        'SHALLOW_OB_FETCH_DEPTH': 5,            # For quick spread check
+        'ORDER_BOOK_FETCH_LIMIT': 50,           # Max depth for fetch_l2_order_book_validated
+        'EXPECTED_MARKET_TYPE': 'swap',
+        'EXPECTED_MARKET_LOGIC': 'linear',
+        'RETRY_COUNT': 2 # Lower retry count for faster feedback in examples
+    }
+
+    # --- Logging Setup for Example ---
+    # Configure root logger for captures from the helper and other libraries
+    logging.basicConfig(level=logging.INFO, # Change to DEBUG for max detail
+                        format="%(asctime)s [%(levelname)-5s] %(name)-20s | %(message)s",
+                        datefmt="%H:%M:%S")
+    # Optionally set specific level for the helper module's logger
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
+    # Silence overly noisy libraries if needed
+    logging.getLogger("websockets").setLevel(logging.INFO)
+    logging.getLogger("ccxt").setLevel(logging.INFO) # CCXT can be very verbose on DEBUG
+
+
+    # --- Main Async Execution Function ---
+    async def run_example():
+        print(f"\n{Style.BRIGHT}{Fore.CYAN}--- Running Example Usage (Testnet: {USE_TESTNET}) ---{Style.RESET_ALL}")
+        exchange = await initialize_bybit(example_config)
+
+        if not exchange:
+            print(f"{Back.RED}{Fore.WHITE} FATAL: Failed to initialize exchange. Exiting example. {Style.RESET_ALL}")
+            return
+
+        # --- Example Calls ---
+        try:
+            print(f"\n{Fore.MAGENTA}--- 1. Basic Info & Validation ---{Style.RESET_ALL}")
+            if API_KEY != "PLACEHOLDER_KEY":
+                await fetch_usdt_balance(exchange, example_config)
+            else:
+                print(f"{Fore.YELLOW}Skipping balance check (API keys missing).{Style.RESET_ALL}")
+
+            market_valid = await validate_market(exchange, example_config['SYMBOL'], example_config)
+            if not market_valid: print(f"{Fore.RED}Default symbol validation failed!{Style.RESET_ALL}")
+
+            await fetch_ticker_validated(exchange, example_config['SYMBOL'], example_config)
+            await fetch_funding_rate(exchange, example_config['SYMBOL'], example_config)
+            await fetch_funding_rate(exchange, example_config['SYMBOL'], example_config, fetch_next=True)
+            await fetch_l2_order_book_validated(exchange, example_config['SYMBOL'], 5, example_config) # Shallow fetch
+            await fetch_recent_trades(exchange, example_config['SYMBOL'], 10, example_config)
+
+            # Example OHLCV Fetch (check if pandas installed)
+            if pd:
+                 print(f"\n{Fore.MAGENTA}--- 2. OHLCV Data ---{Style.RESET_ALL}")
+                 ohlcv_df = await fetch_ohlcv_paginated(exchange, example_config['SYMBOL'], '1m', limit=100) # Fetch last 100 minutes
+                 if ohlcv_df is not None and not ohlcv_df.empty:
+                     print(f"Fetched {len(ohlcv_df)} 1m candles for {example_config['SYMBOL']}:")
+                     print(ohlcv_df.tail())
+                 else:
+                     print(f"{Fore.YELLOW}Could not fetch OHLCV data.{Style.RESET_ALL}")
+            else:
+                 print(f"\n{Fore.YELLOW}--- Skipping OHLCV (pandas not installed) ---{Style.RESET_ALL}")
+
+
+            # --- Authenticated Actions (Require API Keys) ---
+            if API_KEY != "PLACEHOLDER_KEY":
+                print(f"\n{Fore.MAGENTA}--- 3. Leverage & Position (Authenticated) ---{Style.RESET_ALL}")
+                await set_leverage(exchange, example_config['SYMBOL'], 3, example_config) # Set 3x leverage
+                await asyncio.sleep(1) # Allow propagation
+                position = await get_current_position_bybit_v5(exchange, example_config['SYMBOL'], example_config)
+                # Close existing position if any BEFORE placing new test orders
+                if position:
+                     print(f"{Fore.YELLOW}Existing position found - attempting to close before proceeding...{Style.RESET_ALL}")
+                     await close_position_reduce_only(exchange, example_config['SYMBOL'], example_config)
+                     await asyncio.sleep(2) # Wait after closing
+
+                print(f"\n{Fore.MAGENTA}--- 4. Order Management (Authenticated - Use Testnet Carefully!) ---{Style.RESET_ALL}")
+                if not USE_TESTNET:
+                    print(f"{Back.RED} DANGER: Running order examples on MAINNET! Press Ctrl+C now to abort or Enter to continue... {Style.RESET_ALL}")
+                    input() # Wait for user confirmation on mainnet
+
+                # --- A. Limit Order Example ---
+                ticker = await fetch_ticker_validated(exchange, example_config['SYMBOL'], example_config)
+                if ticker and ticker.get('bid'):
+                    limit_price = safe_decimal_conversion(ticker['bid']) * Decimal('0.8') # 20% below bid (unlikely to fill)
+                    market_info = market_cache.get_market(example_config['SYMBOL'])
+                    min_amount = safe_decimal_conversion(market_info.get('limits',{}).get('amount',{}).get('min'), Decimal('0.001'))
+                    limit_amount = max(min_amount, Decimal('0.001')) # Use min amount or default
+
+                    print(f"\nTesting Limit Order (BUY {limit_amount} @ {limit_price})...")
+                    limit_order = await place_limit_order_tif(exchange, example_config['SYMBOL'], Side.BUY, limit_amount, limit_price, example_config, time_in_force=TimeInForce.GTC)
+                    if limit_order:
+                        order_id_to_manage = limit_order.get('id')
+                        print(f"Placed Limit Order ID: ...{format_order_id(order_id_to_manage)}")
+                        await asyncio.sleep(2)
+                        await fetch_order(exchange, example_config['SYMBOL'], order_id=order_id_to_manage, config=example_config)
+                        print(f"Cancelling order ...{format_order_id(order_id_to_manage)}...")
+                        await cancel_order(exchange, example_config['SYMBOL'], order_id=order_id_to_manage, config=example_config)
+                        await asyncio.sleep(1)
+                        fetch_res = await fetch_order(exchange, example_config['SYMBOL'], order_id=order_id_to_manage, config=example_config)
+                        print(f"Fetch after cancel: {'Not Found/Cancelled' if fetch_res is None or fetch_res.get('status') == 'canceled' else 'Still Found?'}")
+                    else: print(f"{Fore.RED}Failed to place limit order.{Style.RESET_ALL}")
+                else: print(f"{Fore.YELLOW}Skipping limit order test (could not get ticker bid price).{Style.RESET_ALL}")
+
+                # --- B. Market Order Example ---
+                # print("\nTesting Market Order (Small BUY)...")
+                # market_order = await place_market_order_slippage_check(exchange, example_config['SYMBOL'], Side.BUY, limit_amount, example_config) # Use min amount
+                # if market_order: print(f"Placed Market Order ID: ...{format_order_id(market_order.get('id'))}")
+                # else: print(f"{Fore.RED}Failed to place market order.{Style.RESET_ALL}")
+                # await asyncio.sleep(2) # Wait if order was placed
+
+                # --- C. Batch Order Example ---
+                print(f"\nTesting Batch Order (2 Limit Orders)...")
+                if ticker and ticker.get('bid') and ticker.get('ask'):
+                    batch_price1 = safe_decimal_conversion(ticker['bid']) * Decimal('0.7') # Far below
+                    batch_price2 = safe_decimal_conversion(ticker['ask']) * Decimal('1.3') # Far above
+                    batch = [
+                        {'symbol': example_config['SYMBOL'], 'side': Side.BUY, 'type': 'Limit', 'amount': limit_amount, 'price': batch_price1, 'clientOrderId': f'batch_buy_{int(time.time()*1000)}'},
+                        {'symbol': example_config['SYMBOL'], 'side': Side.SELL, 'type': 'Limit', 'amount': limit_amount, 'price': batch_price2, 'clientOrderId': f'batch_sell_{int(time.time()*1000)}'}
+                    ]
+                    success, errors = await place_batch_orders(exchange, batch, example_config)
+                    print(f"Batch Results:")
+                    for i in range(len(batch)):
+                         if success[i]: print(f"  Order #{i+1}: SUCCESS, ID ...{format_order_id(success[i].get('id'))}")
+                         elif errors[i]: print(f"  Order #{i+1}: FAILED, Code: {errors[i].get('code')}, Msg: {errors[i].get('msg')}")
+                    # Cancel the batch orders if placed successfully
+                    await asyncio.sleep(1)
+                    print("Cancelling ALL orders for cleanup...")
+                    await cancel_all_orders(exchange, symbol=example_config['SYMBOL'], config=example_config, reason="Batch Test Cleanup")
+
+                else: print(f"{Fore.YELLOW}Skipping batch order test (could not get ticker prices).{Style.RESET_ALL}")
+
+
+                # --- D. Position Closure Example ---
+                # print("\nTesting Position Closure (if any position exists)...")
+                # await close_position_reduce_only(exchange, example_config['SYMBOL'], example_config)
+
+
+            else:
+                print(f"\n{Fore.YELLOW}--- Skipping Authenticated Actions (API keys missing/placeholder) ---{Style.RESET_ALL}")
+
+
+            # --- WebSocket Example ---
+            if websockets:
+                print(f"\n{Fore.MAGENTA}--- 5. WebSocket Subscription Example (Public Tickers) ---{Style.RESET_ALL}")
+                ws_topics = [f"tickers.{example_config['SYMBOL']}"] # Add more topics if desired e.g. "tickers.ETHUSDT"
+
+                # Define the async callback function
+                async def handle_ws_message(data: Dict):
+                    # This function will be called for every message received on the subscribed topics.
+                    topic = data.get('topic', 'N/A')
+                    data_content = data.get('data', {})
+                    ts = data.get('ts', 'N/A') # Timestamp from Bybit message
+                    if topic.startswith("tickers."):
+                        symbol = topic.split('.')[-1]
+                        last_price = data_content.get('lastPrice')
+                        print(f"{Fore.CYAN} WS TICKER | {symbol:<15} | Last Price: {last_price:<15} | Time: {ts}{Style.RESET_ALL}")
+                    elif topic.startswith("orderbook."):
+                        # Process order book updates...
+                        print(f"{Fore.BLUE} WS ORDERBOOK | {topic} | Bids: {len(data_content.get('b', []))} Asks: {len(data_content.get('a', []))} | Time: {ts}{Style.RESET_ALL}")
+                    else:
+                        # Handle other topics or message types
+                        print(f"{Fore.WHITE} WS OTHER | Topic: {topic} | Data: {str(data_content)[:100]}...{Style.RESET_ALL}")
+
+                # Construct the expected URL for this subscription
+                ws_base = "wss://stream-testnet.bybit.com/v5" if USE_TESTNET else "wss://stream.bybit.com/v5"
+                ws_url = f"{ws_base}/public/linear" # Assuming linear topics
+
+                # Subscribe
+                sub_success = await subscribe_to_websocket(
+                    topics=ws_topics,
+                    config=example_config,
+                    callback=handle_ws_message,
+                    endpoint_type='public', # Change to 'private' for orders/positions
+                    market_category=Category.LINEAR # Match category to topics
+                )
+
+                if sub_success:
+                    print(f"{Fore.GREEN}Subscribed to WebSocket topics: {ws_topics} on {ws_url}{Style.RESET_ALL}")
+                    print("Waiting for messages for 15 seconds...")
+                    await asyncio.sleep(15)
+                    print("Unsubscribing and closing WebSocket...")
+                    unsub_success = await unsubscribe_from_websocket(ws_url)
+                    print(f"WebSocket unsubscribe/close {'successful' if unsub_success else 'failed'}.")
+                else:
+                    print(f"{Fore.RED}WebSocket subscription failed to initiate.{Style.RESET_ALL}")
+            else:
+                print(f"\n{Fore.YELLOW}--- Skipping WebSocket Example (websockets library not installed) ---{Style.RESET_ALL}")
+
+
+        except Exception as e:
+            logger.critical(f"{Back.RED}{Fore.WHITE} An unexpected error occurred during the example run: {e} {Style.RESET_ALL}", exc_info=True)
+        finally:
+            # --- Cleanup ---
+            if exchange and not exchange.closed:
+                print(f"\n{Fore.CYAN}--- Closing Exchange Connection ---{Style.RESET_ALL}")
+                await exchange.close()
+                print("Exchange connection closed.")
+            # Ensure any remaining WS connections are closed (unsubscribe handles this but good failsafe)
+            async with _ws_manage_lock:
+                 for url, task in list(_websocket_tasks.items()): # Iterate over copy
+                      if not task.done():
+                           logger.warning(f"Force cancelling potentially orphaned WS task for {url}")
+                           task.cancel()
+                 for url, ws_conn in list(_active_websockets.items()):
+                      if not ws_conn.closed:
+                           logger.warning(f"Force closing potentially orphaned WS connection for {url}")
+                           await ws_conn.close()
+
+
+    # --- Run the Async Example ---
+    try:
+        # Use asyncio.run() for simple cases, or manage event loop explicitly if needed
+        asyncio.run(run_example())
+        print(f"\n{Style.BRIGHT}{Fore.GREEN}--- Standalone Example Finished ---{Style.RESET_ALL}")
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}--- Execution Interrupted by User ---{Style.RESET_ALL}")
+    except Exception as main_err:
+         print(f"\n{Back.RED}{Fore.WHITE}--- Top Level Error Caught ---{Style.RESET_ALL}")
+         logger.critical(f"An error occurred outside the main example function: {main_err}", exc_info=True)
+

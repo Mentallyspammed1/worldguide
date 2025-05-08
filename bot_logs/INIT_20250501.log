@@ -1,0 +1,142 @@
+2025-05-01 03:59:18,043 - INFO - Application starting...
+2025-05-01 03:59:18,072 - ERROR - Unexpected error loading markets (Attempt 1/3): string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v3.py", line 396, in initialize_markets
+    self.markets = await self.exchange.load_markets()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 274, in load_markets_helper
+    currencies = await self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1600, in fetch_currencies
+    response = await self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-05-01 03:59:23,852 - ERROR - Unexpected error loading markets (Attempt 2/3): string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v3.py", line 396, in initialize_markets
+    self.markets = await self.exchange.load_markets()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 274, in load_markets_helper
+    currencies = await self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1600, in fetch_currencies
+    response = await self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-05-01 03:59:32,414 - ERROR - Unexpected error loading markets (Attempt 3/3): string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v3.py", line 396, in initialize_markets
+    self.markets = await self.exchange.load_markets()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 274, in load_markets_helper
+    currencies = await self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1600, in fetch_currencies
+    response = await self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-05-01 03:59:32,424 - ERROR - Max retries reached for loading markets.
+2025-05-01 03:59:32,426 - CRITICAL - Failed to load markets. Cannot proceed. Exiting.
+2025-05-01 03:59:32,678 - INFO - Closed ccxt exchange connection.
+2025-05-01T04:09:02-0500 - INFO - INIT - Application starting...
+2025-05-01T04:09:02-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-01T04:09:02-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-01T04:09:02-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-01T04:09:02-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-01T04:09:02-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T04:09:02-0500 - INFO - INIT - Attempting to load markets...
+2025-05-01T04:09:13-0500 - INFO - INIT - Successfully loaded 2603 markets from Bybit.
+2025-05-01T04:09:13-0500 - INFO - INIT - Cached categories for 2603 markets.
+2025-05-01T04:09:13-0500 - INFO - INIT - Closed CCXT exchange connection.
+2025-05-01T04:09:13-0500 - INFO - INIT - Market data loaded successfully.
+2025-05-01T17:40:28-0500 - INFO - INIT - Application starting...
+2025-05-01T17:40:28-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-01T17:40:28-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-01T17:40:28-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-01T17:40:28-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-01T17:40:28-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T17:40:28-0500 - INFO - INIT - Attempting to load markets...
+2025-05-01T17:40:34-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:40:34-0500 - ERROR - INIT - Unexpected error loading markets (Attempt 1/5): 'NoneType' object has no attribute 'upper'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 582, in initialize_markets
+    self._cache_market_categories() # Populate category cache
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 617, in _cache_market_categories
+    settle_currency = details.get('settle', '').upper() # USDT, USD, BTC etc.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-05-01T17:40:44-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:40:44-0500 - ERROR - INIT - Unexpected error loading markets (Attempt 2/5): 'NoneType' object has no attribute 'upper'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 582, in initialize_markets
+    self._cache_market_categories() # Populate category cache
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 617, in _cache_market_categories
+    settle_currency = details.get('settle', '').upper() # USDT, USD, BTC etc.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-05-01T17:40:57-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:40:57-0500 - ERROR - INIT - Unexpected error loading markets (Attempt 3/5): 'NoneType' object has no attribute 'upper'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 582, in initialize_markets
+    self._cache_market_categories() # Populate category cache
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/neonta_v4.1.py", line 617, in _cache_market_categories
+    settle_currency = details.get('settle', '').upper() # USDT, USD, BTC etc.
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'upper'
+2025-05-01T17:41:09-0500 - INFO - INIT - Closed CCXT exchange connection.
+2025-05-01T17:51:08-0500 - INFO - INIT - Application starting...
+2025-05-01T17:51:08-0500 - INFO - INIT - Using configuration from: /data/data/com.termux/files/home/worldguide/config.json
+2025-05-01T17:51:08-0500 - INFO - INIT - Log directory: /data/data/com.termux/files/home/worldguide/bot_logs
+2025-05-01T17:51:08-0500 - INFO - INIT - Timezone: America/Chicago
+2025-05-01T17:51:08-0500 - INFO - INIT - API Environment: Mainnet
+2025-05-01T17:51:08-0500 - INFO - INIT - CCXT client initialized for Bybit Mainnet.
+2025-05-01T17:51:08-0500 - INFO - INIT - Attempting to load markets...
+2025-05-01T17:51:15-0500 - INFO - INIT - Successfully loaded 2605 markets from Bybit.
+2025-05-01T17:51:15-0500 - INFO - INIT - Cached categories for 2605 markets (Spot/Linear/Inverse/Option).
+2025-05-01T17:51:15-0500 - INFO - INIT - Market data loaded successfully (2605 valid markets found).
+2025-05-01T17:51:15-0500 - INFO - INIT - Closed CCXT exchange connection.

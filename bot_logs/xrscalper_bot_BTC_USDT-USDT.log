@@ -1,0 +1,403 @@
+2025-05-01 19:30:53,100 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:30:53,101 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:30:53,101 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:30:53,547 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:30:53,548 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:30:53,907 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94155.1, 'bid': 96900.0, 'bidVolume': 27.549, 'ask': 96900.1, 'askVolume': 4.323, 'vwap': 96155.22326330584, 'open': 94229.2, 'close': 96900.0, 'last': 96900.0, 'previousClose': None, 'change': 2670.8, 'percentage': 2.8343, 'average': 95564.6, 'baseVolume': 98679.307, 'quoteVolume': 9488530796.0533, 'markPrice': 96900.0, 'indexPrice': 96935.98, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96900.00', 'indexPrice': '96935.98', 'markPrice': '96900.00', 'prevPrice24h': '94229.20', 'price24hPcnt': '0.028343', 'highPrice24h': '97383.10', 'lowPrice24h': '94155.10', 'prevPrice1h': '96375.90', 'openInterest': '54216.65', 'openInterestValue': '5253593385.00', 'turnover24h': '9488530796.0533', 'volume24h': '98679.3070', 'fundingRate': '-0.00002735', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '4.323', 'bid1Price': '96900.00', 'ask1Price': '96900.10', 'bid1Size': '27.549', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:30:53,907 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96900.0
+2025-05-01 19:30:53,907 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:30:53,907 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:30:54,587 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:30:54,600 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:30:54,605 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:30:54,610 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:30:54,613 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:30:54,640 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:30:54,645 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:30:54,685 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:30:54,703 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:30:54,990 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:30:54,990 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:30:54,994 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:30:55,013 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:30:55,014 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:30:55,028 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:30:55,045 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:30:55,046 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:30:55,046 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:30:55,050 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:30:55,053 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:30:55,054 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '122.0', 'EMA_Short': '96636.00258', 'EMA_Long': '96517.18289', 'Momentum': '469.20000', 'CCI': '192.96435', 'Williams_R': '-0.32480', 'MFI': '87.23981', 'VWAP': '96667.94553', 'PSAR_long': '96408.09630', 'SMA10': '96575.47000', 'StochRSI_K': '100.00000', 'StochRSI_D': '98.23349', 'RSI': '73.08053', 'BB_Lower': '96028.67180', 'BB_Middle': '96424.93500', 'BB_Upper': '96821.19820', 'Volume_MA': '192.87600', 'Open': '96793.1', 'High': '96902.6', 'Low': '96788.0', 'Close': '96900.1', 'Volume': '514.477000'}
+2025-05-01 19:30:55,057 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:30:55,058 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '96902.6', 'Fib_23.6%': '96720.9', 'Fib_38.2%': '96608.5', 'Fib_50.0%': '96517.7', 'Fib_61.8%': '96426.9', 'Fib_78.6%': '96297.6', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:30:55,058 - WARNING - [xrscalper_bot_BTC_USDT-USDT:1678] - Error during volume confirmation check: unsupported operand type(s) for /: 'float' and 'decimal.Decimal'
+2025-05-01 19:30:55,059 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=27.8550, AskVol=6.4700, OBI=0.6230 -> Score=0.6230
+2025-05-01 19:30:55,060 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:30:55,060 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96900.0): Set='default', Indicators=[Active:12, NaN:1], TotalWeight=2.80, FinalScore=0.1060 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:30:55,060 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.968', 'volume_confirmation': 'NaN', 'stoch_rsi': '0.200', 'rsi': '-1.000', 'bollinger_bands': '-1.000', 'vwap': '0.700', 'cci': '-1.000', 'wr': '-1.000', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '0.623'}
+2025-05-01 19:30:55,060 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:30:55,061 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:30:55,061 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:30:55,061 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96900.0
+2025-05-01 19:30:55,061 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 121.97
+2025-05-01 19:30:55,062 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:30:55,062 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:30:55,062 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:30:55,063 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:30:55,423 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:30:55,423 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:30:55,423 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:30:55,424 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:30:55,424 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 2.32s) ==---
+2025-05-01 19:31:03,101 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:31:03,102 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:31:03,103 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:31:04,029 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:31:04,031 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:31:04,713 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94155.1, 'bid': 96921.6, 'bidVolume': 4.929, 'ask': 96921.7, 'askVolume': 2.244, 'vwap': 96155.89516607717, 'open': 94229.2, 'close': 96921.6, 'last': 96921.6, 'previousClose': None, 'change': 2692.4, 'percentage': 2.8572, 'average': 95575.4, 'baseVolume': 98767.402, 'quoteVolume': 9497067952.5378, 'markPrice': 96921.6, 'indexPrice': 96958.79, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96921.60', 'indexPrice': '96958.79', 'markPrice': '96921.60', 'prevPrice24h': '94229.20', 'price24hPcnt': '0.028572', 'highPrice24h': '97383.10', 'lowPrice24h': '94155.10', 'prevPrice1h': '96375.90', 'openInterest': '54269.317', 'openInterestValue': '5259869034.55', 'turnover24h': '9497067952.5378', 'volume24h': '98767.4020', 'fundingRate': '-0.00002735', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '2.244', 'bid1Price': '96921.60', 'ask1Price': '96921.70', 'bid1Size': '4.929', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:31:04,713 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96921.6
+2025-05-01 19:31:04,714 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:31:04,714 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:31:05,067 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:31:05,075 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:31:05,078 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:31:05,081 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:31:05,082 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:31:05,105 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:31:05,109 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:31:05,135 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:31:05,146 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:31:05,356 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:31:05,356 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:31:05,359 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:31:05,374 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:31:05,374 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:31:05,382 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:31:05,391 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:31:05,391 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:31:05,392 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:31:05,394 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:31:05,396 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:05,397 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '124.0', 'EMA_Short': '96640.32258', 'EMA_Long': '96519.14653', 'Momentum': '490.80000', 'CCI': '198.53747', 'Williams_R': '-1.21478', 'MFI': '87.64267', 'VWAP': '96681.47399', 'PSAR_long': '96408.09630', 'SMA10': '96577.63000', 'StochRSI_K': '100.00000', 'StochRSI_D': '98.23349', 'RSI': '73.68948', 'BB_Lower': '96024.49464', 'BB_Middle': '96426.01500', 'BB_Upper': '96827.53536', 'Volume_MA': '198.79820', 'Open': '96793.1', 'High': '96931.4', 'Low': '96788.0', 'Close': '96921.7', 'Volume': '603.310000'}
+2025-05-01 19:31:05,400 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:05,400 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '96931.4', 'Fib_23.6%': '96742.9', 'Fib_38.2%': '96626.3', 'Fib_50.0%': '96532.1', 'Fib_61.8%': '96437.9', 'Fib_78.6%': '96303.7', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:31:05,401 - WARNING - [xrscalper_bot_BTC_USDT-USDT:1678] - Error during volume confirmation check: unsupported operand type(s) for /: 'float' and 'decimal.Decimal'
+2025-05-01 19:31:05,401 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=1.8900, AskVol=8.4420, OBI=-0.6341 -> Score=-0.6341
+2025-05-01 19:31:05,402 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:05,402 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96921.6): Set='default', Indicators=[Active:12, NaN:1], TotalWeight=2.80, FinalScore=-0.0134 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:31:05,403 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '1.000', 'volume_confirmation': 'NaN', 'stoch_rsi': '0.200', 'rsi': '-1.000', 'bollinger_bands': '-1.000', 'vwap': '0.700', 'cci': '-1.000', 'wr': '-1.000', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '-0.634'}
+2025-05-01 19:31:05,403 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:31:05,403 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:05,403 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:31:05,403 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96921.6
+2025-05-01 19:31:05,404 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 124.02
+2025-05-01 19:31:05,404 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:31:05,404 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:31:05,405 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:31:05,405 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:31:05,775 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:31:05,776 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:31:05,776 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:31:05,777 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:31:05,777 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 2.68s) ==---
+2025-05-01 19:31:13,103 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:31:13,103 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:31:13,104 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:31:13,513 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:31:13,514 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:31:14,290 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94155.1, 'bid': 96903.9, 'bidVolume': 1.839, 'ask': 96904.0, 'askVolume': 6.427, 'vwap': 96156.28650074816, 'open': 94229.2, 'close': 96904.6, 'last': 96904.6, 'previousClose': None, 'change': 2675.4, 'percentage': 2.8392, 'average': 95566.9, 'baseVolume': 98818.632, 'quoteVolume': 9502032690.204, 'markPrice': 96910.0, 'indexPrice': 96946.64, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96904.60', 'indexPrice': '96946.64', 'markPrice': '96910.00', 'prevPrice24h': '94229.20', 'price24hPcnt': '0.028392', 'highPrice24h': '97383.10', 'lowPrice24h': '94155.10', 'prevPrice1h': '96375.90', 'openInterest': '54253.26', 'openInterestValue': '5257683426.60', 'turnover24h': '9502032690.2040', 'volume24h': '98818.6320', 'fundingRate': '0.00000328', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '6.427', 'bid1Price': '96903.90', 'ask1Price': '96904.00', 'bid1Size': '1.839', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:31:14,291 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96904.6
+2025-05-01 19:31:14,291 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:31:14,291 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:31:14,997 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:31:15,008 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:31:15,011 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:31:15,014 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:31:15,016 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:31:15,045 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:31:15,048 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:31:15,079 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:31:15,087 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:31:15,282 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:31:15,283 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:31:15,284 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:31:15,294 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:31:15,294 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:31:15,300 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:31:15,305 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:31:15,306 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:31:15,306 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:31:15,308 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:31:15,309 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:15,309 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '124.0', 'EMA_Short': '96637.96258', 'EMA_Long': '96518.07380', 'Momentum': '479.00000', 'CCI': '197.23911', 'Williams_R': '-2.69255', 'MFI': '87.85400', 'VWAP': '96684.92432', 'PSAR_long': '96408.09630', 'SMA10': '96576.45000', 'StochRSI_K': '100.00000', 'StochRSI_D': '98.23349', 'RSI': '73.36027', 'BB_Lower': '96026.79557', 'BB_Middle': '96425.42500', 'BB_Upper': '96824.05443', 'Volume_MA': '202.06700', 'Open': '96793.1', 'High': '96931.4', 'Low': '96788.0', 'Close': '96909.9', 'Volume': '652.342000'}
+2025-05-01 19:31:15,311 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:15,311 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '96931.4', 'Fib_23.6%': '96742.9', 'Fib_38.2%': '96626.3', 'Fib_50.0%': '96532.1', 'Fib_61.8%': '96437.9', 'Fib_78.6%': '96303.7', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:31:15,311 - WARNING - [xrscalper_bot_BTC_USDT-USDT:1678] - Error during volume confirmation check: unsupported operand type(s) for /: 'float' and 'decimal.Decimal'
+2025-05-01 19:31:15,312 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=1.5140, AskVol=17.8670, OBI=-0.8438 -> Score=-0.8438
+2025-05-01 19:31:15,312 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:15,312 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96904.6): Set='default', Indicators=[Active:12, NaN:1], TotalWeight=2.80, FinalScore=-0.0367 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:31:15,313 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.989', 'volume_confirmation': 'NaN', 'stoch_rsi': '0.200', 'rsi': '-1.000', 'bollinger_bands': '-1.000', 'vwap': '0.700', 'cci': '-1.000', 'wr': '-1.000', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '-0.844'}
+2025-05-01 19:31:15,313 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:31:15,313 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:31:15,313 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:31:15,313 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96904.6
+2025-05-01 19:31:15,314 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 124.02
+2025-05-01 19:31:15,314 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:31:15,314 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:31:15,314 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:31:15,315 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:31:15,674 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:31:15,675 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:31:15,675 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:31:15,675 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:31:15,676 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 2.57s) ==---
+2025-05-01 19:39:43,984 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:39:43,985 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:39:43,985 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:39:44,430 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:39:44,431 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:39:45,106 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94198.5, 'bid': 96709.9, 'bidVolume': 13.364, 'ask': 96710.0, 'askVolume': 2.942, 'vwap': 96164.99819037717, 'open': 94198.7, 'close': 96709.9, 'last': 96709.9, 'previousClose': None, 'change': 2511.2, 'percentage': 2.6658, 'average': 95454.3, 'baseVolume': 99536.156, 'quoteVolume': 9571894261.6171, 'markPrice': 96710.0, 'indexPrice': 96754.56, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96709.90', 'indexPrice': '96754.56', 'markPrice': '96710.00', 'prevPrice24h': '94198.70', 'price24hPcnt': '0.026658', 'highPrice24h': '97383.10', 'lowPrice24h': '94198.50', 'prevPrice1h': '96183.00', 'openInterest': '54171.557', 'openInterestValue': '5238931277.47', 'turnover24h': '9571894261.6171', 'volume24h': '99536.1560', 'fundingRate': '0.00000222', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '2.942', 'bid1Price': '96709.90', 'ask1Price': '96710.00', 'bid1Size': '13.364', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:39:45,106 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96709.9
+2025-05-01 19:39:45,107 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:39:45,107 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:39:45,465 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:39:45,484 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:39:45,488 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:39:45,491 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:39:45,497 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:39:45,525 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:39:45,532 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:39:45,564 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:39:45,585 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:39:45,782 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:39:45,782 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:39:45,784 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:39:45,794 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:39:45,795 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:39:45,800 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:39:45,807 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:39:45,807 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:39:45,808 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:39:45,809 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:39:45,811 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:45,811 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '129.9', 'EMA_Short': '96636.25806', 'EMA_Long': '96527.19932', 'Momentum': '190.00000', 'CCI': '119.33357', 'Williams_R': '-35.67049', 'MFI': '85.53106', 'VWAP': '96732.13671', 'PSAR_long': '96495.16282', 'SMA10': '96602.38000', 'StochRSI_K': '90.51404', 'StochRSI_D': '95.95476', 'RSI': '62.27730', 'BB_Lower': '96045.47200', 'BB_Middle': '96439.29500', 'BB_Upper': '96833.11800', 'Volume_MA': '248.04153', 'Open': '96809.2', 'High': '96815.3', 'Low': '96700.0', 'Close': '96710.0', 'Volume': '169.800000'}
+2025-05-01 19:39:45,813 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:45,813 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '97030.0', 'Fib_23.6%': '96818.2', 'Fib_38.2%': '96687.3', 'Fib_50.0%': '96581.4', 'Fib_61.8%': '96475.5', 'Fib_78.6%': '96324.8', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:39:45,814 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=17.6730, AskVol=3.8690, OBI=0.6408 -> Score=0.6408
+2025-05-01 19:39:45,814 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:45,814 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96709.9): Set='default', Indicators=[Active:13, NaN:0], TotalWeight=2.90, FinalScore=-0.2611 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:39:45,814 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.393', 'volume_confirmation': '0.000', 'stoch_rsi': '-1.000', 'rsi': '-0.500', 'bollinger_bands': '0.481', 'vwap': '-0.700', 'cci': '-0.600', 'wr': '-0.400', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '0.641'}
+2025-05-01 19:39:45,814 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:39:45,815 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:45,815 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:39:45,815 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96709.9
+2025-05-01 19:39:45,815 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 129.94
+2025-05-01 19:39:45,815 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:39:45,816 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:39:45,816 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:39:45,816 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:39:46,191 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:39:46,191 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:39:46,192 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:39:46,192 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:39:46,193 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 2.21s) ==---
+2025-05-01 19:39:53,984 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:39:53,985 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:39:53,985 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:39:54,418 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:39:54,419 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:39:54,871 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94198.5, 'bid': 96700.0, 'bidVolume': 51.998, 'ask': 96700.1, 'askVolume': 5.161, 'vwap': 96165.01263681849, 'open': 94198.7, 'close': 96700.0, 'last': 96700.0, 'previousClose': None, 'change': 2501.3, 'percentage': 2.6553, 'average': 95449.3, 'baseVolume': 99538.812, 'quoteVolume': 9572151113.8339, 'markPrice': 96702.47, 'indexPrice': 96752.37, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96700.00', 'indexPrice': '96752.37', 'markPrice': '96702.47', 'prevPrice24h': '94198.70', 'price24hPcnt': '0.026553', 'highPrice24h': '97383.10', 'lowPrice24h': '94198.50', 'prevPrice1h': '96183.00', 'openInterest': '54171.098', 'openInterestValue': '5238478979.21', 'turnover24h': '9572151113.8339', 'volume24h': '99538.8120', 'fundingRate': '0.00000222', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '5.161', 'bid1Price': '96700.00', 'ask1Price': '96700.10', 'bid1Size': '51.998', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:39:54,871 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96700.0
+2025-05-01 19:39:54,871 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:39:54,872 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:39:55,240 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:39:55,261 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:39:55,265 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:39:55,268 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:39:55,270 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:39:55,299 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:39:55,302 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:39:55,324 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:39:55,333 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:39:55,528 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:39:55,529 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:39:55,531 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:39:55,540 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:39:55,540 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:39:55,546 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:39:55,552 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:39:55,552 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:39:55,552 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:39:55,554 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:39:55,556 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:55,556 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '129.9', 'EMA_Short': '96634.25806', 'EMA_Long': '96526.29023', 'Momentum': '180.00000', 'CCI': '118.23602', 'Williams_R': '-36.78520', 'MFI': '85.45447', 'VWAP': '96731.95060', 'PSAR_long': '96495.16282', 'SMA10': '96601.38000', 'StochRSI_K': '89.69477', 'StochRSI_D': '95.68167', 'RSI': '61.57865', 'BB_Lower': '96046.32495', 'BB_Middle': '96438.79500', 'BB_Upper': '96831.26505', 'Volume_MA': '248.25600', 'Open': '96809.2', 'High': '96815.3', 'Low': '96700.0', 'Close': '96700.0', 'Volume': '173.017000'}
+2025-05-01 19:39:55,558 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:55,558 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '97030.0', 'Fib_23.6%': '96818.2', 'Fib_38.2%': '96687.3', 'Fib_50.0%': '96581.4', 'Fib_61.8%': '96475.5', 'Fib_78.6%': '96324.8', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:39:55,559 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=52.0780, AskVol=5.9110, OBI=0.7961 -> Score=0.7961
+2025-05-01 19:39:55,559 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:55,559 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96700.0): Set='default', Indicators=[Active:13, NaN:0], TotalWeight=2.90, FinalScore=-0.2528 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:39:55,560 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.372', 'volume_confirmation': '0.000', 'stoch_rsi': '-1.000', 'rsi': '-0.500', 'bollinger_bands': '0.466', 'vwap': '-0.700', 'cci': '-0.600', 'wr': '-0.400', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '0.796'}
+2025-05-01 19:39:55,560 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:39:55,560 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:39:55,560 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:39:55,560 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96700.0
+2025-05-01 19:39:55,560 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 129.94
+2025-05-01 19:39:55,561 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:39:55,561 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:39:55,561 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:39:55,561 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:39:55,921 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:39:55,921 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:39:55,922 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:39:55,922 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:39:55,923 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 1.94s) ==---
+2025-05-01 19:40:03,987 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:40:03,988 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:40:03,988 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:40:04,417 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:40:04,418 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:40:04,860 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94198.5, 'bid': 96709.3, 'bidVolume': 12.11, 'ask': 96709.4, 'askVolume': 3.772, 'vwap': 96165.01998016439, 'open': 94198.7, 'close': 96709.4, 'last': 96709.4, 'previousClose': None, 'change': 2510.7, 'percentage': 2.6653, 'average': 95454.0, 'baseVolume': 99540.167, 'quoteVolume': 9572282148.3839, 'markPrice': 96709.3, 'indexPrice': 96753.8, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96709.40', 'indexPrice': '96753.80', 'markPrice': '96709.30', 'prevPrice24h': '94198.70', 'price24hPcnt': '0.026653', 'highPrice24h': '97383.10', 'lowPrice24h': '94198.50', 'prevPrice1h': '96183.00', 'openInterest': '54168.101', 'openInterestValue': '5238559130.04', 'turnover24h': '9572282148.3839', 'volume24h': '99540.1670', 'fundingRate': '0.00000222', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '3.772', 'bid1Price': '96709.30', 'ask1Price': '96709.40', 'bid1Size': '12.110', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:40:04,860 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96709.4
+2025-05-01 19:40:04,861 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:40:04,861 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:40:05,220 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:40:05,230 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:40:05,234 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:40:05,236 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:40:05,238 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:40:05,264 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:40:05,267 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:40:05,292 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:40:05,299 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:40:05,495 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:40:05,495 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:40:05,497 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:40:05,506 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:40:05,507 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:40:05,512 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:40:05,518 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:40:05,518 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:40:05,518 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:40:05,520 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:40:05,521 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:05,521 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '121.3', 'EMA_Short': '96649.30245', 'EMA_Long': '96542.94484', 'Momentum': '195.40000', 'CCI': '93.13751', 'Williams_R': '-35.73738', 'MFI': '88.41524', 'VWAP': '96731.95045', 'PSAR_long': '96570.04002', 'SMA10': '96632.36000', 'StochRSI_K': '79.88170', 'StochRSI_D': '89.86152', 'RSI': '62.01242', 'BB_Lower': '96067.89725', 'BB_Middle': '96463.41500', 'BB_Upper': '96858.93275', 'Volume_MA': '239.32573', 'Open': '96700.1', 'High': '96709.4', 'Low': '96700.1', 'Close': '96709.4', 'Volume': '0.401000'}
+2025-05-01 19:40:05,523 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:05,523 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '97030.0', 'Fib_23.6%': '96818.2', 'Fib_38.2%': '96687.3', 'Fib_50.0%': '96581.4', 'Fib_61.8%': '96475.5', 'Fib_78.6%': '96324.8', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:40:05,524 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=14.4640, AskVol=4.9820, OBI=0.4876 -> Score=0.4876
+2025-05-01 19:40:05,524 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:05,524 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96709.4): Set='default', Indicators=[Active:13, NaN:0], TotalWeight=2.90, FinalScore=-0.3233 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:40:05,524 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.404', 'volume_confirmation': '-0.400', 'stoch_rsi': '-1.000', 'rsi': '-0.500', 'bollinger_bands': '0.435', 'vwap': '-0.700', 'cci': '-0.600', 'wr': '-0.400', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '0.488'}
+2025-05-01 19:40:05,525 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:40:05,525 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:05,525 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:40:05,525 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96709.4
+2025-05-01 19:40:05,525 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 121.32
+2025-05-01 19:40:05,526 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:40:05,526 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:40:05,526 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:40:05,526 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:40:05,891 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:40:05,892 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:40:05,892 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:40:05,893 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:40:05,893 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 1.91s) ==---
+2025-05-01 19:40:13,988 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:40:13,989 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:40:13,990 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:40:14,438 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:40:14,440 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:40:14,890 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94198.5, 'bid': 96700.0, 'bidVolume': 51.605, 'ask': 96700.1, 'askVolume': 8.815, 'vwap': 96165.02490180335, 'open': 94198.7, 'close': 96700.0, 'last': 96700.0, 'previousClose': None, 'change': 2501.3, 'percentage': 2.6553, 'average': 95449.3, 'baseVolume': 99541.076, 'quoteVolume': 9572370052.2923, 'markPrice': 96700.0, 'indexPrice': 96748.02, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96700.00', 'indexPrice': '96748.02', 'markPrice': '96700.00', 'prevPrice24h': '94198.70', 'price24hPcnt': '0.026553', 'highPrice24h': '97383.10', 'lowPrice24h': '94198.50', 'prevPrice1h': '96183.00', 'openInterest': '54168.789', 'openInterestValue': '5238121896.30', 'turnover24h': '9572370052.2923', 'volume24h': '99541.0760', 'fundingRate': '0', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '8.815', 'bid1Price': '96700.00', 'ask1Price': '96700.10', 'bid1Size': '51.605', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:40:14,891 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96700.0
+2025-05-01 19:40:14,891 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:40:14,891 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:40:15,271 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:40:15,303 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:40:15,315 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:40:15,319 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:40:15,322 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:40:15,348 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:40:15,351 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:40:15,372 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:40:15,379 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:40:15,575 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:40:15,576 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:40:15,577 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:40:15,587 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:40:15,587 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:40:15,593 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:40:15,599 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:40:15,600 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:40:15,600 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:40:15,601 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:40:15,603 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:15,603 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '121.3', 'EMA_Short': '96647.42245', 'EMA_Long': '96542.09029', 'Momentum': '186.00000', 'CCI': '92.09941', 'Williams_R': '-36.78520', 'MFI': '88.38277', 'VWAP': '96731.93751', 'PSAR_long': '96570.04002', 'SMA10': '96631.42000', 'StochRSI_K': '79.39689', 'StochRSI_D': '89.69992', 'RSI': '61.57811', 'BB_Lower': '96068.57693', 'BB_Middle': '96462.94500', 'BB_Upper': '96857.31307', 'Volume_MA': '239.41067', 'Open': '96700.1', 'High': '96709.4', 'Low': '96700.0', 'Close': '96700.0', 'Volume': '1.675000'}
+2025-05-01 19:40:15,604 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:15,605 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '97030.0', 'Fib_23.6%': '96818.2', 'Fib_38.2%': '96687.3', 'Fib_50.0%': '96581.4', 'Fib_61.8%': '96475.5', 'Fib_78.6%': '96324.8', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:40:15,605 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=51.7050, AskVol=9.9720, OBI=0.6766 -> Score=0.6766
+2025-05-01 19:40:15,605 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:15,606 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96700.0): Set='default', Indicators=[Active:13, NaN:0], TotalWeight=2.90, FinalScore=-0.3112 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:40:15,606 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.385', 'volume_confirmation': '-0.400', 'stoch_rsi': '-1.000', 'rsi': '-0.500', 'bollinger_bands': '0.421', 'vwap': '-0.700', 'cci': '-0.600', 'wr': '-0.400', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '0.677'}
+2025-05-01 19:40:15,606 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:40:15,606 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:15,606 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:40:15,607 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96700.0
+2025-05-01 19:40:15,607 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 121.33
+2025-05-01 19:40:15,607 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:40:15,607 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:40:15,608 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:40:15,608 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:40:15,986 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:40:15,987 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:40:15,987 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:40:15,988 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:40:15,988 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 2.00s) ==---
+2025-05-01 19:40:23,989 - INFO - [xrscalper_bot_BTC_USDT-USDT:3514] - ---== Analyzing BTC/USDT:USDT (5) Cycle Start ==---
+2025-05-01 19:40:23,990 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2287] - Market Info for BTC/USDT:USDT: ID=BTCUSDT, Base=BTC, Quote=USDT, Type=swap, IsContract=True, ContractType=Linear, Precision(Price/Amount): 0.1/0.001, Limits(Amount Min/Max): 0.001/1190.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-05-01 19:40:23,991 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:589] - Fetching klines for BTC/USDT:USDT, 5m, limit=500 (Attempt 1/4)
+2025-05-01 19:40:24,418 - INFO - [xrscalper_bot_BTC_USDT-USDT:672] - Successfully fetched and processed 500 klines for BTC/USDT:USDT 5m
+2025-05-01 19:40:24,419 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:501] - Fetching ticker for BTC/USDT:USDT... (Attempt 1)
+2025-05-01 19:40:24,850 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:503] - Ticker data for BTC/USDT:USDT: {'symbol': 'BTC/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 97383.1, 'low': 94223.6, 'bid': 96709.3, 'bidVolume': 16.341, 'ask': 96709.4, 'askVolume': 1.399, 'vwap': 96165.12474111229, 'open': 94233.0, 'close': 96709.3, 'last': 96709.3, 'previousClose': None, 'change': 2476.3, 'percentage': 2.6278, 'average': 95471.1, 'baseVolume': 99537.364, 'quoteVolume': 9572023025.4615, 'markPrice': 96709.3, 'indexPrice': 96751.99, 'info': {'symbol': 'BTCUSDT', 'lastPrice': '96709.30', 'indexPrice': '96751.99', 'markPrice': '96709.30', 'prevPrice24h': '94233.00', 'price24hPcnt': '0.026278', 'highPrice24h': '97383.10', 'lowPrice24h': '94223.60', 'prevPrice1h': '96230.10', 'openInterest': '54169.492', 'openInterestValue': '5238693652.68', 'turnover24h': '9572023025.4615', 'volume24h': '99537.3640', 'fundingRate': '0', 'nextFundingTime': '1746172800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1.399', 'bid1Price': '96709.30', 'ask1Price': '96709.40', 'bid1Size': '16.341', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-05-01 19:40:24,851 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:514] - Using 'last' price: 96709.3
+2025-05-01 19:40:24,851 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:3561] - Fetching order book for BTC/USDT:USDT (Weight: 0.1)...
+2025-05-01 19:40:24,851 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:699] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-05-01 19:40:25,210 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:717] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-05-01 19:40:25,220 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'ATR' to column 'ATRr_14'
+2025-05-01 19:40:25,223 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Short' to column 'EMA_9'
+2025-05-01 19:40:25,227 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'EMA_Long' to column 'EMA_21'
+2025-05-01 19:40:25,228 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Momentum' to column 'MOM_7'
+2025-05-01 19:40:25,258 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'CCI' to column 'CCI_20_0.015'
+2025-05-01 19:40:25,261 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'Williams_R' to column 'WILLR_14'
+2025-05-01 19:40:25,285 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'MFI' to column 'MFI_14'
+2025-05-01 19:40:25,292 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'VWAP' to column 'VWAP_D'
+2025-05-01 19:40:25,488 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_long' to column 'PSARl_0.02_0.2'
+2025-05-01 19:40:25,488 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'PSAR_short' to column 'PSARs_0.02_0.2'
+2025-05-01 19:40:25,490 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'SMA10' to column 'SMA_10'
+2025-05-01 19:40:25,499 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_K' to column 'STOCHRSIk_14_12_3_3'
+2025-05-01 19:40:25,500 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'StochRSI_D' to column 'STOCHRSId_14_12_3_3'
+2025-05-01 19:40:25,505 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'RSI' to column 'RSI_14'
+2025-05-01 19:40:25,511 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Lower' to column 'BBL_20_2.0'
+2025-05-01 19:40:25,511 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Middle' to column 'BBM_20_2.0'
+2025-05-01 19:40:25,511 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:872] - Mapped 'BB_Upper' to column 'BBU_20_2.0'
+2025-05-01 19:40:25,513 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1033] - Finished indicator calculations for BTC/USDT:USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-05-01 19:40:25,514 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:25,514 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1124] - Latest indicator values updated for BTC/USDT:USDT: {'ATR': '121.3', 'EMA_Short': '96649.28245', 'EMA_Long': '96542.93575', 'Momentum': '195.30000', 'CCI': '93.11567', 'Williams_R': '-35.74852', 'MFI': '88.35451', 'VWAP': '96731.92957', 'PSAR_long': '96570.04002', 'SMA10': '96632.35000', 'StochRSI_K': '79.87664', 'StochRSI_D': '89.85983', 'RSI': '62.00788', 'BB_Lower': '96067.90469', 'BB_Middle': '96463.41000', 'BB_Upper': '96858.91531', 'Volume_MA': '239.48460', 'Open': '96700.1', 'High': '96709.4', 'Low': '96700.0', 'Close': '96709.3', 'Volume': '2.784000'}
+2025-05-01 19:40:25,516 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:25,516 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1213] - Calculated Fibonacci levels for BTC/USDT:USDT (Window: 50): {'Fib_0.0%': '97030.0', 'Fib_23.6%': '96818.2', 'Fib_38.2%': '96687.3', 'Fib_50.0%': '96581.4', 'Fib_61.8%': '96475.5', 'Fib_78.6%': '96324.8', 'Fib_100.0%': '96132.9'}
+2025-05-01 19:40:25,517 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1940] - Orderbook check (BTC/USDT:USDT): Top 10 levels -> BidVol=21.1490, AskVol=1.8140, OBI=0.8420 -> Score=0.8420
+2025-05-01 19:40:25,517 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:25,517 - INFO - [xrscalper_bot_BTC_USDT-USDT:1588] - Signal Summary (BTC/USDT:USDT @ 96709.3): Set='default', Indicators=[Active:13, NaN:0], TotalWeight=2.90, FinalScore=-0.2880 (Threshold: +/-1.50) ==> [33mHOLD[0m
+2025-05-01 19:40:25,517 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1590] -   Indicator Scores (BTC/USDT:USDT): {'ema_alignment': '1.000', 'momentum': '0.404', 'volume_confirmation': '-0.400', 'stoch_rsi': '-1.000', 'rsi': '-0.500', 'bollinger_bands': '0.435', 'vwap': '-0.700', 'cci': '-0.600', 'wr': '-0.400', 'psar': '1.000', 'sma_10': '0.600', 'mfi': '-1.000', 'orderbook': '0.842'}
+2025-05-01 19:40:25,517 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1984] - TP/SL calculation skipped: Signal is 'HOLD'.
+2025-05-01 19:40:25,518 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1263] - Calculated price precision from market_info.precision.price (tick size 0.1): 1 for BTC/USDT:USDT
+2025-05-01 19:40:25,518 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:1324] - Using tick size from precision.price: 0.1 for BTC/USDT:USDT
+2025-05-01 19:40:25,518 - INFO - [xrscalper_bot_BTC_USDT-USDT:3586] - Current Price: 96709.3
+2025-05-01 19:40:25,518 - INFO - [xrscalper_bot_BTC_USDT-USDT:3587] - ATR: 121.33
+2025-05-01 19:40:25,519 - INFO - [xrscalper_bot_BTC_USDT-USDT:3588] - Calculated Initial SL (for sizing): N/A
+2025-05-01 19:40:25,519 - INFO - [xrscalper_bot_BTC_USDT-USDT:3589] - Calculated Initial TP (potential target): N/A
+2025-05-01 19:40:25,519 - INFO - [xrscalper_bot_BTC_USDT-USDT:3594] - Position Management: TSL=Enabled, BE=Enabled, TimeExit=Disabled
+2025-05-01 19:40:25,519 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2616] - Fetching positions for symbol: BTC/USDT:USDT
+2025-05-01 19:40:25,883 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2631] - Fetched single symbol position data for BTC/USDT:USDT (ID: BTCUSDT). Count: 1
+2025-05-01 19:40:25,884 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:2689] - Using position size threshold: 0.0005 for BTC/USDT:USDT
+2025-05-01 19:40:25,884 - INFO - [xrscalper_bot_BTC_USDT-USDT:2811] - No active open position found for BTC/USDT:USDT.
+2025-05-01 19:40:25,884 - INFO - [xrscalper_bot_BTC_USDT-USDT:3834] - Signal is HOLD and no open position for BTC/USDT:USDT. No entry action taken.
+2025-05-01 19:40:25,885 - DEBUG - [xrscalper_bot_BTC_USDT-USDT:4058] - ---== Analysis Cycle End (BTC/USDT:USDT, 1.89s) ==---

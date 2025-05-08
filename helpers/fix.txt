@@ -1,0 +1,129 @@
+O [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 0.65s) ---
+
+~/worldguide/helpers main* 23s ❯ python main.py               15:07:08
+.env file loaded: True
+Warning: SMS alerts enabled, but required configuration keys are missing: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
+         Disabling SMS alerts.
+Configuration loaded successfully. Testnet Mode: False
+2025-04-26 15:07:42,138 - bybit_utils - INFO - Placeholder logger initialized for bybit_utils.py.
+Starting Asynchronous Trading Bot...
+/data/data/com.termux/files/home/worldguide/helpers/main.py:261: DeprecationWarning: There is no current event loop
+  event_loop = asyncio.get_event_loop()
+Neon Logger: Overriding console level from env LOG_CONSOLE_LEVEL='INFO' -> INFO
+Neon Logger: Overriding file level from env LOG_FILE_LEVEL='DEBUG' -> DEBUG
+Neon Logger: Overriding log file path from env LOG_FILE_PATH='ehlers_strategy.log'
+Neon Logger: Console logging active at level [INFO].
+Neon Logger: Rotating file logging active at level [DEBUG] to 'ehlers_strategy.log' (Max: 5.0 MB, Backups: 5).
+Neon Logger: Setting third-party library log level to [WARNING].
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread setup_logger:298] - --- Logger Setup Complete (INFO Test) ---
+2025-04-26 15:07:42 - TradingBot - SUCCESS [MainThread log_success:55] - --- Logger Setup Complete (SUCCESS Test) ---
+2025-04-26 15:07:42 - TradingBot - WARNING [MainThread setup_logger:300] - --- Logger Setup Complete (WARNING Test) ---
+2025-04-26 15:07:42 - TradingBot - ERROR [MainThread setup_logger:301] - --- Logger Setup Complete (ERROR Test) ---
+2025-04-26 15:07:42 - TradingBot - CRITICAL [MainThread setup_logger:302] - --- Logger Setup Complete (CRITICAL Test) ---
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:140] - ============================================================
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:141] - === TradingBot Initializing ===
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:144] - Testnet Mode: False
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:145] - Symbol: DOT/USDT:USDT
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:147] - Strategy: EhlersVolumetricStrategy
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:149] - Timeframe: 5m
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:150] - ============================================================
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread __init__:151] - Strategy EhlersVolumetricStrategy initialized.
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread main:181] - Starting strategy execution loop...
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread _initialize:162] - --- Strategy Initialization Phase ---
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:604} - [initialize_bybit] Initializing Bybit V5 (Mainnet)...
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:640} - [initialize_bybit] Mainnet mode active. API Endpoint Base: {'spot': 'https://api.{hostname}', 'futures': 'https://api.{hostname}', 'v2': 'https://api.{hostname}', 'public': 'https://api.{hostname}', 'private': 'https://api.{hostname}'}
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:643} - [initialize_bybit] Loading markets via MarketCache (force reload)...
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:240} - [MarketCache] Loading markets from bybit...
+2025-04-26 15:07:42 - TradingBot - INFO [MainThread _initialize:162] - --- Strategy Initialization Phase ---
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:604} - [initialize_bybit] Initializing Bybit V5 (Mainnet)...
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:640} - [initialize_bybit] Mainnet mode active. API Endpoint Base: {'spot': 'https://api.{hostname}', 'futures': 'https://api.{hostname}', 'v2': 'https://api.{hostname}', 'public': 'https://api.{hostname}', 'private': 'https://api.{hostname}'}
+2025-04-26 15:07:42 [INFO    ] {bybit_helpers:643} - [initialize_bybit] Loading markets via MarketCache (force reload)...
+2025-04-26 15:07:49 [INFO    ] {bybit_helpers:254} - [MarketCache] Successfully loaded 2569 markets.
+2025-04-26 15:07:49 [INFO    ] {bybit_helpers:675} - [initialize_bybit] Performing authentication check (fetching UNIFIED balance)...
+2025-04-26 15:07:49 [INFO    ] {bybit_helpers:240} - [MarketCache] Reloading markets from bybit...
+2025-04-26 15:07:50 [INFO    ] {bybit_helpers:680} - [initialize_bybit] Authentication check successful (Unified Balance fetched).
+2025-04-26 15:07:50 [INFO    ] {bybit_helpers:703} - [initialize_bybit] Attempting initial margin/leverage config for DOT/USDT:USDT...
+2025-04-26 15:07:50 [INFO    ] {bybit_helpers:714} - [initialize_bybit] Configured default margin mode is CROSS (account-level for UTA). Verifying account mode...
+2025-04-26 15:07:51 [ERROR   ] {bybit_helpers:805} - [fetch_account_info_bybit_v5] Failed to fetch account info. Code: 0, Msg: OK
+2025-04-26 15:07:51 [WARNING ] {bybit_helpers:722} - [initialize_bybit] Could not verify account margin mode via fetch_account_info_bybit_v5.
+2025-04-26 15:07:51 [INFO    ] {bybit_helpers:733} - [initialize_bybit] Bybit V5 exchange initialized successfully.
+2025-04-26 15:07:51 - TradingBot - INFO [MainThread _extract_market_details:253] - Market Details Set: Min Qty=0.1, Qty Step=0.1, Price Tick=0.0001
+2025-04-26 15:07:51 - TradingBot - INFO [MainThread _initialize:179] - Setting leverage for DOT/USDT:USDT to 10x...
+2025-04-26 15:07:51 [INFO    ] {bybit_helpers:875} - [set_leverage (DOT/USDT:USDT -> 10x)] Sending request with params: {'category': 'linear', 'buyLeverage': '10', 'sellLeverage': '10'}... (This implies ISOLATED mode for DOT/USDT:USDT)
+2025-04-26 15:07:52 [INFO    ] {bybit_helpers:892} - [set_leverage (DOT/USDT:USDT -> 10x)] Leverage already set to 10x (or not modified). Considered success.
+2025-04-26 15:07:52 - TradingBot - SUCCESS [MainThread log_success:55] - Leverage set confirmed.
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:191] - Fetching initial account state (position, orders, balance)...
+2025-04-26 15:07:52 - TradingBot - ERROR [MainThread _update_state:325] - Unexpected error during state update: module 'bybit_helpers' has no attribute 'get_current_position_bybit_v5'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 269, in _update_state
+    bybit.get_current_position_bybit_v5(self.exchange, self.symbol, self.api_config),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'bybit_helpers' has no attribute 'get_current_position_bybit_v5'
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:195] - Initial Position: Side=NONE, Qty=0
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:196] - Initial Open Orders: 0
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:197] - Initial Available Balance: 0.0000 USDT
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _initialize:200] - Performing initial cleanup: cancelling existing orders...
+2025-04-26 15:07:52 [ERROR   ] {bybit_helpers:575} - [cancel_all_orders] Unhandled exception during attempt 1: TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 15:07:52 - TradingBot - CRITICAL [MainThread _initialize:220] - Critical error during strategy initialization: cancel_all_orders() got an unexpected keyword argument 'category'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 203, in _initialize
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 15:07:52 - TradingBot - CRITICAL [MainThread main:215] - Main execution block encountered an unhandled error: 'bybit' object has no attribute 'closed'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 203, in _initialize
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 188, in main
+    initialized = await strategy_instance._initialize() # Run initialization explicitly
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 222, in _initialize
+    if self.exchange and hasattr(self.exchange, 'close') and not self.exchange.closed:                                                                                                                         ^^^^^^^^^^^^^^^^^^^^                                                         AttributeError: 'bybit' object has no attribute 'closed'
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread main:219] - --- Main Execution Block Finalizing (Run Success: False) ---
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread main:223] - Running strategy internal cleanup (_cleanup)...
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _cleanup:911] - --- Initiating Strategy Cleanup ---
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread _cleanup:914] - Cancelling all remaining open orders...
+2025-04-26 15:07:52 [ERROR   ] {bybit_helpers:575} - [cancel_all_orders] Unhandled exception during attempt 1: TypeError: cancel_all_orders() got an unexpected keyword argument 'category'                          Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)                                                  ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 15:07:52 - TradingBot - ERROR [MainThread main:230] - Error during strategy internal cleanup: cancel_all_orders() got an unexpected keyword argument 'category'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/helpers/main.py", line 228, in main
+    await cleanup_result
+  File "/data/data/com.termux/files/home/worldguide/helpers/ehlers_volumetric_strategy.py", line 917, in _cleanup
+    cancelled_count = await bybit.cancel_all_orders(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/helpers/bybit_helpers.py", line 556, in async_wrapper
+    return await func(*args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: cancel_all_orders() got an unexpected keyword argument 'category'
+2025-04-26 15:07:52 - TradingBot - WARNING [MainThread main:246] - Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed).
+2025-04-26 15:07:52 - TradingBot - ERROR [MainThread main:249] - Main execution block finished due to errors.
+Cleaning up remaining asyncio tasks...
+Cancelling 2 outstanding tasks...
+Closing asyncio event loop.
+--- Application Shutdown Complete (Total Runtime: 9.93s) ---
+2025-04-26 15:07:52 - TradingBot - INFO [MainThread <module>:321] - --- Application Shutdown Complete (Runtime: 9.93s) ---
+bybit requires to release all resources with an explicit call to the .close() coroutine. If you are using the exchange instance with async coroutines, add `await exchange.close()` to your code into a place when you're done with the exchange and don't need the exchange instance anymore (at the end of your async coroutine).
+Unclosed connector
+connections: ['[(<aiohttp.client_proto.ResponseHandler object at 0x7ab8341bb0>, 12506.87761455), (<aiohttp.client_proto.ResponseHandler object at 0x7ab8341790>, 12507.071559706), (<aiohttp.client_proto.ResponseHandler object at 0x7ab8e39730>, 12507.318260018), (<aiohttp.client_proto.ResponseHandler object at 0x7ab8342210>, 12507.59503981), (<aiohttp.client_proto.ResponseHandler object at 0x7ab8342690>, 12507.621116372), (<aiohttp.client_proto.ResponseHandler object at 0x7ab8341f70>, 12510.213892048), (<aiohttp.client_proto.ResponseHandler object at 0x7ab8342450>, 12512.098679183)]']                                                  connector: <aiohttp.connector.TCPConnector object at 0x7acdf27950>
+bybit requires to release all resources with an explicit call to the .close() coroutine. If you are using the exchange instance with async coroutines, add `await exchange.close()` to your code into a place when you're done with the exchange and don't need the exchange instance anymore (at the end of your async coroutine).                                Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7ab7e1e2a0>

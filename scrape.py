@@ -24,7 +24,7 @@ class ColoredFormatter(logging.Formatter):
         "CRITICAL": Fore.RED + Back.WHITE + Style.BRIGHT,
     }
 
-    def format(self, record):
+    def format(self, record) -> str:
         color = self.COLORS.get(record.levelname, Fore.WHITE)
         message = super().format(record)
         return f"{color}{message}"
@@ -38,30 +38,28 @@ logger.setLevel(logging.INFO)
 
 
 # Color Print Functions
-def print_header(text):
-    print(Fore.YELLOW + Style.BRIGHT + "\n" + "═" * 50)
-    print(Fore.YELLOW + Style.BRIGHT + f"  {text}")
-    print(Fore.YELLOW + Style.BRIGHT + "═" * 50 + "\n")
+def print_header(text) -> None:
+    pass
 
 
-def print_success(text):
-    print(Fore.GREEN + Style.BRIGHT + "✓ " + text)
+def print_success(text) -> None:
+    pass
 
 
-def print_warning(text):
-    print(Fore.YELLOW + Style.BRIGHT + "! " + text)
+def print_warning(text) -> None:
+    pass
 
 
-def print_error(text):
-    print(Fore.RED + Style.BRIGHT + "✗ " + text)
+def print_error(text) -> None:
+    pass
 
 
-def print_info(text):
-    print(Fore.CYAN + Style.NORMAL + "➤ " + text)
+def print_info(text) -> None:
+    pass
 
 
 # Utility Functions
-def validate_date(date_str):
+def validate_date(date_str) -> bool | None:
     """Validates date strings in YYYY-MM-DD format."""
     try:
         datetime.strptime(date_str, "%Y-%m-%d")
@@ -78,7 +76,7 @@ def format_date_for_bing(date_str):
     return datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y%m%d")
 
 
-def create_directory(path):
+def create_directory(path) -> None:
     """Creates directory with error handling."""
     try:
         os.makedirs(path, exist_ok=True)
@@ -172,19 +170,19 @@ def get_image_metadata(url):
         return {"content_length": "N/A", "content_type": "N/A"}
 
 
-def save_metadata(metadata_list, output_dir):
+def save_metadata(metadata_list, output_dir) -> None:
     """Saves metadata to JSON file."""
     metadata_file = os.path.join(output_dir, "metadata.json")
     try:
         with open(metadata_file, "w") as f:
             json.dump(metadata_list, f, indent=4)
         print_success(f"Metadata saved to {metadata_file}")
-    except IOError as e:
+    except OSError as e:
         print_error(f"Failed to save metadata: {e}")
 
 
 # Main Application
-def main():
+def main() -> None:
     print_header("🌟 Enhanced Bing Image Downloader 🌟")
 
     # Get user inputs with color prompts
@@ -256,10 +254,8 @@ def main():
         metadata = extract_metadata(renamed_paths)
 
         print_header("📄 Download Results")
-        for item in metadata:
-            print(Fore.MAGENTA + f"📷 {os.path.basename(item['path'])}")
-            print(Fore.CYAN + f"   Size: {item.get('content_length', 'N/A')} bytes")
-            print(Fore.CYAN + f"   Type: {item.get('content_type', 'N/A')}\n")
+        for _item in metadata:
+            pass
 
         save_metadata(metadata, output_dir)
         print_success("Operation completed successfully!")

@@ -1,0 +1,421 @@
+Okay, I've reviewed the Python script and will provide an enhanced version. The main improvements include:
+
+1.  **Corrected Critical Import Error Handling:** The original script had a significant structural error where a large block of code (the symbol processing loop) was incorrectly placed inside an `except ImportError` block for custom modules. This has been removed, as that logic belongs (and is already present) in the `main` function. A `sys.exit(1)` call is ensured if custom modules fail to import.
+2.  **Centralized ANSI Color Codes:** Defined all ANSI color codes as constants at the top for consistency and easier management.
+3.  **Added Missing `json` Import:** The `json` module was used in the `if __name__ == "__main__":` block but not imported.
+4.  **Consistent Use of Color Constants:** Ensured all `print` statements use the defined color constants.
+5.  **Improved Readability and Minor Refinements:** General code style, comments, and ensuring clarity.
+6.  **Robustness:** Ensured critical failures lead to `sys.exit(1)`.
+
+Here's the enhanced version:
+
+```python
+# File: main.py
+"""
+Main execution script for the XR Scalper Trading Bot.
+
+Initializes and runs the bot, managing configuration, logging,
+exchange connection (via BybitAPI client), and the main trading loop.
+"""
+
+import logging
+import os
+import sys
+import time  # For monotonic clock loop timing
+import signal
+import traceback
+import asyncio
+import json # Added missing import
+from datetime import datetime
+from typing import Dict, Any, Optional, List # Added List for type hint
+import importlib.util  # For checking module availability
+import importlib.metadata  # For getting package versions (Python 3.8+)
+
+# --- ANSI Color Codes ---
+# It's good practice to define these in one place, perhaps even a utils module if used widely.
+NEON_RED = "\033[1;91m"
+NEON_GREEN = "\033[1;92m"
+NEON_YELLOW = "\033[1;93m"
+NEON_BLUE = "\033[1;94m" # Added for variety if needed
+NEON_PURPLE = "\033[1;95m"
+RESET_COLOR = "\033[0m"
+
+# --- Import Third-Party Libraries ---
+try:
+    import pandas as pd
+    import pandas_ta as ta
+    import ccxt.async_support as ccxt_async  # Keep for type hints and exception handling
+    from dotenv import load_dotenv
+except ImportError as e:
+    print(
+        f"{NEON_RED}CRITICAL ERROR: Missing required library: {e}. "
+        f"Please install dependencies (e.g., pip install -r requirements.txt){RESET_COLOR}",
+        file=sys.stderr
+    )
+    sys.exit(1)
+
+# --- Import Custom Modules ---
+# These imports are critical. If they fail, the bot cannot run.
+try:
+    import config_loader
+    from exchange_api import BybitAPI  # Import the API client class
+    import logger_setup
+    import trading_strategy
+    import utils # Assuming utils might contain helper functions or shared constants
+except ImportError as e:
+    print(
+        f"{NEON_RED}CRITICAL ERROR: Failed to import one or more custom modules: {e}. "
+        f"Ensure all custom modules (config_loader, exchange_api, logger_setup, "
+        f"trading_strategy, utils) are present and correct in your PYTHONPATH.{RESET_COLOR}",
+        file=sys.stderr
+    )
+    # The erroneous duplicated code block that was here has been removed.
+    # If custom modules can't be imported, the bot should exit.
+    sys.exit(1)
+
+
+# --- Global Variables ---
+CONFIG: Optional[Dict[str, Any]] = None  # Loaded in main()
+shutdown_requested: bool = False  # Signal handler sets this to True
+
+# --- Signal Handling ---
+def signal_handler(signum, frame):
+    """Gracefully handle termination signals."""
+    global shutdown_requested
+    signal_name = signal.Signals(signum).name
+    # Use init_logger if available, otherwise print
+    logger = logging.getLogger("xrscalper_bot_main") # Use a consistent logger name
+    if logger.hasHandlers():
+        logger.warning(f"{signal_name} received. Initiating shutdown sequence...")
+    else:
+        print(f"\n{NEON_YELLOW}{signal_name} received. Initiating shutdown sequence...{RESET_COLOR}", file=sys.stderr)
+    shutdown_requested = True
+
+
+# --- Dependency Checking ---
+def check_dependencies(logger: logging.Logger):
+    """Checks for critical dependencies and logs their versions."""
+    logger.info("--- Checking Dependencies ---")
+    required_modules = {
+        "pandas": "pd",
+        "pandas_ta": "ta",
+        "ccxt": "ccxt_async", # ccxt.async_support is part of ccxt
+        "python-dotenv": "dotenv"
+    }
+    all_ok = True
+    for pkg_name, mod_name in required_modules.items():
+        spec = importlib.util.find_spec(mod_name)
+        if spec is None:
+            logger.error(f"Dependency '{pkg_name}' (module '{mod_name}') NOT FOUND.")
+            all_ok = False
+        else:
+            try:
+                version = importlib.metadata.version(pkg_name)
+                logger.info(f"Dependency '{pkg_name}' found. Version: {version}")
+            except importlib.metadata.PackageNotFoundError:
+                logger.info(f"Dependency '{pkg_name}' (module '{mod_name}') found, but version info not available via importlib.metadata.")
+            except Exception as e:
+                logger.warning(f"Could not get version for '{pkg_name}': {e}")
+
+    if not all_ok:
+        logger.critical(
+            f"{NEON_RED}One or more critical dependencies are missing. Please install them. Exiting.{RESET_COLOR}")
+        sys.exit(1)
+    logger.info("All critical dependencies seem to be present.")
+
+
+# --- Main Application Logic ---
+async def main():
+    """
+    Main asynchronous function to run the XR Scalper Bot.
+    """
+    global CONFIG, shutdown_requested
+    api_client: Optional[BybitAPI] = None # Initialize for finally block
+
+    # 1. Load Configuration
+    try:
+        CONFIG = config_loader.load_config()
+        if not CONFIG: # Ensure config is loaded
+            print(f"{NEON_RED}CRITICAL ERROR: Configuration could not be loaded. Exiting.{RESET_COLOR}", file=sys.stderr)
+            sys.exit(1)
+    except Exception as e:
+        print(f"{NEON_RED}CRITICAL ERROR: Failed to load configuration: {e}{RESET_COLOR}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+
+    # 2. Setup Logging (using loaded configuration)
+    try:
+        logger_setup.setup_logging(CONFIG)
+    except Exception as e:
+        print(f"{NEON_RED}CRITICAL ERROR: Failed to setup logging: {e}{RESET_COLOR}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1) # Logging is essential
+
+    init_logger = logging.getLogger("xrscalper_bot_main") # Consistent main logger name
+    init_logger.info(f"--- {NEON_PURPLE}XR Scalper Bot Initializing{RESET_COLOR} ---")
+    init_logger.info(f"Python version: {sys.version.split()[0]}")
+    init_logger.info(f"Process ID: {os.getpid()}")
+
+    # 3. Check Dependencies
+    check_dependencies(init_logger)
+
+    # 4. Setup Signal Handlers for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+    signal.signal(signal.SIGTERM, signal_handler) # kill command
+    init_logger.info("Signal handlers registered for SIGINT and SIGTERM.")
+
+    # 5. Initialize Exchange API Client
+    try:
+        api_key = CONFIG.get("exchange", {}).get("api_key", os.getenv("BYBIT_API_KEY"))
+        api_secret = CONFIG.get("exchange", {}).get("api_secret", os.getenv("BYBIT_API_SECRET"))
+        api_passphrase = CONFIG.get("exchange", {}).get("api_passphrase", os.getenv("BYBIT_API_PASSPHRASE")) # If needed
+        is_testnet = CONFIG.get("exchange", {}).get("testnet", False)
+
+        if not api_key or not api_secret:
+            init_logger.critical(
+                "API Key or Secret not found in config or environment variables. "
+                "Please ensure BYBIT_API_KEY and BYBIT_API_SECRET are set."
+            )
+            sys.exit(1)
+
+        api_client = BybitAPI(
+            api_key=api_key,
+            api_secret=api_secret,
+            passphrase=api_passphrase,
+            is_testnet=is_testnet,
+            logger=init_logger # Pass logger to API client for its own logging
+        )
+        await api_client.initialize() # Perform any async setup if needed (e.g., test connection)
+        init_logger.info(f"BybitAPI client initialized. Testnet: {is_testnet}")
+
+    except ccxt_async.AuthenticationError as e:
+        init_logger.critical(f"FATAL: Bybit API Authentication Error: {e}. Check your API credentials. Exiting.")
+        sys.exit(1)
+    except Exception as e:
+        init_logger.critical(f"FATAL: Failed to initialize BybitAPI client: {e}", exc_info=True)
+        sys.exit(1)
+
+    # 6. Determine symbols to process
+    symbols_to_process: List[str] = CONFIG.get("trading", {}).get("symbols", [])
+    if not symbols_to_process:
+        init_logger.critical("No symbols configured for trading in 'trading.symbols'. Exiting.")
+        sys.exit(1)
+    init_logger.info(f"Symbols to process: {', '.join(symbols_to_process)}")
+
+    # 7. Trading Enabled/Disabled Check
+    enable_trading_config = CONFIG.get("trading", {}).get("enable_trading", False)
+    enable_trading = False # Default to False
+    if enable_trading_config:
+        init_logger.warning(f"{NEON_YELLOW}Live trading is configured as ENABLED in settings.{RESET_COLOR}")
+        if not utils.IS_PRODUCTION_ENV: # Assuming utils.IS_PRODUCTION_ENV checks a flag or env var
+             response = input(f"{NEON_YELLOW}CONFIRM: Enable LIVE TRADING? (yes/no): {RESET_COLOR}").strip().lower()
+             if response == "yes":
+                 enable_trading = True
+                 init_logger.info(f"{NEON_GREEN}Live trading has been MANUALLY CONFIRMED and ENABLED.{RESET_COLOR}")
+             else:
+                 init_logger.info(f"{NEON_YELLOW}Live trading CANCELED by user. Running in paper/analysis mode.{RESET_COLOR}")
+        else: # Production environment, no prompt
+            enable_trading = True
+            init_logger.info(f"{NEON_GREEN}Live trading ENABLED (production environment).{RESET_COLOR}")
+    else:
+        init_logger.info(f"{NEON_BLUE}Live trading is DISABLED in settings. Running in paper/analysis mode.{RESET_COLOR}")
+
+
+    # --- Main Trading Loop ---
+    loop_interval_seconds: float = float(CONFIG.get("bot_settings", {}).get("loop_interval_seconds", 60.0))
+    init_logger.info(f"Starting main trading loop. Interval: {loop_interval_seconds}s")
+
+    try:
+        while not shutdown_requested:
+            loop_start_time = time.monotonic()
+            init_logger.debug(f"--- New Loop Cycle Started at {datetime.now().isoformat()} ---")
+
+            # Process symbols sequentially (can be changed to parallel with asyncio.gather if strategy allows)
+            for symbol in symbols_to_process:
+                if shutdown_requested:
+                    init_logger.info("Shutdown requested during symbol processing, stopping.")
+                    break
+
+                # Create a logger specific to this symbol for the cycle
+                safe_symbol_name = symbol.replace('/', '_').replace(':', '-')
+                symbol_logger_name = f"xrscalper_bot_symbol_{safe_symbol_name}"
+                symbol_logger = logging.getLogger(symbol_logger_name)
+                # Ensure symbol logger is configured if not already (e.g., inherits from root or main)
+                if not symbol_logger.handlers: # Basic configuration if not set up by logger_setup
+                    handler = logging.StreamHandler(sys.stdout)
+                    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                    handler.setFormatter(formatter)
+                    symbol_logger.addHandler(handler)
+                    symbol_logger.setLevel(CONFIG.get("logging", {}).get("level", "INFO").upper()) # Use configured level
+                    symbol_logger.propagate = False # Avoid duplicate messages if root logger also has handlers
+
+                symbol_logger.info(f"--- Processing Symbol: {symbol} ---")
+
+                try:
+                    # Call the core strategy function, passing the API client instance
+                    await trading_strategy.analyze_and_trade_symbol(
+                        api_client=api_client,
+                        symbol=symbol,
+                        config=CONFIG,
+                        logger=symbol_logger,
+                        enable_trading=enable_trading
+                    )
+                except (ccxt_async.NetworkError, ccxt_async.RequestTimeout, asyncio.TimeoutError) as net_err:
+                    symbol_logger.warning(
+                        f"Network/Timeout Error for {symbol}: {net_err}. Will retry next cycle.", exc_info=False)
+                except ccxt_async.RateLimitExceeded as rate_err:
+                    symbol_logger.warning(
+                        f"Rate Limit Exceeded for {symbol}: {rate_err}. Check API rate limits.", exc_info=False)
+                except ccxt_async.AuthenticationError as auth_err:
+                    symbol_logger.critical(
+                        f"Authentication Error for {symbol}: {auth_err}. Check API keys! Exiting bot.", exc_info=True)
+                    shutdown_requested = True  # Stop the bot on auth errors
+                except ccxt_async.ExchangeError as exch_err:
+                    symbol_logger.error(
+                        f"Exchange Error for {symbol}: {exch_err}. Check parameters/permissions.", exc_info=False) # Set to True if more detail is often needed
+                except Exception as symbol_err:  # Catch unexpected errors for this symbol
+                    symbol_logger.error(
+                        f"!!! Unhandled Exception processing {symbol}: {symbol_err} !!!", exc_info=True)
+                    symbol_logger.warning(
+                        "Attempting to continue to next symbol/cycle if possible.")
+                finally:
+                    symbol_logger.debug(
+                        f"--- Finished Processing Symbol: {symbol} ---")
+
+            if shutdown_requested:
+                init_logger.info("Shutdown flag set, exiting main loop.")
+                break
+
+            # --- Loop Delay ---
+            loop_end_time = time.monotonic()
+            elapsed = loop_end_time - loop_start_time
+            sleep_duration = max(0.1, loop_interval_seconds - elapsed)  # Ensure minimum sleep
+            init_logger.debug(
+                f"Loop cycle finished. Elapsed: {elapsed:.2f}s. Sleeping for: {sleep_duration:.2f}s.")
+            if elapsed > loop_interval_seconds:
+                init_logger.warning(f"Loop duration ({elapsed:.2f}s) exceeded target interval ({loop_interval_seconds}s). Consider increasing interval or optimizing strategy.")
+            
+            try:
+                await asyncio.sleep(sleep_duration)
+            except asyncio.CancelledError: # Can happen if task is cancelled during sleep
+                init_logger.info("Sleep interrupted by task cancellation (shutdown).")
+                shutdown_requested = True # Ensure shutdown flag is set
+
+    except asyncio.CancelledError:
+        init_logger.info(
+            "Main trading loop task cancelled, likely due to shutdown request or external interrupt.")
+    except Exception as loop_err:
+        init_logger.critical(
+            f"!!! CRITICAL UNHANDLED EXCEPTION IN MAIN TRADING LOOP: {loop_err} !!!", exc_info=True)
+        init_logger.critical("Bot encountered a critical error and will attempt to shut down gracefully.")
+    finally:
+        init_logger.info(
+            f"--- {NEON_PURPLE}XR Scalper Bot Shutting Down{RESET_COLOR} ---")
+        # Ensure the API client connection is closed
+        if api_client:
+            try:
+                init_logger.info("Closing API client connection...")
+                await api_client.close()
+                init_logger.info("API client connection closed.")
+            except Exception as e:
+                init_logger.error(f"Error while closing API client: {e}", exc_info=True)
+        
+        init_logger.info("Shutting down logging system.")
+        logging.shutdown()
+
+# --- Script Entry Point ---
+if __name__ == "__main__":
+    # Load .env file first to make environment variables available for config and API keys
+    if importlib.util.find_spec("dotenv"):
+        load_dotenv()
+        # Basic print to confirm .env load, as logger isn't set up yet
+        # print(f"{NEON_BLUE}INFO: .env file loaded (if present).{RESET_COLOR}")
+    else:
+        print(f"{NEON_YELLOW}WARNING: python-dotenv not installed, .env file will not be loaded.{RESET_COLOR}")
+
+
+    # Pre-flight check for essential API keys if they are not expected to be solely in config.json
+    # This provides an early exit if fundamental credentials are missing.
+    # config_loader and BybitAPI should also handle their absence robustly.
+    # This check assumes keys might be in .env or directly in config.json.
+    # If config_loader merges .env into its config structure, this check might be simplified
+    # or handled by the BybitAPI initialization.
+    api_key_env = os.getenv("BYBIT_API_KEY")
+    api_secret_env = os.getenv("BYBIT_API_SECRET")
+
+    if not (api_key_env and api_secret_env):
+        # Attempt to see if they are in config.json as a fallback
+        # This part might be redundant if config_loader.load_config() is called first
+        # or if BybitAPI directly handles config object. For now, it's a quick pre-check.
+        config_file_path = getattr(config_loader, 'CONFIG_FILE', 'config.json') # Get path from config_loader or default
+        try:
+            if os.path.exists(config_file_path):
+                with open(config_file_path, 'r') as f:
+                    temp_config = json.load(f)
+                # Check if keys are in the 'exchange' section of the config file
+                exchange_config = temp_config.get("exchange", {})
+                if not (exchange_config.get("api_key") and exchange_config.get("api_secret")):
+                    # If also not in env, then it's an issue
+                    print(
+                        f"{NEON_RED}CRITICAL ERROR: BYBIT_API_KEY/SECRET must be set in .env or "
+                        f"defined in the 'exchange' section of {config_file_path}.{RESET_COLOR}",
+                        file=sys.stderr
+                    )
+                    sys.exit(1)
+            else: # Config file doesn't exist and env vars are missing
+                 print(
+                    f"{NEON_RED}CRITICAL ERROR: BYBIT_API_KEY/SECRET not found in environment variables, "
+                    f"and configuration file ({config_file_path}) not found.{RESET_COLOR}",
+                    file=sys.stderr
+                )
+                 sys.exit(1)
+        except (FileNotFoundError, KeyError, json.JSONDecodeError) as e:
+            # This error means config file exists but is malformed or keys are missing
+            print(
+                f"{NEON_RED}CRITICAL ERROR: BYBIT_API_KEY/SECRET not found in environment variables. "
+                f"Tried to check {config_file_path}, but encountered an error: {e}. "
+                f"Ensure keys are in .env or correctly in {config_file_path}.{RESET_COLOR}",
+                file=sys.stderr
+            )
+            sys.exit(1)
+
+    # Assuming utils.IS_PRODUCTION_ENV is defined, e.g., based on an environment variable
+    # This is just a placeholder for how you might check production status
+    if 'utils' in sys.modules: # Check if utils was successfully imported
+        utils.IS_PRODUCTION_ENV = os.getenv("BOT_ENV", "development").lower() == "production"
+    else: # Fallback if utils module is not available (should not happen if imports are fine)
+        class MockUtils: IS_PRODUCTION_ENV = False
+        utils = MockUtils()
+        print(f"{NEON_YELLOW}Warning: 'utils' module not fully available for IS_PRODUCTION_ENV check.{RESET_COLOR}", file=sys.stderr)
+
+
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        # The signal handler (signal_handler) should manage 'shutdown_requested'.
+        # This print is for immediate feedback if Ctrl+C is pressed before/during asyncio.run setup.
+        print(
+            f"\n{NEON_YELLOW}Ctrl+C detected outside main async loop. Initiating shutdown...{RESET_COLOR}",
+            file=sys.stderr
+        )
+        # If main() was running, its signal handler would have set shutdown_requested.
+        # If it wasn't (e.g., error before loop), this ensures a clean message.
+    except Exception as e:
+        # Catch top-level errors during asyncio.run() or before it if main() itself raises early
+        print(
+            f"{NEON_RED}CRITICAL UNHANDLED ERROR at script execution: {e}{RESET_COLOR}",
+            file=sys.stderr
+        )
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+    finally:
+        # Final message after main() completes or is interrupted
+        # Logger might be shut down already, so use print.
+        print(
+            f"{NEON_GREEN}XR Scalper Bot script execution concluded.{RESET_COLOR}",
+            file=sys.stderr
+        )
+        # Explicit exit, especially if shutdown_requested was due to an error.
+        # If shutdown was graceful, exit code 0. If due to unhandled error, it would have exited with 1 already.
+        # sys.exit(0) # Can be added if a specific exit code is desired on normal completion.
+```

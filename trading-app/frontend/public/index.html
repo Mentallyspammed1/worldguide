@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111827" /> <!-- Dark theme color (gray-900) -->
+    <meta
+      name="description"
+      content="Web interface for the Pyrmethus CCXT Trading Automaton"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Trading Automaton</title>
+    <!-- Tailwind CSS via CDN (for simplicity in this setup script) -->
+    <!-- For production builds, integrate Tailwind via PostCSS for better performance and features -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Optional: Customize Tailwind theme defaults if needed via CDN
+      // tailwind.config = { theme: { extend: { colors: { /* ... */ } } } }
+    </script>
+    <style>
+      /* Basic dark mode theme applied to body */
+      body {
+        background-color: #111827; /* Tailwind gray-900 */
+        color: #d1d5db; /* Tailwind gray-300 */
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        -webkit-font-smoothing: antialiased; /* Smoother fonts */
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Ensure root element takes full height for layout */
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      /* Improve scrollbar appearance in dark mode (Webkit browsers) */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #1f2937; } /* gray-800 */
+      ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; } /* gray-600 */
+      ::-webkit-scrollbar-thumb:hover { background: #6b7280; } /* gray-500 */
+
+      /* Style for the initial loading message */
+      #initial-loading {
+        display: flex;
+        flex-direction: column; /* Stack icon and text */
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        font-size: 1.2em;
+        color: #9ca3af; /* gray-400 */
+        text-align: center;
+      }
+      /* Basic spinner animation (optional) */
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      #initial-loading svg { animation: spin 1s linear infinite; margin-bottom: 1rem; } /* Add margin below spinner */
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this trading interface.</noscript>
+    <div id="root">
+       <!-- React app will render here -->
+       <!-- Simple loading indicator shown before React hydrates -->
+       <div id="initial-loading">
+            <!-- Optional SVG Spinner -->
+            <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+                <path d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"/>
+            </svg>
+           Loading Automaton Interface...
+       </div>
+    </div>
+  </body>
+</html>

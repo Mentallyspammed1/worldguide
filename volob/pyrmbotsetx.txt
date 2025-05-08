@@ -1,0 +1,3103 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# Cryptocurrency Trading Bot Setup Script for Termux
+# This script sets up the complete trading bot environment on Termux
+
+echo "=== Setting up Cryptocurrency Trading Bot on Termux ==="
+echo
+
+# Install required packages
+echo "Installing required packages..."
+pkg update -y
+pkg install -y python python-pip git libffi openssl
+
+# Create project directory and navigate to it
+echo "Creating project directory..."
+mkdir -p ~/trading_bot
+cd ~/trading_bot
+
+# Create required subdirectories
+echo "Creating subdirectories..."
+mkdir -p bot_logs static/css static/js templates
+
+# Install Python dependencies
+echo "Installing Python dependencies..."
+pip install ccxt numpy pandas pandas-ta Flask colorama python-dotenv flask-sqlalchemy gunicorn
+
+# Create utils.py
+echo "Creating utils.py..."
+cat > utils.py << 'EOL'
+"""
+Utility Functions for Trading Bot
+
+This module contains utility functions for the trading bot:
+- API interaction with retry mechanism
+- Exchange setup and configuration
+- Timeframe parsing and conversion
+- Error handling and logging utilities
+"""
+
+import logging
+import time
+from datetime import datetime, timedelta
+from decimal import Decimal, ROUND_DOWN, ROUND_UP
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+import ccxt
+import pandas as pd
+
+# Configure logger
+logger = logging.getLogger("utils")
+
+# Mapping from string timeframes to seconds
+TIMEFRAME_SECONDS = {
+    "1m": 60,
+    "3m": 180,
+    "5m": 300,
+    "15m": 900,
+    "30m": 1800,
+    "1h": 3600,
+    "2h": 7200,
+    "4h": 14400,
+    "6h": 21600,
+    "8h": 28800,
+    "12h": 43200,
+    "1d": 86400,
+    "3d": 259200,
+    "1w": 604800,
+    "1M": 2592000,
+}
+
+
+def parse_timeframe(timeframe: str) -> int:
+    """
+    Parse timeframe string to seconds.
+    
+    Args:
+        timeframe: Timeframe string (e.g., '1m', '1h', '1d')
+        
+    Returns:
+        int: Timeframe in seconds
+    """
+    return TIMEFRAME_SECONDS.get(timeframe, 0)
+
+
+def setup_ccxt_exchange(
+    exchange_id: str,
+    api_key: Optional[str] = None,
+    api_secret: Optional[str] = None,
+    options: Optional[Dict] = None,
+    params: Optional[Dict] = None
+) -> Optional[ccxt.Exchange]:
+    """
+    Set up and configure a CCXT exchange instance.
+    
+    Args:
+        exchange_id: Exchange ID (e.g., 'bybit', 'binance')
+        api_key: API key for authentication
+        api_secret: API secret for authentication
+        options: Exchange-specific options
+        params: Additional parameters for exchange initialization
+        
+    Returns:
+        ccxt.Exchange: Configured exchange instance
+    """
+    # Default config
+    config = {
+        "apiKey": api_key,
+        "secret": api_secret,
+        "timeout": 30000,  # 30 seconds timeout
+        "enableRateLimit": True,
+    }
+    
+    # Add options if provided
+    if options:
+        config["options"] = options
+    
+    # Add params if provided
+    if params:
+        for key, value in params.items():
+            config[key] = value
+    
+    try:
+        # Get exchange class
+        if not hasattr(ccxt, exchange_id):
+            logger.error(f"Unsupported exchange: {exchange_id}")
+            return None
+        
+        exchange_class = getattr(ccxt, exchange_id)
+        
+        # Create exchange instance
+        exchange = exchange_class(config)
+        
+        logger.info(f"CCXT {exchange_id} exchange initialized")
+        return exchange
+    except Exception as e:
+        logger.error(f"Error initializing {exchange_id} exchange: {e}")
+        return None
+
+
+def retry_api_call(
+    func: Callable,
+    *args: Any,
+    max_retries: int = 3,
+    retry_delay: int = 5,
+    **kwargs: Any
+) -> Any:
+    """
+    Retry an API call with exponential backoff.
+    
+    Args:
+        func: Function to call
+        *args: Positional arguments for the function
+        max_retries: Maximum number of retries
+        retry_delay: Initial delay in seconds
+        **kwargs: Keyword arguments for the function
+        
+    Returns:
+        Any: Result of the function call
+        
+    Raises:
+        Exception: Last encountered exception after all retries
+    """
+    last_exception = None
+    retry_count = 0
+    
+    while retry_count <= max_retries:
+        try:
+            result = func(*args, **kwargs)
+            return result
+        except ccxt.RateLimitExceeded as e:
+            last_exception = e
+            # Rate limit reached, use a longer delay
+            sleep_time = retry_delay * (2 ** retry_count) + 0.5  # Add extra buffer
+            logger.warning(
+                f"Rate limit exceeded. Retrying in {sleep_time:.1f} seconds... "
+                f"({retry_count+1}/{max_retries+1})"
+            )
+            time.sleep(sleep_time)
+        except ccxt.NetworkError as e:
+            last_exception = e
+            # Network error, use standard delay
+            sleep_time = retry_delay * (1.5 ** retry_count)
+            logger.warning(
+                f"Network error: {str(e)}. Retrying in {sleep_time:.1f} seconds... "
+                f"({retry_count+1}/{max_retries+1})"
+            )
+            time.sleep(sleep_time)
+        except ccxt.ExchangeError as e:
+            last_exception = e
+            if "Too many requests" in str(e) or "rate limit" in str(e).lower():
+                # Handle exchange-specific rate limit errors
+                sleep_time = retry_delay * (2 ** retry_count) + 1  # Add extra buffer
+                logger.warning(
+                    f"Exchange rate limit: {str(e)}. Retrying in {sleep_time:.1f} seconds... "
+                    f"({retry_count+1}/{max_retries+1})"
+                )
+                time.sleep(sleep_time)
+            else:
+                # General exchange error, might be permanent
+                logger.error(f"Exchange error: {str(e)}. Retrying...")
+                time.sleep(retry_delay)
+        except Exception as e:
+            # Unexpected error, log and raise
+            logger.error(f"Unexpected error in API call: {str(e)}")
+            raise
+        
+        retry_count += 1
+    
+    # If we get here, we've exhausted retries
+    if last_exception:
+        logger.error(f"Failed after {max_retries} retries. Last error: {str(last_exception)}")
+        raise last_exception
+    
+    return None
+
+
+def round_to_tick(
+    price: float,
+    tick_size: float,
+    rounding_mode: str = "down"
+) -> float:
+    """
+    Round price to the nearest tick size.
+    
+    Args:
+        price: Price to round
+        tick_size: Tick size (minimum price movement)
+        rounding_mode: Rounding mode ('up', 'down', or 'nearest')
+        
+    Returns:
+        float: Rounded price
+    """
+    decimal_tick = Decimal(str(tick_size))
+    decimal_price = Decimal(str(price))
+    
+    # Count decimal places in tick size
+    tick_decimals = abs(decimal_tick.as_tuple().exponent)
+    
+    # Calculate division
+    ticks = decimal_price / decimal_tick
+    
+    # Round according to mode
+    if rounding_mode == "up":
+        rounded_ticks = ticks.quantize(Decimal("1"), rounding=ROUND_UP)
+    elif rounding_mode == "down":
+        rounded_ticks = ticks.quantize(Decimal("1"), rounding=ROUND_DOWN)
+    else:  # nearest
+        rounded_ticks = ticks.quantize(Decimal("1"))
+    
+    # Multiply back by tick size
+    rounded_price = rounded_ticks * decimal_tick
+    
+    # Convert back to float with appropriate precision
+    return float(rounded_price.quantize(Decimal("0." + "0" * tick_decimals)))
+
+
+def calculate_candle_interval(timeframe: str) -> Tuple[datetime, datetime]:
+    """
+    Calculate start and end datetime for the current candle interval.
+    
+    Args:
+        timeframe: Timeframe string (e.g., '1m', '1h', '1d')
+        
+    Returns:
+        Tuple[datetime, datetime]: Start and end datetime
+    """
+    now = datetime.utcnow()
+    seconds = parse_timeframe(timeframe)
+    
+    if seconds == 0:
+        # Invalid timeframe
+        return now, now
+    
+    # Special handling for daily, weekly, monthly candles
+    if timeframe == "1d":
+        start = datetime(now.year, now.month, now.day)
+        end = start + timedelta(days=1)
+    elif timeframe == "1w":
+        # Get current week's Monday
+        start = now - timedelta(days=now.weekday())
+        start = datetime(start.year, start.month, start.day)
+        end = start + timedelta(days=7)
+    elif timeframe == "1M":
+        # Get current month's first day
+        start = datetime(now.year, now.month, 1)
+        # Move to next month's first day
+        if now.month == 12:
+            end = datetime(now.year + 1, 1, 1)
+        else:
+            end = datetime(now.year, now.month + 1, 1)
+    else:
+        # Regular intervals
+        timestamp = int(now.timestamp())
+        interval_count = timestamp // seconds
+        start = datetime.fromtimestamp(interval_count * seconds)
+        end = datetime.fromtimestamp((interval_count + 1) * seconds)
+    
+    return start, end
+
+
+def format_price_quantity(
+    price: float,
+    quantity: float,
+    price_precision: int,
+    quantity_precision: int
+) -> Tuple[float, float]:
+    """
+    Format price and quantity to exchange precision.
+    
+    Args:
+        price: Price value
+        quantity: Quantity value
+        price_precision: Decimal places for price
+        quantity_precision: Decimal places for quantity
+        
+    Returns:
+        Tuple[float, float]: Formatted price and quantity
+    """
+    # Format price
+    formatted_price = round(price, price_precision)
+    
+    # Format quantity
+    formatted_quantity = round(quantity, quantity_precision)
+    
+    return formatted_price, formatted_quantity
+EOL
+
+# Create indicators.py
+echo "Creating indicators.py..."
+cat > indicators.py << 'EOL'
+"""
+Technical Indicators Module
+
+This module contains functions for calculating technical indicators
+and trading signals based on the configured strategy.
+"""
+
+import logging
+from typing import Dict, List, Tuple, Optional, Union, Any
+
+import numpy as np
+import pandas as pd
+import pandas_ta as ta
+
+# Configure logger
+logger = logging.getLogger("indicators")
+
+# Default indicator parameters
+DEFAULT_RSI_WINDOW = 14
+DEFAULT_MACD_FAST = 12
+DEFAULT_MACD_SLOW = 26
+DEFAULT_MACD_SIGNAL = 9
+DEFAULT_BB_WINDOW = 20
+DEFAULT_BB_STD = 2.0
+DEFAULT_EMA_FAST = 8
+DEFAULT_EMA_SLOW = 21
+DEFAULT_ATR_WINDOW = 14
+DEFAULT_CCI_WINDOW = 20
+DEFAULT_STOCH_WINDOW = 14
+DEFAULT_STOCH_K = 3
+DEFAULT_STOCH_D = 3
+
+
+def calculate_indicators(df: pd.DataFrame, config: Dict) -> pd.DataFrame:
+    """
+    Calculate technical indicators based on configuration.
+    
+    Args:
+        df: DataFrame with OHLCV data
+        config: Dictionary with indicator configuration
+        
+    Returns:
+        pd.DataFrame: DataFrame with added indicator columns
+    """
+    # Make a copy to avoid modifying the original
+    df_copy = df.copy()
+    
+    # Calculate RSI if enabled
+    if "rsi" in config and config["rsi"].get("enabled", True):
+        window = config["rsi"].get("window", DEFAULT_RSI_WINDOW)
+        try:
+            df_copy["rsi"] = ta.rsi(df_copy["close"], length=window)
+            logger.debug(f"Calculated RSI with window={window}")
+        except Exception as e:
+            logger.error(f"Error calculating RSI: {e}")
+    
+    # Calculate MACD if enabled
+    if "macd" in config and config["macd"].get("enabled", True):
+        fast_period = config["macd"].get("fast_period", DEFAULT_MACD_FAST)
+        slow_period = config["macd"].get("slow_period", DEFAULT_MACD_SLOW)
+        signal_period = config["macd"].get("signal_period", DEFAULT_MACD_SIGNAL)
+        try:
+            macd = ta.macd(
+                df_copy["close"], 
+                fast=fast_period, 
+                slow=slow_period, 
+                signal=signal_period
+            )
+            # Add MACD components to dataframe
+            df_copy["macd"] = macd["MACD_" + str(fast_period) + "_" + str(slow_period) + "_" + str(signal_period)]
+            df_copy["macd_signal"] = macd["MACDs_" + str(fast_period) + "_" + str(slow_period) + "_" + str(signal_period)]
+            df_copy["macd_hist"] = macd["MACDh_" + str(fast_period) + "_" + str(slow_period) + "_" + str(signal_period)]
+            logger.debug(f"Calculated MACD with fast={fast_period}, slow={slow_period}, signal={signal_period}")
+        except Exception as e:
+            logger.error(f"Error calculating MACD: {e}")
+    
+    # Calculate Bollinger Bands if enabled
+    if "bollinger_bands" in config and config["bollinger_bands"].get("enabled", True):
+        window = config["bollinger_bands"].get("window", DEFAULT_BB_WINDOW)
+        std_dev = config["bollinger_bands"].get("std_dev", DEFAULT_BB_STD)
+        try:
+            bbands = ta.bbands(df_copy["close"], length=window, std=std_dev)
+            df_copy["bb_upper"] = bbands["BBU_" + str(window) + "_" + str(std_dev)]
+            df_copy["bb_middle"] = bbands["BBM_" + str(window) + "_" + str(std_dev)]
+            df_copy["bb_lower"] = bbands["BBL_" + str(window) + "_" + str(std_dev)]
+            df_copy["bb_width"] = bbands["BBB_" + str(window) + "_" + str(std_dev)]
+            logger.debug(f"Calculated Bollinger Bands with window={window}, std_dev={std_dev}")
+        except Exception as e:
+            logger.error(f"Error calculating Bollinger Bands: {e}")
+    
+    # Calculate EMA Cross if enabled
+    if "ema_cross" in config and config["ema_cross"].get("enabled", True):
+        fast_period = config["ema_cross"].get("fast_period", DEFAULT_EMA_FAST)
+        slow_period = config["ema_cross"].get("slow_period", DEFAULT_EMA_SLOW)
+        try:
+            df_copy["ema_fast"] = ta.ema(df_copy["close"], length=fast_period)
+            df_copy["ema_slow"] = ta.ema(df_copy["close"], length=slow_period)
+            # Calculate crossover signals
+            df_copy["ema_cross"] = np.where(
+                df_copy["ema_fast"] > df_copy["ema_slow"], 
+                1, 
+                np.where(df_copy["ema_fast"] < df_copy["ema_slow"], -1, 0)
+            )
+            logger.debug(f"Calculated EMA Cross with fast={fast_period}, slow={slow_period}")
+        except Exception as e:
+            logger.error(f"Error calculating EMA Cross: {e}")
+    
+    # Calculate ATR if enabled
+    if "atr" in config and config["atr"].get("enabled", True):
+        window = config["atr"].get("window", DEFAULT_ATR_WINDOW)
+        try:
+            df_copy["atr"] = ta.atr(
+                df_copy["high"], 
+                df_copy["low"], 
+                df_copy["close"], 
+                length=window
+            )
+            logger.debug(f"Calculated ATR with window={window}")
+        except Exception as e:
+            logger.error(f"Error calculating ATR: {e}")
+    
+    return df_copy
+
+
+def calculate_rsi_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+    """
+    Calculate trading signal based on RSI indicator.
+    
+    Args:
+        df: DataFrame with indicator data
+        config: RSI configuration
+        
+    Returns:
+        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+    """
+    if "rsi" not in df.columns:
+        return 0.0, ""
+    
+    # Get parameters
+    rsi = df["rsi"].iloc[-1]
+    overbought = config.get("overbought", 70)
+    oversold = config.get("oversold", 30)
+    
+    # Calculate signal
+    if rsi <= oversold:
+        # Oversold - buy signal
+        signal_strength = 1.0 - (rsi / oversold)
+        return signal_strength, "long"
+    elif rsi >= overbought:
+        # Overbought - sell signal
+        signal_strength = (rsi - overbought) / (100 - overbought)
+        return signal_strength, "short"
+    else:
+        # Neutral zone - weak signal
+        midpoint = (overbought + oversold) / 2
+        if rsi < midpoint:
+            signal_strength = (midpoint - rsi) / (midpoint - oversold) * 0.5
+            return signal_strength, "long"
+        else:
+            signal_strength = (rsi - midpoint) / (overbought - midpoint) * 0.5
+            return signal_strength, "short"
+
+
+def calculate_macd_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+    """
+    Calculate trading signal based on MACD indicator.
+    
+    Args:
+        df: DataFrame with indicator data
+        config: MACD configuration
+        
+    Returns:
+        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+    """
+    if "macd" not in df.columns or "macd_signal" not in df.columns or "macd_hist" not in df.columns:
+        return 0.0, ""
+    
+    # Get latest values
+    macd = df["macd"].iloc[-1]
+    signal = df["macd_signal"].iloc[-1]
+    hist = df["macd_hist"].iloc[-1]
+    prev_hist = df["macd_hist"].iloc[-2] if len(df) > 2 else 0
+    
+    # Calculate signal
+    if hist > 0 and prev_hist <= 0:
+        # Bullish crossover
+        signal_strength = min(1.0, abs(hist) / 0.5)  # Normalize with typical value
+        return signal_strength, "long"
+    elif hist < 0 and prev_hist >= 0:
+        # Bearish crossover
+        signal_strength = min(1.0, abs(hist) / 0.5)  # Normalize with typical value
+        return signal_strength, "short"
+    elif hist > 0:
+        # Bullish trend
+        signal_strength = min(0.5, abs(hist) / 1.0)  # Weaker signal during trend
+        return signal_strength, "long"
+    elif hist < 0:
+        # Bearish trend
+        signal_strength = min(0.5, abs(hist) / 1.0)  # Weaker signal during trend
+        return signal_strength, "short"
+    else:
+        return 0.0, ""
+
+
+def calculate_bollinger_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+    """
+    Calculate trading signal based on Bollinger Bands indicator.
+    
+    Args:
+        df: DataFrame with indicator data
+        config: Bollinger Bands configuration
+        
+    Returns:
+        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+    """
+    if "bb_upper" not in df.columns or "bb_lower" not in df.columns or "bb_middle" not in df.columns:
+        return 0.0, ""
+    
+    # Get latest values
+    close = df["close"].iloc[-1]
+    upper = df["bb_upper"].iloc[-1]
+    lower = df["bb_lower"].iloc[-1]
+    middle = df["bb_middle"].iloc[-1]
+    width = df["bb_width"].iloc[-1] if "bb_width" in df.columns else (upper - lower) / middle
+    
+    # Percentage distance from bands
+    upper_dist = (upper - close) / (upper - lower) if upper != lower else 0
+    lower_dist = (close - lower) / (upper - lower) if upper != lower else 0
+    
+    # Calculate signal
+    if close <= lower:
+        # Price at or below lower band - strong buy signal
+        signal_strength = min(1.0, 1.0 + lower_dist)  # Can exceed 1.0 for breakouts
+        return signal_strength, "long"
+    elif close >= upper:
+        # Price at or above upper band - strong sell signal
+        signal_strength = min(1.0, 1.0 + upper_dist)  # Can exceed 1.0 for breakouts
+        return signal_strength, "short"
+    elif close < middle:
+        # Price between middle and lower band - weak buy signal
+        signal_strength = lower_dist * 0.5  # Scale down for less confident signal
+        return signal_strength, "long"
+    elif close > middle:
+        # Price between middle and upper band - weak sell signal
+        signal_strength = upper_dist * 0.5  # Scale down for less confident signal
+        return signal_strength, "short"
+    else:
+        return 0.0, ""
+
+
+def calculate_ema_cross_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+    """
+    Calculate trading signal based on EMA cross indicator.
+    
+    Args:
+        df: DataFrame with indicator data
+        config: EMA cross configuration
+        
+    Returns:
+        Tuple[float, str]: Signal strength (-1.0 to 1.0) and direction ("long" or "short")
+    """
+    if "ema_fast" not in df.columns or "ema_slow" not in df.columns:
+        return 0.0, ""
+    
+    # Get latest values
+    fast = df["ema_fast"].iloc[-1]
+    slow = df["ema_slow"].iloc[-1]
+    
+    # Get previous values if available
+    prev_fast = df["ema_fast"].iloc[-2] if len(df) > 2 else fast
+    prev_slow = df["ema_slow"].iloc[-2] if len(df) > 2 else slow
+    
+    # Calculate percentage difference between fast and slow EMAs
+    diff_pct = (fast - slow) / slow * 100 if slow != 0 else 0
+    
+    # Calculate signal
+    if fast > slow and prev_fast <= prev_slow:
+        # Bullish crossover - strong buy signal
+        signal_strength = 1.0
+        return signal_strength, "long"
+    elif fast < slow and prev_fast >= prev_slow:
+        # Bearish crossover - strong sell signal
+        signal_strength = 1.0
+        return signal_strength, "short"
+    elif fast > slow:
+        # Fast above slow - existing bullish trend
+        signal_strength = min(0.5, abs(diff_pct) / 2.0)  # Normalize to reasonable range
+        return signal_strength, "long"
+    elif fast < slow:
+        # Fast below slow - existing bearish trend
+        signal_strength = min(0.5, abs(diff_pct) / 2.0)  # Normalize to reasonable range
+        return signal_strength, "short"
+    else:
+        return 0.0, ""
+
+
+def calculate_atr_signal(df: pd.DataFrame, config: Dict) -> Tuple[float, str]:
+    """
+    Calculate volatility-adjusted signal based on ATR.
+    This function doesn't provide direction, only volatility assessment.
+    
+    Args:
+        df: DataFrame with indicator data
+        config: ATR configuration
+        
+    Returns:
+        Tuple[float, str]: Signal strength (0.0 to 1.0) and empty direction
+    """
+    if "atr" not in df.columns:
+        return 0.0, ""
+    
+    # Get latest values
+    atr = df["atr"].iloc[-1]
+    close = df["close"].iloc[-1]
+    
+    # Calculate ATR as percentage of price
+    atr_pct = (atr / close) * 100 if close != 0 else 0
+    
+    # Typical ATR percentages range from 0.5% to 5% for most assets
+    # Higher ATR percentage indicates higher volatility
+    # Scale to 0-1 range assuming 5% is maximum expected volatility
+    max_expected_atr_pct = 5.0
+    volatility_score = min(1.0, atr_pct / max_expected_atr_pct)
+    
+    # ATR doesn't provide direction, only volatility assessment
+    return volatility_score, ""
+
+
+def calculate_signal(df: pd.DataFrame, indicators_config: Dict, 
+                     threshold: float = 0.5) -> Tuple[float, str]:
+    """
+    Calculate overall trading signal based on multiple indicators.
+    
+    Args:
+        df: DataFrame with indicator data
+        indicators_config: Configuration for all indicators
+        threshold: Signal threshold for entry
+        
+    Returns:
+        Tuple[float, str]: Overall signal strength (-1.0 to 1.0) and direction ("long" or "short")
+    """
+    if df.empty:
+        return 0.0, ""
+    
+    # Initialize variables for weighted signal calculation
+    total_weight = 0.0
+    long_signal = 0.0
+    short_signal = 0.0
+    
+    # RSI signal
+    if "rsi" in indicators_config and indicators_config["rsi"].get("enabled", True):
+        weight = float(indicators_config["rsi"].get("weight", 1.0))
+        signal_strength, direction = calculate_rsi_signal(df, indicators_config["rsi"])
+        total_weight += weight
+        if direction == "long":
+            long_signal += signal_strength * weight
+        elif direction == "short":
+            short_signal += signal_strength * weight
+    
+    # MACD signal
+    if "macd" in indicators_config and indicators_config["macd"].get("enabled", True):
+        weight = float(indicators_config["macd"].get("weight", 1.0))
+        signal_strength, direction = calculate_macd_signal(df, indicators_config["macd"])
+        total_weight += weight
+        if direction == "long":
+            long_signal += signal_strength * weight
+        elif direction == "short":
+            short_signal += signal_strength * weight
+    
+    # Bollinger Bands signal
+    if "bollinger_bands" in indicators_config and indicators_config["bollinger_bands"].get("enabled", True):
+        weight = float(indicators_config["bollinger_bands"].get("weight", 1.0))
+        signal_strength, direction = calculate_bollinger_signal(df, indicators_config["bollinger_bands"])
+        total_weight += weight
+        if direction == "long":
+            long_signal += signal_strength * weight
+        elif direction == "short":
+            short_signal += signal_strength * weight
+    
+    # EMA Cross signal
+    if "ema_cross" in indicators_config and indicators_config["ema_cross"].get("enabled", True):
+        weight = float(indicators_config["ema_cross"].get("weight", 1.0))
+        signal_strength, direction = calculate_ema_cross_signal(df, indicators_config["ema_cross"])
+        total_weight += weight
+        if direction == "long":
+            long_signal += signal_strength * weight
+        elif direction == "short":
+            short_signal += signal_strength * weight
+    
+    # If no weights/signals, return neutral
+    if total_weight == 0:
+        return 0.0, ""
+    
+    # Calculate final signals normalized by total weight
+    final_long_signal = long_signal / total_weight
+    final_short_signal = short_signal / total_weight
+    
+    # Determine direction based on strongest signal
+    if final_long_signal > final_short_signal:
+        if final_long_signal >= threshold:
+            return final_long_signal, "long"
+        else:
+            return final_long_signal, ""  # Below threshold
+    elif final_short_signal > final_long_signal:
+        if final_short_signal >= threshold:
+            return final_short_signal, "short"
+        else:
+            return -final_short_signal, ""  # Below threshold
+    else:
+        return 0.0, ""  # Neutral
+EOL
+
+# Create trading_bot.py (partial - due to size limitations)
+echo "Creating trading_bot.py (part 1)..."
+cat > trading_bot.py << 'EOL'
+"""
+Trading Bot Core Module
+
+This module implements the main trading bot logic, including:
+- Exchange connection and market data retrieval
+- Technical analysis and signal generation
+- Order execution and management
+- Position tracking and risk management
+"""
+
+import json
+import logging
+import os
+import time
+from decimal import Decimal, ROUND_DOWN
+from typing import Dict, List, Optional, Tuple, Union, Any
+
+import ccxt
+import numpy as np
+import pandas as pd
+
+from indicators import calculate_indicators, calculate_signal
+from utils import parse_timeframe, setup_ccxt_exchange, retry_api_call
+
+# Configure logger
+logger = logging.getLogger("trading_bot")
+
+
+class TradingBot:
+    """
+    Main trading bot class that handles the entire trading logic flow:
+    - Loading configuration
+    - Connecting to exchange
+    - Retrieving market data
+    - Analyzing with technical indicators
+    - Executing trades based on signals
+    - Managing risk and positions
+    """
+
+    def __init__(self, config_file: str = "config.json"):
+        """
+        Initialize the trading bot with the given configuration.
+        
+        Args:
+            config_file: Path to the configuration file
+        """
+        self.logger = logger
+        self.config_file = config_file
+        self.config = self.load_config()
+        self.state_file = "bot_state.json"
+        self.state = self.load_state()
+        
+        # Initialize exchange connection
+        self.exchange_id = self.config.get("exchange", "bybit")
+        self.exchange = self.setup_exchange()
+        
+        # Market and position information
+        self.symbol = self.config.get("symbol", "BTC/USDT:USDT")
+        self.timeframe = self.config.get("timeframe", "15m")
+        self.market_info = None
+        self.current_position = None
+        self.candles_df = None
+        self.precision = {
+            "price": self.config.get("advanced", {}).get("price_precision", 2),
+            "amount": self.config.get("advanced", {}).get("amount_precision", 6)
+        }
+        
+        # Initialize exchange and fetch market data
+        self.initialize()
+
+    def load_config(self) -> Dict:
+        """
+        Load configuration from JSON file.
+        
+        Returns:
+            Dict: Configuration dictionary
+        """
+        try:
+            with open(self.config_file, "r") as f:
+                config = json.load(f)
+            self.logger.info(f"Configuration loaded from {self.config_file}")
+            return config
+        except FileNotFoundError:
+            self.logger.error(f"Configuration file {self.config_file} not found")
+            # Create default config if file doesn't exist
+            default_config = {
+                "exchange": "bybit",
+                "symbol": "BTC/USDT:USDT",
+                "timeframe": "15m",
+                "api_key": "",
+                "api_secret": "",
+                "test_mode": True,
+                "risk_management": {
+                    "position_size_pct": 1.0,
+                    "max_risk_per_trade_pct": 1.0,
+                    "use_atr_position_sizing": True,
+                    "stop_loss": {
+                        "enabled": True,
+                        "mode": "atr",
+                        "atr_multiplier": 2.0,
+                        "fixed_pct": 2.0
+                    },
+                    "take_profit": {
+                        "enabled": True,
+                        "mode": "atr",
+                        "atr_multiplier": 4.0,
+                        "fixed_pct": 4.0
+                    },
+                    "break_even": {
+                        "enabled": False,
+                        "activation_pct": 1.0
+                    }
+                },
+                "strategy": {
+                    "entry_threshold": 0.5,
+                    "exit_threshold": 0.3,
+                    "indicators": {
+                        "rsi": {
+                            "enabled": True,
+                            "window": 14,
+                            "overbought": 70,
+                            "oversold": 30,
+                            "weight": 1.0
+                        },
+                        "macd": {
+                            "enabled": True,
+                            "fast_period": 12,
+                            "slow_period": 26,
+                            "signal_period": 9,
+                            "weight": 1.0
+                        },
+                        "bollinger_bands": {
+                            "enabled": True,
+                            "window": 20,
+                            "std_dev": 2.0,
+                            "weight": 1.0
+                        },
+                        "ema_cross": {
+                            "enabled": True,
+                            "fast_period": 8,
+                            "slow_period": 21,
+                            "use_for_exit": True,
+                            "weight": 1.0
+                        },
+                        "atr": {
+                            "enabled": True,
+                            "window": 14
+                        }
+                    }
+                },
+                "advanced": {
+                    "candles_required": 100,
+                    "price_precision": 2,
+                    "amount_precision": 6,
+                    "min_amount": 0.001
+                },
+                "loop_interval_seconds": 15
+            }
+            with open(self.config_file, "w") as f:
+                json.dump(default_config, f, indent=4)
+            self.logger.info(f"Created default configuration file {self.config_file}")
+            return default_config
+        except json.JSONDecodeError:
+            self.logger.error(f"Invalid JSON in configuration file {self.config_file}")
+            raise
+
+    def load_state(self) -> Dict:
+        """
+        Load bot state from JSON file.
+        
+        Returns:
+            Dict: Bot state dictionary
+        """
+        try:
+            with open(self.state_file, "r") as f:
+                state = json.load(f)
+            self.logger.info(f"State loaded from {self.state_file}")
+            return state
+        except (FileNotFoundError, json.JSONDecodeError):
+            # Initialize with default state if file doesn't exist or is invalid
+            default_state = {
+                "positions": {},
+                "orders": {},
+                "trades": [],
+                "last_update": 0
+            }
+            self.save_state(default_state)
+            return default_state
+
+    def save_state(self, state: Optional[Dict] = None) -> None:
+        """
+        Save bot state to JSON file.
+        
+        Args:
+            state: State dictionary to save (uses self.state if None)
+        """
+        if state is None:
+            state = self.state
+        try:
+            with open(self.state_file, "w") as f:
+                json.dump(state, f, indent=4)
+            self.logger.debug(f"State saved to {self.state_file}")
+        except Exception as e:
+            self.logger.error(f"Failed to save state: {e}")
+
+    def setup_exchange(self) -> ccxt.Exchange:
+        """
+        Set up the CCXT exchange instance.
+        
+        Returns:
+            ccxt.Exchange: Configured exchange instance
+        """
+        api_key = self.config.get("api_key") or os.getenv("API_KEY")
+        api_secret = self.config.get("api_secret") or os.getenv("API_SECRET")
+        
+        # Default options for the exchange
+        options = {}
+        params = {}
+        
+        # Add exchange-specific options
+        if self.exchange_id == "bybit":
+            options["defaultType"] = "swap"
+            if self.config.get("test_mode", True):
+                params["testnet"] = True
+        
+        # Create exchange instance with retry mechanism
+        exchange = setup_ccxt_exchange(
+            self.exchange_id,
+            api_key,
+            api_secret,
+            options=options,
+            params=params
+        )
+        
+        if exchange:
+            self.logger.info(f"Connected to {exchange.id} exchange")
+            # Load markets to get trading info
+            retry_api_call(exchange.load_markets)
+            return exchange
+        else:
+            self.logger.error(f"Failed to connect to {self.exchange_id} exchange")
+            raise ConnectionError(f"Failed to connect to {self.exchange_id} exchange")
+EOL
+
+# Continue creating trading_bot.py due to size limit
+echo "Creating trading_bot.py (part 2)..."
+cat >> trading_bot.py << 'EOL'
+    def initialize(self) -> None:
+        """Initialize exchange connection and load market data"""
+        try:
+            # Fetch market information for the symbol
+            self.market_info = self.exchange.market(self.symbol)
+            self.logger.info(f"Market info loaded for {self.symbol}")
+            
+            # Update precision settings from market info if available
+            if "precision" in self.market_info:
+                if "price" in self.market_info["precision"]:
+                    self.precision["price"] = self.market_info["precision"]["price"]
+                if "amount" in self.market_info["precision"]:
+                    self.precision["amount"] = self.market_info["precision"]["amount"]
+            
+            # Fetch current position
+            self.update_position()
+            
+            # Fetch initial candles
+            self.update_candles()
+            
+            self.logger.info(f"Bot initialized successfully for {self.symbol}")
+        except Exception as e:
+            self.logger.error(f"Initialization error: {e}")
+            raise
+
+    def update_candles(self) -> None:
+        """Fetch and update OHLCV candles data"""
+        try:
+            # Determine how many candles we need
+            candles_required = self.config.get("advanced", {}).get("candles_required", 100)
+            
+            # Fetch candles with retry mechanism
+            ohlcv = retry_api_call(
+                self.exchange.fetch_ohlcv,
+                self.symbol,
+                timeframe=self.timeframe,
+                limit=candles_required
+            )
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(
+                ohlcv,
+                columns=["timestamp", "open", "high", "low", "close", "volume"]
+            )
+            
+            # Convert timestamp to datetime
+            df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+            df.set_index("timestamp", inplace=True)
+            
+            self.candles_df = df
+            self.logger.debug(f"Updated {len(df)} candles for {self.symbol}")
+            
+            # Calculate indicators
+            self.candles_df = calculate_indicators(
+                self.candles_df, 
+                self.config.get("strategy", {}).get("indicators", {})
+            )
+        except Exception as e:
+            self.logger.error(f"Error updating candles: {e}")
+            raise
+
+    def update_position(self) -> None:
+        """Update current position information from exchange"""
+        try:
+            positions = retry_api_call(
+                self.exchange.fetch_positions,
+                [self.symbol]
+            ) or []
+            
+            # Find the position for our symbol
+            for position in positions:
+                if position["symbol"] == self.symbol:
+                    if float(position["contracts"]) > 0:
+                        self.current_position = {
+                            "side": "long",
+                            "amount": float(position["contracts"]),
+                            "entry_price": float(position["entryPrice"]),
+                            "pnl": float(position["unrealizedPnl"]),
+                            "liquidation_price": float(position.get("liquidationPrice", 0))
+                        }
+                        break
+                    elif float(position["contracts"]) < 0:
+                        self.current_position = {
+                            "side": "short",
+                            "amount": abs(float(position["contracts"])),
+                            "entry_price": float(position["entryPrice"]),
+                            "pnl": float(position["unrealizedPnl"]),
+                            "liquidation_price": float(position.get("liquidationPrice", 0))
+                        }
+                        break
+            else:
+                self.current_position = None
+            
+            # Update state
+            if self.current_position:
+                self.state["positions"][self.symbol] = self.current_position
+            elif self.symbol in self.state["positions"]:
+                del self.state["positions"][self.symbol]
+            
+            self.save_state()
+            self.logger.debug(f"Position updated: {self.current_position}")
+        except Exception as e:
+            self.logger.error(f"Error updating position: {e}")
+
+    def calculate_position_size(self, price: float, risk_pct: float = None) -> float:
+        """
+        Calculate position size based on risk management settings.
+        
+        Args:
+            price: Current price for the asset
+            risk_pct: Risk percentage override (uses config value if None)
+            
+        Returns:
+            float: Position size in base currency
+        """
+        # Get risk management settings
+        risk_settings = self.config.get("risk_management", {})
+        if risk_pct is None:
+            risk_pct = risk_settings.get("max_risk_per_trade_pct", 1.0)
+        
+        try:
+            # Fetch account balance
+            balance = retry_api_call(
+                self.exchange.fetch_balance
+            )
+            
+            quote_currency = self.symbol.split('/')[1].split(':')[0]
+            available_balance = float(balance.get(quote_currency, {}).get("free", 0))
+            
+            # Calculate position size based on percentage of balance
+            position_size_pct = risk_settings.get("position_size_pct", 1.0)
+            position_value = available_balance * (position_size_pct / 100)
+            
+            # If ATR position sizing is enabled, adjust based on ATR
+            if risk_settings.get("use_atr_position_sizing", False) and self.candles_df is not None and "atr" in self.candles_df.columns:
+                atr = self.candles_df["atr"].iloc[-1]
+                stop_loss_pct = None
+                
+                # Get stop loss configuration
+                sl_config = risk_settings.get("stop_loss", {})
+                if sl_config.get("enabled", True):
+                    sl_mode = sl_config.get("mode", "atr")
+                    if sl_mode == "atr":
+                        atr_multiplier = sl_config.get("atr_multiplier", 2.0)
+                        stop_loss_pct = (atr * atr_multiplier / price) * 100
+                    else:
+                        stop_loss_pct = sl_config.get("fixed_pct", 2.0)
+                else:
+                    # Default stop loss percentage if not configured
+                    stop_loss_pct = 2.0
+                
+                # Calculate risk-adjusted position size
+                risk_amount = available_balance * (risk_pct / 100)
+                if stop_loss_pct > 0:
+                    position_value = min(position_value, risk_amount / (stop_loss_pct / 100))
+            
+            # Calculate actual amount in base currency
+            amount = position_value / price
+            
+            # Round down to meet exchange precision requirements
+            decimal_places = self.precision["amount"]
+            amount = Decimal(str(amount)).quantize(
+                Decimal('0.' + '0' * decimal_places),
+                rounding=ROUND_DOWN
+            )
+            
+            # Check against minimum amount
+            min_amount = self.config.get("advanced", {}).get("min_amount", 0.001)
+            if float(amount) < min_amount:
+                self.logger.warning(
+                    f"Calculated position size {float(amount)} is below minimum {min_amount}. "
+                    f"Using minimum amount."
+                )
+                amount = Decimal(str(min_amount))
+                
+            return float(amount)
+        except Exception as e:
+            self.logger.error(f"Error calculating position size: {e}")
+            # Return a safe minimal value
+            return self.config.get("advanced", {}).get("min_amount", 0.001)
+
+    def run_once(self) -> None:
+        """
+        Execute a single iteration of the trading bot logic.
+        """
+        try:
+            # Update market data
+            self.update_candles()
+            
+            # Update position information
+            self.update_position()
+            
+            # Check if we should exit an existing position
+            if self.current_position:
+                if self.should_exit_trade():
+                    self.execute_exit()
+                else:
+                    # If we're not exiting, check if we should move stop loss to break even
+                    self.check_break_even()
+            # Check if we should enter a new position
+            else:
+                should_enter, side = self.should_enter_trade()
+                if should_enter:
+                    # Convert side to order side
+                    order_side = "buy" if side == "long" else "sell"
+                    self.execute_entry(order_side)
+            
+            # Update state with timestamp
+            self.state["last_update"] = int(time.time() * 1000)
+            self.save_state()
+            
+        except Exception as e:
+            self.logger.error(f"Error in run_once: {e}")
+
+    def run(self) -> None:
+        """
+        Run the trading bot in continuous mode.
+        """
+        self.logger.info(f"Starting trading bot for {self.symbol} on {self.exchange_id}")
+        
+        loop_interval = self.config.get("loop_interval_seconds", 15)
+        
+        try:
+            while True:
+                start_time = time.time()
+                
+                self.run_once()
+                
+                # Calculate time to sleep
+                elapsed = time.time() - start_time
+                sleep_time = max(0, loop_interval - elapsed)
+                
+                if sleep_time > 0:
+                    self.logger.debug(f"Sleeping for {sleep_time:.2f} seconds")
+                    time.sleep(sleep_time)
+                
+        except KeyboardInterrupt:
+            self.logger.info("Trading bot stopped by user")
+        except Exception as e:
+            self.logger.exception(f"Unexpected error: {e}")
+            raise
+
+    def should_enter_trade(self) -> Tuple[bool, str]:
+        """
+        Determine if we should enter a trade based on signals.
+        
+        Returns:
+            Tuple[bool, str]: (should_enter, side)
+        """
+        # Don't enter if we already have a position
+        if self.current_position:
+            return False, ""
+        
+        # Get strategy settings
+        strategy = self.config.get("strategy", {})
+        indicators = strategy.get("indicators", {})
+        entry_threshold = strategy.get("entry_threshold", 0.5)
+        
+        # Get volume filter settings
+        volume_filter = strategy.get("volume_filter", {})
+        if volume_filter.get("enabled", False):
+            min_volume = volume_filter.get("min_24h_volume_usd", 1000000)
+            ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
+            volume_usd = ticker["quoteVolume"]
+            
+            if volume_usd < min_volume:
+                self.logger.debug(
+                    f"Volume filter rejected trade: {volume_usd:.2f} < {min_volume:.2f}"
+                )
+                return False, ""
+        
+        # Calculate signal
+        signal_strength, signal_direction = calculate_signal(
+            self.candles_df,
+            indicators,
+            threshold=entry_threshold
+        )
+        
+        # Check if signal is strong enough to enter
+        if signal_strength >= entry_threshold and signal_direction in ["long", "short"]:
+            self.logger.info(
+                f"Entry signal: {signal_direction} with strength {signal_strength:.2f}"
+            )
+            return True, signal_direction
+        
+        return False, ""
+
+    def should_exit_trade(self) -> bool:
+        """
+        Determine if we should exit the current position.
+        
+        Returns:
+            bool: True if should exit, False otherwise
+        """
+        if not self.current_position:
+            return False
+        
+        # Get strategy settings
+        strategy = self.config.get("strategy", {})
+        indicators = strategy.get("indicators", {})
+        exit_threshold = strategy.get("exit_threshold", -0.3)
+        
+        # Calculate signal
+        signal_strength, signal_direction = calculate_signal(
+            self.candles_df,
+            indicators,
+            threshold=abs(exit_threshold)
+        )
+        
+        # Check for exit signal (opposite to current position)
+        if self.current_position["side"] == "long" and signal_direction == "short":
+            if signal_strength >= abs(exit_threshold):
+                self.logger.info(
+                    f"Exit signal for long: short with strength {signal_strength:.2f}"
+                )
+                return True
+        elif self.current_position["side"] == "short" and signal_direction == "long":
+            if signal_strength >= abs(exit_threshold):
+                self.logger.info(
+                    f"Exit signal for short: long with strength {signal_strength:.2f}"
+                )
+                return True
+        
+        # Check for EMA cross exit condition if enabled
+        if "ema_cross" in indicators and indicators["ema_cross"].get("use_for_exit", False):
+            if "ema_cross" in self.candles_df.columns:
+                ema_cross = self.candles_df["ema_cross"].iloc[-1]
+                prev_ema_cross = self.candles_df["ema_cross"].iloc[-2] if len(self.candles_df) > 2 else 0
+                
+                if self.current_position["side"] == "long" and ema_cross == -1 and prev_ema_cross != -1:
+                    self.logger.info("Exit signal for long: EMA cross turned bearish")
+                    return True
+                elif self.current_position["side"] == "short" and ema_cross == 1 and prev_ema_cross != 1:
+                    self.logger.info("Exit signal for short: EMA cross turned bullish")
+                    return True
+        
+        return False
+EOL
+
+# Continue with trading_bot.py methods
+echo "Creating trading_bot.py (part 3)..."
+cat >> trading_bot.py << 'EOL'
+    def check_break_even(self) -> None:
+        """Check and adjust stop loss to break even if configured"""
+        if not self.current_position:
+            return
+        
+        risk_settings = self.config.get("risk_management", {})
+        break_even = risk_settings.get("break_even", {})
+        
+        if not break_even.get("enabled", False):
+            return
+        
+        # Get break even activation percentage
+        activation_pct = break_even.get("activation_pct", 1.0)
+        
+        # Get current price
+        ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
+        current_price = ticker["last"]
+        
+        # Calculate current profit percentage
+        entry_price = self.current_position["entry_price"]
+        side = self.current_position["side"]
+        
+        if side == "long":
+            profit_pct = (current_price / entry_price - 1) * 100
+        else:  # short
+            profit_pct = (1 - current_price / entry_price) * 100
+        
+        # If profit exceeds activation percentage, move stop loss to break even
+        if profit_pct >= activation_pct:
+            # Check if we have a stop loss order in state
+            if "sl" in self.state.get("orders", {}):
+                try:
+                    # Cancel existing stop loss order
+                    sl_order_id = self.state["orders"]["sl"]["id"]
+                    retry_api_call(
+                        self.exchange.cancel_order,
+                        sl_order_id,
+                        self.symbol
+                    )
+                    
+                    # Place new stop loss order at break even
+                    sl_side = "sell" if side == "long" else "buy"
+                    amount = self.current_position["amount"]
+                    
+                    # Add a small buffer to break even price to account for fees
+                    buffer_pct = 0.1  # 0.1% buffer
+                    if side == "long":
+                        break_even_price = entry_price * (1 + buffer_pct / 100)
+                    else:
+                        break_even_price = entry_price * (1 - buffer_pct / 100)
+                    
+                    # Round to price precision
+                    decimal_places = self.precision["price"]
+                    break_even_price = Decimal(str(break_even_price)).quantize(
+                        Decimal('0.' + '0' * decimal_places),
+                        rounding=ROUND_DOWN if side == "long" else ROUND_DOWN
+                    )
+                    
+                    sl_order = retry_api_call(
+                        self.exchange.create_order,
+                        self.symbol,
+                        "stop",
+                        sl_side,
+                        amount,
+                        price=float(break_even_price),
+                        params={"stopPrice": float(break_even_price)}
+                    )
+                    
+                    # Update stop loss order in state
+                    self.state["orders"]["sl"] = {
+                        "id": sl_order["id"],
+                        "price": float(break_even_price),
+                        "amount": amount,
+                        "side": sl_side
+                    }
+                    
+                    self.save_state()
+                    self.logger.info(
+                        f"Moved stop loss to break even: {float(break_even_price)}"
+                    )
+                    
+                except Exception as e:
+                    self.logger.error(f"Error adjusting stop loss to break even: {e}")
+
+    def calculate_stop_loss(self, entry_price: float, side: str) -> float:
+        """
+        Calculate stop loss price based on configuration.
+        
+        Args:
+            entry_price: Entry price for the position
+            side: Position side ('long' or 'short')
+            
+        Returns:
+            float: Stop loss price
+        """
+        risk_settings = self.config.get("risk_management", {})
+        sl_config = risk_settings.get("stop_loss", {})
+        
+        if not sl_config.get("enabled", True):
+            return 0.0
+        
+        sl_mode = sl_config.get("mode", "atr")
+        
+        if sl_mode == "atr" and self.candles_df is not None and "atr" in self.candles_df.columns:
+            atr = self.candles_df["atr"].iloc[-1]
+            atr_multiplier = sl_config.get("atr_multiplier", 2.0)
+            
+            if side == "long":
+                sl_price = entry_price - (atr * atr_multiplier)
+            else:
+                sl_price = entry_price + (atr * atr_multiplier)
+        else:
+            # Fixed percentage
+            fixed_pct = sl_config.get("fixed_pct", 2.0)
+            
+            if side == "long":
+                sl_price = entry_price * (1 - fixed_pct / 100)
+            else:
+                sl_price = entry_price * (1 + fixed_pct / 100)
+        
+        # Round to price precision
+        decimal_places = self.precision["price"]
+        sl_price = Decimal(str(sl_price)).quantize(
+            Decimal('0.' + '0' * decimal_places),
+            rounding=ROUND_DOWN if side == "long" else ROUND_DOWN  # Ensure conservative rounding
+        )
+        
+        return float(sl_price)
+
+    def calculate_take_profit(self, entry_price: float, side: str) -> float:
+        """
+        Calculate take profit price based on configuration.
+        
+        Args:
+            entry_price: Entry price for the position
+            side: Position side ('long' or 'short')
+            
+        Returns:
+            float: Take profit price
+        """
+        risk_settings = self.config.get("risk_management", {})
+        tp_config = risk_settings.get("take_profit", {})
+        
+        if not tp_config.get("enabled", True):
+            return 0.0
+        
+        tp_mode = tp_config.get("mode", "atr")
+        
+        if tp_mode == "atr" and self.candles_df is not None and "atr" in self.candles_df.columns:
+            atr = self.candles_df["atr"].iloc[-1]
+            atr_multiplier = tp_config.get("atr_multiplier", 4.0)
+            
+            if side == "long":
+                tp_price = entry_price + (atr * atr_multiplier)
+            else:
+                tp_price = entry_price - (atr * atr_multiplier)
+        else:
+            # Fixed percentage
+            fixed_pct = tp_config.get("fixed_pct", 4.0)
+            
+            if side == "long":
+                tp_price = entry_price * (1 + fixed_pct / 100)
+            else:
+                tp_price = entry_price * (1 - fixed_pct / 100)
+        
+        # Round to price precision
+        decimal_places = self.precision["price"]
+        tp_price = Decimal(str(tp_price)).quantize(
+            Decimal('0.' + '0' * decimal_places),
+            rounding=ROUND_DOWN if side == "short" else ROUND_DOWN  # Ensure conservative rounding
+        )
+        
+        return float(tp_price)
+
+    def execute_entry(self, side: str) -> Dict:
+        """
+        Execute an entry order for the given side.
+        
+        Args:
+            side: Order side ('buy' for long, 'sell' for short)
+            
+        Returns:
+            Dict: Order result information
+        """
+        try:
+            # Get current market price
+            ticker = retry_api_call(self.exchange.fetch_ticker, self.symbol)
+            current_price = ticker["last"]
+            
+            # Calculate position size
+            amount = self.calculate_position_size(current_price)
+            
+            # Calculate stop loss and take profit
+            entry_side = "long" if side == "buy" else "short"
+            sl_price = self.calculate_stop_loss(current_price, entry_side)
+            tp_price = self.calculate_take_profit(current_price, entry_side)
+            
+            # Execute order
+            order = retry_api_call(
+                self.exchange.create_market_order,
+                self.symbol,
+                side,
+                amount
+            )
+            
+            # Wait for order to be filled
+            time.sleep(1)
+            
+            # Update order with actual fill price and amount
+            filled_order = retry_api_call(
+                self.exchange.fetch_order,
+                order["id"],
+                self.symbol
+            )
+            
+            # Update position
+            self.update_position()
+            
+            # If stop loss or take profit is enabled, place those orders
+            if sl_price > 0:
+                sl_side = "sell" if entry_side == "long" else "buy"
+                sl_order = retry_api_call(
+                    self.exchange.create_order,
+                    self.symbol,
+                    "stop",
+                    sl_side,
+                    amount,
+                    price=sl_price,
+                    params={"stopPrice": sl_price}
+                )
+                self.logger.info(
+                    f"Placed stop loss order at {sl_price} for {amount} {self.symbol}"
+                )
+                
+                # Save stop loss order to state
+                self.state["orders"]["sl"] = {
+                    "id": sl_order["id"],
+                    "price": sl_price,
+                    "amount": amount,
+                    "side": sl_side
+                }
+            
+            if tp_price > 0:
+                tp_side = "sell" if entry_side == "long" else "buy"
+                tp_order = retry_api_call(
+                    self.exchange.create_order,
+                    self.symbol,
+                    "limit",
+                    tp_side,
+                    amount,
+                    price=tp_price
+                )
+                self.logger.info(
+                    f"Placed take profit order at {tp_price} for {amount} {self.symbol}"
+                )
+                
+                # Save take profit order to state
+                self.state["orders"]["tp"] = {
+                    "id": tp_order["id"],
+                    "price": tp_price,
+                    "amount": amount,
+                    "side": tp_side
+                }
+            
+            # Save filled order details to state
+            if filled_order["status"] == "closed":
+                entry_price = filled_order["price"]
+                filled_amount = filled_order["filled"]
+                
+                entry_trade = {
+                    "symbol": self.symbol,
+                    "entry_side": entry_side,
+                    "entry_price": entry_price,
+                    "amount": filled_amount,
+                    "timestamp": int(time.time() * 1000),
+                    "sl_price": sl_price,
+                    "tp_price": tp_price
+                }
+                
+                self.state["positions"][self.symbol] = {
+                    "side": entry_side,
+                    "amount": filled_amount,
+                    "entry_price": entry_price,
+                    "sl_price": sl_price,
+                    "tp_price": tp_price
+                }
+                
+                self.state["current_trade"] = entry_trade
+                self.save_state()
+                
+                self.logger.info(
+                    f"Opened {entry_side} position of {filled_amount} {self.symbol} at {entry_price}"
+                )
+                
+                return {
+                    "success": True,
+                    "side": entry_side,
+                    "amount": filled_amount,
+                    "price": entry_price
+                }
+            else:
+                self.logger.warning(f"Order not fully filled: {filled_order}")
+                return {
+                    "success": False,
+                    "message": "Order not fully filled"
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Error executing entry: {e}")
+            return {
+                "success": False,
+                "message": str(e)
+            }
+
+    def execute_exit(self) -> Dict:
+        """
+        Execute an exit order for the current position.
+        
+        Returns:
+            Dict: Order result information
+        """
+        if not self.current_position:
+            self.logger.warning("No position to exit")
+            return {
+                "success": False,
+                "message": "No position to exit"
+            }
+        
+        try:
+            # Cancel any existing SL/TP orders
+            if "sl" in self.state.get("orders", {}):
+                try:
+                    sl_order_id = self.state["orders"]["sl"]["id"]
+                    retry_api_call(
+                        self.exchange.cancel_order,
+                        sl_order_id,
+                        self.symbol
+                    )
+                    self.logger.info(f"Canceled stop loss order {sl_order_id}")
+                except Exception as e:
+                    self.logger.warning(f"Error canceling stop loss order: {e}")
+            
+            if "tp" in self.state.get("orders", {}):
+                try:
+                    tp_order_id = self.state["orders"]["tp"]["id"]
+                    retry_api_call(
+                        self.exchange.cancel_order,
+                        tp_order_id,
+                        self.symbol
+                    )
+                    self.logger.info(f"Canceled take profit order {tp_order_id}")
+                except Exception as e:
+                    self.logger.warning(f"Error canceling take profit order: {e}")
+            
+            # Execute market order to close position
+            side = "sell" if self.current_position["side"] == "long" else "buy"
+            amount = self.current_position["amount"]
+            
+            order = retry_api_call(
+                self.exchange.create_market_order,
+                self.symbol,
+                side,
+                amount
+            )
+            
+            # Wait for order to be filled
+            time.sleep(1)
+            
+            # Update order with actual fill price
+            filled_order = retry_api_call(
+                self.exchange.fetch_order,
+                order["id"],
+                self.symbol
+            )
+            
+            if filled_order["status"] == "closed":
+                exit_price = filled_order["price"]
+                filled_amount = filled_order["filled"]
+                
+                # Calculate PnL
+                entry_price = self.current_position["entry_price"]
+                if self.current_position["side"] == "long":
+                    pnl = (exit_price - entry_price) * filled_amount
+                    pnl_pct = (exit_price / entry_price - 1) * 100
+                else:  # short
+                    pnl = (entry_price - exit_price) * filled_amount
+                    pnl_pct = (1 - exit_price / entry_price) * 100
+                
+                # Add trade to history
+                if "current_trade" in self.state:
+                    current_trade = self.state["current_trade"]
+                    current_trade["exit_price"] = exit_price
+                    current_trade["exit_timestamp"] = int(time.time() * 1000)
+                    current_trade["pnl"] = pnl
+                    current_trade["pnl_pct"] = pnl_pct
+                    
+                    self.state["trades"].append(current_trade)
+                    del self.state["current_trade"]
+                
+                # Clear position from state
+                if self.symbol in self.state["positions"]:
+                    del self.state["positions"][self.symbol]
+                
+                # Clear orders from state
+                self.state["orders"] = {}
+                
+                self.save_state()
+                
+                # Update position
+                self.update_position()
+                
+                self.logger.info(
+                    f"Closed {self.current_position['side']} position of {filled_amount} {self.symbol} "
+                    f"at {exit_price} with PnL: {pnl:.2f} ({pnl_pct:.2f}%)"
+                )
+                
+                return {
+                    "success": True,
+                    "amount": filled_amount,
+                    "price": exit_price,
+                    "pnl": pnl,
+                    "pnl_pct": pnl_pct
+                }
+            else:
+                self.logger.warning(f"Exit order not fully filled: {filled_order}")
+                return {
+                    "success": False,
+                    "message": "Exit order not fully filled"
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Error executing exit: {e}")
+            return {
+                "success": False,
+                "message": str(e)
+            }
+
+    def run_backtest(self) -> Dict:
+        """
+        Run the trading bot in backtest mode using historical data.
+        
+        Returns:
+            Dict: Backtest results
+        """
+        self.logger.info(f"Starting backtest for {self.symbol} on {self.exchange_id}")
+        
+        # Initialize backtest state
+        backtest_state = {
+            "trades": [],
+            "current_position": None,
+            "equity_curve": [],
+            "starting_balance": 10000,  # Default starting balance
+            "current_balance": 10000,
+            "max_drawdown": 0,
+            "max_drawdown_pct": 0,
+            "peak_balance": 10000
+        }
+        
+        try:
+            # Fetch historical data for backtest period
+            historical_data = self.candles_df.copy() if self.candles_df is not None else pd.DataFrame()
+            
+            if historical_data.empty:
+                self.logger.error("No historical data available for backtest")
+                return {"error": "No historical data available"}
+            
+            # Calculate indicators
+            historical_data = calculate_indicators(
+                historical_data,
+                self.config.get("strategy", {}).get("indicators", {})
+            )
+            
+            self.logger.info(f"Loaded {len(historical_data)} candles for backtest")
+            
+            # Run backtest
+            results = self._run_backtest_simulation(historical_data, backtest_state)
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Error in backtest: {e}")
+            return {"error": str(e)}
+            
+    def _run_backtest_simulation(self, data: pd.DataFrame, backtest_state: Dict) -> Dict:
+        """
+        Run the actual backtest simulation.
+        
+        Args:
+            data: Historical price data
+            backtest_state: Initial backtest state
+            
+        Returns:
+            Dict: Backtest results
+        """
+        # Simulate trades on historical data
+        for i in range(len(data) - 1):
+            # Skip the first few bars until we have enough data for indicators
+            if i < 20:
+                continue
+            
+            # Get current candle data
+            current_data = data.iloc[:i+1]
+            current_candle = current_data.iloc[-1]
+            
+            # Get strategy settings
+            strategy = self.config.get("strategy", {})
+            indicators = strategy.get("indicators", {})
+            entry_threshold = strategy.get("entry_threshold", 0.5)
+            exit_threshold = strategy.get("exit_threshold", -0.3)
+            
+            # Check for exit if in position
+            if backtest_state["current_position"]:
+                signal_strength, signal_direction = calculate_signal(
+                    current_data,
+                    indicators,
+                    threshold=abs(exit_threshold)
+                )
+                
+                position = backtest_state["current_position"]
+                should_exit = False
+                
+                # Check for exit signal (opposite to current position)
+                if position["side"] == "long" and signal_direction == "short":
+                    if signal_strength >= abs(exit_threshold):
+                        should_exit = True
+                elif position["side"] == "short" and signal_direction == "long":
+                    if signal_strength >= abs(exit_threshold):
+                        should_exit = True
+                
+                # Execute exit if needed
+                if should_exit:
+                    exit_price = current_candle["close"]
+                    entry_price = position["entry_price"]
+                    amount = position["amount"]
+                    
+                    # Calculate PnL
+                    if position["side"] == "long":
+                        pnl = (exit_price - entry_price) * amount
+                        pnl_pct = (exit_price / entry_price - 1) * 100
+                    else:  # short
+                        pnl = (entry_price - exit_price) * amount
+                        pnl_pct = (1 - exit_price / entry_price) * 100
+                    
+                    # Update balance
+                    backtest_state["current_balance"] += pnl
+                    
+                    # Record trade
+                    trade = {
+                        "entry_timestamp": position["timestamp"],
+                        "exit_timestamp": current_candle.name.timestamp() * 1000,
+                        "entry_price": entry_price,
+                        "exit_price": exit_price,
+                        "amount": amount,
+                        "side": position["side"],
+                        "pnl": pnl,
+                        "pnl_pct": pnl_pct
+                    }
+                    backtest_state["trades"].append(trade)
+                    
+                    # Clear position
+                    backtest_state["current_position"] = None
+                    
+                    self.logger.debug(
+                        f"Backtest exit: {position['side']} at {exit_price} with PnL: {pnl:.2f} ({pnl_pct:.2f}%)"
+                    )
+            
+            # Check for entry if not in position
+            else:
+                signal_strength, signal_direction = calculate_signal(
+                    current_data,
+                    indicators,
+                    threshold=entry_threshold
+                )
+                
+                # Check if signal is strong enough to enter
+                if signal_strength >= entry_threshold and signal_direction in ["long", "short"]:
+                    entry_price = current_candle["close"]
+                    
+                    # Calculate position size
+                    position_size_pct = self.config.get("risk_management", {}).get("position_size_pct", 1.0)
+                    position_value = backtest_state["current_balance"] * (position_size_pct / 100)
+                    amount = position_value / entry_price
+                    
+                    # Record position
+                    backtest_state["current_position"] = {
+                        "side": signal_direction,
+                        "entry_price": entry_price,
+                        "amount": amount,
+                        "timestamp": current_candle.name.timestamp() * 1000
+                    }
+                    
+                    self.logger.debug(
+                        f"Backtest entry: {signal_direction} at {entry_price} with amount: {amount:.6f}"
+                    )
+            
+            # Update equity curve
+            backtest_state["equity_curve"].append({
+                "timestamp": current_candle.name.timestamp() * 1000,
+                "balance": backtest_state["current_balance"]
+            })
+            
+            # Update drawdown metrics
+            if backtest_state["current_balance"] > backtest_state["peak_balance"]:
+                backtest_state["peak_balance"] = backtest_state["current_balance"]
+            
+            current_drawdown = backtest_state["peak_balance"] - backtest_state["current_balance"]
+            current_drawdown_pct = (current_drawdown / backtest_state["peak_balance"]) * 100
+            
+            if current_drawdown > backtest_state["max_drawdown"]:
+                backtest_state["max_drawdown"] = current_drawdown
+                backtest_state["max_drawdown_pct"] = current_drawdown_pct
+        
+        # Calculate backtest results
+        total_trades = len(backtest_state["trades"])
+        profitable_trades = sum(1 for trade in backtest_state["trades"] if trade["pnl"] > 0)
+        win_rate = (profitable_trades / total_trades * 100) if total_trades > 0 else 0
+        
+        # Calculate returns
+        starting_balance = backtest_state["starting_balance"]
+        final_balance = backtest_state["current_balance"]
+        total_return = final_balance - starting_balance
+        total_return_pct = (final_balance / starting_balance - 1) * 100
+        
+        results = {
+            "total_trades": total_trades,
+            "profitable_trades": profitable_trades,
+            "win_rate": win_rate,
+            "total_return": total_return,
+            "total_return_pct": total_return_pct,
+            "max_drawdown": backtest_state["max_drawdown"],
+            "max_drawdown_pct": backtest_state["max_drawdown_pct"],
+            "trades": backtest_state["trades"],
+            "equity_curve": backtest_state["equity_curve"]
+        }
+        
+        self.logger.info(f"Backtest completed with {total_trades} trades and {win_rate:.2f}% win rate")
+        return results
+EOL
+
+# Create web_interface.py
+echo "Creating web_interface.py..."
+cat > web_interface.py << 'EOL'
+"""
+Web Interface for Trading Bot
+
+This module implements a Flask web interface for the trading bot
+to display statistics, control the bot, and view trading history.
+"""
+
+import json
+import logging
+import os
+from datetime import datetime
+from typing import Dict, List, Optional
+
+from flask import Flask, jsonify, render_template, request, session
+
+# Configure logger
+logger = logging.getLogger("web_interface")
+
+# Initialize Flask app
+app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = os.environ.get("SESSION_SECRET", "trading_bot_development_key")
+
+# File paths
+CONFIG_FILE = "config.json"
+STATE_FILE = "bot_state.json"
+
+
+def load_config() -> Dict:
+    """Load configuration from file"""
+    try:
+        with open(CONFIG_FILE, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logger.error(f"Error loading config: {e}")
+        return {}
+
+
+def load_state() -> Dict:
+    """Load bot state from file"""
+    try:
+        with open(STATE_FILE, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logger.error(f"Error loading state: {e}")
+        return {"positions": {}, "orders": {}, "trades": [], "last_update": 0}
+
+
+def save_config(config: Dict) -> bool:
+    """Save configuration to file"""
+    try:
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(config, f, indent=4)
+        return True
+    except Exception as e:
+        logger.error(f"Error saving config: {e}")
+        return False
+
+
+@app.route("/")
+def index():
+    """Render main dashboard page"""
+    return render_template("index.html")
+
+
+@app.route("/dashboard")
+def dashboard():
+    """Render main dashboard page"""
+    config = load_config()
+    state = load_state()
+    
+    # Format timestamps in trades for display
+    for trade in state.get("trades", []):
+        if "timestamp" in trade:
+            trade["time"] = datetime.fromtimestamp(trade["timestamp"] / 1000).strftime("%Y-%m-%d %H:%M:%S")
+    
+    return render_template(
+        "dashboard.html",
+        config=config,
+        state=state,
+        last_update=datetime.fromtimestamp(state.get("last_update", 0) / 1000).strftime("%Y-%m-%d %H:%M:%S") if state.get("last_update", 0) > 0 else "Never"
+    )
+
+
+@app.route("/api/config", methods=["GET"])
+def get_config():
+    """API endpoint to get current configuration"""
+    return jsonify(load_config())
+
+
+@app.route("/api/config", methods=["POST"])
+def update_config():
+    """API endpoint to update configuration"""
+    try:
+        new_config = request.json
+        if save_config(new_config):
+            return jsonify({"status": "success", "message": "Configuration updated"})
+        else:
+            return jsonify({"status": "error", "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        logger.error(f"Error updating config: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/state", methods=["GET"])
+def get_state():
+    """API endpoint to get current bot state"""
+    return jsonify(load_state())
+
+
+@app.route("/api/performance", methods=["GET"])
+def get_performance():
+    """API endpoint to get trading performance statistics"""
+    state = load_state()
+    trades = state.get("trades", [])
+    
+    # Calculate performance metrics
+    total_trades = len(trades)
+    profitable_trades = sum(1 for trade in trades if trade.get("pnl", 0) > 0)
+    win_rate = (profitable_trades / total_trades * 100) if total_trades > 0 else 0
+    
+    total_pnl = sum(trade.get("pnl", 0) for trade in trades)
+    best_trade = max(trades, key=lambda x: x.get("pnl", 0))["pnl"] if trades else 0
+    worst_trade = min(trades, key=lambda x: x.get("pnl", 0))["pnl"] if trades else 0
+    
+    # Calculate drawdown
+    cumulative_pnl = 0
+    max_cumulative_pnl = 0
+    current_drawdown = 0
+    max_drawdown = 0
+    
+    for trade in trades:
+        pnl = trade.get("pnl", 0)
+        cumulative_pnl += pnl
+        
+        if cumulative_pnl > max_cumulative_pnl:
+            max_cumulative_pnl = cumulative_pnl
+            current_drawdown = 0
+        else:
+            current_drawdown = max_cumulative_pnl - cumulative_pnl
+            max_drawdown = max(max_drawdown, current_drawdown)
+    
+    return jsonify({
+        "total_trades": total_trades,
+        "profitable_trades": profitable_trades,
+        "win_rate": win_rate,
+        "total_pnl": total_pnl,
+        "best_trade": best_trade,
+        "worst_trade": worst_trade,
+        "max_drawdown": max_drawdown,
+        "current_positions": len(state.get("positions", {}))
+    })
+
+
+if __name__ == "__main__":
+    # This is used when running directly with Python
+    # In production, use main.py instead
+    app.run(host="0.0.0.0", port=5000, debug=True)
+EOL
+
+# Create main.py
+echo "Creating main.py..."
+cat > main.py << 'EOL'
+#!/usr/bin/env python3
+"""
+Cryptocurrency Trading Bot Main Entry Point
+
+This script serves as the entry point for the trading bot application,
+loading configurations and starting either the bot or web interface based
+on command-line arguments.
+"""
+
+import argparse
+import logging
+import os
+import sys
+from logging.handlers import RotatingFileHandler
+
+from trading_bot import TradingBot
+from web_interface import app as flask_app
+
+# Configure basic logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        RotatingFileHandler(
+            "bot_logs/trading_bot.log",
+            maxBytes=10 * 1024 * 1024,  # 10 MB
+            backupCount=5,
+            encoding="utf-8",
+        ),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+
+logger = logging.getLogger("main")
+
+
+def parse_arguments():
+    """Parse command-line arguments"""
+    parser = argparse.ArgumentParser(description="Cryptocurrency Trading Bot")
+    parser.add_argument(
+        "--config", default="config.json", help="Path to configuration file"
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug logging"
+    )
+    parser.add_argument(
+        "--web", action="store_true", help="Start the web interface"
+    )
+    parser.add_argument(
+        "--backtest", action="store_true", help="Run in backtest mode"
+    )
+    parser.add_argument(
+        "--symbol", help="Override trading symbol from config"
+    )
+    parser.add_argument(
+        "--exchange", help="Override exchange from config"
+    )
+    return parser.parse_args()
+
+
+def ensure_directories():
+    """Ensure required directories exist"""
+    directories = ["bot_logs"]
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+
+
+def main():
+    """Main entry point for the trading bot application"""
+    # Parse command-line arguments
+    args = parse_arguments()
+    
+    # Ensure required directories exist
+    ensure_directories()
+    
+    # Set log level based on debug flag
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logger.debug("Debug logging enabled")
+
+    if args.web:
+        # Start web interface
+        logger.info("Starting web interface")
+        flask_app.run(host="0.0.0.0", port=5000, debug=args.debug)
+    else:
+        # Start trading bot
+        logger.info("Starting trading bot")
+        try:
+            bot = TradingBot(args.config)
+            # Override config with command-line arguments if provided
+            if args.symbol:
+                bot.config["symbol"] = args.symbol
+            if args.exchange:
+                bot.config["exchange"] = args.exchange
+            
+            if args.backtest:
+                logger.info("Running in backtest mode")
+                bot.run_backtest()
+            else:
+                bot.run()
+        except KeyboardInterrupt:
+            logger.info("Bot stopped by user")
+        except Exception as e:
+            logger.exception(f"Critical error: {e}")
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
+EOL
+
+# Create CSS file
+echo "Creating custom.css..."
+mkdir -p static/css
+cat > static/css/custom.css << 'EOL'
+/* Custom styles for the Trading Bot interface */
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Position related color coding */
+.position-long {
+    color: #28a745;
+}
+
+.position-short {
+    color: #dc3545;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart container */
+.chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+/* Nav link styles */
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1rem;
+    color: var(--bs-secondary);
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--bs-primary);
+}
+
+.nav-link.active {
+    color: var(--bs-primary);
+}
+
+.nav-link svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Performance stats */
+.performance-stat {
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.performance-positive {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.performance-negative {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Table styles */
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+/* Form controls with better contrast */
+.form-control, .form-select {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+}
+EOL
+
+# Create dashboard.js
+mkdir -p static/js
+echo "Creating dashboard.js..."
+cat > static/js/dashboard.js << 'EOL'
+// Dashboard.js - Client-side JavaScript for the Trading Bot Dashboard
+
+// DOM elements
+let performanceChart = null;
+
+// Initialize dashboard components when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    setupEventListeners();
+    refreshData();
+});
+
+// Set up event listeners
+function setupEventListeners() {
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshData);
+    }
+    
+    // Save configuration button
+    const saveConfigBtn = document.getElementById('saveConfigBtn');
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', saveConfiguration);
+    }
+}
+
+// Initialize charts
+function initializeCharts() {
+    // Performance chart
+    const ctx = document.getElementById('performanceChart');
+    if (ctx) {
+        performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Cumulative PnL',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: false
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Refresh dashboard data
+function refreshData() {
+    // Get performance data
+    fetch('/api/performance')
+        .then(response => response.json())
+        .then(data => {
+            updatePerformanceStats(data);
+        })
+        .catch(error => {
+            console.error('Error fetching performance data:', error);
+        });
+        
+    // Get state data to update charts
+    fetch('/api/state')
+        .then(response => response.json())
+        .then(data => {
+            updateCharts(data);
+        })
+        .catch(error => {
+            console.error('Error fetching state data:', error);
+        });
+}
+
+// Update performance statistics
+function updatePerformanceStats(data) {
+    // If we had elements with IDs matching these stats, we'd update them
+    console.log('Performance data:', data);
+    
+    // For now, just log the data to console
+    // In a full implementation, we'd update DOM elements with these values
+}
+
+// Update charts with new data
+function updateCharts(data) {
+    // If no trade data, don't update charts
+    if (!data.trades || data.trades.length === 0) {
+        return;
+    }
+    
+    // Sort trades by timestamp
+    const sortedTrades = data.trades.sort((a, b) => a.timestamp - b.timestamp);
+    
+    // Update performance chart
+    if (performanceChart) {
+        // Calculate cumulative PnL
+        let cumulativePnL = 0;
+        const chartData = sortedTrades.map(trade => {
+            cumulativePnL += trade.pnl || 0;
+            return cumulativePnL;
+        });
+        
+        // Format dates for labels
+        const labels = sortedTrades.map(trade => {
+            const date = new Date(trade.timestamp);
+            return date.toLocaleDateString();
+        });
+        
+        // Update chart data
+        performanceChart.data.labels = labels;
+        performanceChart.data.datasets[0].data = chartData;
+        performanceChart.update();
+    }
+}
+
+// Save configuration changes
+function saveConfiguration() {
+    // Gather basic settings
+    const config = {
+        symbol: document.getElementById('symbol').value,
+        exchange: document.getElementById('exchange').value,
+        timeframe: document.getElementById('timeframe').value,
+        risk_management: {
+            position_size_pct: parseFloat(document.getElementById('position_size').value),
+            max_risk_per_trade_pct: parseFloat(document.getElementById('max_risk').value),
+            use_atr_position_sizing: document.getElementById('use_atr_sizing').checked
+        }
+    };
+    
+    // Gather strategy parameters if elements exist
+    if (document.getElementById('entry_threshold')) {
+        if (!config.strategy) config.strategy = {};
+        config.strategy.entry_threshold = parseFloat(document.getElementById('entry_threshold').value);
+    }
+    
+    if (document.getElementById('exit_threshold')) {
+        if (!config.strategy) config.strategy = {};
+        config.strategy.exit_threshold = parseFloat(document.getElementById('exit_threshold').value);
+    }
+    
+    // Gather indicator parameters
+    const indicators = {};
+    
+    // RSI
+    if (document.getElementById('rsi_enabled')) {
+        indicators.rsi = {
+            enabled: document.getElementById('rsi_enabled').checked,
+            weight: 1.0
+        };
+    }
+    
+    // MACD
+    if (document.getElementById('macd_enabled')) {
+        indicators.macd = {
+            enabled: document.getElementById('macd_enabled').checked,
+            weight: 1.0
+        };
+    }
+    
+    // Bollinger Bands
+    if (document.getElementById('bollinger_enabled')) {
+        indicators.bollinger_bands = {
+            enabled: document.getElementById('bollinger_enabled').checked,
+            weight: 1.0
+        };
+    }
+    
+    // EMA Cross
+    if (document.getElementById('ema_cross_enabled')) {
+        indicators.ema_cross = {
+            enabled: document.getElementById('ema_cross_enabled').checked,
+            weight: 1.0,
+            use_for_exit: true
+        };
+    }
+    
+    // Add indicators to strategy
+    if (Object.keys(indicators).length > 0) {
+        if (!config.strategy) config.strategy = {};
+        config.strategy.indicators = indicators;
+    }
+    
+    // Send to API
+    fetch('/api/config', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Configuration saved successfully');
+        } else {
+            alert('Error saving configuration: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving configuration:', error);
+        alert('Error saving configuration');
+    });
+}
+
+// Utility function to format currency values
+function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(value);
+}
+
+// Utility function to format percentage values
+function formatPercentage(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'percent',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value / 100);
+}
+EOL
+
+# Create template HTML files
+mkdir -p templates
+echo "Creating index.html..."
+cat > templates/index.html << 'EOL'
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <div class="d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity me-2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <h1 class="fs-4">Crypto Trading Bot</h1>
+            </div>
+        </header>
+
+        <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Automated Cryptocurrency Trading</h1>
+                <p class="col-md-8 fs-4">A Python-based trading bot using technical indicators to make automated trading decisions.</p>
+                <a href="/dashboard" class="btn btn-primary btn-lg">Go to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="row align-items-md-stretch">
+            <div class="col-md-6 mb-4">
+                <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+                    <h2>Key Features</h2>
+                    <ul>
+                        <li>Multi-indicator trading strategies with weighted signals</li>
+                        <li>Dynamic position sizing based on risk percentage and ATR</li>
+                        <li>Configurable stop-loss and take-profit mechanisms</li>
+                        <li>Support for multiple exchanges via CCXT</li>
+                        <li>Detailed performance tracking and reporting</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+                    <h2>Getting Started</h2>
+                    <p>Configure your API keys and trading parameters in the dashboard to start using the bot.</p>
+                    <p>Monitor your trading performance and adjust your strategy as needed.</p>
+                    <a href="/dashboard" class="btn btn-outline-secondary">Go to Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        <footer class="pt-3 mt-4 text-body-secondary border-top">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>Crypto Trading Bot &copy; 2023</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>
+                        <a href="https://github.com/ccxt/ccxt" target="_blank" class="text-decoration-none">CCXT</a> |
+                        <a href="https://pandas-ta.readthedocs.io/" target="_blank" class="text-decoration-none">pandas_ta</a>
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+EOL
+
+echo "Creating dashboard.html..."
+cat > templates/dashboard.html << 'EOL'
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Bot Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link active" href="#">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link" href="#trades">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Trades
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link" href="#config">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                Configuration
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Trading Bot Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshBtn">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Symbol</h5>
+                                <p class="card-text fs-4">{{ config.get('symbol', 'Not set') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Exchange</h5>
+                                <p class="card-text fs-4">{{ config.get('exchange', 'Not set') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Active Positions</h5>
+                                <p class="card-text fs-4">{{ state.get('positions', {})|length }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Last Update</h5>
+                                <p class="card-text">{{ last_update }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Chart -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                Performance
+                            </div>
+                            <div class="card-body">
+                                <canvas id="performanceChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Positions -->
+                <h2 id="positions" class="mt-4 mb-3">Active Positions</h2>
+                <div class="table-responsive mb-4">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Amount</th>
+                                <th>Entry Price</th>
+                                <th>Current PnL</th>
+                                <th>Liquidation Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if state.get('positions')|length > 0 %}
+                                {% for symbol, position in state.get('positions', {}).items() %}
+                                <tr>
+                                    <td>{{ symbol }}</td>
+                                    <td>
+                                        {% if position.side == 'long' %}
+                                        <span class="badge bg-success">LONG</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">SHORT</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ position.amount }}</td>
+                                    <td>{{ position.entry_price }}</td>
+                                    <td>{{ position.pnl }}</td>
+                                    <td>{{ position.liquidation_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No active positions</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Trade History -->
+                <h2 id="trades" class="mt-4 mb-3">Trade History</h2>
+                <div class="table-responsive mb-4">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Amount</th>
+                                <th>Entry Price</th>
+                                <th>Exit Price</th>
+                                <th>PnL</th>
+                                <th>PnL %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if state.get('trades')|length > 0 %}
+                                {% for trade in state.get('trades', []) %}
+                                <tr>
+                                    <td>{{ trade.get('time', '') }}</td>
+                                    <td>{{ trade.symbol }}</td>
+                                    <td>
+                                        {% if trade.entry_side == 'long' %}
+                                        <span class="badge bg-success">LONG</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">SHORT</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ trade.amount }}</td>
+                                    <td>{{ trade.entry_price }}</td>
+                                    <td>{{ trade.exit_price }}</td>
+                                    <td>
+                                        {% if trade.pnl > 0 %}
+                                        <span class="text-success">{{ trade.pnl }}</span>
+                                        {% else %}
+                                        <span class="text-danger">{{ trade.pnl }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if trade.pnl_pct > 0 %}
+                                        <span class="text-success">{{ trade.pnl_pct }}%</span>
+                                        {% else %}
+                                        <span class="text-danger">{{ trade.pnl_pct }}%</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No trade history</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Configuration -->
+                <h2 id="config" class="mt-4 mb-3">Configuration</h2>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Trading Parameters
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Basic Settings</h5>
+                                <div class="mb-3">
+                                    <label for="symbol" class="form-label">Symbol</label>
+                                    <input type="text" class="form-control" id="symbol" value="{{ config.get('symbol', '') }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exchange" class="form-label">Exchange</label>
+                                    <select class="form-select" id="exchange">
+                                        <option value="bybit" {% if config.get('exchange') == 'bybit' %}selected{% endif %}>Bybit</option>
+                                        <option value="binance" {% if config.get('exchange') == 'binance' %}selected{% endif %}>Binance</option>
+                                        <option value="kucoin" {% if config.get('exchange') == 'kucoin' %}selected{% endif %}>KuCoin</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="timeframe" class="form-label">Timeframe</label>
+                                    <select class="form-select" id="timeframe">
+                                        <option value="1m" {% if config.get('timeframe') == '1m' %}selected{% endif %}>1 minute</option>
+                                        <option value="5m" {% if config.get('timeframe') == '5m' %}selected{% endif %}>5 minutes</option>
+                                        <option value="15m" {% if config.get('timeframe') == '15m' %}selected{% endif %}>15 minutes</option>
+                                        <option value="1h" {% if config.get('timeframe') == '1h' %}selected{% endif %}>1 hour</option>
+                                        <option value="4h" {% if config.get('timeframe') == '4h' %}selected{% endif %}>4 hours</option>
+                                        <option value="1d" {% if config.get('timeframe') == '1d' %}selected{% endif %}>1 day</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Risk Management</h5>
+                                <div class="mb-3">
+                                    <label for="position_size" class="form-label">Position Size (%)</label>
+                                    <input type="number" class="form-control" id="position_size" value="{{ config.get('risk_management', {}).get('position_size_pct', 1.0) }}" min="0.1" max="100" step="0.1">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="max_risk" class="form-label">Max Risk Per Trade (%)</label>
+                                    <input type="number" class="form-control" id="max_risk" value="{{ config.get('risk_management', {}).get('max_risk_per_trade_pct', 1.0) }}" min="0.1" max="10" step="0.1">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="use_atr_sizing" {% if config.get('risk_management', {}).get('use_atr_position_sizing', True) %}checked{% endif %}>
+                                    <label class="form-check-label" for="use_atr_sizing">Use ATR for Position Sizing</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-3" id="saveConfigBtn">Save Configuration</button>
+                    </div>
+                </div>
+
+                <!-- Strategy Configuration -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Strategy Parameters
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Indicators</h5>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="rsi_enabled" {% if config.get('strategy', {}).get('indicators', {}).get('rsi', {}).get('enabled', True) %}checked{% endif %}>
+                                    <label class="form-check-label" for="rsi_enabled">RSI</label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="macd_enabled" {% if config.get('strategy', {}).get('indicators', {}).get('macd', {}).get('enabled', True) %}checked{% endif %}>
+                                    <label class="form-check-label" for="macd_enabled">MACD</label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="bollinger_enabled" {% if config.get('strategy', {}).get('indicators', {}).get('bollinger_bands', {}).get('enabled', True) %}checked{% endif %}>
+                                    <label class="form-check-label" for="bollinger_enabled">Bollinger Bands</label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="ema_cross_enabled" {% if config.get('strategy', {}).get('indicators', {}).get('ema_cross', {}).get('enabled', True) %}checked{% endif %}>
+                                    <label class="form-check-label" for="ema_cross_enabled">EMA Cross</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Signal Thresholds</h5>
+                                <div class="mb-3">
+                                    <label for="entry_threshold" class="form-label">Entry Signal Threshold</label>
+                                    <input type="number" class="form-control" id="entry_threshold" value="{{ config.get('strategy', {}).get('entry_threshold', 0.5) }}" min="0" max="1" step="0.1">
+                                    <div class="form-text">Higher values require stronger signals to enter a trade.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exit_threshold" class="form-label">Exit Signal Threshold</label>
+                                    <input type="number" class="form-control" id="exit_threshold" value="{{ config.get('strategy', {}).get('exit_threshold', 0.3) }}" min="0" max="1" step="0.1">
+                                    <div class="form-text">Higher values require stronger signals to exit a trade.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
+EOL
+
+# Create default config.json
+echo "Creating config.json..."
+cat > config.json << 'EOL'
+{
+    "exchange": "bybit",
+    "symbol": "BTC/USDT:USDT",
+    "timeframe": "15m",
+    "api_key": "",
+    "api_secret": "",
+    "test_mode": true,
+    "risk_management": {
+        "position_size_pct": 1.0,
+        "max_risk_per_trade_pct": 1.0,
+        "use_atr_position_sizing": true,
+        "stop_loss": {
+            "enabled": true,
+            "mode": "atr",
+            "atr_multiplier": 2.0,
+            "fixed_pct": 2.0
+        },
+        "take_profit": {
+            "enabled": true,
+            "mode": "atr",
+            "atr_multiplier": 4.0,
+            "fixed_pct": 4.0
+        },
+        "break_even": {
+            "enabled": false,
+            "activation_pct": 1.0
+        }
+    },
+    "strategy": {
+        "entry_threshold": 0.5,
+        "exit_threshold": 0.3,
+        "indicators": {
+            "rsi": {
+                "enabled": true,
+                "window": 14,
+                "overbought": 70,
+                "oversold": 30,
+                "weight": 1.0
+            },
+            "macd": {
+                "enabled": true,
+                "fast_period": 12,
+                "slow_period": 26,
+                "signal_period": 9,
+                "weight": 1.0
+            },
+            "bollinger_bands": {
+                "enabled": true,
+                "window": 20,
+                "std_dev": 2.0,
+                "weight": 1.0
+            },
+            "ema_cross": {
+                "enabled": true,
+                "fast_period": 8,
+                "slow_period": 21,
+                "use_for_exit": true,
+                "weight": 1.0
+            },
+            "atr": {
+                "enabled": true,
+                "window": 14
+            }
+        }
+    },
+    "advanced": {
+        "candles_required": 100,
+        "price_precision": 2,
+        "amount_precision": 6,
+        "min_amount": 0.001
+    },
+    "loop_interval_seconds": 15
+}
+EOL
+
+# Create empty bot_state.json
+echo "Creating default bot_state.json..."
+cat > bot_state.json << 'EOL'
+{
+    "positions": {},
+    "orders": {},
+    "trades": [],
+    "last_update": 0
+}
+EOL
+
+# Make main.py executable
+chmod +x main.py
+
+echo
+echo "=== Setup Complete ==="
+echo 
+echo "To start the web interface, run:"
+echo "cd ~/trading_bot && python main.py --web"
+echo 
+echo "To start the trading bot, run:"
+echo "cd ~/trading_bot && python main.py"
+echo
+echo "Note: You'll need to set your API keys in config.json or via environment variables"
+echo "before the bot can trade with real exchanges."
+echo
+echo "Happy trading!"

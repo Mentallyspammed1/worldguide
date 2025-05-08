@@ -16,14 +16,13 @@ from dotenv import load_dotenv
 # ==============================================================================
 # Initialize Arcane Environment
 # ==============================================================================
-init(autoreset=True) # Let the colors flow freely!
-decimal.getcontext().prec = 30 # Precision for potent calculations
+init(autoreset=True)  # Let the colors flow freely!
+decimal.getcontext().prec = 30  # Precision for potent calculations
 
 # ==============================================================================
 # Load Scrolls of Configuration (.env) & Define Constants
 # ==============================================================================
 load_dotenv()
-print(f"{Fore.CYAN}{Style.DIM}# Loading ancient scrolls (.env)...{Style.RESET_ALL}")
 
 CONFIG = {
     # --- API Secrets (Keep these guarded!) ---
@@ -31,17 +30,17 @@ CONFIG = {
     "API_SECRET": os.environ.get("BYBIT_API_SECRET"),
 
     # --- Market & Order Book ---
-    "VOLUME_THRESHOLDS": {'high': decimal.Decimal('10'), 'medium': decimal.Decimal('2')}, # Thresholds for highlighting volume
-    "REFRESH_INTERVAL": 9, # Seconds between market whispers
-    "MAX_ORDERBOOK_DEPTH_DISPLAY": 50, # How deep the order book vision extends
-    "ORDER_FETCH_LIMIT": 200, # How many orders to summon from the book
-    "DEFAULT_EXCHANGE_TYPE": 'linear', # 'linear' or 'inverse' contracts
-    "CONNECT_TIMEOUT": 30000, # Milliseconds to wait for the exchange spirit
-    "RETRY_DELAY_NETWORK_ERROR": 10, # Seconds to pause after network static
-    "RETRY_DELAY_RATE_LIMIT": 60, # Seconds to pause when the exchange demands patience
+    "VOLUME_THRESHOLDS": {'high': decimal.Decimal('10'), 'medium': decimal.Decimal('2')},  # Thresholds for highlighting volume
+    "REFRESH_INTERVAL": 9,  # Seconds between market whispers
+    "MAX_ORDERBOOK_DEPTH_DISPLAY": 50,  # How deep the order book vision extends
+    "ORDER_FETCH_LIMIT": 200,  # How many orders to summon from the book
+    "DEFAULT_EXCHANGE_TYPE": 'linear',  # 'linear' or 'inverse' contracts
+    "CONNECT_TIMEOUT": 30000,  # Milliseconds to wait for the exchange spirit
+    "RETRY_DELAY_NETWORK_ERROR": 10,  # Seconds to pause after network static
+    "RETRY_DELAY_RATE_LIMIT": 60,  # Seconds to pause when the exchange demands patience
 
     # --- Indicators Configuration ---
-    "INDICATOR_TIMEFRAME": '15m', # Candle interval for most indicators
+    "INDICATOR_TIMEFRAME": '15m',  # Candle interval for most indicators
     "SMA_PERIOD": 9,
     "SMA2_PERIOD": 20,
     "EMA1_PERIOD": 12,
@@ -54,15 +53,15 @@ CONFIG = {
     "STOCH_RSI_OVERBOUGHT": decimal.Decimal('80'),
 
     # --- Display & Formatting ---
-    "PIVOT_TIMEFRAME": '30m', # Candle interval for pivot points (usually daily)
-    "PNL_PRECISION": 2, # Decimal places for Profit/Loss
-    "MIN_PRICE_DISPLAY_PRECISION": 3, # Minimum decimal places for prices
-    "STOCH_RSI_DISPLAY_PRECISION": 3, # Decimal places for Stoch RSI values
-    "VOLUME_DISPLAY_PRECISION": 0, # Decimal places for volume figures
-    "BALANCE_DISPLAY_PRECISION": 2, # Decimal places for balance display
+    "PIVOT_TIMEFRAME": '30m',  # Candle interval for pivot points (usually daily)
+    "PNL_PRECISION": 2,  # Decimal places for Profit/Loss
+    "MIN_PRICE_DISPLAY_PRECISION": 3,  # Minimum decimal places for prices
+    "STOCH_RSI_DISPLAY_PRECISION": 3,  # Decimal places for Stoch RSI values
+    "VOLUME_DISPLAY_PRECISION": 0,  # Decimal places for volume figures
+    "BALANCE_DISPLAY_PRECISION": 2,  # Decimal places for balance display
 
     # --- Trading ---
-    "FETCH_BALANCE_ASSET": "USDT", # Asset to display balance for
+    "FETCH_BALANCE_ASSET": "USDT",  # Asset to display balance for
 }
 
 # Fibonacci Ratios - Universal constants
@@ -75,17 +74,18 @@ FIB_RATIOS = {
 # Utility Glyphs (Helper Functions)
 # ==============================================================================
 
-def print_color(text, color=Fore.WHITE, style=Style.NORMAL, end='\n', **kwargs):
-    """Prints text imbued with Colorama's magic."""
-    print(f"{style}{color}{text}{Style.RESET_ALL}", end=end, **kwargs)
 
-def termux_toast(message, duration="short"):
+def print_color(text, color=Fore.WHITE, style=Style.NORMAL, end='\n', **kwargs) -> None:
+    """Prints text imbued with Colorama's magic."""
+
+
+def termux_toast(message, duration="short") -> None:
     """Sends a fleeting message to the Termux ether."""
     try:
         # Ensure message is a string
         message_str = str(message)
         # Basic sanitization: remove potential command injection risks (simple approach)
-        safe_message = ''.join(c for c in message_str if c.isalnum() or c in ' .,!?-:')[:100] # Limit length
+        safe_message = ''.join(c for c in message_str if c.isalnum() or c in ' .,!?-:')[:100]  # Limit length
         subprocess.run(['termux-toast', '-d', duration, safe_message], check=True, capture_output=True, timeout=5)
         # print_color(f"# Toast sent: {safe_message}", color=Fore.MAGENTA, style=Style.DIM) # Optional: uncomment for debugging toasts
     except FileNotFoundError:
@@ -102,14 +102,14 @@ def format_decimal(value, reported_precision, min_display_precision=None):
     if value is None: return "N/A"
     if not isinstance(value, decimal.Decimal):
         try: value = decimal.Decimal(str(value))
-        except (decimal.InvalidOperation, TypeError, ValueError): return str(value) # Return as string if conversion fails
+        except (decimal.InvalidOperation, TypeError, ValueError): return str(value)  # Return as string if conversion fails
 
     try:
         # Determine the display precision, respecting minimum if provided
         display_precision = int(reported_precision)
         if min_display_precision is not None:
             display_precision = max(display_precision, int(min_display_precision))
-        if display_precision < 0: display_precision = 0 # Precision cannot be negative
+        if display_precision < 0: display_precision = 0  # Precision cannot be negative
 
         # Create the quantizer based on display precision
         quantizer = decimal.Decimal('1') / (decimal.Decimal('10') ** display_precision)
@@ -118,10 +118,10 @@ def format_decimal(value, reported_precision, min_display_precision=None):
         rounded_value = value.quantize(quantizer, rounding=decimal.ROUND_HALF_UP)
 
         # Format as string
-        if quantizer == 1: # Integer precision
+        if quantizer == 1:  # Integer precision
              formatted_str = str(rounded_value.to_integral_value(rounding=decimal.ROUND_HALF_UP))
         else:
-            formatted_str = str(rounded_value.normalize()) # normalize() removes trailing zeros
+            formatted_str = str(rounded_value.normalize())  # normalize() removes trailing zeros
 
         # Ensure minimum decimal places are shown even if zero
         if '.' not in formatted_str and display_precision > 0:
@@ -134,10 +134,11 @@ def format_decimal(value, reported_precision, min_display_precision=None):
         return formatted_str
     except (ValueError, TypeError, decimal.InvalidOperation) as e:
         print_color(f"# FormatDecimalError ({value}): {e}", color=Fore.YELLOW, style=Style.DIM)
-        return str(value) # Fallback to simple string conversion
+        return str(value)  # Fallback to simple string conversion
     except Exception as e:
         print_color(f"# FormatDecimal Unexpected Error ({value}): {e}", color=Fore.YELLOW, style=Style.DIM)
-        return str(value) # Fallback
+        return str(value)  # Fallback
+
 
 def get_market_info(exchange, symbol):
     """Queries the exchange spirits for market runes (precision, limits)."""
@@ -147,10 +148,10 @@ def get_market_info(exchange, symbol):
         if not exchange.markets or symbol not in exchange.markets:
             print_color(f"{Fore.CYAN}# Summoning market list...", style=Style.DIM, end='\r')
             exchange.load_markets(True)
-            sys.stdout.write("\033[K") # Clear line after loading
+            sys.stdout.write("\033[K")  # Clear line after loading
 
         market = exchange.market(symbol)
-        sys.stdout.write("\033[K") # Clear "Querying..." message
+        sys.stdout.write("\033[K")  # Clear "Querying..." message
 
         # Extract precision and limits, providing defaults
         price_prec_raw = market.get('precision', {}).get('price')
@@ -159,16 +160,15 @@ def get_market_info(exchange, symbol):
 
         # Safely convert to appropriate types using Decimal's log10 for precision digits
         try: price_prec = int(decimal.Decimal(str(price_prec_raw)).log10() * -1) if price_prec_raw is not None else 8
-        except: price_prec = 8 # Default precision if conversion fails
+        except: price_prec = 8  # Default precision if conversion fails
         try: amount_prec = int(decimal.Decimal(str(amount_prec_raw)).log10() * -1) if amount_prec_raw is not None else 8
-        except: amount_prec = 8 # Default precision
+        except: amount_prec = 8  # Default precision
         try: min_amount = decimal.Decimal(str(min_amount_raw)) if min_amount_raw is not None else decimal.Decimal('0')
-        except: min_amount = decimal.Decimal('0') # Default min amount
+        except: min_amount = decimal.Decimal('0')  # Default min amount
 
         # Calculate tick sizes (useful for some operations, though not heavily used here yet)
         price_tick_size = decimal.Decimal('1') / (decimal.Decimal('10') ** price_prec) if price_prec >= 0 else decimal.Decimal('1')
         amount_step = decimal.Decimal('1') / (decimal.Decimal('10') ** amount_prec) if amount_prec >= 0 else decimal.Decimal('1')
-
 
         return {
             'price_precision': price_prec,
@@ -176,7 +176,7 @@ def get_market_info(exchange, symbol):
             'min_amount': min_amount,
             'price_tick_size': price_tick_size,
             'amount_step': amount_step,
-            'symbol': symbol # Store symbol within info
+            'symbol': symbol  # Store symbol within info
         }
     except ccxt.BadSymbol:
         sys.stdout.write("\033[K")
@@ -185,15 +185,16 @@ def get_market_info(exchange, symbol):
     except ccxt.NetworkError as e:
         sys.stdout.write("\033[K")
         print_color(f"Network ether disturbed (Market Info): {e}", color=Fore.YELLOW)
-        return None # Indicate error but allow retry potentially
+        return None  # Indicate error but allow retry potentially
     except Exception as e:
         sys.stdout.write("\033[K")
         print_color(f"An arcane error occurred fetching market info: {e}", color=Fore.RED)
-        return None # Indicate error
+        return None  # Indicate error
 
 # ==============================================================================
 # Indicator Incantations
 # ==============================================================================
+
 
 def calculate_sma(data, period):
     """Calculates the Simple Moving Average."""
@@ -205,6 +206,7 @@ def calculate_sma(data, period):
         print_color(f"# SMA Calc Error: {e}", color=Fore.YELLOW, style=Style.DIM); return None
     except Exception as e:
         print_color(f"# SMA Unexpected Calc Error: {e}", color=Fore.YELLOW, style=Style.DIM); return None
+
 
 def calculate_ema(data, period):
     """Calculates the Exponential Moving Average."""
@@ -232,10 +234,10 @@ def calculate_ema(data, period):
 
 def calculate_momentum(data, period):
     """Calculates the Momentum indicator."""
-    if not data or len(data) <= period: return None # Need at least period+1 points
+    if not data or len(data) <= period: return None  # Need at least period+1 points
     try:
         current_price = decimal.Decimal(str(data[-1]))
-        past_price = decimal.Decimal(str(data[-period -1])) # Price 'period' candles ago
+        past_price = decimal.Decimal(str(data[-period - 1]))  # Price 'period' candles ago
         return current_price - past_price
     except (decimal.InvalidOperation, TypeError, ValueError) as e:
         print_color(f"# Momentum Calc Error: {e}", color=Fore.YELLOW, style=Style.DIM); return None
@@ -248,10 +250,10 @@ def calculate_fib_pivots(high, low, close):
     if None in [high, low, close]: return None
     try:
         h, l, c = decimal.Decimal(str(high)), decimal.Decimal(str(low)), decimal.Decimal(str(close))
-        if h <= 0 or l <= 0 or c <= 0 or h < l: return None # Basic validation
+        if h <= 0 or l <= 0 or c <= 0 or h < l: return None  # Basic validation
 
-        pp = (h + l + c) / 3 # Pivot Point (PP)
-        range_hl = h - l # High-Low Range
+        pp = (h + l + c) / 3  # Pivot Point (PP)
+        range_hl = h - l  # High-Low Range
 
         return {
             'R3': pp + (range_hl * FIB_RATIOS['r3']), 'R2': pp + (range_hl * FIB_RATIOS['r2']),
@@ -264,6 +266,7 @@ def calculate_fib_pivots(high, low, close):
     except Exception as e:
         print_color(f"# Pivot Unexpected Calc Error: {e}", color=Fore.YELLOW, style=Style.DIM); return None
 
+
 def calculate_rsi_manual(close_prices_list, period=14):
     """Calculates RSI manually using Wilder's Smoothing Method."""
     if not close_prices_list or len(close_prices_list) <= period:
@@ -274,7 +277,7 @@ def calculate_rsi_manual(close_prices_list, period=14):
         try: prices.append(decimal.Decimal(str(p)))
         except (decimal.InvalidOperation, TypeError, ValueError): return None, "Invalid price data for RSI"
 
-    deltas = [prices[i] - prices[i-1] for i in range(1, len(prices))]
+    deltas = [prices[i] - prices[i - 1] for i in range(1, len(prices))]
 
     gains = [d if d > 0 else decimal.Decimal('0') for d in deltas]
     losses = [-d if d < 0 else decimal.Decimal('0') for d in deltas]
@@ -285,10 +288,10 @@ def calculate_rsi_manual(close_prices_list, period=14):
     avg_gain = sum(gains[:period]) / decimal.Decimal(period)
     avg_loss = sum(losses[:period]) / decimal.Decimal(period)
 
-    rsi_values = [decimal.Decimal('NaN')] * period # Pad with NaN for initial period
+    rsi_values = [decimal.Decimal('NaN')] * period  # Pad with NaN for initial period
 
     # Calculate first RSI value
-    if avg_loss == 0: rs = decimal.Decimal('inf') # Avoid division by zero
+    if avg_loss == 0: rs = decimal.Decimal('inf')  # Avoid division by zero
     else: rs = avg_gain / avg_loss
     first_rsi = 100 - (100 / (1 + rs)) if rs.is_finite() else decimal.Decimal('100')
     rsi_values.append(first_rsi)
@@ -298,13 +301,13 @@ def calculate_rsi_manual(close_prices_list, period=14):
         avg_gain = (avg_gain * (period - 1) + gains[i]) / decimal.Decimal(period)
         avg_loss = (avg_loss * (period - 1) + losses[i]) / decimal.Decimal(period)
 
-        if avg_loss == 0: rs = decimal.Decimal('inf')
-        else: rs = avg_gain / avg_loss
+        rs = decimal.Decimal('inf') if avg_loss == 0 else avg_gain / avg_loss
         rsi = 100 - (100 / (1 + rs)) if rs.is_finite() else decimal.Decimal('100')
         rsi_values.append(rsi)
 
     # Return only valid RSI values (excluding initial NaNs)
     return [r for r in rsi_values if not r.is_nan()], None
+
 
 def calculate_stoch_rsi_manual(rsi_values, k_period=14, d_period=3):
     """Calculates Stochastic RSI %K and %D manually from RSI values."""
@@ -324,7 +327,7 @@ def calculate_stoch_rsi_manual(rsi_values, k_period=14, d_period=3):
 
         # Handle division by zero if max == min
         if max_rsi == min_rsi:
-            stoch_k = decimal.Decimal('50') # Often considered neutral or 50 in this case
+            stoch_k = decimal.Decimal('50')  # Often considered neutral or 50 in this case
         else:
             stoch_k = ((current_rsi - min_rsi) / (max_rsi - min_rsi)) * 100
         stoch_k_values.append(stoch_k)
@@ -346,13 +349,14 @@ def calculate_stoch_rsi_manual(rsi_values, k_period=14, d_period=3):
     latest_k = stoch_k_values[-1] if stoch_k_values else None
     latest_d = stoch_d_values[-1] if stoch_d_values else None
 
-    return latest_k, latest_d, None # Success
+    return latest_k, latest_d, None  # Success
 
 # ==============================================================================
 # Data Fetching Conjurations
 # ==============================================================================
 
-def fetch_market_data(exchange, symbol, config): # Takes lowercase config param
+
+def fetch_market_data(exchange, symbol, config):  # Takes lowercase config param
     """Fetches Ticker, OHLCV, Positions, and Balance data."""
     results = {"ticker": None, "indicator_ohlcv": None, "pivot_ohlcv": None, "positions": [], "balance": None}
     error_occurred = False
@@ -364,14 +368,14 @@ def fetch_market_data(exchange, symbol, config): # Takes lowercase config param
     indicator_history_needed = max(
         config['SMA_PERIOD'], config['SMA2_PERIOD'],
         config['EMA1_PERIOD'], config['EMA2_PERIOD'],
-        config['MOMENTUM_PERIOD'] + 1, # Momentum needs one extra point
-        config['RSI_PERIOD'] + config['STOCH_K_PERIOD'] + config['STOCH_D_PERIOD'] # Chain dependency
-    ) + 5 # Add buffer
+        config['MOMENTUM_PERIOD'] + 1,  # Momentum needs one extra point
+        config['RSI_PERIOD'] + config['STOCH_K_PERIOD'] + config['STOCH_D_PERIOD']  # Chain dependency
+    ) + 5  # Add buffer
 
     api_calls = [
         {"func": exchange.fetch_ticker, "args": [symbol], "desc": "ticker"},
         {"func": exchange.fetch_ohlcv, "args": [symbol, config['INDICATOR_TIMEFRAME'], None, indicator_history_needed], "desc": "Indicator OHLCV"},
-        {"func": exchange.fetch_ohlcv, "args": [symbol, config['PIVOT_TIMEFRAME'], None, 2], "desc": "Pivot OHLCV"}, # Need previous candle
+        {"func": exchange.fetch_ohlcv, "args": [symbol, config['PIVOT_TIMEFRAME'], None, 2], "desc": "Pivot OHLCV"},  # Need previous candle
         {"func": exchange.fetch_positions, "args": [[symbol]], "desc": "positions"},
         {"func": exchange.fetch_balance, "args": [], "desc": "balance"},
     ]
@@ -385,36 +389,36 @@ def fetch_market_data(exchange, symbol, config): # Takes lowercase config param
                 results[call["desc"]] = [p for p in data if p.get('symbol') == symbol and p.get('contracts') is not None and decimal.Decimal(str(p['contracts'])) != 0]
             elif call["desc"] == "balance":
                  # Extract the specific asset balance
-                 asset = config["FETCH_BALANCE_ASSET"] # Use config parameter
-                 results[call["desc"]] = data.get('total', {}).get(asset) # Store total balance for the asset
+                 asset = config["FETCH_BALANCE_ASSET"]  # Use config parameter
+                 results[call["desc"]] = data.get('total', {}).get(asset)  # Store total balance for the asset
             else:
                 results[call["desc"]] = data
-            time.sleep(exchange.rateLimit / 1000) # Respect basic rate limit
+            time.sleep(exchange.rateLimit / 1000)  # Respect basic rate limit
 
         except ccxt.RateLimitExceeded:
             print_color(f"Rate Limit ({call['desc']}). Pausing {rate_limit_wait}s.", color=Fore.YELLOW, style=Style.DIM)
             time.sleep(rate_limit_wait)
-            error_occurred = True; break # Stop fetching this cycle
+            error_occurred = True; break  # Stop fetching this cycle
         except ccxt.NetworkError:
             print_color(f"Network Error ({call['desc']}). Pausing {network_wait}s.", color=Fore.YELLOW, style=Style.DIM)
             time.sleep(network_wait)
-            error_occurred = True # Mark error, might retry next cycle
+            error_occurred = True  # Mark error, might retry next cycle
             # Don't break here, maybe other calls succeed
         except ccxt.AuthenticationError as e:
             print_color(f"Auth Error ({call['desc']}). Check API scrolls!", color=Fore.RED, style=Style.BRIGHT)
-            error_occurred = True; raise e # Fatal error, stop the script
+            error_occurred = True; raise e  # Fatal error, stop the script
         except Exception as e:
             # Only show error for critical data, positions/balance failing is less critical for display
             if call['desc'] in ["ticker", "Indicator OHLCV", "Pivot OHLCV"]:
                  print_color(f"Error ({call['desc']}): {e}", color=Fore.RED, style=Style.DIM)
-            results[call["desc"]] = None # Ensure failed calls result in None
-            error_occurred = True # Mark error
+            results[call["desc"]] = None  # Ensure failed calls result in None
+            error_occurred = True  # Mark error
 
-    sys.stdout.write("\033[K") # Clear "Contacting..." message
+    sys.stdout.write("\033[K")  # Clear "Contacting..." message
     return results, error_occurred
 
 
-def analyze_orderbook_volume(exchange, symbol, market_info, config): # Takes lowercase config param
+def analyze_orderbook_volume(exchange, symbol, market_info, config):  # Takes lowercase config param
     """Summons and analyzes the order book spirits."""
     print_color(f"{Fore.CYAN}# Summoning order book spirits...", style=Style.DIM, end='\r')
     try:
@@ -422,18 +426,18 @@ def analyze_orderbook_volume(exchange, symbol, market_info, config): # Takes low
         orderbook = exchange.fetch_order_book(symbol, limit=config["ORDER_FETCH_LIMIT"])
         sys.stdout.write("\033[K")
     except ccxt.RateLimitExceeded:
-        sys.stdout.write("\033[K"); print_color("Rate Limit (OB). Pausing...", color=Fore.YELLOW); time.sleep(config["RETRY_DELAY_RATE_LIMIT"]); return None, True # Error, needs retry
+        sys.stdout.write("\033[K"); print_color("Rate Limit (OB). Pausing...", color=Fore.YELLOW); time.sleep(config["RETRY_DELAY_RATE_LIMIT"]); return None, True  # Error, needs retry
     except ccxt.NetworkError:
-        sys.stdout.write("\033[K"); print_color("Network Error (OB). Retrying...", color=Fore.YELLOW); time.sleep(config["RETRY_DELAY_NETWORK_ERROR"]); return None, True # Error, needs retry
+        sys.stdout.write("\033[K"); print_color("Network Error (OB). Retrying...", color=Fore.YELLOW); time.sleep(config["RETRY_DELAY_NETWORK_ERROR"]); return None, True  # Error, needs retry
     except ccxt.ExchangeError as e:
-        sys.stdout.write("\033[K"); print_color(f"Exchange Error (OB): {e}", color=Fore.RED); return None, False # Error, likely won't resolve soon
+        sys.stdout.write("\033[K"); print_color(f"Exchange Error (OB): {e}", color=Fore.RED); return None, False  # Error, likely won't resolve soon
     except Exception as e:
-        sys.stdout.write("\033[K"); print_color(f"Unexpected Error (OB): {e}", color=Fore.RED); return None, False # Error
+        sys.stdout.write("\033[K"); print_color(f"Unexpected Error (OB): {e}", color=Fore.RED); return None, False  # Error
 
     if not orderbook or not orderbook.get('bids') or not orderbook.get('asks'):
-        print_color(f"Order book for {symbol} is empty or unavailable.", color=Fore.YELLOW); return None, False # No data, but not necessarily an API error
+        print_color(f"Order book for {symbol} is empty or unavailable.", color=Fore.YELLOW); return None, False  # No data, but not necessarily an API error
 
-    price_prec = market_info['price_precision']
+    market_info['price_precision']
     amount_prec = market_info['amount_precision']
     # Access values using the 'config' parameter
     vol_disp_prec = config["VOLUME_DISPLAY_PRECISION"]
@@ -445,18 +449,18 @@ def analyze_orderbook_volume(exchange, symbol, market_info, config): # Takes low
         'ask_total_volume': decimal.Decimal('0'), 'bid_total_volume': decimal.Decimal('0'),
         'ask_weighted_price': decimal.Decimal('0'), 'bid_weighted_price': decimal.Decimal('0'),
         'volume_imbalance_ratio': decimal.Decimal('0'),
-        'cumulative_ask_volume': decimal.Decimal('0'), # Within displayed depth
-        'cumulative_bid_volume': decimal.Decimal('0'), # Within displayed depth
+        'cumulative_ask_volume': decimal.Decimal('0'),  # Within displayed depth
+        'cumulative_bid_volume': decimal.Decimal('0'),  # Within displayed depth
     }
 
     # --- Process Asks (Offers to Sell) ---
     ask_volume_times_price = decimal.Decimal('0')
     cumulative_ask_volume = decimal.Decimal('0')
     for i, ask in enumerate(orderbook['asks']):
-        if i >= config["MAX_ORDERBOOK_DEPTH_DISPLAY"]: break # Use config parameter
+        if i >= config["MAX_ORDERBOOK_DEPTH_DISPLAY"]: break  # Use config parameter
         try:
             price, volume = decimal.Decimal(str(ask[0])), decimal.Decimal(str(ask[1]))
-        except (decimal.InvalidOperation, TypeError, ValueError): continue # Skip malformed entry
+        except (decimal.InvalidOperation, TypeError, ValueError): continue  # Skip malformed entry
 
         volume_str = format_decimal(volume, amount_prec, vol_disp_prec)
         cumulative_ask_volume += volume
@@ -480,10 +484,10 @@ def analyze_orderbook_volume(exchange, symbol, market_info, config): # Takes low
     bid_volume_times_price = decimal.Decimal('0')
     cumulative_bid_volume = decimal.Decimal('0')
     for i, bid in enumerate(orderbook['bids']):
-        if i >= config["MAX_ORDERBOOK_DEPTH_DISPLAY"]: break # Use config parameter
+        if i >= config["MAX_ORDERBOOK_DEPTH_DISPLAY"]: break  # Use config parameter
         try:
             price, volume = decimal.Decimal(str(bid[0])), decimal.Decimal(str(bid[1]))
-        except (decimal.InvalidOperation, TypeError, ValueError): continue # Skip malformed entry
+        except (decimal.InvalidOperation, TypeError, ValueError): continue  # Skip malformed entry
 
         volume_str = format_decimal(volume, amount_prec, vol_disp_prec)
         cumulative_bid_volume += volume
@@ -525,13 +529,14 @@ def analyze_orderbook_volume(exchange, symbol, market_info, config): # Takes low
     else:
         analyzed_orderbook['bid_weighted_price'] = decimal.Decimal('0')
 
-    return analyzed_orderbook, False # Success, no retry needed
+    return analyzed_orderbook, False  # Success, no retry needed
 
 # ==============================================================================
 # Display Enchantments (Breaking down the monolith)
 # ==============================================================================
 
-def display_header(symbol, timestamp, balance_info, config): # Takes lowercase config param
+
+def display_header(symbol, timestamp, balance_info, config) -> None:  # Takes lowercase config param
     """Displays the main header and balance."""
     print_color("=" * 80, color=Fore.CYAN)
     print_color(f"📜 Pyrmethus's Market Vision: {Fore.MAGENTA}{Style.BRIGHT}{symbol}{Style.RESET_ALL} @ {Fore.YELLOW}{timestamp}", color=Fore.CYAN)
@@ -551,7 +556,7 @@ def display_header(symbol, timestamp, balance_info, config): # Takes lowercase c
     print_color("-" * 80, color=Fore.CYAN)
 
 
-def display_ticker_and_trend(ticker_info, indicators_info, config, market_info): # Takes lowercase config param
+def display_ticker_and_trend(ticker_info, indicators_info, config, market_info):  # Takes lowercase config param
     """Displays the last price and primary trend indicator (SMA1)."""
     price_prec = market_info['price_precision']
     # Access values using the 'config' parameter
@@ -572,7 +577,7 @@ def display_ticker_and_trend(ticker_info, indicators_info, config, market_info):
             current_price_str = f"{price_color}{Style.BRIGHT}{current_price_str_fmt}{Style.RESET_ALL}"
         except (decimal.InvalidOperation, TypeError, ValueError):
             current_price_str = f"{Fore.YELLOW}Error{Style.RESET_ALL}"
-            last_price = None # Ensure last_price is None if formatting fails
+            last_price = None  # Ensure last_price is None if formatting fails
 
     # --- Primary Trend (SMA1) ---
     sma1_val = indicators_info.get('sma1', {}).get('value')
@@ -593,10 +598,10 @@ def display_ticker_and_trend(ticker_info, indicators_info, config, market_info):
         trend_str = f"Trend ({sma1_period}@{tf}): SMA unavailable"
 
     print_color(f"  Last Price: {current_price_str} | {trend_color}{trend_str}{Style.RESET_ALL}")
-    return last_price # Return parsed last price for other displays
+    return last_price  # Return parsed last price for other displays
 
 
-def display_indicators(indicators_info, config, market_info, last_price): # Takes lowercase config param
+def display_indicators(indicators_info, config, market_info, last_price) -> None:  # Takes lowercase config param
     """Displays SMA2, EMAs, Momentum, and Stoch RSI."""
     price_prec = market_info['price_precision']
     # Access values using the 'config' parameter
@@ -607,7 +612,7 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
     # --- Display Second SMA (SMA2) ---
     sma2_val = indicators_info.get('sma2', {}).get('value')
     sma2_error = indicators_info.get('sma2', {}).get('error')
-    sma2_period = config['SMA2_PERIOD'] # Use config parameter
+    sma2_period = config['SMA2_PERIOD']  # Use config parameter
     sma2_str = f"{Fore.YELLOW}N/A{Style.RESET_ALL}"
     sma2_trend_str, sma2_trend_color = f"SMA ({sma2_period}@{tf}): -", Fore.YELLOW
 
@@ -615,13 +620,13 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
         sma2_trend_str, sma2_trend_color = f"SMA ({sma2_period}@{tf}): Error", Fore.YELLOW
     elif sma2_val is not None:
         sma2_str_fmt = format_decimal(sma2_val, price_prec, min_disp_prec)
-        sma2_str = f"{Fore.YELLOW}{sma2_str_fmt}{Style.RESET_ALL}" # Value itself isn't colored by trend
+        sma2_str = f"{Fore.YELLOW}{sma2_str_fmt}{Style.RESET_ALL}"  # Value itself isn't colored by trend
         if last_price is not None:
             if last_price > sma2_val: sma2_trend_str, sma2_trend_color = f"Above {sma2_period}@{tf} SMA", Fore.GREEN
             elif last_price < sma2_val: sma2_trend_str, sma2_trend_color = f"Below {sma2_period}@{tf} SMA", Fore.RED
             else: sma2_trend_str, sma2_trend_color = f"On {sma2_period}@{tf} SMA", Fore.YELLOW
         else:
-             sma2_trend_str, sma2_trend_color = f"SMA ({sma2_period}@{tf}): OK", Fore.WHITE # Have value, no price context
+             sma2_trend_str, sma2_trend_color = f"SMA ({sma2_period}@{tf}): OK", Fore.WHITE  # Have value, no price context
     else:
         sma2_trend_str = f"SMA ({sma2_period}@{tf}): unavailable"
     print_color(f"  SMA ({sma2_period}@{tf}): {sma2_str} | {sma2_trend_color}{sma2_trend_str}{Style.RESET_ALL}")
@@ -629,8 +634,8 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
     # --- Display EMAs ---
     ema1_val = indicators_info.get('ema1', {}).get('value')
     ema2_val = indicators_info.get('ema2', {}).get('value')
-    ema_error = indicators_info.get('ema1', {}).get('error') or indicators_info.get('ema2', {}).get('error') # Error if either failed
-    ema1_period, ema2_period = config['EMA1_PERIOD'], config['EMA2_PERIOD'] # Use config parameter
+    ema_error = indicators_info.get('ema1', {}).get('error') or indicators_info.get('ema2', {}).get('error')  # Error if either failed
+    ema1_period, ema2_period = config['EMA1_PERIOD'], config['EMA2_PERIOD']  # Use config parameter
     ema1_str, ema2_str = f"{Fore.YELLOW}N/A{Style.RESET_ALL}", f"{Fore.YELLOW}N/A{Style.RESET_ALL}"
     ema_trend_str, ema_trend_color, ema_trend_signal = f"EMA ({ema1_period}/{ema2_period}@{tf}): -", Fore.YELLOW, ""
 
@@ -646,7 +651,7 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
             elif ema1_val > ema2_val: ema_trend_color, ema_trend_signal = Fore.LIGHTGREEN_EX, "(Neutral-Bullish)"
             elif ema1_val < ema2_val: ema_trend_color, ema_trend_signal = Fore.LIGHTRED_EX, "(Neutral-Bearish)"
             else: ema_trend_color, ema_trend_signal = Fore.YELLOW, "(Neutral)"
-        else: # Have values, no price context
+        else:  # Have values, no price context
             if ema1_val > ema2_val: ema_trend_color, ema_trend_signal = Fore.LIGHTGREEN_EX, "(Crossed Up)"
             elif ema1_val < ema2_val: ema_trend_color, ema_trend_signal = Fore.LIGHTRED_EX, "(Crossed Down)"
             else: ema_trend_color, ema_trend_signal = Fore.YELLOW, "(Neutral)"
@@ -658,7 +663,7 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
     # --- Display Momentum ---
     mom_val = indicators_info.get('momentum', {}).get('value')
     mom_error = indicators_info.get('momentum', {}).get('error')
-    mom_period = config['MOMENTUM_PERIOD'] # Use config parameter
+    mom_period = config['MOMENTUM_PERIOD']  # Use config parameter
     momentum_str = f"{Fore.YELLOW}N/A{Style.RESET_ALL}"
     momentum_trend_str, momentum_color = f"Momentum ({mom_period}@{tf}): -", Fore.YELLOW
 
@@ -666,7 +671,7 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
         momentum_trend_str, momentum_color = f"Momentum ({mom_period}@{tf}): Error", Fore.YELLOW
     elif mom_val is not None:
         momentum_str_fmt = format_decimal(mom_val, price_prec, min_disp_prec)
-        momentum_str = f"{Fore.YELLOW}{momentum_str_fmt}{Style.RESET_ALL}" # Value itself not colored
+        momentum_str = f"{Fore.YELLOW}{momentum_str_fmt}{Style.RESET_ALL}"  # Value itself not colored
         if mom_val > 0: momentum_color, momentum_trend_str = Fore.GREEN, f"Momentum ({mom_period}@{tf}): Positive"
         elif mom_val < 0: momentum_color, momentum_trend_str = Fore.RED, f"Momentum ({mom_period}@{tf}): Negative"
         else: momentum_color, momentum_trend_str = Fore.YELLOW, f"Momentum ({mom_period}@{tf}): Neutral"
@@ -685,7 +690,7 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
     if stoch_error:
         stoch_k_str, stoch_d_str = "Error", "Error"; stoch_color = Fore.YELLOW
         stoch_signal = f"({stoch_error})" if isinstance(stoch_error, str) else "(Error)"
-    elif stoch_k_val is not None: # D might be None initially
+    elif stoch_k_val is not None:  # D might be None initially
         stoch_k_str = format_decimal(stoch_k_val, stoch_disp_prec)
         stoch_d_str = format_decimal(stoch_d_val, stoch_disp_prec) if stoch_d_val is not None else "N/A"
 
@@ -699,23 +704,23 @@ def display_indicators(indicators_info, config, market_info, last_price): # Take
 
         if is_oversold: stoch_color, stoch_signal = Fore.GREEN, "(Oversold)"
         elif is_overbought: stoch_color, stoch_signal = Fore.RED, "(Overbought)"
-        elif stoch_d_val is not None: # Check cross only if D exists
+        elif stoch_d_val is not None:  # Check cross only if D exists
             if stoch_k_val > stoch_d_val: stoch_color = Fore.LIGHTGREEN_EX
             elif stoch_k_val < stoch_d_val: stoch_color = Fore.LIGHTRED_EX
-        else: # K exists but D doesn't, neutral color
+        else:  # K exists but D doesn't, neutral color
              stoch_color = Fore.WHITE
     # else: K is None, default "N/A" strings are used
 
     print_color(f"  Stoch RSI ({rsi_p},{k_p},{d_p}@{tf}): {stoch_color}%K={stoch_k_str}, %D={stoch_d_str} {stoch_signal}{Style.RESET_ALL}")
 
 
-def display_position(position_info, ticker_info, market_info, config): # Takes lowercase config param
+def display_position(position_info, ticker_info, market_info, config) -> None:  # Takes lowercase config param
     """Displays current position information."""
     # Use config parameter
     pnl_prec = config["PNL_PRECISION"]
     price_prec = market_info['price_precision']
     amount_prec = market_info['amount_precision']
-    min_disp_prec = config["MIN_PRICE_DISPLAY_PRECISION"] # Use config parameter
+    min_disp_prec = config["MIN_PRICE_DISPLAY_PRECISION"]  # Use config parameter
 
     pnl_str = f"{Fore.LIGHTBLACK_EX}Position: None or Fetch Failed{Style.RESET_ALL}"
     if position_info.get('has_position'):
@@ -723,8 +728,8 @@ def display_position(position_info, ticker_info, market_info, config): # Takes l
         side = pos.get('side', 'N/A').capitalize()
         size_str = pos.get('contracts', '0')
         entry_price_str = pos.get('entryPrice', '0')
-        quote_asset = pos.get('quoteAsset', 'USDT') # Assuming quote asset if available
-        pnl_val = position_info.get('unrealizedPnl') # Already Decimal or None
+        quote_asset = pos.get('quoteAsset', 'USDT')  # Assuming quote asset if available
+        pnl_val = position_info.get('unrealizedPnl')  # Already Decimal or None
 
         try:
             size = decimal.Decimal(size_str)
@@ -740,7 +745,7 @@ def display_position(position_info, ticker_info, market_info, config): # Takes l
                 last_price_for_pnl = decimal.Decimal(str(ticker_info['last']))
                 if side.lower() == 'long':
                     pnl_val = (last_price_for_pnl - entry_price) * size
-                else: # short
+                else:  # short
                     pnl_val = (entry_price - last_price_for_pnl) * size
 
             # Format PNL
@@ -760,12 +765,12 @@ def display_position(position_info, ticker_info, market_info, config): # Takes l
     print_color(f"  {pnl_str}")
 
 
-def display_pivots(pivots_info, last_price, market_info, config): # Takes lowercase config param
+def display_pivots(pivots_info, last_price, market_info, config) -> None:  # Takes lowercase config param
     """Displays Fibonacci Pivot Points."""
     print_color("--- Fibonacci Pivots (Prev Day) ---", color=Fore.BLUE)
     price_prec = market_info['price_precision']
-    min_disp_prec = config["MIN_PRICE_DISPLAY_PRECISION"] # Use config parameter
-    pivot_width = max(10, price_prec + 6) # Dynamic width based on precision
+    min_disp_prec = config["MIN_PRICE_DISPLAY_PRECISION"]  # Use config parameter
+    pivot_width = max(10, price_prec + 6)  # Dynamic width based on precision
 
     if pivots_info:
         pivot_lines = {}
@@ -787,7 +792,7 @@ def display_pivots(pivots_info, last_price, market_info, config): # Takes lowerc
                         # Highlight if within 0.1%
                         if diff_ratio < decimal.Decimal('0.001'):
                             highlight = Back.LIGHTBLACK_EX + Fore.WHITE + Style.BRIGHT + " *NEAR* " + Style.RESET_ALL
-                    except (decimal.InvalidOperation, TypeError, ValueError): pass # Ignore errors during highlight calc
+                    except (decimal.InvalidOperation, TypeError, ValueError): pass  # Ignore errors during highlight calc
 
                 pivot_lines[level] = f"  {level_color}{level_str}{value_str_aligned}{Style.RESET_ALL}{highlight}"
             else:
@@ -795,32 +800,27 @@ def display_pivots(pivots_info, last_price, market_info, config): # Takes lowerc
                 pivot_lines[level] = f"  {level}:".ljust(6) + f"{'N/A':>{pivot_width}}"
 
         # Print pivots in a structured way
-        print(f"{pivot_lines.get('R3','')}")
-        print(f"{pivot_lines.get('R2','').ljust(pivot_width + 15)} {pivot_lines.get('S2','')}") # Adjust spacing as needed
-        print(f"{pivot_lines.get('R1','').ljust(pivot_width + 15)} {pivot_lines.get('S1','')}")
-        print(f"{pivot_lines.get('PP','')}")
-        print(f"{pivot_lines.get('S3','')}")
     else:
         print_color(f"  {Fore.YELLOW}Pivot data unavailable.{Style.RESET_ALL}")
 
 
-def display_orderbook(analyzed_orderbook, market_info, config): # Takes lowercase config param
+def display_orderbook(analyzed_orderbook, market_info, config) -> None:  # Takes lowercase config param
     """Displays the analyzed order book."""
     print_color("--- Order Book Depths ---", color=Fore.BLUE)
-    if not analyzed_orderbook: # Handle case where OB fetch failed completely
+    if not analyzed_orderbook:  # Handle case where OB fetch failed completely
         print_color(f"  {Fore.YELLOW}Order book data unavailable.{Style.RESET_ALL}")
         return
 
     price_prec = market_info['price_precision']
-    amount_prec = market_info['amount_precision']
+    market_info['amount_precision']
     # Use config parameter
     min_disp_prec = config["MIN_PRICE_DISPLAY_PRECISION"]
     vol_disp_prec = config["VOLUME_DISPLAY_PRECISION"]
 
     # Dynamic column widths
     price_width = max(10, price_prec + 4)
-    volume_width = max(12, vol_disp_prec + 6) # Width for individual volume
-    cum_volume_width = max(15, vol_disp_prec + 10) # Width for cumulative volume display part
+    volume_width = max(12, vol_disp_prec + 6)  # Width for individual volume
+    cum_volume_width = max(15, vol_disp_prec + 10)  # Width for cumulative volume display part
 
     ask_lines, bid_lines = [], []
 
@@ -845,20 +845,17 @@ def display_orderbook(analyzed_orderbook, market_info, config): # Takes lowercas
         )
 
     # Print header
-    col_width_total = price_width + volume_width + len("(Cum: )") + cum_volume_width # More accurate width estimate
+    col_width_total = price_width + volume_width + len("(Cum: )") + cum_volume_width  # More accurate width estimate
     print_color(f"{'Asks':^{col_width_total}}{'Bids':^{col_width_total}}", color=Fore.LIGHTBLACK_EX)
-    print_color(f"{'-'*col_width_total:<{col_width_total}} {'-'*col_width_total:<{col_width_total}}", color=Fore.LIGHTBLACK_EX)
-
+    print_color(f"{'-' * col_width_total:<{col_width_total}} {'-' * col_width_total:<{col_width_total}}", color=Fore.LIGHTBLACK_EX)
 
     # Print rows side-by-side
     max_rows = max(len(ask_lines), len(bid_lines))
     for i in range(max_rows):
         # Estimate actual displayed length (crude, ignores color codes)
-        ask_part = ask_lines[i] if i < len(ask_lines) else ''
-        bid_part = bid_lines[i] if i < len(bid_lines) else ''
+        ask_lines[i] if i < len(ask_lines) else ''
+        bid_lines[i] if i < len(bid_lines) else ''
         # Pad dynamically based on estimated width (might not be perfect with colors)
-        print(f"{ask_part:<{col_width_total}}  {bid_part}")
-
 
     # Calculate and display spread
     best_ask = analyzed_orderbook['asks'][-1]['price'] if analyzed_orderbook['asks'] else decimal.Decimal('NaN')
@@ -868,9 +865,9 @@ def display_orderbook(analyzed_orderbook, market_info, config): # Takes lowercas
     print_color(f"\n--- Spread: {spread_str} ---", color=Fore.MAGENTA, style=Style.DIM)
 
 
-def display_volume_analysis(analyzed_orderbook, market_info, config): # Takes lowercase config param
+def display_volume_analysis(analyzed_orderbook, market_info, config) -> None:  # Takes lowercase config param
     """Displays summary volume analysis and pressure reading."""
-    if not analyzed_orderbook: return # Nothing to display if OB failed
+    if not analyzed_orderbook: return  # Nothing to display if OB failed
 
     amount_prec = market_info['amount_precision']
     price_prec = market_info['price_precision']
@@ -881,8 +878,8 @@ def display_volume_analysis(analyzed_orderbook, market_info, config): # Takes lo
     print_color("\n--- Volume Analysis (Displayed Depth) ---", color=Fore.BLUE)
     total_ask_vol = analyzed_orderbook['ask_total_volume']
     total_bid_vol = analyzed_orderbook['bid_total_volume']
-    cum_ask_vol = analyzed_orderbook['cumulative_ask_volume'] # Already calculated for displayed depth
-    cum_bid_vol = analyzed_orderbook['cumulative_bid_volume'] # Already calculated for displayed depth
+    cum_ask_vol = analyzed_orderbook['cumulative_ask_volume']  # Already calculated for displayed depth
+    cum_bid_vol = analyzed_orderbook['cumulative_bid_volume']  # Already calculated for displayed depth
 
     print_color(f"  Total Ask : {Fore.RED}{format_decimal(total_ask_vol, amount_prec, vol_disp_prec)}{Style.RESET_ALL} | "
                 f"Total Bid : {Fore.GREEN}{format_decimal(total_bid_vol, amount_prec, vol_disp_prec)}{Style.RESET_ALL}")
@@ -896,10 +893,10 @@ def display_volume_analysis(analyzed_orderbook, market_info, config): # Takes lo
     if imbalance_ratio.is_infinite():
         imbalance_color = Fore.LIGHTGREEN_EX; imbalance_str = "inf"
     elif imbalance_ratio.is_finite():
-        imbalance_str = format_decimal(imbalance_ratio, 2) # Format to 2 decimal places
+        imbalance_str = format_decimal(imbalance_ratio, 2)  # Format to 2 decimal places
         if imbalance_ratio > decimal.Decimal('1.5'): imbalance_color = Fore.GREEN
         elif imbalance_ratio < decimal.Decimal('0.67') and not imbalance_ratio.is_zero(): imbalance_color = Fore.RED
-        elif imbalance_ratio.is_zero() and analyzed_orderbook['ask_total_volume'] > 0: imbalance_color = Fore.LIGHTRED_EX # Zero bids, some asks
+        elif imbalance_ratio.is_zero() and analyzed_orderbook['ask_total_volume'] > 0: imbalance_color = Fore.LIGHTRED_EX  # Zero bids, some asks
         # else: stays white for balanced ratio
 
     ask_vwap_str = format_decimal(analyzed_orderbook['ask_weighted_price'], price_prec, min_disp_prec)
@@ -917,15 +914,15 @@ def display_volume_analysis(analyzed_orderbook, market_info, config): # Takes lo
          print_color("  Extreme Ask Dominance (Zero B/A)", color=Fore.LIGHTYELLOW_EX)
     elif imbalance_ratio > decimal.Decimal('1.5'):
         print_color("  Strong Buy Pressure", color=Fore.GREEN, style=Style.BRIGHT)
-    elif imbalance_ratio < decimal.Decimal('0.67'): # Already checked for non-zero
+    elif imbalance_ratio < decimal.Decimal('0.67'):  # Already checked for non-zero
         print_color("  Strong Sell Pressure", color=Fore.RED, style=Style.BRIGHT)
-    else: # Covers balanced and zero total volume cases
+    else:  # Covers balanced and zero total volume cases
         print_color("  Volume Relatively Balanced", color=Fore.WHITE)
 
     print_color("=" * 80, color=Fore.CYAN)
 
 
-def display_combined_analysis(analysis_data, market_info, config): # Takes lowercase config param
+def display_combined_analysis(analysis_data, market_info, config) -> None:  # Takes lowercase config param
     """Orchestrates the display of all analyzed data."""
     # Extract data for clarity
     analyzed_orderbook = analysis_data['orderbook']
@@ -934,7 +931,7 @@ def display_combined_analysis(analysis_data, market_info, config): # Takes lower
     position_info = analysis_data['position']
     pivots_info = analysis_data['pivots']
     balance_info = analysis_data['balance']
-    timestamp = analysis_data.get('timestamp', 'N/A') # Use collected timestamp
+    timestamp = analysis_data.get('timestamp', 'N/A')  # Use collected timestamp
 
     symbol = market_info['symbol']
 
@@ -948,15 +945,15 @@ def display_combined_analysis(analysis_data, market_info, config): # Takes lower
     display_indicators(indicators_info, config, market_info, last_price)
     display_position(position_info, ticker_info, market_info, config)
     display_pivots(pivots_info, last_price, market_info, config)
-    display_orderbook(analyzed_orderbook, market_info, config) # Handles None case internally
-    display_volume_analysis(analyzed_orderbook, market_info, config) # Handles None case internally
+    display_orderbook(analyzed_orderbook, market_info, config)  # Handles None case internally
+    display_volume_analysis(analyzed_orderbook, market_info, config)  # Handles None case internally
 
 
 # ==============================================================================
 # Trading Spells
 # ==============================================================================
 
-def place_market_order(exchange, symbol, side, amount_str, market_info): # Doesn't need config directly
+def place_market_order(exchange, symbol, side, amount_str, market_info) -> None:  # Doesn't need config directly
     """Places a market order after casting confirmation charms."""
     print_color(f"{Fore.CYAN}# Preparing {side.upper()} market order spell...{Style.RESET_ALL}")
     try:
@@ -994,7 +991,6 @@ def place_market_order(exchange, symbol, side, amount_str, market_info): # Doesn
         else:
              amount_str = format_decimal(amount, amount_prec)
 
-
     except (decimal.InvalidOperation, TypeError, ValueError) as e:
         print_color(f"Invalid amount entered: {e}", color=Fore.YELLOW); return
     except KeyError as e:
@@ -1025,7 +1021,7 @@ def place_market_order(exchange, symbol, side, amount_str, market_info): # Doesn
 
             order = exchange.create_market_order(symbol, side, amount_float, params=params)
 
-            sys.stdout.write("\033[K") # Clear "Transmitting..." message
+            sys.stdout.write("\033[K")  # Clear "Transmitting..." message
             order_id = order.get('id', 'N/A')
             avg_price = order.get('average')
             filled_amount = order.get('filled')
@@ -1037,7 +1033,7 @@ def place_market_order(exchange, symbol, side, amount_str, market_info): # Doesn
             if details: confirmation_msg += f" ({', '.join(details)})"
 
             print_color(f"\n{confirmation_msg}", color=Fore.GREEN, style=Style.BRIGHT)
-            termux_toast(f"{symbol} {side.upper()} Order Placed: {order_id}") # Send toast notification
+            termux_toast(f"{symbol} {side.upper()} Order Placed: {order_id}")  # Send toast notification
 
         except ccxt.InsufficientFunds as e:
             sys.stdout.write("\033[K"); print_color(f"\n❌ Insufficient Funds: {e}", color=Fore.RED, style=Style.BRIGHT)
@@ -1053,10 +1049,10 @@ def place_market_order(exchange, symbol, side, amount_str, market_info): # Doesn
                 termux_toast(f"{symbol} Order Failed: Hedge Mode Error?", duration="long")
             else:
                 print_color(f"\n❌ Exchange Error: {e}", color=Fore.RED, style=Style.BRIGHT)
-                termux_toast(f"{symbol} Order Failed: ExchangeError", duration="long") # Simplified toast
+                termux_toast(f"{symbol} Order Failed: ExchangeError", duration="long")  # Simplified toast
         except Exception as e:
             sys.stdout.write("\033[K"); print_color(f"\n❌ Order Placement Error: {e}", color=Fore.RED, style=Style.BRIGHT)
-            termux_toast(f"{symbol} Order Failed: PlacementError", duration="long") # Simplified toast
+            termux_toast(f"{symbol} Order Failed: PlacementError", duration="long")  # Simplified toast
     else:
         print_color("Order cancelled by user.", color=Fore.YELLOW)
 
@@ -1065,7 +1061,7 @@ def place_market_order(exchange, symbol, side, amount_str, market_info): # Doesn
 # Main Analysis Loop
 # ==============================================================================
 
-def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase config param
+def run_analysis_cycle(exchange, symbol, market_info, config):  # Takes lowercase config param
     """Performs one cycle of fetching, processing, and displaying data."""
     print_color(f"{Fore.CYAN}# Beginning analysis cycle...", style=Style.DIM, end='\r')
 
@@ -1073,25 +1069,25 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
     # Pass the 'config' parameter correctly
     fetched_data, data_error = fetch_market_data(exchange, symbol, config)
     analyzed_orderbook, orderbook_error = analyze_orderbook_volume(exchange, symbol, market_info, config)
-    sys.stdout.write("\033[K") # Clear status message
+    sys.stdout.write("\033[K")  # Clear status message
 
-    if data_error and not any(fetched_data.values()): # If all critical fetches failed
+    if data_error and not any(fetched_data.values()):  # If all critical fetches failed
          print_color(f"{Fore.YELLOW}Critical data fetch failed, skipping analysis this cycle.{Style.RESET_ALL}")
-         return False # Indicate cycle failed, allows main loop to decide on waiting
+         return False  # Indicate cycle failed, allows main loop to decide on waiting
 
     # --- Process Indicators ---
     print_color(f"{Fore.CYAN}# Weaving indicator patterns...", style=Style.DIM, end='\r')
-    indicators_info = { # Store value and error status separately
+    indicators_info = {  # Store value and error status separately
         'sma1': {'value': None, 'error': False},
         'sma2': {'value': None, 'error': False},
         'ema1': {'value': None, 'error': False},
         'ema2': {'value': None, 'error': False},
         'momentum': {'value': None, 'error': False},
-        'stoch_rsi': {'k': None, 'd': None, 'error': None} # Store k, d, and potential error message
+        'stoch_rsi': {'k': None, 'd': None, 'error': None}  # Store k, d, and potential error message
     }
     indicator_ohlcv = fetched_data.get("indicator_ohlcv")
     if indicator_ohlcv:
-        close_prices = [candle[4] for candle in indicator_ohlcv] # Index 4 is close price
+        close_prices = [candle[4] for candle in indicator_ohlcv]  # Index 4 is close price
 
         # SMA1 - Use config parameter
         sma1 = calculate_sma(close_prices, config["SMA_PERIOD"])
@@ -1109,7 +1105,7 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
         if ema1_values: indicators_info['ema1']['value'] = ema1_values[-1]
         else: indicators_info['ema1']['error'] = True
         if ema2_values: indicators_info['ema2']['value'] = ema2_values[-1]
-        else: indicators_info['ema2']['error'] = True # Mark error if calculation failed
+        else: indicators_info['ema2']['error'] = True  # Mark error if calculation failed
 
         # Momentum - Use config parameter
         momentum = calculate_momentum(close_prices, config["MOMENTUM_PERIOD"])
@@ -1122,13 +1118,13 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
             indicators_info['stoch_rsi']['error'] = f"RSI Error: {rsi_error}"
         elif rsi_list:
             stoch_k, stoch_d, stoch_err = calculate_stoch_rsi_manual(rsi_list, config["STOCH_K_PERIOD"], config["STOCH_D_PERIOD"])
-            indicators_info['stoch_rsi']['k'] = stoch_k # Can be None if not enough data for K
-            indicators_info['stoch_rsi']['d'] = stoch_d # Can be None if not enough data for D
-            if stoch_err: indicators_info['stoch_rsi']['error'] = stoch_err # Store error message
-        else: # Should not happen if rsi_error is None, but safety check
+            indicators_info['stoch_rsi']['k'] = stoch_k  # Can be None if not enough data for K
+            indicators_info['stoch_rsi']['d'] = stoch_d  # Can be None if not enough data for D
+            if stoch_err: indicators_info['stoch_rsi']['error'] = stoch_err  # Store error message
+        else:  # Should not happen if rsi_error is None, but safety check
              indicators_info['stoch_rsi']['error'] = "RSI list empty"
 
-    else: # OHLCV data missing
+    else:  # OHLCV data missing
         indicators_info['sma1']['error'] = True; indicators_info['sma2']['error'] = True
         indicators_info['ema1']['error'] = True; indicators_info['ema2']['error'] = True
         indicators_info['momentum']['error'] = True; indicators_info['stoch_rsi']['error'] = "OHLCV data missing"
@@ -1143,12 +1139,11 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
         p_high, p_low, p_close = prev_day_candle[2], prev_day_candle[3], prev_day_candle[4]
         pivots_info = calculate_fib_pivots(p_high, p_low, p_close)
 
-
     # --- Process Positions ---
     position_info = {'has_position': False, 'position': None, 'unrealizedPnl': None}
-    position_data = fetched_data.get("positions") # Already filtered in fetch
+    position_data = fetched_data.get("positions")  # Already filtered in fetch
     if position_data:
-        current_pos = position_data[0] # Assume only one position per symbol for linear/inverse
+        current_pos = position_data[0]  # Assume only one position per symbol for linear/inverse
         position_info['has_position'] = True
         position_info['position'] = current_pos
         try:
@@ -1159,9 +1154,9 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
             # else: PNL will be calculated later in display if needed and possible
         except (decimal.InvalidOperation, TypeError, ValueError) as pnl_e:
             print_color(f"# Warning: PNL parsing error: {pnl_e}", color=Fore.YELLOW, style=Style.DIM)
-            position_info['unrealizedPnl'] = None # Mark as unavailable if parsing failed
+            position_info['unrealizedPnl'] = None  # Mark as unavailable if parsing failed
 
-    sys.stdout.write("\033[K") # Clear indicator message
+    sys.stdout.write("\033[K")  # Clear indicator message
 
     # --- Aggregate Data for Display ---
     analysis_data = {
@@ -1170,7 +1165,7 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
         'pivots': pivots_info,
         'position': position_info,
         'balance': fetched_data.get('balance'),
-        'orderbook': analyzed_orderbook, # Can be None
+        'orderbook': analyzed_orderbook,  # Can be None
         'timestamp': analyzed_orderbook['timestamp'] if analyzed_orderbook else (fetched_data.get('ticker', {}).get('iso8601', 'N/A'))
     }
 
@@ -1183,14 +1178,14 @@ def run_analysis_cycle(exchange, symbol, market_info, config): # Takes lowercase
     return not data_error or any(fetched_data.values())
 
 
-def main():
+def main() -> None:
     """The main summoning ritual."""
     # Use global CONFIG here
     print_color("*" * 80, color=Fore.RED, style=Style.BRIGHT)
     print_color("   🔥 Pyrmethus's Termux Market Analyzer Activated 🔥", color=Fore.RED, style=Style.BRIGHT)
     print_color("   Use with wisdom. Market forces are potent and volatile.", color=Fore.YELLOW)
     print_color("   MARKET ORDERS CARRY SLIPPAGE RISK. YOU ARE THE MASTER OF YOUR FATE.", color=Fore.YELLOW)
-    print_color("*" * 80, color=Fore.RED, style=Style.BRIGHT); print("\n")
+    print_color("*" * 80, color=Fore.RED, style=Style.BRIGHT)
 
     if not CONFIG["API_KEY"] or not CONFIG["API_SECRET"]:
         print_color("API Key/Secret scrolls are missing or unreadable in .env.", color=Fore.RED, style=Style.BRIGHT)
@@ -1204,10 +1199,10 @@ def main():
             'secret': CONFIG["API_SECRET"],
             'options': {
                 'defaultType': CONFIG["DEFAULT_EXCHANGE_TYPE"],
-                'adjustForTimeDifference': True, # Crucial for signature timing
+                'adjustForTimeDifference': True,  # Crucial for signature timing
             },
             'timeout': CONFIG["CONNECT_TIMEOUT"],
-            'enableRateLimit': True # Let ccxt handle basic rate limiting
+            'enableRateLimit': True  # Let ccxt handle basic rate limiting
         })
         # Test connection with a lightweight call
         print_color(f"{Fore.CYAN}# Testing connection conduit...{Style.RESET_ALL}", style=Style.DIM, end='\r')
@@ -1229,16 +1224,16 @@ def main():
         try:
             symbol_input = input(f"{Style.BRIGHT}{Fore.BLUE}Which Bybit Futures market shall we observe? (e.g., BTCUSDT): {Style.RESET_ALL}").strip().upper()
             if not symbol_input: continue
-            market_info = get_market_info(exchange, symbol_input) # Handles errors internally
+            market_info = get_market_info(exchange, symbol_input)  # Handles errors internally
             if market_info:
-                symbol = symbol_input # Confirmed valid symbol
+                symbol = symbol_input  # Confirmed valid symbol
                 print_color(f"Focusing vision on: {Fore.MAGENTA}{symbol}{Fore.CYAN} | "
                             f"Price Precision: {market_info['price_precision']}, Amount Precision: {market_info['amount_precision']}", color=Fore.CYAN)
         except (EOFError, KeyboardInterrupt):
             print_color("\nSummoning interrupted by user.", color=Fore.YELLOW); return
-        except Exception as e: # Catch unexpected errors during input/validation
+        except Exception as e:  # Catch unexpected errors during input/validation
             print_color(f"An unexpected disturbance in symbol selection: {e}", color=Fore.RED)
-            time.sleep(1) # Pause before retrying
+            time.sleep(1)  # Pause before retrying
 
     print_color(f"\n{Fore.CYAN}Starting continuous analysis for {symbol}. Press Ctrl+C to banish.{Style.RESET_ALL}")
     last_critical_error_msg = ""
@@ -1251,7 +1246,7 @@ def main():
             cycle_successful = run_analysis_cycle(exchange, symbol, market_info, CONFIG)
 
             # --- Action Prompt ---
-            if cycle_successful: # Only prompt if the analysis cycle provided some data
+            if cycle_successful:  # Only prompt if the analysis cycle provided some data
                 action = input(f"\n{Style.BRIGHT}{Fore.BLUE}Action ({Fore.CYAN}refresh{Fore.BLUE}/{Fore.GREEN}buy{Fore.BLUE}/{Fore.RED}sell{Fore.BLUE}/{Fore.YELLOW}exit{Fore.BLUE}): {Style.RESET_ALL}").strip().lower()
                 if action == 'buy':
                     qty_str = input(f"{Style.BRIGHT}{Fore.GREEN}BUY Quantity: {Style.RESET_ALL}").strip()
@@ -1262,40 +1257,39 @@ def main():
                     qty_str = input(f"{Style.BRIGHT}{Fore.RED}SELL Quantity: {Style.RESET_ALL}").strip()
                     place_market_order(exchange, symbol, 'sell', qty_str, market_info)
                     time.sleep(2)
-                elif action == 'refresh' or action == '': # Enter key also refreshes
+                elif action == 'refresh' or action == '':  # Enter key also refreshes
                     print_color("Refreshing...", color=Fore.CYAN, style=Style.DIM)
                     # No sleep here, loop will continue shortly below
                 elif action == 'exit':
                     print_color("Dispelling the vision...", color=Fore.YELLOW); break
                 else:
                     print_color("Unknown command whispered.", color=Fore.YELLOW)
-                    time.sleep(1) # Brief pause for invalid command
+                    time.sleep(1)  # Brief pause for invalid command
 
                 # Use global CONFIG here for refresh interval
                 print_color(f"{Fore.CYAN}# Pausing for {CONFIG['REFRESH_INTERVAL']}s before next cycle...{Style.RESET_ALL}", style=Style.DIM, end='\r')
                 time.sleep(CONFIG["REFRESH_INTERVAL"])
                 sys.stdout.write("\033[K")
 
-
-            else: # Cycle failed (likely critical data error)
+            else:  # Cycle failed (likely critical data error)
                 print_color("Waiting due to data fetch errors...", color=Fore.YELLOW, style=Style.DIM)
                 # Use global CONFIG here for retry delay
-                time.sleep(CONFIG["RETRY_DELAY_NETWORK_ERROR"]) # Wait longer if fetches failed
+                time.sleep(CONFIG["RETRY_DELAY_NETWORK_ERROR"])  # Wait longer if fetches failed
 
         except KeyboardInterrupt:
             print_color("\nBanished by user input.", color=Fore.YELLOW); break
-        except ccxt.AuthenticationError: # Catch auth errors possibly missed earlier
+        except ccxt.AuthenticationError:  # Catch auth errors possibly missed earlier
              print_color("\nAuthentication Error! Halting the ritual.", color=Fore.RED, style=Style.BRIGHT)
              break
         except Exception as e:
             # This is the handler that was likely causing the issue
             current_error_msg = str(e)
-            print_color(".", color=Fore.RED, end='') # Indicate an error occurred
+            print_color(".", color=Fore.RED, end='')  # Indicate an error occurred
             # Only print the full error if it's different from the last one to avoid spam
             if current_error_msg != last_critical_error_msg:
                 print_color(f"\nCritical Loop Error: {e}", color=Fore.RED, style=Style.BRIGHT)
                 # Also send a toast for critical errors
-                termux_toast(f"Pyrmethus Error: {current_error_msg}", duration="long") # Pass the error string
+                termux_toast(f"Pyrmethus Error: {current_error_msg}", duration="long")  # Pass the error string
                 last_critical_error_msg = current_error_msg
             # Wait longer after a critical error
             # !!! CRITICAL FIX: Use uppercase CONFIG here !!!
@@ -1304,11 +1298,11 @@ def main():
             except NameError:
                 # Fallback if CONFIG is somehow undefined (shouldn't happen normally)
                 print_color("\nFATAL: CONFIG not defined in critical error handler!", color=Fore.RED, style=Style.BRIGHT)
-                time.sleep(20) # Default long sleep
+                time.sleep(20)  # Default long sleep
             except KeyError:
                  # Fallback if REFRESH_INTERVAL is missing
                 print_color("\nFATAL: CONFIG['REFRESH_INTERVAL'] missing in critical error handler!", color=Fore.RED, style=Style.BRIGHT)
-                time.sleep(20) # Default long sleep
+                time.sleep(20)  # Default long sleep
 
 
 if __name__ == '__main__':

@@ -1,0 +1,28 @@
+2025-04-25 01:08:58 - INFO - [BotInit:3910] - [1m[92m--- Initializing Pyrmethus Volumatic Bot ---[0m
+2025-04-25 01:08:58 - INFO - [BotInit:3911] - Timestamp: 2025-04-25 01:08:58.327895-05:00
+2025-04-25 01:08:58 - INFO - [BotInit:3912] - Using config file: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-25 01:08:58 - INFO - [BotInit:3913] - Trading Enabled: True
+2025-04-25 01:08:58 - INFO - [BotInit:3914] - Using Sandbox: False
+2025-04-25 01:08:58 - WARNING - [BotInit:3919] - [1m[91m--- LIVE TRADING IS ENABLED ON REAL ACCOUNT ---[0m
+2025-04-25 01:08:58 - INFO - [BotInit:3925] - Live trading aborted by user confirmation.
+2025-04-25 01:09:19 - INFO - [BotInit:3910] - [1m[92m--- Initializing Pyrmethus Volumatic Bot ---[0m
+2025-04-25 01:09:19 - INFO - [BotInit:3911] - Timestamp: 2025-04-25 01:09:19.676699-05:00
+2025-04-25 01:09:19 - INFO - [BotInit:3912] - Using config file: /data/data/com.termux/files/home/worldguide/codes/config.json
+2025-04-25 01:09:19 - INFO - [BotInit:3913] - Trading Enabled: True
+2025-04-25 01:09:19 - INFO - [BotInit:3914] - Using Sandbox: False
+2025-04-25 01:09:19 - WARNING - [BotInit:3919] - [1m[91m--- LIVE TRADING IS ENABLED ON REAL ACCOUNT ---[0m
+2025-04-25 01:09:36 - INFO - [BotInit:3928] - Live trading confirmed by user.
+2025-04-25 01:09:36 - INFO - [BotInit:435] - Initializing CCXT Bybit exchange...
+2025-04-25 01:09:36 - WARNING - [BotInit:462] - [1m[91mLIVE TRADING MODE ENABLED[0m
+2025-04-25 01:09:36 - INFO - [BotInit:465] - Loading markets for bybit...
+2025-04-25 01:09:45 - INFO - [BotInit:467] - Markets loaded successfully for bybit.
+2025-04-25 01:09:45 - INFO - [BotInit:470] - Fetching initial balance to verify connection...
+2025-04-25 01:09:46 - WARNING - [BotInit:485] - [33mCould not fetch initial balance (potential connection issue or account type mismatch): bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745561386358}[0m
+2025-04-25 01:09:46 - INFO - [BotInit:486] - [92mExchange object created, but balance check failed. Proceeding cautiously.[0m
+2025-04-25 01:09:58 - DEBUG - [BotInit:3865] - Validating symbol 'DOT/USDT:USDT' on bybit...
+2025-04-25 01:09:58 - DEBUG - [BotInit:739] - Fetching market info for DOT/USDT:USDT from exchange...
+2025-04-25 01:09:58 - INFO - [BotInit:813] - Cached market info for DOT/USDT:USDT: Type=swap, Contract=True, Active=True
+2025-04-25 01:09:58 - DEBUG - [BotInit:814] - Limits: {'amount': {'min': Decimal('0.1'), 'max': Decimal('198890.0')}, 'price': {'min': Decimal('0.0001'), 'max': Decimal('1999.9998')}, 'cost': {'min': None, 'max': None}}
+2025-04-25 01:09:58 - DEBUG - [BotInit:815] - Precision (Tick Sizes): {'amount': Decimal('0.1'), 'price': Decimal('0.0001')}
+2025-04-25 01:09:58 - INFO - [BotInit:3872] - Symbol DOT/USDT:USDT validated successfully.
+2025-04-25 01:10:03 - INFO - [BotInit:3898] - Interval '3' validated.

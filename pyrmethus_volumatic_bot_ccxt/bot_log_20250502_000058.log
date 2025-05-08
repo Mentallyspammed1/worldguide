@@ -1,0 +1,26 @@
+2025-05-02 00:00:58 - PyrmethusVolumaticBotCCXT - INFO - Logging to file: bot_log_20250502_000058.log
+2025-05-02 00:00:58 - PyrmethusVolumaticBotCCXT - INFO - Logging configured.
+2025-05-02 00:00:58 - PyrmethusVolumaticBotCCXT - INFO - API Key found (ending with ...rKZ1)
+2025-05-02 00:00:58 - PyrmethusVolumaticBotCCXT - INFO - Connecting to CCXT exchange 'bybit' (Account: contract, Testnet: False)...
+2025-05-02 00:01:06 - PyrmethusVolumaticBotCCXT - INFO - [32mSuccessfully connected to Bybit. Loaded 2607 markets.[0m
+2025-05-02 00:01:14 - PyrmethusVolumaticBotCCXT - INFO - Market data loaded/updated for BTC/USDT:USDT.
+2025-05-02 00:01:14 - PyrmethusVolumaticBotCCXT - INFO - Attempting to set leverage for BTC/USDT:USDT to 10.0x...
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - WARNING - Leverage for BTC/USDT:USDT likely already set to 10.0x (Exchange response: Not modified).
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - INFO - Strategy 'VolumaticOBStrategy' initialized.
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - INFO - Strategy requires minimum 1000 data points.
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - WARNING - Configured fetch_limit (750) is less than required by strategy + buffer (1050). Increasing fetch limit.
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - INFO - Fetching initial 1050 candles for BTC/USDT:USDT (15m)...
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - INFO - Fetched 1000 initial candles. From 2025-04-21 19:15:00+00:00 to 2025-05-02 05:00:00+00:00
+2025-05-02 00:01:15 - PyrmethusVolumaticBotCCXT - INFO - Running initial analysis on historical data...
+2025-05-02 00:01:16 - PyrmethusVolumaticBotCCXT - ERROR - [31mCRITICAL ERROR during initial strategy analysis: 'numpy.ndarray' object has no attribute 'fillna'. FIX REQUIRED IN strategy.py.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/pyrmethus_volumatic_bot_ccxt/main.py", line 2161, in main
+    initial_results = strategy_instance.update(df_copy)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/pyrmethus_volumatic_bot_ccxt/strategy.py", line 544, in update
+    ).fillna(0.0) # Fill any remaining NaNs (e.g., from input volume) with 0
+      ^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'fillna'. Did you mean: 'fill'?
+2025-05-02 00:01:16 - PyrmethusVolumaticBotCCXT - INFO - Entering final cleanup phase...
+2025-05-02 00:01:16 - PyrmethusVolumaticBotCCXT - WARNING - Event loop unavailable, cannot perform final task cleanup.
+2025-05-02 00:01:16 - PyrmethusVolumaticBotCCXT - INFO - [35m~~~ Pyrmethus Volumatic+OB Trading Bot Finished ~~~[0m

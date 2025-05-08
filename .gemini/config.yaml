@@ -1,0 +1,94 @@
+# Gemini Code Assist Configuration - Debugging Enhanced
+# See documentation for all options: https://cloud.google.com/gemini/docs/codeassist/configure
+
+# Core Configuration
+version: 1
+
+# Debugging Settings
+debug:
+  # Enable automatic debugging
+  auto_debug: true
+  
+  # Debugging modes
+  modes:
+    # Enable static code analysis
+    static_analysis: true
+    # Enable runtime debugging
+    runtime_debug: true
+    # Enable performance debugging
+    performance_debug: true
+    # Enable security debugging
+    security_debug: true
+
+  # Debugging thresholds
+  thresholds:
+    # Minimum severity for debug comments (LOW, MEDIUM, HIGH, CRITICAL)
+    severity_threshold: MEDIUM
+    # Maximum number of debug suggestions per run
+    max_suggestions: 50
+    # Time limit for debugging analysis (in minutes)
+    timeout: 5
+
+# Performance Optimization
+performance:
+  # Enable caching for debugging results
+  caching: true
+  # Cache timeout in minutes
+  cache_timeout: 30
+  # Maximum cache size in MB
+  max_cache_size: 1000
+  # Enable parallel processing for faster debugging
+  parallel_processing: true
+
+# Error Handling
+error_handling:
+  # Enable detailed error reporting
+  detailed_reporting: true
+  # Log level (DEBUG, INFO, WARNING, ERROR)
+  log_level: DEBUG
+  # Maximum log file size in MB
+  max_log_size: 100
+  # Number of log files to keep
+  log_retention: 5
+
+# Smart Commands
+smart_commands:
+  # Enable debugging-specific commands
+  enabled: true
+  # Available commands
+  commands:
+    # Debug current function
+    debug_function: true
+    # Debug entire file
+    debug_file: true
+    # Debug selected code block
+    debug_selection: true
+    # Generate debug logs
+    generate_logs: true
+
+# Code Analysis
+analysis:
+  # Enable detailed code analysis
+  detailed_analysis: true
+  # Enable performance analysis
+  performance_analysis: true
+  # Enable security analysis
+  security_analysis: true
+  # Enable best practices analysis
+  best_practices: true
+
+# IDE Integration
+ide:
+  # Enable IDE-specific debugging features
+  enabled: true
+  # Supported IDEs
+  supported_ides:
+    - VSCode
+    - IntelliJ
+    - AndroidStudio
+  # Enable smart actions
+  smart_actions: true
+  # Enable code completion
+  code_completion: true
+  # Enable documentation generation
+  doc_generation: true

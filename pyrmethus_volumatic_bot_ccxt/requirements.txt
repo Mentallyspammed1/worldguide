@@ -1,0 +1,9 @@
+# Use specific versions known to work or use >= for latest compatible
+ccxt>=4.1.60 # Check CCXT releases for latest stable Bybit V5 & asyncio support
+python-dotenv>=0.20.0
+pandas>=1.4.0
+pandas-ta>=0.3.14b # For technical analysis indicators
+numpy>=1.21.0
+colorama>=0.4.4
+requests>=2.27.0 # Often useful for auxiliary API calls or health checks
+# asyncio is built-in Python 3.7+

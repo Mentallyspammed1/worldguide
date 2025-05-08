@@ -1,0 +1,85 @@
+2025-04-24 03:55:34 - INFO - [volbot_AERGO_USDT_USDT:2391] - --- Starting analysis cycle for AERGO/USDT:USDT ---
+2025-04-24 03:55:34 - DEBUG - [volbot_AERGO_USDT_USDT:1598] - Market Info AERGO/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-05, AmtPrec=1.0, MinAmt=1.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:55:34 - WARNING - [volbot_AERGO_USDT_USDT:1045] - Could not determine price precision from tick size for AERGO/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:55:34 - WARNING - [volbot_AERGO_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for AERGO/USDT:USDT.[0m
+2025-04-24 03:55:34 - WARNING - [volbot_AERGO_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for AERGO/USDT:USDT.
+2025-04-24 03:55:34 - DEBUG - [volbot_AERGO_USDT_USDT:2426] - Fetching 1150 klines for AERGO/USDT:USDT 5m...
+2025-04-24 03:55:34 - DEBUG - [volbot_AERGO_USDT_USDT:509] - Fetching klines for AERGO/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:55:35 - DEBUG - [volbot_AERGO_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:55:35 - INFO - [volbot_AERGO_USDT_USDT:585] - Successfully fetched and processed 1000 klines for AERGO/USDT:USDT 5m
+2025-04-24 03:55:35 - WARNING - [volbot_AERGO_USDT_USDT:1045] - Could not determine price precision from tick size for AERGO/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:55:35 - WARNING - [volbot_AERGO_USDT_USDT:1120] - [33mInsufficient data (1000 points) for AERGO/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:55:35 - DEBUG - [volbot_AERGO_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:55:35 - INFO - [volbot_AERGO_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:55:35 - WARNING - [volbot_AERGO_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:55:35 - INFO - [volbot_AERGO_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:55:36 - INFO - [volbot_AERGO_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:55:36 - INFO - [volbot_AERGO_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_1 (Pivot: 2025-04-21 00:45:00, Candle: 2025-04-20 22:40:00, Range: [0.29150, 0.29634])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_1 (Close 0.27062 < Bottom 0.29150)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_2 (Pivot: 2025-04-21 03:05:00, Candle: 2025-04-21 01:00:00, Range: [0.27100, 0.27149])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_2 (Close 0.27038 < Bottom 0.27100)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_3 (Pivot: 2025-04-21 06:10:00, Candle: 2025-04-21 04:05:00, Range: [0.27297, 0.27327])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_3 (Close 0.26678 < Bottom 0.27297)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_4 (Pivot: 2025-04-21 07:55:00, Candle: 2025-04-21 05:50:00, Range: [0.27019, 0.27066])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_4 (Close 0.27209 > Top 0.27066)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 09:20:00, Candle: 2025-04-21 07:15:00, Range: [0.26851, 0.26858])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.26200 < Bottom 0.26851)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_6 (Pivot: 2025-04-21 11:25:00, Candle: 2025-04-21 09:20:00, Range: [0.26200, 0.26412])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_6 (Close 0.27446 > Top 0.26412)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-21 14:40:00, Candle: 2025-04-21 12:35:00, Range: [0.26847, 0.26983])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.26397 < Bottom 0.26847)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-21 18:55:00, Candle: 2025-04-21 16:50:00, Range: [0.26913, 0.27005])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-21 19:30:00, Candle: 2025-04-21 17:25:00, Range: [0.27428, 0.27460])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.28148 > Top 0.27460)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.26896 < Bottom 0.26913)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_10 (Pivot: 2025-04-22 00:25:00, Candle: 2025-04-21 22:20:00, Range: [0.26902, 0.26998])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_10 (Close 0.25060 < Bottom 0.26902)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_11 (Pivot: 2025-04-22 05:10:00, Candle: 2025-04-22 03:05:00, Range: [0.24867, 0.24948])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_11 (Close 0.23172 < Bottom 0.24867)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_12 (Pivot: 2025-04-22 07:40:00, Candle: 2025-04-22 05:35:00, Range: [0.23650, 0.23667])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_12 (Close 0.25462 > Top 0.23667)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_13 (Pivot: 2025-04-22 12:30:00, Candle: 2025-04-22 10:25:00, Range: [0.24275, 0.24332])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_13 (Close 0.23654 < Bottom 0.24275)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_14 (Pivot: 2025-04-22 15:00:00, Candle: 2025-04-22 12:55:00, Range: [0.23872, 0.23896])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_14 (Close 0.24114 > Top 0.23896)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_15 (Pivot: 2025-04-22 15:15:00, Candle: 2025-04-22 13:10:00, Range: [0.23757, 0.23765])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_15 (Close 0.23268 < Bottom 0.23757)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_16 (Pivot: 2025-04-22 17:45:00, Candle: 2025-04-22 15:40:00, Range: [0.23179, 0.23372])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_16 (Close 0.23095 < Bottom 0.23179)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_17 (Pivot: 2025-04-22 18:45:00, Candle: 2025-04-22 16:40:00, Range: [0.23622, 0.23695])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_17 (Close 0.23820 > Top 0.23695)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_18 (Pivot: 2025-04-23 00:00:00, Candle: 2025-04-22 21:55:00, Range: [0.22512, 0.22809])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_18 (Close 0.23334 > Top 0.22809)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_19 (Pivot: 2025-04-23 01:40:00, Candle: 2025-04-22 23:35:00, Range: [0.22398, 0.22525])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_19 (Close 0.20932 < Bottom 0.22398)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 06:25:00, Candle: 2025-04-23 04:20:00, Range: [0.20767, 0.20875])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.20579 < Bottom 0.20767)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_21 (Pivot: 2025-04-23 07:00:00, Candle: 2025-04-23 04:55:00, Range: [0.20950, 0.20985])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_21 (Close 0.20991 > Top 0.20985)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_22 (Pivot: 2025-04-23 10:30:00, Candle: 2025-04-23 08:25:00, Range: [0.20648, 0.20664])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_22 (Close 0.21482 > Top 0.20664)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_23 (Pivot: 2025-04-23 13:05:00, Candle: 2025-04-23 11:00:00, Range: [0.21103, 0.21250])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_23 (Close 0.20764 < Bottom 0.21103)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_24 (Pivot: 2025-04-23 14:50:00, Candle: 2025-04-23 12:45:00, Range: [0.20861, 0.20957])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_24 (Close 0.21062 > Top 0.20957)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_25 (Pivot: 2025-04-23 17:15:00, Candle: 2025-04-23 15:10:00, Range: [0.20606, 0.20734])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:957] - Closed Bullish OB: BullOB_25 (Close 0.19557 < Bottom 0.20606)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_26 (Pivot: 2025-04-23 19:25:00, Candle: 2025-04-23 17:20:00, Range: [0.19556, 0.19728])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_26 (Close 0.20269 > Top 0.19728)
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:947] - Created Bullish OB: BullOB_27 (Pivot: 2025-04-24 00:30:00, Candle: 2025-04-23 22:25:00, Range: [0.19507, 0.19539])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:918] - Created Bearish OB: BearOB_28 (Pivot: 2025-04-24 01:25:00, Candle: 2025-04-23 23:20:00, Range: [0.20049, 0.20049])
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:970] - Closed Bearish OB: BearOB_28 (Close 0.21511 > Top 0.20049)
+2025-04-24 03:55:36 - INFO - [volbot_AERGO_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 16, Bear OBs: 12
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:1143] - Indicator calculations complete for AERGO/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:1198] - Latest strategy state updated for AERGO/USDT:USDT: {'open': '0.2271', 'high': '0.2302', 'low': '0.2267', 'close': '0.2279', 'volume': Decimal('1492024.0'), 'atr_risk': '0.0038'}
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:1872] - Fetching position for symbol: AERGO/USDT:USDT
+2025-04-24 03:55:36 - DEBUG - [volbot_AERGO_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:55:37 - INFO - [volbot_AERGO_USDT_USDT:2024] - No active position found for AERGO/USDT:USDT.
+2025-04-24 03:55:37 - DEBUG - [volbot_AERGO_USDT_USDT:432] - Fetching ticker for AERGO/USDT:USDT...
+2025-04-24 03:55:37 - DEBUG - [volbot_AERGO_USDT_USDT:441] - Ticker data received for AERGO/USDT:USDT: {'symbol': 'AERGO/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.23015, 'low': 0.18846, 'bid': 0.22868, 'bidVolume': 359.0, 'ask': 0.22869, 'askVolume': 3.0, 'vwap': 0.20592929326843307, 'open': 0.20608, 'close': 0.22869, 'last': 0.22869, 'previousClose': None, 'change': 0.02261, 'percentage': 10.9714, 'average': 0.21738, 'baseVolume': 509005635.0, 'quoteVolume': 104819170.6852, 'markPrice': 0.22759, 'indexPrice': 0.22934, 'info': {'symbol': 'AERGOUSDT', 'lastPrice': '0.22869', 'indexPrice': '0.22934', 'markPrice': '0.22759', 'prevPrice24h': '0.20608', 'price24hPcnt': '0.109714', 'highPrice24h': '0.23015', 'lowPrice24h': '0.18846', 'prevPrice1h': '0.19835', 'openInterest': '85184155', 'openInterestValue': '19387061.84', 'turnover24h': '104819170.6852', 'volume24h': '509005635.0000', 'fundingRate': '-0.00998804', 'nextFundingTime': '1745488800000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '3', 'bid1Price': '0.22868', 'ask1Price': '0.22869', 'bid1Size': '359', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:55:37 - DEBUG - [volbot_AERGO_USDT_USDT:447] - Using 'last' price: 0.22869
+2025-04-24 03:55:37 - DEBUG - [volbot_AERGO_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:55:37 - INFO - [volbot_AERGO_USDT_USDT:2611] - No open position for AERGO/USDT:USDT. Checking for entry signals.
+2025-04-24 03:55:37 - INFO - [volbot_AERGO_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:55:37 - INFO - [volbot_AERGO_USDT_USDT:2708] - --- Finished analysis cycle for AERGO/USDT:USDT (2.53s) ---

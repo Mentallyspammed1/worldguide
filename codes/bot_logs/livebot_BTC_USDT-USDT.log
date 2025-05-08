@@ -1,0 +1,360 @@
+2025-04-24 11:06:50,932 - DEBUG - [livebot_BTC_USDT-USDT:1442] - Market info retrieved for BTC/USDT:USDT
+2025-04-24 11:06:50,932 - DEBUG - [livebot_BTC_USDT-USDT:1637] - Minimum order cost not explicitly found for BTC/USDT:USDT. Will rely on min amount.
+2025-04-24 11:06:50,932 - DEBUG - [livebot_BTC_USDT-USDT:1453] - Derived info for BTC/USDT:USDT: TickSize=0.1, PricePrec=1, AmtPrec=3, MinAmt=0.001, MinCost=None
+2025-04-24 11:06:50,933 - INFO - [livebot_BTC_USDT-USDT:3034] - Symbol BTC/USDT:USDT validated. Market Type: swap, Category: linear
+2025-04-24 11:06:51,711 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:06:51,711 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:06:51,712 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:06:52,169 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:06:52,170 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:06:52,171 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:06:52,557 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93184.15 (Bid: 93184.1, Ask: 93184.2)
+2025-04-24 11:06:52,558 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:06:52,558 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:06:52,932 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:06:52,933 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:06:53,419 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:06:53,422 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '123.0052', 'EMA_Short': '93204.2232', 'EMA_Long': '93184.9901', 'RSI': '51.2219', 'BBL': '93002.4573', 'BBM': '93179.7667', 'BBU': '93357.0760', 'CCI': '-29.2749', 'WR': '-58.7519', 'MFI': '63.5771', 'STOCHRSIk': '51.9186', 'STOCHRSId': '49.9373', 'MOM': '-75.4000', 'VOL_MA': '120.1109', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93199.5000', 'VWAP': '92579.9734', 'close': '93184.2000', 'high': '93221.7000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '31.8900'}
+2025-04-24 11:06:53,426 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:06:53,427 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93184, Score=0.208 (Norm=0.061), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:06:53,427 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '-1.00 (w=0.5, ws=-0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.00 (w=0.5, ws=0.00)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '0.00 (w=0.2, ws=0.00)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '-0.50 (w=0.1, ws=-0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-0.47 (w=0.3, ws=-0.14)'}
+2025-04-24 11:06:53,428 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=123.0, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:06:53,428 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:06:53,429 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:06:53,429 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.72s) ==---
+2025-04-24 11:07:09,748 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:07:09,752 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:07:09,752 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:10,183 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:07:10,184 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:07:10,185 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:10,567 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93198.75 (Bid: 93198.7, Ask: 93198.8)
+2025-04-24 11:07:10,567 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:07:10,567 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:11,027 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:07:11,028 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:07:11,373 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:07:11,375 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '123.0052', 'EMA_Short': '93208.3661', 'EMA_Long': '93186.5164', 'RSI': '52.1829', 'BBL': '93002.8159', 'BBM': '93180.2500', 'BBU': '93357.6841', 'CCI': '-22.1244', 'WR': '-51.3952', 'MFI': '62.9318', 'STOCHRSIk': '54.6724', 'STOCHRSId': '50.8552', 'MOM': '-60.9000', 'VOL_MA': '121.3425', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93201.3125', 'VWAP': '92580.1719', 'close': '93198.7000', 'high': '93221.7000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '46.6690'}
+2025-04-24 11:07:11,378 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:07:11,379 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93199, Score=0.263 (Norm=0.077), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:07:11,379 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '-1.00 (w=0.5, ws=-0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.00 (w=0.5, ws=0.00)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '0.00 (w=0.2, ws=0.00)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '-0.50 (w=0.1, ws=-0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-0.29 (w=0.3, ws=-0.09)'}
+2025-04-24 11:07:11,380 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=123.0, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:07:11,380 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:07:11,381 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:07:11,381 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.63s) ==---
+2025-04-24 11:07:27,999 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:07:28,000 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:07:28,000 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:28,464 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:07:28,465 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:07:28,465 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:28,862 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93217.85 (Bid: 93217.8, Ask: 93217.9)
+2025-04-24 11:07:28,862 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:07:28,862 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:29,239 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:07:29,240 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:07:29,564 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:07:29,566 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '123.0052', 'EMA_Short': '93211.0518', 'EMA_Long': '93187.5059', 'RSI': '52.8254', 'BBL': '93002.9669', 'BBM': '93180.5633', 'BBU': '93358.1597', 'CCI': '-17.4492', 'WR': '-46.6261', 'MFI': '62.3166', 'STOCHRSIk': '56.5275', 'STOCHRSId': '51.4736', 'MOM': '-51.5000', 'VOL_MA': '122.5406', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93202.4875', 'VWAP': '92580.3659', 'close': '93208.1000', 'high': '93221.7000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '61.0460'}
+2025-04-24 11:07:29,569 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:07:29,570 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93218, Score=1.000 (Norm=0.294), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:07:29,570 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '-1.00 (w=0.5, ws=-0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '0.00 (w=0.2, ws=0.00)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '1.00 (w=0.3, ws=0.30)'}
+2025-04-24 11:07:29,570 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=123.0, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:07:29,571 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:07:29,571 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:07:29,571 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.57s) ==---
+2025-04-24 11:07:45,880 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:07:45,882 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:07:45,883 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:46,791 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:07:46,792 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:07:46,792 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:47,181 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93281.75 (Bid: 93281.7, Ask: 93281.8)
+2025-04-24 11:07:47,181 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:07:47,181 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:07:47,579 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:07:47,580 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:07:47,957 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:07:47,959 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '127.4695', 'EMA_Short': '93232.0804', 'EMA_Long': '93195.2533', 'RSI': '57.2076', 'BBL': '93001.9666', 'BBM': '93183.0167', 'BBU': '93364.0667', 'CCI': '49.9198', 'WR': '-9.2846', 'MFI': '66.6642', 'STOCHRSIk': '69.2954', 'STOCHRSId': '55.7295', 'MOM': '22.1000', 'VOL_MA': '123.2609', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93211.6875', 'VWAP': '92580.5478', 'close': '93281.7000', 'high': '93284.2000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '69.6900'}
+2025-04-24 11:07:47,962 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:07:47,963 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93282, Score=1.246 (Norm=0.366), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:07:47,964 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-0.85 (w=0.3, ws=-0.25)'}
+2025-04-24 11:07:47,964 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=127.5, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:07:47,964 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:07:47,965 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:07:47,965 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (2.08s) ==---
+2025-04-24 11:08:04,239 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:08:04,240 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:08:04,240 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:04,641 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:08:04,642 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:08:04,642 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:05,031 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93281.95 (Bid: 93281.9, Ask: 93282.0)
+2025-04-24 11:08:05,031 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:08:05,032 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:05,414 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:08:05,414 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:08:05,735 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:08:05,737 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '128.0767', 'EMA_Short': '93235.1947', 'EMA_Long': '93196.4006', 'RSI': '57.7759', 'BBL': '93001.4974', 'BBM': '93183.3800', 'BBU': '93365.2626', 'CCI': '59.0105', 'WR': '-3.7544', 'MFI': '66.8476', 'STOCHRSIk': '70.9158', 'STOCHRSId': '56.2697', 'MOM': '33.0000', 'VOL_MA': '123.9424', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93213.0500', 'VWAP': '92580.6749', 'close': '93292.6000', 'high': '93292.7000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '77.8680'}
+2025-04-24 11:08:05,739 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:08:05,740 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93282, Score=1.298 (Norm=0.382), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:08:05,740 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-0.67 (w=0.3, ws=-0.20)'}
+2025-04-24 11:08:05,740 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=128.1, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:08:05,741 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:08:05,741 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:08:05,741 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.50s) ==---
+2025-04-24 11:08:22,300 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:08:22,301 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:08:22,301 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:22,721 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:08:22,722 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:08:22,723 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:23,082 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93299.75 (Bid: 93299.7, Ask: 93299.8)
+2025-04-24 11:08:23,082 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:08:23,082 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:23,458 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:08:23,458 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:08:23,810 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:08:23,812 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '128.5838', 'EMA_Short': '93237.2232', 'EMA_Long': '93197.1480', 'RSI': '58.1380', 'BBL': '93001.1487', 'BBM': '93183.6167', 'BBU': '93366.0846', 'CCI': '65.5789', 'WR': '-0.1522', 'MFI': '67.2180', 'STOCHRSIk': '71.9431', 'STOCHRSId': '56.6121', 'MOM': '40.1000', 'VOL_MA': '125.3418', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93213.9375', 'VWAP': '92580.9255', 'close': '93299.7000', 'high': '93299.8000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '94.6610'}
+2025-04-24 11:08:23,814 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:08:23,815 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93300, Score=1.689 (Norm=0.497), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:08:23,815 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '0.63 (w=0.3, ws=0.19)'}
+2025-04-24 11:08:23,816 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=128.6, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:08:23,816 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:08:23,816 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:08:23,816 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.52s) ==---
+2025-04-24 11:08:40,086 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:08:40,091 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:08:40,091 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:40,523 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:08:40,523 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:08:40,524 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:40,890 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93294.95 (Bid: 93294.9, Ask: 93295.0)
+2025-04-24 11:08:40,890 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:08:40,890 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:41,292 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:08:41,293 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:08:41,640 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:08:41,642 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '130.6552', 'EMA_Short': '93235.8804', 'EMA_Long': '93196.6533', 'RSI': '57.8990', 'BBL': '93001.3833', 'BBM': '93183.4600', 'BBU': '93365.5367', 'CCI': '76.6549', 'WR': '-14.9624', 'MFI': '67.7490', 'STOCHRSIk': '71.2655', 'STOCHRSId': '56.3862', 'MOM': '35.4000', 'VOL_MA': '127.4036', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93213.3500', 'VWAP': '92581.3034', 'close': '93295.0000', 'high': '93328.8000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '119.4020'}
+2025-04-24 11:08:41,644 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:08:41,645 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93295, Score=1.305 (Norm=0.384), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:08:41,645 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-0.65 (w=0.3, ws=-0.20)'}
+2025-04-24 11:08:41,646 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=130.7, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:08:41,646 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:08:41,646 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:08:41,646 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.56s) ==---
+2025-04-24 11:08:57,897 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:08:57,900 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:08:57,900 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:58,343 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:08:58,344 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:08:58,345 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:58,729 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93284.05 (Bid: 93284.0, Ask: 93284.1)
+2025-04-24 11:08:58,730 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:08:58,730 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:08:59,119 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:08:59,120 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:08:59,619 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:08:59,623 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:06:00): {'ATR': '130.6552', 'EMA_Short': '93232.7661', 'EMA_Long': '93195.5059', 'RSI': '57.3340', 'BBL': '93001.8702', 'BBM': '93183.0967', 'BBU': '93364.3231', 'CCI': '71.7120', 'WR': '-19.7875', 'MFI': '67.8497', 'STOCHRSIk': '69.6568', 'STOCHRSId': '55.8500', 'MOM': '24.5000', 'VOL_MA': '127.8031', 'PSARl': '93039.3838', 'PSARs': 'None', 'SMA10': '93211.9875', 'VWAP': '92581.3638', 'close': '93284.1000', 'high': '93328.8000', 'low': '93180.0000', 'open': '93221.7000', 'volume': '124.1960'}
+2025-04-24 11:08:59,628 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:08:59,630 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93284, Score=1.200 (Norm=0.353), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:08:59,631 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '0.00 (w=0.2, ws=0.00)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-1.00 (w=0.3, ws=-0.30)'}
+2025-04-24 11:08:59,632 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=130.7, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:08:59,633 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:08:59,633 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:08:59,634 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.73s) ==---
+2025-04-24 11:09:15,924 - INFO - [livebot_BTC_USDT-USDT:2457] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:09:15,926 - DEBUG - [livebot_BTC_USDT-USDT:578] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:09:15,926 - DEBUG - [livebot_BTC_USDT-USDT:587] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:09:16,385 - INFO - [livebot_BTC_USDT-USDT:658] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:09:16,386 - DEBUG - [livebot_BTC_USDT-USDT:487] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:09:16,386 - DEBUG - [livebot_BTC_USDT-USDT:497] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:09:16,754 - DEBUG - [livebot_BTC_USDT-USDT:514] - Using bid/ask midpoint for BTC/USDT:USDT: 93269.25 (Bid: 93269.2, Ask: 93269.3)
+2025-04-24 11:09:16,754 - DEBUG - [livebot_BTC_USDT-USDT:676] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:09:16,754 - DEBUG - [livebot_BTC_USDT-USDT:685] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:09:17,120 - DEBUG - [livebot_BTC_USDT-USDT:698] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:09:17,121 - DEBUG - [livebot_BTC_USDT-USDT:786] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:09:17,432 - DEBUG - [livebot_BTC_USDT-USDT:864] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:09:17,434 - DEBUG - [livebot_BTC_USDT-USDT:902] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:09:00): {'ATR': '122.5013', 'EMA_Short': '93243.1758', 'EMA_Long': '93203.2632', 'RSI': '56.2092', 'BBL': '93008.2082', 'BBM': '93188.9133', 'BBU': '93369.6184', 'CCI': '101.4120', 'WR': '-26.3834', 'MFI': '64.2719', 'STOCHRSIk': '71.1431', 'STOCHRSId': '63.5077', 'MOM': '64.7000', 'VOL_MA': '115.0032', 'PSARl': '93056.7488', 'PSARs': 'None', 'SMA10': '93219.4125', 'VWAP': '92580.1703', 'close': '93269.2000', 'high': '93285.7000', 'low': '93269.2000', 'open': '93284.1000', 'volume': '7.8240'}
+2025-04-24 11:09:17,437 - DEBUG - [livebot_BTC_USDT-USDT:959] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93420.3', 'Fib_23.6%': '93218.8', 'Fib_38.2%': '93094.1', 'Fib_50.0%': '92993.4', 'Fib_61.8%': '92892.6', 'Fib_78.6%': '92749.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:09:17,437 - INFO - [livebot_BTC_USDT-USDT:1230] - Signal Calc (BTC/USDT:USDT): Price=93269, Score=1.390 (Norm=0.409), Threshold=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:09:17,438 - DEBUG - [livebot_BTC_USDT-USDT:1231] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '0.50 (w=0.5, ws=0.25)', 'rsi': '0.00 (w=0.2, ws=0.00)', 'bollinger_bands': '0.00 (w=0.1, ws=0.00)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '-1.00 (w=0.2, ws=-0.20)', 'wr': '0.00 (w=0.2, ws=0.00)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '0.00 (w=0.2, ws=0.00)', 'orderbook': '-0.37 (w=0.3, ws=-0.11)'}
+2025-04-24 11:09:17,438 - INFO - [livebot_BTC_USDT-USDT:2539] - Analysis: ATR=122.5, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:09:17,438 - INFO - [livebot_BTC_USDT-USDT:2544] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:09:17,439 - INFO - [livebot_BTC_USDT-USDT:2734] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:09:17,439 - INFO - [livebot_BTC_USDT-USDT:2953] - ---== Analysis Cycle End for BTC/USDT:USDT (1.51s) ==---
+2025-04-24 11:19:36,199 - DEBUG - [livebot_BTC_USDT-USDT:1512] - Market info retrieved for BTC/USDT:USDT
+2025-04-24 11:19:36,202 - DEBUG - [livebot_BTC_USDT-USDT:1700] - Minimum order cost not explicitly found for BTC/USDT:USDT. Will rely on min amount.
+2025-04-24 11:19:36,202 - DEBUG - [livebot_BTC_USDT-USDT:1523] - Derived info for BTC/USDT:USDT: TickSize=0.1, PricePrec=1, AmtPrec=3, MinAmt=0.001, MinCost=None
+2025-04-24 11:19:36,203 - INFO - [livebot_BTC_USDT-USDT:3186] - Symbol BTC/USDT:USDT validated. Market Type: swap, Category: linear
+2025-04-24 11:19:37,924 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:19:37,925 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 40, Fetching limit: 250
+2025-04-24 11:19:37,925 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:19:37,925 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:19:38,347 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:19:38,347 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:19:38,347 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:19:38,801 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93486.35 (Bid: 93486.3, Ask: 93486.4)
+2025-04-24 11:19:38,802 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:19:38,802 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:19:39,414 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:19:39,415 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:19:39,853 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:19:39,856 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:18:00): {'ATR': '116.7319', 'EMA_Short': '93390.4075', 'EMA_Long': '93281.1523', 'RSI': '67.3056', 'BBL': '93004.3410', 'BBM': '93226.2133', 'BBU': '93448.0856', 'CCI': '222.7681', 'WR': '-2.9478', 'MFI': '82.4873', 'STOCHRSIk': '100.0000', 'STOCHRSId': '98.3115', 'MOM': '266.4000', 'VOL_MA': '152.0907', 'PSARl': '93161.1574', 'PSARs': 'None', 'SMA10': '93328.3000', 'VWAP': '92589.8879', 'close': '93488.1000', 'high': '93499.8000', 'low': '93455.7000', 'open': '93455.7000', 'volume': '115.1220'}
+2025-04-24 11:19:39,859 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93499.8', 'Fib_23.6%': '93279.5', 'Fib_38.2%': '93143.2', 'Fib_50.0%': '93033.1', 'Fib_61.8%': '92923.0', 'Fib_78.6%': '92766.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:19:39,860 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93486.4, Score=-0.050 (Norm=-0.015), Threshold=+/=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:19:39,860 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.5, ws=-0.40)', 'rsi': '-0.50 (w=0.2, ws=-0.10)', 'bollinger_bands': '-1.00 (w=0.1, ws=-0.10)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '-1.00 (w=0.2, ws=-0.20)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-1.00 (w=0.2, ws=-0.20)', 'orderbook': '-1.00 (w=0.3, ws=-0.30)'}
+2025-04-24 11:19:39,861 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=116.73, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:19:39,861 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:19:39,861 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:19:39,861 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.94s) ==---
+2025-04-24 11:19:56,186 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:19:56,187 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 40, Fetching limit: 250
+2025-04-24 11:19:56,187 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:19:56,187 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:19:56,600 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:19:56,601 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:19:56,601 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:19:56,973 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93476.15 (Bid: 93476.1, Ask: 93476.2)
+2025-04-24 11:19:56,973 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:19:56,974 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:19:57,355 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:19:57,356 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:19:57,769 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:19:57,771 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:18:00): {'ATR': '116.7319', 'EMA_Short': '93387.0075', 'EMA_Long': '93279.8996', 'RSI': '66.7773', 'BBL': '93005.7837', 'BBM': '93225.8167', 'BBU': '93445.8496', 'CCI': '220.0222', 'WR': '-5.9461', 'MFI': '82.8652', 'STOCHRSIk': '100.0000', 'STOCHRSId': '98.3115', 'MOM': '254.5000', 'VOL_MA': '155.4388', 'PSARl': '93161.1574', 'PSARs': 'None', 'SMA10': '93326.8125', 'VWAP': '92590.6383', 'close': '93476.2000', 'high': '93499.8000', 'low': '93455.7000', 'open': '93455.7000', 'volume': '155.2990'}
+2025-04-24 11:19:57,777 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93499.8', 'Fib_23.6%': '93279.5', 'Fib_38.2%': '93143.2', 'Fib_50.0%': '93033.1', 'Fib_61.8%': '92923.0', 'Fib_78.6%': '92766.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:19:57,778 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93476.2, Score=0.104 (Norm=0.031), Threshold=+/=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:19:57,779 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.5, ws=-0.40)', 'rsi': '-0.50 (w=0.2, ws=-0.10)', 'bollinger_bands': '-1.00 (w=0.1, ws=-0.10)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '-1.00 (w=0.2, ws=-0.20)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-1.00 (w=0.2, ws=-0.20)', 'orderbook': '-0.49 (w=0.3, ws=-0.15)'}
+2025-04-24 11:19:57,779 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=116.73, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:19:57,779 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:19:57,780 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:19:57,780 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.59s) ==---
+2025-04-24 11:20:14,070 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:20:14,074 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 40, Fetching limit: 250
+2025-04-24 11:20:14,074 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:20:14,075 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:14,520 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:20:14,521 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:20:14,521 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:14,885 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93488.55 (Bid: 93488.5, Ask: 93488.6)
+2025-04-24 11:20:14,886 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:20:14,886 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:15,284 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:20:15,285 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:20:15,848 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:20:15,851 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:18:00): {'ATR': '116.7319', 'EMA_Short': '93390.5504', 'EMA_Long': '93281.2049', 'RSI': '67.3274', 'BBL': '93004.2790', 'BBM': '93226.2300', 'BBU': '93448.1810', 'CCI': '222.8831', 'WR': '-2.8219', 'MFI': '82.9020', 'STOCHRSIk': '100.0000', 'STOCHRSId': '98.3115', 'MOM': '266.9000', 'VOL_MA': '155.7718', 'PSARl': '93161.1574', 'PSARs': 'None', 'SMA10': '93328.3625', 'VWAP': '92590.7278', 'close': '93488.6000', 'high': '93499.8000', 'low': '93455.7000', 'open': '93455.7000', 'volume': '159.2950'}
+2025-04-24 11:20:15,856 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93499.8', 'Fib_23.6%': '93279.5', 'Fib_38.2%': '93143.2', 'Fib_50.0%': '93033.1', 'Fib_61.8%': '92923.0', 'Fib_78.6%': '92766.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:20:15,857 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93488.6, Score=0.498 (Norm=0.147), Threshold=+/=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:20:15,857 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.5, ws=-0.40)', 'rsi': '-0.50 (w=0.2, ws=-0.10)', 'bollinger_bands': '-1.00 (w=0.1, ws=-0.10)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '-1.00 (w=0.2, ws=-0.20)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-1.00 (w=0.2, ws=-0.20)', 'orderbook': '0.83 (w=0.3, ws=0.25)'}
+2025-04-24 11:20:15,858 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=116.73, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:20:15,858 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:20:15,859 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:20:15,859 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.79s) ==---
+2025-04-24 11:20:32,155 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:20:32,157 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 40, Fetching limit: 250
+2025-04-24 11:20:32,157 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:20:32,158 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:32,580 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:20:32,581 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:20:32,581 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:32,941 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93476.15 (Bid: 93476.1, Ask: 93476.2)
+2025-04-24 11:20:32,941 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:20:32,941 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:33,312 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:20:33,313 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:20:33,774 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:20:33,786 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:18:00): {'ATR': '116.7319', 'EMA_Short': '93386.6075', 'EMA_Long': '93279.7523', 'RSI': '66.7140', 'BBL': '93005.9490', 'BBM': '93225.7700', 'BBU': '93445.5910', 'CCI': '219.6979', 'WR': '-6.2988', 'MFI': '83.0734', 'STOCHRSIk': '100.0000', 'STOCHRSId': '98.3115', 'MOM': '253.1000', 'VOL_MA': '157.3466', 'PSARl': '93161.1574', 'PSARs': 'None', 'SMA10': '93326.6375', 'VWAP': '92591.0690', 'close': '93474.8000', 'high': '93499.8000', 'low': '93455.7000', 'open': '93455.7000', 'volume': '178.1920'}
+2025-04-24 11:20:33,789 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93499.8', 'Fib_23.6%': '93279.5', 'Fib_38.2%': '93143.2', 'Fib_50.0%': '93033.1', 'Fib_61.8%': '92923.0', 'Fib_78.6%': '92766.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:20:33,791 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93476.2, Score=0.176 (Norm=0.052), Threshold=+/=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:20:33,791 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '0.00 (w=0.2, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.5, ws=-0.40)', 'rsi': '-0.50 (w=0.2, ws=-0.10)', 'bollinger_bands': '-1.00 (w=0.1, ws=-0.10)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '-1.00 (w=0.2, ws=-0.20)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-1.00 (w=0.2, ws=-0.20)', 'orderbook': '-0.25 (w=0.3, ws=-0.07)'}
+2025-04-24 11:20:33,792 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=116.73, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:20:33,792 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:20:33,792 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:20:33,792 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.64s) ==---
+2025-04-24 11:20:50,086 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (3) ==---
+2025-04-24 11:20:50,087 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 40, Fetching limit: 250
+2025-04-24 11:20:50,087 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 3m, limit=250 (Attempt 1/4)
+2025-04-24 11:20:50,087 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:50,679 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 3m
+2025-04-24 11:20:50,680 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:20:50,680 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:51,060 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93455.75 (Bid: 93455.7, Ask: 93455.8)
+2025-04-24 11:20:51,062 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:20:51,062 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:20:51,428 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:20:51,430 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:20:52,080 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_6', 'EMA_18', 'VWAP_D', 'RSI_12', 'CCI_20_0.015', 'WILLR_12', 'MFI_12', 'STOCHRSIk_12_10_3_3', 'STOCHRSId_12_10_3_3', 'MOM_5', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_12', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_8']
+2025-04-24 11:20:52,096 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:18:00): {'ATR': '117.5390', 'EMA_Short': '93381.1504', 'EMA_Long': '93277.7417', 'RSI': '65.8261', 'BBL': '93008.1082', 'BBM': '93225.1333', 'BBU': '93442.1585', 'CCI': '212.5080', 'WR': '-11.1111', 'MFI': '83.2087', 'STOCHRSIk': '100.0000', 'STOCHRSId': '98.3115', 'MOM': '234.0000', 'VOL_MA': '158.6139', 'PSARl': '93161.1574', 'PSARs': 'None', 'SMA10': '93324.2500', 'VWAP': '92591.3142', 'close': '93455.7000', 'high': '93499.8000', 'low': '93444.4000', 'open': '93455.7000', 'volume': '193.4000'}
+2025-04-24 11:20:52,113 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93499.8', 'Fib_23.6%': '93279.5', 'Fib_38.2%': '93143.2', 'Fib_50.0%': '93033.1', 'Fib_61.8%': '92923.0', 'Fib_78.6%': '92766.2', 'Fib_100.0%': '92566.5'}
+2025-04-24 11:20:52,120 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93455.8, Score=0.246 (Norm=0.072), Threshold=+/=2.5, Signal=[33mHOLD[0m
+2025-04-24 11:20:52,136 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.6, ws=0.60)', 'momentum': '1.00 (w=0.5, ws=0.50)', 'volume_confirmation': '1.00 (w=0.2, ws=0.20)', 'stoch_rsi': '-0.80 (w=0.5, ws=-0.40)', 'rsi': '-0.50 (w=0.2, ws=-0.10)', 'bollinger_bands': '-1.00 (w=0.1, ws=-0.10)', 'vwap': '1.00 (w=0.1, ws=0.10)', 'cci': '-1.00 (w=0.2, ws=-0.20)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.2, ws=0.20)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-1.00 (w=0.2, ws=-0.20)', 'orderbook': '-0.68 (w=0.3, ws=-0.20)'}
+2025-04-24 11:20:52,153 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=117.54, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:20:52,158 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:20:52,161 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:20:52,168 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (2.08s) ==---
+2025-04-24 11:38:54,789 - DEBUG - [livebot_BTC_USDT-USDT:1512] - Market info retrieved for BTC/USDT:USDT
+2025-04-24 11:38:54,792 - DEBUG - [livebot_BTC_USDT-USDT:1700] - Minimum order cost not explicitly found for BTC/USDT:USDT. Will rely on min amount.
+2025-04-24 11:38:54,792 - DEBUG - [livebot_BTC_USDT-USDT:1523] - Derived info for BTC/USDT:USDT: TickSize=0.1, PricePrec=1, AmtPrec=3, MinAmt=0.001, MinCost=None
+2025-04-24 11:38:54,792 - INFO - [livebot_BTC_USDT-USDT:3186] - Symbol BTC/USDT:USDT validated. Market Type: swap, Category: linear
+2025-04-24 11:38:55,619 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (5) ==---
+2025-04-24 11:38:55,619 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 50, Fetching limit: 250
+2025-04-24 11:38:55,620 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 5m, limit=250 (Attempt 1/4)
+2025-04-24 11:38:55,620 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:38:56,066 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 5m
+2025-04-24 11:38:56,067 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:38:56,068 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:38:56,450 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93450.75 (Bid: 93450.7, Ask: 93450.8)
+2025-04-24 11:38:56,450 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:38:56,450 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:38:56,815 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:38:56,816 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:38:57,429 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'VWAP_D', 'RSI_14', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'MOM_7', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10']
+2025-04-24 11:38:57,432 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:35:00): {'ATR': '154.3838', 'EMA_Short': '93394.1032', 'EMA_Long': '93270.5422', 'RSI': '62.7754', 'BBL': '93037.8633', 'BBM': '93283.4250', 'BBU': '93528.9867', 'CCI': '126.6428', 'WR': '-13.7016', 'MFI': '75.3538', 'STOCHRSIk': '78.5978', 'STOCHRSId': '77.9090', 'MOM': '196.5000', 'VOL_MA': '270.6111', 'PSARl': '93248.9375', 'PSARs': 'None', 'SMA10': '93367.4600', 'VWAP': '92720.4385', 'close': '93457.4000', 'high': '93528.1000', 'low': '93425.1000', 'open': '93480.0000', 'volume': '298.1650'}
+2025-04-24 11:38:57,436 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93528.1', 'Fib_23.6%': '93280.4', 'Fib_38.2%': '93127.1', 'Fib_50.0%': '93003.3', 'Fib_61.8%': '92879.5', 'Fib_78.6%': '92703.1', 'Fib_100.0%': '92478.6'}
+2025-04-24 11:38:57,438 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93450.8, Score=0.204 (Norm=0.070), Threshold=+/=1.5, Signal=[33mHOLD[0m
+2025-04-24 11:38:57,438 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.3, ws=0.30)', 'momentum': '1.00 (w=0.2, ws=0.20)', 'volume_confirmation': '0.00 (w=0.1, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.4, ws=-0.32)', 'rsi': '-0.50 (w=0.3, ws=-0.15)', 'bollinger_bands': '0.00 (w=0.2, ws=0.00)', 'vwap': '1.00 (w=0.3, ws=0.30)', 'cci': '-0.50 (w=0.2, ws=-0.10)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.3, ws=0.30)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-0.40 (w=0.2, ws=-0.08)', 'orderbook': '-0.96 (w=0.1, ws=-0.10)'}
+2025-04-24 11:38:57,439 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=154.38, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:38:57,439 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:38:57,440 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:38:57,440 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.82s) ==---
+2025-04-24 11:39:13,743 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (5) ==---
+2025-04-24 11:39:13,744 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 50, Fetching limit: 250
+2025-04-24 11:39:13,744 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 5m, limit=250 (Attempt 1/4)
+2025-04-24 11:39:13,744 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:39:14,175 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 5m
+2025-04-24 11:39:14,177 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:39:14,177 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:39:14,582 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93465.95 (Bid: 93465.9, Ask: 93466.0)
+2025-04-24 11:39:14,583 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:39:14,583 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:39:14,981 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:39:14,982 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:39:15,617 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'VWAP_D', 'RSI_14', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'MOM_7', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10']
+2025-04-24 11:39:15,620 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:35:00): {'ATR': '154.3838', 'EMA_Short': '93395.8032', 'EMA_Long': '93271.3149', 'RSI': '63.3029', 'BBL': '93037.0590', 'BBM': '93283.8500', 'BBU': '93530.6410', 'CCI': '128.2158', 'WR': '-12.0543', 'MFI': '75.2734', 'STOCHRSIk': '80.1785', 'STOCHRSId': '78.4359', 'MOM': '205.0000', 'VOL_MA': '270.8846', 'PSARl': '93248.9375', 'PSARs': 'None', 'SMA10': '93368.3100', 'VWAP': '92720.5065', 'close': '93465.9000', 'high': '93528.1000', 'low': '93425.1000', 'open': '93480.0000', 'volume': '302.2680'}
+2025-04-24 11:39:15,625 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93528.1', 'Fib_23.6%': '93280.4', 'Fib_38.2%': '93127.1', 'Fib_50.0%': '93003.3', 'Fib_61.8%': '92879.5', 'Fib_78.6%': '92703.1', 'Fib_100.0%': '92478.6'}
+2025-04-24 11:39:15,627 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93466.0, Score=0.400 (Norm=0.138), Threshold=+/=1.5, Signal=[33mHOLD[0m
+2025-04-24 11:39:15,628 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.3, ws=0.30)', 'momentum': '1.00 (w=0.2, ws=0.20)', 'volume_confirmation': '0.00 (w=0.1, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.4, ws=-0.32)', 'rsi': '-0.50 (w=0.3, ws=-0.15)', 'bollinger_bands': '0.00 (w=0.2, ws=0.00)', 'vwap': '1.00 (w=0.3, ws=0.30)', 'cci': '-0.50 (w=0.2, ws=-0.10)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.3, ws=0.30)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-0.40 (w=0.2, ws=-0.08)', 'orderbook': '1.00 (w=0.1, ws=0.10)'}
+2025-04-24 11:39:15,628 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=154.38, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:39:15,628 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:39:15,629 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:39:15,629 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.89s) ==---
+2025-04-24 11:39:32,395 - INFO - [livebot_BTC_USDT-USDT:2654] - ---== Analyzing BTC/USDT:USDT (5) ==---
+2025-04-24 11:39:32,397 - DEBUG - [livebot_BTC_USDT-USDT:2674] - Required kline history for indicators: 50, Fetching limit: 250
+2025-04-24 11:39:32,398 - DEBUG - [livebot_BTC_USDT-USDT:585] - Fetching klines for BTC/USDT:USDT, 5m, limit=250 (Attempt 1/4)
+2025-04-24 11:39:32,398 - DEBUG - [livebot_BTC_USDT-USDT:594] - Using params for fetch_ohlcv (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:39:32,814 - INFO - [livebot_BTC_USDT-USDT:665] - Successfully fetched and processed 250 klines for BTC/USDT:USDT 5m
+2025-04-24 11:39:32,815 - DEBUG - [livebot_BTC_USDT-USDT:494] - Fetching ticker for BTC/USDT:USDT...
+2025-04-24 11:39:32,815 - DEBUG - [livebot_BTC_USDT-USDT:504] - Using params for fetch_ticker (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:39:33,187 - DEBUG - [livebot_BTC_USDT-USDT:521] - Using bid/ask midpoint for BTC/USDT:USDT: 93480.25 (Bid: 93480.2, Ask: 93480.3)
+2025-04-24 11:39:33,188 - DEBUG - [livebot_BTC_USDT-USDT:683] - Fetching order book for BTC/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 11:39:33,188 - DEBUG - [livebot_BTC_USDT-USDT:692] - Using params for fetch_order_book (BTC/USDT:USDT): {'category': 'linear'}
+2025-04-24 11:39:33,560 - DEBUG - [livebot_BTC_USDT-USDT:705] - Successfully fetched orderbook for BTC/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 11:39:33,561 - DEBUG - [livebot_BTC_USDT-USDT:795] - Calculating indicators for BTC/USDT:USDT...
+2025-04-24 11:39:34,034 - DEBUG - [livebot_BTC_USDT-USDT:900] - Indicators calculated for BTC/USDT:USDT. DataFrame columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'VWAP_D', 'RSI_14', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'MOM_7', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10']
+2025-04-24 11:39:34,040 - DEBUG - [livebot_BTC_USDT-USDT:951] - Latest Indicator Values (BTC/USDT:USDT @ 2025-04-24 16:35:00): {'ATR': '154.3838', 'EMA_Short': '93399.2632', 'EMA_Long': '93272.8877', 'RSI': '64.3123', 'BBL': '93035.2708', 'BBM': '93284.7150', 'BBU': '93534.1592', 'CCI': '131.3994', 'WR': '-8.7016', 'MFI': '83.2058', 'STOCHRSIk': '83.2030', 'STOCHRSId': '79.4440', 'MOM': '222.3000', 'VOL_MA': '272.3164', 'PSARl': '93248.9375', 'PSARs': 'None', 'SMA10': '93370.0400', 'VWAP': '92720.8184', 'close': '93483.2000', 'high': '93528.1000', 'low': '93425.1000', 'open': '93480.0000', 'volume': '323.7450'}
+2025-04-24 11:39:34,044 - DEBUG - [livebot_BTC_USDT-USDT:1009] - Calculated Fibonacci levels for BTC/USDT:USDT: {'Fib_0.0%': '93528.1', 'Fib_23.6%': '93280.4', 'Fib_38.2%': '93127.1', 'Fib_50.0%': '93003.3', 'Fib_61.8%': '92879.5', 'Fib_78.6%': '92703.1', 'Fib_100.0%': '92478.6'}
+2025-04-24 11:39:34,045 - INFO - [livebot_BTC_USDT-USDT:1285] - Signal Calc (BTC/USDT:USDT): Price=93480.2, Score=0.080 (Norm=0.028), Threshold=+/=1.5, Signal=[33mHOLD[0m
+2025-04-24 11:39:34,045 - DEBUG - [livebot_BTC_USDT-USDT:1286] - Indicator Scores: {'ema_alignment': '1.00 (w=0.3, ws=0.30)', 'momentum': '1.00 (w=0.2, ws=0.20)', 'volume_confirmation': '0.00 (w=0.1, ws=0.00)', 'stoch_rsi': '-0.80 (w=0.4, ws=-0.32)', 'rsi': '-0.50 (w=0.3, ws=-0.15)', 'bollinger_bands': '0.00 (w=0.2, ws=0.00)', 'vwap': '1.00 (w=0.3, ws=0.30)', 'cci': '-0.50 (w=0.2, ws=-0.10)', 'wr': '-1.00 (w=0.2, ws=-0.20)', 'psar': '1.00 (w=0.3, ws=0.30)', 'sma_10': '0.50 (w=0.1, ws=0.05)', 'mfi': '-1.00 (w=0.2, ws=-0.20)', 'orderbook': '-1.00 (w=0.1, ws=-0.10)'}
+2025-04-24 11:39:34,046 - INFO - [livebot_BTC_USDT-USDT:2744] - Analysis: ATR=154.38, Potential SL=N/A, Potential TP=N/A
+2025-04-24 11:39:34,046 - INFO - [livebot_BTC_USDT-USDT:2749] - Config: TSL=True, BE=True (Triggered: False), MA Cross Exit=True
+2025-04-24 11:39:34,046 - INFO - [livebot_BTC_USDT-USDT:2920] - Signal is HOLD and no open position for BTC/USDT:USDT. No trade action taken.
+2025-04-24 11:39:34,047 - INFO - [livebot_BTC_USDT-USDT:3109] - ---== Analysis Cycle End for BTC/USDT:USDT (1.65s) ==---

@@ -1,0 +1,3 @@
+TimestampUTC,Symbol,Action,Side,Quantity,AvgPrice,OrderID,Reason,Notes
+2025-05-03 07:50:41,FARTCOIN/USDT:USDT,EXIT,SHORT,4E+1,NaN,292bbbec-f937-441d-95c5-889fc5441722,EmergencyClose:FailedStopSet,
+2025-05-03 07:51:10,FARTCOIN/USDT:USDT,EXIT,SHORT,39,NaN,8085bf2b-cdcc-462e-85fa-387531f26a62,EmergencyClose:FailedStopSet,

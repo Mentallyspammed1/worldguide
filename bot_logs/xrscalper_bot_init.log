@@ -1,0 +1,396 @@
+2025-05-01 19:20:54,110 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:20:54 CDT) ---
+2025-05-01 19:20:54,111 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:20:54,111 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:20:54,111 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:20:54,112 - INFO - [xrscalper_bot_init:4099] - Live trading is DISABLED in config. Running in analysis-only mode.
+2025-05-01 19:20:54,137 - WARNING - [xrscalper_bot_init:432] - [33mUSING SANDBOX MODE (Testnet)[0m
+2025-05-01 19:20:54,138 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:20:55,828 - ERROR - [xrscalper_bot_init:482] - [91mCCXT Authentication Error during initialization: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1746145255496}[0m
+2025-05-01 19:20:55,829 - ERROR - [xrscalper_bot_init:483] - [91m>> Check API Key/Secret format and validity in your .env file.[0m
+2025-05-01 19:20:55,835 - ERROR - [xrscalper_bot_init:4104] - [91mFailed to initialize exchange. Exiting bot.[0m
+2025-05-01 19:22:21,144 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:22:21 CDT) ---
+2025-05-01 19:22:21,146 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:22:21,146 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:22:21,146 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:22:21,146 - INFO - [xrscalper_bot_init:4099] - Live trading is DISABLED in config. Running in analysis-only mode.
+2025-05-01 19:22:21,172 - WARNING - [xrscalper_bot_init:432] - [33mUSING SANDBOX MODE (Testnet)[0m
+2025-05-01 19:22:21,173 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:22:22,364 - ERROR - [xrscalper_bot_init:482] - [91mCCXT Authentication Error during initialization: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1746145342042}[0m
+2025-05-01 19:22:22,364 - ERROR - [xrscalper_bot_init:483] - [91m>> Check API Key/Secret format and validity in your .env file.[0m
+2025-05-01 19:22:22,365 - ERROR - [xrscalper_bot_init:4104] - [91mFailed to initialize exchange. Exiting bot.[0m
+2025-05-01 19:24:12,805 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:24:12 CDT) ---
+2025-05-01 19:24:12,807 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:24:12,807 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:24:12,807 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:24:12,807 - INFO - [xrscalper_bot_init:4099] - Live trading is DISABLED in config. Running in analysis-only mode.
+2025-05-01 19:24:12,832 - WARNING - [xrscalper_bot_init:432] - [33mUSING SANDBOX MODE (Testnet)[0m
+2025-05-01 19:24:12,833 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:24:14,465 - ERROR - [xrscalper_bot_init:482] - [91mCCXT Authentication Error during initialization: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1746145454144}[0m
+2025-05-01 19:24:14,466 - ERROR - [xrscalper_bot_init:483] - [91m>> Check API Key/Secret format and validity in your .env file.[0m
+2025-05-01 19:24:14,467 - ERROR - [xrscalper_bot_init:4104] - [91mFailed to initialize exchange. Exiting bot.[0m
+2025-05-01 19:27:33,462 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:27:33 CDT) ---
+2025-05-01 19:27:33,464 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:27:33,465 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:27:33,465 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:27:33,465 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:27:33,465 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:27:33,466 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['BTC/USDT:USDT']
+2025-05-01 19:27:33,466 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:27:38,509 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:27:39,799 - ERROR - [xrscalper_bot_init:482] - [91mCCXT Authentication Error during initialization: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1746145659474}[0m
+2025-05-01 19:27:39,799 - ERROR - [xrscalper_bot_init:483] - [91m>> Check API Key/Secret format and validity in your .env file.[0m
+2025-05-01 19:27:39,801 - ERROR - [xrscalper_bot_init:4104] - [91mFailed to initialize exchange. Exiting bot.[0m
+2025-05-01 19:28:23,813 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:28:23 CDT) ---
+2025-05-01 19:28:23,814 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:28:23,814 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:28:23,814 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:28:23,815 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:28:23,815 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:28:23,815 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['BTC/USDT:USDT']
+2025-05-01 19:28:23,815 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:28:28,857 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:28:29,664 - ERROR - [xrscalper_bot_init:482] - [91mCCXT Authentication Error during initialization: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1746145709342}[0m
+2025-05-01 19:28:29,664 - ERROR - [xrscalper_bot_init:483] - [91m>> Check API Key/Secret format and validity in your .env file.[0m
+2025-05-01 19:28:29,666 - ERROR - [xrscalper_bot_init:4104] - [91mFailed to initialize exchange. Exiting bot.[0m
+2025-05-01 19:29:20,169 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:29:20 CDT) ---
+2025-05-01 19:29:20,171 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:29:20,171 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:29:20,171 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:29:20,171 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:29:20,172 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:29:20,172 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['BTC/USDT:USDT']
+2025-05-01 19:29:20,172 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:29:25,212 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:29:26,546 - ERROR - [xrscalper_bot_init:482] - [91mCCXT Authentication Error during initialization: bybit {"retCode":33004,"retMsg":"Your api key has expired.","result":{},"retExtInfo":{},"time":1746145766220}[0m
+2025-05-01 19:29:26,547 - ERROR - [xrscalper_bot_init:483] - [91m>> Check API Key/Secret format and validity in your .env file.[0m
+2025-05-01 19:29:26,548 - ERROR - [xrscalper_bot_init:4104] - [91mFailed to initialize exchange. Exiting bot.[0m
+2025-05-01 19:30:36,700 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:30:36 CDT) ---
+2025-05-01 19:30:36,702 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:30:36,702 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:30:36,702 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:30:36,703 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:30:36,703 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:30:36,703 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['BTC/USDT:USDT']
+2025-05-01 19:30:36,703 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:30:41,730 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:30:51,986 - INFO - [xrscalper_bot_init:445] - CCXT exchange initialized (bybit). Sandbox: False
+2025-05-01 19:30:51,987 - INFO - [xrscalper_bot_init:449] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-05-01 19:30:53,099 - INFO - [xrscalper_bot_init:459] - [92mSuccessfully connected and fetched initial balance.[0m (Example: USDT available: 9.33562046)
+2025-05-01 19:30:53,099 - INFO - [xrscalper_bot_init:4114] - Starting main trading loop for symbols: ['BTC/USDT:USDT']
+2025-05-01 19:30:55,424 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.32s. Waiting 7.68s for next cycle.
+2025-05-01 19:31:05,778 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.68s. Waiting 7.32s for next cycle.
+2025-05-01 19:31:15,676 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.57s. Waiting 7.43s for next cycle.
+2025-05-01 19:39:29,066 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:39:29 CDT) ---
+2025-05-01 19:39:29,067 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:39:29,067 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:39:29,067 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:39:29,068 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:39:29,068 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:39:29,068 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['BTC/USDT:USDT']
+2025-05-01 19:39:29,068 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:39:34,108 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:39:42,830 - INFO - [xrscalper_bot_init:445] - CCXT exchange initialized (bybit). Sandbox: False
+2025-05-01 19:39:42,834 - INFO - [xrscalper_bot_init:449] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-05-01 19:39:43,976 - INFO - [xrscalper_bot_init:459] - [92mSuccessfully connected and fetched initial balance.[0m (Example: USDT available: 9.33562046)
+2025-05-01 19:39:43,980 - INFO - [xrscalper_bot_init:4114] - Starting main trading loop for symbols: ['BTC/USDT:USDT']
+2025-05-01 19:39:46,193 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.21s. Waiting 7.79s for next cycle.
+2025-05-01 19:39:55,923 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.94s. Waiting 8.06s for next cycle.
+2025-05-01 19:40:05,894 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.91s. Waiting 8.09s for next cycle.
+2025-05-01 19:40:15,989 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.00s. Waiting 8.00s for next cycle.
+2025-05-01 19:40:25,886 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.90s. Waiting 8.10s for next cycle.
+2025-05-01 19:41:05,206 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:41:05 CDT) ---
+2025-05-01 19:41:05,208 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:41:05,208 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:41:05,208 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:41:05,208 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:41:05,208 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:41:05,209 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['BTC/USDT:USDT']
+2025-05-01 19:41:05,209 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:41:10,247 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:44:16,242 - INFO - [xrscalper_bot_init:4068] - --- Starting XR Scalper Bot (2025-05-01 19:44:16 CDT) ---
+2025-05-01 19:44:16,243 - INFO - [xrscalper_bot_init:4072] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 19:44:16,243 - INFO - [xrscalper_bot_init:4073] - Using Timezone: America/Chicago
+2025-05-01 19:44:16,244 - INFO - [xrscalper_bot_init:4078] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 19:44:16,244 - WARNING - [xrscalper_bot_init:4083] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 19:44:16,244 - WARNING - [xrscalper_bot_init:4088] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 19:44:16,244 - INFO - [xrscalper_bot_init:4094] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['FARTCOIN/USDT:USDT']
+2025-05-01 19:44:16,244 - INFO - [xrscalper_bot_init:4095] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 19:44:21,269 - INFO - [xrscalper_bot_init:443] - Loading markets for bybit...
+2025-05-01 19:44:29,009 - INFO - [xrscalper_bot_init:445] - CCXT exchange initialized (bybit). Sandbox: False
+2025-05-01 19:44:29,009 - INFO - [xrscalper_bot_init:449] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-05-01 19:44:30,155 - INFO - [xrscalper_bot_init:459] - [92mSuccessfully connected and fetched initial balance.[0m (Example: USDT available: 9.33562046)
+2025-05-01 19:44:30,155 - INFO - [xrscalper_bot_init:4114] - Starting main trading loop for symbols: ['FARTCOIN/USDT:USDT']
+2025-05-01 19:44:32,042 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.89s. Waiting 8.11s for next cycle.
+2025-05-01 19:44:42,092 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.94s. Waiting 8.06s for next cycle.
+2025-05-01 19:44:52,016 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.86s. Waiting 8.14s for next cycle.
+2025-05-01 19:45:01,951 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.79s. Waiting 8.21s for next cycle.
+2025-05-01 19:45:11,944 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.79s. Waiting 8.21s for next cycle.
+2025-05-01 19:45:21,955 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.80s. Waiting 8.20s for next cycle.
+2025-05-01 19:45:32,595 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.44s. Waiting 7.56s for next cycle.
+2025-05-01 19:45:42,432 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.27s. Waiting 7.73s for next cycle.
+2025-05-01 19:45:52,347 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.19s. Waiting 7.81s for next cycle.
+2025-05-01 19:46:02,053 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.89s. Waiting 8.11s for next cycle.
+2025-05-01 19:46:12,019 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.86s. Waiting 8.14s for next cycle.
+2025-05-01 19:46:22,163 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.00s. Waiting 8.00s for next cycle.
+2025-05-01 19:46:32,056 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.89s. Waiting 8.11s for next cycle.
+2025-05-01 19:46:42,065 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.90s. Waiting 8.10s for next cycle.
+2025-05-01 19:46:52,041 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.88s. Waiting 8.12s for next cycle.
+2025-05-01 19:47:02,065 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.90s. Waiting 8.10s for next cycle.
+2025-05-01 19:47:12,628 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.45s. Waiting 7.55s for next cycle.
+2025-05-01 19:47:22,614 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.43s. Waiting 7.57s for next cycle.
+2025-05-01 19:47:31,971 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.78s. Waiting 8.22s for next cycle.
+2025-05-01 19:47:42,000 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.81s. Waiting 8.19s for next cycle.
+2025-05-01 19:47:52,591 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.39s. Waiting 7.61s for next cycle.
+2025-05-01 19:48:02,093 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.89s. Waiting 8.11s for next cycle.
+2025-05-01 19:48:12,273 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.06s. Waiting 7.94s for next cycle.
+2025-05-01 19:48:22,684 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.47s. Waiting 7.53s for next cycle.
+2025-05-01 19:48:32,364 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.15s. Waiting 7.85s for next cycle.
+2025-05-01 19:48:42,158 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.94s. Waiting 8.06s for next cycle.
+2025-05-01 19:48:52,523 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.31s. Waiting 7.69s for next cycle.
+2025-05-01 19:49:02,069 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.85s. Waiting 8.15s for next cycle.
+2025-05-01 19:49:12,072 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.86s. Waiting 8.14s for next cycle.
+2025-05-01 19:49:22,340 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.12s. Waiting 7.88s for next cycle.
+2025-05-01 19:49:32,674 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.46s. Waiting 7.54s for next cycle.
+2025-05-01 19:49:42,271 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.05s. Waiting 7.95s for next cycle.
+2025-05-01 19:49:52,567 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.34s. Waiting 7.66s for next cycle.
+2025-05-01 19:50:02,212 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.98s. Waiting 8.02s for next cycle.
+2025-05-01 19:50:12,108 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.88s. Waiting 8.12s for next cycle.
+2025-05-01 19:50:22,032 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.80s. Waiting 8.20s for next cycle.
+2025-05-01 19:50:33,831 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 3.60s. Waiting 6.40s for next cycle.
+2025-05-01 19:50:42,250 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.02s. Waiting 7.98s for next cycle.
+2025-05-01 19:50:52,092 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.86s. Waiting 8.14s for next cycle.
+2025-05-01 19:51:02,077 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.84s. Waiting 8.16s for next cycle.
+2025-05-01 19:51:12,082 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.83s. Waiting 8.17s for next cycle.
+2025-05-01 19:51:22,200 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.94s. Waiting 8.06s for next cycle.
+2025-05-01 19:51:32,064 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.81s. Waiting 8.19s for next cycle.
+2025-05-01 19:51:42,191 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.93s. Waiting 8.07s for next cycle.
+2025-05-01 19:51:52,251 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 1.99s. Waiting 8.01s for next cycle.
+2025-05-01 19:52:02,584 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.33s. Waiting 7.67s for next cycle.
+2025-05-01 19:52:12,323 - DEBUG - [xrscalper_bot_init:4147] - Loop finished in 2.06s. Waiting 7.94s for next cycle.
+2025-05-01 20:04:54,361 - INFO - [xrscalper_bot_init:4137] - --- Starting XR Scalper Bot (2025-05-01 20:04:54 CDT) ---
+2025-05-01 20:04:54,363 - INFO - [xrscalper_bot_init:4141] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 20:04:54,363 - INFO - [xrscalper_bot_init:4142] - Using Timezone: America/Chicago
+2025-05-01 20:04:54,364 - INFO - [xrscalper_bot_init:4147] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 20:04:54,364 - WARNING - [xrscalper_bot_init:4152] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 20:04:54,364 - WARNING - [xrscalper_bot_init:4157] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 20:04:54,364 - INFO - [xrscalper_bot_init:4163] - Critical Settings: Risk/Trade=1.00%, Leverage=20x, Symbols=['FARTCOIN/USDT:USDT']
+2025-05-01 20:04:54,364 - INFO - [xrscalper_bot_init:4164] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 20:04:54,365 - INFO - [xrscalper_bot_init:4166] - Starting in 5 seconds...
+2025-05-01 20:04:59,394 - INFO - [xrscalper_bot_init:477] - Loading markets for bybit...
+2025-05-01 20:05:08,051 - INFO - [xrscalper_bot_init:479] - CCXT exchange initialized (bybit). Sandbox: False
+2025-05-01 20:05:08,051 - INFO - [xrscalper_bot_init:483] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-05-01 20:05:09,305 - INFO - [xrscalper_bot_init:493] - [92mSuccessfully connected and fetched initial balance.[0m (Example: USDT available: 9.33562046)
+2025-05-01 20:05:09,306 - INFO - [xrscalper_bot_init:4183] - Starting main trading loop for symbols: ['FARTCOIN/USDT:USDT']
+2025-05-01 20:05:11,424 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.12s. Waiting 7.88s for next cycle.
+2025-05-01 20:05:21,407 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.10s. Waiting 7.90s for next cycle.
+2025-05-01 20:05:31,160 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.85s. Waiting 8.15s for next cycle.
+2025-05-01 20:05:41,177 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.87s. Waiting 8.13s for next cycle.
+2025-05-01 20:05:51,130 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.82s. Waiting 8.18s for next cycle.
+2025-05-01 20:09:16,703 - INFO - [xrscalper_bot_init:4137] - --- Starting XR Scalper Bot (2025-05-01 20:09:16 CDT) ---
+2025-05-01 20:09:16,704 - INFO - [xrscalper_bot_init:4141] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 20:09:16,705 - INFO - [xrscalper_bot_init:4142] - Using Timezone: America/Chicago
+2025-05-01 20:09:16,705 - INFO - [xrscalper_bot_init:4147] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 20:09:16,705 - WARNING - [xrscalper_bot_init:4152] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 20:09:16,705 - WARNING - [xrscalper_bot_init:4157] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 20:09:16,706 - INFO - [xrscalper_bot_init:4163] - Critical Settings: Risk/Trade=0.50%, Leverage=20x, Symbols=['FARTCOIN/USDT:USDT']
+2025-05-01 20:09:16,706 - INFO - [xrscalper_bot_init:4164] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 20:09:16,706 - INFO - [xrscalper_bot_init:4166] - Starting in 5 seconds...
+2025-05-01 20:09:21,731 - INFO - [xrscalper_bot_init:477] - Loading markets for bybit...
+2025-05-01 20:09:33,245 - INFO - [xrscalper_bot_init:479] - CCXT exchange initialized (bybit). Sandbox: False
+2025-05-01 20:09:33,246 - INFO - [xrscalper_bot_init:483] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-05-01 20:09:34,389 - INFO - [xrscalper_bot_init:493] - [92mSuccessfully connected and fetched initial balance.[0m (Example: USDT available: 9.33562046)
+2025-05-01 20:09:34,390 - INFO - [xrscalper_bot_init:4183] - Starting main trading loop for symbols: ['FARTCOIN/USDT:USDT']
+2025-05-01 20:09:36,275 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.89s. Waiting 8.11s for next cycle.
+2025-05-01 20:09:46,558 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.17s. Waiting 7.83s for next cycle.
+2025-05-01 20:09:56,450 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.06s. Waiting 7.94s for next cycle.
+2025-05-01 20:10:06,082 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.69s. Waiting 8.31s for next cycle.
+2025-05-01 20:10:16,598 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.20s. Waiting 7.80s for next cycle.
+2025-05-01 20:10:26,405 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.01s. Waiting 7.99s for next cycle.
+2025-05-01 20:10:36,466 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.07s. Waiting 7.93s for next cycle.
+2025-05-01 20:10:46,785 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.39s. Waiting 7.61s for next cycle.
+2025-05-01 20:10:56,118 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 20:11:06,112 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 20:11:16,152 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.75s. Waiting 8.25s for next cycle.
+2025-05-01 20:11:26,716 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.31s. Waiting 7.69s for next cycle.
+2025-05-01 20:11:36,734 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.33s. Waiting 7.67s for next cycle.
+2025-05-01 20:11:46,160 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.75s. Waiting 8.25s for next cycle.
+2025-05-01 20:11:57,148 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.74s. Waiting 7.26s for next cycle.
+2025-05-01 20:12:06,771 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.36s. Waiting 7.64s for next cycle.
+2025-05-01 20:12:16,086 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.67s. Waiting 8.33s for next cycle.
+2025-05-01 20:12:26,409 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.00s. Waiting 8.00s for next cycle.
+2025-05-01 20:12:36,928 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.51s. Waiting 7.49s for next cycle.
+2025-05-01 20:12:47,822 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 3.40s. Waiting 6.60s for next cycle.
+2025-05-01 20:12:56,420 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.00s. Waiting 8.00s for next cycle.
+2025-05-01 20:13:06,603 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.18s. Waiting 7.82s for next cycle.
+2025-05-01 20:13:16,747 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.33s. Waiting 7.67s for next cycle.
+2025-05-01 20:13:26,157 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.74s. Waiting 8.26s for next cycle.
+2025-05-01 20:13:36,104 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.68s. Waiting 8.32s for next cycle.
+2025-05-01 20:13:46,463 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.04s. Waiting 7.96s for next cycle.
+2025-05-01 20:13:57,689 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 3.26s. Waiting 6.74s for next cycle.
+2025-05-01 20:14:06,449 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.02s. Waiting 7.98s for next cycle.
+2025-05-01 20:14:16,424 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.99s. Waiting 8.01s for next cycle.
+2025-05-01 20:14:26,594 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.16s. Waiting 7.84s for next cycle.
+2025-05-01 20:14:36,782 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.34s. Waiting 7.66s for next cycle.
+2025-05-01 20:14:46,765 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.32s. Waiting 7.68s for next cycle.
+2025-05-01 20:14:56,541 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.10s. Waiting 7.90s for next cycle.
+2025-05-01 20:15:08,180 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 3.74s. Waiting 6.26s for next cycle.
+2025-05-01 20:15:16,508 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.06s. Waiting 7.94s for next cycle.
+2025-05-01 20:15:27,172 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.73s. Waiting 7.27s for next cycle.
+2025-05-01 20:15:36,623 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.18s. Waiting 7.82s for next cycle.
+2025-05-01 20:15:47,575 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 3.13s. Waiting 6.87s for next cycle.
+2025-05-01 20:15:56,516 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.07s. Waiting 7.93s for next cycle.
+2025-05-01 20:16:06,531 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.09s. Waiting 7.91s for next cycle.
+2025-05-01 20:16:16,315 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.87s. Waiting 8.13s for next cycle.
+2025-05-01 20:16:26,932 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.48s. Waiting 7.52s for next cycle.
+2025-05-01 20:16:36,374 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.92s. Waiting 8.08s for next cycle.
+2025-05-01 20:16:46,322 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.87s. Waiting 8.13s for next cycle.
+2025-05-01 20:16:56,527 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.08s. Waiting 7.92s for next cycle.
+2025-05-01 20:17:06,550 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.09s. Waiting 7.91s for next cycle.
+2025-05-01 20:17:15,980 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.52s. Waiting 8.48s for next cycle.
+2025-05-01 20:17:26,954 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.49s. Waiting 7.51s for next cycle.
+2025-05-01 20:17:36,797 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.28s. Waiting 7.72s for next cycle.
+2025-05-01 20:17:47,017 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.47s. Waiting 7.53s for next cycle.
+2025-05-01 20:17:56,271 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.73s. Waiting 8.27s for next cycle.
+2025-05-01 20:18:06,652 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.11s. Waiting 7.89s for next cycle.
+2025-05-01 20:18:16,650 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.10s. Waiting 7.90s for next cycle.
+2025-05-01 20:18:26,762 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.21s. Waiting 7.79s for next cycle.
+2025-05-01 20:18:36,772 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.22s. Waiting 7.78s for next cycle.
+2025-05-01 20:18:46,444 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.89s. Waiting 8.11s for next cycle.
+2025-05-01 20:18:56,994 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.43s. Waiting 7.57s for next cycle.
+2025-05-01 20:19:06,277 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 20:19:16,568 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.00s. Waiting 8.00s for next cycle.
+2025-05-01 20:19:26,297 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.73s. Waiting 8.27s for next cycle.
+2025-05-01 20:19:36,287 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 20:19:46,241 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.67s. Waiting 8.33s for next cycle.
+2025-05-01 20:19:56,146 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.57s. Waiting 8.43s for next cycle.
+2025-05-01 20:20:06,129 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 20:20:16,119 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.55s. Waiting 8.45s for next cycle.
+2025-05-01 20:20:26,760 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.19s. Waiting 7.81s for next cycle.
+2025-05-01 20:20:36,429 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.85s. Waiting 8.15s for next cycle.
+2025-05-01 20:20:46,136 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 20:20:56,359 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.78s. Waiting 8.22s for next cycle.
+2025-05-01 20:21:06,213 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.63s. Waiting 8.37s for next cycle.
+2025-05-01 20:21:16,165 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.58s. Waiting 8.42s for next cycle.
+2025-05-01 20:21:26,126 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 20:21:36,272 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.69s. Waiting 8.31s for next cycle.
+2025-05-01 20:21:46,774 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 2.19s. Waiting 7.81s for next cycle.
+2025-05-01 20:21:56,144 - DEBUG - [xrscalper_bot_init:4216] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 20:58:12,044 - INFO - [xrscalper_bot_init:4152] - --- Starting XR Scalper Bot (2025-05-01 20:58:12 CDT) ---
+2025-05-01 20:58:12,046 - INFO - [xrscalper_bot_init:4156] - Config loaded from config.json. Quote Currency: USDT
+2025-05-01 20:58:12,047 - INFO - [xrscalper_bot_init:4157] - Using Timezone: America/Chicago
+2025-05-01 20:58:12,047 - INFO - [xrscalper_bot_init:4162] - Versions: CCXT=4.4.72, Pandas=2.2.3, PandasTA=0.3.14b0, Python=3.12.10
+2025-05-01 20:58:12,047 - WARNING - [xrscalper_bot_init:4167] - [33m!!! LIVE TRADING IS ENABLED !!![0m
+2025-05-01 20:58:12,048 - WARNING - [xrscalper_bot_init:4172] - [91m!!! CAUTION: USING REAL MONEY ENVIRONMENT !!![0m
+2025-05-01 20:58:12,048 - INFO - [xrscalper_bot_init:4178] - Critical Settings: Risk/Trade=0.50%, Leverage=20x, Symbols=['FARTCOIN/USDT:USDT']
+2025-05-01 20:58:12,048 - INFO - [xrscalper_bot_init:4179] -                      TSL Enabled=True, BE Enabled=True
+2025-05-01 20:58:12,048 - INFO - [xrscalper_bot_init:4181] - Starting in 5 seconds...
+2025-05-01 20:58:17,076 - INFO - [xrscalper_bot_init:479] - Loading markets for bybit...
+2025-05-01 20:58:25,039 - INFO - [xrscalper_bot_init:481] - CCXT exchange initialized (bybit). Sandbox: False
+2025-05-01 20:58:25,040 - INFO - [xrscalper_bot_init:485] - Attempting initial balance fetch (Account Type: CONTRACT)...
+2025-05-01 20:58:26,151 - INFO - [xrscalper_bot_init:495] - [92mSuccessfully connected and fetched initial balance.[0m (Example: USDT available: 9.30074825)
+2025-05-01 20:58:26,151 - INFO - [xrscalper_bot_init:4198] - Starting main trading loop for symbols: ['FARTCOIN/USDT:USDT']
+2025-05-01 20:58:27,732 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.58s. Waiting 8.42s for next cycle.
+2025-05-01 20:58:37,682 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 20:58:47,701 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.55s. Waiting 8.45s for next cycle.
+2025-05-01 20:58:57,713 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 20:59:07,734 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.58s. Waiting 8.42s for next cycle.
+2025-05-01 20:59:17,704 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 20:59:27,925 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.76s. Waiting 8.24s for next cycle.
+2025-05-01 20:59:37,711 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.55s. Waiting 8.45s for next cycle.
+2025-05-01 20:59:47,778 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.61s. Waiting 8.39s for next cycle.
+2025-05-01 20:59:57,732 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.55s. Waiting 8.45s for next cycle.
+2025-05-01 21:00:07,756 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.58s. Waiting 8.42s for next cycle.
+2025-05-01 21:00:17,754 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.57s. Waiting 8.43s for next cycle.
+2025-05-01 21:00:27,715 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 21:00:37,714 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 21:00:47,752 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.57s. Waiting 8.43s for next cycle.
+2025-05-01 21:00:58,536 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.34s. Waiting 7.66s for next cycle.
+2025-05-01 21:01:07,881 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.69s. Waiting 8.31s for next cycle.
+2025-05-01 21:01:17,920 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.73s. Waiting 8.27s for next cycle.
+2025-05-01 21:01:27,724 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 21:01:37,733 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:01:47,741 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:01:57,901 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:02:07,878 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.67s. Waiting 8.33s for next cycle.
+2025-05-01 21:02:17,803 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.59s. Waiting 8.41s for next cycle.
+2025-05-01 21:02:27,748 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:02:37,890 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.68s. Waiting 8.32s for next cycle.
+2025-05-01 21:02:47,911 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:02:57,932 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 21:03:07,759 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:03:17,757 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:03:27,929 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:03:38,102 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.88s. Waiting 8.12s for next cycle.
+2025-05-01 21:03:47,944 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 21:03:57,733 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.50s. Waiting 8.50s for next cycle.
+2025-05-01 21:04:07,743 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.51s. Waiting 8.49s for next cycle.
+2025-05-01 21:04:17,790 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 21:04:27,783 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.55s. Waiting 8.45s for next cycle.
+2025-05-01 21:04:37,747 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.51s. Waiting 8.49s for next cycle.
+2025-05-01 21:04:48,281 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.05s. Waiting 7.95s for next cycle.
+2025-05-01 21:04:57,768 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 21:05:07,769 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 21:05:17,784 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.55s. Waiting 8.45s for next cycle.
+2025-05-01 21:05:27,832 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.60s. Waiting 8.40s for next cycle.
+2025-05-01 21:05:37,927 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.69s. Waiting 8.31s for next cycle.
+2025-05-01 21:05:47,925 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.69s. Waiting 8.31s for next cycle.
+2025-05-01 21:05:58,183 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.94s. Waiting 8.06s for next cycle.
+2025-05-01 21:06:07,941 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:06:17,963 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 21:06:27,781 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:06:37,904 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.66s. Waiting 8.34s for next cycle.
+2025-05-01 21:06:47,766 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.52s. Waiting 8.48s for next cycle.
+2025-05-01 21:06:57,762 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.52s. Waiting 8.48s for next cycle.
+2025-05-01 21:07:07,939 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:07:17,929 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.69s. Waiting 8.31s for next cycle.
+2025-05-01 21:07:27,762 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.52s. Waiting 8.48s for next cycle.
+2025-05-01 21:07:38,428 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.18s. Waiting 7.82s for next cycle.
+2025-05-01 21:07:47,803 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 21:07:57,972 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 21:08:08,327 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.07s. Waiting 7.93s for next cycle.
+2025-05-01 21:08:29,377 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 13.12s. Waiting 0.00s for next cycle.
+2025-05-01 21:08:31,198 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.82s. Waiting 8.18s for next cycle.
+2025-05-01 21:08:41,106 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 21:08:51,087 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:09:01,531 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.14s. Waiting 7.86s for next cycle.
+2025-05-01 21:09:11,105 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 21:09:21,304 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.91s. Waiting 8.09s for next cycle.
+2025-05-01 21:09:31,238 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.84s. Waiting 8.16s for next cycle.
+2025-05-01 21:09:41,093 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:09:50,956 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 21:10:00,939 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:10:10,959 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 21:10:21,095 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:10:30,974 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.57s. Waiting 8.43s for next cycle.
+2025-05-01 21:10:40,945 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:10:50,930 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.52s. Waiting 8.48s for next cycle.
+2025-05-01 21:11:00,964 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 21:11:11,071 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.66s. Waiting 8.34s for next cycle.
+2025-05-01 21:11:21,079 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.67s. Waiting 8.33s for next cycle.
+2025-05-01 21:11:30,945 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:11:41,116 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 21:11:51,017 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.61s. Waiting 8.39s for next cycle.
+2025-05-01 21:12:00,928 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.51s. Waiting 8.49s for next cycle.
+2025-05-01 21:12:10,930 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.52s. Waiting 8.48s for next cycle.
+2025-05-01 21:12:20,973 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.56s. Waiting 8.44s for next cycle.
+2025-05-01 21:12:31,135 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.72s. Waiting 8.28s for next cycle.
+2025-05-01 21:12:41,118 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.68s. Waiting 8.32s for next cycle.
+2025-05-01 21:12:51,231 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.79s. Waiting 8.21s for next cycle.
+2025-05-01 21:13:00,983 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.54s. Waiting 8.46s for next cycle.
+2025-05-01 21:13:10,943 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.50s. Waiting 8.50s for next cycle.
+2025-05-01 21:13:21,489 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.04s. Waiting 7.96s for next cycle.
+2025-05-01 21:13:31,151 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:13:40,950 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.50s. Waiting 8.50s for next cycle.
+2025-05-01 21:13:51,151 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.70s. Waiting 8.30s for next cycle.
+2025-05-01 21:14:01,097 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.65s. Waiting 8.35s for next cycle.
+2025-05-01 21:14:11,121 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.67s. Waiting 8.33s for next cycle.
+2025-05-01 21:14:21,290 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.84s. Waiting 8.16s for next cycle.
+2025-05-01 21:14:31,879 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.42s. Waiting 7.58s for next cycle.
+2025-05-01 21:14:41,171 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 21:14:51,523 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.07s. Waiting 7.93s for next cycle.
+2025-05-01 21:15:01,142 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.68s. Waiting 8.32s for next cycle.
+2025-05-01 21:15:10,994 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.53s. Waiting 8.47s for next cycle.
+2025-05-01 21:15:21,168 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 21:15:31,171 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.71s. Waiting 8.29s for next cycle.
+2025-05-01 21:15:41,325 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 1.86s. Waiting 8.14s for next cycle.
+2025-05-01 21:15:51,497 - DEBUG - [xrscalper_bot_init:4233] - Loop finished in 2.03s. Waiting 7.97s for next cycle.

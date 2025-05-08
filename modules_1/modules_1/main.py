@@ -1,0 +1,337 @@
+# File: main.py
+"""
+Main execution script for the XR Scalper Trading Bot.
+
+This script initializes the bot, loads configuration, sets up logging,
+connects to the exchange, and runs the main trading loop which iterates
+through specified symbols, analyzes market data, and potentially places trades
+based on the defined strategy.
+"""
+
+import logging
+import sys
+import signal
+import traceback
+import asyncio
+from datetime import datetime
+from typing import Dict, Any, Optional, List
+import os
+
+# Third-party imports
+# import ccxt # No longer needed if ccxt_async.version is used
+import ccxt.async_support as ccxt_async  # For async exchange operations
+
+# pandas and pandas_ta are likely used in submodules like trading_strategy
+# but are kept here for clarity if they are fundamental to data processing passed around.
+import pandas as pd
+
+# --- Import Custom Modules ---
+try:
+    import config_loader
+    import exchange_api
+    import logger_setup
+    import trading_strategy
+    import utils
+except ImportError as e:
+    print(
+        "CRITICAL ERROR: Failed to import one or more custom modules. Ensure all required modules "
+        "(config_loader.py, exchange_api.py, logger_setup.py, trading_strategy.py, utils.py) "
+        "are in the correct directory and do not have syntax errors.",
+        file=sys.stderr,
+    )
+    print(f"ImportError details: {e}", file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+    sys.exit(1)
+except Exception as e:  # Catch any other unexpected error during imports
+    print(f"CRITICAL ERROR: An unexpected error occurred during module import: {e}", file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+    sys.exit(1)
+
+
+# --- Constants ---
+DEFAULT_LOOP_INTERVAL_SECONDS = 60
+APP_NAME = "XRSCALPER_BOT"
+
+# --- Global State for Shutdown ---
+shutdown_requested = False
+# It's generally better to pass logger instances rather than using a global one,
+# but for signal handlers that might be called before full logger setup,
+# a basic print or a try-get-logger approach is common.
+# For now, the signal handler will try to get a logger if available.
+
+
+def signal_handler(signum: int, frame: Any) -> None:
+    """Handles termination signals and requests a graceful shutdown."""
+    global shutdown_requested
+    shutdown_requested = True
+    # type: ignore because _value2member_map_ is internal
+    signal_name = (
+        signal.Signals(signum).name
+        if hasattr(signal, "Signals") and signum in signal.Signals._value2member_map_
+        else f"Signal {signum}"
+    )  # type: ignore
+
+    message = f"\nSignal {signal_name} received. Requesting bot shutdown..."
+    # Attempt to use logging if available, otherwise print to stderr
+    try:
+        # Check if a root logger has handlers (basic check for configured logging)
+        # or get a specific logger if one is commonly used early.
+        logger = logging.getLogger(APP_NAME)  # Or specific logger like "xrscalper_bot_shutdown"
+        if logger.hasHandlers() or logging.getLogger().hasHandlers():
+            logger.critical(message.strip())  # Use critical for shutdown signals
+        else:
+            print(message + " (logging not fully configured)", file=sys.stderr)
+    except Exception:  # Fallback if logging fails
+        print(message + " (error during logging attempt)", file=sys.stderr)
+
+
+async def run_trading_cycle(exchange: ccxt_async.Exchange, config: Dict[str, Any], main_logger: logging.Logger) -> None:
+    """
+    Executes a single trading cycle: iterates through symbols, analyzes, and trades.
+    """
+    symbols: List[str] = config.get("trading", {}).get("symbols", [])
+    timeframe: str = config.get("trading", {}).get("timeframe", "1m")
+    ohlcv_limit: int = config.get("trading", {}).get("ohlcv_limit", 100)
+
+    if not symbols:
+        main_logger.warning("No symbols configured for trading in this cycle.")
+        return
+
+    main_logger.info(f"--- Starting new trading cycle for symbols: {', '.join(symbols)} ---")
+
+    for symbol in symbols:
+        if shutdown_requested:
+            main_logger.info(f"Shutdown requested during symbol processing ({symbol}). Aborting cycle.")
+            break
+        try:
+            main_logger.info(f"Processing symbol: {symbol}")
+
+            # 1. Fetch Market Data
+            # Example: ohlcv = await exchange_api.fetch_ohlcv_async(exchange, symbol, timeframe, limit=ohlcv_limit)
+            # main_logger.debug(f"Fetched {len(ohlcv)} candles for {symbol}")
+            # df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            # df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True)
+            # df.set_index('timestamp', inplace=True)
+
+            # --- Placeholder for fetching data ---
+            await asyncio.sleep(0.1)  # Simulate async I/O
+            df = pd.DataFrame()  # Replace with actual data fetching
+            main_logger.info(f"Simulated data fetch for {symbol}.")
+            # --- End Placeholder ---
+
+            if df.empty:
+                main_logger.warning(f"No data fetched for {symbol}, skipping analysis.")
+                continue
+
+            # 2. Analyze Data & Make Decision (using trading_strategy)
+            # Example: decision = await trading_strategy.analyze_market(df, symbol, config, exchange) # strategy might need exchange access
+            # main_logger.info(f"Strategy decision for {symbol}: {decision.action if decision else 'NO_ACTION'}")
+
+            # --- Placeholder for analysis and decision ---
+            await asyncio.sleep(0.1)  # Simulate analysis
+            main_logger.info(f"Simulated analysis for {symbol}.")
+            # --- End Placeholder ---
+
+            # 3. Execute Trades (if decision warrants, using exchange_api)
+            # Example: if decision and decision.action != "HOLD":
+            #    await exchange_api.execute_trade(exchange, decision, config)
+            # --- Placeholder for trade execution ---
+            await asyncio.sleep(0.1)  # Simulate trade execution
+            main_logger.info(f"Simulated trade action for {symbol}.")
+            # --- End Placeholder ---
+
+        except ccxt.NetworkError as e:
+            main_logger.error(f"Network error processing {symbol}: {e}", exc_info=True)
+        except ccxt.ExchangeError as e:
+            main_logger.error(f"Exchange error processing {symbol}: {e}", exc_info=True)
+        except Exception as e:
+            main_logger.error(f"Unexpected error processing {symbol}: {e}", exc_info=True)
+        finally:
+            # Optional: Short delay between processing symbols to avoid rate limits
+            # if not shutdown_requested and len(symbols) > 1 and symbol != symbols[-1]:
+            #     await asyncio.sleep(config.get("trading", {}).get("intra_symbol_delay_seconds", 1))
+            pass  # No delay in this template
+
+    main_logger.info("--- Trading cycle finished ---")
+
+
+async def main() -> None:
+    """Main asynchronous function to run the bot."""
+    global shutdown_requested  # Allow modification by signal_handler
+
+    # Initialize logger for the main application scope
+    # This logger will be used before the full config logging is set up for critical messages
+    # and then reconfigured by logger_setup.
+    # Using a distinct name for initial/critical logs vs operational logs can be helpful.
+    # For simplicity, we'll use one main logger name.
+    main_logger = logging.getLogger(APP_NAME)  # Main application logger
+
+    # --- Load Configuration ---
+    CONFIG: Dict[str, Any] = {}
+    try:
+        CONFIG = config_loader.load_config()
+        # Initial print, as logging might not be set up yet if config fails partially
+        print(f"Configuration loaded successfully from '{utils.CONFIG_FILE}'.", file=sys.stderr)
+    except FileNotFoundError:
+        # No config means no logging config, print to stderr
+        print(f"CRITICAL: Configuration file '{utils.CONFIG_FILE}' not found. Exiting.", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"CRITICAL: Error loading configuration: {e}. Exiting.", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+
+    # --- Configure Logging ---
+    try:
+        logger_setup.configure_logging(CONFIG)
+        main_logger.info("Logging configured successfully.")  # Now use the logger
+    except Exception as e:
+        main_logger.critical(f"Error configuring logging: {e}. Exiting.", exc_info=True)
+        # If logging setup fails, further logs might not work, so also print
+        print(f"CRITICAL: Error configuring logging: {e}. Exiting.", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+
+    main_logger.info(f"--- Initializing {APP_NAME} (Async Version) ---")
+    main_logger.info(f"CCXT Version: {ccxt_async}")  # Use async version
+
+    # --- Timezone Configuration ---
+    configured_timezone_str = os.getenv("TIMEZONE", CONFIG.get("system", {}).get("timezone", utils.DEFAULT_TIMEZONE))
+    try:
+        utils.set_timezone(configured_timezone_str)
+        main_logger.info(f"Using Timezone: {utils.get_timezone()}")
+    except Exception as e:
+        main_logger.warning(
+            f"Failed to set timezone to '{configured_timezone_str}': {e}. Using system default or UTC.", exc_info=True
+        )
+
+    # --- Sensitive Data Masking for Logging ---
+    api_key = CONFIG.get("exchange", {}).get("api_key")
+    api_secret = CONFIG.get("exchange", {}).get("api_secret")
+
+    if hasattr(utils, "SensitiveFormatter") and hasattr(utils.SensitiveFormatter, "set_sensitive_data"):
+        if api_key and api_secret:
+            try:
+                utils.SensitiveFormatter.set_sensitive_data([api_key, api_secret])  # Pass as a list
+                main_logger.debug("Sensitive data (API key/secret) masking configured for logging.")
+            except Exception as e:
+                main_logger.warning(f"Error configuring sensitive data masking: {e}", exc_info=True)
+        else:
+            main_logger.warning(
+                "API key or secret not found in configuration. Sensitive data masking may not be fully effective."
+            )
+    else:
+        main_logger.info("SensitiveFormatter or set_sensitive_data not found in utils. Skipping masking setup.")
+
+    # --- Startup Time ---
+    try:
+        current_time_str = datetime.now(utils.get_timezone()).strftime("%Y-%m-%d %H:%M:%S %Z")
+        main_logger.info(f"Startup Time: {current_time_str}")
+    except Exception as e:
+        main_logger.warning(f"Could not format startup time with timezone: {e}. Using UTC.", exc_info=True)
+        main_logger.info(f"Startup Time (UTC): {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+
+    # --- Initialize Exchange ---
+    exchange: Optional[ccxt_async.Exchange] = None
+    try:
+        exchange_id = CONFIG.get("exchange", {}).get("name", "binance")  # Default to 'binance' if not specified
+        # exchange_api.initialize_exchange should handle API key presence checks
+        exchange = await exchange_api.initialize_exchange(
+            exchange_id=exchange_id,
+            api_key=api_key,
+            api_secret=api_secret,
+            config=CONFIG.get("exchange", {}),  # Pass exchange-specific sub-config
+        )
+        main_logger.info(f"Exchange '{exchange_id}' initialized successfully.")
+        # Optional: Load markets, check connection
+        # await exchange.load_markets()
+        # main_logger.info(f"Markets loaded for {exchange_id}.")
+        # main_logger.info(f"Rate limit: {exchange.rateLimit}")
+
+    except ccxt.AuthenticationError as e:
+        main_logger.critical(f"Exchange authentication failed: {e}. Check API keys and permissions.", exc_info=True)
+        sys.exit(1)
+    except ccxt.NetworkError as e:
+        main_logger.critical(
+            f"Network error initializing exchange: {e}. Check connection and exchange status.", exc_info=True
+        )
+        sys.exit(1)
+    except Exception as e:
+        main_logger.critical(f"Failed to initialize exchange: {e}", exc_info=True)
+        sys.exit(1)
+
+    if not exchange:  # Should not happen if initialize_exchange raises on failure, but as a safeguard
+        main_logger.critical("Exchange object is None after initialization attempt. Exiting.")
+        sys.exit(1)
+
+    # --- Main Trading Loop ---
+    loop_interval_seconds = CONFIG.get("trading", {}).get("loop_interval_seconds", DEFAULT_LOOP_INTERVAL_SECONDS)
+    main_logger.info(f"Starting main trading loop. Update interval: {loop_interval_seconds} seconds.")
+
+    try:
+        while not shutdown_requested:
+            await run_trading_cycle(exchange, CONFIG, main_logger)
+
+            if shutdown_requested:
+                main_logger.info("Shutdown requested. Exiting main loop.")
+                break
+
+            main_logger.debug(f"Main loop iteration complete. Waiting for {loop_interval_seconds} seconds...")
+            # Sleep in 1-second intervals to allow faster shutdown response
+            for _ in range(loop_interval_seconds):
+                if shutdown_requested:
+                    main_logger.info("Shutdown detected during wait period. Breaking sleep.")
+                    break
+                await asyncio.sleep(1)
+
+    except asyncio.CancelledError:
+        main_logger.info("Main trading loop was cancelled.")
+    except Exception as e:
+        main_logger.critical(f"Unhandled exception in main trading loop: {e}", exc_info=True)
+    finally:
+        main_logger.info("--- Initiating Bot Shutdown Sequence ---")
+        if exchange:
+            try:
+                main_logger.info(f"Closing exchange connection for '{exchange.id}'...")
+                await exchange_api.close_exchange(exchange)
+                main_logger.info(f"Exchange connection for '{exchange.id}' closed.")
+            except Exception as e:
+                main_logger.error(f"Error closing exchange connection: {e}", exc_info=True)
+        main_logger.info(f"--- {APP_NAME} Shutdown Complete ---")
+
+
+if __name__ == "__main__":
+    # --- Register Signal Handlers ---
+    # Handle SIGINT (Ctrl+C) and SIGTERM (kill)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    # Basic console logging setup until file logging is configured
+    # This ensures that early messages (like signal handling before full logger setup) go somewhere visible.
+    # logger_setup.configure_logging should override this if it sets up root logger handlers.
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", stream=sys.stdout
+    )
+    # If logger_setup configures specific loggers, not root, this basicConfig might still be active for others.
+    # It's usually fine as logger_setup would typically add more specific handlers.
+
+    # Get a logger for the __main__ block itself, if needed for pre-async messages
+    script_runner_logger = logging.getLogger(f"{APP_NAME}_runner")
+
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        # This might be caught if shutdown_requested is not set fast enough or asyncio.run is interrupted.
+        script_runner_logger.info("KeyboardInterrupt received directly in __main__. Shutting down.")
+    except SystemExit as e:
+        # sys.exit() calls will be caught here.
+        # Log the exit code if it's non-zero (error)
+        if e.code != 0 and e.code is not None:  # e.code can be None
+            script_runner_logger.warning(f"Bot exited with code: {e.code}")
+        else:
+            script_runner_logger.info("Bot exited gracefully.")
+    except Exception as e:
+        script_runner_logger.critical(f"Unhandled exception in asyncio.run(main()): {e}", exc_info=True)
+        # Also print to stderr as logging might have issues
+        print(f"CRITICAL UNHANDLED EXCEPTION: {e}\n{traceback.format_exc()}", file=sys.stderr)
+        sys.exit(1)  # Ensure non-zero exit code for critical failures

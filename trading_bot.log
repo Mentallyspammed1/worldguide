@@ -1,0 +1,290 @@
+2025-05-01 04:22:29,057 - INFO - [intermediate_code.tmp:112] - Configuration loaded successfully from config.json
+2025-05-01 04:22:29,057 - ERROR - [intermediate_code.tmp:132] - Missing required configuration section: 'exchange'
+2025-05-01 04:22:29,058 - CRITICAL - [intermediate_code.tmp:1128] - Failed to load configuration. Exiting.
+2025-05-01 04:30:28,553 - INFO - [y.1.4.py:134] - Configuration loaded successfully from config.json
+2025-05-01 04:30:28,554 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'exchange'
+2025-05-01 04:30:28,554 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'api_credentials'
+2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'trading_settings'
+2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'risk_management'
+2025-05-01 04:30:28,555 - ERROR - [y.1.4.py:137] - Configuration validation failed.
+2025-05-01 04:30:28,555 - CRITICAL - [y.1.4.py:1560] - Failed to load or validate configuration. Exiting.
+2025-05-01 18:13:27,911 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'exchange'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'api_credentials'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'trading_settings'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'risk_management'
+2025-05-01 18:13:27,912 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-01 18:13:27,913 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
+2025-05-03 01:03:05,018 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 01:03:05,018 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'exchange'
+2025-05-03 01:03:05,018 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'api_credentials'
+2025-05-03 01:03:05,019 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'trading_settings'
+2025-05-03 01:03:05,019 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'indicator_settings'
+2025-05-03 01:03:05,019 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'risk_management'
+2025-05-03 01:03:05,019 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'logging'
+2025-05-03 01:03:05,019 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-03 01:03:05,020 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
+2025-05-03 04:18:21,826 - INFO - [y.1.4.py:134] - Configuration loaded successfully from config.json
+2025-05-03 04:18:21,827 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'exchange'
+2025-05-03 04:18:21,827 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'api_credentials'
+2025-05-03 04:18:21,827 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'trading_settings'
+2025-05-03 04:18:21,827 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'indicator_settings'
+2025-05-03 04:18:21,827 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'risk_management'
+2025-05-03 04:18:21,828 - ERROR - [y.1.4.py:156] - Missing required configuration section: 'logging'
+2025-05-03 04:18:21,828 - ERROR - [y.1.4.py:137] - Configuration validation failed.
+2025-05-03 04:18:21,828 - CRITICAL - [y.1.4.py:1560] - Failed to load or validate configuration. Exiting.
+2025-05-03 04:18:36,468 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 04:18:36,470 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'exchange'
+2025-05-03 04:18:36,470 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'api_credentials'
+2025-05-03 04:18:36,470 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'trading_settings'
+2025-05-03 04:18:36,470 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'indicator_settings'
+2025-05-03 04:18:36,470 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'risk_management'
+2025-05-03 04:18:36,471 - ERROR - [y.1.5.py:165] - Missing required configuration section: 'logging'
+2025-05-03 04:18:36,471 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-03 04:18:36,471 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
+2025-05-03 05:07:59,163 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:07:59,164 - ERROR - [y.1.5.py:195] - Config validation failed: 'trading_settings.leverage' must be a positive finite number (loaded as Decimal).
+2025-05-03 05:07:59,164 - ERROR - [y.1.5.py:220] - Config validation failed: 'risk_per_trade_percent' must be a finite number between 0 (exclusive) and 100 (inclusive).
+2025-05-03 05:07:59,164 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-03 05:07:59,164 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
+2025-05-03 05:09:31,102 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:09:31,102 - ERROR - [y.1.5.py:195] - Config validation failed: 'trading_settings.leverage' must be a positive finite number (loaded as Decimal).
+2025-05-03 05:09:31,102 - ERROR - [y.1.5.py:220] - Config validation failed: 'risk_per_trade_percent' must be a finite number between 0 (exclusive) and 100 (inclusive).
+2025-05-03 05:09:31,103 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-03 05:09:31,103 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
+2025-05-03 05:13:14,805 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:13:14,806 - ERROR - [y.1.5.py:195] - Config validation failed: 'trading_settings.leverage' must be a positive finite number (loaded as Decimal).
+2025-05-03 05:13:14,807 - ERROR - [y.1.5.py:146] - Configuration validation failed.
+2025-05-03 05:13:14,807 - CRITICAL - [y.1.5.py:1957] - Failed to load or validate configuration. Exiting.
+2025-05-03 05:14:32,857 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:14:32,858 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-03 05:14:32,859 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-03 05:14:33,144 - ERROR - [y.1.5.py:312] - Network error loading markets: bybit GET https://api.bybit.com/v5/asset/coin/query-info? 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: WFEFho7g3qLrO5mEC7v67MIFwmxeXQdwH9iSPj3rH5tE0dhq_GgGnw==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 577, in fetch
+    response.raise_for_status()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://api.bybit.com/v5/asset/coin/query-info
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 306, in __init__
+    self.exchange.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4388, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 595, in fetch
+    self.handle_http_status_code(http_status_code, http_status_text, url, method, http_response)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1691, in handle_http_status_code
+    raise ErrorClass(self.id + ' ' + method + ' ' + url + ' ' + codeAsString + ' ' + reason + ' ' + body)
+ccxt.base.errors.RateLimitExceeded: bybit GET https://api.bybit.com/v5/asset/coin/query-info? 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: WFEFho7g3qLrO5mEC7v67MIFwmxeXQdwH9iSPj3rH5tE0dhq_GgGnw==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>
+2025-05-03 05:14:33,168 - CRITICAL - [y.1.5.py:1992] - Failed to initialize core components: bybit GET https://api.bybit.com/v5/asset/coin/query-info? 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: WFEFho7g3qLrO5mEC7v67MIFwmxeXQdwH9iSPj3rH5tE0dhq_GgGnw==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>. Exiting.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 577, in fetch
+    response.raise_for_status()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://api.bybit.com/v5/asset/coin/query-info
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 1987, in __init__
+    self.exchange = BybitV5Wrapper(self.config, self.logger)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 306, in __init__
+    self.exchange.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4388, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 595, in fetch
+    self.handle_http_status_code(http_status_code, http_status_text, url, method, http_response)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1691, in handle_http_status_code
+    raise ErrorClass(self.id + ' ' + method + ' ' + url + ' ' + codeAsString + ' ' + reason + ' ' + body)
+ccxt.base.errors.RateLimitExceeded: bybit GET https://api.bybit.com/v5/asset/coin/query-info? 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: WFEFho7g3qLrO5mEC7v67MIFwmxeXQdwH9iSPj3rH5tE0dhq_GgGnw==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>
+2025-05-03 05:15:01,048 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:15:01,050 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-03 05:15:01,051 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-03 05:15:13,910 - INFO - [y.1.5.py:307] - Markets loaded successfully for bybit.
+2025-05-03 05:15:13,910 - INFO - [y.1.5.py:2013] - --- Starting Trading Bot ---
+2025-05-03 05:15:13,910 - INFO - [y.1.5.py:2014] - Symbol: FARTCOINUSDT, Timeframe: 1m, Quote: USDT, Leverage: 25.0x, Hedge Mode: False
+2025-05-03 05:15:13,911 - INFO - [y.1.5.py:2015] - Poll Interval: 60s
+2025-05-03 05:15:13,911 - INFO - [y.1.5.py:2112] - Initializing exchange settings...
+2025-05-03 05:15:13,911 - INFO - [y.1.5.py:885] - Setting leverage for FARTCOINUSDT to 25.0x...
+2025-05-03 05:15:14,572 - INFO - [y.1.5.py:912] - Leverage for FARTCOINUSDT set to 25.0x request sent successfully.
+2025-05-03 05:15:14,573 - INFO - [y.1.5.py:2121] - Leverage set to 25.0x for FARTCOINUSDT.
+2025-05-03 05:15:14,573 - CRITICAL - [y.1.5.py:2874] - Unhandled exception caused bot termination: 'TradingBot' object has no attribute 'exchange_id'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 2854, in <module>
+    bot_instance.run()
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 2018, in run
+    if not self.initialize_exchange_settings():
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 2161, in initialize_exchange_settings
+    if self.exchange_id == 'bybit' and self.exchange.category in ['linear', 'inverse']:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'TradingBot' object has no attribute 'exchange_id'. Did you mean: 'exchange'?
+2025-05-03 05:16:37,060 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:16:37,061 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-03 05:16:37,062 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-03 05:16:37,062 - CRITICAL - [y.1.5.py:1992] - Failed to initialize core components: 'BybitV5Wrapper' object has no attribute 'exchange_id'. Exiting.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 1987, in __init__
+    self.exchange = BybitV5Wrapper(self.config, self.logger)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 275, in __init__
+    if self.exchange_id != 'bybit':
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'BybitV5Wrapper' object has no attribute 'exchange_id'. Did you mean: 'exchange'?
+2025-05-03 05:17:34,329 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:17:34,330 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-03 05:17:34,331 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-03 05:17:34,331 - CRITICAL - [y.1.5.py:1992] - Failed to initialize core components: 'BybitV5Wrapper' object has no attribute 'exchange_id'. Exiting.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 279, in __init__
+    exchange_class = getattr(ccxt, self.exchange_id)
+                                   ^^^^^^^^^^^^^^^^
+AttributeError: 'BybitV5Wrapper' object has no attribute 'exchange_id'. Did you mean: 'exchange'?
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 1987, in __init__
+    self.exchange = BybitV5Wrapper(self.config, self.logger)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/y.1.5.py", line 281, in __init__
+    self.logger.critical(f"CCXT exchange class not found for ID: '{self.exchange_id}'. Exiting.")
+                                                                   ^^^^^^^^^^^^^^^^
+AttributeError: 'BybitV5Wrapper' object has no attribute 'exchange_id'. Did you mean: 'exchange'?
+2025-05-03 05:19:38,939 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:19:38,940 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-03 05:19:38,941 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-03 05:19:49,096 - INFO - [y.1.5.py:307] - Markets loaded successfully for Bybit.
+2025-05-03 05:19:49,100 - INFO - [y.1.5.py:2013] - --- Starting Trading Bot ---
+2025-05-03 05:19:49,101 - INFO - [y.1.5.py:2014] - Symbol: FARTCOINUSDT, Timeframe: 1m, Quote: USDT, Leverage: 25.0x, Hedge Mode: False
+2025-05-03 05:19:49,101 - INFO - [y.1.5.py:2015] - Poll Interval: 60s
+2025-05-03 05:19:49,101 - INFO - [y.1.5.py:2112] - Initializing exchange settings...
+2025-05-03 05:19:49,101 - INFO - [y.1.5.py:885] - Setting leverage for FARTCOINUSDT to 25.0x...
+2025-05-03 05:19:49,730 - ERROR - [y.1.5.py:414] - Bad Request: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746267589768}. Check parameters. Assuming non-retryable.
+2025-05-03 05:19:49,731 - ERROR - [y.1.5.py:2118] - Failed to set initial leverage to 25.0x for FARTCOINUSDT. Check permissions/settings. Continuing but trading might fail.
+2025-05-03 05:19:49,731 - CRITICAL - [y.1.5.py:2019] - Failed to initialize exchange settings (e.g., leverage). Exiting.
+2025-05-03 05:19:49,735 - INFO - [y.1.5.py:2860] - Bot process terminated with exit code 1.
+2025-05-03 05:20:48,449 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-03 05:20:48,450 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-03 05:20:48,451 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-03 05:20:57,742 - INFO - [y.1.5.py:307] - Markets loaded successfully for Bybit.
+2025-05-03 05:20:57,744 - INFO - [y.1.5.py:2013] - --- Starting Trading Bot ---
+2025-05-03 05:20:57,744 - INFO - [y.1.5.py:2014] - Symbol: FARTCOINUSDT, Timeframe: 1m, Quote: USDT, Leverage: 25.0x, Hedge Mode: False
+2025-05-03 05:20:57,744 - INFO - [y.1.5.py:2015] - Poll Interval: 60s
+2025-05-03 05:20:57,744 - INFO - [y.1.5.py:2112] - Initializing exchange settings...
+2025-05-03 05:20:57,745 - INFO - [y.1.5.py:885] - Setting leverage for FARTCOINUSDT to 25.0x...
+2025-05-03 05:20:58,147 - ERROR - [y.1.5.py:414] - Bad Request: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746267658311}. Check parameters. Assuming non-retryable.
+2025-05-03 05:20:58,148 - ERROR - [y.1.5.py:2118] - Failed to set initial leverage to 25.0x for FARTCOINUSDT. Check permissions/settings. Continuing but trading might fail.
+2025-05-03 05:20:58,148 - CRITICAL - [y.1.5.py:2019] - Failed to initialize exchange settings (e.g., leverage). Exiting.
+2025-05-03 05:20:58,149 - INFO - [y.1.5.py:2860] - Bot process terminated with exit code 1.

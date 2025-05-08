@@ -1,0 +1,977 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Indicators Module (v3.5 - Pyrmethus Weave: Structure)
+
+Contains the alchemical formulas (technical indicators) for trading strategies,
+optimized for use with the BybitHelper Arcanum. Uses pandas_ta for efficiency
+and includes custom Ehlers Volumetric Trend (EVT), manual Pivot Points,
+Swing High/Low Support/Resistance, and basic Order Block identification.
+
+Provides:
+- calculate_indicators: Processes a full DataFrame scroll.
+- update_indicators: Efficiently updates indicators for new candle whispers.
+
+Indicators Included:
+EVT, ATR, SMA, HMA, ZEMA, Supertrend, MACD, RSI, Fisher(RSI), Momentum,
+StochRSI, ADX, Volume SMA, Standard Pivots (Daily), Fibonacci Pivots (Daily),
+Swing High/Low S/R, Basic Order Blocks.
+
+Termux Dependencies:
+pkg install python numpy pandas
+pip install pandas_ta colorama
+"""
+
+import logging
+from typing import Any, Dict, Optional
+
+import numpy as np # Summoned for numerical conjurations
+import pandas as pd
+import pandas_ta as ta
+from colorama import init as colorama_init, Fore, Style # For vibrant terminal echoes
+
+# Initialize Colorama for mystical hues
+colorama_init(autoreset=True)
+
+# --- Configuration Import ---
+# Attempt to import the AppConfig spellbook from the main helper scroll.
+try:
+    # Adjust the import path based on your project structure
+    from bybit_trading_enhanced import AppConfig
+except ImportError:
+    print(f"{Fore.RED + Style.BRIGHT}Fatal Error:{Style.RESET_ALL} {Fore.YELLOW}Cannot import AppConfig from bybit_trading_enhanced.py.{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Ensure bybit_trading_enhanced.py is accessible and defines AppConfig.{Style.RESET_ALL}")
+    # Define a dummy AppConfig locally ONLY for static analysis or isolated testing.
+    class AppConfig:
+        # Provide default values matching the real AppConfig structure
+        evt_length: int = 7
+        evt_multiplier: float = 2.5
+        atr_period: int = 14
+        sma_short: int = 10
+        sma_long: int = 50
+        hma_period: int = 9
+        zema_period: int = 14
+        supertrend_period: int = 10
+        supertrend_multiplier: float = 3.0
+        macd_fast: int = 12
+        macd_slow: int = 26
+        macd_signal: int = 9
+        rsi_period: int = 14
+        fisher_rsi_period: int = 9
+        momentum_period: int = 10
+        stochrsi_length: int = 14
+        stochrsi_rsi_length: int = 14
+        stochrsi_k: int = 3
+        stochrsi_d: int = 3
+        adx_period: int = 14
+        volume_sma_period: int = 20
+        symbol: str = "BTCUSDT"
+        # --- New Parameters for Structure ---
+        swing_sr_window: int = 10 # Bars left/right to confirm swing point
+        ob_atr_threshold: float = 1.5 # Min ATR multiple for move after OB candle
+        ob_wick_factor: Optional[float] = 0.5 # Max wick size relative to body for OB candle (optional filter)
+
+        # Helper for dummy config display
+        def model_dump_json(self, indent=None):
+            import json
+            attrs = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+            return json.dumps(attrs, indent=indent)
+
+    print(f"{Fore.YELLOW + Style.BRIGHT}Warning:{Style.RESET_ALL} {Fore.YELLOW}Using dummy AppConfig for indicators.py. This is for linting/testing only.{Style.RESET_ALL}")
+
+
+# Setup logger for this module's whispers
+logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
+# --- Pivot Point Calculation Spell (Unchanged - Adjusted to use full daily_df) ---
+def _calculate_daily_pivot_points(daily_df: pd.DataFrame) -> pd.DataFrame:
+    """Calculates Standard and Fibonacci Pivot Points based on previous day's HLC."""
+    logger.debug(f"{Fore.CYAN}# Calculating daily pivot points...{Style.RESET_ALL}")
+    if not all(col in daily_df.columns for col in ['high', 'low', 'close']):
+        logger.error(f"{Fore.RED}Daily DataFrame missing required columns (high, low, close) for pivot calculation.{Style.RESET_ALL}")
+        return pd.DataFrame()
+    if daily_df.empty:
+         logger.debug(f"{Fore.YELLOW}Daily DataFrame is empty. No pivots to calculate.{Style.RESET_ALL}")
+         return pd.DataFrame()
+
+    # Use the shift(1) trick on the daily data itself
+    prev_high = daily_df['high'].shift(1)
+    prev_low = daily_df['low'].shift(1)
+    prev_close = daily_df['close'].shift(1)
+
+    # Calculate pivots for each day based on the *previous* day's HLC
+    pp = (prev_high + prev_low + prev_close) / 3
+    r1 = (2 * pp) - prev_low; s1 = (2 * pp) - prev_high
+    r2 = pp + (prev_high - prev_low); s2 = pp - (prev_high - prev_low)
+    r3 = prev_high + (2 * (pp - prev_low)); s3 = prev_low - (2 * (prev_high - pp))
+
+    fib_range = prev_high - prev_low
+    # Handle potential division by zero or near-zero range for Fib pivots
+    fib_range = fib_range.replace(0, np.nan) # Replace 0 range with NaN
+
+    fr1 = pp + (0.382 * fib_range); fs1 = pp - (0.382 * fib_range)
+    fr2 = pp + (0.618 * fib_range); fs2 = pp - (0.618 * fib_range)
+    fr3 = pp + (1.000 * fib_range); fs3 = pp - (1.000 * fib_range)
+
+    pivots = pd.DataFrame({
+        'PP': pp, 'S1': s1, 'R1': r1, 'S2': s2, 'R2': r2, 'S3': s3, 'R3': r3,
+        'FS1': fs1, 'FR1': fr1, 'FS2': fs2, 'FR2': fr2, 'FS3': fs3, 'FR3': fr3
+    }, index=daily_df.index)
+
+    # The first row will have NaNs because there's no previous day
+    pivots = pivots.iloc[1:] # Drop the first row with NaNs
+
+    logger.debug(f"{Fore.GREEN}Calculated pivots for {len(pivots)} days.{Style.RESET_ALL}")
+    return pivots
+
+# --- Swing High/Low Support & Resistance Spell ---
+def _calculate_swing_sr(df: pd.DataFrame, window: int) -> pd.DataFrame:
+    """
+    Identifies Swing Highs and Lows to mark potential Support and Resistance levels.
+    Looks for peaks and troughs within a defined window.
+
+    Args:
+        df: DataFrame with 'high' and 'low' columns. Must have a DatetimeIndex.
+        window: Number of bars to the left and right to confirm a swing point.
+
+    Returns:
+        DataFrame with added columns:
+        - 'Is_Swing_High': Boolean, True if the bar is a swing high.
+        - 'Is_Swing_Low': Boolean, True if the bar is a swing low.
+        - 'Resistance': Price level of the last identified swing high (forward-filled).
+        - 'Support': Price level of the last identified swing low (forward-filled).
+        - 'Swing_High_Level': Price level of the swing high if applicable, else NaN.
+        - 'Swing_Low_Level': Price level of the swing low if applicable, else NaN.
+    """
+    logger.debug(f"{Fore.CYAN}# Identifying Swing High/Low Support & Resistance (window: {window})...{Style.RESET_ALL}")
+    if window <= 0 or len(df) <= window * 2:
+        logger.warning(f"{Fore.YELLOW}Swing S/R window ({window}) is invalid or DataFrame too short ({len(df)}). Skipping calculation.{Style.RESET_ALL}")
+        df['Is_Swing_High'] = False
+        df['Is_Swing_Low'] = False
+        df['Resistance'] = np.nan
+        df['Support'] = np.nan
+        df['Swing_High_Level'] = np.nan
+        df['Swing_Low_Level'] = np.nan
+        return df
+
+    # Use rolling max/min with center=True to find local peaks/troughs.
+    # min_periods is window + 1 because a swing point needs at least 'window' bars on one side
+    # to be potentially confirmed, and 2*window + 1 for full confirmation.
+    # We use min_periods=window+1 to allow calculations near the ends, though swing points
+    # will only be truly confirmed 'window' bars *after* they occur.
+    local_max = df['high'].rolling(window=window * 2 + 1, center=True, min_periods=window + 1).max()
+    local_min = df['low'].rolling(window=window * 2 + 1, center=True, min_periods=window + 1).min()
+
+    # A high is a swing high if it equals the local maximum within the centered window
+    df['Is_Swing_High'] = (df['high'] == local_max)
+    # A low is a swing low if it equals the local minimum within the centered window
+    df['Is_Swing_Low'] = (df['low'] == local_min)
+
+    # Store the price level of the swing points
+    df['Swing_High_Level'] = df['high'].where(df['Is_Swing_High'])
+    df['Swing_Low_Level'] = df['low'].where(df['Is_Swing_Low'])
+
+    # Forward fill to get the current active S/R levels based on the last swing point
+    # Note: Swing points are identified with center=True, meaning the Is_Swing_High/Low
+    # flag for a point at index `i` depends on data up to `i + window`.
+    # Therefore, the confirmed swing high/low level at index `i` is actually the
+    # Swing_High_Level/Swing_Low_Level from index `i - window`.
+    # We apply ffill *after* shifting back by 'window' to represent the level becoming
+    # active once it's confirmed.
+    df['Resistance'] = df['Swing_High_Level'].shift(window).ffill()
+    df['Support'] = df['Swing_Low_Level'].shift(window).ffill()
+
+    # Handle NaNs at the beginning due to shift/ffill
+    df.loc[:df.index[window], ['Resistance', 'Support']] = np.nan
+
+    logger.debug(f"{Fore.GREEN}Swing S/R calculation complete.{Style.RESET_ALL}")
+    return df
+
+# --- Basic Order Block Identification Spell ---
+def _calculate_order_blocks(df: pd.DataFrame, atr_col: str, atr_threshold: float, wick_factor: Optional[float] = None) -> pd.DataFrame:
+    """
+    Identifies potential Bullish and Bearish Order Block candles.
+    Looks for specific candles followed by a strong move (relative to ATR).
+
+    Args:
+        df: DataFrame with 'open', 'high', 'low', 'close', and the ATR column. Must have a DatetimeIndex.
+        atr_col: Name of the Average True Range column (e.g., 'ATR_14').
+        atr_threshold: Multiplier for ATR to define a "strong move" on the next candle.
+        wick_factor: Optional. If provided, filters OB candles where wick size relative
+                     to body size exceeds this factor (e.g., 0.5 means wicks <= 50% of body).
+
+    Returns:
+        DataFrame with added columns:
+        - 'Is_Bullish_OB': Boolean, True if the candle is a potential Bullish OB.
+        - 'Is_Bearish_OB': Boolean, True if the candle is a potential Bearish OB.
+        - 'OB_High': High price of the identified OB candle if applicable, else NaN.
+        - 'OB_Low': Low price of the identified OB candle if applicable, else NaN.
+        - 'OB_Type': 'Bullish' or 'Bearish' if an OB, else NaN.
+    """
+    logger.debug(f"{Fore.CYAN}# Identifying potential Order Blocks (ATR Threshold: {atr_threshold}, Wick Factor: {wick_factor})...{Style.RESET_ALL}")
+    df['Is_Bullish_OB'] = False
+    df['Is_Bearish_OB'] = False
+    df['OB_High'] = np.nan
+    df['OB_Low'] = np.nan
+    df['OB_Type'] = np.nan
+
+    if atr_col not in df.columns or df[atr_col].isnull().all():
+        logger.error(f"{Fore.RED}ATR column '{atr_col}' not found or all NaN. Cannot calculate Order Blocks.{Style.RESET_ALL}")
+        return df
+    if len(df) < 2:
+         logger.debug(f"{Fore.YELLOW}DataFrame too short ({len(df)}) for OB calculation. Need at least 2 bars.{Style.RESET_ALL}")
+         return df
+
+    # Shift data to compare current candle with the *next* candle's move
+    df_shifted = df.shift(-1)
+    atr_val = df[atr_col]
+
+    # Ensure required columns for shifted data exist and are numeric
+    required_shifted_cols = ['open', 'high', 'low', 'close']
+    if not all(col in df_shifted.columns for col in required_shifted_cols):
+        logger.error(f"{Fore.RED}Shifted DataFrame missing required columns for OB calculation.{Style.RESET_ALL}")
+        return df # Return df with empty OB columns
+
+    # Calculate move size of the *next* candle
+    next_move_size = (df_shifted['high'] - df_shifted['low']).abs()
+
+    # Calculate minimum required move based on current candle's ATR
+    min_move = atr_threshold * atr_val
+
+    # --- Identify Potential Bullish OBs ---
+    # Current candle is bearish (close < open)
+    # Next candle is bullish (close > open)
+    # Next candle's move is significant (range > threshold * ATR)
+    # Next candle closes above the high of the current (potential OB) candle
+    bullish_ob_cond = (
+        (df['close'] < df['open']) & # Current candle is bearish
+        (df_shifted['close'] > df_shifted['open']) & # Next candle is bullish
+        (next_move_size > min_move) & # Next candle has a significant move
+        (df_shifted['close'] > df['high']) # Next candle breaks current candle's high
+    )
+
+    # --- Identify Potential Bearish OBs ---
+    # Current candle is bullish (close > open)
+    # Next candle is bearish (close < open)
+    # Next candle's move is significant (range > threshold * ATR)
+    # Next candle closes below the low of the current (potential OB) candle
+    bearish_ob_cond = (
+        (df['close'] > df['open']) & # Current candle is bullish
+        (df_shifted['close'] < df_shifted['open']) & # Next candle is bearish
+        (next_move_size > min_move) & # Next candle has a significant move
+        (df_shifted['close'] < df['low']) # Next candle breaks current candle's low
+    )
+
+    # --- Optional Wick Filter ---
+    if wick_factor is not None and wick_factor >= 0:
+        body_size = (df['close'] - df['open']).abs()
+        # Add a small epsilon to avoid division by zero for dojis
+        body_size_safe = body_size.replace(0, 1e-9)
+
+        upper_wick = df['high'] - df[['open', 'close']].max(axis=1)
+        lower_wick = df[['open', 'close']].min(axis=1) - df['low']
+
+        # For Bullish OB (down candle): Check upper wick relative to body
+        bullish_wick_cond = (upper_wick / body_size_safe) <= wick_factor
+        # For Bearish OB (up candle): Check lower wick relative to body
+        bearish_wick_cond = (lower_wick / body_size_safe) <= wick_factor
+
+        # Combine wick filter with main conditions
+        bullish_ob_cond = bullish_ob_cond & bullish_wick_cond
+        bearish_ob_cond = bearish_ob_cond & bearish_wick_cond
+    elif wick_factor is not None and wick_factor < 0:
+         logger.warning(f"{Fore.YELLOW}Invalid OB wick_factor ({wick_factor}). Must be >= 0. Skipping wick filter.{Style.RESET_ALL}")
+
+
+    # --- Apply Conditions ---
+    # Use .loc with boolean indexing to apply conditions safely
+    df.loc[bullish_ob_cond, 'Is_Bullish_OB'] = True
+    df.loc[bullish_ob_cond, 'OB_High'] = df['high']
+    df.loc[bullish_ob_cond, 'OB_Low'] = df['low']
+    df.loc[bullish_ob_cond, 'OB_Type'] = 'Bullish'
+
+    df.loc[bearish_ob_cond, 'Is_Bearish_OB'] = True
+    df.loc[bearish_ob_cond, 'OB_High'] = df['high']
+    df.loc[bearish_ob_cond, 'OB_Low'] = df['low']
+    df.loc[bearish_ob_cond, 'OB_Type'] = 'Bearish'
+
+    # Note: This identifies the *candle* that forms the OB.
+    # A trading strategy would need to track these OB ranges (OB_High, OB_Low)
+    # and check for mitigation (price returning to the range).
+    logger.debug(f"{Fore.GREEN}Order Block identification complete.{Style.RESET_ALL}")
+    return df
+
+
+# --- Main Indicator Calculation ---
+def calculate_indicators(df: pd.DataFrame, config: AppConfig, daily_df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    """
+    Calculates all technical indicators and structural elements (Pivots, S/R, OBs)
+    for the given OHLCV DataFrame scroll. The grand conjuration, now with structure!
+
+    Args:
+        df: Primary DataFrame scroll (e.g., 5m). Must include 'timestamp', 'open',
+            'high', 'low', 'close', 'volume'.
+        config: AppConfig spellbook containing indicator parameters.
+        daily_df: Optional DataFrame scroll with Daily OHLCV data for pivot calculations.
+                  Must have a DatetimeIndex and 'high', 'low', 'close'.
+
+    Returns:
+        DataFrame scroll with original columns plus calculated indicator/structure columns.
+        Returns an empty DataFrame if calculation fails or input is invalid.
+    """
+    logger.debug(f"{Fore.MAGENTA}Calculating indicators & structure for DataFrame with {len(df)} rows. Daily pivots: {'Yes' if daily_df is not None else 'No'}{Style.RESET_ALL}")
+    required_columns = {"timestamp", "open", "high", "low", "close", "volume"}
+    if not required_columns.issubset(df.columns):
+        logger.error(f"{Fore.RED}Primary DataFrame scroll missing required columns. Need: {required_columns}. Got: {list(df.columns)}{Style.RESET_ALL}")
+        return pd.DataFrame()
+    if df.empty:
+        logger.warning(f"{Fore.YELLOW}Input primary DataFrame scroll is empty. Cannot conjure indicators.{Style.RESET_ALL}")
+        return pd.DataFrame()
+
+    # Ensure timestamp is datetime and make a copy
+    try:
+        df_processed = df.copy()
+        if not pd.api.types.is_datetime64_any_dtype(df_processed['timestamp']):
+            logger.debug(f"{Fore.CYAN}# Primary timestamp column requires temporal alignment... converting.{Style.RESET_ALL}")
+            df_processed['timestamp'] = pd.to_datetime(df_processed['timestamp'])
+        df_indexed = df_processed.set_index('timestamp').sort_index()
+    except Exception as e:
+        logger.error(f"{Fore.RED}Failed to process primary timestamp column: {e}{Style.RESET_ALL}", exc_info=True)
+        return pd.DataFrame()
+
+    # Ensure required columns for TA are numeric
+    numeric_cols = ['open', 'high', 'low', 'close', 'volume']
+    for col in numeric_cols:
+        if not pd.api.types.is_numeric_dtype(df_indexed[col]):
+             logger.warning(f"{Fore.YELLOW}Column '{col}' is not numeric. Attempting conversion.{Style.RESET_ALL}")
+             df_indexed[col] = pd.to_numeric(df_indexed[col], errors='coerce')
+             if df_indexed[col].isnull().all():
+                 logger.error(f"{Fore.RED}Column '{col}' could not be converted to numeric. Cannot proceed.{Style.RESET_ALL}")
+                 return pd.DataFrame()
+    df_indexed.dropna(subset=numeric_cols, inplace=True) # Drop rows with NaNs in core data
+
+    if df_indexed.empty:
+        logger.error(f"{Fore.RED}DataFrame became empty after processing/dropping NaNs.{Style.RESET_ALL}")
+        return pd.DataFrame()
+
+    try:
+        # --- Custom Ehlers Volumetric Trend (EVT) Calculation ---
+        # Note: The previous EVT calculation was overly simplified.
+        # A more standard EVWMA approach or Ehlers' specific filters would be better.
+        # Reverting to a basic VWMA + SuperSmoother concept similar to original request.
+        # Or, let's use a simpler pandas_ta-like wrapper if possible, but pandas_ta
+        # doesn't have native EVT. Let's stick to a custom calculation using VWMA and a SuperSmoother concept.
+        # A SuperSmoother requires history, so this is sensitive to data length.
+        logger.debug(f"{Fore.CYAN}# Conjuring Ehlers Volumetric Trend (EVT) [Simplified VWMA + Smoother]...{Style.RESET_ALL}")
+        evt_len = getattr(config, 'evt_length', 7)
+        evt_mult = getattr(config, 'evt_multiplier', 2.5) # Multiplier often unused in standard EVT variations, but kept for config compatibility
+
+        if len(df_indexed) >= evt_len:
+            # Calculate VWMA (similar logic to original VWMA helper)
+            pv = df_indexed['close'] * df_indexed['volume']
+            cumulative_pv = pv.rolling(window=evt_len, min_periods=evt_len).sum()
+            cumulative_vol = df_indexed['volume'].rolling(window=evt_len, min_periods=evt_len).sum()
+            vwma = cumulative_pv / cumulative_vol
+            vwma.replace([np.inf, -np.inf], np.nan, inplace=True)
+            df_indexed['VWMA_EVT'] = vwma
+
+            # SuperSmoother Filter (2-pole Butterworth approx)
+            # This requires careful handling of initial values and is recursive
+            # Using a simplified approach for demonstration; a proper recursive
+            # implementation is needed for accuracy.
+            # A = exp(-sqrt(2)*PI / Length)
+            # b = 2*A*cos(sqrt(2)*PI / Length)
+            # c2 = b
+            # c3 = -A^2
+            # c1 = 1 - c2 - c3
+            # Filter[i] = c1 * Price[i] + c2 * Filter[i-1] + c3 * Filter[i-2]
+            a = np.exp(-np.sqrt(2) * np.pi / evt_len)
+            b = 2 * a * np.cos(np.sqrt(2) * np.pi / evt_len)
+            c2, c3, c1 = b, -a*a, 1 - b + a*a
+
+            smoothed_evt = pd.Series(np.nan, index=df_indexed.index)
+            vwma_values = df_indexed['VWMA_EVT'].values
+            # Recursive calculation requires a loop or numba/vectorization
+            # This loop is slow but conceptually clear for the filter
+            filter_values = np.full_like(vwma_values, np.nan)
+            for i in range(len(vwma_values)):
+                 if np.isnan(vwma_values[i]): continue
+                 if i < 2:
+                      filter_values[i] = vwma_values[i] # Seed with raw value or NaN
+                 else:
+                      prev1 = filter_values[i-1] if not np.isnan(filter_values[i-1]) else vwma_values[i-1] # Handle initial NaNs
+                      prev2 = filter_values[i-2] if not np.isnan(filter_values[i-2]) else vwma_values[i-2] # Handle initial NaNs
+                      filter_values[i] = c1 * vwma_values[i] + c2 * prev1 + c3 * prev2
+
+            df_indexed['EVT_Smoothed'] = filter_values
+
+            # Trend based on Smoothed EVT vs previous value
+            # Simple trend: up if > previous, down if < previous
+            df_indexed['EVT_Trend_Up'] = df_indexed['EVT_Smoothed'] > df_indexed['EVT_Smoothed'].shift(1)
+            df_indexed['EVT_Trend_Down'] = df_indexed['EVT_Smoothed'] < df_indexed['EVT_Smoothed'].shift(1)
+            # df_indexed.drop(columns=['VWMA_EVT'], inplace=True) # Clean up intermediate column
+            logger.debug(f"{Fore.GREEN}EVT (Smoothed VWMA) calculated (len={evt_len}).{Style.RESET_ALL}")
+        else:
+             logger.warning(f"{Fore.YELLOW}DataFrame too short ({len(df_indexed)}) for EVT calculation (need {evt_len}). Skipping EVT.{Style.RESET_ALL}")
+             df_indexed['EVT_Smoothed'] = np.nan
+             df_indexed['EVT_Trend_Up'] = False
+             df_indexed['EVT_Trend_Down'] = False
+
+
+        # --- Define pandas_ta Strategy - Core Mathematical Indicators ---
+        # Ensure periods are positive integers, use getattr for safety
+        atr_period = max(1, getattr(config, 'atr_period', 14))
+        sma_short = max(1, getattr(config, 'sma_short', 10))
+        sma_long = max(1, getattr(config, 'sma_long', 50))
+        hma_period = max(1, getattr(config, 'hma_period', 9))
+        zema_period = max(1, getattr(config, 'zema_period', 14))
+        supertrend_period = max(1, getattr(config, 'supertrend_period', 10))
+        supertrend_multiplier = max(0.1, getattr(config, 'supertrend_multiplier', 3.0)) # Multiplier must be > 0
+        macd_fast = max(1, getattr(config, 'macd_fast', 12))
+        macd_slow = max(macd_fast + 1, getattr(config, 'macd_slow', 26)) # Slow must be > Fast
+        macd_signal = max(1, getattr(config, 'macd_signal', 9))
+        rsi_period = max(1, getattr(config, 'rsi_period', 14))
+        fisher_rsi_period = max(1, getattr(config, 'fisher_rsi_period', 9))
+        momentum_period = max(1, getattr(config, 'momentum_period', 10))
+        stochrsi_length = max(1, getattr(config, 'stochrsi_length', 14))
+        stochrsi_rsi_length = max(1, getattr(config, 'stochrsi_rsi_length', 14))
+        stochrsi_k = max(1, getattr(config, 'stochrsi_k', 3))
+        stochrsi_d = max(1, getattr(config, 'stochrsi_d', 3))
+        adx_period = max(1, getattr(config, 'adx_period', 14))
+        volume_sma_period = max(1, getattr(config, 'volume_sma_period', 20))
+
+        ta_strategy = ta.Strategy(
+            name="Pyrmethus Core Indicators",
+            description="ATR, SMAs, HMA, ZEMA, Supertrend, MACD, RSI, Momentum, StochRSI, ADX, Volume SMA",
+            ta=[
+                {"kind": "atr", "length": atr_period}, # Crucial for OBs
+                {"kind": "sma", "length": sma_short},
+                {"kind": "sma", "length": sma_long},
+                {"kind": "hma", "length": hma_period},
+                {"kind": "zlma", "length": zema_period},
+                {"kind": "supertrend", "length": supertrend_period, "multiplier": supertrend_multiplier},
+                {"kind": "macd", "fast": macd_fast, "slow": macd_slow, "signal": macd_signal},
+                {"kind": "rsi", "length": rsi_period},
+                {"kind": "mom", "length": momentum_period},
+                {"kind": "stochrsi", "length": stochrsi_length, "rsi_length": stochrsi_rsi_length, "k": stochrsi_k, "d": stochrsi_d},
+                {"kind": "adx", "length": adx_period},
+                {"kind": "sma", "close": "volume", "length": volume_sma_period, "prefix": "VOLUME"},
+            ]
+        )
+
+        # --- Apply the Core TA Strategy ---
+        logger.debug(f"{Fore.CYAN}# Applying core pandas_ta strategy...{Style.RESET_ALL}")
+        df_indexed.ta.strategy(ta_strategy)
+        logger.debug(f"{Fore.GREEN}Core pandas_ta strategy application complete.{Style.RESET_ALL}")
+
+        # --- Calculate Fisher Transform on RSI ---
+        rsi_col_name = f'RSI_{rsi_period}'
+        if rsi_col_name in df_indexed.columns:
+             logger.debug(f"{Fore.CYAN}# Calculating Fisher Transform on {rsi_col_name}...{Style.RESET_ALL}")
+             # Fill NaNs in RSI with 50 temporarily for Fisher calculation if needed
+             rsi_series = df_indexed[rsi_col_name].fillna(50)
+             fisher_result = ta.fisher(rsi_series, length=fisher_rsi_period, signal=1)
+             if fisher_result is not None and not fisher_result.empty and fisher_result.shape[1] >= 2:
+                 df_indexed['Fisher_RSI'] = fisher_result.iloc[:, 0]
+                 df_indexed['Fisher_RSI_Signal'] = fisher_result.iloc[:, 1]
+                 logger.debug(f"{Fore.GREEN}Fisher Transform calculated.{Style.RESET_ALL}")
+             else: logger.warning(f"{Fore.YELLOW}Fisher Transform calculation returned unexpected result or empty. Skipping.{Style.RESET_ALL}")
+        else: logger.warning(f"{Fore.YELLOW}Base RSI column '{rsi_col_name}' not found for Fisher Transform. Skipping.{Style.RESET_ALL}")
+
+        # --- Calculate Swing S/R ---
+        swing_window = max(1, getattr(config, 'swing_sr_window', 10))
+        df_indexed = _calculate_swing_sr(df_indexed, window=swing_window)
+
+        # --- Calculate Order Blocks ---
+        # pandas_ta names raw ATR as ATRr_Length and smoothed ATR as ATRt_Length
+        atr_col_name_raw = f'ATRr_{atr_period}'
+        atr_col_name_smoothed = f'ATRt_{atr_period}'
+        ob_atr_thresh = getattr(config, 'ob_atr_threshold', 1.5)
+        ob_wick_f = getattr(config, 'ob_wick_factor', None)
+
+        if atr_col_name_raw in df_indexed.columns and not df_indexed[atr_col_name_raw].isnull().all():
+             logger.debug(f"{Fore.CYAN}# Using raw ATR '{atr_col_name_raw}' for Order Blocks.{Style.RESET_ALL}")
+             df_indexed = _calculate_order_blocks(df_indexed, atr_col=atr_col_name_raw, atr_threshold=ob_atr_thresh, wick_factor=ob_wick_f)
+        elif atr_col_name_smoothed in df_indexed.columns and not df_indexed[atr_col_name_smoothed].isnull().all():
+             logger.warning(f"{Fore.YELLOW}Raw ATR '{atr_col_name_raw}' not found or all NaN. Using smoothed ATR '{atr_col_name_smoothed}' for Order Blocks.{Style.RESET_ALL}")
+             df_indexed = _calculate_order_blocks(df_indexed, atr_col=atr_col_name_smoothed, atr_threshold=ob_atr_thresh, wick_factor=ob_wick_f)
+        else:
+             logger.error(f"{Fore.RED}Neither raw nor smoothed ATR column found/valid after pandas_ta calculation. Cannot calculate Order Blocks.{Style.RESET_ALL}")
+             # Add empty OB columns to prevent errors later
+             df_indexed['Is_Bullish_OB'] = False
+             df_indexed['Is_Bearish_OB'] = False
+             df_indexed['OB_High'] = np.nan
+             df_indexed['OB_Low'] = np.nan
+             df_indexed['OB_Type'] = np.nan
+
+
+        # --- Calculate and Merge Daily Pivot Points ---
+        if daily_df is not None and not daily_df.empty:
+            logger.debug(f"{Fore.CYAN}# Calculating and merging Daily Pivot Points...{Style.RESET_ALL}")
+            try:
+                if not isinstance(daily_df.index, pd.DatetimeIndex):
+                     logger.debug(f"{Fore.CYAN}# Daily timestamp index requires temporal alignment... converting.{Style.RESET_ALL}")
+                     try: daily_df.index = pd.to_datetime(daily_df.index)
+                     except Exception as date_err: raise ValueError(f"Failed to convert daily_df index: {date_err}")
+
+                # Ensure daily data is sorted
+                daily_df = daily_df.sort_index()
+                # Ensure required columns are numeric
+                daily_numeric_cols = ['high', 'low', 'close']
+                for col in daily_numeric_cols:
+                    if not pd.api.types.is_numeric_dtype(daily_df[col]):
+                        logger.warning(f"{Fore.YELLOW}Daily column '{col}' is not numeric. Attempting conversion.{Style.RESET_ALL}")
+                        daily_df[col] = pd.to_numeric(daily_df[col], errors='coerce')
+                daily_df.dropna(subset=daily_numeric_cols, inplace=True)
+
+
+                daily_pivots = _calculate_daily_pivot_points(daily_df)
+
+                if not daily_pivots.empty:
+                    # Need to merge daily pivots onto the primary (e.g., 5m) DataFrame.
+                    # The pivots for day N are valid from the start of day N.
+                    # So, we align the 5m data's date with the daily pivot index (which is the date).
+                    df_indexed['date'] = df_indexed.index.normalize() # Extract date from primary index
+                    # Merge based on the date column. Use 'left' merge to keep all primary rows.
+                    df_indexed = pd.merge(df_indexed, daily_pivots, left_on='date', right_index=True, how='left')
+                    # Forward fill the pivot columns within the primary DataFrame
+                    pivot_cols = daily_pivots.columns.tolist()
+                    # Apply ffill only to the pivot columns that exist after merge
+                    existing_pivot_cols = [col for col in pivot_cols if col in df_indexed.columns]
+                    if existing_pivot_cols:
+                         df_indexed[existing_pivot_cols] = df_indexed[existing_pivot_cols].ffill()
+                    else:
+                         logger.warning(f"{Fore.YELLOW}No pivot columns found after merge. Check daily_pivots output.{Style.RESET_ALL}")
+
+                    df_indexed.drop(columns=['date'], inplace=True) # Clean up temporary date column
+                    logger.debug(f"{Fore.GREEN}Daily Pivot Points merged.{Style.RESET_ALL}")
+                else: logger.warning(f"{Fore.YELLOW}Pivot point calculation resulted empty. Skipping merge.{Style.RESET_ALL}")
+            except Exception as pivot_err: logger.error(f"{Fore.RED}Error with pivot points: {pivot_err}{Style.RESET_ALL}", exc_info=True)
+        else: logger.debug(f"{Fore.YELLOW}No daily data provided, skipping pivot points.{Style.RESET_ALL}")
+
+
+        # --- Rename Columns ---
+        logger.debug(f"{Fore.CYAN}# Renaming indicator columns...{Style.RESET_ALL}")
+        rename_map = {
+            f'SMA_{sma_short}': 'SMA_Short', # Use generic names
+            f'SMA_{sma_long}': 'SMA_Long',
+            f'HMA_{hma_period}': 'HMA',
+            f'ZLMA_{zema_period}': 'ZEMA',
+            f'SUPERT_{supertrend_period}_{supertrend_multiplier}': 'Supertrend',
+            f'SUPERTd_{supertrend_period}_{supertrend_multiplier}': 'Supertrend_Direction',
+            f'MACD_{macd_fast}_{macd_slow}_{macd_signal}': 'MACD_Line',
+            f'MACDh_{macd_fast}_{macd_slow}_{macd_signal}': 'MACD_Hist',
+            f'MACDs_{macd_fast}_{macd_slow}_{macd_signal}': 'MACD_Signal',
+            f'MOM_{momentum_period}': 'Momentum',
+            f'STOCHRSIk_{stochrsi_length}_{stochrsi_rsi_length}_{stochrsi_k}_{stochrsi_d}': 'StochRSI_K',
+            f'STOCHRSId_{stochrsi_length}_{stochrsi_rsi_length}_{stochrsi_k}_{stochrsi_d}': 'StochRSI_D',
+            f'ADX_{adx_period}': 'ADX',
+            f'DMP_{adx_period}': 'ADX_DMP',
+            f'DMN_{adx_period}': 'ADX_DMN',
+            f'VOLUME_SMA_{volume_sma_period}': 'Volume_SMA',
+            f'RSI_{rsi_period}': 'RSI',
+            # Rename the used ATR column to 'ATR'
+            atr_col_name_raw: 'ATR',
+            atr_col_name_smoothed: 'ATR' # In case smoothed was used
+        }
+        df_indexed.rename(columns=rename_map, inplace=True, errors='ignore')
+
+
+        # --- Post-processing / Combined Signal Flags ---
+        logger.debug(f"{Fore.CYAN}# Weaving combined signal flags...{Style.RESET_ALL}")
+        # SMA Trend
+        if 'SMA_Short' in df_indexed.columns and 'SMA_Long' in df_indexed.columns:
+            df_indexed['SMA_Trend_Up'] = df_indexed['SMA_Short'] > df_indexed['SMA_Long']
+            df_indexed['SMA_Trend_Down'] = df_indexed['SMA_Short'] < df_indexed['SMA_Long']
+        else: df_indexed['SMA_Trend_Up'], df_indexed['SMA_Trend_Down'] = False, False
+
+        # Supertrend Direction Flags
+        if 'Supertrend_Direction' in df_indexed.columns:
+            df_indexed['Supertrend_Up'] = df_indexed['Supertrend_Direction'] == 1.0 # Use float comparison
+            df_indexed['Supertrend_Down'] = df_indexed['Supertrend_Direction'] == -1.0 # Use float comparison
+        else: df_indexed['Supertrend_Up'], df_indexed['Supertrend_Down'] = False, False
+
+        # MACD Crossover Flags
+        if 'MACD_Line' in df_indexed.columns and 'MACD_Signal' in df_indexed.columns:
+            # Ensure columns are numeric before comparison
+            macd_line = pd.to_numeric(df_indexed['MACD_Line'], errors='coerce')
+            macd_signal = pd.to_numeric(df_indexed['MACD_Signal'], errors='coerce')
+            # Check for NaNs introduced by conversion
+            if not macd_line.isnull().all() and not macd_signal.isnull().all():
+                df_indexed['MACD_Cross_Up'] = (macd_line > macd_signal) & (macd_line.shift(1).fillna(-np.inf) <= macd_signal.shift(1).fillna(-np.inf))
+                df_indexed['MACD_Cross_Down'] = (macd_line < macd_signal) & (macd_line.shift(1).fillna(np.inf) >= macd_signal.shift(1).fillna(np.inf))
+                df_indexed['MACD_Cross_Up'] = df_indexed['MACD_Cross_Up'].fillna(False)
+                df_indexed['MACD_Cross_Down'] = df_indexed['MACD_Cross_Down'].fillna(False)
+            else:
+                 logger.warning(f"{Fore.YELLOW}MACD columns contain NaNs. Cannot calculate MACD crossovers.{Style.RESET_ALL}")
+                 df_indexed['MACD_Cross_Up'], df_indexed['MACD_Cross_Down'] = False, False
+        else: df_indexed['MACD_Cross_Up'], df_indexed['MACD_Cross_Down'] = False, False
+
+        # Fisher RSI Crossover Flags
+        if 'Fisher_RSI' in df_indexed.columns and 'Fisher_RSI_Signal' in df_indexed.columns:
+            # Ensure columns are numeric before comparison
+            fisher_rsi = pd.to_numeric(df_indexed['Fisher_RSI'], errors='coerce')
+            fisher_signal = pd.to_numeric(df_indexed['Fisher_RSI_Signal'], errors='coerce')
+             # Check for NaNs introduced by conversion
+            if not fisher_rsi.isnull().all() and not fisher_signal.isnull().all():
+                df_indexed['Fisher_Cross_Up'] = (fisher_rsi > fisher_signal) & (fisher_rsi.shift(1).fillna(-np.inf) <= fisher_signal.shift(1).fillna(-np.inf))
+                df_indexed['Fisher_Cross_Down'] = (fisher_rsi < fisher_signal) & (fisher_rsi.shift(1).fillna(np.inf) >= fisher_signal.shift(1).fillna(np.inf))
+                df_indexed['Fisher_Cross_Up'] = df_indexed['Fisher_Cross_Up'].fillna(False)
+                df_indexed['Fisher_Cross_Down'] = df_indexed['Fisher_Cross_Down'].fillna(False)
+            else:
+                logger.warning(f"{Fore.YELLOW}Fisher RSI columns contain NaNs. Cannot calculate Fisher RSI crossovers.{Style.RESET_ALL}")
+                df_indexed['Fisher_Cross_Up'], df_indexed['Fisher_Cross_Down'] = False, False
+        else: df_indexed['Fisher_Cross_Up'], df_indexed['Fisher_Cross_Down'] = False, False
+
+
+        # Restore timestamp from index to column
+        df_final = df_indexed.reset_index()
+
+    except Exception as e:
+        logger.exception(f"{Fore.RED + Style.BRIGHT}Error calculating indicators: {e}{Style.RESET_ALL}")
+        # Return empty DataFrame on critical failure
+        return pd.DataFrame()
+
+    logger.debug(f"{Fore.GREEN}Indicators & structure conjured successfully. Final DataFrame shape: {df_final.shape}{Style.RESET_ALL}")
+    return df_final
+
+
+def update_indicators(df_new_row: pd.DataFrame, config: AppConfig, prev_df_with_indicators: Optional[pd.DataFrame], daily_df: Optional[pd.DataFrame] = None) -> Optional[pd.DataFrame]:
+    """
+    Efficiently updates indicators and structure by recalculating on the necessary trailing slice.
+
+    Args:
+        df_new_row: DataFrame with new OHLCV row(s). Must include 'timestamp', 'open',
+            'high', 'low', 'close', 'volume'.
+        config: AppConfig spellbook object.
+        prev_df_with_indicators: Previous DataFrame containing OHLCV AND calculated indicators/structure.
+                                 Must have a DatetimeIndex or 'timestamp' column.
+        daily_df: Optional DataFrame with Daily OHLCV data for pivots.
+
+    Returns:
+        DataFrame containing the updated row(s) with indicators/structure, or None if update fails.
+    """
+    logger.debug(f"{Fore.MAGENTA}Attempting to update indicators & structure for {len(df_new_row)} new row(s). Daily pivots: {'Yes' if daily_df is not None else 'No'}{Style.RESET_ALL}")
+    if df_new_row.empty:
+        logger.warning(f"{Fore.YELLOW}Received empty DataFrame for update.{Style.RESET_ALL}")
+        return None
+
+    required_columns = {"timestamp", "open", "high", "low", "close", "volume"}
+    if not required_columns.issubset(df_new_row.columns):
+        logger.error(f"{Fore.RED}New row DataFrame missing required columns. Need: {required_columns}. Got: {list(df_new_row.columns)}{Style.RESET_ALL}")
+        return None
+
+    # Ensure timestamp column is datetime and set index for new row(s)
+    try:
+        df_new_row_indexed = df_new_row.copy()
+        if not pd.api.types.is_datetime64_any_dtype(df_new_row_indexed['timestamp']):
+            logger.debug(f"{Fore.CYAN}# New row timestamp requires temporal alignment... converting.{Style.RESET_ALL}")
+            df_new_row_indexed['timestamp'] = pd.to_datetime(df_new_row_indexed['timestamp'])
+        df_new_row_indexed = df_new_row_indexed.set_index('timestamp').sort_index()
+    except Exception as e:
+        logger.error(f"{Fore.RED}Failed to process new row timestamp: {e}{Style.RESET_ALL}", exc_info=True)
+        return None
+
+    # --- Determine Required Lookback ---
+    # Include window for Swing S/R and buffer for OB look-ahead/ATR calc
+    try:
+        # Use getattr with defaults for safety
+        evt_length = getattr(config, 'evt_length', 7)
+        atr_period = getattr(config, 'atr_period', 14)
+        sma_long = getattr(config, 'sma_long', 50)
+        hma_period = getattr(config, 'hma_period', 9)
+        zema_period = getattr(config, 'zema_period', 14)
+        supertrend_period = getattr(config, 'supertrend_period', 10)
+        macd_slow = getattr(config, 'macd_slow', 26)
+        macd_signal = getattr(config, 'macd_signal', 9)
+        rsi_period = getattr(config, 'rsi_period', 14)
+        fisher_rsi_period = getattr(config, 'fisher_rsi_period', 9)
+        momentum_period = getattr(config, 'momentum_period', 10)
+        stochrsi_length = getattr(config, 'stochrsi_length', 14)
+        stochrsi_rsi_length = getattr(config, 'stochrsi_rsi_length', 14)
+        stochrsi_k = getattr(config, 'stochrsi_k', 3)
+        stochrsi_d = getattr(config, 'stochrsi_d', 3)
+        adx_period = getattr(config, 'adx_period', 14)
+        volume_sma_period = getattr(config, 'volume_sma_period', 20)
+        swing_window = getattr(config, 'swing_sr_window', 10)
+
+        # Max lookback for indicators (need history for rolling/smoothing/ADX/etc.)
+        # Add buffer for recursive filters (like SuperSmoother) and shifts
+        indicator_lookback = max(
+            evt_length * 3, # EVT smoother needs history
+            atr_period + 1, # ATR for OB needs next bar info
+            sma_long, hma_period, zema_period * 2,
+            supertrend_period * 2,
+            macd_slow + macd_signal, # MACD related
+            rsi_period + fisher_rsi_period, # Fisher on RSI
+            momentum_period,
+            stochrsi_length + stochrsi_rsi_length + stochrsi_d, # StochRSI
+            adx_period * 2, # ADX needs DI which needs prior values
+            volume_sma_period
+        )
+
+        # Lookback for Swing S/R (needs window bars *before* the current bar to confirm a swing)
+        # And Order Blocks (needs current bar + next bar's move relative to current bar's ATR)
+        structure_lookback = max(
+            swing_window + 1, # To get the swing level confirmed up to the current bar
+            atr_period + 1 # For OB calculation involving next bar and ATR
+        )
+
+        # Total lookback needed is the maximum of all components, plus a margin for safety
+        max_lookback = max(indicator_lookback, structure_lookback) + 50 # Added margin
+
+        logger.debug(f"{Fore.CYAN}# Determined maximum lookback requirement: {max_lookback} periods.{Style.RESET_ALL}")
+    except AttributeError as e:
+         logger.error(f"{Fore.RED}Missing parameter in AppConfig for lookback calculation: {e}. Using default.{Style.RESET_ALL}")
+         max_lookback = 400 # Increased fallback for safety
+
+
+    # --- Prepare Data for Recalculation ---
+    # Need a combined DataFrame containing enough historical data plus the new row(s).
+    # The historical data should contain *at least* OHLCV columns.
+    combined_df_raw = df_new_row_indexed.copy() # Start with the new data
+
+    if prev_df_with_indicators is not None and not prev_df_with_indicators.empty:
+        try:
+            # Ensure previous df has a datetime index or convert 'timestamp' to index
+            prev_df_processed = prev_df_with_indicators.copy()
+            if 'timestamp' in prev_df_processed.columns and not isinstance(prev_df_processed.index, pd.DatetimeIndex):
+                 prev_df_processed['timestamp'] = pd.to_datetime(prev_df_processed['timestamp'])
+                 prev_df_processed = prev_df_processed.set_index('timestamp')
+            elif not isinstance(prev_df_processed.index, pd.DatetimeIndex):
+                 logger.error(f"{Fore.RED}Previous DataFrame does not have a DatetimeIndex or 'timestamp' column. Cannot update.{Style.RESET_ALL}")
+                 return None
+
+            prev_df_processed = prev_df_processed.sort_index()
+
+            # Take the necessary slice of the past OHLCV data plus a small buffer
+            ohlcv_cols = ['open', 'high', 'low', 'close', 'volume']
+            # Ensure historical slice has required OHLCV columns
+            historical_slice = prev_df_processed.tail(max_lookback + 10)[ohlcv_cols]
+
+            # Concatenate historical slice with the new row(s)
+            combined_df_raw = pd.concat([historical_slice, df_new_row_indexed[ohlcv_cols]], axis=0)
+
+        except Exception as e:
+            logger.error(f"{Fore.RED}Error preparing historical data slice for update: {e}{Style.RESET_ALL}", exc_info=True)
+            return None
+
+    # Drop duplicates just in case (e.g., resending the last bar) and sort by time
+    combined_df_raw = combined_df_raw[~combined_df_raw.index.duplicated(keep='last')].sort_index()
+
+    if len(combined_df_raw) < max_lookback + len(df_new_row_indexed):
+         logger.warning(f"{Fore.YELLOW}Combined data length ({len(combined_df_raw)}) is less than expected ({max_lookback + len(df_new_row_indexed)}) based on lookback. Results might be incomplete near the end.{Style.RESET_ALL}")
+         if len(combined_df_raw) < max_lookback:
+              logger.error(f"{Fore.RED}Insufficient combined data ({len(combined_df_raw)}) even for lookback ({max_lookback}). Cannot update reliably.{Style.RESET_ALL}")
+              return None
+
+
+    # Recalculate indicators & structure on this combined raw slice
+    logger.debug(f"{Fore.CYAN}# Recalculating indicators & structure on combined slice of {len(combined_df_raw)} rows for update.{Style.RESET_ALL}")
+    # Pass daily_df to the calculation function if available
+    updated_slice_with_indicators = calculate_indicators(combined_df_raw.reset_index(), config, daily_df)
+
+    if updated_slice_with_indicators is None or updated_slice_with_indicators.empty:
+        logger.error(f"{Fore.RED}Indicator/structure calculation failed during update on combined slice.{Style.RESET_ALL}")
+        return None
+
+    # --- Extract the Updated Row(s) ---
+    # Get the timestamps of the original new row(s) to filter the result
+    new_timestamps = df_new_row['timestamp'].tolist()
+
+    if 'timestamp' not in updated_slice_with_indicators.columns:
+        logger.error(f"{Fore.RED}'timestamp' column missing in result from calculate_indicators during update.{Style.RESET_ALL}")
+        return None
+
+    # Filter the recalculated slice to get only the rows corresponding to the new input timestamps
+    final_updated_rows = updated_slice_with_indicators[updated_slice_with_indicators['timestamp'].isin(new_timestamps)]
+
+    if final_updated_rows.empty:
+         logger.error(f"{Fore.RED}Could not find updated data for timestamp(s) {new_timestamps} after recalculation. This might indicate a timestamp matching issue or calculation failure.{Style.RESET_ALL}")
+         logger.debug(f"Tail of recalculated slice timestamps:\n{updated_slice_with_indicators['timestamp'].tail().to_string()}")
+         logger.debug(f"New input timestamps:\n{new_timestamps}")
+         return None
+
+    logger.debug(f"{Fore.GREEN}Successfully updated indicators & structure for {len(final_updated_rows)} new row(s).{Style.RESET_ALL}")
+    return final_updated_rows.reset_index(drop=True) # Reset index just in case
+
+
+# --- Self-Test Snippet (Optional) - A Test of Power & Structure ---
+if __name__ == "__main__":
+    print(f"{Fore.YELLOW + Style.BRIGHT}--- Running Indicators Module Self-Test (v3.5 - Pyrmethus Weave: Structure) ---{Style.RESET_ALL}")
+    # Set a more detailed logging level for the test
+    logging.basicConfig(level=logging.DEBUG, format=f'{Fore.BLUE}%(asctime)s{Style.RESET_ALL} - {Fore.CYAN}%(name)s{Style.RESET_ALL} - {Fore.MAGENTA}%(levelname)s{Style.RESET_ALL} - %(message)s')
+
+    # Create dummy config for testing
+    class TestConfig(AppConfig):
+        # Inherit defaults and override for testing specific behaviors
+        rsi_period: int = 14
+        fisher_rsi_period: int = 9
+        momentum_period: int = 10
+        hma_period: int = 9
+        zema_period: int = 14
+        atr_period: int = 14
+        evt_length: int = 7
+        evt_multiplier: float = 2.5 # Multiplier not heavily used in this EVT variation
+        swing_sr_window: int = 5 # Smaller window for easier testing
+        ob_atr_threshold: float = 1.0 # Lower threshold for more frequent OBs in test
+        ob_wick_factor: Optional[float] = 0.6 # Example wick filter (allow wicks up to 60% of body)
+        sma_short: int = 10
+        sma_long: int = 20 # Reduced long SMA for shorter test data
+
+    test_config = TestConfig()
+    print(f"\n{Fore.CYAN + Style.BRIGHT}Using Test Config Spellbook:{Style.RESET_ALL}")
+    try: print(Fore.WHITE + test_config.model_dump_json(indent=2))
+    except AttributeError: # Fallback for dummy AppConfig without model_dump_json
+        import json
+        attrs = {k: v for k, v in test_config.__dict__.items() if not k.startswith('_')}
+        print(Fore.WHITE + json.dumps(attrs, indent=2))
+
+    # Create sample DataFrame
+    # Ensure enough periods for lookback and structure calculations (e.g., max_lookback + buffer)
+    # Calculate a rough estimate of max_lookback for the test data generation
+    # Using default config values + structure values
+    test_max_lookback_estimate = max(
+        test_config.evt_length * 3, test_config.atr_period + 1, test_config.sma_long,
+        test_config.hma_period, test_config.zema_period * 2, test_config.supertrend_period * 2,
+        test_config.macd_slow + test_config.macd_signal, test_config.rsi_period + test_config.fisher_rsi_period,
+        test_config.momentum_period, test_config.stochrsi_length + test_config.stochrsi_rsi_length + test_config.stochrsi_d,
+        test_config.adx_period * 2, test_config.volume_sma_period, test_config.swing_sr_window + 1
+    ) + 50 # Add buffer
+
+    num_periods = max(400, test_max_lookback_estimate + 50) # Ensure sufficient data
+    start_time = pd.Timestamp.now(tz='UTC') - pd.Timedelta(days=5) # Use a slightly longer period
+    timestamps = pd.date_range(start=start_time, periods=num_periods, freq='5min', name='timestamp')
+    print(f"\n{Fore.CYAN}Generating {num_periods} periods of 5min sample data...{Style.RESET_ALL}")
+
+    # Generate data with some trends, swings, and potential OB setups
+    np.random.seed(42) # for reproducibility
+    price = 10000 + np.cumsum(np.random.randn(num_periods) * 10) # Base price with random walk
+    # Add some larger swings
+    price[50:70] -= 200 # Down swing
+    price[100:130] += 300 # Up swing
+    price[180:200] -= 250 # Stronger down swing
+    price[250:280] += 350 # Stronger up swing
+    price[300:310] -= 100 # Small down move after up
+    price[350:360] += 120 # Small up move after down
+
+    # Create OHLCV with some variance and ensure H >= O,C and L <= O,C
+    open_p = price + np.random.randn(num_periods) * 5
+    close_p = price + np.random.randn(num_periods) * 5 + (price - price.mean()) * 0.01 # Add slight trend bias
+    high_p = np.maximum(open_p, close_p) + np.random.rand(num_periods) * 20 # Add random wick
+    low_p = np.minimum(open_p, close_p) - np.random.rand(num_periods) * 20 # Add random wick
+
+    # Ensure H >= O,C and L <= O,C strictly
+    high_p = np.maximum.reduce([open_p, close_p, high_p])
+    low_p = np.minimum.reduce([open_p, close_p, low_p])
+
+    volume_p = np.random.randint(500, 10000, size=num_periods) # More varied volume
+
+    data = {'open': open_p, 'high': high_p, 'low': low_p, 'close': close_p, 'volume': volume_p}
+    sample_df = pd.DataFrame(data, index=timestamps)
+    sample_df.reset_index(inplace=True) # Reset index before passing to calculate_indicators
+
+    # Create dummy Daily data
+    print(f"{Fore.CYAN}Generating corresponding daily sample data...{Style.RESET_ALL}")
+    sample_df['date'] = sample_df['timestamp'].dt.normalize()
+    # Aggregate daily HLC from the 5m data
+    daily_agg = sample_df.groupby('date').agg(high=('high', 'max'), low=('low', 'min'), close=('close', 'last'))
+    # Ensure the index is a DatetimeIndex
+    sample_daily_df = daily_agg.ffill().bfill() # Fill NaNs at start/end if any
+    sample_df.drop(columns=['date'], inplace=True) # Drop temporary date column from 5m data
+
+    print(f"\n{Fore.BLUE + Style.BRIGHT}Sample Input 5m DataFrame (first 3 rows):{Style.RESET_ALL}\n{Fore.WHITE}{sample_df.head(3).to_string()}{Style.RESET_ALL}")
+    print(f"\n{Fore.BLUE + Style.BRIGHT}Sample Input Daily DataFrame (first 3 rows):{Style.RESET_ALL}\n{Fore.WHITE}{sample_daily_df.head(3).to_string()}{Style.RESET_ALL}")
+
+    # --- Test calculate_indicators ---
+    print(f"\n{Fore.MAGENTA + Style.BRIGHT}Testing calculate_indicators with Structure...{Style.RESET_ALL}")
+    df_calculated = calculate_indicators(sample_df.copy(), test_config, sample_daily_df.copy())
+
+    if df_calculated is not None and not df_calculated.empty:
+        print(f"{Fore.GREEN + Style.BRIGHT}calculate_indicators successful.{Style.RESET_ALL}")
+        # Check if new structure columns exist
+        # Added Swing_High_Level, Swing_Low_Level
+        structure_cols = ['Resistance', 'Support', 'Is_Swing_High', 'Is_Swing_Low',
+                          'Swing_High_Level', 'Swing_Low_Level',
+                          'Is_Bullish_OB', 'Is_Bearish_OB', 'OB_High', 'OB_Low', 'OB_Type', 'ATR']
+        missing_cols = [col for col in structure_cols if col not in df_calculated.columns]
+        if not missing_cols:
+            print(f"{Fore.GREEN}All key structure columns found.{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}Missing structure columns: {missing_cols}{Style.RESET_ALL}")
+            assert False, f"Missing columns: {missing_cols}"
+
+        # Check some values (allow NaNs initially due to lookback/forward fill)
+        # Resistance/Support should be mostly populated after the swing window
+        assert df_calculated['Resistance'].iloc[test_config.swing_sr_window:].notna().any(), "Resistance levels not populated after swing window."
+        assert df_calculated['Support'].iloc[test_config.swing_sr_window:].notna().any(), "Support levels not populated after swing window."
+        # Check if at least one OB was identified (depends on sample data)
+        if not (df_calculated['Is_Bullish_OB'].any() or df_calculated['Is_Bearish_OB'].any()):
+             print(f"{Fore.YELLOW}No Order Blocks identified in test data with current parameters. This is possible depending on data generation and thresholds.{Style.RESET_ALL}")
+        else:
+             print(f"{Fore.GREEN}At least one Order Block identified in test data.{Style.RESET_ALL}")
+        assert df_calculated['ATR'].iloc[test_config.atr_period:].notna().all(), "ATR is NaN after its period." # ATR should be populated
+
+        print(f"{Fore.GREEN}Basic checks on structure columns passed.{Style.RESET_ALL}")
+
+        # Display OBs found
+        obs_found = df_calculated[df_calculated['Is_Bullish_OB'] | df_calculated['Is_Bearish_OB']]
+        print(f"{Fore.CYAN}Identified Order Blocks ({len(obs_found)}):{Style.RESET_ALL}\n{Fore.WHITE}{obs_found[['timestamp', 'OB_Type', 'OB_High', 'OB_Low', 'open', 'close']].tail().to_string()}{Style.RESET_ALL}")
+
+        # Display Swing S/R levels
+        print(f"\n{Fore.CYAN}Swing S/R Levels (last 5 rows):{Style.RESET_ALL}\n{Fore.WHITE}{df_calculated[['timestamp', 'Resistance', 'Support', 'Is_Swing_High', 'Is_Swing_Low']].tail().to_string()}{Style.RESET_ALL}")
+
+
+        print(f"{Fore.BLUE + Style.BRIGHT}Output DataFrame with Indicators & Structure (last 5 rows):{Style.RESET_ALL}\n{Fore.WHITE}{df_calculated.tail().to_string()}{Style.RESET_ALL}")
+
+        # --- Test update_indicators ---
+        print(f"\n{Fore.MAGENTA + Style.BRIGHT}Testing update_indicators with Structure...{Style.RESET_ALL}")
+        last_row_data = df_calculated.iloc[-1]
+        # Create a new timestamp slightly after the last one
+        new_timestamp = last_row_data['timestamp'] + pd.Timedelta(minutes=5)
+        # Create a new row simulating market movement
+        new_row_data = [{
+            'timestamp': new_timestamp,
+            'open': last_row_data['close'], # Open near previous close
+            'high': last_row_data['close'] + np.random.rand() * last_row_data['ATR'] * 0.8, # High relative to ATR
+            'low': last_row_data['close'] - np.random.rand() * last_row_data['ATR'] * 0.8,  # Low relative to ATR
+            'close': last_row_data['close'] + np.random.randn() * last_row_data['ATR'] * 0.5, # Close with some noise
+            'volume': np.random.randint(1000, 5000) # New volume
+        }]
+        # Ensure high >= open, close and low <= open, close for the new row
+        new_row_data[0]['high'] = max(new_row_data[0]['high'], new_row_data[0]['open'], new_row_data[0]['close'])
+        new_row_data[0]['low'] = min(new_row_data[0]['low'], new_row_data[0]['open'], new_row_data[0]['close'])
+
+        new_row_df = pd.DataFrame(new_row_data)
+        print(f"{Fore.BLUE + Style.BRIGHT}New Row DataFrame:{Style.RESET_ALL}\n{Fore.WHITE}{new_row_df.to_string()}{Style.RESET_ALL}")
+
+        # Pass the *entire* calculated df and the daily df for context
+        updated_row_df = update_indicators(new_row_df.copy(), test_config, df_calculated.copy(), sample_daily_df.copy())
+
+        if updated_row_df is not None and not updated_row_df.empty:
+            print(f"{Fore.GREEN + Style.BRIGHT}update_indicators successful.{Style.RESET_ALL}")
+            assert len(updated_row_df) == len(new_row_df), f"Update should return {len(new_row_df)} row(s), got {len(updated_row_df)}."
+            # Check key structure values in the updated row are populated (allow NaN for OBs if none formed)
+            # Resistance/Support/ATR should *always* be populated after a successful update on sufficient data
+            assert pd.notna(updated_row_df.iloc[-1]['Resistance']), "Resistance is NaN in updated row."
+            assert pd.notna(updated_row_df.iloc[-1]['Support']), "Support is NaN in updated row."
+            assert pd.notna(updated_row_df.iloc[-1]['ATR']), "ATR is NaN in updated row."
+            # Check if Pivot Points are populated (requires daily_df)
+            if sample_daily_df is not None and not sample_daily_df.empty:
+                 assert pd.notna(updated_row_df.iloc[-1]['PP']), "Daily Pivot Point (PP) is NaN in updated row."
+                 print(f"{Fore.GREEN}Daily Pivot Points populated in updated row.{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}Key structure indicators in updated row are populated.{Style.RESET_ALL}")
+
+            print(f"{Fore.BLUE + Style.BRIGHT}Updated Row with Indicators & Structure:{Style.RESET_ALL}\n{Fore.WHITE}{updated_row_df.to_string()}{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED + Style.BRIGHT}update_indicators failed.{Style.RESET_ALL}")
+            assert False, "update_indicators returned None or empty DataFrame."
+
+    else:
+        print(f"{Fore.RED + Style.BRIGHT}calculate_indicators failed.{Style.RESET_ALL}")
+        assert False, "calculate_indicators returned None or empty DataFrame."
+
+    print(f"\n{Fore.YELLOW + Style.BRIGHT}--- Indicators Module Self-Test Complete (v3.5) ---{Style.RESET_ALL}")
+

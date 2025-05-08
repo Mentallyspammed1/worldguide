@@ -11,7 +11,6 @@ import yaml
 from colorama import Fore, Style
 from colorama import init as colorama_init
 from dotenv import load_dotenv
-
 from ta.momentum import RSIIndicator, StochRSIIndicator
 from ta.trend import MACD, EMAIndicator
 from ta.volatility import AverageTrueRange
@@ -88,7 +87,7 @@ class EnhancedTradingBot:
     and historical order flow analysis threaded into the signal generation logic.
     """
 
-    def __init__(self, symbol, config_file="config.yaml"):
+    def __init__(self, symbol, config_file="config.yaml") -> None:
         self.load_config(config_file)
         self._validate_config()  # Ensure all config sections are present
         self._setup_logging()  # Setup logging as per config
@@ -188,7 +187,7 @@ class EnhancedTradingBot:
         logger.info(f"EnhancedTradingBot initialized for symbol: {self.symbol}")
         logger.info("EnhancedTradingBot initialization complete.")
 
-    def load_config(self, config_file):
+    def load_config(self, config_file) -> None:
         """Loads configuration from YAML file."""
         try:
             with open(config_file) as f:
@@ -207,7 +206,7 @@ class EnhancedTradingBot:
             )
             exit()
 
-    def _validate_config(self):
+    def _validate_config(self) -> None:
         """Validates that the configuration file contains all necessary parameters."""
         required_sections = [
             "exchange",
@@ -228,7 +227,7 @@ class EnhancedTradingBot:
                 exit()
         logger.debug("Configuration sections validated.")
 
-    def _setup_logging(self):
+    def _setup_logging(self) -> None:
         """Sets up logging level based on configuration."""
         log_level_str = self.config["logging"].get("level", "DEBUG").upper()
         log_level = getattr(logging, log_level_str, logging.DEBUG)
@@ -348,8 +347,8 @@ class EnhancedTradingBot:
         """Calculates technical indicators from OHLCV data."""
         # Extract prices from OHLCV data (assumes [timestamp, open, high, low, close, volume])
         close_prices = np.array([candle[4] for candle in ohlcv])
-        high_prices = np.array([candle[2] for candle in ohlcv])
-        low_prices = np.array([candle[3] for candle in ohlcv])
+        np.array([candle[2] for candle in ohlcv])
+        np.array([candle[3] for candle in ohlcv])
 
         ema = self.calculate_ema(close_prices)
         rsi = self.calculate_rsi(close_prices)
@@ -563,7 +562,7 @@ class EnhancedTradingBot:
         )
         return avg_flow * self.historical_order_flow_weight
 
-    def generate_trading_signal(self, indicators, orderbook):
+    def generate_trading_signal(self, indicators, orderbook) -> str:
         """Generates a composite trading signal based on all indicators and order book analysis."""
         signal_score = 0
         signal_score += self._get_ema_signal(indicators)
@@ -689,7 +688,7 @@ class EnhancedTradingBot:
             return None
 
     @retry_api_call()
-    def cancel_order(self, order_id):
+    def cancel_order(self, order_id) -> bool | None:
         """Cancels an open order."""
         if self.simulation_mode:
             logger.info(
@@ -760,7 +759,7 @@ class EnhancedTradingBot:
             return None
 
     @retry_api_call()
-    def set_leverage(self, leverage_value):
+    def set_leverage(self, leverage_value) -> bool | None:
         """Sets leverage for the trading symbol."""
         if self.simulation_mode:
             logger.info(
@@ -779,7 +778,7 @@ class EnhancedTradingBot:
             )
             return False
 
-    def check_trailing_stop_loss(self, position, current_price):
+    def check_trailing_stop_loss(self, position, current_price) -> bool:
         """Checks and adjusts trailing stop loss if conditions are met."""
         if not position["trailing_stop_active"]:
             return False
@@ -813,7 +812,7 @@ class EnhancedTradingBot:
                     return True
         return False
 
-    def adjust_trailing_stop_loss(self, position, current_price):
+    def adjust_trailing_stop_loss(self, position, current_price) -> bool:
         """Adjusts the stop loss based on trailing stop logic."""
         if not position["trailing_stop_active"]:
             return False
@@ -843,7 +842,7 @@ class EnhancedTradingBot:
             return True
         return False
 
-    def monitor_positions(self):
+    def monitor_positions(self) -> None:
         """Monitors open positions for take profit, stop loss, and trailing stop adjustments."""
         positions_to_remove = []
         for position in self.open_positions:
@@ -913,7 +912,7 @@ class EnhancedTradingBot:
             logger.error("Failed to close position.")
         return order
 
-    def _update_order_flow_history(self):
+    def _update_order_flow_history(self) -> None:
         """Background thread that fetches order book snapshots at a high frequency,
         computes the order flow delta (bid volume minus ask volume), and stores
         the data for historical analysis.
@@ -935,7 +934,7 @@ class EnhancedTradingBot:
                     ]
             time.sleep(1)  # Adjust frequency as needed
 
-    def run(self):
+    def run(self) -> None:
         """Main loop to run the trading bot."""
         logger.info("Starting trading bot loop...")
         while True:

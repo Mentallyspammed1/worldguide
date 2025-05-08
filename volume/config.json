@@ -1,0 +1,51 @@
+{
+    "interval": "5",
+    "retry_delay": 5,
+    "fetch_limit": 1000,
+    "orderbook_limit": 25,
+    "enable_trading": true,
+    "use_sandbox": false,
+    "risk_per_trade": 0.01,
+    "leverage": 20,
+    "max_concurrent_positions": 1,
+    "quote_currency": "USDT",
+    "loop_delay_seconds": 10,
+    "position_confirm_delay_seconds": 8,
+    "strategy_params": {
+        "vt_length": 40,
+        "vt_atr_period": 200,
+        "vt_vol_ema_length": 950,
+        "vt_atr_multiplier": 3.0,
+        "vt_step_atr_multiplier": 4.0,
+        "ob_source": "Wicks",
+        "ph_left": 10,
+        "ph_right": 10,
+        "pl_left": 10,
+        "pl_right": 10,
+        "ob_extend": true,
+        "ob_max_boxes": 50,
+        "ob_entry_proximity_factor": 1.005,
+        "ob_exit_proximity_factor": 1.001
+    },
+    "protection": {
+        "enable_trailing_stop": true,
+        "trailing_stop_callback_rate": 0.005,
+        "trailing_stop_activation_percentage": 0.003,
+        "enable_break_even": true,
+        "break_even_trigger_atr_multiple": 1.0,
+        "break_even_offset_ticks": 2,
+        "initial_stop_loss_atr_multiple": 1.8,
+        "initial_take_profit_atr_multiple": 0.7
+    },
+    "trading_pairs": [
+        "BCH/USDT"
+    ],
+    "notifications": {
+        "enable_notifications": true
+    },
+    "backtesting": {
+        "enabled": false,
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+    }
+}

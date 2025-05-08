@@ -1,0 +1,785 @@
+Okay, seeker of strategic fusion! You desire to imbue the `UnifiedTrader` with the specific market-reading technique of Volumetric Order Blocks. As Pyrmethus, I shall weave this analytical spell directly into the familiar's core intelligence.
+
+We will replace the placeholder Moving Average logic within `_generate_signals` with the previously developed Volumetric Order Block analysis. This involves:
+
+1.  **Integrating Block Calculation:** Adding a helper method (`_calculate_volumetric_order_blocks`) to the `UnifiedTrader` class.
+2.  **Implementing Signal Logic:** Modifying `_generate_signals` to:
+    *   Call the block calculation helper.
+    *   Analyze the latest price action against the identified blocks.
+    *   Generate 'long' or 'short' signals based on interaction with Bullish or Bearish blocks.
+    *   Crucially, determine the `sl_price` based on the specific block that triggered the signal (e.g., below a Bull Box bottom for long, above a Bear Box top for short).
+    *   Return the signal dictionary in the required format.
+
+Here is the complete `UnifiedTrader` code with the Volumetric Order Block strategy integrated into `_generate_signals`:
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Pyrmethus's Unified Trading Familiar v1.1 (VOB Strategy)
+# Combines Volumetric Order Block strategy with position management (TSL/TP/SL).
+
+import os
+import sys
+import time
+import logging
+from logging.handlers import RotatingFileHandler
+from decimal import Decimal, getcontext, ROUND_HALF_UP, ROUND_DOWN, InvalidOperation, DivisionByZero
+from typing import Dict, Optional, Any, Tuple, Union, List
+
+# Third-party enchantments
+import ccxt
+from dotenv import load_dotenv
+import pandas as pd # Keep pandas for strategy calculations
+from colorama import init, Fore, Style, Back
+
+# =============================================================================
+# Initialization Rituals & Constants
+# =============================================================================
+init(autoreset=True)
+getcontext().prec = 50
+
+APP_NAME = "UnifiedTrader-VOB" # Indicate strategy in name
+LOG_FORMAT_CONSOLE = f"{Fore.BLUE}%(asctime)s{Style.RESET_ALL} - {Fore.MAGENTA}{APP_NAME}{Style.RESET_ALL} - %(levelname)s - %(message)s"
+LOG_FORMAT_FILE = "%(asctime)s - %(name)s - %(levelname)-8s - %(message)s"
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+# --- State Definitions ---
+STATE_SEARCHING = "SEARCHING"
+STATE_ENTERING = "ENTERING"
+STATE_MANAGING_LONG = "MANAGING_LONG"
+STATE_MANAGING_SHORT = "MANAGING_SHORT"
+STATE_EXIT_TRIGGERED = "EXIT_TRIGGERED"
+STATE_CLOSING = "CLOSING"
+STATE_CLOSED = "CLOSED"
+STATE_ERROR = "ERROR"
+STATE_HALTED = "HALTED"
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(dotenv_path): load_dotenv(dotenv_path=dotenv_path); print(Fore.CYAN + Style.DIM + f"# Secrets whispered from {dotenv_path}")
+else: load_dotenv(); print(Fore.YELLOW + Style.BRIGHT + f"# Warning: .env file not found. Seeking secrets from environment variables.")
+
+# =============================================================================
+# Arcane Logging Configuration (Combined)
+# =============================================================================
+log_level_str = os.getenv("LOG_LEVEL", "INFO").upper()
+try: log_level = getattr(logging, log_level_str)
+except AttributeError: print(f"{Fore.RED}Invalid LOG_LEVEL '{log_level_str}'. Defaulting to INFO."); log_level = logging.INFO
+
+logger = logging.getLogger(APP_NAME)
+logger.setLevel(log_level)
+logger.propagate = False
+
+class ColorFormatter(logging.Formatter):
+    LOG_COLORS = { logging.DEBUG: Fore.CYAN + Style.DIM, logging.INFO: Fore.GREEN, logging.WARNING: Fore.YELLOW, logging.ERROR: Fore.RED, logging.CRITICAL: Fore.RED + Style.BRIGHT + Back.WHITE }
+    RESET = Style.RESET_ALL
+    def __init__(self, fmt=LOG_FORMAT_CONSOLE, datefmt=DATE_FORMAT): super().__init__(fmt, datefmt)
+    def format(self, record):
+        log_color = self.LOG_COLORS.get(record.levelno, Fore.WHITE)
+        original_levelname = record.levelname
+        record.levelname = f"{log_color}{record.levelname:<8}{self.RESET}"
+        if record.levelno >= logging.WARNING: record.msg = f"{log_color}{record.msg}{self.RESET}"
+        formatted_message = super().format(record)
+        record.levelname = original_levelname
+        return formatted_message
+
+if not logger.handlers:
+    console_handler = logging.StreamHandler(sys.stdout); console_handler.setLevel(log_level); console_handler.setFormatter(ColorFormatter()); logger.addHandler(console_handler)
+    log_file_path = os.getenv("LOG_FILE_PATH", f"{APP_NAME.lower()}.log")
+    try:
+        file_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5, encoding='utf-8'); file_handler.setLevel(log_level); file_handler.setFormatter(logging.Formatter(LOG_FORMAT_FILE, datefmt=DATE_FORMAT)); logger.addHandler(file_handler)
+        logger.info(f"{Fore.CYAN+Style.DIM}Logging detailed whispers to: {log_file_path}")
+    except Exception as e: logger.error(f"{Fore.RED}Could not set up file logger at '{log_file_path}': {e}")
+
+# =============================================================================
+# Unified Trader Configuration Class
+# =============================================================================
+class TraderConfig:
+    """Holds and validates parameters for the Unified Trader."""
+    def __init__(self):
+        logger.debug("Summoning unified configuration runes...")
+        # --- Exchange & Symbol ---
+        self.api_key: Optional[str] = os.getenv('BYBIT_API_KEY')
+        self.api_secret: Optional[str] = os.getenv('BYBIT_API_SECRET')
+        self.symbol: str = self._get_env('SYMBOL', 'BTC/USDT:USDT', cast_type=str)
+        self.market_type: str = self._get_env('MARKET_TYPE', 'linear', cast_type=str, allowed_values=['linear', 'inverse']).lower()
+        # --- Strategy & Timing ---
+        self.interval: str = self._get_env('INTERVAL', '5m', cast_type=str) # VOB might need slightly higher timeframe
+        self.ohlcv_limit: int = self._get_env('OHLCV_LIMIT', 200, cast_type=int, min_val=50, max_val=1000) # Need enough candles for pivots/EMA
+        self.loop_sleep_seconds: int = self._get_env('LOOP_SLEEP_SECONDS', 30, cast_type=int, min_val=5) # Base loop interval when searching
+        self.manage_interval_seconds: int = self._get_env('MANAGE_INTERVAL_SECONDS', 10, cast_type=int, min_val=3) # Faster checks when managing position
+        # --- VOB Strategy Specific Parameters ---
+        self.vob_volume_ema_span: int = self._get_env('VOB_VOLUME_EMA_SPAN', 20, cast_type=int, min_val=5)
+        self.vob_pivot_window: int = self._get_env('VOB_PIVOT_WINDOW', 10, cast_type=int, min_val=3) # Needs to be odd or logic adjusted slightly if even
+        self.vob_sl_buffer_pct: Decimal = self._get_env('VOB_SL_BUFFER_PCT', '0.001', cast_type=Decimal, min_val=Decimal("0.0001"), max_val=Decimal("0.05")) # % buffer for SL (0.1%)
+        # --- Risk & Sizing ---
+        self.leverage: int = self._get_env('LEVERAGE', 10, cast_type=int, min_val=1, max_val=125)
+        self.risk_percentage: Decimal = self._get_env('RISK_PERCENTAGE', '0.01', cast_type=Decimal, min_val=Decimal("0.0001"), max_val=Decimal("0.1")) # Risk per trade
+        # --- Position Management (Exit) ---
+        self.trailing_stop_pct: Decimal = self._get_env('TRAILING_STOP_PCT', '0.02', cast_type=Decimal, min_val=Decimal("0.001"), max_val=Decimal("0.99")) # 2% TSL
+        self.take_profit_pct: Optional[Decimal] = self._get_env('TAKE_PROFIT_PCT', '0.04', cast_type=Decimal, required=False, min_val=Decimal("0.001"), max_val=Decimal("10.0")) # 4% TP (Optional)
+        # --- Execution ---
+        self.entry_order_type: str = self._get_env('ENTRY_ORDER_TYPE', 'market', cast_type=str, allowed_values=['market', 'limit'])
+        self.exit_order_type: str = self._get_env('EXIT_ORDER_TYPE', 'market', cast_type=str, allowed_values=['market'])
+        self.order_check_delay_seconds: int = self._get_env('ORDER_CHECK_DELAY_SECONDS', 2, cast_type=int, min_val=1)
+        self.order_check_attempts: int = self._get_env('ORDER_CHECK_ATTEMPTS', 5, cast_type=int, min_val=1, max_val=20)
+        self.max_fetch_retries: int = self._get_env('MAX_FETCH_RETRIES', 3, cast_type=int, min_val=1, max_val=10)
+        self.dry_run: bool = self._get_env('DRY_RUN', True, cast_type=bool)
+        self._validate()
+        logger.debug("Unified configuration runes validated.")
+
+    def _get_env(self, key: str, default: Any = None, cast_type: type = str, required: bool = False,
+                 min_val: Optional[Union[int, float, Decimal]] = None,
+                 max_val: Optional[Union[int, float, Decimal]] = None,
+                 allowed_values: Optional[List[str]] = None) -> Any:
+        # (Reusing the robust _get_env from previous examples)
+        value_str = os.getenv(key)
+        is_secret = "SECRET" in key or "KEY" in key
+        log_value = "****" if is_secret and value_str else value_str
+        if value_str is None or value_str.strip() == "":
+            if required: raise ValueError(f"Required config '{key}' is missing.")
+            if default is None: return None
+            value_str = str(default)
+            log_default = "****" if is_secret else default
+            logger.debug(f"Config '{key}' not found, using default: {log_default}")
+        else: logger.debug(f"Found config '{key}': {log_value}")
+        try:
+            if cast_type == bool: value = value_str.lower() in ['true', '1', 'yes', 'y', 'on']
+            elif cast_type == Decimal: value = Decimal(value_str)
+            elif cast_type == int: value = int(float(value_str))
+            elif cast_type == float: value = float(value_str)
+            else: value = str(value_str)
+        except (ValueError, TypeError, InvalidOperation) as e: raise ValueError(f"Cast error for '{key}' ('{value_str}') to {cast_type.__name__}: {e}")
+        if allowed_values and value not in allowed_values: raise ValueError(f"Invalid value '{value}' for '{key}'. Allowed: {allowed_values}.")
+        if isinstance(value, (int, float, Decimal)):
+            min_val_comp = cast_type(min_val) if min_val is not None else None
+            max_val_comp = cast_type(max_val) if max_val is not None else None
+            if min_val_comp is not None and value < min_val_comp: raise ValueError(f"Config '{key}' {value} below min {min_val}.")
+            if max_val_comp is not None and value > max_val_comp: raise ValueError(f"Config '{key}' {value} above max {max_val}.")
+        return value
+
+    def _validate(self):
+        if not self.dry_run and (not self.api_key or not self.api_secret): raise ValueError("API Key/Secret required when DRY_RUN is False.")
+        if '/' not in self.symbol or ':' not in self.symbol: raise ValueError(f"Invalid SYMBOL format: '{self.symbol}'.")
+        if self.vob_pivot_window % 2 == 0: logger.warning(f"{Fore.YELLOW}VOB_PIVOT_WINDOW ({self.vob_pivot_window}) is even. Pivot calculation might be slightly off-center. Odd number recommended.")
+        logger.info(f"{Fore.GREEN}Unified configuration runes successfully summoned and validated.")
+
+# =============================================================================
+# The Unified Trading Familiar Class (with VOB Strategy)
+# =============================================================================
+class UnifiedTrader:
+    """Orchestrates trading strategy execution and position management using VOB."""
+
+    def __init__(self, config: TraderConfig):
+        self.config = config
+        self.state = STATE_SEARCHING
+        self.exchange = self._initialize_exchange()
+        self.market_info = self._load_market_info()
+        self.price_quantizer = Decimal(f'1e-{self.market_info["precision"]["price"]}')
+        self.amount_quantizer = Decimal(f'1e-{self.market_info["precision"]["amount"]}')
+        self.min_order_amount = Decimal(str(self.market_info['limits']['amount']['min']))
+        self.base_currency = self.market_info['base']
+        self.quote_currency = self.market_info['quote']
+        self._set_leverage()
+        self.active_position: Dict[str, Any] = {}
+
+    # --- Core Methods (_initialize_exchange, _load_market_info, _set_leverage, _quantize_*, _fetch_ohlcv, _fetch_current_price, _get_balance, _place_order, _confirm_order_status, _get_actual_entry_price, _calculate_position_size) ---
+    # (These methods remain largely the same as in the previous UnifiedTrader example)
+    # ... (Include the full implementations of these helper methods here) ...
+    def _initialize_exchange(self) -> ccxt.Exchange:
+        logger.info(f"{Fore.CYAN}Initializing connection to Bybit ({self.config.market_type})...")
+        try:
+            exchange = ccxt.bybit({
+                'apiKey': self.config.api_key if not self.config.dry_run else None,
+                'secret': self.config.api_secret if not self.config.dry_run else None,
+                'enableRateLimit': True,
+                'options': { 'defaultType': 'swap', 'defaultSubType': self.config.market_type, 'adjustForTimeDifference': True }
+            })
+            if not self.config.dry_run: exchange.fetch_balance() # Test keys
+            logger.info(f"{Fore.GREEN}Exchange connection established.")
+            return exchange
+        except ccxt.AuthenticationError as e: logger.critical(f"{Fore.RED+Style.BRIGHT}Auth Error! {e}"); raise SystemExit("Auth Failed")
+        except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.critical(f"{Fore.RED+Style.BRIGHT}Exchange Connect Error: {e}"); raise SystemExit("Exchange Connect Failed")
+        except Exception as e: logger.critical(f"{Fore.RED+Style.BRIGHT}Exchange Init Error: {e}"); raise SystemExit("Exchange Init Failed")
+
+    def _load_market_info(self) -> Dict:
+        logger.info(f"{Fore.CYAN}Loading market data for {self.config.symbol}...")
+        try:
+            markets = self.exchange.load_markets(True)
+            if self.config.symbol not in markets: raise ccxt.BadSymbol(f"Symbol '{self.config.symbol}' not found.")
+            market = markets[self.config.symbol]
+            logger.info(f"{Fore.GREEN}Market data loaded. Base: {market['base']}, Quote: {market['quote']}")
+            return market
+        except ccxt.BadSymbol as e: logger.critical(f"{Fore.RED+Style.BRIGHT}{e}"); raise SystemExit("Invalid Symbol")
+        except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.critical(f"{Fore.RED+Style.BRIGHT}Market Load Error: {e}"); raise SystemExit("Market Load Failed")
+        except Exception as e: logger.critical(f"{Fore.RED+Style.BRIGHT}Market Load Error: {e}"); raise SystemExit("Market Load Failed")
+
+    def _set_leverage(self):
+        if self.config.leverage:
+            logger.info(f"{Fore.CYAN}Setting leverage for {self.config.symbol} to {self.config.leverage}x...")
+            try:
+                if self.config.dry_run and (not self.config.api_key or not self.config.api_secret):
+                     logger.warning(f"{Fore.YELLOW}Dry run: Cannot set leverage without API keys. Skipping.")
+                     return
+                # Ensure leverage setting is supported and handle potential errors
+                if self.exchange.has['setLeverage']:
+                    response = self.exchange.set_leverage(self.config.leverage, self.config.symbol)
+                    logger.info(f"{Fore.GREEN}Leverage set successfully: {response}")
+                else:
+                    logger.warning(f"{Fore.YELLOW}Exchange does not support setting leverage via API for {self.config.symbol}. Please set manually on the exchange.")
+            except ccxt.AuthenticationError: logger.error(f"{Fore.RED}Auth failed setting leverage.")
+            except ccxt.ExchangeError as e: logger.error(f"{Fore.RED}Failed to set leverage: {e}") # Might be due to open positions/orders
+            except Exception as e: logger.error(f"{Fore.RED}Unexpected error setting leverage: {e}")
+
+    def _quantize_price(self, price: Decimal) -> Decimal:
+        return price.quantize(self.price_quantizer, rounding=ROUND_HALF_UP)
+
+    def _quantize_amount(self, amount: Decimal) -> Decimal:
+        return amount.quantize(self.amount_quantizer, rounding=ROUND_DOWN)
+
+    def _fetch_ohlcv(self) -> Optional[pd.DataFrame]:
+        logger.debug(f"Fetching OHLCV for {self.config.symbol} ({self.config.interval})...")
+        for attempt in range(self.config.max_fetch_retries):
+            try:
+                ohlcv = self.exchange.fetch_ohlcv(self.config.symbol, timeframe=self.config.interval, limit=self.config.ohlcv_limit)
+                if not ohlcv: logger.warning(f"Empty OHLCV data (Attempt {attempt+1})."); time.sleep(1*(attempt+1)); continue
+                df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+                df.set_index('timestamp', inplace=True)
+                num_cols = ['open', 'high', 'low', 'close', 'volume']
+                for col in num_cols: df[col] = df[col].apply(lambda x: Decimal(str(x)) if pd.notna(x) else None)
+                df.dropna(subset=num_cols, inplace=True)
+                if df.empty: logger.warning(f"OHLCV empty after processing (Attempt {attempt+1})."); time.sleep(1*(attempt+1)); continue
+                logger.debug(f"Fetched {len(df)} OHLCV records.")
+                return df
+            except ccxt.RateLimitExceeded as e: logger.warning(f"Rate limit fetching OHLCV (Attempt {attempt+1}). Wait... ({e})"); time.sleep(self.exchange.rateLimit/1000*(attempt+2))
+            except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.warning(f"Network/Exchange error fetching OHLCV (Attempt {attempt+1}): {e}. Retry..."); time.sleep(2**attempt)
+            except Exception as e: logger.error(f"Unexpected error fetching OHLCV (Attempt {attempt+1}): {e}", exc_info=True); time.sleep(3**attempt)
+        logger.error(f"{Fore.RED+Style.BRIGHT}Failed to fetch OHLCV after {self.config.max_fetch_retries} attempts."); return None
+
+    def _fetch_current_price(self) -> Optional[Decimal]:
+        logger.debug(f"Fetching ticker for {self.config.symbol}")
+        for attempt in range(self.config.max_fetch_retries):
+            try:
+                ticker = self.exchange.fetch_ticker(self.config.symbol)
+                price = Decimal(str(ticker['close']))
+                logger.debug(f"Current price: {price:.{self.market_info['precision']['price']}f}")
+                return price
+            except ccxt.RateLimitExceeded as e: logger.warning(f"Rate limit fetching ticker (Attempt {attempt+1}). Wait... ({e})"); time.sleep(self.exchange.rateLimit/1000*(attempt+2))
+            except (ccxt.NetworkError, ccxt.ExchangeError, ccxt.RequestTimeout) as e: logger.warning(f"Network/Exchange error fetching ticker (Attempt {attempt+1}): {e}. Retry..."); time.sleep(2**attempt)
+            except Exception as e: logger.error(f"Unexpected error fetching ticker (Attempt {attempt+1}): {e}", exc_info=True); time.sleep(3**attempt)
+        logger.error(f"{Fore.RED+Style.BRIGHT}Failed to fetch price after {self.config.max_fetch_retries} attempts."); return None
+
+    def _get_balance(self, currency: str) -> Optional[Decimal]:
+        if self.config.dry_run: logger.debug(f"Dry run: Simulating {currency} balance."); return Decimal("10000.0")
+        logger.debug(f"Fetching balance for {currency}...")
+        try:
+            balance_data = self.exchange.fetch_balance()
+            free_balance = Decimal("0.0")
+            # Adapt parsing based on exchange structure (Bybit example)
+            if currency in balance_data: free_balance = Decimal(str(balance_data[currency].get('free', '0')))
+            elif 'info' in balance_data and 'result' in balance_data['info'] and 'list' in balance_data['info']['result']:
+                 for account in balance_data['info']['result']['list']:
+                     # Handle different account types (e.g., UNIFIED, CONTRACT)
+                     if account.get('accountType') == 'UNIFIED' or account.get('accountType') == 'CONTRACT':
+                         coin_list = account.get('coin', [])
+                         for coin_data in coin_list:
+                             if coin_data.get('coin') == currency:
+                                 # Use availableToWithdraw or walletBalance
+                                 balance_str = coin_data.get('availableToWithdraw', coin_data.get('walletBalance', '0'))
+                                 free_balance = Decimal(str(balance_str))
+                                 break # Found the currency
+                         if free_balance > 0: break # Found in this account type
+            logger.info(f"Available {currency} balance: {free_balance}")
+            return free_balance
+        except ccxt.AuthenticationError: logger.error(f"{Fore.RED}Auth failed fetching balance."); return None
+        except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.error(f"{Fore.RED}Error fetching balance: {e}"); return None
+        except Exception as e: logger.error(f"{Fore.RED}Unexpected error fetching balance: {e}", exc_info=True); return None
+
+    def _calculate_position_size(self, entry_price: Decimal, stop_loss_price: Decimal) -> Optional[Decimal]:
+        logger.debug("Calculating position size...")
+        wallet_balance = self._get_balance(self.quote_currency)
+        if wallet_balance is None or wallet_balance <= 0: logger.error(f"{Fore.RED}Cannot size: Invalid balance."); return None
+        if entry_price <= 0 or stop_loss_price <= 0: logger.error(f"{Fore.RED}Cannot size: Invalid prices."); return None
+        price_diff = abs(entry_price - stop_loss_price)
+        if price_diff < Decimal("1e-18"): logger.error(f"{Fore.RED}Cannot size: Entry and SL too close."); return None
+        try:
+            risk_amount_quote = wallet_balance * self.config.risk_percentage
+            if self.config.market_type == 'linear':
+                position_size_base = risk_amount_quote / price_diff
+                order_size = position_size_base
+                notional_value = order_size * entry_price
+            elif self.config.market_type == 'inverse':
+                 position_size_contracts = (wallet_balance * self.config.risk_percentage * entry_price) / price_diff
+                 order_size = position_size_contracts
+                 notional_value = order_size
+            else: logger.error(f"Unsupported market type: {self.config.market_type}"); return None
+
+            final_order_size = self._quantize_amount(order_size)
+            if final_order_size < self.min_order_amount:
+                logger.warning(f"{Fore.YELLOW}Calculated size {final_order_size} below min {self.min_order_amount}. Cannot place trade.")
+                return None
+            required_margin = notional_value / Decimal(self.config.leverage)
+            if required_margin > wallet_balance:
+                 logger.warning(f"{Fore.YELLOW}Insufficient margin. Required: {required_margin:.4f}, Available: {wallet_balance:.4f}. Cannot place trade.")
+                 return None
+            logger.info(f"Calculated position size: {final_order_size} {self.base_currency if self.config.market_type == 'linear' else 'Contracts'}")
+            logger.info(f"  Risk Amount: {risk_amount_quote:.4f} {self.quote_currency}")
+            logger.info(f"  Notional: {notional_value:.4f} {self.quote_currency}")
+            logger.info(f"  Margin Req: {required_margin:.4f} {self.quote_currency}")
+            return final_order_size
+        except (InvalidOperation, DivisionByZero) as e: logger.error(f"{Fore.RED}Math error during sizing: {e}"); return None
+        except Exception as e: logger.error(f"{Fore.RED}Unexpected error sizing: {e}", exc_info=True); return None
+
+    def _place_order(self, side: str, amount: Decimal, order_type: str, price: Optional[Decimal]=None, params: Optional[Dict]=None) -> Optional[Dict]:
+        if self.config.dry_run:
+            order_id = f"DRYRUN_{side.upper()}_{int(time.time())}"
+            logger.warning(f"{Back.YELLOW+Fore.BLACK} DRY RUN {Style.RESET_ALL}{Fore.YELLOW} Simulating {order_type} order: {side} {amount} {self.config.symbol} @ {price if price else 'Market'}")
+            return {'id': order_id, 'status': 'closed' if order_type == 'market' else 'open', 'symbol': self.config.symbol, 'side': side, 'amount': float(amount), 'price': float(price) if price else 0.0, 'filled': float(amount) if order_type == 'market' else 0.0, 'remaining': 0.0 if order_type == 'market' else float(amount), 'info': {'orderId': order_id}}
+
+        logger.info(f"{Fore.BLUE+Style.BRIGHT}Attempting to place {order_type} order: {side} {amount} {self.config.symbol}...")
+        order_params = params if params else {}
+        order_price = float(price) if price else None
+        for attempt in range(self.config.max_fetch_retries):
+            try:
+                order = self.exchange.create_order(self.config.symbol, order_type, side, float(amount), order_price, params=order_params)
+                logger.info(f"{Fore.GREEN+Style.BRIGHT}Order placed successfully! ID: {order.get('id')}")
+                logger.debug(f"Order details: {order}")
+                return order
+            except ccxt.InsufficientFunds as e: logger.error(f"{Fore.RED+Style.BRIGHT}Insufficient Funds: {e}"); return None
+            except ccxt.InvalidOrder as e: logger.error(f"{Fore.RED+Style.BRIGHT}Invalid Order: {e}"); return None
+            except ccxt.RateLimitExceeded as e: logger.warning(f"Rate limit placing order (Attempt {attempt+1}). Wait... ({e})"); time.sleep(self.exchange.rateLimit/1000*(attempt+2))
+            except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.warning(f"Network/Exchange error placing order (Attempt {attempt+1}): {e}. Retry..."); time.sleep(2**attempt)
+            except Exception as e: logger.error(f"Unexpected error placing order (Attempt {attempt+1}): {e}", exc_info=True); time.sleep(3**attempt)
+        logger.error(f"{Fore.RED+Style.BRIGHT}Failed to place order after {self.config.max_fetch_retries} attempts."); return None
+
+    def _confirm_order_status(self, order_id: str, target_status: str = 'closed') -> bool:
+        if self.config.dry_run: logger.info(f"{Fore.YELLOW}Dry run: Assuming order {order_id} reached status '{target_status}'."); return True
+        if not order_id: logger.error(f"{Fore.RED}Cannot confirm order: No Order ID."); return False
+        logger.info(f"Confirming status '{target_status}' for Order ID: {order_id}...")
+        for attempt in range(self.config.order_check_attempts):
+            try:
+                logger.debug(f"Fetching order status (Attempt {attempt+1})...")
+                order_data = self.exchange.fetch_order(order_id, self.config.symbol)
+                status = order_data.get('status')
+                logger.info(f"  Order Status: {status}")
+                if status == target_status: logger.info(f"{Fore.GREEN}Order {order_id} confirmed '{status}'."); return True
+                if status in ['canceled', 'rejected', 'expired']: logger.error(f"{Fore.RED}Order {order_id} failed: {status}."); return False
+                logger.info(f"Status is '{status}'. Waiting {self.config.order_check_delay_seconds}s..."); time.sleep(self.config.order_check_delay_seconds)
+            except ccxt.OrderNotFound: logger.error(f"{Fore.RED}Order {order_id} not found (Attempt {attempt+1})."); time.sleep(self.config.order_check_delay_seconds*(attempt+1))
+            except (ccxt.NetworkError, ccxt.ExchangeError) as e: logger.warning(f"Network/Exchange error confirming order (Attempt {attempt+1}): {e}. Retry..."); time.sleep(self.config.order_check_delay_seconds*(attempt+1))
+            except Exception as e: logger.error(f"Unexpected error confirming order (Attempt {attempt+1}): {e}", exc_info=True); time.sleep(self.config.order_check_delay_seconds*(attempt+1))
+        logger.error(f"{Fore.RED+Style.BRIGHT}Failed to confirm status '{target_status}' for order {order_id} after {self.config.order_check_attempts} attempts."); return False
+
+    def _get_actual_entry_price(self, order_id: str) -> Optional[Decimal]:
+         if self.config.dry_run: logger.info(f"{Fore.YELLOW}Dry run: Using initial price estimate."); return None
+         if not order_id: return None
+         logger.info(f"Fetching fill price for order {order_id}...")
+         try:
+             # Allow multiple attempts to fetch order details, especially if it just filled
+             for _ in range(self.config.order_check_attempts):
+                 order_data = self.exchange.fetch_order(order_id, self.config.symbol)
+                 if order_data and order_data.get('average'):
+                     avg_price = Decimal(str(order_data['average']))
+                     logger.info(f"Found average fill price: {avg_price}")
+                     return avg_price
+                 elif order_data and order_data.get('status') == 'closed' and order_data.get('price') and order_data.get('filled') == order_data.get('amount'):
+                      # Fallback for market orders if 'average' not present but order closed/filled
+                      avg_price = Decimal(str(order_data['price']))
+                      logger.info(f"Using order price as fill price (market order assumed): {avg_price}")
+                      return avg_price
+                 elif order_data and order_data.get('status') == 'open':
+                      logger.debug(f"Order {order_id} still open, cannot determine final fill price yet.")
+                      time.sleep(self.config.order_check_delay_seconds) # Wait before retrying
+                 else:
+                      logger.warning(f"Could not determine average fill price for order {order_id}. Status: {order_data.get('status')}. Data: {order_data}")
+                      return None # Cannot determine price
+             logger.warning(f"Order {order_id} did not reach a state where fill price could be determined after multiple checks.")
+             return None
+         except Exception as e:
+              logger.error(f"Error fetching fill price for {order_id}: {e}", exc_info=True)
+              return None
+
+    # --- VOB Strategy Specific Methods ---
+
+    def _calculate_volumetric_order_blocks(self, df: pd.DataFrame) -> Tuple[Optional[pd.DataFrame], Optional[Dict[str, Any]]]:
+        """
+        Identifies potential support (bull) and resistance (bear) zones based on
+        pivot points and volume characteristics. Integrated from VOB script.
+        """
+        if df is None or df.empty:
+            logger.error(f"{Fore.RED}VOB Calc: Input DataFrame is empty.")
+            return None, None
+
+        logger.debug(f"{Fore.CYAN}Calculating volumetric order blocks...")
+        try:
+            df_copy = df.copy()
+            ema_span = self.config.vob_volume_ema_span
+            pivot_window = self.config.vob_pivot_window
+            half_window = pivot_window // 2 # Used for centered window logic
+
+            if len(df_copy) < pivot_window:
+                 logger.warning(f"Not enough data ({len(df_copy)}) for pivot window ({pivot_window}). Cannot calculate VOBs.")
+                 return df_copy, None # Return original df, no blocks
+
+            # Volume analysis
+            df_copy['volume_ema'] = df_copy['volume'].ewm(span=ema_span, adjust=False).mean()
+            df_copy['volume_norm'] = df_copy['volume'] / (df_copy['volume_ema'] + Decimal("1e-18")) # Avoid zero division
+
+            # Identify pivot points (centered window)
+            # Note: rolling().apply() can be slow; consider vectorizing if performance is critical
+            df_copy['pivot_high'] = df_copy['high'].rolling(window=pivot_window, center=True, min_periods=pivot_window).apply(lambda x: x.iloc[half_window] == x.max(), raw=True).fillna(0)
+            df_copy['pivot_low'] = df_copy['low'].rolling(window=pivot_window, center=True, min_periods=pivot_window).apply(lambda x: x.iloc[half_window] == x.min(), raw=True).fillna(0)
+
+            bull_boxes = []
+            bear_boxes = []
+
+            for i in range(len(df_copy)):
+                # Bearish block candidate: Pivot High identified
+                if df_copy['pivot_high'].iloc[i] == 1.0:
+                    bear_boxes.append({
+                        'timestamp': df_copy.index[i],
+                        'top': df_copy['high'].iloc[i],    # Using Decimal from OHLCV fetch
+                        'bottom': df_copy['low'].iloc[i],
+                        'volume_norm': df_copy['volume_norm'].iloc[i]
+                    })
+                # Bullish block candidate: Pivot Low identified
+                if df_copy['pivot_low'].iloc[i] == 1.0:
+                    bull_boxes.append({
+                        'timestamp': df_copy.index[i],
+                        'top': df_copy['high'].iloc[i],
+                        'bottom': df_copy['low'].iloc[i],
+                        'volume_norm': df_copy['volume_norm'].iloc[i]
+                    })
+
+            logger.debug(f"VOB Calc complete. Found {len(bull_boxes)} bull, {len(bear_boxes)} bear candidates.")
+            return df_copy, {'bull_boxes': bull_boxes, 'bear_boxes': bear_boxes}
+
+        except KeyError as e:
+            logger.error(f"{Fore.RED}VOB Calc Error: Missing column {e}.", exc_info=True)
+            return df, None # Return original df
+        except Exception as e:
+            logger.error(f"{Fore.RED}VOB Calc Error: {e}", exc_info=True)
+            return df, None # Return original df
+
+    # --- Overridden Strategy Method ---
+
+    def _generate_signals(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Generates trading signals based on Volumetric Order Block analysis.
+        Returns: {'signal': 'long'/'short'/None, 'sl_price': Decimal/None, 'tp_price': None}
+        """
+        if df is None or df.empty: return {'signal': None}
+        logger.debug("Generating VOB signals...")
+
+        df_analyzed, order_blocks = self._calculate_volumetric_order_blocks(df)
+
+        if order_blocks is None:
+            logger.warning("Could not calculate order blocks, no signal generated.")
+            return {'signal': None}
+
+        signals: Dict[str, Any] = {'signal': None, 'sl_price': None, 'tp_price': None}
+        try:
+            last_candle = df_analyzed.iloc[-1]
+            last_close = last_candle['close']
+            last_high = last_candle['high']
+            last_low = last_candle['low']
+
+            bull_boxes = order_blocks.get('bull_boxes', [])
+            bear_boxes = order_blocks.get('bear_boxes', [])
+
+            # --- Check Bearish Blocks for Short Signal ---
+            # Look for price entering a recent bearish order block
+            relevant_bear_boxes = [box for box in bear_boxes if box['timestamp'] < last_candle.name]
+            if relevant_bear_boxes:
+                latest_bear_box = max(relevant_bear_boxes, key=lambda box: box['timestamp'])
+                box_top = latest_bear_box['top']
+                box_bottom = latest_bear_box['bottom']
+
+                # Condition: Last candle's high touched or exceeded the box bottom,
+                # AND last candle's low was somewhere within or below the box top.
+                # AND last close is below the box top (confirmation?) - Optional refinement
+                if last_high >= box_bottom and last_low <= box_top: # Price interacted with the zone
+                    signals['signal'] = 'short'
+                    # SL slightly above the box top + buffer
+                    sl_price = box_top * (1 + self.config.vob_sl_buffer_pct)
+                    signals['sl_price'] = self._quantize_price(sl_price)
+                    reason = f"Price entered Bearish OB @ {box_bottom:.{self.market_info['precision']['price']}f}-{box_top:.{self.market_info['precision']['price']}f}"
+                    logger.info(f"{Fore.RED}Generated SHORT signal ({reason}). Proposed SL: {signals['sl_price']}")
+                    # Short signal found, no need to check for long
+                    return signals
+
+            # --- Check Bullish Blocks for Long Signal ---
+            relevant_bull_boxes = [box for box in bull_boxes if box['timestamp'] < last_candle.name]
+            if relevant_bull_boxes:
+                latest_bull_box = max(relevant_bull_boxes, key=lambda box: box['timestamp'])
+                box_top = latest_bull_box['top']
+                box_bottom = latest_bull_box['bottom']
+
+                # Condition: Last candle's low touched or went below the box top,
+                # AND last candle's high was somewhere within or above the box bottom.
+                # AND last close is above the box bottom (confirmation?) - Optional refinement
+                if last_low <= box_top and last_high >= box_bottom: # Price interacted with the zone
+                    signals['signal'] = 'long'
+                    # SL slightly below the box bottom - buffer
+                    sl_price = box_bottom * (1 - self.config.vob_sl_buffer_pct)
+                    signals['sl_price'] = self._quantize_price(sl_price)
+                    reason = f"Price entered Bullish OB @ {box_bottom:.{self.market_info['precision']['price']}f}-{box_top:.{self.market_info['precision']['price']}f}"
+                    logger.info(f"{Fore.GREEN}Generated LONG signal ({reason}). Proposed SL: {signals['sl_price']}")
+                    return signals
+
+            logger.debug("No VOB signal generated based on zone interaction.")
+            return signals # No signal found
+
+        except KeyError as e:
+            logger.error(f"{Fore.RED}Error generating VOB signals: Missing key {e}.", exc_info=True)
+            return {'signal': None}
+        except Exception as e:
+            logger.error(f"{Fore.RED}Error generating VOB signals: {e}", exc_info=True)
+            return {'signal': None}
+
+
+    # --- State Handling Methods (_handle_searching, _handle_managing_position, _handle_closing) ---
+    # (These methods remain largely the same as in the previous UnifiedTrader example,
+    #  they correctly use the output of the overridden _generate_signals)
+    # ... (Include the full implementations of these state handling methods here) ...
+    def _handle_searching(self):
+        """Fetches data, runs strategy, attempts entry if signal found."""
+        df = self._fetch_ohlcv()
+        if df is None: return
+
+        signal_data = self._generate_signals(df) # Uses the VOB implementation now
+        signal = signal_data.get('signal')
+
+        if signal in ['long', 'short']:
+            logger.info(f"{Fore.CYAN+Style.BRIGHT}Signal detected: {signal.upper()}")
+            side = 'buy' if signal == 'long' else 'sell'
+
+            # Determine Stop Loss (Now primarily from VOB signal)
+            stop_loss_price = signal_data.get('sl_price')
+            if stop_loss_price is None:
+                 # Fallback or error if strategy MUST provide SL
+                 logger.error(f"{Fore.RED}VOB Strategy did not provide SL price for {signal} signal! Cannot proceed.")
+                 return # Do not proceed without SL
+
+            # Estimate entry price
+            estimated_entry_price = df['close'].iloc[-1] # Use last close for market order estimate
+
+            # Calculate Size
+            position_size = self._calculate_position_size(estimated_entry_price, stop_loss_price)
+            if position_size is None or position_size <= 0:
+                 logger.warning(f"{Fore.YELLOW}Could not calculate valid position size. Skipping entry.")
+                 return
+
+            # Place Entry Order
+            self.state = STATE_ENTERING
+            logger.info(f"Transitioning to {self.state}")
+            entry_order = self._place_order(side=side, amount=position_size, order_type=self.config.entry_order_type)
+
+            if entry_order and entry_order.get('id'):
+                order_id = entry_order['id']
+                target_status = 'closed' if self.config.entry_order_type == 'market' else 'open'
+                if self._confirm_order_status(order_id, target_status=target_status):
+                     actual_entry_price = self._get_actual_entry_price(order_id)
+                     if actual_entry_price is None:
+                          logger.warning(f"{Fore.YELLOW}Could not get actual fill price, using estimate: {estimated_entry_price}")
+                          actual_entry_price = estimated_entry_price
+
+                     # Recalculate SL/TP based on actual entry price
+                     # SL is already determined by VOB block, use that directly
+                     final_sl = stop_loss_price
+                     final_tp = None
+                     if self.config.take_profit_pct: # Calculate TP based on fixed % if configured
+                         tp_factor = (1 + self.config.take_profit_pct) if signal == 'long' else (1 - self.config.take_profit_pct)
+                         final_tp = self._quantize_price(actual_entry_price * tp_factor)
+
+                     self.active_position = {
+                         'side': signal, 'entry_price': actual_entry_price, 'size': position_size,
+                         'initial_sl': final_sl, 'current_tsl': final_sl, 'take_profit': final_tp,
+                         'entry_order_id': order_id, 'entry_time': pd.Timestamp.now(tz='UTC')
+                     }
+                     self.state = STATE_MANAGING_LONG if signal == 'long' else STATE_MANAGING_SHORT
+                     logger.info(f"{Fore.GREEN+Style.BRIGHT}Entry successful! Transitioning to {self.state}")
+                     logger.info(f"  Entry Price: {self.active_position['entry_price']:.{self.market_info['precision']['price']}f}")
+                     logger.info(f"  Strategy SL: {self.active_position['initial_sl']:.{self.market_info['precision']['price']}f}")
+                     if self.active_position['take_profit']: logger.info(f"  Take Profit: {self.active_position['take_profit']:.{self.market_info['precision']['price']}f}")
+                else:
+                     logger.error(f"{Fore.RED}Entry order {order_id} failed confirmation. Returning to SEARCHING.")
+                     self.state = STATE_SEARCHING
+            else:
+                logger.error(f"{Fore.RED}Failed to place entry order. Returning to SEARCHING.")
+                self.state = STATE_SEARCHING
+        else:
+            logger.debug("No entry signal found.")
+
+    def _handle_managing_position(self):
+        """Monitors price, updates TSL, checks for exit conditions."""
+        if not self.active_position:
+             logger.error(f"{Fore.RED}Attempted to manage position, but no active position data found! Returning to SEARCHING.")
+             self.state = STATE_SEARCHING; return
+
+        current_price = self._fetch_current_price()
+        if current_price is None: logger.warning("Price fetch failed during management. Holding state."); return
+
+        pos = self.active_position; side = pos['side']; effective_sl = pos['current_tsl']
+        pnl_pct = ((current_price / pos['entry_price']) - 1) if side == 'long' else ((pos['entry_price'] / current_price) - 1)
+        pnl_color = Fore.GREEN if pnl_pct >= 0 else Fore.RED
+        tp_str = f"{pos['take_profit']:.{self.market_info['precision']['price']}f}" if pos['take_profit'] else 'N/A'
+        logger.info(f"Managing {side.upper()}: Price={current_price:.{self.market_info['precision']['price']}f} "
+                    f"| Entry={pos['entry_price']:.{self.market_info['precision']['price']}f} "
+                    f"| PnL={pnl_color}{pnl_pct:+.2%}{Style.RESET_ALL} "
+                    f"| TP={tp_str} | SL(eff)={effective_sl:.{self.market_info['precision']['price']}f}")
+
+        # Update Trailing Stop
+        if side == 'long' and current_price > pos['entry_price']:
+            potential_tsl = self._quantize_price(current_price * (1 - self.config.trailing_stop_pct))
+            if potential_tsl > pos['current_tsl']: logger.info(f"{Fore.GREEN}TSL Updated (LONG): {pos['current_tsl']} -> {potential_tsl}"); pos['current_tsl'] = potential_tsl
+        elif side == 'short' and current_price < pos['entry_price']:
+            potential_tsl = self._quantize_price(current_price * (1 + self.config.trailing_stop_pct))
+            if potential_tsl < pos['current_tsl']: logger.info(f"{Fore.GREEN}TSL Updated (SHORT): {pos['current_tsl']} -> {potential_tsl}"); pos['current_tsl'] = potential_tsl
+
+        # Check Exit Conditions
+        exit_reason = None
+        if side == 'long':
+            if pos['take_profit'] and current_price >= pos['take_profit']: exit_reason = "Take Profit"
+            elif current_price <= pos['current_tsl']: exit_reason = "Stop Loss (TSL)" if pos['current_tsl'] != pos['initial_sl'] else "Stop Loss (Initial)"
+        elif side == 'short':
+            if pos['take_profit'] and current_price <= pos['take_profit']: exit_reason = "Take Profit"
+            elif current_price >= pos['current_tsl']: exit_reason = "Stop Loss (TSL)" if pos['current_tsl'] != pos['initial_sl'] else "Stop Loss (Initial)"
+
+        if exit_reason:
+            logger.info(f"{Fore.YELLOW+Style.BRIGHT}Exit condition met: {exit_reason} at price {current_price:.{self.market_info['precision']['price']}f}")
+            self.active_position['exit_reason'] = exit_reason
+            self.state = STATE_EXIT_TRIGGERED
+            logger.info(f"Transitioning to {self.state}")
+
+    def _handle_closing(self):
+        """Places the closing order and confirms closure."""
+        if not self.active_position: logger.error(f"{Fore.RED}Attempted to close, but no active position! Returning to SEARCHING."); self.state = STATE_SEARCHING; return
+        pos = self.active_position; close_side = 'sell' if pos['side'] == 'long' else 'buy'
+        logger.info(f"Placing closing order: {close_side} {pos['size']}...")
+        exit_order = self._place_order(side=close_side, amount=pos['size'], order_type=self.config.exit_order_type, params={'reduceOnly': True})
+        if exit_order and exit_order.get('id'):
+            order_id = exit_order['id']
+            if self._confirm_order_status(order_id, target_status='closed'):
+                 logger.info(f"{Fore.GREEN+Style.BRIGHT}Position successfully closed. Reason: {pos.get('exit_reason', 'N/A')}")
+                 self.state = STATE_CLOSED
+            else: logger.error(f"{Fore.RED+Style.BRIGHT}Failed confirm closure order {order_id}. Manual check required!"); self.state = STATE_ERROR
+        else: logger.error(f"{Fore.RED+Style.BRIGHT}Failed place closing order. Manual check required!"); self.state = STATE_ERROR
+        if self.state in [STATE_CLOSED, STATE_ERROR]: self.active_position = {} # Clear position details
+
+
+    # --- Main Execution Loop ---
+    def run(self):
+        """The main operational cycle of the Unified Trader."""
+        logger.info(f"{Fore.YELLOW+Style.BRIGHT}=== {APP_NAME} v1.1 Activated ===")
+        if self.config.dry_run: logger.warning(f"{Back.YELLOW+Fore.BLACK+Style.BRIGHT} DRY RUN MODE ENABLED {Style.RESET_ALL}")
+        logger.info(f"Initial state: {self.state}")
+
+        while self.state not in [STATE_ERROR, STATE_HALTED]:
+            cycle_start_time = time.monotonic()
+            current_state = self.state
+
+            try:
+                if current_state == STATE_SEARCHING: self._handle_searching()
+                elif current_state in [STATE_MANAGING_LONG, STATE_MANAGING_SHORT]: self._handle_managing_position()
+                elif current_state == STATE_EXIT_TRIGGERED: self.state = STATE_CLOSING; logger.info(f"Transitioning to {self.state}"); self._handle_closing()
+                elif current_state == STATE_CLOSED: logger.info("Position closed. Returning to search."); self.state = STATE_SEARCHING
+            except KeyboardInterrupt: logger.info(f"\n{Fore.YELLOW+Style.BRIGHT}Shutdown signal received. Halting..."); self.state = STATE_HALTED; break
+            except Exception as e: logger.critical(f"{Fore.RED+Style.BRIGHT}Critical unexpected error in main loop: {e}", exc_info=True); self.state = STATE_ERROR; break
+
+            elapsed_time = time.monotonic() - cycle_start_time
+            base_interval = self.config.manage_interval_seconds if current_state in [STATE_MANAGING_LONG, STATE_MANAGING_SHORT] else self.config.loop_sleep_seconds
+            sleep_duration = max(0, base_interval - elapsed_time)
+            if self.state not in [STATE_ERROR, STATE_HALTED]: logger.debug(f"State: {self.state} | Cycle Time: {elapsed_time:.2f}s | Sleeping: {sleep_duration:.2f}s"); time.sleep(sleep_duration)
+
+        logger.info(f"{Fore.MAGENTA+Style.BRIGHT}=== {APP_NAME} Deactivated (Final State: {self.state}) ===")
+
+
+# =============================================================================
+# Spell Invocation
+# =============================================================================
+if __name__ == '__main__':
+    print(Fore.MAGENTA + Style.BRIGHT + f"Initializing Pyrmethus's {APP_NAME} v1.1...")
+    print(Fore.CYAN + Style.DIM + "Ensure Termux has network access.")
+    print(Fore.RED + Style.BRIGHT + "Trading involves significant risk. Review config and test thoroughly with DRY_RUN=True.")
+
+    trader = None
+    try:
+        config = TraderConfig()
+        trader = UnifiedTrader(config)
+        trader.run()
+    except (SystemExit, ValueError) as e: logger.critical(f"{Fore.RED + Style.BRIGHT}Initialization failed: {e}")
+    except KeyboardInterrupt: logger.info(f"\n{Fore.YELLOW+Style.BRIGHT}Familiar interrupted during initialization.")
+    except Exception as e: logger.critical(f"{Fore.RED + Style.BRIGHT}Critical setup error: {e}", exc_info=True)
+
+    logger.info(Fore.MAGENTA + "Incantation complete. The terminal rests.")
+
+```
+
+**Changes Made:**
+
+1.  **`TraderConfig`**: Added VOB-specific parameters:
+    *   `VOB_VOLUME_EMA_SPAN`: EMA period for volume normalization.
+    *   `VOB_PIVOT_WINDOW`: Lookback window for identifying pivot highs/lows.
+    *   `VOB_SL_BUFFER_PCT`: A small percentage buffer added below/above the order block for the stop-loss to avoid premature triggering due to spread or minor wicks.
+2.  **`_calculate_volumetric_order_blocks` Method**: Added this private helper method to the `UnifiedTrader` class. It encapsulates the logic for calculating pivots and identifying potential bull/bear boxes based on the DataFrame and config parameters. It returns the analyzed DataFrame and the `order_blocks` dictionary. Uses `Decimal` for prices.
+3.  **`_generate_signals` Method Overridden**:
+    *   Now calls `self._calculate_volumetric_order_blocks`.
+    *   Implements the logic to check the last candle's interaction with the *most recent relevant* bull or bear boxes.
+    *   If a signal is triggered:
+        *   Sets `signal` to `'long'` or `'short'`.
+        *   Calculates `sl_price` based on the triggering block's `top` (for short) or `bottom` (for long), adjusted by the `VOB_SL_BUFFER_PCT`.
+        *   Sets `tp_price` to `None` (you can add logic here if your VOB strategy includes specific TP targets, otherwise it relies on the configured `TAKE_PROFIT_PCT` or TSL).
+    *   Returns the required dictionary format.
+4.  **`_handle_searching` Modifications**:
+    *   It now correctly receives the `sl_price` from the VOB `_generate_signals`.
+    *   It uses this `sl_price` directly for position sizing and setting the `initial_sl` in the `active_position` dictionary. The logic related to `USE_FIXED_STOP_LOSS` is effectively bypassed when the strategy provides the SL.
+5.  **`.env` File**: You'll need to add the new `VOB_` parameters to your `.env` file.
+
+**To Use This VOB-Powered Familiar:**
+
+1.  **Save**: Save the code.
+2.  **Dependencies**: Ensure `ccxt`, `python-dotenv`, `pandas`, `colorama` are installed.
+3.  **`.env` File**: Update your `.env` file, **adding the `VOB_` parameters**:
+    ```dotenv
+    # .env file for Unified Trader v1.1 (VOB Strategy)
+    BYBIT_API_KEY=YOUR_API_KEY
+    BYBIT_API_SECRET=YOUR_SECRET
+
+    # --- Exchange & Symbol ---
+    SYMBOL=BTC/USDT:USDT
+    MARKET_TYPE=linear
+
+    # --- Strategy & Timing ---
+    INTERVAL=5m
+    OHLCV_LIMIT=200
+    LOOP_SLEEP_SECONDS=30
+    MANAGE_INTERVAL_SECONDS=10
+
+    # --- VOB Strategy Parameters ---
+    VOB_VOLUME_EMA_SPAN=20
+    VOB_PIVOT_WINDOW=11 # Odd number recommended
+    VOB_SL_BUFFER_PCT=0.001 # 0.1% buffer for SL
+
+    # --- Risk & Sizing ---
+    LEVERAGE=10
+    RISK_PERCENTAGE=0.005
+
+    # --- Position Management (Exit) ---
+    TRAILING_STOP_PCT=0.02
+    TAKE_PROFIT_PCT=0.04 # Optional fixed TP %
+
+    # --- Execution ---
+    ENTRY_ORDER_TYPE=market
+    EXIT_ORDER_TYPE=market
+    ORDER_CHECK_DELAY_SECONDS=2
+    ORDER_CHECK_ATTEMPTS=5
+    MAX_FETCH_RETRIES=3
+    DRY_RUN=True            # CRITICAL: Start with True!
+    LOG_LEVEL=INFO
+    # LOG_FILE_PATH=unified_trader_vob.log # Optional
+    ```
+4.  **Run**: `python your_script_name.py`
+
+The familiar is now equipped with the Volumetric Order Block strategy for signal generation and will manage entered positions using the TSL/TP/SL logic. Remember to fine-tune the `VOB_` parameters and test extensively!

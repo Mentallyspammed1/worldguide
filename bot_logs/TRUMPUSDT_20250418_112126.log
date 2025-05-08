@@ -1,0 +1,64 @@
+2025-04-18 11:21:29,613 - ERROR - [91mAn unexpected error occurred in main loop: unsupported operand type(s) for +=: 'float' and 'NoneType'. Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1515, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1188, in analyze
+    trend_data = self.determine_trend_momentum()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 845, in determine_trend_momentum
+    atr_list = self.calculate_atr()
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 678, in calculate_atr
+    atr = rolling_mean(tr, window) # Use helper for rolling mean
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 333, in rolling_mean
+    current_sum += x
+TypeError: unsupported operand type(s) for +=: 'float' and 'NoneType'
+2025-04-18 11:21:37,356 - ERROR - [91mAn unexpected error occurred in main loop: unsupported operand type(s) for +=: 'float' and 'NoneType'. Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1515, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1188, in analyze
+    trend_data = self.determine_trend_momentum()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 845, in determine_trend_momentum
+    atr_list = self.calculate_atr()
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 678, in calculate_atr
+    atr = rolling_mean(tr, window) # Use helper for rolling mean
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 333, in rolling_mean
+    current_sum += x
+TypeError: unsupported operand type(s) for +=: 'float' and 'NoneType'
+2025-04-18 11:21:46,550 - ERROR - [91mAn unexpected error occurred in main loop: unsupported operand type(s) for +=: 'float' and 'NoneType'. Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1515, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1188, in analyze
+    trend_data = self.determine_trend_momentum()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 845, in determine_trend_momentum
+    atr_list = self.calculate_atr()
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 678, in calculate_atr
+    atr = rolling_mean(tr, window) # Use helper for rolling mean
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 333, in rolling_mean
+    current_sum += x
+TypeError: unsupported operand type(s) for +=: 'float' and 'NoneType'
+2025-04-18 11:21:54,190 - ERROR - [91mAn unexpected error occurred in main loop: unsupported operand type(s) for +=: 'float' and 'NoneType'. Retrying in 5 seconds...[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1515, in main
+    analyzer.analyze(current_price, timestamp)
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 1188, in analyze
+    trend_data = self.determine_trend_momentum()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 845, in determine_trend_momentum
+    atr_list = self.calculate_atr()
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 678, in calculate_atr
+    atr = rolling_mean(tr, window) # Use helper for rolling mean
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/script.py", line 333, in rolling_mean
+    current_sum += x
+TypeError: unsupported operand type(s) for +=: 'float' and 'NoneType'

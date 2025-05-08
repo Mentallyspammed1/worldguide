@@ -1,0 +1,152 @@
+2025-04-24 03:51:46 - INFO - [volbot_10000COQ_USDT_USDT:2391] - --- Starting analysis cycle for 10000COQ/USDT:USDT ---
+2025-04-24 03:51:46 - DEBUG - [volbot_10000COQ_USDT_USDT:1598] - Market Info 10000COQ/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-06, AmtPrec=10.0, MinAmt=10.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:51:46 - WARNING - [volbot_10000COQ_USDT_USDT:1045] - Could not determine price precision from tick size for 10000COQ/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:46 - WARNING - [volbot_10000COQ_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 10000COQ/USDT:USDT.[0m
+2025-04-24 03:51:46 - WARNING - [volbot_10000COQ_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 10000COQ/USDT:USDT.
+2025-04-24 03:51:46 - DEBUG - [volbot_10000COQ_USDT_USDT:2426] - Fetching 1100 klines for 10000COQ/USDT:USDT 5m...
+2025-04-24 03:51:46 - DEBUG - [volbot_10000COQ_USDT_USDT:509] - Fetching klines for 10000COQ/USDT:USDT, 5m, limit=1100 (Attempt 1/4)
+2025-04-24 03:51:46 - DEBUG - [volbot_10000COQ_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:51:47 - INFO - [volbot_10000COQ_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 10000COQ/USDT:USDT 5m
+2025-04-24 03:51:47 - WARNING - [volbot_10000COQ_USDT_USDT:1045] - Could not determine price precision from tick size for 10000COQ/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:51:47 - WARNING - [volbot_10000COQ_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 10000COQ/USDT:USDT. Need ~1050 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:51:47 - INFO - [volbot_10000COQ_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:51:47 - WARNING - [volbot_10000COQ_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1010). Skipping.[0m
+2025-04-24 03:51:47 - INFO - [volbot_10000COQ_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:51:47 - INFO - [volbot_10000COQ_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:51:47 - INFO - [volbot_10000COQ_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 01:00:00, Candle: 2025-04-20 22:55:00, Range: [0.00596, 0.00597])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.00613 > Top 0.00597)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_2 (Pivot: 2025-04-21 03:10:00, Candle: 2025-04-21 01:05:00, Range: [0.00611, 0.00613])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_2 (Close 0.00600 < Bottom 0.00611)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 08:20:00, Candle: 2025-04-21 06:15:00, Range: [0.00615, 0.00615])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.00640 > Top 0.00615)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 11:25:00, Candle: 2025-04-21 09:20:00, Range: [0.00627, 0.00631])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.00626 < Bottom 0.00627)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 13:55:00, Candle: 2025-04-21 11:50:00, Range: [0.00630, 0.00633])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00619 < Bottom 0.00630)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.00628, 0.00631])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.00603 < Bottom 0.00628)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-21 22:20:00, Candle: 2025-04-21 20:15:00, Range: [0.00611, 0.00613])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.00607 < Bottom 0.00611)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.00606, 0.00607])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.00602 < Bottom 0.00606)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 02:05:00, Candle: 2025-04-22 00:00:00, Range: [0.00614, 0.00616])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.00623 > Top 0.00616)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_10 (Pivot: 2025-04-22 18:45:00, Candle: 2025-04-22 16:40:00, Range: [0.00651, 0.00663])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_10 (Close 0.00669 > Top 0.00663)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 22:00:00, Candle: 2025-04-22 19:55:00, Range: [0.00664, 0.00665])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.00683 > Top 0.00665)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-23 00:45:00, Candle: 2025-04-22 22:40:00, Range: [0.00673, 0.00675])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.00671 < Bottom 0.00673)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-23 05:00:00, Candle: 2025-04-23 02:55:00, Range: [0.00686, 0.00687])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.00692 > Top 0.00687)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-23 08:00:00, Candle: 2025-04-23 05:55:00, Range: [0.00679, 0.00679])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 0.00679 < Bottom 0.00679)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 10:40:00, Candle: 2025-04-23 08:35:00, Range: [0.00677, 0.00678])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.00720 > Top 0.00678)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 13:35:00, Candle: 2025-04-23 11:30:00, Range: [0.00710, 0.00711])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.00717 > Top 0.00711)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 13:55:00, Candle: 2025-04-23 11:50:00, Range: [0.00709, 0.00710])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.00684 < Bottom 0.00709)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-23 17:50:00, Candle: 2025-04-23 15:45:00, Range: [0.00690, 0.00692])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.00666 < Bottom 0.00690)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-23 22:20:00, Candle: 2025-04-23 20:15:00, Range: [0.00670, 0.00670])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.00673 > Top 0.00670)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 23:50:00, Candle: 2025-04-23 21:45:00, Range: [0.00676, 0.00676])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.00656 < Bottom 0.00676)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_21 (Pivot: 2025-04-24 02:15:00, Candle: 2025-04-24 00:10:00, Range: [0.00655, 0.00657])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_21 (Close 0.00661 > Top 0.00657)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-24 02:50:00, Candle: 2025-04-24 00:45:00, Range: [0.00655, 0.00656])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.00640 < Bottom 0.00655)
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-24 06:30:00, Candle: 2025-04-24 04:25:00, Range: [0.00639, 0.00641])
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.00651 > Top 0.00641)
+2025-04-24 03:51:47 - INFO - [volbot_10000COQ_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 12, Bear OBs: 11
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:1143] - Indicator calculations complete for 10000COQ/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:1198] - Latest strategy state updated for 10000COQ/USDT:USDT: {'open': '0.0064', 'high': '0.0064', 'low': '0.0063', 'close': '0.0064', 'volume': Decimal('80390.0'), 'atr_risk': '0.0000'}
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:1872] - Fetching position for symbol: 10000COQ/USDT:USDT
+2025-04-24 03:51:47 - DEBUG - [volbot_10000COQ_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:51:48 - INFO - [volbot_10000COQ_USDT_USDT:2024] - No active position found for 10000COQ/USDT:USDT.
+2025-04-24 03:51:48 - DEBUG - [volbot_10000COQ_USDT_USDT:432] - Fetching ticker for 10000COQ/USDT:USDT...
+2025-04-24 03:51:48 - DEBUG - [volbot_10000COQ_USDT_USDT:441] - Ticker data received for 10000COQ/USDT:USDT: {'symbol': '10000COQ/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.007243, 'low': 0.006332, 'bid': 0.006358, 'bidVolume': 1880.0, 'ask': 0.006367, 'askVolume': 1210.0, 'vwap': 0.006771967352045384, 'open': 0.006789, 'close': 0.006365, 'last': 0.006365, 'previousClose': None, 'change': -0.000424, 'percentage': -6.2453, 'average': 0.006577, 'baseVolume': 93052690.0, 'quoteVolume': 630149.7787, 'markPrice': 0.006369, 'indexPrice': 0.006384, 'info': {'symbol': '10000COQUSDT', 'lastPrice': '0.006365', 'indexPrice': '0.006384', 'markPrice': '0.006369', 'prevPrice24h': '0.006789', 'price24hPcnt': '-0.062453', 'highPrice24h': '0.007243', 'lowPrice24h': '0.006332', 'prevPrice1h': '0.006355', 'openInterest': '52523360', 'openInterestValue': '334521.28', 'turnover24h': '630149.7787', 'volume24h': '93052690.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1210', 'bid1Price': '0.006358', 'ask1Price': '0.006367', 'bid1Size': '1880', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:51:48 - DEBUG - [volbot_10000COQ_USDT_USDT:447] - Using 'last' price: 0.006365
+2025-04-24 03:51:48 - DEBUG - [volbot_10000COQ_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:51:48 - INFO - [volbot_10000COQ_USDT_USDT:2611] - No open position for 10000COQ/USDT:USDT. Checking for entry signals.
+2025-04-24 03:51:48 - INFO - [volbot_10000COQ_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:51:48 - INFO - [volbot_10000COQ_USDT_USDT:2708] - --- Finished analysis cycle for 10000COQ/USDT:USDT (2.45s) ---
+2025-04-24 03:54:01 - INFO - [volbot_10000COQ_USDT_USDT:2391] - --- Starting analysis cycle for 10000COQ/USDT:USDT ---
+2025-04-24 03:54:01 - DEBUG - [volbot_10000COQ_USDT_USDT:1598] - Market Info 10000COQ/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=1e-06, AmtPrec=10.0, MinAmt=10.0, MinCost=None, ContractSize=1.0
+2025-04-24 03:54:01 - WARNING - [volbot_10000COQ_USDT_USDT:1045] - Could not determine price precision from tick size for 10000COQ/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:01 - WARNING - [volbot_10000COQ_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for 10000COQ/USDT:USDT.[0m
+2025-04-24 03:54:01 - WARNING - [volbot_10000COQ_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for 10000COQ/USDT:USDT.
+2025-04-24 03:54:01 - DEBUG - [volbot_10000COQ_USDT_USDT:2426] - Fetching 1150 klines for 10000COQ/USDT:USDT 5m...
+2025-04-24 03:54:01 - DEBUG - [volbot_10000COQ_USDT_USDT:509] - Fetching klines for 10000COQ/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:54:02 - DEBUG - [volbot_10000COQ_USDT_USDT:520] - Received 1000 klines from API.
+2025-04-24 03:54:02 - INFO - [volbot_10000COQ_USDT_USDT:585] - Successfully fetched and processed 1000 klines for 10000COQ/USDT:USDT 5m
+2025-04-24 03:54:02 - WARNING - [volbot_10000COQ_USDT_USDT:1045] - Could not determine price precision from tick size for 10000COQ/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:54:02 - WARNING - [volbot_10000COQ_USDT_USDT:1120] - [33mInsufficient data (1000 points) for 10000COQ/USDT:USDT. Need ~1100 for reliable calculations. Results may be inaccurate.[0m
+2025-04-24 03:54:02 - DEBUG - [volbot_10000COQ_USDT_USDT:1132] - Calculated Risk Management ATR (Length: 14)
+2025-04-24 03:54:02 - INFO - [volbot_10000COQ_USDT_USDT:651] - Calculating Volumatic Trend Levels...
+2025-04-24 03:54:02 - WARNING - [volbot_10000COQ_USDT_USDT:659] - [33mInsufficient data (1000 rows) for Volumatic Trend calculation (min ~1060). Skipping.[0m
+2025-04-24 03:54:02 - INFO - [volbot_10000COQ_USDT_USDT:786] - Calculating Pivot Points (Source: Wicks, Left/Right H: 25/25, L: 25/25)...
+2025-04-24 03:54:03 - INFO - [volbot_10000COQ_USDT_USDT:842] - Pivot Point calculation complete.
+2025-04-24 03:54:03 - INFO - [volbot_10000COQ_USDT_USDT:864] - Managing Order Block Boxes...
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_1 (Pivot: 2025-04-21 01:00:00, Candle: 2025-04-20 22:55:00, Range: [0.00596, 0.00597])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_1 (Close 0.00613 > Top 0.00597)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_2 (Pivot: 2025-04-21 03:10:00, Candle: 2025-04-21 01:05:00, Range: [0.00611, 0.00613])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_2 (Close 0.00600 < Bottom 0.00611)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_3 (Pivot: 2025-04-21 08:20:00, Candle: 2025-04-21 06:15:00, Range: [0.00615, 0.00615])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_3 (Close 0.00640 > Top 0.00615)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_4 (Pivot: 2025-04-21 11:25:00, Candle: 2025-04-21 09:20:00, Range: [0.00627, 0.00631])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_4 (Close 0.00626 < Bottom 0.00627)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_5 (Pivot: 2025-04-21 13:55:00, Candle: 2025-04-21 11:50:00, Range: [0.00630, 0.00633])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_5 (Close 0.00619 < Bottom 0.00630)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_6 (Pivot: 2025-04-21 17:05:00, Candle: 2025-04-21 15:00:00, Range: [0.00628, 0.00631])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_6 (Close 0.00603 < Bottom 0.00628)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_7 (Pivot: 2025-04-21 22:20:00, Candle: 2025-04-21 20:15:00, Range: [0.00611, 0.00613])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_7 (Close 0.00607 < Bottom 0.00611)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_8 (Pivot: 2025-04-22 00:35:00, Candle: 2025-04-21 22:30:00, Range: [0.00606, 0.00607])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_8 (Close 0.00602 < Bottom 0.00606)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_9 (Pivot: 2025-04-22 02:05:00, Candle: 2025-04-22 00:00:00, Range: [0.00614, 0.00616])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_9 (Close 0.00623 > Top 0.00616)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_10 (Pivot: 2025-04-22 18:45:00, Candle: 2025-04-22 16:40:00, Range: [0.00651, 0.00663])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_10 (Close 0.00669 > Top 0.00663)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_11 (Pivot: 2025-04-22 22:00:00, Candle: 2025-04-22 19:55:00, Range: [0.00664, 0.00665])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_11 (Close 0.00683 > Top 0.00665)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_12 (Pivot: 2025-04-23 00:45:00, Candle: 2025-04-22 22:40:00, Range: [0.00673, 0.00675])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_12 (Close 0.00671 < Bottom 0.00673)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_13 (Pivot: 2025-04-23 05:00:00, Candle: 2025-04-23 02:55:00, Range: [0.00686, 0.00687])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_13 (Close 0.00692 > Top 0.00687)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_14 (Pivot: 2025-04-23 08:00:00, Candle: 2025-04-23 05:55:00, Range: [0.00679, 0.00679])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_14 (Close 0.00679 < Bottom 0.00679)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_15 (Pivot: 2025-04-23 10:40:00, Candle: 2025-04-23 08:35:00, Range: [0.00677, 0.00678])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_15 (Close 0.00720 > Top 0.00678)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_16 (Pivot: 2025-04-23 13:35:00, Candle: 2025-04-23 11:30:00, Range: [0.00710, 0.00711])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_16 (Close 0.00717 > Top 0.00711)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_17 (Pivot: 2025-04-23 13:55:00, Candle: 2025-04-23 11:50:00, Range: [0.00709, 0.00710])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_17 (Close 0.00684 < Bottom 0.00709)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_18 (Pivot: 2025-04-23 17:50:00, Candle: 2025-04-23 15:45:00, Range: [0.00690, 0.00692])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_18 (Close 0.00666 < Bottom 0.00690)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_19 (Pivot: 2025-04-23 22:20:00, Candle: 2025-04-23 20:15:00, Range: [0.00670, 0.00670])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_19 (Close 0.00673 > Top 0.00670)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_20 (Pivot: 2025-04-23 23:50:00, Candle: 2025-04-23 21:45:00, Range: [0.00676, 0.00676])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_20 (Close 0.00656 < Bottom 0.00676)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_21 (Pivot: 2025-04-24 02:15:00, Candle: 2025-04-24 00:10:00, Range: [0.00655, 0.00657])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_21 (Close 0.00661 > Top 0.00657)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:947] - Created Bullish OB: BullOB_22 (Pivot: 2025-04-24 02:50:00, Candle: 2025-04-24 00:45:00, Range: [0.00655, 0.00656])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:957] - Closed Bullish OB: BullOB_22 (Close 0.00640 < Bottom 0.00655)
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:918] - Created Bearish OB: BearOB_23 (Pivot: 2025-04-24 06:30:00, Candle: 2025-04-24 04:25:00, Range: [0.00639, 0.00641])
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:970] - Closed Bearish OB: BearOB_23 (Close 0.00651 > Top 0.00641)
+2025-04-24 03:54:03 - INFO - [volbot_10000COQ_USDT_USDT:994] - Order Block management complete. Total Bull OBs tracked: 12, Bear OBs: 11
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:1143] - Indicator calculations complete for 10000COQ/USDT:USDT. Processed DF has 1000 rows.
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:1198] - Latest strategy state updated for 10000COQ/USDT:USDT: {'open': '0.0064', 'high': '0.0064', 'low': '0.0063', 'close': '0.0064', 'volume': Decimal('125850.0'), 'atr_risk': '0.0000'}
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:1872] - Fetching position for symbol: 10000COQ/USDT:USDT
+2025-04-24 03:54:03 - DEBUG - [volbot_10000COQ_USDT_USDT:1881] - Using params for fetch_positions: {'category': 'linear'}
+2025-04-24 03:54:04 - INFO - [volbot_10000COQ_USDT_USDT:2024] - No active position found for 10000COQ/USDT:USDT.
+2025-04-24 03:54:04 - DEBUG - [volbot_10000COQ_USDT_USDT:432] - Fetching ticker for 10000COQ/USDT:USDT...
+2025-04-24 03:54:04 - DEBUG - [volbot_10000COQ_USDT_USDT:441] - Ticker data received for 10000COQ/USDT:USDT: {'symbol': '10000COQ/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 0.007243, 'low': 0.006332, 'bid': 0.006367, 'bidVolume': 1180.0, 'ask': 0.006369, 'askVolume': 7830.0, 'vwap': 0.006771779430022485, 'open': 0.006774, 'close': 0.006368, 'last': 0.006368, 'previousClose': None, 'change': -0.000406, 'percentage': -5.9935, 'average': 0.006571, 'baseVolume': 93086830.0, 'quoteVolume': 630363.4806, 'markPrice': 0.00637, 'indexPrice': 0.006389, 'info': {'symbol': '10000COQUSDT', 'lastPrice': '0.006368', 'indexPrice': '0.006389', 'markPrice': '0.006370', 'prevPrice24h': '0.006774', 'price24hPcnt': '-0.059935', 'highPrice24h': '0.007243', 'lowPrice24h': '0.006332', 'prevPrice1h': '0.006348', 'openInterest': '52521480', 'openInterestValue': '334561.83', 'turnover24h': '630363.4806', 'volume24h': '93086830.0000', 'fundingRate': '0.0001', 'nextFundingTime': '1745510400000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '7830', 'bid1Price': '0.006367', 'ask1Price': '0.006369', 'bid1Size': '1180', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 03:54:04 - DEBUG - [volbot_10000COQ_USDT_USDT:447] - Using 'last' price: 0.006368
+2025-04-24 03:54:04 - DEBUG - [volbot_10000COQ_USDT_USDT:1232] - Volbot signal: HOLD (Trend state undetermined)
+2025-04-24 03:54:04 - INFO - [volbot_10000COQ_USDT_USDT:2611] - No open position for 10000COQ/USDT:USDT. Checking for entry signals.
+2025-04-24 03:54:04 - INFO - [volbot_10000COQ_USDT_USDT:2700] - Signal is HOLD and no open position. No trading action.
+2025-04-24 03:54:04 - INFO - [volbot_10000COQ_USDT_USDT:2708] - --- Finished analysis cycle for 10000COQ/USDT:USDT (2.95s) ---

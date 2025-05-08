@@ -1,0 +1,5 @@
+2025-04-24 00:36:27.839 UTC [pyrmethus.main:349] DEBUG    Logger 'pyrmethus.main' initialized. File: 'bot_logs/pyrmethus.main.log', Console Level: INFO
+2025-04-24 00:36:27.839 UTC [pyrmethus.main:2142] INFO     [35m[1m===== Starting Main Bot Loop (Pyrmethus v1.5.0) =====[0m
+2025-04-24 00:36:39.353 UTC [pyrmethus.main:2169] INFO     Connected to Bybit (Sandbox: False). Markets loaded.
+2025-04-24 00:36:39.356 UTC [pyrmethus.main:2191] INFO     Validated symbol: BCH/USDT (Spot)
+2025-04-24 00:36:39.358 UTC [pyrmethus.main:2204] WARNING  [92m[1m### TRADING ENABLED ### Live orders will be placed.[0m

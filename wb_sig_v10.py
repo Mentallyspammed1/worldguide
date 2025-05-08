@@ -132,7 +132,6 @@ def load_config(filepath: str) -> dict[str, Any]:
     if not os.path.exists(filepath):
         with open(filepath, "w") as f:
             json.dump(default_config, f, indent=4)
-        print(f"{NEON_YELLOW}Created new config file with defaults{RESET}")
         return default_config
 
     try:
@@ -140,8 +139,7 @@ def load_config(filepath: str) -> dict[str, Any]:
             config = json.load(f)
             _ensure_config_keys(config, default_config)
             return config
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"{NEON_YELLOW}Could not load config: {e}. Using defaults.{RESET}")
+    except (FileNotFoundError, json.JSONDecodeError):
         return default_config
 
 
@@ -150,7 +148,6 @@ def _ensure_config_keys(config: dict[str, Any], default_config: dict[str, Any]) 
     for key, value in default_config.items():
         if key not in config:
             config[key] = value
-            print(f"{NEON_YELLOW}Added missing key '{key}' to config{RESET}")
         elif isinstance(value, dict) and isinstance(config[key], dict):
             _ensure_config_keys(config[key], value)
 
@@ -296,7 +293,7 @@ def fetch_klines(
 def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | None:
     """Fetch orderbook data using ccxt with retries."""
     exchange = ccxt.bybit()
-    for attempt in range(MAX_API_RETRIES + 1):
+    for _attempt in range(MAX_API_RETRIES + 1):
         try:
             orderbook = exchange.fetch_order_book(symbol, limit=limit)
             if orderbook:
@@ -322,7 +319,7 @@ class TradingAnalyzer:
         config: dict[str, Any],
         symbol: str,
         interval: str,
-    ):
+    ) -> None:
         self.df = df
         self.logger = logger
         self.config = config
@@ -911,7 +908,6 @@ def analyze_symbol(symbol: str, config: dict[str, Any]) -> None:
             f"  {name}: {NEON_PURPLE}{level:.4f}{RESET}" for name, level in fib_levels
         )
     )
-    print(output)
     logger.info(output)
 
 
@@ -921,18 +917,16 @@ def main() -> None:
     interval = input(f"{NEON_YELLOW}Enter interval (e.g., 1m, 5m): {RESET}").lower()
 
     if interval not in VALID_INTERVALS:
-        print(f"{NEON_RED}Invalid interval: {VALID_INTERVALS}{RESET}")
         return
 
     CONFIG["interval"] = interval
-    print(f"{NEON_CYAN}--- Neonta Scalping Bot v1.1 ---{RESET}")
 
     try:
         while True:
             analyze_symbol(symbol, CONFIG)
             time.sleep(LOOP_DELAY_SECONDS)
     except KeyboardInterrupt:
-        print(f"{NEON_CYAN}--- Stopped by User ---{RESET}")
+        pass
 
 
 if __name__ == "__main__":

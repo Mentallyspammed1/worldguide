@@ -1,0 +1,152 @@
+2025-04-25 01:10:03 - INFO - [Trader_DOT_USDT:USDT:3982] - Initializing strategy for DOT/USDT:USDT on 3 interval...
+2025-04-25 01:10:03 - DEBUG - [Trader_DOT_USDT:USDT:1995] - Minimum data length required for indicators: 1110
+2025-04-25 01:10:03 - INFO - [Trader_DOT_USDT:USDT:3996] - [1m[92m--- Starting Trading Loop for DOT/USDT:USDT ---[0m
+2025-04-25 01:10:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:10:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:10:03 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:10:03 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:10:03 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.69s. Sleeping for 14.31s (Loop Delay: 15s).
+2025-04-25 01:10:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:10:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:10:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:10:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:10:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.54s. Sleeping for 14.46s (Loop Delay: 15s).
+2025-04-25 01:10:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:10:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:10:33 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:10:33 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:10:33 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.68s. Sleeping for 14.32s (Loop Delay: 15s).
+2025-04-25 01:10:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:10:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:10:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:10:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:10:48 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.58s. Sleeping for 14.42s (Loop Delay: 15s).
+2025-04-25 01:11:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:11:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:11:03 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:11:03 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:11:03 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.89s. Sleeping for 14.11s (Loop Delay: 15s).
+2025-04-25 01:11:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:11:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:11:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:11:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:11:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.75s. Sleeping for 14.25s (Loop Delay: 15s).
+2025-04-25 01:11:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:11:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:11:33 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:11:33 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:11:33 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.55s. Sleeping for 14.45s (Loop Delay: 15s).
+2025-04-25 01:11:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:11:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:11:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:09:00 UTC
+2025-04-25 01:11:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:11:48 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.82s. Sleeping for 14.18s (Loop Delay: 15s).
+2025-04-25 01:12:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:12:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:12:03 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:12:03 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:12:03 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.55s. Sleeping for 14.45s (Loop Delay: 15s).
+2025-04-25 01:12:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:12:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:12:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:12:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:12:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.88s. Sleeping for 14.12s (Loop Delay: 15s).
+2025-04-25 01:12:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:12:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:12:33 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:12:33 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:12:33 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.84s. Sleeping for 14.16s (Loop Delay: 15s).
+2025-04-25 01:12:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:12:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:12:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:12:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:12:49 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.92s. Sleeping for 14.08s (Loop Delay: 15s).
+2025-04-25 01:13:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:13:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:13:03 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:13:03 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:13:03 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.53s. Sleeping for 14.47s (Loop Delay: 15s).
+2025-04-25 01:13:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:13:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:13:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:13:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:13:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.86s. Sleeping for 14.14s (Loop Delay: 15s).
+2025-04-25 01:13:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:13:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:13:34 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:13:34 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:13:34 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.93s. Sleeping for 14.07s (Loop Delay: 15s).
+2025-04-25 01:13:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:13:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:13:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:13:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:13:48 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.84s. Sleeping for 14.16s (Loop Delay: 15s).
+2025-04-25 01:14:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:14:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:14:03 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:14:03 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:14:03 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.87s. Sleeping for 14.13s (Loop Delay: 15s).
+2025-04-25 01:14:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:14:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:14:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:14:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:14:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.82s. Sleeping for 14.18s (Loop Delay: 15s).
+2025-04-25 01:14:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:14:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:14:33 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:14:33 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:14:33 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.57s. Sleeping for 14.43s (Loop Delay: 15s).
+2025-04-25 01:14:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:14:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:14:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:12:00 UTC
+2025-04-25 01:14:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:14:48 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.53s. Sleeping for 14.47s (Loop Delay: 15s).
+2025-04-25 01:15:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:15:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:15:04 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:15:04 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:15:04 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 1.01s. Sleeping for 13.99s (Loop Delay: 15s).
+2025-04-25 01:15:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:15:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:15:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:15:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:15:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.56s. Sleeping for 14.44s (Loop Delay: 15s).
+2025-04-25 01:15:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:15:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:15:33 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:15:33 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:15:33 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.73s. Sleeping for 14.27s (Loop Delay: 15s).
+2025-04-25 01:15:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:15:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:15:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:15:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:15:48 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.59s. Sleeping for 14.41s (Loop Delay: 15s).
+2025-04-25 01:16:03 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:16:03 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:16:03 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:16:03 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:16:03 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.78s. Sleeping for 14.22s (Loop Delay: 15s).
+2025-04-25 01:16:18 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:16:18 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:16:18 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:16:18 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:16:18 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.81s. Sleeping for 14.19s (Loop Delay: 15s).
+2025-04-25 01:16:33 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:16:33 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:16:33 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:16:33 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:16:33 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.56s. Sleeping for 14.44s (Loop Delay: 15s).
+2025-04-25 01:16:48 - INFO - [Trader_DOT_USDT:USDT:3268] - ---== Cycle Start: Analyzing DOT/USDT:USDT (3) ==---
+2025-04-25 01:16:48 - DEBUG - [Trader_DOT_USDT:USDT:646] - Fetching 1160 klines for DOT/USDT:USDT (3m)...
+2025-04-25 01:16:48 - INFO - [Trader_DOT_USDT:USDT:693] - Fetched and processed 1000 klines for DOT/USDT:USDT (3m). Last timestamp: 2025-04-25 06:15:00 UTC
+2025-04-25 01:16:48 - WARNING - [Trader_DOT_USDT:USDT:3295] - Insufficient kline data after fetch: 1000 rows, require 1110. Skipping cycle.
+2025-04-25 01:16:48 - DEBUG - [Trader_DOT_USDT:USDT:4036] - Main loop cycle took 0.88s. Sleeping for 14.12s (Loop Delay: 15s).
+2025-04-25 01:17:00 - INFO - [Trader_DOT_USDT:USDT:4041] - Keyboard interrupt received. Shutting down gracefully...
+2025-04-25 01:17:00 - INFO - [Trader_DOT_USDT:USDT:4048] - --- Bot Shutdown Sequence Initiated ---
+2025-04-25 01:17:00 - WARNING - [Trader_DOT_USDT:USDT:4054] - Attempting to close open positions/orders on shutdown...
+2025-04-25 01:17:00 - DEBUG - [Trader_DOT_USDT:USDT:911] - Checking for open position for DOT/USDT:USDT...
+2025-04-25 01:17:01 - INFO - [Trader_DOT_USDT:USDT:941] - No active position found for DOT/USDT:USDT.
+2025-04-25 01:17:01 - INFO - [Trader_DOT_USDT:USDT:4072] - No open position found for DOT/USDT:USDT during shutdown.
+2025-04-25 01:17:01 - INFO - [Trader_DOT_USDT:USDT:4075] - Cancelling any remaining open orders for DOT/USDT:USDT...
+2025-04-25 01:17:02 - DEBUG - [Trader_DOT_USDT:USDT:4080] - Cancel all orders response: []
+2025-04-25 01:17:02 - INFO - [Trader_DOT_USDT:USDT:4081] - Open orders cancellation attempt completed.

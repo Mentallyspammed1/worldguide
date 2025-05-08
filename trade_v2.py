@@ -83,7 +83,7 @@ def retry_api_call(max_retries=3, initial_delay=1):
 class ScalpingBot:
     """A cryptocurrency scalping bot."""
 
-    def __init__(self, config_file="config.yaml"):
+    def __init__(self, config_file="config.yaml") -> None:
         """Initialize the ScalpingBot."""
         self.load_config(config_file)
         self.validate_config()
@@ -142,7 +142,7 @@ class ScalpingBot:
 
         self.exchange = self._initialize_exchange()
 
-    def load_config(self, config_file):
+    def load_config(self, config_file) -> None:
         """Load configuration from YAML file."""
         try:
             with open(config_file) as f:
@@ -165,7 +165,7 @@ class ScalpingBot:
             )
             exit()
 
-    def create_default_config(self, config_file):
+    def create_default_config(self, config_file) -> None:
         """Create a default configuration file."""
         default_config = {
             "logging_level": "DEBUG",
@@ -222,7 +222,7 @@ class ScalpingBot:
         with open(config_file, "w") as f:
             yaml.dump(default_config, f, indent=4)
 
-    def validate_config(self):
+    def validate_config(self) -> None:
         """Validate the configuration loaded from the YAML file."""
         if "trading" not in self.config:
             raise ValueError("Missing 'trading' section in config.yaml")
@@ -712,7 +712,7 @@ class ScalpingBot:
             logger.error(f"{Fore.RED}Error placing {side} order: {e}{Style.RESET_ALL}")
             return None
 
-    def manage_positions(self):
+    def manage_positions(self) -> None:
         """Manage open positions, check for stop-loss, take-profit, and time-based exits."""
         for position in list(self.open_positions):
             time_elapsed = (time.time() - position["entry_time"]) / 60
@@ -815,7 +815,7 @@ class ScalpingBot:
                     )
 
     @retry_api_call()
-    def cancel_orders(self):
+    def cancel_orders(self) -> None:
         """Cancel all open orders for the trading symbol."""
         open_orders = self.exchange.fetch_open_orders(self.symbol)
         if open_orders:
@@ -834,7 +834,7 @@ class ScalpingBot:
                         f"might already be filled or cancelled.{Style.RESET_ALL}"
                     )
 
-    def scalp_trade(self):
+    def scalp_trade(self) -> None:
         """Main trading loop for the scalping bot."""
         while True:
             self.iteration += 1

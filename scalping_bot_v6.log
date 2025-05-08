@@ -1,0 +1,49 @@
+2025-04-25 18:58:13,773 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-25 18:58:13,775 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-25 18:58:13,789 - ScalpingBotV6 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-25 18:58:13,790 - ScalpingBotV6 - DEBUG [MainThread] - Scrutinizing the configuration spellbook...
+2025-04-25 18:58:13,790 - ScalpingBotV6 - CRITICAL [MainThread] - [31mConfiguration flaw detected: "Missing required key: 'exchange.exchange_id'". Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-25 18:58:13,791 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-25 18:58:13,791 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-25 19:07:43,110 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-25 19:07:43,113 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-25 19:07:43,141 - ScalpingBotV6 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-25 19:07:43,141 - ScalpingBotV6 - DEBUG [MainThread] - Scrutinizing the configuration spellbook...
+2025-04-25 19:07:43,142 - ScalpingBotV6 - CRITICAL [MainThread] - [31mConfiguration flaw detected: "Missing required key: 'exchange.exchange_id'". Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-25 19:07:43,142 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-25 19:07:43,143 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-25 19:12:24,270 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-25 19:12:24,276 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-25 19:12:24,303 - ScalpingBotV6 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-25 19:12:24,303 - ScalpingBotV6 - DEBUG [MainThread] - Scrutinizing the configuration spellbook...
+2025-04-25 19:12:24,304 - ScalpingBotV6 - CRITICAL [MainThread] - [31mConfiguration flaw detected: "Missing required key: 'exchange.exchange_id'". Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-25 19:12:24,304 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-25 19:12:24,304 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-25 19:12:56,342 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-25 19:12:56,345 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-25 19:12:56,349 - ScalpingBotV6 - CRITICAL [MainThread] - [31mFatal: Error parsing spellbook config.yaml: while parsing a block mapping
+  in "config.yaml", line 10, column 2
+expected <block end>, but found '<block mapping start>'
+  in "config.yaml", line 14, column 3. Check YAML syntax. Aborting.[0m
+2025-04-25 19:12:56,349 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-25 19:12:56,349 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-25 19:20:19,861 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-25 19:20:19,863 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-25 19:20:19,866 - ScalpingBotV6 - CRITICAL [MainThread] - [31mFatal: Error parsing spellbook config.yaml: mapping values are not allowed here
+  in "config.yaml", line 6, column 15. Check YAML syntax. Aborting.[0m
+2025-04-25 19:20:19,866 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-25 19:20:19,866 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-25 19:21:18,150 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-25 19:21:18,153 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-25 19:21:18,165 - ScalpingBotV6 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-25 19:21:18,165 - ScalpingBotV6 - DEBUG [MainThread] - Scrutinizing the configuration spellbook...
+2025-04-25 19:21:18,165 - ScalpingBotV6 - CRITICAL [MainThread] - [31mConfiguration flaw detected: "Missing required key: 'exchange.exchange_id'". Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-25 19:21:18,166 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-25 19:21:18,166 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...
+2025-04-28 10:34:25,241 - ScalpingBotV6 - INFO [MainThread] - [36m# Summoning secrets from .env scroll...[0m
+2025-04-28 10:34:25,245 - ScalpingBotV6 - INFO [MainThread] - [35m--- Pyrmethus Scalping Bot v6.2 Awakening ---[0m
+2025-04-28 10:34:25,256 - ScalpingBotV6 - INFO [MainThread] - [32mConfiguration spellbook loaded from config.yaml[0m
+2025-04-28 10:34:25,257 - ScalpingBotV6 - DEBUG [MainThread] - Scrutinizing the configuration spellbook...
+2025-04-28 10:34:25,257 - ScalpingBotV6 - CRITICAL [MainThread] - [31mConfiguration flaw detected: "Missing required key: 'exchange.exchange_id'". Mend the 'config.yaml' scroll. Aborting.[0m
+2025-04-28 10:34:25,257 - ScalpingBotV6 - ERROR [MainThread] - Bot exited via SystemExit with code: 1.
+2025-04-28 10:34:25,257 - ScalpingBotV6 - INFO [MainThread] - Initiating final shutdown procedures...

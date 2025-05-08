@@ -1,0 +1,64 @@
+[36m2025-04-22 02:03:51,292 [1m[INFO    ] [37m(pyrm1.01.py:149) [0m[37mLoading and validating configuration from environment...
+[36m2025-04-22 02:03:51,293 [1m[INFO    ] [37m(pyrm1.01.py:248) [0m[37mParsed Symbol 'BTC/USDT:USDT': Base=BTC, Quote=USDT, Settle=USDT
+[36m2025-04-22 02:03:51,293 [1m[INFO    ] [37m(pyrm1.01.py:167) [0m[37mConfiguration loaded and validated successfully.
+[36m2025-04-22 02:03:51,293 [1m[INFO    ] [37m(pyrm1.01.py:287) [0m[37m--- Trading Configuration Summary ---
+[36m2025-04-22 02:03:51,293 [1m[INFO    ] [37m(pyrm1.01.py:288) [0m[37mSymbol: BTC/USDT:USDT (Linear) | Timeframe: 5 (5m)
+[36m2025-04-22 02:03:51,294 [1m[INFO    ] [37m(pyrm1.01.py:289) [0m[37mTrading: DISABLED | Environment: SANDBOX (Testnet)
+[36m2025-04-22 02:03:51,294 [1m[INFO    ] [37m(pyrm1.01.py:290) [0m[37mRisk: 1.00% | Leverage: 10x | Quote: USDT
+[36m2025-04-22 02:03:51,294 [1m[INFO    ] [37m(pyrm1.01.py:291) [0m[37mInitial SL/TP (ATR Mult): 1.5 / 2.0
+[36m2025-04-22 02:03:51,294 [1m[INFO    ] [37m(pyrm1.01.py:299) [0m[37mTrailing SL: ENABLED (Dist:1.2*ATR, Act:1.0*ATR)
+[36m2025-04-22 02:03:51,294 [1m[INFO    ] [37m(pyrm1.01.py:301) [0m[37mBreak-Even SL: ENABLED (Trig:0.8*ATR, Offset:3 ticks)
+[36m2025-04-22 02:03:51,295 [1m[INFO    ] [37m(pyrm1.01.py:302) [0m[37mTrend Filter (EMA 50): ON
+[36m2025-04-22 02:03:51,295 [1m[INFO    ] [37m(pyrm1.01.py:303) [0m[37mActive Weight Set: 'default'
+[36m2025-04-22 02:03:51,295 [1m[INFO    ] [37m(pyrm1.01.py:304) [0m[37m-----------------------------------
+[36m2025-04-22 02:03:51,306 [1m[INFO    ] [37m(pyrm1.01.py:1341) [0m[37m*** Pyrmethus Bot v4.0.0 Initializing ***
+[36m2025-04-22 02:23:42,180 [1m[INFO    ] [37m(pyrm1.01.py:149) [0m[37mLoading and validating configuration from environment...
+[36m2025-04-22 02:23:42,181 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded SYMBOL: 'FARTCOIN/USDT:USDT'
+[36m2025-04-22 02:23:42,181 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded MARKET_TYPE: 'linear'
+[36m2025-04-22 02:23:42,181 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INTERVAL: '5'
+[36m2025-04-22 02:23:42,182 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded USE_TESTNET: 'False'
+[36m2025-04-22 02:23:42,182 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded ENABLE_TRADING: 'True'
+[36m2025-04-22 02:23:42,182 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded LOG_LEVEL: 'INFO'
+[36m2025-04-22 02:23:42,182 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded RISK_PERCENTAGE: '0.01'
+[36m2025-04-22 02:23:42,182 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded LEVERAGE: '25'
+[36m2025-04-22 02:23:42,183 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded SL_ATR_MULTIPLIER: '1.5'
+[36m2025-04-22 02:23:42,183 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded TP_ATR_MULTIPLIER: '2.0'
+[36m2025-04-22 02:23:42,183 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded ENABLE_TRAILING_STOP: 'True'
+[36m2025-04-22 02:23:42,183 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded TSL_ACTIVATION_ATR_MULTIPLIER: '1.0'
+[36m2025-04-22 02:23:42,184 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded TRAILING_STOP_DISTANCE_ATR_MULTIPLIER: '1.2'
+[36m2025-04-22 02:23:42,184 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded ENABLE_BREAK_EVEN: 'True'
+[36m2025-04-22 02:23:42,184 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded BREAK_EVEN_TRIGGER_ATR_MULTIPLE: '0.8'
+[36m2025-04-22 02:23:42,184 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded BREAK_EVEN_OFFSET_TICKS: '3'
+[36m2025-04-22 02:23:42,184 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded MAX_CONCURRENT_POSITIONS: '1'
+[36m2025-04-22 02:23:42,185 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded SL_TRIGGER_BY: 'LastPrice'
+[36m2025-04-22 02:23:42,185 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded TP_TRIGGER_BY: 'LastPrice'
+[36m2025-04-22 02:23:42,185 [1m[ERROR   ] [37m(pyrm1.01.py:198) [0m[37mCast Error for TIME_BASED_EXIT_MINUTES='# Optional: Exit after X minutes (e.g., 120). Leave blank to disable.' to int: invalid literal for int() with base 10: '# Optional: Exit after X minutes (e.g., 120). Leave blank to disable.'. Using default: 'None'.
+[36m2025-04-22 02:23:42,185 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded ACTIVE_WEIGHT_SET: 'default'
+[36m2025-04-22 02:23:42,186 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded OHLCV_LIMIT: '500'
+[36m2025-04-22 02:23:42,186 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_ATR_PERIOD: '14'
+[36m2025-04-22 02:23:42,186 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_EMA_SHORT: '9'
+[36m2025-04-22 02:23:42,186 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_EMA_LONG: '21'
+[36m2025-04-22 02:23:42,186 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_TREND_EMA: '50'
+[36m2025-04-22 02:23:42,187 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_STOCH_RSI_WINDOW: '14'
+[36m2025-04-22 02:23:42,187 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_STOCH_RSI_K: '3'
+[36m2025-04-22 02:23:42,187 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_STOCH_RSI_D: '3'
+[36m2025-04-22 02:23:42,187 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_RSI_WINDOW: '14'
+[36m2025-04-22 02:23:42,187 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded INDICATOR_CCI_WINDOW: '20'
+[36m2025-04-22 02:23:42,188 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded TRADE_ONLY_WITH_TREND: 'True'
+[36m2025-04-22 02:23:42,188 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded LOOP_SLEEP_SECONDS: '15'
+[36m2025-04-22 02:23:42,188 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded ORDER_CHECK_DELAY_SECONDS: '3'
+[36m2025-04-22 02:23:42,188 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded ORDER_CHECK_TIMEOUT_SECONDS: '15'
+[36m2025-04-22 02:23:42,188 [1m[INFO    ] [37m(pyrm1.01.py:232) [0m[37mLoaded MAX_FETCH_RETRIES: '3'
+[36m2025-04-22 02:23:42,189 [1m[INFO    ] [37m(pyrm1.01.py:248) [0m[37mParsed Symbol 'FARTCOIN/USDT:USDT': Base=FARTCOIN, Quote=USDT, Settle=USDT
+[36m2025-04-22 02:23:42,189 [1m[INFO    ] [37m(pyrm1.01.py:167) [0m[37mConfiguration loaded and validated successfully.
+[36m2025-04-22 02:23:42,189 [1m[INFO    ] [37m(pyrm1.01.py:287) [0m[37m--- Trading Configuration Summary ---
+[36m2025-04-22 02:23:42,189 [1m[INFO    ] [37m(pyrm1.01.py:288) [0m[37mSymbol: FARTCOIN/USDT:USDT (Linear) | Timeframe: 5 (5m)
+[36m2025-04-22 02:23:42,189 [1m[INFO    ] [37m(pyrm1.01.py:289) [0m[37mTrading: LIVE | Environment: REAL MONEY
+[36m2025-04-22 02:23:42,190 [1m[INFO    ] [37m(pyrm1.01.py:290) [0m[37mRisk: 1.00% | Leverage: 25x | Quote: USDT
+[36m2025-04-22 02:23:42,190 [1m[INFO    ] [37m(pyrm1.01.py:291) [0m[37mInitial SL/TP (ATR Mult): 1.5 / 2.0
+[36m2025-04-22 02:23:42,190 [1m[INFO    ] [37m(pyrm1.01.py:299) [0m[37mTrailing SL: ENABLED (Dist:1.2*ATR, Act:1.0*ATR)
+[36m2025-04-22 02:23:42,190 [1m[INFO    ] [37m(pyrm1.01.py:301) [0m[37mBreak-Even SL: ENABLED (Trig:0.8*ATR, Offset:3 ticks)
+[36m2025-04-22 02:23:42,190 [1m[INFO    ] [37m(pyrm1.01.py:302) [0m[37mTrend Filter (EMA 50): ON
+[36m2025-04-22 02:23:42,191 [1m[INFO    ] [37m(pyrm1.01.py:303) [0m[37mActive Weight Set: 'default'
+[36m2025-04-22 02:23:42,191 [1m[INFO    ] [37m(pyrm1.01.py:304) [0m[37m-----------------------------------
+[36m2025-04-22 02:23:42,206 [1m[INFO    ] [37m(pyrm1.01.py:1341) [0m[37m*** Pyrmethus Bot v4.0.0 Initializing ***

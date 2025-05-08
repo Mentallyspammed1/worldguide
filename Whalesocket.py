@@ -42,7 +42,7 @@ console = Console(theme=custom_theme)
 
 # Configuration and Setup
 class TradingConfig:
-    def __init__(self, config_file: str = "config.json"):
+    def __init__(self, config_file: str = "config.json") -> None:
         self.config_file = config_file
         self.config = self._load_config()
         self._validate_config()
@@ -186,7 +186,7 @@ class TradingConfig:
 class BybitAPIClient:
     def __init__(
         self, api_key: str, api_secret: str, base_url: str = "https://api.bybit.com"
-    ):
+    ) -> None:
         self.api_key = api_key
         self.api_secret = api_secret
         self.base_url = base_url
@@ -295,7 +295,7 @@ class TradingAnalyzer:
         config: dict,
         symbol: str,
         interval: str,
-    ):
+    ) -> None:
         self.df = df
         self.logger = logger
         self.levels = {}
@@ -729,21 +729,13 @@ def analyze_market_data_signals(
 ) -> dict | None:
     """Analyzes market data indicators and generates trading signals based on combined strategies."""
     signal_config = config.get("signal_config", {})
-    significant_bid_volume_ratio = signal_config.get(
-        "significant_bid_volume_ratio", 1.5
-    )
-    significant_ask_volume_ratio = signal_config.get(
-        "significant_ask_volume_ratio", 1.5
-    )
-    oversold_rsi_threshold = signal_config.get("oversold_rsi_threshold", 30)
-    overbought_rsi_threshold = config.get("overbought_rsi_threshold", 70)
-    oversold_stoch_rsi_threshold = signal_config.get(
-        "oversold_stoch_rsi_threshold", 0.2
-    )
-    overbought_stoch_rsi_threshold = signal_config.get(
-        "overbought_stoch_rsi_threshold", 0.8
-    )
-    stoch_rsi_crossover_lookback = signal_config.get("stoch_rsi_crossover_lookback", 2)
+    signal_config.get("significant_bid_volume_ratio", 1.5)
+    signal_config.get("significant_ask_volume_ratio", 1.5)
+    signal_config.get("oversold_rsi_threshold", 30)
+    config.get("overbought_rsi_threshold", 70)
+    signal_config.get("oversold_stoch_rsi_threshold", 0.2)
+    signal_config.get("overbought_stoch_rsi_threshold", 0.8)
+    signal_config.get("stoch_rsi_crossover_lookback", 2)
     stop_loss_atr_multiplier = signal_config.get("stop_loss_atr_multiplier", 2)
     take_profit_risk_reward_ratio = signal_config.get(
         "take_profit_risk_reward_ratio", 2
@@ -760,10 +752,8 @@ def analyze_market_data_signals(
     pivot_level_proximity_threshold_short = signal_config.get(
         "pivot_level_proximity_threshold_short", 0.005
     )
-    bollinger_band_breakout_lookback = signal_config.get(
-        "bollinger_band_breakout_lookback", 1
-    )
-    trend_confirmation_lookback = signal_config.get("trend_confirmation_lookback", 3)
+    signal_config.get("bollinger_band_breakout_lookback", 1)
+    signal_config.get("trend_confirmation_lookback", 3)
 
     signal = None
     signal_type = None
@@ -778,11 +768,11 @@ def analyze_market_data_signals(
     trend_status = indicators.get("Trend", "Neutral")
     obv_status = indicators.get("OBV", "Neutral")
     ema_20_status = indicators.get("EMA 20 Status")
-    sma_10_value = indicators.get("SMA (10)")
+    indicators.get("SMA (10)")
     stoch_rsi_k_status = indicators.get("Stochastic RSI K Status")
     stoch_rsi_status = indicators.get("Stochastic RSI Status")
     williams_r_status = indicators.get("Williams %R Status")
-    rsi_20_100_status = indicators.get("RSI 20/100")
+    indicators.get("RSI 20/100")
     bb_upper = indicators.get("Bollinger Bands Upper")
     bb_lower = indicators.get("Bollinger Bands Lower")
     bb_middle = indicators.get("Bollinger Bands Middle")
@@ -791,7 +781,6 @@ def analyze_market_data_signals(
     # Long Signal Logic
     if "Significant bid volume" in orderbook_analysis:
         is_oversold_stoch_rsi = stoch_rsi_k_status == "Oversold"
-        is_williams_r_oversold = williams_r_status == "Oversold"
         is_ema_above_sma = ema_20_status == "Price above EMA"
 
         long_entry_level_options = [
@@ -864,7 +853,6 @@ def analyze_market_data_signals(
     # Short Signal Logic
     elif "Significant ask volume" in orderbook_analysis:
         is_overbought_stoch_rsi = stoch_rsi_k_status == "Overbought"
-        is_williams_r_overbought = williams_r_status == "Overbought"
         is_ema_below_sma = ema_20_status == "Price below EMA"
 
         short_entry_level_options = [
@@ -1111,7 +1099,6 @@ def setup_logger(symbol: str) -> logging.Logger:
 
 def fetch_klines(symbol: str, interval: str, logger: logging.Logger) -> pd.DataFrame:
     """Fetches kline data from Bybit API."""
-    bybit_api_url = "https://api.bybit.com"
     endpoint = "/v5/market/kline"
     params = {"category": "spot", "symbol": symbol, "interval": interval, "limit": 200}
 
@@ -1134,7 +1121,6 @@ def fetch_klines(symbol: str, interval: str, logger: logging.Logger) -> pd.DataF
 
 def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | None:
     """Fetches orderbook data from Bybit API."""
-    bybit_api_url = "https://api.bybit.com"
     endpoint = "/v5/market/orderbook"
     params = {"category": "spot", "symbol": symbol, "limit": limit}
 
@@ -1156,7 +1142,6 @@ def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | N
 
 def fetch_current_price(symbol: str, logger: logging.Logger) -> Decimal | None:
     """Fetches the current price for a symbol from Bybit."""
-    bybit_api_url = "https://api.bybit.com"
     endpoint = "/v5/market/tickers"
     params = {"category": "spot", "symbol": symbol}
     client = BybitAPIClient(os.getenv("BYBIT_API_KEY"), os.getenv("BYBIT_API_SECRET"))
@@ -1177,7 +1162,7 @@ def fetch_current_price(symbol: str, logger: logging.Logger) -> Decimal | None:
         return None
 
 
-def main():
+def main() -> None:
     """Main execution function for the trading analyzer."""
     console.print(
         Panel(

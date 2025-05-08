@@ -1,0 +1,1209 @@
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:182] - Logger 'livebot_BCH_USDT-USDT' initialized. File: 'bot_logs/livebot_BCH_USDT-USDT.log', Console Level: INFO
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3454] - ---=== [92mWhale 2.0 Enhanced Trading Bot Initializing[0m ===---
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3455] - Symbol: BCH/USDT:USDT
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3456] - Config File: config.json
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3457] - Log Directory: bot_logs
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3458] - Timezone: America/Chicago
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3459] - Trading Enabled: [91mTrue[0m
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3460] - Sandbox Mode: [91mFalse[0m
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3461] - Quote Currency: USDT
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3462] - Risk Per Trade: 1.00%
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3463] - Leverage: 20x
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:3464] - Interval: 3
+2025-04-24 12:37:37 - WARNING - [livebot_BCH_USDT-USDT:402] - [91mUSING LIVE TRADING MODE (Real Money)[0m
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:406] - Connecting to bybit (Sandbox: False)...
+2025-04-24 12:37:37 - INFO - [livebot_BCH_USDT-USDT:407] - Loading markets for bybit...
+2025-04-24 12:37:50 - INFO - [livebot_BCH_USDT-USDT:410] - Markets loaded successfully for bybit.
+2025-04-24 12:37:50 - INFO - [livebot_BCH_USDT-USDT:421] - CCXT exchange initialized (bybit). CCXT Version: 4.4.72
+2025-04-24 12:37:50 - INFO - [livebot_BCH_USDT-USDT:426] - Attempting initial balance fetch for USDT...
+2025-04-24 12:37:50 - DEBUG - [livebot_BCH_USDT-USDT:1797] - Fetching balance using params={'accountType': 'CONTRACT'} for USDT (Attempt 1)
+2025-04-24 12:37:53 - ERROR - [livebot_BCH_USDT-USDT:1920] - [91mExchange error fetching balance: bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745516274021}. Not retrying.[0m
+2025-04-24 12:37:53 - WARNING - [livebot_BCH_USDT-USDT:434] - [33mInitial balance fetch returned None or failed. Check logs. Ensure API keys have 'Read' permissions and correct account type (CONTRACT/UNIFIED) is accessible.[0m
+2025-04-24 12:37:53 - ERROR - [livebot_BCH_USDT-USDT:437] - [91mCannot verify balance. Trading is enabled, aborting initialization for safety.[0m
+2025-04-24 12:37:53 - CRITICAL - [livebot_BCH_USDT-USDT:3474] - [91mFailed to initialize exchange. Bot cannot start.[0m
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:177] - Logger 'livebot_BCH_USDT-USDT' initialized. File: 'bot_logs/livebot_BCH_USDT-USDT.log', Console Level: INFO
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2132] - ---=== [92mWhale 2.0 Enhanced Trading Bot Initializing[0m ===---
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2133] - Symbol: BCH/USDT:USDT
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2134] - Config File: config.json
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2135] - Log Directory: bot_logs
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2136] - Timezone: America/Chicago
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2137] - Trading Enabled: [91mTrue[0m
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2138] - Sandbox Mode: [91mFalse[0m
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2139] - Quote Currency: USDT
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2140] - Risk Per Trade: 1.00%
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2141] - Leverage: 20x
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:2142] - Interval: 3
+2025-04-24 17:47:55 - WARNING - [livebot_BCH_USDT-USDT:391] - [91mUSING LIVE TRADING MODE (Real Money)[0m
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:394] - Connecting to bybit (Sandbox: False)...
+2025-04-24 17:47:55 - INFO - [livebot_BCH_USDT-USDT:395] - Loading markets for bybit...
+2025-04-24 17:48:08 - INFO - [livebot_BCH_USDT-USDT:398] - Markets loaded successfully for bybit.
+2025-04-24 17:48:08 - INFO - [livebot_BCH_USDT-USDT:403] - CCXT exchange initialized (bybit). CCXT Version: 4.4.72
+2025-04-24 17:48:08 - INFO - [livebot_BCH_USDT-USDT:407] - Attempting initial balance fetch for USDT...
+2025-04-24 17:48:08 - DEBUG - [livebot_BCH_USDT-USDT:1252] - Fetching balance using params={'accountType': 'CONTRACT'} for USDT (Attempt 1)
+2025-04-24 17:48:09 - DEBUG - [livebot_BCH_USDT-USDT:1266] - Account type 'CONTRACT' not supported or error fetching: bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745516891166}. Trying next.
+2025-04-24 17:48:09 - DEBUG - [livebot_BCH_USDT-USDT:1252] - Fetching balance using params={'accountType': 'UNIFIED'} for USDT (Attempt 1)
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:1257] - Received balance structure using accountType 'UNIFIED'.
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:1292] - Found balance via standard ccxt structure ['USDT']['free']: 10.24602081
+2025-04-24 17:48:10 - INFO - [livebot_BCH_USDT-USDT:1349] - Available USDT balance: 10.2460
+2025-04-24 17:48:10 - INFO - [livebot_BCH_USDT-USDT:412] - [92mSuccessfully connected and fetched initial balance.[0m (USDT available: 10.2460)
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:10 - INFO - [livebot_BCH_USDT-USDT:2156] - Symbol Details: Contract=True, TickSize=N/A, MinAmount=0.01, MinCost=None
+2025-04-24 17:48:10 - INFO - [livebot_BCH_USDT-USDT:2160] - [92mInitialization complete. Starting main trading loop for BCH/USDT:USDT...[0m
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:2166] - --- Loop Cycle 1 starting at 2025-04-24 12:48:10 CDT ---
+2025-04-24 17:48:10 - INFO - [livebot_BCH_USDT-USDT:1932] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:547] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:48:10 - DEBUG - [livebot_BCH_USDT-USDT:557] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:48:11 - INFO - [livebot_BCH_USDT-USDT:583] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:48:11 - DEBUG - [livebot_BCH_USDT-USDT:476] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:48:11 - DEBUG - [livebot_BCH_USDT-USDT:488] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:48:11 - DEBUG - [livebot_BCH_USDT-USDT:491] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.4, 'bidVolume': 7.65, 'ask': 349.5, 'askVolume': 34.88, 'vwap': 355.121357770949, 'open': 362.1, 'close': 349.5, 'last': 349.5, 'previousClose': None, 'change': -12.6, 'percentage': -3.4797, 'average': 355.8, 'baseVolume': 151879.52, 'quoteVolume': 53935661.36, 'markPrice': 349.3, 'indexPrice': 349.61, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.50', 'indexPrice': '349.61', 'markPrice': '349.30', 'prevPrice24h': '362.10', 'price24hPcnt': '-0.034797', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.90', 'openInterest': '110215.76', 'openInterestValue': '38498364.97', 'turnover24h': '53935661.3600', 'volume24h': '151879.5200', 'fundingRate': '-0.00004967', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '34.88', 'bid1Price': '349.40', 'ask1Price': '349.50', 'bid1Size': '7.65', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:48:11 - DEBUG - [livebot_BCH_USDT-USDT:503] - Using 'last' price: 349.5
+2025-04-24 17:48:11 - DEBUG - [livebot_BCH_USDT-USDT:622] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:48:11 - DEBUG - [livebot_BCH_USDT-USDT:632] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:650] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:844] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:879] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11621', 'EMA_Short': '349.84565', 'EMA_Long': '350.71294', 'Momentum': '-1.40000', 'CCI': '-78.22280', 'Williams_R': '-74.07407', 'MFI': '16.04387', 'VWAP': '354.83935', 'PSAR_long': '348.32016', 'PSAR_short': nan, 'SMA10': '349.77000', 'StochRSI_K': '41.68270', 'StochRSI_D': '40.95303', 'RSI': '39.62710', 'BB_Lower': '347.49336', 'BB_Middle': '350.96000', 'BB_Upper': '354.42664', 'Volume_MA': '350.24267', 'Open': '349.00000', 'High': '349.30000', 'Low': '349.00000', 'Close': '349.30000', 'Volume': '2.84000'}
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:964] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.80000000', 'Fib_23.6%': '353.17160000', 'Fib_38.2%': '352.16420000', 'Fib_50.0%': '351.35000000', 'Fib_61.8%': '350.53580000', 'Fib_78.6%': '349.37660000', 'Fib_100.0%': '347.90000000'}
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:1173] - OBI (10 levels): BidVol=581.8500, AskVol=612.6100, OBI=-0.0258
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - INFO - [livebot_BCH_USDT-USDT:1063] - Signal Calculation Summary (BCH/USDT:USDT @ 349.50000000):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: 0.4694
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:1064] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.14, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.52, bollinger_bands: 0.00, vwap: -0.70, cci: 0.47, wr: 0.80, psar: 1.00, sma_10: -0.60, mfi: 1.00, orderbook: -0.03
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:12 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:12 - INFO - [livebot_BCH_USDT-USDT:1971] - Current ATR: 1.116208882 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:48:12 - INFO - [livebot_BCH_USDT-USDT:1973] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:1551] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:12 - DEBUG - [livebot_BCH_USDT-USDT:1560] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:48:13 - INFO - [livebot_BCH_USDT-USDT:1593] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:48:13 - INFO - [livebot_BCH_USDT-USDT:2029] - Signal is HOLD and no open position. No action.
+2025-04-24 17:48:13 - INFO - [livebot_BCH_USDT-USDT:2119] - ---== Analysis Cycle End (2.78s) ==---
+2025-04-24 17:48:13 - DEBUG - [livebot_BCH_USDT-USDT:2185] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:2166] - --- Loop Cycle 2 starting at 2025-04-24 12:48:28 CDT ---
+2025-04-24 17:48:28 - INFO - [livebot_BCH_USDT-USDT:1932] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:547] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:557] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:48:28 - INFO - [livebot_BCH_USDT-USDT:583] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:476] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:488] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:491] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.2, 'bidVolume': 0.57, 'ask': 349.3, 'askVolume': 32.18, 'vwap': 355.11951936403875, 'open': 362.2, 'close': 349.2, 'last': 349.2, 'previousClose': None, 'change': -13.0, 'percentage': -3.5891, 'average': 355.7, 'baseVolume': 151868.37, 'quoteVolume': 53931422.561, 'markPrice': 349.28, 'indexPrice': 349.59, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.20', 'indexPrice': '349.59', 'markPrice': '349.28', 'prevPrice24h': '362.20', 'price24hPcnt': '-0.035891', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '354.00', 'openInterest': '110215.8', 'openInterestValue': '38496174.62', 'turnover24h': '53931422.5610', 'volume24h': '151868.3700', 'fundingRate': '-0.00004967', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '32.18', 'bid1Price': '349.20', 'ask1Price': '349.30', 'bid1Size': '0.57', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:503] - Using 'last' price: 349.2
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:622] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:48:28 - DEBUG - [livebot_BCH_USDT-USDT:632] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:650] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:844] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:879] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.13049', 'EMA_Short': '349.82565', 'EMA_Long': '350.70385', 'Momentum': '-1.50000', 'CCI': '-76.90637', 'Williams_R': '-75.92593', 'MFI': '16.33408', 'VWAP': '354.83864', 'PSAR_long': '348.32016', 'PSAR_short': nan, 'SMA10': '349.76000', 'StochRSI_K': '40.05857', 'StochRSI_D': '40.41166', 'RSI': '38.92744', 'BB_Lower': '347.47852', 'BB_Middle': '350.95500', 'BB_Upper': '354.43148', 'Volume_MA': '351.42733', 'Open': '349.00000', 'High': '349.50000', 'Low': '349.00000', 'Close': '349.20000', 'Volume': '20.61000'}
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:964] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.80000000', 'Fib_23.6%': '353.17160000', 'Fib_38.2%': '352.16420000', 'Fib_50.0%': '351.35000000', 'Fib_61.8%': '350.53580000', 'Fib_78.6%': '349.37660000', 'Fib_100.0%': '347.90000000'}
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:1173] - OBI (10 levels): BidVol=445.0700, AskVol=666.8200, OBI=-0.1994
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - INFO - [livebot_BCH_USDT-USDT:1063] - Signal Calculation Summary (BCH/USDT:USDT @ 349.20000000):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: 0.0713
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:1064] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.15, volume_confirmation: -0.40, stoch_rsi: -0.50, rsi: 0.55, bollinger_bands: 0.00, vwap: -0.70, cci: 0.46, wr: 0.86, psar: 1.00, sma_10: -0.60, mfi: 1.00, orderbook: -0.20
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:29 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:29 - INFO - [livebot_BCH_USDT-USDT:1971] - Current ATR: 1.130494596 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:48:29 - INFO - [livebot_BCH_USDT-USDT:1973] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:1551] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:29 - DEBUG - [livebot_BCH_USDT-USDT:1560] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:48:30 - INFO - [livebot_BCH_USDT-USDT:1593] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:48:30 - INFO - [livebot_BCH_USDT-USDT:2029] - Signal is HOLD and no open position. No action.
+2025-04-24 17:48:30 - INFO - [livebot_BCH_USDT-USDT:2119] - ---== Analysis Cycle End (2.02s) ==---
+2025-04-24 17:48:30 - DEBUG - [livebot_BCH_USDT-USDT:2185] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 17:48:45 - DEBUG - [livebot_BCH_USDT-USDT:2166] - --- Loop Cycle 3 starting at 2025-04-24 12:48:45 CDT ---
+2025-04-24 17:48:45 - INFO - [livebot_BCH_USDT-USDT:1932] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:48:45 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:45 - DEBUG - [livebot_BCH_USDT-USDT:547] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:48:45 - DEBUG - [livebot_BCH_USDT-USDT:557] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:48:46 - INFO - [livebot_BCH_USDT-USDT:583] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:48:46 - DEBUG - [livebot_BCH_USDT-USDT:476] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:48:46 - DEBUG - [livebot_BCH_USDT-USDT:488] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:48:46 - DEBUG - [livebot_BCH_USDT-USDT:491] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 348.6, 'bidVolume': 1.08, 'ask': 348.7, 'askVolume': 28.72, 'vwap': 355.11585979072134, 'open': 362.2, 'close': 348.7, 'last': 348.7, 'previousClose': None, 'change': -13.5, 'percentage': -3.7272, 'average': 355.4, 'baseVolume': 151959.13, 'quoteVolume': 53963097.103, 'markPrice': 348.76, 'indexPrice': 349.07, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '348.70', 'indexPrice': '349.07', 'markPrice': '348.76', 'prevPrice24h': '362.20', 'price24hPcnt': '-0.037272', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '354.00', 'openInterest': '110269.17', 'openInterestValue': '38457475.73', 'turnover24h': '53963097.1030', 'volume24h': '151959.1300', 'fundingRate': '-0.00004967', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '28.72', 'bid1Price': '348.60', 'ask1Price': '348.70', 'bid1Size': '1.08', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:48:46 - DEBUG - [livebot_BCH_USDT-USDT:503] - Using 'last' price: 348.7
+2025-04-24 17:48:46 - DEBUG - [livebot_BCH_USDT-USDT:622] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:48:46 - DEBUG - [livebot_BCH_USDT-USDT:632] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:650] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:844] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:879] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.15192', 'EMA_Short': '349.72565', 'EMA_Long': '350.65840', 'Momentum': '-2.00000', 'CCI': '-87.38213', 'Williams_R': '-85.18519', 'MFI': '15.99730', 'VWAP': '354.83479', 'PSAR_long': '348.32016', 'PSAR_short': nan, 'SMA10': '349.71000', 'StochRSI_K': '33.70464', 'StochRSI_D': '38.29368', 'RSI': '36.19023', 'BB_Lower': '347.39667', 'BB_Middle': '350.93000', 'BB_Upper': '354.46333', 'Volume_MA': '357.48600', 'Open': '349.00000', 'High': '349.50000', 'Low': '348.70000', 'Close': '348.70000', 'Volume': '111.49000'}
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:964] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.80000000', 'Fib_23.6%': '353.17160000', 'Fib_38.2%': '352.16420000', 'Fib_50.0%': '351.35000000', 'Fib_61.8%': '350.53580000', 'Fib_78.6%': '349.37660000', 'Fib_100.0%': '347.90000000'}
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:1173] - OBI (10 levels): BidVol=578.8500, AskVol=676.5900, OBI=-0.0779
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - INFO - [livebot_BCH_USDT-USDT:1063] - Signal Calculation Summary (BCH/USDT:USDT @ 348.70000000):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: 0.1542
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:1064] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.20, volume_confirmation: -0.40, stoch_rsi: -0.50, rsi: 0.69, bollinger_bands: 0.00, vwap: -0.70, cci: 0.52, wr: 1.00, psar: 1.00, sma_10: -0.60, mfi: 1.00, orderbook: -0.08
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:906] - Error determining tick size for BCH/USDT:USDT: 'decimal.Decimal' object has no attribute 'is_integer'. Using fallback.
+2025-04-24 17:48:47 - WARNING - [livebot_BCH_USDT-USDT:909] - Using fallback tick size 1E-8 for BCH/USDT:USDT.
+2025-04-24 17:48:47 - INFO - [livebot_BCH_USDT-USDT:1971] - Current ATR: 1.151923168 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:48:47 - INFO - [livebot_BCH_USDT-USDT:1973] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:1551] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:1398] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:48:47 - DEBUG - [livebot_BCH_USDT-USDT:1560] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:48:48 - INFO - [livebot_BCH_USDT-USDT:1593] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:48:48 - INFO - [livebot_BCH_USDT-USDT:2029] - Signal is HOLD and no open position. No action.
+2025-04-24 17:48:48 - INFO - [livebot_BCH_USDT-USDT:2119] - ---== Analysis Cycle End (3.01s) ==---
+2025-04-24 17:48:48 - DEBUG - [livebot_BCH_USDT-USDT:2185] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:174] - Logger 'livebot_BCH_USDT-USDT' initialized. File: 'bot_logs/livebot_BCH_USDT-USDT.log', Console Level: INFO
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2133] - ---=== [92mWhale 2.0 Enhanced Trading Bot Initializing[0m ===---
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2134] - Symbol: BCH/USDT:USDT
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2135] - Config File: config.json
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2136] - Log Directory: bot_logs
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2137] - Timezone: America/Chicago
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2138] - Trading Enabled: [91mTrue[0m
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2139] - Sandbox Mode: [91mFalse[0m
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2140] - Quote Currency: USDT
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2141] - Risk Per Trade: 1.00%
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2142] - Leverage: 20x
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:2143] - Interval: 3
+2025-04-24 17:58:49 - WARNING - [livebot_BCH_USDT-USDT:388] - [91mUSING LIVE TRADING MODE (Real Money)[0m
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:391] - Connecting to bybit (Sandbox: False)...
+2025-04-24 17:58:49 - INFO - [livebot_BCH_USDT-USDT:392] - Loading markets for bybit...
+2025-04-24 17:58:58 - INFO - [livebot_BCH_USDT-USDT:395] - Markets loaded successfully for bybit.
+2025-04-24 17:58:58 - INFO - [livebot_BCH_USDT-USDT:400] - CCXT exchange initialized (bybit). CCXT Version: 4.4.72
+2025-04-24 17:58:58 - INFO - [livebot_BCH_USDT-USDT:404] - Attempting initial balance fetch for USDT...
+2025-04-24 17:58:58 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'CONTRACT'} for USDT (Attempt 1)
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:1267] - Account type 'CONTRACT' not supported or error fetching: bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745517542963}. Trying next.
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'UNIFIED'} for USDT (Attempt 1)
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:1258] - Received balance structure using accountType 'UNIFIED'.
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:1293] - Found balance via standard ccxt structure ['USDT']['free']: 10.24602081
+2025-04-24 17:59:02 - INFO - [livebot_BCH_USDT-USDT:1350] - Available USDT balance: 10.2460
+2025-04-24 17:59:02 - INFO - [livebot_BCH_USDT-USDT:409] - [92mSuccessfully connected and fetched initial balance.[0m (USDT available: 10.2460)
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:02 - INFO - [livebot_BCH_USDT-USDT:2157] - Symbol Details: Contract=True, TickSize=N/A, MinAmount=0.01, MinCost=None
+2025-04-24 17:59:02 - INFO - [livebot_BCH_USDT-USDT:2161] - [92mInitialization complete. Starting main trading loop for BCH/USDT:USDT...[0m
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 1 starting at 2025-04-24 12:59:02 CDT ---
+2025-04-24 17:59:02 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:59:02 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:59:03 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:59:03 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:59:03 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:59:03 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.4, 'bidVolume': 0.78, 'ask': 349.5, 'askVolume': 43.4, 'vwap': 355.06766493846766, 'open': 362.1, 'close': 349.4, 'last': 349.4, 'previousClose': None, 'change': -12.7, 'percentage': -3.5073, 'average': 355.7, 'baseVolume': 152445.79, 'quoteVolume': 54128570.685, 'markPrice': 349.4, 'indexPrice': 349.68, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.40', 'indexPrice': '349.68', 'markPrice': '349.40', 'prevPrice24h': '362.10', 'price24hPcnt': '-0.035073', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.20', 'openInterest': '110208.23', 'openInterestValue': '38506755.56', 'turnover24h': '54128570.6850', 'volume24h': '152445.7900', 'fundingRate': '-0.00006154', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '43.40', 'bid1Price': '349.40', 'ask1Price': '349.50', 'bid1Size': '0.78', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:59:03 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.4
+2025-04-24 17:59:03 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:59:03 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.15916', 'EMA_Short': '349.40849', 'EMA_Long': '350.25030', 'Momentum': '-1.30000', 'CCI': '-53.70370', 'Williams_R': '-52.94118', 'MFI': '34.74537', 'VWAP': '354.80299', 'PSAR_long': nan, 'PSAR_short': '350.77630', 'SMA10': '349.52000', 'StochRSI_K': '75.36012', 'StochRSI_D': '56.58742', 'RSI': '42.26822', 'BB_Lower': '347.09347', 'BB_Middle': '350.30500', 'BB_Upper': '353.51653', 'Volume_MA': '297.74867', 'Open': '349.40000', 'High': '349.70000', 'Low': '349.10000', 'Close': '349.30000', 'Volume': '196.95000'}
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=600.8100, AskVol=697.0100, OBI=-0.0741
+2025-04-24 17:59:04 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.4):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4417
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.13, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.39, bollinger_bands: 0.00, vwap: -0.70, cci: 0.32, wr: 0.10, psar: -1.00, sma_10: -0.60, mfi: 0.51, orderbook: -0.07
+2025-04-24 17:59:04 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.16 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:59:04 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:04 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:59:05 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:59:05 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 17:59:05 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.69s) ==---
+2025-04-24 17:59:05 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 17:59:20 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 2 starting at 2025-04-24 12:59:20 CDT ---
+2025-04-24 17:59:20 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:59:20 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:20 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:59:20 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:59:21 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.4, 'bidVolume': 3.1, 'ask': 349.5, 'askVolume': 42.39, 'vwap': 355.0674547643021, 'open': 362.1, 'close': 349.5, 'last': 349.5, 'previousClose': None, 'change': -12.6, 'percentage': -3.4797, 'average': 355.8, 'baseVolume': 152451.5, 'quoteVolume': 54130566.08, 'markPrice': 349.41, 'indexPrice': 349.78, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.50', 'indexPrice': '349.78', 'markPrice': '349.41', 'prevPrice24h': '362.10', 'price24hPcnt': '-0.034797', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.20', 'openInterest': '110267.52', 'openInterestValue': '38528574.16', 'turnover24h': '54130566.0800', 'volume24h': '152451.5000', 'fundingRate': '-0.00006366', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '42.39', 'bid1Price': '349.40', 'ask1Price': '349.50', 'bid1Size': '3.10', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.5
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:59:21 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.15916', 'EMA_Short': '349.42849', 'EMA_Long': '350.25939', 'Momentum': '-1.20000', 'CCI': '-52.00222', 'Williams_R': '-50.00000', 'MFI': '34.11869', 'VWAP': '354.80088', 'PSAR_long': nan, 'PSAR_short': '350.77630', 'SMA10': '349.53000', 'StochRSI_K': '76.49707', 'StochRSI_D': '56.96641', 'RSI': '42.75800', 'BB_Lower': '347.10444', 'BB_Middle': '350.31000', 'BB_Upper': '353.51556', 'Volume_MA': '301.48600', 'Open': '349.40000', 'High': '349.70000', 'Low': '349.10000', 'Close': '349.40000', 'Volume': '253.01000'}
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=616.4600, AskVol=655.4400, OBI=-0.0306
+2025-04-24 17:59:22 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.5):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4202
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.12, volume_confirmation: 0.00, stoch_rsi: 0.50, rsi: 0.36, bollinger_bands: 0.00, vwap: -0.70, cci: 0.31, wr: 0.00, psar: -1.00, sma_10: -0.60, mfi: 0.53, orderbook: -0.03
+2025-04-24 17:59:22 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.16 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:59:22 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:59:22 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:59:22 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 17:59:22 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.11s) ==---
+2025-04-24 17:59:22 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 17:59:37 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 3 starting at 2025-04-24 12:59:37 CDT ---
+2025-04-24 17:59:37 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:59:37 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:37 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:59:37 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:59:37 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:59:37 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:59:37 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:59:38 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.0, 'bidVolume': 48.77, 'ask': 349.1, 'askVolume': 14.27, 'vwap': 355.0667883327317, 'open': 361.9, 'close': 349.1, 'last': 349.1, 'previousClose': None, 'change': -12.8, 'percentage': -3.5368, 'average': 355.5, 'baseVolume': 152439.11, 'quoteVolume': 54126065.204, 'markPrice': 349.18, 'indexPrice': 349.56, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.10', 'indexPrice': '349.56', 'markPrice': '349.18', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.035368', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.20', 'openInterest': '110260.39', 'openInterestValue': '38500722.98', 'turnover24h': '54126065.2040', 'volume24h': '152439.1100', 'fundingRate': '-0.00006366', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '14.27', 'bid1Price': '349.00', 'ask1Price': '349.10', 'bid1Size': '48.77', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:59:38 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.1
+2025-04-24 17:59:38 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:59:38 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:59:38 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.15916', 'EMA_Short': '349.36849', 'EMA_Long': '350.23212', 'Momentum': '-1.50000', 'CCI': '-57.09534', 'Williams_R': '-58.82353', 'MFI': '34.07511', 'VWAP': '354.80054', 'PSAR_long': nan, 'PSAR_short': '350.77630', 'SMA10': '349.50000', 'StochRSI_K': '73.16261', 'StochRSI_D': '55.85492', 'RSI': '41.32155', 'BB_Lower': '347.06980', 'BB_Middle': '350.29500', 'BB_Upper': '353.52020', 'Volume_MA': '301.75600', 'Open': '349.40000', 'High': '349.70000', 'Low': '349.10000', 'Close': '349.10000', 'Volume': '257.06000'}
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=700.6600, AskVol=643.8800, OBI=0.0422
+2025-04-24 17:59:39 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.1):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.3321
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.15, volume_confirmation: 0.00, stoch_rsi: 0.50, rsi: 0.43, bollinger_bands: 0.00, vwap: -0.70, cci: 0.34, wr: 0.29, psar: -1.00, sma_10: -0.60, mfi: 0.53, orderbook: 0.04
+2025-04-24 17:59:39 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.16 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:59:39 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:59:39 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:59:39 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 17:59:39 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.96s) ==---
+2025-04-24 17:59:39 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 17:59:54 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 4 starting at 2025-04-24 12:59:54 CDT ---
+2025-04-24 17:59:54 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 17:59:54 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:54 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 17:59:54 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 17:59:54 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 17:59:54 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 17:59:54 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 17:59:55 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 348.9, 'bidVolume': 8.45, 'ask': 349.0, 'askVolume': 17.55, 'vwap': 355.0659240359971, 'open': 361.9, 'close': 349.0, 'last': 349.0, 'previousClose': None, 'change': -12.9, 'percentage': -3.5645, 'average': 355.4, 'baseVolume': 152461.16, 'quoteVolume': 54133762.655, 'markPrice': 349.1, 'indexPrice': 349.54, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.00', 'indexPrice': '349.54', 'markPrice': '349.10', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.035645', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.20', 'openInterest': '110284.56', 'openInterestValue': '38500339.90', 'turnover24h': '54133762.6550', 'volume24h': '152461.1600', 'fundingRate': '-0.00006366', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '17.55', 'bid1Price': '348.90', 'ask1Price': '349.00', 'bid1Size': '8.45', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 17:59:55 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.0
+2025-04-24 17:59:55 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 17:59:55 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 17:59:55 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.15916', 'EMA_Short': '349.36849', 'EMA_Long': '350.23212', 'Momentum': '-1.50000', 'CCI': '-57.09534', 'Williams_R': '-58.82353', 'MFI': '33.86208', 'VWAP': '354.79978', 'PSAR_long': nan, 'PSAR_short': '350.77630', 'SMA10': '349.50000', 'StochRSI_K': '73.16261', 'StochRSI_D': '55.85492', 'RSI': '41.32155', 'BB_Lower': '347.06980', 'BB_Middle': '350.29500', 'BB_Upper': '353.52020', 'Volume_MA': '303.06200', 'Open': '349.40000', 'High': '349.70000', 'Low': '349.10000', 'Close': '349.10000', 'Volume': '276.65000'}
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=590.1400, AskVol=636.1700, OBI=-0.0375
+2025-04-24 17:59:56 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.0):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.3387
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.15, volume_confirmation: 0.00, stoch_rsi: 0.50, rsi: 0.43, bollinger_bands: 0.00, vwap: -0.70, cci: 0.34, wr: 0.29, psar: -1.00, sma_10: -0.60, mfi: 0.54, orderbook: -0.04
+2025-04-24 17:59:56 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.16 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 17:59:56 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 17:59:56 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 17:59:56 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 17:59:56 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.93s) ==---
+2025-04-24 17:59:56 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:00:11 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 5 starting at 2025-04-24 13:00:11 CDT ---
+2025-04-24 18:00:11 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:00:11 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:00:11 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:00:11 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:00:12 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:00:12 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:00:12 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:00:12 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.2, 'bidVolume': 1.07, 'ask': 349.3, 'askVolume': 32.26, 'vwap': 355.0647052666998, 'open': 361.9, 'close': 349.2, 'last': 349.2, 'previousClose': None, 'change': -12.7, 'percentage': -3.5092, 'average': 355.5, 'baseVolume': 152492.27, 'quoteVolume': 54144622.903, 'markPrice': 349.2, 'indexPrice': 349.47, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.20', 'indexPrice': '349.47', 'markPrice': '349.20', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.035092', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.20', 'openInterest': '110280.72', 'openInterestValue': '38510027.42', 'turnover24h': '54144622.9030', 'volume24h': '152492.2700', 'fundingRate': '-0.00007324', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '32.26', 'bid1Price': '349.20', 'ask1Price': '349.30', 'bid1Size': '1.07', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:00:12 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.2
+2025-04-24 18:00:12 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:00:12 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.10442', 'EMA_Short': '349.31879', 'EMA_Long': '350.13003', 'Momentum': '-1.30000', 'CCI': '-62.80925', 'Williams_R': '-55.88235', 'MFI': '36.21223', 'VWAP': '354.79829', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.40000', 'StochRSI_K': '80.07215', 'StochRSI_D': '69.34019', 'RSI': '42.24162', 'BB_Lower': '347.13388', 'BB_Middle': '350.08500', 'BB_Upper': '353.03612', 'Volume_MA': '211.13067', 'Open': '349.00000', 'High': '349.20000', 'Low': '348.90000', 'Close': '349.20000', 'Volume': '31.11000'}
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=588.3000, AskVol=581.9600, OBI=0.0054
+2025-04-24 18:00:13 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.2):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4126
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.13, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.39, bollinger_bands: 0.00, vwap: -0.70, cci: 0.38, wr: 0.20, psar: -1.00, sma_10: -0.60, mfi: 0.46, orderbook: 0.01
+2025-04-24 18:00:13 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.10 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:00:13 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:00:13 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:00:14 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:00:14 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:00:14 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.58s) ==---
+2025-04-24 18:00:14 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:00:29 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 6 starting at 2025-04-24 13:00:29 CDT ---
+2025-04-24 18:00:29 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:00:29 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:00:29 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:00:29 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:00:29 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:00:29 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:00:29 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.2, 'bidVolume': 26.37, 'ask': 349.3, 'askVolume': 1.97, 'vwap': 355.0582401919105, 'open': 362.2, 'close': 349.3, 'last': 349.3, 'previousClose': None, 'change': -12.9, 'percentage': -3.5615, 'average': 355.7, 'baseVolume': 152354.34, 'quoteVolume': 54094663.846, 'markPrice': 349.3, 'indexPrice': 349.5, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.30', 'indexPrice': '349.50', 'markPrice': '349.30', 'prevPrice24h': '362.20', 'price24hPcnt': '-0.035615', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.30', 'openInterest': '110278.6', 'openInterestValue': '38520314.98', 'turnover24h': '54094663.8460', 'volume24h': '152354.3400', 'fundingRate': '-0.00007324', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1.97', 'bid1Price': '349.20', 'ask1Price': '349.30', 'bid1Size': '26.37', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.3
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11156', 'EMA_Short': '349.33879', 'EMA_Long': '350.13912', 'Momentum': '-1.20000', 'CCI': '-59.13325', 'Williams_R': '-52.94118', 'MFI': '36.19968', 'VWAP': '354.79826', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.41000', 'StochRSI_K': '81.61592', 'StochRSI_D': '69.85478', 'RSI': '42.90666', 'BB_Lower': '347.14456', 'BB_Middle': '350.09000', 'BB_Upper': '353.03544', 'Volume_MA': '211.19800', 'Open': '349.00000', 'High': '349.30000', 'Low': '348.90000', 'Close': '349.30000', 'Volume': '32.12000'}
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=681.6000, AskVol=559.2500, OBI=0.0986
+2025-04-24 18:00:30 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.3):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4352
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.12, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.35, bollinger_bands: 0.00, vwap: -0.70, cci: 0.35, wr: 0.10, psar: -1.00, sma_10: -0.60, mfi: 0.46, orderbook: 0.10
+2025-04-24 18:00:30 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:00:30 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:00:30 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:00:31 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:00:31 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:00:31 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.53s) ==---
+2025-04-24 18:00:31 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:00:46 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 7 starting at 2025-04-24 13:00:46 CDT ---
+2025-04-24 18:00:46 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:00:46 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:00:46 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:00:46 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:00:47 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:00:47 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:00:47 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:00:47 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 348.9, 'bidVolume': 2.0, 'ask': 349.0, 'askVolume': 9.11, 'vwap': 355.0578536069273, 'open': 362.2, 'close': 349.0, 'last': 349.0, 'previousClose': None, 'change': -13.2, 'percentage': -3.6443, 'average': 355.6, 'baseVolume': 152364.45, 'quoteVolume': 54098194.583, 'markPrice': 349.0, 'indexPrice': 349.26, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.00', 'indexPrice': '349.26', 'markPrice': '349.00', 'prevPrice24h': '362.20', 'price24hPcnt': '-0.036443', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.30', 'openInterest': '110265.67', 'openInterestValue': '38482718.83', 'turnover24h': '54098194.5830', 'volume24h': '152364.4500', 'fundingRate': '-0.00007324', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '9.11', 'bid1Price': '348.90', 'ask1Price': '349.00', 'bid1Size': '2.00', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:00:47 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.0
+2025-04-24 18:00:47 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:00:47 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11156', 'EMA_Short': '349.27879', 'EMA_Long': '350.11185', 'Momentum': '-1.50000', 'CCI': '-64.63974', 'Williams_R': '-61.76471', 'MFI': '36.07545', 'VWAP': '354.79783', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.38000', 'StochRSI_K': '76.87414', 'StochRSI_D': '68.27419', 'RSI': '40.86394', 'BB_Lower': '347.11063', 'BB_Middle': '350.07500', 'BB_Upper': '353.03937', 'Volume_MA': '211.87200', 'Open': '349.00000', 'High': '349.30000', 'Low': '348.90000', 'Close': '349.00000', 'Volume': '42.23000'}
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=581.4500, AskVol=652.4800, OBI=-0.0576
+2025-04-24 18:00:48 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.0):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.3599
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.15, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.46, bollinger_bands: 0.00, vwap: -0.70, cci: 0.39, wr: 0.39, psar: -1.00, sma_10: -0.60, mfi: 0.46, orderbook: -0.06
+2025-04-24 18:00:48 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:00:48 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:00:48 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:00:49 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:00:49 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:00:49 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.50s) ==---
+2025-04-24 18:00:49 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:01:04 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 8 starting at 2025-04-24 13:01:04 CDT ---
+2025-04-24 18:01:04 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:01:04 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:04 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:01:04 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:01:04 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:01:04 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:01:04 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:01:05 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.0, 'bidVolume': 12.29, 'ask': 349.1, 'askVolume': 38.31, 'vwap': 355.0565732153688, 'open': 361.9, 'close': 349.0, 'last': 349.0, 'previousClose': None, 'change': -12.9, 'percentage': -3.5645, 'average': 355.4, 'baseVolume': 152339.6, 'quoteVolume': 54089176.341, 'markPrice': 349.0, 'indexPrice': 349.32, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.00', 'indexPrice': '349.32', 'markPrice': '349.00', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.035645', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.20', 'openInterest': '110264.74', 'openInterestValue': '38482394.26', 'turnover24h': '54089176.3410', 'volume24h': '152339.6000', 'fundingRate': '-0.00007324', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '38.31', 'bid1Price': '349.00', 'ask1Price': '349.10', 'bid1Size': '12.29', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:01:05 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.0
+2025-04-24 18:01:05 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:01:05 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:01:05 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11156', 'EMA_Short': '349.27879', 'EMA_Long': '350.11185', 'Momentum': '-1.50000', 'CCI': '-64.63974', 'Williams_R': '-61.76471', 'MFI': '36.06418', 'VWAP': '354.79779', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.38000', 'StochRSI_K': '76.87414', 'StochRSI_D': '68.27419', 'RSI': '40.86394', 'BB_Lower': '347.11063', 'BB_Middle': '350.07500', 'BB_Upper': '353.03937', 'Volume_MA': '211.93333', 'Open': '349.00000', 'High': '349.30000', 'Low': '348.90000', 'Close': '349.00000', 'Volume': '43.15000'}
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=579.4000, AskVol=635.9200, OBI=-0.0465
+2025-04-24 18:01:06 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.0):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.3587
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.15, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.46, bollinger_bands: 0.00, vwap: -0.70, cci: 0.39, wr: 0.39, psar: -1.00, sma_10: -0.60, mfi: 0.46, orderbook: -0.05
+2025-04-24 18:01:06 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:01:06 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:01:06 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:01:06 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:01:06 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.66s) ==---
+2025-04-24 18:01:06 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:01:21 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 9 starting at 2025-04-24 13:01:21 CDT ---
+2025-04-24 18:01:21 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:01:21 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:21 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:01:21 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:01:22 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:01:22 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:01:22 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:01:22 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.1, 'bidVolume': 29.7, 'ask': 349.2, 'askVolume': 13.52, 'vwap': 355.0559972254205, 'open': 361.9, 'close': 349.2, 'last': 349.2, 'previousClose': None, 'change': -12.7, 'percentage': -3.5092, 'average': 355.5, 'baseVolume': 152354.62, 'quoteVolume': 54094421.536, 'markPrice': 349.2, 'indexPrice': 349.42, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.20', 'indexPrice': '349.42', 'markPrice': '349.20', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.035092', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.20', 'openInterest': '110270.49', 'openInterestValue': '38506455.11', 'turnover24h': '54094421.5360', 'volume24h': '152354.6200', 'fundingRate': '-0.00007532', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '13.52', 'bid1Price': '349.10', 'ask1Price': '349.20', 'bid1Size': '29.70', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:01:22 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.2
+2025-04-24 18:01:22 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:01:22 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11156', 'EMA_Short': '349.31879', 'EMA_Long': '350.13003', 'Momentum': '-1.30000', 'CCI': '-60.97376', 'Williams_R': '-55.88235', 'MFI': '35.87130', 'VWAP': '354.79718', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.40000', 'StochRSI_K': '80.07215', 'StochRSI_D': '69.34019', 'RSI': '42.24162', 'BB_Lower': '347.13388', 'BB_Middle': '350.08500', 'BB_Upper': '353.03612', 'Volume_MA': '212.98800', 'Open': '349.00000', 'High': '349.30000', 'Low': '348.90000', 'Close': '349.20000', 'Volume': '58.97000'}
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=658.7500, AskVol=683.2700, OBI=-0.0183
+2025-04-24 18:01:23 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.2):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4149
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.13, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.39, bollinger_bands: 0.00, vwap: -0.70, cci: 0.37, wr: 0.20, psar: -1.00, sma_10: -0.60, mfi: 0.47, orderbook: -0.02
+2025-04-24 18:01:23 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:01:23 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:01:23 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:01:23 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:01:23 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.04s) ==---
+2025-04-24 18:01:23 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:01:38 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 10 starting at 2025-04-24 13:01:38 CDT ---
+2025-04-24 18:01:38 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:01:38 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:38 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:01:38 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:01:39 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:01:39 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:01:39 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:01:39 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.2, 'bidVolume': 1.28, 'ask': 349.3, 'askVolume': 50.02, 'vwap': 355.05528883880714, 'open': 361.9, 'close': 349.2, 'last': 349.2, 'previousClose': None, 'change': -12.7, 'percentage': -3.5092, 'average': 355.5, 'baseVolume': 152373.05, 'quoteVolume': 54100857.279, 'markPrice': 349.2, 'indexPrice': 349.48, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.20', 'indexPrice': '349.48', 'markPrice': '349.20', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.035092', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.20', 'openInterest': '110265.8', 'openInterestValue': '38504817.36', 'turnover24h': '54100857.2790', 'volume24h': '152373.0500', 'fundingRate': '-0.00007532', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '50.02', 'bid1Price': '349.20', 'ask1Price': '349.30', 'bid1Size': '1.28', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:01:39 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.2
+2025-04-24 18:01:39 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:01:39 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11156', 'EMA_Short': '349.31879', 'EMA_Long': '350.13003', 'Momentum': '-1.30000', 'CCI': '-60.97376', 'Williams_R': '-55.88235', 'MFI': '35.64930', 'VWAP': '354.79643', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.40000', 'StochRSI_K': '80.07215', 'StochRSI_D': '69.34019', 'RSI': '42.24162', 'BB_Lower': '347.13388', 'BB_Middle': '350.08500', 'BB_Upper': '353.03612', 'Volume_MA': '214.21667', 'Open': '349.00000', 'High': '349.30000', 'Low': '348.90000', 'Close': '349.20000', 'Volume': '77.40000'}
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=597.9900, AskVol=648.2700, OBI=-0.0403
+2025-04-24 18:01:40 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.2):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4156
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.13, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.39, bollinger_bands: 0.00, vwap: -0.70, cci: 0.37, wr: 0.20, psar: -1.00, sma_10: -0.60, mfi: 0.48, orderbook: -0.04
+2025-04-24 18:01:40 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:01:40 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:01:40 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:01:40 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:01:40 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.12s) ==---
+2025-04-24 18:01:40 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:01:55 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 11 starting at 2025-04-24 13:01:55 CDT ---
+2025-04-24 18:01:55 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:01:55 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:55 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:01:55 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:01:56 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:01:56 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:01:56 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:01:56 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.2, 'bidVolume': 18.51, 'ask': 349.3, 'askVolume': 17.2, 'vwap': 355.0552835114891, 'open': 361.9, 'close': 349.3, 'last': 349.3, 'previousClose': None, 'change': -12.6, 'percentage': -3.4816, 'average': 355.6, 'baseVolume': 152373.19, 'quoteVolume': 54100906.175, 'markPrice': 349.3, 'indexPrice': 349.5, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.30', 'indexPrice': '349.50', 'markPrice': '349.30', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.034816', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.20', 'openInterest': '110265.93', 'openInterestValue': '38515889.35', 'turnover24h': '54100906.1750', 'volume24h': '152373.1900', 'fundingRate': '-0.00007532', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '17.20', 'bid1Price': '349.20', 'ask1Price': '349.30', 'bid1Size': '18.51', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:01:56 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.3
+2025-04-24 18:01:56 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:01:56 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.11156', 'EMA_Short': '349.33879', 'EMA_Long': '350.13912', 'Momentum': '-1.20000', 'CCI': '-59.13325', 'Williams_R': '-52.94118', 'MFI': '35.64777', 'VWAP': '354.79645', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.41000', 'StochRSI_K': '81.61592', 'StochRSI_D': '69.85478', 'RSI': '42.90666', 'BB_Lower': '347.14456', 'BB_Middle': '350.09000', 'BB_Upper': '353.03544', 'Volume_MA': '214.22467', 'Open': '349.00000', 'High': '349.30000', 'Low': '348.90000', 'Close': '349.30000', 'Volume': '77.52000'}
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=710.3200, AskVol=525.5100, OBI=0.1495
+2025-04-24 18:01:57 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.3):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4264
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.12, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.35, bollinger_bands: 0.00, vwap: -0.70, cci: 0.35, wr: 0.10, psar: -1.00, sma_10: -0.60, mfi: 0.48, orderbook: 0.15
+2025-04-24 18:01:57 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:01:57 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:01:57 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:01:57 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:01:57 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.91s) ==---
+2025-04-24 18:01:57 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:02:12 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 12 starting at 2025-04-24 13:02:12 CDT ---
+2025-04-24 18:02:12 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:02:12 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:02:12 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:02:12 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:02:13 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:02:13 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:02:13 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:02:13 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.5, 'bidVolume': 17.71, 'ask': 349.6, 'askVolume': 10.67, 'vwap': 355.05453933283525, 'open': 361.9, 'close': 349.6, 'last': 349.6, 'previousClose': None, 'change': -12.3, 'percentage': -3.3987, 'average': 355.7, 'baseVolume': 152393.54, 'quoteVolume': 54108018.142, 'markPrice': 349.6, 'indexPrice': 349.86, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.60', 'indexPrice': '349.86', 'markPrice': '349.60', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.033987', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.20', 'openInterest': '110257.4', 'openInterestValue': '38545987.04', 'turnover24h': '54108018.1420', 'volume24h': '152393.5400', 'fundingRate': '-0.00006596', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '10.67', 'bid1Price': '349.50', 'ask1Price': '349.60', 'bid1Size': '17.71', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:02:13 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.6
+2025-04-24 18:02:13 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:02:13 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.14014', 'EMA_Short': '349.39879', 'EMA_Long': '350.16639', 'Momentum': '-0.90000', 'CCI': '-46.10745', 'Williams_R': '-44.11765', 'MFI': '38.67151', 'VWAP': '354.79580', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.44000', 'StochRSI_K': '86.04104', 'StochRSI_D': '71.32982', 'RSI': '44.81296', 'BB_Lower': '347.17278', 'BB_Middle': '350.10500', 'BB_Upper': '353.03722', 'Volume_MA': '215.58133', 'Open': '349.00000', 'High': '349.70000', 'Low': '348.90000', 'Close': '349.60000', 'Volume': '97.87000'}
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=599.5900, AskVol=594.9500, OBI=0.0039
+2025-04-24 18:02:14 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.6):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.1382
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: -0.09, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.26, bollinger_bands: 0.00, vwap: -0.70, cci: 0.28, wr: -0.20, psar: -1.00, sma_10: 0.60, mfi: 0.38, orderbook: 0.00
+2025-04-24 18:02:14 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.14 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:02:14 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:02:14 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:02:14 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:02:14 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.95s) ==---
+2025-04-24 18:02:14 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:02:29 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 13 starting at 2025-04-24 13:02:29 CDT ---
+2025-04-24 18:02:29 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:02:29 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:02:29 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:02:29 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:02:30 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:02:30 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:02:30 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:02:30 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.3, 'bidVolume': 4.21, 'ask': 349.4, 'askVolume': 14.61, 'vwap': 355.0536505250699, 'open': 361.9, 'close': 349.3, 'last': 349.3, 'previousClose': None, 'change': -12.6, 'percentage': -3.4816, 'average': 355.6, 'baseVolume': 152417.8, 'quoteVolume': 54116496.295, 'markPrice': 349.34, 'indexPrice': 349.69, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.30', 'indexPrice': '349.69', 'markPrice': '349.34', 'prevPrice24h': '361.90', 'price24hPcnt': '-0.034816', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.20', 'openInterest': '110251.56', 'openInterestValue': '38515279.97', 'turnover24h': '54116496.2950', 'volume24h': '152417.8000', 'fundingRate': '-0.00006596', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '14.61', 'bid1Price': '349.30', 'ask1Price': '349.40', 'bid1Size': '4.21', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:02:30 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.3
+2025-04-24 18:02:30 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:02:30 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.14014', 'EMA_Short': '349.33879', 'EMA_Long': '350.13912', 'Momentum': '-1.20000', 'CCI': '-51.72063', 'Williams_R': '-52.94118', 'MFI': '39.16339', 'VWAP': '354.79478', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.41000', 'StochRSI_K': '81.61592', 'StochRSI_D': '69.85478', 'RSI': '42.90666', 'BB_Lower': '347.14456', 'BB_Middle': '350.09000', 'BB_Upper': '353.03544', 'Volume_MA': '217.19867', 'Open': '349.00000', 'High': '349.70000', 'Low': '348.90000', 'Close': '349.30000', 'Volume': '122.13000'}
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=606.3800, AskVol=545.8900, OBI=0.0525
+2025-04-24 18:02:31 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.3):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.4684
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: -1.00, momentum: -0.12, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.35, bollinger_bands: 0.00, vwap: -0.70, cci: 0.31, wr: 0.10, psar: -1.00, sma_10: -0.60, mfi: 0.36, orderbook: 0.05
+2025-04-24 18:02:31 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.14 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:02:31 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:02:31 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:02:31 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:02:31 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.02s) ==---
+2025-04-24 18:02:31 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:02:46 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 14 starting at 2025-04-24 13:02:46 CDT ---
+2025-04-24 18:02:46 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:02:46 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:02:46 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:02:46 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:02:47 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:02:47 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:02:47 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.4, 'bidVolume': 3.82, 'ask': 349.5, 'askVolume': 54.98, 'vwap': 355.0518798679958, 'open': 361.8, 'close': 349.4, 'last': 349.4, 'previousClose': None, 'change': -12.4, 'percentage': -3.4273, 'average': 355.6, 'baseVolume': 152383.04, 'quoteVolume': 54103884.812, 'markPrice': 349.4, 'indexPrice': 349.69, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.40', 'indexPrice': '349.69', 'markPrice': '349.40', 'prevPrice24h': '361.80', 'price24hPcnt': '-0.034273', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.70', 'openInterest': '110243.34', 'openInterestValue': '38519023.00', 'turnover24h': '54103884.8120', 'volume24h': '152383.0400', 'fundingRate': '-0.00006596', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '54.98', 'bid1Price': '349.40', 'ask1Price': '349.50', 'bid1Size': '3.82', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.4
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.14014', 'EMA_Short': '349.35879', 'EMA_Long': '350.14821', 'Momentum': '-1.10000', 'CCI': '-49.85472', 'Williams_R': '-50.00000', 'MFI': '39.22559', 'VWAP': '354.79469', 'PSAR_long': nan, 'PSAR_short': '350.65325', 'SMA10': '349.42000', 'StochRSI_K': '83.12454', 'StochRSI_D': '70.35765', 'RSI': '43.55656', 'BB_Lower': '347.15461', 'BB_Middle': '350.09500', 'BB_Upper': '353.03539', 'Volume_MA': '217.40400', 'Open': '349.00000', 'High': '349.70000', 'Low': '348.90000', 'Close': '349.40000', 'Volume': '125.21000'}
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=607.9100, AskVol=475.3600, OBI=0.1224
+2025-04-24 18:02:48 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.4):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.1915
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: -0.11, volume_confirmation: -0.40, stoch_rsi: 0.50, rsi: 0.32, bollinger_bands: 0.00, vwap: -0.70, cci: 0.30, wr: 0.00, psar: -1.00, sma_10: -0.60, mfi: 0.36, orderbook: 0.12
+2025-04-24 18:02:48 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.14 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:02:48 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:02:48 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:02:49 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:02:49 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:02:49 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.66s) ==---
+2025-04-24 18:02:49 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:03:04 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 15 starting at 2025-04-24 13:03:04 CDT ---
+2025-04-24 18:03:04 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:03:04 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:04 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:03:04 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:03:05 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.6, 'bidVolume': 18.43, 'ask': 349.7, 'askVolume': 4.58, 'vwap': 355.0515735763072, 'open': 361.8, 'close': 349.7, 'last': 349.7, 'previousClose': None, 'change': -12.1, 'percentage': -3.3443, 'average': 355.7, 'baseVolume': 152391.72, 'quoteVolume': 54106919.986, 'markPrice': 349.7, 'indexPrice': 350.03, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.70', 'indexPrice': '350.03', 'markPrice': '349.70', 'prevPrice24h': '361.80', 'price24hPcnt': '-0.033443', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '352.70', 'openInterest': '110240.12', 'openInterestValue': '38550969.96', 'turnover24h': '54106919.9860', 'volume24h': '152391.7200', 'fundingRate': '-0.00006596', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '4.58', 'bid1Price': '349.60', 'ask1Price': '349.70', 'bid1Size': '18.43', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.7
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:03:05 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.07196', 'EMA_Short': '349.47504', 'EMA_Long': '350.13226', 'Momentum': '0.60000', 'CCI': '-18.99013', 'Williams_R': '-41.17647', 'MFI': '46.16483', 'VWAP': '354.79451', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.39000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '45.42042', 'BB_Lower': '347.57080', 'BB_Middle': '349.89500', 'BB_Upper': '352.21920', 'Volume_MA': '202.20200', 'Open': '349.70000', 'High': '349.70000', 'Low': '349.70000', 'Close': '349.70000', 'Volume': '0.80000'}
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=653.2700, AskVol=567.8300, OBI=0.0700
+2025-04-24 18:03:06 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.7):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.8128
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.06, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.23, bollinger_bands: 0.00, vwap: -0.70, cci: 0.11, wr: -0.29, psar: -1.00, sma_10: 0.60, mfi: 0.13, orderbook: 0.07
+2025-04-24 18:03:06 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.07 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:03:06 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:03:06 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:03:06 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:03:06 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.47s) ==---
+2025-04-24 18:03:06 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:03:21 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 16 starting at 2025-04-24 13:03:21 CDT ---
+2025-04-24 18:03:21 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:03:21 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:21 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:03:21 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:03:22 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:03:22 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:03:22 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:03:22 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.6, 'bidVolume': 28.29, 'ask': 349.7, 'askVolume': 1.37, 'vwap': 355.0480689580284, 'open': 361.6, 'close': 349.7, 'last': 349.7, 'previousClose': None, 'change': -11.9, 'percentage': -3.2909, 'average': 355.6, 'baseVolume': 152319.32, 'quoteVolume': 54080680.431, 'markPrice': 349.7, 'indexPrice': 350.05, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.70', 'indexPrice': '350.05', 'markPrice': '349.70', 'prevPrice24h': '361.60', 'price24hPcnt': '-0.032909', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.30', 'openInterest': '110226.24', 'openInterestValue': '38546116.13', 'turnover24h': '54080680.4310', 'volume24h': '152319.3200', 'fundingRate': '-0.00006753', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '1.37', 'bid1Price': '349.60', 'ask1Price': '349.70', 'bid1Size': '28.29', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:03:22 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.7
+2025-04-24 18:03:22 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:03:22 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.07196', 'EMA_Short': '349.47504', 'EMA_Long': '350.13226', 'Momentum': '0.60000', 'CCI': '-18.99013', 'Williams_R': '-41.17647', 'MFI': '46.23594', 'VWAP': '354.79439', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.39000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '45.42042', 'BB_Lower': '347.57080', 'BB_Middle': '349.89500', 'BB_Upper': '352.21920', 'Volume_MA': '202.43000', 'Open': '349.70000', 'High': '349.70000', 'Low': '349.70000', 'Close': '349.70000', 'Volume': '4.22000'}
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=674.6600, AskVol=550.1800, OBI=0.1016
+2025-04-24 18:03:23 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.7):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.8101
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.06, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.23, bollinger_bands: 0.00, vwap: -0.70, cci: 0.11, wr: -0.29, psar: -1.00, sma_10: 0.60, mfi: 0.13, orderbook: 0.10
+2025-04-24 18:03:23 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.07 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:03:23 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:03:23 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:03:23 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:03:23 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.91s) ==---
+2025-04-24 18:03:23 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:03:38 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 17 starting at 2025-04-24 13:03:38 CDT ---
+2025-04-24 18:03:38 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:03:38 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:38 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:03:38 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:03:39 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:03:39 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:03:39 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:03:39 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.6, 'bidVolume': 18.71, 'ask': 349.7, 'askVolume': 30.87, 'vwap': 355.04788799402957, 'open': 361.6, 'close': 349.6, 'last': 349.6, 'previousClose': None, 'change': -12.0, 'percentage': -3.3185, 'average': 355.6, 'baseVolume': 152324.38, 'quoteVolume': 54082449.409, 'markPrice': 349.61, 'indexPrice': 349.95, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.60', 'indexPrice': '349.95', 'markPrice': '349.61', 'prevPrice24h': '361.60', 'price24hPcnt': '-0.033185', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.30', 'openInterest': '110226.11', 'openInterestValue': '38536150.32', 'turnover24h': '54082449.4090', 'volume24h': '152324.3800', 'fundingRate': '-0.00006753', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '30.87', 'bid1Price': '349.60', 'ask1Price': '349.70', 'bid1Size': '18.71', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:03:39 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.6
+2025-04-24 18:03:39 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:03:39 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.07910', 'EMA_Short': '349.45504', 'EMA_Long': '350.12317', 'Momentum': '0.50000', 'CCI': '-23.68866', 'Williams_R': '-44.11765', 'MFI': '46.29110', 'VWAP': '354.79429', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.38000', 'StochRSI_K': '89.29120', 'StochRSI_D': '82.47996', 'RSI': '44.88832', 'BB_Lower': '347.56372', 'BB_Middle': '349.89000', 'BB_Upper': '352.21628', 'Volume_MA': '202.60733', 'Open': '349.70000', 'High': '349.70000', 'Low': '349.60000', 'Close': '349.60000', 'Volume': '6.88000'}
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=657.6200, AskVol=570.4800, OBI=0.0710
+2025-04-24 18:03:40 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.6):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.7823
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.05, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.26, bollinger_bands: 0.00, vwap: -0.70, cci: 0.14, wr: -0.20, psar: -1.00, sma_10: 0.60, mfi: 0.12, orderbook: 0.07
+2025-04-24 18:03:40 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.08 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:03:40 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:03:40 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:03:40 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:03:40 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.88s) ==---
+2025-04-24 18:03:40 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:03:55 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 18 starting at 2025-04-24 13:03:55 CDT ---
+2025-04-24 18:03:55 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:03:55 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:55 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:03:55 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:03:56 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.7, 'bidVolume': 3.26, 'ask': 349.8, 'askVolume': 17.74, 'vwap': 355.04787254631253, 'open': 361.6, 'close': 349.7, 'last': 349.7, 'previousClose': None, 'change': -11.9, 'percentage': -3.2909, 'average': 355.6, 'baseVolume': 152324.82, 'quoteVolume': 54082603.277, 'markPrice': 349.77, 'indexPrice': 350.11, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.70', 'indexPrice': '350.11', 'markPrice': '349.77', 'prevPrice24h': '361.60', 'price24hPcnt': '-0.032909', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.30', 'openInterest': '110218.46', 'openInterestValue': '38551110.75', 'turnover24h': '54082603.2770', 'volume24h': '152324.8200', 'fundingRate': '-0.00006753', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '17.74', 'bid1Price': '349.70', 'ask1Price': '349.80', 'bid1Size': '3.26', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.7
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:03:56 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.07910', 'EMA_Short': '349.47504', 'EMA_Long': '350.13226', 'Momentum': '0.60000', 'CCI': '-21.34338', 'Williams_R': '-41.17647', 'MFI': '46.34989', 'VWAP': '354.79419', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.39000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '45.42042', 'BB_Lower': '347.57080', 'BB_Middle': '349.89500', 'BB_Upper': '352.21920', 'Volume_MA': '202.79667', 'Open': '349.70000', 'High': '349.70000', 'Low': '349.60000', 'Close': '349.70000', 'Volume': '9.72000'}
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=682.0500, AskVol=525.6200, OBI=0.1295
+2025-04-24 18:03:57 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.7):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.8052
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.06, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.23, bollinger_bands: 0.00, vwap: -0.70, cci: 0.13, wr: -0.29, psar: -1.00, sma_10: 0.60, mfi: 0.12, orderbook: 0.13
+2025-04-24 18:03:57 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.08 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:03:57 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:03:57 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:03:57 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:03:57 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.94s) ==---
+2025-04-24 18:03:57 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:04:12 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 19 starting at 2025-04-24 13:04:12 CDT ---
+2025-04-24 18:04:12 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:04:12 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:04:12 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:04:12 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:04:13 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:04:13 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:04:13 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:04:13 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.9, 'bidVolume': 3.12, 'ask': 350.0, 'askVolume': 41.72, 'vwap': 355.0442687962173, 'open': 362.3, 'close': 350.0, 'last': 350.0, 'previousClose': None, 'change': -12.3, 'percentage': -3.3949, 'average': 356.1, 'baseVolume': 152306.31, 'quoteVolume': 54075482.467, 'markPrice': 349.93, 'indexPrice': 350.27, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '350.00', 'indexPrice': '350.27', 'markPrice': '349.93', 'prevPrice24h': '362.30', 'price24hPcnt': '-0.033949', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.80', 'openInterest': '110217.98', 'openInterestValue': '38568577.74', 'turnover24h': '54075482.4670', 'volume24h': '152306.3100', 'fundingRate': '-0.00006985', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '41.72', 'bid1Price': '349.90', 'ask1Price': '350.00', 'bid1Size': '3.12', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:04:13 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 350.0
+2025-04-24 18:04:13 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:04:13 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.09339', 'EMA_Short': '349.51504', 'EMA_Long': '350.15044', 'Momentum': '0.80000', 'CCI': '-11.88219', 'Williams_R': '-35.29412', 'MFI': '47.04509', 'VWAP': '354.79299', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.41000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '46.68442', 'BB_Lower': '347.58252', 'BB_Middle': '349.90500', 'BB_Upper': '352.22748', 'Volume_MA': '205.06667', 'Open': '349.70000', 'High': '349.90000', 'Low': '349.60000', 'Close': '349.90000', 'Volume': '43.77000'}
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=630.7400, AskVol=580.0100, OBI=0.0419
+2025-04-24 18:04:14 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 350.0):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.8842
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.08, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.17, bollinger_bands: 0.00, vwap: -0.70, cci: 0.07, wr: -0.49, psar: -1.00, sma_10: 0.60, mfi: 0.10, orderbook: 0.04
+2025-04-24 18:04:14 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.09 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:04:14 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:04:14 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:04:15 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:04:15 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:04:15 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.87s) ==---
+2025-04-24 18:04:15 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:04:30 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 20 starting at 2025-04-24 13:04:30 CDT ---
+2025-04-24 18:04:30 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:04:30 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:04:30 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:04:30 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:04:31 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:04:31 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:04:31 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:04:32 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.9, 'bidVolume': 22.48, 'ask': 350.0, 'askVolume': 9.02, 'vwap': 355.04421490650094, 'open': 362.3, 'close': 350.0, 'last': 350.0, 'previousClose': None, 'change': -12.3, 'percentage': -3.3949, 'average': 356.1, 'baseVolume': 152307.91, 'quoteVolume': 54076042.33, 'markPrice': 350.0, 'indexPrice': 350.27, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '350.00', 'indexPrice': '350.27', 'markPrice': '350.00', 'prevPrice24h': '362.30', 'price24hPcnt': '-0.033949', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.80', 'openInterest': '110214.19', 'openInterestValue': '38574966.50', 'turnover24h': '54076042.3300', 'volume24h': '152307.9100', 'fundingRate': '-0.00006985', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '9.02', 'bid1Price': '349.90', 'ask1Price': '350.00', 'bid1Size': '22.48', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:04:32 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 350.0
+2025-04-24 18:04:32 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:04:32 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.10053', 'EMA_Short': '349.53504', 'EMA_Long': '350.15953', 'Momentum': '0.90000', 'CCI': '-7.10299', 'Williams_R': '-32.35294', 'MFI': '47.09258', 'VWAP': '354.79293', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.42000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '47.29472', 'BB_Lower': '347.58716', 'BB_Middle': '349.91000', 'BB_Upper': '352.23284', 'Volume_MA': '205.22333', 'Open': '349.70000', 'High': '350.00000', 'Low': '349.60000', 'Close': '350.00000', 'Volume': '46.12000'}
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=653.1900, AskVol=492.7200, OBI=0.1400
+2025-04-24 18:04:33 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 350.0):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.9072
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.09, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.14, bollinger_bands: 0.00, vwap: -0.70, cci: 0.04, wr: -0.59, psar: -1.00, sma_10: 0.60, mfi: 0.10, orderbook: 0.14
+2025-04-24 18:04:33 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.10 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:04:33 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:04:33 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:04:34 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:04:34 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:04:34 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (3.97s) ==---
+2025-04-24 18:04:34 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:04:49 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 21 starting at 2025-04-24 13:04:49 CDT ---
+2025-04-24 18:04:49 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:04:49 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:04:49 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:04:49 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:04:49 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:04:49 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:04:49 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:04:50 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.8, 'bidVolume': 23.7, 'ask': 349.9, 'askVolume': 7.73, 'vwap': 355.04414245153225, 'open': 362.3, 'close': 349.8, 'last': 349.8, 'previousClose': None, 'change': -12.5, 'percentage': -3.4501, 'average': 356.0, 'baseVolume': 152310.05, 'quoteVolume': 54076791.089, 'markPrice': 349.87, 'indexPrice': 350.21, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.80', 'indexPrice': '350.21', 'markPrice': '349.87', 'prevPrice24h': '362.30', 'price24hPcnt': '-0.034501', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.80', 'openInterest': '110215.98', 'openInterestValue': '38561264.92', 'turnover24h': '54076791.0890', 'volume24h': '152310.0500', 'fundingRate': '-0.00006985', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '7.73', 'bid1Price': '349.80', 'ask1Price': '349.90', 'bid1Size': '23.70', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:04:50 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.8
+2025-04-24 18:04:50 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:04:50 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:04:50 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.10053', 'EMA_Short': '349.49504', 'EMA_Long': '350.14135', 'Momentum': '0.70000', 'CCI': '-11.88219', 'Williams_R': '-38.23529', 'MFI': '47.13542', 'VWAP': '354.79283', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.40000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '46.05983', 'BB_Lower': '347.57707', 'BB_Middle': '349.90000', 'BB_Upper': '352.22293', 'Volume_MA': '205.36600', 'Open': '349.70000', 'High': '350.00000', 'Low': '349.60000', 'Close': '349.80000', 'Volume': '48.26000'}
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=671.7400, AskVol=508.8400, OBI=0.1380
+2025-04-24 18:04:51 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.8):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.8482
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.07, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.20, bollinger_bands: 0.00, vwap: -0.70, cci: 0.07, wr: -0.39, psar: -1.00, sma_10: 0.60, mfi: 0.10, orderbook: 0.14
+2025-04-24 18:04:51 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.10 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:04:51 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:04:51 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:04:51 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:04:51 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (1.95s) ==---
+2025-04-24 18:04:51 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:05:06 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 22 starting at 2025-04-24 13:05:06 CDT ---
+2025-04-24 18:05:06 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:05:06 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:05:06 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:05:06 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:05:07 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:05:07 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:05:07 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:05:07 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 349.5, 'bidVolume': 5.7, 'ask': 349.6, 'askVolume': 23.77, 'vwap': 355.0412799852905, 'open': 362.3, 'close': 349.7, 'last': 349.7, 'previousClose': None, 'change': -12.6, 'percentage': -3.4777, 'average': 356.0, 'baseVolume': 152390.97, 'quoteVolume': 54105085.047, 'markPrice': 349.7, 'indexPrice': 349.93, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '349.70', 'indexPrice': '349.93', 'markPrice': '349.70', 'prevPrice24h': '362.30', 'price24hPcnt': '-0.034777', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.80', 'openInterest': '110250.64', 'openInterestValue': '38554648.81', 'turnover24h': '54105085.0470', 'volume24h': '152390.9700', 'fundingRate': '-0.00006985', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '23.77', 'bid1Price': '349.50', 'ask1Price': '349.60', 'bid1Size': '5.70', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:05:07 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 349.7
+2025-04-24 18:05:07 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=25 (Attempt 1/4)
+2025-04-24 18:05:07 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 25 bids, 25 asks.
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.10768', 'EMA_Short': '349.47504', 'EMA_Long': '350.13226', 'Momentum': '0.60000', 'CCI': '-16.62887', 'Williams_R': '-41.17647', 'MFI': '48.71150', 'VWAP': '354.78990', 'PSAR_long': nan, 'PSAR_short': '350.53512', 'SMA10': '349.39000', 'StochRSI_K': '90.82581', 'StochRSI_D': '82.99150', 'RSI': '45.42042', 'BB_Lower': '347.57080', 'BB_Middle': '349.89500', 'BB_Upper': '352.21920', 'Volume_MA': '210.76067', 'Open': '349.70000', 'High': '350.00000', 'Low': '349.50000', 'Close': '349.70000', 'Volume': '129.18000'}
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=611.5800, AskVol=645.8500, OBI=-0.0273
+2025-04-24 18:05:08 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 349.7):
+  Weight Set: default
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 2.900
+  Final Weighted Score: -0.8423
+  Signal Threshold: +/- 1.500
+  ==> Final Signal: [33mHOLD[0m
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.06, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: 0.23, bollinger_bands: 0.00, vwap: -0.70, cci: 0.10, wr: -0.29, psar: -1.00, sma_10: 0.60, mfi: 0.04, orderbook: -0.03
+2025-04-24 18:05:08 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.11 | Potential Initial SL/TP: N/A / N/A
+2025-04-24 18:05:08 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:05:08 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:05:08 - INFO - [livebot_BCH_USDT-USDT:2030] - Signal is HOLD and no open position. No action.
+2025-04-24 18:05:08 - INFO - [livebot_BCH_USDT-USDT:2120] - ---== Analysis Cycle End (2.40s) ==---
+2025-04-24 18:05:08 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:05:23 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 23 starting at 2025-04-24 13:05:23 CDT ---
+2025-04-24 18:05:23 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:05:23 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:05:23 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:05:23 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:05:27 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:05:27 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:05:27 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:05:31 - INFO - [livebot_BCH_USDT-USDT:2171] - KeyboardInterrupt received. Shutting down...
+2025-04-24 18:05:31 - INFO - [livebot_BCH_USDT-USDT:2189] - ---=== [91mTrading Bot for BCH/USDT:USDT has stopped.[0m ===---
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:174] - Logger 'livebot_BCH_USDT-USDT' initialized. File: 'bot_logs/livebot_BCH_USDT-USDT.log', Console Level: INFO
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2133] - ---=== [92mWhale 2.0 Enhanced Trading Bot Initializing[0m ===---
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2134] - Symbol: BCH/USDT:USDT
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2135] - Config File: config.json
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2136] - Log Directory: bot_logs
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2137] - Timezone: America/Chicago
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2138] - Trading Enabled: [91mTrue[0m
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2139] - Sandbox Mode: [91mFalse[0m
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2140] - Quote Currency: USDT
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2141] - Risk Per Trade: 1.00%
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2142] - Leverage: 20x
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:2143] - Interval: 3
+2025-04-24 18:06:14 - WARNING - [livebot_BCH_USDT-USDT:388] - [91mUSING LIVE TRADING MODE (Real Money)[0m
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:391] - Connecting to bybit (Sandbox: False)...
+2025-04-24 18:06:14 - INFO - [livebot_BCH_USDT-USDT:392] - Loading markets for bybit...
+2025-04-24 18:06:25 - ERROR - [livebot_BCH_USDT-USDT:397] - [91mError loading markets: bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745517974616],server_timestamp[1745517982958],recv_window[5000]","result":{},"retExtInfo":{},"time":1745517982958}. Check connection/API settings.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/x1.2.py", line 394, in initialize_exchange
+    exchange.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4388, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.InvalidNonce: bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745517974616],server_timestamp[1745517982958],recv_window[5000]","result":{},"retExtInfo":{},"time":1745517982958}
+2025-04-24 18:06:25 - CRITICAL - [livebot_BCH_USDT-USDT:2149] - Failed to initialize exchange. Bot cannot start.
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:174] - Logger 'livebot_BCH_USDT-USDT' initialized. File: 'bot_logs/livebot_BCH_USDT-USDT.log', Console Level: INFO
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2133] - ---=== [92mWhale 2.0 Enhanced Trading Bot Initializing[0m ===---
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2134] - Symbol: BCH/USDT:USDT
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2135] - Config File: config.json
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2136] - Log Directory: bot_logs
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2137] - Timezone: America/Chicago
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2138] - Trading Enabled: [91mTrue[0m
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2139] - Sandbox Mode: [91mFalse[0m
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2140] - Quote Currency: USDT
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2141] - Risk Per Trade: 1.00%
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2142] - Leverage: 20x
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:2143] - Interval: 3
+2025-04-24 18:07:08 - WARNING - [livebot_BCH_USDT-USDT:388] - [91mUSING LIVE TRADING MODE (Real Money)[0m
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:391] - Connecting to bybit (Sandbox: False)...
+2025-04-24 18:07:08 - INFO - [livebot_BCH_USDT-USDT:392] - Loading markets for bybit...
+2025-04-24 18:07:16 - ERROR - [livebot_BCH_USDT-USDT:397] - [91mError loading markets: bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745518028193],server_timestamp[1745518037221],recv_window[5000]","result":{},"retExtInfo":{},"time":1745518037221}. Check connection/API settings.[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/x1.2.py", line 394, in initialize_exchange
+    exchange.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4388, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.InvalidNonce: bybit {"retCode":10002,"retMsg":"invalid request, please check your server timestamp or recv_window param. req_timestamp[1745518028193],server_timestamp[1745518037221],recv_window[5000]","result":{},"retExtInfo":{},"time":1745518037221}
+2025-04-24 18:07:16 - CRITICAL - [livebot_BCH_USDT-USDT:2149] - Failed to initialize exchange. Bot cannot start.
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:174] - Logger 'livebot_BCH_USDT-USDT' initialized. File: 'bot_logs/livebot_BCH_USDT-USDT.log', Console Level: INFO
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2133] - ---=== [92mWhale 2.0 Enhanced Trading Bot Initializing[0m ===---
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2134] - Symbol: BCH/USDT:USDT
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2135] - Config File: config.json
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2136] - Log Directory: bot_logs
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2137] - Timezone: America/Chicago
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2138] - Trading Enabled: [91mTrue[0m
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2139] - Sandbox Mode: [91mFalse[0m
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2140] - Quote Currency: USDT
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2141] - Risk Per Trade: 1.00%
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2142] - Leverage: 20x
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:2143] - Interval: 3
+2025-04-24 18:07:39 - WARNING - [livebot_BCH_USDT-USDT:388] - [91mUSING LIVE TRADING MODE (Real Money)[0m
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:391] - Connecting to bybit (Sandbox: False)...
+2025-04-24 18:07:39 - INFO - [livebot_BCH_USDT-USDT:392] - Loading markets for bybit...
+2025-04-24 18:07:51 - INFO - [livebot_BCH_USDT-USDT:395] - Markets loaded successfully for bybit.
+2025-04-24 18:07:51 - INFO - [livebot_BCH_USDT-USDT:400] - CCXT exchange initialized (bybit). CCXT Version: 4.4.72
+2025-04-24 18:07:51 - INFO - [livebot_BCH_USDT-USDT:404] - Attempting initial balance fetch for USDT...
+2025-04-24 18:07:51 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'CONTRACT'} for USDT (Attempt 1)
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:1267] - Account type 'CONTRACT' not supported or error fetching: bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745518075351}. Trying next.
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'UNIFIED'} for USDT (Attempt 1)
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:1258] - Received balance structure using accountType 'UNIFIED'.
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:1293] - Found balance via standard ccxt structure ['USDT']['free']: 10.24602081
+2025-04-24 18:07:54 - INFO - [livebot_BCH_USDT-USDT:1350] - Available USDT balance: 10.2460
+2025-04-24 18:07:54 - INFO - [livebot_BCH_USDT-USDT:409] - [92mSuccessfully connected and fetched initial balance.[0m (USDT available: 10.2460)
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:07:54 - INFO - [livebot_BCH_USDT-USDT:2157] - Symbol Details: Contract=True, TickSize=N/A, MinAmount=0.01, MinCost=None
+2025-04-24 18:07:54 - INFO - [livebot_BCH_USDT-USDT:2161] - [92mInitialization complete. Starting main trading loop for BCH/USDT:USDT...[0m
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 1 starting at 2025-04-24 13:07:54 CDT ---
+2025-04-24 18:07:54 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:07:54 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:07:55 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:07:55 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:07:55 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:07:56 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 350.4, 'bidVolume': 9.72, 'ask': 350.5, 'askVolume': 28.6, 'vwap': 355.0348097382308, 'open': 362.3, 'close': 350.5, 'last': 350.5, 'previousClose': None, 'change': -11.8, 'percentage': -3.2569, 'average': 356.4, 'baseVolume': 152445.76, 'quoteVolume': 54123551.397, 'markPrice': 350.6, 'indexPrice': 350.91, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '350.50', 'indexPrice': '350.91', 'markPrice': '350.60', 'prevPrice24h': '362.30', 'price24hPcnt': '-0.032569', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.00', 'openInterest': '110264.04', 'openInterestValue': '38658572.42', 'turnover24h': '54123551.3970', 'volume24h': '152445.7600', 'fundingRate': '-0.0000685', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '28.60', 'bid1Price': '350.40', 'ask1Price': '350.50', 'bid1Size': '9.72', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:07:56 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 350.5
+2025-04-24 18:07:56 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=30 (Attempt 1/4)
+2025-04-24 18:07:56 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:07:57 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 30 bids, 30 asks.
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_8', 'EMA_22', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_12', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_15']
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.07039', 'EMA_Short': '349.78701', 'EMA_Long': '350.26077', 'Momentum': '1.60000', 'CCI': '59.32722', 'Williams_R': '-14.70588', 'MFI': '45.36361', 'VWAP': '354.78639', 'PSAR_long': '347.70000', 'PSAR_short': nan, 'SMA10': '349.44000', 'StochRSI_K': '100.00000', 'StochRSI_D': '92.29138', 'RSI': '52.17258', 'BB_Lower': '347.17075', 'BB_Middle': '351.03667', 'BB_Upper': '354.90258', 'Volume_MA': '188.61000', 'Open': '350.20000', 'High': '350.60000', 'Low': '350.20000', 'Close': '350.60000', 'Volume': '36.82000'}
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=628.3100, AskVol=616.3500, OBI=0.0096
+2025-04-24 18:07:58 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 350.5):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: -1.0482
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [91mSELL[0m
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.16, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: -0.11, bollinger_bands: 0.00, vwap: -0.70, cci: -0.36, wr: -1.00, psar: 1.00, sma_10: 0.60, mfi: 0.15, orderbook: 0.01
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1229] - Calculated TP/SL for BCH/USDT:USDT SELL: Entry=350.5, TP=349.4, SL=352.2 (ATR=1.07)
+2025-04-24 18:07:58 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.07 | Potential Initial SL/TP: 352.2 / 349.4
+2025-04-24 18:07:58 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:07:58 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:07:58 - INFO - [livebot_BCH_USDT-USDT:1985] - *** SELL Signal & No Position: Initiating Trade Sequence for BCH/USDT:USDT ***
+2025-04-24 18:07:58 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'CONTRACT'} for USDT (Attempt 1)
+2025-04-24 18:07:59 - DEBUG - [livebot_BCH_USDT-USDT:1267] - Account type 'CONTRACT' not supported or error fetching: bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745518080550}. Trying next.
+2025-04-24 18:07:59 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'UNIFIED'} for USDT (Attempt 1)
+2025-04-24 18:07:59 - DEBUG - [livebot_BCH_USDT-USDT:1258] - Received balance structure using accountType 'UNIFIED'.
+2025-04-24 18:07:59 - DEBUG - [livebot_BCH_USDT-USDT:1293] - Found balance via standard ccxt structure ['USDT']['free']: 10.24602081
+2025-04-24 18:07:59 - INFO - [livebot_BCH_USDT-USDT:1350] - Available USDT balance: 10.2460
+2025-04-24 18:07:59 - INFO - [livebot_BCH_USDT-USDT:1676] - Attempting to set leverage for BCH/USDT:USDT to 20x...
+2025-04-24 18:07:59 - DEBUG - [livebot_BCH_USDT-USDT:1683] - Using Bybit V5 specific params for set_leverage: {'buyLeverage': '20', 'sellLeverage': '20', 'category': 'linear'}
+2025-04-24 18:08:00 - ERROR - [livebot_BCH_USDT-USDT:1703] - [91mExchange error setting leverage for BCH/USDT:USDT: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1745518081675} (Code: None)[0m
+2025-04-24 18:08:00 - ERROR - [livebot_BCH_USDT-USDT:1993] - Trade Aborted (SELL): Failed to set/confirm leverage.
+2025-04-24 18:08:00 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...
+2025-04-24 18:08:15 - DEBUG - [livebot_BCH_USDT-USDT:2167] - --- Loop Cycle 2 starting at 2025-04-24 13:08:15 CDT ---
+2025-04-24 18:08:15 - INFO - [livebot_BCH_USDT-USDT:1933] - ---== Analyzing BCH/USDT:USDT (3) Cycle Start ==---
+2025-04-24 18:08:15 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:08:15 - DEBUG - [livebot_BCH_USDT-USDT:544] - Fetching klines for BCH/USDT:USDT, 3m, limit=500 (Attempt 1/4)
+2025-04-24 18:08:15 - DEBUG - [livebot_BCH_USDT-USDT:554] - Using params for fetch_ohlcv: {'category': 'linear'}
+2025-04-24 18:08:16 - INFO - [livebot_BCH_USDT-USDT:580] - Successfully fetched and processed 500 klines for BCH/USDT:USDT 3m
+2025-04-24 18:08:16 - DEBUG - [livebot_BCH_USDT-USDT:473] - Fetching ticker for BCH/USDT:USDT (Attempt 1/4)...
+2025-04-24 18:08:16 - DEBUG - [livebot_BCH_USDT-USDT:485] - Using params for fetch_ticker: {'category': 'linear'}
+2025-04-24 18:08:17 - DEBUG - [livebot_BCH_USDT-USDT:488] - Raw ticker data for BCH/USDT:USDT: {'symbol': 'BCH/USDT:USDT', 'timestamp': None, 'datetime': None, 'high': 368.5, 'low': 342.3, 'bid': 350.3, 'bidVolume': 9.89, 'ask': 350.4, 'askVolume': 2.91, 'vwap': 355.0345203522265, 'open': 362.3, 'close': 350.4, 'last': 350.4, 'previousClose': None, 'change': -11.9, 'percentage': -3.2845, 'average': 356.3, 'baseVolume': 152455.31, 'quoteVolume': 54126897.861, 'markPrice': 350.44, 'indexPrice': 350.78, 'info': {'symbol': 'BCHUSDT', 'lastPrice': '350.40', 'indexPrice': '350.78', 'markPrice': '350.44', 'prevPrice24h': '362.30', 'price24hPcnt': '-0.032845', 'highPrice24h': '368.50', 'lowPrice24h': '342.30', 'prevPrice1h': '353.00', 'openInterest': '110263.75', 'openInterestValue': '38640828.55', 'turnover24h': '54126897.8610', 'volume24h': '152455.3100', 'fundingRate': '-0.00007074', 'nextFundingTime': '1745539200000', 'predictedDeliveryPrice': '', 'basisRate': '', 'deliveryFeeRate': '', 'deliveryTime': '0', 'ask1Size': '2.91', 'bid1Price': '350.30', 'ask1Price': '350.40', 'bid1Size': '9.89', 'basis': '', 'preOpenPrice': '', 'preQty': '', 'curPreListingPhase': ''}}
+2025-04-24 18:08:17 - DEBUG - [livebot_BCH_USDT-USDT:500] - Using 'last' price: 350.4
+2025-04-24 18:08:17 - DEBUG - [livebot_BCH_USDT-USDT:619] - Fetching order book for BCH/USDT:USDT, limit=30 (Attempt 1/4)
+2025-04-24 18:08:17 - DEBUG - [livebot_BCH_USDT-USDT:629] - Using params for fetch_order_book: {'category': 'linear'}
+2025-04-24 18:08:17 - DEBUG - [livebot_BCH_USDT-USDT:647] - Successfully fetched orderbook for BCH/USDT:USDT with 30 bids, 30 asks.
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:841] - Finished indicator calculations for BCH/USDT:USDT. DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_8', 'EMA_22', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_14_3_3', 'STOCHRSId_14_14_3_3', 'RSI_12', 'BBL_30_2.0', 'BBM_30_2.0', 'BBU_30_2.0', 'BBB_30_2.0', 'BBP_30_2.0', 'VOL_SMA_15']
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:876] - Latest indicator float values updated for BCH/USDT:USDT: {'ATR': '1.07039', 'EMA_Short': '349.74256', 'EMA_Long': '350.24338', 'Momentum': '1.40000', 'CCI': '53.76344', 'Williams_R': '-20.58824', 'MFI': '45.57600', 'VWAP': '354.78607', 'PSAR_long': '347.70000', 'PSAR_short': nan, 'SMA10': '349.42000', 'StochRSI_K': '100.00000', 'StochRSI_D': '92.29138', 'RSI': '50.84853', 'BB_Lower': '347.16041', 'BB_Middle': '351.03000', 'BB_Upper': '354.89959', 'Volume_MA': '189.27200', 'Open': '350.20000', 'High': '350.60000', 'Low': '350.20000', 'Close': '350.40000', 'Volume': '46.75000'}
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:965] - Calculated Fibonacci levels for BCH/USDT:USDT: {'Fib_0.0%': '354.6', 'Fib_23.6%': '352.9', 'Fib_38.2%': '351.9', 'Fib_50.0%': '351.2', 'Fib_61.8%': '350.4', 'Fib_78.6%': '349.2', 'Fib_100.0%': '347.7'}
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1174] - OBI (10 levels): BidVol=682.1900, AskVol=549.7800, OBI=0.1075
+2025-04-24 18:08:18 - INFO - [livebot_BCH_USDT-USDT:1064] - Signal Calculation Summary (BCH/USDT:USDT @ 350.4):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: -1.0118
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [91mSELL[0m
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1065] -   Detailed Scores: ema_alignment: 0.00, momentum: 0.14, volume_confirmation: -0.40, stoch_rsi: -1.00, rsi: -0.04, bollinger_bands: 0.00, vwap: -0.70, cci: -0.32, wr: -0.98, psar: 1.00, sma_10: 0.60, mfi: 0.15, orderbook: 0.11
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1229] - Calculated TP/SL for BCH/USDT:USDT SELL: Entry=350.4, TP=349.3, SL=352.1 (ATR=1.07)
+2025-04-24 18:08:18 - INFO - [livebot_BCH_USDT-USDT:1972] - Current ATR: 1.07 | Potential Initial SL/TP: 352.1 / 349.3
+2025-04-24 18:08:18 - INFO - [livebot_BCH_USDT-USDT:1974] - Configured Protections: TSL=On | BE=On | MA Exit=On
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1552] - Fetching positions for symbol: BCH/USDT:USDT
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1399] - Market Info (BCH/USDT:USDT): ID=BCHUSDT, Type=swap, Contract=True (Linear), Precision(Price/Amount/Tick): 0.1/0.01/N/A, Limits(Amount Min/Max): 0.01/5300.0, Limits(Cost Min/Max): None/None, Contract Size: 1.0
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1561] - Using params for fetch_positions: {'category': 'linear', 'symbol': 'BCHUSDT'}
+2025-04-24 18:08:18 - INFO - [livebot_BCH_USDT-USDT:1594] - No active open position found for BCH/USDT:USDT.
+2025-04-24 18:08:18 - INFO - [livebot_BCH_USDT-USDT:1985] - *** SELL Signal & No Position: Initiating Trade Sequence for BCH/USDT:USDT ***
+2025-04-24 18:08:18 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'CONTRACT'} for USDT (Attempt 1)
+2025-04-24 18:08:19 - DEBUG - [livebot_BCH_USDT-USDT:1267] - Account type 'CONTRACT' not supported or error fetching: bybit {"retCode":10001,"retMsg":"accountType only support UNIFIED.","result":{},"retExtInfo":{},"time":1745518100274}. Trying next.
+2025-04-24 18:08:19 - DEBUG - [livebot_BCH_USDT-USDT:1253] - Fetching balance using params={'accountType': 'UNIFIED'} for USDT (Attempt 1)
+2025-04-24 18:08:19 - DEBUG - [livebot_BCH_USDT-USDT:1258] - Received balance structure using accountType 'UNIFIED'.
+2025-04-24 18:08:19 - DEBUG - [livebot_BCH_USDT-USDT:1293] - Found balance via standard ccxt structure ['USDT']['free']: 10.24602081
+2025-04-24 18:08:19 - INFO - [livebot_BCH_USDT-USDT:1350] - Available USDT balance: 10.2460
+2025-04-24 18:08:19 - INFO - [livebot_BCH_USDT-USDT:1676] - Attempting to set leverage for BCH/USDT:USDT to 20x...
+2025-04-24 18:08:19 - DEBUG - [livebot_BCH_USDT-USDT:1683] - Using Bybit V5 specific params for set_leverage: {'buyLeverage': '20', 'sellLeverage': '20', 'category': 'linear'}
+2025-04-24 18:08:20 - ERROR - [livebot_BCH_USDT-USDT:1703] - [91mExchange error setting leverage for BCH/USDT:USDT: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1745518101511} (Code: None)[0m
+2025-04-24 18:08:20 - ERROR - [livebot_BCH_USDT-USDT:1993] - Trade Aborted (SELL): Failed to set/confirm leverage.
+2025-04-24 18:08:20 - DEBUG - [livebot_BCH_USDT-USDT:2186] - Loop cycle finished. Sleeping for 15 seconds...

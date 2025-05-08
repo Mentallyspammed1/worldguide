@@ -1,0 +1,2093 @@
+Okay, seeker of automation! Let us weave a powerful Bash incantation to conjure the entire project structure, infuse it with the provided code spells, and prepare the necessary enchantments (dependencies).
+
+This script will perform the following rites:
+
+1.  **Check for Prerequisites**: Ensure `nodejs` and `npm` are available in Termux.
+2.  **Create Directory Structure**: Build the `trading-app` folder and all necessary subdirectories for backend and frontend.
+3.  **Inject Code**: Use `cat << 'EOF'` to precisely place each code snippet into its corresponding file.
+4.  **Generate Configuration**: Create `.gitignore` and `.env` files. **It will prompt you securely for your API keys.**
+5.  **Install Dependencies**: Run `npm install` in both the `backend` and `frontend` directories.
+6.  **Provide Guidance**: Output final instructions and warnings.
+
+**The Grand Setup Spell (Save as `setup_trading_bot.sh`)**
+
+```bash
+#!/data/data/com.termux/files/usr/bin/bash
+
+# Bash Script to Set Up the CCXT Trading Bot Project in Termux
+# Pyrmethus - The Termux Coding Wizard
+
+# Exit immediately if a command exits with a non-zero status.
+set -e
+# Treat unset variables as an error when substituting.
+set -u
+# Prevent errors in pipelines from being masked.
+set -o pipefail
+
+# --- Color Codes ---
+COLOR_CYAN='\x1b[36m'
+COLOR_GREEN='\x1b[32m'
+COLOR_YELLOW='\x1b[38;5;214m'
+COLOR_RED='\x1b[31;1m'
+COLOR_BLUE='\x1b[34m'
+COLOR_BOLD='\x1b[1m'
+COLOR_RESET='\x1b[0m'
+
+# --- Project Configuration ---
+PROJECT_DIR="trading-app"
+
+# --- Helper Functions ---
+print_info() {
+    echo -e "${COLOR_CYAN}${COLOR_BOLD}INFO:${COLOR_RESET} ${COLOR_CYAN}$1${COLOR_RESET}"
+}
+
+print_success() {
+    echo -e "${COLOR_GREEN}${COLOR_BOLD}SUCCESS:${COLOR_RESET} ${COLOR_GREEN}$1${COLOR_RESET}"
+}
+
+print_warning() {
+    echo -e "${COLOR_YELLOW}${COLOR_BOLD}WARNING:${COLOR_RESET} ${COLOR_YELLOW}$1${COLOR_RESET}"
+}
+
+print_error() {
+    echo -e "${COLOR_RED}${COLOR_BOLD}ERROR:${COLOR_RESET} ${COLOR_RED}$1${COLOR_RESET}" >&2
+}
+
+# --- Sanity Checks ---
+print_info "Checking for required Termux packages (nodejs)..."
+if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+    print_warning "Node.js or npm not found. Attempting installation..."
+    pkg update -y && pkg upgrade -y
+    pkg install -y nodejs
+    if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+        print_error "Failed to install Node.js. Please install it manually ('pkg install nodejs') and retry."
+        exit 1
+    fi
+    print_success "Node.js installed."
+else
+    print_success "Node.js and npm found."
+fi
+
+# --- Directory Creation ---
+print_info "Conjuring project directory structure..."
+mkdir -p "${PROJECT_DIR}/backend/src/services"
+mkdir -p "${PROJECT_DIR}/backend/src/routes"
+mkdir -p "${PROJECT_DIR}/backend/src/utils"
+mkdir -p "${PROJECT_DIR}/frontend/src/components"
+mkdir -p "${PROJECT_DIR}/frontend/src/services"
+mkdir -p "${PROJECT_DIR}/frontend/public"
+print_success "Directory structure created in '${PROJECT_DIR}'."
+
+# --- Backend Setup ---
+print_info "Setting up Backend..."
+cd "${PROJECT_DIR}/backend"
+
+# Backend package.json
+print_info "Creating backend package.json..."
+cat << 'EOF' > package.json
+{
+  "name": "trading-bot-backend",
+  "version": "1.0.0",
+  "description": "Backend for CCXT Trading Bot",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "trading",
+    "bot",
+    "ccxt",
+    "bybit",
+    "crypto"
+  ],
+  "author": "Pyrmethus",
+  "license": "MIT",
+  "dependencies": {
+    "ccxt": "^4.3.2",             # Use a recent version
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",          # Use a recent version
+    "express": "^4.18.2",         # Use a recent version
+    "technicalindicators": "^3.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"           # Optional for development
+  }
+}
+EOF
+print_success "backend/package.json created."
+
+# Backend .gitignore
+print_info "Creating backend .gitignore..."
+cat << 'EOF' > .gitignore
+node_modules
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+EOF
+print_success "backend/.gitignore created."
+
+# Backend .env (Prompt for keys)
+print_info "Creating backend .env file..."
+print_warning "You will be prompted for your Bybit API keys."
+print_warning "${COLOR_RED}NEVER share these keys or commit them to Git.${COLOR_RESET}"
+print_warning "Start with ${COLOR_BOLD}TESTNET/SANDBOX${COLOR_RESET} keys!"
+
+read -p "$(echo -e ${COLOR_BLUE}"Enter your Bybit API Key: "${COLOR_RESET})" BYBIT_API_KEY
+read -sp "$(echo -e ${COLOR_BLUE}"Enter your Bybit API Secret: "${COLOR_RESET})" BYBIT_API_SECRET
+echo # Newline after secret input
+
+# Validate input (basic check)
+if [ -z "$BYBIT_API_KEY" ] || [ -z "$BYBIT_API_SECRET" ]; then
+    print_error "API Key and Secret cannot be empty. Aborting."
+    exit 1
+fi
+
+cat << EOF > .env
+NODE_ENV=development
+PORT=5001
+
+# --- Bybit API Keys ---
+# Replace with your ACTUAL keys (use Testnet keys first!)
+BYBIT_API_KEY="${BYBIT_API_KEY}"
+BYBIT_API_SECRET="${BYBIT_API_SECRET}"
+USE_SANDBOX="true" # IMPORTANT: Set to "true" for testnet, "false" for live (EXTREME CAUTION!)
+
+# --- Strategy & Trading Defaults ---
+DEFAULT_SYMBOL="BTC/USDT:USDT" # CCXT format
+DEFAULT_INTERVAL="5m"         # CCXT interval format (1m, 3m, 5m, 15m, 1h, 4h, 1d...)
+DEFAULT_LEVERAGE="10"
+RISK_PER_TRADE="0.005"      # 0.5% of equity per trade
+ATR_PERIOD="14"
+ATR_SL_MULT="1.5"
+ATR_TP_MULT="1.5"
+INDICATOR_PERIOD="14"       # Common period for RSI, StochRSI
+EHLERS_MA_PERIOD="10"       # Period for the MA used in strategy
+# STOCH_RSI specific params (k, d, rsi_length, stoch_length are often combined in libraries)
+STOCH_RSI_K=3
+STOCH_RSI_D=3
+STOCH_RSI_LENGTH=14 # Period for underlying RSI
+STOCH_RSI_STOCH_LENGTH=14 # Period for Stochastic calculation on RSI
+
+STRATEGY_NAME="STOCH_RSI_EHLERS_MA" # Or "MA_CROSS" etc.
+EOF
+print_success "backend/.env created. ${COLOR_YELLOW}Remember to set USE_SANDBOX appropriately!${COLOR_RESET}"
+
+# Backend src/utils/indicators.js
+print_info "Injecting code into backend/src/utils/indicators.js..."
+cat << 'EOF' > src/utils/indicators.js
+// src/utils/indicators.js
+const { RSI, StochasticRSI, EMA, ATR, SMA } = require('technicalindicators');
+
+// Simple wrapper, add more as needed
+const calculateIndicators = (ohlcv, config) => {
+    if (!ohlcv || ohlcv.length < config.indicatorPeriod) {
+        console.warn(`[Indicators] Not enough data. Need ${config.indicatorPeriod}, got ${ohlcv?.length || 0}`);
+        return {}; // Not enough data
+    }
+
+    const closes = ohlcv.map(k => k.close);
+    const highs = ohlcv.map(k => k.high);
+    const lows = ohlcv.map(k => k.low);
+
+    let indicators = {};
+
+    try {
+        const rsi = RSI.calculate({ values: closes, period: config.indicatorPeriod });
+        indicators.rsi = rsi.length ? rsi[rsi.length - 1] : null;
+    } catch (e) { console.error("Error calculating RSI:", e); indicators.rsi = null; }
+
+    try {
+        // Note: technicalindicators StochasticRSI needs RSI input
+        const rsiValues = RSI.calculate({ values: closes, period: config.stochRsiLength });
+        if (rsiValues.length >= config.stochRsiStochLength) {
+            const stochRsi = StochasticRSI.calculate({
+                values: rsiValues, // Use calculated RSI values
+                rsiPeriod: config.stochRsiLength, // Often redundant here, used above
+                stochasticPeriod: config.stochRsiStochLength,
+                kPeriod: config.stochRsiK,
+                dPeriod: config.stochRsiD,
+            });
+            indicators.stochRsi = stochRsi.length ? stochRsi[stochRsi.length - 1] : null; // Contains { k, d }
+            indicators.fullStochRsi = stochRsi; // Keep full series if needed
+        } else {
+            indicators.stochRsi = null;
+            indicators.fullStochRsi = [];
+        }
+    } catch (e) { console.error("Error calculating StochRSI:", e); indicators.stochRsi = null; indicators.fullStochRsi = []; }
+
+
+    try {
+        // Using EMA as a substitute for "Ehlers MA"
+        const ehlersMa = EMA.calculate({ values: closes, period: config.ehlersMaPeriod });
+        indicators.ehlersMa = ehlersMa.length ? ehlersMa[ehlersMa.length - 1] : null;
+        indicators.fullEhlersMa = ehlersMa; // Keep full series
+    } catch (e) { console.error("Error calculating EhlersMA (EMA):", e); indicators.ehlersMa = null; indicators.fullEhlersMa = []; }
+
+    try {
+        const atrInput = { high: highs, low: lows, close: closes, period: config.atrPeriod };
+        const atr = ATR.calculate(atrInput);
+        indicators.atr = atr.length ? atr[atr.length - 1] : null;
+    } catch (e) { console.error("Error calculating ATR:", e); indicators.atr = null; }
+
+    indicators.closes = closes; // Pass along closes
+
+    // console.log("[Indicators] Calculated:", indicators); // Debug log
+    return indicators;
+};
+
+module.exports = { calculateIndicators };
+EOF
+print_success "Code injected into backend/src/utils/indicators.js."
+
+# Backend src/services/bybitService.js
+print_info "Injecting code into backend/src/services/bybitService.js..."
+cat << 'EOF' > src/services/bybitService.js
+// src/services/bybitService.js
+const ccxt = require('ccxt');
+require('dotenv').config(); // Load .env variables
+
+let bybit;
+let marketsLoaded = false;
+
+const initializeBybit = async () => {
+    if (bybit) return bybit;
+
+    console.log(`Initializing Bybit CCXT (Sandbox: ${process.env.USE_SANDBOX === 'true'})...`);
+    try {
+        bybit = new ccxt.bybit({
+            apiKey: process.env.BYBIT_API_KEY,
+            secret: process.env.BYBIT_API_SECRET,
+            options: {
+                // Adjust options if needed, e.g., defaultType for market type
+                 'defaultType': 'linear', // Or 'inverse', 'spot' - adjust based on your target market
+            }
+        });
+
+        if (process.env.USE_SANDBOX === 'true') {
+            bybit.setSandboxMode(true);
+            console.log("Bybit Sandbox Mode Enabled.");
+        } else {
+            console.warn("------------------------------------------------------");
+            console.warn("--- Bybit LIVE TRADING MODE ENABLED - EXTREME CAUTION ---");
+            console.warn("------------------------------------------------------");
+        }
+         // Load markets on initialization
+        await bybit.loadMarkets();
+        marketsLoaded = true;
+        console.log("Bybit markets loaded successfully.");
+
+    } catch (error) {
+        console.error("FATAL: Failed to initialize Bybit CCXT:", error.message);
+        // Consider exiting if initialization fails critically
+        // process.exit(1);
+        throw error; // Re-throw for server startup to potentially catch
+    }
+    return bybit;
+};
+
+const getBybit = () => {
+    if (!bybit) {
+        throw new Error("Bybit CCXT instance not initialized. Call initializeBybit first.");
+    }
+    if (!marketsLoaded) {
+         // This shouldn't happen if initializeBybit succeeded, but as a safeguard
+         console.warn("Attempting to use Bybit instance before markets are loaded.");
+    }
+    return bybit;
+};
+
+// --- CCXT Wrapper Functions ---
+
+const fetchOHLCV = async (symbol, timeframe, limit = 200) => {
+    const exchange = getBybit();
+    try {
+        // console.log(`Fetching OHLCV for ${symbol}, ${timeframe}, limit ${limit}`);
+        const ohlcv = await exchange.fetchOHLCV(symbol, timeframe, undefined, limit);
+         // CCXT returns [timestamp, open, high, low, close, volume]
+         // Convert to object format for easier use
+         return ohlcv.map(k => ({
+             timestamp: k[0],
+             open: k[1],
+             high: k[2],
+             low: k[3],
+             close: k[4],
+             volume: k[5]
+         }));
+    } catch (error) {
+        console.error(`Error fetching OHLCV for ${symbol}:`, error.constructor.name, error.message);
+        throw error; // Re-throw for handling in strategy service
+    }
+};
+
+const fetchBalance = async (currency = 'USDT') => {
+    const exchange = getBybit();
+    try {
+        const balance = await exchange.fetchBalance();
+        // Access total balance, free and used might also be relevant
+        // Structure can vary slightly; check debug output if needed
+        return balance[currency] ? (balance[currency].total ?? 0) : 0;
+    } catch (error) {
+        console.error(`Error fetching balance for ${currency}:`, error.constructor.name, error.message);
+        throw error;
+    }
+};
+
+ const setLeverage = async (symbol, leverage) => {
+    const exchange = getBybit();
+    try {
+        console.log(`Attempting to set leverage for ${symbol} to ${leverage}x`);
+        const market = exchange.market(symbol);
+        if (!market) throw new Error(`Market not found for ${symbol}`);
+        if (!market.linear) throw new Error(`Leverage setting currently implemented for Linear contracts only (${symbol})`);
+
+        // Bybit unified margin requires setting for the symbol itself
+        // For USDT perpetuals, this should work. Check CCXT docs for specifics.
+        const response = await exchange.setLeverage(leverage, symbol);
+        console.log(`Set leverage response for ${symbol}:`, response); // Log response for debugging
+        return response;
+    } catch (error) {
+        console.error(`Error setting leverage for ${symbol} to ${leverage}x:`, error.constructor.name, error.message);
+        // Handle specific errors like "leverage not modified" gracefully
+        if (error.message.includes('leverage not modified')) {
+             console.warn(`Leverage for ${symbol} already set to ${leverage}x or modification failed.`);
+             return { info: `Leverage already set or modification failed: ${error.message}` };
+        }
+        throw error;
+    }
+};
+
+ const fetchPosition = async (symbol) => {
+    const exchange = getBybit();
+    try {
+        // Fetch positions for the specific symbol if supported, otherwise fetch all and filter
+        let positions;
+        if (exchange.has['fetchPositionsForSymbol']) {
+             positions = await exchange.fetchPositionsForSymbol(symbol);
+        } else if (exchange.has['fetchPositions']) {
+             positions = await exchange.fetchPositions([symbol]); // Pass symbol array
+        } else {
+            console.warn("Exchange does not support fetchPositions or fetchPositionsForSymbol via CCXT.");
+            return null;
+        }
+
+        // Filter for the specific symbol and ensure it's an open position
+        // The structure of the position object varies, check CCXT docs/debug output
+        // Common indicators of an open position: non-zero contracts/size/positionAmt
+        const position = positions.find(p =>
+            p.symbol === symbol &&
+            p.contracts !== undefined && // Check contracts first
+            parseFloat(p.contracts) !== 0
+        );
+
+        // console.log("Fetched position details:", position); // Debug log
+        return position || null; // Return null if no open position matching criteria
+    } catch (error) {
+        console.error(`Error fetching position for ${symbol}:`, error.constructor.name, error.message);
+        throw error;
+    }
+};
+
+ const createMarketOrder = async (symbol, side, amount, params = {}) => {
+     const exchange = getBybit();
+     try {
+         console.log(`Creating market ${side} order for ${symbol}, amount ${amount}, params: ${JSON.stringify(params)}`);
+         // Ensure amount is a number
+         const numericAmount = parseFloat(amount);
+         if (isNaN(numericAmount) || numericAmount <= 0) {
+             throw new Error(`Invalid order amount: ${amount}`);
+         }
+         const order = await exchange.createMarketOrder(symbol, side, numericAmount, undefined, params);
+         console.log(`Market order placed successfully: ID ${order.id}`);
+         return order;
+     } catch (error) {
+         console.error(`Error creating market ${side} order for ${symbol} (amount: ${amount}):`, error.constructor.name, error.message);
+         // Log specific CCXT error details if available
+         if (error instanceof ccxt.ExchangeError) {
+             console.error("CCXT Error Details:", error);
+         }
+         throw error;
+     }
+ };
+
+ const createOrder = async (symbol, type, side, amount, price = undefined, params = {}) => {
+    const exchange = getBybit();
+    try {
+        console.log(`Creating ${type} ${side} order for ${symbol}, amount ${amount}, price ${price}, params: ${JSON.stringify(params)}`);
+        // Ensure amount is a number
+         const numericAmount = parseFloat(amount);
+         if (isNaN(numericAmount) || numericAmount <= 0) {
+             throw new Error(`Invalid order amount: ${amount}`);
+         }
+         // Ensure price is valid for limit/stop orders
+         const numericPrice = price !== undefined ? parseFloat(price) : undefined;
+         if (type !== 'market' && (numericPrice === undefined || isNaN(numericPrice) || numericPrice <= 0)) {
+             throw new Error(`Invalid order price for ${type} order: ${price}`);
+         }
+
+        const order = await exchange.createOrder(symbol, type, side, numericAmount, numericPrice, params);
+        console.log(`${type} order placed successfully: ID ${order.id}`);
+        return order;
+    } catch (error) {
+        console.error(`Error creating ${type} ${side} order for ${symbol} (amount: ${amount}, price: ${price}):`, error.constructor.name, error.message);
+         if (error instanceof ccxt.ExchangeError) {
+             console.error("CCXT Error Details:", error);
+         }
+        throw error;
+    }
+};
+
+ const cancelOrder = async (orderId, symbol) => {
+     const exchange = getBybit();
+     try {
+         console.log(`Attempting to cancel order ${orderId} for ${symbol}`);
+         const response = await exchange.cancelOrder(orderId, symbol);
+         console.log(`Cancel order response for ${orderId}:`, response);
+         return response;
+     } catch (error) {
+         console.error(`Error cancelling order ${orderId} for ${symbol}:`, error.constructor.name, error.message);
+         // Handle cases where order is already filled/cancelled
+         if (error instanceof ccxt.OrderNotFound) {
+            console.warn(`Order ${orderId} not found, likely already filled or cancelled.`);
+            return { info: `Order ${orderId} not found.` };
+         }
+         throw error;
+     }
+ };
+
+ // Helper to get market details (precision, limits)
+ const getMarketDetails = async (symbol) => {
+    const exchange = getBybit();
+    try {
+        // Ensure markets are loaded (should be by initializeBybit)
+        if (!marketsLoaded) {
+            console.warn("Markets not loaded, attempting to load now...");
+            await exchange.loadMarkets();
+            marketsLoaded = true;
+        }
+        const market = exchange.market(symbol);
+        if (!market) {
+            throw new Error(`Market details not found for symbol: ${symbol}`);
+        }
+        return market; // Contains precision, limits, etc.
+    } catch (error) {
+        console.error(`Error fetching market details for ${symbol}:`, error.message);
+        throw error;
+    }
+ };
+
+
+module.exports = {
+    initializeBybit,
+    getBybit,
+    fetchOHLCV,
+    fetchBalance,
+    setLeverage,
+    fetchPosition,
+    createMarketOrder,
+    createOrder,
+    cancelOrder,
+    getMarketDetails
+};
+EOF
+print_success "Code injected into backend/src/services/bybitService.js."
+
+# Backend src/services/strategyService.js
+print_info "Injecting code into backend/src/services/strategyService.js..."
+cat << 'EOF' > src/services/strategyService.js
+// src/services/strategyService.js
+const { calculateIndicators } = require('../utils/indicators');
+const {
+    fetchOHLCV,
+    fetchBalance,
+    setLeverage,
+    fetchPosition,
+    createMarketOrder,
+    createOrder, // For SL/TP if using limit orders
+    getMarketDetails, // To get precision and limits
+} = require('./bybitService');
+require('dotenv').config();
+
+let tradingIntervalId = null;
+let isTradingEnabled = false;
+let currentConfig = {
+    symbol: process.env.DEFAULT_SYMBOL,
+    interval: process.env.DEFAULT_INTERVAL,
+    leverage: parseInt(process.env.DEFAULT_LEVERAGE, 10),
+    riskPerTrade: parseFloat(process.env.RISK_PER_TRADE),
+    atrPeriod: parseInt(process.env.ATR_PERIOD, 10),
+    atrSlMult: parseFloat(process.env.ATR_SL_MULT),
+    atrTpMult: parseFloat(process.env.ATR_TP_MULT),
+    indicatorPeriod: parseInt(process.env.INDICATOR_PERIOD, 10),
+    ehlersMaPeriod: parseInt(process.env.EHLERS_MA_PERIOD, 10),
+    stochRsiK: parseInt(process.env.STOCH_RSI_K, 10),
+    stochRsiD: parseInt(process.env.STOCH_RSI_D, 10),
+    stochRsiLength: parseInt(process.env.STOCH_RSI_LENGTH, 10),
+    stochRsiStochLength: parseInt(process.env.STOCH_RSI_STOCH_LENGTH, 10),
+    strategy: process.env.STRATEGY_NAME,
+};
+let tradeLogs = []; // Simple in-memory log
+let lastExecutionTime = 0;
+
+const logTrade = (message, level = 'INFO') => {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${level}] ${message}`;
+    console.log(logEntry); // Log to console
+    tradeLogs.push(logEntry);
+    // Limit log size to prevent memory issues
+    if (tradeLogs.length > 200) {
+        tradeLogs.shift();
+    }
+};
+
+// Helper to format numbers based on market precision
+const formatPrice = (price, market) => {
+    if (!market || !market.precision || typeof market.precision.price !== 'number') {
+        return price; // Return original if precision info is missing
+    }
+    return parseFloat(price.toFixed(market.precision.price));
+};
+
+const formatAmount = (amount, market) => {
+     if (!market || !market.precision || typeof market.precision.amount !== 'number') {
+        // Attempt a reasonable default if precision is missing
+        return parseFloat(amount.toFixed(6));
+    }
+    // Use floor for amount precision to avoid exceeding limits
+    const factor = Math.pow(10, market.precision.amount);
+    return Math.floor(amount * factor) / factor;
+};
+
+// --- Strategy Logic ---
+const runStrategy = async () => {
+    const now = Date.now();
+    // Simple debounce/rate limiting: Ensure runs aren't too close together
+    if (now - lastExecutionTime < 5000) { // Minimum 5 seconds between runs
+        // logTrade("Skipping execution: Too soon since last run.", "DEBUG");
+        return;
+    }
+    lastExecutionTime = now;
+
+    logTrade(`Running strategy check for ${currentConfig.symbol}...`, "DEBUG");
+    try {
+        // 0. Get Market Details (Precision, Limits)
+        const market = await getMarketDetails(currentConfig.symbol);
+        if (!market || !market.limits || !market.precision) {
+            logTrade(`Market details not available for ${currentConfig.symbol}. Cannot proceed.`, "ERROR");
+            stopTrading(); // Stop if critical info is missing
+            return;
+        }
+        // console.log("Market Details:", market); // Debug log
+
+        // 1. Fetch Data
+        // Fetch slightly more data for indicator stability
+        const ohlcv = await fetchOHLCV(currentConfig.symbol, currentConfig.interval, 300);
+        if (!ohlcv || ohlcv.length < Math.max(currentConfig.indicatorPeriod, currentConfig.atrPeriod, currentConfig.ehlersMaPeriod, 50)) { // Ensure enough data for longest period + buffer
+            logTrade(`Not enough historical data fetched (${ohlcv?.length || 0}) for ${currentConfig.symbol}. Need more for indicators.`, "WARN");
+            return;
+        }
+        const lastCandle = ohlcv[ohlcv.length - 1];
+        const currentPrice = lastCandle.close;
+        logTrade(`Current Price (${currentConfig.symbol}): ${formatPrice(currentPrice, market)}`, "DEBUG");
+
+
+        // 2. Calculate Indicators
+        const indicators = calculateIndicators(ohlcv, currentConfig);
+        if (!indicators.atr || !indicators.stochRsi || !indicators.ehlersMa) {
+            logTrade("Failed to calculate necessary indicators. Check data or indicator settings.", "WARN");
+            return;
+        }
+        // logTrade(`Indicators: ATR=${indicators.atr?.toFixed(5)}, StochK=${indicators.stochRsi?.k?.toFixed(2)}, StochD=${indicators.stochRsi?.d?.toFixed(2)}, MA=${indicators.ehlersMa?.toFixed(5)}`, "DEBUG");
+
+
+        // 3. Fetch Current State
+        const position = await fetchPosition(currentConfig.symbol);
+        const hasOpenPosition = position !== null;
+        const positionSide = hasOpenPosition ? (position.side === 'long' ? 'buy' : 'sell') : null;
+        const positionSizeContracts = hasOpenPosition ? parseFloat(position.contracts) : 0; // Size in contracts/base currency
+        logTrade(`Current Position: ${hasOpenPosition ? `${position.side} ${positionSizeContracts} @ ${formatPrice(position.entryPrice, market)}` : 'None'}`, "DEBUG");
+
+
+        // --- STOCH_RSI_EHLERS_MA Strategy ---
+        let entrySignal = null; // 'buy' or 'sell'
+        let exitSignal = false;
+
+        // Ensure indicators are valid numbers before proceeding
+        if (typeof indicators.stochRsi?.k !== 'number' || typeof indicators.stochRsi?.d !== 'number' || typeof indicators.ehlersMa !== 'number') {
+            logTrade("Invalid indicator values received. Skipping logic.", "WARN");
+            return;
+        }
+
+        const { k: stochK, d: stochD } = indicators.stochRsi;
+        const maValue = indicators.ehlersMa;
+
+        // --- Entry Conditions ---
+        if (!hasOpenPosition) {
+             // Long Entry: Stoch %K crosses above %D below 25, and price > MA
+            if (stochK > stochD && stochK < 25 && currentPrice > maValue) {
+                entrySignal = 'buy';
+                logTrade(`Long Entry Signal Triggered: StochK(${stochK.toFixed(2)}) > StochD(${stochD.toFixed(2)}) [Both < 25], Price(${formatPrice(currentPrice, market)}) > MA(${formatPrice(maValue, market)})`);
+             }
+             // Short Entry: Stoch %K crosses below %D above 75, and price < MA
+             else if (stochK < stochD && stochK > 75 && currentPrice < maValue) {
+                entrySignal = 'sell';
+                 logTrade(`Short Entry Signal Triggered: StochK(${stochK.toFixed(2)}) < StochD(${stochD.toFixed(2)}) [Both > 75], Price(${formatPrice(currentPrice, market)}) < MA(${formatPrice(maValue, market)})`);
+             }
+        }
+
+        // --- Exit Conditions ---
+        if (hasOpenPosition) {
+             // Long Exit: Stoch %K crosses below %D above 75
+             if (positionSide === 'buy' && stochK < stochD && stochK > 75) {
+                exitSignal = true;
+                logTrade(`Long Exit Signal Triggered: StochK(${stochK.toFixed(2)}) < StochD(${stochD.toFixed(2)}) [Both > 75]`);
+             }
+             // Short Exit: Stoch %K crosses above %D below 25
+             else if (positionSide === 'sell' && stochK > stochD && stochK < 25) {
+                exitSignal = true;
+                 logTrade(`Short Exit Signal Triggered: StochK(${stochK.toFixed(2)}) > StochD(${stochD.toFixed(2)}) [Both < 25]`);
+             }
+            // Add SL/TP exit logic here if not using built-in exchange SL/TP params
+            // Example: if (positionSide === 'buy' && currentPrice <= calculatedSL) exitSignal = true;
+        }
+
+        // --- Execute Trades ---
+        if (entrySignal && !hasOpenPosition) { // Ensure no position before entering
+            logTrade(`Attempting to open ${entrySignal} position for ${currentConfig.symbol}...`);
+            const balance = await fetchBalance('USDT'); // Assuming USDT margin
+            if (balance <= 0) {
+                logTrade("Insufficient balance (0 USDT). Cannot open position.", "ERROR");
+                return;
+            }
+
+            // Calculate Position Size based on Risk & ATR Stop Loss
+            const atrValue = indicators.atr;
+            if (typeof atrValue !== 'number' || atrValue <= 0) {
+                logTrade(`Invalid ATR value (${atrValue}). Cannot calculate position size.`, "ERROR");
+                return;
+            }
+            const slDistance = atrValue * currentConfig.atrSlMult;
+            const riskAmount = balance * currentConfig.riskPerTrade; // Risk amount in USDT
+
+            // Stop Loss Price Calculation
+            const stopLossPrice = entrySignal === 'buy' ? currentPrice - slDistance : currentPrice + slDistance;
+            const formattedSL = formatPrice(stopLossPrice, market);
+
+            // Take Profit Price Calculation (Optional)
+            const tpDistance = atrValue * currentConfig.atrTpMult;
+            const takeProfitPrice = entrySignal === 'buy' ? currentPrice + tpDistance : currentPrice - tpDistance;
+            const formattedTP = formatPrice(takeProfitPrice, market);
+
+
+            // Calculate position size in BASE currency (e.g., BTC for BTC/USDT)
+            // Size = Risk Amount / (Entry Price - Stop Loss Price) for longs
+            // Size = Risk Amount / (Stop Loss Price - Entry Price) for shorts
+            // Absolute distance is slDistance
+            let positionSizeBase = riskAmount / slDistance; // Size in base currency (e.g., BTC)
+
+            // Adjust for leverage - NOTE: This is a simplification. True leveraged size depends on margin used.
+            // A better approach is often: Size = (Account Balance * Leverage * Risk Per Trade) / (Entry Price * SL Distance %)
+            // Sticking to the ATR distance method for now:
+            // positionSizeBase = positionSizeBase * currentConfig.leverage; // This is often INCORRECT for risk calc.
+            // Let's stick to riskAmount / slDistance_in_quote_currency
+
+            // Ensure size respects market limits (amount)
+            const minAmount = market.limits?.amount?.min;
+            const maxAmount = market.limits?.amount?.max;
+
+            if (typeof minAmount === 'number' && positionSizeBase < minAmount) {
+                logTrade(`Calculated size (${positionSizeBase}) is below minimum (${minAmount}). Adjusting to minimum.`, "WARN");
+                positionSizeBase = minAmount;
+            }
+             if (typeof maxAmount === 'number' && positionSizeBase > maxAmount) {
+                logTrade(`Calculated size (${positionSizeBase}) exceeds maximum (${maxAmount}). Adjusting to maximum.`, "WARN");
+                positionSizeBase = maxAmount;
+            }
+
+            // Format final size according to market precision
+            const finalPositionSize = formatAmount(positionSizeBase, market);
+
+            // Check if final size is valid after formatting and limits
+             if (finalPositionSize <= 0 || (typeof minAmount === 'number' && finalPositionSize < minAmount)) {
+                 logTrade(`Final position size (${finalPositionSize}) is invalid or below minimum after adjustments. Cannot place order.`, "ERROR");
+                 return;
+             }
+
+            logTrade(`Trade Calculation: Balance=${balance.toFixed(2)}, Risk=${(currentConfig.riskPerTrade * 100).toFixed(2)}%, ATR=${atrValue.toFixed(5)}, SL Dist=${slDistance.toFixed(5)}`);
+            logTrade(`Calculated Size (Base): ${positionSizeBase.toFixed(6)}, Final Size (Formatted): ${finalPositionSize}`);
+            logTrade(`Entry: ~${formatPrice(currentPrice, market)}, SL: ${formattedSL}, TP: ${formattedTP}`);
+
+
+            // Set Leverage (should ideally be done once or checked if necessary)
+            try {
+                await setLeverage(currentConfig.symbol, currentConfig.leverage);
+            } catch (leverageError) {
+                logTrade(`Failed to set leverage to ${currentConfig.leverage}x. Continuing with existing leverage. Error: ${leverageError.message}`, "WARN");
+                // Decide if this is a critical failure or not
+            }
+
+             // Place Market Order with SL/TP parameters if supported by exchange/CCXT
+             // Check Bybit documentation for correct parameter names ('stopLoss', 'takeProfit', 'slTriggerPrice', 'tpTriggerPrice', etc.)
+             const orderParams = {
+                 // Example Bybit Params (verify!)
+                 // 'stopLoss': formattedSL,
+                 // 'takeProfit': formattedTP,
+                 // 'tpslMode': 'Full', // Or 'Partial'
+                 // 'slTriggerBy': 'LastPrice', // Or MarkPrice, IndexPrice
+                 // 'tpTriggerBy': 'LastPrice',
+             };
+             // Filter out undefined params
+             Object.keys(orderParams).forEach(key => orderParams[key] === undefined && delete orderParams[key]);
+
+            try {
+                await createMarketOrder(currentConfig.symbol, entrySignal, finalPositionSize, orderParams);
+                logTrade(`Market ${entrySignal} order placed for ${finalPositionSize} ${market.base}. SL/TP params sent (if any): ${JSON.stringify(orderParams)}`);
+                // Consider adding logic to confirm order fill status
+            } catch (orderError) {
+                 logTrade(`Failed to place market ${entrySignal} order: ${orderError.message}`, "ERROR");
+                 // Handle specific errors like insufficient margin
+            }
+
+        } else if (exitSignal && hasOpenPosition) {
+            logTrade(`Attempting to close ${positionSide} position for ${currentConfig.symbol} due to exit signal...`);
+            const closeSide = positionSide === 'buy' ? 'sell' : 'buy';
+            const amountToClose = Math.abs(positionSizeContracts); // Use the actual size from the fetched position
+
+            // Format amount to close based on market precision
+            const formattedAmountToClose = formatAmount(amountToClose, market);
+
+            if (formattedAmountToClose <= 0) {
+                logTrade(`Invalid amount to close (${formattedAmountToClose}). Cannot place close order.`, "ERROR");
+                return;
+            }
+
+            // Place Market Order to close the position
+            // Use 'reduceOnly' parameter if available and appropriate
+            const closeParams = {
+                 'reduceOnly': true // Essential for closing positions safely
+            };
+
+            try {
+                await createMarketOrder(currentConfig.symbol, closeSide, formattedAmountToClose, closeParams);
+                logTrade(`Market ${closeSide} (close) order placed for ${formattedAmountToClose} ${market.base}.`);
+                // Consider adding logic to confirm order fill status
+            } catch (orderError) {
+                 logTrade(`Failed to place market ${closeSide} (close) order: ${orderError.message}`, "ERROR");
+            }
+        } else {
+             logTrade("No trade action conditions met.", "DEBUG");
+        }
+
+    } catch (error) {
+        // Catch errors from API calls (fetchOHLCV, fetchPosition etc.) or logic errors
+        logTrade(`Strategy Execution Error: ${error.message}`, "ERROR");
+        console.error(error); // Log full error stack trace
+        // Consider adding logic to stop trading on repeated critical errors
+    }
+};
+
+const startTrading = (config) => {
+    if (tradingIntervalId) {
+        logTrade("Trading loop already running.", "WARN");
+        return { success: false, message: "Trading loop already running." };
+    }
+
+    isTradingEnabled = true;
+    currentConfig = { ...currentConfig, ...config }; // Update config if provided
+    logTrade(`--- Starting Trading Loop ---`, "INFO");
+    logTrade(`Configuration: ${JSON.stringify(currentConfig)}`, "INFO");
+    if (process.env.USE_SANDBOX !== 'true') {
+         logTrade("!!! LIVE TRADING MODE ACTIVE !!!", "WARN");
+    } else {
+         logTrade("Sandbox Mode Active.", "INFO");
+    }
+
+
+    // Determine interval in milliseconds
+    const intervalString = currentConfig.interval;
+    let intervalMs = 60000; // Default 1 min
+    try {
+        const value = parseInt(intervalString.slice(0, -1), 10);
+        const unit = intervalString.slice(-1).toLowerCase();
+        if (isNaN(value) || value <= 0) throw new Error("Invalid interval value");
+
+        if (unit === 'm') intervalMs = value * 60 * 1000;
+        else if (unit === 'h') intervalMs = value * 60 * 60 * 1000;
+        else if (unit === 'd') intervalMs = value * 24 * 60 * 60 * 1000;
+        else throw new Error("Invalid interval unit (use m, h, d)");
+
+        // Ensure interval is reasonably short for responsiveness, but not too short for rate limits
+        intervalMs = Math.max(10000, intervalMs); // Minimum 10 seconds
+        logTrade(`Setting trading interval to ${intervalMs} ms (${intervalString})`, "INFO");
+
+    } catch (e) {
+        logTrade(`Invalid interval string: ${intervalString}. Defaulting to 60000 ms. Error: ${e.message}`, "ERROR");
+        intervalMs = 60000;
+    }
+
+
+    // Run immediately first time after a short delay to allow initialization
+    setTimeout(() => {
+        if (isTradingEnabled) runStrategy(); // Check if still enabled
+    }, 2000); // 2-second delay
+
+
+    // Then run on interval
+    tradingIntervalId = setInterval(runStrategy, intervalMs);
+    return { success: true, message: "Trading loop started." };
+};
+
+const stopTrading = () => {
+    if (tradingIntervalId) {
+        clearInterval(tradingIntervalId);
+        tradingIntervalId = null;
+        isTradingEnabled = false;
+        lastExecutionTime = 0; // Reset timer
+        logTrade("--- Trading loop stopped ---", "INFO");
+        return { success: true, message: "Trading loop stopped." };
+    }
+    logTrade("Trading loop not running.", "WARN");
+    return { success: false, message: "Trading loop not running." };
+};
+
+const getStatus = async () => {
+    let balance = null;
+    let position = null;
+    let errorMsg = null;
+    try {
+        // Ensure Bybit is initialized before fetching status
+        if (!require('./bybitService').getBybit()) {
+             throw new Error("Bybit service not ready.");
+        }
+        balance = await fetchBalance('USDT'); // Assuming USDT margin
+        position = await fetchPosition(currentConfig.symbol);
+    } catch (error) {
+        logTrade(`Error fetching status data: ${error.message}`, "ERROR");
+        errorMsg = `Failed to fetch status: ${error.message}`;
+    }
+    return {
+        isTradingEnabled,
+        config: currentConfig,
+        logs: [...tradeLogs].reverse(), // Return newest first
+        balance,
+        position,
+        error: errorMsg, // Include error message in status if fetch failed
+        lastUpdate: new Date().toISOString(),
+    };
+};
+
+const updateConfig = (newConfig) => {
+     const oldConfig = { ...currentConfig };
+     currentConfig = { ...currentConfig, ...newConfig };
+     logTrade(`Configuration updated: ${JSON.stringify(currentConfig)}`, "INFO");
+     // If running, stop and restart with the new config
+     if (isTradingEnabled) {
+         logTrade("Restarting trading loop with new configuration...", "INFO");
+         stopTrading();
+         // Small delay before restarting
+         setTimeout(() => startTrading(currentConfig), 1000);
+     }
+     return currentConfig;
+ };
+
+
+module.exports = {
+    startTrading,
+    stopTrading,
+    getStatus,
+    updateConfig,
+};
+EOF
+print_success "Code injected into backend/src/services/strategyService.js."
+
+# Backend src/routes/api.js
+print_info "Injecting code into backend/src/routes/api.js..."
+cat << 'EOF' > src/routes/api.js
+// src/routes/api.js
+const express = require('express');
+const { initializeBybit, getBybit, fetchOHLCV } = require('../services/bybitService');
+const strategyService = require('../services/strategyService');
+
+const router = express.Router();
+
+// Middleware to ensure Bybit is initialized (or attempt initialization)
+// Note: initializeBybit is async, proper handling might need adjustments
+router.use(async (req, res, next) => {
+    try {
+        // Check if already initialized, if not, initialize
+        if (!getBybit()) {
+            console.log("API Middleware: Bybit not initialized, attempting initialization...");
+            await initializeBybit();
+        }
+        next();
+    } catch (error) {
+         console.error("API Middleware Error: Failed to ensure Bybit service initialization:", error);
+        res.status(503).json({ error: 'Service Unavailable: Trading service connection failed.' }); // 503 Service Unavailable
+    }
+});
+
+// Get current status (trading state, config, logs, balance, position)
+router.get('/status', async (req, res) => {
+    try {
+        const status = await strategyService.getStatus();
+        res.json(status);
+    } catch (error) {
+         console.error("API Error (/status):", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
+
+// Start the trading bot
+router.post('/trade/start', (req, res) => {
+    try {
+         // Pass config overrides from frontend request body: req.body
+         // Validate req.body structure if necessary
+        const result = strategyService.startTrading(req.body || {});
+        res.json(result);
+    } catch (error) {
+         console.error("API Error (/trade/start):", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
+
+// Stop the trading bot
+router.post('/trade/stop', (req, res) => {
+    try {
+        const result = strategyService.stopTrading();
+        res.json(result);
+    } catch (error) {
+         console.error("API Error (/trade/stop):", error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+    }
+});
+
+// Update configuration
+ router.post('/config', (req, res) => {
+     try {
+         // Add validation for req.body structure/values here
+         if (typeof req.body !== 'object' || req.body === null) {
+            return res.status(400).json({ error: 'Invalid configuration data format.' });
+         }
+         const newConfig = strategyService.updateConfig(req.body);
+         res.json({ success: true, config: newConfig });
+     } catch (error) {
+          console.error("API Error (/config):", error);
+         res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+     }
+ });
+
+ // Get available symbols (Example - filter for linear USDT perpetuals)
+ router.get('/symbols', async (req, res) => {
+     try {
+         const exchange = getBybit();
+         // Markets should be loaded during initialization
+         if (!exchange.markets) {
+             // Attempt reload if somehow missed, though this indicates an issue
+             console.warn("Markets not loaded in /symbols endpoint, attempting reload.");
+             await exchange.loadMarkets();
+         }
+         if (!exchange.markets) {
+              throw new Error("Failed to load markets.");
+         }
+
+         // Filter for active USDT Linear Perpetuals
+         const symbols = Object.keys(exchange.markets)
+             .filter(s => {
+                 const market = exchange.markets[s];
+                 return market && // Market exists
+                        market.active && // Market is active
+                        market.linear && // Is a linear contract
+                        market.quote === 'USDT' && // Quote currency is USDT
+                        market.type === 'swap'; // Is a perpetual swap
+             })
+             .sort();
+         res.json(symbols);
+     } catch (error) {
+          console.error("API Error (/symbols):", error);
+         res.status(500).json({ error: `Failed to fetch symbols: ${error.message}` });
+     }
+ });
+
+ // Get OHLCV data for charting
+ router.get('/ohlcv', async (req, res) => {
+     const { symbol, interval, limit = 200 } = req.query;
+     if (!symbol || !interval) {
+         return res.status(400).json({ error: 'Missing required query parameters: symbol, interval.' });
+     }
+     try {
+          // Basic validation for limit
+          const parsedLimit = parseInt(limit, 10);
+          if (isNaN(parsedLimit) || parsedLimit <= 0 || parsedLimit > 1000) { // Set a reasonable max limit
+              return res.status(400).json({ error: 'Invalid limit parameter. Must be between 1 and 1000.' });
+          }
+          const data = await fetchOHLCV(symbol, interval, parsedLimit);
+          res.json(data);
+     } catch (error) {
+          console.error(`API Error (/ohlcv) for ${symbol}/${interval}:`, error);
+          // Provide more specific error messages if possible (e.g., rate limit, invalid symbol)
+          if (error.constructor.name === 'BadSymbol') {
+             res.status(404).json({ error: `Symbol not found or invalid: ${symbol}` });
+          } else if (error.constructor.name === 'RateLimitExceeded') {
+             res.status(429).json({ error: `Rate limit exceeded. Please wait and try again.` });
+          }
+          else {
+             res.status(500).json({ error: `Failed to fetch OHLCV: ${error.message}` });
+          }
+     }
+ });
+
+
+module.exports = router;
+EOF
+print_success "Code injected into backend/src/routes/api.js."
+
+# Backend src/server.js
+print_info "Injecting code into backend/src/server.js..."
+cat << 'EOF' > src/server.js
+// src/server.js
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+const apiRoutes = require('./routes/api');
+const path = require('path');
+const { initializeBybit } = require('./services/bybitService'); // Import initializer
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+// --- Middleware ---
+// Enable CORS for all origins (adjust for production)
+app.use(cors());
+// Parse JSON request bodies
+app.use(express.json());
+
+// --- API Routes ---
+app.use('/api', apiRoutes);
+
+// --- Serve React Frontend ---
+// Construct the path to the frontend build directory relative to this server file
+const frontendBuildPath = path.join(__dirname, '..', '..', 'frontend', 'build');
+console.log(`Serving static files from: ${frontendBuildPath}`);
+
+// Serve static files from the React build directory
+app.use(express.static(frontendBuildPath));
+
+// For any route not handled by API or static files, serve the React app's index.html
+app.get('*', (req, res) => {
+    const indexPath = path.resolve(frontendBuildPath, 'index.html');
+    console.log(`Attempting to serve index.html from: ${indexPath}`);
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error("Error sending index.html:", err);
+            // Avoid sending confusing error messages if the file just doesn't exist yet
+            if (err.code === 'ENOENT') {
+                 res.status(404).send('Frontend build not found. Run `npm run build` in the frontend directory.');
+            } else {
+                 res.status(500).send('Internal Server Error');
+            }
+        }
+    });
+});
+// --- End Serve React Frontend ---
+
+
+// --- Server Startup ---
+const startServer = async () => {
+    try {
+        console.log("Initializing Bybit service before starting server...");
+        await initializeBybit(); // Wait for Bybit connection and market loading
+        console.log("Bybit service initialized successfully.");
+
+        app.listen(PORT, () => {
+            console.log(`Backend server running on http://localhost:${PORT}`);
+            console.log(`API endpoints available at http://localhost:${PORT}/api`);
+            if (process.env.USE_SANDBOX === 'true') {
+                 console.log("Mode: Sandbox/Testnet");
+            } else {
+                 console.warn("Mode: LIVE TRADING - EXERCISE EXTREME CAUTION!");
+            }
+        });
+    } catch (error) {
+        console.error("------------------------------------------------------");
+        console.error("--- FATAL SERVER STARTUP ERROR ---");
+        console.error("Failed to initialize Bybit service on startup:", error.message);
+        console.error("The server cannot start without a valid exchange connection.");
+        console.error("Check your API keys, network connection, and CCXT compatibility.");
+        console.error("------------------------------------------------------");
+        process.exit(1); // Exit if critical initialization fails
+    }
+};
+
+startServer();
+EOF
+print_success "Code injected into backend/src/server.js."
+
+# Install Backend Dependencies
+print_info "Installing backend dependencies (npm install)... This may take a moment."
+if npm install; then
+    print_success "Backend dependencies installed."
+else
+    print_error "Backend npm install failed. Please check package.json and network connection."
+    exit 1
+fi
+
+# --- Frontend Setup ---
+print_info "Setting up Frontend..."
+cd ../frontend # Move to frontend directory
+
+# Frontend package.json (Basic React setup)
+print_info "Creating frontend package.json..."
+cat << 'EOF' > package.json
+{
+  "name": "trading-bot-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.6.0",           # Use a recent version
+    "lucide-react": "^0.292.0",   # Use a recent version
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",     # Standard CRA scripts
+    "recharts": "^2.10.1",        # Use a recent version
+    "web-vitals": "^2.1.4"
+     # Add other UI libraries like shadcn/ui here if needed, but setup is manual
+     # Example: "@radix-ui/react-select": "...", "class-variance-authority": "...", etc.
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+EOF
+print_success "frontend/package.json created."
+
+# Frontend .gitignore
+print_info "Creating frontend .gitignore..."
+cat << 'EOF' > .gitignore
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env # Also ignore the main .env file
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+EOF
+print_success "frontend/.gitignore created."
+
+# Frontend .env
+print_info "Creating frontend .env file..."
+cat << EOF > .env
+REACT_APP_API_URL=http://localhost:${process.env.PORT:-5001}/api
+# You can add other frontend-specific env vars here if needed
+EOF
+print_success "frontend/.env created (pointing to backend API)."
+
+# Frontend public/index.html (Basic)
+print_info "Creating basic frontend public/index.html..."
+cat << 'EOF' > public/index.html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="CCXT Trading Bot Interface"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Trading Bot</title>
+    <!-- Add Tailwind CSS via CDN for simplicity in this script -->
+    <!-- For production, integrate Tailwind properly via PostCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Basic dark mode */
+      body { background-color: #1a202c; color: #cbd5e0; }
+      /* Add more base styles if needed */
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+EOF
+print_success "frontend/public/index.html created."
+
+# Frontend src/index.js (Basic)
+print_info "Creating frontend src/index.js..."
+cat << 'EOF' > src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+// import './index.css'; // If you create a separate CSS file
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+EOF
+print_success "frontend/src/index.js created."
+
+
+# Frontend src/services/apiService.js
+print_info "Injecting code into frontend/src/services/apiService.js..."
+cat << 'EOF' > src/services/apiService.js
+// src/services/apiService.js
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL;
+
+// Basic check if the URL is set
+if (!API_URL) {
+    console.error("FATAL: REACT_APP_API_URL is not defined. Check your .env file.");
+    // You might want to throw an error or display a message to the user
+}
+
+
+const apiClient = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 15000, // Set a reasonable timeout (15 seconds)
+});
+
+// --- API Functions ---
+
+// Helper to handle API errors consistently
+const handleApiError = (error, functionName) => {
+    console.error(`API Error in ${functionName}:`, error);
+    let errorMessage = `An unexpected error occurred in ${functionName}.`;
+    if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error Response Data:', error.response.data);
+        console.error('Error Response Status:', error.response.status);
+        errorMessage = `Server Error (${error.response.status}): ${error.response.data?.error || error.response.statusText}`;
+    } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error Request:', error.request);
+        errorMessage = 'No response received from server. Check network connection or backend status.';
+    } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error Message:', error.message);
+        errorMessage = `Request setup error: ${error.message}`;
+    }
+     // Re-throw a more structured error or return a specific error object
+     // For simplicity here, we'll just throw the original error for now
+     // In a real app, you might want: throw new Error(errorMessage);
+    throw error;
+};
+
+
+export const getStatus = async () => {
+    try {
+        const response = await apiClient.get('/status');
+        return response; // Return the full response object
+    } catch (error) {
+        handleApiError(error, 'getStatus');
+    }
+};
+
+export const startTrading = async (config = {}) => {
+     try {
+        const response = await apiClient.post('/trade/start', config);
+        return response;
+    } catch (error) {
+        handleApiError(error, 'startTrading');
+    }
+};
+
+export const stopTrading = async () => {
+     try {
+        const response = await apiClient.post('/trade/stop');
+        return response;
+    } catch (error) {
+        handleApiError(error, 'stopTrading');
+    }
+};
+
+export const updateConfig = async (config) => {
+     try {
+        const response = await apiClient.post('/config', config);
+        return response;
+    } catch (error) {
+        handleApiError(error, 'updateConfig');
+    }
+};
+
+export const getSymbols = async () => {
+     try {
+        const response = await apiClient.get('/symbols');
+        return response;
+    } catch (error) {
+        handleApiError(error, 'getSymbols');
+    }
+};
+
+export const getOhlcv = async (symbol, interval, limit) => {
+    try {
+        const response = await apiClient.get('/ohlcv', { params: { symbol, interval, limit } });
+        return response;
+    } catch (error) {
+        handleApiError(error, `getOhlcv(${symbol}, ${interval})`);
+    }
+};
+
+// Add more functions as needed (e.g., fetch specific order status, etc.)
+EOF
+print_success "Code injected into frontend/src/services/apiService.js."
+
+# Frontend src/components/ChartComponent.jsx
+print_info "Injecting code into frontend/src/components/ChartComponent.jsx..."
+cat << 'EOF' > src/components/ChartComponent.jsx
+// src/components/ChartComponent.jsx
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { getOhlcv } from '../services/apiService';
+import { Loader2, AlertTriangle } from 'lucide-react'; // Use lucide icons
+
+const ChartComponent = ({ symbol, interval }) => {
+    const [chartData, setChartData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    // Ref to store the interval ID for cleanup
+    const intervalIdRef = useRef(null);
+
+    const fetchData = useCallback(async (isInitialLoad = false) => {
+        if (!symbol || !interval) {
+            setChartData([]); // Clear data if no symbol/interval
+            setError(null);
+            return;
+        }
+        if (isInitialLoad) setIsLoading(true); // Only show loader on initial load
+        // Don't clear error immediately on refresh, only if successful
+        // setError(null);
+
+        try {
+            const response = await getOhlcv(symbol, interval, 200); // Fetch from backend
+            if (response && response.data) {
+                 // Format data for recharts
+                 const formattedData = response.data.map(d => ({
+                    ...d,
+                    // Format timestamp to a more readable time string (adjust format as needed)
+                    time: new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    // Ensure numeric types
+                    open: Number(d.open),
+                    high: Number(d.high),
+                    low: Number(d.low),
+                    close: Number(d.close),
+                    volume: Number(d.volume),
+                }));
+                setChartData(formattedData);
+                setError(null); // Clear error on successful fetch
+            } else {
+                 throw new Error("Invalid data received from API");
+            }
+        } catch (err) {
+            console.error("Chart data fetch error:", err);
+            // Don't clear chart data on error, keep showing the last known state
+            setError(err.message || "Failed to load chart data. Check backend connection.");
+        } finally {
+            if (isInitialLoad) setIsLoading(false);
+        }
+    }, [symbol, interval]); // Dependencies for the fetch function
+
+    useEffect(() => {
+        // Clear previous interval if symbol/interval changes
+        if (intervalIdRef.current) {
+            clearInterval(intervalIdRef.current);
+            intervalIdRef.current = null;
+        }
+
+        // Fetch immediately when component mounts or symbol/interval changes
+        fetchData(true); // Pass true for initial load
+
+        // Set up polling interval for refreshing data
+        const newIntervalId = setInterval(() => fetchData(false), 30000); // Refresh every 30 seconds
+        intervalIdRef.current = newIntervalId;
+
+        // Cleanup function to clear interval when component unmounts or dependencies change
+        return () => {
+            if (intervalIdRef.current) {
+                clearInterval(intervalIdRef.current);
+            }
+        };
+    }, [fetchData]); // Rerun effect if fetchData function changes (due to symbol/interval change)
+
+    // --- Render Logic ---
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64 md:h-96 text-gray-400">
+                <Loader2 className="animate-spin h-8 w-8 mr-2" /> Loading Chart...
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-64 md:h-96 w-full bg-gray-800 p-2 rounded-md shadow-lg relative">
+            {error && (
+                <div className="absolute top-2 left-2 right-2 z-10 bg-red-700 bg-opacity-80 text-white p-2 rounded text-xs flex items-center">
+                    <AlertTriangle className="h-4 w-4 mr-1 flex-shrink-0" />
+                    <span>Chart Error: {error}</span>
+                </div>
+            )}
+            {chartData.length === 0 && !isLoading && !error && (
+                 <div className="flex justify-center items-center h-full text-gray-500">
+                     Select Symbol and Interval to load chart.
+                 </div>
+            )}
+            {chartData.length > 0 && (
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#4a5568" />
+                        <XAxis dataKey="time" fontSize={10} stroke="#a0aec0" tick={{ fill: '#a0aec0' }} />
+                        <YAxis
+                            fontSize={10}
+                            stroke="#a0aec0"
+                            tick={{ fill: '#a0aec0' }}
+                            domain={['auto', 'auto']}
+                            tickFormatter={(value) => value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} // Format Y-axis ticks
+                            orientation="left"
+                        />
+                        <Tooltip
+                            contentStyle={{ backgroundColor: '#2d3748', border: 'none', borderRadius: '4px', fontSize: '12px' }}
+                            labelStyle={{ color: '#e2e8f0', fontWeight: 'bold' }}
+                            itemStyle={{ color: '#a0aec0' }}
+                            formatter={(value, name) => [value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4}), name]} // Format tooltip values
+                        />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
+                        <Line type="monotone" dataKey="close" name="Price" stroke="#4299e1" strokeWidth={2} dot={false} />
+                        {/* Add lines for indicators if backend provides them in OHLCV endpoint or separate endpoint */}
+                        {/* Example: <Line type="monotone" dataKey="ma" name="MA" stroke="#f6ad55" strokeWidth={1} dot={false}/> */}
+                    </LineChart>
+                </ResponsiveContainer>
+            )}
+        </div>
+    );
+};
+
+export default ChartComponent;
+EOF
+print_success "Code injected into frontend/src/components/ChartComponent.jsx."
+
+# Frontend src/components/ControlsComponent.jsx
+print_info "Injecting code into frontend/src/components/ControlsComponent.jsx..."
+# NOTE: This version removes Shadcn UI imports for simplicity in this script.
+# Use basic HTML elements + Tailwind. Add Shadcn manually if desired.
+cat << 'EOF' > src/components/ControlsComponent.jsx
+// src/components/ControlsComponent.jsx (Basic HTML + Tailwind version)
+ import React, { useState, useEffect, useCallback } from 'react';
+ import { startTrading, stopTrading, updateConfig, getSymbols } from '../services/apiService';
+ import { Play, StopCircle, Settings, Loader2, AlertCircle } from 'lucide-react';
+
+ const ControlsComponent = ({ initialConfig, isTradingEnabled, onStatusChange }) => {
+     // Initialize state from props or defaults
+     const [config, setConfig] = useState(initialConfig || {
+         symbol: '', interval: '', leverage: 10, riskPerTrade: 0.005,
+         atrPeriod: 14, atrSlMult: 1.5, atrTpMult: 1.5, indicatorPeriod: 14,
+         ehlersMaPeriod: 10, stochRsiK: 3, stochRsiD: 3, stochRsiLength: 14,
+         stochRsiStochLength: 14
+     });
+     const [symbols, setSymbols] = useState([]);
+     const [isLoading, setIsLoading] = useState(false); // For button loading states
+     const [actionError, setActionError] = useState(null); // For errors from actions (start/stop/update)
+     const [symbolsLoading, setSymbolsLoading] = useState(true);
+
+     // CCXT timeframes (adjust as needed)
+     const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1w'];
+
+     // Fetch symbols on mount
+     useEffect(() => {
+         setSymbolsLoading(true);
+         getSymbols()
+             .then(response => {
+                 setSymbols(response?.data || []);
+                 // Set default symbol if available and not already set
+                 if (!config.symbol && response?.data?.length > 0) {
+                     setConfig(prev => ({ ...prev, symbol: response.data[0] }));
+                 }
+             })
+             .catch(err => {
+                 console.error("Error fetching symbols:", err);
+                 setActionError("Could not load symbols from backend.");
+                 setSymbols([]);
+             })
+             .finally(() => {
+                 setSymbolsLoading(false);
+             });
+         // eslint-disable-next-line react-hooks/exhaustive-deps
+     }, []); // Run only once on mount
+
+
+     // Update local state if initialConfig prop changes (e.g., after backend update)
+     useEffect(() => {
+        if (initialConfig) {
+            setConfig(initialConfig);
+        }
+     }, [initialConfig]);
+
+     const handleInputChange = (e) => {
+         const { name, value, type } = e.target;
+         // Basic validation for numbers
+         let processedValue = value;
+         if (type === 'number') {
+             processedValue = parseFloat(value);
+             if (isNaN(processedValue)) processedValue = 0; // Default to 0 if invalid number
+             // Add min/max constraints if needed here
+             if (name === 'leverage') processedValue = Math.max(1, Math.round(processedValue));
+             if (name === 'riskPerTrade') processedValue = Math.max(0.0001, Math.min(0.1, processedValue)); // e.g., 0.01% to 10%
+         }
+         setConfig(prev => ({ ...prev, [name]: processedValue }));
+     };
+
+      const handleSelectChange = (e) => {
+         const { name, value } = e.target;
+         setConfig(prev => ({ ...prev, [name]: value }));
+     };
+
+     // Generic action handler
+     const handleAction = useCallback(async (actionFn, actionArgs = []) => {
+         setIsLoading(true);
+         setActionError(null);
+         try {
+             await actionFn(...actionArgs);
+             if (actionFn === updateConfig) {
+                // Optionally show a success message
+                console.log("Configuration updated successfully via API.");
+             }
+             onStatusChange(); // Trigger status refresh in parent after any action
+         } catch (err) {
+             console.error("Action error:", err);
+             setActionError(err.response?.data?.error || err.message || "An unknown error occurred.");
+         } finally {
+             setIsLoading(false);
+         }
+     }, [onStatusChange]); // Include onStatusChange in dependencies
+
+
+     return (
+         <div className="p-4 border border-gray-700 rounded-md space-y-4 bg-gray-800 shadow-lg">
+             <h3 className="text-lg font-semibold text-gray-200">Controls & Configuration</h3>
+             {actionError && (
+                <div className="bg-red-600 border border-red-800 text-white px-3 py-2 rounded text-sm flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2"/> Error: {actionError}
+                </div>
+              )}
+
+              {/* Configuration Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                   {/* Symbol Select */}
+                   <div className="space-y-1">
+                       <label htmlFor="symbol" className="block text-sm font-medium text-gray-400">Symbol</label>
+                        <select
+                            id="symbol" name="symbol" value={config.symbol || ''}
+                            onChange={handleSelectChange} disabled={isLoading || isTradingEnabled || symbolsLoading}
+                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
+                        >
+                           {symbolsLoading && <option value="" disabled>Loading Symbols...</option>}
+                           {!symbolsLoading && symbols.length === 0 && <option value="" disabled>No Symbols Found</option>}
+                           {symbols.map(s => <option key={s} value={s}>{s}</option>)}
+                       </select>
+                   </div>
+                    {/* Interval Select */}
+                   <div className="space-y-1">
+                       <label htmlFor="interval" className="block text-sm font-medium text-gray-400">Interval</label>
+                       <select
+                           id="interval" name="interval" value={config.interval || ''}
+                           onChange={handleSelectChange} disabled={isLoading || isTradingEnabled}
+                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
+                        >
+                           <option value="" disabled>Select Interval</option>
+                           {timeframes.map(t => <option key={t} value={t}>{t}</option>)}
+                       </select>
+                   </div>
+                     {/* Leverage Input */}
+                   <div className="space-y-1">
+                        <label htmlFor="leverage" className="block text-sm font-medium text-gray-400">Leverage (e.g., 10)</label>
+                        <input
+                            id="leverage" name="leverage" type="number" value={config.leverage || ''}
+                            onChange={handleInputChange} disabled={isLoading || isTradingEnabled} min="1" step="1"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50"
+                         />
+                   </div>
+                     {/* Risk Input */}
+                   <div className="space-y-1">
+                        <label htmlFor="riskPerTrade" className="block text-sm font-medium text-gray-400">Risk % (0.005 = 0.5%)</label>
+                        <input
+                            id="riskPerTrade" name="riskPerTrade" type="number" value={config.riskPerTrade || ''}
+                            onChange={handleInputChange} disabled={isLoading || isTradingEnabled} min="0.0001" max="0.1" step="0.001"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50"
+                         />
+                   </div>
+                   {/* Add inputs for other config vars similarly */}
+                    {/* Example: ATR Period */}
+                   <div className="space-y-1">
+                        <label htmlFor="atrPeriod" className="block text-sm font-medium text-gray-400">ATR Period</label>
+                        <input id="atrPeriod" name="atrPeriod" type="number" value={config.atrPeriod || ''} onChange={handleInputChange} disabled={isLoading || isTradingEnabled} min="1" step="1" className="mt-1 block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50"/>
+                   </div>
+                   {/* Add ATR SL Mult, ATR TP Mult, Indicator Period, Ehlers MA Period, Stoch RSI params... */}
+
+              </div>
+
+             {/* Action Buttons */}
+             <div className="flex flex-wrap gap-3 pt-4 items-center">
+                  <button
+                      onClick={() => handleAction(updateConfig, [config])}
+                      disabled={isLoading || isTradingEnabled}
+                      className="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                     {isLoading ? <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> : <Settings className="-ml-1 mr-2 h-5 w-5" />}
+                     Update Config
+                 </button>
+                  <button
+                      onClick={() => handleAction(startTrading, [config])}
+                      disabled={isLoading || isTradingEnabled || !config.symbol || !config.interval} // Disable if no symbol/interval
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                     {isLoading ? <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> : <Play className="-ml-1 mr-2 h-5 w-5" />}
+                      Start Trading
+                 </button>
+                  <button
+                      onClick={() => handleAction(stopTrading)}
+                      disabled={isLoading || !isTradingEnabled}
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                     {isLoading ? <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> : <StopCircle className="-ml-1 mr-2 h-5 w-5" />}
+                      Stop Trading
+                 </button>
+
+                 {/* Trading Status Indicator */}
+                 <div className={`ml-auto text-sm font-semibold ${isTradingEnabled ? 'text-green-400' : 'text-yellow-400'}`}>
+                    {isTradingEnabled ? 'Trading: LIVE' : 'Trading: STOPPED'}
+                 </div>
+             </div>
+
+         </div>
+     );
+ };
+
+ export default ControlsComponent;
+EOF
+print_success "Code injected into frontend/src/components/ControlsComponent.jsx."
+
+# Frontend src/components/StatusComponent.jsx
+print_info "Injecting code into frontend/src/components/StatusComponent.jsx..."
+cat << 'EOF' > src/components/StatusComponent.jsx
+// src/components/StatusComponent.jsx
+import React from 'react';
+import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'; // Import icons
+
+// Helper to format numbers, handling potential null/undefined
+const formatNumber = (num, options = {}) => {
+    const { digits = 2, currency = false } = options;
+    if (typeof num !== 'number' || isNaN(num)) {
+        return 'N/A';
+    }
+    const formatterOptions = {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+    };
+    if (currency) {
+        formatterOptions.style = 'currency';
+        formatterOptions.currency = 'USD'; // Assuming USDT ~ USD
+    }
+    return num.toLocaleString(undefined, formatterOptions);
+};
+
+const StatusComponent = ({ statusData }) => {
+    if (!statusData) {
+        return (
+            <div className="p-4 border border-gray-700 rounded-md text-center text-gray-500 bg-gray-800 shadow-lg h-full flex items-center justify-center">
+                Loading status...
+            </div>
+        );
+    }
+
+    const { balance, position, config, error: statusError } = statusData;
+    const symbol = config?.symbol || 'N/A';
+
+    // Determine position side and color
+    const positionSide = position?.side;
+    const isLong = positionSide === 'long';
+    const isShort = positionSide === 'sell'; // CCXT often uses 'sell' for short side
+    const positionColor = isLong ? 'text-green-400' : isShort ? 'text-red-400' : 'text-gray-400';
+
+    // Determine PNL color
+    const pnl = position?.unrealizedPnl;
+    const pnlColor = typeof pnl === 'number' ? (pnl >= 0 ? 'text-green-400' : 'text-red-400') : 'text-gray-400';
+
+    return (
+        <div className="p-4 border border-gray-700 rounded-md space-y-4 bg-gray-800 shadow-lg h-full">
+            <h3 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Account Status</h3>
+
+            {statusError && (
+                 <div className="bg-red-600 border border-red-800 text-white px-3 py-2 rounded text-sm flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2"/> Status Error: {statusError}
+                </div>
+            )}
+
+            {/* Balance */}
+            <div className="flex items-center space-x-2 text-gray-300">
+                <DollarSign className="h-5 w-5 text-blue-400" />
+                <span>Balance (USDT):</span>
+                <span className="font-mono font-semibold text-lg text-gray-100">{formatNumber(balance, { digits: 2 })}</span>
+            </div>
+
+            {/* Position Details */}
+            <div>
+                <h4 className="font-medium text-gray-400 mb-2">Current Position ({symbol})</h4>
+                {position ? (
+                    <div className="space-y-2 text-sm pl-2 border-l-2 border-gray-600">
+                        <p className="flex justify-between">
+                            <span className="text-gray-400">Side:</span>
+                            <span className={`font-semibold ${positionColor} uppercase`}>{positionSide}</span>
+                        </p>
+                        <p className="flex justify-between">
+                            <span className="text-gray-400">Size ({position.baseCurrency || 'Contracts'}):</span>
+                            <span className="font-mono text-gray-200">{formatNumber(position.contracts, { digits: marketPrecision(position.symbol, 'amount') })}</span>
+                        </p>
+                         <p className="flex justify-between">
+                            <span className="text-gray-400">Entry Price:</span>
+                            <span className="font-mono text-gray-200">{formatNumber(position.entryPrice, { digits: marketPrecision(position.symbol, 'price') })}</span>
+                        </p>
+                        <p className="flex justify-between">
+                            <span className="text-gray-400">Mark Price:</span>
+                            <span className="font-mono text-gray-200">{formatNumber(position.markPrice, { digits: marketPrecision(position.symbol, 'price') })}</span>
+                        </p>
+                        <p className="flex justify-between items-center">
+                            <span className="text-gray-400">Unrealized PNL:</span>
+                            <span className={`font-mono font-semibold ${pnlColor} flex items-center`}>
+                                {typeof pnl === 'number' && pnl !== 0 && (
+                                    pnl > 0 ? <TrendingUp className="h-4 w-4 mr-1"/> : <TrendingDown className="h-4 w-4 mr-1"/>
+                                )}
+                                {formatNumber(pnl, { digits: 2 })}
+                            </span>
+                        </p>
+                        <p className="flex justify-between">
+                            <span className="text-gray-400">Leverage:</span>
+                            <span className="font-mono text-gray-200">{position.leverage ? `${formatNumber(position.leverage, {digits: 0})}x` : 'N/A'}</span>
+                        </p>
+                         <p className="flex justify-between">
+                            <span className="text-gray-400">Liq. Price:</span>
+                            <span className="font-mono text-orange-400">{formatNumber(position.liquidationPrice, { digits: marketPrecision(position.symbol, 'price') })}</span>
+                        </p>
+                        {/* Add Margin, Margin Ratio etc. if available */}
+                    </div>
+                ) : (
+                    <p className="text-gray-500 pl-4 text-sm">No open position for {symbol}.</p>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// Helper to guess precision based on symbol (very basic)
+// In a real app, fetch market details from backend if needed
+const marketPrecision = (symbol, type) => {
+    if (!symbol) return 2;
+    // Very rough guess based on common pairs
+    const base = symbol.split('/')[0];
+    if (type === 'price') {
+        if (['BTC', 'ETH'].includes(base)) return 2;
+        if (['SOL', 'ADA', 'XRP', 'DOGE'].includes(base)) return 4;
+        return 3; // Default guess
+    }
+    if (type === 'amount') {
+         if (['BTC', 'ETH'].includes(base)) return 3;
+         if (['SOL', 'ADA', 'XRP', 'DOGE'].includes(base)) return 1;
+         return 2; // Default guess
+    }
+    return 2;
+};
+
+
+export default StatusComponent;
+EOF
+print_success "Code injected into frontend/src/components/StatusComponent.jsx."
+
+# Frontend src/components/LogComponent.jsx
+print_info "Injecting code into frontend/src/components/LogComponent.jsx..."
+cat << 'EOF' > src/components/LogComponent.jsx
+// src/components/LogComponent.jsx
+import React, { useRef, useEffect } from 'react';
+
+const LogComponent = ({ logs }) => {
+    const logEndRef = useRef(null);
+
+    // Auto-scroll to the bottom when logs update
+    useEffect(() => {
+        logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [logs]); // Dependency array ensures this runs when logs change
+
+    // Function to add color based on log level
+    const getLogColor = (logLine) => {
+        if (logLine.includes('[ERROR]')) return 'text-red-400';
+        if (logLine.includes('[WARN]')) return 'text-yellow-400';
+        if (logLine.includes('[INFO]')) return 'text-blue-400';
+        if (logLine.includes('[SUCCESS]')) return 'text-green-400'; // Custom level example
+        if (logLine.includes('[DEBUG]')) return 'text-gray-500';
+        return 'text-gray-300'; // Default color
+    };
+
+    return (
+        <div className="p-4 border border-gray-700 rounded-md h-64 md:h-80 overflow-y-auto bg-gray-900 shadow-inner">
+             <h3 className="text-lg font-semibold text-gray-200 mb-2 sticky top-0 bg-gray-900 pb-1 z-10 border-b border-gray-700">
+                 Trade Logs
+             </h3>
+            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed">
+                {(logs && logs.length > 0)
+                    ? logs.map((log, index) => (
+                        <div key={index} className={getLogColor(log)}>
+                            {log}
+                        </div>
+                      ))
+                    : <span className="text-gray-500">No logs yet. Start trading to see logs.</span>
+                }
+                {/* Empty div at the end to target for scrolling */}
+                <div ref={logEndRef} />
+            </pre>
+        </div>
+    );
+};
+
+export default LogComponent;
+EOF
+print_success "Code injected into frontend/src/components/LogComponent.jsx."
+
+# Frontend src/App.jsx
+print_info "Injecting code into frontend/src/App.jsx..."
+# NOTE: This version removes Shadcn UI ThemeProvider/Toaster for simplicity.
+cat << 'EOF' > src/App.jsx
+// src/App.jsx
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import ChartComponent from './components/ChartComponent';
+import ControlsComponent from './components/ControlsComponent';
+import StatusComponent from './components/StatusComponent';
+import LogComponent from './components/LogComponent';
+import { getStatus } from './services/apiService';
+import { Loader2, AlertTriangle } from 'lucide-react'; // Icons
+
+function App() {
+    const [status, setStatus] = useState(null); // Holds { isTradingEnabled, config, logs, balance, position, error, lastUpdate }
+    const [globalError, setGlobalError] = useState(null); // For critical backend connection errors
+    const [isLoadingInitial, setIsLoadingInitial] = useState(true); // Only for the very first load
+    const statusIntervalRef = useRef(null); // Ref for the interval ID
+
+    const fetchStatus = useCallback(async (isInitial = false) => {
+         if (!isInitial) {
+             // Don't show loading indicator for background refreshes
+         }
+         // Clear global error only if fetch succeeds later
+         // setGlobalError(null);
+        try {
+            const response = await getStatus();
+            if (response && response.data) {
+                setStatus(response.data);
+                setGlobalError(null); // Clear global error on successful fetch
+            } else {
+                 // This case might indicate an issue with apiService or network layer
+                 throw new Error("Received invalid status response from backend.");
+            }
+        } catch (err) {
+            console.error("Critical Error fetching status:", err);
+            // Distinguish between errors reported *by* the backend vs. failure *to reach* backend
+            if (err.message.includes('Network Error') || err.message.includes('No response') || err.code === 'ECONNABORTED') {
+                 setGlobalError(`Cannot connect to backend. Is it running? (${err.message})`);
+                 // Keep existing status data if available, but show error prominently
+                 // setStatus(null); // Option: Clear status entirely on connection loss
+            } else {
+                // Error likely came from the backend API call itself (e.g., 500 error)
+                setGlobalError(`Backend API error: ${err.response?.data?.error || err.message}`);
+                 // If the backend reports an error within the status object, it's handled by StatusComponent
+            }
+             // Stop polling if we can't reach the backend repeatedly? (Add logic if needed)
+        } finally {
+             if (isInitial) {
+                 setIsLoadingInitial(false);
+             }
+        }
+    }, []); // No dependencies needed if it doesn't rely on external state/props
+
+    // Effect for initial load and setting up polling interval
+    useEffect(() => {
+        // Fetch status immediately on mount
+        fetchStatus(true); // Pass true for initial load
+
+        // Clear previous interval if component re-mounts (though unlikely for App)
+        if (statusIntervalRef.current) {
+            clearInterval(statusIntervalRef.current);
+        }
+
+        // Set up polling interval
+        statusIntervalRef.current = setInterval(() => fetchStatus(false), 10000); // Poll status every 10 seconds
+
+        // Cleanup function: clear interval when component unmounts
+        return () => {
+            if (statusIntervalRef.current) {
+                clearInterval(statusIntervalRef.current);
+            }
+        };
+    }, [fetchStatus]); // Rerun effect if fetchStatus function identity changes (it shouldn't with useCallback [])
+
+
+    return (
+        // Basic Theme setup using Tailwind classes on body (see public/index.html)
+        <div className="container mx-auto p-4 space-y-6 max-w-7xl"> {/* Max width container */}
+            <h1 className="text-3xl font-bold text-center text-gray-100 my-4">
+                Pyrmethus Trading Automaton Interface
+            </h1>
+
+             {/* Global Error Display */}
+             {globalError && (
+                 <div className="bg-red-600 border border-red-800 text-white px-4 py-3 rounded text-center flex items-center justify-center">
+                     <AlertTriangle className="h-5 w-5 mr-2"/> Critical Error: {globalError}
+                 </div>
+             )}
+
+             {/* Initial Loading State */}
+             {isLoadingInitial && (
+                 <div className="flex justify-center items-center text-gray-400 py-10">
+                     <Loader2 className="animate-spin h-8 w-8 mr-3" /> Loading Initial Bot Status...
+                 </div>
+             )}
+
+             {/* Main Content Area (only render if not initial loading or if status exists despite error) */}
+             {!isLoadingInitial && (status || globalError) && (
+                 <>
+                    {/* Controls Component - Pass status safely */}
+                    <ControlsComponent
+                         initialConfig={status?.config} // Pass config if status exists
+                         isTradingEnabled={status?.isTradingEnabled || false} // Default to false if status is null
+                         onStatusChange={() => fetchStatus(false)} // Allow controls to trigger immediate refresh
+                     />
+
+                    {/* Chart and Status Grid */}
+                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                         <div className="lg:col-span-2">
+                             {/* Chart Component - Pass symbol/interval safely */}
+                             <ChartComponent
+                                 symbol={status?.config?.symbol}
+                                 interval={status?.config?.interval}
+                             />
+                         </div>
+                         <div className="lg:col-span-1">
+                              {/* Status Component - Pass status data safely */}
+                              <StatusComponent statusData={status} />
+                         </div>
+                     </div>
+
+                     {/* Log Component - Pass logs safely */}
+                     <LogComponent logs={status?.logs || []} /> {/* Pass empty array if logs are missing */}
+                </>
+            )}
+             {/* Footer or other elements */}
+             <footer className="text-center text-xs text-gray-600 mt-8">
+                 Disclaimer: Trading involves risk. Use this tool responsibly. Test thoroughly in Sandbox mode.
+             </footer>
+        </div>
+    );
+}
+
+export default App;
+EOF
+print_success "Code injected into frontend/src/App.jsx."
+
+# Install Frontend Dependencies
+print_info "Installing frontend dependencies (npm install)... This may take a moment."
+if npm install; then
+    print_success "Frontend dependencies installed."
+else
+    print_error "Frontend npm install failed. Please check package.json and network connection."
+    exit 1
+fi
+
+# --- Final Instructions ---
+cd ../.. # Return to the root directory where the script was run
+
+print_success "Project setup complete in '${PROJECT_DIR}' directory!"
+echo -e "${COLOR_YELLOW}-----------------------------------------------------${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}${COLOR_BOLD}IMPORTANT NEXT STEPS:${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}1. ${COLOR_BOLD}Review Backend .env:${COLOR_RESET} ${COLOR_YELLOW}cd ${PROJECT_DIR}/backend && nano .env${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}   - ${COLOR_RED}Ensure API keys are correct.${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}   - ${COLOR_RED}VERIFY 'USE_SANDBOX=true' for initial testing!${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}2. ${COLOR_BOLD}Build Frontend:${COLOR_RESET} ${COLOR_YELLOW}cd ${PROJECT_DIR}/frontend && npm run build${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}   (This creates the 'build' folder the backend serves)"
+echo -e "${COLOR_YELLOW}3. ${COLOR_BOLD}Start Backend Server:${COLOR_RESET} ${COLOR_YELLOW}cd ${PROJECT_DIR}/backend && node src/server.js${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}   (Or use 'npm run dev' if you installed nodemon)"
+echo -e "${COLOR_YELLOW}4. ${COLOR_BOLD}Access the App:${COLOR_RESET} ${COLOR_YELLOW}Open your browser to http://localhost:5001 (or the port specified)${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}5. ${COLOR_BOLD}Test THOROUGHLY:${COLOR_RESET} ${COLOR_YELLOW}Use Sandbox mode extensively before considering live trading.${COLOR_RESET}"
+echo -e "${COLOR_RED}${COLOR_BOLD}6. LIVE TRADING IS RISKY. YOU ARE RESPONSIBLE FOR ANY LOSSES.${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}-----------------------------------------------------${COLOR_RESET}"
+
+exit 0
+```
+
+**How to Use:**
+
+1.  **Save the Code:** Copy the entire script above and save it to a file in your Termux home directory (or anywhere accessible). Let's name it `setup_trading_bot.sh`.
+2.  **Make Executable:** Open Termux and run:
+    ```bash
+    chmod +x setup_trading_bot.sh
+    ```
+3.  **Run the Script:** Execute the script:
+    ```bash
+    ./setup_trading_bot.sh
+    ```
+4.  **Enter API Keys:** The script will pause and securely prompt you to enter your Bybit API Key and Secret. **Use your Testnet/Sandbox keys first!**
+5.  **Wait:** The script will create directories, inject code, and run `npm install` for both backend and frontend. This might take a few minutes depending on your device and network speed.
+6.  **Follow Instructions:** Once finished, the script will print instructions on how to build the frontend, start the backend server, and access the application.
+
+This spell should reliably conjure your trading bot's structure and code within the Termux environment, preparing it for the next steps of building and execution. Remember the warnings, young sorcerer – tread carefully!

@@ -1,0 +1,549 @@
+2025-04-23 22:57:53,115 - INFO - [livexy_bot_POPCAT_USDT:3608] - ---=== Starting Trading Loop for POPCAT/USDT (5) ===---
+2025-04-23 22:57:53,116 - INFO - [livexy_bot_POPCAT_USDT:3609] - Using Configuration: Risk=1.00%, Lev=20x, TSL=ON, BE=ON, Trading=ENABLED
+2025-04-23 22:57:53,116 - DEBUG - [livexy_bot_POPCAT_USDT:3616] - >>> New Loop Cycle Starting at 2025-04-23 22:57:53
+2025-04-23 22:57:53,117 - INFO - [livexy_bot_POPCAT_USDT:2962] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-23 22:57:53,117 - DEBUG - [livexy_bot_POPCAT_USDT:1754] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/N/A, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-23 22:57:53,117 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-23 22:57:53,540 - INFO - [livexy_bot_POPCAT_USDT:511] - Successfully fetched and processed 500 klines for POPCAT/USDT 5m
+2025-04-23 22:57:53,541 - DEBUG - [livexy_bot_POPCAT_USDT:357] - Fetching ticker for POPCAT/USDT...
+2025-04-23 22:57:53,902 - DEBUG - [livexy_bot_POPCAT_USDT:359] - Ticker data for POPCAT/USDT: {'symbol': 'POPCAT/USDT', 'timestamp': None, 'datetime': None, 'high': 0.3977, 'low': 0.3178, 'bid': 0.3181, 'bidVolume': 5074.38, 'ask': 0.3183, 'askVolume': 3114.1, 'vwap': 0.35609771896108516, 'open': 0.3636, 'close': 0.3181, 'last': 0.3181, 'previousClose': None, 'change': -0.0455, 'percentage': -12.51, 'average': 0.3408, 'baseVolume': 115300126.31, 'quoteVolume': 41058111.974916, 'markPrice': None, 'indexPrice': None, 'info': {'symbol': 'POPCATUSDT', 'bid1Price': '0.3181', 'bid1Size': '5074.38', 'ask1Price': '0.3183', 'ask1Size': '3114.1', 'lastPrice': '0.3181', 'prevPrice24h': '0.3636', 'price24hPcnt': '-0.1251', 'highPrice24h': '0.3977', 'lowPrice24h': '0.3178', 'turnover24h': '41058111.974916', 'volume24h': '115300126.31', 'usdIndexPrice': '0.31796'}}
+2025-04-23 22:57:53,902 - DEBUG - [livexy_bot_POPCAT_USDT:372] - Using 'last' price for POPCAT/USDT: 0.3181
+2025-04-23 22:57:53,903 - DEBUG - [livexy_bot_POPCAT_USDT:532] - Fetching order book for POPCAT/USDT, limit=25 (Attempt 1/4)
+2025-04-23 22:57:54,259 - DEBUG - [livexy_bot_POPCAT_USDT:548] - Successfully fetched orderbook for POPCAT/USDT with 25 bids, 25 asks.
+2025-04-23 22:57:54,708 - DEBUG - [livexy_bot_POPCAT_USDT:831] - Finished indicator calculations for POPCAT/USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_8', 'EMA_12', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_7', 'BBL_40_2.0', 'BBM_40_2.0', 'BBU_40_2.0', 'BBB_40_2.0', 'BBP_40_2.0', 'VOL_SMA_10']
+2025-04-23 22:57:54,711 - DEBUG - [livexy_bot_POPCAT_USDT:895] - Latest indicator float values updated for POPCAT/USDT: {'ATR': '0.00312', 'EMA_Short': '0.32194', 'EMA_Long': '0.32354', 'Momentum': '-0.01030', 'CCI': '-145.85720', 'Williams_R': '-97.97297', 'MFI': '31.38127', 'VWAP': '0.32837', 'PSAR_short': '0.32576', 'SMA10': '0.32348', 'StochRSI_K': '11.97221', 'StochRSI_D': '10.42689', 'RSI': '22.92534', 'BB_Lower': '0.31936', 'BB_Middle': '0.32843', 'BB_Upper': '0.33750', 'Volume_MA': '300723.04300', 'Close': '0.31810', 'Volume': '217451.37000', 'High': '0.31970', 'Low': '0.31780'}
+2025-04-23 22:57:54,713 - DEBUG - [livexy_bot_POPCAT_USDT:953] - Calculated Fibonacci levels for POPCAT/USDT: {'Fib_0.0%': '0.3377', 'Fib_23.6%': '0.3330', 'Fib_38.2%': '0.3300', 'Fib_50.0%': '0.3277', 'Fib_61.8%': '0.3254', 'Fib_78.6%': '0.3220', 'Fib_100.0%': '0.3178'}
+2025-04-23 22:57:54,715 - DEBUG - [livexy_bot_POPCAT_USDT:1484] - Orderbook check (POPCAT/USDT): Top 10 Levels: BidVol=125430.5200, AskVol=127350.8500, OBI=-0.0076, Score=-0.0076
+2025-04-23 22:57:54,715 - INFO - [livexy_bot_POPCAT_USDT:1214] - Signal Calculation Summary (POPCAT/USDT @ 0.3181):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: 0.9034
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [92mBUY[0m
+2025-04-23 22:57:54,716 - DEBUG - [livexy_bot_POPCAT_USDT:1583] - Calculated TP/SL for POPCAT/USDT BUY: Entry=0.3181, TP=0.3188, SL=0.3165, ATR=0.00312
+2025-04-23 22:57:54,716 - INFO - [livexy_bot_POPCAT_USDT:3036] - ATR: 0.00312
+2025-04-23 22:57:54,716 - INFO - [livexy_bot_POPCAT_USDT:3037] - Potential Initial SL (for new trade sizing): 0.3165
+2025-04-23 22:57:54,717 - INFO - [livexy_bot_POPCAT_USDT:3038] - Potential Initial TP (for new trade): 0.3188
+2025-04-23 22:57:54,717 - INFO - [livexy_bot_POPCAT_USDT:3042] - Trailing Stop: Enabled | Break Even: Enabled
+2025-04-23 22:57:54,717 - DEBUG - [livexy_bot_POPCAT_USDT:2079] - Fetching positions for symbol: POPCAT/USDT
+2025-04-23 22:57:54,717 - DEBUG - [livexy_bot_POPCAT_USDT:2102] - Using params for fetch_positions: {'category': 'inverse', 'symbol': 'POPCAT/USDT'}
+2025-04-23 22:57:55,495 - ERROR - [livexy_bot_POPCAT_USDT:2120] - Exchange error fetching single position for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467076430}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot3.py", line 2104, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params) # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467076430}
+2025-04-23 22:57:55,526 - INFO - [livexy_bot_POPCAT_USDT:3060] - *** BUY Signal & No Open Position: Initiating Trade Sequence for POPCAT/USDT ***
+2025-04-23 22:57:55,526 - DEBUG - [livexy_bot_POPCAT_USDT:1603] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-04-23 22:57:56,233 - DEBUG - [livexy_bot_POPCAT_USDT:1608] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-04-23 22:57:56,234 - DEBUG - [livexy_bot_POPCAT_USDT:1660] - Found balance via standard ccxt structure ['USDT']['free']: 3.08781684
+2025-04-23 22:57:56,234 - INFO - [livexy_bot_POPCAT_USDT:1712] - Available USDT balance: 3.0878
+2025-04-23 22:57:56,234 - INFO - [livexy_bot_POPCAT_USDT:3088] - Leverage setting skipped for POPCAT/USDT (Spot market).
+2025-04-23 22:57:56,235 - WARNING - [livexy_bot_POPCAT_USDT:1838] - Could not parse contract size 'None' for POPCAT/USDT. Defaulting to 1.
+2025-04-23 22:57:56,235 - INFO - [livexy_bot_POPCAT_USDT:1873] - Position Sizing (POPCAT/USDT): Balance=3.09 USDT, Risk=1.00%, Risk Amount=0.0309 USDT
+2025-04-23 22:57:56,235 - INFO - [livexy_bot_POPCAT_USDT:1874] -   Entry=0.3181, SL=0.3165, SL Distance=0.0016
+2025-04-23 22:57:56,236 - INFO - [livexy_bot_POPCAT_USDT:1875] -   Contract Size=1, Initial Calculated Size = 19.29885525 POPCAT
+2025-04-23 22:57:56,236 - DEBUG - [livexy_bot_POPCAT_USDT:1920] -   Cost Check: Amount-Adjusted Size=19.29885525 POPCAT, Estimated Cost=6.1390 USDT
+2025-04-23 22:57:56,236 - WARNING - [livexy_bot_POPCAT_USDT:1998] - [33mCould not use exchange.amount_to_precision for POPCAT/USDT ('bybit' object has no attribute 'TRUNCATE'). Using manual rounding based on precision.[0m
+2025-04-23 22:57:56,236 - INFO - [livexy_bot_POPCAT_USDT:2015] - Applied manual amount step size (0.01): 19.29885525 -> 19.29 POPCAT
+2025-04-23 22:57:56,237 - INFO - [livexy_bot_POPCAT_USDT:2060] - [92mFinal calculated position size for POPCAT/USDT: 19.29 POPCAT[0m
+2025-04-23 22:57:56,237 - INFO - [livexy_bot_POPCAT_USDT:3107] - ==> Placing BUY market order for POPCAT/USDT | Size: 19.29 <==
+2025-04-23 22:57:56,237 - INFO - [livexy_bot_POPCAT_USDT:2493] - Attempting to place BUY market order for POPCAT/USDT:
+2025-04-23 22:57:56,237 - INFO - [livexy_bot_POPCAT_USDT:2494] -   Size: 19.29000000 POPCAT
+2025-04-23 22:57:56,238 - INFO - [livexy_bot_POPCAT_USDT:2495] -   Params: {'positionIdx': 0, 'reduceOnly': False, 'category': 'inverse'}
+2025-04-23 22:57:56,643 - ERROR - [livexy_bot_POPCAT_USDT:2556] - [91mExchange error placing order for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"Illegal category","result":{},"retExtInfo":{},"time":1745467077607} (Code: None)[0m
+2025-04-23 22:57:56,644 - ERROR - [livexy_bot_POPCAT_USDT:3218] - [91m=== TRADE EXECUTION FAILED for POPCAT/USDT (BUY). See previous logs for details. ===
+2025-04-23 22:57:56,644 - DEBUG - [livexy_bot_POPCAT_USDT:3441] - ---== Analysis Cycle End for POPCAT/USDT (3.53s) ==---
+2025-04-23 22:57:56,645 - DEBUG - [livexy_bot_POPCAT_USDT:3656] - <<< Loop cycle finished in 3.53s. Waiting 11.47s for next cycle...
+2025-04-23 22:58:08,117 - DEBUG - [livexy_bot_POPCAT_USDT:3616] - >>> New Loop Cycle Starting at 2025-04-23 22:58:08
+2025-04-23 22:58:08,118 - INFO - [livexy_bot_POPCAT_USDT:2962] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-23 22:58:08,118 - DEBUG - [livexy_bot_POPCAT_USDT:1754] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/N/A, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-23 22:58:08,118 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-23 22:58:09,032 - INFO - [livexy_bot_POPCAT_USDT:511] - Successfully fetched and processed 500 klines for POPCAT/USDT 5m
+2025-04-23 22:58:09,033 - DEBUG - [livexy_bot_POPCAT_USDT:357] - Fetching ticker for POPCAT/USDT...
+2025-04-23 22:58:09,402 - DEBUG - [livexy_bot_POPCAT_USDT:359] - Ticker data for POPCAT/USDT: {'symbol': 'POPCAT/USDT', 'timestamp': None, 'datetime': None, 'high': 0.3977, 'low': 0.3171, 'bid': 0.3172, 'bidVolume': 2160.0, 'ask': 0.3173, 'askVolume': 365.33, 'vwap': 0.35608870532103565, 'open': 0.3618, 'close': 0.3171, 'last': 0.3171, 'previousClose': None, 'change': -0.0447, 'percentage': -12.35, 'average': 0.3394, 'baseVolume': 115209648.73, 'quoteVolume': 41024854.656757, 'markPrice': None, 'indexPrice': None, 'info': {'symbol': 'POPCATUSDT', 'bid1Price': '0.3172', 'bid1Size': '2160', 'ask1Price': '0.3173', 'ask1Size': '365.33', 'lastPrice': '0.3171', 'prevPrice24h': '0.3618', 'price24hPcnt': '-0.1235', 'highPrice24h': '0.3977', 'lowPrice24h': '0.3171', 'turnover24h': '41024854.656757', 'volume24h': '115209648.73', 'usdIndexPrice': '0.317417'}}
+2025-04-23 22:58:09,402 - DEBUG - [livexy_bot_POPCAT_USDT:372] - Using 'last' price for POPCAT/USDT: 0.3171
+2025-04-23 22:58:09,403 - DEBUG - [livexy_bot_POPCAT_USDT:532] - Fetching order book for POPCAT/USDT, limit=25 (Attempt 1/4)
+2025-04-23 22:58:09,783 - DEBUG - [livexy_bot_POPCAT_USDT:548] - Successfully fetched orderbook for POPCAT/USDT with 25 bids, 25 asks.
+2025-04-23 22:58:10,203 - DEBUG - [livexy_bot_POPCAT_USDT:831] - Finished indicator calculations for POPCAT/USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_8', 'EMA_12', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_7', 'BBL_40_2.0', 'BBM_40_2.0', 'BBU_40_2.0', 'BBB_40_2.0', 'BBP_40_2.0', 'VOL_SMA_10']
+2025-04-23 22:58:10,205 - DEBUG - [livexy_bot_POPCAT_USDT:895] - Latest indicator float values updated for POPCAT/USDT: {'ATR': '0.00317', 'EMA_Short': '0.32172', 'EMA_Long': '0.32338', 'Momentum': '-0.01130', 'CCI': '-152.98682', 'Williams_R': '-100.00000', 'MFI': '31.30935', 'VWAP': '0.32835', 'PSAR_short': '0.32576', 'SMA10': '0.32338', 'StochRSI_K': '11.68841', 'StochRSI_D': '10.33229', 'RSI': '21.21678', 'BB_Lower': '0.31922', 'BB_Middle': '0.32840', 'BB_Upper': '0.33759', 'Volume_MA': '301618.42800', 'Close': '0.31710', 'Volume': '226405.22000', 'High': '0.31970', 'Low': '0.31710'}
+2025-04-23 22:58:10,208 - DEBUG - [livexy_bot_POPCAT_USDT:953] - Calculated Fibonacci levels for POPCAT/USDT: {'Fib_0.0%': '0.3377', 'Fib_23.6%': '0.3328', 'Fib_38.2%': '0.3298', 'Fib_50.0%': '0.3274', 'Fib_61.8%': '0.3249', 'Fib_78.6%': '0.3215', 'Fib_100.0%': '0.3171'}
+2025-04-23 22:58:10,209 - DEBUG - [livexy_bot_POPCAT_USDT:1484] - Orderbook check (POPCAT/USDT): Top 10 Levels: BidVol=128841.0100, AskVol=102503.7900, OBI=0.1138, Score=0.1138
+2025-04-23 22:58:10,209 - INFO - [livexy_bot_POPCAT_USDT:1214] - Signal Calculation Summary (POPCAT/USDT @ 0.3171):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: 1.0401
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [92mBUY[0m
+2025-04-23 22:58:10,210 - DEBUG - [livexy_bot_POPCAT_USDT:1583] - Calculated TP/SL for POPCAT/USDT BUY: Entry=0.3171, TP=0.3178, SL=0.3155, ATR=0.00317
+2025-04-23 22:58:10,210 - INFO - [livexy_bot_POPCAT_USDT:3036] - ATR: 0.00317
+2025-04-23 22:58:10,210 - INFO - [livexy_bot_POPCAT_USDT:3037] - Potential Initial SL (for new trade sizing): 0.3155
+2025-04-23 22:58:10,210 - INFO - [livexy_bot_POPCAT_USDT:3038] - Potential Initial TP (for new trade): 0.3178
+2025-04-23 22:58:10,211 - INFO - [livexy_bot_POPCAT_USDT:3042] - Trailing Stop: Enabled | Break Even: Enabled
+2025-04-23 22:58:10,211 - DEBUG - [livexy_bot_POPCAT_USDT:2079] - Fetching positions for symbol: POPCAT/USDT
+2025-04-23 22:58:10,211 - DEBUG - [livexy_bot_POPCAT_USDT:2102] - Using params for fetch_positions: {'category': 'inverse', 'symbol': 'POPCAT/USDT'}
+2025-04-23 22:58:10,907 - ERROR - [livexy_bot_POPCAT_USDT:2120] - Exchange error fetching single position for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467091579}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot3.py", line 2104, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params) # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467091579}
+2025-04-23 22:58:10,913 - INFO - [livexy_bot_POPCAT_USDT:3060] - *** BUY Signal & No Open Position: Initiating Trade Sequence for POPCAT/USDT ***
+2025-04-23 22:58:10,913 - DEBUG - [livexy_bot_POPCAT_USDT:1603] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-04-23 22:58:11,299 - DEBUG - [livexy_bot_POPCAT_USDT:1608] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-04-23 22:58:11,300 - DEBUG - [livexy_bot_POPCAT_USDT:1660] - Found balance via standard ccxt structure ['USDT']['free']: 3.08781684
+2025-04-23 22:58:11,300 - INFO - [livexy_bot_POPCAT_USDT:1712] - Available USDT balance: 3.0878
+2025-04-23 22:58:11,300 - INFO - [livexy_bot_POPCAT_USDT:3088] - Leverage setting skipped for POPCAT/USDT (Spot market).
+2025-04-23 22:58:11,301 - WARNING - [livexy_bot_POPCAT_USDT:1838] - Could not parse contract size 'None' for POPCAT/USDT. Defaulting to 1.
+2025-04-23 22:58:11,301 - INFO - [livexy_bot_POPCAT_USDT:1873] - Position Sizing (POPCAT/USDT): Balance=3.09 USDT, Risk=1.00%, Risk Amount=0.0309 USDT
+2025-04-23 22:58:11,301 - INFO - [livexy_bot_POPCAT_USDT:1874] -   Entry=0.3171, SL=0.3155, SL Distance=0.0016
+2025-04-23 22:58:11,302 - INFO - [livexy_bot_POPCAT_USDT:1875] -   Contract Size=1, Initial Calculated Size = 19.29885525 POPCAT
+2025-04-23 22:58:11,302 - DEBUG - [livexy_bot_POPCAT_USDT:1920] -   Cost Check: Amount-Adjusted Size=19.29885525 POPCAT, Estimated Cost=6.1197 USDT
+2025-04-23 22:58:11,302 - WARNING - [livexy_bot_POPCAT_USDT:1998] - [33mCould not use exchange.amount_to_precision for POPCAT/USDT ('bybit' object has no attribute 'TRUNCATE'). Using manual rounding based on precision.[0m
+2025-04-23 22:58:11,303 - INFO - [livexy_bot_POPCAT_USDT:2015] - Applied manual amount step size (0.01): 19.29885525 -> 19.29 POPCAT
+2025-04-23 22:58:11,303 - INFO - [livexy_bot_POPCAT_USDT:2060] - [92mFinal calculated position size for POPCAT/USDT: 19.29 POPCAT[0m
+2025-04-23 22:58:11,304 - INFO - [livexy_bot_POPCAT_USDT:3107] - ==> Placing BUY market order for POPCAT/USDT | Size: 19.29 <==
+2025-04-23 22:58:11,304 - INFO - [livexy_bot_POPCAT_USDT:2493] - Attempting to place BUY market order for POPCAT/USDT:
+2025-04-23 22:58:11,304 - INFO - [livexy_bot_POPCAT_USDT:2494] -   Size: 19.29000000 POPCAT
+2025-04-23 22:58:11,305 - INFO - [livexy_bot_POPCAT_USDT:2495] -   Params: {'positionIdx': 0, 'reduceOnly': False, 'category': 'inverse'}
+2025-04-23 22:58:11,689 - ERROR - [livexy_bot_POPCAT_USDT:2556] - [91mExchange error placing order for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"Illegal category","result":{},"retExtInfo":{},"time":1745467092666} (Code: None)[0m
+2025-04-23 22:58:11,690 - ERROR - [livexy_bot_POPCAT_USDT:3218] - [91m=== TRADE EXECUTION FAILED for POPCAT/USDT (BUY). See previous logs for details. ===
+2025-04-23 22:58:11,691 - DEBUG - [livexy_bot_POPCAT_USDT:3441] - ---== Analysis Cycle End for POPCAT/USDT (3.57s) ==---
+2025-04-23 22:58:11,691 - DEBUG - [livexy_bot_POPCAT_USDT:3656] - <<< Loop cycle finished in 3.57s. Waiting 11.43s for next cycle...
+2025-04-23 22:58:23,117 - DEBUG - [livexy_bot_POPCAT_USDT:3616] - >>> New Loop Cycle Starting at 2025-04-23 22:58:23
+2025-04-23 22:58:23,118 - INFO - [livexy_bot_POPCAT_USDT:2962] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-23 22:58:23,118 - DEBUG - [livexy_bot_POPCAT_USDT:1754] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/N/A, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-23 22:58:23,119 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-23 22:58:23,595 - INFO - [livexy_bot_POPCAT_USDT:511] - Successfully fetched and processed 500 klines for POPCAT/USDT 5m
+2025-04-23 22:58:23,597 - DEBUG - [livexy_bot_POPCAT_USDT:357] - Fetching ticker for POPCAT/USDT...
+2025-04-23 22:58:23,995 - DEBUG - [livexy_bot_POPCAT_USDT:359] - Ticker data for POPCAT/USDT: {'symbol': 'POPCAT/USDT', 'timestamp': None, 'datetime': None, 'high': 0.3977, 'low': 0.3162, 'bid': 0.3166, 'bidVolume': 5125.26, 'ask': 0.3168, 'askVolume': 23083.21, 'vwap': 0.35604888093925346, 'open': 0.3618, 'close': 0.3168, 'last': 0.3168, 'previousClose': None, 'change': -0.045, 'percentage': -12.44, 'average': 0.3393, 'baseVolume': 115326759.43, 'quoteVolume': 41061963.637402, 'markPrice': None, 'indexPrice': None, 'info': {'symbol': 'POPCATUSDT', 'bid1Price': '0.3166', 'bid1Size': '5125.26', 'ask1Price': '0.3168', 'ask1Size': '23083.21', 'lastPrice': '0.3168', 'prevPrice24h': '0.3618', 'price24hPcnt': '-0.1244', 'highPrice24h': '0.3977', 'lowPrice24h': '0.3162', 'turnover24h': '41061963.637402', 'volume24h': '115326759.43', 'usdIndexPrice': '0.316976'}}
+2025-04-23 22:58:23,996 - DEBUG - [livexy_bot_POPCAT_USDT:372] - Using 'last' price for POPCAT/USDT: 0.3168
+2025-04-23 22:58:23,996 - DEBUG - [livexy_bot_POPCAT_USDT:532] - Fetching order book for POPCAT/USDT, limit=25 (Attempt 1/4)
+2025-04-23 22:58:24,375 - DEBUG - [livexy_bot_POPCAT_USDT:548] - Successfully fetched orderbook for POPCAT/USDT with 25 bids, 25 asks.
+2025-04-23 22:58:25,832 - DEBUG - [livexy_bot_POPCAT_USDT:831] - Finished indicator calculations for POPCAT/USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_8', 'EMA_12', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_7', 'BBL_40_2.0', 'BBM_40_2.0', 'BBU_40_2.0', 'BBB_40_2.0', 'BBP_40_2.0', 'VOL_SMA_10']
+2025-04-23 22:58:25,836 - DEBUG - [livexy_bot_POPCAT_USDT:895] - Latest indicator float values updated for POPCAT/USDT: {'ATR': '0.00324', 'EMA_Short': '0.32161', 'EMA_Long': '0.32331', 'Momentum': '-0.01180', 'CCI': '-158.78281', 'Williams_R': '-97.56098', 'MFI': '30.41784', 'VWAP': '0.32826', 'PSAR_short': '0.32576', 'SMA10': '0.32333', 'StochRSI_K': '11.68841', 'StochRSI_D': '10.33229', 'RSI': '20.45456', 'BB_Lower': '0.31914', 'BB_Middle': '0.32839', 'BB_Upper': '0.33764', 'Volume_MA': '312621.69300', 'Close': '0.31660', 'Volume': '336437.87000', 'High': '0.31970', 'Low': '0.31620'}
+2025-04-23 22:58:25,843 - DEBUG - [livexy_bot_POPCAT_USDT:953] - Calculated Fibonacci levels for POPCAT/USDT: {'Fib_0.0%': '0.3377', 'Fib_23.6%': '0.3326', 'Fib_38.2%': '0.3294', 'Fib_50.0%': '0.3269', 'Fib_61.8%': '0.3244', 'Fib_78.6%': '0.3208', 'Fib_100.0%': '0.3162'}
+2025-04-23 22:58:25,844 - DEBUG - [livexy_bot_POPCAT_USDT:1484] - Orderbook check (POPCAT/USDT): Top 10 Levels: BidVol=102138.7200, AskVol=126835.2800, OBI=-0.1079, Score=-0.1079
+2025-04-23 22:58:25,846 - INFO - [livexy_bot_POPCAT_USDT:1214] - Signal Calculation Summary (POPCAT/USDT @ 0.3168):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: 1.0061
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [92mBUY[0m
+2025-04-23 22:58:25,849 - DEBUG - [livexy_bot_POPCAT_USDT:1583] - Calculated TP/SL for POPCAT/USDT BUY: Entry=0.3168, TP=0.3175, SL=0.3151, ATR=0.00324
+2025-04-23 22:58:25,849 - INFO - [livexy_bot_POPCAT_USDT:3036] - ATR: 0.00324
+2025-04-23 22:58:25,851 - INFO - [livexy_bot_POPCAT_USDT:3037] - Potential Initial SL (for new trade sizing): 0.3151
+2025-04-23 22:58:25,852 - INFO - [livexy_bot_POPCAT_USDT:3038] - Potential Initial TP (for new trade): 0.3175
+2025-04-23 22:58:25,853 - INFO - [livexy_bot_POPCAT_USDT:3042] - Trailing Stop: Enabled | Break Even: Enabled
+2025-04-23 22:58:25,854 - DEBUG - [livexy_bot_POPCAT_USDT:2079] - Fetching positions for symbol: POPCAT/USDT
+2025-04-23 22:58:25,854 - DEBUG - [livexy_bot_POPCAT_USDT:2102] - Using params for fetch_positions: {'category': 'inverse', 'symbol': 'POPCAT/USDT'}
+2025-04-23 22:58:26,577 - ERROR - [livexy_bot_POPCAT_USDT:2120] - Exchange error fetching single position for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467107540}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot3.py", line 2104, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params) # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467107540}
+2025-04-23 22:58:26,583 - INFO - [livexy_bot_POPCAT_USDT:3060] - *** BUY Signal & No Open Position: Initiating Trade Sequence for POPCAT/USDT ***
+2025-04-23 22:58:26,584 - DEBUG - [livexy_bot_POPCAT_USDT:1603] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-04-23 22:58:26,969 - DEBUG - [livexy_bot_POPCAT_USDT:1608] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-04-23 22:58:26,969 - DEBUG - [livexy_bot_POPCAT_USDT:1660] - Found balance via standard ccxt structure ['USDT']['free']: 3.08781684
+2025-04-23 22:58:26,970 - INFO - [livexy_bot_POPCAT_USDT:1712] - Available USDT balance: 3.0878
+2025-04-23 22:58:26,970 - INFO - [livexy_bot_POPCAT_USDT:3088] - Leverage setting skipped for POPCAT/USDT (Spot market).
+2025-04-23 22:58:26,971 - WARNING - [livexy_bot_POPCAT_USDT:1838] - Could not parse contract size 'None' for POPCAT/USDT. Defaulting to 1.
+2025-04-23 22:58:26,971 - INFO - [livexy_bot_POPCAT_USDT:1873] - Position Sizing (POPCAT/USDT): Balance=3.09 USDT, Risk=1.00%, Risk Amount=0.0309 USDT
+2025-04-23 22:58:26,972 - INFO - [livexy_bot_POPCAT_USDT:1874] -   Entry=0.3168, SL=0.3151, SL Distance=0.0017
+2025-04-23 22:58:26,972 - INFO - [livexy_bot_POPCAT_USDT:1875] -   Contract Size=1, Initial Calculated Size = 18.16362847 POPCAT
+2025-04-23 22:58:26,972 - DEBUG - [livexy_bot_POPCAT_USDT:1920] -   Cost Check: Amount-Adjusted Size=18.16362847 POPCAT, Estimated Cost=5.7542 USDT
+2025-04-23 22:58:26,973 - WARNING - [livexy_bot_POPCAT_USDT:1998] - [33mCould not use exchange.amount_to_precision for POPCAT/USDT ('bybit' object has no attribute 'TRUNCATE'). Using manual rounding based on precision.[0m
+2025-04-23 22:58:26,973 - INFO - [livexy_bot_POPCAT_USDT:2015] - Applied manual amount step size (0.01): 18.16362847 -> 18.16 POPCAT
+2025-04-23 22:58:26,973 - INFO - [livexy_bot_POPCAT_USDT:2060] - [92mFinal calculated position size for POPCAT/USDT: 18.16 POPCAT[0m
+2025-04-23 22:58:26,974 - INFO - [livexy_bot_POPCAT_USDT:3107] - ==> Placing BUY market order for POPCAT/USDT | Size: 18.16 <==
+2025-04-23 22:58:26,974 - INFO - [livexy_bot_POPCAT_USDT:2493] - Attempting to place BUY market order for POPCAT/USDT:
+2025-04-23 22:58:26,974 - INFO - [livexy_bot_POPCAT_USDT:2494] -   Size: 18.16000000 POPCAT
+2025-04-23 22:58:26,975 - INFO - [livexy_bot_POPCAT_USDT:2495] -   Params: {'positionIdx': 0, 'reduceOnly': False, 'category': 'inverse'}
+2025-04-23 22:58:27,530 - ERROR - [livexy_bot_POPCAT_USDT:2556] - [91mExchange error placing order for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"Illegal category","result":{},"retExtInfo":{},"time":1745467108386} (Code: None)[0m
+2025-04-23 22:58:27,531 - ERROR - [livexy_bot_POPCAT_USDT:3218] - [91m=== TRADE EXECUTION FAILED for POPCAT/USDT (BUY). See previous logs for details. ===
+2025-04-23 22:58:27,531 - DEBUG - [livexy_bot_POPCAT_USDT:3441] - ---== Analysis Cycle End for POPCAT/USDT (4.41s) ==---
+2025-04-23 22:58:27,532 - DEBUG - [livexy_bot_POPCAT_USDT:3656] - <<< Loop cycle finished in 4.41s. Waiting 10.59s for next cycle...
+2025-04-23 22:58:38,118 - DEBUG - [livexy_bot_POPCAT_USDT:3616] - >>> New Loop Cycle Starting at 2025-04-23 22:58:38
+2025-04-23 22:58:38,123 - INFO - [livexy_bot_POPCAT_USDT:2962] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-23 22:58:38,124 - DEBUG - [livexy_bot_POPCAT_USDT:1754] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/N/A, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-23 22:58:38,124 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-23 22:58:38,738 - INFO - [livexy_bot_POPCAT_USDT:511] - Successfully fetched and processed 500 klines for POPCAT/USDT 5m
+2025-04-23 22:58:38,739 - DEBUG - [livexy_bot_POPCAT_USDT:357] - Fetching ticker for POPCAT/USDT...
+2025-04-23 22:58:39,137 - DEBUG - [livexy_bot_POPCAT_USDT:359] - Ticker data for POPCAT/USDT: {'symbol': 'POPCAT/USDT', 'timestamp': None, 'datetime': None, 'high': 0.3977, 'low': 0.3162, 'bid': 0.3164, 'bidVolume': 7468.63, 'ask': 0.3165, 'askVolume': 547.99, 'vwap': 0.35603479049165754, 'open': 0.3618, 'close': 0.3165, 'last': 0.3165, 'previousClose': None, 'change': -0.0453, 'percentage': -12.52, 'average': 0.3391, 'baseVolume': 115368167.76, 'quoteVolume': 41075081.437838, 'markPrice': None, 'indexPrice': None, 'info': {'symbol': 'POPCATUSDT', 'bid1Price': '0.3164', 'bid1Size': '7468.63', 'ask1Price': '0.3165', 'ask1Size': '547.99', 'lastPrice': '0.3165', 'prevPrice24h': '0.3618', 'price24hPcnt': '-0.1252', 'highPrice24h': '0.3977', 'lowPrice24h': '0.3162', 'turnover24h': '41075081.437838', 'volume24h': '115368167.76', 'usdIndexPrice': '0.316843'}}
+2025-04-23 22:58:39,138 - DEBUG - [livexy_bot_POPCAT_USDT:372] - Using 'last' price for POPCAT/USDT: 0.3165
+2025-04-23 22:58:39,140 - DEBUG - [livexy_bot_POPCAT_USDT:532] - Fetching order book for POPCAT/USDT, limit=25 (Attempt 1/4)
+2025-04-23 22:58:39,971 - DEBUG - [livexy_bot_POPCAT_USDT:548] - Successfully fetched orderbook for POPCAT/USDT with 25 bids, 25 asks.
+2025-04-23 22:58:41,214 - DEBUG - [livexy_bot_POPCAT_USDT:831] - Finished indicator calculations for POPCAT/USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_8', 'EMA_12', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_7', 'BBL_40_2.0', 'BBM_40_2.0', 'BBU_40_2.0', 'BBB_40_2.0', 'BBP_40_2.0', 'VOL_SMA_10']
+2025-04-23 22:58:41,241 - DEBUG - [livexy_bot_POPCAT_USDT:895] - Latest indicator float values updated for POPCAT/USDT: {'ATR': '0.00324', 'EMA_Short': '0.32163', 'EMA_Long': '0.32332', 'Momentum': '-0.01170', 'CCI': '-158.37104', 'Williams_R': '-96.95122', 'MFI': '30.04555', 'VWAP': '0.32822', 'PSAR_short': '0.32576', 'SMA10': '0.32334', 'StochRSI_K': '11.68841', 'StochRSI_D': '10.33229', 'RSI': '20.60259', 'BB_Lower': '0.31916', 'BB_Middle': '0.32839', 'BB_Upper': '0.33763', 'Volume_MA': '317391.36700', 'Close': '0.31670', 'Volume': '384134.61000', 'High': '0.31970', 'Low': '0.31620'}
+2025-04-23 22:58:41,249 - DEBUG - [livexy_bot_POPCAT_USDT:953] - Calculated Fibonacci levels for POPCAT/USDT: {'Fib_0.0%': '0.3377', 'Fib_23.6%': '0.3326', 'Fib_38.2%': '0.3294', 'Fib_50.0%': '0.3269', 'Fib_61.8%': '0.3244', 'Fib_78.6%': '0.3208', 'Fib_100.0%': '0.3162'}
+2025-04-23 22:58:41,250 - DEBUG - [livexy_bot_POPCAT_USDT:1484] - Orderbook check (POPCAT/USDT): Top 10 Levels: BidVol=124877.3100, AskVol=108050.3400, OBI=0.0722, Score=0.0722
+2025-04-23 22:58:41,251 - INFO - [livexy_bot_POPCAT_USDT:1214] - Signal Calculation Summary (POPCAT/USDT @ 0.3165):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: 1.0333
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [92mBUY[0m
+2025-04-23 22:58:41,252 - DEBUG - [livexy_bot_POPCAT_USDT:1583] - Calculated TP/SL for POPCAT/USDT BUY: Entry=0.3165, TP=0.3172, SL=0.3148, ATR=0.00324
+2025-04-23 22:58:41,252 - INFO - [livexy_bot_POPCAT_USDT:3036] - ATR: 0.00324
+2025-04-23 22:58:41,252 - INFO - [livexy_bot_POPCAT_USDT:3037] - Potential Initial SL (for new trade sizing): 0.3148
+2025-04-23 22:58:41,253 - INFO - [livexy_bot_POPCAT_USDT:3038] - Potential Initial TP (for new trade): 0.3172
+2025-04-23 22:58:41,253 - INFO - [livexy_bot_POPCAT_USDT:3042] - Trailing Stop: Enabled | Break Even: Enabled
+2025-04-23 22:58:41,266 - DEBUG - [livexy_bot_POPCAT_USDT:2079] - Fetching positions for symbol: POPCAT/USDT
+2025-04-23 22:58:41,267 - DEBUG - [livexy_bot_POPCAT_USDT:2102] - Using params for fetch_positions: {'category': 'inverse', 'symbol': 'POPCAT/USDT'}
+2025-04-23 22:58:41,690 - ERROR - [livexy_bot_POPCAT_USDT:2120] - Exchange error fetching single position for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467122642}
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/codes/livebot3.py", line 2104, in get_open_position
+    positions = exchange.fetch_positions(symbols=[symbol], params=params) # Pass symbol in list and params
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 6021, in fetch_positions
+    response = self.privateGetV5PositionList(self.extend(request, params))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4390, in fetch2
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4379, in fetch2
+    return self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 621, in fetch
+    self.handle_errors(http_status_code, http_status_text, url, method, headers, http_response, json_response, request_headers, request_body)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8838, in handle_errors
+    self.throw_exactly_matched_exception(self.exceptions['exact'], errorCode, feedback)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4783, in throw_exactly_matched_exception
+    raise exact[string](message)
+ccxt.base.errors.BadRequest: bybit {"retCode":10001,"retMsg":"symbol not exist","result":{},"retExtInfo":{},"time":1745467122642}
+2025-04-23 22:58:41,706 - INFO - [livexy_bot_POPCAT_USDT:3060] - *** BUY Signal & No Open Position: Initiating Trade Sequence for POPCAT/USDT ***
+2025-04-23 22:58:41,706 - DEBUG - [livexy_bot_POPCAT_USDT:1603] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-04-23 22:58:42,582 - DEBUG - [livexy_bot_POPCAT_USDT:1608] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-04-23 22:58:42,582 - DEBUG - [livexy_bot_POPCAT_USDT:1660] - Found balance via standard ccxt structure ['USDT']['free']: 3.08781684
+2025-04-23 22:58:42,583 - INFO - [livexy_bot_POPCAT_USDT:1712] - Available USDT balance: 3.0878
+2025-04-23 22:58:42,583 - INFO - [livexy_bot_POPCAT_USDT:3088] - Leverage setting skipped for POPCAT/USDT (Spot market).
+2025-04-23 22:58:42,584 - WARNING - [livexy_bot_POPCAT_USDT:1838] - Could not parse contract size 'None' for POPCAT/USDT. Defaulting to 1.
+2025-04-23 22:58:42,584 - INFO - [livexy_bot_POPCAT_USDT:1873] - Position Sizing (POPCAT/USDT): Balance=3.09 USDT, Risk=1.00%, Risk Amount=0.0309 USDT
+2025-04-23 22:58:42,585 - INFO - [livexy_bot_POPCAT_USDT:1874] -   Entry=0.3165, SL=0.3148, SL Distance=0.0017
+2025-04-23 22:58:42,585 - INFO - [livexy_bot_POPCAT_USDT:1875] -   Contract Size=1, Initial Calculated Size = 18.16362847 POPCAT
+2025-04-23 22:58:42,585 - DEBUG - [livexy_bot_POPCAT_USDT:1920] -   Cost Check: Amount-Adjusted Size=18.16362847 POPCAT, Estimated Cost=5.7488 USDT
+2025-04-23 22:58:42,586 - WARNING - [livexy_bot_POPCAT_USDT:1998] - [33mCould not use exchange.amount_to_precision for POPCAT/USDT ('bybit' object has no attribute 'TRUNCATE'). Using manual rounding based on precision.[0m
+2025-04-23 22:58:42,586 - INFO - [livexy_bot_POPCAT_USDT:2015] - Applied manual amount step size (0.01): 18.16362847 -> 18.16 POPCAT
+2025-04-23 22:58:42,587 - INFO - [livexy_bot_POPCAT_USDT:2060] - [92mFinal calculated position size for POPCAT/USDT: 18.16 POPCAT[0m
+2025-04-23 22:58:42,587 - INFO - [livexy_bot_POPCAT_USDT:3107] - ==> Placing BUY market order for POPCAT/USDT | Size: 18.16 <==
+2025-04-23 22:58:42,587 - INFO - [livexy_bot_POPCAT_USDT:2493] - Attempting to place BUY market order for POPCAT/USDT:
+2025-04-23 22:58:42,588 - INFO - [livexy_bot_POPCAT_USDT:2494] -   Size: 18.16000000 POPCAT
+2025-04-23 22:58:42,588 - INFO - [livexy_bot_POPCAT_USDT:2495] -   Params: {'positionIdx': 0, 'reduceOnly': False, 'category': 'inverse'}
+2025-04-23 22:58:42,970 - ERROR - [livexy_bot_POPCAT_USDT:2556] - [91mExchange error placing order for POPCAT/USDT: bybit {"retCode":10001,"retMsg":"Illegal category","result":{},"retExtInfo":{},"time":1745467123963} (Code: None)[0m
+2025-04-23 22:58:42,971 - ERROR - [livexy_bot_POPCAT_USDT:3218] - [91m=== TRADE EXECUTION FAILED for POPCAT/USDT (BUY). See previous logs for details. ===
+2025-04-23 22:58:42,971 - DEBUG - [livexy_bot_POPCAT_USDT:3441] - ---== Analysis Cycle End for POPCAT/USDT (4.85s) ==---
+2025-04-23 22:58:42,972 - DEBUG - [livexy_bot_POPCAT_USDT:3656] - <<< Loop cycle finished in 4.85s. Waiting 10.15s for next cycle...
+2025-04-23 22:58:53,119 - DEBUG - [livexy_bot_POPCAT_USDT:3616] - >>> New Loop Cycle Starting at 2025-04-23 22:58:53
+2025-04-23 22:58:53,121 - INFO - [livexy_bot_POPCAT_USDT:2962] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-23 22:58:53,122 - DEBUG - [livexy_bot_POPCAT_USDT:1754] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/N/A, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-23 22:58:53,123 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-23 22:58:53,347 - WARNING - [livexy_bot_POPCAT_USDT:458] - Network error fetching klines for POPCAT/USDT (Attempt 1/4): bybit GET https://api.bybit.com/v5/market/kline?symbol=POPCATUSDT&limit=500&interval=5&category=spot 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: KFBYgOaCgTS8dznCVx6Pe16AjCDxxbkX0-yd_ITz4tMa-rxupT7hNw==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>. Retrying in 5s...
+2025-04-23 22:58:58,349 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 2/4)
+2025-04-23 22:58:58,420 - WARNING - [livexy_bot_POPCAT_USDT:458] - Network error fetching klines for POPCAT/USDT (Attempt 2/4): bybit GET https://api.bybit.com/v5/market/kline?symbol=POPCATUSDT&limit=500&interval=5&category=spot 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: iK1jru14jZQgJ0TUg0SZtk48UaGeMe1XrpfNZI5K5CX4nXRHvnWNFQ==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>. Retrying in 5s...
+2025-04-23 22:59:03,421 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 3/4)
+2025-04-23 22:59:03,481 - WARNING - [livexy_bot_POPCAT_USDT:458] - Network error fetching klines for POPCAT/USDT (Attempt 3/4): bybit GET https://api.bybit.com/v5/market/kline?symbol=POPCATUSDT&limit=500&interval=5&category=spot 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: Th2wdCK-Yu-Iw3GIuZ1CVq4-XSwHbXSFcbu0STKlzhRWZulg-vRXjQ==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>. Retrying in 5s...
+2025-04-23 22:59:08,483 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 4/4)
+2025-04-23 22:59:08,533 - ERROR - [livexy_bot_POPCAT_USDT:461] - [91mMax retries reached fetching klines for POPCAT/USDT after network errors.[0m
+2025-04-23 22:59:08,534 - ERROR - [livexy_bot_POPCAT_USDT:515] - [91mNetwork error fetching klines for POPCAT/USDT after retries: bybit GET https://api.bybit.com/v5/market/kline?symbol=POPCATUSDT&limit=500&interval=5&category=spot 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: imRlBUrVfsm-dpAaf0uY6sw59nT4UWMcS1fiGwsdXRKMIQQWr8WMHg==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>[0m
+2025-04-23 22:59:08,583 - ERROR - [livexy_bot_POPCAT_USDT:2981] - [91mFailed to fetch sufficient kline data for POPCAT/USDT (fetched 0). Skipping analysis cycle.[0m
+2025-04-23 22:59:08,583 - DEBUG - [livexy_bot_POPCAT_USDT:3656] - <<< Loop cycle finished in 15.46s. Waiting 0.00s for next cycle...
+2025-04-23 22:59:08,584 - DEBUG - [livexy_bot_POPCAT_USDT:3616] - >>> New Loop Cycle Starting at 2025-04-23 22:59:08
+2025-04-23 22:59:08,584 - INFO - [livexy_bot_POPCAT_USDT:2962] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-23 22:59:08,584 - DEBUG - [livexy_bot_POPCAT_USDT:1754] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/N/A, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-23 22:59:08,585 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-23 22:59:08,630 - WARNING - [livexy_bot_POPCAT_USDT:458] - Network error fetching klines for POPCAT/USDT (Attempt 1/4): bybit GET https://api.bybit.com/v5/market/kline?symbol=POPCATUSDT&limit=500&interval=5&category=spot 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: jeqR4HpKA3FFTKrAwYZ5Lrk-jZnudtqyJO5p896v2dgT11JbjclexQ==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>. Retrying in 5s...
+2025-04-23 22:59:13,634 - DEBUG - [livexy_bot_POPCAT_USDT:447] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 2/4)
+2025-04-23 22:59:13,679 - WARNING - [livexy_bot_POPCAT_USDT:458] - Network error fetching klines for POPCAT/USDT (Attempt 2/4): bybit GET https://api.bybit.com/v5/market/kline?symbol=POPCATUSDT&limit=500&interval=5&category=spot 403 Forbidden <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<TITLE>ERROR: The request could not be satisfied</TITLE>
+</HEAD><BODY>
+<H1>403 ERROR</H1>
+<H2>The request could not be satisfied.</H2>
+<HR noshade size="1px">
+The Amazon CloudFront distribution is configured to block access from your country.
+We can't connect to the server for this app or website at this time. There might be too much traffic or a configuration error. Try again later, or contact the app or website owner.
+<BR clear="all">
+If you provide content to customers through CloudFront, you can find steps to troubleshoot and help prevent this error by reviewing the CloudFront documentation.
+<BR clear="all">
+<HR noshade size="1px">
+<PRE>
+Generated by cloudfront (CloudFront)
+Request ID: vG7UJ6NkyT9BjLxko6XDLdCxjxbKoXiB58OGE0r2aa57ElYDk7r0wQ==
+</PRE>
+<ADDRESS>
+</ADDRESS>
+</BODY></HTML>. Retrying in 5s...
+2025-04-23 22:59:16,894 - INFO - [livexy_bot_POPCAT_USDT:3661] - Keyboard interrupt received. Shutting down gracefully...
+2025-04-23 22:59:16,900 - INFO - [livexy_bot_POPCAT_USDT:3673] - --- LiveXY Trading Bot for POPCAT/USDT Stopping ---
+2025-04-23 22:59:16,901 - INFO - [livexy_bot_POPCAT_USDT:3689] - Bot stopped.
+2025-04-24 04:39:13,966 - INFO - [livexy_bot_POPCAT_USDT:3851] - ---=== Starting Trading Loop for POPCAT/USDT (5) ===---
+2025-04-24 04:39:13,967 - INFO - [livexy_bot_POPCAT_USDT:3852] - Using Configuration: Risk=5.00%, Lev=20x, TSL=OFF, BE=ON, Trading=ENABLED
+2025-04-24 04:39:13,968 - DEBUG - [livexy_bot_POPCAT_USDT:3859] - >>> New Loop Cycle Starting at 2025-04-24 04:39:13
+2025-04-24 04:39:13,969 - INFO - [livexy_bot_POPCAT_USDT:3204] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-24 04:39:13,970 - DEBUG - [livexy_bot_POPCAT_USDT:1874] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/0.0001, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-24 04:39:13,972 - DEBUG - [livexy_bot_POPCAT_USDT:449] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-24 04:39:14,511 - INFO - [livexy_bot_POPCAT_USDT:532] - Successfully fetched and processed 500 klines for POPCAT/USDT 5m
+2025-04-24 04:39:14,512 - DEBUG - [livexy_bot_POPCAT_USDT:359] - Fetching ticker for POPCAT/USDT...
+2025-04-24 04:39:15,498 - DEBUG - [livexy_bot_POPCAT_USDT:361] - Ticker data for POPCAT/USDT: {'symbol': 'POPCAT/USDT', 'timestamp': None, 'datetime': None, 'high': 0.3977, 'low': 0.3159, 'bid': 0.3277, 'bidVolume': 3700.72, 'ask': 0.3278, 'askVolume': 17.81, 'vwap': 0.352081071254754, 'open': 0.3621, 'close': 0.3277, 'last': 0.3277, 'previousClose': None, 'change': -0.0344, 'percentage': -9.5, 'average': 0.3449, 'baseVolume': 106852710.03, 'quoteVolume': 37620816.613836, 'markPrice': None, 'indexPrice': None, 'info': {'symbol': 'POPCATUSDT', 'bid1Price': '0.3277', 'bid1Size': '3700.72', 'ask1Price': '0.3278', 'ask1Size': '17.81', 'lastPrice': '0.3277', 'prevPrice24h': '0.3621', 'price24hPcnt': '-0.0950', 'highPrice24h': '0.3977', 'lowPrice24h': '0.3159', 'turnover24h': '37620816.613836', 'volume24h': '106852710.03', 'usdIndexPrice': '0.327338'}}
+2025-04-24 04:39:15,499 - DEBUG - [livexy_bot_POPCAT_USDT:374] - Using 'last' price for POPCAT/USDT: 0.3277
+2025-04-24 04:39:15,499 - DEBUG - [livexy_bot_POPCAT_USDT:553] - Fetching order book for POPCAT/USDT, limit=25 (Attempt 1/4)
+2025-04-24 04:39:15,954 - DEBUG - [livexy_bot_POPCAT_USDT:569] - Successfully fetched orderbook for POPCAT/USDT with 25 bids, 25 asks.
+2025-04-24 04:39:16,265 - DEBUG - [livexy_bot_POPCAT_USDT:865] - Finished indicator calculations for POPCAT/USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 04:39:16,267 - DEBUG - [livexy_bot_POPCAT_USDT:934] - Latest indicator float values updated for POPCAT/USDT: {'ATR': '0.00292', 'EMA_Short': '0.32666', 'EMA_Long': '0.32508', 'Momentum': '0.00370', 'CCI': '96.65541', 'Williams_R': '-24.39024', 'MFI': '60.14742', 'VWAP': '0.32666', 'PSAR_long': '0.32134', 'SMA10': '0.32629', 'StochRSI_K': '75.14962', 'StochRSI_D': '84.71320', 'RSI': '56.65251', 'BB_Lower': '0.31640', 'BB_Middle': '0.32344', 'BB_Upper': '0.33048', 'Volume_MA': '294873.25600', 'Close': '0.32750', 'Volume': '177902.76000', 'High': '0.32910', 'Low': '0.32630'}
+2025-04-24 04:39:16,269 - DEBUG - [livexy_bot_POPCAT_USDT:1001] - Calculated Fibonacci levels for POPCAT/USDT: {'Fib_0.0%': '0.3357', 'Fib_23.6%': '0.3313', 'Fib_38.2%': '0.3286', 'Fib_50.0%': '0.3264', 'Fib_61.8%': '0.3242', 'Fib_78.6%': '0.3211', 'Fib_100.0%': '0.3172'}
+2025-04-24 04:39:16,269 - DEBUG - [livexy_bot_POPCAT_USDT:1544] - Orderbook check (POPCAT/USDT): Top 10 Levels: BidVol=130983.7100, AskVol=131814.9400, OBI=-0.0032, Score=-0.0032
+2025-04-24 04:39:16,270 - INFO - [livexy_bot_POPCAT_USDT:1266] - Signal Calculation Summary (POPCAT/USDT @ 0.3277):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: -0.8352
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [91mSELL[0m
+2025-04-24 04:39:16,270 - DEBUG - [livexy_bot_POPCAT_USDT:1650] - Calculated TP/SL for POPCAT/USDT SELL: Entry=0.3277, TP=0.3262, SL=0.3307, ATR=0.00292
+2025-04-24 04:39:16,270 - INFO - [livexy_bot_POPCAT_USDT:3282] - ATR: 0.00292
+2025-04-24 04:39:16,270 - INFO - [livexy_bot_POPCAT_USDT:3283] - Potential Initial SL (for new trade sizing): 0.3307
+2025-04-24 04:39:16,270 - INFO - [livexy_bot_POPCAT_USDT:3284] - Potential Initial TP (for new trade): 0.3262
+2025-04-24 04:39:16,271 - INFO - [livexy_bot_POPCAT_USDT:3288] - Trailing Stop: Disabled | Break Even: Enabled
+2025-04-24 04:39:16,271 - DEBUG - [livexy_bot_POPCAT_USDT:2208] - Fetching positions for symbol: POPCAT/USDT
+2025-04-24 04:39:16,271 - DEBUG - [livexy_bot_POPCAT_USDT:2231] - Using params for fetch_positions: {'category': 'inverse'}
+2025-04-24 04:39:16,741 - INFO - [livexy_bot_POPCAT_USDT:2472] - No active open position found for POPCAT/USDT.
+2025-04-24 04:39:16,742 - INFO - [livexy_bot_POPCAT_USDT:3306] - *** SELL Signal & No Open Position: Initiating Trade Sequence for POPCAT/USDT ***
+2025-04-24 04:39:16,743 - DEBUG - [livexy_bot_POPCAT_USDT:1670] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-04-24 04:39:17,205 - DEBUG - [livexy_bot_POPCAT_USDT:1675] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-04-24 04:39:17,205 - DEBUG - [livexy_bot_POPCAT_USDT:1746] - Found balance via standard ccxt structure ['USDT']['free']: 0.64586428
+2025-04-24 04:39:17,205 - INFO - [livexy_bot_POPCAT_USDT:1821] - Available USDT balance: 0.6459
+2025-04-24 04:39:17,206 - INFO - [livexy_bot_POPCAT_USDT:3334] - Leverage setting skipped for POPCAT/USDT (Spot market).
+2025-04-24 04:39:17,206 - WARNING - [livexy_bot_POPCAT_USDT:1956] - Could not parse contract size 'None' for POPCAT/USDT. Defaulting to 1.
+2025-04-24 04:39:17,207 - DEBUG - [livexy_bot_POPCAT_USDT:1974] -   Linear/Spot Sizing: RiskAmt=0.0322932140 / (SLDist=0.0030 * ContSize=1) = 10.76440466666666666666666667
+2025-04-24 04:39:17,207 - INFO - [livexy_bot_POPCAT_USDT:2000] - Position Sizing (POPCAT/USDT): Balance=0.65 USDT, Risk=5.00%, Risk Amount=0.0323 USDT
+2025-04-24 04:39:17,207 - INFO - [livexy_bot_POPCAT_USDT:2001] -   Entry=0.3277, SL=0.3307, SL Distance=0.0030
+2025-04-24 04:39:17,208 - INFO - [livexy_bot_POPCAT_USDT:2002] -   Contract Size=1, Initial Calculated Size = 10.76440467 POPCAT
+2025-04-24 04:39:17,208 - DEBUG - [livexy_bot_POPCAT_USDT:2046] -   Cost Check: Amount-Adjusted Size=10.76440467 POPCAT, Estimated Cost=3.5275 USDT
+2025-04-24 04:39:17,208 - DEBUG - [livexy_bot_POPCAT_USDT:2047] -   Cost Limits: Min=5.0, Max=200000.0
+2025-04-24 04:39:17,209 - WARNING - [livexy_bot_POPCAT_USDT:2050] - [33mEstimated cost 3.5275 USDT (Size: 10.76440467) is below minimum cost 5.0000 USDT. Attempting to increase size.[0m
+2025-04-24 04:39:17,209 - INFO - [livexy_bot_POPCAT_USDT:2067] -   Required size for min cost: 15.25785780 POPCAT
+2025-04-24 04:39:17,209 - INFO - [livexy_bot_POPCAT_USDT:2078] -   Adjusting size to meet min cost: 15.25785780 POPCAT
+2025-04-24 04:39:17,210 - WARNING - [livexy_bot_POPCAT_USDT:2125] - [33mCould not use exchange.amount_to_precision for POPCAT/USDT ('bybit' object has no attribute 'TRUNCATE'). Using manual rounding (ROUND_DOWN) based on precision.[0m
+2025-04-24 04:39:17,210 - INFO - [livexy_bot_POPCAT_USDT:2144] - Applied manual amount step size (0.01), rounded down: 15.25785780 -> 15.25 POPCAT
+2025-04-24 04:39:17,211 - ERROR - [livexy_bot_POPCAT_USDT:2183] - [91mFinal formatted size 15.25 POPCAT results in cost 4.9974 USDT which is below minimum cost 5.0000 USDT for POPCAT/USDT. Trade aborted.[0m
+2025-04-24 04:39:17,211 - ERROR - [livexy_bot_POPCAT_USDT:3349] - [91mTrade Aborted (POPCAT/USDT SELL): Invalid position size calculated (None). Check balance, risk, SL, market limits, and logs.[0m
+2025-04-24 04:39:17,211 - DEBUG - [livexy_bot_POPCAT_USDT:3913] - <<< Loop cycle finished in 3.24s. Waiting 11.76s for next cycle...
+2025-04-24 04:39:28,969 - DEBUG - [livexy_bot_POPCAT_USDT:3859] - >>> New Loop Cycle Starting at 2025-04-24 04:39:28
+2025-04-24 04:39:28,969 - INFO - [livexy_bot_POPCAT_USDT:3204] - ---== Analyzing POPCAT/USDT (5) Cycle Start ==---
+2025-04-24 04:39:28,969 - DEBUG - [livexy_bot_POPCAT_USDT:1874] - Market Info for POPCAT/USDT: ID=POPCATUSDT, Type=spot, Contract=N/A, Precision(Price/Amount/Tick): 0.0001/0.01/0.0001, Limits(Amount Min/Max): 6.0/1208459.214502, Limits(Cost Min/Max): 5.0/200000.0, Contract Size: None
+2025-04-24 04:39:28,970 - DEBUG - [livexy_bot_POPCAT_USDT:449] - Fetching klines for POPCAT/USDT, 5m, limit=500 (Attempt 1/4)
+2025-04-24 04:39:29,974 - INFO - [livexy_bot_POPCAT_USDT:532] - Successfully fetched and processed 500 klines for POPCAT/USDT 5m
+2025-04-24 04:39:29,975 - DEBUG - [livexy_bot_POPCAT_USDT:359] - Fetching ticker for POPCAT/USDT...
+2025-04-24 04:39:30,449 - DEBUG - [livexy_bot_POPCAT_USDT:361] - Ticker data for POPCAT/USDT: {'symbol': 'POPCAT/USDT', 'timestamp': None, 'datetime': None, 'high': 0.3977, 'low': 0.3159, 'bid': 0.3276, 'bidVolume': 5012.04, 'ask': 0.3278, 'askVolume': 1080.0, 'vwap': 0.35207999931023587, 'open': 0.3621, 'close': 0.3276, 'last': 0.3276, 'previousClose': None, 'change': -0.0345, 'percentage': -9.53, 'average': 0.3448, 'baseVolume': 106857400.63, 'quoteVolume': 37622353.540104, 'markPrice': None, 'indexPrice': None, 'info': {'symbol': 'POPCATUSDT', 'bid1Price': '0.3276', 'bid1Size': '5012.04', 'ask1Price': '0.3278', 'ask1Size': '1080', 'lastPrice': '0.3276', 'prevPrice24h': '0.3621', 'price24hPcnt': '-0.0953', 'highPrice24h': '0.3977', 'lowPrice24h': '0.3159', 'turnover24h': '37622353.540104', 'volume24h': '106857400.63', 'usdIndexPrice': '0.327775'}}
+2025-04-24 04:39:30,450 - DEBUG - [livexy_bot_POPCAT_USDT:374] - Using 'last' price for POPCAT/USDT: 0.3276
+2025-04-24 04:39:30,450 - DEBUG - [livexy_bot_POPCAT_USDT:553] - Fetching order book for POPCAT/USDT, limit=25 (Attempt 1/4)
+2025-04-24 04:39:30,903 - DEBUG - [livexy_bot_POPCAT_USDT:569] - Successfully fetched orderbook for POPCAT/USDT with 25 bids, 25 asks.
+2025-04-24 04:39:31,205 - DEBUG - [livexy_bot_POPCAT_USDT:865] - Finished indicator calculations for POPCAT/USDT. Final DF columns: ['open', 'high', 'low', 'close', 'volume', 'ATRr_14', 'EMA_9', 'EMA_21', 'MOM_7', 'CCI_20_0.015', 'WILLR_14', 'MFI_14', 'VWAP_D', 'PSARl_0.02_0.2', 'PSARs_0.02_0.2', 'PSARaf_0.02_0.2', 'PSARr_0.02_0.2', 'SMA_10', 'STOCHRSIk_14_12_3_3', 'STOCHRSId_14_12_3_3', 'RSI_14', 'BBL_20_2.0', 'BBM_20_2.0', 'BBU_20_2.0', 'BBB_20_2.0', 'BBP_20_2.0', 'VOL_SMA_15']
+2025-04-24 04:39:31,206 - DEBUG - [livexy_bot_POPCAT_USDT:934] - Latest indicator float values updated for POPCAT/USDT: {'ATR': '0.00292', 'EMA_Short': '0.32668', 'EMA_Long': '0.32509', 'Momentum': '0.00380', 'CCI': '97.30801', 'Williams_R': '-23.57724', 'MFI': '60.05844', 'VWAP': '0.32666', 'PSAR_long': '0.32134', 'SMA10': '0.32630', 'StochRSI_K': '75.58670', 'StochRSI_D': '84.85890', 'RSI': '56.93048', 'BB_Lower': '0.31639', 'BB_Middle': '0.32344', 'BB_Upper': '0.33050', 'Volume_MA': '295259.73733', 'Close': '0.32760', 'Volume': '183699.98000', 'High': '0.32910', 'Low': '0.32630'}
+2025-04-24 04:39:31,208 - DEBUG - [livexy_bot_POPCAT_USDT:1001] - Calculated Fibonacci levels for POPCAT/USDT: {'Fib_0.0%': '0.3357', 'Fib_23.6%': '0.3313', 'Fib_38.2%': '0.3286', 'Fib_50.0%': '0.3264', 'Fib_61.8%': '0.3242', 'Fib_78.6%': '0.3211', 'Fib_100.0%': '0.3172'}
+2025-04-24 04:39:31,209 - DEBUG - [livexy_bot_POPCAT_USDT:1544] - Orderbook check (POPCAT/USDT): Top 10 Levels: BidVol=131887.3500, AskVol=135535.9400, OBI=-0.0136, Score=-0.0136
+2025-04-24 04:39:31,209 - INFO - [livexy_bot_POPCAT_USDT:1266] - Signal Calculation Summary (POPCAT/USDT @ 0.3276):
+  Weight Set: scalping
+  Indicators Used: 13 (0 NaN)
+  Total Weight Applied: 3.450
+  Final Weighted Score: -0.8488
+  Signal Threshold: +/- 0.800
+  ==> Final Signal: [91mSELL[0m
+2025-04-24 04:39:31,209 - DEBUG - [livexy_bot_POPCAT_USDT:1650] - Calculated TP/SL for POPCAT/USDT SELL: Entry=0.3276, TP=0.3261, SL=0.3306, ATR=0.00292
+2025-04-24 04:39:31,209 - INFO - [livexy_bot_POPCAT_USDT:3282] - ATR: 0.00292
+2025-04-24 04:39:31,210 - INFO - [livexy_bot_POPCAT_USDT:3283] - Potential Initial SL (for new trade sizing): 0.3306
+2025-04-24 04:39:31,210 - INFO - [livexy_bot_POPCAT_USDT:3284] - Potential Initial TP (for new trade): 0.3261
+2025-04-24 04:39:31,210 - INFO - [livexy_bot_POPCAT_USDT:3288] - Trailing Stop: Disabled | Break Even: Enabled
+2025-04-24 04:39:31,210 - DEBUG - [livexy_bot_POPCAT_USDT:2208] - Fetching positions for symbol: POPCAT/USDT
+2025-04-24 04:39:31,210 - DEBUG - [livexy_bot_POPCAT_USDT:2231] - Using params for fetch_positions: {'category': 'inverse'}
+2025-04-24 04:39:31,670 - INFO - [livexy_bot_POPCAT_USDT:2472] - No active open position found for POPCAT/USDT.
+2025-04-24 04:39:31,671 - INFO - [livexy_bot_POPCAT_USDT:3306] - *** SELL Signal & No Open Position: Initiating Trade Sequence for POPCAT/USDT ***
+2025-04-24 04:39:31,671 - DEBUG - [livexy_bot_POPCAT_USDT:1670] - Fetching balance using params={'type': 'CONTRACT'} for USDT...
+2025-04-24 04:39:32,130 - DEBUG - [livexy_bot_POPCAT_USDT:1675] - Found currency 'USDT' in balance structure using type 'CONTRACT'.
+2025-04-24 04:39:32,131 - DEBUG - [livexy_bot_POPCAT_USDT:1746] - Found balance via standard ccxt structure ['USDT']['free']: 0.64586428
+2025-04-24 04:39:32,131 - INFO - [livexy_bot_POPCAT_USDT:1821] - Available USDT balance: 0.6459
+2025-04-24 04:39:32,131 - INFO - [livexy_bot_POPCAT_USDT:3334] - Leverage setting skipped for POPCAT/USDT (Spot market).
+2025-04-24 04:39:32,132 - WARNING - [livexy_bot_POPCAT_USDT:1956] - Could not parse contract size 'None' for POPCAT/USDT. Defaulting to 1.
+2025-04-24 04:39:32,132 - DEBUG - [livexy_bot_POPCAT_USDT:1974] -   Linear/Spot Sizing: RiskAmt=0.0322932140 / (SLDist=0.0030 * ContSize=1) = 10.76440466666666666666666667
+2025-04-24 04:39:32,132 - INFO - [livexy_bot_POPCAT_USDT:2000] - Position Sizing (POPCAT/USDT): Balance=0.65 USDT, Risk=5.00%, Risk Amount=0.0323 USDT
+2025-04-24 04:39:32,133 - INFO - [livexy_bot_POPCAT_USDT:2001] -   Entry=0.3276, SL=0.3306, SL Distance=0.0030
+2025-04-24 04:39:32,133 - INFO - [livexy_bot_POPCAT_USDT:2002] -   Contract Size=1, Initial Calculated Size = 10.76440467 POPCAT
+2025-04-24 04:39:32,134 - DEBUG - [livexy_bot_POPCAT_USDT:2046] -   Cost Check: Amount-Adjusted Size=10.76440467 POPCAT, Estimated Cost=3.5264 USDT
+2025-04-24 04:39:32,134 - DEBUG - [livexy_bot_POPCAT_USDT:2047] -   Cost Limits: Min=5.0, Max=200000.0
+2025-04-24 04:39:32,134 - WARNING - [livexy_bot_POPCAT_USDT:2050] - [33mEstimated cost 3.5264 USDT (Size: 10.76440467) is below minimum cost 5.0000 USDT. Attempting to increase size.[0m
+2025-04-24 04:39:32,134 - INFO - [livexy_bot_POPCAT_USDT:2067] -   Required size for min cost: 15.26251526 POPCAT
+2025-04-24 04:39:32,135 - INFO - [livexy_bot_POPCAT_USDT:2078] -   Adjusting size to meet min cost: 15.26251526 POPCAT
+2025-04-24 04:39:32,135 - WARNING - [livexy_bot_POPCAT_USDT:2125] - [33mCould not use exchange.amount_to_precision for POPCAT/USDT ('bybit' object has no attribute 'TRUNCATE'). Using manual rounding (ROUND_DOWN) based on precision.[0m
+2025-04-24 04:39:32,136 - INFO - [livexy_bot_POPCAT_USDT:2144] - Applied manual amount step size (0.01), rounded down: 15.26251526 -> 15.26 POPCAT
+2025-04-24 04:39:32,136 - ERROR - [livexy_bot_POPCAT_USDT:2183] - [91mFinal formatted size 15.26 POPCAT results in cost 4.9992 USDT which is below minimum cost 5.0000 USDT for POPCAT/USDT. Trade aborted.[0m
+2025-04-24 04:39:32,136 - ERROR - [livexy_bot_POPCAT_USDT:3349] - [91mTrade Aborted (POPCAT/USDT SELL): Invalid position size calculated (None). Check balance, risk, SL, market limits, and logs.[0m
+2025-04-24 04:39:32,137 - DEBUG - [livexy_bot_POPCAT_USDT:3913] - <<< Loop cycle finished in 3.17s. Waiting 11.83s for next cycle...
+2025-04-24 04:39:35,516 - INFO - [livexy_bot_POPCAT_USDT:3918] - Keyboard interrupt received. Shutting down gracefully...
+2025-04-24 04:39:35,517 - INFO - [livexy_bot_POPCAT_USDT:3930] - --- LiveXY Trading Bot for POPCAT/USDT Stopping ---
+2025-04-24 04:39:35,517 - INFO - [livexy_bot_POPCAT_USDT:3946] - Bot stopped.

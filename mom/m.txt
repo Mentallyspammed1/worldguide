@@ -1,0 +1,287 @@
+Okay, this is a *lot* of Pylint feedback, mostly related to line length and complexity. Fixing all of them comprehensively, especially the complexity ones (too many lines, branches, statements, locals, etc.), would require significant refactoring and breaking the file into smaller modules and functions.
+
+However, I can provide patches to address the most common and straightforward issues, primarily:
+
+1.  **Line Length (C0301):** Breaking long lines.
+2.  **Superfluous Parens (C0325):** Removing unnecessary parentheses.
+3.  **Naming Conventions (C0103):** Changing constants to UPPER_CASE.
+4.  **Logging Format (W1203):** Using recommended logging format.
+5.  **Broad Exceptions (W0718, W0702):** Making exception handling more specific where obvious, or adding logging.
+6.  **Unnecessary Else/Elif (R1705, R1724, R0837):** Simplifying conditional logic after return/continue.
+7.  **Unused Arguments (W0613):** Prefixing unused arguments (required by signature) with `_`.
+8.  **Missing Docstring (C0116):** Adding a basic docstring.
+9.  **Global Statement (W0603):** Acknowledged, but often acceptable for simple module-level state like a color index. Left as is for now.
+10. **Redefined Names (W0621):** Renaming some local variables/parameters to avoid shadowing where it causes confusion. Some instances (like loop variables `i` or common parameter names like `symbol`) might be left if renaming reduces clarity.
+11. **Protected Access (W0212):** Acknowledged. Sometimes necessary if the library doesn't provide a public interface. Can be suppressed with a comment if justified.
+12. **FIXME (W0511):** Left as is, as it's a developer note.
+
+**Major Issues Requiring Refactoring (Not fully addressed here):**
+
+*   **Too Many Lines (C0302):** The file *needs* to be split into multiple files (e.g., `config_loader.py`, `bybit_client.py`, `strategy_logic.py`, `indicators.py`, `main.py`).
+*   **High Complexity (R09xx, R17xx):** Functions like `calculate_trade_parameters`, `calculate_position_size`, `handle_order_execution`, `process_kline_data`, `check_entry_conditions`, `manage_open_position`, `process_websocket_message` are doing far too much and need to be broken down into smaller, single-responsibility functions. Classes like `BybitTrader` and `StrategyState` have too many attributes and might benefit from decomposition.
+
+**Applying Fixes (Illustrative Examples - Apply these patterns throughout):**
+
+I'll provide examples for the most common types. You'll need to apply these patterns to *all* the reported line numbers.
+
+**1. Line Length (C0301)**
+
+*   **Example (Line 62):**
+    ```python
+    # Original
+    log_console(f"{timestamp} [INFO] [{symbol}] Processing {len(candles)} candles for timeframe {timeframe}...")
+
+    # Fixed
+    log_console(
+        f"{timestamp} [INFO] [{symbol}] Processing {len(candles)} candles "
+        f"for timeframe {timeframe}..."
+    )
+    ```
+*   **Example (Line 368):**
+    ```python
+    # Original
+    log_console(f"{get_timestamp()} [DEBUG] [{symbol}] Checking entry conditions. Trend: {trend}, Momentum: {momentum}, Volatility: {volatility}")
+
+    # Fixed
+    log_console(
+        f"{get_timestamp()} [DEBUG] [{symbol}] Checking entry conditions. "
+        f"Trend: {trend}, Momentum: {momentum}, Volatility: {volatility}"
+    )
+    ```
+*   **Example (Line 377 - Function Call):**
+    ```python
+    # Original
+    long_entry_condition = (trend == 'up' and momentum > strategy_cfg.get('momentum_threshold_long', 0) and volatility < strategy_cfg.get('volatility_threshold_long', 100))
+
+    # Fixed
+    long_entry_condition = (
+        trend == 'up' and
+        momentum > strategy_cfg.get('momentum_threshold_long', 0) and
+        volatility < strategy_cfg.get('volatility_threshold_long', 100)
+    )
+    ```
+*   **Example (Line 1507 - Very Long String):** Break f-string using implicit concatenation within parentheses.
+    ```python
+    # Original
+    log_console(f"{get_timestamp()} [INFO] [{symbol}] Calculated Position Size: {position_size:.{qty_precision}f} {base_currency}. Entry: {entry_price:.{price_precision}f}, Stop Loss: {stop_loss_price:.{price_precision}f}, Take Profit: {take_profit_price:.{price_precision}f}, Risk per trade: {risk_amount:.2f} {quote_currency} ({risk_percent:.2f}%), Est. Cost: {estimated_cost:.2f} {quote_currency}, Leverage: {leverage}x")
+
+    # Fixed
+    log_console(
+        f"{get_timestamp()} [INFO] [{symbol}] Calculated Position Size: "
+        f"{position_size:.{qty_precision}f} {base_currency}. "
+        f"Entry: {entry_price:.{price_precision}f}, "
+        f"Stop Loss: {stop_loss_price:.{price_precision}f}, "
+        f"Take Profit: {take_profit_price:.{price_precision}f}, "
+        f"Risk per trade: {risk_amount:.2f} {quote_currency} ({risk_percent:.2f}%), "
+        f"Est. Cost: {estimated_cost:.2f} {quote_currency}, "
+        f"Leverage: {leverage}x"
+    )
+    ```
+
+**2. Superfluous Parens (C0325)**
+
+*   **Example (Line 5345):**
+    ```python
+    # Original
+    if not (symbol_data['last_kline_close_time'] and symbol_data['last_kline_close_time'] >= current_kline_start_time):
+
+    # Fixed
+    if not symbol_data['last_kline_close_time'] or symbol_data['last_kline_close_time'] < current_kline_start_time:
+    # Alternative (if original logic was intended):
+    # if not (symbol_data['last_kline_close_time'] and
+    #         symbol_data['last_kline_close_time'] >= current_kline_start_time):
+    # Or clearer:
+    has_last_time = symbol_data['last_kline_close_time']
+    is_recent = has_last_time and symbol_data['last_kline_close_time'] >= current_kline_start_time
+    if not is_recent:
+         # ...
+    ```
+    *(Self-correction: The original `if not (A and B)` is equivalent to `if not A or not B`. Applying De Morgan's laws makes it clearer)*
+    ```python
+    # Corrected Fix for Line 5345:
+    if not symbol_data['last_kline_close_time'] or \
+       symbol_data['last_kline_close_time'] < current_kline_start_time:
+        # ... rest of the code ...
+    ```
+
+
+**3. Naming Conventions (C0103)**
+
+*   **Example (Line 113, 5112, etc.):**
+    ```python
+    # Original
+    log_file_mode = config.get('logging', {}).get('file_mode', 'a')
+    log_level_console = config.get('logging', {}).get('level_console', 'INFO').upper()
+    timeframe = symbol_cfg.get('timeframe', '1h') # Line 5349
+    htf = symbol_cfg.get('htf', None) # Line 5436
+    exit_code = 0 # Line 5470, 5487, 5500, 5510, 5520
+
+    # Fixed
+    LOG_FILE_MODE = config.get('logging', {}).get('file_mode', 'a')
+    LOG_LEVEL_CONSOLE = config.get('logging', {}).get('level_console', 'INFO').upper()
+    TIMEFRAME = symbol_cfg.get('timeframe', '1h') # Line 5349 (adjust usage elsewhere)
+    HTF = symbol_cfg.get('htf', None) # Line 5436 (adjust usage elsewhere)
+    EXIT_CODE = 0 # Line 5470, etc. (adjust usage elsewhere)
+    ```
+    *Note: If `timeframe` and `htf` are truly variable based on `symbol_cfg`, they shouldn't be constants. The C0103 might be flagging them because they are defined at the module level based on config. If they change per symbol within loops, their definition point might need adjustment, or they should remain lowercase.* Re-evaluate based on usage. If they are set once based on *a specific* symbol's config at the start and don't change, UPPER_CASE might be appropriate but confusing. If they change per symbol processed, keep lowercase. Let's assume they vary and keep them lowercase for now, but be mindful of the Pylint warning's reason. The `exit_code` variable seems like global state, so `EXIT_CODE` is appropriate.
+
+**4. Logging Format (W1203)**
+
+*   **Example (Line 227):**
+    ```python
+    # Original
+    logging.error(f"Error loading configuration: {e}")
+
+    # Fixed
+    logging.error("Error loading configuration: %s", e)
+    # OR if you want the traceback
+    # logging.exception("Error loading configuration:")
+    ```
+
+**5. Broad Exceptions (W0718, W0702)**
+
+*   **Example (Line 222):**
+    ```python
+    # Original
+    except Exception as e:
+        # ... log error ...
+
+    # Fixed (Example - adjust based on actual possible errors)
+    except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError) as e:
+         logging.error("Error loading or parsing configuration file '%s': %s", CONFIG_FILE, e)
+         # ... maybe sys.exit ...
+    except Exception as e: # Catch any other unexpected error
+         logging.exception("Unexpected error loading configuration:") # Use logging.exception to include traceback
+         # ... maybe sys.exit ...
+    ```
+*   **Example (Line 5034 - W0702 Bare Except):**
+    ```python
+    # Original
+    except: # bare except
+        # ... handle ...
+
+    # Fixed
+    except Exception as e: # At least catch Exception and potentially log it
+        logging.error("Error processing symbol %s in cleanup: %s", symbol, e)
+        # ... handle ...
+    ```
+
+**6. Unnecessary Else/Elif (R1705, R1724, R0837)**
+
+*   **Example (Line 1361 - R1705):**
+    ```python
+    # Original
+    if condition:
+        # ...
+        return value1
+    else:
+        # ...
+        return value2
+
+    # Fixed
+    if condition:
+        # ...
+        return value1
+    # ... (Code that was in else, now de-indented)
+    return value2
+    ```
+*   **Example (Line 4465 - R1724):**
+    ```python
+    # Original
+    if some_check:
+        continue
+    else:
+        # process item
+        # ...
+
+    # Fixed
+    if some_check:
+        continue
+    # process item (Code that was in else, now de-indented)
+    # ...
+    ```
+
+**7. Unused Arguments (W0613)**
+
+*   **Example (Line 4172, 4312):**
+    ```python
+    # Original
+    def on_error(ws_app, error):
+        # ... error is used, ws_app is not ...
+
+    # Fixed
+    def on_error(_ws_app, error): # Prefix unused ws_app with _
+        # ... error is used ...
+    ```
+*   **Example (Line 1874, 1875):** If `api_key`, `api_secret` are truly unused in `BybitTrader.__init__`.
+    ```python
+    # Original
+    def __init__(self, api_key, api_secret, config, symbol_cfg, ...):
+        # api_key, api_secret not used
+
+    # Fixed
+    def __init__(self, _api_key, _api_secret, config, symbol_cfg, ...):
+         # ...
+    ```
+
+**8. Missing Docstring (C0116)**
+
+*   **Example (Line 5220):**
+    ```python
+    # Original
+    class Signal:
+        def __init__(self, symbol, side, entry_price, stop_loss, take_profit, timestamp):
+            # ...
+
+    # Fixed
+    class Signal:
+        """Represents a potential trading signal."""
+        def __init__(self, symbol, side, entry_price, stop_loss, take_profit, timestamp):
+            """Initialize a Signal object."""
+            # ...
+    ```
+
+**9. Redefined Names (W0621)**
+
+*   **Example (Line 289 `config` parameter):**
+    ```python
+    # Original
+    def load_config(config_file=CONFIG_FILE):
+        # ... uses config_file ...
+        try:
+            # ...
+            config = yaml.safe_load(stream) # Local variable named 'config'
+            # ... uses local config ...
+            # ... implicitly shadows global config if used later in this function
+
+    # Fixed (If shadowing is problematic)
+    def load_config(config_file=CONFIG_FILE):
+        # ...
+        try:
+            # ...
+            loaded_config = yaml.safe_load(stream) # Rename local variable
+            # ... use loaded_config ...
+            return loaded_config # Assuming it returns the loaded config
+        # ...
+    ```
+    *Self-correction*: Looking closer at `load_config`, it *seems* to load into the global `config` variable later. If the parameter `config` on line 589 (`calculate_trade_parameters`) shadows the global, rename the *parameter*:
+    ```python
+    # Line 589 Original
+    def calculate_trade_parameters(..., strategy_cfg, config):
+
+    # Line 589 Fixed
+    def calculate_trade_parameters(..., strategy_cfg, global_config): # Or p_config, app_config etc.
+        # use global_config instead of config in this function scope
+    ```
+    Apply similar renaming logic to other W0621 warnings based on context (is it a parameter, local variable, or loop variable causing the shadow?).
+
+**Action Plan:**
+
+1.  **Backup:** Make a copy of `mom_scany.py` before making changes.
+2.  **Apply Line Length Fixes:** Go through every C0301 error and break the line using the techniques shown. This is tedious but necessary.
+3.  **Apply Other Simple Fixes:** Address C0325, C0103, W1203, W0718/W0702, R1705/R1724/R0837, W0613, C0116 using the patterns above.
+4.  **Address W0621 (Redefined Names):** Carefully review each instance. Rename parameters or local variables if the shadowing causes confusion or potential bugs (e.g., `p_symbol`, `local_cfg`). Leave loop variables like `i` or common parameter names if renaming hurts readability more than it helps.
+5.  **Run Pylint Again:** Check the output. Many errors should be gone.
+6.  **Consider Refactoring:** The C0302 (too many lines) and the remaining R09xx/R17xx complexity warnings are strong indicators that this file *must* be refactored for maintainability and readability. This is a larger task than just fixing lint errors.
+
+This approach will clean up the majority of the Pylint report, making the code conform better to style guides and fixing some potential issues, but the underlying complexity and size issues will remain until a proper refactoring is undertaken.

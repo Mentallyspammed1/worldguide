@@ -1,10 +1,8 @@
-import os
-import time
 import logging
-import json
+import os
 import threading
-import numpy as np  # Keep numpy for potential future calculations if needed
-from collections import deque
+import time
+
 from dotenv import load_dotenv
 from pybit import HTTP, WebSocket
 
@@ -77,13 +75,14 @@ try:
         f"HTTP session initialized. Testnet: {USE_TESTNET}. "
         f"Server Time: {server_time.get('timeNano', 'N/A')}"
     )
-except Exception as e:
+except Exception:
     logging.exception("Fatal Error: Failed to initialize Bybit HTTP session.")
     exit()
 
 # --- WebSocket Functions ---
 
-def handle_public_message(msg):
+
+def handle_public_message(msg) -> None:
     """Processes public WebSocket messages (Order Book, Liquidations)."""
     global latest_order_book, last_best_bid, last_best_ask
 
@@ -153,11 +152,11 @@ def handle_public_message(msg):
                 # Trigger the entry logic based on the liquidation event
                 handle_liquidation_event(liq_side, liq_qty)
 
-            except Exception as e:
+            except Exception:
                 logging.exception(f"Error processing liquidation data: {liq}")
 
 
-def handle_private_message(msg):
+def handle_private_message(msg) -> None:
     """Processes private WebSocket messages (Order Updates)."""
     global in_position, active_order_id, entry_price, position_entry_time
     global last_trade_exit_time, current_position_side, position_size
@@ -169,7 +168,7 @@ def handle_private_message(msg):
         for order_info in order_updates:
             order_id = order_info.get('orderId')
             status = order_info.get('orderStatus')
-            side = order_info.get('side') # 'Buy' or 'Sell'
+            side = order_info.get('side')  # 'Buy' or 'Sell'
             filled_qty_str = order_info.get('cumExecQty', '0')
             avg_price_str = order_info.get('avgPrice', '0')
             reduce_only = order_info.get('reduceOnly', False)
@@ -190,13 +189,13 @@ def handle_private_message(msg):
 
                         in_position = True
                         position_entry_time = time.time()
-                        current_position_side = side # Confirm side based on filled order
+                        current_position_side = side  # Confirm side based on filled order
                         # Now place the Take Profit order
-                        place_take_profit_order() # active_order_id will be updated inside
+                        place_take_profit_order()  # active_order_id will be updated inside
 
                     elif status in ['Cancelled', 'Rejected', 'Expired']:
                         logging.warning(f"Entry order {order_id} {status}. Resetting.")
-                        reset_position_state() # Resets active_order_id too
+                        reset_position_state()  # Resets active_order_id too
 
                     # Note: Partial fills are complex. This basic logic assumes full fill or failure.
                     # For partial entry fills, you'd need to adjust TP size.
@@ -205,7 +204,7 @@ def handle_private_message(msg):
                 # If we are in position, *any* filled order that is reduceOnly means an exit
                 elif in_position and status == 'Filled' and reduce_only:
                     exit_price = float(avg_price_str) if avg_price_str else 0.0
-                    exit_qty = float(filled_qty_str) if filled_qty_str else 0.0
+                    float(filled_qty_str) if filled_qty_str else 0.0
                     # Check if it's our TP order or the server-side SL that filled
                     if active_order_id == order_id:
                         logging.info(
@@ -234,7 +233,7 @@ def handle_private_message(msg):
                      # close_position_market("TP was cancelled externally")
 
 
-def setup_websocket():
+def setup_websocket() -> None:
     """Initializes and connects the Public and Private WebSockets."""
     ws_public_url = ("wss://stream-testnet.bybit.com/v5/public/linear" if USE_TESTNET
                      else "wss://stream.bybit.com/v5/public/linear")
@@ -245,7 +244,7 @@ def setup_websocket():
     ws_public = WebSocket(testnet=USE_TESTNET, channel_type="linear")
     logging.info(f"Connecting to Public WebSocket: {ws_public_url}")
     ws_public.subscribe(["orderbook.50." + SYMBOL, "liquidations." + SYMBOL])
-    ws_public.websocket_data_handler(handle_public_message) # Register handler
+    ws_public.websocket_data_handler(handle_public_message)  # Register handler
     # Start public stream in a background thread (pybit handles the thread)
     ws_public.run()
     logging.info("Public WebSocket connected and subscriptions sent.")
@@ -254,23 +253,24 @@ def setup_websocket():
     # Authentication is handled internally by pybit v5+ when api_key/secret provided
     ws_private = WebSocket(
         testnet=USE_TESTNET,
-        channel_type="private", # Important: Use 'private' channel type
+        channel_type="private",  # Important: Use 'private' channel type
         api_key=API_KEY,
         api_secret=API_SECRET
     )
     logging.info(f"Connecting to Private WebSocket: {ws_private_url}")
     # Subscribe to order updates
-    ws_private.subscribe(["order"]) # Topic for private order updates
-    ws_private.websocket_data_handler(handle_private_message) # Register handler
+    ws_private.subscribe(["order"])  # Topic for private order updates
+    ws_private.websocket_data_handler(handle_private_message)  # Register handler
     # Start private stream in a background thread
     ws_private.run()
     logging.info("Private WebSocket connected and subscriptions sent.")
 
 # --- Trading Logic & Actions ---
 
-def handle_liquidation_event(liquidation_side, liquidation_qty):
+
+def handle_liquidation_event(liquidation_side, liquidation_qty) -> None:
     """Processes a filtered liquidation event and attempts to place an entry order."""
-    global active_order_id, current_position_side # Only write these under lock
+    global active_order_id, current_position_side  # Only write these under lock
 
     # Acquire lock to check and modify position state
     with position_lock:
@@ -313,7 +313,7 @@ def handle_liquidation_event(liquidation_side, liquidation_qty):
             entry_price_target = best_bid + (ENTRY_PRICE_OFFSET_TICKS * TICK_SIZE)
             # Ensure we don't cross the spread immediately with limit order
             entry_price_target = min(entry_price_target, best_ask - TICK_SIZE)
-        else: # trade_side == 'Sell'
+        else:  # trade_side == 'Sell'
             entry_price_target = best_ask - (ENTRY_PRICE_OFFSET_TICKS * TICK_SIZE)
             # Ensure we don't cross the spread immediately
             entry_price_target = max(entry_price_target, best_bid + TICK_SIZE)
@@ -334,7 +334,7 @@ def handle_liquidation_event(liquidation_side, liquidation_qty):
         sl_price = 0.0
         if trade_side == 'Buy':
             sl_price = entry_price_target - (STOP_LOSS_TICKS * TICK_SIZE)
-        else: # trade_side == 'Sell'
+        else:  # trade_side == 'Sell'
             sl_price = entry_price_target + (STOP_LOSS_TICKS * TICK_SIZE)
 
         # Place the Entry Order with Server-Side Stop Loss
@@ -383,10 +383,10 @@ def place_limit_order_with_sl(side, price, qty, stop_loss_price):
             orderType="Limit",
             qty=qty_str,
             price=price_str,
-            timeInForce="PostOnly", # Aim to be maker for entry
+            timeInForce="PostOnly",  # Aim to be maker for entry
             stopLoss=sl_price_str,
             slTriggerBy=STOP_LOSS_TRIGGER_METHOD,
-            reduceOnly=False # This is an entry order
+            reduceOnly=False  # This is an entry order
         )
 
         logging.debug(f"Place entry order raw result: {order_result}")
@@ -404,14 +404,14 @@ def place_limit_order_with_sl(side, price, qty, stop_loss_price):
             err_msg = order_result.get('retMsg', 'No Response/Error')
             logging.error(f"Failed to place entry order: Code={err_code}, Msg='{err_msg}'")
             return None
-    except Exception as e:
+    except Exception:
         logging.exception(f"Exception placing {side} entry order with SL.")
         return None
 
 
-def place_take_profit_order():
+def place_take_profit_order() -> None:
     """Places the reduce-only take profit order after entry confirmation."""
-    global active_order_id # Will store the TP order ID now
+    global active_order_id  # Will store the TP order ID now
 
     if not in_position or not current_position_side or not entry_price or position_size <= 0:
         logging.error("Cannot place TP: Not in a valid position state.")
@@ -425,14 +425,14 @@ def place_take_profit_order():
     if current_position_side == 'Buy':
         tp_price = entry_price + (TAKE_PROFIT_TICKS * TICK_SIZE)
         tp_side = 'Sell'
-    else: # Sell position
+    else:  # Sell position
         tp_price = entry_price - (TAKE_PROFIT_TICKS * TICK_SIZE)
         tp_side = 'Buy'
 
     # Round TP price
     tp_price = round(tp_price / TICK_SIZE) * TICK_SIZE
     tp_price_str = f"{tp_price:.{max(0, str(TICK_SIZE)[::-1].find('.'))}f}"
-    qty_str = f"{position_size:.{ORDER_QTY_PRECISION}f}" # Use actual filled quantity
+    qty_str = f"{position_size:.{ORDER_QTY_PRECISION}f}"  # Use actual filled quantity
 
     logging.info(
         f"Placing {tp_side} Take Profit order: Qty={qty_str}, Price={tp_price_str}"
@@ -446,8 +446,8 @@ def place_take_profit_order():
             orderType="Limit",
             qty=qty_str,
             price=tp_price_str,
-            timeInForce="GTC", # GoodTillCancel for TP
-            reduceOnly=True # CRITICAL: Ensure it only closes the position
+            timeInForce="GTC",  # GoodTillCancel for TP
+            reduceOnly=True  # CRITICAL: Ensure it only closes the position
         )
 
         logging.debug(f"Place TP order raw result: {order_result}")
@@ -469,21 +469,21 @@ def place_take_profit_order():
             # Close market if TP placement fails? Critical decision.
             close_position_market(f"Failed to place TP order (Code: {err_code})")
 
-    except Exception as e:
+    except Exception:
         logging.exception(f"Exception placing {tp_side} TP order.")
         close_position_market("Exception placing TP order")
 
 
-def cancel_active_order(reason=""):
+def cancel_active_order(reason="") -> bool | None:
     """Cancels the currently tracked active order (entry or TP)."""
     global active_order_id
 
     if not active_order_id:
         logging.debug("No active order ID to cancel.")
-        return True # No order existed
+        return True  # No order existed
 
     order_id_to_cancel = active_order_id
-    active_order_id = None # Optimistically clear
+    active_order_id = None  # Optimistically clear
 
     try:
         log_prefix = f"Cancelling order {order_id_to_cancel}"
@@ -508,18 +508,18 @@ def cancel_active_order(reason=""):
                  f"Failed to cancel order {order_id_to_cancel} "
                  f"(might be filled/gone): Code={err_code}, Msg='{err_msg}'"
              )
-             return False # Indicate potential issue, though state is cleared
+             return False  # Indicate potential issue, though state is cleared
 
-    except Exception as e:
+    except Exception:
         logging.exception(f"Exception cancelling order ID {order_id_to_cancel}.")
         return False
 
 
-def close_position_market(reason=""):
+def close_position_market(reason="") -> None:
     """Attempts to close the current position with a market order."""
-    global position_lock # Ensure lock is acquired correctly
+    global position_lock  # Ensure lock is acquired correctly
 
-    with position_lock: # Acquire lock before modifying state/placing orders
+    with position_lock:  # Acquire lock before modifying state/placing orders
         if not in_position:
             logging.info("Request to close position, but not in position.")
             return
@@ -530,7 +530,7 @@ def close_position_market(reason=""):
 
         # 1. Cancel the outstanding Take Profit order first (if it exists)
         # Must do this *before* placing market order to avoid race condition
-        if active_order_id: # If TP order ID is tracked
+        if active_order_id:  # If TP order ID is tracked
             cancel_active_order("Closing position market")
             # Even if cancel fails, proceed to market close for safety
 
@@ -544,19 +544,19 @@ def close_position_market(reason=""):
                 pos_list = position_info.get('result', {}).get('list', [])
                 if pos_list and pos_list[0].get('symbol') == SYMBOL:
                     current_pos_size = float(pos_list[0].get('size', '0'))
-                    actual_pos_side = pos_list[0].get('side') # 'Buy', 'Sell', or 'None'
+                    actual_pos_side = pos_list[0].get('side')  # 'Buy', 'Sell', or 'None'
             else:
                  err_msg = position_info.get('retMsg', 'Failed to get position info')
                  logging.error(f"Could not get position info for market close: {err_msg}")
                  # Fallback: try closing based on initially recorded side/size? Risky.
                  # For now, we won't place market order if we can't confirm size.
-                 reset_position_state() # Reset state even if close fails
-                 return # Exit function
+                 reset_position_state()  # Reset state even if close fails
+                 return  # Exit function
 
-        except Exception as e:
+        except Exception:
              logging.exception("Exception getting position info during market close.")
-             reset_position_state() # Reset state even if close fails
-             return # Exit function
+             reset_position_state()  # Reset state even if close fails
+             return  # Exit function
 
         # 3. Place Market Order if position exists
         if current_pos_size > 0 and actual_pos_side in ['Buy', 'Sell']:
@@ -581,7 +581,7 @@ def close_position_market(reason=""):
                      )
                 # Market order assumed filled or failed, state reset happens below
 
-            except Exception as e:
+            except Exception:
                  logging.exception("CRITICAL: Exception placing market close order!")
                  # Manual intervention likely needed if market order fails
         else:
@@ -594,7 +594,7 @@ def close_position_market(reason=""):
         last_trade_exit_time = time.time()
 
 
-def reset_position_state():
+def reset_position_state() -> None:
     """Resets all variables related to holding a position or active order."""
     global in_position, active_order_id, entry_price, position_entry_time
     global current_position_side, position_size
@@ -612,7 +612,7 @@ def reset_position_state():
 
 # --- Main Loop & Position Management ---
 
-def check_position_timeout():
+def check_position_timeout() -> None:
     """Checks if the current position has timed out."""
     with position_lock:
         if in_position and position_entry_time:
@@ -628,7 +628,8 @@ def check_position_timeout():
                 close_position_market("Timeout")
                 # State reset happens inside close_position_market
 
-def run_bot():
+
+def run_bot() -> None:
     """Main execution loop for the bot."""
     logging.info("Starting Liquidation Hunter Bot...")
 
@@ -650,7 +651,7 @@ def run_bot():
             check_position_timeout()
 
             # Keep main thread alive and prevent high CPU usage
-            time.sleep(1) # Check timeout every second
+            time.sleep(1)  # Check timeout every second
 
         except KeyboardInterrupt:
             logging.info("Shutdown signal received...")
@@ -666,7 +667,7 @@ def run_bot():
                       cancel_active_order("Keyboard Interrupt Shutdown")
             logging.info("Exiting bot.")
             break
-        except Exception as e:
+        except Exception:
             # Log unexpected errors in the main loop
             logging.exception("FATAL ERROR in main loop!")
             # Consider adding emergency position closing here as well for safety
@@ -675,9 +676,9 @@ def run_bot():
                 with position_lock:
                     if in_position: close_position_market("Main Loop Unhandled Exception")
                     elif active_order_id: cancel_active_order("Main Loop Unhandled Exception")
-            except Exception as shutdown_e:
+            except Exception:
                  logging.exception("Error during emergency shutdown!")
-            time.sleep(5) # Pause before potentially restarting or exiting
+            time.sleep(5)  # Pause before potentially restarting or exiting
 
 
 if __name__ == "__main__":

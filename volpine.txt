@@ -1,0 +1,139 @@
+
+//@version=5
+indicator("Enhanced SR + MA Cross + Volumatic Trend Pro [v2.0]", overlay=true, max_bars_back=5000, max_lines_count=500, max_labels_count=500)
+// —————— Input Settings ——————
+priceSource       = input(close, "Price Source", group="1. General")
+showSR            = input(true, "Show Support/Resistance", group="1. General")
+showEMA           = input(true, "Show EMA Cross", group="1. General")
+showVolumatic     = input(true, "Show Volumatic Trend", group="1. General")
+
+// —————— Style Settings ——————
+srLineWidth       = input(2, "SR Line Width", minval=1, maxval=5, group="2. Style")
+emaFastColor      = input(color.new(#00FF00, 0), "Fast EMA Color", group="2. Style")
+emaSlowColor      = input(color.new(#FF0000, 0), "Slow EMA Color", group="2. Style")
+volTrendColor     = input(color.new(#0095FF, 0), "Volumatic Trend Color", group="2. Style")
+srZoneOpacity     = input(70, "SR Zone Opacity %", minval=0, maxval=100, group="2. Style")
+
+// —————— Enhanced MA Functions ——————
+// SWMA function
+swma(src) =>
+    src[3] * 1/6 + src[2] * 2/6 + src[1] * 2/6 + src * 1/6
+
+// Zero-lag EMA function
+zlEma(src, length) =>
+    ma1 = ta.ema(swma(src), length)
+    ma2 = ta.ema(ma1, length)
+    ma1 + (ma1 - ma2)
+
+// —————— Support/Resistance System ——————
+if showSR
+    lookback     = input(500, "Lookback Period", minval=50, maxval=2000, group="3. Support/Resistance")
+    minSuccess   = input(30.0, "Min Success Rate %", minval=0.0, maxval=100.0, group="3. Support/Resistance")
+    showTable    = input(true, "Show Stats Table", group="3. Support/Resistance")
+    showBreakout = input(true, "Show Breakout Alerts", group="3. Support/Resistance")
+
+    highRange = ta.highest(priceSource, lookback)
+    lowRange  = ta.lowest(priceSource, lookback)
+    rangeSize = highRange - lowRange
+    binSize   = rangeSize / 10
+
+    // Support/Resistance testing function
+    testLevel(price, len) =>
+        var bull = 0
+        var bear = 0
+        for i = 0 to math.min(len-1, 2000) by 5
+            bull += high[i] >= price and close[i] < price ? 1 : 0
+            bear += low[i] <= price and close[i] > price ? 1 : 0
+        total = bull + bear
+        [bear/total*100, bull/total*100, total]
+
+    // Variables for storing support/resistance levels
+    var srLines = array.new_line()
+    var srLabels = array.new_label()
+    var srBoxes = array.new_box()
+    var srTable = showTable ? table.new(position.top_right, 4, 1) : na
+
+    if barstate.islast
+        array.clear(srLines)
+        array.clear(srLabels)
+        array.clear(srBoxes)
+        
+        if showTable
+            table.cell(srTable, 0, 0, "Level", bgcolor=color.gray)
+            table.cell(srTable, 1, 0, "Support%", bgcolor=color.gray)
+            table.cell(srTable, 2, 0, "Resist%", bgcolor=color.gray)
+            table.cell(srTable, 3, 0, "Tests", bgcolor=color.gray)
+
+        for i = 0 to 10
+            level = lowRange + i * binSize
+            [sRate, rRate, tests] = testLevel(level, lookback)
+            strength = math.max(sRate, rRate)
+
+            if strength >= minSuccess
+                gradColor = color.from_gradient(strength, 0, 100, #AA00FF, #0000FF)
+                
+                // Create SR line
+                line.new(
+                     bar_index - lookback, level, 
+                     bar_index + 100, level,
+                     color=gradColor, 
+                     width=srLineWidth
+                )
+                
+                // Create zone box
+                box.new(
+                     bar_index - lookback, level + binSize / 2,
+                     bar_index + 100, level - binSize / 2,
+                     bgcolor=color.new(gradColor, 100 - srZoneOpacity), 
+                     border_color=color.new(gradColor, 90)
+                )
+                
+                // Create label
+                label.new(
+                     bar_index + 100, level,
+                     text=str.format("S:{0,number,#.#}% R:{1,number,#.#}%", sRate, rRate),
+                     color=color.new(#000000, 80), 
+                     textcolor=color.white,
+                     style=label.style_label_left, 
+                     size=size.small
+                )
+                
+                // Add to table
+                if showTable
+                    row = array.size(table.cells(srTable)[1] / 4
+                    table.cell(srTable, 0, row, str.tostring(math.round(level, 2))
+                    table.cell(srTable, 1, row, str.tostring(math.round(sRate, 1)))
+                    table.cell(srTable, 2, row, str.tostring(math.round(rRate, 1)))
+                    table.cell(srTable, 3, row, str.tostring(tests))
+
+// —————— EMA Cross System ——————
+if showEMA
+    fastLen = input(10, "Fast EMA Length", group="4. EMA Cross")
+    slowLen = input(20, "Slow EMA Length", group="4. EMA Cross")
+    
+    fastMA = zlEma(priceSource, fastLen)
+    slowMA = zlEma(priceSource, slowLen)
+    
+    bullCross = ta.crossover(fastMA, slowMA)
+    bearCross = ta.crossunder(fastMA, slowMA)
+    
+    plot(fastMA, "Fast MA", color=emaFastColor, linewidth=2)
+    plot(slowMA, "Slow MA", color=emaSlowColor, linewidth=2)
+    
+    plotshape(bullCross, "Bullish Cross", shape.triangleup, location.belowbar, color=color.green, size=size.small)
+    plotshape(bearCross, "Bearish Cross", shape.triangledown, location.abovebar, color=color.red, size=size.small)
+
+// —————— Volumatic Trend System ——————
+if showVolumatic
+    trendLength = input(40, "Trend Length", group="5. Volumatic")
+    atrLength = input(200, "ATR Length", group="5. Volumatic")
+    
+    trendMA = zlEma(priceSource, trendLength)
+    atr = ta.atr(atrLength)
+    
+    upperBand = trendMA + atr * 3
+    lowerBand = trendMA - atr * 3
+    
+    plot(trendMA, "Trend MA", color=volTrendColor, linewidth=2)
+    plot(upperBand, "Upper Band", color=color.new(volTrendColor, 70))
+    plot(lowerBand, "Lower Band", color=color.new(volTrendColor, 70)

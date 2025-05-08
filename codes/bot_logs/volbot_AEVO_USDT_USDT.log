@@ -1,0 +1,8 @@
+2025-04-24 03:55:41 - INFO - [volbot_AEVO_USDT_USDT:2391] - --- Starting analysis cycle for AEVO/USDT:USDT ---
+2025-04-24 03:55:41 - DEBUG - [volbot_AEVO_USDT_USDT:1598] - Market Info AEVO/USDT:USDT: Type=swap, Contract=Linear, IsContract=True, PricePrec=0.0001, AmtPrec=0.1, MinAmt=0.1, MinCost=None, ContractSize=1.0
+2025-04-24 03:55:41 - WARNING - [volbot_AEVO_USDT_USDT:1045] - Could not determine price precision from tick size for AEVO/USDT:USDT: 'TradingAnalyzer' object has no attribute 'min_tick_size'. Using default.
+2025-04-24 03:55:41 - WARNING - [volbot_AEVO_USDT_USDT:1105] - [33mRaw DataFrame empty, cannot calculate indicators for AEVO/USDT:USDT.[0m
+2025-04-24 03:55:41 - WARNING - [volbot_AEVO_USDT_USDT:1156] - Cannot update state: Processed DataFrame is empty for AEVO/USDT:USDT.
+2025-04-24 03:55:41 - DEBUG - [volbot_AEVO_USDT_USDT:2426] - Fetching 1150 klines for AEVO/USDT:USDT 5m...
+2025-04-24 03:55:41 - DEBUG - [volbot_AEVO_USDT_USDT:509] - Fetching klines for AEVO/USDT:USDT, 5m, limit=1150 (Attempt 1/4)
+2025-04-24 03:55:41 - INFO - [volbot_AEVO_USDT_USDT:2708] - --- Finished analysis cycle for AEVO/USDT:USDT (0.05s) ---

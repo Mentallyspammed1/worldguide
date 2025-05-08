@@ -1,0 +1,168 @@
+2025-04-28 14:51:34,369 - INFO - Starting analysis for DOT/USDT:USDT on 1 (1m) interval.
+2025-04-28 14:51:34,369 - INFO - Using API Environment: PROD (https://api.bybit.com)
+2025-04-28 14:51:34,370 - INFO - Analysis loop interval: 30 seconds.
+2025-04-28 14:51:34,370 - INFO - [36m--- Starting Analysis Cycle ---[0m
+2025-04-28 14:51:34,371 - ERROR - [91mUnexpected error calling fetch_tickers (Attempt 1/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 2392, in fetch_tickers
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 274, in load_markets_helper
+    currencies = await self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1600, in fetch_currencies
+    response = await self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:34,388 - ERROR - [91mUnexpected error calling fetch_ohlcv (Attempt 1/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 2535, in fetch_ohlcv
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:34,390 - ERROR - [91mUnexpected error calling fetch_order_book (Attempt 1/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 3074, in fetch_order_book
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:39,956 - ERROR - [91mUnexpected error calling fetch_tickers (Attempt 2/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 2392, in fetch_tickers
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 274, in load_markets_helper
+    currencies = await self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1600, in fetch_currencies
+    response = await self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:39,966 - ERROR - [91mUnexpected error calling fetch_ohlcv (Attempt 2/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 2535, in fetch_ohlcv
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:39,968 - ERROR - [91mUnexpected error calling fetch_order_book (Attempt 2/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 3074, in fetch_order_book
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:48,035 - ERROR - [91mUnexpected error calling fetch_tickers (Attempt 3/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 2392, in fetch_tickers
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 274, in load_markets_helper
+    currencies = await self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1600, in fetch_currencies
+    response = await self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:48,038 - ERROR - [91mUnexpected error calling fetch_ohlcv (Attempt 3/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 2535, in fetch_ohlcv
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:48,039 - ERROR - [91mUnexpected error calling fetch_order_book (Attempt 3/5): string indices must be integers, not 'str'[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/neonta_v1.py", line 321, in fetch_with_retry
+    result = await method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 3074, in fetch_order_book
+    await self.load_markets()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-04-28 14:51:54,696 - INFO - Closed ccxt exchange connection.
+2025-04-28 14:51:54,697 - INFO - Application finished.

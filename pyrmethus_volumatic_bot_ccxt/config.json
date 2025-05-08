@@ -1,0 +1,56 @@
+{
+  "exchange": "bybit",
+  "symbol": "BTC/USDT:USDT",
+  "timeframe": "15m",
+  "account_type": "unified",
+  "mode": "live",
+  "log_level": "INFO",
+  "log_filename": "bot_log_{timestamp}.log",
+  "order": {
+    "type": "market",
+    "risk_per_trade_percent": 1.0,
+    "leverage": "10",
+    "tp_ratio": 2.0,
+    "time_in_force": "GTC",
+    "sl_trigger_type": "LastPrice",
+    "tp_trigger_type": "LastPrice",
+    "positionIdx": 0,
+    "max_min_qty_risk_multiplier": 2.0
+  },
+  "strategy": {
+    "params": {
+      "atr_length": 14,
+      "volatility_threshold": 1.5,
+      "trend_ema_length": 50,
+      "ob_confirmation_bars": 2,
+      "ob_breakout_bars": 5
+    },
+    "stop_loss": {
+      "method": "ATR",
+      "atr_multiplier": 1.5,
+      "ob_buffer_atr_mult": 0.1,
+      "ob_buffer_ticks": 5
+    }
+  },
+  "data": {
+    "fetch_limit": 750,
+    "max_df_len": 2000,
+    "fetch_buffer": 50
+  },
+  "checks": {
+    "health_check_interval": 60,
+    "position_check_interval": 30,
+    "ws_timeout_factor": 1.5
+  },
+  "websockets": {
+    "watch_positions": true,
+    "watch_orders": true
+  },
+  "shutdown": {
+    "close_open_position": false
+  },
+  "ccxt_options": {
+    "recvWindow": 10000,
+    "extra_options": {}
+  }
+}

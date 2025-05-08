@@ -1,0 +1,1871 @@
+# -*- coding: utf-8 -*-
+# File: exchange_api.py
+import logging
+import time
+import sys # Import sys for stderr
+from decimal import Decimal, InvalidOperation, ROUND_UP, ROUND_DOWN
+from typing import Any, Dict, List, Optional, Union
+import requests # Import requests for specific error checking
+import asyncio # Import asyncio for asynchronous operations
+import pandas as pd # Import pandas for DataFrame operations
+
+# Use async support version of ccxt
+import ccxt.async_support as ccxt
+
+# Import constants and utility functions
+# Ensure necessary items are imported from utils
+# Use print colors only for initial prints before logging is fully configured
+try:
+    from utils import (MAX_API_RETRIES, RETRY_DELAY_SECONDS,
+                       RETRY_HTTP_STATUS_CODES, get_min_tick_size,
+                       get_price_precision)
+    from utils import (NEON_GREEN_PRINT, NEON_RED_PRINT, NEON_YELLOW_PRINT,
+                       RESET_PRINT)
+except ImportError as e:
+    print(f"CRITICAL ERROR: Failed to import utils in exchange_api: {e}", file=sys.stderr)
+    sys.exit(1)
+
+
+# --- CCXT Exchange Setup ---
+async def initialize_exchange(api_key: str, api_secret: str, config: Dict[str, Any], logger: logging.Logger) -> Optional[ccxt.Exchange]:
+    """Initializes the CCXT exchange object (defaulting to Bybit) with error handling."""
+    lg = logger # Use shorter alias
+    exchange_id = str(config.get("exchange_id", "bybit")).lower() # Ensure exchange_id is string
+    exchange: Optional[ccxt.Exchange] = None # Initialize exchange to None
+
+    try:
+        # Check if the requested exchange is available in CCXT async
+        if not hasattr(ccxt, exchange_id):
+             lg.error(f"{NEON_RED_PRINT}Exchange ID '{exchange_id}' not found in CCXT async library.{RESET_PRINT}")
+             lg.error(f"{NEON_RED_PRINT}Available exchanges (async): {', '.join(ccxt.exchanges)}{RESET_PRINT}")
+             return None
+
+        exchange_class = getattr(ccxt, exchange_id)
+
+        exchange_options = {
+            'apiKey': api_key,
+            'secret': api_secret,
+            'enableRateLimit': True, # Crucial for managing API calls within limits
+            'options': {
+                # Default type might vary by exchange, configure explicitly if needed per exchange
+                # 'defaultType': 'linear', # Example for Bybit linear, can be set per market in config
+                'adjustForTimeDifference': True, # Syncs local time with exchange time
+                # Increased timeouts for robustness on potentially slow connections/APIs
+                'fetchTickerTimeout': 10000, # 10 seconds
+                'fetchBalanceTimeout': 15000, # 15 seconds
+                'createOrderTimeout': 20000, # 20 seconds
+                'cancelOrderTimeout': 15000, # 15 seconds
+                'fetchPositionsTimeout': 15000, # 15 seconds
+                'fetchOHLCVTimeout': 20000, # 20 seconds
+                'fetchOrderBookTimeout': 10000, # 10 seconds
+                'loadMarketsTimeout': 30000, # 30 seconds
+            }
+        }
+
+        # Set default market type from config if specified (e.g., 'spot', 'swap', 'future')
+        default_market_type = config.get("default_market_type")
+        if default_market_type and isinstance(default_market_type, str):
+             exchange_options['options']['defaultType'] = default_market_type.lower()
+             lg.info(f"Setting default market type from config: {exchange_options['options']['defaultType']}")
+        else:
+            # Default to linear for Bybit if no type specified, common for USDT perpetuals
+            if exchange_id == 'bybit':
+                 # Access 'has' from the class, not an uninitialized instance
+                 supported_default_types = getattr(exchange_class, 'has', {}).get('defaultType', [])
+
+                 if 'linear' in supported_default_types:
+                      exchange_options['options']['defaultType'] = 'linear'
+                      lg.info(f"Using default market type 'linear' for Bybit.")
+                 else:
+                      # Fallback to 'swap' or another common type if 'linear' is not listed
+                      common_types = ['swap', 'future', 'spot'] # Order of preference
+                      found_fallback = False
+                      for common_type in common_types:
+                           if common_type in supported_default_types:
+                                exchange_options['options']['defaultType'] = common_type
+                                lg.info(f"Using fallback default market type '{common_type}' for Bybit.")
+                                found_fallback = True
+                                break
+                      if not found_fallback:
+                           lg.warning(f"{NEON_YELLOW_PRINT}Could not determine a suitable default market type for {exchange_id} from {common_types}. Using CCXT's default (might be 'spot').{RESET_PRINT}")
+
+
+        lg.info(f"Instantiating CCXT exchange: {exchange_id}")
+        exchange = exchange_class(exchange_options) # Type hint the exchange instance
+
+        # Set sandbox mode if configured
+        if config.get('use_sandbox', False):
+            lg.warning(f"{NEON_YELLOW_PRINT}Attempting to enable SANDBOX MODE (Testnet) for {exchange.id}...{RESET_PRINT}")
+            # CCXT Standard way to set sandbox mode
+            if hasattr(exchange, 'set_sandbox_mode'):
+                try:
+                    await exchange.set_sandbox_mode(True) # await needed for async method
+                    lg.warning(f"{NEON_YELLOW_PRINT}Sandbox mode enabled via CCXT standard method.{RESET_PRINT}")
+                except Exception as sandbox_err:
+                     lg.warning(f"{NEON_YELLOW_PRINT}Error calling set_sandbox_mode(True) for {exchange.id}: {sandbox_err}. Attempting manual URL override if known...{RESET_PRINT}")
+                     # Fallback to manual URL override if set_sandbox_mode failed or not available
+                     if exchange.id == 'bybit':
+                          lg.info("Attempting manual Bybit testnet URL override...")
+                          # Check current URL to avoid unnecessary overwrite if it's already testnet
+                          current_url = exchange.urls.get('api', '')
+                          testnet_url = 'https://api-testnet.bybit.com'
+                          if testnet_url not in current_url:
+                               exchange.urls['api'] = testnet_url
+                               lg.info(f"Manual Bybit testnet URL set to: {exchange.urls['api']}")
+                          else:
+                               lg.info(f"Bybit testnet URL already set: {exchange.urls['api']}")
+                     else:
+                         lg.warning(f"{exchange.id} does not have a known manual testnet URL override configured here.")
+            else:
+                lg.warning(f"{NEON_YELLOW_PRINT}Exchange {exchange.id} does not support set_sandbox_mode. Ensure API keys are for Testnet and configuration specifies the correct endpoints if needed.{RESET_PRINT}")
+                # Attempt manual URL override if set_sandbox_mode is not hasattr
+                if exchange.id == 'bybit':
+                     lg.info("Attempting manual Bybit testnet URL override...")
+                     current_url = exchange.urls.get('api', '')
+                     testnet_url = 'https://api-testnet.bybit.com'
+                     if testnet_url not in current_url:
+                          exchange.urls['api'] = testnet_url
+                          lg.info(f"Manual Bybit testnet URL set to: {exchange.urls['api']}")
+                     else:
+                          lg.info(f"Bybit testnet URL already set: {exchange.urls['api']}")
+                else:
+                    lg.warning(f"{exchange.id} does not have a known manual testnet URL override configured here.")
+
+
+        lg.info(f"Loading markets for {exchange.id}...")
+        # Load markets with retry logic
+        # Use config's retry delay
+        config_retry_delay = config.get("retry_delay_seconds", RETRY_DELAY_SECONDS)
+
+        for attempt in range(MAX_API_RETRIES + 1):
+            try:
+                 await exchange.load_markets(reload=True, params={'timeout': exchange.options.get('loadMarketsTimeout', 30000)}) # await needed
+                 lg.info(f"Markets loaded successfully for {exchange.id}.")
+                 break # Success
+            except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+                 if attempt < MAX_API_RETRIES:
+                     lg.warning(f"{NEON_YELLOW_PRINT}Network error loading markets (Attempt {attempt + 1}/{MAX_API_RETRIES + 1}): {e}. Retrying in {config_retry_delay}s...{RESET_PRINT}")
+                     await asyncio.sleep(config_retry_delay) # await needed
+                 else:
+                     lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to load markets for {exchange.id}.{RESET_PRINT}")
+                     await exchange.close()
+                     return None
+            except ccxt.RateLimitExceeded as e:
+                wait_time = config_retry_delay * 5 # Longer delay for rate limits
+                lg.warning(f"{NEON_YELLOW_PRINT}Rate limit exceeded loading markets. Retrying in {wait_time}s... (Attempt {attempt+1}/{MAX_API_RETRIES + 1}){RESET_PRINT}")
+                await asyncio.sleep(wait_time) # await needed
+            except Exception as e:
+                 lg.error(f"{NEON_RED_PRINT}Unexpected error loading markets for {exchange.id} (Attempt {attempt + 1}/{MAX_API_RETRIES + 1}): {e}{RESET_PRINT}", exc_info=True)
+                 if attempt < MAX_API_RETRIES:
+                     await asyncio.sleep(config_retry_delay) # await needed
+                 else:
+                      await exchange.close() # Close connection on critical failure
+                      return None
+
+
+        # Test connection and API keys by fetching balance
+        quote_currency = str(config.get("quote_currency", "USDT")) # Ensure currency is string
+        # Default account type might vary, Bybit V5 uses 'CONTRACT' or 'UNIFIED'
+        # Determine account type based on market type used in config
+        test_account_type = None
+        if 'defaultType' in exchange.options['options']:
+             default_type = exchange.options['options']['defaultType']
+             if default_type in ['spot']: test_account_type = 'SPOT'
+             elif default_type in ['swap', 'future', 'option']: test_account_type = 'CONTRACT' # Or 'UNIFIED' for V5
+             # Add more specific mapping if needed
+
+
+        lg.info(f"Attempting initial balance fetch (Account Type: {test_account_type if test_account_type else 'Default'})...")
+        try:
+            # Use params suitable for the specific exchange (e.g., Bybit V5)
+            params = {}
+            if exchange.id == 'bybit' and test_account_type:
+                 # For Bybit V5, 'type' param specifies account type (SPOT, CONTRACT, UNIFIED)
+                 # If using unified account, 'coin' param might be needed for specific coin balance
+                 params={'type': test_account_type} # Start with account type
+                 if test_account_type == 'UNIFIED':
+                      params['coin'] = quote_currency # Specify coin for unified account balance fetch
+
+            # Use the fetch_balance function with retries
+            balance_decimal = await fetch_balance(exchange, quote_currency, lg, params=params) # await needed, pass params
+
+
+            if balance_decimal is not None:
+                 lg.info(f"{NEON_GREEN_PRINT}Successfully connected and fetched initial balance.{RESET_PRINT} (Example: {quote_currency} available: {balance_decimal:.4f})")
+            else:
+                 # Initial balance fetch failed after retries
+                 lg.error(f"{NEON_RED_PRINT}Initial balance fetch for {quote_currency} failed after retries. Check API permissions/account type.{RESET_PRINT}")
+                 # This might be a critical failure if balance is needed for sizing immediately
+                 # Decide if bot should exit or just log warning. For now, log error but allow bot to continue if possible.
+
+
+        except ccxt.AuthenticationError as auth_err:
+             lg.error(f"{NEON_RED_PRINT}CCXT Authentication Error during initial balance fetch: {auth_err}{RESET_PRINT}")
+             lg.error(f"{NEON_RED_PRINT}>> Ensure API keys are correct, have necessary permissions (Read, Trade), match the account type (Real/Testnet), and IP whitelist is correctly set if enabled on the exchange.{RESET_PRINT}")
+             await exchange.close() # Close connection on critical failure
+             return None
+        except Exception as e:
+             # Catch any other exception during the balance test (fetch_balance handles its own retries)
+             lg.error(f"{NEON_RED_PRINT}An error occurred during the initial balance test: {e}{RESET_PRINT}", exc_info=True)
+             # This implies fetch_balance itself might have raised an unexpected error or failed its retries without returning None.
+
+
+        # Return the exchange object on successful initialization (even if initial balance test warned/errored)
+        return exchange
+
+    except ccxt.AuthenticationError as e:
+        # This catches auth errors during the initial exchange class instantiation
+        lg.error(f"{NEON_RED_PRINT}CCXT Authentication Error during initialization: {e}{RESET_PRINT}")
+        lg.error(f"{NEON_RED_PRINT}>> Check API Key/Secret format and validity in your .env file.{RESET_PRINT}")
+    except ccxt.ExchangeError as e:
+        lg.error(f"{NEON_RED_PRINT}CCXT Exchange Error initializing: {e}{RESET_PRINT}")
+    except ccxt.NetworkError as e:
+        lg.error(f"{NEON_RED_PRINT}CCXT Network Error initializing: {e}{RESET_PRINT}")
+    except Exception as e:
+        lg.error(f"{NEON_RED_PRINT}Failed to initialize CCXT exchange: {e}{RESET_PRINT}", exc_info=True)
+
+    # Close the connection if initialization failed before returning None
+    if exchange: # Check if exchange was instantiated
+         await exchange.close() # await needed
+    return None
+
+
+# --- CCXT Data Fetching Functions with Retries ---
+
+async def _handle_fetch_exception(e: Exception, logger: logging.Logger, attempt: int, total_attempts: int, item_desc: str, context_info: str) -> bool:
+     """Helper to log and determine if a fetch exception is retryable."""
+     lg = logger
+     is_retryable = False
+     log_level = lg.warning # Default level for retryable errors
+     error_detail = str(e)
+
+     # Use config's retry delay
+     # Need access to config here ideally, or use a default/global retry delay.
+     # For simplicity, use the constant RETRY_DELAY_SECONDS here.
+     retry_delay = RETRY_DELAY_SECONDS # Standard retry delay
+
+     if isinstance(e, (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout)):
+          log_level = lg.warning
+          is_retryable = True
+          msg = f"Network error fetching {item_desc} for {context_info}"
+     elif isinstance(e, (ccxt.RateLimitExceeded, ccxt.DDoSProtection)):
+          log_level = lg.warning
+          is_retryable = True # Rate limits are usually retryable after a delay
+          msg = f"Rate limit/DDoS triggered fetching {item_desc} for {context_info}"
+          retry_delay = RETRY_DELAY_SECONDS * 5 # Longer delay
+     elif isinstance(e, ccxt.ExchangeError):
+          # Exchange errors are often not retryable, but some might be temporary
+          log_level = lg.error
+          is_retryable = False # Assume not retryable by default
+
+          # Check if it's a common "item not found" or "invalid input" error
+          err_str = error_detail.lower()
+          if "symbol" in err_str or "market" in err_str or "not found" in err_str or "invalid" in err_str or "parameter" in err_str or "argument" in err_str:
+               msg = f"Exchange error (Bad Input?) fetching {item_desc} for {context_info}"
+               is_retryable = False # Don't retry bad input
+          else:
+               # Other exchange errors might be temporary backend issues, cautiously retry
+               msg = f"Potential temporary Exchange error fetching {item_desc} for {context_info}"
+               is_retryable = True # Cautiously retry other exchange errors
+
+     else:
+          log_level = lg.error
+          is_retryable = False # Don't retry unexpected errors
+          msg = f"Unexpected error fetching {item_desc} for {context_info}"
+          lg.error(f"{NEON_RED_PRINT}{msg}: {error_detail}{RESET_PRINT}", exc_info=True) # Log unexpected errors with traceback
+          return False # Not retryable, stop attempts
+
+     # Log the error message at the determined level
+     # Use color formatting via the logger
+     log_level(f"{msg}: {error_detail} (Attempt {attempt + 1}/{total_attempts})")
+
+     # Apply retry delay if retryable and not the last attempt
+     if is_retryable and attempt < total_attempts - 1:
+          lg.warning(f"Waiting {retry_delay}s before retrying {item_desc} fetch for {context_info}...")
+          await asyncio.sleep(retry_delay) # await needed
+
+     return is_retryable # Return True if retryable, False otherwise
+
+
+async def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Decimal]:
+    """Fetch the current price of a trading symbol using CCXT ticker with retries and parsing."""
+    lg = logger
+    item_desc = "price"
+    total_attempts = MAX_API_RETRIES + 1
+    context_info = symbol # Use symbol for context info
+
+    for attempt in range(total_attempts):
+        try:
+            lg.debug(f"Fetching ticker for {symbol}... (Attempt {attempt + 1})")
+            ticker = await exchange.fetch_ticker(symbol) # await needed
+
+            price: Optional[Decimal] = None
+            # Prioritize 'last', then mid-price, then ask/bid
+            last_price = ticker.get('last')
+            bid_price = ticker.get('bid')
+            ask_price = ticker.get('ask')
+
+            # Try 'last' price first
+            if last_price is not None:
+                try:
+                    p = Decimal(str(last_price))
+                    if p > 0: price = p; lg.debug(f"Using 'last' price: {p}")
+                except (InvalidOperation, ValueError, TypeError): lg.debug(f"Invalid 'last' price format: {last_price}")
+
+            # Try bid/ask midpoint if 'last' failed or was invalid
+            if price is None and bid_price is not None and ask_price is not None:
+                try:
+                    bid = Decimal(str(bid_price))
+                    ask = Decimal(str(ask_price))
+                    if bid > 0 and ask > 0 and ask >= bid:
+                        price = (bid + ask) / 2 # Midpoint
+                        lg.debug(f"Using bid/ask midpoint: {price}")
+                    elif ask > 0: # If only ask is valid (e.g., thin book)
+                         price = ask
+                         lg.debug(f"Using 'ask' price (bid invalid): {price}")
+                    elif bid > 0: # If only bid is valid
+                         price = bid
+                         lg.debug(f"Using 'bid' price (ask invalid): {price}")
+                except (InvalidOperation, ValueError, TypeError): lg.debug(f"Invalid bid/ask format: {bid_price}, {ask_price}")
+
+            # Fallbacks if midpoint failed or wasn't available
+            if price is None and ask_price is not None:
+                 try:
+                      p = Decimal(str(ask_price));
+                      if p > 0: price = p; lg.debug(f"Using 'ask' price fallback: {p}")
+                 except (InvalidOperation, ValueError, TypeError): lg.debug(f"Invalid 'ask' price format: {ask_price}")
+
+            if price is None and bid_price is not None:
+                 try:
+                      p = Decimal(str(bid_price));
+                      if p > 0: price = p; lg.debug(f"Using 'bid' price fallback: {p}")
+                 except (InvalidOperation, ValueError, TypeError): lg.debug(f"Invalid 'bid' price format: {bid_price}")
+
+            # Final validation and return
+            if price is not None and price > 0:
+                lg.debug(f"Successfully fetched and parsed price for {symbol}: {price}")
+                return price
+            else:
+                lg.warning(f"{NEON_YELLOW_PRINT}Failed to get a valid price from ticker data for {symbol} on attempt {attempt + 1}. Ticker: {ticker}{RESET_PRINT}")
+                # Fall through to retry logic if price is None or <= 0
+                # Raise a temporary error to trigger retry mechanism
+                raise ccxt.ExchangeError("Invalid price data from ticker")
+
+        except Exception as e:
+             # Use await in the exception handler
+             if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                  return None # Not retryable, exit function
+
+
+    lg.error(f"{NEON_RED_PRINT}Failed to fetch a valid current price for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return None
+
+async def fetch_klines_ccxt(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int = 250, logger: Optional[logging.Logger] = None) -> pd.DataFrame:
+    """Fetch OHLCV kline data using CCXT with retries and processing into DataFrame."""
+    lg = logger or logging.getLogger(__name__) # Use provided logger or default
+    item_desc = "klines"
+    total_attempts = MAX_API_RETRIES + 1
+    context_info = f"{symbol} {timeframe}" # Use symbol and timeframe for context info
+    ohlcv: Optional[List[List[Union[int, float, str]]]] = None # Initialize ohlcv
+
+    # Check if the exchange supports fetching OHLCV data
+    if not exchange.has.get('fetchOHLCV'):
+         lg.error(f"{NEON_RED_PRINT}Exchange {exchange.id} does not support fetchOHLCV.{RESET_PRINT}")
+         return pd.DataFrame()
+
+    for attempt in range(total_attempts):
+         try:
+              lg.debug(f"Fetching klines for {symbol}, {timeframe}, limit={limit} (Attempt {attempt+1}/{total_attempts})")
+              # Fetch the data
+              ohlcv = await exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit) # await needed
+
+              # Basic check if data was returned and is valid format (list of lists)
+              if ohlcv is not None and isinstance(ohlcv, list) and all(isinstance(item, list) and len(item) >= 6 for item in ohlcv):
+                  if not ohlcv: # Empty list returned
+                     lg.warning(f"{NEON_YELLOW_PRINT}fetch_ohlcv returned an empty list for {context_info} (Attempt {attempt+1}). Retrying...{RESET_PRINT}")
+                     # Raise a temporary error to trigger retry mechanism
+                     raise ccxt.ExchangeError("Empty OHLCV list returned")
+                  else: # Valid, non-empty list
+                     break # Success, exit retry loop
+              else: # Invalid data format
+                  lg.warning(f"{NEON_YELLOW_PRINT}fetch_ohlcv returned invalid data (type: {type(ohlcv)}) for {context_info} (Attempt {attempt+1}). Retrying...{RESET_PRINT}")
+                  # Raise a temporary error to trigger retry mechanism
+                  raise ccxt.ExchangeError(f"Invalid OHLCV data format returned")
+
+
+         except Exception as e:
+              # Use await in the exception handler
+              if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                   return pd.DataFrame() # Not retryable, return empty DF
+
+    # After the loop, process the data if successfully fetched
+    if not ohlcv or not isinstance(ohlcv, list) or not all(isinstance(item, list) and len(item) >= 6 for item in ohlcv):
+        lg.error(f"{NEON_RED_PRINT}No valid kline data returned for {context_info} after {total_attempts} attempts.{RESET_PRINT}")
+        return pd.DataFrame()
+
+    try:
+        # Process the data into a pandas DataFrame
+        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+
+        # Basic validation of the DataFrame structure
+        if df.empty:
+             lg.warning(f"{NEON_YELLOW_PRINT}Kline data DataFrame is empty for {context_info}.{RESET_PRINT}")
+             return df # Return empty DataFrame
+
+        # Convert timestamp to datetime objects (UTC)
+        # Use errors='coerce' to handle potential conversion errors gracefully
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', errors='coerce', utc=True)
+        # Drop rows where timestamp conversion failed
+        df.dropna(subset=['timestamp'], inplace=True)
+        if df.empty: # Check if all rows were dropped
+            lg.warning(f"{NEON_YELLOW_PRINT}Kline data for {context_info} empty after timestamp conversion/dropna.{RESET_PRINT}")
+            return pd.DataFrame()
+        # Set timestamp as index
+        df.set_index('timestamp', inplace=True)
+
+        # Convert price/volume columns to numeric, coercing errors to NaN
+        # Use Decimal for OHLC values directly in the DataFrame for accuracy
+        for col in ['open', 'high', 'low', 'close']:
+             # Attempt conversion to Decimal via string, handle None/NaN explicitly
+             df[col] = df[col].apply(lambda x: Decimal(str(x)) if pd.notna(x) else pd.NA) # Use pd.NA for nullable numeric type
+        # Volume can sometimes be large, float might be acceptable, but Decimal is safer
+        df['volume'] = df['volume'].apply(lambda x: Decimal(str(x)) if pd.notna(x) else pd.NA)
+
+        # Data Cleaning: Drop rows with NaN/None in essential price columns or zero/negative close price
+        initial_len = len(df)
+        df.dropna(subset=['open', 'high', 'low', 'close', 'volume'], inplace=True) # Require all OHLCV + Volume to be valid
+        # Ensure close price is positive (relevant for log returns, some indicators)
+        # Filter out rows where close is not Decimal or <= 0
+        df = df[df['close'].apply(lambda x: isinstance(x, Decimal) and x > 0)].copy() # Use .copy() to avoid SettingWithCopyWarning
+        # Ensure volume is non-negative
+        df = df[df['volume'].apply(lambda x: isinstance(x, Decimal) and x >= 0)].copy()
+
+        rows_dropped = initial_len - len(df)
+        if rows_dropped > 0:
+             lg.debug(f"Dropped {rows_dropped} rows with NaN/invalid price/volume data for {context_info}.")
+
+        # Check if DataFrame became empty after cleaning
+        if df.empty:
+             lg.warning(f"{NEON_YELLOW_PRINT}Kline data for {context_info} empty after cleaning.{RESET_PRINT}")
+             return pd.DataFrame()
+
+        # Sort by timestamp index to ensure chronological order (usually already sorted by CCXT, but good practice)
+        df.sort_index(inplace=True)
+
+        lg.info(f"Successfully fetched and processed {len(df)} klines for {context_info}")
+        return df
+
+    # Catch errors that occur during DataFrame processing *after* successful fetch attempt
+    except Exception as e:
+        lg.error(f"{NEON_RED_PRINT}Unexpected error processing klines for {context_info}: {e}{RESET_PRINT}", exc_info=True)
+        return pd.DataFrame()
+
+
+async def fetch_orderbook_ccxt(exchange: ccxt.Exchange, symbol: str, limit: int, logger: logging.Logger) -> Optional[Dict]:
+    """Fetch orderbook data using ccxt with retries and basic validation."""
+    lg = logger
+    item_desc = "orderbook"
+    total_attempts = MAX_API_RETRIES + 1
+    context_info = f"{symbol} limit={limit}"
+
+    # Check if the exchange supports fetching order book data
+    if not exchange.has.get('fetchOrderBook'):
+         lg.error(f"{NEON_RED_PRINT}Exchange {exchange.id} does not support fetchOrderBook.{RESET_PRINT}")
+         return None
+
+    for attempt in range(total_attempts):
+        try:
+            lg.debug(f"Fetching order book for {context_info} (Attempt {attempt+1}/{total_attempts})")
+            orderbook = await exchange.fetch_order_book(symbol, limit=limit) # await needed
+
+            # Validate the received orderbook structure
+            if not orderbook or not isinstance(orderbook, dict) or 'bids' not in orderbook or 'asks' not in orderbook:
+                 lg.warning(f"{NEON_YELLOW_PRINT}Invalid orderbook structure received for {context_info}. Attempt {attempt + 1}. Response: {orderbook}{RESET_PRINT}")
+                 # Raise a temporary error to trigger retry mechanism
+                 raise ccxt.ExchangeError("Invalid orderbook structure")
+            elif not isinstance(orderbook['bids'], list) or not isinstance(orderbook['asks'], list):
+                 lg.warning(f"{NEON_YELLOW_PRINT}Invalid orderbook structure for {context_info}: 'bids' or 'asks' are not lists. Attempt {attempt + 1}. bids type: {type(orderbook['bids'])}, asks type: {type(orderbook['asks'])}{RESET_PRINT}")
+                 # Raise a temporary error to trigger retry mechanism
+                 raise ccxt.ExchangeError("Invalid bids/asks format in orderbook")
+            else:
+                 # Basic validation passed, return the raw dict
+                 lg.debug(f"Successfully fetched orderbook for {context_info} with {len(orderbook.get('bids', []))} bids, {len(orderbook.get('asks', []))} asks.")
+                 # Optional: Deeper validation (check price/size format within bids/asks) can be added here if needed
+                 return orderbook # Return the raw dict on success
+
+        except Exception as e:
+            # Use await in the exception handler
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return None # Not retryable, exit function
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached fetching orderbook for {context_info}.{RESET_PRINT}")
+    return None
+
+
+async def fetch_balance(exchange: ccxt.Exchange, currency: str, logger: logging.Logger, params: Optional[Dict] = None) -> Optional[Decimal]:
+    """Fetches the available balance for a specific currency with retries and robust parsing."""
+    lg = logger
+    item_desc = "balance"
+    total_attempts = MAX_API_RETRIES + 1
+    context_info = currency # Use currency for context info
+
+    request_params = params if params is not None else {}
+
+    for attempt in range(total_attempts):
+        try:
+            balance_info: Optional[Dict] = None # Initialize balance_info
+
+            # --- Attempt fetch_balance with provided params first ---
+            # This handles scenarios like fetching balance for a specific account type or settlement currency
+            lg.debug(f"Fetching balance for {currency} with params {request_params}... (Attempt {attempt+1})")
+            balance_info = await exchange.fetch_balance(params=request_params) # await needed
+
+            # --- Parse the balance_info ---
+            available_balance_str: Optional[str] = None
+
+            # 1. Standard CCXT: balance[currency]['free'] (Prioritize standard format)
+            if isinstance(balance_info, dict) and currency in balance_info and isinstance(balance_info[currency], dict) and balance_info[currency].get('free') is not None:
+                available_balance_str = str(balance_info[currency]['free'])
+                lg.debug(f"Found balance via standard ['{currency}']['free']: {available_balance_str}")
+
+            # 2. Bybit V5 Nested: info.result.list[].coin[].availableToWithdraw/availableBalance (Fallback for Bybit V5)
+            # This handles cases where the standard structure might not be fully populated or available,
+            # especially with params like {'type': 'UNIFIED', 'coin': 'USDT'}
+            elif isinstance(balance_info, dict) and 'info' in balance_info and isinstance(balance_info['info'].get('result'), dict) and isinstance(balance_info['info']['result'].get('list'), list):
+                for account in balance_info['info']['result']['list']:
+                    if isinstance(account.get('coin'), list):
+                        for coin_data in account['coin']:
+                             if coin_data.get('coin') == currency:
+                                 # Prioritize availableToWithdraw > availableBalance > walletBalance
+                                 # Ensure these keys exist and are not None
+                                 free = coin_data.get('availableToWithdraw')
+                                 if free is None: free = coin_data.get('availableBalance')
+                                 if free is None: free = coin_data.get('walletBalance')
+
+                                 if free is not None:
+                                     available_balance_str = str(free)
+                                     lg.debug(f"Found balance via Bybit V5 nested ['available...']: {available_balance_str}")
+                                     break # Found it
+                        if available_balance_str is not None: break # Exit account loop
+                if available_balance_str is None:
+                     lg.debug(f"{currency} balance details not found within Bybit V5 'info.result.list[].coin[]'.")
+
+
+            # 3. Fallback: Top-level 'free' dictionary (less common but possible)
+            elif isinstance(balance_info, dict) and 'free' in balance_info and isinstance(balance_info['free'], dict) and currency in balance_info['free'] and balance_info['free'][currency] is not None:
+                 available_balance_str = str(balance_info['free'][currency])
+                 lg.debug(f"Found balance via top-level 'free' dict: {available_balance_str}")
+
+            # 4. Final Fallback: Use 'total' balance if 'free' is unavailable (Less ideal for trading)
+            if available_balance_str is None:
+                 total_balance_raw = None
+                 if isinstance(balance_info, dict) and currency in balance_info and isinstance(balance_info[currency], dict):
+                     total_balance_raw = balance_info[currency].get('total')
+                 
+                 if total_balance_raw is not None:
+                      lg.warning(f"{NEON_YELLOW_PRINT}Using 'total' balance ({total_balance_raw}) as fallback for available {currency}.{RESET_PRINT}")
+                      available_balance_str = str(total_balance_raw)
+                 else:
+                      lg.error(f"{NEON_RED_PRINT}Could not determine any balance ('free' or 'total') for {currency} from balance info.{RESET_PRINT}")
+                      lg.debug(f"Full balance_info structure: {balance_info}")
+                      # Fall through to retry logic by raising an error
+                      raise ccxt.ExchangeError("Balance data missing or invalid structure after parsing attempts")
+
+
+            # Convert the found string balance to Decimal
+            if available_balance_str is not None: # Should always be true if we haven't raised an error above
+                try:
+                    final_balance = Decimal(available_balance_str)
+                    # Allow zero balance, just not negative
+                    if final_balance >= 0:
+                         lg.info(f"Available {currency} balance: {final_balance:.8f}") # Log with higher precision
+                         return final_balance # Successfully fetched and parsed balance
+                    else:
+                         lg.error(f"{NEON_RED_PRINT}Parsed balance for {currency} is negative ({final_balance}).{RESET_PRINT}")
+                         # Treat negative balance as an error, fall through to retry logic
+                         raise ccxt.ExchangeError(f"Parsed balance is negative: {final_balance}") # Trigger retry
+                except (InvalidOperation, ValueError, TypeError) as e:
+                    lg.error(f"{NEON_RED_PRINT}Failed to convert balance string '{available_balance_str}' to Decimal for {currency}: {e}{RESET_PRINT}")
+                    # Treat conversion error as a fetch error, fall through to retry logic
+                    raise ccxt.ExchangeError(f"Balance string conversion failed: {e}") # Trigger retry
+            else:
+                # This path should ideally not be reached due to the raise in step 4 if no balance_str found.
+                # Defensive: If no balance string was found or parsing failed, indicate data missing/invalid
+                raise ccxt.ExchangeError("Balance data missing or invalid structure (available_balance_str is None)") # Trigger retry
+
+
+        except Exception as e:
+            # Catch any exception during the fetch attempt (including parsing errors re-raised)
+            # Use await in the exception handler
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return None # Not retryable, exit function
+
+
+    # If the retry loop finishes without returning success
+    lg.error(f"{NEON_RED_PRINT}Failed to fetch balance for {currency} after {total_attempts} attempts.{RESET_PRINT}")
+    return None
+
+
+async def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Optional[Dict]:
+    """Gets market information (precision, limits, type) using exchange.market()."""
+    lg = logger
+    try:
+        # Ensure markets are loaded
+        if not exchange.markets or symbol not in exchange.markets:
+             lg.info(f"Market info for {symbol} not loaded or symbol not found. Attempting to reload markets...")
+             try:
+                 # await needed for async load_markets
+                 await exchange.load_markets(reload=True, params={'timeout': exchange.options.get('loadMarketsTimeout', 30000)})
+                 lg.info(f"Markets reloaded successfully for {exchange.id}.")
+             except Exception as load_err:
+                  lg.error(f"{NEON_RED_PRINT}Failed to reload markets: {load_err}{RESET_PRINT}")
+                  # Decide if this is critical. Loading markets is essential.
+                  return None
+
+        # Check again after reload
+        if symbol not in exchange.markets:
+             lg.error(f"{NEON_RED_PRINT}Market {symbol} still not found after reloading.{RESET_PRINT}")
+             # Suggest alternatives if common variations exist (e.g., PERP)
+             if '/' in symbol:
+                 base, quote = symbol.split('/', 1)
+                 # Suggest common perp suffixes (adapt if needed based on exchange)
+                 possible_suffixes = [':USDT', '-PERP', 'PERP', 'USD'] # Example suffixes
+                 possible_symbols = [f"{symbol}{suffix}" for suffix in possible_suffixes] + \
+                                    [f"{base}{suffix}" for suffix in possible_suffixes] # Also try base + suffix
+                 # Check for case variations
+                 possible_symbols.extend([s.lower() for s in possible_symbols] + [s.upper() for s in possible_symbols])
+                 # Add standard base/quote variations
+                 possible_symbols.extend([f"{base}/{quote}", f"{base}{quote}"])
+
+                 matching_symbols = sorted(list(set([s for s in exchange.markets if s in possible_symbols or (s.startswith(base) and any(suffix in s for suffix in possible_suffixes)) or (base in s and quote in s and ('PERP' in s or 'USD' in s)) ])))
+
+
+                 if matching_symbols:
+                     lg.warning(f"{NEON_YELLOW_PRINT}Did you mean one of these? {matching_symbols[:10]}{RESET_PRINT}") # Show a few possibilities
+             return None
+
+        # Retrieve market details
+        market = exchange.market(symbol)
+        if market:
+            # --- Extract relevant details ---
+            market_type = market.get('type', 'unknown') # spot, future, swap, option
+            # CCXT often provides boolean flags like 'spot', 'future', 'swap', 'option', 'linear', 'inverse', 'contract'
+            is_contract = market.get('contract', False) or market_type in ['swap', 'future', 'option'] # Added 'option' to contract check
+            contract_type = "N/A"
+            if is_contract:
+                if market.get('linear'): contract_type = "Linear"
+                elif market.get('inverse'): contract_type = "Inverse"
+                else: contract_type = "Unknown Contract"
+
+            # Log key details
+            lg.debug(
+                f"Market Info for {symbol}: ID={market.get('id')}, Base={market.get('base')}, Quote={market.get('quote')}, "
+                f"Type={market_type}, IsContract={is_contract}, ContractType={contract_type}, "
+                f"Precision(Price/Amount): {market.get('precision', {}).get('price')}/{market.get('precision', {}).get('amount')}, "
+                f"Limits(Amount Min/Max): {market.get('limits', {}).get('amount', {}).get('min')}/{market.get('limits', {}).get('amount', {}).get('max')}, "
+                f"Limits(Cost Min/Max): {market.get('limits', {}).get('cost', {}).get('min')}/{market.get('limits', {}).get('cost', {}).get('max')}, "
+                f"Contract Size: {market.get('contractSize', 'N/A')}"
+            )
+            # Add custom 'is_contract' flag for easier checks later
+            market['is_contract'] = is_contract
+            return market
+        else:
+             # Should not happen if symbol is in exchange.markets, but handle defensively
+             lg.error(f"{NEON_RED_PRINT}Market dictionary unexpectedly not found for validated symbol {symbol}.{RESET_PRINT}")
+             return None
+
+    except ccxt.BadSymbol as e:
+         # This might occur if the symbol format is wrong despite passing initial checks
+         lg.error(f"{NEON_RED_PRINT}Symbol '{symbol}' is invalid or not supported by {exchange.id}: {e}{RESET_PRINT}")
+         return None
+    except ccxt.NetworkError as e:
+         lg.error(f"{NEON_RED_PRINT}Network error getting market info for {symbol}: {e}{RESET_PRINT}")
+         return None # Network errors might be temporary, but critical for this step
+    except Exception as e:
+        # Catch any other unexpected errors
+        lg.error(f"{NEON_RED_PRINT}Unexpected error getting market info for {symbol}: {e}{RESET_PRINT}", exc_info=True)
+        return None
+
+
+async def get_open_position(exchange: ccxt.Exchange, symbol: str, market_info: Dict, logger: logging.Logger) -> Optional[Dict]:
+    """
+    Checks for an open position for the given symbol using fetch_positions.
+    Parses and standardizes relevant fields, converting numeric ones to Decimal.
+    """
+    lg = logger
+    item_desc = "positions"
+    total_attempts = MAX_API_RETRIES + 1
+    context_info = symbol # Use symbol for context info
+
+    if not exchange.has.get('fetchPositions'):
+         lg.warning(f"{NEON_YELLOW_PRINT}Exchange {exchange.id} does not support fetchPositions. Cannot check position status.{RESET_PRINT}")
+         return None
+
+    positions: List[Dict] = [] # Holds the successfully fetched and filtered positions for the symbol
+    market_id = market_info.get('id')
+    if not market_id:
+         lg.error(f"{NEON_RED_PRINT}Cannot fetch position: Market ID missing for {symbol}.{RESET_PRINT}")
+         return None
+
+    for attempt in range(total_attempts):
+        try:
+            lg.debug(f"Fetching positions for {symbol} (ID: {market_id})... (Attempt {attempt + 1}/{total_attempts})")
+
+            fetched_positions_raw: List[Dict] = []
+            fetch_all = False
+            
+            # Attempt to fetch positions for the specific symbol if supported
+            supports_symbol_param = exchange.has.get('fetchPositions') and \
+                                    isinstance(exchange.has['fetchPositions'], dict) and \
+                                    exchange.has['fetchPositions'].get('symbol') is not False
+
+            if supports_symbol_param:
+                try:
+                    lg.debug(f"Attempting to fetch positions with params {{'symbol': '{market_id}'}} for {exchange.id}.")
+                    fetched_positions_raw = await exchange.fetch_positions(params={'symbol': market_id})
+                    lg.debug(f"Fetched {len(fetched_positions_raw)} position entries for {symbol} via params.")
+                except (ccxt.ArgumentsRequired, ccxt.NotSupported) as e_specific_fetch:
+                    lg.debug(f"Exchange {exchange.id} fetchPositions params not supported as expected ({e_specific_fetch}). Falling back to fetching all.")
+                    fetch_all = True
+                except ccxt.ExchangeError as e_specific_fetch:
+                    no_pos_codes_v5 = [110025, 110026]
+                    no_pos_messages = ["position not found", "position is closed", "no position found", "not found", "does not exist"]
+                    err_str = str(e_specific_fetch).lower()
+                    bybit_code = getattr(e_specific_fetch, 'code', None)
+
+                    if any(msg in err_str for msg in no_pos_messages) or \
+                       (exchange.id == 'bybit' and bybit_code in no_pos_codes_v5):
+                        lg.info(f"No position found for {symbol} (Exchange confirmed via specific fetch error: {e_specific_fetch}).")
+                        return None # Confirmed no position
+                    else:
+                        lg.warning(f"{NEON_YELLOW_PRINT}Exchange error fetching position for {symbol} via params: {e_specific_fetch}. Falling back to fetching all...{RESET_PRINT}", exc_info=False)
+                        fetch_all = True
+                except Exception as e_specific_fetch:
+                    lg.warning(f"{NEON_YELLOW_PRINT}Error fetching position for {symbol} via params: {e_specific_fetch}. Falling back to fetching all...{RESET_PRINT}", exc_info=True)
+                    fetch_all = True
+            else:
+                lg.debug(f"Exchange {exchange.id} likely doesn't support fetching positions by symbol param. Fetching all.")
+                fetch_all = True
+
+            # Fetch all positions if fallback flag is set
+            if fetch_all:
+                lg.debug(f"Attempting to fetch all positions for {exchange.id}...")
+                all_fetched_raw = await exchange.fetch_positions() 
+                if isinstance(all_fetched_raw, list):
+                    fetched_positions_raw = [p for p in all_fetched_raw if p.get('symbol') == symbol]
+                    lg.debug(f"Fetched {len(all_fetched_raw)} total positions, found {len(fetched_positions_raw)} matching {symbol}.")
+                else:
+                    lg.warning(f"{NEON_YELLOW_PRINT}fetch_positions (all) returned invalid data type (expected list, got {type(all_fetched_raw)}). Retrying...{RESET_PRINT}")
+                    raise ccxt.ExchangeError(f"Invalid position data format from fetch_positions(all) (type: {type(all_fetched_raw)})")
+            
+            # At this point, fetched_positions_raw should be a list of positions for the target symbol
+            # (or an empty list if no positions or if specific fetch failed and fetch_all was not triggered or also failed to produce a list)
+            if not isinstance(fetched_positions_raw, list): # Should have been caught by specific/all fetch logic if not list
+                lg.warning(f"{NEON_YELLOW_PRINT}Position data is not a list (type: {type(fetched_positions_raw)}) after fetch attempts. Retrying...{RESET_PRINT}")
+                raise ccxt.ExchangeError(f"Position data is not a list (type: {type(fetched_positions_raw)})")
+
+            if not fetched_positions_raw: # Empty list means no positions for this symbol from this attempt's data
+                lg.info(f"No open position found for {symbol} (exchange data for attempt {attempt+1} shows no position).")
+                return None # Confirmed no position for this symbol
+
+            # If we have positions, assign to the outer 'positions' and break
+            positions = fetched_positions_raw
+            break # Exit retry loop, proceed to process 'positions'
+
+        except Exception as e:
+             if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                  return None # Not retryable, exit function
+
+
+    # After the retry loop, if positions list is still empty or invalid, return None
+    if not positions or not isinstance(positions, list) or not all(isinstance(p, dict) for p in positions):
+        lg.error(f"{NEON_RED_PRINT}Failed to fetch any valid position data for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+        return None
+
+
+    # --- Process the fetched positions list to find the *single* active position ---
+    active_position: Optional[Dict[str, Any]] = None
+    size_threshold = Decimal('1e-9') # Default fallback threshold
+    try:
+        amount_prec_val = market_info.get('precision', {}).get('amount')
+        if amount_prec_val is not None:
+            if isinstance(amount_prec_val, (float, str)):
+                 try:
+                      amount_step = Decimal(str(amount_prec_val))
+                      if amount_step > 0: size_threshold = amount_step / Decimal('2')
+                 except (InvalidOperation, ValueError, TypeError): pass 
+            elif isinstance(amount_prec_val, int) and amount_prec_val >= 0: 
+                 size_threshold = Decimal('1e-' + str(amount_prec_val + 1)) 
+        if size_threshold <= 0: size_threshold = Decimal('1e-9') 
+    except Exception as thresh_err:
+        lg.debug(f"Could not determine size threshold from market precision ({thresh_err}). Using default: {size_threshold:.12f}") 
+    lg.debug(f"Using position size threshold: {size_threshold:.12f} for {symbol}") 
+
+    for pos in positions:
+        pos_size_raw = pos.get('contracts') or pos.get('size') or pos.get('info', {}).get('size')
+        size_decimal = Decimal('0') 
+        if pos_size_raw is not None:
+            try:
+                size_decimal = Decimal(str(pos_size_raw))
+            except (InvalidOperation, ValueError, TypeError) as parse_err:
+                lg.warning(f"Could not parse position size '{pos_size_raw}' for {symbol}: {parse_err}. Skipping position entry.", exc_info=False)
+                continue 
+
+        if abs(size_decimal) > size_threshold:
+            active_position = pos 
+            active_position['contractsDecimal'] = size_decimal 
+            side = active_position.get('side') 
+            if side is None: side = active_position.get('info', {}).get('side') 
+            if side is None: side = active_position.get('currentQtyDirection') 
+
+            if side not in ['long', 'short']:
+                if size_decimal > size_threshold: side = 'long'
+                elif size_decimal < -size_threshold: side = 'short'
+                else:
+                    lg.warning(f"Position size {size_decimal:.12f} near zero for {symbol}, cannot reliably determine side. Skipping this entry.", exc_info=False)
+                    continue 
+            active_position['side'] = side 
+            lg.debug(f"Found active position entry for {symbol}. Side: {side.upper()}, Raw Size: {pos_size_raw}, Parsed Size: {size_decimal:.12f}.")
+            break
+        else:
+            lg.debug(f"Skipping position entry with size {size_decimal:.12f} <= threshold {size_threshold:.12f} for {symbol}. Position: {pos}")
+            continue 
+
+    # --- Post-Process the found active position (if any) ---
+    if active_position:
+        try:
+            if 'contractsDecimal' not in active_position or 'side' not in active_position:
+                raise ValueError("ContractsDecimal or side missing after initial position processing.")
+            # size_decimal = active_position['contractsDecimal'] # Already available
+            side = active_position['side'] 
+
+            entry_price_raw = active_position.get('entryPrice') or active_position.get('avgPrice') or active_position.get('info', {}).get('avgPrice')
+            entry_price_decimal: Optional[Decimal] = None
+            if entry_price_raw is not None:
+                try:
+                    entry_price_decimal = Decimal(str(entry_price_raw))
+                    if entry_price_decimal <= 0: 
+                        lg.warning(f"Parsed entry price {entry_price_decimal} is not positive for {symbol}. Setting to None.", exc_info=False)
+                        entry_price_decimal = None
+                except (InvalidOperation, ValueError, TypeError) as parse_err:
+                     lg.warning(f"Could not parse entryPrice '{entry_price_raw}' for {symbol}: {parse_err}. Entry Price will be None.", exc_info=False)
+                     entry_price_decimal = None 
+            active_position['entryPriceDecimal'] = entry_price_decimal
+
+            liq_price_raw = active_position.get('liquidationPrice') or active_position.get('info', {}).get('liqPrice')
+            liq_price_decimal: Optional[Decimal] = None
+            if liq_price_raw is not None:
+                 try:
+                     liq_price_decimal = Decimal(str(liq_price_raw))
+                 except (InvalidOperation, ValueError, TypeError): 
+                     lg.debug(f"Could not parse liqPrice '{liq_price_raw}' for {symbol}. Liq Price will be None.", exc_info=False)
+                     liq_price_decimal = None
+            active_position['liquidationPriceDecimal'] = liq_price_decimal
+
+            unrealized_pnl_raw = active_position.get('unrealizedPnl') or active_position.get('info', {}).get('unrealisedPnl')
+            unrealized_pnl_decimal: Optional[Decimal] = None
+            if unrealized_pnl_raw is not None:
+                 try:
+                     unrealized_pnl_decimal = Decimal(str(unrealized_pnl_raw))
+                 except (InvalidOperation, ValueError, TypeError):
+                     lg.debug(f"Could not parse unrealizedPnl '{unrealized_pnl_raw}' for {symbol}. PnL will be None.", exc_info=False)
+                     unrealized_pnl_decimal = None
+            active_position['unrealizedPnlDecimal'] = unrealized_pnl_decimal
+
+            timestamp_ms: Optional[int] = active_position.get('timestamp') 
+            if timestamp_ms is None: timestamp_ms = active_position.get('info', {}).get('createTime') 
+            if timestamp_ms is None: timestamp_ms = active_position.get('info', {}).get('updatedTime') 
+
+            if timestamp_ms is not None and not isinstance(timestamp_ms, int):
+                 try: timestamp_ms = int(float(str(timestamp_ms))) 
+                 except (ValueError, TypeError): timestamp_ms = None 
+            active_position['timestamp_ms'] = timestamp_ms 
+
+            sl_price_raw = active_position.get('stopLossPrice') or active_position.get('info', {}).get('stopLoss')
+            tp_price_raw = active_position.get('takeProfitPrice') or active_position.get('info', {}).get('takeProfit')
+            
+            active_position['stopLossPriceDecimal'] = Decimal(str(sl_price_raw)) if sl_price_raw is not None and str(sl_price_raw).strip() not in ['0', '0.0', '0.00000000'] else None # More robust zero check
+            active_position['takeProfitPriceDecimal'] = Decimal(str(tp_price_raw)) if tp_price_raw is not None and str(tp_price_raw).strip() not in ['0', '0.0', '0.00000000'] else None
+
+            tsl_value_raw = active_position.get('trailingStopLossValue') or active_position.get('info', {}).get('trailingStop')
+            tsl_activation_price_raw = active_position.get('trailingStopActivationPrice') or active_position.get('info', {}).get('activePrice') 
+            
+            active_position['trailingStopLossValueDecimal'] = Decimal(str(tsl_value_raw)) if tsl_value_raw is not None and str(tsl_value_raw).strip() not in ['0', '0.0', '0.00000000'] else None
+            active_position['trailingStopActivationPriceDecimal'] = Decimal(str(tsl_activation_price_raw)) if tsl_activation_price_raw is not None and str(tsl_activation_price_raw).strip() not in ['0', '0.0', '0.00000000'] else None
+
+            price_precision = get_price_precision(market_info, lg)
+            amount_precision_log = market_info.get('amountPrecision')
+            if amount_precision_log is None:
+                 amount_step_raw = market_info.get('precision', {}).get('amount')
+                 if isinstance(amount_step_raw, (float, str)):
+                      try:
+                           amount_step_dec = Decimal(str(amount_step_raw))
+                           if amount_step_dec > 0: amount_precision_log = abs(amount_step_dec.normalize().as_tuple().exponent)
+                      except: pass 
+            if amount_precision_log is None or not isinstance(amount_precision_log, int) or amount_precision_log < 0:
+                 amount_precision_log = 8 
+
+            def format_log_val(val_decimal: Optional[Decimal], prec: int, is_price: bool = True, allow_zero: bool = True) -> str:
+                 if val_decimal is None: return 'N/A'
+                 if not allow_zero and val_decimal == Decimal('0'): return 'N/A' 
+                 try:
+                      return f"{val_decimal:.{prec}f}"
+                 except Exception:
+                      return str(val_decimal)
+
+            entry_price_fmt = format_log_val(active_position.get('entryPriceDecimal'), price_precision, allow_zero=False)
+            contracts_fmt = format_log_val(abs(active_position.get('contractsDecimal', Decimal('0'))), amount_precision_log, is_price=False, allow_zero=False)
+            liq_price_fmt = format_log_val(active_position.get('liquidationPriceDecimal'), price_precision, allow_zero=True) 
+            leverage_str = active_position.get('leverage') or active_position.get('info', {}).get('leverage')
+            leverage_fmt = f"{Decimal(str(leverage_str)):.1f}x" if leverage_str is not None else 'N/A'
+            pnl_fmt = format_log_val(active_position.get('unrealizedPnlDecimal'), 4, is_price=False, allow_zero=True) 
+            sl_price_fmt = format_log_val(active_position.get('stopLossPriceDecimal'), price_precision, allow_zero=False) 
+            tp_price_fmt = format_log_val(active_position.get('takeProfitPriceDecimal'), price_precision, allow_zero=False) 
+
+            tsl_dist_fmt = format_log_val(active_position.get('trailingStopLossValueDecimal'), price_precision + 2, is_price=False, allow_zero=False) 
+            tsl_act_fmt = format_log_val(active_position.get('trailingStopActivationPriceDecimal'), price_precision, allow_zero=False) 
+
+            logger.info(f"Active {side.upper()} position found ({symbol}): "
+                        f"Size={contracts_fmt}, Entry={entry_price_fmt}, Liq={liq_price_fmt}, "
+                        f"Lev={leverage_fmt}, PnL={pnl_fmt}, "
+                        f"SL={sl_price_fmt}, TP={tp_price_fmt}, "
+                        f"TSL(Dist/Act): {tsl_dist_fmt}/{tsl_act_fmt}")
+            logger.debug(f"Full position details for {symbol}: {active_position}")
+            return active_position 
+
+        except (InvalidOperation, ValueError, TypeError) as proc_err:
+             lg.error(f"{NEON_RED_PRINT}Error processing active position details for {symbol} (Decimal/Type Error): {proc_err}{RESET_PRINT}", exc_info=False)
+             lg.debug(f"Problematic position data: {active_position}")
+             return None 
+        except Exception as proc_err:
+             lg.error(f"{NEON_RED_PRINT}Error processing active position details for {symbol}: {proc_err}{RESET_PRINT}", exc_info=True)
+             lg.debug(f"Problematic position data: {active_position}")
+             return None 
+
+    else:
+        logger.info(f"No active open position found for {symbol} (size > {size_threshold:.8f}).")
+        return None
+
+    # Fallthrough case, should ideally not be reached.
+    # lg.debug(f"Fell through get_open_position for {symbol}, returning None.") # For debugging if it ever happens
+    return None
+
+
+async def set_leverage_ccxt(exchange: ccxt.Exchange, symbol: str, leverage: int, market_info: Dict, logger: logging.Logger) -> bool:
+    """Sets leverage for a symbol using CCXT, handling exchange specifics (like Bybit V5)."""
+    lg = logger
+    is_contract = market_info.get('is_contract', False)
+
+    if not is_contract:
+        lg.info(f"Leverage setting skipped for {symbol} (Not a contract market).")
+        return True 
+    if not isinstance(leverage, int) or leverage <= 0:
+        lg.warning(f"{NEON_YELLOW_PRINT}Leverage setting skipped for {symbol}: Invalid leverage value ({leverage}). Must be a positive integer.{RESET_PRINT}")
+        return False
+    
+    if not exchange.has.get('setLeverage'):
+         if not exchange.has.get('setMarginMode'):
+              lg.error(f"{NEON_RED_PRINT}Exchange {exchange.id} does not support setLeverage or setMarginMode via CCXT. Cannot set leverage.{RESET_PRINT}")
+              return False
+         else:
+              lg.warning(f"{NEON_YELLOW_PRINT}Exchange {exchange.id} uses setMarginMode for leverage. Ensure you set margin mode correctly (e.g., ISOLATED). setLeverage might still work or require custom params.{RESET_PRINT}")
+
+    lg.info(f"Attempting to set leverage for {symbol} to {leverage}x...")
+    params = {}
+    if 'bybit' in exchange.id.lower() and is_contract: 
+         leverage_str = str(leverage)
+         params = {'buyLeverage': leverage_str, 'sellLeverage': leverage_str}
+         lg.debug(f"Using Bybit V5 params for set_leverage: {params}")
+
+    item_desc = "leverage"
+    context_info = symbol
+    total_attempts = MAX_API_RETRIES + 1
+
+    for attempt in range(total_attempts):
+        try:
+            response = await exchange.set_leverage(leverage=leverage, symbol=symbol, params=params)
+            lg.debug(f"Set leverage raw response for {symbol}: {response}")
+
+            if isinstance(response, dict):
+                 ret_code = response.get('retCode')
+                 ret_msg = response.get('retMsg', '')
+                 if ret_code == 0:
+                     if "not modified" in ret_msg.lower():
+                          lg.info(f"{NEON_YELLOW_PRINT}Leverage for {symbol} likely already set to {leverage}x (Exchange confirmation: '{ret_msg}'). Treating as success.{RESET_PRINT}")
+                     else:
+                          lg.info(f"{NEON_GREEN_PRINT}Leverage for {symbol} successfully set/requested to {leverage}x.{RESET_PRINT}")
+                     return True
+                 else:
+                      raise ccxt.ExchangeError(f"API returned retCode={ret_code}, retMsg='{ret_msg}' for set_leverage")
+
+            lg.info(f"Leverage for {symbol} set/requested to {leverage}x (No specific confirmation in response, assuming success if no error).")
+            return True 
+
+        except Exception as e:
+            # Check for "not modified" type errors specifically, even if not parsed above
+            err_str = str(e).lower()
+            exchange_code = getattr(e, 'code', None) # For Bybit specific codes
+            if 'bybit' in exchange.id.lower() and (exchange_code == 110045 or "leverage not modified" in err_str): # Bybit: 110045 is "Leverage not modified"
+                lg.info(f"{NEON_YELLOW_PRINT}Leverage for {symbol} likely already set to {leverage}x (Error indicates no change: {e}). Treating as success.{RESET_PRINT}")
+                return True
+            
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return False # Non-retryable error after handling common success cases like "not modified"
+
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to set leverage for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return False
+
+
+async def place_trade(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    trade_signal: str, 
+    position_size: Decimal, 
+    market_info: Dict, 
+    logger: Optional[logging.Logger] = None,
+    order_type: str = 'market', 
+    limit_price: Optional[Decimal] = None, 
+    stop_price: Optional[Decimal] = None, 
+    base_price: Optional[Decimal] = None, 
+    reduce_only: bool = False, 
+    params: Optional[Dict] = None 
+) -> Optional[Dict]:
+    lg = logger or logging.getLogger(__name__)
+    side = 'buy' if trade_signal == "BUY" else 'sell'
+    is_contract = market_info.get('is_contract', False)
+    size_unit = market_info.get('base', '') 
+    if is_contract:
+        contract_size_desc = market_info.get('contractSize') 
+        # Use base if contractSize is 1 or not descriptive like "Contracts"
+        if contract_size_desc == Decimal('1') or contract_size_desc == 'Contracts' or contract_size_desc is None:
+            if market_info.get('base'): size_unit = market_info['base']
+        elif isinstance(contract_size_desc, (str, Decimal, float, int)):
+             size_unit = str(contract_size_desc) # Use the contract size itself if it's a value
+        else: # Fallback if contractSize is unusual
+             if market_info.get('base'): size_unit = market_info['base']
+
+
+    action_desc = "Close/Reduce" if reduce_only else "Open/Increase"
+    item_desc = f"{action_desc} {order_type} order"
+    context_info = symbol
+
+    if not isinstance(position_size, Decimal) or position_size <= 0:
+         lg.error(f"{NEON_RED_PRINT}Trade aborted ({symbol} {side} {item_desc}): Invalid or zero position size ({position_size}).{RESET_PRINT}")
+         return None
+
+    amount_for_api: Optional[float] = None
+    size_str_formatted: Optional[str] = None
+    amount_decimal_formatted: Optional[Decimal] = None
+    try:
+        size_str_raw = f"{position_size:.{max(8, abs(position_size.as_tuple().exponent))}f}" # Ensure enough initial precision
+        size_str_formatted = exchange.amount_to_precision(symbol, size_str_raw)
+        amount_decimal_formatted = Decimal(size_str_formatted)
+
+        if amount_decimal_formatted <= 0:
+            lg.error(f"{NEON_RED_PRINT}Trade aborted ({symbol} {side} {item_desc}): Formatted position size resulted in zero or negative ({amount_decimal_formatted}). Original: {position_size}. Formatted string: '{size_str_formatted}'{RESET_PRINT}")
+            return None
+        amount_for_api = float(amount_decimal_formatted)
+    except (ccxt.ExchangeError, InvalidOperation, ValueError, TypeError) as e:
+        lg.error(f"{NEON_RED_PRINT}Trade aborted ({symbol} {side} {item_desc}): Failed to format/convert size {position_size}: {e}{RESET_PRINT}", exc_info=True)
+        return None
+
+
+    price_for_api: Optional[float] = None
+    price_str_formatted: Optional[str] = None
+    stop_price_for_api: Optional[float] = None
+    stop_price_str_formatted: Optional[str] = None
+    base_price_for_api: Optional[float] = None
+    base_price_str_formatted: Optional[str] = None
+
+    def format_price_for_api(price_decimal: Optional[Decimal], price_type_desc: str) -> Optional[str]:
+        if not isinstance(price_decimal, Decimal): return None
+        if price_decimal <= 0:
+             lg.warning(f"{NEON_YELLOW_PRINT}Attempted to format non-positive {price_type_desc} {price_decimal} for {symbol}. Skipping formatting.{RESET_PRINT}")
+             return None
+        try:
+            return exchange.price_to_precision(symbol, float(price_decimal))
+        except Exception as e:
+            lg.error(f"{NEON_RED_PRINT}Failed to format {price_type_desc} {price_decimal} for {symbol}: {e}{RESET_PRINT}", exc_info=False)
+            return None 
+
+    if 'limit' in order_type.lower(): # More robust check for limit type
+        if limit_price is None or not isinstance(limit_price, Decimal) or limit_price <= 0:
+            lg.error(f"{NEON_RED_PRINT}Trade aborted ({symbol} {side} {item_desc}): {order_type} requested but invalid limit_price ({limit_price}) provided.{RESET_PRINT}")
+            return None
+        price_str_formatted = format_price_for_api(limit_price, "limit price")
+        if price_str_formatted is None: return None 
+        price_for_api = float(price_str_formatted) 
+
+    if 'stop' in order_type.lower() or 'profit' in order_type.lower(): # More robust check
+         if stop_price is None or not isinstance(stop_price, Decimal) or stop_price <= 0:
+              lg.error(f"{NEON_RED_PRINT}Trade aborted ({symbol} {side} {item_desc}): {order_type} requested but invalid stop_price ({stop_price}) provided.{RESET_PRINT}")
+              return None
+         stop_price_str_formatted = format_price_for_api(stop_price, "stop price")
+         if stop_price_str_formatted is None: return None 
+         stop_price_for_api = float(stop_price_str_formatted) 
+
+    if base_price is not None and isinstance(base_price, Decimal) and base_price > 0:
+         base_price_str_formatted = format_price_for_api(base_price, "base price")
+         if base_price_str_formatted is not None:
+              base_price_for_api = float(base_price_str_formatted) 
+
+    order_params: Dict[str, Any] = {}
+    if params:
+         order_params.update(params)
+    order_params['reduceOnly'] = reduce_only
+    if stop_price_for_api is not None:
+         order_params['stopPrice'] = stop_price_for_api
+    if base_price_for_api is not None:
+         order_params['basePrice'] = base_price_for_api
+
+    if reduce_only:
+        if 'market' in order_type.lower(): 
+             if exchange.id == 'bybit' and (order_type.lower() in ['market', 'limit_market']): 
+                  order_params['timeInForce'] = 'IOC' 
+                  lg.debug(f"Setting TimeInForce=IOC for Bybit {order_type} reduce-only order.")
+             # Generic check (less reliable than exchange-specific)
+             elif exchange.has.get(f'create{order_type.capitalize()}Order', {}).get('timeInForce') and 'IOC' in exchange.markets[symbol].get('info',{}).get('time_in_force',[]): # Check if market supports IOC
+                  order_params['timeInForce'] = 'IOC'
+                  lg.debug(f"Setting TimeInForce=IOC for generic {order_type} reduce-only order based on exchange.has and market info.")
+             else:
+                  lg.debug(f"Exchange {exchange.id} does not explicitly support TimeInForce=IOC for {order_type} orders or it's unknown for {symbol}. Skipping IOC.")
+
+    if 'bybit' in exchange.id.lower() and is_contract: 
+         if 'positionIdx' not in order_params:
+              order_params['positionIdx'] = 0 
+              lg.debug(f"Using default positionIdx: {order_params['positionIdx']} for Bybit contract order.")
+         else:
+              lg.debug(f"Using provided positionIdx: {order_params['positionIdx']} for Bybit contract order.")
+
+    log_details = [
+        f"Attempting to place {action_desc} {side.upper()} {order_type.upper()} order for {symbol}:",
+        f"  Size: {amount_decimal_formatted} {size_unit} (API: {amount_for_api})" # Log both Decimal and float for API
+    ]
+    if price_for_api is not None: log_details.append(f"  Limit Price: {price_str_formatted} (API: {price_for_api})")
+    if stop_price_for_api is not None: log_details.append(f"  Stop Price: {stop_price_str_formatted} (API: {stop_price_for_api})")
+    if base_price_for_api is not None: log_details.append(f"  Base Price: {base_price_str_formatted} (API: {base_price_for_api})")
+    log_details.append(f"  ReduceOnly: {reduce_only}")
+    
+    log_params_safe = {k: (v if not isinstance(v, Decimal) else str(v)) for k,v in order_params.items()} # Convert Decimals in params to str for logging
+    log_details.append(f"  Params: {log_params_safe}") 
+    lg.info("\n".join(log_details))
+
+    order: Optional[Dict] = None
+    total_attempts = MAX_API_RETRIES + 1
+
+    for attempt in range(total_attempts):
+        try:
+            order = await exchange.create_order(
+                symbol=symbol, type=order_type, side=side,
+                amount=amount_for_api, price=price_for_api, 
+                params=order_params
+            )
+            break
+        except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info): return None
+        except (ccxt.RateLimitExceeded, ccxt.DDoSProtection) as e:
+             if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info): return None
+        except ccxt.AuthenticationError as e:
+             lg.error(f"{NEON_RED_PRINT}Authentication error placing {item_desc} for {symbol}: {e}{RESET_PRINT}")
+             return None 
+        except ccxt.InsufficientFunds as e:
+             lg.error(f"{NEON_RED_PRINT}Insufficient funds to place {item_desc} for {symbol}: {e}{RESET_PRINT}")
+             try:
+                 quote_ccy = market_info.get('quote', 'USDT') 
+                 balance = await fetch_balance(exchange, quote_ccy, lg)
+                 if balance is not None: lg.info(f"Current Balance for {quote_ccy}: {balance:.4f}")
+             except Exception as bal_e: lg.debug(f"Could not fetch balance during InsufficientFunds: {bal_e}")
+             return None
+        except ccxt.InvalidOrder as e:
+            lg.error(f"{NEON_RED_PRINT}Invalid order parameters for {item_desc} for {symbol}: {e}{RESET_PRINT}")
+            lg.error(f"  > Used Parameters: amount={amount_for_api}, price={price_for_api if 'limit' in order_type.lower() else 'N/A'}, stopPrice={stop_price_for_api if 'stop' in order_type.lower() or 'profit' in order_type.lower() else 'N/A'}, basePrice={base_price_for_api if base_price_for_api is not None else 'N/A'}, params={log_params_safe}")
+            err_str = str(e).lower()
+            if "price" in err_str and ("tick size" in err_str or "precision" in err_str): lg.error("  >> Hint: Check limit_price/stop_price alignment with market tick size/precision.")
+            if "size" in err_str and ("step size" in err_str or "precision" in err_str or "lot size" in err_str) : lg.error("  >> Hint: Check position_size alignment with market amount step/lot size/precision.")
+            if "minnotional" in err_str or "cost" in err_str or "minimum value" in err_str or "min_qty" in err_str or "min_amount" in err_str: lg.error("  >> Hint: Order cost/amount might be below the minimum required.")
+            if "stop price must be" in err_str or "base price must be" in err_str: lg.error("  >> Hint: Check stopPrice/basePrice validity relative to current market price and order side.")
+            exchange_code = getattr(e, 'code', None)
+            if reduce_only and exchange_code == 110014: # Bybit V5: Reduce-only order failed (e.g. size too large)
+                 lg.error(f"{NEON_YELLOW_PRINT}  >> Hint (Bybit 110014): Reduce-only order failed. Position might be smaller than reduce size, or side wrong?{RESET_PRINT}")
+            return None
+        except ccxt.ExchangeError as e:
+            exchange_code = getattr(e, 'code', None)
+            lg.error(f"{NEON_RED_PRINT}Exchange error placing {item_desc} for {symbol}: {e} (Code: {exchange_code}){RESET_PRINT}")
+            if reduce_only and exchange_code == 110025: # Bybit V5: Position has been closed
+                lg.warning(f"{NEON_YELLOW_PRINT} >> Hint (Bybit 110025): Position might have been closed already when trying to place reduce-only order. Treating as successful close attempt.{RESET_PRINT}")
+                return {'id': 'AlreadyClosed', 'status': 'closed', 'symbol': symbol, 'side': side, 
+                        'amount': amount_for_api, 'filled': amount_for_api, 
+                        'info': {'retCode': 0, 'retMsg': 'Position already closed (simulated)'}}
+            # For most other exchange errors on order placement, don't retry to avoid duplicates.
+            return None 
+
+        except Exception as e:
+            lg.error(f"{NEON_RED_PRINT}Unexpected error placing {item_desc} for {symbol}: {e}{RESET_PRINT}", exc_info=True)
+            return None 
+
+    if order and isinstance(order, dict) and order.get('id'):
+        order_id = order['id']
+        order_status = order.get('status', 'N/A') 
+        filled_amount_raw = order.get('filled')
+        filled_amount = float(filled_amount_raw) if filled_amount_raw is not None else 0.0
+        avg_price_raw = order.get('average')
+        avg_price = float(avg_price_raw) if avg_price_raw is not None else None
+
+
+        lg.info(f"{NEON_GREEN_PRINT}{action_desc} Trade Placed Successfully!{RESET_PRINT}")
+        lg.info(f"  Order ID: {order_id}, Initial Status: {order_status}")
+        if filled_amount > 0: lg.info(f"  Filled Amount: {filled_amount}")
+        if avg_price: lg.info(f"  Average Fill Price: {avg_price}")
+        lg.debug(f"Raw order response ({symbol} {side} {item_desc}): {order}")
+        return order
+    else:
+         lg.error(f"{NEON_RED_PRINT}Order placement call returned an invalid response or failed after {total_attempts} attempts for {symbol}.{RESET_PRINT}")
+         lg.debug(f"Invalid or missing order response: {order}")
+         return None
+
+
+async def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: logging.Logger, params: Optional[Dict] = None) -> bool:
+    """Cancels an order by ID with retries."""
+    lg = logger
+    item_desc = "cancel order"
+    context_info = f"ID: {order_id}, Symbol: {symbol}"
+    total_attempts = MAX_API_RETRIES + 1
+
+    if not order_id:
+         lg.error(f"{NEON_RED_PRINT}Cannot cancel order: Invalid or missing order_id.{RESET_PRINT}")
+         return False
+    if not symbol: # Symbol is often required by CCXT cancel_order
+         lg.error(f"{NEON_RED_PRINT}Cannot cancel order: Invalid or missing symbol.{RESET_PRINT}")
+         return False
+    if not exchange.has.get('cancelOrder'):
+         lg.error(f"{NEON_RED_PRINT}Exchange {exchange.id} does not support cancelOrder.{RESET_PRINT}")
+         return False
+
+    lg.info(f"Attempting to cancel order ID: {order_id} for {symbol}...")
+    request_params = params if params is not None else {}
+
+    for attempt in range(total_attempts):
+        try:
+            response = await exchange.cancel_order(order_id, symbol, params=request_params)
+            lg.debug(f"Cancel order raw response for ID {order_id}: {response}")
+
+            if response and isinstance(response, dict):
+                 order_status = response.get('status')
+                 if order_status in ['canceled', 'closed']: 
+                      lg.info(f"{NEON_GREEN_PRINT}Order ID {order_id} for {symbol} successfully cancelled. Status: {order_status}.{RESET_PRINT}")
+                      return True
+                 elif order_status == 'open':
+                      lg.warning(f"{NEON_YELLOW_PRINT}Cancel order call for ID {order_id} returned status 'open'. Cancellation might have failed. Response: {response}.{RESET_PRINT}")
+                      if attempt < total_attempts - 1:
+                           raise ccxt.ExchangeError(f"Cancel order returned status '{order_status}'")
+                      else: return False
+                 else: # Unknown status
+                      lg.warning(f"{NEON_YELLOW_PRINT}Cancel order call for ID {order_id} returned with status '{order_status}' or unexpected structure: {response}. Assuming success if no error, but verify.{RESET_PRINT}")
+                      # Some exchanges might not return a clear 'canceled' status but imply it.
+                      # If no error, we might assume success here or require specific checks.
+                      # For now, if no error and not 'open', let's cautiously assume success.
+                      return True # Cautious: if no error and not 'open', assume cancel worked or it's gone.
+            elif response is None and exchange.id == 'binance': # Binance returns None on successful cancel
+                lg.info(f"{NEON_GREEN_PRINT}Order ID {order_id} for {symbol} successfully cancelled (Binance: None response).{RESET_PRINT}")
+                return True
+            else: # None or non-dict response (and not a known case like Binance)
+                 lg.warning(f"{NEON_YELLOW_PRINT}Cancel order call for ID {order_id} returned {type(response)}: {response}. Potential failure. Retrying...{RESET_PRINT}")
+                 if attempt < total_attempts - 1:
+                      raise ccxt.ExchangeError(f"Cancel order returned {type(response)}: {response}")
+                 else: return False
+
+
+        except ccxt.OrderNotFound as e:
+            lg.warning(f"{NEON_YELLOW_PRINT}Order ID {order_id} for {symbol} not found. It may have been already cancelled or filled: {e}{RESET_PRINT}")
+            return True 
+        except ccxt.InvalidOrder as e: # E.g. order already closed/canceled
+             lg.warning(f"{NEON_YELLOW_PRINT}Invalid order for cancellation ({order_id} {symbol}): {e}. Likely already closed/cancelled.{RESET_PRINT}")
+             # Many exchanges throw InvalidOrder if the order is already not cancellable.
+             return True # Treat as success if it means the order is not open.
+        except Exception as e:
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return False 
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to cancel order ID {order_id} for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return False
+
+
+async def cancel_all_orders(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger, params: Optional[Dict] = None) -> bool:
+    """Cancels all open orders for a symbol with retries and optional parameters."""
+    lg = logger
+    item_desc = "cancel all orders"
+    context_info = symbol
+    total_attempts = MAX_API_RETRIES + 1
+
+    if not symbol:
+         lg.error(f"{NEON_RED_PRINT}Cannot cancel all orders: Invalid or missing symbol.{RESET_PRINT}")
+         return False
+    
+    request_params = params.copy() if params is not None else {} # Use provided params or empty dict
+    # CCXT standardizes symbol in first arg for cancelAllOrders, but some exchanges might need it in params too.
+    # If 'symbol' is not already in params, it's fine; it's passed as the first argument.
+    # If an exchange *requires* it in params, it should be added there.
+    # For Bybit, symbol is the first arg. Example: `exchange.cancel_all_orders(symbol, params={'settleCoin': 'USDT'})`
+    # Let's ensure 'symbol' is not redundantly added if it's not a specific param key for the exchange.
+    # Most CCXT unified methods handle symbol as the primary argument.
+
+    if not exchange.has.get('cancelAllOrders'):
+         lg.warning(f"{NEON_YELLOW_PRINT}Exchange {exchange.id} does not support cancelAllOrders. Attempting to cancel orders one by one...{RESET_PRINT}")
+         # Pass original params to fetch_open_orders and cancel_order if they are relevant
+         open_orders = await fetch_open_orders(exchange, symbol, lg, params=params) 
+         if open_orders is None: # fetch_open_orders failed critically
+             lg.error(f"Failed to fetch open orders for {symbol} to cancel one by one.")
+             return False
+         if not open_orders:
+              lg.info(f"No open orders found for {symbol} to cancel.")
+              return True 
+         
+         lg.info(f"Found {len(open_orders)} open orders to cancel one by one for {symbol}.")
+         all_canceled_individually = True
+         for order in open_orders:
+              order_id = order.get('id')
+              if order_id:
+                   # Pass original params to individual cancel_order if relevant
+                   if not await cancel_order(exchange, order_id, symbol, lg, params=params): 
+                        all_canceled_individually = False 
+              else:
+                   lg.warning(f"{NEON_YELLOW_PRINT}Skipping cancellation for order with no ID: {order}{RESET_PRINT}")
+                   all_canceled_individually = False 
+         
+         if all_canceled_individually:
+              lg.info(f"{NEON_GREEN_PRINT}All found open orders for {symbol} successfully cancelled one by one.{RESET_PRINT}")
+         else:
+              lg.error(f"{NEON_RED_PRINT}Failed to cancel all open orders one by one for {symbol}. Check previous logs.{RESET_PRINT}")
+         return all_canceled_individually
+
+
+    lg.info(f"Attempting to cancel all open orders for {symbol} using cancelAllOrders...")
+    for attempt in range(total_attempts):
+        try:
+            response = await exchange.cancel_all_orders(symbol, params=request_params) 
+            lg.debug(f"Cancel all orders raw response for {symbol}: {response}")
+
+            # Verification is highly exchange-dependent.
+            if isinstance(response, dict) and response.get('retCode') == 0: # Bybit specific check
+                 result_list = response.get('result', {}).get('list')
+                 count_msg = f"{len(result_list)} entries in result list" if result_list is not None and isinstance(result_list, list) else "no result list or empty"
+                 lg.info(f"{NEON_GREEN_PRINT}All open orders for {symbol} successfully requested to be cancelled (Bybit confirmation, {count_msg}).{RESET_PRINT}")
+                 return True
+            elif isinstance(response, list): # Common CCXT format (list of orders)
+                 lg.info(f"{NEON_GREEN_PRINT}All open orders for {symbol} successfully requested to be cancelled (returned list of {len(response)} orders).{RESET_PRINT}")
+                 return True
+            elif response is None: # Some exchanges might return None on success if no orders were open
+                 lg.info(f"{NEON_YELLOW_PRINT}Cancel all orders for {symbol} returned None. Assuming no open orders to cancel or success.{RESET_PRINT}")
+                 return True
+            else: # Unexpected response format
+                 lg.warning(f"{NEON_YELLOW_PRINT}Cancel all orders call for {symbol} returned unexpected response: {response}. Retrying...{RESET_PRINT}")
+                 if attempt < total_attempts - 1:
+                      raise ccxt.ExchangeError(f"Cancel all orders returned unexpected response: {response}")
+                 else: return False
+
+
+        except ccxt.OrderNotFound as e: # Should ideally not happen with cancelAllOrders, but possible
+             lg.info(f"No open orders found for {symbol} to cancel (Exchange confirmed via OrderNotFound: {e}). Treating as success.")
+             return True 
+        except ccxt.InvalidOrder as e: # E.g. if symbol is invalid for this operation
+             lg.error(f"{NEON_RED_PRINT}Invalid parameters for cancel all orders ({symbol}): {e}{RESET_PRINT}")
+             lg.error(f"  > Used Parameters: {request_params}")
+             return False
+        except Exception as e:
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return False 
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to cancel all open orders for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return False
+
+
+async def fetch_open_orders(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger, since: Optional[int] = None, limit: Optional[int] = None, params: Optional[Dict] = None) -> List[Dict]:
+    """Fetches open orders for a symbol with retries and optional parameters."""
+    lg = logger
+    item_desc = "open orders"
+    context_info = symbol
+    total_attempts = MAX_API_RETRIES + 1
+
+    if not symbol:
+         lg.error(f"{NEON_RED_PRINT}Cannot fetch open orders: Invalid or missing symbol.{RESET_PRINT}")
+         return [] # Return empty list on invalid input
+    if not exchange.has.get('fetchOpenOrders'):
+         lg.warning(f"{NEON_YELLOW_PRINT}Exchange {exchange.id} does not support fetchOpenOrders. Cannot fetch open orders.{RESET_PRINT}")
+         return []
+
+    lg.debug(f"Attempting to fetch open orders for {symbol}...")
+    request_params = params if params is not None else {} 
+
+    for attempt in range(total_attempts):
+        try:
+            orders = await exchange.fetch_open_orders(symbol, since=since, limit=limit, params=request_params)
+            lg.debug(f"Fetch open orders raw response for {symbol}: {orders}")
+
+            if isinstance(orders, list):
+                 lg.debug(f"Successfully fetched {len(orders)} open orders for {symbol}.")
+                 return orders
+            else:
+                 lg.warning(f"{NEON_YELLOW_PRINT}Fetch open orders call for {symbol} returned unexpected response type: {type(orders)}. Expected list. Response: {orders}. Retrying...{RESET_PRINT}")
+                 raise ccxt.ExchangeError(f"Fetch open orders returned unexpected type: {type(orders)}")
+
+        except Exception as e:
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return [] # Not retryable, return empty list
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to fetch open orders for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return []
+
+
+async def fetch_closed_orders(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger, since: Optional[int] = None, limit: Optional[int] = None, params: Optional[Dict] = None) -> List[Dict]:
+    """Fetches closed orders for a symbol with retries and optional parameters."""
+    lg = logger
+    item_desc = "closed orders"
+    context_info = symbol
+    total_attempts = MAX_API_RETRIES + 1
+
+    if not symbol:
+         lg.error(f"{NEON_RED_PRINT}Cannot fetch closed orders: Invalid or missing symbol.{RESET_PRINT}")
+         return []
+    if not exchange.has.get('fetchClosedOrders'):
+         lg.warning(f"{NEON_YELLOW_PRINT}Exchange {exchange.id} does not support fetchClosedOrders. Cannot fetch closed orders.{RESET_PRINT}")
+         return []
+
+    lg.debug(f"Attempting to fetch closed orders for {symbol}...")
+    request_params = params if params is not None else {} 
+
+    for attempt in range(total_attempts):
+        try:
+            orders = await exchange.fetch_closed_orders(symbol, since=since, limit=limit, params=request_params)
+            lg.debug(f"Fetch closed orders raw response for {symbol}: {orders}")
+
+            if isinstance(orders, list):
+                 lg.debug(f"Successfully fetched {len(orders)} closed orders for {symbol}.")
+                 return orders
+            else:
+                 lg.warning(f"{NEON_YELLOW_PRINT}Fetch closed orders call for {symbol} returned unexpected response type: {type(orders)}. Expected list. Response: {orders}. Retrying...{RESET_PRINT}")
+                 raise ccxt.ExchangeError(f"Fetch closed orders returned unexpected type: {type(orders)}")
+
+        except Exception as e:
+            if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc, context_info):
+                 return [] 
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to fetch closed orders for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return []
+
+
+async def _set_position_protection(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    market_info: Dict,
+    position_info: Dict, 
+    logger: logging.Logger,
+    stop_loss_price: Optional[Decimal] = None,
+    take_profit_price: Optional[Decimal] = None,
+    trailing_stop_distance: Optional[Decimal] = None, 
+    tsl_activation_price: Optional[Decimal] = None, 
+    params: Optional[Dict] = None 
+) -> bool:
+    lg = logger
+
+    if 'bybit' not in exchange.id.lower():
+        lg.error(f"{NEON_RED_PRINT}Protection setting via specific endpoint is currently implemented only for Bybit. Cannot set for {exchange.id}.{RESET_PRINT}")
+        return False
+    if not market_info.get('is_contract', False):
+         if stop_loss_price is not None or take_profit_price is not None or trailing_stop_distance is not None or tsl_activation_price is not None:
+             lg.warning(f"{NEON_YELLOW_PRINT}Protection setting attempted for spot market {symbol}. SL/TP/TSL are typically only for contract markets. Skipping.{RESET_PRINT}")
+             return False 
+         else:
+             lg.debug(f"Protection setting skipped for {symbol} (Not a contract market), and no protection requested anyway.")
+             return True 
+
+    if not position_info or not isinstance(position_info, dict):
+        lg.error(f"{NEON_RED_PRINT}Cannot set protection for {symbol}: Missing or invalid position information.{RESET_PRINT}")
+        return False
+
+    pos_side = position_info.get('side')
+    if pos_side not in ['long', 'short']:
+         lg.error(f"{NEON_RED_PRINT}Cannot set protection for {symbol}: Invalid or missing position side ('{pos_side}') in position_info.{RESET_PRINT}")
+         return False
+    position_idx = 0 
+    try:
+        pos_idx_val = position_info.get('info', {}).get('positionIdx') # Bybit V5 specific
+        if pos_idx_val is not None:
+             position_idx = int(pos_idx_val)
+             lg.debug(f"Using positionIdx: {position_idx} from position info for {symbol}.")
+        else: # Fallback for older CCXT versions or if not in 'info'
+             pos_idx_val_direct = position_info.get('positionIdx')
+             if pos_idx_val_direct is not None:
+                 position_idx = int(pos_idx_val_direct)
+                 lg.debug(f"Using positionIdx: {position_idx} directly from position info for {symbol}.")
+             else:
+                 lg.debug(f"positionIdx not found in position_info for {symbol}. Using default {position_idx} (assuming One-Way mode).")
+    except (ValueError, TypeError) as idx_err:
+        lg.warning(f"{NEON_YELLOW_PRINT}Could not parse positionIdx from position info ({idx_err}), using default {position_idx}.{RESET_PRINT}")
+
+    # Determine category (linear/inverse) from market_info
+    # Default to 'linear' if not specified, as it's common for USDT contracts
+    category = 'linear' # Default
+    if market_info.get('inverse', False): # Check if 'inverse' is True
+        category = 'inverse'
+    elif market_info.get('linear', True) is False and not market_info.get('inverse', False): # Explicitly not linear and not inverse
+        # This case might indicate a spot market or an unhandled contract type.
+        # For safety, if it's a contract but neither linear nor inverse is clearly true, log warning.
+        if market_info.get('is_contract', False):
+            lg.warning(f"{NEON_YELLOW_PRINT}Market {symbol} is a contract but neither 'linear' nor 'inverse' flag is true. Defaulting category to 'linear'. Market info: {market_info.get('linear')}, {market_info.get('inverse')}{RESET_PRINT}")
+    # If market_info.get('linear') is True or None (and inverse is False), 'linear' is fine.
+
+    request_params: Dict[str, Any] = {
+        'category': category,
+        'symbol': market_info['id'], 
+        'tpslMode': 'Full',          
+        'slTriggerBy': 'LastPrice',  
+        'tpTriggerBy': 'LastPrice',  
+        'positionIdx': position_idx  
+    }
+    if params:
+         request_params.update(params)
+
+    log_parts = [f"Attempting to set protection for {symbol} ({pos_side.upper()} PosIdx: {position_idx}, Category: {category}):"]
+    protection_params_added = False # Flag to track if any protection is actually being set
+
+    try:
+        min_tick_size = get_min_tick_size(market_info, lg)
+        price_precision = get_price_precision(market_info, lg)
+
+        if min_tick_size is None or not isinstance(min_tick_size, Decimal) or min_tick_size <= 0:
+             lg.warning(f"{NEON_YELLOW_PRINT}Invalid min tick size ({min_tick_size}) for {symbol}. Price formatting might be inaccurate.{RESET_PRINT}")
+             # Allow proceeding but with a warning, formatting might rely on price_to_precision's internal logic
+
+        def format_price_str(price_decimal: Optional[Decimal], price_type_desc: str) -> Optional[str]:
+            if not isinstance(price_decimal, Decimal): return None 
+            if price_decimal <= 0: 
+                 lg.warning(f"{NEON_YELLOW_PRINT}Attempted to format non-positive {price_type_desc} {price_decimal} for {symbol}. Skipping.{RESET_PRINT}")
+                 return None
+            try:
+                return exchange.price_to_precision(symbol, float(price_decimal))
+            except Exception as e:
+                lg.warning(f"{NEON_RED_PRINT}Failed to format {price_type_desc} {price_decimal} for {symbol}: {e}{RESET_PRINT}", exc_info=False)
+                return None 
+
+        def format_value_str(value_decimal: Optional[Decimal], precision_places: int, value_type_desc: str) -> Optional[str]:
+             if not isinstance(value_decimal, Decimal): return None 
+             if value_decimal < 0: # Allow 0 for TSL distance if it means "remove"
+                  lg.warning(f"{NEON_YELLOW_PRINT}Attempted to format negative {value_type_desc} {value_decimal}. Skipping.{RESET_PRINT}")
+                  return None
+             try:
+                 raw_str_val = f"{value_decimal:.{max(8, abs(value_decimal.as_tuple().exponent))}f}" 
+                 return exchange.decimal_to_precision(
+                     raw_str_val, exchange.ROUND, precision=precision_places, padding_mode=exchange.NO_PADDING
+                 )
+             except Exception as e:
+                  lg.warning(f"{NEON_YELLOW_PRINT}Failed to format {value_type_desc} {value_decimal} (prec={precision_places}): {e}. Skipping.{RESET_PRINT}", exc_info=False)
+                  return None
+
+        # --- Trailing Stop ---
+        # Bybit: trailingStop = "0" means remove TSL.
+        # trailingStop is distance, activePrice is activation.
+        formatted_tsl_distance_str: Optional[str] = None
+        formatted_activation_price_str: Optional[str] = None
+        tsl_requested_to_set = isinstance(trailing_stop_distance, Decimal) and trailing_stop_distance > 0 and \
+                               isinstance(tsl_activation_price, Decimal) and tsl_activation_price > 0
+        tsl_requested_to_remove = isinstance(trailing_stop_distance, Decimal) and trailing_stop_distance == Decimal('0') # Explicit request to remove TSL
+
+        if tsl_requested_to_set:
+            dist_prec = abs(min_tick_size.normalize().as_tuple().exponent) if min_tick_size and min_tick_size > 0 else price_precision + 2
+            dist_prec = max(0, dist_prec)
+            
+            formatted_tsl_distance_str = format_value_str(trailing_stop_distance, dist_prec, "TSL distance")
+            if formatted_tsl_distance_str and Decimal(formatted_tsl_distance_str) <= 0:
+                lg.error(f"{NEON_RED_PRINT}Formatted TSL distance {formatted_tsl_distance_str} is zero or negative for {symbol}. TSL will not be set.{RESET_PRINT}")
+                formatted_tsl_distance_str = None # Invalidate
+
+            if min_tick_size and min_tick_size > 0 and formatted_tsl_distance_str and Decimal(formatted_tsl_distance_str) < min_tick_size:
+                lg.warning(f"{NEON_YELLOW_PRINT}Calculated TSL distance {formatted_tsl_distance_str} is smaller than min tick {min_tick_size}. Adjusting to min tick for {symbol}.{RESET_PRINT}")
+                formatted_tsl_distance_str = str(min_tick_size)
+                if Decimal(formatted_tsl_distance_str) <= 0: formatted_tsl_distance_str = None # Invalidate
+
+            formatted_activation_price_str = format_price_str(tsl_activation_price, "TSL activation price")
+
+            if formatted_tsl_distance_str and formatted_activation_price_str:
+                request_params['trailingStop'] = formatted_tsl_distance_str
+                request_params['activePrice'] = formatted_activation_price_str
+                log_parts.append(f"  Trailing SL: Dist={formatted_tsl_distance_str}, Act={formatted_activation_price_str}")
+                stop_loss_price = None # TSL overrides fixed SL
+                protection_params_added = True
+            else:
+                lg.error(f"{NEON_RED_PRINT}Failed to format valid TSL parameters for {symbol}. TSL will not be set.{RESET_PRINT}")
+        elif tsl_requested_to_remove:
+            request_params['trailingStop'] = "0" # Bybit specific: "0" to remove TSL
+            log_parts.append(f"  Trailing SL: Removing (distance set to '0')")
+            # activePrice might not be needed or ignored by Bybit when TSL is "0"
+            protection_params_added = True
+
+
+        # --- Fixed Stop Loss ---
+        # Bybit: stopLoss = "0" means remove SL.
+        sl_requested_to_set = isinstance(stop_loss_price, Decimal) and stop_loss_price > 0
+        sl_requested_to_remove = isinstance(stop_loss_price, Decimal) and stop_loss_price == Decimal('0') # Explicit request to remove SL
+
+        if sl_requested_to_set: # Only if SL price is positive and TSL was not set
+            formatted_sl_str = format_price_str(stop_loss_price, "stop loss price")
+            if formatted_sl_str:
+                request_params['stopLoss'] = formatted_sl_str
+                log_parts.append(f"  Fixed SL: {formatted_sl_str}")
+                protection_params_added = True
+            else:
+                lg.error(f"{NEON_RED_PRINT}Failed to format fixed SL price {stop_loss_price} for {symbol}. Fixed SL will not be set.{RESET_PRINT}")
+        elif sl_requested_to_remove:
+            request_params['stopLoss'] = "0" # Bybit specific: "0" to remove SL
+            log_parts.append(f"  Fixed SL: Removing (price set to '0')")
+            protection_params_added = True
+
+
+        # --- Fixed Take Profit ---
+        # Bybit: takeProfit = "0" means remove TP.
+        tp_requested_to_set = isinstance(take_profit_price, Decimal) and take_profit_price > 0
+        tp_requested_to_remove = isinstance(take_profit_price, Decimal) and take_profit_price == Decimal('0') # Explicit request to remove TP
+
+        if tp_requested_to_set:
+            formatted_tp_str = format_price_str(take_profit_price, "take profit price")
+            if formatted_tp_str:
+                request_params['takeProfit'] = formatted_tp_str
+                log_parts.append(f"  Fixed TP: {formatted_tp_str}")
+                protection_params_added = True
+            else:
+                lg.error(f"{NEON_RED_PRINT}Failed to format fixed TP price {take_profit_price} for {symbol}. Fixed TP will not be set.{RESET_PRINT}")
+        elif tp_requested_to_remove:
+            request_params['takeProfit'] = "0" # Bybit specific: "0" to remove TP
+            log_parts.append(f"  Fixed TP: Removing (price set to '0')")
+            protection_params_added = True
+
+    except Exception as fmt_err:
+         lg.error(f"{NEON_RED_PRINT}Error during formatting/preparation of protection parameters for {symbol}: {fmt_err}{RESET_PRINT}", exc_info=True)
+         return False 
+
+    if not protection_params_added: # No valid SL/TP/TSL to set or remove
+        lg.info(f"No protection parameters were formatted or requested to be set/removed for {symbol} (PosIdx: {position_idx}). No API call made.")
+        # If inputs were all None, this is success. If inputs were provided but failed formatting, it's a failure.
+        # This function is called with specific values, so if nothing was added, it implies formatting failure of inputs.
+        initial_request_made = (stop_loss_price is not None or 
+                                take_profit_price is not None or 
+                                trailing_stop_distance is not None) # Check if any protection was intended
+        return not initial_request_made # True if no protection was intended, False if intended but failed formatting
+
+
+    lg.info("\n".join(log_parts))
+    log_params_safe = {k: (v if not isinstance(v, Decimal) else str(v)) for k,v in request_params.items()}
+    lg.debug(f"  API Call: exchange.private_post('/v5/position/set-trading-stop', params={log_params_safe})")
+
+    total_attempts = MAX_API_RETRIES + 1
+    item_desc_parts = []
+    if request_params.get('stopLoss'): item_desc_parts.append('SL')
+    if request_params.get('takeProfit'): item_desc_parts.append('TP')
+    if request_params.get('trailingStop'): item_desc_parts.append('TSL')
+    item_desc_str = f"protection ({'/'.join(item_desc_parts) if item_desc_parts else 'empty'})"
+    context_info = symbol
+
+
+    for attempt in range(total_attempts):
+        try:
+            response = await exchange.private_post('/v5/position/set-trading-stop', request_params)
+            lg.debug(f"Set protection raw response for {symbol}: {response}")
+
+            if isinstance(response, dict):
+                ret_code = response.get('retCode')
+                ret_msg = response.get('retMsg', 'Unknown Error')
+                
+                if ret_code == 0:
+                    if "not modified" in ret_msg.lower() or "no need to modify" in ret_msg.lower(): # Bybit can return this
+                         lg.info(f"{NEON_YELLOW_PRINT}Position protection already set to target values or no modification needed for {symbol} (PosIdx: {position_idx}). Response: {ret_msg}{RESET_PRINT}")
+                    else:
+                         lg.info(f"{NEON_GREEN_PRINT}Position protection (SL/TP/TSL) set/updated successfully for {symbol} (PosIdx: {position_idx}).{RESET_PRINT}")
+                    return True 
+                else:
+                    lg.error(f"{NEON_RED_PRINT}Failed to set protection for {symbol} (PosIdx: {position_idx}): {ret_msg} (Code: {ret_code}){RESET_PRINT}")
+                    if ret_code == 110013: lg.error(f"{NEON_YELLOW_PRINT} >> Hint (110013 - Parameter Error): Check SL/TP/TSL values, tick compliance. Params: {log_params_safe}{RESET_PRINT}")
+                    elif ret_code == 110036: lg.error(f"{NEON_YELLOW_PRINT} >> Hint (110036 - TSL Price Invalid): TSL Activation price '{request_params.get('activePrice')}' likely invalid.{RESET_PRINT}")
+                    elif ret_code == 110086: lg.error(f"{NEON_YELLOW_PRINT} >> Hint (110086): SL price cannot be equal to TP price.{RESET_PRINT}")
+                    elif ret_code == 110043: lg.error(f"{NEON_YELLOW_PRINT} >> Hint (110043): Position status prevents modification.{RESET_PRINT}")
+                    elif ret_code == 110025: lg.error(f"{NEON_YELLOW_PRINT} >> Hint (110025): Position not found/closed or positionIdx mismatch.{RESET_PRINT}")
+                    elif ret_code == 10001: lg.error(f"{NEON_YELLOW_PRINT} >> Hint (10001 - Parameter Error): Check data types/formats. Params: {log_params_safe}{RESET_PRINT}")
+                    elif "trailing stop value invalid" in ret_msg.lower(): lg.error(f"{NEON_YELLOW_PRINT} >> Hint: TSL distance '{request_params.get('trailingStop')}' likely invalid.{RESET_PRINT}")
+                    
+                    # Decide if retryable based on code/message
+                    is_temp_error = "timeout" in ret_msg.lower() or "temporary" in ret_msg.lower() or ret_code in RETRY_HTTP_STATUS_CODES # Add known retryable API codes if any
+                    if is_temp_error and attempt < total_attempts - 1:
+                         raise ccxt.ExchangeError(f"Retryable Exchange Error for protection: {ret_msg} (Code: {ret_code})") # Trigger _handle_fetch_exception
+                    else:
+                         return False # Non-retryable exchange error
+            else:
+                lg.error(f"{NEON_RED_PRINT}API call to set protection returned unexpected response type: {type(response)} for {symbol}. Response: {response}{RESET_PRINT}")
+                return False 
+
+        except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+             if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc_str, context_info): return False
+        except (ccxt.RateLimitExceeded, ccxt.DDoSProtection) as e:
+             if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc_str, context_info): return False
+        except ccxt.AuthenticationError as e:
+             lg.error(f"{NEON_RED_PRINT}Authentication error during protection API call for {symbol}: {e}{RESET_PRINT}")
+             return False 
+        except ccxt.ExchangeError as e: # Catch specific retryable ExchangeError from above, or other ExchangeErrors
+             if "Retryable Exchange Error for protection" in str(e): # Check if it's our re-raised error
+                 if not await _handle_fetch_exception(e, lg, attempt, total_attempts, item_desc_str, context_info): return False
+             else: # Other, likely non-retryable ExchangeErrors for this operation
+                  lg.error(f"{NEON_RED_PRINT}Unhandled ExchangeError during protection API call for {symbol}: {e}{RESET_PRINT}")
+                  return False
+        except Exception as e:
+            lg.error(f"{NEON_RED_PRINT}Unexpected error during protection API call for {symbol}: {e}{RESET_PRINT}", exc_info=True)
+            return False 
+
+
+    lg.error(f"{NEON_RED_PRINT}Max retries reached. Failed to set {item_desc_str} for {symbol} after {total_attempts} attempts.{RESET_PRINT}")
+    return False
+
+
+async def set_trailing_stop_loss(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    market_info: Dict,
+    position_info: Dict, 
+    config: Dict[str, Any], 
+    logger: logging.Logger,
+    take_profit_price: Optional[Decimal] = None 
+) -> bool:
+    lg = logger
+
+    if not config.get("enable_trailing_stop", False):
+        lg.info(f"Trailing Stop Loss is disabled in config for {symbol}. Skipping TSL setup.")
+        return False # TSL was not actioned
+
+    if not market_info.get('is_contract', False):
+         # If TP is requested for a spot market, _set_position_protection will handle it (and likely fail if endpoint is contract-only)
+         if isinstance(take_profit_price, Decimal) and take_profit_price is not None and take_profit_price > 0:
+             lg.warning(f"{NEON_YELLOW_PRINT}Trailing Stop Loss is not applicable for spot market {symbol}. Attempting to set TP if provided.{RESET_PRINT}")
+             return await _set_position_protection(
+                 exchange=exchange, symbol=symbol, market_info=market_info,
+                 position_info=position_info, logger=lg,
+                 stop_loss_price=None, take_profit_price=take_profit_price,
+                 trailing_stop_distance=None, tsl_activation_price=None 
+             )
+         else:
+             lg.debug(f"Trailing Stop Loss setup skipped for {symbol} (Not a contract market), and no TP requested anyway.")
+             return True # No action needed, TSL not applicable
+
+    callback_rate_str = config.get("trailing_stop_callback_rate")
+    activation_perc_str = config.get("trailing_stop_activation_percentage")
+
+    if callback_rate_str is None or activation_perc_str is None:
+         lg.error(f"{NEON_RED_PRINT}TSL configuration missing 'trailing_stop_callback_rate' or 'trailing_stop_activation_percentage' for {symbol}.{RESET_PRINT}")
+         return False
+
+    try:
+        callback_rate = Decimal(str(callback_rate_str))
+        activation_percentage = Decimal(str(activation_perc_str))
+    except (InvalidOperation, ValueError, TypeError) as e:
+        lg.error(f"{NEON_RED_PRINT}Invalid TSL parameter format in config ({symbol}): {e}.{RESET_PRINT}")
+        lg.error(f"  >> Check 'trailing_stop_callback_rate' ({callback_rate_str}) and 'trailing_stop_activation_percentage' ({activation_perc_str}).")
+        return False
+    if callback_rate <= 0:
+        lg.error(f"{NEON_RED_PRINT}Invalid 'trailing_stop_callback_rate' ({callback_rate}) in config. Must be positive for {symbol}.{RESET_PRINT}")
+        return False
+    if activation_percentage < 0:
+         lg.error(f"{NEON_RED_PRINT}Invalid 'trailing_stop_activation_percentage' ({activation_percentage}) in config. Cannot be negative for {symbol}.{RESET_PRINT}")
+         return False
+
+    try:
+        entry_price: Optional[Decimal] = position_info.get('entryPriceDecimal')
+        side = position_info.get('side')
+
+        if entry_price is None or not isinstance(entry_price, Decimal) or entry_price <= 0:
+            lg.error(f"{NEON_RED_PRINT}Missing or invalid entry price ({entry_price}) in position info for TSL calc ({symbol}).{RESET_PRINT}")
+            return False
+        if side not in ['long', 'short']:
+            lg.error(f"{NEON_RED_PRINT}Missing or invalid position side ('{side}') in position info for TSL calc ({symbol}).{RESET_PRINT}")
+            return False
+    except Exception as e:
+        lg.error(f"{NEON_RED_PRINT}Error accessing position info for TSL calculation ({symbol}): {e}.{RESET_PRINT}", exc_info=True)
+        lg.debug(f"Position info received: {position_info}")
+        return False
+
+    try:
+        min_tick_size = get_min_tick_size(market_info, lg)
+        price_precision = get_price_precision(market_info, lg)
+
+        if min_tick_size is None or not isinstance(min_tick_size, Decimal) or min_tick_size <= 0:
+             lg.error(f"{NEON_RED_PRINT}Invalid or zero min tick size ({min_tick_size}) for {symbol}. Cannot calculate TSL accurately.{RESET_PRINT}")
+             return False
+
+        activation_price: Optional[Decimal] = None
+        activation_offset = entry_price * activation_percentage
+
+        if side == 'long':
+            raw_activation = entry_price + activation_offset
+            activation_price = (raw_activation / min_tick_size).quantize(Decimal('1'), rounding=ROUND_UP) * min_tick_size
+            # Ensure activation is at least one tick above entry, especially if activation_percentage is 0 or very small
+            min_activation_long = ((entry_price + min_tick_size) / min_tick_size).quantize(Decimal('1'), rounding=ROUND_UP) * min_tick_size
+            if activation_price < min_activation_long : # Use '<' to allow activation at entry if percentage is 0 and rounding results in entry_price
+                if activation_percentage > Decimal('0'): # If intended to be above entry
+                    activation_price = min_activation_long
+                    lg.debug(f"Adjusted LONG TSL activation price to be at least one tick above entry: {activation_price}")
+                elif activation_percentage == Decimal('0') and activation_price <= entry_price: # Immediate activation needs to be distinct
+                    activation_price = min_activation_long
+                    lg.debug(f"Immediate TSL activation (0%) requested for LONG. Setting activation slightly above entry: {activation_price}")
+
+        else: # side == 'short'
+            raw_activation = entry_price - activation_offset
+            activation_price = (raw_activation / min_tick_size).quantize(Decimal('1'), rounding=ROUND_DOWN) * min_tick_size
+            min_activation_short = ((entry_price - min_tick_size) / min_tick_size).quantize(Decimal('1'), rounding=ROUND_DOWN) * min_tick_size
+            if activation_price > min_activation_short: # Use '>' for short
+                if activation_percentage > Decimal('0'):
+                    activation_price = min_activation_short
+                    lg.debug(f"Adjusted SHORT TSL activation price to be at least one tick below entry: {activation_price}")
+                elif activation_percentage == Decimal('0') and activation_price >= entry_price:
+                    activation_price = min_activation_short
+                    lg.debug(f"Immediate TSL activation (0%) requested for SHORT. Setting activation slightly below entry: {activation_price}")
+
+        if activation_price is None or activation_price <= 0:
+             lg.error(f"{NEON_RED_PRINT}Calculated TSL activation price ({activation_price}) is invalid for {symbol}.{RESET_PRINT}")
+             return False
+
+        trailing_distance_raw = entry_price * callback_rate 
+        if trailing_distance_raw <= 0:
+             lg.error(f"{NEON_RED_PRINT}Calculated raw TSL distance ({trailing_distance_raw}) is zero or negative for {symbol}.{RESET_PRINT}")
+             return False
+        trailing_distance = (trailing_distance_raw / min_tick_size).quantize(Decimal('1'), rounding=ROUND_UP) * min_tick_size
+        if trailing_distance < min_tick_size: # Ensure distance is at least one tick
+            lg.warning(f"{NEON_YELLOW_PRINT}Calculated TSL distance {trailing_distance} is smaller than min tick {min_tick_size}. Adjusting to min tick for {symbol}.{RESET_PRINT}")
+            trailing_distance = min_tick_size
+        if trailing_distance <= 0:
+            lg.error(f"{NEON_RED_PRINT}Calculated TSL distance ({trailing_distance}) became non-positive after adjustments for {symbol}.{RESET_PRINT}")
+            return False
+
+        lg.info(f"Calculated TSL Parameters for {symbol} ({side.upper()}):")
+        lg.info(f"  Entry={entry_price:.{price_precision}f}, Act%={activation_percentage:.3%}, Callback%={callback_rate:.3%}")
+        lg.info(f"  => Activation Price (Target): {activation_price:.{price_precision}f}")
+        lg.info(f"  => Trailing Distance (Target): {trailing_distance:.{price_precision+2}f}")
+        
+        final_tp_price = None
+        if isinstance(take_profit_price, Decimal) and take_profit_price is not None and take_profit_price > 0:
+             final_tp_price = take_profit_price
+             tp_fmt = f"{final_tp_price:.{price_precision}f}"
+             lg.info(f"  Take Profit Price (Target): {tp_fmt} (Will be set simultaneously)")
+        else:
+            lg.debug("  Take Profit: Not being set or updated with TSL.")
+
+        return await _set_position_protection(
+            exchange=exchange, symbol=symbol, market_info=market_info,
+            position_info=position_info, logger=lg,
+            stop_loss_price=None, # TSL overrides fixed SL on Bybit
+            take_profit_price=final_tp_price,
+            trailing_stop_distance=trailing_distance,
+            tsl_activation_price=activation_price
+        )
+
+    except (InvalidOperation, ValueError, TypeError) as e:
+         lg.error(f"{NEON_RED_PRINT}Error calculating or preparing TSL parameters for {symbol} (Decimal/Type Error): {e}{RESET_PRINT}", exc_info=True)
+         return False
+    except Exception as e:
+        lg.error(f"{NEON_RED_PRINT}Unexpected error calculating or setting TSL for {symbol}: {e}{RESET_PRINT}", exc_info=True)
+        return False
+

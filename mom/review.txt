@@ -1,0 +1,84 @@
+INFO: API keys loaded successfully.
+INFO: Attempting to load configuration file: config.json
+INFO: Successfully loaded configuration from config.json
+DEBUG: [FARTCOINUSDT] Calculated KLINE_LIMIT for FARTCOINUSDT: 167 (Max Period: 89, Buffer: 50, ADX Buf: 28, Min Needed: 42)
+DEBUG: [DOTUSDT] Calculated KLINE_LIMIT for DOTUSDT: 128 (Max Period: 50, Buffer: 50, ADX Buf: 28, Min Needed: 42)
+DEBUG: Performing detailed configuration validation...
+DEBUG: Configuration validation passed.
+INFO: Configuration loaded and validated successfully.
+INFO: Configured symbols: FARTCOINUSDT, DOTUSDT
+INFO: Using V5 API category 'linear' for UNIFIED account. Ensure configured symbols match this category (e.g., USDT perpetuals).
+INFO: Initializing Trader Orchestrator (Testnet: False, Account: UNIFIED, Category: linear)...
+DEBUG: Testing API connection via get_server_time...
+DEBUG: Clock skew check passed (0.0s difference).
+INFO: REST API connection successful. Server Time: 2025-05-02T23:09:51.249719+00:00
+INFO: Initializing traders for 2 configured symbol(s)...
+INFO: [FARTCOINUSDT] --- Initializing trader for FARTCOINUSDT (1/2) ---
+DEBUG: [FARTCOINUSDT] Fetching instrument info for FARTCOINUSDT (Category: linear)...
+INFO: [FARTCOINUSDT] Instrument Info Fetched: MinQty=1.0, QtyStep='1' (Float: 1.00000000, Precision: 0), TickSize='0.0001' (Float: 0.00010000, Precision: 4)
+INFO: [FARTCOINUSDT] Performing initial setup: Setting leverage to 10x for FARTCOINUSDT...
+WARNING: [FARTCOINUSDT] Exception during initial setup (leverage/margin): leverage not modified (ErrCode: 110043) (ErrTime: 23:09:51).
+Request → POST https://api.bybit.com/v5/position/set-leverage: {"category": "linear", "symbol": "FARTCOINUSDT", "buyLeverage": "10", "sellLeverage": "10"}.. Continuing...
+DEBUG: [FARTCOINUSDT] Trader for FARTCOINUSDT initialized successfully.
+INFO: [FARTCOINUSDT] --- Trader for FARTCOINUSDT initialized successfully ---
+INFO: [DOTUSDT] --- Initializing trader for DOTUSDT (2/2) ---
+DEBUG: [DOTUSDT] Fetching instrument info for DOTUSDT (Category: linear)...
+INFO: [DOTUSDT] Instrument Info Fetched: MinQty=0.1, QtyStep='0.1' (Float: 0.10000000, Precision: 1), TickSize='0.0001' (Float: 0.00010000, Precision: 4)
+INFO: [DOTUSDT] Performing initial setup: Setting leverage to 10x for DOTUSDT...
+WARNING: [DOTUSDT] Exception during initial setup (leverage/margin): leverage not modified (ErrCode: 110043) (ErrTime: 23:09:52).
+Request → POST https://api.bybit.com/v5/position/set-leverage: {"category": "linear", "symbol": "DOTUSDT", "buyLeverage": "10", "sellLeverage": "10"}.. Continuing...
+DEBUG: [DOTUSDT] Trader for DOTUSDT initialized successfully.
+INFO: [DOTUSDT] --- Trader for DOTUSDT initialized successfully ---
+INFO: Successfully initialized 2/2 traders: FARTCOINUSDT, DOTUSDT
+INFO: WebSocket is disabled for all symbols or no traders initialized. Bot will use REST API polling only.
+DEBUG: Signal handlers set up successfully.
+INFO: --- Starting Main Trading Loop (2 Symbols) ---
+INFO: Performing initial balance check for UNIFIED account (Coin: USDT)...
+DEBUG: 'availableToWithdraw'/'availableBalance' empty for USDT, using 'walletBalance' as fallback.
+DEBUG: Found balance for USDT (walletBalance): 7.74893312
+INFO: Initial Balance Check (UNIFIED): 7.75 USDT Available
+
+===== CYCLE START: 2025-05-02T23:09:53+00:00 =====
+DEBUG: Allocated Balance/Trader: 3.87 USDT, Max Position Value/Trader: 5000.00 USDT
+[FARTCOINUSDT] --- Processing Symbol ---
+DEBUG: [FARTCOINUSDT] Internal kline_df is empty for FARTCOINUSDT, attempting REST fetch.
+DEBUG: [FARTCOINUSDT] Executing REST fetch for FARTCOINUSDT...
+DEBUG: [FARTCOINUSDT] Fetching 172 klines for FARTCOINUSDT (Timeframe: 15) via REST API...
+DEBUG: [FARTCOINUSDT] REST Fetch for FARTCOINUSDT successful. Cleaned data shape: (172, 6)
+ERROR: Indicator Calc: Specified price source 'hl2' not found or calculable. Falling back to 'close'.
+DEBUG: [FARTCOINUSDT] Updated internal kline_df successfully via REST API for FARTCOINUSDT.
+DEBUG: [FARTCOINUSDT] No active position found for FARTCOINUSDT.
+DEBUG: [FARTCOINUSDT] No active position for FARTCOINUSDT. Checking for entry signals...
+DEBUG: [FARTCOINUSDT] No valid entry signal found for FARTCOINUSDT this cycle.
+[DOTUSDT] --- Processing Symbol ---
+DEBUG: [DOTUSDT] Internal kline_df is empty for DOTUSDT, attempting REST fetch.
+DEBUG: [DOTUSDT] Executing REST fetch for DOTUSDT...
+DEBUG: [DOTUSDT] Fetching 133 klines for DOTUSDT (Timeframe: 5) via REST API...
+DEBUG: [DOTUSDT] REST Fetch for DOTUSDT successful. Cleaned data shape: (133, 6)
+DEBUG: Indicator Calc: Insufficient valid data points after cleaning (133 < 150). Need more historical data.
+WARNING: [DOTUSDT] REST KLine: Indicator calculation failed for fetched data (DOTUSDT 5).
+WARNING: [DOTUSDT] REST API fetch fallback failed for DOTUSDT. Kline data may be missing or stale.
+DEBUG: [DOTUSDT] No valid kline data available for DOTUSDT after WS/REST attempts.
+DEBUG: [DOTUSDT] Insufficient data (0 rows < 2) or calculation failed for DOTUSDT. Skipping cycle.
+METRICS: SUMMARY,ALL_SYMBOLS,No trades executed yet.
+===== CYCLE END (1.67s) | Sleeping for 58.33s =====
+
+===== CYCLE START: 2025-05-02T23:10:53+00:00 =====
+DEBUG: Allocated Balance/Trader: 3.87 USDT, Max Position Value/Trader: 5000.00 USDT
+[FARTCOINUSDT] --- Processing Symbol ---
+DEBUG: [FARTCOINUSDT] WS disabled for FARTCOINUSDT, using recent REST data.
+DEBUG: [FARTCOINUSDT] No active position found for FARTCOINUSDT.
+DEBUG: [FARTCOINUSDT] No active position for FARTCOINUSDT. Checking for entry signals...
+DEBUG: [FARTCOINUSDT] No valid entry signal found for FARTCOINUSDT this cycle.
+[DOTUSDT] --- Processing Symbol ---
+DEBUG: [DOTUSDT] Internal kline_df is empty for DOTUSDT, attempting REST fetch.
+DEBUG: [DOTUSDT] Executing REST fetch for DOTUSDT...
+DEBUG: [DOTUSDT] Fetching 133 klines for DOTUSDT (Timeframe: 5) via REST API...
+DEBUG: [DOTUSDT] REST Fetch for DOTUSDT successful. Cleaned data shape: (133, 6)
+DEBUG: Indicator Calc: Insufficient valid data points after cleaning (133 < 150). Need more historical data.
+WARNING: [DOTUSDT] REST KLine: Indicator calculation failed for fetched data (DOTUSDT 5).
+WARNING: [DOTUSDT] REST API fetch fallback failed for DOTUSDT. Kline data may be missing or stale.
+DEBUG: [DOTUSDT] No valid kline data available for DOTUSDT after WS/REST attempts.
+DEBUG: [DOTUSDT] Insufficient data (0 rows < 2) or calculation failed for DOTUSDT. Skipping cycle.
+METRICS: SUMMARY,ALL_SYMBOLS,No trades executed yet.
+===== CYCLE END (0.89s) | Sleeping for 59.11s =====

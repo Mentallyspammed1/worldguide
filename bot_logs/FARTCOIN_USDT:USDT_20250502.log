@@ -1,0 +1,2809 @@
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Logger initialized for symbol FARTCOIN/USDT:USDT.
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - CCXT client initialized for Bybit Mainnet.
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - CCXT Client initialized for FARTCOIN/USDT:USDT. Markets assigned.
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Trading Analyzer initialized.
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - --- Starting Analysis ---
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Symbol: FARTCOIN/USDT:USDT (Linear)
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Interval: 3 (CCXT: 3m)
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - API Env: PROD (URL: https://api.{hostname})
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Loop Interval: 30 seconds
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Kline Limit: 200 candles
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Orderbook Limit: 50 levels
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Timezone: America/Chicago
+2025-05-02T00:17:55-0500 - INFO - FARTCOIN/USDT:USDT - Starting analysis loop for FARTCOIN/USDT:USDT with interval 3...
+2025-05-02T00:18:06-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:18:05 CDT)
+Interval: 3    Current Price: $1.1826
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.82): Ranging (ADX < 25.00)
+PSAR (1.1824): Bullish
+RSI (14) (41.20): Neutral
+MFI (14) (66.13): Neutral
+CCI (20) (-89.22): Neutral
+Williams %R (14) (-87.63): Oversold
+StochRSI (3/3) (K:49.20 D:75.21): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0010 S:-0.0009): Bearish (Crossed Down)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (1519): Low Volume (Vol:1519 MA:334153)
+OBV Trend (2754922): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1900
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1698
+  > S2: $1.1569
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $871097
+OB Value (Asks): $609310
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $281509
+  Support near Period Low ($1.1771) - Value: $105211
+
+2025-05-02T00:18:42-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:18:42 CDT)
+Interval: 3    Current Price: $1.1845
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.85): Ranging (ADX < 25.00)
+PSAR (1.1912): Flip Bearish (Just Flipped!)
+RSI (14) (44.45): Neutral
+MFI (14) (64.01): Neutral
+CCI (20) (-71.84): Neutral
+Williams %R (14) (-69.07): Neutral
+StochRSI (3/3) (K:56.40 D:77.61): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0008 S:-0.0009): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (125509): Low Volume (Vol:125509 MA:340353)
+OBV Trend (2881950): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1906
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1710
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $706661
+OB Value (Asks): $686477
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $120070
+  Resistance near Fib 78.6% ($1.1842) - Value: $115899
+  Resistance near Fib 61.8% ($1.1897) - Value: $77840
+
+2025-05-02T00:19:07-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:19:06 CDT)
+Interval: 3    Current Price: $1.1851
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.85): Ranging (ADX < 25.00)
+PSAR (1.1912): Flip Bearish (Just Flipped!)
+RSI (14) (45.96): Neutral
+MFI (14) (63.37): Neutral
+CCI (20) (-57.96): Neutral
+Williams %R (14) (-59.79): Neutral
+StochRSI (3/3) (K:59.76 D:78.73): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0008 S:-0.0009): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (164881): Low Volume (Vol:164881 MA:342321)
+OBV Trend (2921322): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1909
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1716
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $615675
+OB Value (Asks): $637878
+Significant OB Clusters (Top 5):
+  Resistance near Fib 61.8% ($1.1897) - Value: $273298
+  Support near Fib 78.6% ($1.1842) - Value: $211931
+  Resistance near Pivot ($1.1909) - Value: $63934
+  Resistance near Fib 78.6% ($1.1842) - Value: $11292
+
+2025-05-02T00:19:37-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:19:37 CDT)
+Interval: 3    Current Price: $1.1830
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.85): Ranging (ADX < 25.00)
+PSAR (1.1912): Flip Bearish (Just Flipped!)
+RSI (14) (41.72): Neutral
+MFI (14) (62.29): Neutral
+CCI (20) (-73.80): Neutral
+Williams %R (14) (-84.54): Oversold
+StochRSI (3/3) (K:50.35 D:75.60): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0010 S:-0.0009): Bearish (Crossed Down)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (232751): Low Volume (Vol:232751 MA:345715)
+OBV Trend (2989192): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1901
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1700
+  > S2: $1.1570
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $854011
+OB Value (Asks): $591332
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $230948
+  Support near Period Low ($1.1771) - Value: $41966
+
+2025-05-02T00:20:07-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:20:07 CDT)
+Interval: 3    Current Price: $1.1822
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.93): Ranging (ADX < 25.00)
+PSAR (1.1912): Flip Bearish (Just Flipped!)
+RSI (14) (40.53): Neutral
+MFI (14) (61.97): Neutral
+CCI (20) (-80.92): Neutral
+Williams %R (14) (-92.78): Oversold
+StochRSI (3/3) (K:47.73 D:74.72): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0010 S:-0.0009): Bearish (Crossed Down)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (253601): Average Volume (Vol:253601 MA:346757)
+OBV Trend (2502840): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1898
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1695
+  > S2: $1.1567
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $885237
+OB Value (Asks): $613911
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $256366
+  Support near Period Low ($1.1771) - Value: $154222
+
+2025-05-02T00:20:43-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:20:42 CDT)
+Interval: 3    Current Price: $1.1816
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.24): Ranging (ADX < 25.00)
+PSAR (1.1912): Flip Bearish (Just Flipped!)
+RSI (14) (39.76): Neutral
+MFI (14) (58.84): Neutral
+CCI (20) (-93.02): Neutral
+Williams %R (14) (-92.31): Oversold
+StochRSI (3/3) (K:46.02 D:74.15): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0011 S:-0.0010): Bearish (Crossed Down)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (467154): Average Volume (Vol:467154 MA:357435)
+OBV Trend (2289287): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1896
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1691
+  > S2: $1.1565
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $867649
+OB Value (Asks): $746464
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $357124
+  Support near Period Low ($1.1771) - Value: $281642
+
+2025-05-02T00:21:13-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:21:13 CDT)
+Interval: 3    Current Price: $1.1800
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.31): Ranging (ADX < 25.00)
+PSAR (1.1910): Bearish
+RSI (14) (37.65): Neutral
+MFI (14) (52.25): Neutral
+CCI (20) (-129.23): Oversold
+Williams %R (14) (-91.80): Oversold
+StochRSI (3/3) (K:14.39 D:46.30): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0015 S:-0.0011): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (178094): Low Volume (Vol:178094 MA:345650)
+OBV Trend (1992853): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1891
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1680
+  > S2: $1.1560
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $797315
+OB Value (Asks): $676567
+Significant OB Clusters (Top 5):
+  Support near Period Low ($1.1771) - Value: $390804
+  Resistance near Fib 78.6% ($1.1842) - Value: $285542
+
+2025-05-02T00:21:44-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:21:43 CDT)
+Interval: 3    Current Price: $1.1801
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.31): Ranging (ADX < 25.00)
+PSAR (1.1910): Bearish
+RSI (14) (37.77): Neutral
+MFI (14) (51.39): Neutral
+CCI (20) (-128.62): Oversold
+Williams %R (14) (-90.98): Oversold
+StochRSI (3/3) (K:14.39 D:46.30): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0015 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (245614): Average Volume (Vol:245614 MA:349026)
+OBV Trend (1925333): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1891
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1681
+  > S2: $1.1560
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $812691
+OB Value (Asks): $749270
+Significant OB Clusters (Top 5):
+  Support near Period Low ($1.1771) - Value: $461769
+  Resistance near Fib 78.6% ($1.1842) - Value: $329192
+
+2025-05-02T00:22:16-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:22:15 CDT)
+Interval: 3    Current Price: $1.1796
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.31): Ranging (ADX < 25.00)
+PSAR (1.1910): Bearish
+RSI (14) (37.17): Neutral
+MFI (14) (50.71): Neutral
+CCI (20) (-131.68): Oversold
+Williams %R (14) (-95.08): Oversold
+StochRSI (3/3) (K:14.39 D:46.30): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0015 S:-0.0011): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (300164): Average Volume (Vol:300164 MA:351754)
+OBV Trend (1870783): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1890
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1677
+  > S2: $1.1559
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $913851
+OB Value (Asks): $726155
+Significant OB Clusters (Top 5):
+  Support near Period Low ($1.1771) - Value: $542459
+  Resistance near Fib 78.6% ($1.1842) - Value: $206061
+
+2025-05-02T00:22:48-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:22:48 CDT)
+Interval: 3    Current Price: $1.1813
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.31): Ranging (ADX < 25.00)
+PSAR (1.1910): Bearish
+RSI (14) (39.30): Neutral
+MFI (14) (49.84): Neutral
+CCI (20) (-119.98): Oversold
+Williams %R (14) (-81.15): Oversold
+StochRSI (3/3) (K:15.94 D:46.82): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0014 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (372615): Average Volume (Vol:372615 MA:355376)
+OBV Trend (1798332): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1895
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1689
+  > S2: $1.1564
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $961588
+OB Value (Asks): $785227
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $379772
+  Support near Period Low ($1.1771) - Value: $277043
+
+2025-05-02T00:23:18-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:23:18 CDT)
+Interval: 3    Current Price: $1.1827
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.31): Ranging (ADX < 25.00)
+PSAR (1.1910): Bearish
+RSI (14) (41.55): Neutral
+MFI (14) (49.04): Neutral
+CCI (20) (-102.36): Oversold
+Williams %R (14) (-69.67): Neutral
+StochRSI (3/3) (K:20.92 D:48.48): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0013 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (441684): Average Volume (Vol:441684 MA:358830)
+OBV Trend (2612631): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1900
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1698
+  > S2: $1.1569
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $821550
+OB Value (Asks): $826362
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $364106
+  Support near Period Low ($1.1771) - Value: $63454
+
+2025-05-02T00:23:48-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:23:48 CDT)
+Interval: 3    Current Price: $1.1830
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.31): Ranging (ADX < 25.00)
+PSAR (1.1910): Bearish
+RSI (14) (41.75): Neutral
+MFI (14) (48.48): Neutral
+CCI (20) (-101.72): Oversold
+Williams %R (14) (-68.85): Neutral
+StochRSI (3/3) (K:21.37 D:48.63): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0013 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (491250): Average Volume (Vol:491250 MA:361308)
+OBV Trend (2662197): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1900
+Nearest Support:
+  > Period Low: $1.1771
+  > S1: $1.1699
+  > S2: $1.1569
+Nearest Resistance:
+  > Fib 78.6%: $1.1842
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $815243
+OB Value (Asks): $838238
+Significant OB Clusters (Top 5):
+  Resistance near Fib 78.6% ($1.1842) - Value: $365681
+  Support near Period Low ($1.1771) - Value: $47928
+
+2025-05-02T00:24:22-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:24:22 CDT)
+Interval: 3    Current Price: $1.1846
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.98): Ranging (ADX < 25.00)
+PSAR (1.1905): Bearish
+RSI (14) (45.29): Neutral
+MFI (14) (45.25): Neutral
+CCI (20) (-46.52): Neutral
+Williams %R (14) (-54.10): Neutral
+StochRSI (3/3) (K:28.24 D:33.16): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0012 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (4486): Low Volume (Vol:4486 MA:331892)
+OBV Trend (2472881): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1906
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1711
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $795361
+OB Value (Asks): $817689
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $444011
+  Resistance near Fib 61.8% ($1.1897) - Value: $159608
+  Resistance near Fib 78.6% ($1.1842) - Value: $49107
+
+2025-05-02T00:24:55-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:24:55 CDT)
+Interval: 3    Current Price: $1.1845
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.90): Ranging (ADX < 25.00)
+PSAR (1.1905): Bearish
+RSI (14) (45.10): Neutral
+MFI (14) (45.42): Neutral
+CCI (20) (-45.75): Neutral
+Williams %R (14) (-54.92): Neutral
+StochRSI (3/3) (K:27.82 D:33.02): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0012 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (17096): Low Volume (Vol:17096 MA:332522)
+OBV Trend (2485491): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1906
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1710
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $814159
+OB Value (Asks): $892239
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $401148
+  Resistance near Fib 61.8% ($1.1897) - Value: $152649
+  Resistance near Fib 78.6% ($1.1842) - Value: $131928
+
+2025-05-02T00:25:27-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:25:27 CDT)
+Interval: 3    Current Price: $1.1842
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.83): Ranging (ADX < 25.00)
+PSAR (1.1905): Bearish
+RSI (14) (44.33): Neutral
+MFI (14) (45.81): Neutral
+CCI (20) (-47.29): Neutral
+Williams %R (14) (-58.20): Neutral
+StochRSI (3/3) (K:26.11 D:32.46): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0013 S:-0.0011): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (46870): Low Volume (Vol:46870 MA:334011)
+OBV Trend (2515265): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1905
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1707
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $818671
+OB Value (Asks): $823906
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $372588
+  Resistance near Fib 78.6% ($1.1842) - Value: $150787
+  Resistance near Fib 61.8% ($1.1897) - Value: $91124
+
+2025-05-02T00:26:01-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:26:01 CDT)
+Interval: 3    Current Price: $1.1847
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.83): Ranging (ADX < 25.00)
+PSAR (1.1905): Bearish
+RSI (14) (45.48): Neutral
+MFI (14) (45.95): Neutral
+CCI (20) (-42.66): Neutral
+Williams %R (14) (-53.28): Neutral
+StochRSI (3/3) (K:28.65 D:33.30): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0012 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (57887): Low Volume (Vol:57887 MA:334562)
+OBV Trend (2526282): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1907
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1711
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $783523
+OB Value (Asks): $821016
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $457383
+  Resistance near Fib 61.8% ($1.1897) - Value: $178777
+  Resistance near Fib 78.6% ($1.1842) - Value: $40376
+  Resistance near Pivot ($1.1907) - Value: $29716
+
+2025-05-02T00:26:34-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:26:33 CDT)
+Interval: 3    Current Price: $1.1857
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.33): Ranging (ADX < 25.00)
+PSAR (1.1905): Bearish
+RSI (14) (47.12): Neutral
+MFI (14) (46.36): Neutral
+CCI (20) (-24.67): Neutral
+Williams %R (14) (-45.90): Neutral
+StochRSI (3/3) (K:32.28 D:34.51): Below Signal (K < D)
+MACD (12/26/9) (L:-0.0012 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Below Middle))
+Volume vs MA(20) (89352): Low Volume (Vol:89352 MA:336135)
+OBV Trend (2557747): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1910
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1717
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $769944
+OB Value (Asks): $837962
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $560060
+  Resistance near Fib 61.8% ($1.1897) - Value: $378972
+  Resistance near Pivot ($1.1910) - Value: $126256
+
+2025-05-02T00:27:06-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:27:06 CDT)
+Interval: 3    Current Price: $1.1856
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.35): Ranging (ADX < 25.00)
+PSAR (1.1901): Bearish
+RSI (14) (47.12): Neutral
+MFI (14) (57.52): Neutral
+CCI (20) (-1.16): Neutral
+Williams %R (14) (-45.90): Neutral
+StochRSI (3/3) (K:45.14 D:33.78): Bullish (Crossed Up)
+MACD (12/26/9) (L:-0.0011 S:-0.0010): Below Signal (Line < Signal)
+Potential Bullish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (7071): Low Volume (Vol:7071 MA:325203)
+OBV Trend (3089379): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1910
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1717
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $799758
+OB Value (Asks): $874909
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $527673
+  Resistance near Fib 61.8% ($1.1897) - Value: $413709
+  Resistance near Pivot ($1.1910) - Value: $127932
+
+2025-05-02T00:27:41-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:27:40 CDT)
+Interval: 3    Current Price: $1.1864
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.35): Ranging (ADX < 25.00)
+PSAR (1.1901): Bearish
+RSI (14) (48.40): Neutral
+MFI (14) (57.85): Neutral
+CCI (20) (5.51): Neutral
+Williams %R (14) (-40.16): Neutral
+StochRSI (3/3) (K:48.38 D:34.86): Bullish (Crossed Up)
+MACD (12/26/9) (L:-0.0010 S:-0.0010): Below Signal (Line < Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (34292): Low Volume (Vol:34292 MA:326564)
+OBV Trend (3130742): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1912
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1722
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $778867
+OB Value (Asks): $923987
+Significant OB Clusters (Top 5):
+  Support near Fib 78.6% ($1.1842) - Value: $544454
+  Resistance near Fib 61.8% ($1.1897) - Value: $481685
+  Resistance near Pivot ($1.1912) - Value: $211583
+
+2025-05-02T00:28:16-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:28:16 CDT)
+Interval: 3    Current Price: $1.1880
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (16.01): Ranging (ADX < 25.00)
+PSAR (1.1901): Bearish
+RSI (14) (50.31): Neutral
+MFI (14) (58.33): Neutral
+CCI (20) (25.97): Neutral
+Williams %R (14) (-31.15): Neutral
+StochRSI (3/3) (K:53.25 D:36.48): Bullish (Crossed Up)
+MACD (12/26/9) (L:-0.0010 S:-0.0010): Bullish (Crossed Up)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (73189): Low Volume (Vol:73189 MA:328509)
+OBV Trend (3169639): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1916
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1729
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $696929
+OB Value (Asks): $888100
+Significant OB Clusters (Top 5):
+  Resistance near Fib 61.8% ($1.1897) - Value: $546628
+  Resistance near Pivot ($1.1916) - Value: $431755
+  Support near Fib 78.6% ($1.1842) - Value: $426241
+  Resistance near Fib 50.0% ($1.1937) - Value: $27335
+
+2025-05-02T00:28:50-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:28:50 CDT)
+Interval: 3    Current Price: $1.1876
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.81): Ranging (ADX < 25.00)
+PSAR (1.1901): Bearish
+RSI (14) (50.65): Neutral
+MFI (14) (58.78): Neutral
+CCI (20) (33.24): Neutral
+Williams %R (14) (-29.51): Neutral
+StochRSI (3/3) (K:54.09 D:36.76): Bullish (Crossed Up)
+MACD (12/26/9) (L:-0.0009 S:-0.0010): Bullish (Crossed Up)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (111763): Low Volume (Vol:111763 MA:330438)
+OBV Trend (3208213): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1916
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1731
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $714269
+OB Value (Asks): $1090453
+Significant OB Clusters (Top 5):
+  Resistance near Pivot ($1.1916) - Value: $575223
+  Resistance near Fib 61.8% ($1.1897) - Value: $517212
+  Support near Fib 78.6% ($1.1842) - Value: $444968
+  Resistance near Fib 50.0% ($1.1937) - Value: $15636
+
+2025-05-02T00:29:22-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:29:22 CDT)
+Interval: 3    Current Price: $1.1879
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.78): Ranging (ADX < 25.00)
+PSAR (1.1901): Bearish
+RSI (14) (51.14): Neutral
+MFI (14) (59.14): Neutral
+CCI (20) (36.83): Neutral
+Williams %R (14) (-27.05): Neutral
+StochRSI (3/3) (K:55.34 D:37.18): Bullish (Crossed Up)
+MACD (12/26/9) (L:-0.0009 S:-0.0010): Bullish (Crossed Up)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (142299): Low Volume (Vol:142299 MA:331964)
+OBV Trend (3238749): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1917
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1733
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $752376
+OB Value (Asks): $1080810
+Significant OB Clusters (Top 5):
+  Resistance near Pivot ($1.1917) - Value: $585497
+  Resistance near Fib 61.8% ($1.1897) - Value: $538173
+  Support near Fib 78.6% ($1.1842) - Value: $459801
+  Resistance near Fib 50.0% ($1.1937) - Value: $21591
+
+2025-05-02T00:29:53-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:29:53 CDT)
+Interval: 3    Current Price: $1.1888
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.57): Ranging (ADX < 25.00)
+PSAR (1.1901): Bearish
+RSI (14) (52.55): Neutral
+MFI (14) (59.55): Neutral
+CCI (20) (50.99): Neutral
+Williams %R (14) (-19.67): Overbought
+StochRSI (3/3) (K:58.94 D:38.38): Bullish (Crossed Up)
+MACD (12/26/9) (L:-0.0008 S:-0.0010): Bullish (Crossed Up)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (178537): Low Volume (Vol:178537 MA:333776)
+OBV Trend (3274987): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1920
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1739
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $553248
+OB Value (Asks): $1131120
+Significant OB Clusters (Top 5):
+  Resistance near Pivot ($1.1920) - Value: $649216
+  Resistance near Fib 61.8% ($1.1897) - Value: $453920
+  Support near Fib 78.6% ($1.1842) - Value: $192716
+  Resistance near Fib 50.0% ($1.1937) - Value: $180561
+  Support near Fib 61.8% ($1.1897) - Value: $17644
+
+2025-05-02T00:30:28-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:30:27 CDT)
+Interval: 3    Current Price: $1.1881
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.86): Ranging (ADX < 25.00)
+PSAR (1.1896): Bearish
+RSI (14) (51.31): Neutral
+MFI (14) (56.90): Neutral
+CCI (20) (73.21): Neutral
+Williams %R (14) (-25.41): Neutral
+StochRSI (3/3) (K:77.19 D:56.27): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0006 S:-0.0009): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (28682): Low Volume (Vol:28682 MA:307590)
+OBV Trend (2940622): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1918
+Nearest Support:
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+  > S1: $1.1734
+Nearest Resistance:
+  > Fib 61.8%: $1.1897
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $524061
+OB Value (Asks): $1174199
+Significant OB Clusters (Top 5):
+  Resistance near Pivot ($1.1918) - Value: $710171
+  Resistance near Fib 61.8% ($1.1897) - Value: $531019
+  Support near Fib 78.6% ($1.1842) - Value: $202712
+  Resistance near Fib 50.0% ($1.1937) - Value: $82392
+
+2025-05-02T00:31:20-0500 - WARNING - FARTCOIN/USDT:USDT - Network/Timeout/DDoS error calling fetch_ohlcv (Attempt 1/5): RequestTimeout. Retrying in 5.0s...
+2025-05-02T00:31:20-0500 - WARNING - FARTCOIN/USDT:USDT - Network/Timeout/DDoS error calling fetch_order_book (Attempt 1/5): RequestTimeout. Retrying in 5.0s...
+2025-05-02T00:31:20-0500 - WARNING - FARTCOIN/USDT:USDT - Network/Timeout/DDoS error calling fetch_tickers (Attempt 1/5): RequestTimeout. Retrying in 5.0s...
+2025-05-02T00:31:41-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:31:40 CDT)
+Interval: 3    Current Price: $1.1899
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.50): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (54.90): Neutral
+MFI (14) (58.23): Neutral
+CCI (20) (104.21): Overbought
+Williams %R (14) (-7.38): Overbought
+StochRSI (3/3) (K:83.14 D:58.25): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0005 S:-0.0009): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (135796): Low Volume (Vol:135796 MA:312946)
+OBV Trend (3105100): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1925
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $563353
+OB Value (Asks): $1077248
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $373331
+  Resistance near Pivot ($1.1925) - Value: $351371
+  Support near Fib 61.8% ($1.1897) - Value: $204751
+  Resistance near Fib 61.8% ($1.1897) - Value: $122658
+
+2025-05-02T00:31:41-0500 - WARNING - FARTCOIN/USDT:USDT - Analysis cycle duration (40.92s) exceeded configured interval (30.0s). Consider increasing the interval or optimizing analysis.
+2025-05-02T00:31:42-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:31:42 CDT)
+Interval: 3    Current Price: $1.1900
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.50): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (54.45): Neutral
+MFI (14) (58.37): Neutral
+CCI (20) (101.77): Overbought
+Williams %R (14) (-9.84): Overbought
+StochRSI (3/3) (K:83.14 D:58.25): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0005 S:-0.0009): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (147402): Low Volume (Vol:147402 MA:313526)
+OBV Trend (3116706): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1924
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $621859
+OB Value (Asks): $1051586
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $358875
+  Resistance near Pivot ($1.1924) - Value: $356371
+  Support near Fib 61.8% ($1.1897) - Value: $222008
+  Resistance near Fib 61.8% ($1.1897) - Value: $134476
+  Support near Fib 78.6% ($1.1842) - Value: $36148
+
+2025-05-02T00:32:18-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:32:17 CDT)
+Interval: 3    Current Price: $1.1901
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.59): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (54.60): Neutral
+MFI (14) (58.99): Neutral
+CCI (20) (105.03): Overbought
+Williams %R (14) (-9.02): Overbought
+StochRSI (3/3) (K:83.14 D:58.25): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0005 S:-0.0009): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (200113): Low Volume (Vol:200113 MA:316162)
+OBV Trend (3169417): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1925
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $565840
+OB Value (Asks): $1094604
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $417012
+  Resistance near Pivot ($1.1925) - Value: $394045
+  Support near Fib 61.8% ($1.1897) - Value: $191406
+  Resistance near Fib 61.8% ($1.1897) - Value: $142897
+  Support near Fib 78.6% ($1.1842) - Value: $29101
+
+2025-05-02T00:32:50-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:32:50 CDT)
+Interval: 3    Current Price: $1.1901
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.59): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (54.60): Neutral
+MFI (14) (59.14): Neutral
+CCI (20) (105.03): Overbought
+Williams %R (14) (-9.02): Overbought
+StochRSI (3/3) (K:83.14 D:58.25): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0005 S:-0.0009): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (212843): Low Volume (Vol:212843 MA:316798)
+OBV Trend (3182147): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1925
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $525464
+OB Value (Asks): $1099821
+Significant OB Clusters (Top 5):
+  Resistance near Pivot ($1.1925) - Value: $386092
+  Resistance near Fib 50.0% ($1.1937) - Value: $378728
+  Support near Fib 61.8% ($1.1897) - Value: $180962
+  Resistance near Fib 61.8% ($1.1897) - Value: $148636
+  Support near Fib 78.6% ($1.1842) - Value: $17278
+
+2025-05-02T00:33:24-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:33:24 CDT)
+Interval: 3    Current Price: $1.1922
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.17): Ranging (ADX < 25.00)
+PSAR (1.1792): Bullish
+RSI (14) (58.04): Neutral
+MFI (14) (66.55): Neutral
+CCI (20) (140.12): Overbought
+Williams %R (14) (0.00): Overbought
+StochRSI (3/3) (K:97.22 D:79.77): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0000 S:-0.0007): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (255831): Average Volume (Vol:255831 MA:290928)
+OBV Trend (4224118): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1932
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $545632
+OB Value (Asks): $790113
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $402366
+  Resistance near Pivot ($1.1932) - Value: $398205
+  Support near Fib 61.8% ($1.1897) - Value: $271706
+  Resistance near Fib 38.2% ($1.1976) - Value: $32972
+
+2025-05-02T00:33:56-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:33:55 CDT)
+Interval: 3    Current Price: $1.1930
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.32): Ranging (ADX < 25.00)
+PSAR (1.1792): Bullish
+RSI (14) (58.72): Neutral
+MFI (14) (68.06): Neutral
+CCI (20) (147.97): Overbought
+Williams %R (14) (-0.71): Overbought
+StochRSI (3/3) (K:97.22 D:79.77): Above Signal (K > D)
+MACD (12/26/9) (L:0.0000 S:-0.0007): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (422600): Average Volume (Vol:422600 MA:299266)
+OBV Trend (4390887): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1934
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $590378
+OB Value (Asks): $774151
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $287137
+  Resistance near Fib 38.2% ($1.1976) - Value: $266167
+  Support near Fib 61.8% ($1.1897) - Value: $248124
+  Resistance near Pivot ($1.1934) - Value: $226619
+  Support near Pivot ($1.1934) - Value: $46911
+
+2025-05-02T00:34:30-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:34:30 CDT)
+Interval: 3    Current Price: $1.1923
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.47): Ranging (ADX < 25.00)
+PSAR (1.1792): Bullish
+RSI (14) (58.04): Neutral
+MFI (14) (69.37): Neutral
+CCI (20) (148.67): Overbought
+Williams %R (14) (-8.22): Overbought
+StochRSI (3/3) (K:97.22 D:79.77): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0000 S:-0.0007): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (581139): High Volume (Vol:581139 MA:307193)
+OBV Trend (4549426): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1932
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $601745
+OB Value (Asks): $907501
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $481879
+  Resistance near Pivot ($1.1932) - Value: $397280
+  Support near Fib 61.8% ($1.1897) - Value: $343702
+  Resistance near Fib 38.2% ($1.1976) - Value: $165982
+
+2025-05-02T00:35:06-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:35:06 CDT)
+Interval: 3    Current Price: $1.1915
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.47): Ranging (ADX < 25.00)
+PSAR (1.1792): Bullish
+RSI (14) (56.75): Neutral
+MFI (14) (69.86): Neutral
+CCI (20) (142.27): Overbought
+Williams %R (14) (-14.38): Overbought
+StochRSI (3/3) (K:97.22 D:79.77): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0001 S:-0.0007): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (644249): High Volume (Vol:644249 MA:310348)
+OBV Trend (4612536): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1929
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $614841
+OB Value (Asks): $897970
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $474130
+  Resistance near Pivot ($1.1929) - Value: $413892
+  Support near Fib 61.8% ($1.1897) - Value: $335968
+  Resistance near Fib 38.2% ($1.1976) - Value: $33574
+
+2025-05-02T00:35:40-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:35:40 CDT)
+Interval: 3    Current Price: $1.1913
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.47): Ranging (ADX < 25.00)
+PSAR (1.1792): Bullish
+RSI (14) (56.46): Neutral
+MFI (14) (70.12): Neutral
+CCI (20) (140.84): Overbought
+Williams %R (14) (-15.75): Overbought
+StochRSI (3/3) (K:97.22 D:79.77): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0001 S:-0.0007): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (678249): High Volume (Vol:678249 MA:312048)
+OBV Trend (4646536): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1929
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $638791
+OB Value (Asks): $857826
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $470841
+  Resistance near Pivot ($1.1929) - Value: $406974
+  Support near Fib 61.8% ($1.1897) - Value: $337183
+
+2025-05-02T00:36:15-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:36:14 CDT)
+Interval: 3    Current Price: $1.1926
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.66): Ranging (ADX < 25.00)
+PSAR (1.1798): Bullish
+RSI (14) (58.37): Neutral
+MFI (14) (69.60): Neutral
+CCI (20) (159.85): Overbought
+Williams %R (14) (-11.39): Overbought
+StochRSI (3/3) (K:97.58 D:92.65): Above Signal (K > D)
+MACD (12/26/9) (L:0.0005 S:-0.0005): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (55308): Low Volume (Vol:55308 MA:300049)
+OBV Trend (5009952): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1934
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $602952
+OB Value (Asks): $769213
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $371085
+  Resistance near Pivot ($1.1934) - Value: $300726
+  Support near Fib 61.8% ($1.1897) - Value: $272155
+  Resistance near Fib 38.2% ($1.1976) - Value: $161988
+  Support near Pivot ($1.1934) - Value: $12991
+
+2025-05-02T00:36:50-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:36:49 CDT)
+Interval: 3    Current Price: $1.1925
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.66): Ranging (ADX < 25.00)
+PSAR (1.1798): Bullish
+RSI (14) (57.42): Neutral
+MFI (14) (69.80): Neutral
+CCI (20) (145.98): Overbought
+Williams %R (14) (-14.56): Overbought
+StochRSI (3/3) (K:95.93 D:92.09): Above Signal (K > D)
+MACD (12/26/9) (L:0.0004 S:-0.0005): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (81459): Low Volume (Vol:81459 MA:301356)
+OBV Trend (4983801): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $615216
+OB Value (Asks): $836264
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $398627
+  Support near Fib 61.8% ($1.1897) - Value: $336129
+  Resistance near Pivot ($1.1933) - Value: $271055
+  Resistance near Fib 38.2% ($1.1976) - Value: $144952
+  Support near Pivot ($1.1933) - Value: $27106
+
+2025-05-02T00:37:23-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:37:22 CDT)
+Interval: 3    Current Price: $1.1928
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.66): Ranging (ADX < 25.00)
+PSAR (1.1798): Bullish
+RSI (14) (57.99): Neutral
+MFI (14) (70.05): Neutral
+CCI (20) (147.98): Overbought
+Williams %R (14) (-12.66): Overbought
+StochRSI (3/3) (K:96.92 D:92.42): Above Signal (K > D)
+MACD (12/26/9) (L:0.0005 S:-0.0005): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (114115): Low Volume (Vol:114115 MA:302989)
+OBV Trend (4951145): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1934
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $582401
+OB Value (Asks): $837903
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $336891
+  Support near Fib 61.8% ($1.1897) - Value: $294318
+  Resistance near Pivot ($1.1934) - Value: $245139
+  Resistance near Fib 38.2% ($1.1976) - Value: $244316
+  Support near Pivot ($1.1934) - Value: $41312
+
+2025-05-02T00:37:55-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:37:55 CDT)
+Interval: 3    Current Price: $1.1927
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.66): Ranging (ADX < 25.00)
+PSAR (1.1798): Bullish
+RSI (14) (57.80): Neutral
+MFI (14) (70.48): Neutral
+CCI (20) (147.32): Overbought
+Williams %R (14) (-13.29): Overbought
+StochRSI (3/3) (K:96.58 D:92.31): Above Signal (K > D)
+MACD (12/26/9) (L:0.0005 S:-0.0005): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.19 (Above Middle))
+Volume vs MA(20) (171159): Low Volume (Vol:171159 MA:305841)
+OBV Trend (4894101): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $593383
+OB Value (Asks): $865787
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $362859
+  Resistance near Pivot ($1.1933) - Value: $280688
+  Support near Fib 61.8% ($1.1897) - Value: $272462
+  Resistance near Fib 38.2% ($1.1976) - Value: $147817
+  Support near Pivot ($1.1933) - Value: $22822
+
+2025-05-02T00:38:27-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:38:27 CDT)
+Interval: 3    Current Price: $1.1946
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.66): Ranging (ADX < 25.00)
+PSAR (1.1798): Bullish
+RSI (14) (60.97): Neutral
+MFI (14) (70.80): Neutral
+CCI (20) (159.85): Overbought
+Williams %R (14) (-1.27): Overbought
+StochRSI (3/3) (K:100.00 D:93.45): Above Signal (K > D)
+MACD (12/26/9) (L:0.0006 S:-0.0004): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Breakout Upper (L:1.18 M:1.19 U:1.19 (Price > Upper))
+Volume vs MA(20) (215100): Low Volume (Vol:215100 MA:308038)
+OBV Trend (5280360): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1940
+Nearest Support:
+  > Fib 50.0%: $1.1937
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+Nearest Resistance:
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+  > Period High: $1.2102
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $526484
+OB Value (Asks): $797370
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $399817
+  Support near Fib 50.0% ($1.1937) - Value: $242766
+  Support near Pivot ($1.1940) - Value: $200088
+  Support near Fib 61.8% ($1.1897) - Value: $147032
+  Resistance near Pivot ($1.1940) - Value: $81839
+
+2025-05-02T00:38:58-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:38:57 CDT)
+Interval: 3    Current Price: $1.1948
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.66): Ranging (ADX < 25.00)
+PSAR (1.1798): Bullish
+RSI (14) (61.22): Neutral
+MFI (14) (71.18): Neutral
+CCI (20) (161.15): Overbought
+Williams %R (14) (0.00): Overbought
+StochRSI (3/3) (K:100.00 D:93.45): Above Signal (K > D)
+MACD (12/26/9) (L:0.0006 S:-0.0004): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Breakout Upper (L:1.18 M:1.19 U:1.19 (Price > Upper))
+Volume vs MA(20) (267650): Average Volume (Vol:267650 MA:310666)
+OBV Trend (5332910): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1940
+Nearest Support:
+  > Fib 50.0%: $1.1937
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+Nearest Resistance:
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+  > Period High: $1.2102
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $519623
+OB Value (Asks): $840949
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $451917
+  Support near Fib 50.0% ($1.1937) - Value: $256940
+  Support near Pivot ($1.1940) - Value: $201278
+  Support near Fib 61.8% ($1.1897) - Value: $74162
+  Resistance near Pivot ($1.1940) - Value: $57865
+
+2025-05-02T00:39:30-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:39:29 CDT)
+Interval: 3    Current Price: $1.1931
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.82): Ranging (ADX < 25.00)
+PSAR (1.1807): Bullish
+RSI (14) (57.81): Neutral
+MFI (14) (70.96): Neutral
+CCI (20) (142.97): Overbought
+Williams %R (14) (-10.76): Overbought
+StochRSI (3/3) (K:94.67 D:97.30): Bearish (Crossed Down)
+MACD (12/26/9) (L:0.0009 S:-0.0002): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (66162): Low Volume (Vol:66162 MA:294962)
+OBV Trend (8270366): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1935
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $535271
+OB Value (Asks): $902179
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $347912
+  Resistance near Fib 50.0% ($1.1937) - Value: $291570
+  Support near Fib 61.8% ($1.1897) - Value: $272591
+  Resistance near Pivot ($1.1935) - Value: $234881
+  Support near Pivot ($1.1935) - Value: $28927
+
+2025-05-02T00:40:03-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:40:03 CDT)
+Interval: 3    Current Price: $1.1928
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.82): Ranging (ADX < 25.00)
+PSAR (1.1807): Bullish
+RSI (14) (57.04): Neutral
+MFI (14) (68.33): Neutral
+CCI (20) (131.31): Overbought
+Williams %R (14) (-13.29): Overbought
+StochRSI (3/3) (K:93.43 D:96.88): Bearish (Crossed Down)
+MACD (12/26/9) (L:0.0009 S:-0.0002): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (125938): Low Volume (Vol:125938 MA:297950)
+OBV Trend (8210590): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $557492
+OB Value (Asks): $818310
+Significant OB Clusters (Top 5):
+  Resistance near Fib 50.0% ($1.1937) - Value: $320705
+  Support near Fib 61.8% ($1.1897) - Value: $284530
+  Resistance near Pivot ($1.1933) - Value: $235235
+  Resistance near Fib 38.2% ($1.1976) - Value: $166820
+  Support near Pivot ($1.1933) - Value: $40790
+
+2025-05-02T00:40:35-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:40:35 CDT)
+Interval: 3    Current Price: $1.1933
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.82): Ranging (ADX < 25.00)
+PSAR (1.1807): Bullish
+RSI (14) (58.20): Neutral
+MFI (14) (67.54): Neutral
+CCI (20) (135.22): Overbought
+Williams %R (14) (-9.49): Overbought
+StochRSI (3/3) (K:95.31 D:97.51): Bearish (Crossed Down)
+MACD (12/26/9) (L:0.0009 S:-0.0002): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (174583): Low Volume (Vol:174583 MA:300383)
+OBV Trend (8161945): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1935
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $557275
+OB Value (Asks): $914389
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $369052
+  Support near Fib 61.8% ($1.1897) - Value: $304416
+  Resistance near Fib 50.0% ($1.1937) - Value: $238042
+  Resistance near Pivot ($1.1935) - Value: $200870
+  Support near Pivot ($1.1935) - Value: $60954
+
+2025-05-02T00:41:06-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:41:05 CDT)
+Interval: 3    Current Price: $1.1936
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.82): Ranging (ADX < 25.00)
+PSAR (1.1807): Bullish
+RSI (14) (59.00): Neutral
+MFI (14) (66.58): Neutral
+CCI (20) (137.82): Overbought
+Williams %R (14) (-6.96): Overbought
+StochRSI (3/3) (K:96.60 D:97.94): Bearish (Crossed Down)
+MACD (12/26/9) (L:0.0009 S:-0.0002): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (234199): Average Volume (Vol:234199 MA:303364)
+OBV Trend (8102329): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1937
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > S1: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $551539
+OB Value (Asks): $913978
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $408186
+  Support near Fib 61.8% ($1.1897) - Value: $297307
+  Resistance near Fib 50.0% ($1.1937) - Value: $180761
+  Resistance near Pivot ($1.1937) - Value: $180761
+  Support near Fib 50.0% ($1.1937) - Value: $83210
+
+2025-05-02T00:41:37-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:41:36 CDT)
+Interval: 3    Current Price: $1.1935
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.82): Ranging (ADX < 25.00)
+PSAR (1.1807): Bullish
+RSI (14) (58.60): Neutral
+MFI (14) (66.22): Neutral
+CCI (20) (136.52): Overbought
+Williams %R (14) (-8.23): Overbought
+StochRSI (3/3) (K:95.95 D:97.72): Bearish (Crossed Down)
+MACD (12/26/9) (L:0.0009 S:-0.0002): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (257801): Average Volume (Vol:257801 MA:304544)
+OBV Trend (8078727): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1936
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $593022
+OB Value (Asks): $864659
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $388107
+  Support near Fib 61.8% ($1.1897) - Value: $318017
+  Resistance near Fib 50.0% ($1.1937) - Value: $180601
+  Resistance near Pivot ($1.1936) - Value: $162654
+  Support near Fib 50.0% ($1.1937) - Value: $94780
+
+2025-05-02T00:42:11-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:42:10 CDT)
+Interval: 3    Current Price: $1.1931
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.97): Ranging (ADX < 25.00)
+PSAR (1.1816): Bullish
+RSI (14) (57.59): Neutral
+MFI (14) (63.41): Neutral
+CCI (20) (116.87): Overbought
+Williams %R (14) (-11.39): Overbought
+StochRSI (3/3) (K:89.30 D:94.76): Below Signal (K < D)
+MACD (12/26/9) (L:0.0011 S:0.0001): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (2107): Low Volume (Vol:2107 MA:293598)
+OBV Trend (6335694): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1934
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $614824
+OB Value (Asks): $952598
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $336222
+  Support near Fib 61.8% ($1.1897) - Value: $305647
+  Resistance near Fib 50.0% ($1.1937) - Value: $298977
+  Resistance near Pivot ($1.1934) - Value: $269358
+  Support near Pivot ($1.1934) - Value: $44809
+
+2025-05-02T00:42:40-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:42:39 CDT)
+Interval: 3    Current Price: $1.1926
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.97): Ranging (ADX < 25.00)
+PSAR (1.1816): Bullish
+RSI (14) (56.77): Neutral
+MFI (14) (62.77): Neutral
+CCI (20) (109.27): Overbought
+Williams %R (14) (-13.92): Overbought
+StochRSI (3/3) (K:87.97 D:94.32): Below Signal (K < D)
+MACD (12/26/9) (L:0.0011 S:0.0001): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (43077): Low Volume (Vol:43077 MA:295646)
+OBV Trend (6294724): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $630944
+OB Value (Asks): $841521
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $346978
+  Resistance near Fib 50.0% ($1.1937) - Value: $319091
+  Resistance near Pivot ($1.1933) - Value: $257222
+  Resistance near Fib 38.2% ($1.1976) - Value: $216698
+  Support near Pivot ($1.1933) - Value: $55537
+
+2025-05-02T00:43:14-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:43:13 CDT)
+Interval: 3    Current Price: $1.1931
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.97): Ranging (ADX < 25.00)
+PSAR (1.1816): Bullish
+RSI (14) (57.79): Neutral
+MFI (14) (62.16): Neutral
+CCI (20) (114.98): Overbought
+Williams %R (14) (-10.76): Overbought
+StochRSI (3/3) (K:89.64 D:94.88): Below Signal (K < D)
+MACD (12/26/9) (L:0.0011 S:0.0001): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (83012): Low Volume (Vol:83012 MA:297643)
+OBV Trend (6254789): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1935
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $658776
+OB Value (Asks): $809963
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $360473
+  Resistance near Fib 38.2% ($1.1976) - Value: $280083
+  Resistance near Fib 50.0% ($1.1937) - Value: $221629
+  Resistance near Pivot ($1.1935) - Value: $193791
+  Support near Pivot ($1.1935) - Value: $78168
+
+2025-05-02T00:43:45-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:43:44 CDT)
+Interval: 3    Current Price: $1.1934
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.97): Ranging (ADX < 25.00)
+PSAR (1.1816): Bullish
+RSI (14) (58.31): Neutral
+MFI (14) (61.37): Neutral
+CCI (20) (118.12): Overbought
+Williams %R (14) (-8.86): Overbought
+StochRSI (3/3) (K:90.47 D:95.15): Below Signal (K < D)
+MACD (12/26/9) (L:0.0011 S:0.0001): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (135817): Low Volume (Vol:135817 MA:300283)
+OBV Trend (6473618): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1936
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $661097
+OB Value (Asks): $868269
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $375092
+  Support near Fib 61.8% ($1.1897) - Value: $337933
+  Resistance near Fib 50.0% ($1.1937) - Value: $196723
+  Resistance near Pivot ($1.1936) - Value: $175721
+  Support near Pivot ($1.1936) - Value: $106301
+
+2025-05-02T00:44:17-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:44:16 CDT)
+Interval: 3    Current Price: $1.1935
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.97): Ranging (ADX < 25.00)
+PSAR (1.1816): Bullish
+RSI (14) (58.46): Neutral
+MFI (14) (61.00): Neutral
+CCI (20) (118.75): Overbought
+Williams %R (14) (-8.23): Overbought
+StochRSI (3/3) (K:90.71 D:95.23): Below Signal (K < D)
+MACD (12/26/9) (L:0.0011 S:0.0001): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (160440): Low Volume (Vol:160440 MA:301515)
+OBV Trend (6498241): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1936
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $662115
+OB Value (Asks): $843976
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $364840
+  Support near Fib 61.8% ($1.1897) - Value: $355440
+  Resistance near Fib 50.0% ($1.1937) - Value: $186813
+  Resistance near Pivot ($1.1936) - Value: $164197
+  Support near Fib 50.0% ($1.1937) - Value: $87125
+
+2025-05-02T00:44:46-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:44:46 CDT)
+Interval: 3    Current Price: $1.1924
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.97): Ranging (ADX < 25.00)
+PSAR (1.1816): Bullish
+RSI (14) (56.37): Neutral
+MFI (14) (60.36): Neutral
+CCI (20) (111.81): Overbought
+Williams %R (14) (-15.19): Overbought
+StochRSI (3/3) (K:87.32 D:94.10): Below Signal (K < D)
+MACD (12/26/9) (L:0.0011 S:0.0001): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (204778): Low Volume (Vol:204778 MA:303731)
+OBV Trend (6133023): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1932
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $708048
+OB Value (Asks): $826531
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $390432
+  Resistance near Fib 50.0% ($1.1937) - Value: $342128
+  Resistance near Pivot ($1.1932) - Value: $291692
+  Resistance near Fib 38.2% ($1.1976) - Value: $151834
+  Support near Pivot ($1.1932) - Value: $16783
+
+2025-05-02T00:45:20-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:45:20 CDT)
+Interval: 3    Current Price: $1.1927
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (15.11): Ranging (ADX < 25.00)
+PSAR (1.1824): Bullish
+RSI (14) (56.95): Neutral
+MFI (14) (55.31): Neutral
+CCI (20) (97.63): Neutral
+Williams %R (14) (-13.29): Overbought
+StochRSI (3/3) (K:81.92 D:88.51): Below Signal (K < D)
+MACD (12/26/9) (L:0.0012 S:0.0003): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (11157): Low Volume (Vol:11157 MA:265169)
+OBV Trend (5881113): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $710360
+OB Value (Asks): $841538
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $405314
+  Resistance near Fib 50.0% ($1.1937) - Value: $333054
+  Resistance near Pivot ($1.1933) - Value: $295177
+  Resistance near Fib 38.2% ($1.1976) - Value: $188132
+  Support near Pivot ($1.1933) - Value: $20020
+
+2025-05-02T00:45:55-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:45:55 CDT)
+Interval: 3    Current Price: $1.1928
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.91): Ranging (ADX < 25.00)
+PSAR (1.1824): Bullish
+RSI (14) (57.17): Neutral
+MFI (14) (54.55): Neutral
+CCI (20) (94.39): Neutral
+Williams %R (14) (-12.66): Overbought
+StochRSI (3/3) (K:82.28 D:88.63): Below Signal (K < D)
+MACD (12/26/9) (L:0.0012 S:0.0003): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (64354): Low Volume (Vol:64354 MA:267829)
+OBV Trend (5892270): Flat
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1934
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $742179
+OB Value (Asks): $854080
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $416450
+  Resistance near Fib 50.0% ($1.1937) - Value: $280901
+  Resistance near Fib 38.2% ($1.1976) - Value: $260798
+  Resistance near Pivot ($1.1934) - Value: $242411
+  Support near Pivot ($1.1934) - Value: $52164
+
+2025-05-02T00:46:28-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:46:28 CDT)
+Interval: 3    Current Price: $1.1928
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.91): Ranging (ADX < 25.00)
+PSAR (1.1824): Bullish
+RSI (14) (57.17): Neutral
+MFI (14) (54.23): Neutral
+CCI (20) (96.99): Neutral
+Williams %R (14) (-12.66): Overbought
+StochRSI (3/3) (K:82.28 D:88.63): Below Signal (K < D)
+MACD (12/26/9) (L:0.0012 S:0.0003): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (86550): Low Volume (Vol:86550 MA:268939)
+OBV Trend (5892270): Flat
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1934
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $705507
+OB Value (Asks): $867200
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $376064
+  Resistance near Fib 50.0% ($1.1937) - Value: $297014
+  Resistance near Fib 38.2% ($1.1976) - Value: $272463
+  Resistance near Pivot ($1.1934) - Value: $256698
+  Support near Pivot ($1.1934) - Value: $36732
+
+2025-05-02T00:47:02-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:47:01 CDT)
+Interval: 3    Current Price: $1.1933
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.91): Ranging (ADX < 25.00)
+PSAR (1.1824): Bullish
+RSI (14) (57.98): Neutral
+MFI (14) (53.95): Neutral
+CCI (20) (101.51): Overbought
+Williams %R (14) (-9.49): Overbought
+StochRSI (3/3) (K:83.59 D:89.07): Below Signal (K < D)
+MACD (12/26/9) (L:0.0013 S:0.0003): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (106489): Low Volume (Vol:106489 MA:269936)
+OBV Trend (5998759): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1935
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $699895
+OB Value (Asks): $851963
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $394215
+  Resistance near Fib 38.2% ($1.1976) - Value: $346419
+  Resistance near Fib 50.0% ($1.1937) - Value: $211370
+  Resistance near Pivot ($1.1935) - Value: $198369
+  Support near Pivot ($1.1935) - Value: $79729
+
+2025-05-02T00:47:33-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:47:32 CDT)
+Interval: 3    Current Price: $1.1932
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.91): Ranging (ADX < 25.00)
+PSAR (1.1824): Bullish
+RSI (14) (57.66): Neutral
+MFI (14) (53.61): Neutral
+CCI (20) (100.87): Overbought
+Williams %R (14) (-10.76): Overbought
+StochRSI (3/3) (K:83.07 D:88.90): Below Signal (K < D)
+MACD (12/26/9) (L:0.0012 S:0.0003): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (131260): Low Volume (Vol:131260 MA:271174)
+OBV Trend (6023530): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1935
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $731231
+OB Value (Asks): $829250
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $408263
+  Resistance near Fib 38.2% ($1.1976) - Value: $329045
+  Resistance near Fib 50.0% ($1.1937) - Value: $220297
+  Resistance near Pivot ($1.1935) - Value: $180721
+  Support near Pivot ($1.1935) - Value: $83896
+
+2025-05-02T00:48:07-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:48:06 CDT)
+Interval: 3    Current Price: $1.1927
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.85): Ranging (ADX < 25.00)
+PSAR (1.1831): Bullish
+RSI (14) (56.91): Neutral
+MFI (14) (48.37): Neutral
+CCI (20) (87.64): Neutral
+Williams %R (14) (-13.29): Overbought
+StochRSI (3/3) (K:79.80 D:83.33): Below Signal (K < D)
+MACD (12/26/9) (L:0.0013 S:0.0005): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (1763): Low Volume (Vol:1763 MA:259368)
+OBV Trend (5498216): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $784227
+OB Value (Asks): $834758
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $413187
+  Resistance near Fib 50.0% ($1.1937) - Value: $291058
+  Resistance near Pivot ($1.1933) - Value: $246826
+  Resistance near Fib 38.2% ($1.1976) - Value: $223685
+  Support near Pivot ($1.1933) - Value: $40592
+
+2025-05-02T00:48:40-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:48:40 CDT)
+Interval: 3    Current Price: $1.1927
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.85): Ranging (ADX < 25.00)
+PSAR (1.1831): Bullish
+RSI (14) (56.91): Neutral
+MFI (14) (49.03): Neutral
+CCI (20) (92.07): Neutral
+Williams %R (14) (-13.29): Overbought
+StochRSI (3/3) (K:79.80 D:83.33): Below Signal (K < D)
+MACD (12/26/9) (L:0.0013 S:0.0005): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (47203): Low Volume (Vol:47203 MA:261640)
+OBV Trend (5543656): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $756625
+OB Value (Asks): $809444
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $439397
+  Resistance near Fib 50.0% ($1.1937) - Value: $309868
+  Resistance near Pivot ($1.1933) - Value: $266797
+  Resistance near Fib 38.2% ($1.1976) - Value: $231574
+  Support near Pivot ($1.1933) - Value: $38371
+
+2025-05-02T00:49:11-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:49:10 CDT)
+Interval: 3    Current Price: $1.1933
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (14.85): Ranging (ADX < 25.00)
+PSAR (1.1831): Bullish
+RSI (14) (57.95): Neutral
+MFI (14) (49.43): Neutral
+CCI (20) (95.84): Neutral
+Williams %R (14) (-9.49): Overbought
+StochRSI (3/3) (K:81.48 D:83.89): Below Signal (K < D)
+MACD (12/26/9) (L:0.0013 S:0.0005): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (75334): Low Volume (Vol:75334 MA:263047)
+OBV Trend (5571787): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1935
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $732557
+OB Value (Asks): $841837
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $391388
+  Resistance near Fib 38.2% ($1.1976) - Value: $344320
+  Resistance near Fib 50.0% ($1.1937) - Value: $202838
+  Resistance near Pivot ($1.1935) - Value: $184189
+  Support near Pivot ($1.1935) - Value: $96349
+
+2025-05-02T00:49:43-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:49:43 CDT)
+Interval: 3    Current Price: $1.1942
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (15.93): Ranging (ADX < 25.00)
+PSAR (1.1831): Bullish
+RSI (14) (63.12): Neutral
+MFI (14) (53.31): Neutral
+CCI (20) (142.75): Overbought
+Williams %R (14) (-5.82): Overbought
+StochRSI (3/3) (K:86.58 D:85.59): Bullish (Crossed Up)
+MACD (12/26/9) (L:0.0016 S:0.0006): Above Signal (Line > Signal)
+BBands (20/2.0) (1.20): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (374694): Average Volume (Vol:374694 MA:278015)
+OBV Trend (5871147): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1947
+Nearest Support:
+  > Fib 50.0%: $1.1937
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+Nearest Resistance:
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+  > Period High: $1.2102
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $563112
+OB Value (Asks): $736003
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $423432
+  Support near Fib 61.8% ($1.1897) - Value: $326177
+  Resistance near Pivot ($1.1947) - Value: $269596
+  Resistance near Fib 50.0% ($1.1937) - Value: $152403
+  Support near Fib 50.0% ($1.1937) - Value: $91798
+
+2025-05-02T00:50:18-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:50:17 CDT)
+Interval: 3    Current Price: $1.1940
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (15.93): Ranging (ADX < 25.00)
+PSAR (1.1831): Bullish
+RSI (14) (59.10): Neutral
+MFI (14) (56.62): Neutral
+CCI (20) (126.35): Overbought
+Williams %R (14) (-20.63): Neutral
+StochRSI (3/3) (K:83.34 D:84.51): Below Signal (K < D)
+MACD (12/26/9) (L:0.0014 S:0.0005): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (672965): High Volume (Vol:672965 MA:292928)
+OBV Trend (6169418): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1938
+Nearest Support:
+  > Fib 50.0%: $1.1937
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+Nearest Resistance:
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+  > Period High: $1.2102
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $692064
+OB Value (Asks): $830999
+Significant OB Clusters (Top 5):
+  Resistance near Fib 38.2% ($1.1976) - Value: $442516
+  Support near Fib 61.8% ($1.1897) - Value: $349259
+  Support near Fib 50.0% ($1.1937) - Value: $132604
+  Resistance near Pivot ($1.1938) - Value: $126664
+  Support near Pivot ($1.1938) - Value: $117004
+
+2025-05-02T00:50:51-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:50:50 CDT)
+Interval: 3    Current Price: $1.1927
+EMA Align (12/26): Bullish (S:1.19 > L:1.19)
+ADX Trend (14) (15.93): Ranging (ADX < 25.00)
+PSAR (1.1831): Bullish
+RSI (14) (56.91): Neutral
+MFI (14) (56.84): Neutral
+CCI (20) (118.57): Overbought
+Williams %R (14) (-27.51): Neutral
+StochRSI (3/3) (K:79.80 D:83.33): Below Signal (K < D)
+MACD (12/26/9) (L:0.0013 S:0.0005): Above Signal (Line > Signal)
+Potential Bearish MACD Divergence
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Above Middle))
+Volume vs MA(20) (694705): High Volume (Vol:694705 MA:294015)
+OBV Trend (6191158): Increasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1933
+Nearest Support:
+  > Fib 61.8%: $1.1897
+  > Fib 78.6%: $1.1842
+  > Period Low: $1.1771
+Nearest Resistance:
+  > Fib 50.0%: $1.1937
+  > Fib 38.2%: $1.1976
+  > Fib 23.6%: $1.2024
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $773806
+OB Value (Asks): $830444
+Significant OB Clusters (Top 5):
+  Support near Fib 61.8% ($1.1897) - Value: $453964
+  Resistance near Fib 50.0% ($1.1937) - Value: $367545
+  Resistance near Pivot ($1.1933) - Value: $308625
+  Resistance near Fib 38.2% ($1.1976) - Value: $189053
+  Support near Pivot ($1.1933) - Value: $17177
+
+2025-05-02T00:51:02-0500 - INFO - FARTCOIN/USDT:USDT - Main analysis task was cancelled externally.
+2025-05-02T00:51:02-0500 - INFO - FARTCOIN/USDT:USDT - Initiating shutdown sequence...
+2025-05-02T00:51:02-0500 - INFO - FARTCOIN/USDT:USDT - Closed CCXT exchange connection.
+2025-05-02T00:51:02-0500 - INFO - FARTCOIN/USDT:USDT - Application finished.
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Logger initialized for symbol FARTCOIN/USDT:USDT.
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - CCXT client initialized for Bybit Mainnet.
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - CCXT Client initialized for FARTCOIN/USDT:USDT. Markets assigned.
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Trading Analyzer initialized.
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - --- Starting Analysis ---
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Symbol: FARTCOIN/USDT:USDT (Linear)
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Interval: 15 (CCXT: 15m)
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - API Env: PROD (URL: https://api.{hostname})
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Loop Interval: 30 seconds
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Kline Limit: 200 candles
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Orderbook Limit: 50 levels
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Timezone: America/Chicago
+2025-05-02T00:51:39-0500 - INFO - FARTCOIN/USDT:USDT - Starting analysis loop for FARTCOIN/USDT:USDT with interval 15...
+2025-05-02T00:51:48-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:51:48 CDT)
+Interval: 15    Current Price: $1.1897
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (47.91): Neutral
+MFI (14) (51.76): Neutral
+CCI (20) (65.38): Neutral
+Williams %R (14) (-51.36): Neutral
+StochRSI (3/3) (K:70.41 D:65.56): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0018 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (991923): Average Volume (Vol:991923 MA:1375968)
+OBV Trend (40396225): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1821
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $727094
+OB Value (Asks): $814386
+No significant OB clusters found near levels.
+
+2025-05-02T00:52:13-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:52:13 CDT)
+Interval: 15    Current Price: $1.1894
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (47.68): Neutral
+MFI (14) (51.97): Neutral
+CCI (20) (62.29): Neutral
+Williams %R (14) (-52.73): Neutral
+StochRSI (3/3) (K:69.39 D:65.22): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0018 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1075926): Average Volume (Vol:1075926 MA:1380168)
+OBV Trend (40312222): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1820
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $747337
+OB Value (Asks): $811662
+No significant OB clusters found near levels.
+
+2025-05-02T00:52:47-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:52:46 CDT)
+Interval: 15    Current Price: $1.1886
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (47.08): Neutral
+MFI (14) (46.04): Neutral
+CCI (20) (45.00): Neutral
+Williams %R (14) (-56.36): Neutral
+StochRSI (3/3) (K:66.70 D:64.33): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1181198): Average Volume (Vol:1181198 MA:1385432)
+OBV Trend (40206950): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1817
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $689451
+OB Value (Asks): $818583
+No significant OB clusters found near levels.
+
+2025-05-02T00:53:17-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:53:17 CDT)
+Interval: 15    Current Price: $1.1863
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (45.43): Neutral
+MFI (14) (45.67): Neutral
+CCI (20) (6.33): Neutral
+Williams %R (14) (-66.82): Neutral
+StochRSI (3/3) (K:59.36 D:61.88): Bearish (Crossed Down)
+MACD (12/26/9) (L:-0.0020 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1336902): Average Volume (Vol:1336902 MA:1393217)
+OBV Trend (40051246): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1810
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $696557
+OB Value (Asks): $778013
+Significant OB Clusters (Top 5):
+  Support near Pivot ($1.1810) - Value: $20132
+
+2025-05-02T00:53:53-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:53:52 CDT)
+Interval: 15    Current Price: $1.1883
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (46.71): Neutral
+MFI (14) (45.51): Neutral
+CCI (20) (21.42): Neutral
+Williams %R (14) (-58.64): Neutral
+StochRSI (3/3) (K:65.06 D:63.78): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1401656): Average Volume (Vol:1401656 MA:1396454)
+OBV Trend (39986492): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1816
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $611656
+OB Value (Asks): $793301
+No significant OB clusters found near levels.
+
+2025-05-02T00:54:25-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:54:25 CDT)
+Interval: 15    Current Price: $1.1884
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (46.93): Neutral
+MFI (14) (45.09): Neutral
+CCI (20) (23.90): Neutral
+Williams %R (14) (-57.27): Neutral
+StochRSI (3/3) (K:66.04 D:64.11): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1581203): Average Volume (Vol:1581203 MA:1405432)
+OBV Trend (39806945): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1817
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $643261
+OB Value (Asks): $773596
+No significant OB clusters found near levels.
+
+2025-05-02T00:54:55-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:54:55 CDT)
+Interval: 15    Current Price: $1.1886
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (47.08): Neutral
+MFI (14) (44.91): Neutral
+CCI (20) (25.55): Neutral
+Williams %R (14) (-56.36): Neutral
+StochRSI (3/3) (K:66.70 D:64.33): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1661752): Average Volume (Vol:1661752 MA:1409459)
+OBV Trend (39726396): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1817
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $654328
+OB Value (Asks): $867685
+No significant OB clusters found near levels.
+
+2025-05-02T00:55:26-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:55:26 CDT)
+Interval: 15    Current Price: $1.1883
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (46.86): Neutral
+MFI (14) (44.82): Neutral
+CCI (20) (23.08): Neutral
+Williams %R (14) (-57.73): Neutral
+StochRSI (3/3) (K:65.71 D:64.00): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1701301): Average Volume (Vol:1701301 MA:1411437)
+OBV Trend (39686847): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1816
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $692062
+OB Value (Asks): $839220
+No significant OB clusters found near levels.
+
+2025-05-02T00:55:59-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:55:58 CDT)
+Interval: 15    Current Price: $1.1880
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (14.22): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (46.64): Neutral
+MFI (14) (44.28): Neutral
+CCI (20) (20.59): Neutral
+Williams %R (14) (-59.09): Neutral
+StochRSI (3/3) (K:64.74 D:63.67): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (1936909): Average Volume (Vol:1936909 MA:1423217)
+OBV Trend (39451239): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1815
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $607873
+OB Value (Asks): $787754
+No significant OB clusters found near levels.
+
+2025-05-02T00:56:31-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:56:30 CDT)
+Interval: 15    Current Price: $1.1858
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.20): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (45.09): Neutral
+MFI (14) (43.23): Neutral
+CCI (20) (-7.32): Neutral
+Williams %R (14) (-69.09): Neutral
+StochRSI (3/3) (K:57.83 D:61.37): Bearish (Crossed Down)
+MACD (12/26/9) (L:-0.0021 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (2423633): High Volume (Vol:2423633 MA:1447553)
+OBV Trend (38964515): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1808
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $852197
+OB Value (Asks): $792595
+Significant OB Clusters (Top 5):
+  Support near Pivot ($1.1808) - Value: $306733
+
+2025-05-02T00:57:03-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:57:03 CDT)
+Interval: 15    Current Price: $1.1846
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.36): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (44.28): Neutral
+MFI (14) (42.05): Neutral
+CCI (20) (-29.03): Neutral
+Williams %R (14) (-74.55): Neutral
+StochRSI (3/3) (K:54.25 D:60.17): Bearish (Crossed Down)
+MACD (12/26/9) (L:-0.0022 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.18): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (2995369): High Volume (Vol:2995369 MA:1476140)
+OBV Trend (38392779): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1804
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $1005704
+OB Value (Asks): $772913
+Significant OB Clusters (Top 5):
+  Support near Pivot ($1.1804) - Value: $639265
+
+2025-05-02T00:57:38-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:57:37 CDT)
+Interval: 15    Current Price: $1.1855
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.36): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (44.88): Neutral
+MFI (14) (41.93): Neutral
+CCI (20) (-21.59): Neutral
+Williams %R (14) (-70.45): Neutral
+StochRSI (3/3) (K:56.92 D:61.06): Bearish (Crossed Down)
+MACD (12/26/9) (L:-0.0021 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (3055198): High Volume (Vol:3055198 MA:1479132)
+OBV Trend (38332950): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1807
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): Neutral Pressure
+OB Value (Bids): $975971
+OB Value (Asks): $819379
+Significant OB Clusters (Top 5):
+  Support near Pivot ($1.1807) - Value: $550474
+
+2025-05-02T00:58:11-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:58:11 CDT)
+Interval: 15    Current Price: $1.1864
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.36): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (45.57): Neutral
+MFI (14) (41.86): Neutral
+CCI (20) (-13.23): Neutral
+Williams %R (14) (-65.91): Neutral
+StochRSI (3/3) (K:59.97 D:62.08): Bearish (Crossed Down)
+MACD (12/26/9) (L:-0.0020 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (3089328): High Volume (Vol:3089328 MA:1480838)
+OBV Trend (38298820): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1810
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $547851
+OB Value (Asks): $847143
+Significant OB Clusters (Top 5):
+  Support near Pivot ($1.1810) - Value: $152585
+
+2025-05-02T00:58:46-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:58:46 CDT)
+Interval: 15    Current Price: $1.1875
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.36): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (46.28): Neutral
+MFI (14) (41.75): Neutral
+CCI (20) (-4.77): Neutral
+Williams %R (14) (-61.36): Neutral
+StochRSI (3/3) (K:63.12 D:63.13): Bearish (Crossed Down)
+MACD (12/26/9) (L:-0.0019 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (3146178): High Volume (Vol:3146178 MA:1483681)
+OBV Trend (38241970): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1814
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $430557
+OB Value (Asks): $811373
+No significant OB clusters found near levels.
+
+2025-05-02T00:59:17-0500 - INFO - FARTCOIN/USDT:USDT - 
+--- Analysis Report for FARTCOIN/USDT:USDT --- (2025-05-02 00:59:16 CDT)
+Interval: 15    Current Price: $1.1892
+EMA Align (12/26): Bearish (S:1.19 < L:1.19)
+ADX Trend (14) (15.36): Ranging (ADX < 25.00)
+PSAR (1.1790): Flip Bullish (Just Flipped!)
+RSI (14) (47.53): Neutral
+MFI (14) (41.64): Neutral
+CCI (20) (9.72): Neutral
+Williams %R (14) (-53.64): Neutral
+StochRSI (3/3) (K:68.71 D:64.99): Above Signal (K > D)
+MACD (12/26/9) (L:-0.0018 S:-0.0024): Above Signal (Line > Signal)
+BBands (20/2.0) (1.19): Within Bands (L:1.18 M:1.19 U:1.20 (Below Middle))
+Volume vs MA(20) (3196293): High Volume (Vol:3196293 MA:1486186)
+OBV Trend (38191855): Decreasing
+A/D Osc Trend: N/A
+
+--- Levels & Orderbook ---
+Pivot Point: $1.1819
+Nearest Support:
+  > Fib 50.0%: $1.1783
+  > Fib 61.8%: $1.1508
+  > Fib 78.6%: $1.1117
+Nearest Resistance:
+  > Fib 38.2%: $1.2058
+  > Fib 23.6%: $1.2398
+  > Period High: $1.2947
+
+OB Pressure (Top 50): High Sell Pressure
+OB Value (Bids): $392665
+OB Value (Asks): $864145
+No significant OB clusters found near levels.
+
