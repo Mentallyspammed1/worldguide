@@ -221,14 +221,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secretsresume: true
-            echo "Uploading lint_report.txt..." >> lint_report.txt
-            if [ -f lint_report.txt ]; then
-              echo "lint_report.txt found, uploading..." >> lint_report.txt
-            else
-              echo "Warning: lint_report.txt not found, creating empty file" >> lint_report.txt
-              touch lint_report.txt
-            fi
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Upload Lint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
           path: lint_report.txt
           retention-days: 7
           if-no-files-found: warn
