@@ -1,8 +1,5 @@
-<<<<<<< HEAD
+
 name: Pyrmethus Enhancement Workflow
-=======
-name: Code Enhancement Workflow
->>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
 
 on:
   workflow_dispatch:
