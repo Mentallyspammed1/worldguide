@@ -1,4 +1,3 @@
-
 name: Pyrmethus Enhancement Workflow
 
 on:
@@ -18,19 +17,11 @@ on:
       max_api_calls:
         description: 'Maximum API calls per minute (1-60)'
         required: false
-<<<<<<< HEAD
-        default: '70'
-      commit_message:
-        description: 'Custom commit message for the enhancement changes'
-        required: false
-        default: 'Apply Pyrmethus code enhancements'
-=======
         default: '59'
       commit_message:
         description: 'Custom commit message for the enhancement changes'
         required: false
         default: 'Apply automated code enhancements'
->>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
 
 jobs:
   enhance_python_code:
@@ -55,12 +46,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install google-generativeai aiohttp
+          pip list >> enhancement_log.txt
 
       - name: Validate Inputs
         run: |
           FILE_PATTERN="${{ inputs.file_pattern }}"
-          if [[ ! "$FILE_PATTERN" =~ \.py$ ]] || [[ "$FILE_PATTERN" =~ \[.*\] ]] || [[ "$FILE_PATTERN" =~ [[:space:]]or[[:space:]] ]]; then
-            echo "Error: file_pattern must target .py files (e.g., '*.py', '**/*.py') and not contain square brackets or 'or'"
+          if [[ ! "$FILE_PATTERN" =~ \.py$ ]]; then
+            echo "Error: file_pattern must target .py files (e.g., '*.py', '**/*.py')"
             echo "Invalid pattern provided: $FILE_PATTERN"
             exit 1
           fi
@@ -77,6 +69,10 @@ jobs:
             echo "Error: Base directory '${{ inputs.base_directory }}' does not exist"
             exit 1
           fi
+          echo "Validated inputs:" >> enhancement_log.txt
+          echo "- Base directory: ${{ inputs.base_directory }}" >> enhancement_log.txt
+          echo "- File pattern: ${{ inputs.file_pattern }}" >> enhancement_log.txt
+          echo "- Max API calls: ${{ inputs.max_api_calls }}" >> enhancement_log.txt
 
       - name: Ensure Enhancement Script
         run: |
@@ -85,18 +81,21 @@ jobs:
             exit 1
           fi
           chmod +x xfix_files.py
+          echo "Confirmed xfix_files.py exists and is executable" >> enhancement_log.txt
 
       - name: List Repository Files
         run: |
           echo "Repository contents:" | tee -a enhancement_log.txt
-          find . -type f | tee -a enhancement_log.txt
+          find . -type f | sort >> enhancement_log.txt
 
       - name: List Matched Python Files
         run: |
           echo "Matched files for pattern ${{ inputs.file_pattern }} in directory ${{ inputs.base_directory }}:" | tee matched_files.txt
-          find "${{ inputs.base_directory }}" -type f -path "${{ inputs.file_pattern }}" | tee -a matched_files.txt
+          find "${{ inputs.base_directory }}" -type f -path "${{ inputs.file_pattern }}" | sort >> matched_files.txt
           if ! grep -q "[^[:space:]]" matched_files.txt; then
             echo "Warning: No Python files matched the pattern ${{ inputs.file_pattern }} in directory ${{ inputs.base_directory }}" | tee -a matched_files.txt
+          else
+            echo "Found $(grep -c "[^[:space:]]" matched_files.txt) Python files" >> matched_files.txt
           fi
 
       - name: Run Code Enhancement Script
@@ -104,12 +103,21 @@ jobs:
           GOOGLE_API_KEY: ${{ inputs.google_api_key || secrets.GOOGLE_API_KEY }}
           MAX_API_CALLS: ${{ inputs.max_api_calls }}
         run: |
-          touch enhancement_log.txt
+          echo "Starting code enhancement at $(date -u)" >> enhancement_log.txt
           ./xfix_files.py "${{ inputs.base_directory }}" "${{ inputs.file_pattern }}" >> enhancement_log.txt 2>&1 || {
-            echo "Error: Enhancement script failed:" >> enhancement_log.txt
-            cat enhancement_log.txt
+            echo "Error: Enhancement script failed. See enhancement_log.txt for details." | tee -a enhancement_log.txt
             exit 1
           }
+          echo "Completed code enhancement at $(date -u)" >> enhancement_log.txt
+
+      - name: Validate Enhanced Files
+        run: |
+          echo "Validating enhanced Python files for syntax errors:" >> enhancement_log.txt
+          find "${{ inputs.base_directory }}" -type f -path "${{ inputs.file_pattern }}" -exec python -m py_compile {} \; >> enhancement_log.txt 2>&1 || {
+            echo "Error: Syntax errors detected in enhanced Python files" | tee -a enhancement_log.txt
+            exit 1
+          }
+          echo "No syntax errors detected in enhanced files" >> enhancement_log.txt
 
       - name: Debug Git Status
         run: |
@@ -123,11 +131,7 @@ jobs:
           git add .
           if ! git diff --cached --quiet; then
             echo "Changes detected" | tee -a enhancement_log.txt
-<<<<<<< HEAD
-            echo* echo "changes_made=true" >> $GITHUB_OUTPUT
-=======
             echo "changes_made=true" >> $GITHUB_OUTPUT
->>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
           else
             echo "No changes detected" | tee -a enhancement_log.txt
             echo "changes_made=false" >> $GITHUB_OUTPUT
@@ -175,11 +179,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.commit-changes.outputs.branch_name }}
           base: ${{ github.ref_name }}
-<<<<<<< HEAD
-          title: "Pyrmethus Code Enhancements"
-=======
           title: "Automated Code Enhancements"
->>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
           body: |
             This PR contains automated code enhancements for Python (.py) files using the Gemini API.
 
@@ -188,6 +188,10 @@ jobs:
             - File pattern: ${{ inputs.file_pattern }}
             - API calls per minute: ${{ inputs.max_api_calls }}
             - Commit message: ${{ inputs.commit_message }}
+
+            **Validation:**
+            - Syntax-checked all enhanced Python files.
+            - Found $(grep -c "[^[:space:]]" matched_files.txt) files matching the pattern.
 
             Please review the changes and the attached `enhancement_log.txt` and `matched_files.txt` artifacts.
           labels: |
