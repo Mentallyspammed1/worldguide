@@ -37,6 +37,35 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Initialize Lint Report
+        run: |
+          echo "Linting and Formatting Report" > lint_report.txt
+          echo "=============================" >> lint_report.txt
+          echo "Workflow started at $(date)" >> lint_report.txt
+
+      - name: Debug Git Configuration
+        run: |
+          echo "Git configuration:" >> lint_report.txt
+          git config --list >> lint_report.txt
+          echo "Remote details:" >> lint_report.txt
+          git remote -v >> lint_report.txt
+          echo "Current branch:" >> lint_report.txt
+          git branch --show-current >> lint_report.txt
+          echo "Repository state:" >> lint_report.txt
+          git status >> lint_report.txt
+          echo "Environment variables:" >> lint_report.txt
+          env | sort >> lint_report.txt
+
+      - name: Initialize Repository if Empty
+        run: |
+          if [ ! -f "$(git rev-parse --git-dir)/HEAD" ]; then
+            echo "Repository is empty, initializing..." >> lint_report.txt
+            git commit --allow-empty -m "Initial empty commit" || {
+              echo "Error: Failed to create initial commit" >> lint_report.txt
+              exit 1
+            }
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -45,32 +74,28 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          echo "Installing dependencies..." >> lint_report.txt
           python -m pip install --upgrade pip
           pip install ruff mypy
-          # Install project dependencies if pyproject.toml or requirements.txt exists
           if [ -f pyproject.toml ]; then
-            pip install .
+            pip install . >> lint_report.txt 2>&1
           elif [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+            pip install -r requirements.txt >> lint_report.txt 2>&1
           fi
 
       - name: Validate Inputs
         run: |
+          echo "Validating inputs..." >> lint_report.txt
           FILE_PATTERN="${{ inputs.file_pattern }}"
           if [[ ! "$FILE_PATTERN" =~ \.py$ ]] || [[ "$FILE_PATTERN" =~ \[.*\] ]] || [[ "$FILE_PATTERN" =~ [[:space:]]or[[:space:]] ]]; then
-            echo "Error: file_pattern must target .py files (e.g., '*.py', '**/*.py') and not contain square brackets or 'or'"
-            echo "Invalid pattern provided: $FILE_PATTERN"
+            echo "Error: file_pattern must target .py files (e.g., '*.py', '**/*.py') and not contain square brackets or 'or'" >> lint_report.txt
+            echo "Invalid pattern provided: $FILE_PATTERN" >> lint_report.txt
             exit 1
           fi
           if [ ! -d "${{ inputs.base_directory }}" ]; then
-            echo "Error: Base directory '${{ inputs.base_directory }}' does not exist"
+            echo "Error: Base directory '${{ inputs.base_directory }}' does not exist" >> lint_report.txt
             exit 1
           fi
-
-      - name: Initialize Lint Report
-        run: |
-          echo "Linting and Formatting Report" > lint_report.txt
-          echo "=============================" >> lint_report.txt
 
       - name: List Repository Files
         run: |
@@ -109,6 +134,7 @@ jobs:
 
       - name: Debug Git Status
         run: |
+          echo "Git status after processing:" >> lint_report.txt
           git status >> lint_report.txt
           echo "Staged changes:" >> lint_report.txt
           git diff --cached || echo "No staged changes" >> lint_report.txt
@@ -128,6 +154,7 @@ jobs:
       - name: Configure Git
         if: steps.git_status.outputs.changes_made == 'true'
         run: |
+          echo "Configuring Git..." >> lint_report.txt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -139,11 +166,12 @@ jobs:
           echo "Creating branch: $BRANCH_NAME" >> lint_report.txt
           git checkout -b "$BRANCH_NAME" || {
             echo "Error: Failed to create branch $BRANCH_NAME" >> lint_report.txt
+            git status >> lint_report.txt
             exit 1
           }
           git commit -m "${{ inputs.commit_message }}" || {
             echo "Error: Failed to commit changes" >> lint_report.txt
-            git status
+            git status >> lint_report.txt
             exit 1
           }
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
@@ -155,8 +183,8 @@ jobs:
           echo "Pushing branch $BRANCH_NAME to origin" >> lint_report.txt
           git push origin "$BRANCH_NAME" --force-with-lease || {
             echo "Error: Failed to push branch $BRANCH_NAME" >> lint_report.txt
-            git status
-            git remote -v
+            git status >> lint_report.txt
+            git remote -v >> lint_report.txt
             exit 1
           }
 
@@ -185,11 +213,22 @@ jobs:
           commit-message: "${{ inputs.commit_message }}"
           delete-branch: true
 
-      - name: Upload Lint Report
-        if: always()
-        uses: actions/upload-artifact@v4
+  upload-artifact:
+    runs-on: ubuntu-latest
+    needs: lint-and-format
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          name: lint-report
+          token: ${{ secretsresume: true
+            echo "Uploading lint_report.txt..." >> lint_report.txt
+            if [ -f lint_report.txt ]; then
+              echo "lint_report.txt found, uploading..." >> lint_report.txt
+            else
+              echo "Warning: lint_report.txt not found, creating empty file" >> lint_report.txt
+              touch lint_report.txt
+            fi
           path: lint_report.txt
           retention-days: 7
           if-no-files-found: warn
