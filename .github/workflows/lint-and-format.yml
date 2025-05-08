@@ -31,17 +31,60 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Initialize Lint Report
+        run: |
+          echo "Linting and Formatting Report" > lint_report.txt
+          echo "=============================" >> lint_report.txt
+          echo "Workflow started at $(date)" >> lint_report.txt
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Initialize Lint Report
+      - name: Initialize Repository
         run: |
-          echo "Linting and Formatting Report" > lint_report.txt
-          echo "=============================" >> lint_report.txt
-          echo "Workflow started at $(date)" >> lint_report.txt
+          echo "Checking repository state..." >> lint_report.txt
+          if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            echo "Error: Not a Git repository" >> lint_report.txt
+            exit 1
+          fi
+          if [ ! -f "$(git rev-parse --git-dir)/HEAD" ]; then
+            echo "Repository is empty, initializing..." >> lint_report.txt
+            git commit --allow-empty -m "Initial empty commit" || {
+              echo "Error: Failed to create initial commit" >> lint_report.txt
+              exit 1
+            }
+          fi
+          git fetch origin || {
+            echo "Error: Failed to fetch from origin" >> lint_report.txt
+            exit 1
+          }
+
+      - name: Validate Git Remote and Permissions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Validating Git remote and permissions..." >> lint_report.txt
+          git remote -v >> lint_report.txt
+          REMOTE_URL=$(git remote get-url origin)
+          if [[ ! "$REMOTE_URL" =~ ^https://github.com ]]; then
+            echo "Error: Remote 'origin' is not a GitHub repository: $REMOTE_URL" >> lint_report.txt
+            exit 1
+          fi
+          # Test authentication by attempting to list branches
+          curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/branches" > branches.json
+          if grep -q '"message": "Not Found"' branches.json; then
+            echo "Error: Repository not found or GITHUB_TOKEN lacks access" >> lint_report.txt
+            exit 1
+          elif grep -q '"message": "Bad credentials"' branches.json; then
+            echo "Error: GITHUB_TOKEN is invalid" >> lint_report.txt
+            exit 1
+          fi
+          echo "Git remote and permissions validated successfully" >> lint_report.txt
 
       - name: Debug Git Configuration
         run: |
@@ -55,16 +98,6 @@ jobs:
           git status >> lint_report.txt
           echo "Environment variables:" >> lint_report.txt
           env | sort >> lint_report.txt
-
-      - name: Initialize Repository if Empty
-        run: |
-          if [ ! -f "$(git rev-parse --git-dir)/HEAD" ]; then
-            echo "Repository is empty, initializing..." >> lint_report.txt
-            git commit --allow-empty -m "Initial empty commit" || {
-              echo "Error: Failed to create initial commit" >> lint_report.txt
-              exit 1
-            }
-          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -178,10 +211,13 @@ jobs:
 
       - name: Push Changes
         if: steps.git_status.outputs.changes_made == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME="${{ steps.commit-changes.outputs.branch_name }}"
           echo "Pushing branch $BRANCH_NAME to origin" >> lint_report.txt
-          git push origin "$BRANCH_NAME" --force-with-lease || {
+          # Use HTTPS URL with token to ensure authentication
+          git push https://x-access-token:$GITHUB_TOKEN@github.com/${{ github.repository }} "$BRANCH_NAME" --force-with-lease || {
             echo "Error: Failed to push branch $BRANCH_NAME" >> lint_report.txt
             git status >> lint_report.txt
             git remote -v >> lint_report.txt
