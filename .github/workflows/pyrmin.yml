@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 name: Pyrmethus Enhancement Workflow
+=======
+name: Code Enhancement Workflow
+>>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
 
 on:
   workflow_dispatch:
@@ -17,11 +21,19 @@ on:
       max_api_calls:
         description: 'Maximum API calls per minute (1-60)'
         required: false
+<<<<<<< HEAD
         default: '70'
       commit_message:
         description: 'Custom commit message for the enhancement changes'
         required: false
         default: 'Apply Pyrmethus code enhancements'
+=======
+        default: '59'
+      commit_message:
+        description: 'Custom commit message for the enhancement changes'
+        required: false
+        default: 'Apply automated code enhancements'
+>>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
 
 jobs:
   enhance_python_code:
@@ -114,7 +126,11 @@ jobs:
           git add .
           if ! git diff --cached --quiet; then
             echo "Changes detected" | tee -a enhancement_log.txt
+<<<<<<< HEAD
             echo* echo "changes_made=true" >> $GITHUB_OUTPUT
+=======
+            echo "changes_made=true" >> $GITHUB_OUTPUT
+>>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
           else
             echo "No changes detected" | tee -a enhancement_log.txt
             echo "changes_made=false" >> $GITHUB_OUTPUT
@@ -162,7 +178,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.commit-changes.outputs.branch_name }}
           base: ${{ github.ref_name }}
+<<<<<<< HEAD
           title: "Pyrmethus Code Enhancements"
+=======
+          title: "Automated Code Enhancements"
+>>>>>>> 67c3910 (Add GitHub Actions workflows for code enhancement and linting)
           body: |
             This PR contains automated code enhancements for Python (.py) files using the Gemini API.
 

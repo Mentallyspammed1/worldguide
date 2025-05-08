@@ -1,0 +1,195 @@
+name: Lint and Format Python Code
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      base_directory:
+        description: 'Base directory to search for Python files'
+        required: true
+        default: '.'
+      file_pattern:
+        description: 'Glob pattern for Python files (e.g., "**/*.py")'
+        required: true
+        default: '**/*.py'
+      commit_message:
+        description: 'Custom commit message for formatting changes'
+        required: false
+        default: 'Apply automated linting and formatting'
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+          # Install project dependencies if pyproject.toml or requirements.txt exists
+          if [ -f pyproject.toml ]; then
+            pip install .
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Validate Inputs
+        run: |
+          FILE_PATTERN="${{ inputs.file_pattern }}"
+          if [[ ! "$FILE_PATTERN" =~ \.py$ ]] || [[ "$FILE_PATTERN" =~ \[.*\] ]] || [[ "$FILE_PATTERN" =~ [[:space:]]or[[:space:]] ]]; then
+            echo "Error: file_pattern must target .py files (e.g., '*.py', '**/*.py') and not contain square brackets or 'or'"
+            echo "Invalid pattern provided: $FILE_PATTERN"
+            exit 1
+          fi
+          if [ ! -d "${{ inputs.base_directory }}" ]; then
+            echo "Error: Base directory '${{ inputs.base_directory }}' does not exist"
+            exit 1
+          fi
+
+      - name: Initialize Lint Report
+        run: |
+          echo "Linting and Formatting Report" > lint_report.txt
+          echo "=============================" >> lint_report.txt
+
+      - name: List Repository Files
+        run: |
+          echo "Repository contents:" >> lint_report.txt
+          find . -type f >> lint_report.txt
+
+      - name: List Matched Python Files
+        run: |
+          echo "Matched files for pattern ${{ inputs.file_pattern }} in directory ${{ inputs.base_directory }}:" >> lint_report.txt
+          find "${{ inputs.base_directory }}" -type f -path "${{ inputs.file_pattern }}" | tee -a lint_report.txt
+          if ! grep -q "[^[:space:]]" lint_report.txt; then
+            echo "Warning: No Python files matched the pattern ${{ inputs.file_pattern }} in directory ${{ inputs.base_directory }}" >> lint_report.txt
+          fi
+
+      - name: Run Ruff Linting
+        run: |
+          echo "Running Ruff linting..." >> lint_report.txt
+          ruff check "${{ inputs.base_directory }}/${{ inputs.file_pattern }}" --output-format=full >> lint_report.txt 2>&1 || {
+            echo "Ruff linting found issues, but continuing to formatting" >> lint_report.txt
+          }
+
+      - name: Run Ruff Formatting
+        run: |
+          echo "Running Ruff formatting..." >> lint_report.txt
+          ruff format "${{ inputs.base_directory }}/${{ inputs.file_pattern }}" >> lint_report.txt 2>&1 || {
+            echo "Error: Ruff formatting failed" >> lint_report.txt
+            exit 1
+          }
+
+      - name: Run Mypy Type Checking
+        run: |
+          echo "Running Mypy type checking..." >> lint_report.txt
+          mypy "${{ inputs.base_directory }}/${{ inputs.file_pattern }}" >> lint_report.txt 2>&1 || {
+            echo "Mypy found type issues, but continuing" >> lint_report.txt
+          }
+
+      - name: Debug Git Status
+        run: |
+          git status >> lint_report.txt
+          echo "Staged changes:" >> lint_report.txt
+          git diff --cached || echo "No staged changes" >> lint_report.txt
+
+      - name: Check for Changes
+        id: git_status
+        run: |
+          git add .
+          if ! git diff --cached --quiet; then
+            echo "Changes detected" >> lint_report.txt
+            echo "changes_made=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes detected" >> lint_report.txt
+            echo "changes_made=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Git
+        if: steps.git_status.outputs.changes_made == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create New Branch and Commit Changes
+        if: steps.git_status.outputs.changes_made == 'true'
+        id: commit-changes
+        run: |
+          BRANCH_NAME="lint-format-$(date +%Y%m%d-%H%M%S)-${{ github.run_id }}"
+          echo "Creating branch: $BRANCH_NAME" >> lint_report.txt
+          git checkout -b "$BRANCH_NAME" || {
+            echo "Error: Failed to create branch $BRANCH_NAME" >> lint_report.txt
+            exit 1
+          }
+          git commit -m "${{ inputs.commit_message }}" || {
+            echo "Error: Failed to commit changes" >> lint_report.txt
+            git status
+            exit 1
+          }
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Push Changes
+        if: steps.git_status.outputs.changes_made == 'true'
+        run: |
+          BRANCH_NAME="${{ steps.commit-changes.outputs.branch_name }}"
+          echo "Pushing branch $BRANCH_NAME to origin" >> lint_report.txt
+          git push origin "$BRANCH_NAME" --force-with-lease || {
+            echo "Error: Failed to push branch $BRANCH_NAME" >> lint_report.txt
+            git status
+            git remote -v
+            exit 1
+          }
+
+      - name: Create Pull Request
+        if: steps.git_status.outputs.changes_made == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.commit-changes.outputs.branch_name }}
+          base: ${{ github.ref_name }}
+          title: "Automated Linting and Formatting"
+          body: |
+            This PR contains automated linting and formatting changes for Python (.py) files using Ruff and Mypy.
+
+            **Details:**
+            - Base directory: ${{ inputs.base_directory }}
+            - File pattern: ${{ inputs.file_pattern }}
+            - Commit message: ${{ inputs.commit_message }}
+
+            Please review the changes and the attached `lint_report.txt` artifact for details.
+          labels: |
+            linting
+            formatting
+            automated
+          assignees: ${{ github.actor }}
+          commit-message: "${{ inputs.commit_message }}"
+          delete-branch: true
+
+      - name: Upload Lint Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint_report.txt
+          retention-days: 7
+          if-no-files-found: warn
