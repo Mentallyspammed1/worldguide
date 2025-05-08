@@ -1,0 +1,90 @@
+# .github/workflows/enhance_code.yml
+
+name: Pyrmethus Enhance Workflow
+
+on:
+  # Allow the workflow to be triggered manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      base_directory:
+        description: 'Base directory to search for Python files'
+        required: true
+        default: '.' # Default to the root of the repository
+      file_pattern:
+        description: 'Glob pattern for Python files (e.g., "**/*.py")'
+        required: true
+        default: '**/*.py' # Default to all .py files recursively
+      branch:
+        description: 'Branch to commit changes to (defaults to the triggered branch)'
+        required: false
+        default: ${{ github.ref_name }} # Use the branch that triggered the workflow
+
+jobs:
+  enhance_python_code:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Grant write permission to the GITHUB_TOKEN
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Checkout the specified branch or the triggered branch
+        ref: ${{ inputs.branch }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x' # Specify the Python version you need
+
+    - name: Run Code Enhancement Script
+      env:
+        # Set the GOOGLE_API_KEY environment variable using a GitHub Secret
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        # Set MAX_API_CALLS if needed, default is 59 in your script
+        # MAX_API_CALLS: 60
+      run: |
+        # Make the script executable (optional, but good practice)
+        chmod +x xfix_files.py
+        # Execute the Python script with the provided inputs
+        python xfix_files.py ${{ inputs.base_directory }} ${{ inputs.file_pattern }}
+
+    - name: Check for changes
+      id: git_status
+      run: |
+        # Use --porcelain to get a stable output format for scripting
+        # If there's any output, there are changes
+        if git status --porcelain | grep .; then
+          echo "changes_made=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes_made=false" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+    - name: Configure Git
+      if: steps.git_status.outputs.changes_made == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and Push Changes
+      if: steps.git_status.outputs.changes_made == 'true'
+      run: |
+        git add .
+        git commit -m "Apply Pyrmethus's automated code enhancements"
+        git push origin ${{ inputs.branch }} # Push to the specified or triggered branch
+
+    - name: Upload Matched Files List
+      uses: actions/upload-artifact@v4
+      with:
+        name: matched-files
+        path: matched_files.txt
+        if-no-files-found: ignore # Don't fail if the file is not created
+
+    - name: Upload Enhancement Log
+      uses: actions/upload-artifact@v4
+      with:
+        name: enhancement-log
+        path: enhancement_log.txt
+        if-no-files-found: ignore # Don't fail if the file is not created
