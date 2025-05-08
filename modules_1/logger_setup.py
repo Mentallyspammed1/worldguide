@@ -1,196 +1,349 @@
+```python
 # File: logger_setup.py
 """
 Configures the application's logging system.
 
 Sets up handlers for console (stdout/stderr) and rotating files,
-using a custom formatter for timezone-aware timestamps and sensitive data masking.
+using a custom formatter for timezone-aware timestamps and potential sensitive data masking.
 """
 
 import logging
 import os
 import sys
+from datetime import datetime, timezone as dt_timezone, tzinfo
 from logging.handlers import RotatingFileHandler
-from datetime import datetime, timezone as dt_timezone  # For timezone aware datetime objects
-from typing import Optional  # For type hinting
+from typing import Optional, Type, Dict, Any, List
 
-# Import utility functions and classes
-# Assumes utils.py provides:
-# - LOG_DIRECTORY: Path to the directory where log files should be stored.
-# - SensitiveFormatter: A logging.Formatter subclass that masks sensitive data.
-# - get_timezone(): A function that returns a timezone object (e.g., from pytz).
+# --- Constants ---
+DEFAULT_LOG_LEVEL: str = "INFO"
+DEFAULT_FILE_LOG_LEVEL: str = "DEBUG"
+DEFAULT_LOG_DIRECTORY_NAME: str = "logs"
+DEFAULT_ROOT_LOG_FILE_NAME: str = "application.log"
+MAX_LOG_FILE_BYTES: int = 10 * 1024 * 1024  # 10 MB
+LOG_FILE_BACKUP_COUNT: int = 5
+
+# Default format strings
+CONSOLE_LOG_FORMAT: str = "%(asctime)s - %(levelname)-8s - [%(name)s] - %(message)s"
+CONSOLE_DATE_FORMAT: str = "%Y-%m-%d %H:%M:%S %Z"  # Includes timezone name
+FILE_LOG_FORMAT: str = (
+    "%(asctime)s.%(msecs)03d %(levelname)-8s "
+    "[%(name)s:%(lineno)d] %(threadName)s - %(message)s"
+)
+# datefmt for file logs; TimezoneAwareFormatter handles localization.
+# Milliseconds are added via .%(msecs)03d in FILE_LOG_FORMAT.
+FILE_DATE_FORMAT: str = "%Y-%m-%d %H:%M:%S"
+
+
+# --- Utility Imports and Fallbacks ---
 try:
+    # Attempt to import custom utilities
+    # Assumes utils.py provides:
+    # - LOG_DIRECTORY: Path to the directory where log files should be stored.
+    # - SensitiveFormatter: A logging.Formatter subclass that masks sensitive data.
+    # - get_timezone(): A function that returns a tzinfo object (e.g., from pytz or zoneinfo).
     from utils import LOG_DIRECTORY, SensitiveFormatter, get_timezone
 except ImportError:
-    print("ERROR: Failed to import required components from 'utils'. Ensure 'utils.py' exists.", file=sys.stderr)
-    # Define fallbacks to allow basic script execution, though logging will be limited/incorrect
-    LOG_DIRECTORY = os.path.join(os.getcwd(), "logs")
-    # Use Python's built-in timezone if pytz/utils not available
-    try:
-        from zoneinfo import ZoneInfo
+    print(
+        "WARNING: Failed to import some components from 'utils'. "
+        "Using default fallbacks. Ensure 'utils.py' is correctly set up "
+        "for full functionality (e.g., sensitive data masking, custom timezone configuration).",
+        file=sys.stderr,
+    )
 
-        get_timezone = lambda: ZoneInfo("UTC")  # Python 3.9+
+    _log_directory_fallback = os.path.join(os.getcwd(), DEFAULT_LOG_DIRECTORY_NAME)
+    LOG_DIRECTORY = os.environ.get("APP_LOG_DIRECTORY", _log_directory_fallback)
+
+    try:
+        from zoneinfo import ZoneInfo  # Python 3.9+
+        _default_timezone_instance = ZoneInfo("UTC")
     except ImportError:
-        from datetime import timezone as dt_tz
+        _default_timezone_instance = dt_timezone.utc  # Python < 3.9 fallback (UTC)
 
-        get_timezone = lambda: dt_tz.utc  # Fallback UTC
+    def get_timezone() -> tzinfo:
+        """Fallback timezone retriever, defaults to UTC."""
+        return _default_timezone_instance
 
-    # Define a basic SensitiveFormatter if not available
-    try:
-        SensitiveFormatter  # Check if already defined
-    except NameError:
+    class SensitiveFormatter(logging.Formatter):
+        """
+        Basic fallback formatter. Does not perform sensitive data masking.
+        This is used if the custom SensitiveFormatter from 'utils' is unavailable.
+        It ensures compatibility with different Python versions' Formatter.__init__ signatures.
+        """
+        def __init__(
+            self,
+            fmt: Optional[str] = None,
+            datefmt: Optional[str] = None,
+            style: str = "%",
+            validate: bool = True,
+            *, # Keyword-only arguments follow
+            defaults: Optional[Dict[str, Any]] = None
+        ):
+            if sys.version_info >= (3, 10):
+                super().__init__(fmt, datefmt, style, validate=validate, defaults=defaults)
+            elif sys.version_info >= (3, 8):
+                super().__init__(fmt, datefmt, style, validate=validate)
+            else:
+                super().__init__(fmt, datefmt, style)
 
-        class SensitiveFormatter(logging.Formatter):
-            """Basic fallback formatter."""
+        def format(self, record: logging.LogRecord) -> str:
+            return super().format(record)
 
-            def format(self, record):
-                return super().format(record)
+    print(
+        "WARNING: Using fallback BasicFormatter instead of SensitiveFormatter. "
+        "Sensitive data will NOT be masked.",
+        file=sys.stderr,
+    )
 
-        print("Warning: Using fallback basic Formatter instead of SensitiveFormatter.", file=sys.stderr)
 
-
-# --- Custom Formatter to Handle Timezone ---
+# --- Custom Timezone-Aware Formatter ---
 class TimezoneAwareFormatter(SensitiveFormatter):
     """
-    A logging formatter that includes timezone information in timestamps.
-    Uses a specified timezone object for localization. Inherits from SensitiveFormatter.
+    A logging formatter that ensures timestamps are timezone-aware.
+    It uses a specified timezone object for localization and inherits
+    from SensitiveFormatter for potential sensitive data masking.
     """
+    _default_time_only_format: str = "%Y-%m-%d %H:%M:%S"
+    _default_full_format_template: str = "%s,%03d %s"  # time_str, msecs, tz_str
 
     def __init__(
-        self, fmt: str = None, datefmt: str = None, style: str = "%", timezone: Optional[datetime.tzinfo] = None
+        self,
+        fmt: Optional[str] = None,
+        datefmt: Optional[str] = None,
+        style: str = "%",
+        timezone_obj: Optional[tzinfo] = None,
+        validate: bool = True,
+        defaults: Optional[Dict[str, Any]] = None
     ):
-        """Initializes the formatter with timezone support."""
-        super().__init__(fmt, datefmt, style)
+        super().__init__(fmt=fmt, datefmt=datefmt, style=style, validate=validate, defaults=defaults)
+
+        resolved_timezone: Optional[tzinfo] = None
         try:
-            self.timezone = timezone or get_timezone()
-            if not isinstance(self.timezone, datetime.tzinfo):
-                raise TypeError("Timezone must be a datetime.tzinfo instance.")
+            if timezone_obj is not None:
+                if not isinstance(timezone_obj, tzinfo):
+                    raise TypeError(
+                        f"timezone_obj must be a datetime.tzinfo instance, got {type(timezone_obj)}"
+                    )
+                resolved_timezone = timezone_obj
+            else:
+                resolved_timezone = get_timezone()
+                if not isinstance(resolved_timezone, tzinfo):
+                    print(
+                        f"WARNING: get_timezone() returned invalid type: {type(resolved_timezone)}. "
+                        "Defaulting to UTC.",
+                        file=sys.stderr,
+                    )
+                    resolved_timezone = dt_timezone.utc
+            self.timezone = resolved_timezone
         except Exception as e:
-            print(f"Warning: Error getting timezone: {e}. Defaulting to UTC.", file=sys.stderr)
-            from datetime import timezone as dt_tz  # Ensure fallback import
+            print(
+                f"WARNING: Error initializing timezone for formatter: {e}. Defaulting to UTC.",
+                file=sys.stderr,
+            )
+            self.timezone = dt_timezone.utc
 
-            self.timezone = dt_tz.utc
 
-    def formatTime(self, record: logging.LogRecord, datefmt: str = None) -> str:
-        """Formats the log record's creation time using the configured timezone."""
-        # Create a timezone-aware datetime object in UTC
+    def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
+        """
+        Formats the log record's creation time using the configured timezone.
+        """
         utc_dt = datetime.fromtimestamp(record.created, tz=dt_timezone.utc)
-        # Convert to the target timezone
         local_dt = utc_dt.astimezone(self.timezone)
-        # Use the effective date format string
         effective_datefmt = datefmt or self.datefmt
+
         if effective_datefmt:
             s = local_dt.strftime(effective_datefmt)
-        else:  # Default format if no datefmt provided
-            s = local_dt.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            time_str = local_dt.strftime(self._default_time_only_format)
             ms = int(local_dt.microsecond / 1000)
-            s = f"{s},{ms:03d} {local_dt.strftime('%Z%z')}"  # Include TZ Name and Offset
+            
+            tz_name_and_offset = local_dt.strftime("%Z%z")
+            if not tz_name_and_offset: # Fallback if strftime("%Z%z") is empty
+                if self.timezone == dt_timezone.utc:
+                    tz_str = "UTC+0000"
+                else:
+                    offset = local_dt.utcoffset()
+                    if offset is not None:
+                        total_seconds = offset.total_seconds()
+                        hours = int(total_seconds // 3600)
+                        minutes = int((total_seconds % 3600) // 60)
+                        tz_str = f"UTC{hours:+03d}:{minutes:02d}"
+                    else: 
+                        tz_str = "UNKNOWN_TZ" # Should be rare for an aware object
+            else:
+                tz_str = tz_name_and_offset
+            s = self._default_full_format_template % (time_str, ms, tz_str)
         return s
 
 
-# --- Global Logging Configuration Function ---
-_logging_configured = False  # Module-level flag
+# --- Global Logging Configuration State ---
+_logging_configured: bool = False
+_application_timezone: Optional[tzinfo] = None
 
 
-def configure_logging(config: dict):
+# --- Helper for Handler Creation ---
+def _create_logging_handler(
+    handler_class: Type[logging.Handler],
+    level: int,
+    formatter: logging.Formatter,
+    handler_args: Optional[List[Any]] = None,
+    handler_kwargs: Optional[Dict[str, Any]] = None,
+) -> Optional[logging.Handler]:
     """
-    Configures the root logger based on application configuration.
-    Sets up console (stdout INFO+, stderr WARNING+) and file handlers (DEBUG+).
+    Creates, configures, and returns a logging handler.
+    Returns None if handler creation fails, printing an error to stderr.
     """
-    global _logging_configured
-    if _logging_configured:
-        logging.getLogger(__name__).info("Logging already configured. Skipping.")
-        return
-
-    log_level_str = config.get("log_level", "INFO").upper()
-    log_level = getattr(logging, log_level_str, logging.INFO)
+    handler_args = handler_args or []
+    handler_kwargs = handler_kwargs or {}
 
     try:
-        tz = get_timezone()
+        handler = handler_class(*handler_args, **handler_kwargs)
+        handler.setFormatter(formatter)
+        handler.setLevel(level)
+        return handler
     except Exception as e:
-        print(f"CRITICAL: Failed get timezone: {e}. Using UTC.", file=sys.stderr)
-        from datetime import timezone as dt_tz
+        print(
+            f"CRITICAL: Failed to create or configure handler {handler_class.__name__}: {e}",
+            file=sys.stderr
+        )
+        return None
 
-        tz = dt_tz.utc
+
+# --- Main Configuration Function ---
+def configure_logging(app_config: Optional[Dict[str, Any]] = None) -> None:
+    """
+    Configures the root logger based on the provided application configuration.
+    """
+    global _logging_configured, _application_timezone
+    if _logging_configured:
+        logging.getLogger(__name__).warning("Logging system already configured. Skipping re-configuration.")
+        return
+
+    config = app_config or {}
+
+    if _application_timezone is None:
+        try:
+            _application_timezone = get_timezone()
+            if not isinstance(_application_timezone, tzinfo):
+                raise TypeError(
+                    f"get_timezone() must return a tzinfo instance, got {type(_application_timezone)}"
+                )
+        except Exception as e:
+            print(
+                f"CRITICAL: Failed to get application timezone: {e}. Defaulting to UTC.",
+                file=sys.stderr,
+            )
+            _application_timezone = dt_timezone.utc
 
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)  # Capture all messages at root
+    root_logger.setLevel(logging.DEBUG)
 
-    # Clear existing handlers
     if root_logger.hasHandlers():
-        print("Clearing existing root logger handlers...", file=sys.stderr)
+        print("INFO: Clearing existing handlers from root logger.", file=sys.stderr)
         for handler in root_logger.handlers[:]:
             try:
                 handler.close()
                 root_logger.removeHandler(handler)
             except Exception as e:
-                print(f"Warning: Error removing handler {handler}: {e}", file=sys.stderr)
+                print(f"WARNING: Error removing existing handler {handler}: {e}", file=sys.stderr)
 
-    # Ensure log directory exists
-    log_dir_exists = False
+    console_log_level_str = str(config.get("log_level", DEFAULT_LOG_LEVEL)).upper()
+    console_log_level = getattr(logging, console_log_level_str, logging.INFO)
+
+    # Stdout Handler
+    stdout_formatter = TimezoneAwareFormatter(
+        fmt=CONSOLE_LOG_FORMAT, datefmt=CONSOLE_DATE_FORMAT, timezone_obj=_application_timezone
+    )
+    stdout_handler = _create_logging_handler(
+        logging.StreamHandler, console_log_level, stdout_formatter, handler_args=[sys.stdout]
+    )
+    if stdout_handler:
+        class MaxLevelFilter(logging.Filter):
+            def __init__(self, max_level: int):
+                super().__init__()
+                self.max_level = max_level
+            def filter(self, record: logging.LogRecord) -> bool:
+                return record.levelno < self.max_level
+        
+        # Only add filter if stdout isn't already set to WARNING or higher
+        if console_log_level < logging.WARNING:
+            stdout_handler.addFilter(MaxLevelFilter(logging.WARNING))
+        root_logger.addHandler(stdout_handler)
+
+    # Stderr Handler
+    stderr_formatter = TimezoneAwareFormatter(
+        fmt=CONSOLE_LOG_FORMAT, datefmt=CONSOLE_DATE_FORMAT, timezone_obj=_application_timezone
+    )
+    stderr_handler = _create_logging_handler(
+        logging.StreamHandler, logging.WARNING, stderr_formatter, handler_args=[sys.stderr]
+    )
+    if stderr_handler:
+        root_logger.addHandler(stderr_handler)
+
+    # Rotating File Handler
+    file_logging_enabled = False
+    actual_file_log_level = logging.NOTSET
+    log_filepath = "" # Initialize to prevent usage if not set
+    log_directory_path = LOG_DIRECTORY
+
     try:
-        os.makedirs(LOG_DIRECTORY, exist_ok=True)
-        log_dir_exists = True
+        os.makedirs(log_directory_path, exist_ok=True)
+        log_dir_exists_and_writable = True
     except OSError as e:
-        print(f"CRITICAL: Cannot create log dir '{LOG_DIRECTORY}': {e}. File logging disabled.", file=sys.stderr)
-
-    # --- Console Handler (stdout) ---
-    try:
-        console_stdout = logging.StreamHandler(sys.stdout)
-        fmt_stdout = TimezoneAwareFormatter(
-            fmt="%(asctime)s - %(levelname)-8s - [%(name)s] - %(message)s", datefmt="%Y-%m-%d %H:%M:%S %Z", timezone=tz
+        print(
+            f"CRITICAL: Cannot create log directory '{log_directory_path}': {e}. File logging disabled.",
+            file=sys.stderr
         )
-        console_stdout.setFormatter(fmt_stdout)
-        console_stdout.setLevel(log_level)  # Filter at handler level
-        root_logger.addHandler(console_stdout)
-    except Exception as e:
-        print(f"CRITICAL: Failed setup stdout handler: {e}", file=sys.stderr)
+        log_dir_exists_and_writable = False
 
-    # --- Console Handler (stderr) ---
-    try:
-        console_stderr = logging.StreamHandler(sys.stderr)
-        fmt_stderr = TimezoneAwareFormatter(  # Use same format for consistency
-            fmt="%(asctime)s - %(levelname)-8s - [%(name)s] - %(message)s", datefmt="%Y-%m-%d %H:%M:%S %Z", timezone=tz
+    if log_dir_exists_and_writable:
+        file_log_level_str = str(config.get("log_file_level", DEFAULT_FILE_LOG_LEVEL)).upper()
+        actual_file_log_level = getattr(logging, file_log_level_str, logging.DEBUG)
+        log_file_name = str(config.get("log_file_name", DEFAULT_ROOT_LOG_FILE_NAME))
+        log_filepath = os.path.join(log_directory_path, log_file_name)
+
+        file_formatter = TimezoneAwareFormatter(
+            fmt=FILE_LOG_FORMAT, datefmt=FILE_DATE_FORMAT, timezone_obj=_application_timezone
         )
-        console_stderr.setFormatter(fmt_stderr)
-        console_stderr.setLevel(logging.WARNING)  # Only WARNING and above
-        root_logger.addHandler(console_stderr)
-    except Exception as e:
-        print(f"CRITICAL: Failed setup stderr handler: {e}", file=sys.stderr)
-
-    # --- Rotating File Handler ---
-    if log_dir_exists:
-        log_filepath = os.path.join(LOG_DIRECTORY, "xrscalper_bot_main.log")  # Use a more specific name
-        try:
-            file_handler = RotatingFileHandler(
-                log_filepath, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8", delay=True
-            )
-            fmt_file = TimezoneAwareFormatter(
-                fmt="%(asctime)s.%(msecs)03d %(levelname)-8s [%(name)s:%(lineno)d] %(threadName)s - %(message)s",  # More detailed format
-                datefmt="%Y-%m-%d %H:%M:%S",
-                timezone=tz,
-            )  # Datefmt for the date part, formatter adds ms, TZ etc.
-            file_handler.setFormatter(fmt_file)
-            file_handler.setLevel(logging.DEBUG)  # Log everything to file
+        file_handler_kwargs = {
+            "maxBytes": MAX_LOG_FILE_BYTES, "backupCount": LOG_FILE_BACKUP_COUNT,
+            "encoding": "utf-8", "delay": True,
+        }
+        file_handler = _create_logging_handler(
+            RotatingFileHandler, actual_file_log_level, file_formatter,
+            handler_args=[log_filepath], handler_kwargs=file_handler_kwargs
+        )
+        if file_handler:
             root_logger.addHandler(file_handler)
-        except Exception as e:
-            logging.critical(f"Failed setup file logger {log_filepath}: {e}", exc_info=True)
-            print(f"CRITICAL: Failed setup file logger {log_filepath}: {e}", file=sys.stderr)
-    else:
-        logging.warning(f"Log directory '{LOG_DIRECTORY}' unusable. File logging disabled.")
-
-    # --- Library Log Levels ---
-    library_log_levels = config.get("library_log_levels", {})
-    for lib_name, level_str in library_log_levels.items():
-        lib_level = getattr(logging, level_str.upper(), None)
-        if lib_level:
-            logging.getLogger(lib_name).setLevel(lib_level)
-            logging.info(f"Set log level for library '{lib_name}' to {level_str.upper()}")
+            file_logging_enabled = True
         else:
-            logging.warning(f"Invalid log level '{level_str}' for lib '{lib_name}'")
-    if not library_log_levels:  # Apply defaults if not configured
-        logging.getLogger("urllib3").setLevel(logging.WARNING)
-        logging.getLogger("ccxt").setLevel(logging.INFO)  # Show INFO for CCXT by default
+            actual_file_log_level = logging.NOTSET
 
-    init_logger = logging.getLogger("App.Init")  # Use hierarchical name
-    init_logger.info(f"Logging configured. Console Level: {logging.getLevelName(log_level)}, File Level: DEBUG")
+    # Library Log Levels
+    default_library_levels = {"urllib3": "WARNING", "httpx": "WARNING", "asyncio": "WARNING"}
+    library_log_levels_config = config.get("library_log_levels", {})
+    final_library_levels = {**default_library_levels, **library_log_levels_config}
+
+    for lib_name, level_str_val in final_library_levels.items():
+        level_str = str(level_str_val).upper()
+        lib_level = getattr(logging, level_str, None)
+        if lib_level is not None:
+            logging.getLogger(lib_name).setLevel(lib_level)
+            logging.info(f"Set log level for library '{lib_name}' to {level_str}.")
+        else:
+            logging.warning(f"Invalid log level '{level_str}' for library '{lib_name}'. Ignoring.")
+
     _logging_configured = True
+    init_logger = logging.getLogger("App.Initialization")
+    init_logger.info(
+        f"Logging configured. Console: {logging.getLevelName(console_log_level)} (stdout <WARNING), "
+        f"{logging.getLevelName(logging.WARNING)}+ (stderr)."
+    )
+    if file_logging_enabled:
+        init_logger.info(
+            f"File logging: {logging.getLevelName(actual_file_log_level)} to '{log_filepath}'."
+        )
+    else:
+        init_logger.warning(
+            f"File logging disabled. Log directory: '{log_directory_path}' (problem or handler error)."
+        )
+```
