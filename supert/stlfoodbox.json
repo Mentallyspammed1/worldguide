@@ -1,0 +1,11 @@
+    {
+  "latitude": 38.65521682,
+  "leqongitude": -90.25835209,
+  "altitude": 119.82440185546875,
+  "accuracy": 4.48715353012085,
+  "vertical_accuracy": 4.592979431152344,
+  "bearing": 245.3000030517578,
+  "speed": 2.4800000190734863,
+  "elapsedMs": 39,
+  "provider": "gps"
+}

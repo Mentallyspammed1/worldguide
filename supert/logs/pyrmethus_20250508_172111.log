@@ -1,0 +1,88 @@
+2025-05-08 17:21:11 [[34mINFO[0m] __main__                     [35m--- Summoning Configuration Runes ---[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [31mConfig 'BYBIT_API_KEY': Found in environment: 'NRrb4Biggi3sO7rKZ1'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [31mConfig 'BYBIT_API_KEY': Using value 'NRrb4Biggi3sO7rKZ1' (Type: str, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [31mConfig 'BYBIT_API_SECRET': Found in environment: 'TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [31mConfig 'BYBIT_API_SECRET': Using value 'TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ' (Type: str, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'SYMBOL': Found in environment: 'TRUMP/USDT:USDT'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'SYMBOL': Using value 'TRUMP/USDT:USDT' (Type: str, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'INTERVAL': Found in environment: '1m'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'INTERVAL': Using value '1m' (Type: str, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'LEVERAGE': Found in environment: '20'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'LEVERAGE': Using value '20' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'SLEEP_SECONDS': Found in environment: '10'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'SLEEP_SECONDS': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STRATEGY_NAME': Found in environment: 'EHLERS_FISHER'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STRATEGY_NAME': Using value 'EHLERS_FISHER' (Type: str, Source: Env Var)[0m
+2025-05-08 17:21:11 [[34mINFO[0m] __main__                     [36mChosen Strategy Path: EHLERS_FISHER[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'RISK_PER_TRADE_PERCENTAGE': Found in environment: '0.01'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'RISK_PER_TRADE_PERCENTAGE': Using value '0.01' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'ATR_STOP_LOSS_MULTIPLIER': Found in environment: '1.5'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'ATR_STOP_LOSS_MULTIPLIER': Using value '1.5' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'MAX_ORDER_USDT_AMOUNT': Found in environment: '50.0'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'MAX_ORDER_USDT_AMOUNT': Using value '50.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'REQUIRED_MARGIN_BUFFER': Found in environment: '1.10'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'REQUIRED_MARGIN_BUFFER': Using value '1.10' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'MAX_ACCOUNT_MARGIN_RATIO': Not set in environment. Using default value: '0.8'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'MAX_ACCOUNT_MARGIN_RATIO': Using value '0.8' (Type: Decimal, Source: Default)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'TRAILING_STOP_PERCENTAGE': Found in environment: '0.007'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'TRAILING_STOP_PERCENTAGE': Using value '0.007' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT': Found in environment: '0.002'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT': Using value '0.002' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'ST_ATR_LENGTH': Found in environment: '3'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'ST_ATR_LENGTH': Using value '3' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'ST_MULTIPLIER': Found in environment: '0.8'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'ST_MULTIPLIER': Using value '0.8' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'CONFIRM_ST_ATR_LENGTH': Found in environment: '5'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'CONFIRM_ST_ATR_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'CONFIRM_ST_MULTIPLIER': Found in environment: '0.4'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'CONFIRM_ST_MULTIPLIER': Using value '0.4' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_RSI_LENGTH': Found in environment: '7'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_RSI_LENGTH': Using value '7' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_STOCH_LENGTH': Found in environment: '5'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_STOCH_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_K_PERIOD': Found in environment: '3'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_K_PERIOD': Using value '3' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_D_PERIOD': Found in environment: '2'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_D_PERIOD': Using value '2' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_OVERBOUGHT': Found in environment: '75.0'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_OVERBOUGHT': Using value '75.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_OVERSOLD': Found in environment: '25.0'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'STOCHRSI_OVERSOLD': Using value '25.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'MOMENTUM_LENGTH': Found in environment: '5'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'MOMENTUM_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_FISHER_LENGTH': Found in environment: '5'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_FISHER_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_FISHER_SIGNAL_LENGTH': Found in environment: '1'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_FISHER_SIGNAL_LENGTH': Using value '1' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_FAST_PERIOD': Found in environment: '5'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_FAST_PERIOD': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_SLOW_PERIOD': Found in environment: '15'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_SLOW_PERIOD': Using value '15' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_SSF_POLES': Found in environment: '2'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [36mConfig 'EHLERS_SSF_POLES': Using value '2' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'VOLUME_MA_PERIOD': Found in environment: '10'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'VOLUME_MA_PERIOD': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'VOLUME_SPIKE_THRESHOLD': Found in environment: '1.8'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'VOLUME_SPIKE_THRESHOLD': Using value '1.8' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'REQUIRE_VOLUME_SPIKE_FOR_ENTRY': Found in environment: 'true'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'REQUIRE_VOLUME_SPIKE_FOR_ENTRY': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_BOOK_DEPTH': Found in environment: '20'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_BOOK_DEPTH': Using value '20' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_BOOK_RATIO_THRESHOLD_LONG': Found in environment: '1.3'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_BOOK_RATIO_THRESHOLD_LONG': Using value '1.3' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_BOOK_RATIO_THRESHOLD_SHORT': Found in environment: '0.7'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_BOOK_RATIO_THRESHOLD_SHORT': Using value '0.7' (Type: Decimal, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'FETCH_ORDER_BOOK_PER_CYCLE': Found in environment: 'true'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'FETCH_ORDER_BOOK_PER_CYCLE': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'ATR_CALCULATION_PERIOD': Found in environment: '7'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [32mConfig 'ATR_CALCULATION_PERIOD': Using value '7' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [35mConfig 'ENABLE_SMS_ALERTS': Found in environment: 'true'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [35mConfig 'ENABLE_SMS_ALERTS': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [35mConfig 'SMS_RECIPIENT_NUMBER': Found in environment: '16364866381'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [35mConfig 'SMS_RECIPIENT_NUMBER': Using value '16364866381' (Type: str, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [35mConfig 'SMS_TIMEOUT_SECONDS': Found in environment: '30'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [35mConfig 'SMS_TIMEOUT_SECONDS': Using value '30' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_FILL_TIMEOUT_SECONDS': Found in environment: '10'[0m
+2025-05-08 17:21:11 [[36m[2mDEBUG[0m] __main__                     [33mConfig 'ORDER_FILL_TIMEOUT_SECONDS': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-08 17:21:11 [[34mINFO[0m] __main__                     [35m--- Configuration Runes Summoned and Verified ---[0m
+2025-05-08 17:21:11 [[34mINFO[0m] PyrmethusCore                Strategy instance 'EHLERS_FISHER' initialized successfully.
