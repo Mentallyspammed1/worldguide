@@ -1,0 +1,472 @@
+```python
+import pornLib
+import logging
+import time
+from typing import List, Optional
+from dataclasses import dataclass, field # Import field for default factory
+from ratelimit import limits, sleep_and_retry
+import sys # For stream handler
+
+# ==============================================================================
+# Configuration
+# ==============================================================================
+
+# --- Logging Configuration ---
+# Use a more standard way to get the root logger if needed,
+# but getting a specific logger for the module is generally preferred.
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout) # Explicitly use stdout
+    ]
+)
+# Get a logger specific to this module
+logger = logging.getLogger(__name__)
+
+# --- Rate Limiting Configuration ---
+# Define constants for rate limits clearly
+# Example: 50 calls per 60 seconds (1 minute)
+API_CALLS_LIMIT = 50
+API_PERIOD_SECONDS = 60
+
+# ==============================================================================
+# Data Classes
+# ==============================================================================
+# Add docstrings to data classes for clarity
+
+@dataclass
+class VideoDataClass:
+    """Represents metadata for a single video."""
+    title: str
+    img: str
+    link: str
+    quality: int
+    time: str # Consider using datetime.timedelta if parsing is feasible
+    channel_name: str
+    channel_link: str
+
+@dataclass
+class VideoDownloadDataClass:
+    """Represents available download links for a video."""
+    low: Optional[str] = None # Default to None for optional fields
+    high: Optional[str] = None
+    hls: Optional[str] = None
+
+@dataclass
+class Tags:
+    """Represents a tag with its name and ID."""
+    name: Optional[str] = None
+    id: Optional[str] = None
+
+# ==============================================================================
+# Xvideos Client Class
+# ==============================================================================
+
+class XvideosClient:
+    """
+    A client for interacting with the xvideos platform via pornLib.
+
+    Provides methods for listing videos, searching, fetching tags, and
+    retrieving download links, incorporating rate limiting and enhanced
+    error handling.
+    """
+
+    def __init__(self, engine: str = "xvideos", soup_sleep: float = 1.0):
+        """
+        Initializes the Xvideos client using pornLib.
+
+        Args:
+            engine (str): The target site engine for pornLib (default: 'xvideos').
+            soup_sleep (float): Delay in seconds allowed for the site/library
+                                 to process requests (default: 1.0). Adjust based
+                                 on network speed and site responsiveness.
+
+        Raises:
+            ImportError: If pornLib is not installed.
+            Exception: If pornLib fails to initialize for other reasons (e.g.,
+                       invalid engine, network issues during initial setup).
+        """
+        try:
+            self.client = pornLib.PornLib(engine=engine, soupSleep=soup_sleep)
+            logger.info(f"Successfully initialized XvideosClient: engine='{engine}', soup_sleep={soup_sleep}s")
+        except ImportError:
+            logger.error("pornLib library not found. Please install it: pip install pornlib")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to initialize pornLib client for engine '{engine}': {e}", exc_info=True)
+            # Re-raise the exception to indicate initialization failure
+            raise RuntimeError(f"XvideosClient initialization failed: {e}") from e
+
+    @sleep_and_retry
+    @limits(calls=API_CALLS_LIMIT, period=API_PERIOD_SECONDS)
+    def list_videos(self, limit: int = 12) -> List[VideoDataClass]:
+        """
+        Fetches a list of the latest or trending videos from xvideos.
+
+        Applies rate limiting and retry logic.
+
+        Args:
+            limit (int): The maximum number of videos to fetch (default: 12).
+                         Must be a positive integer.
+
+        Returns:
+            List[VideoDataClass]: A list of video data objects. Returns an empty
+                                  list if no videos are found or if an error occurs
+                                  that is handled internally by pornLib.
+
+        Raises:
+            ValueError: If the provided limit is not a positive integer.
+            Exception: If an unexpected error occurs during the API call
+                       that is not handled by the rate limiter or pornLib.
+        """
+        if not isinstance(limit, int) or limit <= 0:
+            msg = f"Invalid limit specified: {limit}. Limit must be a positive integer."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        logger.debug(f"Attempting to fetch {limit} videos...")
+        try:
+            videos: List[VideoDataClass] = self.client.list(limit=limit)
+            logger.info(f"Successfully fetched {len(videos)} videos (limit was {limit}).")
+            # Add check if pornlib might return None instead of empty list on failure
+            return videos if videos is not None else []
+        except Exception as e:
+            logger.error(f"Error fetching video list (limit={limit}): {e}", exc_info=True)
+            # Re-raise the exception to signal failure upstream
+            raise Exception(f"Failed to list videos: {e}") from e
+
+    @sleep_and_retry
+    @limits(calls=API_CALLS_LIMIT, period=API_PERIOD_SECONDS)
+    def get_tags(self, keyword: Optional[str] = None) -> List[Tags]:
+        """
+        Fetches tags, optionally filtering them by a keyword.
+
+        Applies rate limiting and retry logic.
+
+        Args:
+            keyword (Optional[str]): A keyword to filter tags. If None, fetches
+                                     all available tags (or a default set).
+
+        Returns:
+            List[Tags]: A list of tag objects. Returns an empty list if no tags
+                        match or if an error occurs handled internally by pornLib.
+
+        Raises:
+            Exception: If an unexpected error occurs during the API call.
+        """
+        action = f"all tags" if keyword is None else f"tags matching keyword '{keyword}'"
+        logger.debug(f"Attempting to fetch {action}...")
+        try:
+            # pornLib's tag method handles None keyword internally for fetching all tags
+            tags_result: List[Tags] = self.client.tags(keyword=keyword)
+            logger.info(f"Successfully fetched {len(tags_result)} {action}.")
+            return tags_result if tags_result is not None else []
+        except Exception as e:
+            logger.error(f"Error fetching tags (keyword={keyword}): {e}", exc_info=True)
+            raise Exception(f"Failed to get tags: {e}") from e
+
+    @sleep_and_retry
+    @limits(calls=API_CALLS_LIMIT, period=API_PERIOD_SECONDS)
+    def search_videos(self,
+                      keyword: Optional[str] = None,
+                      channel: Optional[str] = None,
+                      tag: Optional[str] = None,
+                      tags: Optional[List[Tags]] = None, # Assuming pornLib handles list of Tags
+                      best: Optional[str] = None,
+                      page: Optional[int] = None) -> List[VideoDataClass]:
+        """
+        Searches for videos based on various criteria.
+
+        Note: Based on the original implementation, it seems only *one* primary
+        search criterion (keyword, channel, tag, tags, best) should be provided per call,
+        as they are handled mutually exclusively. Pagination might be supported via 'page'.
+
+        Applies rate limiting and retry logic.
+
+        Args:
+            keyword (Optional[str]): Search by keyword.
+            channel (Optional[str]): Search by channel name.
+            tag (Optional[str]): Search by a single tag ID.
+            tags (Optional[List[Tags]]): Search by a list of tag objects.
+                                         (Verify pornLib documentation for exact usage).
+            best (Optional[str]): Search for best videos within a period (e.g., 'month', '2024-01').
+                                  (Verify pornLib documentation for valid values).
+            page (Optional[int]): The page number for pagination (if supported).
+
+        Returns:
+            List[VideoDataClass]: A list of video data objects matching the search.
+                                  Returns an empty list if no matches are found.
+
+        Raises:
+            ValueError: If no valid search criteria (keyword, channel, tag, tags, best) are provided.
+            Exception: If an unexpected error occurs during the search API call.
+        """
+        search_params = {}
+        search_description_parts = []
+
+        # Build search parameters and description string
+        if keyword:
+            search_params['keyword'] = keyword
+            search_description_parts.append(f"keyword='{keyword}'")
+        if channel: # Changed from elif to if, assuming they might be combined? Check pornLib docs.
+                     # If mutually exclusive, revert to elif structure.
+            search_params['channel'] = channel
+            search_description_parts.append(f"channel='{channel}'")
+        if tag:
+            search_params['tag'] = tag # Assuming 'tag' handles single ID
+            search_description_parts.append(f"tag_id='{tag}'")
+        if tags:
+            # IMPORTANT: Verify how pornLib expects a list of tags.
+            # Does it want a list of IDs, names, or Tag objects?
+            # Assuming it takes the list directly for the 'tag' parameter key.
+            search_params['tag'] = tags
+            tag_names = [t.name for t in tags if t.name]
+            search_description_parts.append(f"tags={tag_names}")
+        if best:
+            search_params['best'] = best
+            search_description_parts.append(f"best='{best}'")
+        if page is not None: # Allow page to be combined with other criteria
+             search_params['page'] = page
+             search_description_parts.append(f"page={page}")
+
+
+        if not any([keyword, channel, tag, tags, best]):
+            msg = "Search requires at least one criterion: keyword, channel, tag, tags, or best."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # If criteria were meant to be mutually exclusive (original code's implication):
+        # active_criteria = [k for k in ['keyword', 'channel', 'tag', 'best'] if k in search_params]
+        # if len(active_criteria) > 1:
+        #    logger.warning(f"Multiple primary search criteria provided ({active_criteria}). Behavior depends on pornLib implementation.")
+        #    # Or raise ValueError("Only one primary search criterion (keyword, channel, tag, best) is supported at a time.")
+
+        search_description = ", ".join(search_description_parts) if search_description_parts else "criteria"
+        logger.debug(f"Attempting to search videos with {search_description}...")
+
+        try:
+            videos: List[VideoDataClass] = self.client.search(**search_params)
+            logger.info(f"Search with {search_description} yielded {len(videos)} results.")
+            return videos if videos is not None else []
+        except Exception as e:
+            logger.error(f"Error searching videos with params {search_params}: {e}", exc_info=True)
+            raise Exception(f"Failed to search videos: {e}") from e
+
+
+    @sleep_and_retry
+    @limits(calls=API_CALLS_LIMIT, period=API_PERIOD_SECONDS)
+    def get_download_link(self, video_link: str) -> Optional[VideoDownloadDataClass]:
+        """
+        Fetches available download links (low quality, high quality, HLS) for a specific video URL.
+
+        Applies rate limiting and retry logic.
+
+        Args:
+            video_link (str): The full URL of the video page on xvideos.
+
+        Returns:
+            Optional[VideoDownloadDataClass]: An object containing download links,
+                                              or None if links cannot be retrieved
+                                              (e.g., video not found, parsing error).
+
+        Raises:
+            ValueError: If the provided video_link is invalid (e.g., empty, not a string).
+            NotImplementedError: If the `getDownloadLink` method is missing in pornLib.
+            Exception: If an unexpected error occurs during the API call.
+        """
+        if not isinstance(video_link, str) or not video_link.strip():
+            msg = "Invalid video link provided: must be a non-empty string URL."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # Basic check for a plausible URL structure (optional but helpful)
+        if not video_link.startswith(('http://', 'https://')):
+             logger.warning(f"Video link '{video_link}' does not start with http/https. Proceeding anyway.")
+
+        logger.debug(f"Attempting to fetch download links for video: {video_link}")
+        try:
+            # Verify the exact method name in your installed pornLib version.
+            # Common variations might be get_download_link, get_download_links, etc.
+            download_data = self.client.getDownloadLink(video_link)
+
+            # Check if pornLib returns None or raises error on failure
+            if download_data is None:
+                 logger.warning(f"Could not retrieve download links for {video_link}. pornLib returned None.")
+                 return None
+
+            # Check if the returned object has the expected attributes.
+            # pornLib might return a dict or a custom object.
+            if isinstance(download_data, dict):
+                # Convert dict to DataClass if necessary
+                logger.debug("Converting dictionary result to VideoDownloadDataClass.")
+                # Use get() for safety if keys might be missing
+                result = VideoDownloadDataClass(
+                    low=download_data.get('low'),
+                    high=download_data.get('high'),
+                    hls=download_data.get('hls')
+                )
+            elif hasattr(download_data, 'low') and hasattr(download_data, 'high') and hasattr(download_data, 'hls'):
+                 # Assume it's already a compatible object (like a dataclass or SimpleNamespace)
+                 logger.debug("Result seems compatible with VideoDownloadDataClass.")
+                 # If it's already the correct type, great. If not, create new instance.
+                 if isinstance(download_data, VideoDownloadDataClass):
+                      result = download_data
+                 else:
+                      result = VideoDownloadDataClass(
+                           low=getattr(download_data, 'low', None),
+                           high=getattr(download_data, 'high', None),
+                           hls=getattr(download_data, 'hls', None)
+                      )
+            else:
+                 logger.error(f"Received unexpected data format for download links: {type(download_data)}. Could not parse.")
+                 return None # Cannot determine links from this data structure
+
+            logger.info(f"Successfully fetched download links for video: {video_link}")
+            return result
+
+        except AttributeError as ae:
+            # Check if the error is specifically about getDownloadLink
+            if 'getDownloadLink' in str(ae):
+                 logger.error(f"The method 'getDownloadLink' was not found in the pornLib client instance. "
+                              f"Check your pornLib version or the library's documentation for the correct method name.", exc_info=True)
+                 raise NotImplementedError("Download link functionality ('getDownloadLink') not available or named differently in pornLib.") from ae
+            else:
+                 # Different attribute error occurred
+                 logger.error(f"An unexpected AttributeError occurred: {ae}", exc_info=True)
+                 raise Exception("An attribute error occurred during download link retrieval.") from ae
+        except Exception as e:
+            logger.error(f"Error fetching download link for {video_link}: {e}", exc_info=True)
+            # Don't return None here, raise exception to signal failure clearly
+            raise Exception(f"Failed to get download links: {e}") from e
+
+# ==============================================================================
+# Example Usage (main function)
+# ==============================================================================
+
+def main():
+    """
+    Demonstrates the usage of the XvideosClient class.
+    Includes examples for listing, fetching tags, searching, and getting download links.
+    """
+    logger.info("--- Starting XvideosClient Demonstration ---")
+    client = None # Initialize client to None for finally block safety
+
+    try:
+        # Initialize the client
+        # Using a slightly longer soup sleep for demonstration robustness
+        client = XvideosClient(soup_sleep=1.5)
+
+        # --- Example 1: List latest videos ---
+        print("\n" + "="*30 + " Example 1: List Videos " + "="*30)
+        logger.info("Fetching latest videos (limit 5)...")
+        try:
+            latest_videos = client.list_videos(limit=5)
+            if latest_videos:
+                logger.info(f"Found {len(latest_videos)} videos:")
+                for i, video in enumerate(latest_videos):
+                    logger.info(f"  {i+1}. Title: {video.title[:60]}... | Channel: {video.channel_name}")
+            else:
+                logger.warning("No videos returned from list_videos.")
+        except Exception as e:
+            logger.error(f"Failed to list videos: {e}")
+        print("="*80)
+        time.sleep(1) # Small pause between examples
+
+        # --- Example 2: Fetch tags matching a keyword ---
+        print("\n" + "="*30 + " Example 2: Fetch Tags " + "="*30)
+        keyword_tags = "teacher" # Example keyword
+        logger.info(f"Fetching tags related to '{keyword_tags}'...")
+        asian_tags = [] # Ensure variable exists
+        try:
+            asian_tags = client.get_tags(keyword=keyword_tags)
+            if asian_tags:
+                logger.info(f"Found {len(asian_tags)} tags matching '{keyword_tags}'. First 5:")
+                for i, tag in enumerate(asian_tags[:5]):
+                    logger.info(f"    {i+1}. Name: {tag.name:<20} | ID: {tag.id}")
+            else:
+                logger.warning(f"No tags found for the keyword '{keyword_tags}'.")
+        except Exception as e:
+            logger.error(f"Failed to fetch tags for keyword '{keyword_tags}': {e}")
+        print("="*80)
+        time.sleep(1)
+
+        # --- Example 3: Search videos by keyword ---
+        print("\n" + "="*30 + " Example 3: Search Videos " + "="*30)
+        search_keyword = "classroom"
+        logger.info(f"Searching for videos with keyword '{search_keyword}'...")
+        search_results = [] # Ensure variable exists
+        try:
+            search_results = client.search_videos(keyword=search_keyword)
+            if search_results:
+                logger.info(f"Found {len(search_results)} videos matching '{search_keyword}'.")
+                # Proceed to get download link for the first result
+                first_video = search_results[0]
+                logger.info(f"Attempting to get download link for first result: '{first_video.title[:60]}...'")
+
+                # --- Example 4: Get download link ---
+                print("\n" + "-"*30 + " Example 4: Get Download Link " + "-"*30)
+                try:
+                    download_info = client.get_download_link(first_video.link)
+                    if download_info:
+                        logger.info(f"Download Links Found for {first_video.link}:")
+                        logger.info(f"  -> Low Quality:  {download_info.low if download_info.low else 'N/A'}")
+                        logger.info(f"  -> High Quality: {download_info.high if download_info.high else 'N/A'}")
+                        logger.info(f"  -> HLS Stream:   {download_info.hls if download_info.hls else 'N/A'}")
+                    else:
+                        logger.warning(f"Could not retrieve download links for {first_video.link}.")
+                except ValueError as ve:
+                     logger.error(f"Input error getting download link: {ve}")
+                except NotImplementedError as nie:
+                     logger.error(f"Feature error getting download link: {nie}")
+                except Exception as dl_error:
+                    logger.error(f"Failed to get download links for {first_video.link}: {dl_error}", exc_info=False) # Keep traceback minimal here unless debugging
+                print("-"*80)
+
+            else:
+                logger.warning(f"No videos found for the keyword '{search_keyword}'. Skipping download link example.")
+        except ValueError as ve:
+            logger.error(f"Input error during search: {ve}")
+        except Exception as e:
+            logger.error(f"Failed to search videos with keyword '{search_keyword}': {e}")
+        print("="*80)
+        time.sleep(1)
+
+        # --- Example 5: Search by tag ID (using a previously found tag) ---
+        print("\n" + "="*30 + " Example 5: Search by Tag ID " + "="*30)
+        if asian_tags and asian_tags[0].id:
+            first_tag_id = asian_tags[0].id
+            first_tag_name = asian_tags[0].name or "Unknown Name"
+            logger.info(f"Searching videos by first tag found: ID='{first_tag_id}', Name='{first_tag_name}'...")
+            try:
+                tag_search_results = client.search_videos(tag=first_tag_id)
+                if tag_search_results:
+                    logger.info(f"Found {len(tag_search_results)} videos for tag '{first_tag_name}'.")
+                    logger.info(f"  Example Result: {tag_search_results[0].title[:60]}...")
+                else:
+                    logger.warning(f"No videos found for tag ID '{first_tag_id}' ('{first_tag_name}').")
+            except ValueError as ve:
+                 logger.error(f"Input error during tag search: {ve}")
+            except Exception as e:
+                logger.error(f"Failed to search videos by tag ID '{first_tag_id}': {e}")
+        else:
+            logger.warning("Could not perform tag search: No tags with IDs were found in Example 2.")
+        print("="*80)
+
+    except ValueError as ve:
+        logger.critical(f"Configuration or Input Error during setup or execution: {ve}", exc_info=True)
+    except NotImplementedError as nie:
+        logger.critical(f"Feature Error: A required feature is not implemented or available: {nie}", exc_info=True)
+    except RuntimeError as rte:
+         logger.critical(f"Runtime Error, often related to initialization: {rte}", exc_info=True)
+    except Exception as e:
+        # Catch any other unexpected exceptions during client usage or setup
+        logger.critical(f"An unexpected critical error occurred in the main execution: {e}", exc_info=True)
+    finally:
+        # Potential cleanup if needed (e.g., closing sessions if pornLib required it)
+        # if client and hasattr(client, 'close'): client.close()
+        logger.info("--- XvideosClient Demonstration Finished ---")
+
+
+if __name__ == "__main__":
+    main()

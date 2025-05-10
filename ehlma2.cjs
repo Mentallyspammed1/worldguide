@@ -1,3 +1,9 @@
+
+pported yet           [WARN] Failed to fetch OHLCV: bybit watchOHLCV() is not supported yet                   [WARN] Failed to fetch OrderBook: bybit watchOrderBook() is not supported yet           [WARN] Failed to fetch OHLCV: bybit watchOHLCV() is not supported yet                   [WARN] Failed to fetch OrderBook: bybit watchOrderBook() is not supported yet           ^X[WARN] Failed to fetch OHLCV: bybit watchOHLCV() is not supported yet
+[WARN] Failed to fetch OrderBook: bybit watchOrderBook() is not supported yet           [WARN] Failed to fetch OHLCV: bybit watchOHLCV() is not supported yet                   [WARN] Failed to fetch OrderBook: bybit watchOrderBook() is not supported yet           [WARN] Failed to fetch OHLCV: bybit watchOHLCV() is not supported yet
+[WARN] Failed to fetch OrderBook: bybit watchOrderBook() is not supported yet
+[WARN] Failed to fetch OHLCV: bybit watchOHLCV() is not supported yet
+
 const ccxt = require('ccxt');
 require('dotenv').config();
 const { performance } = require('perf_hooks'); // For more precise timing if needed
@@ -5,10 +11,10 @@ const { performance } = require('perf_hooks'); // For more precise timing if nee
 // --- Configuration ---
 const config = {
     exchange: 'bybit', // Or 'binance', 'kucoin', etc. (ensure compatibility)
-    symbol: 'BTC/USDT:USDT', // Unified symbol format for derivatives
+    symbol: 'FARTCOIN/USDT:USDT', // Unified symbol format for derivatives
     timeframe: '1m', // 1-minute candles
     tradeAmountQuote: 10, // Amount to trade in Quote currency (e.g., 10 USDT)
-    leverage: 5, // Set leverage
+    leverage: 25, // Set leverage
 
     // Ehlers Super Smoother Periods
     fastMaPeriod: 10,
@@ -224,7 +230,9 @@ async function tradingBot() {
     logger.info('Configuration:', config);
 
     // --- Initialization ---
-    const apiKey = process.env.BYBIT_API_KEY;
+    const 
+
+    apiKey = process.env.BYBIT_API_KEY;
     const secret = process.env.BYBIT_SECRET;
     if (!apiKey || !secret) { logger.error('API key and secret required in .env file'); return; }
 

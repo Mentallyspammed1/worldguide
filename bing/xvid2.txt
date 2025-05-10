@@ -1,0 +1,1043 @@
+Import pornLib  
+import logging
+import time
+import sys
+import datetime
+import os
+import html
+import argparse 
+from pathlib import Path # For better path handling
+from typing import List, Optional, Dict, Any, Union, Tuple
+from dataclasses import dataclass, field
+from ratelimit import limits, sleep_and_retry # type: ignore # Ignore type hint error if stub missing
+import webbrowser # For opening the file
+
+# ==============================================================================
+# Configuration
+# ==============================================================================
+
+# --- Logging Configuration ---
+# Set default log level, can be overridden by command-line args if needed later
+LOG_LEVEL = logging.INFO
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format='%(asctime)s - %(name)s - [%(levelname)s] - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.StreamHandler(sys.stdout) # Log to standard output
+        # Optionally add FileHandler here:
+        # logging.FileHandler("script.log", encoding='utf-8')
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# --- Rate Limiting Configuration ---
+# Define API call limits to prevent being blocked
+API_CALLS_LIMIT = 50  # Max calls
+API_PERIOD_SECONDS = 60 # Per minute
+
+# --- Default Settings (can be overridden by CLI args) ---
+DEFAULT_OUTPUT_DIR = Path(".") # Use pathlib for robust path operations
+DEFAULT_SEARCH_LIMIT = 200      # Default number of results per page/request
+DEFAULT_ENGINE = "xvideos"     # Default engine for pornLib
+DEFAULT_SOUP_SLEEP = 1.0       # Default delay for scraping operations in pornLib
+DEFAULT_FILENAME_PREFIX = "search_results" # Prefix for the output HTML file
+
+# ==============================================================================
+# Data Classes (Using dataclasses for structured data)
+# ==============================================================================
+
+@dataclass
+class VideoDataClass:
+    """
+    Represents structured metadata for a single video.
+    Includes placeholder for preview URL, which typically requires additional scraping.
+    """
+    title: str
+    img: Optional[str] # Thumbnail URL, can be None
+    link: str          # URL to the video page
+    preview_url: Optional[str] = None # URL for hover preview video/gif (NEEDS SEPARATE SCRAPING/POPULATION)
+    quality: Optional[Union[str, int]] = None # e.g., 'HD', 720, None
+    time: Optional[str] = None       # Duration string, e.g., "10:30"
+    channel_name: Optional[str] = None # Name of the uploader/channel
+    channel_link: Optional[str] = None # Link to the channel page
+
+    def __post_init__(self):
+        """ Ensure essential fields are not empty strings if they shouldn't be. """
+        if not self.title:
+            logger.warning("VideoDataClass created with empty title.")
+        if not self.link:
+            # This should ideally not happen if parsing is correct, but good to check.
+            raise ValueError("VideoDataClass must have a valid link.")
+        # Allow img, preview_url etc. to be None or empty
+
+
+@dataclass
+class VideoDownloadDataClass:
+    """ Represents available download links for a specific video (Placeholder - not used in main search flow). """
+    low: Optional[str] = None  # URL for low quality download
+    high: Optional[str] = None # URL for high quality download
+    hls: Optional[str] = None  # URL for HLS stream manifest
+
+@dataclass
+class TagDataClass: # Renamed from Tags for clarity
+    """ Represents a tag associated with videos or search results (Placeholder - not used in main search flow). """
+    name: Optional[str] = None # Display name of the tag
+    id: Optional[str] = None   # Unique identifier or link part for the tag
+
+# ==============================================================================
+# Xvideos Client Class - Wrapper for pornLib Interaction
+# ==============================================================================
+
+class XvideosClient:
+    """
+    Provides an enhanced client for interacting with the pornLib library,
+    focusing on robust data parsing, error handling, and rate limiting.
+    """
+
+    def __init__(self, engine: str = DEFAULT_ENGINE, soup_sleep: float = DEFAULT_SOUP_SLEEP):
+        """
+        Initializes the client using pornLib.
+
+        Args:
+            engine: The pornLib engine name (e.g., 'xvideos', 'pornhub').
+            soup_sleep: Delay between requests during scraping (passed to pornLib).
+
+        Raises:
+            ImportError: If pornLib is not installed or cannot be imported.
+            RuntimeError: If pornLib fails to initialize for any other reason.
+        """
+        self.engine = engine
+        self.soup_sleep = soup_sleep
+
+        try:
+            # Check if pornLib is actually available before trying to use it.
+            if 'pornLib' not in sys.modules:
+                 # This check might be basic, relies on the import statement succeeding.
+                 # A more robust check might involve trying to access a specific attribute.
+                 raise ImportError("pornLib module was not found in sys.modules after import attempt.")
+
+            # Initialize the pornLib client instance
+            self.client = pornLib.PornLib(engine=self.engine, soupSleep=self.soup_sleep)
+            logger.info(f"Successfully initialized PornLib Client: engine='{self.engine}', soup_sleep={self.soup_sleep:.2f}s")
+
+        except ImportError as e:
+            logger.critical(f"Fatal Error: pornLib library not found or import failed. Please install it (e.g., 'pip install pornlib'). Details: {e}")
+            raise # Re-raise to stop execution immediately
+
+        except AttributeError as e:
+             logger.critical(f"Fatal Error: Could not find PornLib class within the imported pornLib module. Is the library installed correctly and up to date? Details: {e}", exc_info=True)
+             raise RuntimeError(f"XvideosClient initialization failed: Missing PornLib class.") from e
+
+        except Exception as e:
+            # Catch any other exception during initialization
+            logger.critical(f"Fatal Error: Failed to initialize pornLib client for engine '{self.engine}'. Error: {e}", exc_info=True)
+            # Wrap the original exception for better context
+            raise RuntimeError(f"XvideosClient initialization failed for engine '{self.engine}': {e}") from e
+
+    # --- Internal Helper Methods for Robust Parsing ---
+
+    def _parse_video_results(self, results_raw: Any) -> List[VideoDataClass]:
+        """
+        Safely parses raw results (expected to be a list of dicts or objects)
+        from pornLib into a list of VideoDataClass objects. Handles various potential
+        issues like incorrect types, missing keys, or exceptions during item processing.
+
+        Args:
+            results_raw: The raw data returned by a pornLib method (e.g., list, search).
+
+        Returns:
+            A list of validated VideoDataClass objects. Returns an empty list if
+            input is invalid or no valid items are found.
+        """
+        if results_raw is None:
+            logger.debug("Received None for video results, returning empty list.")
+            return []
+        if not isinstance(results_raw, list):
+            logger.warning(f"Expected a list of video results, but received type {type(results_raw)}. Returning empty list. Data: {results_raw!r}")
+            return []
+        if not results_raw:
+             logger.info("Received empty list for video results.")
+             return []
+
+        videos: List[VideoDataClass] = []
+        required_keys = ['title', 'link'] # 'img' is desirable but might be missing
+
+        for i, item_raw in enumerate(results_raw):
+            video: Optional[VideoDataClass] = None
+            try:
+                if isinstance(item_raw, dict):
+                    # Check for minimum required keys
+                    if all(k in item_raw and item_raw[k] for k in required_keys):
+                         # Use .get() for optional fields to avoid KeyErrors
+                         video = VideoDataClass(
+                             title=str(item_raw.get('title', '')).strip(), # Explicit str cast and strip whitespace
+                             img=str(item_raw['img']) if item_raw.get('img') else None,
+                             link=str(item_raw.get('link', '')).strip(),
+                             # IMPORTANT: preview_url likely needs separate scraping of the video page.
+                             # It's rarely included in list/search results directly.
+                             preview_url=str(item_raw['preview_url']) if item_raw.get('preview_url') else None,
+                             quality=item_raw.get('quality'), # Keep original type (str/int/None)
+                             time=str(item_raw['time']) if item_raw.get('time') else None,
+                             channel_name=str(item_raw['channel_name']).strip() if item_raw.get('channel_name') else None,
+                             channel_link=str(item_raw['channel_link']).strip() if item_raw.get('channel_link') else None,
+                         )
+                    else:
+                        missing = [k for k in required_keys if k not in item_raw or not item_raw[k]]
+                        logger.warning(f"Skipping video dict item #{i+1} due to missing/empty required keys: {missing}. Data: {item_raw}")
+
+                elif isinstance(item_raw, VideoDataClass):
+                     # If it's already a dataclass, validate required fields
+                     if not all([item_raw.title, item_raw.link]):
+                          logger.warning(f"Skipping VideoDataClass item #{i+1} due to missing/empty essential attributes (title or link). Data: {item_raw!r}")
+                     else:
+                          # Ensure optional attributes exist if object was created differently
+                          if not hasattr(item_raw, 'preview_url'): item_raw.preview_url = None
+                          if not hasattr(item_raw, 'quality'): item_raw.quality = None
+                          if not hasattr(item_raw, 'time'): item_raw.time = None
+                          if not hasattr(item_raw, 'channel_name'): item_raw.channel_name = None
+                          if not hasattr(item_raw, 'channel_link'): item_raw.channel_link = None
+                          video = item_raw # It's already the correct type and validated
+
+                elif hasattr(item_raw, 'title') and hasattr(item_raw, 'link'):
+                     # Handle generic objects with expected attributes
+                     title_val = getattr(item_raw, 'title', None)
+                     link_val = getattr(item_raw, 'link', None)
+                     if title_val and link_val:
+                         video = VideoDataClass(
+                             title=str(title_val).strip(),
+                             img=str(getattr(item_raw, 'img', None)),
+                             link=str(link_val).strip(),
+                             preview_url=str(getattr(item_raw, 'preview_url', None)),
+                             quality=getattr(item_raw, 'quality', None),
+                             time=str(getattr(item_raw, 'time', None)),
+                             channel_name=str(getattr(item_raw, 'channel_name', None)).strip(),
+                             channel_link=str(getattr(item_raw, 'channel_link', None)).strip(),
+                         )
+                     else:
+                           logger.warning(f"Skipping object item #{i+1} due to missing/empty essential attributes (title or link). Object type: {type(item_raw)}")
+                else:
+                    logger.warning(f"Skipping unrecognized video item #{i+1}. Type: {type(item_raw)}. Data: {item_raw!r}")
+
+                # Add the successfully parsed and validated video to the list
+                if video:
+                    videos.append(video)
+
+            except (TypeError, ValueError, AttributeError, KeyError) as e:
+                # Catch specific parsing errors for this item
+                logger.error(f"Error parsing individual video item #{i+1}: Data: {item_raw!r}. Error: {e}", exc_info=False) # exc_info=False to avoid spamming logs
+            except Exception as e:
+                 # Catch unexpected errors during parsing of a single item
+                 logger.error(f"Unexpected error parsing video item #{i+1}: Data: {item_raw!r}. Error: {e}", exc_info=True)
+
+        logger.debug(f"Parsed {len(videos)} valid video items from {len(results_raw)} raw items.")
+        return videos
+
+    def _parse_tag_results(self, tags_raw: Any) -> List[TagDataClass]:
+        """
+        Safely parses raw tag results from pornLib into a list of TagDataClass objects.
+        (Placeholder - currently unused but follows similar robust parsing pattern).
+
+        Args:
+            tags_raw: The raw data for tags returned by a pornLib method.
+
+        Returns:
+            A list of validated TagDataClass objects.
+        """
+        if tags_raw is None: return []
+        if not isinstance(tags_raw, list):
+             logger.warning(f"Expected list for tags, got {type(tags_raw)}. Returning empty list."); return []
+
+        tags_list: List[TagDataClass] = []
+        for i, item_raw in enumerate(tags_raw):
+             tag: Optional[TagDataClass] = None
+             try:
+                 if isinstance(item_raw, dict):
+                      tag = TagDataClass(name=str(item_raw['name']).strip() if item_raw.get('name') else None,
+                                         id=str(item_raw['id']).strip() if item_raw.get('id') else None)
+                 elif isinstance(item_raw, TagDataClass): tag = item_raw # Assume already valid
+                 elif hasattr(item_raw, 'name') or hasattr(item_raw, 'id'): # Check attributes
+                      tag = TagDataClass(name=str(getattr(item_raw, 'name', None)).strip(),
+                                         id=str(getattr(item_raw, 'id', None)).strip())
+                 else:
+                      logger.warning(f"Skipping unrecognized tag item #{i+1} type: {type(item_raw)}. Data: {item_raw!r}"); continue
+
+                 # Add only if it has at least a name or an id
+                 if tag and (tag.name or tag.id):
+                     tags_list.append(tag)
+                 elif tag:
+                     logger.debug(f"Skipping parsed tag item #{i+1} with no name or id: {item_raw!r}")
+
+             except (TypeError, ValueError, AttributeError, KeyError) as e:
+                 logger.error(f"Error parsing tag item #{i+1}: Data: {item_raw!r}. Error: {e}", exc_info=False)
+             except Exception as e:
+                 logger.error(f"Unexpected error parsing tag item #{i+1}: Data: {item_raw!r}. Error: {e}", exc_info=True)
+        return tags_list
+
+
+    # --- Public API Interaction Methods ---
+
+    @sleep_and_retry # Apply retry logic from ratelimit library
+    @limits(calls=API_CALLS_LIMIT, period=API_PERIOD_SECONDS) # Apply rate limiting
+    def list_videos(self, limit: int = 12) -> List[VideoDataClass]:
+        """
+        Fetches a list of the latest or trending videos from the configured engine.
+
+        Args:
+            limit: The maximum number of videos to fetch. Must be a positive integer.
+
+        Returns:
+            A list of VideoDataClass objects.
+
+        Raises:
+            ValueError: If the limit is not a positive integer.
+            RuntimeError: If the API call via pornLib fails.
+        """
+        if not isinstance(limit, int) or limit <= 0:
+            logger.error(f"Invalid limit provided for list_videos: {limit}. Must be a positive integer.")
+            raise ValueError("Limit must be a positive integer.")
+
+        logger.debug(f"Attempting to fetch {limit} videos using pornLib.list()...")
+        try:
+            # Call the underlying pornLib method
+            videos_raw = self.client.list(limit=limit)
+            # Parse the raw results robustly
+            videos = self._parse_video_results(videos_raw)
+            logger.info(f"Fetched and parsed {len(videos)} videos (requested limit: {limit}).")
+            return videos
+        except AttributeError:
+             logger.error(f"The pornLib client for engine '{self.engine}' does not seem to support the 'list' method.", exc_info=True)
+             raise RuntimeError(f"Engine '{self.engine}' does not support list method.") from None
+        except Exception as e:
+            # Catch potential errors from the pornLib call itself
+            logger.error(f"Error during pornLib.list(limit={limit}) for engine '{self.engine}': {e}", exc_info=True)
+            # Re-raise as a runtime error for the caller to handle
+            raise RuntimeError(f"Failed to list videos from engine '{self.engine}': {e}") from e
+
+    @sleep_and_retry # Apply retry logic
+    @limits(calls=API_CALLS_LIMIT, period=API_PERIOD_SECONDS) # Apply rate limiting
+    def search_videos(self,
+                      keyword: Optional[str] = None,
+                      page: Optional[int] = None,
+                      limit: Optional[int] = None,
+                      **kwargs: Any # Allow other engine-specific search criteria (e.g., channel, tag, sort_by)
+                      ) -> List[VideoDataClass]:
+        """
+        Searches for videos based on various criteria using the pornLib client.
+
+        Args:
+            keyword: The search term(s).
+            page: The page number of results to fetch (if supported by engine).
+            limit: Max results per page (if supported/overridable by engine).
+            **kwargs: Additional keyword arguments passed directly to pornLib's search method
+                      (e.g., channel='somechannel', sort_by='popular').
+
+        Returns:
+            A list of VideoDataClass objects matching the search criteria.
+
+        Raises:
+            ValueError: If no valid search criteria (like keyword) are provided,
+                        or if page/limit have invalid values.
+            RuntimeError: If the API call via pornLib fails.
+        """
+        search_params: Dict[str, Any] = {k: v for k, v in kwargs.items() if v is not None} # Filter out None values from kwargs
+        search_description_parts: List[str] = [f"{k}='{v}'" for k, v in search_params.items()]
+
+        # Validate and add standard parameters
+        if keyword:
+            search_params['keyword'] = keyword
+            search_description_parts.append(f"keyword='{keyword}'")
+        else:
+            # Most engines require a keyword for search
+             if not any(k in search_params for k in ['tag', 'channel']): # Allow search by tag/channel without keyword
+                 logger.error("Search attempt failed: No keyword or other primary search criterion provided.")
+                 raise ValueError("Search requires at least one criterion (e.g., keyword, tag, channel).")
+
+        if page is not None:
+            if isinstance(page, int) and page > 0:
+                search_params['page'] = page
+                search_description_parts.append(f"page={page}")
+            else:
+                 logger.warning(f"Invalid page number '{page}' ignored. Must be a positive integer.")
+                 # Do not raise error, just ignore invalid page? Or raise ValueError? Decide based on desired strictness.
+                 # raise ValueError(f"Page number must be a positive integer, got {page}")
+
+        # Note: pornLib's handling of 'limit' during search might vary by engine.
+        # We pass it if provided, assuming the engine might use it.
+        if limit is not None:
+            if isinstance(limit, int) and limit > 0:
+                search_params['limit'] = limit
+                search_description_parts.append(f"limit={limit}")
+            else:
+                 logger.warning(f"Invalid limit '{limit}' ignored. Must be a positive integer.")
+                 # raise ValueError(f"Limit must be a positive integer, got {limit}")
+
+
+        if not search_params: # Double-check if *any* effective criteria remain
+            logger.error("Search attempt failed: No valid search parameters were provided after filtering.")
+            raise ValueError("Search requires at least one valid criterion.")
+
+        search_description = ", ".join(sorted(search_description_parts)) # Sort for consistent logging
+        logger.debug(f"Attempting video search with parameters: {search_description}...")
+
+        try:
+            # Call the underlying pornLib search method with unpacked parameters
+            videos_raw = self.client.search(**search_params)
+            # Parse results robustly
+            videos = self._parse_video_results(videos_raw)
+            logger.info(f"Search with ({search_description}) yielded {len(videos)} parsed results.")
+            return videos
+        except AttributeError:
+             logger.error(f"The pornLib client for engine '{self.engine}' does not seem to support the 'search' method.", exc_info=True)
+             raise RuntimeError(f"Engine '{self.engine}' does not support search method.") from None
+        except TypeError as e:
+             # Catch errors if unexpected arguments are passed to pornLib's search
+             logger.error(f"TypeError during pornLib.search call for engine '{self.engine}' with params {search_params}. Check if parameters are supported. Error: {e}", exc_info=True)
+             raise RuntimeError(f"Failed search on engine '{self.engine}' due to parameter issue: {e}") from e
+        except Exception as e:
+            # Catch other potential errors from the pornLib call
+            logger.error(f"Error during pornLib.search with params {search_params} for engine '{self.engine}': {e}", exc_info=True)
+            raise RuntimeError(f"Failed to search videos on engine '{self.engine}': {e}") from e
+
+    # --- Placeholder for Future Methods ---
+    # def get_video_details(self, video_url: str) -> Tuple[Optional[VideoDataClass], Optional[VideoDownloadDataClass]]:
+    #     """ Fetches detailed info and download links for a single video URL. Requires scraping the page. """
+    #     logger.info(f"Fetching details for video: {video_url}")
+    #     # Implementation would involve:
+    #     # 1. Making a request to video_url (potentially using pornLib internals or requests/BeautifulSoup)
+    #     # 2. Parsing the HTML of the video page
+    #     # 3. Extracting metadata (title, description, tags, duration, quality options)
+    #     # 4. Finding download links (often embedded in JS or network requests)
+    #     # 5. Populating VideoDataClass and VideoDownloadDataClass
+    #     # 6. Applying rate limiting and error handling
+    #     raise NotImplementedError("get_video_details requires page scraping and is not yet implemented.")
+
+    # def get_tags(self, ...) -> List[TagDataClass]:
+    #     """ Fetches popular or related tags. """
+    #     # Implementation would call a relevant pornLib method (if exists) or scrape
+    #     raise NotImplementedError("get_tags is not yet implemented.")
+
+
+# ==============================================================================
+# HTML Generation Function (Enhanced Dark/Neon Theme with Previews)
+# ==============================================================================
+
+def generate_html_output(videos: List[VideoDataClass], query: str, filename_display: str, engine: str) -> str:
+    """
+    Generates an HTML page displaying video results with a dark/neon theme,
+    grid layout, and JavaScript for hover previews (if preview_url is available).
+
+    Args:
+        videos: A list of VideoDataClass objects to display.
+        query: The original search query string (used for the title).
+        filename_display: The name of the file being generated (for display in the header).
+        engine: The name of the engine used (for display).
+
+    Returns:
+        A string containing the complete HTML document.
+    """
+    if not videos:
+        # Generate a simple "No Results" page
+        logger.warning(f"generate_html_output called with no videos for query: '{query}'")
+        safe_query_html = html.escape(query)
+        return (
+            "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>"
+            "<title>No Results Found</title><style>"
+            "body{background-color:#1a1a1a; color:#e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align:center; padding-top: 60px;}"
+            "h1{color:#ff4d4d; text-shadow:0 0 5px #ff4d4d;} p {color: #aaa;}"
+            "</style></head>"
+            f"<body><h1>No videos found</h1><p>Your search for '<strong>{safe_query_html}</strong>' on engine '<strong>{html.escape(engine)}</strong>' did not return any results.</p></body></html>"
+        )
+
+    safe_query_html = html.escape(query)
+    page_title = f"Search Results: '{safe_query_html}' ({len(videos)} videos)"
+    safe_filename_html = html.escape(filename_display)
+    safe_engine_html = html.escape(engine.capitalize())
+
+    # --- CSS (Embedded for simplicity, could be external file) ---
+    # Enhanced dark/neon theme with better layout and hover effects
+    css = """<style>
+        :root {
+            --neon-cyan: #08f7fe;
+            --neon-green: #39ff14;
+            --neon-pink: #f0f;
+            --dark-bg: #121212; /* Slightly darker */
+            --medium-dark-bg: #1e1e1e; /* Card background */
+            --light-text: #e0e0e0;
+            --dim-text: #a0a0a0;
+            --border-color: #333;
+            --hover-border-color: var(--neon-green);
+            --shadow-color: rgba(8, 247, 254, 0.3);
+            --hover-shadow-color: rgba(57, 255, 20, 0.6);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 25px;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            border-bottom: 2px solid var(--neon-cyan);
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: var(--neon-cyan);
+            margin: 0 0 10px 0;
+            font-size: 2.2em;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .header .results-info {
+            color: var(--dim-text);
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+            gap: 30px; /* Increased gap */
+            padding: 0;
+            margin: 0;
+            list-style: none; /* Remove default list styles if using <ul> */
+        }
+        .video-item {
+            background-color: var(--medium-dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative; /* Needed for absolute positioning of preview */
+            display: flex; /* Use flexbox for better internal layout */
+            flex-direction: column;
+        }
+        .video-item:hover {
+            transform: translateY(-5px) scale(1.02); /* Lift effect */
+            border-color: var(--hover-border-color);
+            box-shadow: 0 8px 25px var(--hover-shadow-color);
+            z-index: 10; /* Bring to front */
+        }
+        .video-item a {
+            text-decoration: none;
+            color: inherit;
+            display: flex; /* Make anchor fill the item */
+            flex-direction: column;
+            flex-grow: 1; /* Allow anchor to grow */
+        }
+        .video-item .image-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: #282828; /* Placeholder background */
+            overflow: hidden; /* Clip preview video */
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.25s ease;
+        }
+        .video-item:hover .image-container {
+            border-bottom-color: var(--hover-border-color);
+        }
+        .video-item .image-container img.thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the area, may crop */
+            display: block;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 1; /* Thumbnail below preview */
+            background-color: #333; /* BG shown if image fails to load */
+        }
+        .video-item .image-container video.preview-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Hidden by default */
+            z-index: 5; /* Preview above thumbnail */
+            background-color: #000; /* Black bg while loading */
+        }
+        /* State when preview is active */
+        .video-item.preview-active .image-container img.thumbnail {
+            opacity: 0;
+            visibility: hidden; /* Hide completely for performance */
+        }
+        .video-item.preview-active .image-container video.preview-video {
+            display: block;
+        }
+        .video-info {
+            padding: 15px;
+            flex-grow: 1; /* Allow info section to take remaining space */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Push details to bottom */
+        }
+        .video-title {
+            font-size: 1.05em; /* Slightly smaller */
+            font-weight: 600; /* Semi-bold */
+            margin: 0 0 10px 0;
+            color: var(--light-text); /* Use light text, maybe highlight on hover */
+            line-height: 1.4;
+            /* Clamp text to 2 lines */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            min-height: 2.8em; /* Ensure space for 2 lines */
+            transition: color 0.2s ease;
+        }
+        .video-item:hover .video-title {
+             color: var(--neon-green); /* Highlight title on hover */
+        }
+        .video-details {
+            font-size: 0.85em;
+            color: var(--dim-text);
+            margin-top: auto; /* Push to bottom */
+            padding-top: 8px; /* Space above details */
+            display: flex;
+            flex-wrap: wrap; /* Allow details to wrap */
+            gap: 5px 15px; /* Row and column gap */
+        }
+        .video-details span {
+            white-space: nowrap; /* Prevent wrapping within a detail */
+            display: inline-flex; /* Align icon and text */
+            align-items: center;
+            gap: 4px; /* Space between icon and text */
+        }
+        /* Placeholder text for missing images */
+        .no-image-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #777;
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+            display: none; /* Hidden by default */
+            z-index: 2; /* Above bg, below preview */
+            font-size: 0.9em;
+        }
+        /* Show placeholder if image fails */
+        .video-item img.thumbnail[data-failed="true"] {
+            opacity: 0; /* Hide broken image icon */
+            object-fit: contain; /* Show placeholder icon if possible */
+            background-color: #282828;
+        }
+         .video-item img.thumbnail[data-failed="true"] + .no-image-text {
+            display: block;
+        }
+         /* Style for when no img URL was provided at all */
+        .video-item .image-container.no-img-provided .no-image-text {
+            display: block;
+        }
+    </style>"""
+
+    # --- HTML Structure ---
+    html_parts = [
+        f"<!DOCTYPE html><html lang='en'><head>",
+        f"<meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>",
+        f"<title>{page_title}</title>", css, f"</head><body>",
+        f"<div class='header'>",
+        f"  <h1>{page_title}</h1>",
+        f"  <p class='results-info'>Engine: {safe_engine_html} | Query: '{safe_query_html}' | Saved to: {safe_filename_html}</p>",
+        f"</div>",
+        f"<div class='results-container' role='list'>" # Use div or ul, added role
+    ]
+
+    # --- Loop through videos and create HTML elements ---
+    for i, video in enumerate(videos):
+        # Sanitize all data for HTML output
+        safe_title = html.escape(video.title or "Untitled Video")
+        safe_link = html.escape(video.link or "#")
+        safe_img_url = html.escape(video.img) if video.img else ""
+        # IMPORTANT: This relies on video.preview_url being populated.
+        # Without extra scraping, this will usually be empty.
+        safe_preview_url = html.escape(video.preview_url) if video.preview_url else ""
+        safe_time = html.escape(video.time) if video.time else "N/A"
+        safe_quality = html.escape(str(video.quality)) if video.quality else None
+        safe_channel = html.escape(video.channel_name) if video.channel_name else None
+        safe_channel_link = html.escape(video.channel_link) if video.channel_link else None
+
+        img_alt_text = f"Thumbnail for {safe_title}"
+        # Add data-preview-url attribute ONLY if the URL exists
+        preview_attr = f'data-preview-url="{safe_preview_url}"' if safe_preview_url else ''
+        # Add class if no image URL provided
+        no_img_class = "no-img-provided" if not safe_img_url else ""
+
+        html_parts.append(f"  <div class='video-item' {preview_attr} role='listitem' aria-label='{safe_title}'>") # Added role and aria-label
+        html_parts.append(f"    <a href='{safe_link}' target='_blank' rel='noopener noreferrer' title='{safe_title} (Opens in new tab)'>") # Added rel attribute
+        html_parts.append(f"      <div class='image-container {no_img_class}'>")
+        # Add img tag even if src is empty, rely on onerror and CSS to handle it
+        html_parts.append(f"        <img class='thumbnail' src='{safe_img_url}' alt='{img_alt_text}' loading='lazy' "
+                          f"onerror='this.setAttribute(\"data-failed\", \"true\"); console.warn(\"Thumbnail failed to load: {safe_img_url or 'No URL'}\");'>")
+        # Placeholder text element (controlled by CSS)
+        html_parts.append(f"        <span class='no-image-text'>Preview N/A</span>")
+        # Preview video element will be added here by JavaScript if preview_url exists
+        html_parts.append(f"      </div>") # end image-container
+        html_parts.append(f"      <div class='video-info'>")
+        html_parts.append(f"        <div class='video-title'>{safe_title}</div>")
+        html_parts.append(f"        <div class='video-details'>")
+        html_parts.append(f"          <span><svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>{safe_time}</span>") # Clock icon
+        if safe_quality:
+            html_parts.append(f"          <span><svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'></polyline></svg>{safe_quality}</span>") # Check icon for quality
+        if safe_channel:
+            channel_html = f"<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'></path><circle cx='9' cy='7' r='4'></circle><path d='M23 21v-2a4 4 0 0 0-3-3.87'></path><path d='M16 3.13a4 4 0 0 1 0 7.75'></path></svg>" # User icon
+            if safe_channel_link:
+                 # Make channel name clickable if link exists
+                 channel_html += f"<a href='{safe_channel_link}' target='_blank' rel='noopener noreferrer' style='color: inherit; text-decoration: underline;' onclick='event.stopPropagation();'>{safe_channel}</a>"
+            else:
+                 channel_html += safe_channel
+            html_parts.append(f"          <span>{channel_html}</span>")
+
+        html_parts.append(f"        </div>") # end video-details
+        html_parts.append(f"      </div>") # end video-info
+        html_parts.append(f"    </a>") # end anchor
+        html_parts.append(f"  </div>") # end video-item
+
+    html_parts.append("</div>") # end results-container
+
+    # --- JavaScript for Hover Preview Logic ---
+    # This JS dynamically adds/removes a <video> element on hover for items
+    # that have the 'data-preview-url' attribute set.
+    # Includes delay, error handling, and cleanup.
+    js = """<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoItems = document.querySelectorAll('.video-item[data-preview-url]'); // Select only items with preview URL
+            let previewTimeout = null;
+            const PREVIEW_DELAY_MS = 300; // Delay in milliseconds before starting preview playback
+
+            videoItems.forEach(item => {
+                const imageContainer = item.querySelector('.image-container');
+                const previewUrl = item.dataset.previewUrl; // Already checked this exists by selector
+                let previewVideoElement = null; // Reference to the dynamically created video element
+
+                if (!imageContainer) return; // Should exist, but safety check
+
+                const createAndPlayPreview = () => {
+                    // If element somehow exists, try playing it (e.g., mouse re-entered quickly)
+                    if (previewVideoElement) {
+                         previewVideoElement.play().catch(e => console.warn(`Preview re-play prevented for ${previewUrl}: ${e.message}`));
+                         item.classList.add('preview-active'); // Ensure class is set
+                         return;
+                    }
+
+                    // Create the video element
+                    console.debug(`Creating preview element for: ${previewUrl}`);
+                    previewVideoElement = document.createElement('video');
+                    previewVideoElement.classList.add('preview-video');
+                    previewVideoElement.src = previewUrl;
+                    previewVideoElement.muted = true;   // Autoplay usually requires mute
+                    previewVideoElement.loop = true;    // Loop the preview
+                    previewVideoElement.preload = 'metadata'; // Start loading metadata only initially
+                    previewVideoElement.setAttribute('playsinline', ''); // Important for iOS Safari
+
+                    // Add error handling for the video source itself
+                    previewVideoElement.addEventListener('error', (e) => {
+                         console.error(`Error loading preview video source: ${previewUrl}`, e);
+                         // Optionally remove the broken video element
+                         stopAndRemovePreview(true); // Pass flag to indicate error
+                    });
+
+                    // Append to the container
+                    imageContainer.appendChild(previewVideoElement);
+
+                    // Attempt to play, handle potential errors (autoplay restrictions)
+                    const playPromise = previewVideoElement.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.debug(`Preview playback started: ${previewUrl}`);
+                            item.classList.add('preview-active'); // Add class AFTER play starts successfully
+                        }).catch(error => {
+                            console.warn(`Autoplay prevented for ${previewUrl}: ${error.message}. User interaction might be required.`);
+                            // Don't add 'preview-active' class if play fails
+                            // Clean up the element if it fails to play? Maybe keep it paused?
+                            stopAndRemovePreview(true); // Remove if play fails
+                        });
+                    } else {
+                         // Fallback for older browsers without playPromise? Unlikely needed.
+                         // item.classList.add('preview-active');
+                         console.warn(`play() did not return a promise for ${previewUrl}. Preview might not work.`);
+                         stopAndRemovePreview(true);
+                    }
+                };
+
+                const stopAndRemovePreview = (dueToError = false) => {
+                    item.classList.remove('preview-active'); // Remove active state class
+                    if (previewVideoElement) {
+                        if (!dueToError) {
+                             console.debug(`Stopping and removing preview: ${previewUrl}`);
+                        } else {
+                             console.warn(`Removing failed preview element: ${previewUrl}`);
+                        }
+                        previewVideoElement.pause();
+                        previewVideoElement.removeAttribute('src'); // Detach source
+                        previewVideoElement.load(); // Abort pending loads
+                        previewVideoElement.remove(); // Remove from DOM
+                        previewVideoElement = null; // Clear reference
+                    }
+                };
+
+                // --- Event Listeners ---
+                item.addEventListener('mouseenter', () => {
+                    // Clear any existing timeout (if user briefly moused out and back in)
+                    clearTimeout(previewTimeout);
+                    // Set a timeout to delay starting the preview creation/playback
+                    previewTimeout = setTimeout(createAndPlayPreview, PREVIEW_DELAY_MS);
+                });
+
+                item.addEventListener('mouseleave', () => {
+                    // Clear the timeout if the mouse leaves before it fires
+                    clearTimeout(previewTimeout);
+                    // Immediately stop and remove any active preview
+                    stopAndRemovePreview();
+                });
+
+                 // Optional: Stop preview if the link inside is clicked, prevents playing in background tab
+                const link = item.querySelector('a');
+                if (link) {
+                     link.addEventListener('click', () => {
+                          clearTimeout(previewTimeout); // Prevent starting if clicked quickly
+                          stopAndRemovePreview();
+                     });
+                }
+            });
+        });
+    </script>"""
+    html_parts.append(js)
+    html_parts.append("</body></html>")
+    return "\n".join(html_parts)
+
+
+# ==============================================================================
+# Main Execution Function
+# ==============================================================================
+
+def main():
+    """
+    Main function to parse command-line arguments, initialize the client,
+    perform the requested action (e.g., search), and generate the HTML output file.
+    """
+
+    parser = argparse.ArgumentParser(
+        description="Search videos using a pornLib engine (e.g., Xvideos) and save results to an HTML file.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, # Show default values in help message
+        epilog="Example: python xvid_enhanced.py \"your search query\" -l 50 -o ./results --engine pornhub"
+    )
+
+    # --- Define Command-Line Arguments ---
+    parser.add_argument(
+        "query",
+        nargs='?', # Make query optional IF other actions are added (like --list-latest)
+        help="The search keyword or phrase. Required for search action."
+    )
+    parser.add_argument(
+        "-l", "--limit",
+        type=int,
+        default=DEFAULT_SEARCH_LIMIT,
+        metavar="NUM",
+        help="Maximum number of results to attempt to fetch."
+    )
+    parser.add_argument(
+        "-p", "--page",
+        type=int,
+        default=1,
+        metavar="NUM",
+        help="Page number for search results (1-based)."
+    )
+    parser.add_argument(
+        "-o", "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_DIR,
+        metavar="DIRECTORY",
+        help="Directory where the HTML output file will be saved."
+    )
+    parser.add_argument(
+        "--engine",
+        default=DEFAULT_ENGINE,
+        metavar="NAME",
+        help="Specify the pornLib engine to use (e.g., 'xvideos', 'pornhub')."
+    )
+    parser.add_argument(
+        "--sleep",
+        type=float,
+        default=DEFAULT_SOUP_SLEEP,
+        metavar="SECONDS",
+        help="Soup sleep duration (delay between requests) for the pornLib client."
+    )
+    parser.add_argument(
+        "--filename-prefix",
+        default=DEFAULT_FILENAME_PREFIX,
+        metavar="PREFIX",
+        help="Prefix for the generated HTML output filename."
+    )
+    parser.add_argument(
+        "--no-open",
+        action="store_true", # Becomes True if flag is present
+        help="Prevent automatically opening the generated HTML file in the web browser."
+    )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable verbose (DEBUG level) logging."
+    )
+    # Example for adding another action:
+    # parser.add_argument("--list-latest", action="store_true", help="List latest videos instead of searching.")
+
+    args = parser.parse_args()
+
+    # --- Configure Logging Level ---
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logger.debug("Verbose logging enabled.")
+    else:
+         logging.getLogger().setLevel(LOG_LEVEL) # Use default INFO
+
+    # --- Validate Arguments ---
+    # If more actions are added, this logic needs refinement. Currently assumes search is the default/only action.
+    if not args.query:
+        parser.error("A search 'query' argument is required for the search action.")
+        # sys.exit(1) # parser.error usually exits
+
+    if args.limit <= 0:
+        parser.error(f"--limit must be a positive integer, received: {args.limit}")
+    if args.page <= 0:
+        parser.error(f"--page must be a positive integer, received: {args.page}")
+    if args.sleep < 0:
+         parser.error(f"--sleep cannot be negative, received: {args.sleep}")
+
+    logger.info("--- Starting PornLib Search Script ---")
+    logger.info(f"Engine: {args.engine}, Query: '{args.query}', Limit: {args.limit}, Page: {args.page}, Output Dir: {args.output_dir}")
+    client: Optional[XvideosClient] = None # Initialize client variable
+
+    try:
+        # --- Initialize the Xvideos Client ---
+        # This step might fail if pornLib is not installed or misconfigured.
+        client = XvideosClient(engine=args.engine, soup_sleep=args.sleep)
+
+        # --- Perform Search Action ---
+        # (Add conditional logic here if other actions like --list-latest are implemented)
+        logger.info(f"Performing search for query: '{args.query}'...")
+        search_results: List[VideoDataClass] = client.search_videos(
+            keyword=args.query,
+            page=args.page,
+            limit=args.limit # Pass the limit, though its effect depends on the engine/pornLib
+        )
+
+        # --- Process Results ---
+        if search_results:
+            logger.info(f"Successfully found {len(search_results)} videos matching the query.")
+
+            # --- Prepare Output File Path ---
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            # Sanitize query for use in filename (remove unsafe chars, limit length)
+            safe_query_part = "".join(c if c.isalnum() or c in ['_','-'] else '_' for c in args.query.replace(' ','_'))[:50]
+            filename_stem = f"{args.filename_prefix}_{args.engine}_{safe_query_part}_p{args.page}_{timestamp}"
+            output_filename = f"{filename_stem}.html"
+            output_path = args.output_dir.resolve() / output_filename # Use resolve for absolute path
+
+            # --- Ensure Output Directory Exists ---
+            try:
+                args.output_dir.mkdir(parents=True, exist_ok=True)
+                logger.debug(f"Output directory ensured: {args.output_dir.resolve()}")
+            except OSError as e:
+                logger.error(f"Failed to create output directory '{args.output_dir}': {e}. Check permissions.")
+                logger.warning(f"Attempting to save HTML file to current working directory instead: {Path.cwd()}")
+                output_path = Path.cwd() / output_filename # Fallback path
+
+            # --- Generate HTML Content ---
+            logger.info("Generating HTML output...")
+            html_content = generate_html_output(search_results, args.query, output_filename, args.engine)
+
+            # --- Save HTML to File ---
+            logger.info(f"Attempting to save results to: {output_path}")
+            try:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
+                logger.info(f"Successfully saved {len(search_results)} results to: {output_path}")
+
+                # --- Auto-open File in Browser (unless --no-open) ---
+                if not args.no_open:
+                    logger.info("Attempting to open the generated HTML file in the default browser...")
+                    try:
+                        webbrowser.open(output_path.as_uri()) # Use file URI scheme
+                        # # Platform-specific alternative (less reliable than webbrowser)
+                        # if sys.platform.startswith('win'): os.startfile(output_path)
+                        # elif sys.platform.startswith('darwin'): os.system(f'open "{output_path}"')
+                        # else: os.system(f'xdg-open "{output_path}"')
+                    except Exception as open_err:
+                        logger.warning(f"Could not automatically open file '{output_path}' in browser: {open_err}")
+                        logger.warning("Please open the file manually.")
+            except IOError as e:
+                logger.error(f"Error writing HTML file '{output_path}': {e}", exc_info=True)
+            except Exception as e:
+                logger.error(f"An unexpected error occurred while saving or opening the HTML file: {e}", exc_info=True)
+
+        else:
+            # Handle case where search returned no results
+            logger.warning(f"No videos found for query '{args.query}' on page {args.page} using engine '{args.engine}'. No HTML file generated.")
+            # Optionally, generate a "No Results" HTML page here if desired
+            # html_content = generate_html_output([], args.query, "no_results.html", args.engine) # Example
+            # ... save this minimal HTML ...
+
+
+    # --- Graceful Error Handling ---
+    except ValueError as ve: # Catch specific validation errors (e.g., invalid limit, missing query)
+        logger.critical(f"Configuration Error: {ve}", exc_info=False) # Usually self-explanatory
+        sys.exit(1)
+    except ImportError as ie:
+        # This is critical, already logged in __init__, but catch again here for safety.
+        logger.critical(f"Dependency Error: {ie}. Please ensure 'pornlib' is installed.", exc_info=False)
+        sys.exit(1)
+    except NotImplementedError as nie:
+        # If a feature (like a specific engine method) isn't implemented in pornLib
+        logger.critical(f"Feature Not Supported Error: {nie}", exc_info=True)
+        sys.exit(1)
+    except RuntimeError as rte: # Catch errors raised during client init or API calls
+         logger.critical(f"Runtime Error: {rte}", exc_info=True)
+         sys.exit(1)
+    except KeyboardInterrupt:
+         logger.info("\nProcess interrupted by user (Ctrl+C). Exiting gracefully.")
+         sys.exit(0)
+    except Exception as e: # Catch-all for any other unexpected errors
+        logger.critical(f"An unexpected critical error occurred during execution: {e}", exc_info=True)
+        sys.exit(1)
+    finally:
+        # This block executes whether an exception occurred or not
+        logger.info("--- PornLib Search Script Finished ---")
+
+# ==============================================================================
+# Script Entry Point Check
+# ==============================================================================
+
+if __name__ == "__main__":
+    # --- Pre-run Notes / Instructions ---
+    # 1. Dependencies: Make sure 'pornlib' and 'ratelimit' are installed.
+    #    Create a requirements.txt file:
+    #    ```
+    #    # requirements.txt
+    #    pornlib>=1.0.0  # Replace with actual required version if known
+    #    ratelimit>=2.2.1 # Replace with actual required version if known
+    #    ```
+    #    Install using: pip install -r requirements.txt
+    #
+    # 2. Hover Previews: The HTML/JS includes logic for hover video previews.
+    #    However, this relies on the 'preview_url' field in VideoDataClass.
+    #    Standard pornLib search results **DO NOT** typically include these preview URLs.
+    #    Populating 'preview_url' would require **additional scraping** of each video's
+    #    individual page within the XvideosClient or a separate process, which is
+    #    **NOT implemented** in this script. The preview feature will likely remain
+    #    inactive unless the data source provides these URLs or the script is extended.
+    #
+    # 3. Rate Limiting: Be mindful of the API rate limits (API_CALLS_LIMIT per API_PERIOD_SECONDS).
+    #    Aggressive searching or large limits might lead to temporary blocks.
+    #
+    # --- Execution ---
+    main()
