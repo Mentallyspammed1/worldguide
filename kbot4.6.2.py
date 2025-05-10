@@ -1,4 +1,3 @@
-```python
 # -*- coding: utf-8 -*-
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods
 # Note: Some pylint disables are kept where refactoring significantly alters structure or standard patterns

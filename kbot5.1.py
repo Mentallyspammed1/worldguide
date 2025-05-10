@@ -1,4 +1,3 @@
-```python
 # -*- coding: utf-8 -*-
 # pylint: disable=logging-fstring-interpolation, too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods, invalid-name, unused-argument, too-many-lines, wrong-import-order, wrong-import-position, unnecessary-pass, unnecessary-lambda-assignment, bad-option-value, line-too-long
 # fmt: off
@@ -276,10 +275,10 @@ def fetch_with_retries(
             result = fetch_function(*args, **kwargs)
             # Log success after previous failures
             if attempt > 0:
-                logger.info(f"{Fore.BRIGHT_GREEN}Successfully executed {func_name} on attempt {attempt + 1}/{max_retries + 1} after previous failures.")
+                logger.info(f"{Style.BRIGHT}{Fore.GREEN}Successfully executed {func_name} on attempt {attempt + 1}/{max_retries + 1} after previous failures.")
             return result
         except fatal_exceptions as e:
-            logger.critical(f"{Fore.BRIGHT_RED}Fatal error ({type(e).__name__}) executing {func_name}: {e}. Halting immediately.", exc_info=False)
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}Fatal error ({type(e).__name__}) executing {func_name}: {e}. Halting immediately.", exc_info=False)
             raise e # Re-raise critical error
         except fail_fast_exceptions as e:
             logger.error(f"{Fore.RED}Fail-fast error ({type(e).__name__}) executing {func_name}: {e}. Not retrying.")
@@ -443,7 +442,7 @@ class TradingConfig:
         # Final Checks
         if not self.api_key or not self.api_secret:
             logger.critical(
-                f"{Fore.BRIGHT_RED}BYBIT_API_KEY or BYBIT_API_SECRET not found in environment. Halting."
+                f"{Style.BRIGHT}{Fore.RED}BYBIT_API_KEY or BYBIT_API_SECRET not found in environment. Halting."
             )
             sys.exit(1)
         self._validate_config()
@@ -473,7 +472,7 @@ class TradingConfig:
             return category
         except ValueError as e:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Could not determine V5 category: {e}. Halting.",
+                f"{Style.BRIGHT}{Fore.RED}Could not determine V5 category: {e}. Halting.",
                 exc_info=True,
             )
             sys.exit(1)
@@ -482,7 +481,7 @@ class TradingConfig:
         """Performs post-load validation of configuration parameters."""
         if self.fast_ema_period >= self.slow_ema_period:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Validation failed: FAST_EMA ({self.fast_ema_period}) must be < SLOW_EMA ({self.slow_ema_period}). Halting."
+                f"{Style.BRIGHT}{Fore.RED}Validation failed: FAST_EMA ({self.fast_ema_period}) must be < SLOW_EMA ({self.slow_ema_period}). Halting."
             )
             sys.exit(1)
         if self.trend_ema_period <= self.slow_ema_period:
@@ -491,7 +490,7 @@ class TradingConfig:
             )
         if self.stoch_oversold_threshold >= self.stoch_overbought_threshold:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Validation failed: STOCH_OVERSOLD ({self.stoch_oversold_threshold.normalize()}) must be < STOCH_OVERBOUGHT ({self.stoch_overbought_threshold.normalize()}). Halting."
+                f"{Style.BRIGHT}{Fore.RED}Validation failed: STOCH_OVERSOLD ({self.stoch_oversold_threshold.normalize()}) must be < STOCH_OVERBOUGHT ({self.stoch_overbought_threshold.normalize()}). Halting."
             )
             sys.exit(1)
         if self.tsl_activation_atr_multiplier < self.sl_atr_multiplier:
@@ -544,10 +543,10 @@ class TradingConfig:
 
         # Min/Max checks
         if min_val is not None and is_numeric and value < min_val:
-            logger.critical(f"{Fore.BRIGHT_RED}Validation failed for {key}: Value '{value}' < minimum '{min_val}'. Halting.")
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}Validation failed for {key}: Value '{value}' < minimum '{min_val}'. Halting.")
             sys.exit(1) # Critical failure
         if max_val is not None and is_numeric and value > max_val:
-            logger.critical(f"{Fore.BRIGHT_RED}Validation failed for {key}: Value '{value}' > maximum '{max_val}'. Halting.")
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}Validation failed for {key}: Value '{value}' > maximum '{max_val}'. Halting.")
             sys.exit(1) # Critical failure
 
         # Allowed values check
@@ -578,7 +577,7 @@ class TradingConfig:
 
         if value_str is None or value_str.strip() == "":
             if default is None:
-                log_msg = f"{Fore.BRIGHT_RED}Required {'secret ' if is_secret else ''}configuration '{key}' not found and no default provided. Halting."
+                log_msg = f"{Style.BRIGHT}{Fore.RED}Required {'secret ' if is_secret else ''}configuration '{key}' not found and no default provided. Halting."
                 logger.critical(log_msg)
                 sys.exit(1)
             use_default = True
@@ -608,7 +607,7 @@ class TradingConfig:
             # Critical: Re-validate the original default value itself
             if not self._validate_value(key, casted_value, min_val, max_val, allowed_values):
                 logger.critical(
-                    f"{Fore.BRIGHT_RED}FATAL: Default value '{default}' for {key} failed validation. Halting."
+                    f"{Style.BRIGHT}{Fore.RED}FATAL: Default value '{default}' for {key} failed validation. Halting."
                 )
                 sys.exit(1)
 
@@ -656,24 +655,24 @@ class ExchangeManager:
             logger.debug("Testing exchange connection...")
             self.exchange.fetch_time()
             logger.info(
-                f"{Fore.BRIGHT_GREEN}Bybit V5 interface initialized and connection tested successfully."
+                f"{Style.BRIGHT}{Fore.GREEN}Bybit V5 interface initialized and connection tested successfully."
             )
 
         except ccxt.AuthenticationError as e:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Authentication failed: {e}. Check API keys/permissions. Halting.",
+                f"{Style.BRIGHT}{Fore.RED}Authentication failed: {e}. Check API keys/permissions. Halting.",
                 exc_info=False,
             )
             sys.exit(1)
         except (ccxt.NetworkError, requests.exceptions.RequestException) as e:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Network error initializing exchange: {e}. Check connection. Halting.",
+                f"{Style.BRIGHT}{Fore.RED}Network error initializing exchange: {e}. Check connection. Halting.",
                 exc_info=True,
             )
             sys.exit(1)
         except Exception as e:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Unexpected error initializing exchange: {e}. Halting.",
+                f"{Style.BRIGHT}{Fore.RED}Unexpected error initializing exchange: {e}. Halting.",
                 exc_info=True,
             )
             sys.exit(1)
@@ -748,7 +747,7 @@ class ExchangeManager:
             return market
         except (ccxt.ExchangeError, KeyError, ValueError, TypeError, Exception) as e:
             logger.critical(
-                f"{Fore.BRIGHT_RED}Failed to load or parse market info for {self.config.symbol}: {e}. Halting.",
+                f"{Style.BRIGHT}{Fore.RED}Failed to load or parse market info for {self.config.symbol}: {e}. Halting.",
                 exc_info=True,
             )
             sys.exit(1)
@@ -1339,7 +1338,7 @@ class IndicatorCalculator:
                      logger.error(f"{Fore.RED}ATR is NaN, cannot proceed with risk calculations. Aborting indicator calc.")
                      return None
 
-            logger.info(f"{Fore.BRIGHT_GREEN}Indicator patterns woven successfully.")
+            logger.info(f"{Style.BRIGHT}{Fore.GREEN}Indicator patterns woven successfully.")
             return indicators_out
 
         except Exception as e:
@@ -1630,7 +1629,7 @@ class OrderManager:
         self.exchange_manager = exchange_manager
         # Ensure exchange instance exists before assigning
         if not exchange_manager or not exchange_manager.exchange:
-            logger.critical(f"{Fore.BRIGHT_RED}OrderManager cannot initialize: Exchange instance missing.")
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}OrderManager cannot initialize: Exchange instance missing.")
             raise ValueError("OrderManager requires a valid Exchange instance.")
         self.exchange = exchange_manager.exchange # Convenience accessor
         self.market_info = exchange_manager.market_info # Convenience accessor
@@ -1833,7 +1832,7 @@ class OrderManager:
                     avg_price_log_str = str(avg_fill_price)
 
             logger.trade(
-                f"{Fore.BRIGHT_GREEN}Market order submitted: ID {order_id}, Side {side.upper()}, Qty {final_qty_decimal.normalize()}, Status: {order_status}, Filled: {filled_qty.normalize()}, AvgPx: {avg_price_log_str}"
+                f"{Style.BRIGHT}{Fore.GREEN}Market order submitted: ID {order_id}, Side {side.upper()}, Qty {final_qty_decimal.normalize()}, Status: {order_status}, Filled: {filled_qty.normalize()}, AvgPx: {avg_price_log_str}"
             )
             termux_notify(
                 f"{symbol} Order Submitted", f"Market {side.upper()} {final_qty_decimal.normalize()} ID:{order_id}"
@@ -1940,7 +1939,7 @@ class OrderManager:
 
         if not hasattr(self.exchange, private_method_name):
             logger.error(
-                f"{Fore.BRIGHT_RED}Private method '{private_method_name}' not found in CCXT instance. Cannot set position protection. Check CCXT version/implementation."
+                f"{Style.BRIGHT}{Fore.RED}Private method '{private_method_name}' not found in CCXT instance. Cannot set position protection. Check CCXT version/implementation."
             )
             return False
 
@@ -1958,7 +1957,7 @@ class OrderManager:
 
             # --- Process Response ---
             if response and response.get("retCode") == V5_SUCCESS_RETCODE:
-                logger.trade(f"{Fore.BRIGHT_GREEN}{action_desc} successful for {position_side.upper()} {symbol}.")
+                logger.trade(f"{Style.BRIGHT}{Fore.GREEN}{action_desc} successful for {position_side.upper()} {symbol}.")
                 termux_notify(f"{symbol} Protection Set", f"{action_desc} {position_side.upper()}")
                 self.protection_tracker[tracker_key] = new_tracker_state
                 return True
@@ -2045,7 +2044,7 @@ class OrderManager:
             logger.debug(f"{action_context} Check {attempt + 1}: {log_msg}")
 
             if verification_met:
-                logger.info(f"{Fore.BRIGHT_GREEN}{action_context} Verification SUCCESSFUL on attempt {attempt + 1}.")
+                logger.info(f"{Style.BRIGHT}{Fore.GREEN}{action_context} Verification SUCCESSFUL on attempt {attempt + 1}.")
                 return True, current_positions # Verification succeeded, return final state
 
             # Verification not met, wait for next attempt if any remain
@@ -2078,7 +2077,7 @@ class OrderManager:
         if current_price.is_nan() or current_price <= 0: logger.error("Entry Aborted: Invalid Price."); return False
 
         position_side = "long" if side == "buy" else "short"
-        logger.info(f"{Fore.BRIGHT_MAGENTA}--- Initiating Entry Sequence for {position_side.upper()} ---{Style.RESET_ALL}")
+        logger.info(f"{Style.BRIGHT}{Fore.MAGENTA}--- Initiating Entry Sequence for {position_side.upper()} ---{Style.RESET_ALL}")
 
         # 1. Calculate Trade Parameters
         logger.debug("Calculating trade parameters...")
@@ -2134,7 +2133,7 @@ class OrderManager:
 
         # Log confirmation with verified details
         logger.info(
-            f"{Fore.BRIGHT_GREEN}Position {position_side.upper()} confirmed via verification: Qty={filled_qty.normalize()}, AvgEntry={avg_entry_price.normalize() if not avg_entry_price.is_nan() else '[N/A]'}"
+            f"{Style.BRIGHT}{Fore.GREEN}Position {position_side.upper()} confirmed via verification: Qty={filled_qty.normalize()}, AvgEntry={avg_entry_price.normalize() if not avg_entry_price.is_nan() else '[N/A]'}"
         )
 
         # Handle partial fill logging (already done in verification logic)
@@ -2158,7 +2157,7 @@ class OrderManager:
                 logger.warning("Logging entry to journal with N/A entry price.")
             self.log_trade_entry_to_journal(side, filled_qty, avg_entry_price, order_id)
 
-        logger.info(f"{Fore.BRIGHT_GREEN}--- Entry Sequence for {position_side.upper()} Completed Successfully ---{Style.RESET_ALL}")
+        logger.info(f"{Style.BRIGHT}{Fore.GREEN}--- Entry Sequence for {position_side.upper()} Completed Successfully ---{Style.RESET_ALL}")
         return True
     # --- End updated place_risked_market_order ---
 
@@ -2216,7 +2215,7 @@ class OrderManager:
                     tsl_activation_price=activation_price,
                 )
                 if activation_success:
-                    logger.trade(f"{Fore.BRIGHT_GREEN}TSL activated successfully for {position_side.upper()}.")
+                    logger.trade(f"{Style.BRIGHT}{Fore.GREEN}TSL activated successfully for {position_side.upper()}.")
                 else:
                     logger.error(f"{Fore.RED}Failed to activate TSL for {position_side.upper()} via API.")
             else:
@@ -2302,7 +2301,7 @@ class OrderManager:
             termux_notify(f"{symbol} CLOSE VERIFY FAILED", f"{position_side.upper()} may still be open!")
             return False # Indicate closure verification failed
         else:
-            logger.trade(f"{Fore.BRIGHT_GREEN}Position {position_side.upper()} confirmed closed via verification.")
+            logger.trade(f"{Style.BRIGHT}{Fore.GREEN}Position {position_side.upper()} confirmed closed via verification.")
             return True # Closure confirmed
     # --- End updated close_position ---
 
@@ -2343,7 +2342,7 @@ class OrderManager:
                 if close_success:
                     logger.info(f"Emergency close order submitted/confirmed for lingering {position_side_to_check} position.")
                 else:
-                    logger.critical(f"{Fore.BRIGHT_RED}EMERGENCY CLOSE FAILED for {position_side_to_check.upper()}. MANUAL INTERVENTION URGENT!")
+                    logger.critical(f"{Style.BRIGHT}{Fore.RED}EMERGENCY CLOSE FAILED for {position_side_to_check.upper()}. MANUAL INTERVENTION URGENT!")
                     termux_notify(f"{self.config.symbol} URGENT CHECK", f"Emergency close FAILED!")
             else:
                 logger.info(f"Lingering pos ({position_side_to_check}) found but qty negligible ({current_qty}). No emergency close needed.")
@@ -2598,12 +2597,12 @@ class TradingBot:
 
     def __init__(self):
         logger.info(
-            f"{Fore.BRIGHT_MAGENTA}{Style.BRIGHT}--- Initializing Pyrmethus v4.5.7 (Neon Nexus Edition) ---{Style.RESET_ALL}"
+            f"{Style.BRIGHT}{Fore.MAGENTA}{Style.BRIGHT}--- Initializing Pyrmethus v4.5.7 (Neon Nexus Edition) ---{Style.RESET_ALL}"
         )
         self.config = TradingConfig()
         self.exchange_manager = ExchangeManager(self.config)
         if not self.exchange_manager.exchange or not self.exchange_manager.market_info:
-            logger.critical(f"{Fore.BRIGHT_RED}TradingBot init failed: ExchangeManager issues. Halting.")
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}TradingBot init failed: ExchangeManager issues. Halting.")
             sys.exit(1)
 
         self.indicator_calculator = IndicatorCalculator(self.config)
@@ -2611,12 +2610,12 @@ class TradingBot:
         try:
             self.order_manager = OrderManager(self.config, self.exchange_manager)
         except ValueError as e:
-            logger.critical(f"{Fore.BRIGHT_RED}TradingBot init failed: {e}. Halting.")
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}TradingBot init failed: {e}. Halting.")
             sys.exit(1)
         self.status_display = StatusDisplay(self.config)
         self.shutdown_requested = False
         self._setup_signal_handlers()
-        logger.info(f"{Fore.BRIGHT_GREEN}Pyrmethus components initialized successfully.")
+        logger.info(f"{Style.BRIGHT}{Fore.GREEN}Pyrmethus components initialized successfully.")
 
     def _setup_signal_handlers(self):
         """Sets up OS signal handlers for graceful shutdown."""
@@ -2654,7 +2653,7 @@ class TradingBot:
                 self.shutdown_requested = True
                 break
             except ccxt.AuthenticationError as e:
-                logger.critical(f"{Fore.BRIGHT_RED}CRITICAL AUTH ERROR in cycle {cycle_count}: {e}. Halting.", exc_info=False)
+                logger.critical(f"{Style.BRIGHT}{Fore.RED}CRITICAL AUTH ERROR in cycle {cycle_count}: {e}. Halting.", exc_info=False)
                 termux_notify("Pyrmethus CRITICAL ERROR", f"Auth failed: {e}")
                 self.shutdown_requested = True
                 break
@@ -2663,7 +2662,7 @@ class TradingBot:
                  self.shutdown_requested = True
                  break
             except Exception as e:
-                logger.error(f"{Fore.BRIGHT_RED}Unhandled exception in main trading cycle {cycle_count}: {e}", exc_info=True)
+                logger.error(f"{Style.BRIGHT}{Fore.RED}Unhandled exception in main trading cycle {cycle_count}: {e}", exc_info=True)
                 termux_notify("Pyrmethus Cycle Error", f"Exception cycle {cycle_count}. Check logs.")
                 sleep_duration = self.config.loop_sleep_seconds * 2 # Longer sleep after error
             else:
@@ -2848,11 +2847,11 @@ class TradingBot:
                      cycle_status = "FAIL:INVALID_STATE_PRE_ENTRY"
                 else:
                     entry_side = "buy" if signals.get("long") else "sell"; signal_reason = signals.get('reason', '')
-                    log_color = Fore.BRIGHT_GREEN if entry_side == 'buy' else Fore.BRIGHT_RED
+                    log_color = {Style.BRIGHT}{Fore.GREEN if entry_side == 'buy' else Style.BRIGHT}{Fore.RED
                     logger.trade(f"{log_color}{Style.BRIGHT}Entry Signal Detected: {entry_side.upper()}! {signal_reason}. Attempting entry...{Style.RESET_ALL}")
                     entry_successful = self.order_manager.place_risked_market_order(entry_side, current_atr, total_equity, current_price)
                     if entry_successful:
-                        logger.info(f"{Fore.BRIGHT_GREEN}Entry sequence completed successfully for {entry_side}.")
+                        logger.info(f"{Style.BRIGHT}{Fore.GREEN}Entry sequence completed successfully for {entry_side}.")
                         logger.debug("Re-fetching state after successful entry...")
                         positions_after_entry = self.exchange_manager.get_current_position()
                         if positions_after_entry is not None:
@@ -2952,7 +2951,7 @@ class TradingBot:
                 logger.error(f"{Fore.RED}Failed fetching positions during shutdown check. MANUAL CHECK REQUIRED for {symbol}!")
                 termux_notify(f"{symbol} Shutdown Issue", "Failed pos check! Manual verify.")
         except Exception as e:
-            logger.error(f"{Fore.BRIGHT_RED}Error during position closure shutdown: {e}. MANUAL CHECK REQUIRED.", exc_info=True)
+            logger.error(f"{Style.BRIGHT}{Fore.RED}Error during position closure shutdown: {e}. MANUAL CHECK REQUIRED.", exc_info=True)
             termux_notify(f"{symbol} Shutdown Issue", f"Error closing pos: {e}")
 
         console.print(f"[bold yellow]Graceful Shutdown Sequence Complete.[/]")
@@ -3001,8 +3000,7 @@ if __name__ == "__main__":
         log_level_exit = logging.INFO if e.code == 0 else logging.WARNING
         logger.log(log_level_exit, f"Pyrmethus process terminated (Exit Code: {e.code}).")
     except Exception as main_exception:
-        logger.critical(f"{Fore.BRIGHT_RED}CRITICAL UNHANDLED ERROR during bot execution: {main_exception}", exc_info=True)
+        logger.critical(f"{Style.BRIGHT}{Fore.RED}CRITICAL UNHANDLED ERROR during bot execution: {main_exception}", exc_info=True)
         try: termux_notify("Pyrmethus CRITICAL ERROR", f"Bot failed: {str(main_exception)[:100]}")
         except Exception as notify_exc: logger.error(f"Failed to send critical error notification: {notify_exc}")
         sys.exit(1) # Ensure non-zero exit code on critical failure
-```

@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# === Gemini Code Review Script v3.4 ===
-Target Model: gemini-2.5-pro-exp-03-25 (or override via GEMINI_MODEL env var)
-# Enhancements:
+# === Gemini Code Review Script v3.5 ===
+# Description: A Bash script to send code to the Gemini API for review and enhancement.
+# Target Model: gemini-2.5-pro-exp-03-25 (or override via GEMINI_MODEL env var)
+#
+# Enhancements (v3.4 -> v3.5):
 # - Prompts interactively for both Input and Output filenames.
 # - Handles large input files by piping content to jq (--rawfile).
 # - Handles large JSON payloads by piping to curl (--data @-).
@@ -10,6 +12,16 @@ Target Model: gemini-2.5-pro-exp-03-25 (or override via GEMINI_MODEL env var)
 # - API Key handling (environment variable or prompt).
 # - Configurable model name.
 # - Clear status messages and error handling.
+# - Improved robustness with 'set -uo pipefail'.
+# - Corrected file content reading to use 'cat' for raw code, ensuring no unintended processing by 'bat'.
+# - Minor improvements to 'read' prompts.
+
+# --- Shell Options ---
+# -u: Treat unset variables as an error
+# -o pipefail: Causes a pipeline to return the exit status of the last command in the pipeline
+#              that returned a non-zero exit status, or zero if all commands in the pipeline
+#              exited successfully.
+set -uo pipefail
 
 # === Configuration ===
 # Set the default model. Can be overridden by GEMINI_MODEL environment variable.
@@ -55,7 +67,7 @@ check_dependencies() {
         missing_dep=1
     fi
     if [[ "$missing_dep" -ne 0 ]]; then
-        exit 1 # Exit directly from here
+        error_exit "One or more dependencies are missing. Please install them and try again." 1
     fi
     echo "Dependencies satisfied."
 }
@@ -64,15 +76,15 @@ check_dependencies() {
 get_api_key() {
     local key
     # Check if API key is set as an environment variable
-    if [[ -n "$GEMINI_API_KEY" ]]; then
+    if [[ -n "${GEMINI_API_KEY:-}" ]]; then # Added :- to prevent unset error with set -u if var truly not set
         key="$GEMINI_API_KEY"
         echo "Using API Key from GEMINI_API_KEY environment variable."
     else
         # If not in env, prompt the user
-        read -sp "Enter your Google Gemini API Key: " key
+        read -rsp "Enter your Google Gemini API Key: " key # Added -r for raw input
         echo # Add a newline after secret input
         if [[ -z "$key" ]]; then
-            error_exit "Google Gemini API Key is required."
+            error_exit "Google Gemini API Key is required." 1
         fi
     fi
     # Set the global internal key variable
@@ -84,10 +96,10 @@ get_api_key() {
 # Returns: Assigns content to global variable CODE_CONTENT and filename to INPUT_FILENAME
 get_input_filename_and_content() {
     # Always prompt for input file
-    read -p "Enter the filename containing the code to review: " INPUT_FILENAME
+    read -rp "Enter the filename containing the code to review: " INPUT_FILENAME # -r for raw input
 
     if [[ -z "$INPUT_FILENAME" ]]; then
-        error_exit "No input filename provided."
+        error_exit "No input filename provided." 2
     fi
     if [[ ! -f "$INPUT_FILENAME" ]]; then
         error_exit "Input file '$INPUT_FILENAME' not found." 2
@@ -97,10 +109,9 @@ get_input_filename_and_content() {
     fi
 
     echo "Reading content from '$INPUT_FILENAME'..."
-    # Read potentially large file content
-    CODE_CONTENT=$(bat "$INPUT_FILENAME")
-    local read_status=$?
-    if [[ $read_status -ne 0 ]]; then
+    # Read potentially large file content using cat for raw content
+    # Use -- to handle filenames that might start with a dash
+    if ! CODE_CONTENT=$(cat -- "$INPUT_FILENAME"); then
        error_exit "Failed to read file content from '$INPUT_FILENAME'." 4
     fi
 
@@ -115,7 +126,7 @@ get_input_filename_and_content() {
 # Prompts user for the desired output filename.
 # Returns: Assigns filename to global variable OUTPUT_FILENAME. Empty if user wants terminal output.
 get_output_filename() {
-    read -p "Enter the filename to save the enhanced code (leave blank to print to terminal): " OUTPUT_FILENAME
+    read -rp "Enter the filename to save the enhanced code (leave blank to print to terminal): " OUTPUT_FILENAME # -r for raw input
     # No validation needed here, we just check if it's empty later
 }
 
@@ -136,7 +147,8 @@ build_payload() {
     # Use --rawfile variable_name /dev/stdin to read the *entire* raw stdin content
     # into a jq string variable WITHOUT parsing it as JSON.
     # Use --arg name value for smaller arguments like the instructions.
-    payload_json=$(echo "$CODE_CONTENT" | jq -n \
+    # Using printf for piping CODE_CONTENT to jq for safety, though echo might be fine here.
+    if ! payload_json=$(printf "%s" "$CODE_CONTENT" | jq -n \
         --rawfile code_from_stdin /dev/stdin \
         --arg prompt_instructions "$prompt_instructions" \
         --argjson temp "$TEMPERATURE" \
@@ -158,10 +170,7 @@ build_payload() {
             {\"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\", \"threshold\": \"BLOCK_MEDIUM_AND_ABOVE\"},
             {\"category\": \"HARM_CATEGORY_DANGEROUS_CONTENT\", \"threshold\": \"BLOCK_MEDIUM_AND_ABOVE\"}
           ]
-        }")
-
-    # Check jq exit status
-    if [[ $? -ne 0 ]]; then
+        }"); then
         # Provide more context in the error message
         echo "DEBUG: CODE_CONTENT length (first 100 chars): ${CODE_CONTENT:0:100}..." >&2
         error_exit "Failed to build JSON payload using jq. Error occurred likely during JSON construction after reading raw input." 8
@@ -180,6 +189,7 @@ call_gemini() {
     local key="$1"
     local payload="$2"
     local response
+    local curl_status
 
     # Print the actual model being used (could be default or from env var)
     echo "Sending code to Gemini for review (Model: ${MODEL_NAME})..."
@@ -190,9 +200,8 @@ call_gemini() {
          --request POST "${API_URL}?key=${key}" \
          --header "Content-Type: application/json" \
          --data @-) # Read data from stdin
+    curl_status=$? # Capture exit status immediately
 
-    # Check curl exit status more reliably
-    local curl_status=$?
     if [[ $curl_status -ne 0 ]]; then
         # Check if response has content even if curl exited non-zero (e.g., HTTP error code)
         if [[ -n "$response" ]]; then
@@ -207,7 +216,7 @@ call_gemini() {
         echo "Error: API returned an error:" >&2
         # Print the formatted error JSON
         echo "$response" | jq '.error' >&2
-        error_exit "API call failed (received error object in response)." 6 # Use a specific exit code for API errors
+        error_exit "API call failed (received error object in response)." 6
     fi
 
     # Set global variable
@@ -221,32 +230,44 @@ call_gemini() {
 extract_code() {
     local response_json="$1"
     local extracted_text
+    local finish_reason
+    local block_reason
 
     # Primary expected path for Gemini API v1beta text response
-    extracted_text=$(echo "$response_json" | jq -r '.candidates[0].content.parts[0].text // ""')
+    # Use a subshell to capture jq output and handle potential errors
+    if ! extracted_text=$(echo "$response_json" | jq -r '.candidates[0].content.parts[0].text // ""'); then
+        echo "Error: Failed to parse primary path for extracted text with jq." >&2
+        extracted_text="" # Ensure it's empty on jq failure
+    fi
 
     # Handle cases where the primary path might fail or be empty
     if [[ -z "$extracted_text" ]]; then
          # Attempt fallback path (less common now but good robustness)
-         extracted_text=$(echo "$response_json" | jq -r '.candidates[0].text // ""')
-         if [[ -n "$extracted_text" ]]; then
-             echo "Warning: Extracted code using fallback path '.candidates[0].text'." >&2
-         fi
+        if ! extracted_text=$(echo "$response_json" | jq -r '.candidates[0].text // ""'); then
+            echo "Warning: Failed to parse fallback path for extracted text with jq." >&2
+            extracted_text="" # Ensure it's empty on jq failure
+        elif [[ -n "$extracted_text" ]]; then # Only print warning if fallback actually yielded something
+            echo "Warning: Extracted code using fallback path '.candidates[0].text'." >&2
+        fi
     fi
 
     # Check if the response indicates blocked content or other issues
-    local finish_reason
-    finish_reason=$(echo "$response_json" | jq -r '.candidates[0].finishReason // "UNKNOWN"')
+    if ! finish_reason=$(echo "$response_json" | jq -r '.candidates[0].finishReason // "UNKNOWN"'); then
+        echo "Warning: Failed to parse finishReason from API response." >&2
+        finish_reason="UNKNOWN"
+    fi
+
     if [[ "$finish_reason" != "STOP" && "$finish_reason" != "MAX_TOKENS" ]]; then
         echo "Warning: Gemini finishReason was '$finish_reason'. Output might be incomplete or blocked due to safety settings or other reasons." >&2
-        # If the primary extraction failed AND we have a non-STOP reason, it's likely blocked.
-        if [[ -z "$extracted_text" ]]; then
+        if [[ -z "$extracted_text" ]]; then # If the primary extraction failed AND we have a non-STOP reason
             echo "Error: Code extraction failed, likely due to content blocking (finishReason: $finish_reason)." >&2
             echo "Full API Response (first 500 chars):" >&2
             echo "${response_json:0:500}..." >&2
              # Check for prompt feedback block reason
-             local block_reason
-             block_reason=$(echo "$response_json" | jq -r '.promptFeedback.blockReason // "NONE"')
+             if ! block_reason=$(echo "$response_json" | jq -r '.promptFeedback.blockReason // "NONE"'); then
+                 echo "Warning: Failed to parse promptFeedback.blockReason from API response." >&2
+                 block_reason="NONE"
+             fi
              if [[ "$block_reason" != "NONE" ]]; then
                  echo "Prompt Feedback Block Reason: $block_reason" >&2
              fi
@@ -255,45 +276,42 @@ extract_code() {
     fi
 
     if [[ -z "$extracted_text" && "$finish_reason" == "STOP" ]]; then
-        # If extraction is empty but finish reason is STOP, maybe the model returned nothing?
         echo "Warning: Gemini returned an empty response text but finished normally (finishReason: STOP)." >&2
-        # Consider if empty response is an error for your use case
-        # error_exit "Received empty response text from Gemini." 7
     elif [[ -z "$extracted_text" && "$finish_reason" != "UNKNOWN" ]]; then
-        # General catch-all if extraction failed for other known non-STOP reasons
         echo "Error: Could not extract enhanced code from the API response (finishReason: $finish_reason)." >&2
         echo "Full API Response (first 500 chars):" >&2
         echo "${response_json:0:500}..." >&2
         error_exit "Failed to parse valid code from API response." 7
     elif [[ -z "$extracted_text" && "$finish_reason" == "UNKNOWN" ]]; then
-         # If reason is unknown and text is empty, parsing likely failed or response was empty/malformed
-        echo "Error: Could not extract enhanced code. API response might be malformed or empty." >&2
+        echo "Error: Could not extract enhanced code. API response might be malformed or empty (finishReason: UNKNOWN)." >&2
         echo "Full API Response (first 500 chars):" >&2
         echo "${response_json:0:500}..." >&2
         error_exit "Failed to parse valid code from API response (Unknown reason)." 7
     fi
-
 
     # Set global variable
     ENHANCED_CODE="$extracted_text"
 }
 
 # === Main Script Logic ===
+main() {
+    echo "Starting Gemini Code Review Script v3.5..."
 
-# --- Preparations ---
-check_dependencies
-get_api_key # Sets GEMINI_API_KEY_INTERNAL
+    # --- Preparations ---
+    check_dependencies
+    get_api_key # Sets GEMINI_API_KEY_INTERNAL
 
-# --- Get Input ---
-# Prompts for filename, validates, sets INPUT_FILENAME and CODE_CONTENT
-get_input_filename_and_content
+    # --- Get Input ---
+    # Prompts for filename, validates, sets INPUT_FILENAME and CODE_CONTENT
+    get_input_filename_and_content
 
-# --- Get Output Destination ---
-# Prompts for filename, sets OUTPUT_FILENAME (can be empty)
-get_output_filename
+    # --- Get Output Destination ---
+    # Prompts for filename, sets OUTPUT_FILENAME (can be empty)
+    get_output_filename
 
-# --- Prepare Prompt Instructions (Code content will be added inside build_payload) ---
-PROMPT_INSTRUCTIONS="Please review the following code snippet from the file named '$INPUT_FILENAME'. Your task is to:
+    # --- Prepare Prompt Instructions (Code content will be added inside build_payload) ---
+    # Note: INPUT_FILENAME is now reliably set.
+    local PROMPT_INSTRUCTIONS="Please review the following code snippet from the file named '$INPUT_FILENAME'. Your task is to:
 1. Identify potential bugs and logical errors.
 2. Suggest enhancements for clarity, readability, and maintainability.
 3. Optimize for performance and efficiency where applicable.
@@ -301,45 +319,53 @@ PROMPT_INSTRUCTIONS="Please review the following code snippet from the file name
 5. Apply necessary fixes and improvements directly to the code.
 
 IMPORTANT: Return ONLY the complete, corrected, and enhanced code block. Do NOT include any introductory phrases (e.g., \"Here's the enhanced code:\"), concluding remarks, explanations outside the code (unless as comments within the code), summaries, or markdown code fences (\`\`\`) unless the code itself is markdown. Provide only the raw, modified code content."
-# Note: The "Original Code:" header and backticks are now added *inside* the build_payload function.
+    # Note: The "Original Code:" header and backticks are now added *inside* the build_payload function.
 
-# --- Build Payload ---
-# The CODE_CONTENT variable (global) will be piped into jq within the function
-build_payload "$PROMPT_INSTRUCTIONS" # Sets JSON_PAYLOAD
+    # --- Build Payload ---
+    # The CODE_CONTENT variable (global) will be piped into jq within the function
+    build_payload "$PROMPT_INSTRUCTIONS" # Sets JSON_PAYLOAD
 
-# --- Call API ---
-call_gemini "$GEMINI_API_KEY_INTERNAL" "$JSON_PAYLOAD" # Sets API_RESPONSE
+    # --- Call API ---
+    call_gemini "$GEMINI_API_KEY_INTERNAL" "$JSON_PAYLOAD" # Sets API_RESPONSE
 
-# --- Extract Code ---
-extract_code "$API_RESPONSE" # Sets ENHANCED_CODE
+    # --- Extract Code ---
+    extract_code "$API_RESPONSE" # Sets ENHANCED_CODE
 
-# --- Output Result ---
-echo ""
-echo "----------------------------------------"
-echo " Gemini Code Review Result:           "
-echo "----------------------------------------"
-
-# Check if the user provided an output filename
-if [[ -n "$OUTPUT_FILENAME" ]]; then
-    # Attempt to save to file
-    if printf "%s" "$ENHANCED_CODE" > "$OUTPUT_FILENAME"; then
-        echo "Enhanced code saved successfully to: $OUTPUT_FILENAME"
-    else
-        local write_status=$?
-        echo "Error: Failed to save enhanced code to '$OUTPUT_FILENAME' (Exit code: $write_status)." >&2
-        echo "Displaying code on terminal instead:"
-        echo "----------------------------------------"
-        printf "%s\n" "$ENHANCED_CODE" # Use printf for safer output
-        echo "----------------------------------------"
-        exit 9 # Specific exit code for file write error
-    fi
-else
-    # Print to terminal if user left the output filename blank
-    printf "%s\n" "$ENHANCED_CODE" # Use printf for potentially safer output than echo
+    # --- Output Result ---
+    echo ""
     echo "----------------------------------------"
-    echo "(Output printed to terminal as requested.)"
-fi
+    echo " Gemini Code Review Result:           "
+    echo "----------------------------------------"
 
-echo ""
-echo "Review complete for '$INPUT_FILENAME'."
-exit 0
+    # Check if the user provided an output filename
+    if [[ -n "$OUTPUT_FILENAME" ]]; then
+        # Attempt to save to file
+        if printf "%s" "$ENHANCED_CODE" > "$OUTPUT_FILENAME"; then
+            echo "Enhanced code saved successfully to: $OUTPUT_FILENAME"
+        else
+            local write_status=$? # Capture status immediately
+            echo "Error: Failed to save enhanced code to '$OUTPUT_FILENAME' (Exit code: $write_status)." >&2
+            echo "Displaying code on terminal instead:"
+            echo "----------------------------------------"
+            printf "%s\n" "$ENHANCED_CODE" # Use printf for safer output
+            echo "----------------------------------------"
+            error_exit "File write operation failed." 9 # Specific exit code for file write error
+        fi
+    else
+        # Print to terminal if user left the output filename blank
+        printf "%s\n" "$ENHANCED_CODE" # Use printf for potentially safer output than echo
+        echo "----------------------------------------"
+        echo "(Output printed to terminal as requested.)"
+    fi
+
+    echo ""
+    echo "Review complete for '$INPUT_FILENAME'."
+    echo "Script finished successfully."
+    exit 0
+}
+
+# --- Script Entry Point ---
+# Wrap main logic in a function to ensure 'set -u' applies correctly to all variables
+# and to allow for easier future expansion (e.g., argument parsing).
+main "$@"
+
