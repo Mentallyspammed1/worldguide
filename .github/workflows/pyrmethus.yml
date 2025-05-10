@@ -181,9 +181,3 @@ jobs:
             matched_files.txt
             enhancement_log.txt
           retention-days: 7
-          if-no-files-found: warn
-```
-
-### Key Adjustments:
-- The `Split Files into Batches` step creates files containing 10 matched Python files each.
-- The `Run Code Enhancement Script in Batches` step processes each batch sequentially to avoid timeouts.
