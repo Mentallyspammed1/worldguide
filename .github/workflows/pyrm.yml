@@ -1,4 +1,3 @@
-Pyrmethus Enhancement Workflow
 # This workflow automates the enhancement of Python code using a specified script.
 # It processes files in batches, validates syntax, commits changes, and creates a pull request.
 name: Pyrmethus Enhancement Workflow
