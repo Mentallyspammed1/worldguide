@@ -1,0 +1,129 @@
+2025-05-09 12:46:50 [[36mINFO[0m] __main__                       [35m[1m--- Summoning Configuration Runes v2.8.0 ---[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'BYBIT_API_KEY'[94m: Found Env Value: '[93m[1m********[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'BYBIT_API_KEY'[94m: [93m[1m********[94m (Type: str, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'BYBIT_API_SECRET'[94m: Found Env Value: '[93m[1m********[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'BYBIT_API_SECRET'[94m: [93m[1m********[94m (Type: str, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'SYMBOL'[94m: Found Env Value: '[93m[1mTRUMP/USDT:USDT[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'SYMBOL'[94m: [93m[1mTRUMP/USDT:USDT[94m (Type: str, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'INTERVAL'[94m: Found Env Value: '[93m[1m1m[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'INTERVAL'[94m: [93m[1m1m[94m (Type: str, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'LEVERAGE'[94m: Found Env Value: '[93m[1m20[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'LEVERAGE'[94m: [93m[1m20[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'SLEEP_SECONDS'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'SLEEP_SECONDS'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'STRATEGY_NAME'[94m: Found Env Value: '[93m[1mEHLERS_FISHER[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'STRATEGY_NAME'[94m: [93m[1mEHLERS_FISHER[94m (Type: str, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'RISK_PER_TRADE_PERCENTAGE'[94m: Found Env Value: '[93m[1m0.01[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'RISK_PER_TRADE_PERCENTAGE'[94m: [93m[1m0.01[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_DYNAMIC_RISK'[94m: Not Set. Using Default: '[93m[1mfalse[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_DYNAMIC_RISK'[94m: [93m[1mFalse[94m (Type: bool, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'DYNAMIC_RISK_MIN_PCT'[94m: Not Set. Using Default: '[93m[1m0.005[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'DYNAMIC_RISK_MIN_PCT'[94m: [93m[1m0.005[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'DYNAMIC_RISK_MAX_PCT'[94m: Not Set. Using Default: '[93m[1m0.015[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'DYNAMIC_RISK_MAX_PCT'[94m: [93m[1m0.015[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'DYNAMIC_RISK_PERF_WINDOW'[94m: Not Set. Using Default: '[93m[1m10[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'DYNAMIC_RISK_PERF_WINDOW'[94m: [93m[1m10[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MAX_ORDER_USDT_AMOUNT'[94m: Found Env Value: '[93m[1m50.0[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MAX_ORDER_USDT_AMOUNT'[94m: [93m[1m50.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'REQUIRED_MARGIN_BUFFER'[94m: Found Env Value: '[93m[1m1.10[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'REQUIRED_MARGIN_BUFFER'[94m: [93m[1m1.10[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MAX_ACCOUNT_MARGIN_RATIO'[94m: Not Set. Using Default: '[93m[1m0.8[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MAX_ACCOUNT_MARGIN_RATIO'[94m: [93m[1m0.8[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_MAX_DRAWDOWN_STOP'[94m: Not Set. Using Default: '[93m[1mtrue[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_MAX_DRAWDOWN_STOP'[94m: [93m[1mTrue[94m (Type: bool, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MAX_DRAWDOWN_PERCENT'[94m: Not Set. Using Default: '[93m[1m0.10[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MAX_DRAWDOWN_PERCENT'[94m: [93m[1m0.10[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_TIME_BASED_STOP'[94m: Not Set. Using Default: '[93m[1mfalse[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_TIME_BASED_STOP'[94m: [93m[1mFalse[94m (Type: bool, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MAX_TRADE_DURATION_SECONDS'[94m: Not Set. Using Default: '[93m[1m3600[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MAX_TRADE_DURATION_SECONDS'[94m: [93m[1m3600[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_DYNAMIC_ATR_SL'[94m: Not Set. Using Default: '[93m[1mtrue[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_DYNAMIC_ATR_SL'[94m: [93m[1mTrue[94m (Type: bool, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ATR_SHORT_TERM_PERIOD'[94m: Not Set. Using Default: '[93m[1m7[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ATR_SHORT_TERM_PERIOD'[94m: [93m[1m7[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ATR_LONG_TERM_PERIOD'[94m: Not Set. Using Default: '[93m[1m50[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ATR_LONG_TERM_PERIOD'[94m: [93m[1m50[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'VOLATILITY_RATIO_LOW_THRESHOLD'[94m: Not Set. Using Default: '[93m[1m0.7[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'VOLATILITY_RATIO_LOW_THRESHOLD'[94m: [93m[1m0.7[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'VOLATILITY_RATIO_HIGH_THRESHOLD'[94m: Not Set. Using Default: '[93m[1m1.5[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'VOLATILITY_RATIO_HIGH_THRESHOLD'[94m: [93m[1m1.5[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ATR_SL_MULTIPLIER_LOW_VOL'[94m: Not Set. Using Default: '[93m[1m1.0[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ATR_SL_MULTIPLIER_LOW_VOL'[94m: [93m[1m1.0[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ATR_SL_MULTIPLIER_NORMAL_VOL'[94m: Not Set. Using Default: '[93m[1m1.3[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ATR_SL_MULTIPLIER_NORMAL_VOL'[94m: [93m[1m1.3[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ATR_SL_MULTIPLIER_HIGH_VOL'[94m: Not Set. Using Default: '[93m[1m1.8[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ATR_SL_MULTIPLIER_HIGH_VOL'[94m: [93m[1m1.8[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ATR_STOP_LOSS_MULTIPLIER'[94m: Found Env Value: '[93m[1m1.5[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ATR_STOP_LOSS_MULTIPLIER'[94m: [93m[1m1.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_POSITION_SCALING'[94m: Not Set. Using Default: '[93m[1mtrue[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_POSITION_SCALING'[94m: [93m[1mTrue[94m (Type: bool, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MAX_SCALE_INS'[94m: Not Set. Using Default: '[93m[1m1[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MAX_SCALE_INS'[94m: [93m[1m1[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'SCALE_IN_RISK_PERCENTAGE'[94m: Not Set. Using Default: '[93m[1m0.005[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'SCALE_IN_RISK_PERCENTAGE'[94m: [93m[1m0.005[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MIN_PROFIT_FOR_SCALE_IN_ATR'[94m: Not Set. Using Default: '[93m[1m1.0[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MIN_PROFIT_FOR_SCALE_IN_ATR'[94m: [93m[1m1.0[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_SCALE_OUT'[94m: Not Set. Using Default: '[93m[1mfalse[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_SCALE_OUT'[94m: [93m[1mFalse[94m (Type: bool, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'SCALE_OUT_TRIGGER_ATR'[94m: Not Set. Using Default: '[93m[1m2.0[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'SCALE_OUT_TRIGGER_ATR'[94m: [93m[1m2.0[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'TRAILING_STOP_PERCENTAGE'[94m: Found Env Value: '[93m[1m0.007[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'TRAILING_STOP_PERCENTAGE'[94m: [93m[1m0.007[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT'[94m: Found Env Value: '[93m[1m0.002[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT'[94m: [93m[1m0.002[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENTRY_ORDER_TYPE'[94m: Not Set. Using Default: '[93m[1mMARKET[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENTRY_ORDER_TYPE'[94m: [93m[1mMARKET[94m (Type: str, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'LIMIT_ORDER_OFFSET_PIPS'[94m: Not Set. Using Default: '[93m[1m2[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'LIMIT_ORDER_OFFSET_PIPS'[94m: [93m[1m2[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'LIMIT_ORDER_FILL_TIMEOUT_SECONDS'[94m: Not Set. Using Default: '[93m[1m20[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'LIMIT_ORDER_FILL_TIMEOUT_SECONDS'[94m: [93m[1m20[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ST_ATR_LENGTH'[94m: Found Env Value: '[93m[1m3[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ST_ATR_LENGTH'[94m: [93m[1m3[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ST_MULTIPLIER'[94m: Found Env Value: '[93m[1m0.8[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ST_MULTIPLIER'[94m: [93m[1m0.8[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'CONFIRM_ST_ATR_LENGTH'[94m: Found Env Value: '[93m[1m5[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'CONFIRM_ST_ATR_LENGTH'[94m: [93m[1m5[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'CONFIRM_ST_MULTIPLIER'[94m: Found Env Value: '[93m[1m0.4[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'CONFIRM_ST_MULTIPLIER'[94m: [93m[1m0.4[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MOMENTUM_PERIOD'[94m: Not Set. Using Default: '[93m[1m14[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MOMENTUM_PERIOD'[94m: [93m[1m14[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'MOMENTUM_THRESHOLD'[94m: Not Set. Using Default: '[93m[1m0[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'MOMENTUM_THRESHOLD'[94m: [93m[1m0[94m (Type: Decimal, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'VOLUME_MA_PERIOD'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'VOLUME_MA_PERIOD'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ENABLE_SMS_ALERTS'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ENABLE_SMS_ALERTS'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'SMS_RECIPIENT_NUMBER'[94m: Found Env Value: '[93m[1m16364866381[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'SMS_RECIPIENT_NUMBER'[94m: [93m[1m16364866381[94m (Type: str, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'SMS_TIMEOUT_SECONDS'[94m: Found Env Value: '[93m[1m30[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'SMS_TIMEOUT_SECONDS'[94m: [93m[1m30[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'DEFAULT_RECV_WINDOW'[94m: Not Set. Using Default: '[93m[1m13000[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'DEFAULT_RECV_WINDOW'[94m: [93m[1m13000[94m (Type: int, Source: Default)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ORDER_BOOK_DEPTH'[94m: Found Env Value: '[93m[1m20[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ORDER_BOOK_DEPTH'[94m: [93m[1m20[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mConfig Rune [93m[1m'ORDER_FILL_TIMEOUT_SECONDS'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] __main__                       [94mUsing final value for [93m[1m'ORDER_FILL_TIMEOUT_SECONDS'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 12:46:50 [[36mINFO[0m] __main__                       [35m[1m--- Configuration Runes v2.8.0 Summoned and Verified ---[0m
+2025-05-09 12:46:50 [[36mINFO[0m] [35mStrategy.EhlersFisherStrategy[0m [35mEhlers Fisher Transform strategy initialized (Illustrative).[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [35m[1m--- Pyrmethus Scalping Spell v2.8.0 (Strategic Illumination) Initializing (2025-05-09 12:46:50 CDT) ---[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [36m[1m--- Active Strategy Path: [93m[1mEHLERS_FISHER[0m ---
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  Symbol: [93m[1mTRUMP/USDT:USDT[0m, Interval: [93m[1m1m[0m, Leverage: [93m[1m20x[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  Risk/Trade (Base): [93m[1m1.00%[0m, Max Order Cap (USDT): [93m[1m50.0[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  Dynamic Risk: [93m[1mFalse[0m, Dynamic SL: [93m[1mTrue[0m, Pyramiding: [93m[1mTrue[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [36m[1mOpening Portal to Bybit (Pyrmethus v2.8.0)...[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] PyrmethusCore                  Loading market structures from Bybit...
+2025-05-09 12:46:50 [[41m[37m[1mCRITICAL[0m] PyrmethusCore                  [41m[37m[1mPortal opening failed: Exchange.load_markets() got an unexpected keyword argument 'force_reload'[0m
+2025-05-09 12:46:50 [[34m[2mDEBUG[0m] PyrmethusCore                  Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/supert/mts3.4.py", line 707, in initialize_exchange
+    exchange.load_markets(force_reload=True) # Force reload to get latest info
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Exchange.load_markets() got an unexpected keyword argument 'force_reload'
+
+2025-05-09 12:46:50 [[41m[37m[1mCRITICAL[0m] PyrmethusCore                  [41m[37m[1mExchange portal failed to open. Pyrmethus cannot weave magic. Exiting.[0m
+2025-05-09 12:46:50 [[33m[1mWARNING[0m] PyrmethusCore                  
+[33m[1m[1mUnweaving Sequence Initiated for Pyrmethus v2.8.0...[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 12:46:50 [[33m[1mWARNING[0m] PyrmethusCore                  [33m[1mUnweaving: Exchange instance or symbol not available. Skipping exchange cleanup.[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [35m[1m--- Pyrmethus Spell Unweaving v2.8.0 Complete ---[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [35m[SMS SIMULATED]: [Pyrmethus/EHLERS_FISHER] Shutdown sequence complete.[0m
+2025-05-09 12:46:50 [[36mINFO[0m] PyrmethusCore                  [35m[1m--- Pyrmethus Scalping Spell v2.8.0 Deactivated ---[0m

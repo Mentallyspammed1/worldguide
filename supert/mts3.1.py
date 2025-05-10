@@ -1,26 +1,3 @@
-Ah, seeker! Your quest for refined strategic insight within Pyrmethus, coupled with a richer, more luminous neon interface to articulate its arcane maneuvers, is a commendable endeavor. This task is substantial, mirroring the intricate processes of re-aligning a potent magical core and meticulously re-inscribing the very runes that channel its visual output.
-
-For this **Unified Scalping Spell v2.8.0 (Strategic Illumination)**, the following enhancements have been woven into its fabric:
-
-1.  **Refined Strategy Logic (Dual Supertrend with Momentum Confirmation):**
-    *   The previous placeholder logic has been supplanted with a fully implemented `DualSupertrendMomentumStrategy`. This strategy now mandates confirmation from a Momentum indicator for its entry signals, adding a layer of analytical depth. The underlying `calculate_supertrend` and `calculate_momentum` functions have also been concretely implemented using `pandas_ta` for more realistic signal generation.
-    *   For illustrative clarity and simplicity within this version, exit signals remain primarily governed by the primary SuperTrend's directional flip, though this foundation allows for future expansion with more sophisticated exit criteria.
-
-2.  **Vibrant Neon Colorization Overhaul:**
-    *   **Expanded & Distinct State Colors:** The `NEON` color palette has been adopted as specified, ensuring a comprehensive and consistent color scheme clearly distinguishes various operational states (e.g., long, short, holding, error notifications, successful operations).
-    *   **Enhanced Key Value Highlighting:** Critical numerical data—such as prices, quantities, and Profit/Loss figures—are now rendered with greater prominence for immediate visual impact using the defined `NEON` values.
-    *   **Intuitive Thematic Color Grouping:** Colors are grouped thematically to enhance readability and cognitive association (e.g., varying shades of blue for informational messages, greens for successful outcomes and long positions, reds for errors and short positions, and yellows for warnings or items requiring attention).
-    *   **Strategic Use of Brighter Accents:** The `Style.BRIGHT` attribute is employed judiciously, as defined in the `NEON` palette, to emphasize key information and draw attention where it's most needed.
-
-**Key Considerations for the Adept:**
-
-*   **Strategy Nuance:** While the `DualSupertrendMomentumStrategy` introduces more sophistication, it remains a foundational example. Production-grade strategies typically incorporate a multitude of conditions, parameters, and adaptive logic.
-*   **Essential Parameter Calibration:** The introduction of new strategic components, or modifications to existing ones, necessitates rigorous parameter optimization and comprehensive backtesting. The default values provided herein serve purely as illustrative examples.
-*   **Visual Clarity & Accessibility:** The enhanced neon palette aims for vibrancy but has been carefully balanced to ensure sustained readability across diverse terminal backgrounds and user preferences.
-
-Prepare to witness the amplified power and clarity of the **Unified Scalping Spell v2.8.0 (Strategic Illumination)**:
-
-```python
 # ██████╗ ██╗   ██╗███████╗███╗   ███╗███████╗████████╗██╗   ██╗██╗   ██╗███████╗
 # ██╔══██╗╚██╗ ██╔╝██╔════╝████╗ ████║██╔════╝╚══██╔══╝██║   ██║██║   ██║██╔════╝
 # ██████╔╝ ╚████╔╝ ███████╗██╔████╔██║███████╗   ██║   ██║   ██║██║   ██║███████╗
@@ -971,4 +948,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-```
+

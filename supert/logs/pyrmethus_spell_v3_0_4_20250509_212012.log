@@ -1,0 +1,5 @@
+{"timestamp": "2025-05-09T21:20:12.fZ", "level": "INFO", "name": "Pyrmethus.PreConfig", "message": "Secrets whispered from .env scroll: \u001b[93m\u001b[1m/data/data/com.termux/files/home/worldguide/supert/.env\u001b[0m"}
+{"timestamp": "2025-05-09T21:20:12.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Summoning Configuration Runes v3.0.4"}
+{"timestamp": "2025-05-09T21:20:12.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "\u001b[36mPAPER TRADING MODE ENABLED. Using Testnet.\u001b[0m"}
+{"timestamp": "2025-05-09T21:20:12.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Configuration Runes v3.0.4 Summoned and Verified."}
+{"timestamp": "2025-05-09T21:20:12.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Chosen path: DUAL_SUPERTREND_MOMENTUM"}

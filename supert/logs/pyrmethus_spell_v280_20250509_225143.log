@@ -1,0 +1,800 @@
+2025-05-09 22:51:43 [[36mINFO[0m] __main__                       [35m[1m--- Summoning Configuration Runes v2.8.0 ---[0m
+2025-05-09 22:51:43 [[36mINFO[0m] __main__                       [35m[1m--- Configuration Runes v2.8.0 Summoned and Verified ---[0m
+2025-05-09 22:51:43 [[36mINFO[0m] [35mStrategy.DualSupertrendMomentumStrategy[0m [35mDual Supertrend with Momentum Confirmation strategy initialized.[0m
+2025-05-09 22:51:43 [[36mINFO[0m] PyrmethusCore                  [35m[1m--- Pyrmethus Scalping Spell v2.8.0 (Strategic Illumination) Initializing (2025-05-09 22:51:43 CDT) ---[0m
+2025-05-09 22:51:43 [[36mINFO[0m] PyrmethusCore                  [36m[1m--- Active Strategy Path: [93m[1mDUAL_SUPERTREND_MOMENTUM[0m ---
+2025-05-09 22:51:43 [[36mINFO[0m] PyrmethusCore                  Symbol: [93m[1mTRUMP/USDT:USDT[0m, Interval: [93m[1m1m[0m, Leverage: [93m[1m25x[0m
+2025-05-09 22:51:43 [[36mINFO[0m] PyrmethusCore                  Risk/Trade (Base): [93m[1m0.50%[0m, Max Order Cap (USDT): [93m[1m100.0[0m
+2025-05-09 22:51:43 [[36mINFO[0m] PyrmethusCore                  Dynamic Risk: [93m[1mFalse[0m, Dynamic SL: [93m[1mTrue[0m, Pyramiding: [93m[1mTrue[0m
+2025-05-09 22:51:43 [[36mINFO[0m] PyrmethusCore                  [36m[1mOpening Portal to Bybit (Pyrmethus v2.8.0)...[0m
+2025-05-09 22:51:55 [[32m[1mSUCCESS[0m] PyrmethusCore                  [32m[1mPortal to Bybit Opened & Authenticated (V5 API).[0m
+2025-05-09 22:51:55 [[33m[1mWARNING[0m] PyrmethusCore                  [41m[37m[1m!!! LIVE SCALPING MODE ACTIVE - EXTREME CAUTION !!![0m
+2025-05-09 22:51:55 [[36mINFO[0m] PyrmethusCore                  [32m[1mSpell focused on symbol: [93m[1mTRUMP/USDT:USDT[32m[1m (Type: swap)[0m
+2025-05-09 22:51:55 [[36mINFO[0m] PyrmethusCore                  [36mSetting leverage to [93m[1m25x[36m for [93m[1mTRUMP/USDT:USDT[36m...[0m
+2025-05-09 22:51:56 [[36mINFO[0m] PyrmethusCore                  [36mLeverage for [93m[1mTRUMP/USDT:USDT[36m already [93m[1m25x[36m or no change needed.[0m
+2025-05-09 22:51:56 [[36mINFO[0m] TradeMetrics                   [36mTradeMetrics: Re-inked [93m[1m0[36m trades from Phoenix scroll.[0m
+2025-05-09 22:51:56 [[32m[1mSUCCESS[0m] PyrmethusCore                  [32m[1mPhoenix Feather: Memories from [93m[1m2025-05-10T03:40:21.613298+00:00[32m[1m reawakened! Active parts: 0, Trades: 0.[0m
+2025-05-09 22:51:56 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: Previous session state successfully restored.[0m
+2025-05-09 22:51:56 [[36mINFO[0m] TradeMetrics                   [36mInitial Equity for session set: [93m[1m6.85 USDT[0m
+2025-05-09 22:51:56 [[36mINFO[0m] PyrmethusCore                  [35m[SMS SIMULATED]: [TRUMP/DUAL_SUPERTREND_MOMENTUM] Pyrmethus v2.8.0 Initialized & Weaving. Symbol: TRUMP/USDT:USDT.[0m
+2025-05-09 22:51:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:51:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:51:00 UTC ==========[0m
+2025-05-09 22:51:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:51:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:51:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:52:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:51:00 UTC ==========[0m
+2025-05-09 22:52:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:52:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:52:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:52:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:51:00 UTC ==========[0m
+2025-05-09 22:52:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:52:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:52:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:52:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:51:00 UTC ==========[0m
+2025-05-09 22:52:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:52:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:52:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:52:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:51:00 UTC ==========[0m
+2025-05-09 22:52:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:52:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:52:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:52:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:51:00 UTC ==========[0m
+2025-05-09 22:52:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:52:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:52:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:52:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:52:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:52:00 UTC ==========[0m
+2025-05-09 22:52:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:52:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:52:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:53:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:52:00 UTC ==========[0m
+2025-05-09 22:53:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:53:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:53:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:53:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:52:00 UTC ==========[0m
+2025-05-09 22:53:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:53:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:53:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:53:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:52:00 UTC ==========[0m
+2025-05-09 22:53:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:53:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:53:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:53:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:52:00 UTC ==========[0m
+2025-05-09 22:53:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:53:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:53:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:53:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:52:00 UTC ==========[0m
+2025-05-09 22:53:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:53:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:53:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:53:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:53:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:53:00 UTC ==========[0m
+2025-05-09 22:53:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:53:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:53:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:54:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:53:00 UTC ==========[0m
+2025-05-09 22:54:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:54:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:54:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:54:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:53:00 UTC ==========[0m
+2025-05-09 22:54:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:54:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:54:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:54:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:53:00 UTC ==========[0m
+2025-05-09 22:54:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:54:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:54:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:54:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:53:00 UTC ==========[0m
+2025-05-09 22:54:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:54:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:54:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:54:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:53:00 UTC ==========[0m
+2025-05-09 22:54:48 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:54:48 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:54:48 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:54:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:54:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:54:00 UTC ==========[0m
+2025-05-09 22:54:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:54:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:54:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:55:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:54:00 UTC ==========[0m
+2025-05-09 22:55:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:55:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:55:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:55:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:54:00 UTC ==========[0m
+2025-05-09 22:55:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:55:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:55:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:55:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:54:00 UTC ==========[0m
+2025-05-09 22:55:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:55:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:55:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:55:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:54:00 UTC ==========[0m
+2025-05-09 22:55:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:55:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:55:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:55:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:54:00 UTC ==========[0m
+2025-05-09 22:55:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:55:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:55:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:55:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:55:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:55:00 UTC ==========[0m
+2025-05-09 22:55:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:55:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:55:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:56:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:55:00 UTC ==========[0m
+2025-05-09 22:56:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:56:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:56:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:56:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:55:00 UTC ==========[0m
+2025-05-09 22:56:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:56:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:56:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:56:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:55:00 UTC ==========[0m
+2025-05-09 22:56:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:56:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:56:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:56:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:55:00 UTC ==========[0m
+2025-05-09 22:56:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:56:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:56:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:56:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:55:00 UTC ==========[0m
+2025-05-09 22:56:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:56:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:56:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:56:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:56:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:56:00 UTC ==========[0m
+2025-05-09 22:56:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:56:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:56:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:57:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:56:00 UTC ==========[0m
+2025-05-09 22:57:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:57:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:57:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:57:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:56:00 UTC ==========[0m
+2025-05-09 22:57:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:57:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:57:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:57:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:56:00 UTC ==========[0m
+2025-05-09 22:57:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:57:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:57:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:57:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:56:00 UTC ==========[0m
+2025-05-09 22:57:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:57:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:57:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:57:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:56:00 UTC ==========[0m
+2025-05-09 22:57:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:57:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:57:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:57:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:57:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:57:00 UTC ==========[0m
+2025-05-09 22:57:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:57:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:57:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:58:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:57:00 UTC ==========[0m
+2025-05-09 22:58:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:58:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:58:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:58:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:57:00 UTC ==========[0m
+2025-05-09 22:58:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:58:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:58:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:58:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:57:00 UTC ==========[0m
+2025-05-09 22:58:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:58:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:58:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:58:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:57:00 UTC ==========[0m
+2025-05-09 22:58:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:58:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:58:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:58:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:57:00 UTC ==========[0m
+2025-05-09 22:58:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:58:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:58:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:58:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:58:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:58:00 UTC ==========[0m
+2025-05-09 22:58:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:58:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:58:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:59:10 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:58:00 UTC ==========[0m
+2025-05-09 22:59:14 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:59:14 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:59:14 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:59:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:58:00 UTC ==========[0m
+2025-05-09 22:59:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:59:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:59:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:59:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:58:00 UTC ==========[0m
+2025-05-09 22:59:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:59:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:59:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:59:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:58:00 UTC ==========[0m
+2025-05-09 22:59:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:59:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:59:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:59:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:58:00 UTC ==========[0m
+2025-05-09 22:59:48 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:59:48 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:59:48 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 22:59:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 22:59:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:59:00 UTC ==========[0m
+2025-05-09 22:59:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 22:59:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 22:59:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:00:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:59:00 UTC ==========[0m
+2025-05-09 23:00:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:00:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:00:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:00:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:59:00 UTC ==========[0m
+2025-05-09 23:00:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:00:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:00:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:00:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:59:00 UTC ==========[0m
+2025-05-09 23:00:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:00:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:00:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:00:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:59:00 UTC ==========[0m
+2025-05-09 23:00:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:00:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:00:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:00:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 03:59:00 UTC ==========[0m
+2025-05-09 23:00:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:00:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:00:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:00:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:00:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:00:00 UTC ==========[0m
+2025-05-09 23:00:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:00:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:00:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:01:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:00:00 UTC ==========[0m
+2025-05-09 23:01:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:01:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:01:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:01:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:00:00 UTC ==========[0m
+2025-05-09 23:01:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:01:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:01:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:01:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:00:00 UTC ==========[0m
+2025-05-09 23:01:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:01:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:01:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:01:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:00:00 UTC ==========[0m
+2025-05-09 23:01:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:01:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:01:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:01:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:00:00 UTC ==========[0m
+2025-05-09 23:01:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:01:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:01:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:01:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:01:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:01:00 UTC ==========[0m
+2025-05-09 23:01:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:01:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:01:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:02:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:01:00 UTC ==========[0m
+2025-05-09 23:02:08 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:02:08 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:02:08 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:02:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:01:00 UTC ==========[0m
+2025-05-09 23:02:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:02:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:02:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:02:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:01:00 UTC ==========[0m
+2025-05-09 23:02:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:02:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:02:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:02:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:01:00 UTC ==========[0m
+2025-05-09 23:02:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:02:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:02:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:02:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:01:00 UTC ==========[0m
+2025-05-09 23:02:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:02:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:02:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:02:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:02:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:02:00 UTC ==========[0m
+2025-05-09 23:02:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:02:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:02:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:03:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:02:00 UTC ==========[0m
+2025-05-09 23:03:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:03:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:03:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:03:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:02:00 UTC ==========[0m
+2025-05-09 23:03:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:03:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:03:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:03:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:02:00 UTC ==========[0m
+2025-05-09 23:03:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:03:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:03:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:03:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:02:00 UTC ==========[0m
+2025-05-09 23:03:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:03:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:03:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:03:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:02:00 UTC ==========[0m
+2025-05-09 23:03:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:03:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:03:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:03:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:03:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:03:00 UTC ==========[0m
+2025-05-09 23:03:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:03:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:03:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:04:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:03:00 UTC ==========[0m
+2025-05-09 23:04:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:04:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:04:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:04:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:03:00 UTC ==========[0m
+2025-05-09 23:04:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:04:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:04:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:04:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:03:00 UTC ==========[0m
+2025-05-09 23:04:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:04:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:04:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:04:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:03:00 UTC ==========[0m
+2025-05-09 23:04:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:04:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:04:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:04:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:03:00 UTC ==========[0m
+2025-05-09 23:04:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:04:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:04:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:04:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:04:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:04:00 UTC ==========[0m
+2025-05-09 23:04:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:04:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:04:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:05:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:04:00 UTC ==========[0m
+2025-05-09 23:05:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:05:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:05:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:05:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:04:00 UTC ==========[0m
+2025-05-09 23:05:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:05:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:05:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:05:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:04:00 UTC ==========[0m
+2025-05-09 23:05:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:05:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:05:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:05:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:04:00 UTC ==========[0m
+2025-05-09 23:05:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:05:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:05:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:05:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:04:00 UTC ==========[0m
+2025-05-09 23:05:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:05:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:05:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:05:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:05:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:05:00 UTC ==========[0m
+2025-05-09 23:05:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:05:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:05:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:06:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:05:00 UTC ==========[0m
+2025-05-09 23:06:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:06:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:06:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:06:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:05:00 UTC ==========[0m
+2025-05-09 23:06:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:06:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:06:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:06:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:05:00 UTC ==========[0m
+2025-05-09 23:06:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:06:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:06:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:06:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:05:00 UTC ==========[0m
+2025-05-09 23:06:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:06:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:06:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:06:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:05:00 UTC ==========[0m
+2025-05-09 23:06:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:06:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:06:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:06:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:06:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:06:00 UTC ==========[0m
+2025-05-09 23:06:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:06:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:06:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:07:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:06:00 UTC ==========[0m
+2025-05-09 23:07:08 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:07:08 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:07:08 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:07:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:06:00 UTC ==========[0m
+2025-05-09 23:07:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:07:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:07:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:07:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:06:00 UTC ==========[0m
+2025-05-09 23:07:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:07:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:07:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:07:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:06:00 UTC ==========[0m
+2025-05-09 23:07:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:07:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:07:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:07:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:06:00 UTC ==========[0m
+2025-05-09 23:07:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:07:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:07:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:07:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:07:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:07:00 UTC ==========[0m
+2025-05-09 23:07:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:07:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:07:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:08:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:07:00 UTC ==========[0m
+2025-05-09 23:08:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:08:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:08:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:08:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:07:00 UTC ==========[0m
+2025-05-09 23:08:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:08:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:08:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:08:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:07:00 UTC ==========[0m
+2025-05-09 23:08:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:08:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:08:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:08:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:07:00 UTC ==========[0m
+2025-05-09 23:08:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:08:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:08:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:08:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:07:00 UTC ==========[0m
+2025-05-09 23:08:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:08:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:08:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:08:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:08:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:08:00 UTC ==========[0m
+2025-05-09 23:08:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:08:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:08:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:09:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:08:00 UTC ==========[0m
+2025-05-09 23:09:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:09:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:09:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:09:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:08:00 UTC ==========[0m
+2025-05-09 23:09:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:09:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:09:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:09:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:08:00 UTC ==========[0m
+2025-05-09 23:09:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:09:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:09:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:09:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:08:00 UTC ==========[0m
+2025-05-09 23:09:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:09:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:09:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:09:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:08:00 UTC ==========[0m
+2025-05-09 23:09:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:09:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:09:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:09:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:09:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:09:00 UTC ==========[0m
+2025-05-09 23:09:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:09:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:09:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:10:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:09:00 UTC ==========[0m
+2025-05-09 23:10:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:10:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:10:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:10:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:09:00 UTC ==========[0m
+2025-05-09 23:10:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:10:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:10:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:10:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:09:00 UTC ==========[0m
+2025-05-09 23:10:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:10:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:10:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:10:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:09:00 UTC ==========[0m
+2025-05-09 23:10:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:10:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:10:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:10:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:09:00 UTC ==========[0m
+2025-05-09 23:10:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:10:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:10:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:10:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:10:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:10:00 UTC ==========[0m
+2025-05-09 23:10:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:10:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:10:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:11:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:10:00 UTC ==========[0m
+2025-05-09 23:11:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:11:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:11:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:11:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:10:00 UTC ==========[0m
+2025-05-09 23:11:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:11:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:11:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:11:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:10:00 UTC ==========[0m
+2025-05-09 23:11:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:11:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:11:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:11:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:10:00 UTC ==========[0m
+2025-05-09 23:11:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:11:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:11:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:11:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:10:00 UTC ==========[0m
+2025-05-09 23:11:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:11:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:11:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:11:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:11:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:11:00 UTC ==========[0m
+2025-05-09 23:11:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:11:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:11:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:12:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:11:00 UTC ==========[0m
+2025-05-09 23:12:08 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:12:08 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:12:08 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:12:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:11:00 UTC ==========[0m
+2025-05-09 23:12:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:12:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:12:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:12:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:11:00 UTC ==========[0m
+2025-05-09 23:12:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:12:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:12:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:12:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:11:00 UTC ==========[0m
+2025-05-09 23:12:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:12:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:12:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:12:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:11:00 UTC ==========[0m
+2025-05-09 23:12:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:12:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:12:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:12:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:12:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:12:00 UTC ==========[0m
+2025-05-09 23:12:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:12:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:12:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:13:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:12:00 UTC ==========[0m
+2025-05-09 23:13:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:13:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:13:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:13:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:12:00 UTC ==========[0m
+2025-05-09 23:13:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:13:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:13:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:13:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:12:00 UTC ==========[0m
+2025-05-09 23:13:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:13:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:13:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:13:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:12:00 UTC ==========[0m
+2025-05-09 23:13:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:13:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:13:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:13:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:12:00 UTC ==========[0m
+2025-05-09 23:13:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:13:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:13:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:13:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:13:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:13:00 UTC ==========[0m
+2025-05-09 23:13:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:13:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:13:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:14:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:13:00 UTC ==========[0m
+2025-05-09 23:14:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:14:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:14:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:14:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:13:00 UTC ==========[0m
+2025-05-09 23:14:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:14:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:14:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:14:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:13:00 UTC ==========[0m
+2025-05-09 23:14:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:14:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:14:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:14:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:13:00 UTC ==========[0m
+2025-05-09 23:14:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:14:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:14:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:14:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:13:00 UTC ==========[0m
+2025-05-09 23:14:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:14:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:14:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:14:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:14:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:14:00 UTC ==========[0m
+2025-05-09 23:14:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:14:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:14:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:15:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:14:00 UTC ==========[0m
+2025-05-09 23:15:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:15:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:15:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:15:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:14:00 UTC ==========[0m
+2025-05-09 23:15:17 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:15:17 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:15:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:15:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:14:00 UTC ==========[0m
+2025-05-09 23:15:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:15:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:15:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:15:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:14:00 UTC ==========[0m
+2025-05-09 23:15:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:15:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:15:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:15:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:14:00 UTC ==========[0m
+2025-05-09 23:15:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:15:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:15:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:15:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:15:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:15:00 UTC ==========[0m
+2025-05-09 23:15:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:15:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:15:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:16:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:15:00 UTC ==========[0m
+2025-05-09 23:16:07 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:16:07 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:16:07 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:16:17 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:15:00 UTC ==========[0m
+2025-05-09 23:16:18 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:16:18 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:16:18 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:16:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:15:00 UTC ==========[0m
+2025-05-09 23:16:27 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:16:27 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:16:27 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:16:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:15:00 UTC ==========[0m
+2025-05-09 23:16:37 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:16:37 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:16:37 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:16:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:15:00 UTC ==========[0m
+2025-05-09 23:16:47 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:16:47 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:16:47 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+
+2025-05-09 23:16:57 [[36mINFO[0m] PyrmethusCore                  [36mFetching market data for [93m[1mTRUMP/USDT:USDT[36m (1m, limit=90)...[0m
+2025-05-09 23:16:57 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle Start v2.8.0 (DUAL_SUPERTREND_MOMENTUM) for 'TRUMP/USDT:USDT' | Candle: 2025-05-10 04:16:00 UTC ==========[0m
+2025-05-09 23:16:58 [[36mINFO[0m] PyrmethusCore                  [36mHolding Cash ([34mFlat[36m). No entry signals or conditions met this cycle.[0m
+2025-05-09 23:16:58 [[36mINFO[0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed to scroll.[0m
+2025-05-09 23:16:58 [[36mINFO[0m] PyrmethusCore                  [36m[1m========== Pyrmethus Cycle End v2.8.0 for 'TRUMP/USDT:USDT' ==========[0m
+

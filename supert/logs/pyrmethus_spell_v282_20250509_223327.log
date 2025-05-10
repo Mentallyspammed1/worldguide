@@ -1,0 +1,9 @@
+2025-05-09 22:33:27 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Summoning Configuration Runes v2.8.2 ---[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] ConfigModule                   [36m[2m# Pyrmethus attunes to the environment's whispers...[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Configuration Runes v2.8.2 Summoned and Verified ---[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] ConfigModule                   [36m[2m# The chosen path: [35mDUAL_SUPERTREND_MOMENTUM[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] Strategy.DualSupertrendMomentumStrategy [35mStrategy Form 'DualSupertrendMomentumStrategy' materializing...[0m
+2025-05-09 22:33:27 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mStrategy '[35mDUAL_SUPERTREND_MOMENTUM[32m[1m' invoked.[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics Ledger opened, ready to chronicle deeds.[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Pyrmethus prepares to breach the veil to the exchange realm...[0m
+2025-05-09 22:33:27 [[36mINFO    [0m] PyrmethusCore                  Attempting to connect to exchange realm: bybit (Version: 4.4.72)

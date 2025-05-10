@@ -1,0 +1,41 @@
+2025-05-09 22:34:11 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Summoning Configuration Runes v2.8.2 ---[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] ConfigModule                   [36m[2m# Pyrmethus attunes to the environment's whispers...[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Configuration Runes v2.8.2 Summoned and Verified ---[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] ConfigModule                   [36m[2m# The chosen path: [35mDUAL_SUPERTREND_MOMENTUM[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] Strategy.DualSupertrendMomentumStrategy [35mStrategy Form 'DualSupertrendMomentumStrategy' materializing...[0m
+2025-05-09 22:34:11 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mStrategy '[35mDUAL_SUPERTREND_MOMENTUM[32m[1m' invoked.[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics Ledger opened, ready to chronicle deeds.[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Pyrmethus prepares to breach veil to exchange realm...[0m
+2025-05-09 22:34:11 [[36mINFO    [0m] PyrmethusCore                  Connecting to: bybit (CCXT: 4.4.72)
+2025-05-09 22:34:19 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mMarket runes for TRUMP/USDT:USDT: Price Step 0.001 (~3 dec places), Amount Step 0.1 (~1 dec places)[0m
+2025-05-09 22:34:19 [[36mINFO    [0m] PyrmethusCore                  Setting leverage to 25x for TRUMP/USDT:USDT (Category: linear)...
+2025-05-09 22:34:19 [[33m[1mWARNING [0m] PyrmethusCore                  [33m[1mCould not set leverage for TRUMP/USDT:USDT (may be pre-set or issue): bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746848060475}[0m
+2025-05-09 22:34:21 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Leverage Warn' sent successfully.[0m
+2025-05-09 22:34:21 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mConnected to bybit for TRUMP/USDT:USDT.[0m
+2025-05-09 22:34:22 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Online' sent successfully.[0m
+2025-05-09 22:34:22 [[36mINFO    [0m] PyrmethusCore                  [35m[1m=== Pyrmethus Spell v2.8.2 Awakening on bybit ===[0m
+2025-05-09 22:34:22 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Listening for TRUMP/USDT:USDT whispers on 1m...[0m
+2025-05-09 22:34:22 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Phoenix Feather seeks past memories from '/data/data/com.termux/files/home/worldguide/supert/pyrmethus_phoenix_state_v282.json'...[0m
+2025-05-09 22:34:22 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics: Re-inked [93m[1m0[36m trade sagas from the Phoenix scroll.[0m
+2025-05-09 22:34:22 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mPhoenix Feather: Memories reawakened! Active Parts: 0, Chronicled Trades: 0[0m
+2025-05-09 22:34:22 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mReawakened from Phoenix scroll. Active parts: 0.[0m
+2025-05-09 22:34:24 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:34:24 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:34:35 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:34:47 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:34:58 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:35:09 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:35:20 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:35:31 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:35:43 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:35:54 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:36:06 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:36:17 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:36:28 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:36:39 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:36:50 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:37:01 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:37:12 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury (Total Equity): [93m[1m6.85[0m
+2025-05-09 22:37:21 [[33m[1mWARNING [0m] PyrmethusCore                  
+[33m[1mSorcerer's intervention! Pyrmethus prepares for slumber...[0m
+2025-05-09 22:37:23 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Shutdown' sent successfully.[0m

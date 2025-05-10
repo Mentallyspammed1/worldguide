@@ -1,0 +1,1479 @@
+Hark, seeker of ever-sharper arcane tools! Pyrmethus has scryed the aether for further enchantments to refine your scalping spell. Behold, 25 snippets of distilled wisdom, ready to be woven into the fabric of your creation, enhancing its finesse in order, position, and strategic management.
+
+**Order Management Enchantments:**
+
+1.  **Adaptive Limit Order Offset (Percentage of ATR):**
+    *   Modify `place_risked_order` or add a helper.
+    *   Requires `latest_atr` to be passed or accessible.
+    *   `CONFIG.limit_order_offset_atr_percentage` (e.g., `Decimal("0.1")` for 10% of ATR).
+
+    ```python
+    # In Config class:
+    # self.limit_order_offset_atr_percentage: Decimal = self._get_env("LIMIT_ORDER_OFFSET_ATR_PERCENTAGE", "0.1", cast_type=Decimal)
+
+    # Helper function or inside place_risked_order:
+    def calculate_adaptive_limit_price(config: Config, entry_price_target: Decimal, latest_atr: Decimal, side: str) -> Decimal:
+        offset = latest_atr * config.limit_order_offset_atr_percentage
+        if side == config.pos_long:
+            return entry_price_target - offset # Buy lower for limit
+        else: # Short
+            return entry_price_target + offset # Sell higher for limit
+    # ...
+    # if config.entry_order_type == OrderEntryType.LIMIT:
+    #     limit_price = calculate_adaptive_limit_price(config, entry_price_target, latest_atr, side)
+    #     order = exchange.create_order(config.symbol, 'limit', side, float(quantity), float(limit_price), params)
+    ```
+
+2.  **Order Fill Timeout with Chase (Market Order Fallback):**
+    *   Enhance `place_risked_order` for limit orders.
+    *   `CONFIG.limit_order_chase_timeout_seconds` (e.g., 10s).
+
+    ```python
+    # In place_risked_order, after placing a limit order:
+    # ...
+    # if order_type == 'Limit':
+    #     time_placed = time.time()
+    #     while time.time() - time_placed < config.limit_order_fill_timeout_seconds:
+    #         time.sleep(1) # Check every second
+    #         polled_order = exchange.fetch_order(order['id'], config.symbol)
+    #         if polled_order.get('status') == 'closed': # Filled
+    #             logger.success(f"{NEON['SUCCESS']}Limit order {order['id']} filled within timeout.{NEON['RESET']}")
+    #             # ... (proceed with filled_order logic) ...
+    #             break 
+    #     else: # Loop finished without break (timeout)
+    #         logger.warning(f"{NEON['WARNING']}Limit order {order['id']} not filled within {config.limit_order_fill_timeout_seconds}s. Chasing with Market order.{NEON['RESET']}")
+    #         try:
+    #             exchange.cancel_order(order['id'], config.symbol)
+    #             # Fallback to market order (re-calculate SL if needed, or use original)
+    #             # This part needs careful quantity and SL re-evaluation if market price moved significantly
+    #             market_order_params = { 'stopLoss': float(sl_price), 'slTriggerBy': 'MarkPrice', 'positionIdx': 0 }
+    #             order = exchange.create_order(config.symbol, 'market', side, float(quantity), None, market_order_params)
+    #             # ... (proceed with market order fill logic) ...
+    #         except Exception as e_chase:
+    #             logger.error(f"{NEON['ERROR']}Error chasing limit order with market: {e_chase}{NEON['RESET']}")
+    #             return None 
+    ```
+
+3.  **Order Parameter Customization (e.g., `postOnly` for Maker Orders):**
+    *   Modify `place_risked_order` `params`.
+    *   `CONFIG.use_post_only_orders` (bool).
+
+    ```python
+    # In Config class:
+    # self.use_post_only_orders: bool = self._get_env("USE_POST_ONLY_ORDERS", "false", cast_type=bool)
+
+    # In place_risked_order params:
+    # params = { ... }
+    # if config.use_post_only_orders and order_type == 'Limit':
+    #    params['postOnly'] = True 
+    #    params['timeInForce'] = 'PostOnly' # Some exchanges require this with postOnly
+    ```
+
+4.  **Immediate-Or-Cancel (IOC) for Market Orders if Exchange Supports:**
+    *   Modify `place_risked_order` `params` for market orders.
+    *   Check CCXT documentation for your exchange.
+
+    ```python
+    # In place_risked_order params for market orders:
+    # if order_type == 'Market':
+    #    params['timeInForce'] = 'IOC' # If supported
+    ```
+
+5.  **Fetch Open Orders on Startup and Reconcile:**
+    *   In `main_loop` after `load_persistent_state`.
+
+    ```python
+    # In main_loop, after load_persistent_state():
+    # try:
+    #     open_orders = exchange.fetch_open_orders(config.symbol)
+    #     if open_orders:
+    #         logger.info(f"{NEON['INFO']}Found {len(open_orders)} open orders on exchange for {config.symbol} at startup.{NEON['RESET']}")
+    #         for order in open_orders:
+    #             # Logic to reconcile with _active_trade_parts or cancel unexpected orders
+    #             # Example: if order['id'] not in [p.get('entry_order_id') for p in _active_trade_parts]:
+    #             #    logger.warning(f"Cancelling unexpected open order {order['id']}")
+    #             #    exchange.cancel_order(order['id'], config.symbol)
+    # except Exception as e_foo:
+    #     logger.error(f"{NEON['ERROR']}Error fetching/reconciling open orders: {e_foo}{NEON['RESET']}")
+    ```
+
+**Position Management Enchantments:**
+
+6.  **Dynamic Trailing Stop Loss (ATR-Based, Client-Side):**
+    *   New function `update_dynamic_tsl`. Called in `main_loop`.
+    *   `CONFIG.enable_atr_tsl` (bool), `CONFIG.atr_tsl_activation_atr_profit` (e.g., 1.5 ATRs in profit), `CONFIG.atr_tsl_trail_atr_distance` (e.g., 1 ATR distance).
+
+    ```python
+    # In Config:
+    # self.enable_atr_tsl: bool = self._get_env("ENABLE_ATR_TSL", "false", cast_type=bool)
+    # self.atr_tsl_activation_atr_profit: Decimal = self._get_env("ATR_TSL_ACTIVATION_ATR_PROFIT", "1.5", cast_type=Decimal)
+    # self.atr_tsl_trail_atr_distance: Decimal = self._get_env("ATR_TSL_TRAIL_ATR_DISTANCE", "1.0", cast_type=Decimal)
+
+    # New function:
+    # def update_client_side_atr_tsl(exchange: ccxt.Exchange, config: Config, part: Dict, latest_close: Decimal, latest_atr: Decimal):
+    #     if not config.enable_atr_tsl or 'trailing_sl_active' not in part: part['trailing_sl_active'] = False
+    #     if not latest_atr or latest_atr <=0: return # Need valid ATR
+        
+    #     current_profit_atr = Decimal(0)
+    #     if part['side'] == config.pos_long:
+    #         current_profit_atr = (latest_close - part['entry_price']) / latest_atr if latest_atr > 0 else Decimal(0)
+    #     else: # Short
+    #         current_profit_atr = (part['entry_price'] - latest_close) / latest_atr if latest_atr > 0 else Decimal(0)
+
+    #     if not part['trailing_sl_active'] and current_profit_atr >= config.atr_tsl_activation_atr_profit:
+    #         part['trailing_sl_active'] = True
+    #         logger.info(f"{NEON['ACTION']}ATR TSL activated for part {part['part_id']}. Profit: {current_profit_atr:.2f} ATRs.{NEON['RESET']}")
+
+    #     if part['trailing_sl_active']:
+    #         new_sl_price = Decimal(0)
+    #         if part['side'] == config.pos_long:
+    #             potential_sl = latest_close - (latest_atr * config.atr_tsl_trail_atr_distance)
+    #             # Only trail up
+    #             if potential_sl > part['sl_price']: new_sl_price = potential_sl
+    #         else: # Short
+    #             potential_sl = latest_close + (latest_atr * config.atr_tsl_trail_atr_distance)
+    #             # Only trail down
+    #             if potential_sl < part['sl_price']: new_sl_price = potential_sl
+            
+    #         if new_sl_price != Decimal(0) and new_sl_price != part['sl_price']:
+    #             # This requires modifying the SL order on the exchange.
+    #             # Bybit V5 SL is part of position; use exchange.edit_order() or modify_position_tp_sl()
+    #             # For simplicity, this snippet just updates internal state. Real implementation needs exchange call.
+    #             logger.info(f"{NEON['ACTION']}Part {part['part_id']} ATR TSL updated. Old SL: {part['sl_price']}, New SL: {new_sl_price}{NEON['RESET']}")
+    #             part['sl_price'] = new_sl_price 
+    #             # exchange.modify_order(part['sl_order_id'], config.symbol, type='stop', side=..., amount=..., price=new_sl_price) # If SL is separate order
+    #             # Or for Bybit V5: exchange.set_trading_stop({'symbol': config.symbol, 'stopLoss': str(new_sl_price), ...})
+    #             save_persistent_state(force_heartbeat=True)
+    ```
+
+7.  **Break-Even Stop Loss:**
+    *   In `main_loop`, check profit against `CONFIG.breakeven_profit_atr_target`.
+    *   `CONFIG.enable_breakeven_sl` (bool), `CONFIG.breakeven_profit_atr_target` (e.g., 1.0 ATR).
+
+    ```python
+    # In Config:
+    # self.enable_breakeven_sl: bool = self._get_env("ENABLE_BREAKEVEN_SL", "true", cast_type=bool)
+    # self.breakeven_profit_atr_target: Decimal = self._get_env("BREAKEVEN_PROFIT_ATR_TARGET", "1.0", cast_type=Decimal)
+
+    # In main_loop, for each active part:
+    # if config.enable_breakeven_sl and not part.get('breakeven_set', False) and latest_atr > 0:
+    #     current_profit_atr = Decimal(0)
+    #     if part['side'] == config.pos_long: current_profit_atr = (latest_close - part['entry_price']) / latest_atr
+    #     else: current_profit_atr = (part['entry_price'] - latest_close) / latest_atr
+        
+    #     if current_profit_atr >= config.breakeven_profit_atr_target:
+    #         new_sl_price = part['entry_price'] # Move SL to entry
+    #         if (part['side'] == config.pos_long and new_sl_price > part['sl_price']) or \
+    #            (part['side'] == config.pos_short and new_sl_price < part['sl_price']):
+    #             logger.info(f"{NEON['ACTION']}Moving SL to breakeven for part {part['part_id']} at {new_sl_price}{NEON['RESET']}")
+    #             # Actual SL modification on exchange needed here (similar to TSL)
+    #             part['sl_price'] = new_sl_price
+    #             part['breakeven_set'] = True
+    #             save_persistent_state(force_heartbeat=True)
+    ```
+
+8.  **Partial Take Profit at ATR Multiple:**
+    *   New function `check_partial_tp`.
+    *   `CONFIG.enable_partial_tp` (bool), `CONFIG.partial_tp_atr_target` (e.g., 2.0 ATRs), `CONFIG.partial_tp_close_percentage` (e.g., 0.5 for 50%).
+
+    ```python
+    # In Config:
+    # self.enable_partial_tp: bool = self._get_env("ENABLE_PARTIAL_TP", "false", cast_type=bool)
+    # self.partial_tp_atr_target: Decimal = self._get_env("PARTIAL_TP_ATR_TARGET", "2.0", cast_type=Decimal)
+    # self.partial_tp_close_percentage: Decimal = self._get_env("PARTIAL_TP_CLOSE_PERCENTAGE", "0.5", cast_type=Decimal) # Close 50%
+
+    # In main_loop, for each active part:
+    # if config.enable_partial_tp and not part.get('partial_tp_taken', False) and latest_atr > 0:
+    #     current_profit_atr = Decimal(0)
+    #     if part['side'] == config.pos_long: current_profit_atr = (latest_close - part['entry_price']) / latest_atr
+    #     else: current_profit_atr = (part['entry_price'] - latest_close) / latest_atr
+
+    #     if current_profit_atr >= config.partial_tp_atr_target:
+    #         qty_to_close = part['qty'] * config.partial_tp_close_percentage
+    #         # Ensure qty_to_close respects market minimums and precision
+    #         # Simplified: create a new "sub-part" to close
+    #         sub_part_to_close = part.copy()
+    #         sub_part_to_close['qty'] = qty_to_close 
+    #         # Use a unique ID if your close_position_part relies on it for removal
+    #         # For simplicity, we assume close_position_part can handle this or is adapted
+                
+    #         logger.info(f"{NEON['ACTION']}Taking partial profit ({config.partial_tp_close_percentage*100}%) for part {part['part_id']}{NEON['RESET']}")
+    #         if close_position_part(exchange, config, sub_part_to_close, f"Partial TP at {config.partial_tp_atr_target} ATR"):
+    #             part['qty'] -= qty_to_close # Reduce original part quantity
+    #             if part['qty'] <= config.MARKET_INFO['limits']['amount']['min']: # If remaining qty is too small
+    #                 logger.info(f"Remaining qty for part {part['part_id']} too small, closing fully.")
+    #                 close_position_part(exchange, config, part, "Partial TP - Full Close (Remainder)")
+    #             else:
+    #                 part['partial_tp_taken'] = True # Mark that partial TP was taken for this part
+    #             save_persistent_state(force_heartbeat=True)
+    ```
+
+9.  **Maximum Trade Duration Exit:**
+    *   In `main_loop`, check `part['entry_time_ms']`.
+
+    ```python
+    # In main_loop, for each active part:
+    # if config.enable_time_based_stop:
+    #     trade_duration_seconds = (time.time() * 1000 - part['entry_time_ms']) / 1000
+    #     if trade_duration_seconds > config.max_trade_duration_seconds:
+    #         logger.info(f"{NEON['ACTION']}Part {part['part_id']} exceeded max duration ({trade_duration_seconds:.0f}s). Closing.{NEON['RESET']}")
+    #         close_position_part(exchange, config, part, "Max Trade Duration Reached")
+    #         # This will remove the part from _active_trade_parts
+    ```
+
+10. **Emergency Stop Button (e.g., via a file check):**
+    *   In `main_loop`, check for a file like `STOP_PYRMETHUS.txt`.
+    *   `CONFIG.emergency_stop_file_path`.
+
+    ```python
+    # In Config:
+    # self.emergency_stop_file_path: str = self._get_env("EMERGENCY_STOP_FILE_PATH", "/data/data/com.termux/files/home/STOP_PYRMETHUS.txt")
+
+    # In main_loop, at the beginning of the loop:
+    # if os.path.exists(config.emergency_stop_file_path):
+    #     logger.critical(f"{NEON['CRITICAL']}EMERGENCY STOP FILE DETECTED at {config.emergency_stop_file_path}! Halting all operations.{NEON['RESET']}")
+    #     config.send_notification_method("Pyrmethus Emergency Stop", "Stop file detected. Halting.")
+    #     close_all_symbol_positions(exchange, config, "Emergency Stop File")
+    #     try: os.remove(config.emergency_stop_file_path) # Remove file after stopping
+    #     except OSError: pass
+    #     break # Exit main loop
+    ```
+
+11. **Position Heartbeat (Log current PNL of open positions):**
+    *   In `main_loop`, periodically.
+
+    ```python
+    # In main_loop, e.g., every N cycles:
+    # if loop_counter % 10 == 0 and _active_trade_parts: # Example: every 10 cycles
+    #     for part in _active_trade_parts:
+    #         current_pnl = Decimal(0)
+    #         if part['side'] == config.pos_long: current_pnl = (latest_close - part['entry_price']) * part['qty']
+    #         else: current_pnl = (part['entry_price'] - latest_close) * part['qty']
+    #         pnl_color = NEON['PNL_POS'] if current_pnl > 0 else (NEON['PNL_NEG'] if current_pnl < 0 else NEON['PNL_ZERO'])
+    #         logger.info(f"{NEON['INFO']}Heartbeat Part {part['part_id']}: Side {part['side']}, Qty {part['qty']}, Entry {part['entry_price']:.{config.MARKET_INFO['precision']['price']}}, Cur PNL: {pnl_color}{current_pnl:.2f}{NEON['RESET']}")
+    ```
+
+12. **Consolidate Small Position Parts:**
+    *   If multiple small parts exist, consider merging them logically or averaging their entry for risk calcs. (Complex).
+    *   This is more for internal representation if pyramiding creates many tiny parts.
+
+    ```python
+    # Conceptual:
+    # def consolidate_trade_parts():
+    #    if len(_active_trade_parts) > config.max_allowed_separate_parts:
+    #        # Logic to average entry price, sum quantity, update SL for the consolidated part
+    #        # And then replace the individual parts with one consolidated part in _active_trade_parts
+    #        logger.info("Consolidating small trade parts...")
+    ```
+
+**Strategy Algorithm Enhancements:**
+
+13. **Volume Spike Confirmation for Entries:**
+    *   Modify `generate_signals` or add to entry condition in `main_loop`.
+    *   `CONFIG.enable_volume_confirmation` (bool), `CONFIG.volume_spike_multiplier` (e.g., 2.0 for 2x avg volume).
+    *   Requires `df.ta.sma(close=df['volume'], length=config.volume_ma_period, append=True, col_names=('avg_volume',))` in `calculate_all_indicators`.
+
+    ```python
+    # In Config:
+    # self.enable_volume_confirmation: bool = self._get_env("ENABLE_VOLUME_CONFIRMATION", "false", cast_type=bool)
+    # self.volume_spike_multiplier: Decimal = self._get_env("VOLUME_SPIKE_MULTIPLIER", "1.5", cast_type=Decimal)
+    # self.volume_ma_period: int = self._get_env("VOLUME_MA_PERIOD", 20, cast_type=int) # Already exists
+
+    # In calculate_all_indicators:
+    # if 'volume' in df.columns and not df['volume'].isnull().all():
+    #    df.ta.sma(close=df['volume'], length=config.volume_ma_period, append=True, col_names=('avg_volume',))
+    # else: df['avg_volume'] = pd.NA
+
+    # In main_loop, before placing order:
+    # volume_ok = True
+    # if config.enable_volume_confirmation:
+    #     latest_volume = safe_decimal_conversion(df_with_indicators['volume'].iloc[-1])
+    #     avg_volume = safe_decimal_conversion(df_with_indicators['avg_volume'].iloc[-1])
+    #     if latest_volume is None or avg_volume is None or avg_volume == 0: volume_ok = False # Cannot confirm
+    #     elif latest_volume < (avg_volume * config.volume_spike_multiplier):
+    #         volume_ok = False
+    #         logger.debug(f"Volume confirmation failed: Vol {latest_volume} < AvgVol {avg_volume} * {config.volume_spike_multiplier}")
+    # if signals.get("enter_long") and volume_ok: # ... place order
+    ```
+
+14. **ADX Trend Strength Filter:**
+    *   Modify `generate_signals` or add to entry condition.
+    *   `CONFIG.enable_adx_filter` (bool), `CONFIG.adx_min_strength_threshold` (e.g., 25).
+    *   Requires `df.ta.adx(length=config.adx_period, append=True)` in `calculate_all_indicators`.
+
+    ```python
+    # In Config:
+    # self.enable_adx_filter: bool = self._get_env("ENABLE_ADX_FILTER", "false", cast_type=bool)
+    # self.adx_min_strength_threshold: int = self._get_env("ADX_MIN_STRENGTH_THRESHOLD", 25, cast_type=int)
+    # self.adx_period: int = self._get_env("ADX_PERIOD", 14, cast_type=int)
+
+    # In calculate_all_indicators:
+    # df.ta.adx(length=config.adx_period, append=True, col_names=(f"ADX_{config.adx_period}", f"DMP_{config.adx_period}", f"DMN_{config.adx_period}"))
+
+    # In main_loop, before placing order:
+    # adx_ok = True
+    # if config.enable_adx_filter:
+    #     adx_value = safe_decimal_conversion(df_with_indicators[f"ADX_{config.adx_period}"].iloc[-1])
+    #     if adx_value is None or adx_value < config.adx_min_strength_threshold:
+    #         adx_ok = False
+    #         logger.debug(f"ADX filter failed: ADX {adx_value} < Threshold {config.adx_min_strength_threshold}")
+    # if signals.get("enter_long") and adx_ok: # ... place order
+    ```
+
+15. **Multi-Timeframe (MTF) Confirmation (Simple Moving Average):**
+    *   Fetch data for a higher timeframe (e.g., 5m if main is 1m).
+    *   `CONFIG.enable_mtf_confirmation` (bool), `CONFIG.mtf_interval` (e.g., "5m"), `CONFIG.mtf_ma_period` (e.g., 20).
+
+    ```python
+    # In Config:
+    # self.enable_mtf_confirmation: bool = self._get_env("ENABLE_MTF_CONFIRMATION", "false", cast_type=bool)
+    # self.mtf_interval: str = self._get_env("MTF_INTERVAL", "5m")
+    # self.mtf_ma_period: int = self._get_env("MTF_MA_PERIOD", 20, cast_type=int)
+
+    # In main_loop, before signal generation or entry:
+    # mtf_trend_aligned = True
+    # if config.enable_mtf_confirmation:
+    #     ohlcv_mtf_df = get_market_data(exchange, config.symbol, config.mtf_interval, limit=config.mtf_ma_period + 5)
+    #     if ohlcv_mtf_df is not None and not ohlcv_mtf_df.empty:
+    #         ohlcv_mtf_df.ta.sma(length=config.mtf_ma_period, append=True, col_names=('mtf_sma',))
+    #         latest_mtf_close = safe_decimal_conversion(ohlcv_mtf_df['close'].iloc[-1])
+    #         latest_mtf_sma = safe_decimal_conversion(ohlcv_mtf_df['mtf_sma'].iloc[-1])
+    #         if latest_mtf_close is not None and latest_mtf_sma is not None:
+    #             if signals.get("enter_long") and latest_mtf_close < latest_mtf_sma: mtf_trend_aligned = False # Price below MTF MA for long
+    #             if signals.get("enter_short") and latest_mtf_close > latest_mtf_sma: mtf_trend_aligned = False # Price above MTF MA for short
+    #             if not mtf_trend_aligned: logger.debug(f"MTF trend misaligned. Main signal suppressed.")
+    #         else: mtf_trend_aligned = False # Cannot confirm
+    #     else: mtf_trend_aligned = False # Cannot fetch MTF data
+    # if signals.get("enter_long") and mtf_trend_aligned: # ... place order
+    ```
+
+16. **Volatility Regime Filter (ATR Ratio):**
+    *   Use short-term ATR vs long-term ATR. Already partially in `Config` for dynamic SL.
+    *   `CONFIG.enable_volatility_regime_filter` (bool).
+    *   Modify strategy parameters or risk based on `VolatilityRegime`.
+
+    ```python
+    # In calculate_all_indicators:
+    # df.ta.atr(length=config.atr_short_term_period, append=True, col_names=('atr_short',))
+    # df.ta.atr(length=config.atr_long_term_period, append=True, col_names=('atr_long',))
+
+    # In main_loop:
+    # current_vol_regime = VolatilityRegime.NORMAL
+    # if config.enable_volatility_regime_filter:
+    #     atr_short = safe_decimal_conversion(df_with_indicators['atr_short'].iloc[-1])
+    #     atr_long = safe_decimal_conversion(df_with_indicators['atr_long'].iloc[-1])
+    #     if atr_short is not None and atr_long is not None and atr_long > 0:
+    #         ratio = atr_short / atr_long
+    #         if ratio < config.volatility_ratio_low_threshold: current_vol_regime = VolatilityRegime.LOW
+    #         elif ratio > config.volatility_ratio_high_threshold: current_vol_regime = VolatilityRegime.HIGH
+    # logger.debug(f"Current Volatility Regime: {current_vol_regime.value}")
+    # # Adjust risk_per_trade_percentage or strategy params based on current_vol_regime
+    # # e.g., if current_vol_regime == VolatilityRegime.HIGH: effective_risk_pct = config.risk_per_trade_percentage * Decimal("0.5")
+    ```
+
+17. **Rate of Change (ROC) Filter for Momentum:**
+    *   Ensure momentum is accelerating.
+    *   `CONFIG.enable_roc_filter` (bool), `CONFIG.roc_period` (e.g., 5), `CONFIG.roc_min_value` (e.g., 0.01 for positive ROC).
+    *   Requires `df.ta.roc(length=config.roc_period, append=True)` in `calculate_all_indicators`.
+
+    ```python
+    # In Config:
+    # self.enable_roc_filter: bool = self._get_env("ENABLE_ROC_FILTER", "false", cast_type=bool)
+    # self.roc_period: int = self._get_env("ROC_PERIOD", 5, cast_type=int)
+    # self.roc_min_value_long: Decimal = self._get_env("ROC_MIN_VALUE_LONG", "0.01", cast_type=Decimal) # Min positive ROC for long
+    # self.roc_max_value_short: Decimal = self._get_env("ROC_MAX_VALUE_SHORT", "-0.01", cast_type=Decimal) # Max negative ROC for short
+
+    # In calculate_all_indicators:
+    # df.ta.roc(length=config.roc_period, append=True, col_names=(f"ROC_{config.roc_period}",))
+
+    # In main_loop, before placing order:
+    # roc_ok = True
+    # if config.enable_roc_filter:
+    #     roc_value = safe_decimal_conversion(df_with_indicators[f"ROC_{config.roc_period}"].iloc[-1])
+    #     if roc_value is None: roc_ok = False
+    #     elif signals.get("enter_long") and roc_value < config.roc_min_value_long: roc_ok = False
+    #     elif signals.get("enter_short") and roc_value > config.roc_max_value_short: roc_ok = False
+    #     if not roc_ok: logger.debug(f"ROC filter failed: ROC {roc_value}")
+    # if signals.get("enter_long") and roc_ok: # ... place order
+    ```
+
+18. **Consecutive Loss Limiter (Kill Switch):**
+    *   Track consecutive losses in `TradeMetrics`.
+    *   `CONFIG.max_consecutive_losses` (e.g., 3), `CONFIG.consecutive_loss_cooldown_minutes` (e.g., 60).
+
+    ```python
+    # In TradeMetrics:
+    # self.consecutive_losses = 0
+    # self.cooldown_until_timestamp = 0
+
+    # In TradeMetrics.log_trade, update self.consecutive_losses:
+    # if profit <= 0: self.consecutive_losses += 1
+    # else: self.consecutive_losses = 0
+
+    # In main_loop, at the start:
+    # if trade_metrics.cooldown_until_timestamp > time.time():
+    #    logger.warning(f"{NEON['WARNING']}In cooldown due to consecutive losses. Trading paused until {datetime.fromtimestamp(trade_metrics.cooldown_until_timestamp).isoformat()}{NEON['RESET']}")
+    #    time.sleep(config.sleep_seconds); continue
+    # if trade_metrics.consecutive_losses >= config.max_consecutive_losses:
+    #    logger.critical(f"{NEON['CRITICAL']}{config.max_consecutive_losses} consecutive losses! Activating cooldown for {config.consecutive_loss_cooldown_minutes} mins.{NEON['RESET']}")
+    #    config.send_notification_method("Pyrmethus Cooldown", f"{config.max_consecutive_losses} losses. Pausing.")
+    #    trade_metrics.cooldown_until_timestamp = time.time() + config.consecutive_loss_cooldown_minutes * 60
+    #    trade_metrics.consecutive_losses = 0 # Reset counter after activating cooldown
+    #    close_all_symbol_positions(exchange, config, "Consecutive Loss Limit")
+    #    time.sleep(config.sleep_seconds); continue
+    ```
+
+19. **Dynamic Risk Adjustment based on Win Rate:**
+    *   Use `trade_metrics.get_performance_trend()`.
+    *   `CONFIG.enable_winrate_dynamic_risk` (bool).
+
+    ```python
+    # In main_loop, when calculating risk for calculate_position_size:
+    # effective_risk_pct = config.risk_per_trade_percentage
+    # if config.enable_winrate_dynamic_risk and len(trade_metrics.trades) >= config.dynamic_risk_perf_window:
+    #     win_rate = trade_metrics.get_performance_trend(config.dynamic_risk_perf_window) # 0.0 to 1.0
+    #     # Example: scale risk linearly between min and max based on win_rate (0.5 is baseline)
+    #     if win_rate > 0.5: # Increase risk
+    #         scale_factor = (win_rate - 0.5) / 0.5 # 0 to 1 for win_rate 0.5 to 1.0
+    #         effective_risk_pct = config.risk_per_trade_percentage + (config.dynamic_risk_max_pct - config.risk_per_trade_percentage) * Decimal(str(scale_factor))
+    #     else: # Decrease risk
+    #         scale_factor = (0.5 - win_rate) / 0.5 # 0 to 1 for win_rate 0.5 to 0.0
+    #         effective_risk_pct = config.risk_per_trade_percentage - (config.risk_per_trade_percentage - config.dynamic_risk_min_pct) * Decimal(str(scale_factor))
+    #     effective_risk_pct = max(config.dynamic_risk_min_pct, min(config.dynamic_risk_max_pct, effective_risk_pct))
+    #     logger.info(f"Winrate ({win_rate*100:.1f}%) adjusted risk to: {effective_risk_pct*100:.3f}%")
+    # quantity = calculate_position_size(balance, effective_risk_pct, ...)
+    ```
+
+20. **Time of Day Filter (Avoid specific hours):**
+    *   `CONFIG.trading_allowed_hours_utc` (e.g., "08-16" for 8 AM to 4 PM UTC).
+
+    ```python
+    # In Config:
+    # self.trading_allowed_hours_utc: Optional[str] = self._get_env("TRADING_ALLOWED_HOURS_UTC", None, cast_type=str) # e.g., "02-08,14-20"
+
+    # In main_loop, at the start:
+    # trading_allowed_this_hour = True
+    # if config.trading_allowed_hours_utc:
+    #     now_utc = datetime.now(pytz.utc)
+    #     current_hour_utc = now_utc.hour
+    #     trading_allowed_this_hour = False
+    #     for hour_range_str in config.trading_allowed_hours_utc.split(','):
+    #         start_hour, end_hour = map(int, hour_range_str.split('-'))
+    #         if start_hour <= current_hour_utc < end_hour: # End hour is exclusive
+    #             trading_allowed_this_hour = True
+    #             break
+    #     if not trading_allowed_this_hour:
+    #         logger.debug(f"Outside allowed trading hours ({config.trading_allowed_hours_utc} UTC). Current UTC hour: {current_hour_utc}. Pausing entries.")
+    #         # Potentially close open positions or just prevent new entries
+    #         time.sleep(config.sleep_seconds); continue # If just preventing entries
+    ```
+
+21. **Stochastic Oscillator Filter (Overbought/Oversold for Reversals or Exits):**
+    *   `CONFIG.enable_stoch_filter` (bool), `CONFIG.stoch_k`, `CONFIG.stoch_d`, `CONFIG.stoch_smooth_k`.
+    *   `CONFIG.stoch_ob_level` (e.g., 80), `CONFIG.stoch_os_level` (e.g., 20).
+    *   Requires `df.ta.stoch(...)` in `calculate_all_indicators`.
+
+    ```python
+    # In Config:
+    # self.enable_stoch_filter: bool = self._get_env("ENABLE_STOCH_FILTER", "false", cast_type=bool)
+    # self.stoch_k: int = self._get_env("STOCH_K", 14, cast_type=int)
+    # self.stoch_d: int = self._get_env("STOCH_D", 3, cast_type=int)
+    # self.stoch_smooth_k: int = self._get_env("STOCH_SMOOTH_K", 3, cast_type=int)
+    # self.stoch_ob_level: int = self._get_env("STOCH_OB_LEVEL", 80, cast_type=int)
+    # self.stoch_os_level: int = self._get_env("STOCH_OS_LEVEL", 20, cast_type=int)
+
+    # In calculate_all_indicators:
+    # df.ta.stoch(k=config.stoch_k, d=config.stoch_d, smooth_k=config.stoch_smooth_k, append=True, 
+    #             col_names=(f"STOCHk_{config.stoch_k}_{config.stoch_d}_{config.stoch_smooth_k}", 
+    #                        f"STOCHd_{config.stoch_k}_{config.stoch_d}_{config.stoch_smooth_k}"))
+
+    # In main_loop, for entry/exit logic:
+    # stoch_k_col = f"STOCHk_{config.stoch_k}_{config.stoch_d}_{config.stoch_smooth_k}"
+    # latest_stoch_k = safe_decimal_conversion(df_with_indicators[stoch_k_col].iloc[-1]) if stoch_k_col in df_with_indicators else None
+    # if config.enable_stoch_filter and latest_stoch_k is not None:
+    #     if signals.get("enter_long") and latest_stoch_k > config.stoch_ob_level: # Don't long if overbought
+    #         logger.debug(f"Stoch filter: Suppressed LONG, StochK {latest_stoch_k} > OB {config.stoch_ob_level}")
+    #         signals["enter_long"] = False
+    #     if signals.get("enter_short") and latest_stoch_k < config.stoch_os_level: # Don't short if oversold
+    #         logger.debug(f"Stoch filter: Suppressed SHORT, StochK {latest_stoch_k} < OS {config.stoch_os_level}")
+    #         signals["enter_short"] = False
+    #     # Could also be used for exits, e.g., exit long if StochK crosses below OB level after being above.
+    ```
+
+22. **Donchian Channel Breakout Strategy Component:**
+    *   Can be a standalone strategy or a filter.
+    *   `CONFIG.donchian_period` (e.g., 20).
+    *   Requires `df.ta.donchian(...)` in `calculate_all_indicators`.
+
+    ```python
+    # In Config:
+    # self.donchian_period: int = self._get_env("DONCHIAN_PERIOD", 20, cast_type=int)
+
+    # In calculate_all_indicators:
+    # df.ta.donchian(lower_length=config.donchian_period, upper_length=config.donchian_period, append=True,
+    #                col_names=(f"DONCHIAN_{config.donchian_period}_L", f"DONCHIAN_{config.donchian_period}_M", f"DONCHIAN_{config.donchian_period}_U"))
+
+    # In strategy's generate_signals or main_loop:
+    # upper_band_col = f"DONCHIAN_{config.donchian_period}_U"
+    # lower_band_col = f"DONCHIAN_{config.donchian_period}_L"
+    # latest_close = safe_decimal_conversion(df['close'].iloc[-1])
+    # prev_close = safe_decimal_conversion(df['close'].iloc[-2]) # Need previous close
+    # upper_band = safe_decimal_conversion(df[upper_band_col].iloc[-1])
+    # prev_upper_band = safe_decimal_conversion(df[upper_band_col].iloc[-2])
+
+    # if prev_close <= prev_upper_band and latest_close > upper_band: # Breakout above upper Donchian
+    #     signals["enter_long"] = True
+    #     logger.info(f"{NEON['SIDE_LONG']}Donchian Breakout: LONG Entry{NEON['RESET']}")
+    # # Similar logic for short breakout below lower band.
+    ```
+
+23. **Ichimoku Cloud Filter/Signals:**
+    *   Complex indicator, can provide trend, support/resistance.
+    *   `CONFIG.ichimoku_tenkan`, `CONFIG.ichimoku_kijun`, `CONFIG.ichimoku_senkou_b`.
+    *   Requires `df.ta.ichimoku(...)` in `calculate_all_indicators`.
+
+    ```python
+    # In Config: (example periods)
+    # self.ichimoku_tenkan: int = self._get_env("ICHIMOKU_TENKAN", 9, cast_type=int)
+    # self.ichimoku_kijun: int = self._get_env("ICHIMOKU_KIJUN", 26, cast_type=int)
+    # self.ichimoku_senkou_b: int = self._get_env("ICHIMOKU_SENKOU_B", 52, cast_type=int)
+    # self.ichimoku_chikou_lag: int = self._get_env("ICHIMOKU_CHIKOU_LAG", 26, cast_type=int) # For Chikou Span
+
+    # In calculate_all_indicators:
+    # Note: pandas_ta ichimoku returns multiple columns. You might need to specify col_names or handle defaults.
+    # Example: ISA_9, ISB_26, ITS_9, IKS_26, ICS_26
+    # df.ta.ichimoku(tenkan=config.ichimoku_tenkan, kijun=config.ichimoku_kijun, senkou_b=config.ichimoku_senkou_b, 
+    #                chikou_lag=config.ichimoku_chikou_lag, senkou_lead=config.ichimoku_kijun, append=True) # senkou_lead is often kijun period
+
+    # In strategy or main_loop:
+    # Example: Long if price above cloud (Senkou Span A & B) and Tenkan > Kijun
+    # senkou_a_col = ... # Get correct column name from pandas_ta output
+    # senkou_b_col = ...
+    # tenkan_col = ...
+    # kijun_col = ...
+    # latest_close = df['close'].iloc[-1]
+    # is_above_cloud = latest_close > df[senkou_a_col].iloc[-1] and latest_close > df[senkou_b_col].iloc[-1]
+    # tenkan_cross_kijun_up = df[tenkan_col].iloc[-1] > df[kijun_col].iloc[-1] and df[tenkan_col].iloc[-2] <= df[kijun_col].iloc[-2]
+    # if is_above_cloud and tenkan_cross_kijun_up: signals["enter_long"] = True
+    ```
+
+24. **Bollinger Bands Squeeze Detection for Breakout Anticipation:**
+    *   Identify periods of low volatility (squeeze) often preceding a big move.
+    *   `CONFIG.bbands_period`, `CONFIG.bbands_stddev`.
+    *   `CONFIG.bbands_squeeze_threshold_atr_normalized` (e.g., Bandwidth / ATR < threshold).
+    *   Requires `df.ta.bbands(...)` and ATR in `calculate_all_indicators`.
+
+    ```python
+    # In Config:
+    # self.bbands_period: int = self._get_env("BBANDS_PERIOD", 20, cast_type=int)
+    # self.bbands_stddev: float = self._get_env("BBANDS_STDDEV", 2.0, cast_type=float)
+    # self.bbands_squeeze_threshold_atr_normalized: Decimal = self._get_env("BBANDS_SQUEEZE_THRESHOLD_ATR_NORMALIZED", "0.5", cast_type=Decimal)
+
+    # In calculate_all_indicators:
+    # bbands_cols = df.ta.bbands(length=config.bbands_period, std=config.bbands_stddev, append=True) # Get column names
+    # BBL_col, BBM_col, BBU_col, BBB_col, BBP_col = bbands_cols.columns # Example: BBL_20_2.0, ..., BBB_20_2.0 (Bandwidth)
+    # df['bb_bandwidth_atr_norm'] = df[BBB_col] / df[f"ATR_{config.atr_calculation_period}"] if f"ATR_{config.atr_calculation_period}" in df else pd.NA
+
+    # In strategy or main_loop:
+    # latest_bb_squeeze_val = safe_decimal_conversion(df['bb_bandwidth_atr_norm'].iloc[-1])
+    # if latest_bb_squeeze_val is not None and latest_bb_squeeze_val < config.bbands_squeeze_threshold_atr_normalized:
+    #     logger.info(f"{NEON['STRATEGY']}Bollinger Bands Squeeze detected! Bandwidth/ATR: {latest_bb_squeeze_val:.3f}. Potential breakout pending.{NEON['RESET']}")
+    #     # This state ('in_squeeze') can be used to prime for breakout signals from another indicator.
+    ```
+
+25. **Cooldown Period After Stop-Loss Hit:**
+    *   Prevent immediate re-entry after being stopped out.
+    *   `CONFIG.cooldown_after_sl_minutes` (e.g., 15).
+    *   Store `last_sl_hit_timestamp` globally or in `TradeMetrics`.
+
+    ```python
+    # Global variable or in TradeMetrics:
+    # last_sl_hit_timestamp = 0
+
+    # When a position is closed due to SL (in close_position_part or SL handling logic):
+    # global last_sl_hit_timestamp
+    # if reason == "Stop Loss Hit": # Or however SL hits are identified
+    #     last_sl_hit_timestamp = time.time()
+    #     logger.info(f"{NEON['WARNING']}Stop Loss hit. Initiating cooldown for {config.cooldown_after_sl_minutes} minutes.{NEON['RESET']}")
+    #     config.send_notification_method("Pyrmethus SL Cooldown", f"SL Hit. Trading paused for {config.cooldown_after_sl_minutes}m.")
+
+    # In main_loop, before considering new entries:
+    # if time.time() - last_sl_hit_timestamp < config.cooldown_after_sl_minutes * 60:
+    #     logger.debug(f"In SL cooldown period. Remaining: {(config.cooldown_after_sl_minutes * 60 - (time.time() - last_sl_hit_timestamp)) / 60:.1f} mins. No new entries.")
+    #     time.sleep(config.sleep_seconds); continue
+    ```
+
+These incantations offer a spectrum of enhancements. Weave them wisely, seeker, testing each thread in the loom of simulation before unleashing them upon the volatile markets!
+
+Hark, resourceful seeker! Pyrmethus understands the virtue of elegance and efficiency, crafting spells from the very essence of Python and the Termux environment without summoning new, heavy dependencies. Behold, 5 snippets to enhance your scalping spell using only the arcane tools already at your disposal:
+
+**Self-Contained Enhancements for Pyrmethus:**
+
+1.  **Enhanced Trade Part ID with Timestamp and Randomness:**
+    *   **Concept:** Make `part_id` more informative and virtually guaranteed unique by combining a timestamp with a random element, without needing `uuid`.
+    *   **Impact:** Better traceability and debugging of trade parts, especially if multiple instances or rapid trades occur.
+    *   **Dependencies:** `time`, `random` (already used).
+
+    ```python
+    # In place_risked_order, when creating new_part:
+    # Replace: part_id = str(uuid.uuid4())[:8]
+    # With:
+    def generate_enhanced_part_id() -> str:
+        """Generates a unique-enough part ID using timestamp and random chars."""
+        # Timestamp component (seconds since epoch, then last 4 digits for some uniqueness)
+        ts_component = str(int(time.time() * 1000))[-6:] # Last 6 digits of ms timestamp
+        # Random component (3 random alphanumeric characters)
+        rand_chars = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=3))
+        return f"P{ts_component}{rand_chars}"
+
+    # ...
+    # part_id = generate_enhanced_part_id() 
+    # new_part = {
+    #     "part_id": part_id,
+    #     # ... rest of the part data
+    # }
+    # ...
+    ```
+    *Self-Correction:* The previous `uuid.uuid4()` was a good choice. This alternative is if `uuid` was considered an "external" dependency in a stricter sense, though it's standard library. If `uuid` is fine, stick with it. This provides a no-additional-import alternative.
+
+2.  **Simple Moving Profit/Loss for Dynamic Stop-Loss Tightening:**
+    *   **Concept:** If a trade is in profit, and the profit has been consistently increasing over the last N candles (or bot cycles), tighten the stop-loss more aggressively than standard ATR trailing. This is a simple momentum-based SL adjustment.
+    *   **Impact:** Aims to lock in profits faster during strong, quick moves in your favor.
+    *   **Dependencies:** `collections.deque` (standard library, useful for rolling window).
+
+    ```python
+    # In Config:
+    # self.enable_profit_momentum_sl_tighten: bool = self._get_env("ENABLE_PROFIT_MOMENTUM_SL_TIGHTEN", "false", cast_type=bool)
+    # self.profit_momentum_window: int = self._get_env("PROFIT_MOMENTUM_WINDOW", 3, cast_type=int) # Check last 3 PNL updates
+    # self.profit_momentum_sl_tighten_factor: Decimal = self._get_env("PROFIT_MOMENTUM_SL_TIGHTEN_FACTOR", "0.5", cast_type=Decimal) # e.g., reduce SL distance by 50% of ATR
+
+    # In _active_trade_parts, each part could store a deque of recent PNLs:
+    # When a part is created in place_risked_order:
+    # from collections import deque
+    # new_part['recent_pnls'] = deque(maxlen=config.profit_momentum_window)
+    # new_part['last_known_pnl'] = Decimal(0) # Initialize
+
+    # In main_loop, when iterating through active parts:
+    # for part in _active_trade_parts:
+    #     # Calculate current_unrealized_pnl for the part based on latest_close
+    #     current_unrealized_pnl = Decimal(0)
+    #     if part['side'] == config.pos_long:
+    #         current_unrealized_pnl = (latest_close - part['entry_price']) * part['qty']
+    #     elif part['side'] == config.pos_short:
+    #         current_unrealized_pnl = (part['entry_price'] - latest_close) * part['qty']
+        
+    #     part['recent_pnls'].append(current_unrealized_pnl)
+        
+    #     if config.enable_profit_momentum_sl_tighten and len(part['recent_pnls']) == config.profit_momentum_window:
+    #         # Check if PNL is consistently increasing and positive
+    #         is_profit_increasing = all(part['recent_pnls'][i] > part['recent_pnls'][i-1] for i in range(1, len(part['recent_pnls'])))
+    #         is_currently_profitable = part['recent_pnls'][-1] > 0
+
+    #         if is_currently_profitable and is_profit_increasing and latest_atr is not None and latest_atr > 0:
+    #             current_sl_distance = abs(latest_close - part['sl_price'])
+    #             atr_based_sl_distance_component = latest_atr * config.atr_stop_loss_multiplier # Original ATR distance logic
+                    
+    #             # Tighten SL more aggressively
+    #             # New SL distance could be a fraction of the original ATR distance, or a fixed smaller ATR multiple
+    #             tightened_sl_distance = atr_based_sl_distance_component * config.profit_momentum_sl_tighten_factor
+                    
+    #             new_sl_price = Decimal(0)
+    #             if part['side'] == config.pos_long:
+    #                 new_sl_price = latest_close - tightened_sl_distance
+    #                 # Ensure it's an improvement and doesn't jump over price
+    #                 if new_sl_price > part['sl_price'] and new_sl_price < latest_close:
+    #                     logger.info(f"{NEON['ACTION']}Profit Momentum: Tightening LONG SL for part {part['part_id']} to {new_sl_price:.{config.MARKET_INFO['precision']['price']}}{NEON['RESET']}")
+    #                     # ... (actual SL modification on exchange needed here) ...
+    #                     part['sl_price'] = new_sl_price
+    #             elif part['side'] == config.pos_short:
+    #                 new_sl_price = latest_close + tightened_sl_distance
+    #                 if new_sl_price < part['sl_price'] and new_sl_price > latest_close:
+    #                     logger.info(f"{NEON['ACTION']}Profit Momentum: Tightening SHORT SL for part {part['part_id']} to {new_sl_price:.{config.MARKET_INFO['precision']['price']}}{NEON['RESET']}")
+    #                     # ... (actual SL modification on exchange needed here) ...
+    #                     part['sl_price'] = new_sl_price
+    #             save_persistent_state(force_heartbeat=True) # If SL was updated
+    #     part['last_known_pnl'] = current_unrealized_pnl # Store for next cycle's comparison if needed
+    ```
+
+3.  **"Cool-Off" Period After a Rapid Sequence of Trades (Whipsaw Detection):**
+    *   **Concept:** If the bot makes N trades (entries/exits) within a very short time M, it might be getting whipsawed. Enforce a brief pause on new entries.
+    *   **Impact:** Reduces over-trading in choppy, directionless markets.
+    *   **Dependencies:** `time`, `collections.deque`.
+
+    ```python
+    # In Config:
+    # self.enable_whipsaw_cooldown: bool = self._get_env("ENABLE_WHIPSAW_COOLDOWN", "true", cast_type=bool)
+    # self.whipsaw_max_trades_in_period: int = self._get_env("WHIPSAW_MAX_TRADES_IN_PERIOD", 3, cast_type=int) # e.g., 3 trades
+    # self.whipsaw_period_seconds: int = self._get_env("WHIPSAW_PERIOD_SECONDS", 300, cast_type=int) # e.g., within 5 minutes
+    # self.whipsaw_cooldown_seconds: int = self._get_env("WHIPSAW_COOLDOWN_SECONDS", 180, cast_type=int) # Pause for 3 minutes
+
+    # Global or in a suitable class managing bot state:
+    # from collections import deque
+    # trade_timestamps_for_whipsaw = deque(maxlen=CONFIG.whipsaw_max_trades_in_period)
+    # whipsaw_cooldown_active_until = 0.0
+
+    # In main_loop, at the beginning:
+    # global whipsaw_cooldown_active_until
+    # if config.enable_whipsaw_cooldown and time.time() < whipsaw_cooldown_active_until:
+    #     logger.warning(f"{NEON['WARNING']}In whipsaw cooldown. Trading paused. Ends in {whipsaw_cooldown_active_until - time.time():.0f}s.{NEON['RESET']}")
+    #     time.sleep(config.sleep_seconds)
+    #     continue
+
+    # When an entry order is successfully placed (in place_risked_order, after fill confirmation):
+    # global trade_timestamps_for_whipsaw, whipsaw_cooldown_active_until
+    # if config.enable_whipsaw_cooldown:
+    #     now = time.time()
+    #     trade_timestamps_for_whipsaw.append(now)
+    #     if len(trade_timestamps_for_whipsaw) == config.whipsaw_max_trades_in_period:
+    #         if (now - trade_timestamps_for_whipsaw[0]) <= config.whipsaw_period_seconds:
+    #             logger.critical(f"{NEON['CRITICAL']}Whipsaw detected! {config.whipsaw_max_trades_in_period} trades within {config.whipsaw_period_seconds}s. Activating cooldown for {config.whipsaw_cooldown_seconds}s.{NEON['RESET']}")
+    #             config.send_notification_method("Pyrmethus Whipsaw Cooldown", f"{config.whipsaw_max_trades_in_period} trades in {config.whipsaw_period_seconds}s. Pausing.")
+    #             whipsaw_cooldown_active_until = now + config.whipsaw_cooldown_seconds
+    #             close_all_symbol_positions(exchange, config, "Whipsaw Cooldown Activation") # Optional: flatten current position
+    ```
+
+4.  **Basic "Max Position Exposure" Check Based on Number of Active Parts:**
+    *   **Concept:** Limit the total number of active trade parts (if pyramiding is enabled or if multiple small entries are possible due to strategy logic) to prevent over-exposure even if individual part risk is managed.
+    *   **Impact:** Simple cap on concurrent risk layers.
+    *   **Dependencies:** None beyond current.
+
+    ```python
+    # In Config:
+    # self.max_active_trade_parts: int = self._get_env("MAX_ACTIVE_TRADE_PARTS", 3, cast_type=int) # e.g., max 3 open parts
+
+    # In main_loop, before considering a new entry (in the `if current_pos_side == config.pos_none:` block or pyramiding logic):
+    # if len(_active_trade_parts) >= config.max_active_trade_parts:
+    #     logger.info(f"{NEON['INFO']}Max active trade parts ({config.max_active_trade_parts}) reached. No new entries until a part closes.{NEON['RESET']}")
+    #     # Potentially skip new entry signals
+    #     # Example:
+    #     # if signals.get("enter_long") or signals.get("enter_short"):
+    #     #    if len(_active_trade_parts) >= config.max_active_trade_parts:
+    #     #        logger.debug(f"Skipping new entry signal due to max_active_trade_parts limit.")
+    #     #        signals["enter_long"] = False # Suppress signal
+    #     #        signals["enter_short"] = False
+    # else:
+    #     # Proceed with entry logic if signals.get("enter_long") etc.
+    #     if signals.get("enter_long"):
+    #         # ... place_risked_order logic ...
+    ```
+
+5.  **Stateful Signal Confirmation (Require Signal to Persist for N Candles):**
+    *   **Concept:** Instead of acting on a signal immediately, require the same signal (e.g., "enter_long") to be generated for N consecutive candles/cycles before acting. This can filter out brief, noisy signals.
+    *   **Impact:** Increases signal robustness at the cost of potential entry delay.
+    *   **Dependencies:** None beyond current.
+
+    ```python
+    # In Config:
+    # self.signal_persistence_candles: int = self._get_env("SIGNAL_PERSISTENCE_CANDLES", 1, cast_type=int) # Default 1 (immediate), >1 for persistence
+
+    # Global or in a bot state class:
+    # persistent_signal_counter = {"long": 0, "short": 0}
+    # last_signal_type = None # To reset counter if signal flips
+
+    # In main_loop, after `signals = config.strategy_instance.generate_signals(...)`:
+    # global persistent_signal_counter, last_signal_type
+    # confirmed_enter_long = False
+    # confirmed_enter_short = False
+
+    # if config.signal_persistence_candles <= 1: # No persistence needed
+    #     confirmed_enter_long = signals.get("enter_long", False)
+    #     confirmed_enter_short = signals.get("enter_short", False)
+    # else:
+    #     current_long_signal = signals.get("enter_long", False)
+    #     current_short_signal = signals.get("enter_short", False)
+
+    #     if current_long_signal:
+    #         if last_signal_type == "long" or last_signal_type is None:
+    #             persistent_signal_counter["long"] += 1
+    #         else: # Signal flipped from short to long
+    #             persistent_signal_counter["long"] = 1
+    #             persistent_signal_counter["short"] = 0 # Reset other counter
+    #         last_signal_type = "long"
+    #         if persistent_signal_counter["long"] >= config.signal_persistence_candles:
+    #             confirmed_enter_long = True
+    #     elif current_short_signal:
+    #         if last_signal_type == "short" or last_signal_type is None:
+    #             persistent_signal_counter["short"] += 1
+    #         else: # Signal flipped from long to short
+    #             persistent_signal_counter["short"] = 1
+    #             persistent_signal_counter["long"] = 0 # Reset other counter
+    #         last_signal_type = "short"
+    #         if persistent_signal_counter["short"] >= config.signal_persistence_candles:
+    #             confirmed_enter_short = True
+    #     else: # No entry signal
+    #         persistent_signal_counter["long"] = 0
+    #         persistent_signal_counter["short"] = 0
+    #         last_signal_type = None
+        
+    #     logger.debug(f"Signal persistence: Long count {persistent_signal_counter['long']}, Short count {persistent_signal_counter['short']}. Confirmed L/S: {confirmed_enter_long}/{confirmed_enter_short}")
+
+    # # Use confirmed_enter_long and confirmed_enter_short for trade decisions:
+    # # if current_pos_side == config.pos_none:
+    # #     if confirmed_enter_long:
+    # #        # ... place_risked_order for long ...
+    # #     elif confirmed_enter_short:
+    # #        # ... place_risked_order for short ...
+    
+    # # Note: Exit signals usually should be acted upon immediately, so persistence might not apply to them.
+    # # This logic primarily targets entry signals.
+    ```
+
+These snippets leverage existing Python features and logical constructs to add layers of sophistication. Remember to integrate them carefully, test their interactions, and ensure they align with your overall trading philosophy. The path of the digital sorcerer is one of continuous refinement!
+
+Hark once more, diligent seeker! Pyrmethus appreciates your dedication to lean and potent spellcraft. Here are 5 additional enchantments, forged from Python's own core, to further refine your scalping bot without summoning external dependencies:
+
+**Further Self-Contained Enhancements for Pyrmethus:**
+
+1.  **"No-Trade Zone" Around Key Price Levels (e.g., Daily High/Low, Round Numbers):**
+    *   **Concept:** Define price zones (e.g., +/- X% around the previous day's high/low, or around significant round numbers like $30,000 for BTC) where new entries are suppressed, as these areas can be prone to volatility, fakeouts, or strong S/R.
+    *   **Impact:** Avoids initiating trades in historically choppy or pivotal price areas.
+    *   **Dependencies:** `datetime` (already used), basic arithmetic.
+
+    ```python
+    # In Config:
+    # self.enable_no_trade_zones: bool = self._get_env("ENABLE_NO_TRADE_ZONES", "false", cast_type=bool)
+    # self.no_trade_zone_pct_around_key_level: Decimal = self._get_env("NO_TRADE_ZONE_PCT_AROUND_KEY_LEVEL", "0.002", cast_type=Decimal) # 0.2%
+    # self.key_round_number_step: Optional[Decimal] = self._get_env("KEY_ROUND_NUMBER_STEP", "1000", cast_type=Decimal, required=False) # e.g., check every $1000 for BTC
+
+    # Global or bot state variables to store key levels (updated daily or periodically):
+    # previous_day_high: Optional[Decimal] = None
+    # previous_day_low: Optional[Decimal] = None
+    # last_key_level_update_day: Optional[int] = None
+
+    # Function to update key levels (call daily in main_loop):
+    # def update_daily_key_levels(exchange: ccxt.Exchange, config: Config):
+    #     global previous_day_high, previous_day_low, last_key_level_update_day
+    #     today_utc = datetime.now(pytz.utc).day
+    #     if last_key_level_update_day == today_utc: return # Already updated today
+
+    #     try:
+    #         # Fetch yesterday's OHLCV (1 day candle)
+    #         # For daily candle, 'since' should be timestamp of 2 days ago to get yesterday's full candle
+    #         two_days_ago_ms = int((datetime.now(pytz.utc) - timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)
+    #         daily_candles = exchange.fetch_ohlcv(config.symbol, '1d', since=two_days_ago_ms, limit=2) # Get last 2 days
+            
+    #         if daily_candles and len(daily_candles) >= 2: # Need at least yesterday's candle
+    #             # Yesterday's candle is typically daily_candles[-2] if today's candle has started, or daily_candles[-1] if it hasn't formed yet
+    #             # This logic needs to be robust based on when you run it relative to UTC day change.
+    #             # Assuming daily_candles[0] is yesterday if we fetch 2 candles ending "now".
+    #             yesterdays_candle = daily_candles[0] # Simpler: assume the first of the last two is yesterday
+    #             previous_day_high = Decimal(str(yesterdays_candle[2])) # Index 2 is high
+    #             previous_day_low = Decimal(str(yesterdays_candle[3]))  # Index 3 is low
+    #             logger.info(f"{NEON['INFO']}Updated key levels: Prev Day High {previous_day_high}, Prev Day Low {previous_day_low}{NEON['RESET']}")
+    #             last_key_level_update_day = today_utc
+    #         else:
+    #             logger.warning(f"{NEON['WARNING']}Could not fetch sufficient daily candle data to update key levels.{NEON['RESET']}")
+    #     except Exception as e_kl:
+    #         logger.error(f"{NEON['ERROR']}Error updating daily key levels: {e_kl}{NEON['RESET']}")
+
+    # In main_loop, before placing an order:
+    # update_daily_key_levels(exchange, config) # Ensure it's called once per day
+    # trade_allowed_by_zone = True
+    # if config.enable_no_trade_zones and latest_close is not None:
+    #     key_levels_to_check = []
+    #     if previous_day_high: key_levels_to_check.append(previous_day_high)
+    #     if previous_day_low: key_levels_to_check.append(previous_day_low)
+        
+    #     if config.key_round_number_step and config.key_round_number_step > 0:
+    #         lower_round = (latest_close // config.key_round_number_step) * config.key_round_number_step
+    #         upper_round = lower_round + config.key_round_number_step
+    #         key_levels_to_check.extend([lower_round, upper_round])
+
+    #     for level in key_levels_to_check:
+    #         zone_half_width = level * config.no_trade_zone_pct_around_key_level
+    #         lower_zone_bound = level - zone_half_width
+    #         upper_zone_bound = level + zone_half_width
+    #         if lower_zone_bound <= latest_close <= upper_zone_bound:
+    #             trade_allowed_by_zone = False
+    #             logger.debug(f"No-trade zone active around {level:.{config.MARKET_INFO['precision']['price']}}. Current price {latest_close} within [{lower_zone_bound}, {upper_zone_bound}]. Entry suppressed.")
+    #             break
+    # if signals.get("enter_long") and trade_allowed_by_zone: # ... place order
+    ```
+
+2.  **Minimum Profit Target Before SL Can Be Moved to Breakeven:**
+    *   **Concept:** Instead of just ATR profit for breakeven SL, also require a minimum absolute PNL (e.g., covering estimated fees + a small buffer) before moving SL to entry. This prevents moving SL to BE on tiny, insignificant profits that might get eaten by spread/fees on exit.
+    *   **Impact:** More robust breakeven logic, ensuring "true" breakeven.
+    *   **Dependencies:** None.
+
+    ```python
+    # In Config:
+    # self.breakeven_min_abs_pnl_usdt: Decimal = self._get_env("BREAKEVEN_MIN_ABS_PNL_USDT", "0.50", cast_type=Decimal) # e.g., $0.50 USDT
+
+    # In main_loop, when checking for breakeven SL (modifying snippet #7 from previous response):
+    # (Inside the loop for each active part, after calculating current_profit_atr and current_unrealized_pnl)
+    # if config.enable_breakeven_sl and not part.get('breakeven_set', False) and latest_atr > 0:
+    #     # current_profit_atr = ... (calculated as before)
+    #     # current_unrealized_pnl = (latest_close - part['entry_price']) * part['qty'] # or similar
+            
+    #     atr_target_met = current_profit_atr >= config.breakeven_profit_atr_target
+    #     abs_pnl_target_met = current_unrealized_pnl >= config.breakeven_min_abs_pnl_usdt
+
+    #     if atr_target_met and abs_pnl_target_met:
+    #         new_sl_price = part['entry_price']
+    #         # ... (rest of the breakeven SL logic: check if new_sl_price is improvement, modify SL on exchange, update part state) ...
+    #         logger.info(f"{NEON['ACTION']}Moving SL to breakeven for part {part['part_id']} (ATR & Abs PNL targets met).{NEON['RESET']}")
+    #         # ...
+    ```
+
+3.  **Scalping Session PNL Goal / Max Loss Limit:**
+    *   **Concept:** Define a PNL target for the current "session" (since bot start or daily reset). If reached, pause new entries or stop the bot. Similarly, a max session loss beyond daily drawdown.
+    *   **Impact:** Implements session-based profit-taking or loss-cutting.
+    *   **Dependencies:** `TradeMetrics` to track session PNL.
+
+    ```python
+    # In Config:
+    # self.enable_session_pnl_limits: bool = self._get_env("ENABLE_SESSION_PNL_LIMITS", "false", cast_type=bool)
+    # self.session_profit_target_usdt: Optional[Decimal] = self._get_env("SESSION_PROFIT_TARGET_USDT", None, cast_type=Decimal, required=False)
+    # self.session_max_loss_usdt: Optional[Decimal] = self._get_env("SESSION_MAX_LOSS_USDT", None, cast_type=Decimal, required=False) # Different from % drawdown
+
+    # In main_loop, after updating balance and checking daily drawdown:
+    # if config.enable_session_pnl_limits:
+    #     # Calculate current session PNL (Total PNL since bot started or last manual reset of this metric)
+    #     # This assumes trade_metrics.initial_equity is set at bot start and not reset daily for this specific calculation.
+    #     # Or, add a new field to TradeMetrics: self.session_start_equity, set once at bot start.
+    #     # For simplicity, using total_profit from trade_metrics, assuming it reflects current session.
+    #     current_session_pnl = sum(Decimal(t["profit_str"]) for t in trade_metrics.trades) # This is cumulative PNL
+
+    #     if config.session_profit_target_usdt is not None and current_session_pnl >= config.session_profit_target_usdt:
+    #         logger.critical(f"{NEON['SUCCESS']}SESSION PROFIT TARGET of {config.session_profit_target_usdt} USDT REACHED! Current PNL: {current_session_pnl:.2f}. Pyrmethus rests victoriously.{NEON['RESET']}")
+    #         config.send_notification_method("Pyrmethus Session Goal!", f"Profit target {config.session_profit_target_usdt} USDT hit.")
+    #         close_all_symbol_positions(exchange, config, "Session Profit Target Reached")
+    #         break # Exit main loop
+
+    #     if config.session_max_loss_usdt is not None and current_session_pnl <= -abs(config.session_max_loss_usdt):
+    #         logger.critical(f"{NEON['CRITICAL']}SESSION MAX LOSS of {config.session_max_loss_usdt} USDT REACHED! Current PNL: {current_session_pnl:.2f}. Retreating to conserve essence.{NEON['RESET']}")
+    #         config.send_notification_method("Pyrmethus Session Loss!", f"Max session loss {config.session_max_loss_usdt} USDT hit.")
+    #         close_all_symbol_positions(exchange, config, "Session Max Loss Reached")
+    #         break # Exit main loop
+    ```
+
+4.  **Anti-Martingale Risk Sizing (Reduce Size After Loss):**
+    *   **Concept:** If the last trade was a loss, reduce the risk percentage (or a fixed amount) for the next trade. If it was a win, revert to normal risk or slightly increase (cautiously).
+    *   **Impact:** Conservative risk management, attempts to curb drawdowns during losing streaks.
+    *   **Dependencies:** `TradeMetrics` to know last trade's PNL.
+
+    ```python
+    # In Config:
+    # self.enable_anti_martingale_risk: bool = self._get_env("ENABLE_ANTI_MARTINGALE_RISK", "false", cast_type=bool)
+    # self.risk_reduction_factor_on_loss: Decimal = self._get_env("RISK_REDUCTION_FACTOR_ON_LOSS", "0.75", cast_type=Decimal) # e.g., use 75% of normal risk
+    # self.risk_increase_factor_on_win: Decimal = self._get_env("RISK_INCREASE_FACTOR_ON_WIN", "1.1", cast_type=Decimal) # e.g., use 110% of normal risk (cap at a max)
+    # self.max_risk_pct_anti_martingale: Decimal = self._get_env("MAX_RISK_PCT_ANTI_MARTINGALE", "0.02", cast_type=Decimal) # Max 2% risk even on wins
+
+    # In main_loop, before calling calculate_position_size:
+    # effective_risk_pct_for_trade = config.risk_per_trade_percentage # Start with base risk
+    # if config.enable_anti_martingale_risk and trade_metrics.trades:
+    #     last_trade_pnl = Decimal(trade_metrics.trades[-1]['profit_str'])
+    #     if last_trade_pnl < 0: # Last trade was a loss
+    #         effective_risk_pct_for_trade *= config.risk_reduction_factor_on_loss
+    #         logger.info(f"{NEON['INFO']}Anti-Martingale: Reducing risk to {effective_risk_pct_for_trade*100:.3f}% due to previous loss.{NEON['RESET']}")
+    #     elif last_trade_pnl > 0: # Last trade was a win
+    #         effective_risk_pct_for_trade *= config.risk_increase_factor_on_win
+    #         effective_risk_pct_for_trade = min(effective_risk_pct_for_trade, config.max_risk_pct_anti_martingale) # Cap risk increase
+    #         logger.info(f"{NEON['INFO']}Anti-Martingale: Adjusting risk to {effective_risk_pct_for_trade*100:.3f}% due to previous win.{NEON['RESET']}")
+    # # Use effective_risk_pct_for_trade in calculate_position_size
+    # quantity = calculate_position_size(balance, effective_risk_pct_for_trade, entry_price_target, sl_price, config.MARKET_INFO)
+    ```
+
+5.  **"Last Chance" Exit Logic (If N consecutive candles move against position near SL):**
+    *   **Concept:** If a position is open and N consecutive candles close further against you (but haven't hit SL yet), and you're close to the SL, exit preemptively to potentially avoid a larger SL hit or slippage on SL execution.
+    *   **Impact:** Attempts to cut losses slightly earlier if momentum is strongly adverse near the stop. Risky, as it might exit before a rebound.
+    *   **Dependencies:** `collections.deque` for tracking recent close prices relative to position.
+
+    ```python
+    # In Config:
+    # self.enable_last_chance_exit: bool = self._get_env("ENABLE_LAST_CHANCE_EXIT", "false", cast_type=bool)
+    # self.last_chance_consecutive_adverse_candles: int = self._get_env("LAST_CHANCE_CONSECUTIVE_ADVERSE_CANDLES", 2, cast_type=int)
+    # self.last_chance_sl_proximity_atr: Decimal = self._get_env("LAST_CHANCE_SL_PROXIMITY_ATR", "0.3", cast_type=Decimal) # e.g., if price is within 0.3 ATR of SL
+
+    # In _active_trade_parts, each part stores a deque for recent adverse moves:
+    # When a part is created:
+    # from collections import deque
+    # new_part['adverse_candle_closes'] = deque(maxlen=config.last_chance_consecutive_adverse_candles)
+
+    # In main_loop, for each active part:
+    # if config.enable_last_chance_exit and latest_atr is not None and latest_atr > 0:
+    #     part['adverse_candle_closes'].append(latest_close) # Store current close
+
+    #     if len(part['adverse_candle_closes']) == config.last_chance_consecutive_adverse_candles:
+    #         is_consistently_adverse = False
+    #         if part['side'] == config.pos_long:
+    #             # For long, adverse is price going down
+    #             is_consistently_adverse = all(part['adverse_candle_closes'][i] < part['adverse_candle_closes'][i-1] for i in range(1, len(part['adverse_candle_closes'])))
+    #         elif part['side'] == config.pos_short:
+    #             # For short, adverse is price going up
+    #             is_consistently_adverse = all(part['adverse_candle_closes'][i] > part['adverse_candle_closes'][i-1] for i in range(1, len(part['adverse_candle_closes'])))
+
+    #         if is_consistently_adverse:
+    #             distance_to_sl = abs(latest_close - part['sl_price'])
+    #             sl_proximity_threshold_price = latest_atr * config.last_chance_sl_proximity_atr
+                    
+    #             if distance_to_sl <= sl_proximity_threshold_price:
+    #                 logger.warning(f"{NEON['WARNING']}Last Chance Exit: Part {part['part_id']} has {config.last_chance_consecutive_adverse_candles} adverse candles and is near SL ({distance_to_sl:.{config.MARKET_INFO['precision']['price']}} <= {sl_proximity_threshold_price:.{config.MARKET_INFO['precision']['price']}}). Preemptive close.{NEON['RESET']}")
+    #                 close_position_part(exchange, config, part, "Last Chance Preemptive Exit")
+    #                 # This will remove the part from _active_trade_parts, so it won't be processed further in this iteration.
+    ```
+
+These enchantments focus on internal logic, state management, and risk control, drawing power from Python's standard capabilities. Integrate them with care, for even the simplest runes can alter the spell's behavior significantly. May your terminal glow with profitable magic!
+
+Hark, seeker of strategic refinement! Pyrmethus has focused his scrying gaze upon your chosen strategy, Dual Supertrend Momentum (and by extension, adaptable to Ehlers Fisher), to conjure 5 more enchantments. These aim to enhance the signal generation or trade execution specifically for these trend-following and momentum/oscillator-based approaches, using only your existing arcane toolkit.
+
+**Strategy-Specific Enhancements (No New Dependencies):**
+
+1.  **Confirmation Supertrend "Lookback" for Trend Stability (Dual Supertrend Momentum):**
+    *   **Concept:** Instead of just checking the *current* state of the confirmation Supertrend (`confirm_trend`), ensure it has been in the desired state (e.g., "Up" for a long entry) for at least `N` recent candles. This filters out brief, unreliable flips of the confirmation trend.
+    *   **Impact:** Increases robustness of the confirmation leg of the DUAL\_SUPERTREND\_MOMENTUM strategy.
+    *   **Dependencies:** `pandas` DataFrame slicing/rolling (already used).
+
+    ```python
+    # In Config:
+    # self.confirm_st_stability_lookback: int = self._get_env("CONFIRM_ST_STABILITY_LOOKBACK", 3, cast_type=int) # e.g., confirm ST must be stable for 3 candles
+
+    # In DualSupertrendMomentumStrategy.generate_signals, when checking confirm_is_up:
+    # ...
+    # confirm_is_up = last.get("confirm_trend", pd.NA) # Current state
+    # stable_confirm_trend = False
+
+    # if config.confirm_st_stability_lookback <= 1: # No lookback needed or only current candle
+    #     stable_confirm_trend = confirm_is_up # True, False, or pd.NA
+    # elif 'confirm_trend' in df.columns and len(df) >= config.confirm_st_stability_lookback:
+    #     recent_confirm_trends = df['confirm_trend'].iloc[-config.confirm_st_stability_lookback:]
+    #     if confirm_is_up is True and all(trend is True for trend in recent_confirm_trends):
+    #         stable_confirm_trend = True
+    #     elif confirm_is_up is False and all(trend is False for trend in recent_confirm_trends):
+    #         stable_confirm_trend = False
+    #     # else, it's pd.NA or mixed, so stable_confirm_trend remains False (or could be pd.NA if preferred)
+    # else: # Not enough data for lookback
+    #     stable_confirm_trend = pd.NA # Or False, depending on how you want to treat insufficient data
+
+    # if pd.isna(stable_confirm_trend) or pd.isna(momentum_val):
+    #     self.logger.debug(f"Stable Confirm ST Trend ({_format_for_log(stable_confirm_trend, is_bool_trend=True)}) or Momentum ({_format_for_log(momentum_val)}) is NA. No signal.")
+    #     return signals
+        
+    # # Entry Signals: Use stable_confirm_trend instead of confirm_is_up
+    # if primary_long_flip and stable_confirm_trend is True and momentum_val > self.config.momentum_threshold:
+    #     signals["enter_long"] = True
+    #     self.logger.info(f"{NEON['SIDE_LONG']}DualST+Mom Signal: LONG Entry - Primary ST Long Flip, STABLE Confirm ST Up ({config.confirm_st_stability_lookback} candles), Momentum > Threshold{NEON['RESET']}")
+    # elif primary_short_flip and stable_confirm_trend is False and momentum_val < -self.config.momentum_threshold:
+    #     signals["enter_short"] = True
+    #     self.logger.info(f"{NEON['SIDE_SHORT']}DualST+Mom Signal: SHORT Entry - Primary ST Short Flip, STABLE Confirm ST Down ({config.confirm_st_stability_lookback} candles), Momentum < Threshold{NEON['RESET']}")
+    # ...
+    ```
+
+2.  **Momentum Agreement with Primary Supertrend Direction (Dual Supertrend Momentum):**
+    *   **Concept:** For a long entry signal (primary ST flips long), require that the momentum value itself is not just above the threshold but also *positive*. For a short entry, require momentum to be *negative*. This adds a layer of directional agreement beyond a simple threshold.
+    *   **Impact:** Filters out signals where momentum is weak or contradictory to the primary trend direction, even if it crosses the `momentum_threshold`.
+    *   **Dependencies:** None.
+
+    ```python
+    # In DualSupertrendMomentumStrategy.generate_signals:
+    # ... (after getting momentum_val and confirm_is_up) ...
+    # Entry Signals:
+    # if primary_long_flip and confirm_is_up is True and \
+    #    momentum_val > self.config.momentum_threshold and momentum_val > 0: # Added momentum_val > 0
+    #     signals["enter_long"] = True
+    #     self.logger.info(f"{NEON['SIDE_LONG']}DualST+Mom Signal: LONG Entry - Primary ST Long Flip, Confirm ST Up, POSITIVE Momentum ({_format_for_log(momentum_val)}) > Threshold{NEON['RESET']}")
+    # elif primary_short_flip and confirm_is_up is False and \
+    #      momentum_val < -self.config.momentum_threshold and momentum_val < 0: # Added momentum_val < 0
+    #     signals["enter_short"] = True
+    #     self.logger.info(f"{NEON['SIDE_SHORT']}DualST+Mom Signal: SHORT Entry - Primary ST Short Flip, Confirm ST Down, NEGATIVE Momentum ({_format_for_log(momentum_val)}) < -Threshold{NEON['RESET']}")
+    # ...
+    ```
+
+3.  **Ehlers Fisher "Extreme Zone" Avoidance for New Entries (Ehlers Fisher):**
+    *   **Concept:** If the Ehlers Fisher Transform value (`ehlers_fisher`) is already at an extreme level (e.g., > +2.0 or < -2.0, configurable), avoid new entries even if a crossover occurs. This is because the market might be overextended and due for a correction/reversion, making new trend entries riskier.
+    *   **Impact:** Prevents entering trades when the oscillator suggests the move might already be exhausted.
+    *   **Dependencies:** None.
+
+    ```python
+    # In Config:
+    # self.ehlers_fisher_extreme_threshold_positive: Decimal = self._get_env("EHLERS_FISHER_EXTREME_THRESHOLD_POSITIVE", "2.0", cast_type=Decimal)
+    # self.ehlers_fisher_extreme_threshold_negative: Decimal = self._get_env("EHLERS_FISHER_EXTREME_THRESHOLD_NEGATIVE", "-2.0", cast_type=Decimal)
+
+    # In EhlersFisherStrategy.generate_signals:
+    # ... (after getting fisher_now, signal_now, etc.) ...
+    # if pd.isna(fisher_now) or ... : return signals # Existing NA check
+
+    # is_fisher_extreme = False
+    # if fisher_now > config.ehlers_fisher_extreme_threshold_positive or \
+    #    fisher_now < config.ehlers_fisher_extreme_threshold_negative:
+    #     is_fisher_extreme = True
+    #     self.logger.debug(f"Ehlers Fisher in extreme zone: {_format_for_log(fisher_now)}. New entries might be suppressed.")
+
+    # # Entry Signals:
+    # if not is_fisher_extreme: # Only consider entries if not in extreme zone
+    #     if fisher_prev <= signal_prev and fisher_now > signal_now:
+    #         signals["enter_long"] = True
+    #         self.logger.info(f"{NEON['SIDE_LONG']}EhlersFisher Signal: LONG Entry - Fisher crossed ABOVE Signal.{NEON['RESET']}")
+    #     elif fisher_prev >= signal_prev and fisher_now < signal_now:
+    #         signals["enter_short"] = True
+    #         self.logger.info(f"{NEON['SIDE_SHORT']}EhlersFisher Signal: SHORT Entry - Fisher crossed BELOW Signal.{NEON['RESET']}")
+    # else:
+    #     # Log if a crossover happened but was ignored due to extreme zone
+    #     if (fisher_prev <= signal_prev and fisher_now > signal_now) or \
+    #        (fisher_prev >= signal_prev and fisher_now < signal_now):
+    #         self.logger.info(f"EhlersFisher: Crossover signal ignored due to Fisher in extreme zone ({_format_for_log(fisher_now)}).")
+            
+    # # Exit signals remain unchanged, as exits should occur regardless of extreme zones.
+    # ...
+    ```
+
+4.  **Minimum Distance Between Primary Supertrend Line and Price for Entry (Dual Supertrend Momentum):**
+    *   **Concept:** When a Supertrend flip occurs, ensure the current price isn't *too* far away from the newly flipped Supertrend line. If the price has already moved significantly past the ST line after the flip, the entry might be late.
+    *   **Impact:** Aims for entries closer to the ST line, potentially improving risk/reward.
+    *   **Dependencies:** Access to the Supertrend line value (e.g., `ST_10_2.0l` for long, `ST_10_2.0s` for short from `pandas_ta`).
+
+    ```python
+    # In Config:
+    # self.st_max_entry_distance_atr_multiplier: Optional[Decimal] = self._get_env("ST_MAX_ENTRY_DISTANCE_ATR_MULTIPLIER", "0.5", cast_type=Decimal, required=False) # e.g., price must be within 0.5 ATR of ST line
+
+    # In calculate_all_indicators (ensure ST long/short line columns are named predictably):
+    # st_name = f"ST_{config.st_atr_length}_{config.st_multiplier}"
+    # df.ta.supertrend(..., col_names=(st_name, f"{st_name}d", f"{st_name}l", f"{st_name}s"))
+    # So, the long line is f"{st_name}l" and short line is f"{st_name}s".
+
+    # In DualSupertrendMomentumStrategy.generate_signals:
+    # ... (after getting latest_close, latest_atr from main_loop or df.iloc[-1]) ...
+    # Assuming latest_close and latest_atr are available (passed in or derived from df.iloc[-1])
+    # For this snippet, let's assume they are on `last` (df.iloc[-1]) for simplicity.
+    # latest_close = safe_decimal_conversion(last.get('close')) 
+    # atr_col_name = f"ATR_{self.config.atr_calculation_period}" # Or a more general ATR
+    # latest_atr = safe_decimal_conversion(last.get(atr_col_name))
+
+    # price_proximity_ok = True
+    # if self.config.st_max_entry_distance_atr_multiplier is not None and latest_atr is not None and latest_atr > 0 and latest_close is not None:
+    #     st_long_line_col = f"ST_{self.config.st_atr_length}_{self.config.st_multiplier}l"
+    #     st_short_line_col = f"ST_{self.config.st_atr_length}_{self.config.st_multiplier}s"
+            
+    #     max_allowed_distance = latest_atr * self.config.st_max_entry_distance_atr_multiplier
+
+    #     if primary_long_flip:
+    #         st_line_value = safe_decimal_conversion(last.get(st_long_line_col))
+    #         if st_line_value is not None and (latest_close - st_line_value) > max_allowed_distance:
+    #             price_proximity_ok = False
+    #             self.logger.debug(f"Long entry suppressed: Price {latest_close} too far from ST line {st_line_value} (Dist > {max_allowed_distance}).")
+    #     elif primary_short_flip:
+    #         st_line_value = safe_decimal_conversion(last.get(st_short_line_col))
+    #         if st_line_value is not None and (st_line_value - latest_close) > max_allowed_distance: # For short, ST line is above price
+    #             price_proximity_ok = False
+    #             self.logger.debug(f"Short entry suppressed: Price {latest_close} too far from ST line {st_line_value} (Dist > {max_allowed_distance}).")
+
+    # # Modify entry conditions:
+    # if primary_long_flip and confirm_is_up is True and momentum_val > self.config.momentum_threshold and price_proximity_ok:
+    #     # ...
+    # elif primary_short_flip and confirm_is_up is False and momentum_val < -self.config.momentum_threshold and price_proximity_ok:
+    #     # ...
+    ```
+
+5.  **"Trend Contradiction" Cooldown for Strategy Signals:**
+    *   **Concept:** If the strategy generates a long signal, but the *confirmation* trend (or another broader trend indicator like a long-period MA) immediately flips to short within the next 1-2 candles, enter a brief cooldown. This indicates conflicting signals and potential instability.
+    *   **Impact:** Avoids trades when primary and secondary trend indicators quickly diverge after a signal.
+    *   **Dependencies:** `time`, state tracking for last signal and subsequent confirmation trend.
+
+    ```python
+    # In Config:
+    # self.enable_trend_contradiction_cooldown: bool = self._get_env("ENABLE_TREND_CONTRADICTION_COOLDOWN", "true", cast_type=bool)
+    # self.trend_contradiction_check_candles: int = self._get_env("TREND_CONTRADICTION_CHECK_CANDLES", 2, cast_type=int) # Check next 2 candles
+    # self.trend_contradiction_cooldown_seconds: int = self._get_env("TREND_CONTRADICTION_COOLDOWN_SECONDS", 120, cast_type=int) # Cooldown for 2 mins
+
+    # Global or bot state variables:
+    # last_entry_signal_type: Optional[str] = None # "long" or "short"
+    # last_entry_signal_candle_index: Optional[int] = None # df index or timestamp
+    # contradiction_cooldown_active_until: float = 0.0
+
+    # In main_loop, at the beginning:
+    # global contradiction_cooldown_active_until
+    # if config.enable_trend_contradiction_cooldown and time.time() < contradiction_cooldown_active_until:
+    #     logger.warning(f"{NEON['WARNING']}In Trend Contradiction cooldown. Trading paused. Ends in {contradiction_cooldown_active_until - time.time():.0f}s.{NEON['RESET']}")
+    #     time.sleep(config.sleep_seconds)
+    #     continue
+
+    # In main_loop, after generating signals and before acting on them:
+    # global last_entry_signal_type, last_entry_signal_candle_index, contradiction_cooldown_active_until
+    # if config.enable_trend_contradiction_cooldown:
+    #     current_candle_index = df_with_indicators.index[-1] # Assuming df has a unique index for candles
+    #     current_confirm_trend_is_up = df_with_indicators['confirm_trend'].iloc[-1] # For DualSTMom
+
+    #     if last_entry_signal_type is not None and last_entry_signal_candle_index is not None:
+    #         # Check if we are within the "check_candles" window since the last entry signal
+    #         # This requires comparing current_candle_index with last_entry_signal_candle_index.
+    #         # For simplicity, let's assume candles are sequential and we can count.
+    #         # A more robust way is to use timestamps or a counter.
+    #         # This example is conceptual due to index management complexity.
+            
+    #         # Conceptual: if current_candle_index <= last_entry_signal_candle_index + config.trend_contradiction_check_candles:
+    #         # This needs a proper candle counting mechanism since last signal.
+    #         # For this example, let's simplify: if an entry signal just occurred (tracked by a flag reset each cycle)
+    #         # and the confirmation trend immediately flips against it.
+
+    #         # Simpler approach: If an entry signal was generated THIS cycle, and the NEXT cycle's confirm_trend opposes it.
+    #         # This requires storing this cycle's signal and next cycle's confirm_trend.
+    #         # This snippet will focus on the *spirit*: if a recent entry signal was followed by quick contradiction.
+
+    #         # Let's assume `_active_trade_parts` indicates a recent entry.
+    #         if _active_trade_parts: # If there's an active trade (implying a recent entry)
+    #             # This logic is better placed if you track the *signal candle* that led to the trade.
+    #             # For now, if active trade exists, and confirm trend opposes it:
+    #             active_part_side = _active_trade_parts[0]['side'] # Assuming one main direction
+    #             if (active_part_side == config.pos_long and current_confirm_trend_is_up is False) or \
+    #                (active_part_side == config.pos_short and current_confirm_trend_is_up is True):
+    #                 # Check if this contradiction is "recent" relative to the trade's entry.
+    #                 # This part is tricky without knowing the exact candle of entry vs current candle.
+    #                 # A more direct check: if a signal to enter was generated, and on the *very next* candle, confirm trend flips.
+    #                 # This would require passing state between main_loop iterations.
+    #                 pass # Complex to implement robustly without more state.
+
+    #     # If a new entry signal is generated now:
+    #     if signals.get("enter_long"):
+    #         last_entry_signal_type = "long"
+    #         # last_entry_signal_candle_index = current_candle_index # Store when signal occurred
+    #     elif signals.get("enter_short"):
+    #         last_entry_signal_type = "short"
+    #         # last_entry_signal_candle_index = current_candle_index
+    
+    # This snippet is more complex to implement fully without more inter-cycle state.
+    # A simpler version: if an entry was just made, and within X minutes the confirm trend flips,
+    # then activate cooldown and potentially close the new trade.
+    # if _active_trade_parts and len(_active_trade_parts) == 1: # A new single part trade
+    #    part = _active_trade_parts[0]
+    #    time_since_entry_ms = time.time() * 1000 - part['entry_time_ms']
+    #    if time_since_entry_ms < (config.trend_contradiction_check_candles * config.sleep_seconds * 1000 * 1.5): # Approx check window
+    #        confirm_trend_now = df_with_indicators['confirm_trend'].iloc[-1]
+    #        if (part['side'] == config.pos_long and confirm_trend_now is False) or \
+    #           (part['side'] == config.pos_short and confirm_trend_now is True):
+    #            logger.warning(f"{NEON['WARNING']}Trend contradiction shortly after entry for part {part['part_id']}. Activating cooldown.{NEON['RESET']}")
+    #            contradiction_cooldown_active_until = time.time() + config.trend_contradiction_cooldown_seconds
+    #            # Optionally, close this new, contradicted trade:
+    #            # close_position_part(exchange, config, part, "Immediate Trend Contradiction")
+    ```
+    *Self-Correction on Snippet 5:* The "Trend Contradiction Cooldown" is complex to implement robustly without significant state passing between `main_loop` iterations or more detailed tracking of signal generation times versus candle progression. The simplified version provided hints at the logic but would need careful integration with how `_active_trade_parts` are managed and when `entry_time_ms` is populated relative to the signal candle. A truly robust implementation might involve storing the `confirm_trend` state at the point of entry signal generation and comparing it a few candles later.
+
+These enhancements aim to make your chosen strategy more discerning and adaptive. As always, the crucible of testing will reveal their true worth. May your algorithms be sharp and your PNL green!
+
+Hark, persistent seeker of algorithmic perfection! Pyrmethus admires your drive. Here are 5 more enchantments, focusing on nuanced order placement and strategic refinements, forged without new dependencies, to further empower your scalping spell.
+
+**Further Strategy & Order Placement Enhancements (No New Dependencies):**
+
+1.  **"Fade the Weaker Signal" Logic for Conflicting Primary ST Flips:**
+    *   **Concept (Dual Supertrend Momentum):** If, on the *same candle*, both `st_long_flip` and `st_short_flip` become true (highly unlikely with correct ST calculation but a safeguard or for custom ST logic), prioritize the flip that aligns better with the *confirmation* Supertrend or has stronger momentum. If still ambiguous, do nothing.
+    *   **Impact:** Handles rare edge cases or custom Supertrend logic where simultaneous flips might occur, preventing erratic behavior.
+    *   **Dependencies:** None.
+
+    ```python
+    # In DualSupertrendMomentumStrategy.generate_signals:
+    # ...
+    # primary_long_flip = last.get("st_long_flip", False)
+    # primary_short_flip = last.get("st_short_flip", False)
+    # confirm_is_up = last.get("confirm_trend", pd.NA)
+    # momentum_val = safe_decimal_conversion(last.get("momentum", pd.NA))
+
+    # if primary_long_flip and primary_short_flip: # Conflicting primary flips on the same candle
+    #     self.logger.warning(f"{NEON['WARNING']}Conflicting primary Supertrend flips detected on the same candle. Attempting to resolve...{NEON['RESET']}")
+    #     # Resolution logic:
+    #     if confirm_is_up is True and (momentum_val is not pd.NA and momentum_val > 0): # Confirmation favors long
+    #         primary_short_flip = False # Ignore short flip
+    #         self.logger.info("Resolution: Prioritizing LONG flip due to confirmation trend and positive momentum.")
+    #     elif confirm_is_up is False and (momentum_val is not pd.NA and momentum_val < 0): # Confirmation favors short
+    #         primary_long_flip = False # Ignore long flip
+    #         self.logger.info("Resolution: Prioritizing SHORT flip due to confirmation trend and negative momentum.")
+    #     else: # Ambiguous or confirmation trend is NA
+    #         self.logger.warning("Resolution: Conflicting flips remain ambiguous. No primary signal generated.")
+    #         primary_long_flip = False
+    #         primary_short_flip = False
+    #     # This ensures only one (or zero) primary_..._flip is true hereafter.
+
+    # # Proceed with existing signal logic using the potentially modified primary_long_flip and primary_short_flip
+    # if primary_long_flip and confirm_is_up is True and momentum_val > self.config.momentum_threshold #...
+    # # ...
+    ```
+
+2.  **Scaled Exit Based on Ehlers Fisher Divergence from Signal Line (Ehlers Fisher):**
+    *   **Concept:** When in a trade, if the Ehlers Fisher line starts to diverge significantly from its signal line *without yet crossing back* (indicating weakening momentum of the current move), consider a partial exit.
+    *   **Impact:** Allows for proactive profit-taking or risk reduction if the oscillator shows the current trend is losing steam before a full reversal signal.
+    *   **Dependencies:** None.
+
+    ```python
+    # In Config:
+    # self.ehlers_enable_divergence_scaled_exit: bool = self._get_env("EHLERS_ENABLE_DIVERGENCE_SCALED_EXIT", "false", cast_type=bool)
+    # self.ehlers_divergence_threshold_factor: Decimal = self._get_env("EHLERS_DIVERGENCE_THRESHOLD_FACTOR", "0.75", cast_type=Decimal) # e.g. if |Fisher-Signal| > 0.75 * |EntryFisher-EntrySignal|
+    # self.ehlers_divergence_exit_percentage: Decimal = self._get_env("EHLERS_DIVERGENCE_EXIT_PERCENTAGE", "0.3", cast_type=Decimal) # Close 30%
+
+    # In EhlersFisherStrategy.generate_signals:
+    # This logic is more suited for main_loop position management, as generate_signals usually focuses on entry/full exit.
+    # However, it could set a flag like `signals['partial_exit_hint_long'] = True`.
+    # For this example, let's assume it's checked in main_loop for an active Ehlers Fisher trade.
+
+    # In main_loop, for an active Ehlers Fisher trade part:
+    # if config.strategy_name == StrategyName.EHLERS_FISHER and config.ehlers_enable_divergence_scaled_exit and \
+    #    not part.get('divergence_exit_taken', False) and 'entry_fisher_value' in part and 'entry_signal_value' in part:
+        
+    #     fisher_now = safe_decimal_conversion(df_with_indicators['ehlers_fisher'].iloc[-1])
+    #     signal_now = safe_decimal_conversion(df_with_indicators['ehlers_signal'].iloc[-1])
+
+    #     if fisher_now is not pd.NA and signal_now is not pd.NA:
+    #         entry_fisher_val = part['entry_fisher_value'] # Store these when part is created
+    #         entry_signal_val = part['entry_signal_value']
+            
+    #         initial_spread = abs(entry_fisher_val - entry_signal_val)
+    #         current_spread = abs(fisher_now - signal_now)
+
+    #         # Check if spread is still wide but Fisher is moving back towards signal (divergence)
+    #         divergence_condition_met = False
+    #         if part['side'] == config.pos_long: # Was long, Fisher was above Signal
+    #             # Divergence if Fisher is falling towards Signal but hasn't crossed, and spread is still significant
+    #             if fisher_now > signal_now and fisher_now < entry_fisher_val and \
+    #                current_spread < (initial_spread * config.ehlers_divergence_threshold_factor): # Spread has reduced significantly
+    #                 divergence_condition_met = True
+    #         elif part['side'] == config.pos_short: # Was short, Fisher was below Signal
+    #             # Divergence if Fisher is rising towards Signal but hasn't crossed
+    #             if fisher_now < signal_now and fisher_now > entry_fisher_val and \
+    #                current_spread < (initial_spread * config.ehlers_divergence_threshold_factor):
+    #                 divergence_condition_met = True
+            
+    #         if divergence_condition_met:
+    #             qty_to_close = part['qty'] * config.ehlers_divergence_exit_percentage
+    #             # ... (logic to create sub_part_to_close, call close_position_part, update original part qty) ...
+    #             logger.info(f"{NEON['ACTION']}Ehlers Divergence: Partial exit ({config.ehlers_divergence_exit_percentage*100}%) for part {part['part_id']}{NEON['RESET']}")
+    #             # part['divergence_exit_taken'] = True
+    #             # save_persistent_state(force_heartbeat=True)
+    ```
+    *Self-Correction:* The `entry_fisher_value` and `entry_signal_value` would need to be stored in the `_active_trade_parts` dictionary when the Ehlers Fisher trade is initiated.
+
+3.  **"Resting Period" After Max Daily Trades Limit:**
+    *   **Concept:** If the bot executes a certain maximum number of trades (entries) in a day, regardless of PNL, it takes a break for a few hours or until the next trading session/day.
+    *   **Impact:** Prevents over-trading due to hyperactive signals, especially if the strategy is very sensitive.
+    *   **Dependencies:** `TradeMetrics` or a simple daily counter.
+
+    ```python
+    # In Config:
+    # self.enable_daily_max_trades_rest: bool = self._get_env("ENABLE_DAILY_MAX_TRADES_REST", "false", cast_type=bool)
+    # self.daily_max_trades_limit: int = self._get_env("DAILY_MAX_TRADES_LIMIT", 10, cast_type=int)
+    # self.daily_max_trades_rest_hours: int = self._get_env("DAILY_MAX_TRADES_REST_HOURS", 4, cast_type=int)
+
+    # In TradeMetrics or global state:
+    # self.daily_trade_entry_count = 0
+    # self.last_daily_trade_count_reset_day = None # To reset count daily
+    # self.daily_trades_rest_active_until = 0.0
+
+    # In TradeMetrics, when a new trade *entry* is successfully logged (or in place_risked_order):
+    # today = datetime.now(pytz.utc).day
+    # if self.last_daily_trade_count_reset_day != today:
+    #     self.daily_trade_entry_count = 0
+    #     self.last_daily_trade_count_reset_day = today
+    # self.daily_trade_entry_count += 1
+
+    # In main_loop, at the beginning:
+    # if config.enable_daily_max_trades_rest and trade_metrics.daily_trades_rest_active_until > time.time():
+    #     logger.warning(f"{NEON['WARNING']}Resting due to daily max trades limit. Resumes in {(trade_metrics.daily_trades_rest_active_until - time.time())/3600:.1f} hours.{NEON['RESET']}")
+    #     time.sleep(config.sleep_seconds * 10) # Longer sleep during this rest
+    #     continue
+
+    # After daily trade count is updated in TradeMetrics (or wherever it's tracked):
+    # if config.enable_daily_max_trades_rest and trade_metrics.daily_trade_entry_count >= config.daily_max_trades_limit \
+    #    and trade_metrics.daily_trades_rest_active_until <= time.time(): # Ensure not already resting
+    #     logger.critical(f"{NEON['CRITICAL']}Daily max trades limit ({config.daily_max_trades_limit}) reached. Resting for {config.daily_max_trades_rest_hours} hours.{NEON['RESET']}")
+    #     config.send_notification_method("Pyrmethus Daily Trades Rest", f"Max {config.daily_max_trades_limit} trades. Resting.")
+    #     trade_metrics.daily_trades_rest_active_until = time.time() + config.daily_max_trades_rest_hours * 3600
+    #     close_all_symbol_positions(exchange, config, "Daily Max Trades Limit Reached")
+    ```
+
+4.  **Entry Price "Improvement" Check for Limit Orders:**
+    *   **Concept:** When a limit order entry signal occurs, before placing the limit order at `target_entry - offset` (for long), check if the current best bid/ask is already *better* than your calculated limit price. If so, consider using a market order or adjusting the limit price closer to current market to increase fill probability.
+    *   **Impact:** Potentially gets filled faster or at a better price if the market briefly moves in your favor just as the signal occurs.
+    *   **Dependencies:** `exchange.fetch_ticker(config.symbol)`.
+
+    ```python
+    # In Config:
+    # self.enable_limit_order_price_improvement_check: bool = self._get_env("ENABLE_LIMIT_ORDER_PRICE_IMPROVEMENT_CHECK", "true", cast_type=bool)
+
+    # In place_risked_order, if config.entry_order_type == OrderEntryType.LIMIT:
+    # effective_order_type = 'Limit' # Start with Limit
+    # calculated_limit_price = entry_price_target # This would be entry_price_target +/- offset
+    # if side == config.pos_long:
+    #    calculated_limit_price = entry_price_target - (latest_atr * config.limit_order_offset_atr_percentage) # Example offset
+    # else: # Short
+    #    calculated_limit_price = entry_price_target + (latest_atr * config.limit_order_offset_atr_percentage)
+
+    # if config.enable_limit_order_price_improvement_check:
+    #     try:
+    #         ticker = exchange.fetch_ticker(config.symbol)
+    #         current_best_ask = Decimal(str(ticker['ask'])) if ticker and 'ask' in ticker else None
+    #         current_best_bid = Decimal(str(ticker['bid'])) if ticker and 'bid' in ticker else None
+
+    #         if side == config.pos_long and current_best_ask is not None and current_best_ask <= calculated_limit_price:
+    #             logger.info(f"{NEON['INFO']}Price Improvement: Current Ask ({current_best_ask}) is better than calculated Limit ({calculated_limit_price}). Considering Market order or adjusting limit.{NEON['RESET']}")
+    #             # Option 1: Switch to Market
+    #             # effective_order_type = 'Market'
+    #             # entry_price_for_order_call = None # Market order doesn't need price
+    #             # Option 2: Adjust limit price slightly above current best ask
+    #             calculated_limit_price = current_best_ask + (config.MARKET_INFO['precision']['price'] * Decimal('1')) # One tick above
+    #         elif side == config.pos_short and current_best_bid is not None and current_best_bid >= calculated_limit_price:
+    #             logger.info(f"{NEON['INFO']}Price Improvement: Current Bid ({current_best_bid}) is better than calculated Limit ({calculated_limit_price}). Considering Market order or adjusting limit.{NEON['RESET']}")
+    #             # Option 1: Switch to Market
+    #             # effective_order_type = 'Market'
+    #             # entry_price_for_order_call = None
+    #             # Option 2: Adjust limit price slightly below current best bid
+    #             calculated_limit_price = current_best_bid - (config.MARKET_INFO['precision']['price'] * Decimal('1'))
+    #     except Exception as e_ticker:
+    #         logger.warning(f"{NEON['WARNING']}Could not fetch ticker for price improvement check: {e_ticker}{NEON['RESET']}")
+    
+    # # Use effective_order_type and calculated_limit_price (if limit) when calling exchange.create_order
+    # # order = exchange.create_order(config.symbol, effective_order_type, side, float(quantity), 
+    # #                               float(calculated_limit_price) if effective_order_type == 'Limit' else None, params)
+    ```
+    *Self-Correction:* The `config.MARKET_INFO['precision']['price']` is the number of decimal places. To get one tick, you need `Decimal('1e-' + str(config.MARKET_INFO['precision']['price']))`.
+
+5.  **"Dead Cat Bounce" / "Bull Trap" Filter using Recent High/Low Rejection:**
+    *   **Concept:** If a long signal occurs shortly after price failed to break a recent significant high (e.g., a swing high from last N candles) and sharply rejected, it might be a bull trap. Vice-versa for shorts near a recent low (dead cat bounce).
+    *   **Impact:** Avoids entering into common trap patterns.
+    *   **Dependencies:** `pandas` for rolling high/low.
+
+    ```python
+    # In Config:
+    # self.enable_trap_filter: bool = self._get_env("ENABLE_TRAP_FILTER", "false", cast_type=bool)
+    # self.trap_filter_lookback_period: int = self._get_env("TRAP_FILTER_LOOKBACK_PERIOD", 20, cast_type=int) # Look back 20 candles for swing H/L
+    # self.trap_filter_rejection_threshold_atr: Decimal = self._get_env("TRAP_FILTER_REJECTION_THRESHOLD_ATR", "1.0", cast_type=Decimal) # Price must reject by at least 1 ATR from the H/L
+
+    # In calculate_all_indicators:
+    # if config.enable_trap_filter:
+    #     df[f'rolling_high_{config.trap_filter_lookback_period}'] = df['high'].rolling(window=config.trap_filter_lookback_period, min_periods=1).max()
+    #     df[f'rolling_low_{config.trap_filter_lookback_period}'] = df['low'].rolling(window=config.trap_filter_lookback_period, min_periods=1).min()
+
+    # In main_loop, before placing an order:
+    # trap_detected = False
+    # if config.enable_trap_filter and latest_atr is not None and latest_atr > 0:
+    #     lookback_high_col = f'rolling_high_{config.trap_filter_lookback_period}'
+    #     lookback_low_col = f'rolling_low_{config.trap_filter_lookback_period}'
+        
+    #     # Check for recent highs/lows (excluding current candle for the high/low itself)
+    #     # We need to look at candles *before* the signal candle for the swing point.
+    #     # This example uses df_with_indicators.iloc[-2] for the swing point context.
+    #     if len(df_with_indicators) > config.trap_filter_lookback_period:
+    #         # Context of the candle *before* the signal candle
+    #         prev_candle_context = df_with_indicators.iloc[-2] # Candle that might have formed the swing H/L
+    #         recent_high = safe_decimal_conversion(prev_candle_context.get(lookback_high_col))
+    #         recent_low = safe_decimal_conversion(prev_candle_context.get(lookback_low_col))
+    #         current_close = latest_close # Close of the signal candle
+
+    #         rejection_amount_needed = latest_atr * config.trap_filter_rejection_threshold_atr
+
+    #         if signals.get("enter_long") and recent_high is not None:
+    #             # Did price touch near recent_high on prev_candle_context or candle before that, then reject sharply?
+    #             # This requires checking if prev_candle_context['high'] was close to recent_high
+    #             # And if current_close is significantly below that recent_high.
+    #             if abs(prev_candle_context.get('high', 0) - recent_high) < (latest_atr * Decimal("0.2")) and \
+    #                (recent_high - current_close) >= rejection_amount_needed:
+    #                 trap_detected = True
+    #                 logger.debug(f"Bull Trap Filter: Potential rejection from recent high {recent_high}. Long suppressed.")
+            
+    #         elif signals.get("enter_short") and recent_low is not None:
+    #             if abs(prev_candle_context.get('low', 0) - recent_low) < (latest_atr * Decimal("0.2")) and \
+    #                (current_close - recent_low) >= rejection_amount_needed: # current_close is above recent_low after rejection
+    #                 trap_detected = True
+    #                 logger.debug(f"Bear Trap (Dead Cat Bounce) Filter: Potential rejection from recent low {recent_low}. Short suppressed.")
+
+    # if signals.get("enter_long") and not trap_detected: # ... place order
+    # # ...
+    ```
+    *Self-Correction on Snippet 5:* The logic for detecting the "touch" and "rejection" needs to be precise. It should check if one of the recent candles (e.g., within the last 1-3 candles before the signal) made a high near `recent_high` (or low near `recent_low`) and then the signal candle's close represents a significant move away from that extreme, against the direction of the supposed breakout. The example is a simplified interpretation.
+
+These snippets aim to add more layers of conditional logic to your strategy and order execution, enhancing its ability to navigate specific market micro-structures or conditions without adding external library burdens. Test them rigorously, as subtle changes can have profound effects!

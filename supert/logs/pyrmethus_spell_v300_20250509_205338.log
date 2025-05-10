@@ -1,0 +1,53 @@
+{"timestamp": "2025-05-09 20:53:38", "level": "INFO", "name": "ConfigModule", "message": "Summoning Configuration Runes v3.0.0"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'BYBIT_API_KEY': Found Env Value: '********'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'BYBIT_API_SECRET': Found Env Value: '********'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'SYMBOL': Found Env Value: 'TRUMP/USDT:USDT'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'INTERVAL': Found Env Value: '1m'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'LEVERAGE': Found Env Value: '25'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'PAPER_TRADING_MODE': Found Env Value: 'true'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'DEFAULT_RECV_WINDOW': Found Env Value: '13000'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'RISK_PER_TRADE_PERCENTAGE': Found Env Value: '0.003'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'MAX_ORDER_USDT_AMOUNT': Found Env Value: '50.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'MIN_USDT_BALANCE_FOR_TRADING': Found Env Value: '2.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'MAX_ACTIVE_TRADE_PARTS': Found Env Value: '1'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ORDER_FILL_TIMEOUT_SECONDS': Found Env Value: '10'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'SLEEP_SECONDS': Found Env Value: '5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ATR_STOP_LOSS_MULTIPLIER': Found Env Value: '1.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ENABLE_TAKE_PROFIT': Found Env Value: 'true'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ATR_TAKE_PROFIT_MULTIPLIER': Found Env Value: '1.5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ENABLE_TRAILING_SL': Not Found. Using Default: 'true'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'TRAILING_SL_TRIGGER_ATR': Not Found. Using Default: '1.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'TRAILING_SL_DISTANCE_ATR': Not Found. Using Default: '0.5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ENABLE_MAX_DRAWDOWN_STOP': Found Env Value: 'true'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'MAX_DRAWDOWN_PERCENT': Found Env Value: '0.03'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ENABLE_SESSION_PNL_LIMITS': Found Env Value: 'true'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'SESSION_PROFIT_TARGET_USDT': Found Env Value: '3.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'SESSION_MAX_LOSS_USDT': Found Env Value: '15.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'STRATEGY_NAME': Found Env Value: 'DUAL_SUPERTREND_MOMENTUM'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ST_ATR_LENGTH': Found Env Value: '7'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ST_MULTIPLIER': Found Env Value: '1.5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'CONFIRM_ST_ATR_LENGTH': Found Env Value: '14'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'CONFIRM_ST_MULTIPLIER': Found Env Value: '2.5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'MOMENTUM_PERIOD': Found Env Value: '10'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'MOMENTUM_THRESHOLD': Found Env Value: '0.5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'CONFIRM_ST_STABILITY_LOOKBACK': Found Env Value: '2'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ST_MAX_ENTRY_DISTANCE_ATR_MULTIPLIER': Found Env Value: '0.3'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'EHLERS_FISHER_LENGTH': Found Env Value: '10'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'EHLERS_FISHER_SIGNAL_LENGTH': Found Env Value: '1'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'EHLERS_FISHER_EXTREME_THRESHOLD_POSITIVE': Found Env Value: '2.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'EHLERS_FISHER_EXTREME_THRESHOLD_NEGATIVE': Found Env Value: '-2.0'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'ENABLE_NOTIFICATIONS': Found Env Value: 'true'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "DEBUG", "name": "ConfigModule", "message": "Config Rune 'NOTIFICATION_TIMEOUT_SECONDS': Found Env Value: '5'"}
+{"timestamp": "2025-05-09 20:53:38", "level": "INFO", "name": "ConfigModule", "message": "Configuration Runes v3.0.0 Summoned and Verified"}
+{"timestamp": "2025-05-09 20:53:38", "level": "INFO", "name": "Strategy.DualSupertrendMomentumStrategy", "message": "Strategy Form 'DualSupertrendMomentumStrategy' materializing..."}
+{"timestamp": "2025-05-09 20:53:38", "level": "SUCCESS", "name": "PyrmethusCore", "message": "Strategy 'DUAL_SUPERTREND_MOMENTUM' invoked."}
+{"timestamp": "2025-05-09 20:53:38", "level": "INFO", "name": "TradeMetrics", "message": "TradeMetrics Ledger opened."}
+{"timestamp": "2025-05-09 20:53:38", "level": "INFO", "name": "PyrmethusCore", "message": "Pyrmethus prepares to breach veil to exchange realm..."}
+{"timestamp": "2025-05-09 20:53:39", "level": "INFO", "name": "PyrmethusCore", "message": "Connecting to: bybit (CCXT: 4.4.72)"}
+{"timestamp": "2025-05-09 20:53:39", "level": "DEBUG", "name": "PyrmethusCore", "message": "Exchange URLs: {'logo': 'https://github.com/user-attachments/assets/97a5d0b3-de10-423d-90e1-6620960025ed', 'api': {'spot': 'https://api.{hostname}', 'futures': 'https://api.{hostname}', 'v2': 'https://api.{hostname}', 'public': 'https://api-testnet.bybit.com', 'private': 'https://api-testnet.bybit.com', 'v5': 'https://api-testnet.bybit.com/v5'}, 'www': 'https://www.bybit.com', 'doc': ['https://bybit-exchange.github.io/docs/inverse/', 'https://bybit-exchange.github.io/docs/linear/', 'https://github.com/bybit-exchange'], 'fees': 'https://help.bybit.com/hc/en-us/articles/360039261154', 'test': {'spot': 'https://api-testnet.{hostname}', 'futures': 'https://api-testnet.{hostname}', 'v2': 'https://api-testnet.{hostname}', 'public': 'https://api-testnet.{hostname}', 'private': 'https://api-testnet.{hostname}'}, 'demotrading': {'spot': 'https://api-demo.{hostname}', 'futures': 'https://api-demo.{hostname}', 'v2': 'https://api-demo.{hostname}', 'public': 'https://api-demo.{hostname}', 'private': 'https://api-demo.{hostname}'}, 'referral': 'https://www.bybit.com/register?affiliate_id=35953'}"}
+{"timestamp": "2025-05-09 20:53:39", "level": "DEBUG", "name": "ccxt.base.exchange", "message": "GET https://api-testnet.bybit.com/v5/asset/coin/query-info?, Request: {'Content-Type': 'application/json', 'X-BAPI-API-KEY': 'NRrb4Biggi3sO7rKZ1', 'X-BAPI-TIMESTAMP': '1746842019024', 'X-BAPI-RECV-WINDOW': '5000', 'X-BAPI-SIGN': 'd5e4a477644c4e0d709a3f6211c9d48a887dc6405791b3f16712a954eeb5b5ad', 'User-Agent': 'python-requests/2.32.3', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive'} None"}
+{"timestamp": "2025-05-09 20:53:39", "level": "DEBUG", "name": "urllib3.connectionpool", "message": "Starting new HTTPS connection (1): api-testnet.bybit.com:443"}
+{"timestamp": "2025-05-09 20:53:40", "level": "DEBUG", "name": "urllib3.connectionpool", "message": "https://api-testnet.bybit.com:443 "GET /v5/asset/coin/query-info HTTP/1.1" 200 97"}
+{"timestamp": "2025-05-09 20:53:40", "level": "DEBUG", "name": "ccxt.base.exchange", "message": "GET https://api-testnet.bybit.com/v5/asset/coin/query-info?, Response: 200 {'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '97', 'Connection': 'keep-alive', 'Date': 'Sat, 10 May 2025 01:53:41 GMT', 'x-cld-src': 'Loc-A', 'Ret_code': '10003', 'Cache-Control': 'no-store', 'Traceid': '391d057c4afe68ae3aff6448fc352218', 'Timenow': '1746842021401', 'Server': 'Openresty', 'X-Cache': 'Miss from cloudfront', 'Via': '1.1 b863f5ba2fad5306016f04b0ec05bd82.cloudfront.net (CloudFront)', 'X-Amz-Cf-Pop': 'JFK50-P6', 'X-Amz-Cf-Id': 'nXTKiqAJWPMDOy2Zbz3sOwmVoW_OHyA5_bLv12Zpl-t7BjyInsR7jg=='} {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1746842021401}"}
+{"timestamp": "2025-05-09 20:53:40", "level": "CRITICAL", "name": "PyrmethusCore", "message": "Failed to init exchange: bybit {"retCode":10003,"retMsg":"API key is invalid.","result":{},"retExtInfo":{},"time":1746842021401}"}
+{"timestamp": "2025-05-09 20:53:40", "level": "DEBUG", "name": "asyncio", "message": "Using selector: EpollSelector"}

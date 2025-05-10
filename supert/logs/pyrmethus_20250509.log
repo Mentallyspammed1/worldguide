@@ -652,3 +652,754 @@
 2025-05-09 11:58:10 [[34mINFO[0m] PyrmethusCore   [32mShutdown: No active position. Clean exit.[0m
 2025-05-09 11:58:10 [[34mINFO[0m] PyrmethusCore   [33m[1m--- Pyrmethus Spell Shutdown Complete ---[0m
 2025-05-09 11:58:10 [[34mINFO[0m] PyrmethusCore   [44m[37m[1m--- Pyrmethus Scalping Spell Deactivated ---[0m
+2025-05-09 18:51:49 [[34mINFO[0m] __main__                  [35m--- Summoning Configuration Runes ---[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [31mConfig BYBIT_API_KEY: Found Env Value: 'NRrb4Biggi3sO7rKZ1'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [31mUsing final value for BYBIT_API_KEY: NRrb4Biggi3sO7rKZ1 (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [31mConfig BYBIT_API_SECRET: Found Env Value: 'TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [31mUsing final value for BYBIT_API_SECRET: TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig SYMBOL: Found Env Value: 'TRUMP/USDT:USDT'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for SYMBOL: TRUMP/USDT:USDT (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig INTERVAL: Found Env Value: '1m'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for INTERVAL: 1m (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig LEVERAGE: Found Env Value: '20'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for LEVERAGE: 20 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig SLEEP_SECONDS: Found Env Value: '10'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for SLEEP_SECONDS: 10 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STRATEGY_NAME: Found Env Value: 'EHLERS_FISHER'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STRATEGY_NAME: EHLERS_FISHER (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[34mINFO[0m] __main__                  [36mChosen Strategy Path: EHLERS_FISHER[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig RISK_PER_TRADE_PERCENTAGE: Found Env Value: '0.01'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for RISK_PER_TRADE_PERCENTAGE: 0.01 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig ATR_STOP_LOSS_MULTIPLIER: Found Env Value: '1.5'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for ATR_STOP_LOSS_MULTIPLIER: 1.5 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig MAX_ORDER_USDT_AMOUNT: Found Env Value: '50.0'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for MAX_ORDER_USDT_AMOUNT: 50.0 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig REQUIRED_MARGIN_BUFFER: Found Env Value: '1.10'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for REQUIRED_MARGIN_BUFFER: 1.10 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig MAX_ACCOUNT_MARGIN_RATIO: Not Set. Using Default: '0.8'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for MAX_ACCOUNT_MARGIN_RATIO: 0.8 (Type: Decimal) (Source: Default)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig TRAILING_STOP_PERCENTAGE: Found Env Value: '0.007'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for TRAILING_STOP_PERCENTAGE: 0.007 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT: Found Env Value: '0.002'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT: 0.002 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig ST_ATR_LENGTH: Found Env Value: '3'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for ST_ATR_LENGTH: 3 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig ST_MULTIPLIER: Found Env Value: '0.8'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for ST_MULTIPLIER: 0.8 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig CONFIRM_ST_ATR_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for CONFIRM_ST_ATR_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig CONFIRM_ST_MULTIPLIER: Found Env Value: '0.4'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for CONFIRM_ST_MULTIPLIER: 0.4 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_RSI_LENGTH: Found Env Value: '7'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_RSI_LENGTH: 7 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_STOCH_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_STOCH_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_K_PERIOD: Found Env Value: '3'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_K_PERIOD: 3 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_D_PERIOD: Found Env Value: '2'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_D_PERIOD: 2 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_OVERBOUGHT: Found Env Value: '75.0'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_OVERBOUGHT: 75.0 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_OVERSOLD: Found Env Value: '25.0'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_OVERSOLD: 25.0 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig MOMENTUM_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for MOMENTUM_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_FISHER_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_FISHER_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_FISHER_SIGNAL_LENGTH: Found Env Value: '1'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_FISHER_SIGNAL_LENGTH: 1 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_FAST_PERIOD: Found Env Value: '5'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_FAST_PERIOD: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_SLOW_PERIOD: Found Env Value: '15'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_SLOW_PERIOD: 15 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_SSF_POLES: Found Env Value: '2'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_SSF_POLES: 2 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig VOLUME_MA_PERIOD: Found Env Value: '10'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for VOLUME_MA_PERIOD: 10 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig VOLUME_SPIKE_THRESHOLD: Found Env Value: '1.8'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for VOLUME_SPIKE_THRESHOLD: 1.8 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig REQUIRE_VOLUME_SPIKE_FOR_ENTRY: Found Env Value: 'true'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for REQUIRE_VOLUME_SPIKE_FOR_ENTRY: True (Type: bool) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_BOOK_DEPTH: Found Env Value: '20'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_BOOK_DEPTH: 20 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_BOOK_RATIO_THRESHOLD_LONG: Found Env Value: '1.3'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_BOOK_RATIO_THRESHOLD_LONG: 1.3 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_BOOK_RATIO_THRESHOLD_SHORT: Found Env Value: '0.7'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_BOOK_RATIO_THRESHOLD_SHORT: 0.7 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig FETCH_ORDER_BOOK_PER_CYCLE: Found Env Value: 'true'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for FETCH_ORDER_BOOK_PER_CYCLE: True (Type: bool) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mConfig ATR_CALCULATION_PERIOD: Found Env Value: '7'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for ATR_CALCULATION_PERIOD: 7 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [35mConfig ENABLE_SMS_ALERTS: Found Env Value: 'true'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [35mUsing final value for ENABLE_SMS_ALERTS: True (Type: bool) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [35mConfig SMS_RECIPIENT_NUMBER: Found Env Value: '16364866381'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [35mUsing final value for SMS_RECIPIENT_NUMBER: 16364866381 (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [35mConfig SMS_TIMEOUT_SECONDS: Found Env Value: '30'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [35mUsing final value for SMS_TIMEOUT_SECONDS: 30 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_FILL_TIMEOUT_SECONDS: Found Env Value: '10'[0m
+2025-05-09 18:51:49 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_FILL_TIMEOUT_SECONDS: 10 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:49 [[34mINFO[0m] __main__                  [35m--- Configuration Runes Summoned and Verified ---[0m
+2025-05-09 18:51:56 [[34mINFO[0m] __main__                  [35m--- Summoning Configuration Runes ---[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [31mConfig BYBIT_API_KEY: Found Env Value: 'NRrb4Biggi3sO7rKZ1'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [31mUsing final value for BYBIT_API_KEY: NRrb4Biggi3sO7rKZ1 (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [31mConfig BYBIT_API_SECRET: Found Env Value: 'TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [31mUsing final value for BYBIT_API_SECRET: TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig SYMBOL: Found Env Value: 'TRUMP/USDT:USDT'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for SYMBOL: TRUMP/USDT:USDT (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig INTERVAL: Found Env Value: '1m'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for INTERVAL: 1m (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig LEVERAGE: Found Env Value: '20'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for LEVERAGE: 20 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig SLEEP_SECONDS: Found Env Value: '10'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for SLEEP_SECONDS: 10 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STRATEGY_NAME: Found Env Value: 'EHLERS_FISHER'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STRATEGY_NAME: EHLERS_FISHER (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[34mINFO[0m] __main__                  [36mChosen Strategy Path: EHLERS_FISHER[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig RISK_PER_TRADE_PERCENTAGE: Found Env Value: '0.01'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for RISK_PER_TRADE_PERCENTAGE: 0.01 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig ATR_STOP_LOSS_MULTIPLIER: Found Env Value: '1.5'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for ATR_STOP_LOSS_MULTIPLIER: 1.5 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig MAX_ORDER_USDT_AMOUNT: Found Env Value: '50.0'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for MAX_ORDER_USDT_AMOUNT: 50.0 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig REQUIRED_MARGIN_BUFFER: Found Env Value: '1.10'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for REQUIRED_MARGIN_BUFFER: 1.10 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig MAX_ACCOUNT_MARGIN_RATIO: Not Set. Using Default: '0.8'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for MAX_ACCOUNT_MARGIN_RATIO: 0.8 (Type: Decimal) (Source: Default)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig TRAILING_STOP_PERCENTAGE: Found Env Value: '0.007'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for TRAILING_STOP_PERCENTAGE: 0.007 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT: Found Env Value: '0.002'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT: 0.002 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig ST_ATR_LENGTH: Found Env Value: '3'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for ST_ATR_LENGTH: 3 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig ST_MULTIPLIER: Found Env Value: '0.8'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for ST_MULTIPLIER: 0.8 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig CONFIRM_ST_ATR_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for CONFIRM_ST_ATR_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig CONFIRM_ST_MULTIPLIER: Found Env Value: '0.4'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for CONFIRM_ST_MULTIPLIER: 0.4 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_RSI_LENGTH: Found Env Value: '7'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_RSI_LENGTH: 7 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_STOCH_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_STOCH_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_K_PERIOD: Found Env Value: '3'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_K_PERIOD: 3 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_D_PERIOD: Found Env Value: '2'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_D_PERIOD: 2 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_OVERBOUGHT: Found Env Value: '75.0'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_OVERBOUGHT: 75.0 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig STOCHRSI_OVERSOLD: Found Env Value: '25.0'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for STOCHRSI_OVERSOLD: 25.0 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig MOMENTUM_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for MOMENTUM_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_FISHER_LENGTH: Found Env Value: '5'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_FISHER_LENGTH: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_FISHER_SIGNAL_LENGTH: Found Env Value: '1'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_FISHER_SIGNAL_LENGTH: 1 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_FAST_PERIOD: Found Env Value: '5'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_FAST_PERIOD: 5 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_SLOW_PERIOD: Found Env Value: '15'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_SLOW_PERIOD: 15 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mConfig EHLERS_SSF_POLES: Found Env Value: '2'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [36mUsing final value for EHLERS_SSF_POLES: 2 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig VOLUME_MA_PERIOD: Found Env Value: '10'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for VOLUME_MA_PERIOD: 10 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig VOLUME_SPIKE_THRESHOLD: Found Env Value: '1.8'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for VOLUME_SPIKE_THRESHOLD: 1.8 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig REQUIRE_VOLUME_SPIKE_FOR_ENTRY: Found Env Value: 'true'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for REQUIRE_VOLUME_SPIKE_FOR_ENTRY: True (Type: bool) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_BOOK_DEPTH: Found Env Value: '20'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_BOOK_DEPTH: 20 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_BOOK_RATIO_THRESHOLD_LONG: Found Env Value: '1.3'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_BOOK_RATIO_THRESHOLD_LONG: 1.3 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_BOOK_RATIO_THRESHOLD_SHORT: Found Env Value: '0.7'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_BOOK_RATIO_THRESHOLD_SHORT: 0.7 (Type: Decimal) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig FETCH_ORDER_BOOK_PER_CYCLE: Found Env Value: 'true'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for FETCH_ORDER_BOOK_PER_CYCLE: True (Type: bool) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mConfig ATR_CALCULATION_PERIOD: Found Env Value: '7'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [32mUsing final value for ATR_CALCULATION_PERIOD: 7 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [35mConfig ENABLE_SMS_ALERTS: Found Env Value: 'true'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [35mUsing final value for ENABLE_SMS_ALERTS: True (Type: bool) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [35mConfig SMS_RECIPIENT_NUMBER: Found Env Value: '16364866381'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [35mUsing final value for SMS_RECIPIENT_NUMBER: 16364866381 (Type: str) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [35mConfig SMS_TIMEOUT_SECONDS: Found Env Value: '30'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [35mUsing final value for SMS_TIMEOUT_SECONDS: 30 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mConfig ORDER_FILL_TIMEOUT_SECONDS: Found Env Value: '10'[0m
+2025-05-09 18:51:56 [[36m[2mDEBUG[0m] __main__                  [33mUsing final value for ORDER_FILL_TIMEOUT_SECONDS: 10 (Type: int) (Source: Env Var)[0m
+2025-05-09 18:51:56 [[34mINFO[0m] __main__                  [35m--- Configuration Runes Summoned and Verified ---[0m
+2025-05-09 22:43:00 [[34mINFO[0m] __main__                  [35m--- Summoning Configuration Runes ---[0m
+2025-05-09 22:43:00 [[34mINFO[0m] __main__                  [36mChosen Strategy Path: DUAL_SUPERTREND[0m
+2025-05-09 22:43:00 [[34mINFO[0m] __main__                  [35m--- Configuration Runes Summoned and Verified ---[0m
+2025-05-09 22:43:10 [[34mINFO[0m] __main__        [35m--- Summoning Configuration Runes ---[0m
+2025-05-09 22:43:10 [[34mINFO[0m] __main__        [36mChosen Strategy Path: DUAL_SUPERTREND[0m
+2025-05-09 22:43:10 [[34mINFO[0m] __main__        [35m--- Configuration Runes Summoned and Verified ---[0m
+2025-05-09 22:43:10 [[34mINFO[0m] PyrmethusCore   [44m[37m[1m--- Pyrmethus Bybit Scalping Spell v2.3.0 Initializing (2025-05-09 22:43:10 CDT) ---[0m
+2025-05-09 22:43:10 [[34mINFO[0m] PyrmethusCore   [36m--- Strategy: DUAL_SUPERTREND ---[0m
+2025-05-09 22:43:10 [[34mINFO[0m] PyrmethusCore   [32m--- Protections: ATR-Stop + Exchange TSL (Bybit V5) ---[0m
+2025-05-09 22:43:10 [[33m[1mWARNING[0m] PyrmethusCore   [43m[30m[1m--- !!! LIVE FUTURES SCALPING - EXTREME RISK - EDUCATIONAL USE ONLY !!! ---[0m
+2025-05-09 22:43:10 [[34mINFO[0m] PyrmethusCore   [34mOpening portal to Bybit via CCXT...[0m
+2025-05-09 22:43:21 [[35m[1mSUCCESS[0m] PyrmethusCore   [32m[1mPortal to Bybit Opened & Authenticated (V5 API).[0m
+2025-05-09 22:43:21 [[33m[1mWARNING[0m] PyrmethusCore   [43m[30m[1m!!! LIVE SCALPING MODE ACTIVE - EXTREME CAUTION !!![0m
+2025-05-09 22:43:21 [[34mINFO[0m] PyrmethusCore   [32mSpell focused on: TRUMP/USDT:USDT (Type: swap)[0m
+2025-05-09 22:43:21 [[34mINFO[0m] PyrmethusCore   [36mLeverage: Setting 25x for TRUMP/USDT:USDT...[0m
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   [36mLeverage: Already 25x for TRUMP/USDT:USDT.[0m
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   [35m--- Spell Config Summary ---[0m
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   Symbol: TRUMP/USDT:USDT, Interval: 1m, Leverage: 25x, Strategy: DUAL_SUPERTREND
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   Risk: 0.50%/trade, MaxCap: 100.0 USDT, ATR SL Mult: 1.5
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   TSL: 0.50%, TSL Act. Offset: 0.10%
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   Account Max Margin Ratio: 80%
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:43:22 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:43:23 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:43:00 UTC ==========[0m
+2025-05-09 22:43:23 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2670, ATR(14)=0.03735
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.09, Spike=False
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.259, Spread=0.0010
+2025-05-09 22:43:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:43:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:43:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:43:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:43:24 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:43:32 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:43:32 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:43:00 UTC ==========[0m
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2670, ATR(14)=0.03735
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.09, Spike=False
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.918, Spread=0.0010
+2025-05-09 22:43:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:43:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:43:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:43:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:43:33 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:43:42 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:43:42 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:43:00 UTC ==========[0m
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2670, ATR(14)=0.03735
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.09, Spike=False
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.744, Spread=0.0010
+2025-05-09 22:43:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:43:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:43:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:43:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:43:43 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:43:52 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:43:52 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:43:00 UTC ==========[0m
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2670, ATR(14)=0.03735
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.09, Spike=False
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.651, Spread=0.0010
+2025-05-09 22:43:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:43:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:43:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:43:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:43:53 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:44:02 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:44:02 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:43:00 UTC ==========[0m
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2670, ATR(14)=0.03735
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.09, Spike=False
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.261, Spread=0.0010
+2025-05-09 22:44:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:44:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:44:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:44:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:44:03 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:44:12 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:44:12 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:43:00 UTC ==========[0m
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2670, ATR(14)=0.03735
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.09, Spike=False
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.967, Spread=0.0010
+2025-05-09 22:44:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:44:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:44:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:44:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:44:13 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:44:22 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:44:23 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:44:00 UTC ==========[0m
+2025-05-09 22:44:23 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2800, ATR(14)=0.03610
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.792, Spread=0.0010
+2025-05-09 22:44:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:44:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:44:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:44:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:44:24 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:44:32 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:44:32 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:44:00 UTC ==========[0m
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2800, ATR(14)=0.03610
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.790, Spread=0.0010
+2025-05-09 22:44:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:44:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:44:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:44:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:44:33 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:44:42 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:44:42 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:44:00 UTC ==========[0m
+2025-05-09 22:44:43 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2800, ATR(14)=0.03610
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.759, Spread=0.0010
+2025-05-09 22:44:44 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:44:44 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:44:44 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:44:44 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:44:44 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:44:52 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:44:52 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:44:00 UTC ==========[0m
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2800, ATR(14)=0.03610
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.053, Spread=0.0010
+2025-05-09 22:44:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:44:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:44:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:44:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:44:53 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:45:02 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:45:02 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:44:00 UTC ==========[0m
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2800, ATR(14)=0.03610
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.483, Spread=0.0010
+2025-05-09 22:45:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:45:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:45:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:45:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:45:03 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:45:12 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:45:12 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:44:00 UTC ==========[0m
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2800, ATR(14)=0.03610
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.151, Spread=0.0010
+2025-05-09 22:45:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:45:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:45:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:45:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:45:13 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:45:22 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:45:23 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:45:00 UTC ==========[0m
+2025-05-09 22:45:23 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2590, ATR(14)=0.03473
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.973, Spread=0.0010
+2025-05-09 22:45:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:45:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:45:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:45:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:45:24 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:45:32 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:45:32 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:45:00 UTC ==========[0m
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2590, ATR(14)=0.03473
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.130, Spread=0.0010
+2025-05-09 22:45:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:45:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:45:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:45:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:45:33 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:45:42 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:45:42 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:45:00 UTC ==========[0m
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2590, ATR(14)=0.03473
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.297, Spread=0.0010
+2025-05-09 22:45:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:45:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:45:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:45:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:45:43 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:45:52 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:45:52 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:45:00 UTC ==========[0m
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2590, ATR(14)=0.03473
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.933, Spread=0.0010
+2025-05-09 22:45:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:45:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:45:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:45:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:45:53 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:46:02 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:46:02 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:45:00 UTC ==========[0m
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2590, ATR(14)=0.03473
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.799, Spread=0.0010
+2025-05-09 22:46:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:46:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:46:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:46:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:46:03 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:46:12 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:46:12 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:45:00 UTC ==========[0m
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2590, ATR(14)=0.03473
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.08, Spike=False
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.547, Spread=0.0010
+2025-05-09 22:46:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:46:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:46:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:46:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:46:13 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:46:22 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:46:23 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:46:00 UTC ==========[0m
+2025-05-09 22:46:23 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2740, ATR(14)=0.03377
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.14, Spike=False
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.866, Spread=0.0010
+2025-05-09 22:46:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:46:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:46:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:46:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:46:24 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:46:32 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:46:32 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:46:00 UTC ==========[0m
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2740, ATR(14)=0.03377
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.14, Spike=False
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.892, Spread=0.0010
+2025-05-09 22:46:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:46:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:46:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:46:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:46:33 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:46:42 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:46:42 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:46:00 UTC ==========[0m
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2740, ATR(14)=0.03377
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.14, Spike=False
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.747, Spread=0.0010
+2025-05-09 22:46:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:46:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:46:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:46:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:46:43 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:46:52 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:46:52 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:46:00 UTC ==========[0m
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2740, ATR(14)=0.03377
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.14, Spike=False
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.808, Spread=0.0010
+2025-05-09 22:46:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:46:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:46:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:46:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:46:53 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:47:02 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:47:02 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:46:00 UTC ==========[0m
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2740, ATR(14)=0.03377
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.14, Spike=False
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.905, Spread=0.0010
+2025-05-09 22:47:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:47:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:47:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:47:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:47:03 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:47:12 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:47:12 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:46:00 UTC ==========[0m
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2740, ATR(14)=0.03377
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.14, Spike=False
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.642, Spread=0.0010
+2025-05-09 22:47:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:47:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:47:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:47:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:47:13 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:47:22 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:47:23 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:47:00 UTC ==========[0m
+2025-05-09 22:47:23 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2620, ATR(14)=0.03383
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.26, Spike=False
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.975, Spread=0.0010
+2025-05-09 22:47:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:47:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:47:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:47:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:47:24 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:47:32 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:47:32 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:47:00 UTC ==========[0m
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2620, ATR(14)=0.03383
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.26, Spike=False
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.222, Spread=0.0010
+2025-05-09 22:47:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:47:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:47:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:47:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:47:33 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:47:42 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:47:42 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:47:00 UTC ==========[0m
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2620, ATR(14)=0.03383
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.26, Spike=False
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.694, Spread=0.0010
+2025-05-09 22:47:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:47:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:47:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:47:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:47:43 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:47:52 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:47:52 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:47:00 UTC ==========[0m
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2620, ATR(14)=0.03383
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.26, Spike=False
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.801, Spread=0.0010
+2025-05-09 22:47:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:47:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:47:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:47:53 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:47:53 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:48:02 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:48:02 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:47:00 UTC ==========[0m
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2620, ATR(14)=0.03383
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.26, Spike=False
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.094, Spread=0.0010
+2025-05-09 22:48:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:48:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:48:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:48:03 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:48:03 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:48:12 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:48:12 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:47:00 UTC ==========[0m
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2620, ATR(14)=0.03383
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.26, Spike=False
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.090, Spread=0.0010
+2025-05-09 22:48:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:48:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:48:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:48:13 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:48:13 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:48:22 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:48:23 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:48:00 UTC ==========[0m
+2025-05-09 22:48:23 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2320, ATR(14)=0.03356
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.73, Spike=False
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=0.804, Spread=0.0010
+2025-05-09 22:48:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:48:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:48:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:48:24 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:48:24 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:48:32 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:48:32 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:48:00 UTC ==========[0m
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2320, ATR(14)=0.03356
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.73, Spike=False
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.761, Spread=0.0010
+2025-05-09 22:48:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:48:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:48:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:48:33 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:48:33 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:48:42 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:48:42 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:48:00 UTC ==========[0m
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2320, ATR(14)=0.03356
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.73, Spike=False
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.232, Spread=0.0010
+2025-05-09 22:48:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:48:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:48:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:48:43 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:48:43 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:48:52 [[34mINFO[0m] PyrmethusCore   Account Health: Equity=6.85, UsedMargin=0.00, MarginRatio=0.00%
+2025-05-09 22:48:52 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle (DUAL_SUPERTREND): TRUMP/USDT:USDT | Candle: 2025-05-10 03:48:00 UTC ==========[0m
+2025-05-09 22:48:53 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore   [35m--- Indicator Snapshot ---[0m
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore     Market: Close=14.2320, ATR(14)=0.03356
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore     Volume: Ratio=0.73, Spike=False
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore     OrderBook: Ratio(B/A)=1.060, Spread=0.0010
+2025-05-09 22:48:54 [[34mINFO[0m] Strategy.DualSupertrendStrategy   Strategy Values (DUAL_SUPERTREND):
+2025-05-09 22:48:54 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_long_flip: False
+2025-05-09 22:48:54 [[34mINFO[0m] Strategy.DualSupertrendStrategy     st_short_flip: False
+2025-05-09 22:48:54 [[34mINFO[0m] Strategy.DualSupertrendStrategy     confirm_trend: [31mDown[0m
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore     Position: Side=[34mNone[0m, Qty=0.00000000, Entry=0.0000
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore   [35m--------------------------[0m
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore   Holding Cash. No entry signal.
+2025-05-09 22:48:54 [[34mINFO[0m] PyrmethusCore   [34m[1m========== Cycle End: TRUMP/USDT:USDT ==========[0m
+
+2025-05-09 22:49:02 [[33m[1mWARNING[0m] PyrmethusCore   
+[33m[1mKeyboardInterrupt. Withdrawing...[0m
+2025-05-09 22:49:02 [[33m[1mWARNING[0m] PyrmethusCore   
+[33m[1mShutdown requested. Withdrawing energies...[0m
+2025-05-09 22:49:02 [[33m[1mWARNING[0m] PyrmethusCore   Shutdown: Cancelling open orders...
+2025-05-09 22:49:02 [[34mINFO[0m] PyrmethusCore   [36mOrder Cleanup: TRUMP/USDT:USDT (Reason: Shutdown)...[0m
+2025-05-09 22:49:03 [[34mINFO[0m] PyrmethusCore   [36mOrder Cleanup: No open orders for TRUMP/USDT:USDT.[0m
+2025-05-09 22:49:05 [[34mINFO[0m] PyrmethusCore   [34mPos Check: No active One-Way position for TRUMPUSDT. Flat.[0m
+2025-05-09 22:49:05 [[34mINFO[0m] PyrmethusCore   [32mShutdown: No active position. Clean exit.[0m
+2025-05-09 22:49:05 [[34mINFO[0m] PyrmethusCore   [33m[1m--- Pyrmethus Spell Shutdown Complete ---[0m
+2025-05-09 22:49:05 [[34mINFO[0m] PyrmethusCore   [44m[37m[1m--- Pyrmethus Scalping Spell Deactivated ---[0m

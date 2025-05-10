@@ -1,0 +1,187 @@
+2025-05-09 20:13:44 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Summoning Configuration Runes v2.9.0 ---[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'BYBIT_API_KEY'[94m: Found Env Value: '[93m[1m********[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'BYBIT_API_KEY'[94m: [93m[1m********[94m (Type: str, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'BYBIT_API_SECRET'[94m: Found Env Value: '[93m[1m********[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'BYBIT_API_SECRET'[94m: [93m[1m********[94m (Type: str, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'SYMBOL'[94m: Found Env Value: '[93m[1mTRUMP/USDT:USDT[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'SYMBOL'[94m: [93m[1mTRUMP/USDT:USDT[94m (Type: str, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'INTERVAL'[94m: Found Env Value: '[93m[1m1m[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'INTERVAL'[94m: [93m[1m1m[94m (Type: str, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'LEVERAGE'[94m: Found Env Value: '[93m[1m25[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'LEVERAGE'[94m: [93m[1m25[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'SLEEP_SECONDS'[94m: Found Env Value: '[93m[1m5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'SLEEP_SECONDS'[94m: [93m[1m5[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'STRATEGY_NAME'[94m: Found Env Value: '[93m[1mDUAL_SUPERTREND_MOMENTUM[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'STRATEGY_NAME'[94m: [93m[1mDUAL_SUPERTREND_MOMENTUM[94m (Type: str, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'RISK_PER_TRADE_PERCENTAGE'[94m: Found Env Value: '[93m[1m0.003[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'RISK_PER_TRADE_PERCENTAGE'[94m: [93m[1m0.003[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MAX_ORDER_USDT_AMOUNT'[94m: Found Env Value: '[93m[1m50.0[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MAX_ORDER_USDT_AMOUNT'[94m: [93m[1m50.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ATR_STOP_LOSS_MULTIPLIER'[94m: Found Env Value: '[93m[1m1.0[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ATR_STOP_LOSS_MULTIPLIER'[94m: [93m[1m1.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_TAKE_PROFIT'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_TAKE_PROFIT'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ATR_TAKE_PROFIT_MULTIPLIER'[94m: Found Env Value: '[93m[1m1.5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ATR_TAKE_PROFIT_MULTIPLIER'[94m: [93m[1m1.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENTRY_ORDER_TYPE'[94m: Found Env Value: '[93m[1mMARKET[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENTRY_ORDER_TYPE'[94m: [93m[1mMARKET[94m (Type: str, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'LIMIT_ORDER_OFFSET_ATR_PERCENTAGE'[94m: Found Env Value: '[93m[1m0.05[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'LIMIT_ORDER_OFFSET_ATR_PERCENTAGE'[94m: [93m[1m0.05[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ORDER_FILL_TIMEOUT_SECONDS'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ORDER_FILL_TIMEOUT_SECONDS'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_MAX_DRAWDOWN_STOP'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_MAX_DRAWDOWN_STOP'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MAX_DRAWDOWN_PERCENT'[94m: Found Env Value: '[93m[1m0.03[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MAX_DRAWDOWN_PERCENT'[94m: [93m[1m0.03[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_SESSION_PNL_LIMITS'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_SESSION_PNL_LIMITS'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'SESSION_PROFIT_TARGET_USDT'[94m: Found Env Value: '[93m[1m3.0[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'SESSION_PROFIT_TARGET_USDT'[94m: [93m[1m3.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'SESSION_MAX_LOSS_USDT'[94m: Found Env Value: '[93m[1m15.0[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'SESSION_MAX_LOSS_USDT'[94m: [93m[1m15.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_NOTIFICATIONS'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_NOTIFICATIONS'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'NOTIFICATION_TIMEOUT_SECONDS'[94m: Found Env Value: '[93m[1m5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'NOTIFICATION_TIMEOUT_SECONDS'[94m: [93m[1m5[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'DEFAULT_RECV_WINDOW'[94m: Found Env Value: '[93m[1m13000[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'DEFAULT_RECV_WINDOW'[94m: [93m[1m13000[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'PAPER_TRADING_MODE'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'PAPER_TRADING_MODE'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ATR_CALCULATION_PERIOD'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ATR_CALCULATION_PERIOD'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ST_ATR_LENGTH'[94m: Found Env Value: '[93m[1m7[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ST_ATR_LENGTH'[94m: [93m[1m7[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ST_MULTIPLIER'[94m: Found Env Value: '[93m[1m1.5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ST_MULTIPLIER'[94m: [93m[1m1.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'CONFIRM_ST_ATR_LENGTH'[94m: Found Env Value: '[93m[1m14[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'CONFIRM_ST_ATR_LENGTH'[94m: [93m[1m14[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'CONFIRM_ST_MULTIPLIER'[94m: Found Env Value: '[93m[1m2.5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'CONFIRM_ST_MULTIPLIER'[94m: [93m[1m2.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MOMENTUM_PERIOD'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MOMENTUM_PERIOD'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MOMENTUM_THRESHOLD'[94m: Found Env Value: '[93m[1m0.5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MOMENTUM_THRESHOLD'[94m: [93m[1m0.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'CONFIRM_ST_STABILITY_LOOKBACK'[94m: Found Env Value: '[93m[1m2[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'CONFIRM_ST_STABILITY_LOOKBACK'[94m: [93m[1m2[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ST_MAX_ENTRY_DISTANCE_ATR_MULTIPLIER'[94m: Found Env Value: '[93m[1m0.3[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ST_MAX_ENTRY_DISTANCE_ATR_MULTIPLIER'[94m: [93m[1m0.3[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_FISHER_LENGTH'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_FISHER_LENGTH'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_FISHER_SIGNAL_LENGTH'[94m: Found Env Value: '[93m[1m1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_FISHER_SIGNAL_LENGTH'[94m: [93m[1m1[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_FISHER_EXTREME_THRESHOLD_POSITIVE'[94m: Found Env Value: '[93m[1m2.0[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_FISHER_EXTREME_THRESHOLD_POSITIVE'[94m: [93m[1m2.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_FISHER_EXTREME_THRESHOLD_NEGATIVE'[94m: Found Env Value: '[93m[1m-2.0[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_FISHER_EXTREME_THRESHOLD_NEGATIVE'[94m: [93m[1m-2.0[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_ENABLE_DIVERGENCE_SCALED_EXIT'[94m: Found Env Value: '[93m[1mfalse[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_ENABLE_DIVERGENCE_SCALED_EXIT'[94m: [93m[1mFalse[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_DIVERGENCE_THRESHOLD_FACTOR'[94m: Found Env Value: '[93m[1m0.75[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_DIVERGENCE_THRESHOLD_FACTOR'[94m: [93m[1m0.75[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'EHLERS_DIVERGENCE_EXIT_PERCENTAGE'[94m: Found Env Value: '[93m[1m0.3[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'EHLERS_DIVERGENCE_EXIT_PERCENTAGE'[94m: [93m[1m0.3[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_PROFIT_MOMENTUM_SL_TIGHTEN'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_PROFIT_MOMENTUM_SL_TIGHTEN'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'PROFIT_MOMENTUM_WINDOW'[94m: Found Env Value: '[93m[1m2[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'PROFIT_MOMENTUM_WINDOW'[94m: [93m[1m2[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'PROFIT_MOMENTUM_SL_TIGHTEN_FACTOR'[94m: Found Env Value: '[93m[1m0.3[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'PROFIT_MOMENTUM_SL_TIGHTEN_FACTOR'[94m: [93m[1m0.3[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_WHIPSAW_COOLDOWN'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_WHIPSAW_COOLDOWN'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'WHIPSAW_MAX_TRADES_IN_PERIOD'[94m: Found Env Value: '[93m[1m2[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'WHIPSAW_MAX_TRADES_IN_PERIOD'[94m: [93m[1m2[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'WHIPSAW_PERIOD_SECONDS'[94m: Found Env Value: '[93m[1m180[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'WHIPSAW_PERIOD_SECONDS'[94m: [93m[1m180[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'WHIPSAW_COOLDOWN_SECONDS'[94m: Found Env Value: '[93m[1m120[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'WHIPSAW_COOLDOWN_SECONDS'[94m: [93m[1m120[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MAX_ACTIVE_TRADE_PARTS'[94m: Found Env Value: '[93m[1m1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MAX_ACTIVE_TRADE_PARTS'[94m: [93m[1m1[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'SIGNAL_PERSISTENCE_CANDLES'[94m: Found Env Value: '[93m[1m1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'SIGNAL_PERSISTENCE_CANDLES'[94m: [93m[1m1[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_NO_TRADE_ZONES'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_NO_TRADE_ZONES'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'NO_TRADE_ZONE_PCT_AROUND_KEY_LEVEL'[94m: Found Env Value: '[93m[1m0.001[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'NO_TRADE_ZONE_PCT_AROUND_KEY_LEVEL'[94m: [93m[1m0.001[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'KEY_ROUND_NUMBER_STEP'[94m: Found Env Value: '[93m[1m5000[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'KEY_ROUND_NUMBER_STEP'[94m: [93m[1m5000[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_BREAKEVEN_SL'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_BREAKEVEN_SL'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'BREAKEVEN_PROFIT_ATR_TARGET'[94m: Found Env Value: '[93m[1m0.5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'BREAKEVEN_PROFIT_ATR_TARGET'[94m: [93m[1m0.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'BREAKEVEN_MIN_ABS_PNL_USDT'[94m: Found Env Value: '[93m[1m0.25[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'BREAKEVEN_MIN_ABS_PNL_USDT'[94m: [93m[1m0.25[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_ANTI_MARTINGALE_RISK'[94m: Found Env Value: '[93m[1mfalse[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_ANTI_MARTINGALE_RISK'[94m: [93m[1mFalse[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'RISK_REDUCTION_FACTOR_ON_LOSS'[94m: Found Env Value: '[93m[1m0.75[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'RISK_REDUCTION_FACTOR_ON_LOSS'[94m: [93m[1m0.75[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'RISK_INCREASE_FACTOR_ON_WIN'[94m: Found Env Value: '[93m[1m1.1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'RISK_INCREASE_FACTOR_ON_WIN'[94m: [93m[1m1.1[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MAX_RISK_PCT_ANTI_MARTINGALE'[94m: Found Env Value: '[93m[1m0.02[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MAX_RISK_PCT_ANTI_MARTINGALE'[94m: [93m[1m0.02[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_LAST_CHANCE_EXIT'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_LAST_CHANCE_EXIT'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'LAST_CHANCE_CONSECUTIVE_ADVERSE_CANDLES'[94m: Found Env Value: '[93m[1m1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'LAST_CHANCE_CONSECUTIVE_ADVERSE_CANDLES'[94m: [93m[1m1[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'LAST_CHANCE_SL_PROXIMITY_ATR'[94m: Found Env Value: '[93m[1m0.2[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'LAST_CHANCE_SL_PROXIMITY_ATR'[94m: [93m[1m0.2[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_TREND_CONTRADICTION_COOLDOWN'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_TREND_CONTRADICTION_COOLDOWN'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'TREND_CONTRADICTION_CHECK_CANDLES_AFTER_ENTRY'[94m: Found Env Value: '[93m[1m1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'TREND_CONTRADICTION_CHECK_CANDLES_AFTER_ENTRY'[94m: [93m[1m1[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'TREND_CONTRADICTION_COOLDOWN_SECONDS'[94m: Found Env Value: '[93m[1m60[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'TREND_CONTRADICTION_COOLDOWN_SECONDS'[94m: [93m[1m60[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_DAILY_MAX_TRADES_REST'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_DAILY_MAX_TRADES_REST'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'DAILY_MAX_TRADES_LIMIT'[94m: Found Env Value: '[93m[1m5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'DAILY_MAX_TRADES_LIMIT'[94m: [93m[1m5[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'DAILY_MAX_TRADES_REST_HOURS'[94m: Found Env Value: '[93m[1m2[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'DAILY_MAX_TRADES_REST_HOURS'[94m: [93m[1m2[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_LIMIT_ORDER_PRICE_IMPROVEMENT_CHECK'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_LIMIT_ORDER_PRICE_IMPROVEMENT_CHECK'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_TRAP_FILTER'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_TRAP_FILTER'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'TRAP_FILTER_LOOKBACK_PERIOD'[94m: Found Env Value: '[93m[1m10[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'TRAP_FILTER_LOOKBACK_PERIOD'[94m: [93m[1m10[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'TRAP_FILTER_REJECTION_THRESHOLD_ATR'[94m: Found Env Value: '[93m[1m0.5[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'TRAP_FILTER_REJECTION_THRESHOLD_ATR'[94m: [93m[1m0.5[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'TRAP_FILTER_WICK_PROXIMITY_ATR'[94m: Found Env Value: '[93m[1m0.1[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'TRAP_FILTER_WICK_PROXIMITY_ATR'[94m: [93m[1m0.1[94m (Type: Decimal, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'ENABLE_CONSECUTIVE_LOSS_LIMITER'[94m: Found Env Value: '[93m[1mtrue[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'ENABLE_CONSECUTIVE_LOSS_LIMITER'[94m: [93m[1mTrue[94m (Type: bool, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'MAX_CONSECUTIVE_LOSSES'[94m: Found Env Value: '[93m[1m2[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'MAX_CONSECUTIVE_LOSSES'[94m: [93m[1m2[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mConfig Rune [93m[1m'CONSECUTIVE_LOSS_COOLDOWN_MINUTES'[94m: Found Env Value: '[93m[1m30[94m'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] ConfigModule._get_env          [94mFinal value for [93m[1m'CONSECUTIVE_LOSS_COOLDOWN_MINUTES'[94m: [93m[1m30[94m (Type: int, Source: Env Var)[0m
+2025-05-09 20:13:44 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Configuration Runes v2.9.0 Summoned and Verified ---[0m
+2025-05-09 20:13:44 [[36mINFO    [0m] ConfigModule                   [36m[2m# The chosen path: [35mDUAL_SUPERTREND_MOMENTUM[0m
+2025-05-09 20:13:44 [[36mINFO    [0m] Strategy.DualSupertrendMomentumStrategy [35mStrategy Form 'DualSupertrendMomentumStrategy' materializing...[0m
+2025-05-09 20:13:44 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mStrategy '[35mDUAL_SUPERTREND_MOMENTUM[32m[1m' invoked.[0m
+2025-05-09 20:13:44 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics Ledger opened.[0m
+2025-05-09 20:13:44 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Pyrmethus prepares to breach veil to exchange realm...[0m
+2025-05-09 20:13:44 [[36mINFO    [0m] PyrmethusCore                  Connecting to: bybit (CCXT: 4.4.72)
+2025-05-09 20:13:44 [[41m[37m[1mCRITICAL[0m] PyrmethusCore                  [41m[37m[1mFailed to init exchange/spell pre-requisites: string indices must be integers, not 'str'[0m
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] PyrmethusCore                  Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/supert/mtsx1.2.py", line 1672, in <module>
+    markets = exchange_instance.load_markets()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 1512, in load_markets
+    currencies = self.fetch_currencies()
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 1599, in fetch_currencies
+    response = self.privateGetV5AssetCoinQueryInfo(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/types.py", line 35, in unbound_method
+    return _self.request(self.path, self.api, self.method, params, config=self.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4394, in request
+    return self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/base/exchange.py", line 4369, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/bybit.py", line 8712, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+
+2025-05-09 20:13:44 [[34m[2mDEBUG   [0m] TermuxNotification             [33m[1mAttempting to send Termux notification: Title='Pyrmethus Init Error'[0m
+2025-05-09 20:13:47 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Init Error' sent successfully.[0m

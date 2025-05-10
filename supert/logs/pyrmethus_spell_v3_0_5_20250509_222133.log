@@ -1,0 +1,17 @@
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "INFO", "name": "Pyrmethus.PreConfig", "message": "Secrets whispered from .env scroll: \u001b[93m\u001b[1m/data/data/com.termux/files/home/worldguide/supert/.env\u001b[0m"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Summoning Configuration Runes v3.0.5"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "\u001b[41m\u001b[37m\u001b[1m\u001b[1mLIVE TRADING MODE ENABLED. Ensure API keys are for MAINNET and you understand ALL RISKS.\u001b[0m"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "\u001b[41m\u001b[37m\u001b[1m\u001b[1mPyrmethus bears NO RESPONSIBILITY for financial outcomes.\u001b[0m"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "ERROR", "name": "Pyrmethus.Config", "message": "Invalid type/value for 'SESSION_PROFIT_TARGET_USDT': '' (Source: Env Var). Err: [<class 'decimal.ConversionSyntax'>]. Using Default: '5.0'."}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "Used casted default for SESSION_PROFIT_TARGET_USDT: '5.0'"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "ERROR", "name": "Pyrmethus.Config", "message": "Invalid type/value for 'SESSION_MAX_LOSS_USDT': '' (Source: Env Var). Err: [<class 'decimal.ConversionSyntax'>]. Using Default: '15.0'."}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "Used casted default for SESSION_MAX_LOSS_USDT: '15.0'"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Configuration Runes v3.0.5 Summoned and Verified."}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Chosen path: DUAL_SUPERTREND_MOMENTUM"}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "INFO", "name": "Pyrmethus.TradeMetrics", "message": "TradeMetrics Ledger opened."}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "INFO", "name": "Pyrmethus.Strategy.DualSupertrendMomentumStrategy", "message": "Strategy Form 'DualSupertrendMomentumStrategy' materializing..."}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "SUCCESS", "name": "Pyrmethus.Core", "message": "Strategy 'DUAL_SUPERTREND_MOMENTUM' invoked and ready."}
+{"timestamp": "2025-05-09T22:21:33.fZ", "level": "CRITICAL", "name": "Pyrmethus.Startup", "message": "An unhandled astral disturbance occurred at the highest level: name 'main' is not defined", "exc_info": "Traceback (most recent call last):\n  File \"/data/data/com.termux/files/home/worldguide/supert/mtsx1.7.py\", line 898, in <module>\n    asyncio.run(main()) # `main` is the primary async orchestrator\n                ^^^^\nNameError: name 'main' is not defined. Did you mean: 'min'?"}
+{"timestamp": "2025-05-09T22:21:35.fZ", "level": "INFO", "name": "Pyrmethus.Notification", "message": "Batched Termux notification sent successfully (1 items)."}
+{"timestamp": "2025-05-09T22:21:35.fZ", "level": "WARNING", "name": "Pyrmethus.Notification", "message": "Telegram notifications configured but TOKEN or CHAT_ID missing in environment."}
+{"timestamp": "2025-05-09T22:21:35.fZ", "level": "INFO", "name": "Pyrmethus.Startup", "message": "Pyrmethus has woven its final thread for this session."}

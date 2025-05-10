@@ -1,0 +1,54 @@
+2025-05-09 22:45:01 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Summoning Configuration Runes v2.9.0 ---[0m
+2025-05-09 22:45:01 [[31m[1mERROR   [0m] ConfigModule._get_env          [31m[1mInvalid type/value for 'SESSION_PROFIT_TARGET_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]. Using Default: 'None'.[0m
+2025-05-09 22:45:01 [[33m[1mWARNING [0m] ConfigModule._get_env          [33m[1mCast fail for optional 'SESSION_PROFIT_TARGET_USDT', default is None. Final: None[0m
+2025-05-09 22:45:01 [[31m[1mERROR   [0m] ConfigModule._get_env          [31m[1mInvalid type/value for 'SESSION_MAX_LOSS_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]. Using Default: 'None'.[0m
+2025-05-09 22:45:01 [[33m[1mWARNING [0m] ConfigModule._get_env          [33m[1mCast fail for optional 'SESSION_MAX_LOSS_USDT', default is None. Final: None[0m
+2025-05-09 22:45:01 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Configuration Runes v2.9.0 Summoned and Verified ---[0m
+2025-05-09 22:45:01 [[36mINFO    [0m] ConfigModule                   [36m[2m# The chosen path: [35mDUAL_SUPERTREND_MOMENTUM[0m
+2025-05-09 22:45:01 [[36mINFO    [0m] Strategy.DualSupertrendMomentumStrategy [35mStrategy Form 'DualSupertrendMomentumStrategy' materializing...[0m
+2025-05-09 22:45:01 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mStrategy '[35mDUAL_SUPERTREND_MOMENTUM[32m[1m' invoked.[0m
+2025-05-09 22:45:01 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics Ledger opened.[0m
+2025-05-09 22:45:01 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Pyrmethus prepares to breach veil to the exchange realm...[0m
+2025-05-09 22:45:01 [[36mINFO    [0m] PyrmethusCore                  Attempting to connect to: bybit (CCXT Version: 4.4.72)
+2025-05-09 22:45:10 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mMarket runes for TRUMP/USDT:USDT: Price Tick 0.001, Amount Step 0.1[0m
+2025-05-09 22:45:10 [[36mINFO    [0m] PyrmethusCore                  Setting leverage to 25x for TRUMP/USDT:USDT (Category: linear)...
+2025-05-09 22:45:11 [[33m[1mWARNING [0m] PyrmethusCore                  [33m[1mCould not set leverage for TRUMP/USDT:USDT (may be pre-set, or an issue with API/permissions): bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746848711984}[0m
+2025-05-09 22:45:14 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Leverage Warn' sent successfully.[0m
+2025-05-09 22:45:14 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mSuccessfully connected to bybit for trading TRUMP/USDT:USDT.[0m
+2025-05-09 22:45:15 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Online' sent successfully.[0m
+2025-05-09 22:45:15 [[36mINFO    [0m] PyrmethusCore                  [35m[1m=== Pyrmethus Spell v2.9.0 Awakening on bybit for TRUMP/USDT:USDT ===[0m
+2025-05-09 22:45:15 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Phoenix Feather seeks past memories from '/data/data/com.termux/files/home/worldguide/supert/pyrmethus_phoenix_state_v290.json'...[0m
+2025-05-09 22:45:15 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics: Re-inked 0 sagas from persistent scroll.[0m
+2025-05-09 22:45:15 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mPhoenix Feather: Memories reawakened! Active Parts: 0, Logged Trades: 0[0m
+2025-05-09 22:45:15 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mReawakened from Phoenix scroll. Active parts: 0.[0m
+2025-05-09 22:45:17 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:45:17 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:45:28 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:45:39 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:45:51 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:46:02 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:46:13 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:46:24 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:46:35 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:46:46 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:46:57 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:47:09 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:47:20 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:47:31 [[36mINFO    [0m] PyrmethusCore                  [36mCurrent USDT Treasury: [93m[1m6.85[0m
+2025-05-09 22:47:34 [[33m[1mWARNING [0m] PyrmethusCore                  
+[33m[1mSorcerer's intervention (KeyboardInterrupt)! Pyrmethus prepares for slumber...[0m
+2025-05-09 22:47:36 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Shutdown' sent successfully.[0m
+2025-05-09 22:47:36 [[36mINFO    [0m] PyrmethusCore                  [35m[1m=== Pyrmethus Spell Concludes (2025-05-10T03:47:36.297383+00:00) ===[0m
+2025-05-09 22:47:36 [[33m[1mWARNING [0m] PyrmethusCore                  [33m[1mInitiating forceful unraveling of ALL positions for TRUMP/USDT:USDT due to: Spell Ending Sequence / Shutdown[0m
+2025-05-09 22:47:36 [[36mINFO    [0m] PyrmethusCore                  No internally tracked trade parts to unravel via individual market orders.
+2025-05-09 22:47:36 [[36mINFO    [0m] PyrmethusCore                  Performing safeguard scrying on exchange for any residual TRUMP/USDT:USDT positions...
+2025-05-09 22:47:36 [[36mINFO    [0m] PyrmethusCore                  No residual positions found on exchange for safeguard unraveling.
+2025-05-09 22:47:36 [[36mINFO    [0m] PyrmethusCore                  [33m[1mDispelling all non-positional open orders for TRUMP/USDT:USDT...[0m
+2025-05-09 22:47:37 [[36mINFO    [0m] PyrmethusCore                  No open orders found for TRUMP/USDT:USDT to dispel.
+2025-05-09 22:47:37 [[36mINFO    [0m] PyrmethusCore                  Attempting to clear any remaining SL/TP settings for position TRUMP/USDT:USDT on exchange.
+2025-05-09 22:47:37 [[33m[1mWARNING [0m] PyrmethusCore                  [33m[1mCould not explicitly clear SL/TP on exchange for TRUMP/USDT:USDT: 'bybit' object has no attribute 'set_trading_stop'. This might be okay if position closure already handled it, or if not supported directly.[0m
+2025-05-09 22:47:37 [[36mINFO    [0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed. Active parts: 0.[0m
+2025-05-09 22:47:37 [[36mINFO    [0m] PyrmethusCore                  All positions/orders for TRUMP/USDT:USDT should now be unraveled/dispelled. Internal state cleared.
+2025-05-09 22:47:37 [[36mINFO    [0m] PyrmethusCore                  [32m[1mPhoenix Feather: State memories scribed. Active parts: 0.[0m
+2025-05-09 22:47:37 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Energies settle. Until next conjuring.[0m
+2025-05-09 22:47:40 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Offline' sent successfully.[0m

@@ -1,0 +1,2 @@
+2025-05-09 22:44:34 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Summoning Configuration Runes v2.9.0 ---[0m
+2025-05-09 22:44:34 [[41m[37m[1mCRITICAL[0m] PyrmethusCore                  [41m[37m[1mConfiguration loading failed. Error: 'DUAL_SUPERTREND' is not a valid StrategyName[0m
