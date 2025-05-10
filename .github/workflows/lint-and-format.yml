@@ -300,7 +300,7 @@ jobs:
           echo -e "\033[1;35m----------------------------- \033[0m" >> lint_report.txt
 
       - name: Cast Black Formatting Spell
-        if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true' && steps.validate-inputs.outputs.additional_formatters =~ 'black'
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true' && contains(steps.validate-inputs.outputs.additional_formatters, 'black')
         run: |
           echo -e "\033[1;34mCasting Black formatting spell...\033[0m" >> lint_report.txt
           TARGET_PATH="${{ steps.validate-inputs.outputs.base_directory }}"
@@ -319,7 +319,7 @@ jobs:
           echo -e "\033[1;35m----------------------------- \033[0m" >> lint_report.txt
 
       - name: Cast isort Formatting Spell
-        if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true' && steps.validate-inputs.outputs.additional_formatters =~ 'isort'
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true' && contains(steps.validate-inputs.outputs.additional_formatters, 'isort')
         run: |
           echo -e "\033[1;34mCasting isort formatting spell...\033[0m" >> lint_report.txt
           TARGET_PATH="${{ steps.validate-inputs.outputs.base_directory }}"
