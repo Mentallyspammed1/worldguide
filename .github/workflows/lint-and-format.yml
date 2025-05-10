@@ -1,4 +1,4 @@
- name: Lint and Format Python Code
+name: Lint and Format Python Codex
 
 # Define permissions at the workflow level to follow the principle of least privilege
 permissions:
