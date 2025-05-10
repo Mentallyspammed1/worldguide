@@ -1693,4 +1693,159 @@ async def async_cancel_all_symbol_orders(exchange: ccxt_async.Exchange, symbol: 
     except (ccxt.NetworkError, ccxt.ExchangeError) as e:
         logger_cancel.error(f"API Error cancelling orders for {symbol}: {e}", exc_info=True)
     except Exception as e:
-        logger_cancel.error(
+        logger_cancel.error(f"Unexpected error cancelling orders for {symbol}: {e}", exc_info=True)
+
+async def async_close_all_symbol_positions(exchange: ccxt_async.Exchange, symbol: str, reason: str, config: Config):
+    logger_close_all = logging.getLogger("Pyrmethus.CloseAllPos")
+    try:
+        logger_close_all.info(f"Attempting to close any open position for {symbol} due to: {reason}")
+        current_pos = await async_get_current_position_info(exchange, symbol, config)
+        
+        if current_pos and current_pos.get("qty", Decimal(0)) > Decimal(0):
+            logger_close_all.info(f"Found active position: {current_pos['side']} {current_pos['qty']} {symbol}. Closing...")
+            # Create a mock part_info for async_close_position_part
+            mock_part = {
+                "symbol": symbol,
+                "side": current_pos["side"],
+                "qty": current_pos["qty"],
+                "part_id": "shutdown_close",
+                "entry_price": current_pos.get("entry_price", Decimal(0)), # May not be accurate if multiple entries averaged
+                "entry_time_ms": int(time.time() * 1000), # Placeholder
+                "entry_indicators": {} # Placeholder
+            }
+            if await async_close_position_part(exchange, mock_part, None, reason, config): # None for close_price_target = market
+                logger_close_all.success(f"Position for {symbol} successfully closed during shutdown sequence.")
+            else:
+                logger_close_all.error(f"Failed to close position for {symbol} during shutdown. Manual check required.")
+        else:
+            logger_close_all.info(f"No active position found for {symbol} to close during shutdown.")
+            
+    except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+        logger_close_all.error(f"API Error closing all positions for {symbol}: {e}", exc_info=True)
+    except Exception as e:
+        logger_close_all.error(f"Unexpected error closing all positions for {symbol}: {e}", exc_info=True)
+
+# --- Main Orchestration ---
+async def main():
+    logger.info(f"{NEON['HEADING']}=== Pyrmethus Spell v{PYRMETHUS_VERSION} Awakening ({CONFIG.exchange['api_key'][:5]}...) ==={NEON['RESET']}")
+    if load_persistent_state(): logger.success(f"Reawakened. Active parts: {len(_active_trade_parts)}.")
+    else: logger.info("Fresh start.")
+
+    async_exchange: Optional[ccxt_async.Exchange] = None
+    price_stream_task: Optional[asyncio.Task] = None
+    try:
+        exchange_params = {
+            'apiKey': CONFIG.exchange["api_key"], 'secret': CONFIG.exchange["api_secret"],
+            'options': {'defaultType': 'swap', 'adjustForTimeDifference': True, 
+                        'brokerId': f'PYRMETHUS{PYRMETHUS_VERSION.replace(".","_")}'}, # Bybit broker ID / partner ID
+            'enableRateLimit': True, 'recvWindow': CONFIG.exchange["recv_window"]
+        }
+        if CONFIG.exchange["paper_trading"]: exchange_params['urls'] = {'api': ccxt_async.bybit.urls['api']['test']}
+        # else: uses default mainnet URLs from ccxt_async.bybit
+        
+        async_exchange = ccxt_async.bybit(exchange_params)
+        logger.info(f"Connecting to {async_exchange.id} (CCXT: {ccxt.__version__}) {'Testnet' if CONFIG.exchange['paper_trading'] else 'Mainnet'}")
+        
+        await async_exchange.load_markets() # Load markets first
+        if CONFIG.exchange["symbol"] not in async_exchange.markets:
+            err = f"Symbol {CONFIG.exchange['symbol']} not found in {async_exchange.id} markets."
+            logger.critical(err); send_general_notification("Pyrmethus Startup Failure", err); await async_exchange.close(); return
+
+        CONFIG.MARKET_INFO = async_exchange.markets[CONFIG.exchange["symbol"]]
+        CONFIG.tick_size = safe_decimal_conversion(CONFIG.MARKET_INFO.get('precision', {}).get('price'), Decimal("1e-8"))
+        CONFIG.qty_step = safe_decimal_conversion(CONFIG.MARKET_INFO.get('precision', {}).get('amount'), Decimal("1e-8"))
+        CONFIG.min_order_qty = safe_decimal_conversion(CONFIG.MARKET_INFO.get('limits', {}).get('amount', {}).get('min'))
+        CONFIG.min_order_cost = safe_decimal_conversion(CONFIG.MARKET_INFO.get('limits', {}).get('cost', {}).get('min'))
+        logger.success(f"Market info: Tick {CONFIG.tick_size}, Step {CONFIG.qty_step}, MinQty: {CONFIG.min_order_qty}, MinCost: {CONFIG.min_order_cost}")
+
+        # Test API connection with a benign authenticated call
+        try:
+            # For Bybit V5, fetch_balance needs accountType. Assume 'UNIFIED' or 'CONTRACT'.
+            # This also depends if user has UTA or classic account.
+            # A simpler test might be fetching positions for a non-existent symbol (harmless).
+            # Or fetch_account_positions (if available and benign)
+            # Let's use fetch_balance with a common account type.
+            test_bal_params = {'accountType': 'UNIFIED'} # Or 'CONTRACT'
+            if CONFIG.exchange['symbol'].endswith(f":{CONFIG.usdt_symbol}"): test_bal_params = {'accountType': 'CONTRACT'}
+            await async_exchange.fetch_balance(params=test_bal_params)
+            logger.success("API Key validated successfully.")
+        except ccxt.AuthenticationError as e_auth:
+            logger.critical(f"CRITICAL: API Key Auth FAILED: {e_auth}. Check .env and API permissions.", exc_info=True)
+            send_general_notification("Pyrmethus Auth FAIL", f"API Key Invalid: {str(e_auth)[:100]}"); await async_exchange.close(); return
+        
+        # Set Leverage (Bybit V5: private_post_position_set_leverage)
+        # Category: linear, marginMode: isolated (typically) or cross
+        try:
+            leverage_params = {'category': 'linear', 'buyLeverage': str(CONFIG.exchange['leverage']), 'sellLeverage': str(CONFIG.exchange['leverage'])}
+            await async_exchange.set_leverage(CONFIG.exchange['leverage'], CONFIG.exchange["symbol"], params=leverage_params)
+            logger.success(f"Leverage for {CONFIG.exchange['symbol']} set/confirmed to {CONFIG.exchange['leverage']}x.")
+        except Exception as e_lev:
+            logger.warning(f"Could not set leverage (may be pre-set or issue): {e_lev}", exc_info=LOGGING_LEVEL <= logging.DEBUG)
+            send_general_notification("Pyrmethus Leverage Warn", f"Leverage issue for {CONFIG.exchange['symbol']}: {str(e_lev)[:60]}")
+
+        logger.success(f"Connected to {async_exchange.id} for {CONFIG.exchange['symbol']}.")
+        send_general_notification("Pyrmethus Online", f"Connected to {async_exchange.id} for {CONFIG.exchange['symbol']} @ {CONFIG.exchange['leverage']}x. Env: {'Testnet' if CONFIG.exchange['paper_trading'] else 'LIVE NET'}")
+
+        initial_bal = await async_fetch_account_balance(async_exchange, CONFIG.usdt_symbol, CONFIG)
+        if initial_bal is None: logger.critical("Failed to fetch initial balance. Aborting."); send_general_notification("Pyrmethus Startup Fail", "Failed initial balance fetch."); await async_exchange.close(); return
+        trade_metrics.set_initial_equity(initial_bal)
+
+        price_queue: asyncio.Queue[Dict[str, Any]] = asyncio.Queue(maxsize=PRICE_QUEUE_MAX_SIZE)
+        price_stream_task = asyncio.create_task(stream_price_data(async_exchange, CONFIG, price_queue))
+        
+        loop_count = 0
+        while not _stop_requested.is_set():
+            loop_count += 1; logger.debug(f"Main loop cycle {loop_count}...")
+            if not await perform_health_check(async_exchange, CONFIG):
+                logger.warning("Health check failed. Pausing..."); await asyncio.sleep(CONFIG.trading["sleep_seconds"] * 5); continue
+            
+            await trading_loop_iteration(async_exchange, CONFIG, price_queue)
+            
+            save_persistent_state() # Regular state save
+            flush_notifications()   # Regular notification flush
+            await asyncio.sleep(CONFIG.trading["sleep_seconds"]) # Main loop delay
+
+    except ccxt.AuthenticationError as e_auth_main: 
+        logger.critical(f"CRITICAL AUTH ERROR in main: {e_auth_main}. Bot cannot continue.", exc_info=True)
+        send_general_notification("Pyrmethus CRITICAL Auth Fail", f"API Key Invalid/Revoked: {str(e_auth_main)[:100]}")
+    except KeyboardInterrupt: logger.warning("\nSorcerer's intervention! Pyrmethus prepares for slumber..."); send_general_notification("Pyrmethus Shutdown", "Manual shutdown initiated.")
+    except asyncio.CancelledError: logger.info("Main task cancelled, likely during shutdown.")
+    except Exception as e_fatal:
+        logger.critical(f"A fatal unhandled astral disturbance in main: {e_fatal}", exc_info=True)
+        send_general_notification("Pyrmethus CRITICAL CRASH", f"Fatal error: {str(e_fatal)[:100]}")
+    finally:
+        _stop_requested.set() # Signal all tasks to stop
+        logger.info(f"{NEON['HEADING']}=== Pyrmethus Spell Concludes Its Weaving ==={NEON['RESET']}")
+        if price_stream_task and not price_stream_task.done():
+            price_stream_task.cancel()
+            try: await price_stream_task
+            except asyncio.CancelledError: logger.info("Price stream task successfully cancelled.")
+            except Exception as e_task_cancel: logger.error(f"Error during price stream task cancellation: {e_task_cancel}")
+
+        if async_exchange:
+            logger.info("Attempting to cancel all open orders and close positions before exiting...")
+            await async_cancel_all_symbol_orders(async_exchange, CONFIG.exchange["symbol"], CONFIG)
+            await async_close_all_symbol_positions(async_exchange, CONFIG.exchange["symbol"], "Spell Ending Sequence", CONFIG)
+            logger.info("Closing exchange connection...")
+            await async_exchange.close()
+            logger.info("Exchange connection gracefully closed.")
+        
+        save_persistent_state(force_heartbeat=True) # Final save
+        trade_metrics.summary()
+        flush_notifications() # Final flush
+        logger.info(f"{NEON['COMMENT']}# Energies settle. Until next conjuring.{NEON['RESET']}")
+        send_general_notification("Pyrmethus Offline", f"Spell concluded for {CONFIG.exchange['symbol']}.")
+
+if __name__ == "__main__":
+    startup_logger = logging.getLogger("Pyrmethus.Startup")
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt: startup_logger.warning("\nSorcerer's intervention! (top-level)..."); _stop_requested.set()
+    except Exception as e_top: startup_logger.critical(f"Top-level unhandled exception: {e_top}", exc_info=True)
+    finally:
+        if 'CONFIG' in globals() and CONFIG and hasattr(CONFIG, 'notifications') and CONFIG.notifications.get('enable'):
+            # Ensure notifications are flushed if main() didn't complete its finally block
+            flush_notifications()
+        startup_logger.info("Pyrmethus main execution (__name__ == '__main__') finished.")
+        logging.shutdown()
+```
