@@ -1,4 +1,4 @@
-name: Lint and Format Python Code
+name: Lint and Format Python Codex
 
 on:
   push:
