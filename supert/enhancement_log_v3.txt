@@ -91,3 +91,20 @@
 {"level":"info","message":"No enhancements made for \u001b[34m/data/data/com.termux/files/home/worldguide/supert/pyrmbot1.1.py\u001b[39m.","timestamp":"2025-05-10 00:03:25,734"}
 {"level":"info","message":"Ritual complete in \u001b[33m302.28\u001b[39m seconds.","timestamp":"2025-05-10 00:03:25,735"}
 {"level":"info","message":"Closing Oracle connection.","timestamp":"2025-05-10 00:03:25,736"}
+{"level":"info","message":"Starting Interactive File Enhancement Spell v3","timestamp":"2025-05-10 00:50:14,016"}
+{"level":"info","message":"Hark! The Advanced Enhancement Spell begins...","timestamp":"2025-05-10 00:50:14,044"}
+{"level":"info","message":"Source: \u001b[34m/data/data/com.termux/files/home/worldguide/supert/pyrmbot1.1.1.py\u001b[39m","timestamp":"2025-05-10 00:50:23,992"}
+{"level":"info","message":"Destination: \u001b[34m/data/data/com.termux/files/home/worldguide/supert/pyrmbot1.1.1_enhanced.py\u001b[39m","timestamp":"2025-05-10 00:50:23,996"}
+{"level":"info","message":"Created sanctuary: \u001b[34m/data/data/com.termux/files/home/worldguide/supert\u001b[39m","timestamp":"2025-05-10 00:50:24,003"}
+{"level":"info","message":"Attuning to \u001b[33mgemini-2.5-pro-exp-03-25\u001b[39m Oracle...","timestamp":"2025-05-10 00:50:24,015"}
+{"level":"info","message":"Gemini Oracle (gemini-2.5-pro-exp-03-25) attuned with BLOCK_NONE safety.","timestamp":"2025-05-10 00:50:24,019"}
+{"level":"info","message":"Configured model: gemini-2.5-pro-exp-03-25, safety: [{\"category\":\"HARM_CATEGORY_HARASSMENT\",\"threshold\":\"BLOCK_NONE\"},{\"category\":\"HARM_CATEGORY_HATE_SPEECH\",\"threshold\":\"BLOCK_NONE\"},{\"category\":\"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\"threshold\":\"BLOCK_NONE\"},{\"category\":\"HARM_CATEGORY_DANGEROUS_CONTENT\",\"threshold\":\"BLOCK_NONE\"}]","timestamp":"2025-05-10 00:50:24,021"}
+{"level":"info","message":"Unfurling scroll: \u001b[34m/data/data/com.termux/files/home/worldguide/supert/pyrmbot1.1.1.py\u001b[39m...","timestamp":"2025-05-10 00:50:24,025"}
+{"level":"info","message":"Read /data/data/com.termux/files/home/worldguide/supert/pyrmbot1.1.1.py: 111408 bytes","timestamp":"2025-05-10 00:50:24,044"}
+{"level":"info","message":"Consulting Oracle for \u001b[34mpyrmbot1.1.1.py\u001b[39m...","timestamp":"2025-05-10 00:50:24,048"}
+{"level":"info","message":"Prompt length for pyrmbot1.1.1.py: 112171","timestamp":"2025-05-10 00:50:24,049"}
+{"level":"error","message":"Oracle consultation failed for pyrmbot1.1.1.py: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent: fetch failed","timestamp":"2025-05-10 00:55:25,518"}
+{"level":"info","message":"Oracle's insight:\n\u001b[2mError: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent: fetch failed\u001b[22m","timestamp":"2025-05-10 00:55:25,533"}
+{"level":"info","message":"No enhancements made for \u001b[34m/data/data/com.termux/files/home/worldguide/supert/pyrmbot1.1.1.py\u001b[39m.","timestamp":"2025-05-10 00:55:25,534"}
+{"level":"info","message":"Ritual complete in \u001b[33m301.51\u001b[39m seconds.","timestamp":"2025-05-10 00:55:25,535"}
+{"level":"info","message":"Closing Oracle connection.","timestamp":"2025-05-10 00:55:25,535"}
