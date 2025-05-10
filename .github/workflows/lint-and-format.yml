@@ -1,9 +1,9 @@
-name: Lint and Format Python Codex
+ name: Lint and Format Python Code
 
 # Define permissions at the workflow level to follow the principle of least privilege
 permissions:
-  contents: write      # Allow checkout of code
-  pull-requests: write # Allow reading PR details (e.g., base branch)
+  contents: write      # Allow checkout and modification of code
+  pull-requests: write # Allow creating and updating pull requests
 
 on:
   push:
@@ -18,60 +18,72 @@ on:
     inputs:
       base_directory:
         description: 'Base directory to search for Python files (relative to repository root)'
-        required: false # Default will be applied
+        required: false
         default: '.'
       file_pattern:
-        description: 'Glob pattern for Python files (e.g., "**/*.py") to be used by linters/formatters'
-        required: false # Default will be applied
+        description: 'Glob pattern for Python files (e.g., "**/*.py")'
+        required: false
         default: '**/*.py'
       commit_message:
         description: 'Custom commit message for formatting changes'
         required: false
         default: 'Apply automated linting and formatting'
       python_version:
-        description: 'Version of Python to use (e.g., 3.12)'
+        description: 'Python version to use (e.g., 3.12)'
         required: false
-        default: '3.12' # Consider updating to the latest stable Python version periodically
+        default: '3.12'
       ruff_version:
-        description: 'Version of Ruff to use (e.g., "0.5.0" or "latest")'
+        description: 'Version of Ruff to use (e.g., "0.6.0" or "latest")'
         required: false
-        default: '0.5.0' # Pin to a specific version for consistency; update as needed
+        default: '0.6.0' # Updated to a newer version
+      ruff_config:
+        description: 'Path to Ruff configuration file (e.g., pyproject.toml, ruff.toml)'
+        required: false
+        default: ''
       mypy_version:
-        description: 'Version of Mypy to use (e.g., "1.10.0" or "latest")'
+        description: 'Version of Mypy to use (e.g., "1.11.0" or "latest")'
         required: false
-        default: '1.10.0' # Pin to a specific version for consistency; update as needed
+        default: '1.11.0' # Updated to a newer version
+      mypy_config:
+        description: 'Path to Mypy configuration file (e.g., mypy.ini)'
+        required: false
+        default: ''
       fail_on_lint:
         description: 'Fail workflow if Ruff linting finds issues (true/false)'
         required: false
-        default: 'false' # More lenient by default, can be made stricter
+        default: 'true' # Stricter default for CI
       fail_on_mypy:
         description: 'Fail workflow if Mypy type checking finds issues (true/false)'
         required: false
-        default: 'false' # More lenient by default
+        default: 'false'
       additional_tools:
         description: 'Additional tools to run, space-separated (e.g., black isort)'
         required: false
         default: ''
+      dry_run:
+        description: 'Run in dry-run mode to preview changes without committing (true/false)'
+        required: false
+        default: 'false'
 
 jobs:
   validate-and-lint:
     runs-on: ubuntu-latest
-    # Grant specific write permissions to this job only
     permissions:
-      contents: write        # Needed for committing and pushing changes
-      pull-requests: write   # Needed for creating pull requests
+      contents: write
+      pull-requests: write
     outputs:
       repo_access: ${{ steps.validate-repo.outputs.repo_access }}
       changes_made: ${{ steps.git-status.outputs.changes_made }}
       branch_name: ${{ steps.commit-changes.outputs.branch_name }}
       pr_url: ${{ steps.create-pr.outputs.pull-request-url }}
+      lint_summary: ${{ steps.summarize-lint.outputs.lint_summary }}
 
     steps:
       - name: Initialize Lint Report
         run: |
           echo "Linting and Formatting Report" > lint_report.txt
           echo "=============================" >> lint_report.txt
-          echo "Workflow started at: $(date --utc +'%Y-%m-%dT%H:%M:%SZ')" >> lint_report.txt
+          echo "Workflow started at: $(date --utc +'%Y-%m-%dTzyn%H:%M:%SZ')" >> lint_report.txt
           echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> lint_report.txt
           echo "Trigger: ${{ github.event_name }}" >> lint_report.txt
           echo "Repository: ${{ github.repository }}" >> lint_report.txt
@@ -81,12 +93,10 @@ jobs:
       - name: Validate Repository Access
         id: validate-repo
         env:
-          # GITHUB_TOKEN is automatically provided by Actions
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Validating repository access..." >> lint_report.txt
           API_RESPONSE_FILE="repo_details.json"
-          # Use -f to fail silently on server errors for curl, check HTTP status code instead
           HTTP_STATUS_CODE=$(curl -s -f -w "%{http_code}" -o "$API_RESPONSE_FILE" \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
@@ -94,15 +104,14 @@ jobs:
 
           if [ "$HTTP_STATUS_CODE" -ne 200 ]; then
             echo "Error: Failed to fetch repository details. HTTP Status: $HTTP_STATUS_CODE" >> lint_report.txt
-            # Attempt to read message from response if file was created
             if [ -f "$API_RESPONSE_FILE" ] && grep -q '"message":' "$API_RESPONSE_FILE"; then
-                grep '"message":' "$API_RESPONSE_FILE" >> lint_report.txt
+              grep '"message":' "$API_RESPONSE_FILE" >> lint_report.txt
             elif [ "$HTTP_STATUS_CODE" == "404" ]; then
-                echo "Cause: Repository not found or GITHUB_TOKEN lacks sufficient scope." >> lint_report.txt
+              echo "Cause: Repository not found or GITHUB_TOKEN lacks sufficient scope." >> lint_report.txt
             elif [ "$HTTP_STATUS_CODE" == "401" ] || [ "$HTTP_STATUS_CODE" == "403" ]; then
-                echo "Cause: GITHUB_TOKEN is invalid or lacks permissions." >> lint_report.txt
+              echo "Cause: GITHUB_TOKEN is invalid or lacks permissions." >> lint_report.txt
             else
-                echo "Cause: Unknown API error. Check runner logs for details." >> lint_report.txt
+              echo "Cause: Unknown API error. Check runner logs for details." >> lint_report.txt
             fi
             echo "repo_access=false" >> $GITHUB_OUTPUT
             exit 1
@@ -113,24 +122,31 @@ jobs:
           echo "-----------------------------" >> lint_report.txt
 
       - name: Validate and Prepare Inputs
-        id: validate-inputs # This step outputs validated/defaulted values
+        id: validate-inputs
         run: |
           echo "Validating and preparing inputs..." >> lint_report.txt
-          # Consistently access inputs via github.event.inputs, providing defaults
-          # For non-workflow_dispatch, github.event.inputs will be empty, so defaults are crucial.
           FILE_PATTERN="${{ github.event.inputs.file_pattern || '**/*.py' }}"
           BASE_DIRECTORY="${{ github.event.inputs.base_directory || '.' }}"
           ADDITIONAL_TOOLS_INPUT="${{ github.event.inputs.additional_tools || '' }}"
           PYTHON_VERSION="${{ github.event.inputs.python_version || '3.12' }}"
-          RUFF_VERSION="${{ github.event.inputs.ruff_version || '0.5.0' }}"
-          MYPY_VERSION="${{ github.event.inputs.mypy_version || '1.10.0' }}"
-          FAIL_ON_LINT="${{ github.event.inputs.fail_on_lint || 'false' }}"
+          RUFF_VERSION="${{ github.event.inputs.ruff_version || '0.6.0' }}"
+          RUFF_CONFIG="${{ github.event.inputs.ruff_config || '' }}"
+          MYPY_VERSION="${{ github.event.inputs.mypy_version || '1.11.0' }}"
+          MYPY_CONFIG="${{ github.event.inputs.mypy_config || '' }}"
+          FAIL_ON_LINT="${{ github.event.inputs.fail_on_lint || 'true' }}"
           FAIL_ON_MYPY="${{ github.event.inputs.fail_on_mypy || 'false' }}"
           COMMIT_MESSAGE="${{ github.event.inputs.commit_message || 'Apply automated linting and formatting' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
 
-          # Basic validation for file pattern
-          if [[ ! "$FILE_PATTERN" =~ \.py(\*|\b|$) ]] || [[ "$FILE_PATTERN" =~ \$ ]] || [[ "$FILE_PATTERN" =~ \; ]] || [[ "$FILE_PATTERN" =~ \&\& ]] || [[ "$FILE_PATTERN" =~ \|\| ]]; then
-            echo "Error: file_pattern ('$FILE_PATTERN') must target .py files (e.g., '*.py', '**/*.py') and avoid shell metacharacters like $, ;, &&, ||." >> lint_report.txt
+          # Enhanced file pattern validation
+          if [[ ! "$FILE_PATTERN" =~ ^[a-zA-Z0-9_/.*-]+\.py$ ]] || [[ "$FILE_PATTERN" =~ [\$;\|\&] ]]; then
+            echo "Error: file_pattern ('$FILE_PATTERN') must be a valid glob pattern for .py files (e.g., '*.py', '**/*.py') and avoid shell metacharacters ($, ;, |, &)." >> lint_report.txt
+            exit 1
+          fi
+
+          # Validate base directory (basic check here, detailed check after checkout)
+          if [[ "$BASE_DIRECTORY" =~ [\$;\|\&] ]] || [[ "$BASE_DIRECTORY" == /* ]]; then
+            echo "Error: base_directory ('$BASE_DIRECTORY') must be a relative path and avoid shell metacharacters." >> lint_report.txt
             exit 1
           fi
 
@@ -138,15 +154,25 @@ jobs:
           VALID_ADDITIONAL_TOOLS=""
           if [[ -n "$ADDITIONAL_TOOLS_INPUT" ]]; then
             for tool in $ADDITIONAL_TOOLS_INPUT; do
-              if [[ "$tool" =~ ^(black|isort)$ ]]; then # Extend regex for more tools
+              if [[ "$tool" =~ ^(black|isort)$ ]]; then
                 VALID_ADDITIONAL_TOOLS="$VALID_ADDITIONAL_TOOLS $tool"
               else
-                echo "Warning: Invalid additional tool '$tool' specified. Supported: black, isort. Ignoring '$tool'." >> lint_report.txt
+                echo "Warning: Invalid additional tool '$tool'. Supported: black, isort. Ignoring." >> lint_report.txt
               fi
             done
-            ADDITIONAL_TOOLS=$(echo "$VALID_ADDITIONAL_TOOLS" | xargs) # Trim leading/trailing whitespace
+            ADDITIONAL_TOOLS=$(echo "$VALID_ADDITIONAL_TOOLS" | xargs)
           else
             ADDITIONAL_TOOLS=""
+          fi
+
+          # Validate config files
+          if [[ -n "$RUFF_CONFIG" && ! "$RUFF_CONFIG" =~ ^[a-zA-Z0-9_/.-]+$ ]]; then
+            echo "Error: ruff_config ('$RUFF_CONFIG') must be a valid file path." >> lint_report.txt
+            exit 1
+          fi
+          if [[ -n "$MYPY_CONFIG" && ! "$MYPY_CONFIG" =~ ^[a-zA-Z0-9_/.-]+$ ]]; then
+            echo "Error: mypy_config ('$MYPY_CONFIG') must be a valid file path." >> lint_report.txt
+            exit 1
           fi
 
           echo "Effective Inputs After Validation/Defaults:" >> lint_report.txt
@@ -154,11 +180,14 @@ jobs:
           echo "- File pattern: $FILE_PATTERN" >> lint_report.txt
           echo "- Python version: $PYTHON_VERSION" >> lint_report.txt
           echo "- Ruff version: $RUFF_VERSION" >> lint_report.txt
+          echo "- Ruff config: ${RUFF_CONFIG:-default}" >> lint_report.txt
           echo "- Mypy version: $MYPY_VERSION" >> lint_report.txt
+          echo "- Mypy config: ${MYPY_CONFIG:-default}" >> lint_report.txt
           echo "- Additional tools: ${ADDITIONAL_TOOLS:-none}" >> lint_report.txt
           echo "- Fail on Ruff lint: $FAIL_ON_LINT" >> lint_report.txt
           echo "- Fail on Mypy: $FAIL_ON_MYPY" >> lint_report.txt
           echo "- Commit message: $COMMIT_MESSAGE" >> lint_report.txt
+          echo "- Dry run: $DRY_RUN" >> lint_report.txt
           echo "-----------------------------" >> lint_report.txt
 
           echo "file_pattern=$FILE_PATTERN" >> $GITHUB_OUTPUT
@@ -166,31 +195,48 @@ jobs:
           echo "additional_tools=$ADDITIONAL_TOOLS" >> $GITHUB_OUTPUT
           echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
           echo "ruff_version=$RUFF_VERSION" >> $GITHUB_OUTPUT
+          echo "ruff_config=$RUFF_CONFIG" >> $GITHUB_OUTPUT
           echo "mypy_version=$MYPY_VERSION" >> $GITHUB_OUTPUT
+          echo "mypy_config=$MYPY_CONFIG" >> $GITHUB_OUTPUT
           echo "fail_on_lint=$FAIL_ON_LINT" >> $GITHUB_OUTPUT
           echo "fail_on_mypy=$FAIL_ON_MYPY" >> $GITHUB_OUTPUT
           echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
-        # Base directory existence check is done after checkout.
+          echo "dry_run=$DRY_RUN" >> $GITHUB_OUTPUT
 
       - name: Checkout Code
         if: steps.validate-repo.outputs.repo_access == 'true'
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }} # PAT_TOKEN is recommended for triggering subsequent workflows
-          fetch-depth: 0 # Fetches all history, useful for diffing and PRs against various bases
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Validate Base Directory Existence
+      - name: Validate Base Directory and Config Files
         if: steps.validate-repo.outputs.repo_access == 'true'
         run: |
           BASE_DIR_TO_CHECK="${{ steps.validate-inputs.outputs.base_directory }}"
-          echo "Validating base directory existence: '$BASE_DIR_TO_CHECK' (relative to repository root)" >> lint_report.txt
+          echo "Validating base directory: '$BASE_DIR_TO_CHECK'" >> lint_report.txt
           if [ ! -d "$BASE_DIR_TO_CHECK" ]; then
-            echo "Error: Base directory '$BASE_DIR_TO_CHECK' does not exist in the checked-out repository." >> lint_report.txt
-            echo "Current directory listing:" >> lint_report.txt
+            echo "Error: Base directory '$BASE_DIR_TO_CHECK' does not exist." >> lint_report.txt
             ls -la . >> lint_report.txt
             exit 1
           fi
-          echo "Base directory '$BASE_DIR_TO_CHECK' validated successfully." >> lint_report.txt
+          echo "Base directory validated." >> lint_report.txt
+
+          # Validate config files if specified
+          if [ -n "${{ steps.validate-inputs.outputs.ruff_config }}" ]; then
+            if [ ! -f "${{ steps.validate-inputs.outputs.ruff_config }}" ]; then
+              echo "Error: Ruff config file '${{ steps.validate-inputs.outputs.ruff_config }}' does not exist." >> lint_report.txt
+              exit 1
+            fi
+            echo "Ruff config file validated." >> lint_report.txt
+          fi
+          if [ -n "${{ steps.validate-inputs.outputs.mypy_config }}" ]; then
+            if [ ! -f "${{ steps.validate-inputs.outputs.mypy_config }}" ]; then
+              echo "Error: Mypy config file '${{ steps.validate-inputs.outputs.mypy_config }}' does not exist." >> lint_report.txt
+              exit 1
+            fi
+            echo "Mypy config file validated." >> lint_report.txt
+          fi
           echo "-----------------------------" >> lint_report.txt
 
       - name: Set up Python ${{ steps.validate-inputs.outputs.python_version }}
@@ -199,28 +245,26 @@ jobs:
         with:
           python-version: ${{ steps.validate-inputs.outputs.python_version }}
           cache: 'pip'
-          # Cache key will be based on python version, runner OS, and hashes of these files
           cache-dependency-path: |
-            **/requirements*.txt
             **/pyproject.toml
+            **/requirements*.txt
             **/setup.py
             **/Pipfile.lock
 
-      - name: Install Dependencies (Linters, Formatters, Project)
+      - name: Install Dependencies
         if: steps.validate-repo.outputs.repo_access == 'true'
         run: |
-          echo "Installing core and additional linting/formatting tools..." >> lint_report.txt
+          echo "Installing tools and project dependencies..." >> lint_report.txt
           python -m pip install --upgrade pip wheel
-          
+
           RUFF_SPEC="ruff==${{ steps.validate-inputs.outputs.ruff_version }}"
           [[ "${{ steps.validate-inputs.outputs.ruff_version }}" == "latest" ]] && RUFF_SPEC="ruff"
-          
           MYPY_SPEC="mypy==${{ steps.validate-inputs.outputs.mypy_version }}"
           [[ "${{ steps.validate-inputs.outputs.mypy_version }}" == "latest" ]] && MYPY_SPEC="mypy"
 
           echo "Installing $RUFF_SPEC and $MYPY_SPEC..." >> lint_report.txt
           pip install "$RUFF_SPEC" "$MYPY_SPEC" >> lint_report.txt 2>&1 || {
-            echo "Error: Failed to install core linting tools (Ruff, Mypy). See logs above." >> lint_report.txt
+            echo "Error: Failed to install Ruff or Mypy." >> lint_report.txt
             exit 1
           }
 
@@ -228,85 +272,58 @@ jobs:
           if [[ -n "$ADDITIONAL_TOOLS_TO_INSTALL" ]]; then
             echo "Installing additional tools: $ADDITIONAL_TOOLS_TO_INSTALL" >> lint_report.txt
             pip install $ADDITIONAL_TOOLS_TO_INSTALL >> lint_report.txt 2>&1 || {
-              # Log warning but don't fail, as these are 'additional'
-              echo "Warning: Failed to install one or more additional tools ($ADDITIONAL_TOOLS_TO_INSTALL). Continuing..." >> lint_report.txt
+              echo "Warning: Failed to install additional tools ($ADDITIONAL_TOOLS_TO_INSTALL). Continuing..." >> lint_report.txt
             }
           fi
 
-          echo "Attempting to install project dependencies (if any)..." >> lint_report.txt
+          # Simplified dependency installation prioritizing pyproject.toml
           PROJECT_BASE_DIR="${{ steps.validate-inputs.outputs.base_directory }}"
-          # Check for dependency files within the project's base directory or repo root
-          # Prefer pyproject.toml if present in base_directory, then root.
-          PROJECT_DEPS_INSTALLED=false
           if [ -f "$PROJECT_BASE_DIR/pyproject.toml" ]; then
-            echo "Found pyproject.toml in '$PROJECT_BASE_DIR', installing project dependencies..." >> lint_report.txt
-            (cd "$PROJECT_BASE_DIR" && pip install ".[dev]" >> ../lint_report.txt 2>&1 || pip install . >> ../lint_report.txt 2>&1) || \
-             echo "Warning: Failed to install dependencies from $PROJECT_BASE_DIR/pyproject.toml. Linting accuracy might be affected." >> lint_report.txt && PROJECT_DEPS_INSTALLED=true
-          elif [ -f "pyproject.toml" ] && [ "$PROJECT_BASE_DIR" != "." ]; then # Check root if base_directory is not root
-             echo "Found pyproject.toml in repository root, installing project dependencies..." >> lint_report.txt
-             pip install ".[dev]" >> lint_report.txt 2>&1 || pip install . >> lint_report.txt 2>&1 || \
-             echo "Warning: Failed to install dependencies from root pyproject.toml. Linting accuracy might be affected." >> lint_report.txt && PROJECT_DEPS_INSTALLED=true
+            echo "Found pyproject.toml in '$PROJECT_BASE_DIR', installing dependencies..." >> lint_report.txt
+            (cd "$PROJECT_BASE_DIR" && pip install ".[dev]" >> ../lint_report.txt 2>&1 || pip install . >> ../lint_report.txt 2>&1) || {
+              echo "Warning: Failed to install dependencies from pyproject.toml. Linting accuracy may be affected." >> lint_report.txt
+            }
+          elif [ -f "$PROJECT_BASE_DIR/requirements.txt" ]; then
+            echo "Found requirements.txt in '$PROJECT_BASE_DIR', installing..." >> lint_report.txt
+            pip install -r "$PROJECT_BASE_DIR/requirements.txt" >> lint_report.txt 2>&1 || {
+              echo "Warning: Failed to install dependencies from requirements.txt." >> lint_report.txt
+            }
+          else
+            echo "No pyproject.toml or requirements.txt found in '$PROJECT_BASE_DIR'. Proceeding with linters only." >> lint_report.txt
           fi
-          
-          if ! $PROJECT_DEPS_INSTALLED; then # If not installed via pyproject.toml, try requirements.txt
-            if [ -f "$PROJECT_BASE_DIR/requirements-dev.txt" ]; then
-              echo "Found requirements-dev.txt in '$PROJECT_BASE_DIR', installing..." >> lint_report.txt
-              pip install -r "$PROJECT_BASE_DIR/requirements-dev.txt" >> lint_report.txt 2>&1 || \
-              echo "Warning: Failed to install from $PROJECT_BASE_DIR/requirements-dev.txt." >> lint_report.txt && PROJECT_DEPS_INSTALLED=true
-            elif [ -f "$PROJECT_BASE_DIR/requirements.txt" ]; then
-              echo "Found requirements.txt in '$PROJECT_BASE_DIR', installing..." >> lint_report.txt
-              pip install -r "$PROJECT_BASE_DIR/requirements.txt" >> lint_report.txt 2>&1 || \
-              echo "Warning: Failed to install from $PROJECT_BASE_DIR/requirements.txt." >> lint_report.txt && PROJECT_DEPS_INSTALLED=true
-            elif [ -f "requirements-dev.txt" ] && [ "$PROJECT_BASE_DIR" != "." ]; then
-              echo "Found requirements-dev.txt in repository root, installing..." >> lint_report.txt
-              pip install -r "requirements-dev.txt" >> lint_report.txt 2>&1 || \
-              echo "Warning: Failed to install from root requirements-dev.txt." >> lint_report.txt && PROJECT_DEPS_INSTALLED=true
-            elif [ -f "requirements.txt" ] && [ "$PROJECT_BASE_DIR" != "." ]; then
-              echo "Found requirements.txt in repository root, installing..." >> lint_report.txt
-              pip install -r "requirements.txt" >> lint_report.txt 2>&1 || \
-              echo "Warning: Failed to install from root requirements.txt." >> lint_report.txt && PROJECT_DEPS_INSTALLED=true
-            fi
-          fi
-
-          if ! $PROJECT_DEPS_INSTALLED; then
-            echo "No standard project dependency files (pyproject.toml, requirements*.txt) found or installation failed. Proceeding with linters only." >> lint_report.txt
-          fi
-          echo "Dependency installation phase completed." >> lint_report.txt
+          echo "Dependency installation completed." >> lint_report.txt
           echo "-----------------------------" >> lint_report.txt
 
-      - name: Check for Python Files to Process
+      - name: Check for Python Files
         if: steps.validate-repo.outputs.repo_access == 'true'
         id: check-python-files
         run: |
           BASE_DIR="${{ steps.validate-inputs.outputs.base_directory }}"
-          FILE_PATTERN_FOR_CHECK="${{ steps.validate-inputs.outputs.file_pattern }}" # Use the actual pattern for a more accurate check
-          echo "Checking for Python files in '$BASE_DIR' matching pattern '$FILE_PATTERN_FOR_CHECK'..." >> lint_report.txt
-          
-          # Use find within the base directory. The pattern should be relative to base_dir.
-          # If pattern starts with './' remove it for find.
-          ADJUSTED_PATTERN=$(echo "$FILE_PATTERN_FOR_CHECK" | sed 's|^\./||')
-          
-          # Use a subshell to handle find's non-zero exit code if no files are found.
-          # Count files matching the pattern within the base directory.
-          PYTHON_FILES_FOUND_COUNT=$( (cd "$BASE_DIR" && find . -path "$ADJUSTED_PATTERN" -type f -name "*.py" -print -quit) | wc -l )
+          FILE_PATTERN="${{ steps.validate-inputs.outputs.file_pattern }}"
+          echo "Checking for Python files in '$BASE_DIR' matching '$FILE_PATTERN'..." >> lint_report.txt
 
-          if [ "$PYTHON_FILES_FOUND_COUNT" -gt 0 ]; then
-            echo "Python files found in '$BASE_DIR' matching pattern. Proceeding with linting/formatting." >> lint_report.txt
+          PYTHON_FILES_FOUND=$(find "$BASE_DIR" -type f -name "*.py" -path "$FILE_PATTERN" | wc -l)
+          if [ "$PYTHON_FILES_FOUND" -gt 0 ]; then
+            echo "Found $PYTHON_FILES_FOUND Python files. Proceeding with linting/formatting." >> lint_report.txt
             echo "python_files_found=true" >> $GITHUB_OUTPUT
           else
-            echo "Warning: No Python files found in '$BASE_DIR' matching pattern '$FILE_PATTERN_FOR_CHECK'." >> lint_report.txt
-            echo "Skipping linting, formatting, and type-checking steps." >> lint_report.txt
+            echo "Warning: No Python files found matching '$FILE_PATTERN' in '$BASE_DIR'." >> lint_report.txt
+            echo "Skipping linting and formatting." >> lint_report.txt
             echo "python_files_found=false" >> $GITHUB_OUTPUT
           fi
           echo "-----------------------------" >> lint_report.txt
 
+      # Parallel execution of independent tools
       - name: Run Ruff Linting
         if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true'
         run: |
           echo "Running Ruff linting..." >> lint_report.txt
           TARGET_PATH="${{ steps.validate-inputs.outputs.base_directory }}/${{ steps.validate-inputs.outputs.file_pattern }}"
-          # Ruff respects config files. --no-cache can be useful in CI for clean runs.
-          ruff check "$TARGET_PATH" --output-format=full --no-cache >> lint_report.txt 2>&1
+          RUFF_ARGS="--output-format=full --no-cache"
+          if [ -n "${{ steps.validate-inputs.outputs.ruff_config }}" ]; then
+            RUFF_ARGS="$RUFF_ARGS --config ${{ steps.validate-inputs.outputs.ruff_config }}"
+          fi
+          ruff check $RUFF_ARGS "$TARGET_PATH" >> lint_report.txt 2>&1
           RUFF_LINT_EXIT_CODE=$?
           if [ $RUFF_LINT_EXIT_CODE -ne 0 ]; then
             echo "Ruff linting found issues (exit code $RUFF_LINT_EXIT_CODE)." >> lint_report.txt
@@ -319,6 +336,7 @@ jobs:
           else
             echo "Ruff linting completed. No issues found." >> lint_report.txt
           fi
+          echo "ruff_exit_code=$RUFF_LINT_EXIT_CODE" >> $GITHUB_OUTPUT
           echo "-----------------------------" >> lint_report.txt
 
       - name: Run Ruff Formatting
@@ -326,10 +344,20 @@ jobs:
         run: |
           echo "Running Ruff formatting..." >> lint_report.txt
           TARGET_PATH="${{ steps.validate-inputs.outputs.base_directory }}/${{ steps.validate-inputs.outputs.file_pattern }}"
-          ruff format "$TARGET_PATH" --no-cache >> lint_report.txt 2>&1 || {
-            echo "Error: Ruff formatting command failed. Check logs above." >> lint_report.txt
-            exit 1 # Formatting failures are generally critical
-          }
+          RUFF_ARGS="--no-cache"
+          if [ -n "${{ steps.validate-inputs.outputs.ruff_config }}" ]; then
+            RUFF_ARGS="$RUFF_ARGS --config ${{ steps.validate-inputs.outputs.ruff_config }}"
+          fi
+          if [ "${{ steps.validate-inputs.outputs.dry_run }}" == "true" ]; then
+            RUFF_ARGS="$RUFF_ARGS --diff"
+            echo "Dry run: Showing formatting changes without applying them." >> lint_report.txt
+            ruff format $RUFF_ARGS "$TARGET_PATH" >> lint_report.txt 2>&1
+          else
+            ruff format $RUFF_ARGS "$TARGET_PATH" >> lint_report.txt 2>&1 || {
+              echo "Error: Ruff formatting failed." >> lint_report.txt
+              exit 1
+            }
+          fi
           echo "Ruff formatting completed." >> lint_report.txt
           echo "-----------------------------" >> lint_report.txt
 
@@ -337,10 +365,11 @@ jobs:
         if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true'
         run: |
           echo "Running Mypy type checking..." >> lint_report.txt
-          # Mypy often works best when pointed at a module or package root.
-          # Using base_directory as the primary target. Mypy will discover .py files.
-          # --install-types can be slow; consider managing stubs explicitly if performance is an issue.
-          mypy --install-types --non-interactive "${{ steps.validate-inputs.outputs.base_directory }}" >> lint_report.txt 2>&1
+          MYPY_ARGS="--install-types --non-interactive"
+          if [ -n "${{ steps.validate-inputs.outputs.mypy_config }}" ]; then
+            MYPY_ARGS="$MYPY_ARGS --config-file ${{ steps.validate-inputs.outputs.mypy_config }}"
+          fi
+          mypy $MYPY_ARGS "${{ steps.validate-inputs.outputs.base_directory }}" >> lint_report.txt 2>&1
           MYPY_EXIT_CODE=$?
           if [ $MYPY_EXIT_CODE -ne 0 ]; then
             echo "Mypy type checking found issues (exit code $MYPY_EXIT_CODE)." >> lint_report.txt
@@ -353,109 +382,136 @@ jobs:
           else
             echo "Mypy type checking completed. No issues found." >> lint_report.txt
           fi
+          echo "mypy_exit_code=$MYPY_EXIT_CODE" >> $GITHUB_OUTPUT
           echo "-----------------------------" >> lint_report.txt
 
-      - name: Run Additional Tools (e.g., Black, Isort)
+      - name: Run Additional Tools
         if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true' && steps.validate-inputs.outputs.additional_tools != ''
         run: |
-          TARGET_PATH_TOOLS="${{ steps.validate-inputs.outputs.base_directory }}/${{ steps.validate-inputs.outputs.file_pattern }}"
+          TARGET_PATH="${{ steps.validate-inputs.outputs.base_directory }}/${{ steps.validate-inputs.outputs.file_pattern }}"
           for tool in ${{ steps.validate-inputs.outputs.additional_tools }}; do
             echo "Running $tool..." >> lint_report.txt
+            TOOL_ARGS=""
+            if [ "${{ steps.validate-inputs.outputs.dry_run }}" == "true" ]; then
+              TOOL_ARGS="--diff"
+              echo "Dry run: Showing $tool changes without applying them." >> lint_report.txt
+            fi
             if [ "$tool" = "black" ]; then
-              black "$TARGET_PATH_TOOLS" >> lint_report.txt 2>&1 || {
-                echo "Error: Black formatting failed. Check logs above." >> lint_report.txt
-                exit 1 # Black failures imply code wasn't compliant
+              black $TOOL_ARGS "$TARGET_PATH" >> lint_report.txt 2>&1 || {
+                echo "Error: Black formatting failed." >> lint_report.txt
+                exit 1
               }
             elif [ "$tool" = "isort" ]; then
-              isort "$TARGET_PATH_TOOLS" >> lint_report.txt 2>&1 || {
-                echo "Error: isort import sorting failed. Check logs above." >> lint_report.txt
-                exit 1 # isort failures imply imports weren't compliant
+              isort $TOOL_ARGS "$TARGET_PATH" >> lint_report.txt 2>&1 || {
+                echo "Error: isort import sorting failed." >> lint_report.txt
+                exit 1
               }
             fi
             echo "$tool completed successfully." >> lint_report.txt
           done
           echo "-----------------------------" >> lint_report.txt
 
+      - name: Summarize Linting Results
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.check-python-files.outputs.python_files_found == 'true'
+        id: summarize-lint
+        run: |
+          echo "Linting Summary" >> lint_report.txt
+          echo "===============" >> lint_report.txt
+          RUFF_ISSUES=0
+          MYPY_ISSUES=0
+          if [ "${{ steps.ruff-lint.outputs.ruff_exit_code }}" -ne 0 ]; then
+            RUFF_ISSUES=$(grep -c "error:" lint_report.txt || echo 0)
+            echo "- Ruff found $RUFF_ISSUES issues." >> lint_report.txt
+            echo "  Affected files:" >> lint_report.txt
+            grep "error:" lint_report.txt | awk -F':' '{print $1}' | sort | uniq >> lint_report.txt
+          else
+            echo "- Ruff found 0 issues." >> lint_report.txt
+          fi
+          if [ "${{ steps.mypy.outputs.mypy_exit_code }}" -ne 0 ]; then
+            MYPY_ISSUES=$(grep -c "error:" lint_report.txt || echo 0)
+            echo "- Mypy found $MYPY_ISSUES issues." >> lint_report.txt
+            echo "  Affected files:" >> lint_report.txt
+            grep "error:" lint_report.txt | awk -F':' '{print $1}' | sort | uniq >> lint_report.txt
+          else
+            echo "- Mypy found 0 issues." >> lint_report.txt
+          fi
+          echo "lint_summary=Ruff: $RUFF_ISSUES issues, Mypy: $MYPY_ISSUES issues" >> $GITHUB_OUTPUT
+          echo "===============" >> lint_report.txt
+          echo "-----------------------------" >> lint_report.txt
+
       - name: Check for Formatting Changes
-        if: steps.validate-repo.outputs.repo_access == 'true' # Run even if no Python files found initially, to confirm no changes.
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.validate-inputs.outputs.dry_run == 'false'
         id: git-status
         run: |
-          echo "Checking for code changes after linting and formatting..." >> lint_report.txt
-          # Stage all changes. If linters/formatters modified files, they will be staged.
-          # Also ensure untracked files created by tools are added.
+          echo "Checking for code changes..." >> lint_report.txt
           git add --all
-          
           if ! git diff --cached --quiet; then
-            echo "Changes detected by linters/formatters:" >> lint_report.txt
-            git diff --cached --name-status >> lint_report.txt # Show names and status (Modified, Added, etc.)
+            echo "Changes detected:" >> lint_report.txt
+            git diff --cached --name-status >> lint_report.txt
             echo "changes_made=true" >> $GITHUB_OUTPUT
           else
-            echo "No functional changes detected after linting and formatting." >> lint_report.txt
+            echo "No changes detected." >> lint_report.txt
             echo "changes_made=false" >> $GITHUB_OUTPUT
           fi
           echo "-----------------------------" >> lint_report.txt
 
       - name: Configure Git User
-        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true'
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true' && steps.validate-inputs.outputs.dry_run == 'false'
         run: |
-          echo "Configuring Git user for commit..." >> lint_report.txt
+          echo "Configuring Git user..." >> lint_report.txt
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com" # Standard GitHub Actions bot email
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           echo "Git user configured." >> lint_report.txt
           echo "-----------------------------" >> lint_report.txt
 
       - name: Create New Branch and Commit Changes
-        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true'
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true' && steps.validate-inputs.outputs.dry_run == 'false'
         id: commit-changes
         run: |
-          COMMIT_MESSAGE_TO_USE="${{ steps.validate-inputs.outputs.commit_message }}"
-          # Determine base branch: github.head_ref for PRs, github.ref_name for push/dispatch
-          BASE_BRANCH_FOR_NAME="${{ github.head_ref || github.ref_name }}"
-          # Sanitize base branch name for use in new branch name (e.g., replace '/' with '-')
-          SANITIZED_BASE_BRANCH_NAME=$(echo "$BASE_BRANCH_FOR_NAME" | sed 's|refs/heads/||' | sed 's|refs/tags/||' | sed 's|/|-|g')
-          BRANCH_NAME="lint-format/${SANITIZED_BASE_BRANCH_NAME}-${{ github.run_id }}"
+          COMMIT_MESSAGE="${{ steps.validate-inputs.outputs.commit_message }}"
+          BASE_BRANCH="${{ github.head_ref || github.ref_name }}"
+          SANITIZED_BASE_BRANCH=$(echo "$BASE_BRANCH" | sed 's|refs/heads/||' | sed 's|refs/tags/||' | sed 's|/|-|g')
+          TIMESTAMP=$(date --utc +'%Y%m%d%H%M%S')
+          BRANCH_NAME="lint-format/${SANITIZED_BASE_BRANCH}-${TIMESTAMP}-${{ github.run_id }}"
 
-          echo "Creating new branch: $BRANCH_NAME" >> lint_report.txt
+          echo "Creating branch: $BRANCH_NAME" >> lint_report.txt
           git checkout -b "$BRANCH_NAME" || {
-            echo "Error: Failed to create branch '$BRANCH_NAME'. Current Git status:" >> lint_report.txt
+            echo "Error: Failed to create branch '$BRANCH_NAME'." >> lint_report.txt
             git status >> lint_report.txt
             exit 1
           }
-          echo "Committing changes with message: '$COMMIT_MESSAGE_TO_USE'" >> lint_report.txt
-          git commit -m "$COMMIT_MESSAGE_TO_USE" || {
-            echo "Error: Failed to commit changes. Current Git status:" >> lint_report.txt
+          echo "Committing changes: '$COMMIT_MESSAGE'" >> lint_report.txt
+          git commit -m "$COMMIT_MESSAGE" || {
+            echo "Error: Failed to commit changes." >> lint_report.txt
             git status >> lint_report.txt
             exit 1
           }
-          echo "Changes committed successfully to branch '$BRANCH_NAME'." >> lint_report.txt
+          echo "Changes committed to '$BRANCH_NAME'." >> lint_report.txt
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "-----------------------------" >> lint_report.txt
 
       - name: Push Changes to Remote
-        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true'
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true' && steps.validate-inputs.outputs.dry_run == 'false'
         env:
-          # Use PAT_TOKEN if available for broader permissions, otherwise GITHUB_TOKEN
-          # PAT_TOKEN is preferred if this push needs to trigger other protected workflows.
-          GH_TOKEN_FOR_PUSH: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH_TO_PUSH="${{ steps.commit-changes.outputs.branch_name }}"
-          echo "Pushing branch '$BRANCH_TO_PUSH' to origin..." >> lint_report.txt
-          git push "https://x-access-token:$GH_TOKEN_FOR_PUSH@github.com/${{ github.repository }}" "$BRANCH_TO_PUSH" --force-with-lease || {
-            echo "Error: Failed to push branch '$BRANCH_TO_PUSH'. Current Git status:" >> lint_report.txt
+          BRANCH="${{ steps.commit-changes.outputs.branch_name }}"
+          echo "Pushing branch '$BRANCH'..." >> lint_report.txt
+          git push "https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}" "$BRANCH" --force-with-lease || {
+            echo "Error: Failed to push branch '$BRANCH'." >> lint_report.txt
             git status >> lint_report.txt
             exit 1
           }
-          echo "Branch '$BRANCH_TO_PUSH' pushed successfully." >> lint_report.txt
+          echo "Branch '$BRANCH' pushed." >> lint_report.txt
           echo "-----------------------------" >> lint_report.txt
 
       - name: Create Pull Request
-        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true'
-        id: create-pr # ID to capture outputs like PR URL
+        if: steps.validate-repo.outputs.repo_access == 'true' && steps.git-status.outputs.changes_made == 'true' && steps.validate-inputs.outputs.dry_run == 'false'
+        id: create-pr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           branch: ${{ steps.commit-changes.outputs.branch_name }}
-          # Determine base for PR: For PR events, target the PR's base. For push/dispatch, target the branch pushed/dispatched from.
           base: ${{ github.event.pull_request.base.ref || github.ref_name }}
           title: "chore: Auto Linting & Formatting for ${{ github.event.pull_request.base.ref || github.ref_name }}"
           body: |
@@ -464,18 +520,23 @@ jobs:
             **Source Branch**: `${{ steps.commit-changes.outputs.branch_name }}`
             **Target Branch**: `${{ github.event.pull_request.base.ref || github.ref_name }}`
 
+            **Linting Summary**: ${{ steps.summarize-lint.outputs.lint_summary }}
+
             **Configuration Used:**
             - **Base directory**: `${{ steps.validate-inputs.outputs.base_directory }}`
             - **File pattern**: `${{ steps.validate-inputs.outputs.file_pattern }}`
             - **Python version**: `${{ steps.validate-inputs.outputs.python_version }}`
             - **Ruff version**: `${{ steps.validate-inputs.outputs.ruff_version }}`
+            - **Ruff config**: `${{ steps.validate-inputs.outputs.ruff_config || 'default' }}`
             - **Mypy version**: `${{ steps.validate-inputs.outputs.mypy_version }}`
+            - **Mypy config**: `${{ steps.validate-inputs.outputs.mypy_config || 'default' }}`
             - **Additional tools**: `${{ steps.validate-inputs.outputs.additional_tools || 'none' }}`
             - **Commit message**: `${{ steps.validate-inputs.outputs.commit_message }}`
             - **Fail on Ruff lint**: `${{ steps.validate-inputs.outputs.fail_on_lint }}`
             - **Fail on Mypy**: `${{ steps.validate-inputs.outputs.fail_on_mypy }}`
+            - **Dry run**: `${{ steps.validate-inputs.outputs.dry_run }}`
 
-            Please review the changes. The detailed `lint_report.txt` artifact from this workflow run contains logs from all linters and formatters.
+            Please review the changes. The `lint-report-${{ github.run_id }}.zip` artifact contains detailed logs.
 
             *This PR was auto-generated.*
           labels: |
@@ -484,53 +545,62 @@ jobs:
             automated
             python
             chore
-          # Assign to the user who triggered the workflow (if manual) or the PR author
           assignees: ${{ github.event.sender.login || github.actor }}
-          delete-branch: true # Automatically delete the branch after the PR is merged/closed
+          delete-branch: true
+
+      - name: Compress Lint Report
+        if: always()
+        run: |
+          if [ -f lint_report.txt ]; then
+            zip -r "lint-report-${{ github.run_id }}.zip" lint_report.txt
+          else
+            echo "Warning: lint_report.txt not found for compression." >> lint_report.txt
+            zip -r "lint-report-${{ github.run_id }}.zip" lint_report.txt || true
+          fi
 
       - name: Upload Lint Report Artifact
-        if: always() # Always run this step to ensure the report is available
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lint-report-${{ github.run_id }} # Unique artifact name per run
-          path: lint_report.txt # Path to the report file
-          retention-days: 7 # Keep artifact for 7 days
-          if-no-files-found: error # Fail this step if lint_report.txt is missing
+          name: lint-report-${{ github.run_id }}
+          path: lint-report-${{ github.run_id }}.zip
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Log Workflow Completion Summary
         if: always()
         run: |
           echo "=============================" >> lint_report.txt
           echo "Workflow completed at: $(date --utc +'%Y-%m-%dT%H:%M:%SZ')" >> lint_report.txt
-          PR_URL_OUTPUT="${{ steps.create-pr.outputs.pull-request-url }}"
-          
+          PR_URL="${{ steps.create-pr.outputs.pull-request-url }}"
+
           if [[ "${{ job.status }}" == "success" ]]; then
             echo "Overall Workflow Status: Success" >> lint_report.txt
-            if [ -n "$PR_URL_OUTPUT" ]; then
-              echo "Pull Request created/updated: $PR_URL_OUTPUT" >> lint_report.txt
-              echo "Pull Request available at: $PR_URL_OUTPUT" # Also log to main console
-            elif [ "${{ steps.git-status.outputs.changes_made }}" == "true" ]; then
-              echo "Changes were made and pushed to branch ${{ steps.commit-changes.outputs.branch_name }}. PR step might have been skipped or failed." >> lint_report.txt
-            elif [ "${{ steps.validate-repo.outputs.repo_access }}" == "true" ] && [ "${{ steps.check-python-files.outputs.python_files_found }}" == "false" ]; then
-              echo "No Python files were found to process according to the specified pattern." >> lint_report.txt
-            elif [ "${{ steps.validate-repo.outputs.repo_access }}" == "true" ]; then
-              echo "No linting or formatting changes were necessary." >> lint_report.txt
+            if [ -n "$PR_URL" ]; then
+              echo "Pull Request: $PR_URL" >> lint_report.txt
+              echo "Pull Request available at: $PR_URL"
+            elif [ "${{ steps.git-status.outputs.changes_made }}" == "true" ] && [ "${{ steps.validate-inputs.outputs.dry_run }}" == "false" ]; then
+              echo "Changes pushed to ${{ steps.commit-changes.outputs.branch_name }}. PR creation may have failed." >> lint_report.txt
+            elif [ "${{ steps.validate-inputs.outputs.dry_run }}" == "true" ]; then
+              echo "Dry run completed. No changes committed." >> lint_report.txt
+            elif [ "${{ steps.check-python-files.outputs.python_files_found }}" == "false" ]; then
+              echo "No Python files found to process." >> lint_report.txt
+            else
+              echo "No changes necessary." >> lint_report.txt
             fi
           else
             echo "Overall Workflow Status: Failure or Cancelled" >> lint_report.txt
-            echo "One or more steps failed. Please check the logs above and the uploaded lint report for details." >> lint_report.txt
+            echo "Check logs and 'lint-report-${{ github.run_id }}.zip' for details." >> lint_report.txt
           fi
 
-          echo "Lint report artifact 'lint-report-${{ github.run_id }}' should be available for download from the Actions run summary page." >> lint_report.txt
+          echo "Artifact 'lint-report-${{ github.run_id }}.zip' available for download." >> lint_report.txt
           echo "=============================" >> lint_report.txt
-          
+
           echo ""
           echo "--- Lint Report (Final Summary) ---"
-          # cat might fail if lint_report.txt was not created due to very early exit, so check existence
           if [ -f lint_report.txt ]; then
             cat lint_report.txt
           else
-            echo "lint_report.txt was not found. Workflow may have exited before its creation."
+            echo "lint_report.txt not found. Workflow may have failed early."
           fi
           echo "--- End of Lint Report ---"
-
