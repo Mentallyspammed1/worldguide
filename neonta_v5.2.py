@@ -82,7 +82,9 @@ class ColorStreamFormatter(logging.Formatter):
 def setup_logging(level: str = "INFO") -> logging.Logger:
     """Configures and returns the root logger."""
     log_level = getattr(logging, level.upper(), logging.INFO)
-    log_formatter = ColorStreamFormatter("%(asctime)s - %(levelname)s - [%(name)s] - %(message)s", "%Y-%m-%d %H:%M:%S")
+    log_formatter = ColorStreamFormatter(
+        "%(asctime)s - %(levelname)s - [%(name)s] - %(message)s", "%Y-%m-%d %H:%M:%S"
+    )
     log_handler = logging.StreamHandler(sys.stdout)
     log_handler.setFormatter(log_formatter)
 
@@ -165,7 +167,9 @@ async def initialize_exchange(config: Dict[str, Any]) -> Optional[Any]:
     return {"name": config.get("exchange", "MockExchange")}
 
 
-async def fetch_ohlcv_data(exchange: Any, symbol: str, timeframe: str, limit: int = 100) -> Optional[pd.DataFrame]:
+async def fetch_ohlcv_data(
+    exchange: Any, symbol: str, timeframe: str, limit: int = 100
+) -> Optional[pd.DataFrame]:
     """Fetches OHLCV data from the exchange."""
     # if not exchange or not hasattr(exchange, 'fetch_ohlcv'):
     #     main_logger.error("Exchange object is invalid or does not support fetch_ohlcv.")
@@ -200,7 +204,9 @@ async def fetch_ohlcv_data(exchange: Any, symbol: str, timeframe: str, limit: in
     main_logger.warning("Using mock OHLCV data.")
     await asyncio.sleep(0.2)  # Simulate async network delay
     end_time = pd.Timestamp.now(tz="UTC").floor(timeframe)
-    start_time = end_time - pd.Timedelta(hours=limit if timeframe == "1h" else limit * 24)  # Adjust based on timeframe
+    start_time = end_time - pd.Timedelta(
+        hours=limit if timeframe == "1h" else limit * 24
+    )  # Adjust based on timeframe
     dates = pd.date_range(start=start_time, end=end_time, freq=timeframe)
     if len(dates) > limit:  # Ensure correct number of points
         dates = dates[-limit:]
@@ -222,7 +228,9 @@ async def fetch_ohlcv_data(exchange: Any, symbol: str, timeframe: str, limit: in
     return df
 
 
-async def fetch_order_book(exchange: Any, symbol: str) -> Optional[Dict[str, List[List[float]]]]:
+async def fetch_order_book(
+    exchange: Any, symbol: str
+) -> Optional[Dict[str, List[List[float]]]]:
     """Fetches the current order book."""
     # if not exchange or not hasattr(exchange, 'fetch_order_book'):
     #     main_logger.error("Exchange object is invalid or does not support fetch_order_book.")
@@ -247,8 +255,13 @@ async def fetch_order_book(exchange: Any, symbol: str) -> Optional[Dict[str, Lis
     await asyncio.sleep(0.1)  # Simulate async network delay
     # Simulate some order book data around a plausible price
     mid_price = 30500.0
-    bids = sorted([[mid_price - i * 0.5, np.random.uniform(0.1, 5.0)] for i in range(1, 21)], reverse=True)
-    asks = sorted([[mid_price + i * 0.5, np.random.uniform(0.1, 5.0)] for i in range(1, 21)])
+    bids = sorted(
+        [[mid_price - i * 0.5, np.random.uniform(0.1, 5.0)] for i in range(1, 21)],
+        reverse=True,
+    )
+    asks = sorted(
+        [[mid_price + i * 0.5, np.random.uniform(0.1, 5.0)] for i in range(1, 21)]
+    )
     return {
         "bids": bids,
         "asks": asks,
@@ -288,12 +301,16 @@ def calculate_rsi(series: pd.Series, period: int) -> pd.Series:
     return rsi
 
 
-def find_support_resistance(df: pd.DataFrame, window: int = 10) -> Tuple[List[float], List[float]]:
+def find_support_resistance(
+    df: pd.DataFrame, window: int = 10
+) -> Tuple[List[float], List[float]]:
     """
     Identifies potential support and resistance levels based on local minima/maxima.
     Simple implementation - more sophisticated methods exist.
     """
-    if not isinstance(df, pd.DataFrame) or not all(col in df.columns for col in ["low", "high"]):
+    if not isinstance(df, pd.DataFrame) or not all(
+        col in df.columns for col in ["low", "high"]
+    ):
         raise ValueError("Input must be a DataFrame with 'low' and 'high' columns.")
     if window <= 0:
         raise ValueError("Window size must be positive.")
@@ -313,7 +330,9 @@ def find_support_resistance(df: pd.DataFrame, window: int = 10) -> Tuple[List[fl
     return support_levels, resistance_levels
 
 
-def analyze_order_book_imbalance(order_book: Dict[str, List[List[float]]], depth: int = 10) -> Optional[float]:
+def analyze_order_book_imbalance(
+    order_book: Dict[str, List[List[float]]], depth: int = 10
+) -> Optional[float]:
     """Calculates the order book imbalance within a certain depth."""
     if not order_book or "bids" not in order_book or "asks" not in order_book:
         main_logger.warning("Invalid order book data for imbalance calculation.")
@@ -355,7 +374,9 @@ async def perform_analysis(config: Dict[str, Any]) -> None:
     # Use asyncio.gather to fetch data concurrently
     try:
         results = await asyncio.gather(
-            fetch_ohlcv_data(exchange, symbol, timeframe, limit=200),  # Fetch more data for indicator stability
+            fetch_ohlcv_data(
+                exchange, symbol, timeframe, limit=200
+            ),  # Fetch more data for indicator stability
             fetch_order_book(exchange, symbol),
             return_exceptions=True,  # Capture exceptions from individual tasks
         )
@@ -419,13 +440,21 @@ async def perform_analysis(config: Dict[str, Any]) -> None:
         ema_trend = "CROSSING"
         if not pd.isna(last_ema_short) and not pd.isna(last_ema_long):
             if last_ema_short > last_ema_long:
-                ema_trend = f"{Color.GREEN.value}UPTREND (Short > Long){Color.RESET.value}"
+                ema_trend = (
+                    f"{Color.GREEN.value}UPTREND (Short > Long){Color.RESET.value}"
+                )
             elif last_ema_short < last_ema_long:
-                ema_trend = f"{Color.RED.value}DOWNTREND (Short < Long){Color.RESET.value}"
+                ema_trend = (
+                    f"{Color.RED.value}DOWNTREND (Short < Long){Color.RESET.value}"
+                )
             else:
                 ema_trend = "SIDEWAYS (Short == Long)"
-        main_logger.info(f"EMA Short ({ema_short_period}): {format_decimal(last_ema_short, 2)}")
-        main_logger.info(f"EMA Long ({ema_long_period}): {format_decimal(last_ema_long, 2)}")
+        main_logger.info(
+            f"EMA Short ({ema_short_period}): {format_decimal(last_ema_short, 2)}"
+        )
+        main_logger.info(
+            f"EMA Long ({ema_long_period}): {format_decimal(last_ema_long, 2)}"
+        )
         main_logger.info(f"EMA Trend: {ema_trend}")
 
         # RSI
@@ -435,11 +464,15 @@ async def perform_analysis(config: Dict[str, Any]) -> None:
                 rsi_signal = f"{Color.RED.value}OVERBOUGHT{Color.RESET.value}"
             elif last_rsi < 30:
                 rsi_signal = f"{Color.GREEN.value}OVERSOLD{Color.RESET.value}"
-        main_logger.info(f"RSI ({rsi_period}): {format_decimal(last_rsi, 2)} ({rsi_signal})")
+        main_logger.info(
+            f"RSI ({rsi_period}): {format_decimal(last_rsi, 2)} ({rsi_signal})"
+        )
 
         # Support / Resistance
         main_logger.info(f"Support Levels: {[format_decimal(s, 2) for s in support]}")
-        main_logger.info(f"Resistance Levels: {[format_decimal(r, 2) for r in resistance]}")
+        main_logger.info(
+            f"Resistance Levels: {[format_decimal(r, 2) for r in resistance]}"
+        )
 
         # Order Book
         if imbalance is not None:
@@ -462,7 +495,9 @@ async def perform_analysis(config: Dict[str, Any]) -> None:
         main_logger.error(f"Missing expected data column during analysis: {ke}")
     except Exception as e:
         # Log detailed exception info for unexpected errors
-        main_logger.exception(f"An unexpected error occurred during technical analysis: {e}")
+        main_logger.exception(
+            f"An unexpected error occurred during technical analysis: {e}"
+        )
 
     # finally:
     # Ensure exchange connection is closed if it was opened

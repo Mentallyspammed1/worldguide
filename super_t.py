@@ -36,9 +36,15 @@ DEFAULT_LEVERAGE = int(os.getenv("LEVERAGE", 10))  # Caution with high leverage
 DEFAULT_SLEEP_SECONDS = int(os.getenv("SLEEP_SECONDS", 10))  # Check frequency
 
 # Risk Management (Critical for Scalping - TUNE CAREFULLY!)
-RISK_PER_TRADE_PERCENTAGE = float(os.getenv("RISK_PER_TRADE_PERCENTAGE", 0.005))  # 0.5% risk
-ATR_STOP_LOSS_MULTIPLIER = float(os.getenv("ATR_STOP_LOSS_MULTIPLIER", 1.5))  # SL = 1.5 * ATR
-ATR_TAKE_PROFIT_MULTIPLIER = float(os.getenv("ATR_TAKE_PROFIT_MULTIPLIER", 2.0))  # TP = 2.0 * ATR
+RISK_PER_TRADE_PERCENTAGE = float(
+    os.getenv("RISK_PER_TRADE_PERCENTAGE", 0.005)
+)  # 0.5% risk
+ATR_STOP_LOSS_MULTIPLIER = float(
+    os.getenv("ATR_STOP_LOSS_MULTIPLIER", 1.5)
+)  # SL = 1.5 * ATR
+ATR_TAKE_PROFIT_MULTIPLIER = float(
+    os.getenv("ATR_TAKE_PROFIT_MULTIPLIER", 2.0)
+)  # TP = 2.0 * ATR
 MAX_ORDER_USDT_AMOUNT = float(os.getenv("MAX_ORDER_USDT_AMOUNT", 500.0))  # Cap exposure
 
 # Supertrend Indicator Parameters (Adjust for Scalping)
@@ -49,14 +55,24 @@ CONFIRM_ST_MULTIPLIER = float(os.getenv("CONFIRM_ST_MULTIPLIER", 2.0))
 
 # Volume Analysis Parameters
 VOLUME_MA_PERIOD = int(os.getenv("VOLUME_MA_PERIOD", 20))
-VOLUME_SPIKE_THRESHOLD = float(os.getenv("VOLUME_SPIKE_THRESHOLD", 1.5))  # Vol > 1.5x MA
-REQUIRE_VOLUME_SPIKE_FOR_ENTRY = os.getenv("REQUIRE_VOLUME_SPIKE_FOR_ENTRY", "true").lower() == "true"
+VOLUME_SPIKE_THRESHOLD = float(
+    os.getenv("VOLUME_SPIKE_THRESHOLD", 1.5)
+)  # Vol > 1.5x MA
+REQUIRE_VOLUME_SPIKE_FOR_ENTRY = (
+    os.getenv("REQUIRE_VOLUME_SPIKE_FOR_ENTRY", "true").lower() == "true"
+)
 
 # Order Book Analysis Parameters
 ORDER_BOOK_DEPTH = int(os.getenv("ORDER_BOOK_DEPTH", 10))  # Analysis depth
-ORDER_BOOK_RATIO_THRESHOLD_LONG = float(os.getenv("ORDER_BOOK_RATIO_THRESHOLD_LONG", 1.2))  # Bid > 1.2x Ask
-ORDER_BOOK_RATIO_THRESHOLD_SHORT = float(os.getenv("ORDER_BOOK_RATIO_THRESHOLD_SHORT", 0.8))  # Ask > 1.2x Bid
-FETCH_ORDER_BOOK_PER_CYCLE = os.getenv("FETCH_ORDER_BOOK_PER_CYCLE", "false").lower() == "true"  # <<< OPTIMIZATION
+ORDER_BOOK_RATIO_THRESHOLD_LONG = float(
+    os.getenv("ORDER_BOOK_RATIO_THRESHOLD_LONG", 1.2)
+)  # Bid > 1.2x Ask
+ORDER_BOOK_RATIO_THRESHOLD_SHORT = float(
+    os.getenv("ORDER_BOOK_RATIO_THRESHOLD_SHORT", 0.8)
+)  # Ask > 1.2x Bid
+FETCH_ORDER_BOOK_PER_CYCLE = (
+    os.getenv("FETCH_ORDER_BOOK_PER_CYCLE", "false").lower() == "true"
+)  # <<< OPTIMIZATION
 
 # ATR Calculation Parameter
 ATR_CALCULATION_PERIOD = int(os.getenv("ATR_CALCULATION_PERIOD", 14))
@@ -93,11 +109,21 @@ def log_success(self, message, *args, **kwargs) -> None:
 
 
 logging.Logger.success = log_success
-logging.addLevelName(logging.INFO, f"\033[96m{logging.getLevelName(logging.INFO)}\033[0m")
-logging.addLevelName(logging.WARNING, f"\033[93m{logging.getLevelName(logging.WARNING)}\033[0m")
-logging.addLevelName(logging.ERROR, f"\033[91m{logging.getLevelName(logging.ERROR)}\033[0m")
-logging.addLevelName(logging.CRITICAL, f"\033[91m\033[1m{logging.getLevelName(logging.CRITICAL)}\033[0m")
-logging.addLevelName(SUCCESS_LEVEL, f"\033[92m{logging.getLevelName(SUCCESS_LEVEL)}\033[0m")
+logging.addLevelName(
+    logging.INFO, f"\033[96m{logging.getLevelName(logging.INFO)}\033[0m"
+)
+logging.addLevelName(
+    logging.WARNING, f"\033[93m{logging.getLevelName(logging.WARNING)}\033[0m"
+)
+logging.addLevelName(
+    logging.ERROR, f"\033[91m{logging.getLevelName(logging.ERROR)}\033[0m"
+)
+logging.addLevelName(
+    logging.CRITICAL, f"\033[91m\033[1m{logging.getLevelName(logging.CRITICAL)}\033[0m"
+)
+logging.addLevelName(
+    SUCCESS_LEVEL, f"\033[92m{logging.getLevelName(SUCCESS_LEVEL)}\033[0m"
+)
 
 
 # logging.getLogger().setLevel(logging.DEBUG) # Uncomment for extreme detail
@@ -122,7 +148,9 @@ def initialize_exchange() -> ccxt.Exchange | None:
         )
         exchange.load_markets()
         exchange.fetch_balance()  # Test authentication
-        logger.info("CCXT Bybit Session Initialized (LIVE FUTURES SCALPING MODE - EXTREME CAUTION!).")
+        logger.info(
+            "CCXT Bybit Session Initialized (LIVE FUTURES SCALPING MODE - EXTREME CAUTION!)."
+        )
         return exchange
     except ccxt.AuthenticationError as e:
         logger.critical(f"Authentication failed: {e}")
@@ -137,14 +165,25 @@ def initialize_exchange() -> ccxt.Exchange | None:
 
 
 # --- Indicator Calculation ---
-def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefix: str = "") -> pd.DataFrame:
+def calculate_supertrend(
+    df: pd.DataFrame, length: int, multiplier: float, prefix: str = ""
+) -> pd.DataFrame:
     """Calculates Supertrend indicator using pandas_ta."""
     col_prefix = f"{prefix}" if prefix else ""
     st_col_name = f"SUPERT_{length}_{multiplier}"
     st_trend_col = f"SUPERTd_{length}_{multiplier}"
-    target_cols = [f"{col_prefix}supertrend", f"{col_prefix}trend", f"{col_prefix}st_long", f"{col_prefix}st_short"]
+    target_cols = [
+        f"{col_prefix}supertrend",
+        f"{col_prefix}trend",
+        f"{col_prefix}st_long",
+        f"{col_prefix}st_short",
+    ]
 
-    if df is None or df.empty or not all(c in df.columns for c in ["high", "low", "close"]):
+    if (
+        df is None
+        or df.empty
+        or not all(c in df.columns for c in ["high", "low", "close"])
+    ):
         logger.warning(f"Insufficient data/columns for {col_prefix}Supertrend.")
         for col in target_cols:
             df[col] = pd.NA
@@ -153,17 +192,27 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
     try:
         df.ta.supertrend(length=length, multiplier=multiplier, append=True)
         if st_col_name not in df.columns or st_trend_col not in df.columns:
-            raise KeyError(f"pandas_ta did not create expected columns: {st_col_name}, {st_trend_col}")
+            raise KeyError(
+                f"pandas_ta did not create expected columns: {st_col_name}, {st_trend_col}"
+            )
 
         df[f"{col_prefix}supertrend"] = df[st_col_name]
         df[f"{col_prefix}trend"] = df[st_trend_col] == 1
         prev_trend_direction = df[st_trend_col].shift(1)
-        df[f"{col_prefix}st_long"] = (prev_trend_direction == -1) & (df[st_trend_col] == 1)
-        df[f"{col_prefix}st_short"] = (prev_trend_direction == 1) & (df[st_trend_col] == -1)
+        df[f"{col_prefix}st_long"] = (prev_trend_direction == -1) & (
+            df[st_trend_col] == 1
+        )
+        df[f"{col_prefix}st_short"] = (prev_trend_direction == 1) & (
+            df[st_trend_col] == -1
+        )
         # Clean up intermediate columns
-        cols_to_drop = [c for c in df.columns if c.startswith("SUPERT_") and c not in target_cols]
+        cols_to_drop = [
+            c for c in df.columns if c.startswith("SUPERT_") and c not in target_cols
+        ]
         df.drop(columns=cols_to_drop, errors="ignore", inplace=True)
-        logger.debug(f"Calculated {col_prefix}Supertrend. Last trend: {df[f'{col_prefix}trend'].iloc[-1]}")
+        logger.debug(
+            f"Calculated {col_prefix}Supertrend. Last trend: {df[f'{col_prefix}trend'].iloc[-1]}"
+        )
 
     except Exception as e:
         logger.error(f"Error calculating {col_prefix}Supertrend: {e}")
@@ -174,10 +223,22 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
 
 
 # --- Volume and ATR Analysis (Corrected Logging) ---
-def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> dict[str, float | None]:
+def analyze_volume_atr(
+    df: pd.DataFrame, atr_len: int, vol_ma_len: int
+) -> dict[str, float | None]:
     """Calculates ATR and Volume MA, checks for volume spikes."""
-    results: dict[str, float | None] = {"atr": None, "volume_ma": None, "last_volume": None, "volume_ratio": None}
-    if df is None or df.empty or "volume" not in df.columns or len(df) < max(atr_len, vol_ma_len):
+    results: dict[str, float | None] = {
+        "atr": None,
+        "volume_ma": None,
+        "last_volume": None,
+        "volume_ratio": None,
+    }
+    if (
+        df is None
+        or df.empty
+        or "volume" not in df.columns
+        or len(df) < max(atr_len, vol_ma_len)
+    ):
         logger.warning("Insufficient data for Volume/ATR analysis.")
         return results
 
@@ -192,11 +253,17 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> dict[
         df.drop(columns=[atr_col], errors="ignore", inplace=True)  # Clean up
 
         # Calculate Volume MA
-        df["volume_ma"] = df["volume"].rolling(window=vol_ma_len, min_periods=vol_ma_len // 2).mean()
+        df["volume_ma"] = (
+            df["volume"].rolling(window=vol_ma_len, min_periods=vol_ma_len // 2).mean()
+        )
         if not df["volume_ma"].isnull().all():
             results["volume_ma"] = df["volume_ma"].iloc[-1]
             results["last_volume"] = df["volume"].iloc[-1]
-            if results["volume_ma"] is not None and results["volume_ma"] > 1e-9 and results["last_volume"] is not None:
+            if (
+                results["volume_ma"] is not None
+                and results["volume_ma"] > 1e-9
+                and results["last_volume"] is not None
+            ):
                 results["volume_ratio"] = results["last_volume"] / results["volume_ma"]
             else:
                 results["volume_ratio"] = None
@@ -213,7 +280,9 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> dict[
         last_vol_str = f"{last_vol_val:.2f}" if last_vol_val is not None else "N/A"
         vol_ma_str = f"{vol_ma_val:.2f}" if vol_ma_val is not None else "N/A"
         vol_ratio_str = f"{vol_ratio_val:.2f}" if vol_ratio_val is not None else "N/A"
-        logger.debug(f"Volume Analysis: Last={last_vol_str}, MA({vol_ma_len})={vol_ma_str}, Ratio={vol_ratio_str}")
+        logger.debug(
+            f"Volume Analysis: Last={last_vol_str}, MA({vol_ma_len})={vol_ma_str}, Ratio={vol_ratio_str}"
+        )
         # End Corrected Logging
 
     except Exception as e:
@@ -223,13 +292,24 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> dict[
 
 
 # --- Order Book Analysis ---
-def analyze_order_book(exchange: ccxt.Exchange, symbol: str, depth: int) -> dict[str, float | None]:
+def analyze_order_book(
+    exchange: ccxt.Exchange, symbol: str, depth: int
+) -> dict[str, float | None]:
     """Fetches L2 order book and analyzes bid/ask pressure and spread."""
-    results: dict[str, float | None] = {"bid_ask_ratio": None, "spread": None, "best_bid": None, "best_ask": None}
+    results: dict[str, float | None] = {
+        "bid_ask_ratio": None,
+        "spread": None,
+        "best_bid": None,
+        "best_ask": None,
+    }
     fetch_limit = max(25, depth)  # Exchange minimums often apply
-    logger.debug(f"Fetching order book for {symbol} (Depth: {depth}, Fetch Limit: {fetch_limit})...")
+    logger.debug(
+        f"Fetching order book for {symbol} (Depth: {depth}, Fetch Limit: {fetch_limit})..."
+    )
     if not exchange.has["fetchL2OrderBook"]:
-        logger.warning(f"Exchange {exchange.id} does not support fetchL2OrderBook. Skipping analysis.")
+        logger.warning(
+            f"Exchange {exchange.id} does not support fetchL2OrderBook. Skipping analysis."
+        )
         return results
     try:
         # Fetch order book data
@@ -278,7 +358,9 @@ def analyze_order_book(exchange: ccxt.Exchange, symbol: str, depth: int) -> dict
 
 
 # --- Data Fetching ---
-def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: int = 100) -> pd.DataFrame | None:
+def get_market_data(
+    exchange: ccxt.Exchange, symbol: str, interval: str, limit: int = 100
+) -> pd.DataFrame | None:
     """Fetches OHLCV data and returns it as a pandas DataFrame."""
     if not exchange.has["fetchOHLCV"]:
         logger.error(f"Exchange {exchange.id} does not support fetchOHLCV.")
@@ -290,7 +372,9 @@ def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: 
             logger.warning(f"No OHLCV data returned for {symbol} ({interval}).")
             return None
 
-        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
         df.set_index("timestamp", inplace=True)
         logger.debug(f"Successfully fetched {len(df)} OHLCV candles.")
@@ -315,11 +399,21 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> dict[str, Any]
         for pos in positions:
             # Check for non-zero contracts, handle potential float inaccuracies
             contracts_val = pos.get("contracts")
-            if pos.get("symbol") == symbol and contracts_val is not None and abs(float(contracts_val)) > 1e-9:
-                side = POSITION_SIDE_LONG if pos.get("side") == "long" else POSITION_SIDE_SHORT
+            if (
+                pos.get("symbol") == symbol
+                and contracts_val is not None
+                and abs(float(contracts_val)) > 1e-9
+            ):
+                side = (
+                    POSITION_SIDE_LONG
+                    if pos.get("side") == "long"
+                    else POSITION_SIDE_SHORT
+                )
                 qty = float(contracts_val)
                 entry = float(pos.get("entryPrice") or 0.0)
-                logger.info(f"Found active position: {side} {qty:.5f} {symbol} @ Entry={entry:.4f}")
+                logger.info(
+                    f"Found active position: {side} {qty:.5f} {symbol} @ Entry={entry:.4f}"
+                )
                 return {"side": side, "qty": qty, "entry_price": entry}
         logger.info(f"No active position found for {symbol}.")
         return default_pos
@@ -343,7 +437,9 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
             logger.error(f"Cannot set leverage for non-futures market: {symbol}")
             return False
     except Exception as e:
-        logger.error(f"Failed to get market info for {symbol} during leverage check: {e}")
+        logger.error(
+            f"Failed to get market info for {symbol} during leverage check: {e}"
+        )
         return False
 
     for attempt in range(RETRY_COUNT):
@@ -355,15 +451,21 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
             error_message_lower = str(e).lower()
             # Correctly handle "leverage not modified" case-insensitively
             if "leverage not modified" in error_message_lower:
-                logger.info(f"Leverage already set to {leverage}x for {symbol} (Exchange confirmed no change needed).")
+                logger.info(
+                    f"Leverage already set to {leverage}x for {symbol} (Exchange confirmed no change needed)."
+                )
                 return True  # Success - it's already set correctly
 
             # Handle other exchange errors
-            logger.warning(f"Leverage set attempt {attempt + 1}/{RETRY_COUNT} failed: {e}")
+            logger.warning(
+                f"Leverage set attempt {attempt + 1}/{RETRY_COUNT} failed: {e}"
+            )
             if attempt < RETRY_COUNT - 1:
                 time.sleep(RETRY_DELAY_SECONDS)
             else:
-                logger.error(f"Failed to set leverage for {symbol} after {RETRY_COUNT} attempts due to errors.")
+                logger.error(
+                    f"Failed to set leverage for {symbol} after {RETRY_COUNT} attempts due to errors."
+                )
         except Exception as e:
             logger.error(f"Unexpected error setting leverage for {symbol}: {e}")
             logger.debug(traceback.format_exc())
@@ -372,7 +474,9 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
 
 
 # --- Close Position ---
-def close_position(exchange: ccxt.Exchange, symbol: str, position: dict[str, Any]) -> dict[str, Any] | None:
+def close_position(
+    exchange: ccxt.Exchange, symbol: str, position: dict[str, Any]
+) -> dict[str, Any] | None:
     """Closes the current position using a market order with reduce_only."""
     if position["side"] == POSITION_SIDE_NONE or position["qty"] <= 0:
         logger.info(f"No position to close for {symbol}.")
@@ -391,8 +495,12 @@ def close_position(exchange: ccxt.Exchange, symbol: str, position: dict[str, Any
             f"Attempting CLOSE {position['side']} position: {amount_str} {symbol} via {side_to_close.upper()} MARKET order (reduce_only)..."
         )
         params = {"reduce_only": True}
-        order = exchange.create_market_order(symbol, side_to_close, amount_float, params=params)
-        logger.success(f"Position CLOSE order placed for {symbol}. Order ID: {order['id']}")
+        order = exchange.create_market_order(
+            symbol, side_to_close, amount_float, params=params
+        )
+        logger.success(
+            f"Position CLOSE order placed for {symbol}. Order ID: {order['id']}"
+        )
         return order
     except ccxt.InsufficientFunds as e:
         logger.error(f"Insufficient funds to close position: {e}")
@@ -408,14 +516,22 @@ def close_position(exchange: ccxt.Exchange, symbol: str, position: dict[str, Any
 
 # --- Risk Calculation ---
 def calculate_position_size(
-    equity: float, risk_per_trade: float, entry_price: float, stop_loss_price: float, leverage: int
+    equity: float,
+    risk_per_trade: float,
+    entry_price: float,
+    stop_loss_price: float,
+    leverage: int,
 ) -> tuple[float | None, float | None]:
     """Calculates position size based on risk, entry, and SL price."""
     logger.debug(
         f"Risk Calc Input: Equity={equity:.2f}, Risk%={risk_per_trade:.2%}, "
         f"Entry={entry_price:.4f}, SL={stop_loss_price:.4f}, Lev={leverage}x"
     )
-    if entry_price <= 0 or stop_loss_price <= 0 or abs(entry_price - stop_loss_price) < 1e-9:
+    if (
+        entry_price <= 0
+        or stop_loss_price <= 0
+        or abs(entry_price - stop_loss_price) < 1e-9
+    ):
         logger.error("Invalid prices for position size calculation.")
         return None, None
 
@@ -448,7 +564,9 @@ def place_risked_market_order(
     """Calculates position size based on risk/ATR-StopLoss and places market order."""
     logger.info(f"--- Attempting to place {side.upper()} order for {symbol} ---")
     if current_atr is None or current_atr <= 0:
-        logger.error("Invalid ATR value provided for risk calculation. Cannot place order.")
+        logger.error(
+            "Invalid ATR value provided for risk calculation. Cannot place order."
+        )
         return None
     try:
         # 1. Get Balance and Equity
@@ -460,7 +578,9 @@ def place_risked_market_order(
         if usdt_equity <= 0:
             logger.error("Cannot determine equity.")
             return None
-        logger.debug(f"Account Status: Equity={usdt_equity:.2f} USDT, Free={usdt_free:.2f} USDT")
+        logger.debug(
+            f"Account Status: Equity={usdt_equity:.2f} USDT, Free={usdt_free:.2f} USDT"
+        )
 
         # 2. Get Market Info & Estimate Entry Price from Fresh OB
         market = exchange.market(symbol)
@@ -470,18 +590,28 @@ def place_risked_market_order(
         entry_price_estimate = 0.0
         if side == SIDE_BUY and ob_data.get("best_ask"):
             entry_price_estimate = ob_data["best_ask"]  # Estimate BUY entry at best ask
-            logger.debug(f"Using best ASK {entry_price_estimate:.4f} as BUY entry estimate.")
+            logger.debug(
+                f"Using best ASK {entry_price_estimate:.4f} as BUY entry estimate."
+            )
         elif side == SIDE_SELL and ob_data.get("best_bid"):
-            entry_price_estimate = ob_data["best_bid"]  # Estimate SELL entry at best bid
-            logger.debug(f"Using best BID {entry_price_estimate:.4f} as SELL entry estimate.")
+            entry_price_estimate = ob_data[
+                "best_bid"
+            ]  # Estimate SELL entry at best bid
+            logger.debug(
+                f"Using best BID {entry_price_estimate:.4f} as SELL entry estimate."
+            )
         else:
             # Fallback to ticker if OB fetch failed
-            logger.warning("Order book fetch for entry estimate failed, using ticker 'last' price.")
+            logger.warning(
+                "Order book fetch for entry estimate failed, using ticker 'last' price."
+            )
             ticker = exchange.fetch_ticker(symbol)
             entry_price_estimate = ticker.get("last")
 
         if entry_price_estimate is None or entry_price_estimate <= 0:
-            logger.error(f"Invalid entry price estimate for {symbol}: {entry_price_estimate}")
+            logger.error(
+                f"Invalid entry price estimate for {symbol}: {entry_price_estimate}"
+            )
             return None
 
         # 3. Calculate Stop Loss Price based on Estimated Entry and ATR
@@ -499,7 +629,11 @@ def place_risked_market_order(
 
         # 4. Calculate Position Size and Required Margin
         quantity, required_margin = calculate_position_size(
-            usdt_equity, risk_percentage, entry_price_estimate, stop_loss_price, leverage
+            usdt_equity,
+            risk_percentage,
+            entry_price_estimate,
+            stop_loss_price,
+            leverage,
         )
         if quantity is None or required_margin is None:
             return None  # Error logged in calc func
@@ -510,7 +644,9 @@ def place_risked_market_order(
         min_qty = market.get("limits", {}).get("amount", {}).get("min")
 
         if min_qty is not None and precise_qty < min_qty:
-            logger.warning(f"Calculated Qty {precise_qty_str} < Min Qty {min_qty}. Skipping order.")
+            logger.warning(
+                f"Calculated Qty {precise_qty_str} < Min Qty {min_qty}. Skipping order."
+            )
             return None
 
         # Optional: Check against MAX_ORDER_USDT_AMOUNT cap
@@ -523,10 +659,14 @@ def place_risked_market_order(
             capped_qty = MAX_ORDER_USDT_AMOUNT / entry_price_estimate
             precise_qty_str = exchange.amount_to_precision(symbol, capped_qty)
             precise_qty = float(precise_qty_str)
-            required_margin = (precise_qty * entry_price_estimate) / leverage  # Recalc margin
+            required_margin = (
+                precise_qty * entry_price_estimate
+            ) / leverage  # Recalc margin
 
             if min_qty is not None and precise_qty < min_qty:
-                logger.warning(f"Capped Qty {precise_qty_str} < Min Qty {min_qty}. Skipping.")
+                logger.warning(
+                    f"Capped Qty {precise_qty_str} < Min Qty {min_qty}. Skipping."
+                )
                 return None
 
         if precise_qty <= 0:
@@ -548,7 +688,9 @@ def place_risked_market_order(
             return None
 
         # 7. Place Order
-        logger.info(f"*** PLACING {side.upper()} MARKET ORDER: {precise_qty_str} {symbol}... ***")
+        logger.info(
+            f"*** PLACING {side.upper()} MARKET ORDER: {precise_qty_str} {symbol}... ***"
+        )
         order = exchange.create_market_order(symbol, side, precise_qty)
         # Note: Actual fill price might differ due to slippage.
         logger.success(
@@ -591,7 +733,9 @@ def trade_logic(
     logger.info(f"========== New Check Cycle: {symbol} ==========")
     required_rows = max(2, st_len, cf_st_len, atr_len, vol_ma_len)
     if df is None or len(df) < required_rows:
-        logger.warning(f"Insufficient data ({len(df) if df is not None else 0} < {required_rows}). Skipping.")
+        logger.warning(
+            f"Insufficient data ({len(df) if df is not None else 0} < {required_rows}). Skipping."
+        )
         return
 
     ob_data: dict[str, float | None] | None = None  # Initialize OB data
@@ -605,7 +749,15 @@ def trade_logic(
         current_atr = vol_atr_data.get("atr")
 
         # Check primary calculations
-        required_cols = ["close", "supertrend", "trend", "st_long", "st_short", "confirm_supertrend", "confirm_trend"]
+        required_cols = [
+            "close",
+            "supertrend",
+            "trend",
+            "st_long",
+            "st_short",
+            "confirm_supertrend",
+            "confirm_trend",
+        ]
         if (
             not all(col in df.columns for col in required_cols)
             or df[required_cols].iloc[-1].isnull().any()
@@ -626,7 +778,9 @@ def trade_logic(
             )
             ob_data = analyze_order_book(exchange, symbol, ORDER_BOOK_DEPTH)
         else:
-            logger.debug("Order book fetch skipped this cycle (no signal and FETCH_PER_CYCLE=False).")
+            logger.debug(
+                "Order book fetch skipped this cycle (no signal and FETCH_PER_CYCLE=False)."
+            )
 
         bid_ask_ratio = ob_data.get("bid_ask_ratio") if ob_data else None
 
@@ -640,25 +794,33 @@ def trade_logic(
         primary_trend = "Up" if last["trend"] else "Down"
         confirm_trend = "Up" if last["confirm_trend"] else "Down"
         volume_ratio = vol_atr_data.get("volume_ratio")
-        volume_spike = volume_ratio is not None and volume_ratio > VOLUME_SPIKE_THRESHOLD
+        volume_spike = (
+            volume_ratio is not None and volume_ratio > VOLUME_SPIKE_THRESHOLD
+        )
 
         # Corrected Logging
         atr_str = f"{current_atr:.5f}" if current_atr is not None else "N/A"
         vol_ratio_str = f"{volume_ratio:.2f}" if volume_ratio is not None else "N/A"
-        logger.info(f"Market State: Price={current_price:.4f}, ATR={atr_str}, V.Ratio={vol_ratio_str}")
+        logger.info(
+            f"Market State: Price={current_price:.4f}, ATR={atr_str}, V.Ratio={vol_ratio_str}"
+        )
 
         logger.info(
             f"Indicators: ST={last['supertrend']:.4f} ({primary_trend}), ConfirmST={last['confirm_supertrend']:.4f} ({confirm_trend})"
         )
 
         if ob_data:  # Only log if fetched
-            bid_ask_ratio_str = f"{bid_ask_ratio:.3f}" if bid_ask_ratio is not None else "N/A"
+            bid_ask_ratio_str = (
+                f"{bid_ask_ratio:.3f}" if bid_ask_ratio is not None else "N/A"
+            )
             spread_val = ob_data.get("spread")
             spread_str = f"{spread_val:.4f}" if spread_val is not None else "N/A"
             logger.info(f"Order Book: Ratio={bid_ask_ratio_str}, Spread={spread_str}")
         # End Corrected Logging
 
-        logger.info(f"Position State: Side={position_side}, Qty={position_qty}, Entry={entry_price:.4f}")
+        logger.info(
+            f"Position State: Side={position_side}, Qty={position_qty}, Entry={entry_price:.4f}"
+        )
 
         # 4. Check Stop-Loss / Take-Profit (Loop-based - INACCURATE FOR SCALPING)
         # !!! WARNING: Loop-based check is inaccurate. Price can move past levels between checks. !!!
@@ -705,7 +867,9 @@ def trade_logic(
             else:
                 logger.debug("Position SL/TP not triggered (Loop-based check).")
         elif position_side != POSITION_SIDE_NONE:
-            logger.warning("Position exists but entry price/ATR invalid for SL/TP check.")
+            logger.warning(
+                "Position exists but entry price/ATR invalid for SL/TP check."
+            )
 
         # 5. Check for Entry Signals
         logger.debug("Checking entry signals...")
@@ -717,9 +881,16 @@ def trade_logic(
         # --- End safe string creation ---
 
         # --- Long Entry Conditions ---
-        passes_long_ob = ob_available and bid_ask_ratio >= ORDER_BOOK_RATIO_THRESHOLD_LONG
+        passes_long_ob = (
+            ob_available and bid_ask_ratio >= ORDER_BOOK_RATIO_THRESHOLD_LONG
+        )
         passes_volume = not REQUIRE_VOLUME_SPIKE_FOR_ENTRY or volume_spike
-        enter_long = primary_long_signal and confirm_trend_up and passes_long_ob and passes_volume
+        enter_long = (
+            primary_long_signal
+            and confirm_trend_up
+            and passes_long_ob
+            and passes_volume
+        )
         # Use the safe string here:
         logger.debug(
             f"Long Entry Check: PrimarySig={primary_long_signal}, ConfirmTrendUp={confirm_trend_up}, "
@@ -727,8 +898,15 @@ def trade_logic(
         )
 
         # --- Short Entry Conditions ---
-        passes_short_ob = ob_available and bid_ask_ratio <= ORDER_BOOK_RATIO_THRESHOLD_SHORT
-        enter_short = primary_short_signal and not confirm_trend_up and passes_short_ob and passes_volume
+        passes_short_ob = (
+            ob_available and bid_ask_ratio <= ORDER_BOOK_RATIO_THRESHOLD_SHORT
+        )
+        enter_short = (
+            primary_short_signal
+            and not confirm_trend_up
+            and passes_short_ob
+            and passes_volume
+        )
         # Use the safe string here:
         logger.debug(
             f"Short Entry Check: PrimarySig={primary_short_signal}, ConfirmTrendDown={not confirm_trend_up}, "
@@ -737,28 +915,64 @@ def trade_logic(
 
         # --- Execute Actions ---
         if enter_long:
-            logger.success(f"*** CONFIRMED LONG ENTRY SIGNAL *** for {symbol} at {current_price:.4f}")
+            logger.success(
+                f"*** CONFIRMED LONG ENTRY SIGNAL *** for {symbol} at {current_price:.4f}"
+            )
             if position_side == POSITION_SIDE_SHORT:
                 logger.warning("Signal LONG, but currently SHORT. Closing short first.")
                 close_position(exchange, symbol, position)
                 time.sleep(RETRY_DELAY_SECONDS)  # Allow time for closure
-                place_risked_market_order(exchange, symbol, SIDE_BUY, risk_pct, current_atr, sl_atr_mult, leverage)
+                place_risked_market_order(
+                    exchange,
+                    symbol,
+                    SIDE_BUY,
+                    risk_pct,
+                    current_atr,
+                    sl_atr_mult,
+                    leverage,
+                )
             elif position_side == POSITION_SIDE_NONE:
                 logger.info("No position, entering LONG.")
-                place_risked_market_order(exchange, symbol, SIDE_BUY, risk_pct, current_atr, sl_atr_mult, leverage)
+                place_risked_market_order(
+                    exchange,
+                    symbol,
+                    SIDE_BUY,
+                    risk_pct,
+                    current_atr,
+                    sl_atr_mult,
+                    leverage,
+                )
             else:
                 logger.info("Already LONG, maintaining position (no action).")
 
         elif enter_short:
-            logger.success(f"*** CONFIRMED SHORT ENTRY SIGNAL *** for {symbol} at {current_price:.4f}")
+            logger.success(
+                f"*** CONFIRMED SHORT ENTRY SIGNAL *** for {symbol} at {current_price:.4f}"
+            )
             if position_side == POSITION_SIDE_LONG:
                 logger.warning("Signal SHORT, but currently LONG. Closing long first.")
                 close_position(exchange, symbol, position)
                 time.sleep(RETRY_DELAY_SECONDS)  # Allow time for closure
-                place_risked_market_order(exchange, symbol, SIDE_SELL, risk_pct, current_atr, sl_atr_mult, leverage)
+                place_risked_market_order(
+                    exchange,
+                    symbol,
+                    SIDE_SELL,
+                    risk_pct,
+                    current_atr,
+                    sl_atr_mult,
+                    leverage,
+                )
             elif position_side == POSITION_SIDE_NONE:
                 logger.info("No position, entering SHORT.")
-                place_risked_market_order(exchange, symbol, SIDE_SELL, risk_pct, current_atr, sl_atr_mult, leverage)
+                place_risked_market_order(
+                    exchange,
+                    symbol,
+                    SIDE_SELL,
+                    risk_pct,
+                    current_atr,
+                    sl_atr_mult,
+                    leverage,
+                )
             else:
                 logger.info("Already SHORT, maintaining position (no action).")
 
@@ -784,7 +998,9 @@ def main() -> None:
         return
 
     # Symbol setup
-    symbol_input = input(f"Enter symbol (default: {DEFAULT_SYMBOL}): ").strip() or DEFAULT_SYMBOL
+    symbol_input = (
+        input(f"Enter symbol (default: {DEFAULT_SYMBOL}): ").strip() or DEFAULT_SYMBOL
+    )
     try:
         market = exchange.market(symbol_input)
         symbol = market["symbol"]  # Use validated symbol format
@@ -804,20 +1020,28 @@ def main() -> None:
 
     # --- Configuration Summary ---
     logger.info("--- Scalping Bot Configuration ---")
-    logger.info(f"Symbol: {symbol}, Interval: {DEFAULT_INTERVAL}, Leverage: {DEFAULT_LEVERAGE}x")
-    logger.info(f"Risk/Trade: {RISK_PER_TRADE_PERCENTAGE:.3%}, Max Order Cap: {MAX_ORDER_USDT_AMOUNT:.2f} USDT")
+    logger.info(
+        f"Symbol: {symbol}, Interval: {DEFAULT_INTERVAL}, Leverage: {DEFAULT_LEVERAGE}x"
+    )
+    logger.info(
+        f"Risk/Trade: {RISK_PER_TRADE_PERCENTAGE:.3%}, Max Order Cap: {MAX_ORDER_USDT_AMOUNT:.2f} USDT"
+    )
     logger.info(
         f"SL: {ATR_STOP_LOSS_MULTIPLIER} * ATR({ATR_CALCULATION_PERIOD}), TP: {ATR_TAKE_PROFIT_MULTIPLIER} * ATR({ATR_CALCULATION_PERIOD})"
     )
     logger.info(f"ST: Len={DEFAULT_ST_ATR_LENGTH}, Mult={DEFAULT_ST_MULTIPLIER}")
-    logger.info(f"Confirm ST: Len={CONFIRM_ST_ATR_LENGTH}, Mult={CONFIRM_ST_MULTIPLIER}")
+    logger.info(
+        f"Confirm ST: Len={CONFIRM_ST_ATR_LENGTH}, Mult={CONFIRM_ST_MULTIPLIER}"
+    )
     logger.info(
         f"Volume: MA={VOLUME_MA_PERIOD}, Spike > {VOLUME_SPIKE_THRESHOLD}x MA (Required: {REQUIRE_VOLUME_SPIKE_FOR_ENTRY})"
     )
     logger.info(
         f"Order Book: Depth={ORDER_BOOK_DEPTH}, Long Ratio > {ORDER_BOOK_RATIO_THRESHOLD_LONG}, Short Ratio < {ORDER_BOOK_RATIO_THRESHOLD_SHORT}"
     )
-    logger.info(f"Fetch OB Every Cycle: {FETCH_ORDER_BOOK_PER_CYCLE} (IMPORTANT: Affects Rate Limits)")
+    logger.info(
+        f"Fetch OB Every Cycle: {FETCH_ORDER_BOOK_PER_CYCLE} (IMPORTANT: Affects Rate Limits)"
+    )
     logger.info(f"Check Interval: {DEFAULT_SLEEP_SECONDS} seconds")
     logger.warning("Ensure configuration aligns with your risk tolerance and strategy.")
     logger.warning("Loop-based SL/TP check is inaccurate for scalping - use caution.")
@@ -827,7 +1051,9 @@ def main() -> None:
     while True:
         start_time = time.time()
         try:
-            logger.debug(f"--- Starting check cycle at {time.strftime('%Y-%m-%d %H:%M:%S')} ---")
+            logger.debug(
+                f"--- Starting check cycle at {time.strftime('%Y-%m-%d %H:%M:%S')} ---"
+            )
             # Fetch data
             data_limit = max(
                 100,
@@ -836,7 +1062,9 @@ def main() -> None:
                 ATR_CALCULATION_PERIOD * 2,
                 VOLUME_MA_PERIOD * 2,
             )
-            df_market = get_market_data(exchange, symbol, DEFAULT_INTERVAL, limit=data_limit)
+            df_market = get_market_data(
+                exchange, symbol, DEFAULT_INTERVAL, limit=data_limit
+            )
 
             if df_market is not None and not df_market.empty:
                 trade_logic(
@@ -876,13 +1104,17 @@ def main() -> None:
             time.sleep(DEFAULT_SLEEP_SECONDS)
         except Exception as e:
             logger.exception(f"!!! Unexpected critical error in main loop: {e} !!!")
-            logger.info(f"Attempting to continue after {DEFAULT_SLEEP_SECONDS}s sleep...")
+            logger.info(
+                f"Attempting to continue after {DEFAULT_SLEEP_SECONDS}s sleep..."
+            )
             time.sleep(DEFAULT_SLEEP_SECONDS)
 
         # Maintain check interval approximately
         elapsed_time = time.time() - start_time
         sleep_duration = max(0, DEFAULT_SLEEP_SECONDS - elapsed_time)
-        logger.debug(f"Cycle execution time: {elapsed_time:.2f}s. Sleeping for {sleep_duration:.2f}s.")
+        logger.debug(
+            f"Cycle execution time: {elapsed_time:.2f}s. Sleeping for {sleep_duration:.2f}s."
+        )
         if sleep_duration > 0:
             time.sleep(sleep_duration)
 

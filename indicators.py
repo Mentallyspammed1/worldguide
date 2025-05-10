@@ -14,7 +14,9 @@ def rsi(close_prices: pd.Series, period: int = 14) -> pd.Series:
         # For simplicity, we'll proceed, but calculations might yield NaNs
         pass
     if len(close_prices) < period:
-        return pd.Series([np.nan] * len(close_prices), index=close_prices.index)  # Not enough data
+        return pd.Series(
+            [np.nan] * len(close_prices), index=close_prices.index
+        )  # Not enough data
 
     delta = close_prices.diff()
     gain = delta.where(delta > 0, 0.0).fillna(0)
@@ -34,20 +36,35 @@ def rsi(close_prices: pd.Series, period: int = 14) -> pd.Series:
 
     rs = avg_gain / avg_loss
     rsi_values = 100.0 - (100.0 / (1.0 + rs))
-    rsi_values.fillna(50, inplace=True)  # Fill initial NaNs, often RSI starts around 50 conceptually
+    rsi_values.fillna(
+        50, inplace=True
+    )  # Fill initial NaNs, often RSI starts around 50 conceptually
     # Ensure the final series has the same index as the input
     return rsi_values.reindex(close_prices.index)
 
 
-def ATR(high_prices: pd.Series, low_prices: pd.Series, close_prices: pd.Series, period: int = 14) -> pd.Series:
+def ATR(
+    high_prices: pd.Series,
+    low_prices: pd.Series,
+    close_prices: pd.Series,
+    period: int = 14,
+) -> pd.Series:
     """Calculates the Average True Range (ATR)."""
-    if not all(isinstance(s, pd.Series) for s in [high_prices, low_prices, close_prices]):
+    if not all(
+        isinstance(s, pd.Series) for s in [high_prices, low_prices, close_prices]
+    ):
         raise TypeError("Inputs must be pandas Series")
-    if high_prices.isnull().any() or low_prices.isnull().any() or close_prices.isnull().any():
+    if (
+        high_prices.isnull().any()
+        or low_prices.isnull().any()
+        or close_prices.isnull().any()
+    ):
         # Handle NaNs if necessary
         pass
     if len(high_prices) < period:
-        return pd.Series([np.nan] * len(high_prices), index=high_prices.index)  # Not enough data
+        return pd.Series(
+            [np.nan] * len(high_prices), index=high_prices.index
+        )  # Not enough data
 
     high_low = high_prices - low_prices
     high_close_prev = abs(high_prices - close_prices.shift(1))
@@ -149,7 +166,9 @@ def safe_decimal_conversion(value: Any, default: Any = Decimal("0.0")) -> Decima
             if np.isnan(value):
                 return default if isinstance(default, Decimal) else None
             value = str(value)
-        elif isinstance(value, (np.int_, np.intc, np.intp, np.int8, np.int16, np.int32, np.int64)):
+        elif isinstance(
+            value, (np.int_, np.intc, np.intp, np.int8, np.int16, np.int32, np.int64)
+        ):
             value = str(value)
         return Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError):
@@ -194,7 +213,11 @@ def calculate_hma(series: pd.Series, length: int) -> Optional[pd.Series]:
 
 
 def calculate_vwap(
-    high: pd.Series, low: pd.Series, close: pd.Series, volume: pd.Series, length: Optional[int] = None
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    volume: pd.Series,
+    length: Optional[int] = None,
 ) -> Optional[pd.Series]:
     """
     Calculates Volume Weighted Average Price.
@@ -213,7 +236,9 @@ def calculate_vwap(
     ):
         return None
     try:
-        return ta.vwap(high=high, low=low, close=close, volume=volume, length=length)  # Use rolling if length given
+        return ta.vwap(
+            high=high, low=low, close=close, volume=volume, length=length
+        )  # Use rolling if length given
     except Exception as e:
         logger.error(f"Error calculating VWAP(length={length}): {e}")
         return None
@@ -230,7 +255,9 @@ def calculate_rsi(series: pd.Series, length: int) -> Optional[pd.Series]:
         return None
 
 
-def calculate_stochrsi(series: pd.Series, length: int, rsi_length: int, k: int, d: int) -> Optional[pd.DataFrame]:
+def calculate_stochrsi(
+    series: pd.Series, length: int, rsi_length: int, k: int, d: int
+) -> Optional[pd.DataFrame]:
     """Calculates Stochastic RSI (K and D lines)."""
     min_len = rsi_length + length + max(k, d)  # Rough estimate
     if series is None or series.empty or len(series) < min_len:
@@ -238,11 +265,15 @@ def calculate_stochrsi(series: pd.Series, length: int, rsi_length: int, k: int, 
     try:
         return ta.stochrsi(series, length=length, rsi_length=rsi_length, k=k, d=d)
     except Exception as e:
-        logger.error(f"Error calculating StochRSI(l={length}, rsi_l={rsi_length}, k={k}, d={d}): {e}")
+        logger.error(
+            f"Error calculating StochRSI(l={length}, rsi_l={rsi_length}, k={k}, d={d}): {e}"
+        )
         return None
 
 
-def calculate_macd(series: pd.Series, fast: int, slow: int, signal: int) -> Optional[pd.DataFrame]:
+def calculate_macd(
+    series: pd.Series, fast: int, slow: int, signal: int
+) -> Optional[pd.DataFrame]:
     """Calculates MACD, Signal line, and Histogram."""
     if (
         series is None
@@ -261,9 +292,17 @@ def calculate_macd(series: pd.Series, fast: int, slow: int, signal: int) -> Opti
         return None
 
 
-def calculate_bollinger_bands(series: pd.Series, length: int, std: float | Decimal) -> Optional[pd.DataFrame]:
+def calculate_bollinger_bands(
+    series: pd.Series, length: int, std: float | Decimal
+) -> Optional[pd.DataFrame]:
     """Calculates Bollinger Bands (Upper, Middle, Lower)."""
-    if series is None or series.empty or length <= 0 or float(std) <= 0 or len(series) < length:
+    if (
+        series is None
+        or series.empty
+        or length <= 0
+        or float(std) <= 0
+        or len(series) < length
+    ):
         return None
     try:
         return ta.bbands(series, length=length, std=float(std))
@@ -281,7 +320,9 @@ def calculate_keltner_channels(
     multiplier: float = 2.0,
 ) -> Optional[pd.DataFrame]:
     """Calculates Keltner Channels."""
-    atr_len = atr_length if atr_length is not None else length  # Default ATR length to KC length if not specified
+    atr_len = (
+        atr_length if atr_length is not None else length
+    )  # Default ATR length to KC length if not specified
     if (
         high is None
         or low is None
@@ -296,14 +337,24 @@ def calculate_keltner_channels(
         return None
     try:
         return ta.kc(
-            high=high, low=low, close=close, length=length, atr_length=atr_len, mamode="EMA", multiplier=multiplier
+            high=high,
+            low=low,
+            close=close,
+            length=length,
+            atr_length=atr_len,
+            mamode="EMA",
+            multiplier=multiplier,
         )  # Use EMA for center line typically
     except Exception as e:
-        logger.error(f"Error calculating Keltner Channels(l={length}, atr_l={atr_len}): {e}")
+        logger.error(
+            f"Error calculating Keltner Channels(l={length}, atr_l={atr_len}): {e}"
+        )
         return None
 
 
-def calculate_atr(high: pd.Series, low: pd.Series, close: pd.Series, length: int) -> Optional[pd.Series]:
+def calculate_atr(
+    high: pd.Series, low: pd.Series, close: pd.Series, length: int
+) -> Optional[pd.Series]:
     """Calculates Average True Range."""
     required_len = length + 1
     if (
@@ -326,7 +377,9 @@ def calculate_atr(high: pd.Series, low: pd.Series, close: pd.Series, length: int
         return None
 
 
-def calculate_cci(high: pd.Series, low: pd.Series, close: pd.Series, length: int) -> Optional[pd.Series]:
+def calculate_cci(
+    high: pd.Series, low: pd.Series, close: pd.Series, length: int
+) -> Optional[pd.Series]:
     """Calculates Commodity Channel Index."""
     if (
         high is None
@@ -348,7 +401,9 @@ def calculate_cci(high: pd.Series, low: pd.Series, close: pd.Series, length: int
         return None
 
 
-def calculate_williams_r(high: pd.Series, low: pd.Series, close: pd.Series, length: int) -> Optional[pd.Series]:
+def calculate_williams_r(
+    high: pd.Series, low: pd.Series, close: pd.Series, length: int
+) -> Optional[pd.Series]:
     """Calculates Williams %R."""
     if (
         high is None
@@ -397,7 +452,9 @@ def calculate_mfi(
         return None
 
 
-def calculate_adx(high: pd.Series, low: pd.Series, close: pd.Series, length: int) -> Optional[pd.DataFrame]:
+def calculate_adx(
+    high: pd.Series, low: pd.Series, close: pd.Series, length: int
+) -> Optional[pd.DataFrame]:
     """Calculates Average Directional Index (ADX, +DI, -DI)."""
     required_len = length * 2
     if (
@@ -422,7 +479,13 @@ def calculate_adx(high: pd.Series, low: pd.Series, close: pd.Series, length: int
 
 def calculate_obv(close: pd.Series, volume: pd.Series) -> Optional[pd.Series]:
     """Calculates On Balance Volume."""
-    if close is None or volume is None or close.empty or volume.empty or len(close) != len(volume):
+    if (
+        close is None
+        or volume is None
+        or close.empty
+        or volume.empty
+        or len(close) != len(volume)
+    ):
         return None
     try:
         return ta.obv(close=close, volume=volume)
@@ -432,7 +495,12 @@ def calculate_obv(close: pd.Series, volume: pd.Series) -> Optional[pd.Series]:
 
 
 def calculate_adosc(
-    high: pd.Series, low: pd.Series, close: pd.Series, volume: pd.Series, fast: int, slow: int
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    volume: pd.Series,
+    fast: int,
+    slow: int,
 ) -> Optional[pd.Series]:
     """Calculates Accumulation/Distribution Oscillator."""
     required_len = max(fast, slow)
@@ -454,15 +522,26 @@ def calculate_adosc(
     ):
         return None
     try:
-        return ta.adosc(high=high, low=low, close=close, volume=volume, fast=fast, slow=slow)
+        return ta.adosc(
+            high=high, low=low, close=close, volume=volume, fast=fast, slow=slow
+        )
     except Exception as e:
         logger.error(f"Error calculating ADOSC(fast={fast}, slow={slow}): {e}")
         return None
 
 
-def calculate_psar(high: pd.Series, low: pd.Series, step: float, max_step: float) -> Optional[pd.DataFrame]:
+def calculate_psar(
+    high: pd.Series, low: pd.Series, step: float, max_step: float
+) -> Optional[pd.DataFrame]:
     """Calculates Parabolic Stop and Reverse (PSAR)."""
-    if high is None or low is None or high.empty or low.empty or step <= 0 or max_step <= step:
+    if (
+        high is None
+        or low is None
+        or high.empty
+        or low.empty
+        or step <= 0
+        or max_step <= step
+    ):
         return None
     try:
         return ta.psar(high=high, low=low, af=step, max_af=max_step)
@@ -482,7 +561,9 @@ def calculate_roc(series: pd.Series, length: int) -> Optional[pd.Series]:
         return None
 
 
-def calculate_awesome_oscillator(high: pd.Series, low: pd.Series, fast: int = 5, slow: int = 34) -> Optional[pd.Series]:
+def calculate_awesome_oscillator(
+    high: pd.Series, low: pd.Series, fast: int = 5, slow: int = 34
+) -> Optional[pd.Series]:
     """Calculates Bill Williams' Awesome Oscillator (AO)."""
     required_len = slow
     if (
@@ -500,12 +581,19 @@ def calculate_awesome_oscillator(high: pd.Series, low: pd.Series, fast: int = 5,
     try:
         return ta.ao(high=high, low=low, fast=fast, slow=slow)
     except Exception as e:
-        logger.error(f"Error calculating Awesome Oscillator(fast={fast}, slow={slow}): {e}")
+        logger.error(
+            f"Error calculating Awesome Oscillator(fast={fast}, slow={slow}): {e}"
+        )
         return None
 
 
 def calculate_ichimoku(
-    high: pd.Series, low: pd.Series, close: pd.Series, tenkan: int = 9, kijun: int = 26, senkou: int = 52
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    tenkan: int = 9,
+    kijun: int = 26,
+    senkou: int = 52,
 ) -> Tuple[Optional[pd.DataFrame], Optional[pd.DataFrame]]:
     """
     Calculates Ichimoku Cloud components.
@@ -539,21 +627,31 @@ def calculate_ichimoku(
         )
         return ichi_df, span_df
     except Exception as e:
-        logger.error(f"Error calculating Ichimoku(t={tenkan}, k={kijun}, s={senkou}): {e}")
+        logger.error(
+            f"Error calculating Ichimoku(t={tenkan}, k={kijun}, s={senkou}): {e}"
+        )
         return None, None
 
 
 # --- Custom / Combined Indicator Functions ---
 
 
-def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: Decimal | float) -> pd.DataFrame:
+def ehlers_volumetric_trend(
+    df: pd.DataFrame, length: int, multiplier: Decimal | float
+) -> pd.DataFrame:
     """
     Calculate Ehlers Volumetric Trend indicator using VWMA and SuperSmoother.
     Adds 'vwma', 'smoothed_vwma', 'trend' (1/-1/0), 'evt_buy', 'evt_sell' (boolean) columns.
     """
     # (Implementation remains the same as previous version)
-    if not all(col in df.columns for col in ["close", "volume"]) or df.empty or length <= 0:
-        logger.warning("EVT calculation skipped: Missing columns, empty df, or invalid length.")
+    if (
+        not all(col in df.columns for col in ["close", "volume"])
+        or df.empty
+        or length <= 0
+    ):
+        logger.warning(
+            "EVT calculation skipped: Missing columns, empty df, or invalid length."
+        )
         return df  # Return original df
     try:
         vwma = calculate_vwma(df["close"], df["volume"], length=length)
@@ -573,15 +671,21 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: Decimal |
                 sm2 = smoothed[i - 2] if not np.isnan(smoothed[i - 2]) else 0
                 smoothed[i] = c1 * vwma_vals[i] + c2 * sm1 + c3 * sm2
             else:
-                smoothed[i] = smoothed[i - 1] if i > 0 and not np.isnan(smoothed[i - 1]) else 0
+                smoothed[i] = (
+                    smoothed[i - 1] if i > 0 and not np.isnan(smoothed[i - 1]) else 0
+                )
         df[f"smooth_vwma_{length}"] = smoothed
         trend = np.zeros(len(df), dtype=int)
         mult_h = 1 + float(multiplier) / 100.0
         mult_l = 1 - float(multiplier) / 100.0
         shifted_smooth = df[f"smooth_vwma_{length}"].shift(1).values
         valid = ~np.isnan(smoothed) & ~np.isnan(shifted_smooth)
-        trend[valid] = np.where(smoothed[valid] > shifted_smooth[valid] * mult_h, 1, trend[valid])
-        trend[valid] = np.where(smoothed[valid] < shifted_smooth[valid] * mult_l, -1, trend[valid])
+        trend[valid] = np.where(
+            smoothed[valid] > shifted_smooth[valid] * mult_h, 1, trend[valid]
+        )
+        trend[valid] = np.where(
+            smoothed[valid] < shifted_smooth[valid] * mult_l, -1, trend[valid]
+        )
         trend_col_name = f"evt_trend_{length}"
         buy_col = f"evt_buy_{length}"
         sell_col = f"evt_sell_{length}"
@@ -590,9 +694,13 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: Decimal |
         trend_shifted = df[trend_col_name].shift(1)
         df[buy_col] = (df[trend_col_name] == 1) & (trend_shifted != 1)
         df[sell_col] = (df[trend_col_name] == -1) & (trend_shifted != -1)
-        logger.debug(f"Ehlers Volumetric Trend (len={length}, mult={multiplier}) calculated.")
+        logger.debug(
+            f"Ehlers Volumetric Trend (len={length}, mult={multiplier}) calculated."
+        )
     except Exception as e:
-        logger.error(f"{Fore.RED}Error in EVT(len={length}): {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}Error in EVT(len={length}): {e}{Style.RESET_ALL}", exc_info=True
+        )
         df[
             [
                 f"vwma_{length}",
@@ -608,7 +716,9 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: Decimal |
 # --- Pivot Point Calculations ---
 
 
-def calculate_standard_pivot_points(high: pd.Series, low: pd.Series, close: pd.Series) -> Dict[str, Decimal]:
+def calculate_standard_pivot_points(
+    high: pd.Series, low: pd.Series, close: pd.Series
+) -> Dict[str, Decimal]:
     """Calculates standard pivot points for the *next* period based on *previous* period's HLC."""
     pivots = {}
     # Ensure we have data for the previous period
@@ -633,7 +743,9 @@ def calculate_standard_pivot_points(high: pd.Series, low: pd.Series, close: pd.S
     return pivots
 
 
-def calculate_fib_pivot_points(high: pd.Series, low: pd.Series, close: pd.Series) -> Dict[str, Decimal]:
+def calculate_fib_pivot_points(
+    high: pd.Series, low: pd.Series, close: pd.Series
+) -> Dict[str, Decimal]:
     """Calculates Fibonacci pivot points for the *next* period."""
     fib_pivots = {}
     if len(high) < 1 or len(low) < 1 or len(close) < 1:
@@ -652,7 +764,9 @@ def calculate_fib_pivot_points(high: pd.Series, low: pd.Series, close: pd.Series
         fib_pivots["R1"] = Pivot + (Decimal("0.382") * Range)
         fib_pivots["S2"] = Pivot - (Decimal("0.618") * Range)
         fib_pivots["R2"] = Pivot + (Decimal("0.618") * Range)
-        fib_pivots["S3"] = Pivot - (Decimal("1.000") * Range)  # = Low - (H - Pivot)? Sometimes defined differently
+        fib_pivots["S3"] = Pivot - (
+            Decimal("1.000") * Range
+        )  # = Low - (H - Pivot)? Sometimes defined differently
         fib_pivots["R3"] = Pivot + (Decimal("1.000") * Range)  # = High + (Pivot - Low)?
 
     except (IndexError, InvalidOperation, TypeError, DivisionByZero) as e:
@@ -662,7 +776,13 @@ def calculate_fib_pivot_points(high: pd.Series, low: pd.Series, close: pd.Series
 
 def calculate_levels(df: pd.DataFrame, current_price: Decimal) -> dict:
     """Calculates various support/resistance levels."""
-    levels = {"support": {}, "resistance": {}, "pivot": None, "fib_pivots": {}, "standard_pivots": {}}
+    levels = {
+        "support": {},
+        "resistance": {},
+        "pivot": None,
+        "fib_pivots": {},
+        "standard_pivots": {},
+    }
     if df.empty:
         return levels
 
@@ -693,7 +813,9 @@ def calculate_levels(df: pd.DataFrame, current_price: Decimal) -> dict:
                     levels["resistance"][label] = value
 
         # Standard Pivot Points (based on *previous* candle's HLC)
-        standard_pivots = calculate_standard_pivot_points(df["high"].shift(1), df["low"].shift(1), df["close"].shift(1))
+        standard_pivots = calculate_standard_pivot_points(
+            df["high"].shift(1), df["low"].shift(1), df["close"].shift(1)
+        )
         if standard_pivots:
             levels["standard_pivots"] = standard_pivots
             pivot = standard_pivots.get("PP")
@@ -706,7 +828,9 @@ def calculate_levels(df: pd.DataFrame, current_price: Decimal) -> dict:
                     levels["resistance"][label] = value
 
         # Fibonacci Pivot Points (based on *previous* candle's HLC)
-        fib_pivots = calculate_fib_pivot_points(df["high"].shift(1), df["low"].shift(1), df["close"].shift(1))
+        fib_pivots = calculate_fib_pivot_points(
+            df["high"].shift(1), df["low"].shift(1), df["close"].shift(1)
+        )
         if fib_pivots:
             levels["fib_pivots"] = fib_pivots
             # Add Fib pivots to S/R levels too
@@ -749,13 +873,17 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
     required_cols = ["high", "low", "close", "volume", "open"]
     if not all(col in df.columns for col in required_cols):
         missing = [col for col in required_cols if col not in df.columns]
-        logger.error(f"Input DataFrame missing required columns for indicator calculation: {missing}")
+        logger.error(
+            f"Input DataFrame missing required columns for indicator calculation: {missing}"
+        )
         return df  # Return original df if columns missing
 
     df_out = df  # Work directly on the DataFrame for efficiency with pandas_ta
     settings = config.get("indicator_settings", {})
     flags = config.get("analysis_flags", {})
-    min_rows_needed = 50  # Default minimum rows for reliable calculation of most indicators
+    min_rows_needed = (
+        50  # Default minimum rows for reliable calculation of most indicators
+    )
 
     # Check length after dropping potential initial NaNs from data fetching
     df_clean = df_out.dropna(subset=required_cols)
@@ -766,7 +894,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
         # Proceed but be aware calculations might fail or be inaccurate
 
     # --- Define a helper to run TA-Lib functions safely ---
-    def apply_ta_indicator(func: Callable, name: str, required_flag: Optional[str] = None, **kwargs):
+    def apply_ta_indicator(
+        func: Callable, name: str, required_flag: Optional[str] = None, **kwargs
+    ):
         """Applies a pandas_ta indicator if flag is true and inputs are valid."""
         if required_flag and not flags.get(required_flag, False):
             # logger.debug(f"Indicator '{name}' disabled by flag '{required_flag}'.")
@@ -779,7 +909,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
             if k in kwargs.get("required_inputs", []) and k in df_out
         }
         if len(series_args) != len(kwargs.get("required_inputs", [])):
-            logger.warning(f"Missing required columns for indicator '{name}'. Skipping.")
+            logger.warning(
+                f"Missing required columns for indicator '{name}'. Skipping."
+            )
             return
 
         # Combine series args with length/param args
@@ -791,12 +923,16 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
             # Most ta functions append columns directly to the DataFrame
             logger.debug(f"Calculating {name} with params: {kwargs}")
             df_out.ta(kind=name.lower(), **final_kwargs, append=True)
-        except AttributeError:  # Handle cases where ta doesn't have the indicator or params are wrong
+        except (
+            AttributeError
+        ):  # Handle cases where ta doesn't have the indicator or params are wrong
             logger.error(
                 f"{Fore.RED}Pandas TA does not have indicator '{name}' or parameters are incorrect: {kwargs}{Style.RESET_ALL}"
             )
         except Exception as e:
-            logger.error(f"{Fore.RED}Error calculating indicator '{name}' with params {kwargs}: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Error calculating indicator '{name}' with params {kwargs}: {e}{Style.RESET_ALL}"
+            )
 
     # --- Apply Indicators based on Flags ---
     # MAs
@@ -834,12 +970,19 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
         ta.hma, "HMA", length=settings.get("hma_length", 9), required_inputs=["close"]
     )  # Add HMA flag if needed
     apply_ta_indicator(
-        ta.vwap, "VWAP", length=settings.get("vwap_length"), required_inputs=["high", "low", "close", "volume"]
+        ta.vwap,
+        "VWAP",
+        length=settings.get("vwap_length"),
+        required_inputs=["high", "low", "close", "volume"],
     )  # Add VWAP flag if needed
 
     # Oscillators
     apply_ta_indicator(
-        ta.rsi, "RSI", required_flag="rsi_threshold", length=settings.get("rsi_period", 14), required_inputs=["close"]
+        ta.rsi,
+        "RSI",
+        required_flag="rsi_threshold",
+        length=settings.get("rsi_period", 14),
+        required_inputs=["close"],
     )
     apply_ta_indicator(
         ta.stochrsi,
@@ -940,7 +1083,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
     )
 
     # Volume Based
-    apply_ta_indicator(ta.obv, "OBV", required_flag="obv_trend", required_inputs=["close", "volume"])
+    apply_ta_indicator(
+        ta.obv, "OBV", required_flag="obv_trend", required_inputs=["close", "volume"]
+    )
     apply_ta_indicator(
         ta.adosc,
         "ADOSC",
@@ -958,11 +1103,21 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
 
     # Custom: Ehlers Volumetric Trend
     if config.get("strategy", {}).get("name", "").upper() == "DUAL_EHLERS_VOLUMETRIC":
-        evt_len = config.get("strategy_params", {}).get("dual_ehlers_volumetric", {}).get("evt_length", 7)
-        evt_mult = (
-            config.get("strategy_params", {}).get("dual_ehlers_volumetric", {}).get("evt_multiplier", Decimal("2.5"))
+        evt_len = (
+            config.get("strategy_params", {})
+            .get("dual_ehlers_volumetric", {})
+            .get("evt_length", 7)
         )
-        conf_evt_len = config.get("strategy_params", {}).get("dual_ehlers_volumetric", {}).get("confirm_evt_length", 5)
+        evt_mult = (
+            config.get("strategy_params", {})
+            .get("dual_ehlers_volumetric", {})
+            .get("evt_multiplier", Decimal("2.5"))
+        )
+        conf_evt_len = (
+            config.get("strategy_params", {})
+            .get("dual_ehlers_volumetric", {})
+            .get("confirm_evt_length", 5)
+        )
         conf_evt_mult = (
             config.get("strategy_params", {})
             .get("dual_ehlers_volumetric", {})
@@ -987,7 +1142,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: Dict[str, Any]) -> pd.Dat
     #     if df_out[col].dtype == 'float64':
     #         df_out[col] = df_out[col].apply(lambda x: safe_decimal_conversion(x, default=Decimal('NaN')))
 
-    logger.debug(f"Finished calculating indicators. Final DataFrame shape: {df_out.shape}")
+    logger.debug(
+        f"Finished calculating indicators. Final DataFrame shape: {df_out.shape}"
+    )
     return df_out
 
 
@@ -1068,14 +1225,18 @@ if __name__ == "__main__":
             "awesome_oscillator": True,
             "ichimoku": True,
         },
-        "strategy": {"name": "DUAL_EHLERS_VOLUMETRIC"},  # Example strategy to test EVT calc
+        "strategy": {
+            "name": "DUAL_EHLERS_VOLUMETRIC"
+        },  # Example strategy to test EVT calc
         # Add threshold dict if interpretation relies on it
     }
 
     # Create dummy data
     periods = 200
     data = {
-        "timestamp": pd.date_range(start="2023-01-01", periods=periods, freq="H", tz="UTC"),
+        "timestamp": pd.date_range(
+            start="2023-01-01", periods=periods, freq="H", tz="UTC"
+        ),
         "open": np.random.uniform(50, 60, periods),
         "high": np.random.uniform(55, 65, periods),
         "low": np.random.uniform(45, 55, periods),
@@ -1103,6 +1264,8 @@ if __name__ == "__main__":
     last_row_nans = df_results.iloc[-1].isnull().sum()
     print(f"NaNs in last row: {last_row_nans} / {len(df_results.columns)}")
     if last_row_nans > 0:
-        print(f"Columns with NaNs in last row:\n{df_results.iloc[-1][df_results.iloc[-1].isnull()].index.tolist()}")
+        print(
+            f"Columns with NaNs in last row:\n{df_results.iloc[-1][df_results.iloc[-1].isnull()].index.tolist()}"
+        )
 
 # --- END OF FILE indicators_v1.1.py ---

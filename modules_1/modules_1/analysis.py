@@ -106,7 +106,11 @@ class TradingAnalyzer:
         },
         "PSAR": {
             "func_name": "psar",
-            "params_map": {"initial": "psar_initial_af", "step": "psar_af_step", "max": "psar_max_af"},
+            "params_map": {
+                "initial": "psar_initial_af",
+                "step": "psar_af_step",
+                "max": "psar_max_af",
+            },
             "multi_cols": {
                 "PSAR_long": "PSARl_{initial}_{step}_{max}",
                 "PSAR_short": "PSARs_{initial}_{step}_{max}",
@@ -133,7 +137,10 @@ class TradingAnalyzer:
         },
         "Bollinger_Bands": {
             "func_name": "bbands",
-            "params_map": {"length": "bollinger_bands_period", "std": "bollinger_bands_std_dev"},
+            "params_map": {
+                "length": "bollinger_bands_period",
+                "std": "bollinger_bands_std_dev",
+            },
             "multi_cols": {
                 "BB_Lower": "BBL_{length}_{std:.1f}",
                 "BB_Middle": "BBM_{length}_{std:.1f}",
@@ -188,7 +195,9 @@ class TradingAnalyzer:
         self.indicator_values: Dict[str, Any] = {}
         self.signals: Dict[str, int] = {"BUY": 0, "SELL": 0, "HOLD": 1}
         self.active_weight_set_name = config.get("active_weight_set", "default")
-        self.weights = config.get("weight_sets", {}).get(self.active_weight_set_name, {})
+        self.weights = config.get("weight_sets", {}).get(
+            self.active_weight_set_name, {}
+        )
         self.fib_levels_data: Dict[str, Decimal] = {}
         self.ta_column_names: Dict[str, str] = {}
         self.df_calculated: pd.DataFrame = pd.DataFrame()
@@ -202,7 +211,9 @@ class TradingAnalyzer:
                     self.indicator_type_map[sub_key] = default_type
 
         if not isinstance(df, pd.DataFrame) or df.empty:
-            self.logger.error(f"{NEON_RED}Input DataFrame for {self.symbol} is invalid or empty.{RESET}")
+            self.logger.error(
+                f"{NEON_RED}Input DataFrame for {self.symbol} is invalid or empty.{RESET}"
+            )
             raise ValueError("Input DataFrame must be a non-empty pandas DataFrame.")
         if not self.ccxt_interval:
             self.logger.error(
@@ -220,11 +231,15 @@ class TradingAnalyzer:
             self.logger.error(
                 f"{NEON_RED}DataFrame for {self.symbol} missing required OHLCV columns: {missing_cols}.{RESET}"
             )
-            raise ValueError(f"DataFrame must contain all OHLCV columns. Missing: {missing_cols}")
+            raise ValueError(
+                f"DataFrame must contain all OHLCV columns. Missing: {missing_cols}"
+            )
 
         self.df_original_ohlcv = df.copy()
         if self.df_original_ohlcv.index.tz is not None:
-            self.df_original_ohlcv.index = self.df_original_ohlcv.index.tz_localize(None)
+            self.df_original_ohlcv.index = self.df_original_ohlcv.index.tz_localize(
+                None
+            )
 
         self._validate_and_prepare_df_calculated()
         self._calculate_all_indicators()
@@ -242,7 +257,9 @@ class TradingAnalyzer:
                 )
                 raise ValueError(f"Column '{col}' is missing from DataFrame.")
             try:
-                self.df_calculated[col] = pd.to_numeric(self.df_calculated[col], errors="coerce")
+                self.df_calculated[col] = pd.to_numeric(
+                    self.df_calculated[col], errors="coerce"
+                )
                 if not pd.api.types.is_float_dtype(self.df_calculated[col]):
                     self.df_calculated[col] = self.df_calculated[col].astype(float)
             except (ValueError, TypeError, AttributeError) as e:
@@ -270,15 +287,22 @@ class TradingAnalyzer:
         for ind_key_cfg, ind_cfg_details in self.INDICATOR_CONFIG.items():
             if enabled_indicators_cfg.get(ind_key_cfg.lower(), False):
                 period_param_key = ind_cfg_details.get("min_data_param_key")
-                if period_param_key and period_param_key in ind_cfg_details["params_map"]:
-                    config_key_for_period = ind_cfg_details["params_map"][period_param_key]
+                if (
+                    period_param_key
+                    and period_param_key in ind_cfg_details["params_map"]
+                ):
+                    config_key_for_period = ind_cfg_details["params_map"][
+                        period_param_key
+                    ]
                     period_val = self.get_period(config_key_for_period)
                     if isinstance(period_val, (int, float)) and period_val > 0:
                         max_lookback = max(max_lookback, int(period_val))
                 elif isinstance(ind_cfg_details.get("min_data"), int):
                     max_lookback = max(max_lookback, ind_cfg_details.get("min_data", 1))
 
-        min_required_rows = max_lookback + self.config.get("indicator_buffer_candles", 20)
+        min_required_rows = max_lookback + self.config.get(
+            "indicator_buffer_candles", 20
+        )
         valid_ohlcv_rows = len(self.df_calculated.dropna(subset=required_cols))
         if valid_ohlcv_rows < min_required_rows:
             self.logger.warning(
@@ -301,7 +325,9 @@ class TradingAnalyzer:
                     f"Param '{k_param}' for column pattern '{pattern}' was None. Using placeholder 'DEF'."
                 )
             elif isinstance(v_param, (float, Decimal)):
-                val_to_format = float(v_param) if isinstance(v_param, Decimal) else v_param
+                val_to_format = (
+                    float(v_param) if isinstance(v_param, Decimal) else v_param
+                )
                 if f"{{{k_param}:." in pattern:
                     fmt_params[k_param] = val_to_format
                 else:
@@ -313,17 +339,27 @@ class TradingAnalyzer:
         try:
             return pattern.format(**fmt_params)
         except (KeyError, ValueError, TypeError) as e:
-            self.logger.error(f"Error formatting TA column pattern '{pattern}' with params {fmt_params}: {e}")
-            base_pattern_part = pattern.split("{")[0].rstrip("_") if pattern else "UNKNOWN_IND"
+            self.logger.error(
+                f"Error formatting TA column pattern '{pattern}' with params {fmt_params}: {e}"
+            )
+            base_pattern_part = (
+                pattern.split("{")[0].rstrip("_") if pattern else "UNKNOWN_IND"
+            )
             param_keys_str = "_".join(map(str, params.values()))
             return f"{base_pattern_part}_{param_keys_str}_FORMAT_ERROR"
 
-    def _calculate_volume_ma(self, df: pd.DataFrame, length: int) -> Optional[pd.Series]:
+    def _calculate_volume_ma(
+        self, df: pd.DataFrame, length: int
+    ) -> Optional[pd.Series]:
         if "volume" not in df.columns:
-            self.logger.warning(f"Volume MA calculation failed for {self.symbol}: 'volume' column missing.")
+            self.logger.warning(
+                f"Volume MA calculation failed for {self.symbol}: 'volume' column missing."
+            )
             return None
         if not (isinstance(length, int) and length > 0):
-            self.logger.warning(f"Volume MA calculation failed for {self.symbol}: Invalid length {length}.")
+            self.logger.warning(
+                f"Volume MA calculation failed for {self.symbol}: Invalid length {length}."
+            )
             return None
 
         volume_series = df["volume"].fillna(0).astype(float)
@@ -336,7 +372,9 @@ class TradingAnalyzer:
 
     def _calculate_all_indicators(self) -> None:
         if self.df_calculated.empty:
-            self.logger.warning(f"df_calculated is empty for {self.symbol}. Skipping indicator calculations.")
+            self.logger.warning(
+                f"df_calculated is empty for {self.symbol}. Skipping indicator calculations."
+            )
             return
 
         df_ta_intermediate = self.df_calculated.copy()
@@ -348,7 +386,9 @@ class TradingAnalyzer:
 
             current_params_for_ta_func = {}
             valid_params = True
-            for ta_func_param_name, config_key_for_value in ind_details["params_map"].items():
+            for ta_func_param_name, config_key_for_value in ind_details[
+                "params_map"
+            ].items():
                 param_value = self.get_period(config_key_for_value)
                 if param_value is None:
                     self.logger.warning(
@@ -358,15 +398,21 @@ class TradingAnalyzer:
                     break
                 try:
                     if isinstance(param_value, Decimal):
-                        current_params_for_ta_func[ta_func_param_name] = float(param_value)
+                        current_params_for_ta_func[ta_func_param_name] = float(
+                            param_value
+                        )
                     elif isinstance(param_value, str):
                         current_params_for_ta_func[ta_func_param_name] = (
-                            float(param_value) if "." in param_value else int(param_value)
+                            float(param_value)
+                            if "." in param_value
+                            else int(param_value)
                         )
                     elif isinstance(param_value, (int, float)):
                         current_params_for_ta_func[ta_func_param_name] = param_value
                     else:
-                        raise TypeError(f"Unsupported parameter type {type(param_value)} for {config_key_for_value}")
+                        raise TypeError(
+                            f"Unsupported parameter type {type(param_value)} for {config_key_for_value}"
+                        )
                 except (ValueError, TypeError) as e:
                     self.logger.error(
                         f"Cannot convert parameter {config_key_for_value}='{param_value}' for {ind_cfg_key} on {self.symbol}: {e}"
@@ -379,7 +425,9 @@ class TradingAnalyzer:
             try:
                 ta_func_name = ind_details["func_name"]
                 ta_func_obj = (
-                    getattr(ta, ta_func_name) if hasattr(ta, ta_func_name) else getattr(self, ta_func_name, None)
+                    getattr(ta, ta_func_name)
+                    if hasattr(ta, ta_func_name)
+                    else getattr(self, ta_func_name, None)
                 )
                 if ta_func_obj is None:
                     self.logger.error(
@@ -388,8 +436,19 @@ class TradingAnalyzer:
                     continue
 
                 lookback_key = ind_details.get("min_data_param_key", "length")
-                min_data_needed = int(current_params_for_ta_func.get(lookback_key, ind_details.get("min_data", 1)))
-                if len(df_ta_intermediate.dropna(subset=["open", "high", "low", "close"])) < min_data_needed:
+                min_data_needed = int(
+                    current_params_for_ta_func.get(
+                        lookback_key, ind_details.get("min_data", 1)
+                    )
+                )
+                if (
+                    len(
+                        df_ta_intermediate.dropna(
+                            subset=["open", "high", "low", "close"]
+                        )
+                    )
+                    < min_data_needed
+                ):
                     self.logger.debug(
                         f"Insufficient data for {ind_cfg_key} ({len(df_ta_intermediate.dropna(subset=['open', 'high', 'low', 'close']))} rows vs {min_data_needed} needed) for {self.symbol}. Skipping."
                     )
@@ -413,14 +472,22 @@ class TradingAnalyzer:
 
                 result_data = None
                 if ta_func_name == "_calculate_volume_ma":
-                    result_data = ta_func_obj(df_ta_intermediate, **current_params_for_ta_func)
+                    result_data = ta_func_obj(
+                        df_ta_intermediate, **current_params_for_ta_func
+                    )
                 elif ind_details.get("pass_close_only", False):
-                    result_data = ta_func_obj(close=df_ta_intermediate["close"], **current_params_for_ta_func)
+                    result_data = ta_func_obj(
+                        close=df_ta_intermediate["close"], **current_params_for_ta_func
+                    )
                 else:
-                    result_data = ta_func_obj(**ta_input_args, **current_params_for_ta_func)
+                    result_data = ta_func_obj(
+                        **ta_input_args, **current_params_for_ta_func
+                    )
 
                 if result_data is None:
-                    self.logger.warning(f"{ind_cfg_key} calculation returned None for {self.symbol}.")
+                    self.logger.warning(
+                        f"{ind_cfg_key} calculation returned None for {self.symbol}."
+                    )
                     continue
 
                 should_concat = ind_details.get("concat", False)
@@ -437,7 +504,9 @@ class TradingAnalyzer:
                         col_name_for_series_concat = self._format_ta_column_name(
                             ind_details["main_col_pattern"], current_params_for_ta_func
                         )
-                        df_piece_to_add = result_data.to_frame(name=col_name_for_series_concat)
+                        df_piece_to_add = result_data.to_frame(
+                            name=col_name_for_series_concat
+                        )
                     elif isinstance(result_data, pd.DataFrame):
                         df_piece_to_add = result_data.copy()
                     else:
@@ -463,7 +532,9 @@ class TradingAnalyzer:
                                 self.logger.error(
                                     f"Failed to convert column {col_idx} for {ind_cfg_key} to float64: {e_col_cast}. Dropping this column."
                                 )
-                        df_piece_to_add = pd.DataFrame(valid_cols_for_df, index=df_piece_to_add.index)  # type: ignore
+                        df_piece_to_add = pd.DataFrame(
+                            valid_cols_for_df, index=df_piece_to_add.index
+                        )  # type: ignore
                         if df_piece_to_add.empty:  # type: ignore
                             self.logger.error(
                                 f"Piece for {ind_cfg_key} became empty after type conversion attempts. Skipping."
@@ -476,13 +547,21 @@ class TradingAnalyzer:
                         if col in df_ta_intermediate.columns  # type: ignore
                     ]
                     if cols_to_drop_if_exist:
-                        df_ta_intermediate.drop(columns=cols_to_drop_if_exist, inplace=True, errors="ignore")
+                        df_ta_intermediate.drop(
+                            columns=cols_to_drop_if_exist, inplace=True, errors="ignore"
+                        )
 
-                    df_ta_intermediate = pd.concat([df_ta_intermediate, df_piece_to_add], axis=1)
+                    df_ta_intermediate = pd.concat(
+                        [df_ta_intermediate, df_piece_to_add], axis=1
+                    )
 
                     if "multi_cols" in ind_details:
-                        for internal_key, col_pattern in ind_details["multi_cols"].items():
-                            actual_col_name = self._format_ta_column_name(col_pattern, current_params_for_ta_func)
+                        for internal_key, col_pattern in ind_details[
+                            "multi_cols"
+                        ].items():
+                            actual_col_name = self._format_ta_column_name(
+                                col_pattern, current_params_for_ta_func
+                            )
                             if actual_col_name in df_ta_intermediate.columns:
                                 self.ta_column_names[internal_key] = actual_col_name
                             else:
@@ -491,14 +570,18 @@ class TradingAnalyzer:
                                 )
                     elif col_name_for_series_concat:
                         if col_name_for_series_concat in df_ta_intermediate.columns:
-                            self.ta_column_names[ind_cfg_key] = col_name_for_series_concat
+                            self.ta_column_names[ind_cfg_key] = (
+                                col_name_for_series_concat
+                            )
                         else:
                             self.logger.error(
                                 f"Internal: Column {col_name_for_series_concat} for {ind_cfg_key} not found after concat."
                             )
                 else:
                     if "main_col_pattern" not in ind_details:
-                        self.logger.error(f"Indicator {ind_cfg_key} (concat=False) lacks main_col_pattern. Skipping.")
+                        self.logger.error(
+                            f"Indicator {ind_cfg_key} (concat=False) lacks main_col_pattern. Skipping."
+                        )
                         continue
                     actual_col_name = self._format_ta_column_name(
                         ind_details["main_col_pattern"], current_params_for_ta_func
@@ -508,7 +591,9 @@ class TradingAnalyzer:
                             self.logger.debug(
                                 f"Overwriting column '{actual_col_name}' for {ind_cfg_key} in df_ta_intermediate."
                             )
-                        df_ta_intermediate[actual_col_name] = result_data.astype("float64")
+                        df_ta_intermediate[actual_col_name] = result_data.astype(
+                            "float64"
+                        )
                         self.ta_column_names[ind_cfg_key] = actual_col_name
                     else:
                         self.logger.warning(
@@ -524,14 +609,24 @@ class TradingAnalyzer:
         self.logger.debug(
             f"Indicator calculation complete for {self.symbol}. Resulting columns: {self.df_calculated.columns.tolist()}"
         )
-        self.logger.debug(f"Final mapped TA column names for {self.symbol}: {self.ta_column_names}")
+        self.logger.debug(
+            f"Final mapped TA column names for {self.symbol}: {self.ta_column_names}"
+        )
 
     def _update_latest_indicator_values(self) -> None:
         df_indicators_src = self.df_calculated
         df_ohlcv_src = self.df_original_ohlcv
 
-        ohlcv_keys_map = {"Open": "open", "High": "high", "Low": "low", "Close": "close", "Volume": "volume"}
-        all_expected_keys = set(self.indicator_type_map.keys()) | set(ohlcv_keys_map.keys())
+        ohlcv_keys_map = {
+            "Open": "open",
+            "High": "high",
+            "Low": "low",
+            "Close": "close",
+            "Volume": "volume",
+        }
+        all_expected_keys = set(self.indicator_type_map.keys()) | set(
+            ohlcv_keys_map.keys()
+        )
         temp_indicator_values: Dict[str, Any] = {k: np.nan for k in all_expected_keys}
 
         if df_indicators_src.empty:
@@ -549,7 +644,9 @@ class TradingAnalyzer:
 
         try:
             if df_indicators_src.index.empty or df_ohlcv_src.index.empty:
-                self.logger.error(f"Cannot get latest row for {self.symbol}: DataFrame index is empty.")
+                self.logger.error(
+                    f"Cannot get latest row for {self.symbol}: DataFrame index is empty."
+                )
                 self.indicator_values = temp_indicator_values
                 return
 
@@ -563,12 +660,16 @@ class TradingAnalyzer:
             for internal_key, actual_col_name in self.ta_column_names.items():
                 if actual_col_name and actual_col_name in latest_indicator_row.index:
                     value = latest_indicator_row[actual_col_name]
-                    indicator_target_type = self.indicator_type_map.get(internal_key, "float")
+                    indicator_target_type = self.indicator_type_map.get(
+                        internal_key, "float"
+                    )
 
                     if pd.notna(value):
                         try:
                             if indicator_target_type == "decimal":
-                                temp_indicator_values[internal_key] = Decimal(str(value))
+                                temp_indicator_values[internal_key] = Decimal(
+                                    str(value)
+                                )
                             else:
                                 temp_indicator_values[internal_key] = float(value)
                         except (ValueError, TypeError, InvalidOperation) as e_conv:
@@ -591,7 +692,9 @@ class TradingAnalyzer:
                         if isinstance(value_ohlcv, Decimal):
                             temp_indicator_values[display_key] = value_ohlcv
                         else:
-                            temp_indicator_values[display_key] = Decimal(str(value_ohlcv))
+                            temp_indicator_values[display_key] = Decimal(
+                                str(value_ohlcv)
+                            )
                     except InvalidOperation:
                         self.logger.warning(
                             f"Failed to convert original OHLCV value '{source_col_name}' ({value_ohlcv}) to Decimal for {self.symbol}. Storing as NaN."
@@ -602,14 +705,20 @@ class TradingAnalyzer:
 
             self.indicator_values = temp_indicator_values
 
-            if "ATR" in self.indicator_values and pd.notna(self.indicator_values.get("ATR")):
+            if "ATR" in self.indicator_values and pd.notna(
+                self.indicator_values.get("ATR")
+            ):
                 self.logger.info(
                     f"DEBUG ATR for {self.symbol}: Final ATR in self.indicator_values: {self.indicator_values.get('ATR')}, Type: {type(self.indicator_values.get('ATR'))}"
                 )
 
             price_prec_log = get_price_precision(self.market_info, self.logger)
             log_output_details = {}
-            decimal_like_keys = [k for k, v_type in self.indicator_type_map.items() if v_type == "decimal"] + [
+            decimal_like_keys = [
+                k
+                for k, v_type in self.indicator_type_map.items()
+                if v_type == "decimal"
+            ] + [
                 "Open",
                 "High",
                 "Low",
@@ -628,7 +737,9 @@ class TradingAnalyzer:
                     log_output_details[k_log] = fmt_str
                 else:
                     log_output_details[k_log] = str(v_val_log)
-            self.logger.debug(f"Latest indicator values updated for {self.symbol}: {log_output_details}")
+            self.logger.debug(
+                f"Latest indicator values updated for {self.symbol}: {log_output_details}"
+            )
 
         except IndexError:
             self.logger.error(
@@ -636,16 +747,23 @@ class TradingAnalyzer:
             )
             self.indicator_values = temp_indicator_values
         except Exception as e:
-            self.logger.error(f"Unexpected error updating latest indicators for {self.symbol}: {e}", exc_info=True)
+            self.logger.error(
+                f"Unexpected error updating latest indicators for {self.symbol}: {e}",
+                exc_info=True,
+            )
             if not self.indicator_values:
                 self.indicator_values = temp_indicator_values
 
-    def calculate_fibonacci_levels(self, window: Optional[int] = None) -> Dict[str, Decimal]:
+    def calculate_fibonacci_levels(
+        self, window: Optional[int] = None
+    ) -> Dict[str, Decimal]:
         cfg_window = self.get_period("fibonacci_window")
         window_val = window if isinstance(window, int) and window > 0 else cfg_window
 
         if not (isinstance(window_val, int) and window_val > 0):
-            self.logger.warning(f"Invalid Fibonacci window ({window_val}) for {self.symbol}. No levels calculated.")
+            self.logger.warning(
+                f"Invalid Fibonacci window ({window_val}) for {self.symbol}. No levels calculated."
+            )
             self.fib_levels_data = {}
             return {}
         if len(self.df_original_ohlcv) < window_val:
@@ -661,7 +779,9 @@ class TradingAnalyzer:
             l_series = pd.to_numeric(df_slice["low"], errors="coerce").dropna()
 
             if h_series.empty or l_series.empty:
-                self.logger.warning(f"No valid high/low data for Fibonacci calculation in window for {self.symbol}.")
+                self.logger.warning(
+                    f"No valid high/low data for Fibonacci calculation in window for {self.symbol}."
+                )
                 self.fib_levels_data = {}
                 return {}
 
@@ -673,15 +793,17 @@ class TradingAnalyzer:
             price_precision = get_price_precision(self.market_info, self.logger)
             min_tick_size = get_min_tick_size(self.market_info, self.logger)
             quantize_factor = (
-                min_tick_size if min_tick_size and min_tick_size > Decimal("0") else Decimal(f"1e-{price_precision}")
+                min_tick_size
+                if min_tick_size and min_tick_size > Decimal("0")
+                else Decimal(f"1e-{price_precision}")
             )
 
             if diff > Decimal("0"):
                 for level_pct in FIB_LEVELS:
                     level_price_raw = period_high - (diff * Decimal(str(level_pct)))
-                    levels[f"Fib_{level_pct * 100:.1f}%"] = (level_price_raw / quantize_factor).quantize(
-                        Decimal("1"), rounding=ROUND_DOWN
-                    ) * quantize_factor
+                    levels[f"Fib_{level_pct * 100:.1f}%"] = (
+                        level_price_raw / quantize_factor
+                    ).quantize(Decimal("1"), rounding=ROUND_DOWN) * quantize_factor
             else:
                 level_price_quantized = (period_high / quantize_factor).quantize(
                     Decimal("1"), rounding=ROUND_DOWN
@@ -696,16 +818,28 @@ class TradingAnalyzer:
             )
             return levels
         except Exception as e:
-            self.logger.error(f"Fibonacci calculation error for {self.symbol}: {e}", exc_info=True)
+            self.logger.error(
+                f"Fibonacci calculation error for {self.symbol}: {e}", exc_info=True
+            )
             self.fib_levels_data = {}
             return {}
 
-    def get_nearest_fibonacci_levels(self, current_price: Decimal, num_levels: int = 5) -> List[Tuple[str, Decimal]]:
+    def get_nearest_fibonacci_levels(
+        self, current_price: Decimal, num_levels: int = 5
+    ) -> List[Tuple[str, Decimal]]:
         if not self.fib_levels_data:
-            self.logger.debug(f"No Fibonacci levels available for {self.symbol} to find nearest.")
+            self.logger.debug(
+                f"No Fibonacci levels available for {self.symbol} to find nearest."
+            )
             return []
-        if not (isinstance(current_price, Decimal) and pd.notna(current_price) and current_price > Decimal("0")):
-            self.logger.warning(f"Invalid current_price ({current_price}) for Fibonacci comparison on {self.symbol}.")
+        if not (
+            isinstance(current_price, Decimal)
+            and pd.notna(current_price)
+            and current_price > Decimal("0")
+        ):
+            self.logger.warning(
+                f"Invalid current_price ({current_price}) for Fibonacci comparison on {self.symbol}."
+            )
             return []
         if num_levels <= 0:
             return []
@@ -714,14 +848,23 @@ class TradingAnalyzer:
             distances = []
             for name, level_price in self.fib_levels_data.items():
                 if isinstance(level_price, Decimal) and level_price > Decimal("0"):
-                    distances.append({"name": name, "level": level_price, "distance": abs(current_price - level_price)})
+                    distances.append(
+                        {
+                            "name": name,
+                            "level": level_price,
+                            "distance": abs(current_price - level_price),
+                        }
+                    )
             if not distances:
                 return []
 
             distances.sort(key=lambda x: x["distance"])
             return [(item["name"], item["level"]) for item in distances[:num_levels]]
         except Exception as e:
-            self.logger.error(f"Error finding nearest Fibonacci levels for {self.symbol}: {e}", exc_info=True)
+            self.logger.error(
+                f"Error finding nearest Fibonacci levels for {self.symbol}: {e}",
+                exc_info=True,
+            )
             return []
 
     def calculate_ema_alignment_score(self) -> float:
@@ -729,7 +872,10 @@ class TradingAnalyzer:
         ema_l_val = self.indicator_values.get("EMA_Long")
         close_price_val = self.indicator_values.get("Close")
 
-        if not all(isinstance(val, Decimal) and pd.notna(val) for val in [ema_s_val, ema_l_val, close_price_val]):
+        if not all(
+            isinstance(val, Decimal) and pd.notna(val)
+            for val in [ema_s_val, ema_l_val, close_price_val]
+        ):
             self.logger.debug(
                 f"EMA alignment score skipped for {self.symbol}: one or more values (EMA_Short, EMA_Long, Close) are invalid/NaN."
             )
@@ -745,18 +891,26 @@ class TradingAnalyzer:
             return -1.0
         return 0.0
 
-    def generate_trading_signal(self, current_price: Decimal, orderbook_data: Optional[Dict]) -> str:
+    def generate_trading_signal(
+        self, current_price: Decimal, orderbook_data: Optional[Dict]
+    ) -> str:
         self.signals = {"BUY": 0, "SELL": 0, "HOLD": 1}
         current_score_decimal, total_weight_decimal = Decimal("0"), Decimal("0")
         active_checks_count, nan_checks_count = 0, 0
         debug_scores_log: Dict[str, str] = {}
 
         if not self.indicator_values:
-            self.logger.warning(f"No indicator values available for {self.symbol}. Defaulting to HOLD signal.")
+            self.logger.warning(
+                f"No indicator values available for {self.symbol}. Defaulting to HOLD signal."
+            )
             return "HOLD"
 
         atr_val = self.indicator_values.get("ATR")
-        if not (isinstance(atr_val, Decimal) and pd.notna(atr_val) and atr_val > Decimal("0")):
+        if not (
+            isinstance(atr_val, Decimal)
+            and pd.notna(atr_val)
+            and atr_val > Decimal("0")
+        ):
             self.logger.warning(
                 f"Signal generation for {self.symbol}: ATR is invalid ({atr_val}). This might affect subsequent TP/SL calculations if ATR is used."
             )
@@ -773,10 +927,13 @@ class TradingAnalyzer:
                 valid_core_indicator_count += 1
 
         num_configured_inds_enabled = sum(
-            1 for enabled_flag in self.config.get("indicators", {}).values() if enabled_flag
+            1
+            for enabled_flag in self.config.get("indicators", {}).values()
+            if enabled_flag
         )
         min_active_inds_for_signal = self.config.get(
-            "min_active_indicators_for_signal", max(1, int(num_configured_inds_enabled * 0.6))
+            "min_active_indicators_for_signal",
+            max(1, int(num_configured_inds_enabled * 0.6)),
         )
 
         if valid_core_indicator_count < min_active_inds_for_signal:
@@ -784,7 +941,11 @@ class TradingAnalyzer:
                 f"Signal for {self.symbol}: Only {valid_core_indicator_count}/{num_configured_inds_enabled} core indicators are valid (min required: {min_active_inds_for_signal}). Defaulting to HOLD."
             )
             return "HOLD"
-        if not (isinstance(current_price, Decimal) and pd.notna(current_price) and current_price > Decimal("0")):
+        if not (
+            isinstance(current_price, Decimal)
+            and pd.notna(current_price)
+            and current_price > Decimal("0")
+        ):
             self.logger.warning(
                 f"Invalid current_price ({current_price}) for {self.symbol} signal generation. Defaulting to HOLD."
             )
@@ -798,7 +959,9 @@ class TradingAnalyzer:
             return "HOLD"
 
         for indicator_check_key_lower in active_weights_dict.keys():
-            if not self.config.get("indicators", {}).get(indicator_check_key_lower, False):
+            if not self.config.get("indicators", {}).get(
+                indicator_check_key_lower, False
+            ):
                 continue
 
             weight_str_val = active_weights_dict.get(indicator_check_key_lower)
@@ -815,7 +978,9 @@ class TradingAnalyzer:
                 continue
 
             check_method_name_str = f"_check_{indicator_check_key_lower}"
-            if not hasattr(self, check_method_name_str) or not callable(getattr(self, check_method_name_str)):
+            if not hasattr(self, check_method_name_str) or not callable(
+                getattr(self, check_method_name_str)
+            ):
                 self.logger.warning(
                     f"No check method '{check_method_name_str}' found for enabled indicator {indicator_check_key_lower} ({self.symbol})."
                 )
@@ -825,21 +990,30 @@ class TradingAnalyzer:
             individual_indicator_score_float = np.nan
             try:
                 if indicator_check_key_lower == "orderbook":
-                    individual_indicator_score_float = method_to_call_obj(orderbook_data, current_price)
+                    individual_indicator_score_float = method_to_call_obj(
+                        orderbook_data, current_price
+                    )
                 else:
                     individual_indicator_score_float = method_to_call_obj()
             except Exception as e_check_method:
                 self.logger.error(
-                    f"Error in check method {check_method_name_str} for {self.symbol}: {e_check_method}", exc_info=True
+                    f"Error in check method {check_method_name_str} for {self.symbol}: {e_check_method}",
+                    exc_info=True,
                 )
 
             debug_scores_log[indicator_check_key_lower] = (
-                f"{individual_indicator_score_float:.3f}" if pd.notna(individual_indicator_score_float) else "NaN"
+                f"{individual_indicator_score_float:.3f}"
+                if pd.notna(individual_indicator_score_float)
+                else "NaN"
             )
             if pd.notna(individual_indicator_score_float):
                 try:
-                    indicator_score_decimal = Decimal(str(individual_indicator_score_float))
-                    clamped_score = max(Decimal("-1"), min(Decimal("1"), indicator_score_decimal))
+                    indicator_score_decimal = Decimal(
+                        str(individual_indicator_score_float)
+                    )
+                    clamped_score = max(
+                        Decimal("-1"), min(Decimal("1"), indicator_score_decimal)
+                    )
                     current_score_decimal += clamped_score * weight_decimal
                     total_weight_decimal += abs(weight_decimal)
                     active_checks_count += 1
@@ -852,7 +1026,9 @@ class TradingAnalyzer:
                 nan_checks_count += 1
 
         final_signal_decision_str = "HOLD"
-        signal_score_threshold = Decimal(str(self.get_period("signal_score_threshold") or "0.7"))
+        signal_score_threshold = Decimal(
+            str(self.get_period("signal_score_threshold") or "0.7")
+        )
 
         if total_weight_decimal == Decimal("0") and active_checks_count == 0:
             self.logger.warning(
@@ -885,12 +1061,16 @@ class TradingAnalyzer:
     def _check_momentum(self) -> float:
         momentum_val = self.indicator_values.get("Momentum")
         last_close_val = self.indicator_values.get("Close")
-        if pd.isna(momentum_val) or not (isinstance(last_close_val, Decimal) and last_close_val > Decimal("0")):
+        if pd.isna(momentum_val) or not (
+            isinstance(last_close_val, Decimal) and last_close_val > Decimal("0")
+        ):
             return np.nan
         try:
             momentum_decimal = Decimal(str(momentum_val))
             mom_pct = (momentum_decimal / last_close_val) * Decimal("100")  # type: ignore
-            threshold_pct = Decimal(str(self.get_period("momentum_threshold_pct") or "0.1"))
+            threshold_pct = Decimal(
+                str(self.get_period("momentum_threshold_pct") or "0.1")
+            )
         except (ZeroDivisionError, InvalidOperation, TypeError):
             return 0.0
         if threshold_pct == Decimal("0"):
@@ -905,13 +1085,26 @@ class TradingAnalyzer:
         current_volume_val = self.indicator_values.get("Volume")
         volume_ma_val = self.indicator_values.get("Volume_MA")
         try:
-            multiplier_val = Decimal(str(self.get_period("volume_confirmation_multiplier") or "1.5"))
+            multiplier_val = Decimal(
+                str(self.get_period("volume_confirmation_multiplier") or "1.5")
+            )
         except (InvalidOperation, TypeError):
             return np.nan
-        if not all(isinstance(v, Decimal) and pd.notna(v) for v in [current_volume_val, volume_ma_val, multiplier_val]):
+        if not all(
+            isinstance(v, Decimal) and pd.notna(v)
+            for v in [current_volume_val, volume_ma_val, multiplier_val]
+        ):
             return np.nan
-        current_volume, volume_ma, multiplier = current_volume_val, volume_ma_val, multiplier_val  # type: ignore
-        if current_volume < Decimal("0") or volume_ma <= Decimal("0") or multiplier <= Decimal("0"):
+        current_volume, volume_ma, multiplier = (
+            current_volume_val,
+            volume_ma_val,
+            multiplier_val,
+        )  # type: ignore
+        if (
+            current_volume < Decimal("0")
+            or volume_ma <= Decimal("0")
+            or multiplier <= Decimal("0")
+        ):
             return np.nan
         try:
             ratio = current_volume / volume_ma
@@ -919,9 +1112,18 @@ class TradingAnalyzer:
                 base_score, scale_top_ratio = Decimal("0.5"), multiplier * Decimal("5")
                 if scale_top_ratio == multiplier:
                     return 1.0 if ratio >= multiplier else 0.5
-                additional_score_pct = (ratio - multiplier) / (scale_top_ratio - multiplier)
-                return float(min(Decimal("1.0"), base_score + additional_score_pct * Decimal("0.5")))
-            if ratio < (Decimal("1") / multiplier if multiplier > Decimal("0") else Decimal("0")):
+                additional_score_pct = (ratio - multiplier) / (
+                    scale_top_ratio - multiplier
+                )
+                return float(
+                    min(
+                        Decimal("1.0"),
+                        base_score + additional_score_pct * Decimal("0.5"),
+                    )
+                )
+            if ratio < (
+                Decimal("1") / multiplier if multiplier > Decimal("0") else Decimal("0")
+            ):
                 return -0.4
             return 0.0
         except (ZeroDivisionError, InvalidOperation, TypeError):
@@ -934,10 +1136,14 @@ class TradingAnalyzer:
             return np.nan
         k_float, d_float = float(k_val), float(d_val)
         oversold_thresh = float(self.get_period("stoch_rsi_oversold_threshold") or 20)
-        overbought_thresh = float(self.get_period("stoch_rsi_overbought_threshold") or 80)
+        overbought_thresh = float(
+            self.get_period("stoch_rsi_overbought_threshold") or 80
+        )
         cross_thresh_val = self.get_period("stoch_rsi_cross_threshold")
         cross_thresh = (
-            float(cross_thresh_val) if isinstance(cross_thresh_val, (int, float)) and cross_thresh_val > 0 else 5.0
+            float(cross_thresh_val)
+            if isinstance(cross_thresh_val, (int, float)) and cross_thresh_val > 0
+            else 5.0
         )
         score = 0.0
         if k_float < oversold_thresh and d_float < oversold_thresh:
@@ -1030,11 +1236,23 @@ class TradingAnalyzer:
         if not isinstance(close_price_val, Decimal) or pd.isna(close_price_val):
             return np.nan
         close_price: Decimal = close_price_val  # type: ignore
-        is_long_trend_active = isinstance(psar_long_val, Decimal) and pd.notna(psar_long_val)
-        is_short_trend_active = isinstance(psar_short_val, Decimal) and pd.notna(psar_short_val)
-        if is_long_trend_active and not is_short_trend_active and close_price > psar_long_val:
+        is_long_trend_active = isinstance(psar_long_val, Decimal) and pd.notna(
+            psar_long_val
+        )
+        is_short_trend_active = isinstance(psar_short_val, Decimal) and pd.notna(
+            psar_short_val
+        )
+        if (
+            is_long_trend_active
+            and not is_short_trend_active
+            and close_price > psar_long_val
+        ):
             return 1.0  # type: ignore
-        if is_short_trend_active and not is_long_trend_active and close_price < psar_short_val:
+        if (
+            is_short_trend_active
+            and not is_long_trend_active
+            and close_price < psar_short_val
+        ):
             return -1.0  # type: ignore
         if not is_long_trend_active and not is_short_trend_active:
             return np.nan
@@ -1046,7 +1264,9 @@ class TradingAnalyzer:
     def _check_sma_10(self) -> float:
         sma_val = self.indicator_values.get("SMA10")
         last_close_val = self.indicator_values.get("Close")
-        if not all(isinstance(v, Decimal) and pd.notna(v) for v in [sma_val, last_close_val]):
+        if not all(
+            isinstance(v, Decimal) and pd.notna(v) for v in [sma_val, last_close_val]
+        ):
             return np.nan
         sma, last_close = sma_val, last_close_val  # type: ignore
         if last_close > sma:
@@ -1058,7 +1278,9 @@ class TradingAnalyzer:
     def _check_vwap(self) -> float:
         vwap_val = self.indicator_values.get("VWAP")
         last_close_val = self.indicator_values.get("Close")
-        if not all(isinstance(v, Decimal) and pd.notna(v) for v in [vwap_val, last_close_val]):
+        if not all(
+            isinstance(v, Decimal) and pd.notna(v) for v in [vwap_val, last_close_val]
+        ):
             return np.nan
         vwap, last_close = vwap_val, last_close_val  # type: ignore
         if last_close > vwap:
@@ -1092,10 +1314,16 @@ class TradingAnalyzer:
         upper_bb_val = self.indicator_values.get("BB_Upper")
         last_close_val = self.indicator_values.get("Close")
         if not all(
-            isinstance(v, Decimal) and pd.notna(v) for v in [lower_bb_val, middle_bb_val, upper_bb_val, last_close_val]
+            isinstance(v, Decimal) and pd.notna(v)
+            for v in [lower_bb_val, middle_bb_val, upper_bb_val, last_close_val]
         ):
             return np.nan
-        lower_bb, middle_bb, upper_bb, last_close = lower_bb_val, middle_bb_val, upper_bb_val, last_close_val  # type: ignore
+        lower_bb, middle_bb, upper_bb, last_close = (
+            lower_bb_val,
+            middle_bb_val,
+            upper_bb_val,
+            last_close_val,
+        )  # type: ignore
         if last_close <= lower_bb:
             return 1.0
         if last_close >= upper_bb:
@@ -1103,13 +1331,20 @@ class TradingAnalyzer:
         band_width = upper_bb - lower_bb
         if band_width > Decimal("0"):
             try:
-                position_score_raw = (last_close - middle_bb) / (band_width / Decimal("2"))
-                return float(max(Decimal("-1"), min(Decimal("1"), position_score_raw)) * Decimal("0.7"))
+                position_score_raw = (last_close - middle_bb) / (
+                    band_width / Decimal("2")
+                )
+                return float(
+                    max(Decimal("-1"), min(Decimal("1"), position_score_raw))
+                    * Decimal("0.7")
+                )
             except (ZeroDivisionError, InvalidOperation, TypeError):
                 return 0.0
         return 0.0
 
-    def _check_orderbook(self, orderbook_data: Optional[Dict], current_price: Decimal) -> float:
+    def _check_orderbook(
+        self, orderbook_data: Optional[Dict], current_price: Decimal
+    ) -> float:
         if not orderbook_data:
             return np.nan
         try:
@@ -1119,21 +1354,35 @@ class TradingAnalyzer:
                 return np.nan
             num_levels = self.config.get("orderbook_check_levels", 10)
             total_bid_qty = sum(
-                b[1] for b in bids[:num_levels] if len(b) == 2 and isinstance(b[1], Decimal) and pd.notna(b[1])
+                b[1]
+                for b in bids[:num_levels]
+                if len(b) == 2 and isinstance(b[1], Decimal) and pd.notna(b[1])
             )
             total_ask_qty = sum(
-                a[1] for a in asks[:num_levels] if len(a) == 2 and isinstance(a[1], Decimal) and pd.notna(a[1])
+                a[1]
+                for a in asks[:num_levels]
+                if len(a) == 2 and isinstance(a[1], Decimal) and pd.notna(a[1])
             )
             if total_bid_qty == Decimal("0") and total_ask_qty == Decimal("0"):
-                total_bid_qty = sum(Decimal(str(b[1])) for b in bids[:num_levels] if len(b) == 2 and pd.notna(b[1]))
-                total_ask_qty = sum(Decimal(str(a[1])) for a in asks[:num_levels] if len(a) == 2 and pd.notna(a[1]))
+                total_bid_qty = sum(
+                    Decimal(str(b[1]))
+                    for b in bids[:num_levels]
+                    if len(b) == 2 and pd.notna(b[1])
+                )
+                total_ask_qty = sum(
+                    Decimal(str(a[1]))
+                    for a in asks[:num_levels]
+                    if len(a) == 2 and pd.notna(a[1])
+                )
             total_qty_in_levels = total_bid_qty + total_ask_qty
             if total_qty_in_levels == Decimal("0"):
                 return 0.0
             obi = (total_bid_qty - total_ask_qty) / total_qty_in_levels
             return float(max(Decimal("-1"), min(Decimal("1"), obi)))
         except (TypeError, ValueError, InvalidOperation, IndexError) as e:
-            self.logger.warning(f"Order book analysis error for {self.symbol}: {e}", exc_info=False)
+            self.logger.warning(
+                f"Order book analysis error for {self.symbol}: {e}", exc_info=False
+            )
             return np.nan
 
     def calculate_entry_tp_sl(
@@ -1154,13 +1403,19 @@ class TradingAnalyzer:
             return entry_price_estimate, None, None
 
         atr_value_final: Optional[Decimal] = None
-        if isinstance(atr_value_orig, Decimal) and pd.notna(atr_value_orig) and atr_value_orig > Decimal("0"):
+        if (
+            isinstance(atr_value_orig, Decimal)
+            and pd.notna(atr_value_orig)
+            and atr_value_orig > Decimal("0")
+        ):
             atr_value_final = atr_value_orig
         else:
             self.logger.warning(
                 f"TP/SL Calc ({self.symbol} {signal}): ATR invalid ({atr_value_orig}). Using default ATR based on price percentage."
             )
-            default_atr_pct_str = str(self.get_period("default_atr_percentage_of_price") or "0.01")
+            default_atr_pct_str = str(
+                self.get_period("default_atr_percentage_of_price") or "0.01"
+            )
             try:
                 atr_value_final = entry_price_estimate * Decimal(default_atr_pct_str)
                 if not (atr_value_final > Decimal("0")):
@@ -1169,20 +1424,32 @@ class TradingAnalyzer:
                     )
                     return entry_price_estimate, None, None
             except InvalidOperation:
-                self.logger.error(f"Invalid 'default_atr_percentage_of_price': {default_atr_pct_str}. No TP/SL.")
+                self.logger.error(
+                    f"Invalid 'default_atr_percentage_of_price': {default_atr_pct_str}. No TP/SL."
+                )
                 return entry_price_estimate, None, None
-            self.logger.debug(f"Using price-percentage based ATR for {self.symbol} TP/SL: {atr_value_final}")
+            self.logger.debug(
+                f"Using price-percentage based ATR for {self.symbol} TP/SL: {atr_value_final}"
+            )
 
         if atr_value_final is None or not (atr_value_final > Decimal("0")):
-            self.logger.error(f"Final ATR value ({atr_value_final}) is invalid for {self.symbol}. Cannot set TP/SL.")
+            self.logger.error(
+                f"Final ATR value ({atr_value_final}) is invalid for {self.symbol}. Cannot set TP/SL."
+            )
             return entry_price_estimate, None, None
 
         try:
-            tp_multiplier = Decimal(str(self.get_period("take_profit_multiple") or "1.5"))
+            tp_multiplier = Decimal(
+                str(self.get_period("take_profit_multiple") or "1.5")
+            )
             sl_multiplier = Decimal(str(self.get_period("stop_loss_multiple") or "1.0"))
             price_precision = get_price_precision(self.market_info, self.logger)
             min_tick = get_min_tick_size(self.market_info, self.logger)
-            quantize_unit = min_tick if min_tick and min_tick > Decimal("0") else Decimal(f"1e-{price_precision}")
+            quantize_unit = (
+                min_tick
+                if min_tick and min_tick > Decimal("0")
+                else Decimal(f"1e-{price_precision}")
+            )
             if not (quantize_unit > Decimal("0")):
                 quantize_unit = Decimal(f"1e-{price_precision}")
 
@@ -1193,23 +1460,31 @@ class TradingAnalyzer:
             if signal == "BUY":
                 raw_tp = entry_price_estimate + tp_offset
                 raw_sl = entry_price_estimate - sl_offset
-                quantized_tp = (raw_tp / quantize_unit).quantize(Decimal("1"), rounding=ROUND_UP) * quantize_unit
-                quantized_sl = (raw_sl / quantize_unit).quantize(Decimal("1"), rounding=ROUND_DOWN) * quantize_unit
+                quantized_tp = (raw_tp / quantize_unit).quantize(
+                    Decimal("1"), rounding=ROUND_UP
+                ) * quantize_unit
+                quantized_sl = (raw_sl / quantize_unit).quantize(
+                    Decimal("1"), rounding=ROUND_DOWN
+                ) * quantize_unit
             else:  # SELL
                 raw_tp = entry_price_estimate - tp_offset
                 raw_sl = entry_price_estimate + sl_offset
-                quantized_tp = (raw_tp / quantize_unit).quantize(Decimal("1"), rounding=ROUND_DOWN) * quantize_unit
-                quantized_sl = (raw_sl / quantize_unit).quantize(Decimal("1"), rounding=ROUND_UP) * quantize_unit
+                quantized_tp = (raw_tp / quantize_unit).quantize(
+                    Decimal("1"), rounding=ROUND_DOWN
+                ) * quantize_unit
+                quantized_sl = (raw_sl / quantize_unit).quantize(
+                    Decimal("1"), rounding=ROUND_UP
+                ) * quantize_unit
 
             if min_tick and min_tick > Decimal("0"):
                 if signal == "BUY" and quantized_sl >= entry_price_estimate:
-                    quantized_sl = ((entry_price_estimate - min_tick) / quantize_unit).quantize(
-                        Decimal("1"), rounding=ROUND_DOWN
-                    ) * quantize_unit
+                    quantized_sl = (
+                        (entry_price_estimate - min_tick) / quantize_unit
+                    ).quantize(Decimal("1"), rounding=ROUND_DOWN) * quantize_unit
                 elif signal == "SELL" and quantized_sl <= entry_price_estimate:
-                    quantized_sl = ((entry_price_estimate + min_tick) / quantize_unit).quantize(
-                        Decimal("1"), rounding=ROUND_UP
-                    ) * quantize_unit
+                    quantized_sl = (
+                        (entry_price_estimate + min_tick) / quantize_unit
+                    ).quantize(Decimal("1"), rounding=ROUND_UP) * quantize_unit
 
             final_tp, final_sl = quantized_tp, quantized_sl
             if (signal == "BUY" and final_tp <= entry_price_estimate) or (
@@ -1220,7 +1495,9 @@ class TradingAnalyzer:
                 )
                 final_tp = None
             if final_sl is not None and final_sl <= Decimal("0"):
-                self.logger.error(f"Calculated SL ({final_sl}) is not positive for {self.symbol}. Setting SL to None.")
+                self.logger.error(
+                    f"Calculated SL ({final_sl}) is not positive for {self.symbol}. Setting SL to None."
+                )
                 final_sl = None
             if final_tp is not None and final_tp <= Decimal("0"):
                 self.logger.warning(
@@ -1237,5 +1514,8 @@ class TradingAnalyzer:
             )
             return entry_price_estimate, final_tp, final_sl
         except (InvalidOperation, TypeError, Exception) as e:
-            self.logger.error(f"Error calculating TP/SL for {self.symbol} ({signal}): {e}", exc_info=True)
+            self.logger.error(
+                f"Error calculating TP/SL for {self.symbol} ({signal}): {e}",
+                exc_info=True,
+            )
             return entry_price_estimate, None, None

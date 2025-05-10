@@ -82,7 +82,13 @@ class ConfigManager:
         "default_order_type": "Limit",  # Added default order type
         "connection_timeout_ms": 30000,  # CCXT uses milliseconds
         "order_history_limit": 50,
-        "indicator_periods": {"sma": 20, "ema": 20, "rsi": 14, "bbands": 20, "bbands_std": 2.0},
+        "indicator_periods": {
+            "sma": 20,
+            "ema": 20,
+            "rsi": 14,
+            "bbands": 20,
+            "bbands_std": 2.0,
+        },
         "chart_height": 10,  # Height for ASCII chart
         "chart_points": 50,  # Number of data points for ASCII chart
     }
@@ -110,13 +116,17 @@ class ConfigManager:
                         }
                     return merged_config
             except json.JSONDecodeError:
-                logger.error(f"Error decoding JSON from '{self.config_path}'. Using default config.")
+                logger.error(
+                    f"Error decoding JSON from '{self.config_path}'. Using default config."
+                )
                 return self.DEFAULT_CONFIG.copy()
             except Exception as e:
                 logger.error(f"Failed to load config: {e}. Using default config.")
                 return self.DEFAULT_CONFIG.copy()
         else:
-            logger.warning(f"'{self.config_path}' not found. Creating default configuration.")
+            logger.warning(
+                f"'{self.config_path}' not found. Creating default configuration."
+            )
             return self._create_default_config()
 
     def _create_default_config(self) -> dict:
@@ -127,7 +137,9 @@ class ConfigManager:
             logger.info(f"Default configuration file created at '{self.config_path}'")
             return self.DEFAULT_CONFIG.copy()
         except OSError as e:
-            logger.error(f"Error creating default config file: {e}. Using in-memory default.")
+            logger.error(
+                f"Error creating default config file: {e}. Using in-memory default."
+            )
             return self.DEFAULT_CONFIG.copy()
 
     def save_config(self) -> None:
@@ -239,7 +251,9 @@ class BybitFuturesCCXTClient:
             logger.warning("Using Bybit TESTNET environment.")
             # CCXT handles testnet via sandboxMode or specific URLs if needed
             # For Bybit, setting sandboxMode=True is standard
-            exchange_config["options"]["sandboxMode"] = True  # Or set testnet URLs if CCXT requires
+            exchange_config["options"]["sandboxMode"] = (
+                True  # Or set testnet URLs if CCXT requires
+            )
 
         try:
             self.exchange = ccxt.bybit(exchange_config)
@@ -251,20 +265,27 @@ class BybitFuturesCCXTClient:
                 f"{Fore.GREEN}CCXT Bybit Futures client initialized successfully for {'Testnet' if self.credentials.testnet else 'Mainnet'}.{Style.RESET_ALL}"
             )
         except ccxt.AuthenticationError as e:
-            logger.error(f"{Fore.RED}CCXT Authentication Error: Invalid API keys or permissions. {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}CCXT Authentication Error: Invalid API keys or permissions. {e}{Style.RESET_ALL}"
+            )
             self.exchange = None  # Ensure exchange is None on failure
             raise ConnectionError("CCXT Authentication Failed") from e
         except (ccxt.NetworkError, ccxt.ExchangeNotAvailable) as e:
-            logger.error(f"{Fore.RED}CCXT Network/Availability Error: Could not connect to Bybit. {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}CCXT Network/Availability Error: Could not connect to Bybit. {e}{Style.RESET_ALL}"
+            )
             self.exchange = None
             raise ConnectionError("CCXT Network Failed") from e
         except ccxt.ExchangeError as e:
-            logger.error(f"{Fore.RED}CCXT Exchange Error during initialization: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}CCXT Exchange Error during initialization: {e}{Style.RESET_ALL}"
+            )
             self.exchange = None
             raise ConnectionError("CCXT Exchange Initialization Failed") from e
         except Exception as e:
             logger.error(
-                f"{Fore.RED}An unexpected error occurred initializing CCXT: {e}{Style.RESET_ALL}", exc_info=True
+                f"{Fore.RED}An unexpected error occurred initializing CCXT: {e}{Style.RESET_ALL}",
+                exc_info=True,
             )
             self.exchange = None
             raise ConnectionError("Unexpected CCXT Initialization Error") from e
@@ -284,7 +305,9 @@ class BybitFuturesCCXTClient:
     def _check_initialized(self) -> None:
         """Raises an error if the client is not initialized."""
         if not self.exchange or not self._initialized:
-            raise ConnectionError("CCXT client is not initialized or connection failed.")
+            raise ConnectionError(
+                "CCXT client is not initialized or connection failed."
+            )
 
     async def fetch_balance(self) -> dict:
         """Fetches account balance (USDT Futures)."""
@@ -305,13 +328,21 @@ class BybitFuturesCCXTClient:
             raise
 
     async def place_order(
-        self, symbol: str, side: str, order_type: str, amount: float, price: float | None = None, params: dict = None
+        self,
+        symbol: str,
+        side: str,
+        order_type: str,
+        amount: float,
+        price: float | None = None,
+        params: dict = None,
     ) -> dict:
         """Places a market or limit order using CCXT."""
         if params is None:
             params = {}
         self._check_initialized()
-        logger.info(f"Placing {order_type} {side} order: {amount} {symbol} @ {price if price else 'Market'}")
+        logger.info(
+            f"Placing {order_type} {side} order: {amount} {symbol} @ {price if price else 'Market'}"
+        )
         try:
             # Explicitly set reduceOnly if needed via params
             # Example: params = {'reduceOnly': True}
@@ -322,13 +353,17 @@ class BybitFuturesCCXTClient:
             # if order_type.lower() == 'market' and 'createOrderRequiresPrice' in self.exchange.options and self.exchange.options['createOrderRequiresPrice']:
             #    price = None # Explicitly set price to None if exchange requires it for market orders
 
-            order = await self.exchange.create_order(symbol, order_type, side, amount, price, params)
+            order = await self.exchange.create_order(
+                symbol, order_type, side, amount, price, params
+            )
 
             # CCXT standardizes the order structure returned by create_order
             logger.info(f"Order placement successful: ID {order.get('id')}")
             return order
         except ccxt.InsufficientFunds as e:
-            logger.error(f"{Fore.RED}Order placement failed: Insufficient funds. {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Order placement failed: Insufficient funds. {e}{Style.RESET_ALL}"
+            )
             raise
         except ccxt.InvalidOrder as e:
             logger.error(
@@ -336,26 +371,38 @@ class BybitFuturesCCXTClient:
             )
             raise
         except ccxt.ExchangeError as e:
-            logger.error(f"{Fore.RED}CCXT Exchange Error placing order: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}CCXT Exchange Error placing order: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             raise
         except Exception as e:
-            logger.error(f"{Fore.RED}Unexpected error placing order: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Unexpected error placing order: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             raise
 
-    async def fetch_ohlcv(self, symbol: str, timeframe: str, limit: int) -> list[list[int | float]]:
+    async def fetch_ohlcv(
+        self, symbol: str, timeframe: str, limit: int
+    ) -> list[list[int | float]]:
         """Fetches OHLCV data."""
         self._check_initialized()
         logger.debug(f"Fetching {limit} OHLCV candles for {symbol} ({timeframe})...")
         try:
             # Add params if needed, e.g., {'paginate': True} for some exchanges if limit is very large
-            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+            ohlcv = await self.exchange.fetch_ohlcv(
+                symbol, timeframe=timeframe, limit=limit
+            )
             if not ohlcv:
                 logger.warning(f"No OHLCV data returned for {symbol} ({timeframe}).")
                 return []
             # CCXT returns list of lists: [timestamp, open, high, low, close, volume]
             return ohlcv
         except ccxt.BadSymbol as e:
-            logger.error(f"{Fore.RED}Invalid symbol for OHLCV: {symbol}. {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Invalid symbol for OHLCV: {symbol}. {e}{Style.RESET_ALL}"
+            )
             raise ValueError(f"Invalid symbol: {symbol}") from e
         except ccxt.ExchangeError as e:
             # Check if the error message specifically mentions timeframe
@@ -365,10 +412,16 @@ class BybitFuturesCCXTClient:
                 )
                 raise ValueError(f"Invalid timeframe: {timeframe}") from e
             else:
-                logger.error(f"{Fore.RED}CCXT Exchange Error fetching OHLCV: {e}{Style.RESET_ALL}", exc_info=True)
+                logger.error(
+                    f"{Fore.RED}CCXT Exchange Error fetching OHLCV: {e}{Style.RESET_ALL}",
+                    exc_info=True,
+                )
                 raise
         except Exception as e:
-            logger.error(f"{Fore.RED}Unexpected error fetching OHLCV: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Unexpected error fetching OHLCV: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             raise
 
 
@@ -388,7 +441,9 @@ class TechnicalAnalysis:
             return df
 
         # Ensure standard column names (case-insensitive check)
-        df.columns = [col.capitalize() for col in df.columns]  # Standardize to Capitalized
+        df.columns = [
+            col.capitalize() for col in df.columns
+        ]  # Standardize to Capitalized
         required_cols = ["Open", "High", "Low", "Close", "Volume"]
         if not all(col in df.columns for col in required_cols):
             missing = [col for col in required_cols if col not in df.columns]
@@ -435,7 +490,9 @@ class TechnicalAnalysis:
             added_cols = [col for col in expected_cols if col in df_out.columns]
             logger.debug(f"Successfully added indicator columns: {added_cols}")
             if len(added_cols) < len(expected_cols) - 3:  # Allow MACD/BBands variations
-                logger.warning("Not all expected indicators were added. Check data length and indicator parameters.")
+                logger.warning(
+                    "Not all expected indicators were added. Check data length and indicator parameters."
+                )
 
             return df_out.round(4)  # Round for cleaner display
 
@@ -443,11 +500,14 @@ class TechnicalAnalysis:
             # Handle cases where df might not have 'ta' accessor if pandas_ta isn't properly installed/imported
             if "'DataFrame' object has no attribute 'ta'" in str(e):
                 logger.error(
-                    "Pandas TA extension not available on DataFrame. Is pandas_ta installed correctly?", exc_info=True
+                    "Pandas TA extension not available on DataFrame. Is pandas_ta installed correctly?",
+                    exc_info=True,
                 )
                 return df  # Return original df
             else:
-                logger.error(f"Attribute error calculating indicators: {e}", exc_info=True)
+                logger.error(
+                    f"Attribute error calculating indicators: {e}", exc_info=True
+                )
                 return df
         except Exception as e:
             logger.error(f"Error calculating indicators: {e}", exc_info=True)
@@ -477,20 +537,26 @@ class TerminalUI:
             term_width = 80
         "=" * term_width
 
-    def display_menu(self, title: str, options: list[str], prompt: str = "Enter your choice") -> str:
+    def display_menu(
+        self, title: str, options: list[str], prompt: str = "Enter your choice"
+    ) -> str:
         """Displays a menu and gets user choice."""
         self.display_header(title)
         for _i, _option in enumerate(options, 1):
             pass
 
         while True:
-            choice = input(f"\n{self.colors['input_prompt']}{prompt} (1-{len(options)}): {self.colors['reset']}")
+            choice = input(
+                f"\n{self.colors['input_prompt']}{prompt} (1-{len(options)}): {self.colors['reset']}"
+            )
             choice = choice.strip()
             if choice.isdigit() and 1 <= int(choice) <= len(options):
                 logger.debug(f"Menu '{title}' choice: {choice}")
                 return choice
             else:
-                self.print_error(f"Invalid input. Please enter a number between 1 and {len(options)}.")
+                self.print_error(
+                    f"Invalid input. Please enter a number between 1 and {len(options)}."
+                )
                 time.sleep(1)  # Give user time to see error before input repeats
 
     def get_input(
@@ -528,7 +594,9 @@ class TerminalUI:
                     elif user_input.lower() in ("false", "0", "f", "n", "no"):
                         value = False
                     else:
-                        raise ValueError("Invalid boolean value. Use True/False, Yes/No, 1/0.")
+                        raise ValueError(
+                            "Invalid boolean value. Use True/False, Yes/No, 1/0."
+                        )
                 else:
                     value = input_type(user_input)  # Convert to desired type
 
@@ -547,7 +615,9 @@ class TerminalUI:
                 logger.debug(f"Input for '{prompt}': {value} (type: {input_type})")
                 return value
             except ValueError as e:
-                self.print_error(f"Invalid input type or value. Expected {input_type.__name__}. Details: {e}")
+                self.print_error(
+                    f"Invalid input type or value. Expected {input_type.__name__}. Details: {e}"
+                )
             except Exception as e:
                 self.print_error(f"Input validation error: {e}")
 
@@ -581,12 +651,18 @@ class TerminalUI:
                 pd.set_option("display.max_rows", 50)
                 pd.set_option("display.max_columns", None)
                 pd.set_option("display.width", term_width)
-                pd.set_option("display.expand_frame_repr", True)  # Prevent wrapping lines
-                pd.set_option("display.float_format", "{:.4f}".format)  # Adjust precision as needed
+                pd.set_option(
+                    "display.expand_frame_repr", True
+                )  # Prevent wrapping lines
+                pd.set_option(
+                    "display.float_format", "{:.4f}".format
+                )  # Adjust precision as needed
                 # Use to_markdown for better alignment in many terminals
                 try:
                     pass
-                except ImportError:  # Fallback if tabulate (markdown dep) isn't installed
+                except (
+                    ImportError
+                ):  # Fallback if tabulate (markdown dep) isn't installed
                     pass
         elif isinstance(data, dict):
             if not data:
@@ -598,7 +674,9 @@ class TerminalUI:
                     self.colors["neutral"]
                     if isinstance(value, (float, np.floating, int)):
                         # Format floats nicely, use default for int
-                        f"{value:.4f}" if isinstance(value, (float, np.floating)) else str(value)
+                        f"{value:.4f}" if isinstance(
+                            value, (float, np.floating)
+                        ) else str(value)
                         if value > 0:
                             self.colors["positive"]
                         elif value < 0:
@@ -630,7 +708,9 @@ class TerminalUI:
                     plot_data.append(float(d))
                     last_valid = float(d)
                 else:
-                    plot_data.append(last_valid)  # Use last valid point to avoid zeroing dips
+                    plot_data.append(
+                        last_valid
+                    )  # Use last valid point to avoid zeroing dips
 
             if not plot_data:
                 self.print_warning(f"No valid numeric data points for chart: {title}")
@@ -663,7 +743,9 @@ class TradingTerminal:
         for sig in (signal.SIGINT, signal.SIGTERM):
             try:
                 # Use lambda to ensure shutdown is called as a coroutine
-                loop.add_signal_handler(sig, lambda s=sig: asyncio.create_task(self.shutdown(signal=s)))
+                loop.add_signal_handler(
+                    sig, lambda s=sig: asyncio.create_task(self.shutdown(signal=s))
+                )
                 logger.debug(f"Signal handler set for {sig.name}")
             except NotImplementedError:
                 # Windows asyncio loop might not support add_signal_handler fully
@@ -683,9 +765,18 @@ class TradingTerminal:
         testnet_str = os.getenv("TESTNET", "False")
         testnet = testnet_str.lower() in ("true", "1", "t", "y", "yes")
 
-        if not api_key or not api_secret or api_key == "your_api_key_here" or api_secret == "your_api_secret_here":
-            logger.error("API credentials (BYBIT_API_KEY, BYBIT_API_SECRET) not found or not set in .env file.")
-            self.ui.print_error("API credentials not found or not configured in .env file.")
+        if (
+            not api_key
+            or not api_secret
+            or api_key == "your_api_key_here"
+            or api_secret == "your_api_secret_here"
+        ):
+            logger.error(
+                "API credentials (BYBIT_API_KEY, BYBIT_API_SECRET) not found or not set in .env file."
+            )
+            self.ui.print_error(
+                "API credentials not found or not configured in .env file."
+            )
             self.ui.print_warning(
                 "Please ensure BYBIT_API_KEY and BYBIT_API_SECRET are correctly set in the .env file."
             )
@@ -699,12 +790,16 @@ class TradingTerminal:
     async def initialize(self) -> None:
         """Initializes the terminal, including API client."""
         if not await self.setup_credentials():
-            self.ui.print_warning("Running in limited mode without valid API credentials.")
+            self.ui.print_warning(
+                "Running in limited mode without valid API credentials."
+            )
             # Allow running, but authenticated features will fail later if attempted.
             return
 
         # Credentials seem valid, initialize the client
-        self.exchange_client = BybitFuturesCCXTClient(self.credentials, self.config_manager.config)
+        self.exchange_client = BybitFuturesCCXTClient(
+            self.credentials, self.config_manager.config
+        )
         try:
             # We need the client instance later, so we call initialize directly here
             # and rely on the shutdown method to close it.
@@ -733,7 +828,9 @@ class TradingTerminal:
             return
         self._running = False  # Prevent new actions in the main loop
 
-        signal_name = f"signal {getattr(signal, 'name', signal)}" if signal else "request"
+        signal_name = (
+            f"signal {getattr(signal, 'name', signal)}" if signal else "request"
+        )
         logger.info(f"Shutdown initiated by {signal_name}...")
         self.ui.print_info("\nShutting down terminal...")  # Notify user
 
@@ -749,7 +846,10 @@ class TradingTerminal:
                 if isinstance(result, asyncio.CancelledError):
                     logger.debug(f"Task {i} cancelled successfully.")
                 elif isinstance(result, Exception):
-                    logger.error(f"Error during background task cancellation/shutdown: {result}", exc_info=result)
+                    logger.error(
+                        f"Error during background task cancellation/shutdown: {result}",
+                        exc_info=result,
+                    )
             logger.info("Background tasks processed.")
 
         # Close the exchange client connection
@@ -775,7 +875,9 @@ class TradingTerminal:
 
         # If initialization failed critically and triggered shutdown, exit early
         if self._shutdown_event.is_set():
-            logger.warning("Shutdown triggered during initialization, exiting run loop.")
+            logger.warning(
+                "Shutdown triggered during initialization, exiting run loop."
+            )
             return
 
         self._running = True
@@ -787,7 +889,8 @@ class TradingTerminal:
 
             # Wait for either the menu choice or the shutdown signal
             done, pending = await asyncio.wait(
-                [menu_task, asyncio.create_task(self._shutdown_event.wait())], return_when=asyncio.FIRST_COMPLETED
+                [menu_task, asyncio.create_task(self._shutdown_event.wait())],
+                return_when=asyncio.FIRST_COMPLETED,
             )
 
             # Cancel pending tasks (if menu finished, cancel shutdown wait; if shutdown, cancel menu)
@@ -828,7 +931,9 @@ class TradingTerminal:
             exit_choice = "5"  # Corresponds to "Exit" in the menu options
             if choice == exit_choice:
                 # Initiate shutdown but let the loop terminate naturally via the event
-                if self._running:  # Avoid calling shutdown again if already called by signal
+                if (
+                    self._running
+                ):  # Avoid calling shutdown again if already called by signal
                     asyncio.create_task(self.shutdown())  # Start shutdown process
                 # Loop will break on next iteration due to _shutdown_event being set
             else:
@@ -887,10 +992,16 @@ class TradingTerminal:
 
         # Check if authentication/client is required and available
         if requires_auth and (
-            not self.credentials or not self.exchange_client or not self.exchange_client._initialized
+            not self.credentials
+            or not self.exchange_client
+            or not self.exchange_client._initialized
         ):
-            self.ui.print_error("This action requires initialized API credentials and a connection.")
-            self.ui.print_warning("Please check your .env file and ensure the connection was successful on startup.")
+            self.ui.print_error(
+                "This action requires initialized API credentials and a connection."
+            )
+            self.ui.print_warning(
+                "Please check your .env file and ensure the connection was successful on startup."
+            )
             await self.ui_wait_for_enter_async()  # Use async version
             return
 
@@ -898,19 +1009,27 @@ class TradingTerminal:
             try:
                 await action()
             except ConnectionError as e:
-                self.ui.print_error(f"Connection Error: {e}. Client might be offline or not initialized.")
+                self.ui.print_error(
+                    f"Connection Error: {e}. Client might be offline or not initialized."
+                )
                 await self.ui_wait_for_enter_async()
             except ccxt.AuthenticationError as e:
-                self.ui.print_error(f"Authentication Error: {e}. Check API keys and permissions in Bybit.")
+                self.ui.print_error(
+                    f"Authentication Error: {e}. Check API keys and permissions in Bybit."
+                )
                 await self.ui_wait_for_enter_async()
             except ccxt.NetworkError as e:
-                self.ui.print_error(f"Network Error: {e}. Check internet connection or Bybit status.")
+                self.ui.print_error(
+                    f"Network Error: {e}. Check internet connection or Bybit status."
+                )
                 await self.ui_wait_for_enter_async()
             except ccxt.InsufficientFunds as e:
                 self.ui.print_error(f"Insufficient Funds: {e}")
                 await self.ui_wait_for_enter_async()
             except ccxt.InvalidOrder as e:
-                self.ui.print_error(f"Invalid Order: {e}. Check parameters (size, price, symbol).")
+                self.ui.print_error(
+                    f"Invalid Order: {e}. Check parameters (size, price, symbol)."
+                )
                 await self.ui_wait_for_enter_async()
             except ccxt.ExchangeError as e:  # Catch other specific exchange errors
                 self.ui.print_error(f"Exchange Error: {e}.")
@@ -919,7 +1038,10 @@ class TradingTerminal:
                 self.ui.print_error(f"Input Error: {e}")
                 await self.ui_wait_for_enter_async()
             except Exception as e:
-                logger.error(f"Unhandled error in menu action {action.__name__}: {e}", exc_info=True)
+                logger.error(
+                    f"Unhandled error in menu action {action.__name__}: {e}",
+                    exc_info=True,
+                )
                 self.ui.print_error(f"An unexpected error occurred: {e}")
                 await self.ui_wait_for_enter_async()
 
@@ -931,7 +1053,9 @@ class TradingTerminal:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self.ui.get_input, *args, **kwargs)
 
-    async def ui_wait_for_enter_async(self, prompt: str = "Press Enter to continue...") -> None:
+    async def ui_wait_for_enter_async(
+        self, prompt: str = "Press Enter to continue..."
+    ) -> None:
         """Asynchronously waits for Enter key using executor."""
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, self.ui.wait_for_enter, prompt)
@@ -958,16 +1082,24 @@ class TradingTerminal:
             if len(parts) != 2 or not parts[0] or not parts[1]:
                 return "Invalid format. Use BASE/QUOTE (e.g., BTC/USDT)."
         # Check length for non-slash format (e.g., BTCUSDT)
-        elif len(symbol) < 4 or len(symbol) > 20:  # Allow longer symbols like 1000PEPEUSDT etc.
+        elif (
+            len(symbol) < 4 or len(symbol) > 20
+        ):  # Allow longer symbols like 1000PEPEUSDT etc.
             return "Symbol length seems unusual. Use format like BTCUSDT or BTC/USDT."
 
         # Optional: More robust validation against loaded markets (if client initialized)
         # Requires markets to be loaded successfully during init
-        if self.exchange_client and self.exchange_client.exchange and self.exchange_client.exchange.markets:
+        if (
+            self.exchange_client
+            and self.exchange_client.exchange
+            and self.exchange_client.exchange.markets
+        ):
             ccxt_symbol = self._get_ccxt_symbol(symbol)  # Ensure it's in CCXT format
             if ccxt_symbol not in self.exchange_client.exchange.markets:
                 # List some available symbols if possible
-                available_symbols = list(self.exchange_client.exchange.markets.keys())[:5]
+                available_symbols = list(self.exchange_client.exchange.markets.keys())[
+                    :5
+                ]
                 return f"Symbol '{ccxt_symbol}' not found on loaded exchange markets. Available examples: {', '.join(available_symbols)}..."
 
         return True
@@ -978,7 +1110,11 @@ class TradingTerminal:
         if "/" not in symbol:
             # Attempt common conversions (USDT, BUSD, USDC, BTC, ETH) - prioritize USDT for Bybit Futures
             # Use a more robust check based on loaded markets if available
-            if self.exchange_client and self.exchange_client.exchange and self.exchange_client.exchange.markets:
+            if (
+                self.exchange_client
+                and self.exchange_client.exchange
+                and self.exchange_client.exchange.markets
+            ):
                 possible_matches = []
                 for market_symbol in self.exchange_client.exchange.markets:
                     base, quote = market_symbol.split("/")
@@ -986,7 +1122,9 @@ class TradingTerminal:
                         possible_matches.append(market_symbol)
                 if len(possible_matches) == 1:
                     formatted = possible_matches[0]
-                    logger.debug(f"Formatted symbol '{symbol}' to '{formatted}' based on markets.")
+                    logger.debug(
+                        f"Formatted symbol '{symbol}' to '{formatted}' based on markets."
+                    )
                     return formatted
                 elif len(possible_matches) > 1:
                     logger.warning(
@@ -1000,7 +1138,9 @@ class TradingTerminal:
                 if symbol.endswith(quote) and len(symbol) > len(quote):
                     base = symbol[: -len(quote)]
                     formatted = f"{base}/{quote}"
-                    logger.debug(f"Formatted symbol '{symbol}' to '{formatted}' (generic).")
+                    logger.debug(
+                        f"Formatted symbol '{symbol}' to '{formatted}' (generic)."
+                    )
                     return formatted
             # If no common quote found, log warning and return as is
             logger.warning(
@@ -1015,7 +1155,10 @@ class TradingTerminal:
 
     def _validate_order_type(self, order_type: str) -> bool | str:
         # CCXT might support more, but limit to common ones for simplicity in UI
-        supported_types = ["market", "limit"]  # Add more if needed: 'Stop', 'TakeProfit', 'StopLimit' etc.
+        supported_types = [
+            "market",
+            "limit",
+        ]  # Add more if needed: 'Stop', 'TakeProfit', 'StopLimit' etc.
         if order_type.lower() not in supported_types:
             return f"Invalid order type. Use {' or '.join(t.capitalize() for t in supported_types)}."
         return True
@@ -1041,10 +1184,16 @@ class TradingTerminal:
         if not re.match(r"^\d+[mhdwyM]$", timeframe):
             return "Invalid timeframe format. Use like '1m', '1h', '1d', '1w'."
         # Optional: Check against exchange.timeframes if markets are loaded
-        if self.exchange_client and self.exchange_client.exchange and self.exchange_client.exchange.timeframes:
+        if (
+            self.exchange_client
+            and self.exchange_client.exchange
+            and self.exchange_client.exchange.timeframes
+        ):
             if timeframe not in self.exchange_client.exchange.timeframes:
                 # List some available timeframes if possible
-                available_tfs = list(self.exchange_client.exchange.timeframes.keys())[:10]
+                available_tfs = list(self.exchange_client.exchange.timeframes.keys())[
+                    :10
+                ]
                 return f"Timeframe '{timeframe}' may not be supported by the exchange. Available examples: {', '.join(available_tfs)}..."
         return True
 
@@ -1057,21 +1206,31 @@ class TradingTerminal:
         default_symbol = self.config_manager.config.get("default_symbol", "BTC/USDT")
         # Use async input getter
         symbol_input = await self.ui_get_input_async(
-            "Enter symbol (e.g., BTC/USDT or BTCUSDT)", default=default_symbol, validation_func=self._validate_symbol
+            "Enter symbol (e.g., BTC/USDT or BTCUSDT)",
+            default=default_symbol,
+            validation_func=self._validate_symbol,
         )
         symbol = self._get_ccxt_symbol(symbol_input)  # Convert to CCXT format
 
-        side = await self.ui_get_input_async("Enter side (buy/sell)", validation_func=self._validate_side)
+        side = await self.ui_get_input_async(
+            "Enter side (buy/sell)", validation_func=self._validate_side
+        )
         side = side.lower()
 
-        default_order_type = self.config_manager.config.get("default_order_type", "Limit")
+        default_order_type = self.config_manager.config.get(
+            "default_order_type", "Limit"
+        )
         order_type = await self.ui_get_input_async(
-            "Enter order type (Market/Limit)", default=default_order_type, validation_func=self._validate_order_type
+            "Enter order type (Market/Limit)",
+            default=default_order_type,
+            validation_func=self._validate_order_type,
         )
         order_type = order_type.lower()  # Use lower case for CCXT consistency
 
         amount = await self.ui_get_input_async(
-            "Enter quantity", input_type=float, validation_func=self._validate_positive_float
+            "Enter quantity",
+            input_type=float,
+            validation_func=self._validate_positive_float,
         )
 
         price = None
@@ -1079,12 +1238,16 @@ class TradingTerminal:
 
         if order_type == "limit":
             price = await self.ui_get_input_async(
-                "Enter price", input_type=float, validation_func=self._validate_positive_float
+                "Enter price",
+                input_type=float,
+                validation_func=self._validate_positive_float,
             )
 
         # --- Optional Advanced Order Parameters ---
         add_advanced = await self.ui_get_input_async(
-            "Add advanced options (StopLoss/TakeProfit/ReduceOnly)? (yes/no)", default="no", required=False
+            "Add advanced options (StopLoss/TakeProfit/ReduceOnly)? (yes/no)",
+            default="no",
+            required=False,
         )
         if add_advanced and add_advanced.lower() == "yes":
             # Stop Loss
@@ -1093,7 +1256,9 @@ class TradingTerminal:
                 default="0",
                 required=False,
                 input_type=float,
-                validation_func=lambda x: isinstance(x, (float, int)) and x >= 0 or "Must be a non-negative number",
+                validation_func=lambda x: isinstance(x, (float, int))
+                and x >= 0
+                or "Must be a non-negative number",
             )
             if sl_price is not None and sl_price > 0:
                 params["stopLoss"] = {
@@ -1109,14 +1274,18 @@ class TradingTerminal:
                 default="0",
                 required=False,
                 input_type=float,
-                validation_func=lambda x: isinstance(x, (float, int)) and x >= 0 or "Must be a non-negative number",
+                validation_func=lambda x: isinstance(x, (float, int))
+                and x >= 0
+                or "Must be a non-negative number",
             )
             if tp_price is not None and tp_price > 0:
                 params["takeProfit"] = {"type": "market", "triggerPrice": tp_price}
                 self.ui.print_info(f"Take Profit trigger set at {tp_price}")
 
             # Reduce Only
-            reduce_only = await self.ui_get_input_async("Set as Reduce Only? (yes/no)", default="no", required=False)
+            reduce_only = await self.ui_get_input_async(
+                "Set as Reduce Only? (yes/no)", default="no", required=False
+            )
             if reduce_only and reduce_only.lower() == "yes":
                 params["reduceOnly"] = True
                 self.ui.print_info("Order set to Reduce Only.")
@@ -1148,7 +1317,9 @@ class TradingTerminal:
         # Place the order via CCXT client
         # Exceptions are caught by handle_menu_choice
         self.ui.print_info("Submitting order...")
-        result = await self.exchange_client.place_order(symbol, side, order_type, amount, price, params)
+        result = await self.exchange_client.place_order(
+            symbol, side, order_type, amount, price, params
+        )
 
         order_id = result.get("id", "N/A")
         status = result.get("status", "N/A")
@@ -1195,7 +1366,9 @@ class TradingTerminal:
         self.ui.print_info("Fetching balance...")
 
         # Exceptions are caught by handle_menu_choice
-        balance_data = await self.exchange_client.fetch_balance()  # Already gets USDT part
+        balance_data = (
+            await self.exchange_client.fetch_balance()
+        )  # Already gets USDT part
 
         if not balance_data:
             self.ui.print_warning("No USDT balance data found in response.")
@@ -1211,7 +1384,9 @@ class TradingTerminal:
             if "info" in balance_data and isinstance(balance_data["info"], dict):
                 raw_info = balance_data["info"]
                 # Bybit v5 API balance endpoint structure (example field names)
-                unrealized_pnl = raw_info.get("unrealisedPnl")  # Check this exact key in Bybit docs/response
+                unrealized_pnl = raw_info.get(
+                    "unrealisedPnl"
+                )  # Check this exact key in Bybit docs/response
                 realized_pnl = raw_info.get("cumRealisedPnl")  # Check this exact key
                 equity = raw_info.get("equity")  # Cross-check total equity
 
@@ -1231,8 +1406,12 @@ class TradingTerminal:
             self.ui.print_table(display_data, title="USDT Balance")
 
             # Suggest fetching positions for more detail
-            self.ui.print_info("\nNote: PNL figures might be estimates based on balance data.")
-            self.ui.print_info("For precise PNL per position, fetch open positions (feature not yet implemented).")
+            self.ui.print_info(
+                "\nNote: PNL figures might be estimates based on balance data."
+            )
+            self.ui.print_info(
+                "For precise PNL per position, fetch open positions (feature not yet implemented)."
+            )
 
         await self.ui_wait_for_enter_async()
 
@@ -1242,7 +1421,9 @@ class TradingTerminal:
 
         default_symbol = self.config_manager.config.get("default_symbol", "BTC/USDT")
         symbol_input = await self.ui_get_input_async(
-            "Enter symbol (e.g., BTC/USDT or BTCUSDT)", default=default_symbol, validation_func=self._validate_symbol
+            "Enter symbol (e.g., BTC/USDT or BTCUSDT)",
+            default=default_symbol,
+            validation_func=self._validate_symbol,
         )
         symbol = self._get_ccxt_symbol(symbol_input)
 
@@ -1263,7 +1444,8 @@ class TradingTerminal:
         indicator_lookback = max(
             indicator_periods.get("sma", 20),
             indicator_periods.get("ema", 20),
-            indicator_periods.get("rsi", 14) + 1,  # RSI needs period + 1 for initial diff
+            indicator_periods.get("rsi", 14)
+            + 1,  # RSI needs period + 1 for initial diff
             indicator_periods.get("bbands", 20),
             26 + 9,  # MACD typical lookback (26 for slow EMA, 9 for signal)
         )
@@ -1272,7 +1454,9 @@ class TradingTerminal:
         logger.debug(f"Fetching {fetch_limit} candles for TA/Chart.")
 
         # Exceptions are caught by handle_menu_choice
-        ohlcv_data = await self.exchange_client.fetch_ohlcv(symbol, timeframe, limit=fetch_limit)
+        ohlcv_data = await self.exchange_client.fetch_ohlcv(
+            symbol, timeframe, limit=fetch_limit
+        )
 
         if not ohlcv_data:
             self.ui.print_warning("No OHLCV data received.")
@@ -1281,15 +1465,22 @@ class TradingTerminal:
 
         # Convert to DataFrame
         try:
-            df = pd.DataFrame(ohlcv_data, columns=["Timestamp", "Open", "High", "Low", "Close", "Volume"])
+            df = pd.DataFrame(
+                ohlcv_data,
+                columns=["Timestamp", "Open", "High", "Low", "Close", "Volume"],
+            )
             df["Timestamp"] = pd.to_datetime(df["Timestamp"], unit="ms")
             df.set_index("Timestamp", inplace=True)
             # Ensure numeric types after potential issues
             df = df.apply(pd.to_numeric, errors="coerce")
-            df.dropna(subset=["Close"], inplace=True)  # Drop rows where close is missing
+            df.dropna(
+                subset=["Close"], inplace=True
+            )  # Drop rows where close is missing
 
         except Exception as e:
-            logger.error(f"Error processing OHLCV data into DataFrame: {e}", exc_info=True)
+            logger.error(
+                f"Error processing OHLCV data into DataFrame: {e}", exc_info=True
+            )
             self.ui.print_error(f"Failed to process market data: {e}")
             await self.ui_wait_for_enter_async()
             return
@@ -1304,25 +1495,38 @@ class TradingTerminal:
 
         # Display chart of close prices
         close_prices = df_indicators["Close"].tail(chart_points).tolist()
-        self.ui.display_chart(close_prices, f"{symbol} ({timeframe}) Close Price Trend (Last {chart_points} points)")
+        self.ui.display_chart(
+            close_prices,
+            f"{symbol} ({timeframe}) Close Price Trend (Last {chart_points} points)",
+        )
 
         # Display table of recent indicator values (last 10 rows)
         # Dynamically find indicator columns added by pandas_ta
         base_cols = ["Open", "High", "Low", "Close", "Volume"]
         indicator_cols = [
-            col for col in df_indicators.columns if col not in base_cols and col != "Timestamp"
+            col
+            for col in df_indicators.columns
+            if col not in base_cols and col != "Timestamp"
         ]  # Exclude original + timestamp
 
         # Prepare DataFrame for display
         display_df = df_indicators.tail(10).reset_index()  # Keep timestamp for display
-        display_df["Timestamp"] = display_df["Timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")  # Format timestamp
+        display_df["Timestamp"] = display_df["Timestamp"].dt.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )  # Format timestamp
 
         # Define column order for display
-        ordered_cols = ["Timestamp", "Open", "High", "Low", "Close", "Volume"] + sorted(indicator_cols)
+        ordered_cols = ["Timestamp", "Open", "High", "Low", "Close", "Volume"] + sorted(
+            indicator_cols
+        )
         # Select only existing columns from our desired list
-        existing_cols_to_show = [col for col in ordered_cols if col in display_df.columns]
+        existing_cols_to_show = [
+            col for col in ordered_cols if col in display_df.columns
+        ]
 
-        self.ui.print_table(display_df[existing_cols_to_show], title="Recent Market Data & Indicators")
+        self.ui.print_table(
+            display_df[existing_cols_to_show], title="Recent Market Data & Indicators"
+        )
 
         await self.ui_wait_for_enter_async()
 
@@ -1343,18 +1547,26 @@ class TradingTerminal:
             # Use a synchronous menu display here as it's within an async function already
             # but the input itself needs to be async
             loop = asyncio.get_running_loop()
-            choice = await loop.run_in_executor(None, self.ui.display_menu, "Settings", options)
+            choice = await loop.run_in_executor(
+                None, self.ui.display_menu, "Settings", options
+            )
 
             if not self._running:  # Check global flag again after input
                 settings_running = False
                 break
 
             if choice == "1":  # Change Theme
-                theme = await self.ui_get_input_async("Enter theme (dark/light)", default=current_config.get("theme"))
+                theme = await self.ui_get_input_async(
+                    "Enter theme (dark/light)", default=current_config.get("theme")
+                )
                 if theme and theme.lower() in ["dark", "light"]:
                     self.config_manager.config["theme"] = theme.lower()
-                    self.config_manager.theme_colors = self.config_manager._setup_theme_colors()
-                    self.ui.colors = self.config_manager.theme_colors  # Update UI instance colors
+                    self.config_manager.theme_colors = (
+                        self.config_manager._setup_theme_colors()
+                    )
+                    self.ui.colors = (
+                        self.config_manager.theme_colors
+                    )  # Update UI instance colors
                     self.config_manager.save_config()
                     self.ui.print_success(f"Theme changed to {theme.lower()}.")
                 else:
@@ -1393,22 +1605,35 @@ class TradingTerminal:
                     validation_func=self._validate_order_type,
                 )
                 if order_type:
-                    self.config_manager.config["default_order_type"] = order_type.capitalize()  # Store capitalized
+                    self.config_manager.config["default_order_type"] = (
+                        order_type.capitalize()
+                    )  # Store capitalized
                     self.config_manager.save_config()
-                    self.ui.print_success(f"Default order type set to {order_type.capitalize()}.")
+                    self.ui.print_success(
+                        f"Default order type set to {order_type.capitalize()}."
+                    )
                 await asyncio.sleep(1)
 
             elif choice == "5":  # Set Log Level
                 log_level = await self.ui_get_input_async(
-                    "Enter log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)", default=current_config.get("log_level")
+                    "Enter log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+                    default=current_config.get("log_level"),
                 )
-                if log_level and log_level.upper() in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+                if log_level and log_level.upper() in [
+                    "DEBUG",
+                    "INFO",
+                    "WARNING",
+                    "ERROR",
+                    "CRITICAL",
+                ]:
                     log_level_upper = log_level.upper()
                     self.config_manager.config["log_level"] = log_level_upper
                     self.config_manager._apply_log_level()  # Apply immediately
                     self.config_manager.save_config()
                     self.ui.print_success(f"Log level set to {log_level_upper}.")
-                    logger.info(f"Log level changed to {log_level_upper} via settings.")  # Log the change
+                    logger.info(
+                        f"Log level changed to {log_level_upper} via settings."
+                    )  # Log the change
                 else:
                     self.ui.print_error("Invalid log level.")
                 await asyncio.sleep(1)
@@ -1434,7 +1659,9 @@ async def main() -> None:
                 f.write("# Bybit API Credentials (replace with your actual keys)\n")
                 f.write("BYBIT_API_KEY=your_api_key_here\n")
                 f.write("BYBIT_API_SECRET=your_api_secret_here\n\n")
-                f.write("# Set to True to use Bybit's testnet environment (e.g., for testing)\n")
+                f.write(
+                    "# Set to True to use Bybit's testnet environment (e.g., for testing)\n"
+                )
                 f.write("# Testnet URL: https://testnet.bybit.com\n")
                 f.write("TESTNET=False\n")
             return  # Exit after creating the file, requiring user action
@@ -1452,7 +1679,9 @@ async def main() -> None:
         logger.info("Main task cancelled, likely during shutdown.")
         # Ensure cleanup runs if cancellation happened abruptly
         if terminal._running:  # Check if shutdown wasn't completed
-            logger.warning("Main task cancelled but terminal still marked as running. Forcing shutdown.")
+            logger.warning(
+                "Main task cancelled but terminal still marked as running. Forcing shutdown."
+            )
             # Use create_task to avoid awaiting shutdown within the cancel handler
             asyncio.create_task(terminal.shutdown())
             # Give shutdown a moment to proceed
@@ -1464,9 +1693,13 @@ async def main() -> None:
         if terminal._running:
             # Manually trigger shutdown if the signal handler didn't catch it or isn't working
             # Use create_task as we are in an exception handler
-            shutdown_task = asyncio.create_task(terminal.shutdown(signal="KeyboardInterrupt"))
+            shutdown_task = asyncio.create_task(
+                terminal.shutdown(signal="KeyboardInterrupt")
+            )
             try:
-                await asyncio.wait_for(shutdown_task, timeout=5.0)  # Wait briefly for shutdown
+                await asyncio.wait_for(
+                    shutdown_task, timeout=5.0
+                )  # Wait briefly for shutdown
             except TimeoutError:
                 logger.error("Shutdown timed out after KeyboardInterrupt.")
             except Exception as e:
@@ -1484,7 +1717,9 @@ async def main() -> None:
                 logger.error(f"Error waiting for main task completion: {e}")
 
     except Exception as e:
-        logger.critical(f"Critical unhandled error in main execution: {e}", exc_info=True)
+        logger.critical(
+            f"Critical unhandled error in main execution: {e}", exc_info=True
+        )
         # Attempt graceful shutdown even on critical error
         if terminal._running:
             logger.info("Attempting shutdown after critical error...")
@@ -1492,7 +1727,9 @@ async def main() -> None:
             try:
                 await asyncio.wait_for(shutdown_task, timeout=5.0)
             except Exception as shutdown_e:
-                logger.error(f"Error during shutdown after critical error: {shutdown_e}")
+                logger.error(
+                    f"Error during shutdown after critical error: {shutdown_e}"
+                )
     finally:
         # Ensure logs are flushed before exit
         logging.shutdown()
@@ -1516,7 +1753,9 @@ if __name__ == "__main__":
     except Exception as e:
         # Catch errors during asyncio.run() setup/teardown itself if any
         # Use a basic logger here as the main one might be shut down
-        logging.getLogger("MainExec").critical(f"Fatal error outside main coroutine: {e}", exc_info=True)
+        logging.getLogger("MainExec").critical(
+            f"Fatal error outside main coroutine: {e}", exc_info=True
+        )
         exit_code = 1
     finally:
         sys.exit(exit_code)

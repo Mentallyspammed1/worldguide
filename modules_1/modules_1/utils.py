@@ -100,9 +100,13 @@ class FallbackZoneInfo(dt.tzinfo):
 
 
 try:
-    from zoneinfo import ZoneInfo as _ZoneInfo_FromModule  # Import with a temporary name (Python 3.9+)
+    from zoneinfo import (
+        ZoneInfo as _ZoneInfo_FromModule,
+    )  # Import with a temporary name (Python 3.9+)
 
-    _ActualZoneInfo = _ZoneInfo_FromModule  # Assign to the variable with the correct type hint
+    _ActualZoneInfo = (
+        _ZoneInfo_FromModule  # Assign to the variable with the correct type hint
+    )
 except ImportError:
     _module_logger.warning(
         "Module 'zoneinfo' not found (requires Python 3.9+ and possibly 'tzdata' package). "
@@ -249,7 +253,9 @@ def set_timezone(tz_str: str) -> None:
             exc_info=True,  # Log full traceback for the timezone loading error
         )
         # Ensure TIMEZONE is always set, defaulting to UTC
-        if _ActualZoneInfo is not FallbackZoneInfo:  # _ActualZoneInfo is zoneinfo.ZoneInfo
+        if (
+            _ActualZoneInfo is not FallbackZoneInfo
+        ):  # _ActualZoneInfo is zoneinfo.ZoneInfo
             try:
                 TIMEZONE = _ActualZoneInfo("UTC")  # Try real zoneinfo.ZoneInfo("UTC")
             except Exception as utc_load_err:  # Should be extremely rare
@@ -280,17 +286,23 @@ def get_timezone() -> dt.tzinfo:
         chosen_tz_str: str
 
         if env_tz:
-            _module_logger.info(f"TIMEZONE environment variable found: '{env_tz}'. Attempting to use it.")
+            _module_logger.info(
+                f"TIMEZONE environment variable found: '{env_tz}'. Attempting to use it."
+            )
             chosen_tz_str = env_tz
         else:
-            _module_logger.info(f"TIMEZONE environment variable not set. Using default timezone: '{DEFAULT_TIMEZONE}'.")
+            _module_logger.info(
+                f"TIMEZONE environment variable not set. Using default timezone: '{DEFAULT_TIMEZONE}'."
+            )
             chosen_tz_str = DEFAULT_TIMEZONE
 
         set_timezone(chosen_tz_str)  # This will initialize TIMEZONE
 
     # At this point, TIMEZONE must be set by set_timezone.
     # An assert helps catch unexpected None states during development.
-    assert TIMEZONE is not None, "TIMEZONE should have been initialized by set_timezone."
+    assert TIMEZONE is not None, (
+        "TIMEZONE should have been initialized by set_timezone."
+    )
     return TIMEZONE
 
 
@@ -306,7 +318,9 @@ class SensitiveFormatter(logging.Formatter):
     _api_secret: Optional[str] = None
 
     @classmethod
-    def set_sensitive_data(cls, api_key: Optional[str], api_secret: Optional[str]) -> None:
+    def set_sensitive_data(
+        cls, api_key: Optional[str], api_secret: Optional[str]
+    ) -> None:
         """Sets the API key and secret to be redacted."""
         cls._api_key = api_key
         cls._api_secret = api_secret
@@ -353,7 +367,9 @@ def get_price_precision(market_info: Dict[str, Any], logger: logging.Logger) -> 
     if price_precision_value is not None:
         if isinstance(price_precision_value, int):
             if price_precision_value >= 0:
-                logger.debug(f"Using integer price precision for {symbol}: {price_precision_value}")
+                logger.debug(
+                    f"Using integer price precision for {symbol}: {price_precision_value}"
+                )
                 return price_precision_value
             else:
                 logger.warning(
@@ -369,7 +385,9 @@ def get_price_precision(market_info: Dict[str, Any], logger: logging.Logger) -> 
                     # Precision is the number of decimal places in the tick size
                     # .normalize() removes trailing zeros, .as_tuple().exponent gives num decimal places (negative)
                     precision = abs(tick_size.normalize().as_tuple().exponent)
-                    logger.debug(f"Derived price precision for {symbol} from tick size {tick_size}: {precision}")
+                    logger.debug(
+                        f"Derived price precision for {symbol} from tick size {tick_size}: {precision}"
+                    )
                     return precision
                 else:  # tick_size is zero or negative
                     logger.warning(
@@ -440,11 +458,15 @@ def get_min_tick_size(market_info: Dict[str, Any], logger: logging.Logger) -> De
     price_precision_value = precision_data.get("price")
 
     if price_precision_value is not None:
-        if isinstance(price_precision_value, (str, float)):  # Typically, this is the tick size itself
+        if isinstance(
+            price_precision_value, (str, float)
+        ):  # Typically, this is the tick size itself
             try:
                 tick_size = Decimal(str(price_precision_value))
                 if tick_size > Decimal("0"):
-                    logger.debug(f"Using tick size from precision.price for {symbol}: {tick_size}")
+                    logger.debug(
+                        f"Using tick size from precision.price for {symbol}: {tick_size}"
+                    )
                     return tick_size
                 else:  # tick_size is zero or negative
                     logger.warning(
@@ -461,7 +483,9 @@ def get_min_tick_size(market_info: Dict[str, Any], logger: logging.Logger) -> De
             if price_precision_value >= 0:
                 # If 'precision'.'price' is an int, it's often number of decimal places for price
                 tick_size = Decimal("1e-" + str(price_precision_value))
-                logger.debug(f"Calculated tick size from integer precision for {symbol}: {tick_size}")
+                logger.debug(
+                    f"Calculated tick size from integer precision for {symbol}: {tick_size}"
+                )
                 return tick_size
             else:
                 logger.warning(
@@ -497,7 +521,9 @@ def get_min_tick_size(market_info: Dict[str, Any], logger: logging.Logger) -> De
 
     # 3. Fallback: derive tick size from calculated price precision
     # This re-uses get_price_precision, which has its own logging for defaults.
-    price_prec_places = get_price_precision(market_info, logger)  # This call might log a warning if it defaults
+    price_prec_places = get_price_precision(
+        market_info, logger
+    )  # This call might log a warning if it defaults
     fallback_tick_size = Decimal("1e-" + str(price_prec_places))
     logger.warning(
         f"Could not determine specific min_tick_size for {symbol} from market_info. "
@@ -506,7 +532,9 @@ def get_min_tick_size(market_info: Dict[str, Any], logger: logging.Logger) -> De
     return fallback_tick_size
 
 
-def _format_signal(signal_payload: Any, *, success: bool = True, detail: Optional[str] = None) -> str:
+def _format_signal(
+    signal_payload: Any, *, success: bool = True, detail: Optional[str] = None
+) -> str:
     """
     Formats a trading signal or related message for display, potentially with color.
     This is a placeholder to resolve the import error and can be customized

@@ -10,9 +10,9 @@ from typing import List, Optional
 import google.generativeai as genai
 
 # --- Constants ---
-MODEL_NAME: str = 'gemini-2.5-pro-exp-03-25'
-LOG_FILE_NAME: str = 'enhancement_log.txt'
-MATCHED_FILES_LOG_NAME: str = 'matched_files.txt'
+MODEL_NAME: str = "gemini-2.5-pro-exp-03-25"
+LOG_FILE_NAME: str = "enhancement_log.txt"
+MATCHED_FILES_LOG_NAME: str = "matched_files.txt"
 DEFAULT_MAX_API_CALLS_PER_MINUTE: int = 59  # Default for Gemini API, adjust if needed
 
 # --- Configure Logging ---
@@ -20,13 +20,14 @@ DEFAULT_MAX_API_CALLS_PER_MINUTE: int = 59  # Default for Gemini API, adjust if 
 # FileHandler will append to the log file.
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - [%(module)s.%(funcName)s:%(lineno)d] - %(message)s',
+    format="%(asctime)s - %(levelname)s - [%(module)s.%(funcName)s:%(lineno)d] - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),  # Log to console
-        logging.FileHandler(LOG_FILE_NAME, mode='a', encoding='utf-8')  # Log to file
-    ]
+        logging.FileHandler(LOG_FILE_NAME, mode="a", encoding="utf-8"),  # Log to file
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 # --- API Configuration ---
 def configure_api() -> Optional[genai.GenerativeModel]:
@@ -36,9 +37,11 @@ def configure_api() -> Optional[genai.GenerativeModel]:
     Sets safety configurations for the model.
     Exits the script if configuration fails.
     """
-    api_key = os.environ.get('GOOGLE_API_KEY')
+    api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        logger.error("GOOGLE_API_KEY environment variable not set. Please set it to your API key.")
+        logger.error(
+            "GOOGLE_API_KEY environment variable not set. Please set it to your API key."
+        )
         sys.exit(1)
 
     try:
@@ -47,7 +50,7 @@ def configure_api() -> Optional[genai.GenerativeModel]:
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
             {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
             {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
         ]
         model = genai.GenerativeModel(MODEL_NAME, safety_settings=safety_settings)
         logger.info(f"Successfully configured Gemini API with model: {MODEL_NAME}")
@@ -55,7 +58,8 @@ def configure_api() -> Optional[genai.GenerativeModel]:
     except Exception as e:
         logger.error(f"Error configuring Gemini API: {e}")
         sys.exit(1)
-    return None # Should not be reached due to sys.exit(1)
+    return None  # Should not be reached due to sys.exit(1)
+
 
 # --- File Operations ---
 def get_python_files(base_dir_str: str, pattern: str) -> List[str]:
@@ -66,63 +70,84 @@ def get_python_files(base_dir_str: str, pattern: str) -> List[str]:
     """
     base_path = Path(base_dir_str)
     matched_files_log_path = Path(MATCHED_FILES_LOG_NAME)
-    
+
     # This check is also in main, but good to have if function is used elsewhere.
     if not base_path.is_dir():
-        logger.error(f"Base directory '{base_path}' does not exist or is not a directory.")
-        with matched_files_log_path.open('w', encoding='utf-8') as f:
-            f.write(f"Error: Base directory '{base_path}' does not exist or is not a directory.\n")
+        logger.error(
+            f"Base directory '{base_path}' does not exist or is not a directory."
+        )
+        with matched_files_log_path.open("w", encoding="utf-8") as f:
+            f.write(
+                f"Error: Base directory '{base_path}' does not exist or is not a directory.\n"
+            )
         sys.exit(1)
 
     files: List[str] = []
     try:
-        files = sorted([str(f.resolve()) for f in base_path.glob(pattern) if f.is_file()])
-        
-        with matched_files_log_path.open('w', encoding='utf-8') as f:
-            f.write(f"Matched files for pattern '{pattern}' in directory '{base_path}':\n")
+        files = sorted(
+            [str(f.resolve()) for f in base_path.glob(pattern) if f.is_file()]
+        )
+
+        with matched_files_log_path.open("w", encoding="utf-8") as f:
+            f.write(
+                f"Matched files for pattern '{pattern}' in directory '{base_path}':\n"
+            )
             if files:
-                f.write('\n'.join(files) + '\n')
+                f.write("\n".join(files) + "\n")
             else:
                 f.write("No Python files matched the pattern.\n")
-        
+
         if files:
-            logger.info(f"Found {len(files)} Python files matching pattern '{pattern}' in '{base_path}'. See {MATCHED_FILES_LOG_NAME}.")
+            logger.info(
+                f"Found {len(files)} Python files matching pattern '{pattern}' in '{base_path}'. See {MATCHED_FILES_LOG_NAME}."
+            )
         else:
             # This is not an error, just no files found.
-            logger.info(f"No Python files matched pattern '{pattern}' in '{base_path}'. See {MATCHED_FILES_LOG_NAME}.")
+            logger.info(
+                f"No Python files matched pattern '{pattern}' in '{base_path}'. See {MATCHED_FILES_LOG_NAME}."
+            )
         return files
-        
+
     except Exception as e:
-        logger.error(f"Error during file search with pattern '{pattern}' in directory '{base_path}': {e}")
-        with matched_files_log_path.open('w', encoding='utf-8') as f:
-            f.write(f"Error finding files with pattern '{pattern}' in '{base_path}': {e}\n")
+        logger.error(
+            f"Error during file search with pattern '{pattern}' in directory '{base_path}': {e}"
+        )
+        with matched_files_log_path.open("w", encoding="utf-8") as f:
+            f.write(
+                f"Error finding files with pattern '{pattern}' in '{base_path}': {e}\n"
+            )
         sys.exit(1)
-    return [] # Should not be reached
+    return []  # Should not be reached
+
 
 def read_file(file_path_str: str) -> Optional[str]:
     """Reads content of a file. Returns None if an error occurs."""
     file_path = Path(file_path_str)
     try:
-        content = file_path.read_text(encoding='utf-8')
+        content = file_path.read_text(encoding="utf-8")
         logger.info(f"Successfully read {file_path}")
         return content
     except Exception as e:
         logger.error(f"Failed to read {file_path}: {e}")
         return None
 
+
 def write_file(file_path_str: str, content: str) -> bool:
     """Writes content to a file. Returns True on success, False otherwise."""
     file_path = Path(file_path_str)
     try:
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         logger.info(f"Successfully wrote enhanced code to {file_path}")
         return True
     except Exception as e:
         logger.error(f"Failed to write to {file_path}: {e}")
         return False
 
+
 # --- Code Enhancement ---
-def enhance_code(model: genai.GenerativeModel, code: str, file_path: str) -> Optional[str]:
+def enhance_code(
+    model: genai.GenerativeModel, code: str, file_path: str
+) -> Optional[str]:
     """
     Enhances Python code using the Gemini API.
     Returns the enhanced code string if successful and changed, otherwise None.
@@ -148,102 +173,134 @@ Original code from file: {file_path}
 ```python
 {code}
 ```"""
-    
+
     try:
         logger.debug(f"Sending code from {file_path} to Gemini API for enhancement.")
         response = model.generate_content(prompt)
-        
-        if not response.text: # Handles cases like empty response or content blocked by safety filters
-            logger.warning(f"No enhancement suggestions or empty response received for {file_path}.")
+
+        if (
+            not response.text
+        ):  # Handles cases like empty response or content blocked by safety filters
+            logger.warning(
+                f"No enhancement suggestions or empty response received for {file_path}."
+            )
             return None
-        
+
         # Extract Python code block using a more robust regex
-        code_match = re.search(r'```python\s*(.*?)\s*```', response.text, re.DOTALL)
+        code_match = re.search(r"```python\s*(.*?)\s*```", response.text, re.DOTALL)
         if not code_match:
-            logger.error(f"No valid Python code block (```python ... ```) found in the API response for {file_path}.")
+            logger.error(
+                f"No valid Python code block (```python ... ```) found in the API response for {file_path}."
+            )
             logger.debug(f"Full response for {file_path}:\n{response.text}")
             return None
-            
+
         enhanced_code = code_match.group(1).strip()
-        
+
         # Check if the code has actually changed (ignoring leading/trailing whitespace)
         if enhanced_code == code.strip():
-            logger.info(f"No functional changes suggested by the API for {file_path}. Original code retained.")
-            return None # Indicate no change needed
-            
+            logger.info(
+                f"No functional changes suggested by the API for {file_path}. Original code retained."
+            )
+            return None  # Indicate no change needed
+
         logger.info(f"Successfully generated enhancements for {file_path}.")
         return enhanced_code
-        
+
     except Exception as e:
         logger.error(f"API call failed for {file_path}: {e}")
-        if hasattr(e, 'response') and hasattr(e.response, 'prompt_feedback'): # More detailed error for Gemini
-             logger.error(f"Prompt feedback: {e.response.prompt_feedback}")
+        if hasattr(e, "response") and hasattr(
+            e.response, "prompt_feedback"
+        ):  # More detailed error for Gemini
+            logger.error(f"Prompt feedback: {e.response.prompt_feedback}")
         return None
+
 
 # --- Main Logic ---
 def main(base_dir: str, file_pattern: str) -> None:
     """Main function to process and enhance Python files."""
-    
-    logger.info(f"Starting code enhancement process for directory '{base_dir}', pattern '{file_pattern}'.")
+
+    logger.info(
+        f"Starting code enhancement process for directory '{base_dir}', pattern '{file_pattern}'."
+    )
     logger.info(f"Log file: {Path(LOG_FILE_NAME).resolve()}")
     logger.info(f"Matched files list: {Path(MATCHED_FILES_LOG_NAME).resolve()}")
 
-    max_api_calls_per_minute = int(os.environ.get('MAX_API_CALLS', DEFAULT_MAX_API_CALLS_PER_MINUTE))
+    max_api_calls_per_minute = int(
+        os.environ.get("MAX_API_CALLS", DEFAULT_MAX_API_CALLS_PER_MINUTE)
+    )
     logger.info(f"Using MAX_API_CALLS_PER_MINUTE: {max_api_calls_per_minute}")
 
     model = configure_api()
-    if not model: # configure_api calls sys.exit on failure, but as a safeguard
+    if not model:  # configure_api calls sys.exit on failure, but as a safeguard
         logger.critical("Failed to configure API model. Exiting.")
         return
 
     files_to_process = get_python_files(base_dir, file_pattern)
-    
+
     if not files_to_process:
-        logger.warning("No Python files found matching the pattern. Nothing to enhance.")
-        return # Exit if no files
-    
+        logger.warning(
+            "No Python files found matching the pattern. Nothing to enhance."
+        )
+        return  # Exit if no files
+
     # Calculate delay to respect API rate limit (calls per minute)
     # Add a small buffer to be safe, e.g., 0.1 seconds
-    delay_seconds = (60.0 / max_api_calls_per_minute if max_api_calls_per_minute > 0 else 0) + 0.1
+    delay_seconds = (
+        60.0 / max_api_calls_per_minute if max_api_calls_per_minute > 0 else 0
+    ) + 0.1
     logger.info(f"Calculated API call delay: {delay_seconds:.2f} seconds per call.")
-    
+
     modified_files_count = 0
     processed_files_count = 0
 
     for file_path_str in files_to_process:
         processed_files_count += 1
-        logger.info(f"Processing file {processed_files_count}/{len(files_to_process)}: {file_path_str}")
-        
+        logger.info(
+            f"Processing file {processed_files_count}/{len(files_to_process)}: {file_path_str}"
+        )
+
         original_code = read_file(file_path_str)
         if original_code is None:
             logger.warning(f"Skipping {file_path_str} due to read error.")
-            continue # Skip to next file
-            
+            continue  # Skip to next file
+
         if not original_code.strip():
-            logger.info(f"Skipping {file_path_str} as it is empty or contains only whitespace.")
+            logger.info(
+                f"Skipping {file_path_str} as it is empty or contains only whitespace."
+            )
             continue
 
         enhanced_code = enhance_code(model, original_code, file_path_str)
-        
-        if enhanced_code: # If enhancement was successful and code changed
+
+        if enhanced_code:  # If enhancement was successful and code changed
             if write_file(file_path_str, enhanced_code):
                 modified_files_count += 1
             else:
-                logger.error(f"Failed to write changes to {file_path_str}. Original file remains unchanged.")
+                logger.error(
+                    f"Failed to write changes to {file_path_str}. Original file remains unchanged."
+                )
         else:
-            logger.info(f"No enhancements applied to {file_path_str} (either no suggestions, error, or no change).")
-        
+            logger.info(
+                f"No enhancements applied to {file_path_str} (either no suggestions, error, or no change)."
+            )
+
         # Respect rate limit - sleep after each API call attempt (even if it failed or returned no change)
-        if processed_files_count < len(files_to_process): # No need to sleep after the last file
-            if delay_seconds > 0.1: # Only sleep if a meaningful delay is set
-                logger.debug(f"Waiting for {delay_seconds:.2f} seconds before next API call...")
+        if processed_files_count < len(
+            files_to_process
+        ):  # No need to sleep after the last file
+            if delay_seconds > 0.1:  # Only sleep if a meaningful delay is set
+                logger.debug(
+                    f"Waiting for {delay_seconds:.2f} seconds before next API call..."
+                )
                 time.sleep(delay_seconds)
-    
+
     logger.info(f"--- Enhancement Process Completed ---")
     logger.info(f"Total files matched: {len(files_to_process)}")
     logger.info(f"Files processed: {processed_files_count}")
     logger.info(f"Files modified: {modified_files_count}")
     logger.info(f"Log file: {Path(LOG_FILE_NAME).resolve()}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -251,14 +308,15 @@ if __name__ == "__main__":
         logger.error(f"Usage: {sys.argv[0]} <base_directory> <file_pattern>")
         logger.error("Example: python3 script_name.py ./my_project '**/*.py'")
         sys.exit(1)
-    
+
     cli_base_dir = sys.argv[1]
     cli_file_pattern = sys.argv[2]
-    
+
     # Validate base_directory existence before starting main logic
     if not Path(cli_base_dir).is_dir():
-        logger.error(f"Error: Base directory '{cli_base_dir}' does not exist or is not a directory.")
+        logger.error(
+            f"Error: Base directory '{cli_base_dir}' does not exist or is not a directory."
+        )
         sys.exit(1)
-    
-    main(cli_base_dir, cli_file_pattern)
 
+    main(cli_base_dir, cli_file_pattern)

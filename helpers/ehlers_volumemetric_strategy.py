@@ -56,11 +56,17 @@ except ImportError as e:
             return ""
 
     ForeImportError = StyleImportError = BackImportError = DummyColorImportError()  # type: ignore
-    err_back = BackImportError.RED if COLORAMA_AVAILABLE else ""  # Use dummies if needed
+    err_back = (
+        BackImportError.RED if COLORAMA_AVAILABLE else ""
+    )  # Use dummies if needed
     err_fore = ForeImportError.WHITE if COLORAMA_AVAILABLE else ""
     reset_all = StyleImportError.RESET_ALL if COLORAMA_AVAILABLE else ""
-    print(f"{err_back}{err_fore}Strategy FATAL: Failed to import helper modules: {e}{reset_all}")
-    print("Ensure neon_logger.py, bybit_helpers.py, indicators.py, bybit_utils.py are present.")
+    print(
+        f"{err_back}{err_fore}Strategy FATAL: Failed to import helper modules: {e}{reset_all}"
+    )
+    print(
+        "Ensure neon_logger.py, bybit_helpers.py, indicators.py, bybit_utils.py are present."
+    )
     exit(1)
 
 # --- Strategy Class ---
@@ -89,7 +95,14 @@ class EhlersVolumetricStrategy:
         self.sms_config = config.get("SMS_CONFIG", {})  # For alerts
 
         # --- Essential Config Validation ---
-        required_api = ["SYMBOL", "TESTNET_MODE", "POS_NONE", "POS_LONG", "POS_SHORT", "POSITION_QTY_EPSILON"]
+        required_api = [
+            "SYMBOL",
+            "TESTNET_MODE",
+            "POS_NONE",
+            "POS_LONG",
+            "POS_SHORT",
+            "POSITION_QTY_EPSILON",
+        ]
         required_strategy = [
             "timeframe",
             "leverage",
@@ -104,31 +117,41 @@ class EhlersVolumetricStrategy:
         ]
         if not all(k in self.api_config for k in required_api):
             missing = [k for k in required_api if k not in self.api_config]
-            self.logger.critical(f"Missing essential API configuration keys: {missing}. Check config.py.")
+            self.logger.critical(
+                f"Missing essential API configuration keys: {missing}. Check config.py."
+            )
             raise ValueError("Incomplete API configuration.")
         if not all(k in self.strategy_config for k in required_strategy):
             missing = [k for k in required_strategy if k not in self.strategy_config]
-            self.logger.critical(f"Missing essential Strategy configuration keys: {missing}. Check config.py.")
+            self.logger.critical(
+                f"Missing essential Strategy configuration keys: {missing}. Check config.py."
+            )
             raise ValueError("Incomplete Strategy configuration.")
-        if not self.strategy_config.get("EVT_ENABLED", False) or not self.strategy_config["analysis_flags"].get(
-            "use_evt"
-        ):
+        if not self.strategy_config.get(
+            "EVT_ENABLED", False
+        ) or not self.strategy_config["analysis_flags"].get("use_evt"):
             self.logger.critical(
                 "Ehlers Volumetric strategy requires 'EVT_ENABLED' in strategy_config AND 'use_evt' in analysis_flags to be True."
             )
             raise ValueError("EVT indicator not enabled in configuration.")
         if not self.strategy_config["analysis_flags"].get("use_atr"):
-            self.logger.critical("ATR-based stop loss requires 'use_atr' flag to be True in analysis_flags.")
+            self.logger.critical(
+                "ATR-based stop loss requires 'use_atr' flag to be True in analysis_flags."
+            )
             raise ValueError("ATR required for SL but not enabled in config.")
 
         self.symbol = self.api_config["SYMBOL"]
         self.timeframe = self.strategy_config["timeframe"]
         self.leverage = self.strategy_config["leverage"]
         # Ensure position_idx is the correct Enum type if helpers expect it
-        self.position_idx = self.strategy_config.get("position_idx", PositionIdx.ONE_WAY)
+        self.position_idx = self.strategy_config.get(
+            "position_idx", PositionIdx.ONE_WAY
+        )
         if not isinstance(self.position_idx, PositionIdx):
             try:
-                self.position_idx = PositionIdx(int(self.position_idx))  # Try converting from int
+                self.position_idx = PositionIdx(
+                    int(self.position_idx)
+                )  # Try converting from int
             except (ValueError, TypeError):
                 self.logger.warning(
                     f"Invalid position_idx format '{self.strategy_config.get('position_idx')}'. Defaulting to ONE_WAY (0)."
@@ -165,11 +188,15 @@ class EhlersVolumetricStrategy:
 
         self.required_indicators = []
         if self.analysis_flags.get("use_evt"):
-            self.required_indicators.extend([self.evt_trend_col, self.evt_buy_col, self.evt_sell_col])
+            self.required_indicators.extend(
+                [self.evt_trend_col, self.evt_buy_col, self.evt_sell_col]
+            )
         if self.analysis_flags.get("use_atr"):
             self.required_indicators.append(self.atr_col)
 
-        self.logger.info(f"Strategy {self.strategy_config.get('name', 'EhlersVolumetric')} initialized.")
+        self.logger.info(
+            f"Strategy {self.strategy_config.get('name', 'EhlersVolumetric')} initialized."
+        )
         self.logger.debug(f"Required indicators: {self.required_indicators}")
 
     async def _initialize(self) -> bool:
@@ -179,62 +206,96 @@ class EhlersVolumetricStrategy:
         Returns:
             bool: True if initialization succeeded, False otherwise.
         """
-        self.logger.info(f"{Style.BRIGHT}--- Strategy Initialization Phase ---{Style.RESET_ALL}")
+        self.logger.info(
+            f"{Style.BRIGHT}--- Strategy Initialization Phase ---{Style.RESET_ALL}"
+        )
         try:
             # 1. Initialize Exchange Connection (Async)
             self.exchange = await bybit.initialize_bybit(self.api_config)
             if not self.exchange:
-                self.logger.critical("Failed to initialize Bybit exchange connection. Stopping.")
+                self.logger.critical(
+                    "Failed to initialize Bybit exchange connection. Stopping."
+                )
                 return False
 
             # 2. Load/Verify Market Info (Uses cache populated by initialize_bybit)
             self.market_info = bybit.market_cache.get_market(self.symbol)
             if not self.market_info:
-                self.logger.critical(f"Market info not found for {self.symbol}. Was it loaded? Stopping.")
+                self.logger.critical(
+                    f"Market info not found for {self.symbol}. Was it loaded? Stopping."
+                )
                 return False
             self._extract_market_details()  # Set precision, limits etc.
 
             # 3. Set Leverage (Async)
             if self.leverage > 0:
-                self.logger.info(f"Setting leverage for {self.symbol} to {self.leverage}x...")
-                leverage_set = await bybit.set_leverage(self.exchange, self.symbol, self.leverage, self.api_config)
+                self.logger.info(
+                    f"Setting leverage for {self.symbol} to {self.leverage}x..."
+                )
+                leverage_set = await bybit.set_leverage(
+                    self.exchange, self.symbol, self.leverage, self.api_config
+                )
                 if not leverage_set:
                     self.logger.warning(
                         f"{Fore.YELLOW}Failed to set leverage to {self.leverage}x. Check API permissions or existing position/orders. Strategy will proceed with current setting.{Style.RESET_ALL}"
                     )
                 else:
-                    self.logger.success(f"{Fore.GREEN}Leverage set confirmed.{Style.RESET_ALL}")
+                    self.logger.success(
+                        f"{Fore.GREEN}Leverage set confirmed.{Style.RESET_ALL}"
+                    )
 
             # 4. Fetch Initial State (Async)
-            self.logger.info("Fetching initial account state (position, orders, balance)...")
+            self.logger.info(
+                "Fetching initial account state (position, orders, balance)..."
+            )
             await self._update_state()  # Handles internal errors
             pos_side = (
                 self.current_position.get("side", self.api_config["POS_NONE"])
                 if self.current_position
                 else self.api_config["POS_NONE"]
             )
-            pos_qty = self.current_position.get("qty", Decimal(0)) if self.current_position else Decimal(0)
+            pos_qty = (
+                self.current_position.get("qty", Decimal(0))
+                if self.current_position
+                else Decimal(0)
+            )
             self.logger.info(f"Initial Position: Side={pos_side}, Qty={pos_qty}")
             self.logger.info(f"Initial Open Orders: {len(self.open_orders)}")
-            self.logger.info(f"Initial Available Balance: {self.available_balance:.4f} USDT")
+            self.logger.info(
+                f"Initial Available Balance: {self.available_balance:.4f} USDT"
+            )
 
             # 5. Initial Order Cleanup (Optional but Recommended)
-            self.logger.info("Performing initial cleanup: cancelling existing orders...")
+            self.logger.info(
+                "Performing initial cleanup: cancelling existing orders..."
+            )
             category = bybit.market_cache.get_category(self.symbol)  # Needed for V5
             if category:  # Proceed only if category is known
                 cancelled_count = await bybit.cancel_all_orders(
-                    self.exchange, symbol=self.symbol, category=category, config=self.api_config, reason="Init Cleanup"
+                    self.exchange,
+                    symbol=self.symbol,
+                    category=category,
+                    config=self.api_config,
+                    reason="Init Cleanup",
                 )
                 if cancelled_count is not None:
-                    self.logger.info(f"Cancelled {cancelled_count} existing orders for {self.symbol}.")
+                    self.logger.info(
+                        f"Cancelled {cancelled_count} existing orders for {self.symbol}."
+                    )
                     await asyncio.sleep(1)  # Brief pause for exchange to process
                     await self._update_state()  # Refresh state after cleanup
                 else:
-                    self.logger.warning("Failed to execute cancel_all_orders during init (check logs).")
+                    self.logger.warning(
+                        "Failed to execute cancel_all_orders during init (check logs)."
+                    )
             else:
-                self.logger.error(f"Cannot perform initial order cleanup: Category unknown for {self.symbol}.")
+                self.logger.error(
+                    f"Cannot perform initial order cleanup: Category unknown for {self.symbol}."
+                )
 
-            self.logger.success(f"{Style.BRIGHT}--- Strategy Initialization Complete ---{Style.RESET_ALL}")
+            self.logger.success(
+                f"{Style.BRIGHT}--- Strategy Initialization Complete ---{Style.RESET_ALL}"
+            )
             return True
 
         except Exception as e:
@@ -243,7 +304,11 @@ class EhlersVolumetricStrategy:
                 exc_info=True,
             )
             # Ensure exchange is closed if partially initialized
-            if self.exchange and hasattr(self.exchange, "close") and not self.exchange.closed:
+            if (
+                self.exchange
+                and hasattr(self.exchange, "close")
+                and not self.exchange.closed
+            ):
                 try:
                     await self.exchange.close()
                 except Exception:
@@ -285,8 +350,12 @@ class EhlersVolumetricStrategy:
             )
 
         except Exception as e:
-            self.logger.error(f"Failed to parse market details for {self.symbol}: {e}", exc_info=True)
-            self.logger.warning("Using default market details, order sizing/pricing may be inaccurate.")
+            self.logger.error(
+                f"Failed to parse market details for {self.symbol}: {e}", exc_info=True
+            )
+            self.logger.warning(
+                "Using default market details, order sizing/pricing may be inaccurate."
+            )
             # Keep the small defaults set in __init__
 
     async def _update_state(self):
@@ -298,10 +367,14 @@ class EhlersVolumetricStrategy:
         try:
             # Use asyncio.gather for concurrent fetching
             results = await asyncio.gather(
-                bybit.get_current_position_bybit_v5(self.exchange, self.symbol, self.api_config),
+                bybit.get_current_position_bybit_v5(
+                    self.exchange, self.symbol, self.api_config
+                ),
                 self._fetch_all_open_orders(),  # Custom helper to get all order types
                 bybit.fetch_usdt_balance(self.exchange, self.api_config),
-                bybit.fetch_ticker_validated(self.exchange, self.symbol, self.api_config),
+                bybit.fetch_ticker_validated(
+                    self.exchange, self.symbol, self.api_config
+                ),
                 return_exceptions=True,  # Don't let one failure stop others
             )
 
@@ -314,7 +387,13 @@ class EhlersVolumetricStrategy:
             elif isinstance(pos_data, list):  # Hedge mode
                 self.logger.debug("Hedge mode detected by position fetch.")
                 found_pos = next(
-                    (p for p in pos_data if p.get("misc", {}).get("positionIdx") == self.position_idx.value), None
+                    (
+                        p
+                        for p in pos_data
+                        if p.get("misc", {}).get("positionIdx")
+                        == self.position_idx.value
+                    ),
+                    None,
                 )
                 self.current_position = found_pos  # Assign found pos or None
             else:  # One-way mode or None returned
@@ -326,7 +405,10 @@ class EhlersVolumetricStrategy:
             else:
                 self.open_orders = {o["id"]: o for o in open_orders_list}
                 # Prune tracked SL order ID if it's no longer open
-                if self.stop_loss_order_id and self.stop_loss_order_id not in self.open_orders:
+                if (
+                    self.stop_loss_order_id
+                    and self.stop_loss_order_id not in self.open_orders
+                ):
                     self.logger.info(
                         f"Tracked SL order ...{format_order_id(self.stop_loss_order_id)} no longer found in open orders."
                     )
@@ -337,7 +419,9 @@ class EhlersVolumetricStrategy:
                 self.logger.error(f"Failed to fetch balance: {balance_tuple}")
             elif balance_tuple is not None and len(balance_tuple) == 2:
                 _, fetched_available = balance_tuple  # (total, available)
-                self.available_balance = fetched_available if fetched_available is not None else Decimal(0)
+                self.available_balance = (
+                    fetched_available if fetched_available is not None else Decimal(0)
+                )
             else:
                 self.logger.error(
                     f"Failed to fetch balance (fetch_usdt_balance returned unexpected value: {balance_tuple})."
@@ -361,14 +445,20 @@ class EhlersVolumetricStrategy:
                 if self.current_position
                 else self.api_config["POS_NONE"]
             )
-            pos_qty = self.current_position.get("qty", Decimal(0)) if self.current_position else Decimal(0)
+            pos_qty = (
+                self.current_position.get("qty", Decimal(0))
+                if self.current_position
+                else Decimal(0)
+            )
             self.logger.debug(
                 f"State Updated: Pos Side={pos_side}, Qty={pos_qty:.8f}, "
                 f"Orders={len(self.open_orders)}, Avail Bal={self.available_balance:.4f}, Last Px={self.last_known_price:.4f}"
             )
 
         except Exception as e:
-            self.logger.error(f"Unexpected error during state update: {e}", exc_info=True)
+            self.logger.error(
+                f"Unexpected error during state update: {e}", exc_info=True
+            )
 
     async def _fetch_all_open_orders(self) -> list[dict]:
         """Fetches all types of open orders (Regular, Stop, TP/SL) concurrently."""
@@ -376,7 +466,9 @@ class EhlersVolumetricStrategy:
             return []
         category = bybit.market_cache.get_category(self.symbol)
         if not category:
-            self.logger.error(f"Cannot fetch orders: Category unknown for {self.symbol}")
+            self.logger.error(
+                f"Cannot fetch orders: Category unknown for {self.symbol}"
+            )
             return []
 
         tasks = []
@@ -390,7 +482,11 @@ class EhlersVolumetricStrategy:
         for order_filter in order_filters_to_check:
             tasks.append(
                 bybit.fetch_open_orders_filtered(
-                    self.exchange, self.symbol, category=category, order_filter=order_filter, config=self.api_config
+                    self.exchange,
+                    self.symbol,
+                    category=category,
+                    order_filter=order_filter,
+                    config=self.api_config,
                 )
             )
 
@@ -400,10 +496,14 @@ class EhlersVolumetricStrategy:
         filter_names = [f.value for f in order_filters_to_check]
         for i, res in enumerate(results):
             if isinstance(res, Exception):
-                self.logger.warning(f"Failed to fetch open orders with filter '{filter_names[i]}': {res}")
+                self.logger.warning(
+                    f"Failed to fetch open orders with filter '{filter_names[i]}': {res}"
+                )
             elif isinstance(res, list):
                 all_orders.extend(res)
-                self.logger.debug(f"Fetched {len(res)} open orders with filter '{filter_names[i]}'.")
+                self.logger.debug(
+                    f"Fetched {len(res)} open orders with filter '{filter_names[i]}'."
+                )
 
         # Deduplicate based on order ID
         unique_orders = {o["id"]: o for o in all_orders}
@@ -425,7 +525,11 @@ class EhlersVolumetricStrategy:
                 config=self.api_config,
             )
 
-            if ohlcv_data is None or ohlcv_data.empty or len(ohlcv_data) < self.min_data_periods:
+            if (
+                ohlcv_data is None
+                or ohlcv_data.empty
+                or len(ohlcv_data) < self.min_data_periods
+            ):
                 self.logger.warning(
                     f"Insufficient OHLCV data ({len(ohlcv_data) if ohlcv_data is not None else 0} candles < {self.min_data_periods})."
                 )
@@ -433,20 +537,40 @@ class EhlersVolumetricStrategy:
 
             if not isinstance(ohlcv_data, pd.DataFrame):
                 # Handle list conversion if helper returns list
-                if isinstance(ohlcv_data, list) and len(ohlcv_data) > 0 and len(ohlcv_data[0]) == 6:
+                if (
+                    isinstance(ohlcv_data, list)
+                    and len(ohlcv_data) > 0
+                    and len(ohlcv_data[0]) == 6
+                ):
                     try:
                         ohlcv_data = pd.DataFrame(
-                            ohlcv_data, columns=["timestamp", "open", "high", "low", "close", "volume"]
+                            ohlcv_data,
+                            columns=[
+                                "timestamp",
+                                "open",
+                                "high",
+                                "low",
+                                "close",
+                                "volume",
+                            ],
                         )
-                        ohlcv_data["datetime"] = pd.to_datetime(ohlcv_data["timestamp"], unit="ms", utc=True)
+                        ohlcv_data["datetime"] = pd.to_datetime(
+                            ohlcv_data["timestamp"], unit="ms", utc=True
+                        )
                         ohlcv_data.set_index("datetime", inplace=True)
                         for col in ["open", "high", "low", "close", "volume"]:
-                            ohlcv_data[col] = pd.to_numeric(ohlcv_data[col], errors="coerce")
+                            ohlcv_data[col] = pd.to_numeric(
+                                ohlcv_data[col], errors="coerce"
+                            )
                     except Exception as conv_err:
-                        self.logger.error(f"Failed to convert OHLCV list to DataFrame: {conv_err}")
+                        self.logger.error(
+                            f"Failed to convert OHLCV list to DataFrame: {conv_err}"
+                        )
                         return None
                 else:
-                    self.logger.error("OHLCV data is not a DataFrame and could not be converted.")
+                    self.logger.error(
+                        "OHLCV data is not a DataFrame and could not be converted."
+                    )
                     return None
 
             # Combine strategy config for calculation
@@ -468,15 +592,23 @@ class EhlersVolumetricStrategy:
             if df_with_indicators is None:
                 self.logger.error("Indicator calculation function returned None.")
                 return None
-            missing_cols = [col for col in self.required_indicators if col not in df_with_indicators.columns]
+            missing_cols = [
+                col
+                for col in self.required_indicators
+                if col not in df_with_indicators.columns
+            ]
             if missing_cols:
-                self.logger.error(f"Required indicator columns missing after calculation: {missing_cols}")
+                self.logger.error(
+                    f"Required indicator columns missing after calculation: {missing_cols}"
+                )
                 return None
 
             return df_with_indicators
 
         except Exception as e:
-            self.logger.error(f"Error fetching or calculating indicators: {e}", exc_info=True)
+            self.logger.error(
+                f"Error fetching or calculating indicators: {e}", exc_info=True
+            )
             return None
 
     def _check_signals(self, df: pd.DataFrame) -> tuple[Side | None, bool]:
@@ -487,8 +619,12 @@ class EhlersVolumetricStrategy:
                    entry_side: Side.BUY, Side.SELL, or None
                    should_exit: True if current position should be closed, False otherwise
         """
-        if df is None or df.empty or len(df) < 2:  # Need at least 2 rows for prev trend check
-            self.logger.debug("Indicator DataFrame is empty or too short for signal generation.")
+        if (
+            df is None or df.empty or len(df) < 2
+        ):  # Need at least 2 rows for prev trend check
+            self.logger.debug(
+                "Indicator DataFrame is empty or too short for signal generation."
+            )
             return None, False
         if not self.analysis_flags.get("use_evt"):
             self.logger.debug("EVT indicator is disabled, no EVT signals generated.")
@@ -498,7 +634,9 @@ class EhlersVolumetricStrategy:
             latest = df.iloc[-1]
             previous = df.iloc[-2]
         except IndexError:
-            self.logger.warning("Could not access latest/previous rows in indicator DataFrame.")
+            self.logger.warning(
+                "Could not access latest/previous rows in indicator DataFrame."
+            )
             return None, False
 
         # --- Safely get required values ---
@@ -537,28 +675,44 @@ class EhlersVolumetricStrategy:
         # --- Define Entry/Exit Logic ---
         entry_side: Side | None = None
         should_exit: bool = False
-        current_pos_side = self.current_position.get("side") if self.current_position else self.api_config["POS_NONE"]
+        current_pos_side = (
+            self.current_position.get("side")
+            if self.current_position
+            else self.api_config["POS_NONE"]
+        )
 
         # **Entry Conditions (Only if flat)**
         if current_pos_side == self.api_config["POS_NONE"]:
             if is_buy_signal:
                 entry_side = Side.BUY
-                self.logger.info(f"{Fore.GREEN}ENTRY Signal: BUY triggered by EVT Buy flag.{Style.RESET_ALL}")
+                self.logger.info(
+                    f"{Fore.GREEN}ENTRY Signal: BUY triggered by EVT Buy flag.{Style.RESET_ALL}"
+                )
             elif is_sell_signal:
                 entry_side = Side.SELL
-                self.logger.info(f"{Fore.RED}ENTRY Signal: SELL triggered by EVT Sell flag.{Style.RESET_ALL}")
+                self.logger.info(
+                    f"{Fore.RED}ENTRY Signal: SELL triggered by EVT Sell flag.{Style.RESET_ALL}"
+                )
 
         # **Exit Conditions (Only if in position)**
         elif current_pos_side != self.api_config["POS_NONE"]:
             # Exit Long: EVT Trend flips from 1 (or 0) to -1
-            if current_pos_side == self.api_config["POS_LONG"] and current_trend == -1 and previous_trend != -1:
+            if (
+                current_pos_side == self.api_config["POS_LONG"]
+                and current_trend == -1
+                and previous_trend != -1
+            ):
                 should_exit = True
                 self.logger.info(
                     f"{Fore.YELLOW}EXIT Signal: Close LONG triggered (EVT Trend flipped to -1 from {previous_trend}){Style.RESET_ALL}"
                 )
 
             # Exit Short: EVT Trend flips from -1 (or 0) to 1
-            elif current_pos_side == self.api_config["POS_SHORT"] and current_trend == 1 and previous_trend != 1:
+            elif (
+                current_pos_side == self.api_config["POS_SHORT"]
+                and current_trend == 1
+                and previous_trend != 1
+            ):
                 should_exit = True
                 self.logger.info(
                     f"{Fore.YELLOW}EXIT Signal: Close SHORT triggered (EVT Trend flipped to 1 from {previous_trend}){Style.RESET_ALL}"
@@ -566,7 +720,9 @@ class EhlersVolumetricStrategy:
 
         return entry_side, should_exit
 
-    def _calculate_position_size(self, entry_price: Decimal, stop_loss_price: Decimal) -> Decimal | None:
+    def _calculate_position_size(
+        self, entry_price: Decimal, stop_loss_price: Decimal
+    ) -> Decimal | None:
         """Calculates position size based on risk percentage, stop-loss distance, and available balance.
         (Relies on self.available_balance which is updated asynchronously).
         """
@@ -574,10 +730,14 @@ class EhlersVolumetricStrategy:
         balance = self.available_balance
 
         if balance <= 0:
-            self.logger.error("Cannot calculate position size: Available balance is zero or negative.")
+            self.logger.error(
+                "Cannot calculate position size: Available balance is zero or negative."
+            )
             return None
         if entry_price <= 0 or stop_loss_price <= 0:
-            self.logger.error("Cannot calculate position size: Entry or SL price is zero or negative.")
+            self.logger.error(
+                "Cannot calculate position size: Entry or SL price is zero or negative."
+            )
             return None
 
         risk_amount_usd = balance * risk_pct
@@ -608,7 +768,9 @@ class EhlersVolumetricStrategy:
                 f"Calculated position size ({position_size_adjusted}) is below exchange minimum ({self.min_qty}). Trying minimum size."
             )
             min_qty_risk_usd = self.min_qty * price_diff
-            if min_qty_risk_usd <= risk_amount_usd * Decimal("1.05"):  # Allow slightly exceeding risk for min qty
+            if min_qty_risk_usd <= risk_amount_usd * Decimal(
+                "1.05"
+            ):  # Allow slightly exceeding risk for min qty
                 self.logger.info(
                     f"Using minimum order size ({self.min_qty}) as its risk ({min_qty_risk_usd:.4f}) is close to budget ({risk_amount_usd:.4f})."
                 )
@@ -637,7 +799,9 @@ class EhlersVolumetricStrategy:
         )
         return position_size_adjusted
 
-    def _calculate_stop_loss_price(self, df: pd.DataFrame, side: Side, entry_price: Decimal) -> Decimal | None:
+    def _calculate_stop_loss_price(
+        self, df: pd.DataFrame, side: Side, entry_price: Decimal
+    ) -> Decimal | None:
         """Calculates ATR based stop loss price (Synchronous)."""
         if not self.analysis_flags.get("use_atr"):
             return None
@@ -657,7 +821,9 @@ class EhlersVolumetricStrategy:
                 self.logger.warning(f"Invalid ATR value ({latest_atr}) for SL.")
                 return None
 
-            multiplier = self.strategy_config.get("stop_loss_atr_multiplier", Decimal("2.0"))
+            multiplier = self.strategy_config.get(
+                "stop_loss_atr_multiplier", Decimal("2.0")
+            )
             stop_offset = latest_atr * multiplier
 
             if side == Side.BUY:
@@ -676,10 +842,14 @@ class EhlersVolumetricStrategy:
 
             # Sanity check and adjustment using price_tick
             if side == Side.BUY and sl_price >= entry_price:
-                self.logger.warning(f"Adjusting Buy SL {sl_price} >= Entry {entry_price}")
+                self.logger.warning(
+                    f"Adjusting Buy SL {sl_price} >= Entry {entry_price}"
+                )
                 sl_price = entry_price - self.price_tick
             elif side == Side.SELL and sl_price <= entry_price:
-                self.logger.warning(f"Adjusting Sell SL {sl_price} <= Entry {entry_price}")
+                self.logger.warning(
+                    f"Adjusting Sell SL {sl_price} <= Entry {entry_price}"
+                )
                 sl_price = entry_price + self.price_tick
 
             # Re-format after potential adjustment
@@ -691,7 +861,9 @@ class EhlersVolumetricStrategy:
                     f"Calculated SL Price: {sl_price_final_fmt} (Entry: {entry_price:.4f}, ATR: {latest_atr:.5f}, Mult: {multiplier})"
                 )
             else:
-                self.logger.error(f"Final SL price after adjustment is invalid: {sl_price_final}")
+                self.logger.error(
+                    f"Final SL price after adjustment is invalid: {sl_price_final}"
+                )
                 sl_price_final = None  # Ensure None is returned
 
             return sl_price_final
@@ -709,7 +881,11 @@ class EhlersVolumetricStrategy:
             return
 
         sl_order_side = Side.SELL if entry_side == Side.BUY else Side.BUY
-        trigger_direction = TriggerDirection.FALL if sl_order_side == Side.SELL else TriggerDirection.RISE
+        trigger_direction = (
+            TriggerDirection.FALL
+            if sl_order_side == Side.SELL
+            else TriggerDirection.RISE
+        )
 
         self.logger.info(
             f"Placing {sl_order_side.value.upper()} native Stop Loss for {qty:.8f} at trigger price {sl_price:.4f}..."
@@ -719,7 +895,9 @@ class EhlersVolumetricStrategy:
         base_price_for_sl = self.last_known_price
         if base_price_for_sl <= 0:
             # Fetch ticker again if last price is bad? Or fail? Fail safer.
-            self.logger.error("Last known price is invalid for SL basePrice. Cannot place SL.")
+            self.logger.error(
+                "Last known price is invalid for SL basePrice. Cannot place SL."
+            )
             # Consider emergency exit here?
             return
 
@@ -761,11 +939,15 @@ class EhlersVolumetricStrategy:
             return
         if self.stop_loss_order_id:
             sl_id_short = format_order_id(self.stop_loss_order_id)
-            self.logger.info(f"Attempting to cancel existing Stop Loss order: ...{sl_id_short}")
+            self.logger.info(
+                f"Attempting to cancel existing Stop Loss order: ...{sl_id_short}"
+            )
             try:
                 category = bybit.market_cache.get_category(self.symbol)
                 if not category:
-                    self.logger.error(f"Cannot cancel SL {sl_id_short}: Category unknown for {self.symbol}")
+                    self.logger.error(
+                        f"Cannot cancel SL {sl_id_short}: Category unknown for {self.symbol}"
+                    )
                     return  # Don't clear ID if we couldn't even try cancelling
 
                 success = await bybit.cancel_order(
@@ -776,28 +958,49 @@ class EhlersVolumetricStrategy:
                     order_filter=bybit.OrderFilter.STOP_ORDER,  # Crucial for V5 conditional order cancellation
                 )
                 if success:
-                    self.logger.info(f"Stop Loss ...{sl_id_short} cancelled successfully (or was already gone).")
-                    self.stop_loss_order_id = None  # Clear ID on success/confirmation gone
+                    self.logger.info(
+                        f"Stop Loss ...{sl_id_short} cancelled successfully (or was already gone)."
+                    )
+                    self.stop_loss_order_id = (
+                        None  # Clear ID on success/confirmation gone
+                    )
                 else:
                     self.logger.warning(
                         f"Failed attempt to cancel Stop Loss order ...{sl_id_short}. It might remain active or already be filled/cancelled."
                     )
                     # Re-check state to be sure it's gone before clearing ID
                     await self._update_state()
-                    if self.stop_loss_order_id and self.stop_loss_order_id not in self.open_orders:
-                        self.logger.info(f"Re-checked state: SL order ...{sl_id_short} is confirmed gone.")
+                    if (
+                        self.stop_loss_order_id
+                        and self.stop_loss_order_id not in self.open_orders
+                    ):
+                        self.logger.info(
+                            f"Re-checked state: SL order ...{sl_id_short} is confirmed gone."
+                        )
                         self.stop_loss_order_id = None
 
             except Exception as e:
-                self.logger.error(f"Error cancelling Stop Loss ...{sl_id_short}: {e}", exc_info=True)
+                self.logger.error(
+                    f"Error cancelling Stop Loss ...{sl_id_short}: {e}", exc_info=True
+                )
                 # Don't clear self.stop_loss_order_id here, might need retry or manual check
         else:
             self.logger.debug("No active Stop Loss order ID tracked to cancel.")
 
-    async def _manage_position(self, entry_side: Side | None, should_exit: bool, df_indicators: pd.DataFrame):
+    async def _manage_position(
+        self, entry_side: Side | None, should_exit: bool, df_indicators: pd.DataFrame
+    ):
         """Handles placing entry/exit orders and managing SL based on signals."""
-        current_pos_side = self.current_position.get("side") if self.current_position else self.api_config["POS_NONE"]
-        current_qty = self.current_position.get("qty", Decimal(0)) if self.current_position else Decimal(0)
+        current_pos_side = (
+            self.current_position.get("side")
+            if self.current_position
+            else self.api_config["POS_NONE"]
+        )
+        current_qty = (
+            self.current_position.get("qty", Decimal(0))
+            if self.current_position
+            else Decimal(0)
+        )
 
         # --- Exit Logic ---
         if should_exit and current_pos_side != self.api_config["POS_NONE"]:
@@ -809,7 +1012,9 @@ class EhlersVolumetricStrategy:
             await asyncio.sleep(0.5)  # Short pause after cancel request
 
             # 2. Close the position with reduce-only market order
-            self.logger.info(f"Submitting market order to close {current_pos_side} position of {current_qty}...")
+            self.logger.info(
+                f"Submitting market order to close {current_pos_side} position of {current_qty}..."
+            )
             close_order = await bybit.close_position_reduce_only(
                 self.exchange,
                 self.symbol,
@@ -849,8 +1054,14 @@ class EhlersVolumetricStrategy:
             )
 
             # 1. Cancel any other pending orders (optional, defensive)
-            if self.open_orders:  # Check if any orders exist (SL ID is handled separately)
-                non_sl_orders = {oid: o for oid, o in self.open_orders.items() if oid != self.stop_loss_order_id}
+            if (
+                self.open_orders
+            ):  # Check if any orders exist (SL ID is handled separately)
+                non_sl_orders = {
+                    oid: o
+                    for oid, o in self.open_orders.items()
+                    if oid != self.stop_loss_order_id
+                }
                 if non_sl_orders:
                     self.logger.warning(
                         f"Found {len(non_sl_orders)} non-SL open orders before entry. Cancelling them..."
@@ -873,20 +1084,28 @@ class EhlersVolumetricStrategy:
                 self.logger.error("Cannot calculate SL: Invalid estimated entry price.")
                 return
 
-            sl_price = self._calculate_stop_loss_price(df_indicators, entry_side, entry_price_estimate)
+            sl_price = self._calculate_stop_loss_price(
+                df_indicators, entry_side, entry_price_estimate
+            )
             if sl_price is None:
-                self.logger.error("Failed to calculate valid SL price. Cannot enter trade.")
+                self.logger.error(
+                    "Failed to calculate valid SL price. Cannot enter trade."
+                )
                 return
 
             # 3. Calculate Position Size (based on estimated entry and SL)
             qty_to_order = self._calculate_position_size(entry_price_estimate, sl_price)
             if qty_to_order is None or qty_to_order <= 0:
-                self.logger.error(f"Failed to calculate valid order quantity ({qty_to_order}). Cannot enter trade.")
+                self.logger.error(
+                    f"Failed to calculate valid order quantity ({qty_to_order}). Cannot enter trade."
+                )
                 return
 
             # 4. Place Market Entry Order
             entry_order_side_str = entry_side.value  # Convert Enum to string for helper
-            self.logger.info(f"Placing {entry_order_side_str.upper()} market order for {qty_to_order:.8f}...")
+            self.logger.info(
+                f"Placing {entry_order_side_str.upper()} market order for {qty_to_order:.8f}..."
+            )
             entry_order = await bybit.place_market_order_slippage_check(
                 exchange=self.exchange,
                 symbol=self.symbol,
@@ -905,22 +1124,37 @@ class EhlersVolumetricStrategy:
                 filled_qty_entry = safe_decimal_conversion(entry_order.get("filled"))
 
                 # If receipt lacks details, wait and fetch position state
-                if not filled_price_entry or not filled_qty_entry or filled_qty_entry <= 0:
-                    self.logger.warning("Entry order receipt lacks fill details, re-fetching position state...")
+                if (
+                    not filled_price_entry
+                    or not filled_qty_entry
+                    or filled_qty_entry <= 0
+                ):
+                    self.logger.warning(
+                        "Entry order receipt lacks fill details, re-fetching position state..."
+                    )
                     await asyncio.sleep(5)  # Wait longer for state update
                     await self._update_state()
                     if (
-                        self.current_position and self.current_position.get("side") == entry_side.name.upper()
+                        self.current_position
+                        and self.current_position.get("side") == entry_side.name.upper()
                     ):  # Check Enum name vs POS_LONG/SHORT
-                        filled_price_entry = self.current_position.get("entry_price", entry_price_estimate)  # Fallback
-                        filled_qty_entry = self.current_position.get("qty", qty_to_order)  # Fallback
+                        filled_price_entry = self.current_position.get(
+                            "entry_price", entry_price_estimate
+                        )  # Fallback
+                        filled_qty_entry = self.current_position.get(
+                            "qty", qty_to_order
+                        )  # Fallback
                         self.logger.info("Using position state for fill details.")
                     else:
-                        self.logger.error("Failed to confirm position opening after entry order.")
+                        self.logger.error(
+                            "Failed to confirm position opening after entry order."
+                        )
                         return  # Cannot proceed without confirmed entry
 
                 if filled_qty_entry <= 0:  # Final check
-                    self.logger.error("Confirmed filled quantity is zero. Cannot place SL.")
+                    self.logger.error(
+                        "Confirmed filled quantity is zero. Cannot place SL."
+                    )
                     return
 
                 self.logger.success(
@@ -928,7 +1162,9 @@ class EhlersVolumetricStrategy:
                 )
 
                 # IMPORTANT: Recalculate SL price based on ACTUAL fill price
-                sl_price_actual = self._calculate_stop_loss_price(df_indicators, entry_side, filled_price_entry)
+                sl_price_actual = self._calculate_stop_loss_price(
+                    df_indicators, entry_side, filled_price_entry
+                )
                 if sl_price_actual is None:
                     self.logger.error(
                         f"{Back.RED}{Fore.WHITE}Failed to recalculate SL price based on actual fill price ({filled_price_entry:.4f}). Cannot place SL. POSITION UNPROTECTED.{Style.RESET_ALL}"
@@ -945,7 +1181,9 @@ class EhlersVolumetricStrategy:
                 await asyncio.sleep(0.5)  # Brief pause before placing SL
 
                 # Place the SL using actual filled quantity and recalculated SL price
-                await self._place_stop_loss(entry_side, filled_qty_entry, sl_price_actual)
+                await self._place_stop_loss(
+                    entry_side, filled_qty_entry, sl_price_actual
+                )
 
                 # Final state update after entry and SL placement
                 await asyncio.sleep(2)
@@ -959,7 +1197,9 @@ class EhlersVolumetricStrategy:
                 )
                 await self._update_state()  # Check if position opened unexpectedly
             else:  # place_market_order returned None
-                self.logger.error("Failed to place entry market order. Check logs from bybit_helpers.")
+                self.logger.error(
+                    "Failed to place entry market order. Check logs from bybit_helpers."
+                )
 
     async def run_loop(self):
         """Main strategy execution loop."""
@@ -968,13 +1208,17 @@ class EhlersVolumetricStrategy:
             return
 
         self.is_running = True
-        self.logger.info(f"{Fore.CYAN}{Style.BRIGHT}=== Starting Ehlers Volumetric Strategy Trading Loop ===")
+        self.logger.info(
+            f"{Fore.CYAN}{Style.BRIGHT}=== Starting Ehlers Volumetric Strategy Trading Loop ==="
+        )
 
         while self.is_running:
             try:
                 loop_start_time = time.monotonic()
                 self.logger.info(
-                    "-" * 30 + f" Tick Start ({pd.Timestamp.now(tz='UTC').strftime('%Y-%m-%d %H:%M:%S')}) " + "-" * 30
+                    "-" * 30
+                    + f" Tick Start ({pd.Timestamp.now(tz='UTC').strftime('%Y-%m-%d %H:%M:%S')}) "
+                    + "-" * 30
                 )
 
                 # 1. Update current state (position, orders, balance, price)
@@ -988,7 +1232,9 @@ class EhlersVolumetricStrategy:
                 df_indicators = await self._fetch_and_calculate_indicators()
                 if df_indicators is None:
                     self.logger.warning("Failed to get indicator data for this tick.")
-                    await asyncio.sleep(self.strategy_config.get("polling_interval_seconds", 60))
+                    await asyncio.sleep(
+                        self.strategy_config.get("polling_interval_seconds", 60)
+                    )
                     continue
 
                 # 3. Check for entry/exit signals
@@ -1002,7 +1248,9 @@ class EhlersVolumetricStrategy:
                 elapsed = loop_end_time - loop_start_time
                 poll_interval = self.strategy_config.get("polling_interval_seconds", 60)
                 sleep_time = max(0.1, poll_interval - elapsed)  # Ensure minimum sleep
-                self.logger.info(f"Tick processed in {elapsed:.2f}s. Sleeping for {sleep_time:.2f}s.")
+                self.logger.info(
+                    f"Tick processed in {elapsed:.2f}s. Sleeping for {sleep_time:.2f}s."
+                )
                 await asyncio.sleep(sleep_time)
 
             except asyncio.CancelledError:
@@ -1014,7 +1262,10 @@ class EhlersVolumetricStrategy:
                     exc_info=True,
                 )
                 if self.sms_config.get("ENABLE_SMS_ALERTS"):
-                    send_sms_alert(f"[{self.symbol}] CRITICAL LOOP ERROR: {type(e).__name__}. Check Logs!", self.config)
+                    send_sms_alert(
+                        f"[{self.symbol}] CRITICAL LOOP ERROR: {type(e).__name__}. Check Logs!",
+                        self.config,
+                    )
                 self.logger.info("Pausing for 1 minute after critical loop error...")
                 await asyncio.sleep(60)  # Pause longer after error
 
@@ -1024,7 +1275,9 @@ class EhlersVolumetricStrategy:
     async def stop(self):
         """Signals the strategy loop to stop gracefully."""
         if self.is_running:
-            self.logger.warning("Stop signal received. Strategy loop will terminate after current cycle.")
+            self.logger.warning(
+                "Stop signal received. Strategy loop will terminate after current cycle."
+            )
             self.is_running = False
         else:
             self.logger.info("Stop signal received, but loop wasn't running.")
@@ -1045,21 +1298,32 @@ class EhlersVolumetricStrategy:
                     reason="Shutdown Cleanup",
                 )
                 if cancelled_count is not None:
-                    self.logger.info(f"Cancelled {cancelled_count} orders during cleanup.")
+                    self.logger.info(
+                        f"Cancelled {cancelled_count} orders during cleanup."
+                    )
             else:
-                self.logger.error("Cannot perform cleanup order cancellation: Category unknown.")
+                self.logger.error(
+                    "Cannot perform cleanup order cancellation: Category unknown."
+                )
 
             # Exchange closing is handled in main.py's finally block
         self.logger.info("--- Strategy Cleanup Complete ---")
 
     async def _emergency_close(self, reason: str):
         """Attempts to immediately close the current position in an emergency."""
-        self.logger.critical(f"{Back.RED}{Fore.WHITE}EMERGENCY CLOSE triggered! Reason: {reason}{Style.RESET_ALL}")
+        self.logger.critical(
+            f"{Back.RED}{Fore.WHITE}EMERGENCY CLOSE triggered! Reason: {reason}{Style.RESET_ALL}"
+        )
         await self._update_state()  # Get latest position info
-        if self.current_position and self.current_position.get("side") != self.api_config["POS_NONE"]:
+        if (
+            self.current_position
+            and self.current_position.get("side") != self.api_config["POS_NONE"]
+        ):
             pos_side = self.current_position["side"]
             pos_qty = self.current_position["qty"]
-            self.logger.warning(f"Attempting to close {pos_side} position of {pos_qty}...")
+            self.logger.warning(
+                f"Attempting to close {pos_side} position of {pos_qty}..."
+            )
             await self._cancel_stop_loss()  # Cancel SL first
             await asyncio.sleep(0.5)
             close_order = await bybit.close_position_reduce_only(
@@ -1075,7 +1339,8 @@ class EhlersVolumetricStrategy:
                 )
                 if self.sms_config.get("ENABLE_SMS_ALERTS"):
                     send_sms_alert(
-                        f"[{self.symbol}] EMERGENCY Closing {pos_side} ({pos_qty:.8f}). Reason: {reason}", self.config
+                        f"[{self.symbol}] EMERGENCY Closing {pos_side} ({pos_qty:.8f}). Reason: {reason}",
+                        self.config,
                     )
             else:
                 self.logger.critical(

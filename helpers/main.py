@@ -22,7 +22,10 @@ except ImportError:
 
     Fore = Style = Back = DummyColor()  # type: ignore
     COLORAMA_AVAILABLE = False
-    print("Warning: 'colorama' library not found. Run 'pip install colorama' for vibrant logs.", file=sys.stderr)
+    print(
+        "Warning: 'colorama' library not found. Run 'pip install colorama' for vibrant logs.",
+        file=sys.stderr,
+    )
 
 # --- Import local modules ---
 try:
@@ -45,23 +48,33 @@ except ImportError as e:
         f"{err_back}{err_fore}FATAL: Failed to import core modules (config, neon_logger, strategy, bybit_helpers): {e}{reset_all}",
         file=sys.stderr,
     )
-    print("Ensure all required .py files are in the correct location and have no syntax errors.", file=sys.stderr)
+    print(
+        "Ensure all required .py files are in the correct location and have no syntax errors.",
+        file=sys.stderr,
+    )
     traceback.print_exc()  # Print detailed traceback for import errors
     sys.exit(1)
 except Exception as e:  # Catch other potential errors during import phase
     err_back = Back.RED if COLORAMA_AVAILABLE else ""
     err_fore = Fore.WHITE if COLORAMA_AVAILABLE else ""
     reset_all = Style.RESET_ALL if COLORAMA_AVAILABLE else ""
-    print(f"{err_back}{err_fore}FATAL: Unexpected error during initial imports: {e}{reset_all}", file=sys.stderr)
+    print(
+        f"{err_back}{err_fore}FATAL: Unexpected error during initial imports: {e}{reset_all}",
+        file=sys.stderr,
+    )
     traceback.print_exc()
     sys.exit(1)
 
 
 # --- Global Variables ---
 logger: logging.Logger | None = None
-strategy_instance: EhlersVolumetricStrategy | None = None  # Change type hint if using different strategy
+strategy_instance: EhlersVolumetricStrategy | None = (
+    None  # Change type hint if using different strategy
+)
 main_task: asyncio.Task | None = None
-exchange_instance_ref: bybit.ccxt.bybit | None = None  # Keep reference for final cleanup
+exchange_instance_ref: bybit.ccxt.bybit | None = (
+    None  # Keep reference for final cleanup
+)
 shutdown_requested = False
 
 
@@ -81,10 +94,14 @@ async def handle_signal(sig: signal.Signals):
         f"\n{Fore.YELLOW}{Style.BRIGHT}>>> Signal {signal_name} ({sig}) received. Initiating graceful shutdown... <<< {Style.RESET_ALL}"
     )
     if logger:
-        logger.warning(f"Signal {signal_name} ({sig}) received. Initiating graceful shutdown...")
+        logger.warning(
+            f"Signal {signal_name} ({sig}) received. Initiating graceful shutdown..."
+        )
 
     # 1. Request strategy loop to stop
-    if strategy_instance and getattr(strategy_instance, "is_running", False):  # Check if running
+    if strategy_instance and getattr(
+        strategy_instance, "is_running", False
+    ):  # Check if running
         if logger:
             logger.info("Requesting strategy loop stop...")
         # Run stop in a new task to avoid blocking signal handler
@@ -113,7 +130,9 @@ async def handle_signal(sig: signal.Signals):
                 logger.info("Main task successfully cancelled.")
         except TimeoutError:
             if logger:
-                logger.error("Timeout waiting for main task to cancel. Forcing exit might be needed.")
+                logger.error(
+                    "Timeout waiting for main task to cancel. Forcing exit might be needed."
+                )
         except Exception as e:
             if logger:
                 logger.error(f"Error during main task cancellation: {e}")
@@ -130,17 +149,25 @@ async def main():
         log_config = getattr(cfg, "LOGGING_CONFIG", {})
         log_console_level_str = log_config.get("CONSOLE_LEVEL_STR", "INFO").upper()
         log_file_level_str = log_config.get("FILE_LEVEL_STR", "DEBUG").upper()
-        log_third_party_level_str = log_config.get("THIRD_PARTY_LOG_LEVEL_STR", "WARNING").upper()
+        log_third_party_level_str = log_config.get(
+            "THIRD_PARTY_LOG_LEVEL_STR", "WARNING"
+        ).upper()
 
         log_console_level = logging.getLevelName(log_console_level_str)
         log_file_level = logging.getLevelName(log_file_level_str)
         log_third_party_level = logging.getLevelName(log_third_party_level_str)
 
         if not isinstance(log_console_level, int):
-            print(f"Warning: Invalid CONSOLE_LEVEL '{log_console_level_str}'. Defaulting to INFO.", file=sys.stderr)
+            print(
+                f"Warning: Invalid CONSOLE_LEVEL '{log_console_level_str}'. Defaulting to INFO.",
+                file=sys.stderr,
+            )
             log_console_level = logging.INFO
         if not isinstance(log_file_level, int):
-            print(f"Warning: Invalid FILE_LEVEL '{log_file_level_str}'. Defaulting to DEBUG.", file=sys.stderr)
+            print(
+                f"Warning: Invalid FILE_LEVEL '{log_file_level_str}'. Defaulting to DEBUG.",
+                file=sys.stderr,
+            )
             log_file_level = logging.DEBUG
         if not isinstance(log_third_party_level, int):
             print(
@@ -159,19 +186,26 @@ async def main():
             third_party_log_level=log_third_party_level,
         )
         logger.info("=" * 60)
-        logger.info(f"=== {log_config.get('LOGGER_NAME', 'Trading Bot')} Initializing ===")
+        logger.info(
+            f"=== {log_config.get('LOGGER_NAME', 'Trading Bot')} Initializing ==="
+        )
         api_conf = getattr(cfg, "API_CONFIG", {})
         strat_conf = getattr(cfg, "STRATEGY_CONFIG", {})
         logger.info(f"Testnet Mode: {api_conf.get('TESTNET_MODE', 'N/A')}")
         logger.info(f"Symbol: {api_conf.get('SYMBOL', 'N/A')}")
         # --- Read STRATEGY name from loaded config ---
-        logger.info(f"Strategy: {strat_conf.get('name', 'N/A')}")  # Ensure config.py has the correct name
+        logger.info(
+            f"Strategy: {strat_conf.get('name', 'N/A')}"
+        )  # Ensure config.py has the correct name
         # ---------------------------------------------
         logger.info(f"Timeframe: {strat_conf.get('timeframe', 'N/A')}")
         logger.info("=" * 60)
 
     except Exception as e:
-        print(f"{Back.RED}{Fore.WHITE}FATAL: Logger setup failed: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Back.RED}{Fore.WHITE}FATAL: Logger setup failed: {e}{Style.RESET_ALL}",
+            file=sys.stderr,
+        )
         traceback.print_exc()
         sys.exit(1)
 
@@ -189,7 +223,10 @@ async def main():
         strategy_instance = EhlersVolumetricStrategy(config=full_config, logger=logger)
         # ------------------------------------------------------
     except ValueError as e:  # Catch the specific configuration error
-        logger.critical(f"Strategy instantiation failed due to configuration error: {e}", exc_info=True)
+        logger.critical(
+            f"Strategy instantiation failed due to configuration error: {e}",
+            exc_info=True,
+        )
         # Error message already logged by strategy's __init__
         sys.exit(1)
     except Exception as e:
@@ -206,9 +243,13 @@ async def main():
         # Store exchange reference AFTER initialization inside strategy completes
         # run_loop calls _initialize which sets self.exchange
         # Need to wait for _initialize to potentially finish
-        initialized = await strategy_instance._initialize()  # Run initialization explicitly
+        initialized = (
+            await strategy_instance._initialize()
+        )  # Run initialization explicitly
         if not initialized:
-            logger.critical("Strategy initialization method failed. Cannot start trading loop.")
+            logger.critical(
+                "Strategy initialization method failed. Cannot start trading loop."
+            )
             # Cleanup will be handled in finally block
             sys.exit(1)
 
@@ -218,22 +259,31 @@ async def main():
         await main_task
 
         if main_task.cancelled():
-            logger.warning("Strategy loop task was cancelled (expected during shutdown).")
+            logger.warning(
+                "Strategy loop task was cancelled (expected during shutdown)."
+            )
             run_success = True
         elif main_task.exception():
             loop_exception = main_task.exception()
-            logger.critical(f"Strategy loop task exited with an exception: {loop_exception}", exc_info=loop_exception)
+            logger.critical(
+                f"Strategy loop task exited with an exception: {loop_exception}",
+                exc_info=loop_exception,
+            )
             run_success = False
         else:
             logger.info("Strategy run_loop finished normally.")
             run_success = True
 
     except asyncio.CancelledError:
-        logger.warning("Main execution task was cancelled (likely during shutdown signal or init failure).")
+        logger.warning(
+            "Main execution task was cancelled (likely during shutdown signal or init failure)."
+        )
         run_success = True  # Treat cancellation as success for cleanup
 
     except Exception as e:
-        logger.critical(f"Main execution block encountered an unhandled error: {e}", exc_info=True)
+        logger.critical(
+            f"Main execution block encountered an unhandled error: {e}", exc_info=True
+        )
         run_success = False
 
     finally:
@@ -250,21 +300,33 @@ async def main():
                 if asyncio.iscoroutine(cleanup_result):
                     await cleanup_result
             except Exception as strategy_cleanup_err:
-                logger.error(f"Error during strategy internal cleanup: {strategy_cleanup_err}", exc_info=True)
+                logger.error(
+                    f"Error during strategy internal cleanup: {strategy_cleanup_err}",
+                    exc_info=True,
+                )
 
         # Final attempt to close the exchange connection
-        if exchange_instance_ref and hasattr(exchange_instance_ref, "close") and callable(exchange_instance_ref.close):
+        if (
+            exchange_instance_ref
+            and hasattr(exchange_instance_ref, "close")
+            and callable(exchange_instance_ref.close)
+        ):
             logger.info("Attempting final exchange connection close...")
             try:
                 if not exchange_instance_ref.closed:
                     close_result = exchange_instance_ref.close()
                     if asyncio.iscoroutine(close_result):  # close() is usually async
                         await close_result
-                    logger.info(f"{Fore.GREEN}Final exchange connection close successful.{Style.RESET_ALL}")
+                    logger.info(
+                        f"{Fore.GREEN}Final exchange connection close successful.{Style.RESET_ALL}"
+                    )
                 else:
                     logger.info("Exchange connection was already closed.")
             except Exception as final_close_err:
-                logger.error(f"Error during final exchange connection close: {final_close_err}", exc_info=True)
+                logger.error(
+                    f"Error during final exchange connection close: {final_close_err}",
+                    exc_info=True,
+                )
         else:
             logger.warning(
                 "Exchange instance reference not available for final cleanup or close method missing (may be normal if init failed)."
@@ -289,9 +351,14 @@ if __name__ == "__main__":
         signals_to_handle = (signal.SIGHUP, signal.SIGTERM, signal.SIGINT)
         for s in signals_to_handle:
             try:
-                event_loop.add_signal_handler(s, lambda s=s: asyncio.create_task(handle_signal(s)))
+                event_loop.add_signal_handler(
+                    s, lambda s=s: asyncio.create_task(handle_signal(s))
+                )
             except (NotImplementedError, RuntimeError) as e:  # Catch RuntimeError too
-                print(f"Warning: Signal {s.name} registration failed: {e}", file=sys.stderr)
+                print(
+                    f"Warning: Signal {s.name} registration failed: {e}",
+                    file=sys.stderr,
+                )
 
         # Run the main asynchronous function
         event_loop.run_until_complete(main())
@@ -312,21 +379,31 @@ if __name__ == "__main__":
         )
         traceback.print_exc()  # Print detailed traceback
         if logger:
-            logger.critical("Fatal unhandled error during asyncio execution", exc_info=True)
+            logger.critical(
+                "Fatal unhandled error during asyncio execution", exc_info=True
+            )
         sys.exit(1)
 
     finally:
         # --- Event Loop Cleanup ---
-        if event_loop and not event_loop.is_closed():  # Check if loop exists and isn't closed
+        if (
+            event_loop and not event_loop.is_closed()
+        ):  # Check if loop exists and isn't closed
             print("Cleaning up remaining asyncio tasks...")
             try:
-                tasks = [task for task in asyncio.all_tasks(loop=event_loop) if not task.done()]
+                tasks = [
+                    task
+                    for task in asyncio.all_tasks(loop=event_loop)
+                    if not task.done()
+                ]
                 if tasks:
                     print(f"Cancelling {len(tasks)} outstanding tasks...")
                     for task in tasks:
                         task.cancel()
                     # Wait briefly for tasks to cancel
-                    event_loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+                    event_loop.run_until_complete(
+                        asyncio.gather(*tasks, return_exceptions=True)
+                    )
 
                 # Shutdown async generators
                 if hasattr(event_loop, "shutdown_asyncgens"):
@@ -350,4 +427,6 @@ if __name__ == "__main__":
             f"{Fore.CYAN}--- Application Shutdown Complete (Total Runtime: {total_runtime:.2f}s) ---{Style.RESET_ALL}"
         )
         if logger:
-            logger.info(f"--- Application Shutdown Complete (Runtime: {total_runtime:.2f}s) ---")
+            logger.info(
+                f"--- Application Shutdown Complete (Runtime: {total_runtime:.2f}s) ---"
+            )

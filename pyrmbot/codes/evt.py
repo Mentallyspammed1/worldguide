@@ -35,7 +35,9 @@ class EhlersVolumetricStrategy:
         self.logger = logging.getLogger(__name__)
         self.position_side = None
         self.position_qty = Decimal("0")
-        self.evt_length = self.config.strategy_config.indicator_settings.get("evt_length", 7)
+        self.evt_length = self.config.strategy_config.indicator_settings.get(
+            "evt_length", 7
+        )
         self.atr_multiplier = Decimal("2.0")  # For SL/TP
         self._initialize()
 
@@ -44,8 +46,12 @@ class EhlersVolumetricStrategy:
         if not self.helper.diagnose_connection():
             self.logger.critical("Connection diagnostics failed. Exiting.")
             raise SystemExit(1)
-        topics = [f"kline.{self.config.strategy_config.timeframe}.{self.config.api_config.symbol}"]
-        self.helper.subscribe_to_stream(topics, self._kline_callback, channel_type="public")
+        topics = [
+            f"kline.{self.config.strategy_config.timeframe}.{self.config.api_config.symbol}"
+        ]
+        self.helper.subscribe_to_stream(
+            topics, self._kline_callback, channel_type="public"
+        )
         self.logger.info("Strategy initialized and subscribed to WebSocket streams.")
 
     def _kline_callback(self, data: dict):
@@ -61,19 +67,31 @@ class EhlersVolumetricStrategy:
             evt_sell_col = f"evt_sell_{self.evt_length}"
             atr_col = f"ATRr_{self.config.strategy_config.indicator_settings.get('atr_period', 14)}"
 
-            if evt_buy_col not in df.columns or evt_sell_col not in df.columns or atr_col not in df.columns:
+            if (
+                evt_buy_col not in df.columns
+                or evt_sell_col not in df.columns
+                or atr_col not in df.columns
+            ):
                 self.logger.warning("Required indicator columns missing.")
                 return
 
             latest = df.iloc[-1]
             current_price = Decimal(str(latest["close"]))
-            atr = Decimal(str(latest[atr_col])) if pd.notna(latest[atr_col]) else Decimal("0")
+            atr = (
+                Decimal(str(latest[atr_col]))
+                if pd.notna(latest[atr_col])
+                else Decimal("0")
+            )
 
             # Calculate position size
             balance = self.helper.fetch_balance()
-            usdt_balance = Decimal(str(balance.get("list", [{}])[0].get("totalEquity", "0")))
+            usdt_balance = Decimal(
+                str(balance.get("list", [{}])[0].get("totalEquity", "0"))
+            )
             risk_amount = usdt_balance * self.config.strategy_config.risk_per_trade
-            position_qty = (risk_amount / (atr * self.atr_multiplier)).quantize(Decimal("0.001"))
+            position_qty = (risk_amount / (atr * self.atr_multiplier)).quantize(
+                Decimal("0.001")
+            )
 
             # Signals
             if latest[evt_buy_col] and self.position_side != "Buy":
@@ -94,7 +112,9 @@ class EhlersVolumetricStrategy:
                     qty=float(self.position_qty),
                     reduce_only=True,
                 )
-                self.logger.info(f"Closed {self.position_side} position: {self.position_qty}")
+                self.logger.info(
+                    f"Closed {self.position_side} position: {self.position_qty}"
+                )
                 self.position_side = None
                 self.position_qty = Decimal("0")
 
@@ -104,13 +124,27 @@ class EhlersVolumetricStrategy:
                 self.position_side = side
                 self.position_qty = qty
                 # Set SL/TP
-                sl_price = price - (atr * self.atr_multiplier) if side == "Buy" else price + (atr * self.atr_multiplier)
-                tp_price = price + (atr * self.atr_multiplier) if side == "Buy" else price - (atr * self.atr_multiplier)
-                self.helper.place_limit_order(
-                    side="Sell" if side == "Buy" else "Buy", qty=float(qty), price=float(sl_price), reduce_only=True
+                sl_price = (
+                    price - (atr * self.atr_multiplier)
+                    if side == "Buy"
+                    else price + (atr * self.atr_multiplier)
+                )
+                tp_price = (
+                    price + (atr * self.atr_multiplier)
+                    if side == "Buy"
+                    else price - (atr * self.atr_multiplier)
                 )
                 self.helper.place_limit_order(
-                    side="Sell" if side == "Buy" else "Buy", qty=float(qty), price=float(tp_price), reduce_only=True
+                    side="Sell" if side == "Buy" else "Buy",
+                    qty=float(qty),
+                    price=float(sl_price),
+                    reduce_only=True,
+                )
+                self.helper.place_limit_order(
+                    side="Sell" if side == "Buy" else "Buy",
+                    qty=float(qty),
+                    price=float(tp_price),
+                    reduce_only=True,
                 )
                 self.logger.info(f"Set SL: {sl_price}, TP: {tp_price}")
         except Exception as e:

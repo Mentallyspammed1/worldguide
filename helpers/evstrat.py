@@ -45,7 +45,10 @@ except ImportError:
 
     Fore = Style = Back = DummyColor()
     COLORAMA_AVAILABLE = False
-    print("Warning: 'colorama' library not found. Run 'pip install colorama' for vibrant logs.", file=sys.stderr)
+    print(
+        "Warning: 'colorama' library not found. Run 'pip install colorama' for vibrant logs.",
+        file=sys.stderr,
+    )
 
 # --- Import Custom Modules ---
 try:
@@ -85,7 +88,9 @@ class Config:
         self.EXCHANGE_ID: str = "bybit"
         self.API_KEY: str | None = os.getenv("BYBIT_API_KEY")
         self.API_SECRET: str | None = os.getenv("BYBIT_API_SECRET")
-        self.TESTNET_MODE: bool = os.getenv("BYBIT_TESTNET_MODE", "true").lower() == "true"
+        self.TESTNET_MODE: bool = (
+            os.getenv("BYBIT_TESTNET_MODE", "true").lower() == "true"
+        )
         self.DEFAULT_RECV_WINDOW: int = int(os.getenv("DEFAULT_RECV_WINDOW", 10000))
 
         # Symbol & Market
@@ -94,13 +99,21 @@ class Config:
         self.EXPECTED_MARKET_TYPE: str = "swap"  # e.g., 'spot', 'swap'
         self.EXPECTED_MARKET_LOGIC: str = "linear"  # 'linear' or 'inverse'
         self.TIMEFRAME: str = os.getenv("TIMEFRAME", "5m")
-        self.OHLCV_LIMIT: int = int(os.getenv("OHLCV_LIMIT", 200))  # Min candles for indicators
+        self.OHLCV_LIMIT: int = int(
+            os.getenv("OHLCV_LIMIT", 200)
+        )  # Min candles for indicators
 
         # Account & Position Settings
         self.DEFAULT_LEVERAGE: int = int(os.getenv("LEVERAGE", 10))
-        self.DEFAULT_MARGIN_MODE: str = os.getenv("MARGIN_MODE", "cross").lower()  # 'cross' or 'isolated'
-        self.DEFAULT_POSITION_MODE: str = os.getenv("POSITION_MODE", "one-way").lower()  # 'one-way' or 'hedge'
-        self.RISK_PER_TRADE: Decimal = Decimal(os.getenv("RISK_PER_TRADE", "0.01"))  # e.g., 0.01 = 1% risk
+        self.DEFAULT_MARGIN_MODE: str = os.getenv(
+            "MARGIN_MODE", "cross"
+        ).lower()  # 'cross' or 'isolated'
+        self.DEFAULT_POSITION_MODE: str = os.getenv(
+            "POSITION_MODE", "one-way"
+        ).lower()  # 'one-way' or 'hedge'
+        self.RISK_PER_TRADE: Decimal = Decimal(
+            os.getenv("RISK_PER_TRADE", "0.01")
+        )  # e.g., 0.01 = 1% risk
 
         # Order Settings
         self.DEFAULT_SLIPPAGE_PCT: Decimal = Decimal(
@@ -120,22 +133,30 @@ class Config:
             os.getenv("EVT_MULTIPLIER", 2.5)
         )  # Note: float, might be better as Decimal if precision critical in indicator
         self.STOP_LOSS_ATR_PERIOD: int = int(os.getenv("ATR_PERIOD", 14))
-        self.STOP_LOSS_ATR_MULTIPLIER: Decimal = Decimal(os.getenv("ATR_MULTIPLIER", "2.5"))
+        self.STOP_LOSS_ATR_MULTIPLIER: Decimal = Decimal(
+            os.getenv("ATR_MULTIPLIER", "2.5")
+        )
 
         # Retry & Timing
         self.RETRY_COUNT: int = int(os.getenv("RETRY_COUNT", 3))
         self.RETRY_DELAY_SECONDS: float = float(os.getenv("RETRY_DELAY", 2.0))
-        self.LOOP_DELAY_SECONDS: int = int(os.getenv("LOOP_DELAY", 60))  # Target time per loop cycle
+        self.LOOP_DELAY_SECONDS: int = int(
+            os.getenv("LOOP_DELAY", 60)
+        )  # Target time per loop cycle
         self.POSITION_CONFIRM_DELAY_SECONDS: int = int(
             os.getenv("POSITION_CONFIRM_DELAY", 7)
         )  # Wait after entry order before checking position
-        self.POST_CLOSE_DELAY_SECONDS: int = int(os.getenv("POST_CLOSE_DELAY", 10))  # Wait after closing position
+        self.POST_CLOSE_DELAY_SECONDS: int = int(
+            os.getenv("POST_CLOSE_DELAY", 10)
+        )  # Wait after closing position
 
         # Logging & Alerts
         self.LOG_CONSOLE_LEVEL: str = os.getenv("LOG_CONSOLE_LEVEL", "INFO").upper()
         self.LOG_FILE_LEVEL: str = os.getenv("LOG_FILE_LEVEL", "DEBUG").upper()
         self.LOG_FILE_PATH: str = os.getenv("LOG_FILE_PATH", "ehlers_strategy.log")
-        self.ENABLE_SMS_ALERTS: bool = os.getenv("ENABLE_SMS_ALERTS", "false").lower() == "true"
+        self.ENABLE_SMS_ALERTS: bool = (
+            os.getenv("ENABLE_SMS_ALERTS", "false").lower() == "true"
+        )
         self.SMS_RECIPIENT_NUMBER: str | None = os.getenv("SMS_RECIPIENT_NUMBER")
         self.SMS_TIMEOUT_SECONDS: int = 30
         self.TWILIO_ACCOUNT_SID: str | None = os.getenv("TWILIO_ACCOUNT_SID")
@@ -148,7 +169,9 @@ class Config:
         self.POS_LONG: str = "LONG"  # Standardize case for position side reporting
         self.POS_SHORT: str = "SHORT"
         self.POS_NONE: str = "NONE"
-        self.POSITION_QTY_EPSILON: Decimal = Decimal("1e-9")  # Small value to compare position quantities
+        self.POSITION_QTY_EPSILON: Decimal = Decimal(
+            "1e-9"
+        )  # Small value to compare position quantities
 
         # --- Derived/Helper Attributes ---
         # Bundled for easier passing to indicator calculation
@@ -167,11 +190,18 @@ class Config:
                 "evt_multiplier": self.EVT_MULTIPLIER,
             }
         }
-        self.strategy = {"name": "ehlers_volumetric"}  # For potential use in shared functions
+        self.strategy = {
+            "name": "ehlers_volumetric"
+        }  # For potential use in shared functions
 
         # --- Validate SMS Config if enabled ---
         if self.ENABLE_SMS_ALERTS and not all(
-            [self.SMS_RECIPIENT_NUMBER, self.TWILIO_ACCOUNT_SID, self.TWILIO_AUTH_TOKEN, self.TWILIO_PHONE_NUMBER]
+            [
+                self.SMS_RECIPIENT_NUMBER,
+                self.TWILIO_ACCOUNT_SID,
+                self.TWILIO_AUTH_TOKEN,
+                self.TWILIO_PHONE_NUMBER,
+            ]
         ):
             print(
                 f"{Fore.YELLOW}Warning: SMS alerts enabled, but one or more Twilio config variables (SID, TOKEN, NUMBER) or recipient number are missing.{Style.RESET_ALL}"
@@ -197,7 +227,9 @@ def calculate_indicators(df: pd.DataFrame, config: Config) -> pd.DataFrame | Non
         print("Logger not initialized in calculate_indicators", file=sys.stderr)
         return None
     if df is None or df.empty:
-        logger.error(f"{Fore.RED}Cannot calculate indicators: Input DataFrame is empty.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Cannot calculate indicators: Input DataFrame is empty.{Style.RESET_ALL}"
+        )
         return None
     try:
         indicator_config = {
@@ -210,19 +242,27 @@ def calculate_indicators(df: pd.DataFrame, config: Config) -> pd.DataFrame | Non
         df_with_indicators = ind.calculate_all_indicators(df.copy(), indicator_config)
 
         if df_with_indicators is None or df_with_indicators.empty:
-            logger.error(f"{Fore.RED}Indicator calculation returned empty or None DataFrame.{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Indicator calculation returned empty or None DataFrame.{Style.RESET_ALL}"
+            )
             return None
 
         # --- Validate required columns exist robustly ---
         required_cols = []
         if config.EVT_ENABLED:
             required_cols.extend(
-                [f"evt_trend_{config.EVT_LENGTH}", f"evt_buy_{config.EVT_LENGTH}", f"evt_sell_{config.EVT_LENGTH}"]
+                [
+                    f"evt_trend_{config.EVT_LENGTH}",
+                    f"evt_buy_{config.EVT_LENGTH}",
+                    f"evt_sell_{config.EVT_LENGTH}",
+                ]
             )
         if config.analysis_flags.get("use_atr", False):  # Check if ATR is expected
             required_cols.append(f"ATRr_{config.STOP_LOSS_ATR_PERIOD}")
 
-        missing_cols = [col for col in required_cols if col not in df_with_indicators.columns]
+        missing_cols = [
+            col for col in required_cols if col not in df_with_indicators.columns
+        ]
 
         # --- Attempt Fallback Calculation for Missing ATR ---
         atr_col_name = f"ATRr_{config.STOP_LOSS_ATR_PERIOD}"
@@ -235,22 +275,29 @@ def calculate_indicators(df: pd.DataFrame, config: Config) -> pd.DataFrame | Non
                     # Assuming 'ta' library is used within indicators.py or available here
                     import pandas_ta as ta  # Ensure pandas_ta is available if used directly
 
-                    atr_result = df_with_indicators.ta.atr(length=config.STOP_LOSS_ATR_PERIOD, append=False)
+                    atr_result = df_with_indicators.ta.atr(
+                        length=config.STOP_LOSS_ATR_PERIOD, append=False
+                    )
                     if atr_result is not None and not atr_result.empty:
                         df_with_indicators[atr_result.name] = atr_result
                         logger.info(
                             f"{Fore.CYAN}Calculated missing ATR column '{atr_result.name}' using pandas_ta.{Style.RESET_ALL}"
                         )
-                        missing_cols.remove(atr_col_name)  # Remove if successfully added
+                        missing_cols.remove(
+                            atr_col_name
+                        )  # Remove if successfully added
                     else:
-                        logger.error(f"{Fore.RED}Fallback ATR calculation failed or returned empty.{Style.RESET_ALL}")
+                        logger.error(
+                            f"{Fore.RED}Fallback ATR calculation failed or returned empty.{Style.RESET_ALL}"
+                        )
                 except ImportError:
                     logger.error(
                         f"{Fore.RED}Cannot perform fallback ATR calculation: 'pandas_ta' not installed. Run 'pip install pandas_ta'.{Style.RESET_ALL}"
                     )
                 except Exception as atr_err:
                     logger.error(
-                        f"{Fore.RED}Error during fallback ATR calculation: {atr_err}{Style.RESET_ALL}", exc_info=True
+                        f"{Fore.RED}Error during fallback ATR calculation: {atr_err}{Style.RESET_ALL}",
+                        exc_info=True,
                     )
             else:
                 logger.error(
@@ -269,7 +316,10 @@ def calculate_indicators(df: pd.DataFrame, config: Config) -> pd.DataFrame | Non
         )
         return df_with_indicators
     except Exception as e:
-        logger.error(f"{Fore.RED}Error calculating indicators: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}Error calculating indicators: {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         return None
 
 
@@ -337,11 +387,15 @@ def generate_signals(df_ind: pd.DataFrame, config: Config) -> str | None:
         # Refined logic: Ensure only one signal is active to avoid ambiguity
         if buy_signal and not sell_signal:  # Explicit buy signal
             # Optional: Add trend confirmation: if trend == 1: ...
-            logger.info(f"{Fore.GREEN}BUY signal generated based on EVT Buy flag.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}BUY signal generated based on EVT Buy flag.{Style.RESET_ALL}"
+            )
             return config.SIDE_BUY
         elif sell_signal and not buy_signal:  # Explicit sell signal
             # Optional: Add trend confirmation: if trend == -1: ...
-            logger.info(f"{Fore.RED}SELL signal generated based on EVT Sell flag.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.RED}SELL signal generated based on EVT Sell flag.{Style.RESET_ALL}"
+            )
             return config.SIDE_SELL
         elif buy_signal and sell_signal:
             logger.warning(
@@ -358,18 +412,29 @@ def generate_signals(df_ind: pd.DataFrame, config: Config) -> str | None:
             f"{Fore.YELLOW}Could not access latest indicator data (IndexError), DataFrame might be too short ({len(df_ind)} rows).{Style.RESET_ALL}"
         )
         return None
-    except (KeyError, ValueError, TypeError) as e:  # Catch potential issues if columns exist but data is wrong type
+    except (
+        KeyError,
+        ValueError,
+        TypeError,
+    ) as e:  # Catch potential issues if columns exist but data is wrong type
         logger.error(
             f"{Fore.RED}Error processing latest data for signal generation: {e}. Data: {latest.to_dict()}{Style.RESET_ALL}"
         )
         return None
     except Exception as e:
-        logger.error(f"{Fore.RED}Unexpected error generating signals: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}Unexpected error generating signals: {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         return None
 
 
 def calculate_stop_loss(
-    current_exchange: ccxt_async.bybit, df_ind: pd.DataFrame, side: str, entry_price: Decimal, config: Config
+    current_exchange: ccxt_async.bybit,
+    df_ind: pd.DataFrame,
+    side: str,
+    entry_price: Decimal,
+    config: Config,
 ) -> Decimal | None:
     """Calculates the initial stop-loss price based on ATR (Synchronous).
     Uses market precision (tick size) for accurate formatting.
@@ -379,10 +444,14 @@ def calculate_stop_loss(
         print("Logger not initialized in calculate_stop_loss", file=sys.stderr)
         return None
     if current_exchange is None:
-        logger.error(f"{Fore.RED}Cannot calculate stop-loss: Exchange object is None.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Cannot calculate stop-loss: Exchange object is None.{Style.RESET_ALL}"
+        )
         return None
     if df_ind is None or df_ind.empty:
-        logger.error(f"{Fore.RED}Cannot calculate stop-loss: Indicator DataFrame is missing or empty.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Cannot calculate stop-loss: Indicator DataFrame is missing or empty.{Style.RESET_ALL}"
+        )
         return None
     if not config.analysis_flags.get("use_atr", False):
         logger.warning(
@@ -413,7 +482,9 @@ def calculate_stop_loss(
             except InvalidOperation:
                 try:
                     # Handles integer style precision (number of decimal places)
-                    tick_size = Decimal("1") / (Decimal("10") ** int(price_precision_str))
+                    tick_size = Decimal("1") / (
+                        Decimal("10") ** int(price_precision_str)
+                    )
                 except (ValueError, TypeError, InvalidOperation):
                     logger.warning(
                         f"{Fore.YELLOW}Could not parse price precision '{price_precision_str}' for {config.SYMBOL}. Using fallback 1e-8.{Style.RESET_ALL}"
@@ -422,11 +493,15 @@ def calculate_stop_loss(
 
         atr_col = f"ATRr_{config.STOP_LOSS_ATR_PERIOD}"
         if atr_col not in df_ind.columns:
-            logger.error(f"{Fore.RED}ATR column '{atr_col}' not found for stop-loss calculation.{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}ATR column '{atr_col}' not found for stop-loss calculation.{Style.RESET_ALL}"
+            )
             return None
 
         if len(df_ind) == 0:
-            logger.warning(f"{Fore.YELLOW}Cannot calculate SL: Indicator DataFrame has 0 rows.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}Cannot calculate SL: Indicator DataFrame has 0 rows.{Style.RESET_ALL}"
+            )
             return None
 
         latest_atr_raw = df_ind.iloc[-1][atr_col]
@@ -444,13 +519,19 @@ def calculate_stop_loss(
             return None
 
         stop_offset = latest_atr * config.STOP_LOSS_ATR_MULTIPLIER
-        stop_loss_price_raw = entry_price - stop_offset if side == config.SIDE_BUY else entry_price + stop_offset
+        stop_loss_price_raw = (
+            entry_price - stop_offset
+            if side == config.SIDE_BUY
+            else entry_price + stop_offset
+        )
 
         # --- Format price according to market precision (tick size) ---
         # Use quantize for correct rounding based on tick size.
         # Round "away" from the entry price for safety.
         rounding_mode = ROUND_DOWN if side == config.SIDE_BUY else ROUND_UP
-        stop_loss_price = stop_loss_price_raw.quantize(tick_size, rounding=rounding_mode)
+        stop_loss_price = stop_loss_price_raw.quantize(
+            tick_size, rounding=rounding_mode
+        )
 
         # --- Sanity checks AFTER precise formatting ---
         if side == config.SIDE_BUY:
@@ -458,7 +539,9 @@ def calculate_stop_loss(
                 logger.warning(
                     f"{Fore.YELLOW}Calculated Buy SL ({format_price(current_exchange, config.SYMBOL, stop_loss_price)}) is >= Entry ({format_price(current_exchange, config.SYMBOL, entry_price)}). Adjusting one tick lower.{Style.RESET_ALL}"
                 )
-                stop_loss_price = (stop_loss_price - tick_size).quantize(tick_size, rounding=ROUND_DOWN)
+                stop_loss_price = (stop_loss_price - tick_size).quantize(
+                    tick_size, rounding=ROUND_DOWN
+                )
             # Ensure it didn't become negative after adjustment
             if stop_loss_price <= Decimal(0):
                 logger.error(
@@ -470,7 +553,9 @@ def calculate_stop_loss(
                 logger.warning(
                     f"{Fore.YELLOW}Calculated Sell SL ({format_price(current_exchange, config.SYMBOL, stop_loss_price)}) is <= Entry ({format_price(current_exchange, config.SYMBOL, entry_price)}). Adjusting one tick higher.{Style.RESET_ALL}"
                 )
-                stop_loss_price = (stop_loss_price + tick_size).quantize(tick_size, rounding=ROUND_UP)
+                stop_loss_price = (stop_loss_price + tick_size).quantize(
+                    tick_size, rounding=ROUND_UP
+                )
 
         logger.info(
             f"Calculated SL for {side.upper()} at {format_price(current_exchange, config.SYMBOL, stop_loss_price)} "
@@ -484,15 +569,24 @@ def calculate_stop_loss(
         )
         return None
     except (KeyError, ValueError, TypeError, InvalidOperation) as e:
-        logger.error(f"{Fore.RED}Error processing data or market info for SL calculation: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Error processing data or market info for SL calculation: {e}{Style.RESET_ALL}"
+        )
         return None
     except Exception as e:
-        logger.error(f"{Fore.RED}Unexpected error calculating stop-loss: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}Unexpected error calculating stop-loss: {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         return None
 
 
 async def calculate_position_size(
-    current_exchange: ccxt_async.bybit, symbol: str, entry_price: Decimal, stop_loss_price: Decimal, config: Config
+    current_exchange: ccxt_async.bybit,
+    symbol: str,
+    entry_price: Decimal,
+    stop_loss_price: Decimal,
+    config: Config,
 ) -> Decimal | None:
     """Calculates position size based on risk percentage and stop-loss distance.
     Fetches available balance asynchronously.
@@ -502,21 +596,29 @@ async def calculate_position_size(
         print("Logger not initialized in calculate_position_size", file=sys.stderr)
         return None
     if not current_exchange:
-        logger.error(f"{Fore.RED}Cannot calculate position size: Exchange object is None.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Cannot calculate position size: Exchange object is None.{Style.RESET_ALL}"
+        )
         return None
 
     try:
         # --- Fetch Available Balance (Asynchronous) ---
-        logger.debug(f"{Fore.CYAN}# Awaiting {config.USDT_SYMBOL} balance for position sizing...{Style.RESET_ALL}")
+        logger.debug(
+            f"{Fore.CYAN}# Awaiting {config.USDT_SYMBOL} balance for position sizing...{Style.RESET_ALL}"
+        )
         # ASSUMPTION: bybit.fetch_usdt_balance IS ASYNC and returns (total, available) Decimals or Nones
-        total_balance, available_balance = await bybit.fetch_usdt_balance(current_exchange, config)
+        total_balance, available_balance = await bybit.fetch_usdt_balance(
+            current_exchange, config
+        )
 
         if available_balance is None or available_balance <= Decimal("0"):
             logger.error(
                 f"{Fore.RED}Cannot calculate position size: Zero, None, or invalid available balance ({available_balance}).{Style.RESET_ALL}"
             )
             return None
-        logger.debug(f"Available balance for sizing: {available_balance:.4f} {config.USDT_SYMBOL}")
+        logger.debug(
+            f"Available balance for sizing: {available_balance:.4f} {config.USDT_SYMBOL}"
+        )
 
         # --- Calculate Risk ---
         risk_amount_usd = available_balance * config.RISK_PER_TRADE
@@ -547,7 +649,9 @@ async def calculate_position_size(
         min_qty_str = amount_limits.get("min")
         max_qty_str = amount_limits.get("max")
         # Amount precision (step size) can be tricky - might be number of digits or step value string
-        qty_precision_value = precision.get("amount")  # Can be int (digits) or float/str ('0.001')
+        qty_precision_value = precision.get(
+            "amount"
+        )  # Can be int (digits) or float/str ('0.001')
 
         # --- Determine Step Size (amount precision) Robustly ---
         step_size: Decimal | None = None
@@ -585,7 +689,9 @@ async def calculate_position_size(
             step_size = Decimal("1e-8")  # Fallback step size
 
         # --- Adjust position size down to the nearest valid step size ---
-        position_size_adjusted = position_size_base.quantize(step_size, rounding=ROUND_DOWN)
+        position_size_adjusted = position_size_base.quantize(
+            step_size, rounding=ROUND_DOWN
+        )
 
         if position_size_adjusted <= Decimal(0):
             logger.warning(
@@ -610,7 +716,9 @@ async def calculate_position_size(
             # Adjust max qty to step size too, just in case max isn't a multiple of step
             position_size_adjusted = max_qty.quantize(step_size, rounding=ROUND_DOWN)
             # Re-check if capping made it too small or zero
-            if position_size_adjusted <= Decimal(0) or (min_qty is not None and position_size_adjusted < min_qty):
+            if position_size_adjusted <= Decimal(0) or (
+                min_qty is not None and position_size_adjusted < min_qty
+            ):
                 logger.error(
                     f"{Fore.RED}Position size after capping at max ({format_amount(current_exchange, symbol, position_size_adjusted)}) became invalid (zero or below min). Cannot place trade.{Style.RESET_ALL}"
                 )
@@ -647,7 +755,10 @@ async def calculate_position_size(
         )
         return None
     except Exception as e:
-        logger.error(f"{Fore.RED}Unexpected error calculating position size: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}Unexpected error calculating position size: {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         return None
 
 
@@ -673,7 +784,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
     logger.info(
         f"EVT Params: Enabled={config.EVT_ENABLED}, Length={config.EVT_LENGTH}, Multiplier={config.EVT_MULTIPLIER}"
     )
-    logger.info(f"ATR Params: Period={config.STOP_LOSS_ATR_PERIOD}, Multiplier={config.STOP_LOSS_ATR_MULTIPLIER}")
+    logger.info(
+        f"ATR Params: Period={config.STOP_LOSS_ATR_PERIOD}, Multiplier={config.STOP_LOSS_ATR_MULTIPLIER}"
+    )
     if config.ENABLE_SMS_ALERTS:
         logger.info(f"SMS Alerts: ENABLED for {config.SMS_RECIPIENT_NUMBER}")
 
@@ -693,9 +806,13 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
             )
 
             # --- 1. Fetch Current State (Requires async calls) ---
-            logger.debug(f"{Fore.CYAN}# Awaiting current position state for {config.SYMBOL}...{Style.RESET_ALL}")
+            logger.debug(
+                f"{Fore.CYAN}# Awaiting current position state for {config.SYMBOL}...{Style.RESET_ALL}"
+            )
             # ASSUMPTION: get_current_position_bybit_v5 IS ASYNC and returns dict or None
-            current_position = await bybit.get_current_position_bybit_v5(current_exchange, config.SYMBOL, config)
+            current_position = await bybit.get_current_position_bybit_v5(
+                current_exchange, config.SYMBOL, config
+            )
             if current_position is None:
                 logger.warning(
                     f"{Fore.YELLOW}Failed to get current position state for {config.SYMBOL}. Retrying next cycle.{Style.RESET_ALL}"
@@ -704,8 +821,12 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 continue
 
             # Extract position details (POS_LONG, POS_SHORT, POS_NONE)
-            current_side = current_position.get("side", config.POS_NONE)  # Default to NONE if missing
-            current_qty = current_position.get("qty", Decimal(0))  # Decimal, default to 0
+            current_side = current_position.get(
+                "side", config.POS_NONE
+            )  # Default to NONE if missing
+            current_qty = current_position.get(
+                "qty", Decimal(0)
+            )  # Decimal, default to 0
             entry_price = current_position.get("entry_price")  # Decimal or None
             logger.info(
                 f"Current Position ({config.SYMBOL}): Side={current_side}, "
@@ -714,19 +835,30 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
             )
 
             # --- 2. Fetch Data & Calculate Indicators (Requires async fetches) ---
-            logger.debug(f"{Fore.CYAN}# Awaiting OHLCV data for {config.SYMBOL}...{Style.RESET_ALL}")
+            logger.debug(
+                f"{Fore.CYAN}# Awaiting OHLCV data for {config.SYMBOL}...{Style.RESET_ALL}"
+            )
             # ASSUMPTION: fetch_ohlcv_paginated IS ASYNC
             ohlcv_df = await bybit.fetch_ohlcv_paginated(
                 current_exchange,
                 config.SYMBOL,
                 config.TIMEFRAME,
                 limit_per_req=1000,  # Bybit V5 default/max
-                max_total_candles=config.OHLCV_LIMIT + 50,  # Fetch slightly more for indicator stability
+                max_total_candles=config.OHLCV_LIMIT
+                + 50,  # Fetch slightly more for indicator stability
                 config=config,
             )
             # Robust check for sufficient data
-            min_required_candles = max(config.OHLCV_LIMIT, config.STOP_LOSS_ATR_PERIOD + 1, config.EVT_LENGTH + 1)
-            if ohlcv_df is None or ohlcv_df.empty or len(ohlcv_df) < min_required_candles:
+            min_required_candles = max(
+                config.OHLCV_LIMIT,
+                config.STOP_LOSS_ATR_PERIOD + 1,
+                config.EVT_LENGTH + 1,
+            )
+            if (
+                ohlcv_df is None
+                or ohlcv_df.empty
+                or len(ohlcv_df) < min_required_candles
+            ):
                 logger.warning(
                     f"{Fore.YELLOW}Could not fetch sufficient OHLCV data for {config.SYMBOL} "
                     f"({len(ohlcv_df) if ohlcv_df is not None else 0} candles, needed ~{min_required_candles}). Skipping cycle.{Style.RESET_ALL}"
@@ -734,9 +866,13 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 await asyncio.sleep(config.LOOP_DELAY_SECONDS)
                 continue
 
-            logger.debug(f"{Fore.CYAN}# Awaiting ticker data for {config.SYMBOL}...{Style.RESET_ALL}")
+            logger.debug(
+                f"{Fore.CYAN}# Awaiting ticker data for {config.SYMBOL}...{Style.RESET_ALL}"
+            )
             # ASSUMPTION: fetch_ticker_validated IS ASYNC
-            ticker = await bybit.fetch_ticker_validated(current_exchange, config.SYMBOL, config)
+            ticker = await bybit.fetch_ticker_validated(
+                current_exchange, config.SYMBOL, config
+            )
             if ticker is None or ticker.get("last") is None:
                 logger.warning(
                     f"{Fore.YELLOW}Could not fetch valid ticker data for {config.SYMBOL}. Skipping cycle.{Style.RESET_ALL}"
@@ -765,11 +901,16 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
 
             # --- 3. Generate Trading Signal (Synchronous) ---
             signal = generate_signals(df_with_indicators, config)
-            logger.info(f"Generated Signal ({config.SYMBOL}): {signal if signal else 'None'}")
+            logger.info(
+                f"Generated Signal ({config.SYMBOL}): {signal if signal else 'None'}"
+            )
 
             # --- 4. Handle Exits (Requires async order calls) ---
             # Only process exits if we are currently in a position
-            if current_side != config.POS_NONE and current_qty > config.POSITION_QTY_EPSILON:
+            if (
+                current_side != config.POS_NONE
+                and current_qty > config.POSITION_QTY_EPSILON
+            ):
                 should_exit = False
                 exit_reason = ""
 
@@ -777,7 +918,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 # Exit Condition 1: EVT Trend Reversal Signal
                 if config.EVT_ENABLED:
                     try:
-                        latest_trend_val = df_with_indicators.iloc[-1].get(f"evt_trend_{config.EVT_LENGTH}")
+                        latest_trend_val = df_with_indicators.iloc[-1].get(
+                            f"evt_trend_{config.EVT_LENGTH}"
+                        )
                         if not pd.isna(latest_trend_val):
                             latest_trend = int(latest_trend_val)
                             if current_side == config.POS_LONG and latest_trend == -1:
@@ -796,7 +939,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                         )
 
                 # Exit Condition 2: Opposite EVT Signal (e.g., Long position sees a SELL signal)
-                if not should_exit and signal:  # Only check if not already exiting based on trend
+                if (
+                    not should_exit and signal
+                ):  # Only check if not already exiting based on trend
                     if (
                         current_side == config.POS_LONG
                         and signal == config.SIDE_SELL
@@ -817,7 +962,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                     )
 
                     # --- Cancel Existing SL Order FIRST ---
-                    sl_order_id = stop_loss_orders.pop(config.SYMBOL, None)  # Get and remove ID if found
+                    sl_order_id = stop_loss_orders.pop(
+                        config.SYMBOL, None
+                    )  # Get and remove ID if found
                     if sl_order_id:
                         try:
                             logger.info(
@@ -828,7 +975,10 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                             )
                             # ASSUMPTION: cancel_order IS async
                             cancelled = await bybit.cancel_order(
-                                current_exchange, config.SYMBOL, sl_order_id, config=config
+                                current_exchange,
+                                config.SYMBOL,
+                                sl_order_id,
+                                config=config,
                             )
                             if cancelled:
                                 logger.info(
@@ -882,10 +1032,18 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                     if close_order and close_order.get("id"):
                         close_id_short = format_order_id(close_order["id"])
                         # Try to get actual filled qty/price from order, fallback to initial qty
-                        filled_qty_close = safe_decimal_conversion(close_order.get("filled", current_qty))
-                        avg_close_price = safe_decimal_conversion(close_order.get("average"))
+                        filled_qty_close = safe_decimal_conversion(
+                            close_order.get("filled", current_qty)
+                        )
+                        avg_close_price = safe_decimal_conversion(
+                            close_order.get("average")
+                        )
                         close_price_formatted = (
-                            format_price(current_exchange, config.SYMBOL, avg_close_price) if avg_close_price else "N/A"
+                            format_price(
+                                current_exchange, config.SYMBOL, avg_close_price
+                            )
+                            if avg_close_price
+                            else "N/A"
                         )
 
                         logger.success(
@@ -898,7 +1056,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                             send_sms_alert(alert_msg, config)
 
                         # Optional: Short delay to allow position update propagation before next cycle checks
-                        logger.debug(f"Waiting {config.POST_CLOSE_DELAY_SECONDS}s after closing position...")
+                        logger.debug(
+                            f"Waiting {config.POST_CLOSE_DELAY_SECONDS}s after closing position..."
+                        )
                         await asyncio.sleep(config.POST_CLOSE_DELAY_SECONDS)
                         continue  # Skip entry logic for this cycle as we just exited
 
@@ -923,7 +1083,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 )
 
                 # --- Pre-entry Cleanup: Cancel any existing orders for the symbol ---
-                logger.debug(f"{Fore.CYAN}# Awaiting pre-entry order cleanup for {config.SYMBOL}...{Style.RESET_ALL}")
+                logger.debug(
+                    f"{Fore.CYAN}# Awaiting pre-entry order cleanup for {config.SYMBOL}...{Style.RESET_ALL}"
+                )
                 # ASSUMPTION: cancel_all_orders IS async and returns count or None
                 cancelled_count = await bybit.cancel_all_orders(
                     current_exchange, config.SYMBOL, config, reason="Pre-Entry Cleanup"
@@ -933,7 +1095,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                         f"Pre-entry cleanup ({config.SYMBOL}): Cancelled {cancelled_count} potential lingering order(s)."
                     )
                 elif cancelled_count == 0:
-                    logger.info(f"Pre-entry cleanup ({config.SYMBOL}): No lingering orders found.")
+                    logger.info(
+                        f"Pre-entry cleanup ({config.SYMBOL}): No lingering orders found."
+                    )
                 # If cancelled_count is None, helper likely logged an error, proceed with caution
 
                 # --- Calculate Stop Loss (Synchronous, uses latest data) ---
@@ -941,23 +1105,37 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 stop_loss_price = calculate_stop_loss(
                     current_exchange, df_with_indicators, signal, current_price, config
                 )
-                if not stop_loss_price or stop_loss_price <= 0:  # Check if None or invalid (zero/negative)
+                if (
+                    not stop_loss_price or stop_loss_price <= 0
+                ):  # Check if None or invalid (zero/negative)
                     logger.error(
                         f"{Fore.RED}Could not calculate a valid stop-loss for {config.SYMBOL} based on current data (Result: {stop_loss_price}). Cannot enter trade.{Style.RESET_ALL}"
                     )
-                    await asyncio.sleep(config.LOOP_DELAY_SECONDS)  # Wait before retrying cycle
+                    await asyncio.sleep(
+                        config.LOOP_DELAY_SECONDS
+                    )  # Wait before retrying cycle
                     continue
 
                 # --- Calculate Position Size (Asynchronous, fetches balance) ---
-                logger.debug(f"{Fore.CYAN}# Awaiting position size calculation for {config.SYMBOL}...{Style.RESET_ALL}")
-                position_size = await calculate_position_size(
-                    current_exchange, config.SYMBOL, current_price, stop_loss_price, config
+                logger.debug(
+                    f"{Fore.CYAN}# Awaiting position size calculation for {config.SYMBOL}...{Style.RESET_ALL}"
                 )
-                if not position_size or position_size <= 0:  # Check if None or zero/negative
+                position_size = await calculate_position_size(
+                    current_exchange,
+                    config.SYMBOL,
+                    current_price,
+                    stop_loss_price,
+                    config,
+                )
+                if (
+                    not position_size or position_size <= 0
+                ):  # Check if None or zero/negative
                     logger.error(
                         f"{Fore.RED}Could not calculate a valid position size for {config.SYMBOL} (Result: {position_size}). Cannot enter trade.{Style.RESET_ALL}"
                     )
-                    await asyncio.sleep(config.LOOP_DELAY_SECONDS)  # Wait before retrying cycle
+                    await asyncio.sleep(
+                        config.LOOP_DELAY_SECONDS
+                    )  # Wait before retrying cycle
                     continue
 
                 # --- Place Market Entry Order (Asynchronous) ---
@@ -979,7 +1157,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                     avg_fill_price_order = safe_decimal_conversion(
                         entry_order.get("average")
                     )  # Might be None immediately
-                    filled_qty_order = safe_decimal_conversion(entry_order.get("filled", 0))  # Might be 0 immediately
+                    filled_qty_order = safe_decimal_conversion(
+                        entry_order.get("filled", 0)
+                    )  # Might be 0 immediately
 
                     logger.success(
                         f"{Fore.GREEN}Entry market order {order_id_short} submitted for {config.SYMBOL} ({signal.upper()} {format_amount(current_exchange, config.SYMBOL, position_size)}). "
@@ -996,22 +1176,37 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                     logger.debug(
                         f"{Fore.CYAN}# Awaiting position confirmation after entry ({config.SYMBOL})...{Style.RESET_ALL}"
                     )
-                    pos_after_entry = await bybit.get_current_position_bybit_v5(current_exchange, config.SYMBOL, config)
+                    pos_after_entry = await bybit.get_current_position_bybit_v5(
+                        current_exchange, config.SYMBOL, config
+                    )
 
                     # --- Validate the confirmed position ---
                     # Check side matches signal, and quantity is positive (using epsilon)
-                    expected_pos_side = config.POS_LONG if signal == config.SIDE_BUY else config.POS_SHORT
+                    expected_pos_side = (
+                        config.POS_LONG
+                        if signal == config.SIDE_BUY
+                        else config.POS_SHORT
+                    )
                     if (
                         pos_after_entry
                         and pos_after_entry.get("side") == expected_pos_side
-                        and pos_after_entry.get("qty", Decimal(0)) > config.POSITION_QTY_EPSILON
+                        and pos_after_entry.get("qty", Decimal(0))
+                        > config.POSITION_QTY_EPSILON
                     ):
                         # --- Position Confirmed! ---
                         actual_filled_qty = pos_after_entry["qty"]
                         # Use actual entry price from position if available, fallback to order's avg or original estimate
-                        actual_entry_price = pos_after_entry.get("entry_price") or avg_fill_price_order or current_price
-                        pos_qty_formatted = format_amount(current_exchange, config.SYMBOL, actual_filled_qty)
-                        entry_price_formatted = format_price(current_exchange, config.SYMBOL, actual_entry_price)
+                        actual_entry_price = (
+                            pos_after_entry.get("entry_price")
+                            or avg_fill_price_order
+                            or current_price
+                        )
+                        pos_qty_formatted = format_amount(
+                            current_exchange, config.SYMBOL, actual_filled_qty
+                        )
+                        entry_price_formatted = format_price(
+                            current_exchange, config.SYMBOL, actual_entry_price
+                        )
 
                         logger.info(
                             f"{Fore.GREEN}{Style.BRIGHT}Position confirmed OPEN ({config.SYMBOL}): {pos_after_entry['side']} {pos_qty_formatted} @ ~{entry_price_formatted}{Style.RESET_ALL}"
@@ -1025,8 +1220,14 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                         #     # For simplicity here, we proceed with the original SL price.
 
                         # --- Place Stop Loss Order ---
-                        sl_side = config.SIDE_SELL if signal == config.SIDE_BUY else config.SIDE_BUY
-                        sl_price_formatted = format_price(current_exchange, config.SYMBOL, stop_loss_price)
+                        sl_side = (
+                            config.SIDE_SELL
+                            if signal == config.SIDE_BUY
+                            else config.SIDE_BUY
+                        )
+                        sl_price_formatted = format_price(
+                            current_exchange, config.SYMBOL, stop_loss_price
+                        )
                         logger.info(
                             f"Placing {sl_side.upper()} native stop-loss order for {pos_qty_formatted} {config.SYMBOL} at {sl_price_formatted}..."
                         )
@@ -1074,7 +1275,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                                 position_to_close=pos_after_entry,  # Use the confirmed details
                                 reason="Emergency Close - Failed SL Placement",
                             )
-                            if emergency_close_order and emergency_close_order.get("id"):
+                            if emergency_close_order and emergency_close_order.get(
+                                "id"
+                            ):
                                 logger.warning(
                                     f"{Fore.YELLOW}Position ({config.SYMBOL}) emergency closed via order {format_order_id(emergency_close_order['id'])} due to failed SL placement.{Style.RESET_ALL}"
                                 )
@@ -1094,9 +1297,17 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
 
                     else:
                         # --- Position confirmation failed ---
-                        pos_side_report = pos_after_entry.get("side", "N/A") if pos_after_entry else "Fetch Failed"
+                        pos_side_report = (
+                            pos_after_entry.get("side", "N/A")
+                            if pos_after_entry
+                            else "Fetch Failed"
+                        )
                         pos_qty_report = (
-                            format_amount(current_exchange, config.SYMBOL, pos_after_entry.get("qty", 0))
+                            format_amount(
+                                current_exchange,
+                                config.SYMBOL,
+                                pos_after_entry.get("qty", 0),
+                            )
                             if pos_after_entry
                             else "N/A"
                         )
@@ -1134,13 +1345,17 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
             logger.warning(
                 f"{Fore.YELLOW}Network Error in main loop ({config.SYMBOL}): {e}. Retrying after {config.RETRY_DELAY_SECONDS * 5:.1f}s delay...{Style.RESET_ALL}"
             )
-            await asyncio.sleep(config.RETRY_DELAY_SECONDS * 5)  # Longer delay for network issues
+            await asyncio.sleep(
+                config.RETRY_DELAY_SECONDS * 5
+            )  # Longer delay for network issues
         except ccxt.ExchangeNotAvailable as e:
             logger.error(
                 f"{Fore.RED}Exchange Not Available ({config.SYMBOL}): {e}. Possibly maintenance. Waiting longer ({config.LOOP_DELAY_SECONDS * 5}s)...{Style.RESET_ALL}"
             )
             if config.ENABLE_SMS_ALERTS:
-                send_sms_alert(f"[{config.SYMBOL}] Exchange Not Available: {e}. Pausing.", config)
+                send_sms_alert(
+                    f"[{config.SYMBOL}] Exchange Not Available: {e}. Pausing.", config
+                )
             await asyncio.sleep(config.LOOP_DELAY_SECONDS * 5)
         except ccxt.RateLimitExceeded as e:
             logger.warning(
@@ -1153,7 +1368,10 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 exc_info=True,
             )
             if config.ENABLE_SMS_ALERTS:
-                send_sms_alert(f"[{config.SYMBOL}] CRITICAL: Auth Error runtime! Strategy stopping.", config)
+                send_sms_alert(
+                    f"[{config.SYMBOL}] CRITICAL: Auth Error runtime! Strategy stopping.",
+                    config,
+                )
             break  # Exit the loop on auth errors
         except ccxt.OrderNotFound as e:
             # This might occur if trying to cancel an already filled/cancelled order - often benign
@@ -1174,16 +1392,24 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                     f"OrderNotFound likely relates to tracked SL order {order_id_in_error}. Removing from tracking."
                 )
                 # Find the key (symbol) for the value (order id) and pop it
-                key_to_remove = next((k for k, v in stop_loss_orders.items() if v == order_id_in_error), None)
+                key_to_remove = next(
+                    (k for k, v in stop_loss_orders.items() if v == order_id_in_error),
+                    None,
+                )
                 if key_to_remove:
                     stop_loss_orders.pop(key_to_remove, None)
-            await asyncio.sleep(config.LOOP_DELAY_SECONDS)  # Normal delay after OrderNotFound
+            await asyncio.sleep(
+                config.LOOP_DELAY_SECONDS
+            )  # Normal delay after OrderNotFound
         except ccxt.InsufficientFunds as e:
             logger.error(
                 f"{Back.RED}{Fore.WHITE}Insufficient Funds Error ({config.SYMBOL}): {e}. Check balance and open orders/positions. Pausing loop significantly.{Style.RESET_ALL}"
             )
             if config.ENABLE_SMS_ALERTS:
-                send_sms_alert(f"[{config.SYMBOL}] Insufficient Funds Error! Check account. Strategy Paused.", config)
+                send_sms_alert(
+                    f"[{config.SYMBOL}] Insufficient Funds Error! Check account. Strategy Paused.",
+                    config,
+                )
             # Long pause - needs manual intervention usually
             await asyncio.sleep(config.LOOP_DELAY_SECONDS * 10)
         except ccxt.ExchangeError as e:
@@ -1204,7 +1430,9 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 f"{Back.RED}{Fore.WHITE}A NameError occurred: {e}. Check imports (e.g., colorama, pandas_ta) and variable names.{Style.RESET_ALL}",
                 exc_info=True,
             )
-            if not COLORAMA_AVAILABLE and ("Fore" in str(e) or "Back" in str(e) or "Style" in str(e)):
+            if not COLORAMA_AVAILABLE and (
+                "Fore" in str(e) or "Back" in str(e) or "Style" in str(e)
+            ):
                 logger.critical(
                     f"{Fore.YELLOW}Suggestion: Ensure {Style.BRIGHT}'pip install colorama'{Style.RESET_ALL}{Fore.YELLOW} is installed and the import succeeded.{Style.RESET_ALL}"
                 )
@@ -1219,9 +1447,14 @@ async def run_strategy(config: Config, current_exchange: ccxt_async.bybit):
                 f"{Back.RED}{Fore.WHITE}!!! UNEXPECTED CRITICAL ERROR IN MAIN LOOP ({config.SYMBOL}) !!!{Style.RESET_ALL}",
                 exc_info=True,
             )
-            logger.critical(f"{Back.RED}{Fore.WHITE}Error Type: {type(e).__name__}, Message: {e}{Style.RESET_ALL}")
+            logger.critical(
+                f"{Back.RED}{Fore.WHITE}Error Type: {type(e).__name__}, Message: {e}{Style.RESET_ALL}"
+            )
             if config.ENABLE_SMS_ALERTS:
-                send_sms_alert(f"[{config.SYMBOL}] CRITICAL ERROR: {type(e).__name__} in loop! Check logs!", config)
+                send_sms_alert(
+                    f"[{config.SYMBOL}] CRITICAL ERROR: {type(e).__name__} in loop! Check logs!",
+                    config,
+                )
             logger.info(
                 f"{Fore.YELLOW}Attempting to continue after critical error... pausing for {config.LOOP_DELAY_SECONDS * 3}s{Style.RESET_ALL}"
             )
@@ -1248,15 +1481,23 @@ async def main():
         logger = setup_logger(
             logger_name="EhlersStrategy",
             log_file=log_file_path,
-            console_level=logging.getLevelName(console_log_level_str),  # Handles invalid level names
+            console_level=logging.getLevelName(
+                console_log_level_str
+            ),  # Handles invalid level names
             file_level=logging.getLevelName(file_log_level_str),
             third_party_log_level=logging.WARNING,  # Reduce noise from ccxt/requests
         )
     except Exception as e:
         # Use print as logger isn't working
-        print(f"{Back.RED}{Fore.WHITE}FATAL: Failed to initialize logger: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Back.RED}{Fore.WHITE}FATAL: Failed to initialize logger: {e}{Style.RESET_ALL}",
+            file=sys.stderr,
+        )
         print(f"Log file path attempted: {log_file_path}", file=sys.stderr)
-        print(f"Console Level: {console_log_level_str}, File Level: {file_log_level_str}", file=sys.stderr)
+        print(
+            f"Console Level: {console_log_level_str}, File Level: {file_log_level_str}",
+            file=sys.stderr,
+        )
         sys.exit(exit_code)  # Exit with error
 
     # --- 1. Load Configuration ---
@@ -1265,7 +1506,8 @@ async def main():
         logger.info("Configuration loaded successfully.")
     except Exception as e:
         logger.critical(
-            f"{Back.RED}{Fore.WHITE}Failed to load or initialize configuration: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Back.RED}{Fore.WHITE}Failed to load or initialize configuration: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
         sys.exit(exit_code)  # Exit with error
 
@@ -1334,14 +1576,18 @@ async def main():
 
         # --- 3b. Load Markets (Async) ---
         logger.info("Loading markets from exchange...")
-        logger.debug(f"{Fore.CYAN}# Awaiting exchange.load_markets()...{Style.RESET_ALL}")
+        logger.debug(
+            f"{Fore.CYAN}# Awaiting exchange.load_markets()...{Style.RESET_ALL}"
+        )
         await exchange.load_markets()
         logger.info(f"Markets loaded. Found {len(exchange.markets)} markets.")
         if CONFIG.SYMBOL not in exchange.markets:
             # Log available symbols if feasible (might be very long)
             # available_symbols = list(exchange.markets.keys())
             # logger.debug(f"Available symbols: {available_symbols[:20]}...") # Log first few
-            raise ValueError(f"Symbol {CONFIG.SYMBOL} not found in loaded markets from {CONFIG.EXCHANGE_ID}.")
+            raise ValueError(
+                f"Symbol {CONFIG.SYMBOL} not found in loaded markets from {CONFIG.EXCHANGE_ID}."
+            )
 
         # --- 3c. Validate Market (Sync check after loading) ---
         logger.info(f"Validating market configuration for {CONFIG.SYMBOL}...")
@@ -1349,7 +1595,9 @@ async def main():
         market_details = bybit.validate_market(exchange, CONFIG.SYMBOL, CONFIG)
         if not market_details:
             # Error should have been logged within the helper function
-            raise ValueError(f"Market validation failed for {CONFIG.SYMBOL}. Check logs above for details.")
+            raise ValueError(
+                f"Market validation failed for {CONFIG.SYMBOL}. Check logs above for details."
+            )
 
         market_type = market_details.get("type", "N/A")
         market_logic = (
@@ -1365,20 +1613,30 @@ async def main():
         # CRITICAL: Understand if the `bybit.set_leverage` helper is async or sync.
         # ASSUMPTION HERE: `bybit.set_leverage` helper is ASYNCHRONOUS (uses `await` internally).
         # If it were synchronous, we would NOT use `await` here, but it could block the event loop.
-        logger.info(f"Attempting to set leverage for {CONFIG.SYMBOL} to {CONFIG.DEFAULT_LEVERAGE}x...")
+        logger.info(
+            f"Attempting to set leverage for {CONFIG.SYMBOL} to {CONFIG.DEFAULT_LEVERAGE}x..."
+        )
         try:
-            logger.debug(f"{Fore.CYAN}# Awaiting bybit.set_leverage(...)...{Style.RESET_ALL}")
+            logger.debug(
+                f"{Fore.CYAN}# Awaiting bybit.set_leverage(...)...{Style.RESET_ALL}"
+            )
             # Use await IF the helper function is defined with `async def`
-            leverage_set_result = await bybit.set_leverage(exchange, CONFIG.SYMBOL, CONFIG.DEFAULT_LEVERAGE, CONFIG)
+            leverage_set_result = await bybit.set_leverage(
+                exchange, CONFIG.SYMBOL, CONFIG.DEFAULT_LEVERAGE, CONFIG
+            )
 
             # Check the return value explicitly for failure indication (e.g., False, None, or exception)
-            if not leverage_set_result:  # Adjust condition based on helper's success/failure return convention
+            if (
+                not leverage_set_result
+            ):  # Adjust condition based on helper's success/failure return convention
                 # Helper function should have logged the specific Bybit API error.
                 logger.critical(
                     f"{Back.RED}{Fore.WHITE}Helper function 'set_leverage' indicated failure (returned: {leverage_set_result}). Check previous logs for API errors.{Style.RESET_ALL}"
                 )
                 # Raise an exception to trigger setup failure handling
-                raise ccxt.ExchangeError("Leverage setting failed as reported by helper function.")
+                raise ccxt.ExchangeError(
+                    "Leverage setting failed as reported by helper function."
+                )
 
             logger.success(
                 f"{Fore.GREEN}Leverage successfully set to {CONFIG.DEFAULT_LEVERAGE}x for {CONFIG.SYMBOL}.{Style.RESET_ALL}"
@@ -1397,7 +1655,8 @@ async def main():
             raise  # Re-raise to be caught by the outer setup error handler
         except Exception as e:  # Catch other unexpected errors from the async call
             logger.critical(
-                f"{Back.RED}{Fore.WHITE}Unexpected error during set_leverage call: {e}{Style.RESET_ALL}", exc_info=True
+                f"{Back.RED}{Fore.WHITE}Unexpected error during set_leverage call: {e}{Style.RESET_ALL}",
+                exc_info=True,
             )
             raise  # Re-raise
 
@@ -1417,7 +1676,9 @@ async def main():
 
         # --- Mark Setup as Successful ---
         setup_success = True
-        logger.success(f"{Fore.GREEN}{Style.BRIGHT}--- Setup Phase Completed Successfully ---{Style.RESET_ALL}")
+        logger.success(
+            f"{Fore.GREEN}{Style.BRIGHT}--- Setup Phase Completed Successfully ---{Style.RESET_ALL}"
+        )
 
     # --- Catch Specific Setup Errors ---
     except ccxt.AuthenticationError as e:
@@ -1426,7 +1687,10 @@ async def main():
             exc_info=True,
         )
         if CONFIG and CONFIG.ENABLE_SMS_ALERTS:
-            send_sms_alert(f"[{CONFIG.SYMBOL if CONFIG else 'N/A'}] EXIT: Auth error setup.", CONFIG)
+            send_sms_alert(
+                f"[{CONFIG.SYMBOL if CONFIG else 'N/A'}] EXIT: Auth error setup.",
+                CONFIG,
+            )
     except (ccxt.ExchangeError, ccxt.NetworkError, ConnectionError, ValueError) as e:
         logger.critical(
             f"{Back.RED}{Fore.WHITE}Exchange/Network/Configuration Error during setup: {e}. Exiting.{Style.RESET_ALL}",
@@ -1434,7 +1698,8 @@ async def main():
         )
         if CONFIG and CONFIG.ENABLE_SMS_ALERTS:
             send_sms_alert(
-                f"[{CONFIG.SYMBOL if CONFIG else 'N/A'}] EXIT: Setup fail ({type(e).__name__}). Logs.", CONFIG
+                f"[{CONFIG.SYMBOL if CONFIG else 'N/A'}] EXIT: Setup fail ({type(e).__name__}). Logs.",
+                CONFIG,
             )
     except Exception as e:
         # Catch any other unexpected errors during setup
@@ -1454,7 +1719,9 @@ async def main():
             await run_strategy(CONFIG, exchange)
             # If run_strategy finishes normally (e.g., loop broken by condition, not error)
             logger.info("Strategy execution loop finished normally.")
-            exit_code = 0  # Success exit code if loop finishes without unhandled exception
+            exit_code = (
+                0  # Success exit code if loop finishes without unhandled exception
+            )
         except Exception as e:
             logger.critical(
                 f"{Back.RED}{Fore.WHITE}Strategy execution loop terminated abnormally by unhandled exception: {e}{Style.RESET_ALL}",
@@ -1462,24 +1729,32 @@ async def main():
             )
             if CONFIG.ENABLE_SMS_ALERTS:
                 send_sms_alert(
-                    f"[{CONFIG.SYMBOL}] CRITICAL FAILURE: Loop terminated ({type(e).__name__}). Logs!", CONFIG
+                    f"[{CONFIG.SYMBOL}] CRITICAL FAILURE: Loop terminated ({type(e).__name__}). Logs!",
+                    CONFIG,
                 )
             exit_code = 1  # Ensure error exit code
     elif not setup_success:
-        logger.error(f"{Fore.RED}Strategy execution skipped due to setup failure.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Strategy execution skipped due to setup failure.{Style.RESET_ALL}"
+        )
         exit_code = 1  # Ensure error exit code
 
     # --- 5. Cleanup Phase: Close Exchange Connection ---
     logger.info(f"{Fore.CYAN}--- Initiating Cleanup Phase ---{Style.RESET_ALL}")
     if exchange and hasattr(exchange, "close") and callable(exchange.close):
         try:
-            logger.info(f"{Fore.CYAN}# Closing connection to the exchange...{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.CYAN}# Closing connection to the exchange...{Style.RESET_ALL}"
+            )
             # exchange.close() IS async in ccxt.async_support
             await exchange.close()
-            logger.info(f"{Fore.GREEN}Exchange connection closed gracefully.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Exchange connection closed gracefully.{Style.RESET_ALL}"
+            )
         except Exception as e:
             logger.error(
-                f"{Fore.RED}Error occurred while closing the exchange connection: {e}{Style.RESET_ALL}", exc_info=True
+                f"{Fore.RED}Error occurred while closing the exchange connection: {e}{Style.RESET_ALL}",
+                exc_info=True,
             )
             # Don't change exit code here, primary error was likely earlier
     else:
@@ -1506,7 +1781,9 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         # Use print because logger might not be available if interrupt happens very early
-        print(f"\n{Fore.YELLOW}{Style.BRIGHT}KeyboardInterrupt detected. Exiting script...{Style.RESET_ALL}")
+        print(
+            f"\n{Fore.YELLOW}{Style.BRIGHT}KeyboardInterrupt detected. Exiting script...{Style.RESET_ALL}"
+        )
         # Cleanup (like exchange.close) should happen within main()'s final section
         sys.exit(0)  # Clean exit on user interrupt
     except Exception as e:
@@ -1517,7 +1794,9 @@ if __name__ == "__main__":
         )
         # Attempt to log if logger was initialized (might not work)
         if logger:
-            logger.critical("Fatal error during asyncio setup or execution", exc_info=True)
+            logger.critical(
+                "Fatal error during asyncio setup or execution", exc_info=True
+            )
         else:
             import traceback
 

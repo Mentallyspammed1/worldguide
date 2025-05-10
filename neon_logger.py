@@ -38,7 +38,10 @@ except ImportError:
     Back = DummyColor()
     Style = DummyColor()
     COLORAMA_AVAILABLE = False
-    print("Warning: 'colorama' library not found. Neon console logging disabled.", file=sys.stderr)
+    print(
+        "Warning: 'colorama' library not found. Neon console logging disabled.",
+        file=sys.stderr,
+    )
     print("         Install using: pip install colorama", file=sys.stderr)
 
 # --- Custom Log Level ---
@@ -77,7 +80,11 @@ class ColoredConsoleFormatter(logging.Formatter):
     """
 
     def __init__(
-        self, fmt: Optional[str] = None, datefmt: Optional[str] = None, style: str = "%", validate: bool = True
+        self,
+        fmt: Optional[str] = None,
+        datefmt: Optional[str] = None,
+        style: str = "%",
+        validate: bool = True,
     ):
         super().__init__(fmt=fmt, datefmt=datefmt, style=style, validate=validate)
         self.use_colors = COLORAMA_AVAILABLE and sys.stdout.isatty()
@@ -178,23 +185,33 @@ def setup_logger(
             )
 
     if env_log_file:
-        print(f"Neon Logger: Overriding log file path from env LOG_FILE_PATH='{env_log_file}'")
+        print(
+            f"Neon Logger: Overriding log file path from env LOG_FILE_PATH='{env_log_file}'"
+        )
         log_file = env_log_file
 
     # --- Get Logger and Set Base Level/Propagation ---
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)  # Set logger to lowest level to capture all messages for handlers
+    logger.setLevel(
+        logging.DEBUG
+    )  # Set logger to lowest level to capture all messages for handlers
     logger.propagate = propagate
 
     # --- Clear Existing Handlers (if re-configuring) ---
     if logger.hasHandlers():
-        print(f"Logger '{logger_name}' already configured. Clearing existing handlers.", file=sys.stderr)
+        print(
+            f"Logger '{logger_name}' already configured. Clearing existing handlers.",
+            file=sys.stderr,
+        )
         for handler in logger.handlers[:]:  # Iterate a copy
             try:
                 handler.close()  # Close file handles etc.
                 logger.removeHandler(handler)
             except Exception as e:
-                print(f"Warning: Error removing/closing existing handler: {e}", file=sys.stderr)
+                print(
+                    f"Warning: Error removing/closing existing handler: {e}",
+                    file=sys.stderr,
+                )
 
     # --- Console Handler ---
     if console_level is not None and console_level >= 0:
@@ -203,9 +220,14 @@ def setup_logger(
             console_h.setLevel(console_level)
             console_h.setFormatter(console_formatter)  # Use the colored formatter
             logger.addHandler(console_h)
-            print(f"Neon Logger: Console logging active at level [{logging.getLevelName(console_level)}].")
+            print(
+                f"Neon Logger: Console logging active at level [{logging.getLevelName(console_level)}]."
+            )
         except Exception as e:
-            print(f"{Fore.RED}Error setting up console handler: {e}{Style.RESET_ALL}", file=sys.stderr)
+            print(
+                f"{Fore.RED}Error setting up console handler: {e}{Style.RESET_ALL}",
+                file=sys.stderr,
+            )
     else:
         print("Neon Logger: Console logging disabled.")
 
@@ -219,7 +241,10 @@ def setup_logger(
             if log_rotation_bytes > 0 and log_backup_count >= 0:
                 # Use Rotating File Handler
                 file_h = logging.handlers.RotatingFileHandler(
-                    log_file, maxBytes=log_rotation_bytes, backupCount=log_backup_count, encoding="utf-8"
+                    log_file,
+                    maxBytes=log_rotation_bytes,
+                    backupCount=log_backup_count,
+                    encoding="utf-8",
                 )
                 print(
                     f"Neon Logger: Rotating file logging active at level [{logging.getLevelName(file_level)}] to '{log_file}' (Max: {log_rotation_bytes / 1024 / 1024:.1f} MB, Backups: {log_backup_count})."
@@ -250,8 +275,15 @@ def setup_logger(
 
     # --- Configure Third-Party Log Levels ---
     if third_party_log_level is not None and third_party_log_level >= 0:
-        noisy_libraries = ["ccxt", "urllib3", "requests", "asyncio"]  # Add others if needed
-        print(f"Neon Logger: Setting third-party library log level to [{logging.getLevelName(third_party_log_level)}].")
+        noisy_libraries = [
+            "ccxt",
+            "urllib3",
+            "requests",
+            "asyncio",
+        ]  # Add others if needed
+        print(
+            f"Neon Logger: Setting third-party library log level to [{logging.getLevelName(third_party_log_level)}]."
+        )
         for lib_name in noisy_libraries:
             try:
                 logging.getLogger(lib_name).setLevel(third_party_log_level)
@@ -301,7 +333,9 @@ if __name__ == "__main__":
 
     # Example 3: Using environment variables
     print("\n--- Example 3: Using Environment Variables ---")
-    print("Set LOG_CONSOLE_LEVEL=WARNING, LOG_FILE_LEVEL=ERROR, LOG_FILE_PATH=env_bot.log")
+    print(
+        "Set LOG_CONSOLE_LEVEL=WARNING, LOG_FILE_LEVEL=ERROR, LOG_FILE_PATH=env_bot.log"
+    )
     # Set env vars before calling setup (in a real script, these would be set externally)
     os.environ["LOG_CONSOLE_LEVEL"] = "WARNING"
     os.environ["LOG_FILE_LEVEL"] = "ERROR"
@@ -315,7 +349,9 @@ if __name__ == "__main__":
     )
     env_logger.info("This INFO message should NOT appear on console (Env WARNING).")
     env_logger.warning("This WARNING message should appear on console (Env WARNING).")
-    env_logger.error("This ERROR message should appear on console AND in env_bot.log (Env ERROR).")
+    env_logger.error(
+        "This ERROR message should appear on console AND in env_bot.log (Env ERROR)."
+    )
     # Cleanup env vars for subsequent tests if needed
     del os.environ["LOG_CONSOLE_LEVEL"]
     del os.environ["LOG_FILE_LEVEL"]
@@ -331,11 +367,15 @@ if __name__ == "__main__":
     )
     # Simulate a third-party log message
     logging.getLogger("ccxt").info("This ccxt INFO message should NOT appear.")
-    logging.getLogger("urllib3").warning("This urllib3 WARNING message should NOT appear.")
+    logging.getLogger("urllib3").warning(
+        "This urllib3 WARNING message should NOT appear."
+    )
     logging.getLogger("ccxt").error("This ccxt ERROR message SHOULD appear.")
     quiet_tp_logger.info("This QuietBot INFO message SHOULD appear.")
 
     print("-" * 60)
     print("Check console output for neon colors (if supported).")
-    print("Check log files ('basic_bot.log', 'verbose_bot_warn.log', 'env_bot.log') for output.")
+    print(
+        "Check log files ('basic_bot.log', 'verbose_bot_warn.log', 'env_bot.log') for output."
+    )
     print("-" * 60)

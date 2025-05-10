@@ -49,7 +49,9 @@ def retry_api_call(max_retries: int = 3, initial_delay: int = 1):
                     delay *= 2
                     retries += 1
                 except Exception as e:
-                    logger.error(f"{Fore.RED}Error: {e} - Retrying in {delay}s ({retries + 1}/{max_retries})")
+                    logger.error(
+                        f"{Fore.RED}Error: {e} - Retrying in {delay}s ({retries + 1}/{max_retries})"
+                    )
                     time.sleep(delay)
                     delay *= 2
                     retries += 1
@@ -142,7 +144,9 @@ class ImprovedTradingBot:
         for tf in self.timeframes:
             data[tf] = {
                 "ohlcv": self.exchange.fetch_ohlcv(self.symbol, tf, limit=100),
-                "orderbook": self.exchange.fetch_order_book(self.symbol, limit=self.order_book_depth),
+                "orderbook": self.exchange.fetch_order_book(
+                    self.symbol, limit=self.order_book_depth
+                ),
             }
         return data
 
@@ -300,7 +304,9 @@ class ImprovedTradingBot:
             "lower": sma - self.bollinger_std * std,
         }
 
-    def calculate_atr(self, highs: np.ndarray, lows: np.ndarray, closes: np.ndarray, period: int = 14) -> float:
+    def calculate_atr(
+        self, highs: np.ndarray, lows: np.ndarray, closes: np.ndarray, period: int = 14
+    ) -> float:
         """Calculate Average True Range."""
         tr_list = []
         for i in range(1, len(closes)):
@@ -314,10 +320,19 @@ class ImprovedTradingBot:
 
     def calculate_stoch_rsi(self, data: np.ndarray) -> tuple[float, float]:
         """Calculate Stochastic RSI."""
-        rsi_values = np.array([self.calculate_rsi(data[i:]) for i in range(len(data) - self.stoch_period + 1)])
+        rsi_values = np.array(
+            [
+                self.calculate_rsi(data[i:])
+                for i in range(len(data) - self.stoch_period + 1)
+            ]
+        )
         min_val = np.min(rsi_values)
         max_val = np.max(rsi_values)
-        k = 100 * (rsi_values[-1] - min_val) / (max_val - min_val) if max_val != min_val else 50
+        k = (
+            100 * (rsi_values[-1] - min_val) / (max_val - min_val)
+            if max_val != min_val
+            else 50
+        )
         d = np.mean(rsi_values[-3:])
         return k, d
 
@@ -340,7 +355,9 @@ class ImprovedTradingBot:
         volatility = self.calculate_volatility()
         base_size = balance * self.risk_per_trade
         if volatility:
-            adjusted_size = base_size * (1 + volatility * self.config["risk_management"]["volatility_multiplier"])
+            adjusted_size = base_size * (
+                1 + volatility * self.config["risk_management"]["volatility_multiplier"]
+            )
             return min(adjusted_size, balance * 0.05)  # Cap at 5% of balance
         return base_size
 
@@ -369,7 +386,9 @@ class ImprovedTradingBot:
                     "price": price,
                     "timestamp": time.time(),
                 }
-                logger.info(f"{Fore.CYAN}[SIMULATION] {side.upper()} order of size {size:.4f} at {price:.2f}")
+                logger.info(
+                    f"{Fore.CYAN}[SIMULATION] {side.upper()} order of size {size:.4f} at {price:.2f}"
+                )
                 return trade_details
 
             order = self.exchange.create_market_order(
@@ -379,7 +398,9 @@ class ImprovedTradingBot:
                 params={"leverage": self.leverage},
             )
 
-            logger.info(f"{Fore.GREEN}Executed {side.upper()} order: Size={size:.4f}, Price={price:.2f}")
+            logger.info(
+                f"{Fore.GREEN}Executed {side.upper()} order: Size={size:.4f}, Price={price:.2f}"
+            )
             return order
         except Exception as e:
             logger.error(f"{Fore.RED}Trade execution error: {e}")
@@ -414,22 +435,32 @@ class ImprovedTradingBot:
                         size = self.calculate_position_size(analysis["price"])
                         self.position = "buy"
                         self.entry_price = analysis["price"]
-                        trade = self.execute_trade(self.position, size, self.entry_price)
+                        trade = self.execute_trade(
+                            self.position, size, self.entry_price
+                        )
                         if trade:
                             self.open_positions.append(trade)
-                            logger.info(f"{Fore.GREEN}Opened long position at {self.entry_price:.2f}")
+                            logger.info(
+                                f"{Fore.GREEN}Opened long position at {self.entry_price:.2f}"
+                            )
                     elif self.position == "sell":
                         # Close short position and open long position
                         size = self.calculate_position_size(analysis["price"])
                         close_trade = self.execute_trade("buy", size, analysis["price"])
                         if close_trade:
-                            logger.info(f"{Fore.YELLOW}Closed short position at {analysis['price']:.2f}")
+                            logger.info(
+                                f"{Fore.YELLOW}Closed short position at {analysis['price']:.2f}"
+                            )
                             self.position = "buy"
                             self.entry_price = analysis["price"]
-                            trade = self.execute_trade(self.position, size, self.entry_price)
+                            trade = self.execute_trade(
+                                self.position, size, self.entry_price
+                            )
                             if trade:
                                 self.open_positions.append(trade)
-                                logger.info(f"{Fore.GREEN}Opened long position at {self.entry_price:.2f}")
+                                logger.info(
+                                    f"{Fore.GREEN}Opened long position at {self.entry_price:.2f}"
+                                )
 
                 # Check for exit signals / short entry signals
                 elif analysis["confidence"] < -self.config["confidence_threshold"]:
@@ -438,35 +469,51 @@ class ImprovedTradingBot:
                         size = self.calculate_position_size(analysis["price"])
                         self.position = "sell"
                         self.entry_price = analysis["price"]
-                        trade = self.execute_trade(self.position, size, self.entry_price)
+                        trade = self.execute_trade(
+                            self.position, size, self.entry_price
+                        )
                         if trade:
                             self.open_positions.append(trade)
-                            logger.info(f"{Fore.RED}Opened short position at {self.entry_price:.2f}")
+                            logger.info(
+                                f"{Fore.RED}Opened short position at {self.entry_price:.2f}"
+                            )
                     elif self.position == "buy":
                         # Close long position and open short position
                         size = self.calculate_position_size(analysis["price"])
-                        close_trade = self.execute_trade("sell", size, analysis["price"])
+                        close_trade = self.execute_trade(
+                            "sell", size, analysis["price"]
+                        )
                         if close_trade:
-                            logger.info(f"{Fore.YELLOW}Closed long position at {analysis['price']:.2f}")
+                            logger.info(
+                                f"{Fore.YELLOW}Closed long position at {analysis['price']:.2f}"
+                            )
                             self.position = "sell"
                             self.entry_price = analysis["price"]
-                            trade = self.execute_trade(self.position, size, self.entry_price)
+                            trade = self.execute_trade(
+                                self.position, size, self.entry_price
+                            )
                             if trade:
                                 self.open_positions.append(trade)
-                                logger.info(f"{Fore.RED}Opened short position at {self.entry_price:.2f}")
+                                logger.info(
+                                    f"{Fore.RED}Opened short position at {self.entry_price:.2f}"
+                                )
 
                 # Manage open position with stop-loss and take-profit logic
                 if self.position is not None:
                     current_price = analysis["price"]
                     if self.position == "buy":
                         stop_loss_price = self.entry_price * (1 - self.stop_loss_pct)
-                        take_profit_price = self.entry_price * (1 + self.take_profit_pct)
+                        take_profit_price = self.entry_price * (
+                            1 + self.take_profit_pct
+                        )
                         trailing_stop = current_price * (1 - self.stop_loss_pct)
                         if trailing_stop > stop_loss_price:
                             stop_loss_price = trailing_stop
                     else:
                         stop_loss_price = self.entry_price * (1 + self.stop_loss_pct)
-                        take_profit_price = self.entry_price * (1 - self.take_profit_pct)
+                        take_profit_price = self.entry_price * (
+                            1 - self.take_profit_pct
+                        )
                         trailing_stop = current_price * (1 + self.stop_loss_pct)
                         if trailing_stop < stop_loss_price:
                             stop_loss_price = trailing_stop
@@ -480,16 +527,28 @@ class ImprovedTradingBot:
                     # Check if stop-loss or take-profit levels are hit
                     if (
                         self.position == "buy"
-                        and (current_price <= stop_loss_price or current_price >= take_profit_price)
+                        and (
+                            current_price <= stop_loss_price
+                            or current_price >= take_profit_price
+                        )
                     ) or (
                         self.position == "sell"
-                        and (current_price >= stop_loss_price or current_price <= take_profit_price)
+                        and (
+                            current_price >= stop_loss_price
+                            or current_price <= take_profit_price
+                        )
                     ):
                         exit_reason = (
                             "Stop Loss"
                             if (
-                                (self.position == "buy" and current_price <= stop_loss_price)
-                                or (self.position == "sell" and current_price >= stop_loss_price)
+                                (
+                                    self.position == "buy"
+                                    and current_price <= stop_loss_price
+                                )
+                                or (
+                                    self.position == "sell"
+                                    and current_price >= stop_loss_price
+                                )
                             )
                             else "Take Profit"
                         )
@@ -501,13 +560,25 @@ class ImprovedTradingBot:
                             current_price,
                         )
                         if close_trade:
-                            logger.info(f"{Fore.YELLOW}Position closed ({exit_reason}) at {current_price:.2f}")
+                            logger.info(
+                                f"{Fore.YELLOW}Position closed ({exit_reason}) at {current_price:.2f}"
+                            )
                             if self.position == "buy":
-                                pnl = (current_price - self.entry_price) / self.entry_price * 100
+                                pnl = (
+                                    (current_price - self.entry_price)
+                                    / self.entry_price
+                                    * 100
+                                )
                             else:
-                                pnl = (self.entry_price - current_price) / self.entry_price * 100
+                                pnl = (
+                                    (self.entry_price - current_price)
+                                    / self.entry_price
+                                    * 100
+                                )
                             self.daily_pnl += pnl
-                            logger.info(f"{Fore.CYAN}Trade PnL: {pnl:.2f}% | Daily PnL: {self.daily_pnl:.2f}%")
+                            logger.info(
+                                f"{Fore.CYAN}Trade PnL: {pnl:.2f}% | Daily PnL: {self.daily_pnl:.2f}%"
+                            )
                             self.position = None
                             self.entry_price = None
 
@@ -530,13 +601,19 @@ class ImprovedTradingBot:
             logger.error(f"{Fore.RED}Unexpected error: {e}{Style.RESET_ALL}")
             raise
         finally:
-            logger.info(f"{Fore.CYAN}Final Daily PnL: {self.daily_pnl:.2f}%{Style.RESET_ALL}")
-            logger.info(f"{Fore.CYAN}Trading session ended at {time.strftime('%Y-%m-%d %H:%M:%S')}{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.CYAN}Final Daily PnL: {self.daily_pnl:.2f}%{Style.RESET_ALL}"
+            )
+            logger.info(
+                f"{Fore.CYAN}Trading session ended at {time.strftime('%Y-%m-%d %H:%M:%S')}{Style.RESET_ALL}"
+            )
 
 
 if __name__ == "__main__":
     try:
-        logger.info(f"{Fore.CYAN}Starting trading bot at {time.strftime('%Y-%m-%d %H:%M:%S')}{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.CYAN}Starting trading bot at {time.strftime('%Y-%m-%d %H:%M:%S')}{Style.RESET_ALL}"
+        )
         bot = ImprovedTradingBot()
         bot.run()
     except Exception as e:

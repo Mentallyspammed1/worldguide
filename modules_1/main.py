@@ -41,7 +41,10 @@ try:
 except ImportError as e:
     _NEON_RED = "\033[1;91m"
     _RESET = "\033[0m"  # Fallback colors
-    print(f"{_NEON_RED}CRITICAL ERROR: Failed to import one or more custom modules: {e}{_RESET}", file=sys.stderr)
+    print(
+        f"{_NEON_RED}CRITICAL ERROR: Failed to import one or more custom modules: {e}{_RESET}",
+        file=sys.stderr,
+    )
     print(
         f"Ensure config_loader.py, exchange_api.py, logger_setup.py, trading_strategy.py, utils.py exist.{_RESET}",
         file=sys.stderr,
@@ -53,7 +56,10 @@ except ImportError as e:
 except Exception as e:
     _NEON_RED = "\033[1;91m"
     _RESET = "\033[0m"
-    print(f"{_NEON_RED}CRITICAL ERROR: Unexpected error during module import: {e}{_RESET}", file=sys.stderr)
+    print(
+        f"{_NEON_RED}CRITICAL ERROR: Unexpected error during module import: {e}{_RESET}",
+        file=sys.stderr,
+    )
     if "traceback" not in sys.modules:
         import traceback
     traceback.print_exc(file=sys.stderr)
@@ -82,7 +88,10 @@ def signal_handler(signum: int, frame: Any) -> None:
             file=sys.stderr,
         )
     else:
-        print(f"\n{NEON_YELLOW}Shutdown already requested. Please wait.{RESET}", file=sys.stderr)
+        print(
+            f"\n{NEON_YELLOW}Shutdown already requested. Please wait.{RESET}",
+            file=sys.stderr,
+        )
 
 
 # --- Main Execution Function ---
@@ -102,9 +111,15 @@ async def main() -> None:
             CONFIG["api_key"] = os.getenv("BYBIT_API_KEY")
         if not CONFIG.get("api_secret") and os.getenv("BYBIT_API_SECRET"):
             CONFIG["api_secret"] = os.getenv("BYBIT_API_SECRET")
-        print(f"{NEON_GREEN}Configuration loaded from '{utils.CONFIG_FILE}'.{RESET}", file=sys.stderr)
+        print(
+            f"{NEON_GREEN}Configuration loaded from '{utils.CONFIG_FILE}'.{RESET}",
+            file=sys.stderr,
+        )
     except FileNotFoundError:
-        print(f"{NEON_RED}CRITICAL: Config file '{utils.CONFIG_FILE}' not found.{RESET}", file=sys.stderr)
+        print(
+            f"{NEON_RED}CRITICAL: Config file '{utils.CONFIG_FILE}' not found.{RESET}",
+            file=sys.stderr,
+        )
         sys.exit(1)
     except Exception as e:
         print(f"{NEON_RED}CRITICAL: Error loading config: {e}.{RESET}", file=sys.stderr)
@@ -115,26 +130,39 @@ async def main() -> None:
     try:
         logger_setup.configure_logging(CONFIG)
     except Exception as e:
-        print(f"{NEON_RED}CRITICAL: Error configuring logging: {e}. Exiting.{RESET}", file=sys.stderr)
+        print(
+            f"{NEON_RED}CRITICAL: Error configuring logging: {e}. Exiting.{RESET}",
+            file=sys.stderr,
+        )
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
     init_logger = logging.getLogger("App.Init")  # Use hierarchical name
-    init_logger.info(f"--- {NEON_PURPLE}Initializing XR Scalper Bot (Async Version){RESET} ---")
+    init_logger.info(
+        f"--- {NEON_PURPLE}Initializing XR Scalper Bot (Async Version){RESET} ---"
+    )
 
     # --- Timezone Setup ---
-    configured_timezone = os.getenv("TIMEZONE", CONFIG.get("timezone", utils.DEFAULT_TIMEZONE))
+    configured_timezone = os.getenv(
+        "TIMEZONE", CONFIG.get("timezone", utils.DEFAULT_TIMEZONE)
+    )
     try:
         utils.set_timezone(configured_timezone)
         init_logger.info(f"Using Timezone: {utils.get_timezone()}")
     except Exception as e:
-        init_logger.warning(f"Failed set timezone '{configured_timezone}': {e}.", exc_info=True)
+        init_logger.warning(
+            f"Failed set timezone '{configured_timezone}': {e}.", exc_info=True
+        )
 
     # --- Sensitive Data Masking ---
     try:
-        if hasattr(utils, "SensitiveFormatter") and hasattr(utils.SensitiveFormatter, "set_sensitive_data"):
+        if hasattr(utils, "SensitiveFormatter") and hasattr(
+            utils.SensitiveFormatter, "set_sensitive_data"
+        ):
             if CONFIG.get("api_key") and CONFIG.get("api_secret"):
-                utils.SensitiveFormatter.set_sensitive_data(CONFIG["api_key"], CONFIG["api_secret"])
+                utils.SensitiveFormatter.set_sensitive_data(
+                    CONFIG["api_key"], CONFIG["api_secret"]
+                )
                 init_logger.debug("Sensitive data masking configured.")
             else:
                 init_logger.warning("API keys not found in config, masking incomplete.")
@@ -145,9 +173,13 @@ async def main() -> None:
 
     # --- Log Startup Info ---
     try:
-        init_logger.info(f"Startup Time: {datetime.now(utils.get_timezone()).strftime('%Y-%m-%d %H:%M:%S %Z')}")
+        init_logger.info(
+            f"Startup Time: {datetime.now(utils.get_timezone()).strftime('%Y-%m-%d %H:%M:%S %Z')}"
+        )
     except Exception:
-        init_logger.info(f"Startup Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        init_logger.info(
+            f"Startup Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
     init_logger.info(f"Quote Currency: {CONFIG.get('quote_currency', 'N/A')}")
 
     # --- Log Dependency Versions ---
@@ -179,8 +211,12 @@ async def main() -> None:
     # --- Trading Mode & Critical Settings Validation ---
     enable_trading = CONFIG.get("enable_trading", False)
     use_sandbox = CONFIG.get("use_sandbox", True)
-    init_logger.info(f"Trading Enabled: {NEON_GREEN if enable_trading else NEON_RED}{enable_trading}{RESET}")
-    init_logger.info(f"Using Sandbox: {NEON_YELLOW if use_sandbox else NEON_RED}{use_sandbox}{RESET}")
+    init_logger.info(
+        f"Trading Enabled: {NEON_GREEN if enable_trading else NEON_RED}{enable_trading}{RESET}"
+    )
+    init_logger.info(
+        f"Using Sandbox: {NEON_YELLOW if use_sandbox else NEON_RED}{use_sandbox}{RESET}"
+    )
 
     if enable_trading:
         if not use_sandbox:
@@ -218,13 +254,17 @@ async def main() -> None:
         # Log validated settings
         init_logger.info("--- Critical Trading Settings ---")
         init_logger.info(f"  Symbols: {symbols}")
-        init_logger.info(f"  Interval: {interval_str} ({utils.CCXT_INTERVAL_MAP.get(interval_str)})")
+        init_logger.info(
+            f"  Interval: {interval_str} ({utils.CCXT_INTERVAL_MAP.get(interval_str)})"
+        )
         init_logger.info(f"  Entry Type: {entry_type}")
         init_logger.info(f"  Risk/Trade: {risk_pct * 100:.2f}%")
         init_logger.info(f"  Leverage: {leverage}x")
         init_logger.info(f"  TSL: {CONFIG.get('enable_trailing_stop', False)}")
         init_logger.info(f"  BE: {CONFIG.get('enable_break_even', False)}")
-        init_logger.info(f"  Time Exit: {CONFIG.get('time_based_exit_minutes') or 'Disabled'}")
+        init_logger.info(
+            f"  Time Exit: {CONFIG.get('time_based_exit_minutes') or 'Disabled'}"
+        )
         init_logger.info("---------------------------------")
         init_logger.info("Starting trading loop in 5 seconds...")
         await asyncio.sleep(5)
@@ -239,7 +279,9 @@ async def main() -> None:
             init_logger.critical(f"Invalid interval '{interval_str}'.")
             return
         init_logger.info(f"Analysis Symbols: {symbols_to_process}")
-        init_logger.info(f"Analysis Interval: {interval_str} ({utils.CCXT_INTERVAL_MAP.get(interval_str)})")
+        init_logger.info(
+            f"Analysis Interval: {interval_str} ({utils.CCXT_INTERVAL_MAP.get(interval_str)})"
+        )
 
     # --- Initialize API Client ---
     api_client: Optional[BybitAPI] = None
@@ -265,7 +307,9 @@ async def main() -> None:
             loop.add_signal_handler(sig, lambda s=sig: signal_handler(s, None))
         init_logger.info("Signal handlers registered using loop.")
     except (NotImplementedError, AttributeError, ValueError) as e:  # Fallback/Warning
-        init_logger.warning(f"Could not register signal handlers with loop ({e}). Using signal.signal fallback.")
+        init_logger.warning(
+            f"Could not register signal handlers with loop ({e}). Using signal.signal fallback."
+        )
         try:
             signal.signal(signal.SIGINT, signal_handler)
             signal.signal(signal.SIGTERM, signal_handler)
@@ -274,7 +318,9 @@ async def main() -> None:
 
     # --- Main Loop Setup ---
     try:
-        loop_interval_seconds = float(CONFIG.get("loop_interval_seconds", DEFAULT_LOOP_INTERVAL_SECONDS))
+        loop_interval_seconds = float(
+            CONFIG.get("loop_interval_seconds", DEFAULT_LOOP_INTERVAL_SECONDS)
+        )
         assert loop_interval_seconds > 0
     except Exception as e:
         init_logger.critical(f"Invalid loop interval: {e}. Exiting.")
@@ -286,25 +332,35 @@ async def main() -> None:
         await api_client.close()
         return
 
-    init_logger.info(f"Starting main processing loop for: {symbols_to_process}. Interval: {loop_interval_seconds:.2f}s")
+    init_logger.info(
+        f"Starting main processing loop for: {symbols_to_process}. Interval: {loop_interval_seconds:.2f}s"
+    )
 
     # --- Main Trading Loop ---
     try:
         while not shutdown_requested:  # Access the global flag
             loop_start_time = time.monotonic()
             current_dt = datetime.now(utils.get_timezone())
-            init_logger.debug(f"--- Loop Cycle Start @ {current_dt.strftime('%H:%M:%S %Z')} ---")
+            init_logger.debug(
+                f"--- Loop Cycle Start @ {current_dt.strftime('%H:%M:%S %Z')} ---"
+            )
 
             async def process_symbol_wrapper(symbol: str):
                 """Wrapper to process one symbol and handle its errors."""
                 safe_symbol_name = symbol.replace("/", "_").replace(":", "-")
-                symbol_logger = logging.getLogger(f"App.Symbol.{safe_symbol_name}")  # Hierarchical name
+                symbol_logger = logging.getLogger(
+                    f"App.Symbol.{safe_symbol_name}"
+                )  # Hierarchical name
                 symbol_logger.debug(f"--- Processing: {symbol} ---")
                 try:
                     await trading_strategy.analyze_and_trade_symbol(
                         api_client, symbol, CONFIG, symbol_logger, enable_trading
                     )
-                except (ccxt_async.NetworkError, ccxt_async.RequestTimeout, asyncio.TimeoutError) as e:
+                except (
+                    ccxt_async.NetworkError,
+                    ccxt_async.RequestTimeout,
+                    asyncio.TimeoutError,
+                ) as e:
                     symbol_logger.warning(f"Network/Timeout: {e}")
                 except ccxt_async.RateLimitExceeded as e:
                     symbol_logger.warning(f"Rate Limit: {e}")
@@ -315,7 +371,9 @@ async def main() -> None:
                 except ccxt_async.ExchangeError as e:
                     symbol_logger.error(f"Exchange Error: {e}", exc_info=False)
                 except Exception as e:
-                    symbol_logger.error(f"!!! Unhandled Symbol Error: {e} !!!", exc_info=True)
+                    symbol_logger.error(
+                        f"!!! Unhandled Symbol Error: {e} !!!", exc_info=True
+                    )
                 finally:
                     symbol_logger.debug(f"--- Finished: {symbol} ---")
 
@@ -332,15 +390,21 @@ async def main() -> None:
             # Loop Delay
             elapsed = time.monotonic() - loop_start_time
             sleep_duration = max(0.1, loop_interval_seconds - elapsed)
-            init_logger.debug(f"Cycle End. Elapsed:{elapsed:.2f}s. Sleep:{sleep_duration:.2f}s.")
+            init_logger.debug(
+                f"Cycle End. Elapsed:{elapsed:.2f}s. Sleep:{sleep_duration:.2f}s."
+            )
             if elapsed > loop_interval_seconds:
-                init_logger.warning(f"Loop duration > interval ({elapsed:.1f}s > {loop_interval_seconds:.1f}s)")
+                init_logger.warning(
+                    f"Loop duration > interval ({elapsed:.1f}s > {loop_interval_seconds:.1f}s)"
+                )
             await asyncio.sleep(sleep_duration)
 
     except asyncio.CancelledError:
         init_logger.info("Main task cancelled.")
     except Exception as loop_err:
-        init_logger.critical(f"!!! CRITICAL MAIN LOOP ERROR: {loop_err} !!!", exc_info=True)
+        init_logger.critical(
+            f"!!! CRITICAL MAIN LOOP ERROR: {loop_err} !!!", exc_info=True
+        )
     finally:
         init_logger.info(f"--- {NEON_PURPLE}Bot Shutting Down...{RESET} ---")
         if api_client:
@@ -352,8 +416,12 @@ async def main() -> None:
 if __name__ == "__main__":
     load_dotenv()
     # Final check for API keys
-    api_key_present = bool(os.getenv("BYBIT_API_KEY")) or config_loader.load_config().get("api_key")
-    api_secret_present = bool(os.getenv("BYBIT_API_SECRET")) or config_loader.load_config().get("api_secret")
+    api_key_present = bool(
+        os.getenv("BYBIT_API_KEY")
+    ) or config_loader.load_config().get("api_key")
+    api_secret_present = bool(
+        os.getenv("BYBIT_API_SECRET")
+    ) or config_loader.load_config().get("api_secret")
     if not (api_key_present and api_secret_present):
         print(f"{NEON_RED}CRITICAL ERROR: API keys missing.{RESET}", file=sys.stderr)
         sys.exit(1)

@@ -21,9 +21,13 @@ class Config:
     RETRY_DELAY_SECONDS: float = 2.0
 
     # Position / Order settings
-    POSITION_QTY_EPSILON: Decimal = Decimal("1e-9")  # Threshold for treating qty as zero
+    POSITION_QTY_EPSILON: Decimal = Decimal(
+        "1e-9"
+    )  # Threshold for treating qty as zero
     QUOTE_PRECISION: int = 2  # Assumed precision for quote currency (e.g., USDT)
-    DEFAULT_SLIPPAGE_PCT: Decimal = Decimal("0.005")  # Default max slippage for market orders
+    DEFAULT_SLIPPAGE_PCT: Decimal = Decimal(
+        "0.005"
+    )  # Default max slippage for market orders
     ORDER_BOOK_FETCH_LIMIT: int = 25  # Default depth for fetch_l2_order_book
     SHALLOW_OB_FETCH_DEPTH: int = 5  # Depth used for slippage check analysis
 

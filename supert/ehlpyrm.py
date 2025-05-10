@@ -61,10 +61,16 @@ try:
 except ImportError as e:
     missing_pkg = e.name
     # Use Colorama's raw codes here as it might not be initialized yet
-    sys.stderr.write(f"\033[91mCRITICAL ERROR: Missing required Python package: '{missing_pkg}'.\033[0m\n")
-    sys.stderr.write(f"\033[91mPlease install it by running: pip install {missing_pkg}\033[0m\n")
+    sys.stderr.write(
+        f"\033[91mCRITICAL ERROR: Missing required Python package: '{missing_pkg}'.\033[0m\n"
+    )
+    sys.stderr.write(
+        f"\033[91mPlease install it by running: pip install {missing_pkg}\033[0m\n"
+    )
     if missing_pkg == "pandas_ta":
-        sys.stderr.write(f"\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n")
+        sys.stderr.write(
+            f"\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
+        )
     sys.exit(1)
 
 # --- Initializations - Preparing the Ritual Chamber ---
@@ -201,8 +207,7 @@ class Config:
         )  # Slow Ehlers Super Smoother Filter (SSF) period
         self.ehlers_ssf_poles: int = self._get_env(
             "EHLERS_SSF_POLES", 2, cast_type=int, color=Fore.CYAN
-        ) # Poles for Ehlers Super Smoother Filter (typically 2 or 3)
-
+        )  # Poles for Ehlers Super Smoother Filter (typically 2 or 3)
 
         # --- Confirmation Filters - Seeking Concordance in the Ether ---
         # Volume Analysis
@@ -1104,17 +1109,14 @@ def calculate_ehlers_fisher(df: pd.DataFrame, length: int, signal: int) -> pd.Da
     return df
 
 
-def calculate_ehlers_ma(df: pd.DataFrame, fast_len: int, slow_len: int, poles: int) -> pd.DataFrame:
+def calculate_ehlers_ma(
+    df: pd.DataFrame, fast_len: int, slow_len: int, poles: int
+) -> pd.DataFrame:
     """Calculates Ehlers Super Smoother Filter (SSF) MAs for fast and slow periods."""
     target_cols = ["ehlers_ssf_fast", "ehlers_ssf_slow"]
     # SSF needs length + poles - 1 data points to start. Add buffer.
     min_len = max(fast_len, slow_len) + poles + 5
-    if (
-        df is None
-        or df.empty
-        or "close" not in df.columns
-        or len(df) < min_len
-    ):
+    if df is None or df.empty or "close" not in df.columns or len(df) < min_len:
         logger.warning(
             f"{Fore.YELLOW}Scrying (Ehlers SSF MA): Insufficient data (Len: {len(df) if df is not None else 0}, Need ~{min_len}).{Style.RESET_ALL}"
         )
@@ -1128,8 +1130,12 @@ def calculate_ehlers_ma(df: pd.DataFrame, fast_len: int, slow_len: int, poles: i
         # Calculate Ehlers Super Smoother Filter (SSF) using pandas_ta
         # pandas_ta.ssf(close, length=10, poles=2, **kwargs)
         # The default 'close' column is used if not specified otherwise.
-        df["ehlers_ssf_fast"] = df.ta.ssf(length=fast_len, poles=poles).apply(safe_decimal_conversion)
-        df["ehlers_ssf_slow"] = df.ta.ssf(length=slow_len, poles=poles).apply(safe_decimal_conversion)
+        df["ehlers_ssf_fast"] = df.ta.ssf(length=fast_len, poles=poles).apply(
+            safe_decimal_conversion
+        )
+        df["ehlers_ssf_slow"] = df.ta.ssf(length=slow_len, poles=poles).apply(
+            safe_decimal_conversion
+        )
 
         # Log latest values for debugging
         fast_val = df["ehlers_ssf_fast"].iloc[-1]
@@ -2910,7 +2916,7 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame) -> None:
         CONFIG.ehlers_fisher_signal_length,
         CONFIG.ehlers_fast_period,
         CONFIG.ehlers_slow_period,
-        CONFIG.ehlers_ssf_poles, # Added for SSF
+        CONFIG.ehlers_ssf_poles,  # Added for SSF
         CONFIG.atr_calculation_period,
         CONFIG.volume_ma_period,
     ]
@@ -2924,7 +2930,11 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame) -> None:
         + CONFIG.stochrsi_d_period
         + 5
     )
-    ehlers_ssf_lookback = max(CONFIG.ehlers_fast_period, CONFIG.ehlers_slow_period) + CONFIG.ehlers_ssf_poles + 5
+    ehlers_ssf_lookback = (
+        max(CONFIG.ehlers_fast_period, CONFIG.ehlers_slow_period)
+        + CONFIG.ehlers_ssf_poles
+        + 5
+    )
 
     required_rows = max(
         required_rows_strict, stochrsi_lookback, ehlers_ssf_lookback, 50
@@ -2963,7 +2973,10 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame) -> None:
             df, CONFIG.ehlers_fisher_length, CONFIG.ehlers_fisher_signal_length
         )
         df = calculate_ehlers_ma(
-            df, CONFIG.ehlers_fast_period, CONFIG.ehlers_slow_period, CONFIG.ehlers_ssf_poles
+            df,
+            CONFIG.ehlers_fast_period,
+            CONFIG.ehlers_slow_period,
+            CONFIG.ehlers_ssf_poles,
         )
         vol_atr_data = analyze_volume_atr(
             df, CONFIG.atr_calculation_period, CONFIG.volume_ma_period
@@ -3555,15 +3568,20 @@ def main() -> None:
                     CONFIG.stochrsi_rsi_length
                     + CONFIG.stochrsi_stoch_length
                     + CONFIG.stochrsi_d_period
-                    + 5 # buffer
+                    + 5  # buffer
                 )
                 ehlers_ssf_lookback = (
                     max(CONFIG.ehlers_fast_period, CONFIG.ehlers_slow_period)
-                    + CONFIG.ehlers_ssf_poles # SSF needs length + poles
-                    + 5 # buffer
+                    + CONFIG.ehlers_ssf_poles  # SSF needs length + poles
+                    + 5  # buffer
                 )
                 data_limit = (
-                    max(max(indicator_periods) + 15, stochrsi_lookback, ehlers_ssf_lookback, 100)
+                    max(
+                        max(indicator_periods) + 15,
+                        stochrsi_lookback,
+                        ehlers_ssf_lookback,
+                        100,
+                    )
                     + CONFIG.api_fetch_limit_buffer
                 )
 

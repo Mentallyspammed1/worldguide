@@ -50,7 +50,9 @@ try:
     from getpass import getpass
 except ImportError as e:
     print(f"Error: Missing dependency: {e}")
-    print("Install dependencies: pip install ccxt pybit pydantic pydantic-settings colorama websocket-client")
+    print(
+        "Install dependencies: pip install ccxt pybit pydantic pydantic-settings colorama websocket-client"
+    )
     sys.exit(1)
 
 try:
@@ -95,18 +97,31 @@ LOG_LEVEL_COLORS: Dict[int, str] = {
 class ColoredConsoleFormatter(logging.Formatter):
     """Custom formatter for colored console logs with module names."""
 
-    def __init__(self, fmt: str | None = None, datefmt: str | None = None, style: str = "%", validate: bool = True):
+    def __init__(
+        self,
+        fmt: str | None = None,
+        datefmt: str | None = None,
+        style: str = "%",
+        validate: bool = True,
+    ):
         super().__init__(fmt=fmt, datefmt=datefmt, style=style, validate=validate)
-        force_no_color = os.getenv("NO_COLOR") or os.getenv("BOT_LOGGING_CONFIG__FORCE_NO_COLOR")
+        force_no_color = os.getenv("NO_COLOR") or os.getenv(
+            "BOT_LOGGING_CONFIG__FORCE_NO_COLOR"
+        )
         self.use_colors = (
-            COLORAMA_AVAILABLE and hasattr(sys.stdout, "isatty") and sys.stdout.isatty() and not force_no_color
+            COLORAMA_AVAILABLE
+            and hasattr(sys.stdout, "isatty")
+            and sys.stdout.isatty()
+            and not force_no_color
         )
 
     def format(self, record: logging.LogRecord) -> str:
         original_levelname = record.levelname
         color = LOG_LEVEL_COLORS.get(record.levelno, Fore.WHITE)
         record.levelname = (
-            f"{color}{original_levelname:<8}{Style.RESET_ALL}" if self.use_colors else f"{original_levelname:<8}"
+            f"{color}{original_levelname:<8}{Style.RESET_ALL}"
+            if self.use_colors
+            else f"{original_levelname:<8}"
         )
         formatted_message = super().format(record)
         record.levelname = original_levelname
@@ -150,7 +165,9 @@ def setup_logger(
             log_file = os.path.join(script_dir, log_file)
         os.makedirs(os.path.dirname(log_file) or ".", exist_ok=True)
         termux_home = "/data/data/com.termux/files/home"
-        if not log_file.startswith(termux_home) and not os.access(os.path.dirname(log_file), os.W_OK):
+        if not log_file.startswith(termux_home) and not os.access(
+            os.path.dirname(log_file), os.W_OK
+        ):
             print(
                 f"{Fore.YELLOW}Warning: Log path '{log_file}' may be inaccessible in Termux. "
                 f"Consider using '{termux_home}/logs/'.{Style.RESET_ALL}"
@@ -165,7 +182,10 @@ def setup_logger(
             )
         else:
             file_h = logging.handlers.RotatingFileHandler(
-                log_file, maxBytes=log_rotation_bytes, backupCount=log_backup_count, encoding="utf-8"
+                log_file,
+                maxBytes=log_rotation_bytes,
+                backupCount=log_backup_count,
+                encoding="utf-8",
             )
         file_h.setLevel(file_level)
         file_h.setFormatter(file_formatter)
@@ -184,26 +204,48 @@ class APIConfig(BaseModel):
     symbol: str = Field("BTC/USDT:USDT", description="Primary trading symbol")
     retry_count: PositiveInt = Field(3, description="API retry attempts")
     retry_delay_seconds: PositiveFloat = Field(1.0, description="Delay between retries")
-    order_book_fetch_limit: PositiveInt = Field(50, description="Order book depth to fetch")
-    shallow_ob_fetch_depth: PositiveInt = Field(10, description="Order book depth for analysis")
+    order_book_fetch_limit: PositiveInt = Field(
+        50, description="Order book depth to fetch"
+    )
+    shallow_ob_fetch_depth: PositiveInt = Field(
+        10, description="Order book depth for analysis"
+    )
 
     @field_validator("symbol")
     def validate_symbol(cls, v: str) -> str:
         if ":" not in v or "/" not in v:
-            raise ValueError("Symbol must be in 'BASE/QUOTE:SETTLE' format (e.g., 'BTC/USDT:USDT')")
+            raise ValueError(
+                "Symbol must be in 'BASE/QUOTE:SETTLE' format (e.g., 'BTC/USDT:USDT')"
+            )
         return v.upper()
 
 
 class StrategyConfig(BaseModel):
     timeframe: str = Field("5m", description="Kline timeframe (e.g., 1m, 5m, 1h)")
-    risk_per_trade: PositiveFloat = Field(0.01, le=1.0, description="Risk per trade as fraction of balance")
+    risk_per_trade: PositiveFloat = Field(
+        0.01, le=1.0, description="Risk per trade as fraction of balance"
+    )
     leverage: PositiveInt = Field(10, description="Default leverage")
-    default_position_mode: Literal["one-way", "hedge"] = Field("one-way", description="Position mode")
+    default_position_mode: Literal["one-way", "hedge"] = Field(
+        "one-way", description="Position mode"
+    )
     loop_delay_seconds: PositiveFloat = Field(60.0, description="Strategy loop delay")
 
     @field_validator("timeframe")
     def validate_timeframe(cls, v: str) -> str:
-        valid_timeframes = ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"]
+        valid_timeframes = [
+            "1m",
+            "3m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "4h",
+            "6h",
+            "12h",
+            "1d",
+        ]
         if v not in valid_timeframes:
             raise ValueError(f"Timeframe must be one of: {', '.join(valid_timeframes)}")
         return v
@@ -211,9 +253,15 @@ class StrategyConfig(BaseModel):
 
 class SMSConfig(BaseModel):
     enable_sms_alerts: bool = Field(False, description="Enable SMS alerts")
-    sms_recipient_number: str | None = Field(None, pattern=r"^\+?[1-9]\d{1,14}$", description="Recipient phone number")
-    sms_cooldown_seconds: PositiveInt = Field(60, ge=10, description="Cooldown for non-critical SMS")
-    critical_sms_cooldown_seconds: PositiveInt = Field(300, ge=10, description="Cooldown for critical SMS")
+    sms_recipient_number: str | None = Field(
+        None, pattern=r"^\+?[1-9]\d{1,14}$", description="Recipient phone number"
+    )
+    sms_cooldown_seconds: PositiveInt = Field(
+        60, ge=10, description="Cooldown for non-critical SMS"
+    )
+    critical_sms_cooldown_seconds: PositiveInt = Field(
+        300, ge=10, description="Cooldown for critical SMS"
+    )
 
     @model_validator(mode="after")
     def check_sms_details(self) -> "SMSConfig":
@@ -226,10 +274,14 @@ class LoggingConfig(BaseModel):
     log_file: str | None = Field("logs/trading_bot.log", description="Log file path")
     console_level: str = Field("INFO", description="Console log level")
     file_level: str = Field("DEBUG", description="File log level")
-    log_rotation_bytes: PositiveInt = Field(5 * 1024 * 1024, description="Max log file size")
+    log_rotation_bytes: PositiveInt = Field(
+        5 * 1024 * 1024, description="Max log file size"
+    )
     log_backup_count: NonNegativeInt = Field(5, description="Number of backup logs")
     log_rotation_time: bool = Field(True, description="Use time-based rotation")
-    log_rotation_interval: PositiveInt = Field(1, description="Rotation interval in days")
+    log_rotation_interval: PositiveInt = Field(
+        1, description="Rotation interval in days"
+    )
 
     @field_validator("console_level", "file_level")
     def validate_log_level(cls, v: str) -> str:
@@ -250,7 +302,9 @@ class LoggingConfig(BaseModel):
 
 class AppConfig(BaseSettings):
     CONFIG_VERSION: str = Field("2.3", description="Configuration version")
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="BOT_", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="BOT_", case_sensitive=False
+    )
     api_config: APIConfig = Field(default_factory=APIConfig)
     sms_config: SMSConfig = Field(default_factory=SMSConfig)
     strategy_config: StrategyConfig = Field(default_factory=StrategyConfig)
@@ -309,14 +363,19 @@ def interactive_setup(env_path: str) -> bool:
     print(f"\n{Fore.MAGENTA}=== Interactive Configuration Setup ==={Style.RESET_ALL}")
 
     def prompt_input(
-        prompt: str, default: str = "", secret: bool = False, validator: Callable[[str], str] | None = None
+        prompt: str,
+        default: str = "",
+        secret: bool = False,
+        validator: Callable[[str], str] | None = None,
     ) -> str:
         while True:
             input_prompt = f"{Fore.BLUE}{prompt}{Style.RESET_ALL}"
             if default:
                 input_prompt += f" [{Fore.CYAN}{default}{Style.RESET_ALL}]"
             input_prompt += ": "
-            value = getpass(input_prompt).strip() if secret else input(input_prompt).strip()
+            value = (
+                getpass(input_prompt).strip() if secret else input(input_prompt).strip()
+            )
             value = value or default
             if validator:
                 try:
@@ -328,7 +387,9 @@ def interactive_setup(env_path: str) -> bool:
 
     def validate_symbol(v: str) -> str:
         if not v or ":" not in v or "/" not in v:
-            raise ValueError("Symbol must be in 'BASE/QUOTE:SETTLE' format (e.g., 'BTC/USDT:USDT')")
+            raise ValueError(
+                "Symbol must be in 'BASE/QUOTE:SETTLE' format (e.g., 'BTC/USDT:USDT')"
+            )
         return v.upper()
 
     def validate_leverage(v: str) -> str:
@@ -337,7 +398,19 @@ def interactive_setup(env_path: str) -> bool:
         return v
 
     def validate_timeframe(v: str) -> str:
-        valid_timeframes = ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"]
+        valid_timeframes = [
+            "1m",
+            "3m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "4h",
+            "6h",
+            "12h",
+            "1d",
+        ]
         if v not in valid_timeframes:
             raise ValueError(f"Timeframe must be one of: {', '.join(valid_timeframes)}")
         return v
@@ -349,15 +422,25 @@ def interactive_setup(env_path: str) -> bool:
 
     api_key = prompt_input("Enter Bybit API Key", secret=True)
     api_secret = prompt_input("Enter Bybit API Secret", secret=True)
-    symbol = prompt_input("Enter trading symbol", "BTC/USDT:USDT", validator=validate_symbol)
+    symbol = prompt_input(
+        "Enter trading symbol", "BTC/USDT:USDT", validator=validate_symbol
+    )
     testnet = prompt_input("Use Testnet? (yes/no)", "yes").lower()
-    timeframe = prompt_input("Enter strategy timeframe (e.g., 5m, 1h)", "5m", validator=validate_timeframe)
+    timeframe = prompt_input(
+        "Enter strategy timeframe (e.g., 5m, 1h)", "5m", validator=validate_timeframe
+    )
     leverage = prompt_input("Enter desired leverage", "10", validator=validate_leverage)
     risk_per_trade = prompt_input("Enter risk per trade (e.g., 0.01 for 1%)", "0.01")
-    position_mode = prompt_input("Enter position mode (one-way/hedge)", "one-way").lower()
+    position_mode = prompt_input(
+        "Enter position mode (one-way/hedge)", "one-way"
+    ).lower()
     sms_enable = prompt_input("Enable SMS alerts? (yes/no)", "no").lower()
     sms_number = (
-        prompt_input("Enter SMS recipient number (e.g., +1234567890)", "", validator=validate_phone)
+        prompt_input(
+            "Enter SMS recipient number (e.g., +1234567890)",
+            "",
+            validator=validate_phone,
+        )
         if sms_enable.startswith("y")
         else ""
     )
@@ -400,7 +483,9 @@ def load_config() -> AppConfig:
     """Load and validate configuration from .env file."""
     env_file_path = ".env"
     if not os.path.exists(env_file_path):
-        print(f"{Fore.YELLOW}No .env file found. Generating default...{Style.RESET_ALL}")
+        print(
+            f"{Fore.YELLOW}No .env file found. Generating default...{Style.RESET_ALL}"
+        )
         generate_default_env_file(env_file_path)
         interactive_setup(env_file_path)
     try:
@@ -414,7 +499,9 @@ def load_config() -> AppConfig:
         return config
     except ValidationError as e:
         print(f"{Fore.RED}Configuration error: {e}{Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}Run with --setup to regenerate .env or check {env_file_path}{Style.RESET_ALL}")
+        print(
+            f"{Fore.YELLOW}Run with --setup to regenerate .env or check {env_file_path}{Style.RESET_ALL}"
+        )
         sys.exit(1)
 
 
@@ -442,7 +529,9 @@ class BybitHelper:
         # Check Termux API
         if config.sms_config.enable_sms_alerts:
             try:
-                subprocess.run(["which", "termux-sms-send"], capture_output=True, check=True)
+                subprocess.run(
+                    ["which", "termux-sms-send"], capture_output=True, check=True
+                )
             except (subprocess.CalledProcessError, FileNotFoundError):
                 self.logger.warning(
                     f"{Fore.YELLOW}Termux SMS alerts enabled, but 'termux-sms-send' not found. "
@@ -452,7 +541,11 @@ class BybitHelper:
     def _initialize_ccxt(self) -> None:
         """Initialize CCXT exchange instance."""
         self.exchange = ccxt.bybit(
-            {"apiKey": self.config.api_config.api_key, "secret": self.config.api_secret, "enableRateLimit": True}
+            {
+                "apiKey": self.config.api_config.api_key,
+                "secret": self.config.api_secret,
+                "enableRateLimit": True,
+            }
         )
         if self.config.api_config.testnet_mode:
             self.exchange.set_sandbox_mode(True)
@@ -486,8 +579,12 @@ class BybitHelper:
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
-                effective_max_retries = max_retries or self.config.api_config.retry_count
-                effective_base_delay = initial_delay or self.config.api_config.retry_delay_seconds
+                effective_max_retries = (
+                    max_retries or self.config.api_config.retry_count
+                )
+                effective_base_delay = (
+                    initial_delay or self.config.api_config.retry_delay_seconds
+                )
                 attempt = 0
                 while attempt <= effective_max_retries:
                     try:
@@ -495,10 +592,18 @@ class BybitHelper:
                         if isinstance(result, dict) and result.get("retCode", 0) != 0:
                             ret_code = result.get("retCode")
                             ret_msg = result.get("retMsg", "Unknown Bybit Error")
-                            retryable_codes = [10001, 10002, 130035]  # Rate limit, timeout, system error
+                            retryable_codes = [
+                                10001,
+                                10002,
+                                130035,
+                            ]  # Rate limit, timeout, system error
                             if ret_code in retryable_codes:
-                                raise ccxt.NetworkError(f"Bybit Error {ret_code}: {ret_msg}")
-                            self.logger.error(f"{func.__name__} failed with Bybit error {ret_code}: {ret_msg}")
+                                raise ccxt.NetworkError(
+                                    f"Bybit Error {ret_code}: {ret_msg}"
+                                )
+                            self.logger.error(
+                                f"{func.__name__} failed with Bybit error {ret_code}: {ret_msg}"
+                            )
                             return result
                         if attempt > 0:
                             self.logger.success(
@@ -531,18 +636,27 @@ class BybitHelper:
                         time.sleep(delay)
                     except Exception as e:
                         self.logger.critical(
-                            f"{error_message_prefix}: Unexpected error in {func.__name__}: {e}", exc_info=True
+                            f"{error_message_prefix}: Unexpected error in {func.__name__}: {e}",
+                            exc_info=True,
                         )
-                        self.send_sms_alert(f"CRITICAL: Unexpected error in {func.__name__}: {e}", priority="critical")
+                        self.send_sms_alert(
+                            f"CRITICAL: Unexpected error in {func.__name__}: {e}",
+                            priority="critical",
+                        )
                         raise
 
             return wrapper
 
         return decorator
 
-    def send_sms_alert(self, message: str, priority: Literal["normal", "critical"] = "normal") -> bool:
+    def send_sms_alert(
+        self, message: str, priority: Literal["normal", "critical"] = "normal"
+    ) -> bool:
         """Send an SMS alert with cooldown based on priority."""
-        if not self.config.sms_config.enable_sms_alerts or not self.config.sms_config.sms_recipient_number:
+        if (
+            not self.config.sms_config.enable_sms_alerts
+            or not self.config.sms_config.sms_recipient_number
+        ):
             self.logger.debug("SMS alerts disabled or no recipient, skipping send.")
             return False
         cooldown = (
@@ -559,10 +673,19 @@ class BybitHelper:
         try:
             masked_number = f"****{self.config.sms_config.sms_recipient_number[-4:]}"
             subprocess.run(
-                ["termux-sms-send", "-n", self.config.sms_config.sms_recipient_number, message], check=True, timeout=30
+                [
+                    "termux-sms-send",
+                    "-n",
+                    self.config.sms_config.sms_recipient_number,
+                    message,
+                ],
+                check=True,
+                timeout=30,
             )
             self._last_sms_time[priority] = current_time
-            self.logger.success(f"{priority.capitalize()} SMS sent to {masked_number}: {message}")
+            self.logger.success(
+                f"{priority.capitalize()} SMS sent to {masked_number}: {message}"
+            )
             return True
         except Exception as e:
             self.logger.error(f"Failed to send {priority} SMS: {e}")
@@ -620,7 +743,9 @@ class BybitHelper:
     ) -> Dict[str, Any]:
         """Set take-profit and stop-loss for a position."""
         symbol = symbol or self.config.api_config.symbol
-        position_idx = position_idx or (0 if self.config.strategy_config.default_position_mode == "one-way" else 1)
+        position_idx = position_idx or (
+            0 if self.config.strategy_config.default_position_mode == "one-way" else 1
+        )
         params = {"category": "linear", "symbol": symbol, "positionIdx": position_idx}
         if take_profit:
             params["takeProfit"] = str(self.format_price(take_profit, symbol))
@@ -628,7 +753,9 @@ class BybitHelper:
             params["stopLoss"] = str(self.format_price(stop_loss, symbol))
         try:
             result = self.session.set_trading_stop(**params)
-            self.logger.success(f"Set TP/SL for {symbol}: TP={take_profit}, SL={stop_loss}")
+            self.logger.success(
+                f"Set TP/SL for {symbol}: TP={take_profit}, SL={stop_loss}"
+            )
             return result
         except Exception as e:
             self.logger.error(f"Failed to set TP/SL for {symbol}: {e}")
@@ -636,7 +763,10 @@ class BybitHelper:
 
     @retry_api_call()
     def fetch_ohlcv(
-        self, timeframe: Optional[str] = None, limit: int = 200, symbol: Optional[str] = None
+        self,
+        timeframe: Optional[str] = None,
+        limit: int = 200,
+        symbol: Optional[str] = None,
     ) -> List[List[float]]:
         """Fetch OHLCV data using CCXT."""
         symbol = symbol or self.config.api_config.symbol
@@ -655,7 +785,9 @@ class BybitHelper:
         return self.exchange.fetch_balance()
 
     @retry_api_call()
-    def fetch_order_book(self, symbol: Optional[str] = None, limit: Optional[int] = None) -> Dict[str, Any]:
+    def fetch_order_book(
+        self, symbol: Optional[str] = None, limit: Optional[int] = None
+    ) -> Dict[str, Any]:
         """Fetch order book using CCXT."""
         symbol = symbol or self.config.api_config.symbol
         limit = limit or self.config.api_config.order_book_fetch_limit
@@ -676,12 +808,17 @@ class BybitHelper:
         return float(self.exchange.amount_to_precision(symbol, amount))
 
     def analyze_order_book(
-        self, symbol: Optional[str] = None, depth: Optional[int] = None, fetch_limit: Optional[int] = None
+        self,
+        symbol: Optional[str] = None,
+        depth: Optional[int] = None,
+        fetch_limit: Optional[int] = None,
     ) -> Dict[str, float]:
         """Analyze order book for liquidity and spread."""
         symbol = symbol or self.config.api_config.symbol
         analysis_depth = depth or self.config.api_config.shallow_ob_fetch_depth
-        effective_fetch_limit = max(analysis_depth, fetch_limit or self.config.api_config.order_book_fetch_limit)
+        effective_fetch_limit = max(
+            analysis_depth, fetch_limit or self.config.api_config.order_book_fetch_limit
+        )
         effective_fetch_limit = min(effective_fetch_limit, analysis_depth * 2)
         order_book = self.fetch_order_book(symbol, effective_fetch_limit)
         bids = order_book["bids"][:analysis_depth]
@@ -704,7 +841,9 @@ class BybitHelper:
             balance = self.fetch_balance()
             positions = self.get_position_info()
             order_book = self.analyze_order_book()
-            sma = sum(c[4] for c in ohlcv[-20:]) / 20 if ohlcv else 0  # Simple Moving Average
+            sma = (
+                sum(c[4] for c in ohlcv[-20:]) / 20 if ohlcv else 0
+            )  # Simple Moving Average
             return {
                 "ohlcv": ohlcv,
                 "current_price": ticker.get("last", 0),
@@ -718,7 +857,9 @@ class BybitHelper:
             return {}
 
     @contextmanager
-    def websocket_connection(self, channel_type: str = "linear", trace_logging: bool = False):
+    def websocket_connection(
+        self, channel_type: str = "linear", trace_logging: bool = False
+    ):
         """Context manager for WebSocket connections."""
         ws = WebSocket(
             testnet=self.config.api_config.testnet_mode,
@@ -744,17 +885,24 @@ class BybitHelper:
             self.logger.warning("WebSocket subscription requested with no topics.")
             return
         self._ws_callbacks["|".join(topics)] = callback
-        is_private = any(topic.startswith(("order", "position", "wallet", "execution")) for topic in topics)
+        is_private = any(
+            topic.startswith(("order", "position", "wallet", "execution"))
+            for topic in topics
+        )
         effective_channel_type = "private" if is_private else channel_type
         max_reconnect_attempts = 5
         reconnect_delay = 5
         attempt = 0
         while self._running and attempt < max_reconnect_attempts:
             try:
-                with self.websocket_connection(channel_type=effective_channel_type, trace_logging=trace_logging) as ws:
+                with self.websocket_connection(
+                    channel_type=effective_channel_type, trace_logging=trace_logging
+                ) as ws:
                     self.logger.debug("WebSocket connected. Subscribing to topics...")
                     ws.subscribe(topics, callback=callback)
-                    self.logger.success(f"Subscribed to WebSocket topics: {', '.join(topics)}")
+                    self.logger.success(
+                        f"Subscribed to WebSocket topics: {', '.join(topics)}"
+                    )
                     while self._running:
                         time.sleep(1)
             except (ConnectionError, websocket.WebSocketException) as e:
@@ -763,7 +911,10 @@ class BybitHelper:
                     self.logger.critical(
                         f"Failed to maintain WebSocket subscription after {max_reconnect_attempts} attempts: {e}"
                     )
-                    self.send_sms_alert(f"CRITICAL: WebSocket failed for {', '.join(topics)}", priority="critical")
+                    self.send_sms_alert(
+                        f"CRITICAL: WebSocket failed for {', '.join(topics)}",
+                        priority="critical",
+                    )
                     break
                 self.logger.warning(
                     f"WebSocket error: {e}. Reconnecting in {reconnect_delay}s (Attempt {attempt}/{max_reconnect_attempts})"
@@ -773,8 +924,13 @@ class BybitHelper:
                 self.logger.info("WebSocket subscription interrupted by user.")
                 break
             except Exception as e:
-                self.logger.critical(f"Unexpected error in WebSocket subscription: {e}", exc_info=True)
-                self.send_sms_alert(f"CRITICAL: WebSocket error for {', '.join(topics)}: {e}", priority="critical")
+                self.logger.critical(
+                    f"Unexpected error in WebSocket subscription: {e}", exc_info=True
+                )
+                self.send_sms_alert(
+                    f"CRITICAL: WebSocket error for {', '.join(topics)}: {e}",
+                    priority="critical",
+                )
                 break
 
     def diagnose_connection(self) -> bool:
@@ -783,7 +939,9 @@ class BybitHelper:
         try:
             balance = self.get_wallet_balance()
             if balance.get("retCode") != 0:
-                self.logger.error(f"Balance Check: FAILED - {balance.get('retMsg', 'Unknown error')}")
+                self.logger.error(
+                    f"Balance Check: FAILED - {balance.get('retMsg', 'Unknown error')}"
+                )
                 healthy = False
             else:
                 self.logger.success("Balance Check: OK")
@@ -796,14 +954,23 @@ class BybitHelper:
             if permissions.get("retCode") == 0 and "result" in permissions:
                 perms = permissions["result"].get("permissions", {})
                 required = ["Order", "Position", "Trade"]
-                missing = [p for p in required if p not in perms.get("spot", []) and p not in perms.get("contract", [])]
+                missing = [
+                    p
+                    for p in required
+                    if p not in perms.get("spot", [])
+                    and p not in perms.get("contract", [])
+                ]
                 if missing:
-                    self.logger.warning(f"API Key Permissions: MISSING required permissions: {missing}")
+                    self.logger.warning(
+                        f"API Key Permissions: MISSING required permissions: {missing}"
+                    )
                     healthy = False
                 else:
                     self.logger.success("API Key Permissions: OK")
             else:
-                self.logger.error(f"API Key Permissions: FAILED - {permissions.get('retMsg', 'Unknown')}")
+                self.logger.error(
+                    f"API Key Permissions: FAILED - {permissions.get('retMsg', 'Unknown')}"
+                )
                 healthy = False
         except Exception as e:
             self.logger.error(f"API Key Permissions: Error - {e}")
@@ -814,19 +981,28 @@ class BybitHelper:
     def start(self):
         """Start the bot's main strategy loop."""
         self._running = True
-        self.logger.info(f"{Fore.MAGENTA}Starting trading bot for {self.config.api_config.symbol}{Style.RESET_ALL}")
+        self.logger.info(
+            f"{Fore.MAGENTA}Starting trading bot for {self.config.api_config.symbol}{Style.RESET_ALL}"
+        )
         if not self.diagnose_connection():
             self.logger.critical("Connection diagnostics failed. Aborting startup.")
-            self.send_sms_alert("CRITICAL: Bot startup failed due to connection issues", priority="critical")
+            self.send_sms_alert(
+                "CRITICAL: Bot startup failed due to connection issues",
+                priority="critical",
+            )
             return
 
         # Subscribe to WebSocket streams
         def ticker_callback(data: Dict[str, Any]):
             price = data.get("data", {}).get("lastPrice")
             if price:
-                self.logger.debug(f"Ticker update: {self.config.api_config.symbol} @ {price}")
+                self.logger.debug(
+                    f"Ticker update: {self.config.api_config.symbol} @ {price}"
+                )
 
-        self.subscribe_to_stream([f"tickers.{self.config.api_config.symbol}"], ticker_callback)
+        self.subscribe_to_stream(
+            [f"tickers.{self.config.api_config.symbol}"], ticker_callback
+        )
         # Main strategy loop
         while self._running:
             try:
@@ -841,7 +1017,9 @@ class BybitHelper:
                 if price and balance and sma:
                     self.logger.info(f"Price: {price}, SMA: {sma}, Balance: {balance}")
                     if price < sma * 0.99:  # Buy if price is 1% below SMA
-                        qty = (balance * self.config.strategy_config.risk_per_trade) / price
+                        qty = (
+                            balance * self.config.strategy_config.risk_per_trade
+                        ) / price
                         self.place_market_order("Buy", qty)
                 time.sleep(self.config.strategy_config.loop_delay_seconds)
             except Exception as e:
@@ -951,17 +1129,29 @@ Use WebSocket subscriptions (e.g., helper.subscribe_to_stream) for real-time dat
 
 def main():
     """CLI entry point."""
-    parser = argparse.ArgumentParser(description="Bybit Trading Bot CLI", add_help=False)
+    parser = argparse.ArgumentParser(
+        description="Bybit Trading Bot CLI", add_help=False
+    )
     parser.add_argument("--help", "-h", action="store_true", help="Show help message")
-    parser.add_argument("--setup", action="store_true", help="Run interactive configuration setup")
-    parser.add_argument("--diagnose", action="store_true", help="Run connection diagnostics")
+    parser.add_argument(
+        "--setup", action="store_true", help="Run interactive configuration setup"
+    )
+    parser.add_argument(
+        "--diagnose", action="store_true", help="Run connection diagnostics"
+    )
     parser.add_argument("--start", action="store_true", help="Start the bot")
     parser.add_argument("--stop", action="store_true", help="Stop the bot")
-    parser.add_argument("--view-positions", action="store_true", help="View open positions")
-    parser.add_argument("--place-order", nargs="+", help="Place a market order: SIDE QTY [SYMBOL]")
+    parser.add_argument(
+        "--view-positions", action="store_true", help="View open positions"
+    )
+    parser.add_argument(
+        "--place-order", nargs="+", help="Place a market order: SIDE QTY [SYMBOL]"
+    )
     parser.add_argument("--view-orders", action="store_true", help="View open orders")
     parser.add_argument("--cancel-order", help="Cancel an order by ID")
-    parser.add_argument("--view-balance", action="store_true", help="View wallet balance")
+    parser.add_argument(
+        "--view-balance", action="store_true", help="View wallet balance"
+    )
     args = parser.parse_args()
 
     if args.help:
@@ -971,7 +1161,9 @@ def main():
     temp_logger = logging.getLogger("TempMain")
     temp_logger.setLevel(logging.INFO)
     temp_handler = logging.StreamHandler(sys.stdout)
-    temp_handler.setFormatter(ColoredConsoleFormatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
+    temp_handler.setFormatter(
+        ColoredConsoleFormatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
+    )
     temp_logger.addHandler(temp_handler)
 
     try:
@@ -1007,7 +1199,9 @@ def main():
         logger.info("Fetching open positions...")
         positions = helper.get_position_info()
         for pos in positions.get("result", {}).get("list", []):
-            print(f"Symbol: {pos['symbol']}, Side: {pos['side']}, Size: {pos['size']}, Entry: {pos['avgPrice']}")
+            print(
+                f"Symbol: {pos['symbol']}, Side: {pos['side']}, Size: {pos['size']}, Entry: {pos['avgPrice']}"
+            )
         sys.exit(0)
 
     if args.place_order:
@@ -1015,7 +1209,11 @@ def main():
             logger.error("Usage: --place-order SIDE QTY [SYMBOL]")
             sys.exit(1)
         side, qty = args.place_order[0], args.place_order[1]
-        symbol = args.place_order[2] if len(args.place_order) > 2 else config.api_config.symbol
+        symbol = (
+            args.place_order[2]
+            if len(args.place_order) > 2
+            else config.api_config.symbol
+        )
         try:
             qty = float(qty)
             if side not in ["Buy", "Sell"]:
@@ -1039,7 +1237,9 @@ def main():
     if args.cancel_order:
         logger.info(f"Cancelling order {args.cancel_order}...")
         try:
-            result = helper.session.cancel_order(category="linear", orderId=args.cancel_order)
+            result = helper.session.cancel_order(
+                category="linear", orderId=args.cancel_order
+            )
             print(f"Order cancelled: {result}")
         except Exception as e:
             logger.error(f"Failed to cancel order: {e}")

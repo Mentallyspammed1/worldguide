@@ -86,7 +86,9 @@ def _format_side(side_text: Optional[str]) -> str:
     return f"{NEON_YELLOW}{side_upper}{RESET}"
 
 
-def _format_price_or_na(price_val: Optional[Union[Decimal, str]], precision_places: int, label: str = "") -> str:
+def _format_price_or_na(
+    price_val: Optional[Union[Decimal, str]], precision_places: int, label: str = ""
+) -> str:
     color = NEON_CYAN
     na_color = NEON_YELLOW
     if price_val is None or str(price_val).strip() == "":
@@ -123,12 +125,26 @@ async def _set_position_protection_logic(
     lg.info(f"Proceeding with protection setup for confirmed {symbol} position...")
     try:
         entry_px_actual = confirmed_pos.get("entryPriceDecimal")
-        analyzer: TradingAnalyzer = analysis_results["analyzer"]  # Get analyzer instance
-        if not (entry_px_actual and isinstance(entry_px_actual, Decimal) and entry_px_actual > 0):
-            lg.warning(f"{NEON_YELLOW}Actual entry price missing/invalid. Using analysis close price estimate.{RESET}")
+        analyzer: TradingAnalyzer = analysis_results[
+            "analyzer"
+        ]  # Get analyzer instance
+        if not (
+            entry_px_actual
+            and isinstance(entry_px_actual, Decimal)
+            and entry_px_actual > 0
+        ):
+            lg.warning(
+                f"{NEON_YELLOW}Actual entry price missing/invalid. Using analysis close price estimate.{RESET}"
+            )
             entry_px_actual = analyzer.indicator_values.get("Close")  # Fallback
-            if not (entry_px_actual and isinstance(entry_px_actual, Decimal) and entry_px_actual > 0):
-                lg.error(f"{NEON_RED}Cannot determine entry price for protection {symbol}. Aborting.{RESET}")
+            if not (
+                entry_px_actual
+                and isinstance(entry_px_actual, Decimal)
+                and entry_px_actual > 0
+            ):
+                lg.error(
+                    f"{NEON_RED}Cannot determine entry price for protection {symbol}. Aborting.{RESET}"
+                )
                 return False
 
         # Recalculate TP/SL using actual/estimated entry price
@@ -145,26 +161,39 @@ async def _set_position_protection_logic(
             lg.info(f"Setting Trailing Stop Loss for {symbol}...")
             # Pass TP target (Decimal, 0 Decimal to remove, or None to leave unchanged)
             tp_param = tp_f if isinstance(tp_f, Decimal) else None
-            prot_ok = await api_client.set_trailing_stop_loss(symbol, confirmed_pos, config, tp_param)
+            prot_ok = await api_client.set_trailing_stop_loss(
+                symbol, confirmed_pos, config, tp_param
+            )
         # Check if valid fixed SL or TP exists (allow 0 to remove)
         elif (sl_f is not None and isinstance(sl_f, Decimal) and sl_f >= 0) or (
             tp_f is not None and isinstance(tp_f, Decimal) and tp_f >= 0
         ):
             lg.info(f"Setting Fixed SL/TP for {symbol}...")
             # Use the internal method directly, passing Decimals (0 means remove)
-            prot_ok = await api_client._set_position_protection(symbol, market_info, confirmed_pos, sl_f, tp_f)
+            prot_ok = await api_client._set_position_protection(
+                symbol, market_info, confirmed_pos, sl_f, tp_f
+            )
         else:
-            lg.info(f"No valid protection targets and TSL disabled. No action taken for {symbol}.")
+            lg.info(
+                f"No valid protection targets and TSL disabled. No action taken for {symbol}."
+            )
             prot_ok = True  # Success as no action needed
 
         if prot_ok:
-            lg.info(f"{NEON_GREEN}Protection setup successful/not required for {symbol}.{RESET}")
+            lg.info(
+                f"{NEON_GREEN}Protection setup successful/not required for {symbol}.{RESET}"
+            )
         else:
-            lg.error(f"{NEON_RED}Protection setup FAILED for {symbol}. Manual check advised.{RESET}")
+            lg.error(
+                f"{NEON_RED}Protection setup FAILED for {symbol}. Manual check advised.{RESET}"
+            )
         return prot_ok
 
     except Exception as protect_err:
-        lg.error(f"{NEON_RED}Error during protection setup {symbol}: {protect_err}{RESET}", exc_info=True)
+        lg.error(
+            f"{NEON_RED}Error during protection setup {symbol}: {protect_err}{RESET}",
+            exc_info=True,
+        )
         return False
 
 
@@ -182,8 +211,12 @@ async def _execute_close_position(
     pos_size = open_position.get("contractsDecimal")
     amount_precision = market_info.get("amountPrecision", 8)
 
-    if not (pos_side in ["long", "short"] and isinstance(pos_size, Decimal) and pos_size > 0):
-        lg.warning(f"Close {symbol} ({reason}) skipped: Invalid pos data. Side='{pos_side}', Size='{pos_size}'.")
+    if not (
+        pos_side in ["long", "short"] and isinstance(pos_size, Decimal) and pos_size > 0
+    ):
+        lg.warning(
+            f"Close {symbol} ({reason}) skipped: Invalid pos data. Side='{pos_side}', Size='{pos_size}'."
+        )
         return False
 
     try:
@@ -193,7 +226,11 @@ async def _execute_close_position(
         )
 
         close_order = await api_client.place_trade(  # Use API client method
-            symbol=symbol, trade_signal=close_signal, position_size=pos_size, order_type="market", reduce_only=True
+            symbol=symbol,
+            trade_signal=close_signal,
+            position_size=pos_size,
+            order_type="market",
+            reduce_only=True,
         )
 
         if close_order and close_order.get("id"):
@@ -201,7 +238,9 @@ async def _execute_close_position(
                 f"{NEON_GREEN}CLOSE order placed {symbol}. ID: {close_order['id']}, Status: {close_order.get('status', 'N/A')}{RESET}"
             )
             # Optional: Confirm position closure
-            await asyncio.sleep(config.get("close_confirm_delay_seconds", 2.0))  # Configurable delay
+            await asyncio.sleep(
+                config.get("close_confirm_delay_seconds", 2.0)
+            )  # Configurable delay
             final_pos = await api_client.get_open_position(symbol)
             if final_pos is None:
                 lg.info(f"{NEON_GREEN}Position closure {symbol} confirmed.{RESET}")
@@ -211,10 +250,14 @@ async def _execute_close_position(
                 )
             return True
         else:
-            lg.error(f"{NEON_RED}Failed to place CLOSE order {symbol}. API call failed/returned None.{RESET}")
+            lg.error(
+                f"{NEON_RED}Failed to place CLOSE order {symbol}. API call failed/returned None.{RESET}"
+            )
             return False
     except Exception as e:
-        lg.error(f"{NEON_RED}Error closing position {symbol}: {e}{RESET}", exc_info=True)
+        lg.error(
+            f"{NEON_RED}Error closing position {symbol}: {e}{RESET}", exc_info=True
+        )
         return False
 
 
@@ -231,7 +274,9 @@ async def _fetch_and_prepare_market_data(
     price_precision = market_info.get("pricePrecisionPlaces", 4)
     min_tick_size = market_info.get("minTickSizeDecimal", Decimal("1e-4"))
     amount_precision = market_info.get("amountPrecision", 8)
-    min_qty = Decimal(str(market_info.get("limits", {}).get("amount", {}).get("min", "0")))
+    min_qty = Decimal(
+        str(market_info.get("limits", {}).get("amount", {}).get("min", "0"))
+    )
 
     interval_str = str(config.get("interval", "5"))
     ccxt_interval = CCXT_INTERVAL_MAP.get(interval_str)
@@ -240,10 +285,14 @@ async def _fetch_and_prepare_market_data(
         return None
 
     kline_limit = max(1, config.get("kline_limit", 500))
-    klines_df = await api_client.fetch_klines(symbol, ccxt_interval, limit=kline_limit)  # Use API client
+    klines_df = await api_client.fetch_klines(
+        symbol, ccxt_interval, limit=kline_limit
+    )  # Use API client
     min_kline_len = max(1, config.get("min_kline_length", 100))
     if klines_df is None or klines_df.empty or len(klines_df) < min_kline_len:
-        lg.error(f"Insufficient klines {symbol} ({len(klines_df) if klines_df is not None else 0}/{min_kline_len}).")
+        lg.error(
+            f"Insufficient klines {symbol} ({len(klines_df) if klines_df is not None else 0}/{min_kline_len})."
+        )
         return None
 
     current_price = await api_client.fetch_current_price(symbol)  # Use API client
@@ -255,18 +304,24 @@ async def _fetch_and_prepare_market_data(
         else:
             lg.error(f"Cannot get valid current price {symbol}.")
             return None
-    lg.debug(f"Current price {symbol}: {_format_price_or_na(current_price, price_precision)}")
+    lg.debug(
+        f"Current price {symbol}: {_format_price_or_na(current_price, price_precision)}"
+    )
 
     orderbook_data = None
     orderbook_enabled = config.get("indicators", {}).get("orderbook", False)
-    active_weights = config.get("weight_sets", {}).get(config.get("active_weight_set", "default"), {})
+    active_weights = config.get("weight_sets", {}).get(
+        config.get("active_weight_set", "default"), {}
+    )
     try:
         weight = Decimal(str(active_weights.get("orderbook", 0)))
     except (InvalidOperation, TypeError):
         weight = Decimal(0)
     if orderbook_enabled and weight != 0:
         ob_limit = max(1, config.get("orderbook_limit", 25))
-        orderbook_data = await api_client.fetch_orderbook(symbol, limit=ob_limit)  # Use API client
+        orderbook_data = await api_client.fetch_orderbook(
+            symbol, limit=ob_limit
+        )  # Use API client
         if not orderbook_data:
             lg.warning(f"Failed fetch orderbook {symbol}.")
     elif orderbook_enabled:
@@ -299,9 +354,13 @@ def _perform_trade_analysis(
     try:
         analyzer = TradingAnalyzer(klines_df.copy(), lg, config, market_info)
     except Exception as e:
-        lg.error(f"Failed init Analyzer {market_info.get('symbol', '?')}: {e}", exc_info=True)
+        lg.error(
+            f"Failed init Analyzer {market_info.get('symbol', '?')}: {e}", exc_info=True
+        )
         return None
-    if not analyzer.indicator_values:  # Check if indicators were successfully calculated
+    if (
+        not analyzer.indicator_values
+    ):  # Check if indicators were successfully calculated
         lg.error(f"Indicator calc failed {market_info.get('symbol', '?')}.")
         return None
 
@@ -309,18 +368,30 @@ def _perform_trade_analysis(
     _, tp_calc, sl_calc = analyzer.calculate_entry_tp_sl(current_price_decimal, signal)
     current_atr = analyzer.indicator_values.get("ATR")
 
-    lg.info(f"--- {NEON_PURPLE}Analysis Summary ({market_info.get('symbol')}){RESET} ---")
+    lg.info(
+        f"--- {NEON_PURPLE}Analysis Summary ({market_info.get('symbol')}){RESET} ---"
+    )
     lg.info(f"  Price: {_format_price_or_na(current_price_decimal, price_precision)}")
-    atr_period = config.get("atr_period", DEFAULT_INDICATOR_PERIODS.get("atr_period", 14))
+    atr_period = config.get(
+        "atr_period", DEFAULT_INDICATOR_PERIODS.get("atr_period", 14)
+    )
     lg.info(
         f"  ATR ({atr_period}): {_format_price_or_na(current_atr, price_precision + 2, 'ATR')}"
     )  # ATR often needs more precision
-    lg.info(f"  Init SL (sizing): {_format_price_or_na(sl_calc, price_precision, 'SL Calc')}")
-    lg.info(f"  Init TP (target): {_format_price_or_na(tp_calc, price_precision, 'TP Calc')}")
+    lg.info(
+        f"  Init SL (sizing): {_format_price_or_na(sl_calc, price_precision, 'SL Calc')}"
+    )
+    lg.info(
+        f"  Init TP (target): {_format_price_or_na(tp_calc, price_precision, 'TP Calc')}"
+    )
     tsl_en = config.get("enable_trailing_stop", False)
     be_en = config.get("enable_break_even", False)
     t_exit_val = config.get("time_based_exit_minutes")
-    t_exit_str = f"{t_exit_val:.1f}m" if isinstance(t_exit_val, (int, float)) and t_exit_val > 0 else "Disabled"
+    t_exit_str = (
+        f"{t_exit_val:.1f}m"
+        if isinstance(t_exit_val, (int, float)) and t_exit_val > 0
+        else "Disabled"
+    )
     lg.info(f"  Config: TSL={tsl_en}, BE={be_en}, TimeExit={t_exit_str}")
     lg.info(f"  Signal: {_format_signal(signal)}")
     lg.info("-----------------------------")
@@ -350,7 +421,9 @@ async def _handle_no_open_position(
     if signal not in ["BUY", "SELL"]:
         lg.info(f"Signal {_format_signal(signal)}, no pos {symbol}. No entry.")
         return
-    lg.info(f"{NEON_PURPLE}*** {_format_signal(signal)} Signal & No Position: Evaluating Entry {symbol} ***{RESET}")
+    lg.info(
+        f"{NEON_PURPLE}*** {_format_signal(signal)} Signal & No Position: Evaluating Entry {symbol} ***{RESET}"
+    )
     loop = asyncio.get_event_loop()
 
     # --- Pre-checks ---
@@ -363,11 +436,17 @@ async def _handle_no_open_position(
     quote_currency = config.get("quote_currency", "USDT")
     balance = await api_client.fetch_balance(quote_currency)
     if not (balance and isinstance(balance, Decimal) and balance > 0):
-        lg.error(f"Entry Abort {symbol}: Invalid balance or zero balance for {quote_currency}.")
+        lg.error(
+            f"Entry Abort {symbol}: Invalid balance or zero balance for {quote_currency}."
+        )
         return
-    risk_pct = Decimal(str(config.get("risk_per_trade", "0.01")))  # Ensure config value is string for Decimal
+    risk_pct = Decimal(
+        str(config.get("risk_per_trade", "0.01"))
+    )  # Ensure config value is string for Decimal
     if not (0 < risk_pct <= 1):  # risk_pct is a percentage of balance, e.g. 0.01 for 1%
-        lg.error(f"Entry Abort {symbol}: Invalid risk_per_trade '{risk_pct}'. Must be > 0 and <= 1.")
+        lg.error(
+            f"Entry Abort {symbol}: Invalid risk_per_trade '{risk_pct}'. Must be > 0 and <= 1."
+        )
         return
     sl_calc = analysis_results["sl_calc"]  # Initial SL for sizing
     if not (sl_calc and isinstance(sl_calc, Decimal) and sl_calc > 0):
@@ -382,7 +461,9 @@ async def _handle_no_open_position(
     min_qty = market_data["min_qty"]
 
     # --- Set Leverage ---
-    if market_info.get("is_contract"):  # Check if it's a contract market (futures/swaps)
+    if market_info.get(
+        "is_contract"
+    ):  # Check if it's a contract market (futures/swaps)
         lev = max(1, int(config.get("leverage", 1)))
         if not await api_client.set_leverage(symbol, lev):
             lg.error(f"Entry Abort {symbol}: Failed set leverage to {lev}x.")
@@ -393,7 +474,9 @@ async def _handle_no_open_position(
         balance, risk_pct, sl_calc, current_price, market_info, api_client.exchange, lg
     )
     if not (pos_size_dec and pos_size_dec > 0):
-        lg.error(f"Entry Abort {symbol}: Pos size calc invalid or zero ({pos_size_dec}).")
+        lg.error(
+            f"Entry Abort {symbol}: Pos size calc invalid or zero ({pos_size_dec})."
+        )
         return
 
     # --- Pre-placement Validations ---
@@ -420,7 +503,9 @@ async def _handle_no_open_position(
                 offset_pct_str = str(config.get(offset_key, "0.0005"))  # e.g. 0.05%
                 offset_pct = Decimal(offset_pct_str)
                 limit_px_candidate = current_price * (
-                    Decimal("1") - offset_pct if signal == "BUY" else Decimal("1") + offset_pct
+                    Decimal("1") - offset_pct
+                    if signal == "BUY"
+                    else Decimal("1") + offset_pct
                 )
 
             if min_tick_size > 0:
@@ -428,7 +513,9 @@ async def _handle_no_open_position(
                     Decimal("1"), ROUND_DOWN if signal == "BUY" else ROUND_UP
                 ) * min_tick_size
             else:  # Should not happen for valid market_info
-                limit_px = limit_px_candidate.quantize(Decimal("1e-8"))  # Generic fallback
+                limit_px = limit_px_candidate.quantize(
+                    Decimal("1e-8")
+                )  # Generic fallback
 
             if not (limit_px and limit_px > 0):
                 raise ValueError(f"Limit price calculation invalid: {limit_px}.")
@@ -438,22 +525,35 @@ async def _handle_no_open_position(
             min_p_str = str(price_limits.get("min", "0"))
             max_p_str = str(price_limits.get("max", "inf"))
             min_p = Decimal(min_p_str) if min_p_str else Decimal("0")
-            max_p = Decimal(max_p_str) if max_p_str and max_p_str != "inf" else Decimal("Infinity")
+            max_p = (
+                Decimal(max_p_str)
+                if max_p_str and max_p_str != "inf"
+                else Decimal("Infinity")
+            )
 
             if not (min_p <= limit_px <= max_p):
-                raise ValueError(f"Limit price {limit_px} outside exchange limits [{min_p},{max_p}]")
+                raise ValueError(
+                    f"Limit price {limit_px} outside exchange limits [{min_p},{max_p}]"
+                )
 
             cost = pos_size_dec * limit_px
-            min_cost_str = str(market_info.get("limits", {}).get("cost", {}).get("min", "0"))
+            min_cost_str = str(
+                market_info.get("limits", {}).get("cost", {}).get("min", "0")
+            )
             min_cost = Decimal(min_cost_str) if min_cost_str else Decimal("0")
             if min_cost > 0 and cost < min_cost:
-                raise ValueError(f"Order cost {cost:.{price_precision + amount_precision}f} < min cost {min_cost}.")
+                raise ValueError(
+                    f"Order cost {cost:.{price_precision + amount_precision}f} < min cost {min_cost}."
+                )
 
     except ValueError as val_err:
         lg.error(f"Entry Aborted {symbol}: Validation Error - {val_err}")
         return
     except Exception as e:
-        lg.error(f"Entry Aborted {symbol}: Pre-placement validation error - {e}", exc_info=True)
+        lg.error(
+            f"Entry Aborted {symbol}: Pre-placement validation error - {e}",
+            exc_info=True,
+        )
         return
 
     # --- Determine Final Order Parameters ---
@@ -471,12 +571,20 @@ async def _handle_no_open_position(
         #    lg.error(f"Conditional trigger price calc invalid for {symbol}. Aborting entry.")
         #    return
         # limit_price_for_api might be None for conditional market, or set for conditional limit
-        lg.warning(f"Conditional order logic for {symbol} is a placeholder. Ensure trigger price is correctly set.")
+        lg.warning(
+            f"Conditional order logic for {symbol} is a placeholder. Ensure trigger price is correctly set."
+        )
 
     time_in_force = config.get("time_in_force")
     post_only = config.get("post_only", False) if entry_type == "limit" else False
-    client_order_id = f"{symbol.replace('/', '')[:10]}_{signal[:1]}_{int(time.monotonic() * 1000)}"[-60:]
-    trigger_by = config.get("trigger_by")  # e.g., 'LastPrice', 'MarkPrice', 'IndexPrice' for conditional/stop
+    client_order_id = (
+        f"{symbol.replace('/', '')[:10]}_{signal[:1]}_{int(time.monotonic() * 1000)}"[
+            -60:
+        ]
+    )
+    trigger_by = config.get(
+        "trigger_by"
+    )  # e.g., 'LastPrice', 'MarkPrice', 'IndexPrice' for conditional/stop
 
     # --- Cancel Conflicting Open Orders ---
     try:
@@ -484,7 +592,9 @@ async def _handle_no_open_position(
         for order in open_orders:
             order_side = order.get("side", "").lower()
             # Cancel open orders that oppose the new signal (e.g. if new signal is BUY, cancel existing SELL limit orders)
-            if (signal == "BUY" and order_side == "sell") or (signal == "SELL" and order_side == "buy"):
+            if (signal == "BUY" and order_side == "sell") or (
+                signal == "SELL" and order_side == "buy"
+            ):
                 # Be cautious not to cancel legitimate TP orders of an existing position if this logic runs unexpectedly
                 # This function assumes no existing position, so any opposing order is likely a remnant or manual.
                 lg.warning(
@@ -492,7 +602,9 @@ async def _handle_no_open_position(
                 )
                 await api_client.cancel_order(order["id"], symbol)
     except Exception as cancel_err:
-        lg.error(f"Failed to cancel conflicting orders for {symbol}: {cancel_err}. Proceeding with caution.")
+        lg.error(
+            f"Failed to cancel conflicting orders for {symbol}: {cancel_err}. Proceeding with caution."
+        )
 
     # --- Place Trade ---
     trade_order = await api_client.place_trade(
@@ -511,7 +623,9 @@ async def _handle_no_open_position(
     )
 
     if not (trade_order and trade_order.get("id")):
-        lg.error(f"{NEON_RED}=== TRADE ENTRY FAILED {symbol} {signal}. Order placement failed. ==={RESET}")
+        lg.error(
+            f"{NEON_RED}=== TRADE ENTRY FAILED {symbol} {signal}. Order placement failed. ==={RESET}"
+        )
         return
 
     order_id = trade_order["id"]
@@ -525,14 +639,18 @@ async def _handle_no_open_position(
     ):  # Order filled immediately
         confirm_delay = config.get("order_confirmation_delay_seconds", 0.75)
         max_retries = config.get("position_confirm_retries", 3)
-        timeout_seconds = config.get("protection_setup_timeout_seconds", 30)  # Overall timeout for this block
+        timeout_seconds = config.get(
+            "protection_setup_timeout_seconds", 30
+        )  # Overall timeout for this block
         lg.info(
             f"Waiting {confirm_delay}s (up to {max_retries} tries / {timeout_seconds}s total) for position confirmation {symbol}..."
         )
         start_time = loop.time()
         for attempt in range(max_retries):
             if loop.time() - start_time > timeout_seconds:
-                lg.error(f"{NEON_RED}Position confirmation timeout for {symbol} after order {order_id}.{RESET}")
+                lg.error(
+                    f"{NEON_RED}Position confirmation timeout for {symbol} after order {order_id}.{RESET}"
+                )
                 break
             await asyncio.sleep(confirm_delay * (attempt + 1))  # Increasing delay
             order_check = await api_client.fetch_order(order_id, symbol)
@@ -540,10 +658,14 @@ async def _handle_no_open_position(
                 confirmed_pos = await api_client.get_open_position(symbol)
                 if confirmed_pos:
                     filled_size_str = str(order_check.get("filled", "0"))
-                    filled_size = Decimal(filled_size_str) if filled_size_str else Decimal("0")
+                    filled_size = (
+                        Decimal(filled_size_str) if filled_size_str else Decimal("0")
+                    )
                     expected_size = pos_size_dec
                     # Check for significant partial fill (e.g., more than 1% difference)
-                    if filled_size > 0 and abs(filled_size - expected_size) > (expected_size * Decimal("0.01")):
+                    if filled_size > 0 and abs(filled_size - expected_size) > (
+                        expected_size * Decimal("0.01")
+                    ):
                         lg.warning(
                             f"{NEON_YELLOW}Partial Fill! Expected {expected_size}, Filled {filled_size} for order {order_id}. Using filled size for protection.{RESET}"
                         )
@@ -552,7 +674,9 @@ async def _handle_no_open_position(
                         confirmed_pos["size"] = filled_size  # common alternative key
                     break  # Position confirmed as open, or order confirmed as filled
             elif order_check is None:
-                lg.warning(f"Order {order_id} not found during confirmation poll for {symbol}.")
+                lg.warning(
+                    f"Order {order_id} not found during confirmation poll for {symbol}."
+                )
                 # Potentially break if order should exist
                 # break
             else:  # Order not closed yet or status unknown
@@ -567,9 +691,19 @@ async def _handle_no_open_position(
             return
 
         if confirmed_pos:
-            lg.info(f"{NEON_GREEN}Position Confirmed for {symbol}! Setting protection...{RESET}")
+            lg.info(
+                f"{NEON_GREEN}Position Confirmed for {symbol}! Setting protection...{RESET}"
+            )
             protection_set = await _set_position_protection_logic(
-                api_client, symbol, market_info, confirmed_pos, config, lg, analysis_results, price_precision, signal
+                api_client,
+                symbol,
+                market_info,
+                confirmed_pos,
+                config,
+                lg,
+                analysis_results,
+                price_precision,
+                signal,
             )
         elif order_status == "closed" and not confirmed_pos:
             lg.error(
@@ -578,7 +712,10 @@ async def _handle_no_open_position(
             # This state might occur if the order fills and closes immediately due to market conditions or other orders.
             # Or it could be an issue with get_open_position consistency.
 
-    elif entry_type in ["limit", "conditional"] and order_status in ["open", "partially_filled"]:
+    elif entry_type in ["limit", "conditional"] and order_status in [
+        "open",
+        "partially_filled",
+    ]:
         lg.info(
             f"{NEON_YELLOW}{entry_type.capitalize()} order {order_id} is '{order_status}' for {symbol} @ price {_format_price_or_na(limit_price_for_api or conditional_trigger_price, price_precision)}. Monitoring...{RESET}"
         )
@@ -594,19 +731,22 @@ async def _handle_no_open_position(
 
             current_order_state = await api_client.fetch_order(order_id, symbol)
             if not current_order_state:
-                lg.warning(f"{entry_type.capitalize()} order {order_id} for {symbol} disappeared during monitoring.")
+                lg.warning(
+                    f"{entry_type.capitalize()} order {order_id} for {symbol} disappeared during monitoring."
+                )
                 break  # Order no longer exists
 
             current_status = current_order_state.get("status", "").lower()
-            last_update_ts_ms = current_order_state.get("lastUpdateTimestamp") or current_order_state.get(
-                "timestamp", order_timestamp_ms
-            )
+            last_update_ts_ms = current_order_state.get(
+                "lastUpdateTimestamp"
+            ) or current_order_state.get("timestamp", order_timestamp_ms)
 
             # Stale Check (optional, based on last update time if available)
             if (
                 stale_timeout_seconds > 0
                 and last_update_ts_ms
-                and (loop.time() * 1000 - last_update_ts_ms) / 1000 > stale_timeout_seconds
+                and (loop.time() * 1000 - last_update_ts_ms) / 1000
+                > stale_timeout_seconds
             ):
                 lg.warning(
                     f"{NEON_YELLOW}{entry_type.capitalize()} order {order_id} for {symbol} considered stale (no update for > {stale_timeout_seconds}s). Canceling.{RESET}"
@@ -615,9 +755,13 @@ async def _handle_no_open_position(
                 break
 
             if current_status == "closed":
-                lg.info(f"{NEON_GREEN}{entry_type.capitalize()} order {order_id} for {symbol} filled.{RESET}")
+                lg.info(
+                    f"{NEON_GREEN}{entry_type.capitalize()} order {order_id} for {symbol} filled.{RESET}"
+                )
                 filled_size_str = str(current_order_state.get("filled", "0"))
-                filled_size = Decimal(filled_size_str) if filled_size_str else Decimal("0")
+                filled_size = (
+                    Decimal(filled_size_str) if filled_size_str else Decimal("0")
+                )
 
                 if filled_size <= Decimal(0):
                     lg.error(
@@ -626,7 +770,9 @@ async def _handle_no_open_position(
                     break
 
                 # Handle partial fills if necessary
-                if filled_size < pos_size_dec * Decimal("0.99"):  # If filled less than 99% of intended
+                if filled_size < pos_size_dec * Decimal(
+                    "0.99"
+                ):  # If filled less than 99% of intended
                     lg.warning(
                         f"{NEON_YELLOW}Partial Fill for {entry_type} order {order_id} on {symbol}! Expected {pos_size_dec}, Filled {filled_size}.{RESET}"
                     )
@@ -661,7 +807,10 @@ async def _handle_no_open_position(
                     f"{NEON_RED}{entry_type.capitalize()} order {order_id} for {symbol} was canceled (manually or by stale check).{RESET}"
                 )
                 break
-            elif current_status not in ["open", "partially_filled"]:  # new, accepted, etc. are usually transient
+            elif current_status not in [
+                "open",
+                "partially_filled",
+            ]:  # new, accepted, etc. are usually transient
                 lg.error(
                     f"{NEON_RED}{entry_type.capitalize()} order {order_id} for {symbol} has unexpected status '{current_status}'. Stopping monitor.{RESET}"
                 )
@@ -678,7 +827,9 @@ async def _handle_no_open_position(
         )
 
     if protection_set:
-        lg.info(f"{NEON_GREEN}=== TRADE ENTRY & PROTECTION COMPLETE ({symbol} {signal}) ==={RESET}")
+        lg.info(
+            f"{NEON_GREEN}=== TRADE ENTRY & PROTECTION COMPLETE ({symbol} {signal}) ==={RESET}"
+        )
     elif confirmed_pos:  # Position exists but protection failed or was skipped
         lg.warning(
             f"{NEON_YELLOW}=== TRADE ENTRY COMPLETE ({symbol} {signal}) BUT PROTECTION FAILED/SKIPPED ==={RESET}"
@@ -700,7 +851,9 @@ async def _manage_existing_open_position(
     pos_side = open_position.get("side")  # 'long' or 'short'
     pos_size = open_position.get("contractsDecimal")
     entry_px = open_position.get("entryPriceDecimal")
-    pos_ts_ms = open_position.get("timestamp_ms")  # Timestamp of position opening/last update
+    pos_ts_ms = open_position.get(
+        "timestamp_ms"
+    )  # Timestamp of position opening/last update
 
     market_info = market_data["market_info"]
     current_price = market_data["current_price_decimal"]
@@ -728,7 +881,9 @@ async def _manage_existing_open_position(
     )
     cur_sl = open_position.get("stopLossPriceDecimal")
     cur_tp = open_position.get("takeProfitPriceDecimal")
-    lg.info(f"  SL: {_format_price_or_na(cur_sl, price_prec)}, TP: {_format_price_or_na(cur_tp, price_prec)}")
+    lg.info(
+        f"  SL: {_format_price_or_na(cur_sl, price_prec)}, TP: {_format_price_or_na(cur_tp, price_prec)}"
+    )
 
     tsl_dist_val = open_position.get(
         "trailingStopDistanceDecimal"
@@ -752,24 +907,48 @@ async def _manage_existing_open_position(
 
             # Determine if order is likely the current position's TP or SL
             is_current_tp = False
-            if cur_tp and order_price and abs(order_price - cur_tp) < min_tick * Decimal("0.5"):
+            if (
+                cur_tp
+                and order_price
+                and abs(order_price - cur_tp) < min_tick * Decimal("0.5")
+            ):
                 is_current_tp = (pos_side == "long" and order_side == "sell") or (
                     pos_side == "short" and order_side == "buy"
                 )
 
             is_current_sl = False  # Harder to match SL as it might be a stop market order without explicit price in `fetch_open_orders`
             # For Bybit, stop orders might appear differently. This check is basic.
-            if cur_sl and order_price and abs(order_price - cur_sl) < min_tick * Decimal("0.5"):
-                is_current_sl = (pos_side == "long" and order_side == "sell" and order_type == "stop_market") or (
-                    pos_side == "short" and order_side == "buy" and order_type == "stop_market"
+            if (
+                cur_sl
+                and order_price
+                and abs(order_price - cur_sl) < min_tick * Decimal("0.5")
+            ):
+                is_current_sl = (
+                    pos_side == "long"
+                    and order_side == "sell"
+                    and order_type == "stop_market"
+                ) or (
+                    pos_side == "short"
+                    and order_side == "buy"
+                    and order_type == "stop_market"
                 )
 
             # If the order opposes the *current position* and is NOT its TP/SL, consider canceling
             # Example: Position is LONG. A SELL limit order that is not the TP might be a remnant.
             conflicting = False
-            if pos_side == "long" and order_side == "sell" and not is_current_tp and not is_current_sl:
+            if (
+                pos_side == "long"
+                and order_side == "sell"
+                and not is_current_tp
+                and not is_current_sl
+            ):
                 conflicting = True
-            elif pos_side == "short" and order_side == "buy" and not is_current_tp and not is_current_sl:
+            elif (
+                pos_side == "short"
+                and order_side == "buy"
+                and not is_current_tp
+                and not is_current_sl
+            ):
                 conflicting = True
 
             if conflicting:
@@ -778,23 +957,42 @@ async def _manage_existing_open_position(
                 )
                 await api_client.cancel_order(order_id_to_check, symbol)
             elif is_current_tp or is_current_sl:
-                lg.debug(f"Keeping order {order_id_to_check} as it appears to be TP/SL for {symbol}.")
+                lg.debug(
+                    f"Keeping order {order_id_to_check} as it appears to be TP/SL for {symbol}."
+                )
 
     except Exception as cancel_err:
-        lg.error(f"Error during conflicting order cancellation for {symbol}: {cancel_err}", exc_info=True)
+        lg.error(
+            f"Error during conflicting order cancellation for {symbol}: {cancel_err}",
+            exc_info=True,
+        )
 
     # --- Check Exit Signal ---
     # If current signal opposes the open position side
-    if (pos_side == "long" and signal == "SELL") or (pos_side == "short" and signal == "BUY"):
+    if (pos_side == "long" and signal == "SELL") or (
+        pos_side == "short" and signal == "BUY"
+    ):
         lg.warning(
             f"{NEON_YELLOW}*** EXIT Signal ({_format_signal(signal)}) opposes current {_format_side(pos_side)} position for {symbol}. Closing... ***{RESET}"
         )
-        if await _execute_close_position(api_client, symbol, market_info, open_position, config, lg, "opposing signal"):
+        if await _execute_close_position(
+            api_client,
+            symbol,
+            market_info,
+            open_position,
+            config,
+            lg,
+            "opposing signal",
+        ):
             return  # Position closed, no further management needed in this cycle
 
     # --- Time Exit ---
     time_exit_min_config = analysis_results.get("time_exit_minutes_config")
-    if isinstance(time_exit_min_config, (int, float)) and time_exit_min_config > 0 and pos_ts_ms:
+    if (
+        isinstance(time_exit_min_config, (int, float))
+        and time_exit_min_config > 0
+        and pos_ts_ms
+    ):
         try:
             current_time_ms = int(loop.time() * 1000)
             elapsed_min = (current_time_ms - pos_ts_ms) / 60000.0
@@ -803,7 +1001,13 @@ async def _manage_existing_open_position(
                     f"{NEON_YELLOW}*** TIME EXIT for {symbol} ({elapsed_min:.1f}m >= configured {time_exit_min_config}m). Closing... ***{RESET}"
                 )
                 if await _execute_close_position(
-                    api_client, symbol, market_info, open_position, config, lg, "time exit"
+                    api_client,
+                    symbol,
+                    market_info,
+                    open_position,
+                    config,
+                    lg,
+                    "time exit",
                 ):
                     return  # Position closed
         except Exception as terr:
@@ -811,50 +1015,81 @@ async def _manage_existing_open_position(
 
     # --- Break-Even --- (Only if not using exchange TSL, as they might conflict)
     be_enabled_config = analysis_results.get("be_enabled_config", False)
-    if be_enabled_config and not is_tsl_active_on_exchange:  # Don't manage BE if exchange TSL is on
+    if (
+        be_enabled_config and not is_tsl_active_on_exchange
+    ):  # Don't manage BE if exchange TSL is on
         lg.debug(f"--- Break-Even Check for {symbol} ---")
         try:
             if not (
-                isinstance(current_atr, Decimal) and current_atr > 0 and isinstance(min_tick, Decimal) and min_tick > 0
+                isinstance(current_atr, Decimal)
+                and current_atr > 0
+                and isinstance(min_tick, Decimal)
+                and min_tick > 0
             ):
-                raise ValueError(f"Invalid ATR ({current_atr}) or MinTick ({min_tick}) for BE calculation.")
+                raise ValueError(
+                    f"Invalid ATR ({current_atr}) or MinTick ({min_tick}) for BE calculation."
+                )
 
-            be_trigger_atr_multiple = Decimal(str(config.get("break_even_trigger_atr_multiple", "1.0")))
+            be_trigger_atr_multiple = Decimal(
+                str(config.get("break_even_trigger_atr_multiple", "1.0"))
+            )
             be_offset_ticks = int(config.get("break_even_offset_ticks", 2))
 
-            if be_trigger_atr_multiple <= 0 or be_offset_ticks < 0:  # Trigger multiple must be positive
+            if (
+                be_trigger_atr_multiple <= 0 or be_offset_ticks < 0
+            ):  # Trigger multiple must be positive
                 raise ValueError(
                     f"Invalid BE config: TriggerATR={be_trigger_atr_multiple}, OffsetTicks={be_offset_ticks}"
                 )
 
-            price_diff_from_entry = (current_price - entry_px) if pos_side == "long" else (entry_px - current_price)
+            price_diff_from_entry = (
+                (current_price - entry_px)
+                if pos_side == "long"
+                else (entry_px - current_price)
+            )
             profit_in_atr = (
-                price_diff_from_entry / current_atr if current_atr > 0 else Decimal("Infinity")
+                price_diff_from_entry / current_atr
+                if current_atr > 0
+                else Decimal("Infinity")
             )  # Avoid div by zero
 
             if profit_in_atr >= be_trigger_atr_multiple:
                 tick_offset_value = min_tick * Decimal(be_offset_ticks)
-                raw_be_price = entry_px + tick_offset_value if pos_side == "long" else entry_px - tick_offset_value
+                raw_be_price = (
+                    entry_px + tick_offset_value
+                    if pos_side == "long"
+                    else entry_px - tick_offset_value
+                )
                 # Round BE price to nearest tick in a favorable direction (or at entry)
                 rounding_direction = ROUND_UP if pos_side == "long" else ROUND_DOWN
-                be_stop_price = (raw_be_price / min_tick).quantize(Decimal("1"), rounding=rounding_direction) * min_tick
+                be_stop_price = (raw_be_price / min_tick).quantize(
+                    Decimal("1"), rounding=rounding_direction
+                ) * min_tick
 
                 # Ensure BE price is sensible (e.g., not worse than entry for a profit move)
                 if (pos_side == "long" and be_stop_price < entry_px) or (
                     pos_side == "short" and be_stop_price > entry_px
                 ):
-                    be_stop_price = (entry_px / min_tick).quantize(Decimal("1"), rounding=rounding_direction) * min_tick
+                    be_stop_price = (entry_px / min_tick).quantize(
+                        Decimal("1"), rounding=rounding_direction
+                    ) * min_tick
 
                 if be_stop_price <= 0:  # Should not happen with valid inputs
-                    raise ValueError(f"Calculated BE stop price is zero or negative: {be_stop_price}")
+                    raise ValueError(
+                        f"Calculated BE stop price is zero or negative: {be_stop_price}"
+                    )
 
                 current_sl_price = open_position.get("stopLossPriceDecimal")
                 update_sl_needed = False
                 if not current_sl_price:  # No SL set, so set BE SL
                     update_sl_needed = True
-                elif pos_side == "long" and be_stop_price > current_sl_price:  # Move SL up to BE
+                elif (
+                    pos_side == "long" and be_stop_price > current_sl_price
+                ):  # Move SL up to BE
                     update_sl_needed = True
-                elif pos_side == "short" and be_stop_price < current_sl_price:  # Move SL down to BE
+                elif (
+                    pos_side == "short" and be_stop_price < current_sl_price
+                ):  # Move SL down to BE
                     update_sl_needed = True
 
                 if update_sl_needed:
@@ -871,9 +1106,13 @@ async def _manage_existing_open_position(
                         take_profit_price=tp_for_be_update,
                     ):
                         lg.info(f"Break-Even SL update successful for {symbol}.")
-                        open_position["stopLossPriceDecimal"] = be_stop_price  # Update local cache
+                        open_position["stopLossPriceDecimal"] = (
+                            be_stop_price  # Update local cache
+                        )
                     else:
-                        lg.error(f"{NEON_RED}Break-Even SL update FAILED for {symbol}.{RESET}")
+                        lg.error(
+                            f"{NEON_RED}Break-Even SL update FAILED for {symbol}.{RESET}"
+                        )
             else:
                 lg.debug(
                     f"BE Target not reached for {symbol} (Profit ATR: {profit_in_atr:.2f} < Trigger: {be_trigger_atr_multiple:.2f})"
@@ -888,7 +1127,9 @@ async def _manage_existing_open_position(
     if tsl_enabled_config and not is_tsl_active_on_exchange:
         # Check if BE has already moved SL to entry or better. If so, TSL might take over or be redundant.
         # For simplicity, this attempts to set TSL if config says so and exchange doesn't show one.
-        lg.debug(f"--- TSL Activation Check for {symbol} (Exchange TSL not detected) ---")
+        lg.debug(
+            f"--- TSL Activation Check for {symbol} (Exchange TSL not detected) ---"
+        )
         try:
             analyzer: TradingAnalyzer = analysis_results["analyzer"]
             # TP target for TSL might be based on initial entry or dynamically calculated
@@ -898,11 +1139,15 @@ async def _manage_existing_open_position(
             lg.info(
                 f"Attempting to activate Trailing Stop Loss for {symbol}. Associated TP Target (if any): {_format_price_or_na(tsl_tp_target, price_prec)}"
             )
-            if await api_client.set_trailing_stop_loss(symbol, open_position, config, tsl_tp_target):
+            if await api_client.set_trailing_stop_loss(
+                symbol, open_position, config, tsl_tp_target
+            ):
                 lg.info(f"Trailing Stop Loss activation initiated for {symbol}.")
                 # After this, is_tsl_active_on_exchange should become true on next cycle's fetch
             else:
-                lg.warning(f"{NEON_YELLOW}Trailing Stop Loss activation attempt failed for {symbol}.{RESET}")
+                lg.warning(
+                    f"{NEON_YELLOW}Trailing Stop Loss activation attempt failed for {symbol}.{RESET}"
+                )
         except Exception as tsl_err:
             lg.error(f"TSL activation error for {symbol}: {tsl_err}", exc_info=True)
 
@@ -926,7 +1171,9 @@ async def analyze_and_trade_symbol(
     # Fetch Market Data
     market_data = await _fetch_and_prepare_market_data(api_client, symbol, config, lg)
     if not market_data:
-        lg.info(f"{NEON_BLUE}--- Cycle End ({symbol}, Market Data Fetch Failed) ---{RESET}\n")
+        lg.info(
+            f"{NEON_BLUE}--- Cycle End ({symbol}, Market Data Fetch Failed) ---{RESET}\n"
+        )
         return
 
     # Perform Analysis
@@ -940,12 +1187,16 @@ async def analyze_and_trade_symbol(
         market_data["price_precision"],
     )
     if not analysis_results:
-        lg.info(f"{NEON_BLUE}--- Cycle End ({symbol}, Trade Analysis Failed) ---{RESET}\n")
+        lg.info(
+            f"{NEON_BLUE}--- Cycle End ({symbol}, Trade Analysis Failed) ---{RESET}\n"
+        )
         return
 
     # Trading Logic (if enabled)
     if not enable_trading:
-        lg.info(f"{NEON_YELLOW}Trading is disabled by global flag. Skipping trade execution for {symbol}.{RESET}")
+        lg.info(
+            f"{NEON_YELLOW}Trading is disabled by global flag. Skipping trade execution for {symbol}.{RESET}"
+        )
         lg.info(f"{NEON_BLUE}--- Cycle End ({symbol}, Trading Disabled) ---{RESET}\n")
         return
 
@@ -954,10 +1205,18 @@ async def analyze_and_trade_symbol(
         open_position = await api_client.get_open_position(symbol)
 
         if open_position is None:  # No open position for this symbol
-            await _handle_no_open_position(api_client, symbol, config, lg, market_data, analysis_results)
+            await _handle_no_open_position(
+                api_client, symbol, config, lg, market_data, analysis_results
+            )
         else:  # There is an open position for this symbol
             await _manage_existing_open_position(
-                api_client, symbol, config, lg, market_data, analysis_results, open_position
+                api_client,
+                symbol,
+                config,
+                lg,
+                market_data,
+                analysis_results,
+                open_position,
             )
     except Exception as trade_err:
         lg.critical(
@@ -968,4 +1227,6 @@ async def analyze_and_trade_symbol(
         # e.g., api_client.trip_circuit_breaker(reason=f"Critical trading error: {symbol}")
 
     cycle_duration = loop.time() - cycle_start_time
-    lg.info(f"{NEON_BLUE}---== Cycle End ({symbol}, Duration: {cycle_duration:.2f}s) ==---{RESET}\n")
+    lg.info(
+        f"{NEON_BLUE}---== Cycle End ({symbol}, Duration: {cycle_duration:.2f}s) ==---{RESET}\n"
+    )

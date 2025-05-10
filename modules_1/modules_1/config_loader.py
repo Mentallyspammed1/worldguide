@@ -17,15 +17,21 @@ from utils import (
 )
 
 
-def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any]) -> Dict[str, Any]:
+def _ensure_config_keys(
+    config: Dict[str, Any], default_config: Dict[str, Any]
+) -> Dict[str, Any]:
     """Recursively ensures all keys from the default config are present in the loaded config."""
     updated_config = config.copy()
     for key, default_value in default_config.items():
         if key not in updated_config:
             updated_config[key] = default_value
-        elif isinstance(default_value, dict) and isinstance(updated_config.get(key), dict):
+        elif isinstance(default_value, dict) and isinstance(
+            updated_config.get(key), dict
+        ):
             # Recursively check nested dictionaries
-            updated_config[key] = _ensure_config_keys(updated_config[key], default_value)
+            updated_config[key] = _ensure_config_keys(
+                updated_config[key], default_value
+            )
     return updated_config
 
 
@@ -33,7 +39,9 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
     """Load configuration from JSON file, creating default if not found,
     and ensuring all default keys are present with validation."""
     default_config = {
-        "symbols_to_trade": ["FARTCOIN/USDT:USDT"],  # List of symbols (e.g., "FARTCOIN/USDT:USDT" for Bybit linear)
+        "symbols_to_trade": [
+            "FARTCOIN/USDT:USDT"
+        ],  # List of symbols (e.g., "FARTCOIN/USDT:USDT" for Bybit linear)
         "interval": "5",  # Default to '5' (map to 5m later)
         "retry_delay": RETRY_DELAY_SECONDS,
         "orderbook_limit": 25,  # Depth of orderbook to fetch
@@ -125,7 +133,9 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             print(f"{NEON_YELLOW}Created default config file: {filepath}{RESET}")
             return default_config
         except IOError as e:
-            print(f"{NEON_RED}Error creating default config file {filepath}: {e}{RESET}")
+            print(
+                f"{NEON_RED}Error creating default config file {filepath}: {e}{RESET}"
+            )
             return default_config  # Return default if creation failed
 
     try:
@@ -138,9 +148,13 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             try:
                 with open(filepath, "w", encoding="utf-8") as f_write:
                     json.dump(updated_config, f_write, indent=4)
-                print(f"{NEON_YELLOW}Updated config file with missing default keys: {filepath}{RESET}")
+                print(
+                    f"{NEON_YELLOW}Updated config file with missing default keys: {filepath}{RESET}"
+                )
             except IOError as e:
-                print(f"{NEON_RED}Error writing updated config file {filepath}: {e}{RESET}")
+                print(
+                    f"{NEON_RED}Error writing updated config file {filepath}: {e}{RESET}"
+                )
 
         # --- Validate crucial values after loading/updating ---
         save_needed = False  # Flag to save config if corrections are made
@@ -178,15 +192,23 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
                 valid = True
             # Explicitly check for bool type and exclude it from numeric validation
             elif isinstance(value, bool):
-                print(f"{NEON_RED}Config value '{key}' ({value}) has invalid type bool. Expected numeric.")
+                print(
+                    f"{NEON_RED}Config value '{key}' ({value}) has invalid type bool. Expected numeric."
+                )
             elif isinstance(value, (int, float, str)):  # Allow string for conversion
                 try:
                     val_decimal = Decimal(str(value))  # Use Decimal for comparison
                     if is_int and val_decimal != val_decimal.to_integral_value():
-                        print(f"{NEON_RED}Config value '{key}' ({value}) must be an integer.")
+                        print(
+                            f"{NEON_RED}Config value '{key}' ({value}) must be an integer."
+                        )
                     else:
-                        min_decimal = Decimal(str(min_val)) if min_val is not None else None
-                        max_decimal = Decimal(str(max_val)) if max_val is not None else None
+                        min_decimal = (
+                            Decimal(str(min_val)) if min_val is not None else None
+                        )
+                        max_decimal = (
+                            Decimal(str(max_val)) if max_val is not None else None
+                        )
 
                         if (min_decimal is None or val_decimal >= min_decimal) and (
                             max_decimal is None or val_decimal <= max_decimal
@@ -194,21 +216,31 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
                             valid = True
                             # Convert back to original type if valid and was string
                             if isinstance(value, str):
-                                updated_config[key] = int(val_decimal) if is_int else float(val_decimal)
+                                updated_config[key] = (
+                                    int(val_decimal) if is_int else float(val_decimal)
+                                )
                         else:
                             range_str = ""
                             if min_val is not None:
                                 range_str += f" >= {min_val}"
                             if max_val is not None:
                                 range_str += f" <= {max_val}"
-                            print(f"{NEON_RED}Config value '{key}' ({value}) out of range ({range_str.strip()}).")
+                            print(
+                                f"{NEON_RED}Config value '{key}' ({value}) out of range ({range_str.strip()})."
+                            )
                 except InvalidOperation:
-                    print(f"{NEON_RED}Config value '{key}' ({value}) could not be converted to Decimal for validation.")
+                    print(
+                        f"{NEON_RED}Config value '{key}' ({value}) could not be converted to Decimal for validation."
+                    )
             else:
-                print(f"{NEON_RED}Config value '{key}' ({value}) has invalid type {type(value)}. Expected numeric.")
+                print(
+                    f"{NEON_RED}Config value '{key}' ({value}) has invalid type {type(value)}. Expected numeric."
+                )
 
             if not valid:
-                print(f"{NEON_YELLOW}Using default value for '{key}': {default_value}{RESET}")
+                print(
+                    f"{NEON_YELLOW}Using default value for '{key}': {default_value}{RESET}"
+                )
                 updated_config[key] = default_value
                 save_needed = True
 
@@ -225,22 +257,37 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
         validate_numeric("break_even_trigger_atr_multiple", min_val=0)
         validate_numeric("break_even_offset_ticks", min_val=0, is_int=True)
         validate_numeric("position_confirm_delay_seconds", min_val=0)
-        validate_numeric("time_based_exit_minutes", min_val=1, allow_none=True)  # Allow None, but min 1 if set
+        validate_numeric(
+            "time_based_exit_minutes", min_val=1, allow_none=True
+        )  # Allow None, but min 1 if set
         validate_numeric("orderbook_limit", min_val=1, is_int=True)
         validate_numeric("limit_order_offset_buy", min_val=0)
         validate_numeric("limit_order_offset_sell", min_val=0)
-        validate_numeric("bollinger_bands_std_dev", min_val=0)  # Ensure std dev is non-negative
+        validate_numeric(
+            "bollinger_bands_std_dev", min_val=0
+        )  # Ensure std dev is non-negative
 
         # Validate indicator periods (ensure positive integers/floats where applicable)
         for key, default_val in DEFAULT_INDICATOR_PERIODS.items():
-            is_int_param = isinstance(default_val, int) or key in ["stoch_rsi_k", "stoch_rsi_d"]  # K/D should be int
-            min_value = 1 if is_int_param else 1e-9  # Periods usually > 0, AF can be small float
+            is_int_param = isinstance(default_val, int) or key in [
+                "stoch_rsi_k",
+                "stoch_rsi_d",
+            ]  # K/D should be int
+            min_value = (
+                1 if is_int_param else 1e-9
+            )  # Periods usually > 0, AF can be small float
             validate_numeric(key, min_val=min_value, is_int=is_int_param)
 
         # Validate symbols_to_trade is a non-empty list of strings
         symbols = updated_config.get("symbols_to_trade")
-        if not isinstance(symbols, list) or not symbols or not all(isinstance(s, str) for s in symbols):
-            print(f"{NEON_RED}Invalid 'symbols_to_trade' format in config. Must be a non-empty list of strings.{RESET}")
+        if (
+            not isinstance(symbols, list)
+            or not symbols
+            or not all(isinstance(s, str) for s in symbols)
+        ):
+            print(
+                f"{NEON_RED}Invalid 'symbols_to_trade' format in config. Must be a non-empty list of strings.{RESET}"
+            )
             updated_config["symbols_to_trade"] = default_config["symbols_to_trade"]
             print(
                 f"{NEON_YELLOW}Using default value for 'symbols_to_trade': {updated_config['symbols_to_trade']}{RESET}"
@@ -252,18 +299,26 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             try:
                 with open(filepath, "w", encoding="utf-8") as f_write:
                     json.dump(updated_config, f_write, indent=4)
-                print(f"{NEON_YELLOW}Corrected invalid values and saved updated config file: {filepath}{RESET}")
+                print(
+                    f"{NEON_YELLOW}Corrected invalid values and saved updated config file: {filepath}{RESET}"
+                )
             except IOError as e:
-                print(f"{NEON_RED}Error writing corrected config file {filepath}: {e}{RESET}")
+                print(
+                    f"{NEON_RED}Error writing corrected config file {filepath}: {e}{RESET}"
+                )
 
         return updated_config
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"{NEON_RED}Error loading config file {filepath}: {e}. Using default config.{RESET}")
+        print(
+            f"{NEON_RED}Error loading config file {filepath}: {e}. Using default config.{RESET}"
+        )
         try:
             # Attempt to recreate default if loading failed badly
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=4)
             print(f"{NEON_YELLOW}Created default config file: {filepath}{RESET}")
         except IOError as e_create:
-            print(f"{NEON_RED}Error creating default config file after load error: {e_create}{RESET}")
+            print(
+                f"{NEON_RED}Error creating default config file after load error: {e_create}{RESET}"
+            )
         return default_config  # Return default

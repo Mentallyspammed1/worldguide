@@ -29,7 +29,9 @@ def test_fetch_ohlcv(helper):
 def test_indicators(helper):
     ohlcv = helper.fetch_ohlcv("5m", limit=50)
     if ohlcv:
-        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
         df_ind = helper.calculate_indicators(df)
         assert "evt_trend_7" in df_ind.columns

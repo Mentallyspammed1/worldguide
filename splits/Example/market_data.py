@@ -24,7 +24,9 @@ try:
 
     # Check for Bybit specific class, as ccxt is a meta-package
     if not hasattr(ccxt, "bybit"):
-        print("Error: ccxt library is installed, but Bybit exchange support might be missing or outdated.")
+        print(
+            "Error: ccxt library is installed, but Bybit exchange support might be missing or outdated."
+        )
         # Optionally add instructions to update ccxt or check installation.
         # sys.exit(1) # Might be too strict, let it fail later if used.
 except ImportError:
@@ -103,7 +105,9 @@ try:
     init(autoreset=True)  # Initialize colorama
     COLORAMA_AVAILABLE = True
 except ImportError:
-    print("WARNING: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print(
+        "WARNING: colorama library not found. Logs will not be colored. Install: pip install colorama"
+    )
     COLORAMA_AVAILABLE = False
 
     # Dummy color class if colorama is not available
@@ -126,7 +130,9 @@ try:
     )
 except ImportError as e:
     print(f"ERROR: Failed to import local modules (config, utils): {e}")
-    print("Please ensure config.py and utils.py are in the same directory or accessible in PYTHONPATH.")
+    print(
+        "Please ensure config.py and utils.py are in the same directory or accessible in PYTHONPATH."
+    )
     sys.exit(1)
 
 # --- Logger Setup ---
@@ -138,8 +144,14 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # Function 3: Fetch USDT Balance (V5 UNIFIED)
 # ============================================================================
-@retry_api_call(max_retries=3, initial_delay=1.0, caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError))
-def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[Decimal], Optional[Decimal]]:
+@retry_api_call(
+    max_retries=3,
+    initial_delay=1.0,
+    caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError),
+)
+def fetch_usdt_balance(
+    exchange: ccxt.bybit, config: Config
+) -> Tuple[Optional[Decimal], Optional[Decimal]]:
     """
     Fetches the USDT balance (Total Equity and Available Balance) using Bybit V5 UNIFIED account logic.
 
@@ -159,15 +171,21 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
         ValueError: If the balance response structure is unexpected or parsing fails completely.
     """
     func_name = "fetch_usdt_balance"
-    logger.debug(f"[{func_name}] Fetching USDT balance (Targeting Bybit V5 UNIFIED Account)...")
+    logger.debug(
+        f"[{func_name}] Fetching USDT balance (Targeting Bybit V5 UNIFIED Account)..."
+    )
 
     try:
         params = {"accountType": "UNIFIED"}  # V5 requires specifying account type
         balance_data = exchange.fetch_balance(params=params)
 
         if not balance_data or "info" not in balance_data:
-            logger.error(f"{Fore.RED}[{func_name}] Received invalid or empty balance response.{Style.RESET_ALL}")
-            raise ValueError("Invalid or empty balance response received from exchange.")
+            logger.error(
+                f"{Fore.RED}[{func_name}] Received invalid or empty balance response.{Style.RESET_ALL}"
+            )
+            raise ValueError(
+                "Invalid or empty balance response received from exchange."
+            )
 
         # --- V5 UNIFIED Parsing Logic ---
         info = balance_data.get("info", {})
@@ -180,17 +198,27 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
 
         if result_list:
             # Find the UNIFIED account details within the list
-            unified_account_info = next((acc for acc in result_list if acc.get("accountType") == "UNIFIED"), None)
+            unified_account_info = next(
+                (acc for acc in result_list if acc.get("accountType") == "UNIFIED"),
+                None,
+            )
 
             if unified_account_info:
                 account_type_found = "UNIFIED (V5)"
-                logger.debug(f"[{func_name}] Found UNIFIED account section in V5 response.")
+                logger.debug(
+                    f"[{func_name}] Found UNIFIED account section in V5 response."
+                )
                 # Total equity for the unified account
-                equity_v5 = safe_decimal_conversion(unified_account_info.get("totalEquity"))
+                equity_v5 = safe_decimal_conversion(
+                    unified_account_info.get("totalEquity")
+                )
 
                 # Find USDT details within the 'coin' list of the unified account
                 coin_list = unified_account_info.get("coin", [])
-                usdt_coin_info = next((coin for coin in coin_list if coin.get("coin") == usdt_symbol), None)
+                usdt_coin_info = next(
+                    (coin for coin in coin_list if coin.get("coin") == usdt_symbol),
+                    None,
+                )
 
                 if usdt_coin_info:
                     # V5 fields: availableToWithdraw seems most reliable for actual available funds
@@ -209,12 +237,16 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
                         logger.warning(
                             f"{Fore.YELLOW}[{func_name}] Found USDT entry in UNIFIED account, but could not parse available balance from V5 fields ('availableToWithdraw', 'availableBalance'): {usdt_coin_info}{Style.RESET_ALL}"
                         )
-                        available_v5 = Decimal("0.0")  # Default to 0 if parsing fails within USDT entry
+                        available_v5 = Decimal(
+                            "0.0"
+                        )  # Default to 0 if parsing fails within USDT entry
                 else:
                     logger.info(
                         f"[{func_name}] {usdt_symbol} coin data not found within the UNIFIED account details. Assuming 0 available {usdt_symbol}."
                     )
-                    available_v5 = Decimal("0.0")  # Assume zero if USDT entry is missing
+                    available_v5 = Decimal(
+                        "0.0"
+                    )  # Assume zero if USDT entry is missing
 
             else:
                 # Fallback if UNIFIED account type is not explicitly found
@@ -223,15 +255,26 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
                 )
                 if result_list:  # Check again if list is not empty
                     first_account = result_list[0]
-                    account_type_found = first_account.get("accountType", "UNKNOWN") + " (Fallback)"
-                    logger.warning(f"[{func_name}] Using first account found: Type '{account_type_found}'")
+                    account_type_found = (
+                        first_account.get("accountType", "UNKNOWN") + " (Fallback)"
+                    )
+                    logger.warning(
+                        f"[{func_name}] Using first account found: Type '{account_type_found}'"
+                    )
                     # Try common equity fields
-                    equity_v5 = safe_decimal_conversion(first_account.get("totalEquity") or first_account.get("equity"))
+                    equity_v5 = safe_decimal_conversion(
+                        first_account.get("totalEquity") or first_account.get("equity")
+                    )
                     coin_list = first_account.get("coin", [])
-                    usdt_coin_info = next((coin for coin in coin_list if coin.get("coin") == usdt_symbol), None)
+                    usdt_coin_info = next(
+                        (coin for coin in coin_list if coin.get("coin") == usdt_symbol),
+                        None,
+                    )
                     if usdt_coin_info:
                         # Use availableBalance or walletBalance as fallback in non-UNIFIED structure
-                        avail_val = usdt_coin_info.get("availableBalance") or usdt_coin_info.get("walletBalance")
+                        avail_val = usdt_coin_info.get(
+                            "availableBalance"
+                        ) or usdt_coin_info.get("walletBalance")
                         available_v5 = safe_decimal_conversion(avail_val)
                         if available_v5 is None:
                             available_v5 = Decimal("0.0")
@@ -268,18 +311,24 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
                 if equity_std is not None:
                     final_equity = equity_std
                     parsed_from_std = True
-                    logger.debug(f"[{func_name}] Parsed 'total' equity from standard CCXT keys.")
+                    logger.debug(
+                        f"[{func_name}] Parsed 'total' equity from standard CCXT keys."
+                    )
 
             if final_available is None:
                 available_std = safe_decimal_conversion(usdt_balance_std.get("free"))
                 if available_std is not None:
                     final_available = available_std
                     parsed_from_std = True
-                    logger.debug(f"[{func_name}] Parsed 'free' (available) balance from standard CCXT keys.")
+                    logger.debug(
+                        f"[{func_name}] Parsed 'free' (available) balance from standard CCXT keys."
+                    )
 
             if parsed_from_std:
                 account_type_found = "CCXT Standard Keys (Fallback)"
-                logger.warning(f"[{func_name}] Used standard CCXT balance keys as fallback for missing values.")
+                logger.warning(
+                    f"[{func_name}] Used standard CCXT balance keys as fallback for missing values."
+                )
             elif final_equity is None or final_available is None:
                 # If still None after all attempts
                 logger.error(
@@ -290,8 +339,16 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
                 )
 
         # Ensure non-negative values and handle potential None remaining (shouldn't happen after ValueError above)
-        final_equity = max(Decimal("0.0"), final_equity) if final_equity is not None else Decimal("0.0")
-        final_available = max(Decimal("0.0"), final_available) if final_available is not None else Decimal("0.0")
+        final_equity = (
+            max(Decimal("0.0"), final_equity)
+            if final_equity is not None
+            else Decimal("0.0")
+        )
+        final_available = (
+            max(Decimal("0.0"), final_available)
+            if final_available is not None
+            else Decimal("0.0")
+        )
 
         logger.info(
             f"{Fore.GREEN}[{func_name}] USDT Balance Fetched (Source: {account_type_found}): "
@@ -308,7 +365,10 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
 
     except (ValueError, KeyError, TypeError, InvalidOperation) as e:
         # Errors during parsing or unexpected structure
-        logger.error(f"{Fore.RED}[{func_name}] Error processing balance data: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.error(
+            f"{Fore.RED}[{func_name}] Error processing balance data: {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         # Potentially send alert here if parsing failure is critical
         # send_sms_alert(f"[BybitHelper] WARNING: Failed to parse USDT balance: {e}", config)
         return None, None  # Indicate failure to the caller
@@ -316,9 +376,12 @@ def fetch_usdt_balance(exchange: ccxt.bybit, config: Config) -> Tuple[Optional[D
     except Exception as e:
         # Catch-all for truly unexpected errors
         logger.critical(
-            f"{Back.RED}[{func_name}] Unexpected critical error fetching balance: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Back.RED}[{func_name}] Unexpected critical error fetching balance: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
-        send_sms_alert("[BybitHelper] CRITICAL: Unexpected error fetching USDT balance!", config)
+        send_sms_alert(
+            "[BybitHelper] CRITICAL: Unexpected error fetching USDT balance!", config
+        )
         return None, None
 
 
@@ -374,7 +437,9 @@ def fetch_ohlcv_paginated(
         # Validate timeframe and calculate duration in milliseconds
         timeframe_ms = exchange.parse_timeframe(timeframe) * 1000
     except (ValueError, TypeError) as e:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid timeframe '{timeframe}': {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Invalid timeframe '{timeframe}': {e}{Style.RESET_ALL}"
+        )
         return None
 
     # Validate and clamp limit_per_req
@@ -399,7 +464,9 @@ def fetch_ohlcv_paginated(
             logger.warning(
                 f"{Fore.YELLOW}[{func_name}] Could not determine market category for {symbol}. Assuming 'linear' for OHLCV fetch. This might fail for Spot/Inverse markets.{Style.RESET_ALL}"
             )
-            category = "linear"  # Bybit default for many operations if unspecified, but risky
+            category = (
+                "linear"  # Bybit default for many operations if unspecified, but risky
+            )
 
         params = {"category": category}
 
@@ -408,7 +475,9 @@ def fetch_ohlcv_paginated(
             if since and PANDAS_AVAILABLE
             else (str(since) if since else "Most Recent")
         )
-        max_total_str = str(max_total_candles) if max_total_candles is not None else "Unlimited"
+        max_total_str = (
+            str(max_total_candles) if max_total_candles is not None else "Unlimited"
+        )
         logger.info(
             f"{Fore.BLUE}[{func_name}] Starting OHLCV fetch for {symbol} ({timeframe}). "
             f"Limit/Req: {limit_per_req}, Since: {since_dt_str}, Max Total: {max_total_str}, Category: {category}{Style.RESET_ALL}"
@@ -444,8 +513,12 @@ def fetch_ohlcv_paginated(
             if max_total_candles is not None:
                 remaining_needed = max_total_candles - len(all_candles)
                 fetch_limit = min(limit_per_req, remaining_needed)
-                if fetch_limit <= 0:  # Should be caught by the check at loop start, but safeguard
-                    logger.debug(f"[{func_name}] Calculated fetch_limit is zero or negative. Breaking loop.")
+                if (
+                    fetch_limit <= 0
+                ):  # Should be caught by the check at loop start, but safeguard
+                    logger.debug(
+                        f"[{func_name}] Calculated fetch_limit is zero or negative. Breaking loop."
+                    )
                     break
 
             logger.debug(
@@ -460,19 +533,36 @@ def fetch_ohlcv_paginated(
             for attempt in range(max_chunk_retries + 1):  # 0 to max_retries
                 try:
                     # Ensure 'since' is int or None, not float
-                    fetch_since = int(current_since) if current_since is not None else None
+                    fetch_since = (
+                        int(current_since) if current_since is not None else None
+                    )
                     candles_chunk = exchange.fetch_ohlcv(
-                        symbol, timeframe, since=fetch_since, limit=fetch_limit, params=params
+                        symbol,
+                        timeframe,
+                        since=fetch_since,
+                        limit=fetch_limit,
+                        params=params,
                     )
                     last_fetch_error = None  # Reset error on success
-                    logger.debug(f"[{func_name}] Chunk #{request_count} attempt {attempt + 1} succeeded.")
+                    logger.debug(
+                        f"[{func_name}] Chunk #{request_count} attempt {attempt + 1} succeeded."
+                    )
                     break  # Exit retry loop on success
 
-                except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.ExchangeNotAvailable, ccxt.RateLimitExceeded) as e:
+                except (
+                    ccxt.NetworkError,
+                    ccxt.RequestTimeout,
+                    ccxt.ExchangeNotAvailable,
+                    ccxt.RateLimitExceeded,
+                ) as e:
                     last_fetch_error = e
                     if attempt < max_chunk_retries:
                         # Exponential backoff with jitter
-                        retry_delay = config.RETRY_DELAY_SECONDS * (2**attempt) * (random.uniform(0.8, 1.2))
+                        retry_delay = (
+                            config.RETRY_DELAY_SECONDS
+                            * (2**attempt)
+                            * (random.uniform(0.8, 1.2))
+                        )
                         logger.warning(
                             f"{Fore.YELLOW}[{func_name}] API Error chunk #{request_count} (Try {attempt + 1}/{max_chunk_retries + 1}): {type(e).__name__}. Retrying in {retry_delay:.2f}s...{Style.RESET_ALL}"
                         )
@@ -482,9 +572,7 @@ def fetch_ohlcv_paginated(
                             f"{Fore.RED}[{func_name}] API Error chunk #{request_count} failed after {max_chunk_retries + 1} attempts: {e}. Aborting chunk fetch.{Style.RESET_ALL}"
                         )
 
-                except (
-                    ccxt.ExchangeError
-                ) as e:  # Includes BadSymbol, AuthenticationError etc. that shouldn't be retried usually
+                except ccxt.ExchangeError as e:  # Includes BadSymbol, AuthenticationError etc. that shouldn't be retried usually
                     last_fetch_error = e
                     logger.error(
                         f"{Fore.RED}[{func_name}] Non-retryable ExchangeError on chunk #{request_count}: {e}. Aborting chunk fetch.{Style.RESET_ALL}"
@@ -566,7 +654,9 @@ def fetch_ohlcv_paginated(
 
             # --- Rate Limiting ---
             # Respect exchange rate limit (add a small buffer)
-            rate_limit_ms = getattr(exchange, "rateLimit", 100)  # Default 100ms if not specified
+            rate_limit_ms = getattr(
+                exchange, "rateLimit", 100
+            )  # Default 100ms if not specified
             delay_seconds = (rate_limit_ms / 1000.0) * 1.1  # Add 10% buffer
             logger.trace(
                 f"[{func_name}] Applying rate limit delay: {delay_seconds:.3f}s"
@@ -576,10 +666,14 @@ def fetch_ohlcv_paginated(
         # --- End Pagination Loop ---
 
         # Process the collected candles into the desired format (DataFrame or list)
-        return _process_ohlcv_data(all_candles, func_name, symbol, timeframe, max_total_candles)
+        return _process_ohlcv_data(
+            all_candles, func_name, symbol, timeframe, max_total_candles
+        )
 
     except ccxt.BadSymbol as e:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for OHLCV fetch: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for OHLCV fetch: {e}{Style.RESET_ALL}"
+        )
         return None
     except ccxt.ExchangeError as e:
         logger.error(
@@ -596,7 +690,11 @@ def fetch_ohlcv_paginated(
 
 
 def _process_ohlcv_data(
-    candle_list: List[list], parent_func_name: str, symbol: str, timeframe: str, max_candles: Optional[int] = None
+    candle_list: List[list],
+    parent_func_name: str,
+    symbol: str,
+    timeframe: str,
+    max_candles: Optional[int] = None,
 ) -> Optional[Union[pd.DataFrame, List[list]]]:
     """
     Internal helper to process a list of OHLCV candles.
@@ -618,21 +716,34 @@ def _process_ohlcv_data(
         - None only in case of unexpected internal error during processing.
     """
     func_name = f"{parent_func_name}._process_ohlcv_data"
-    cols = ["timestamp", "open", "high", "low", "close", "volume"]  # Including timestamp initially
+    cols = [
+        "timestamp",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+    ]  # Including timestamp initially
 
     if not candle_list:
         logger.warning(
             f"{Fore.YELLOW}[{func_name}] No candles were collected for {symbol} ({timeframe}). Returning empty result.{Style.RESET_ALL}"
         )
         if PANDAS_AVAILABLE:
-            empty_df = pd.DataFrame(columns=cols[1:]).astype({c: float for c in cols[1:]})  # OHLCV cols
-            empty_df.index = pd.to_datetime([]).tz_localize("UTC")  # Empty UTC DatetimeIndex
+            empty_df = pd.DataFrame(columns=cols[1:]).astype(
+                {c: float for c in cols[1:]}
+            )  # OHLCV cols
+            empty_df.index = pd.to_datetime([]).tz_localize(
+                "UTC"
+            )  # Empty UTC DatetimeIndex
             empty_df.index.name = "timestamp"
             return empty_df
         else:
             return []  # Return empty list
 
-    logger.debug(f"[{func_name}] Processing {len(candle_list)} raw candles for {symbol} ({timeframe})...")
+    logger.debug(
+        f"[{func_name}] Processing {len(candle_list)} raw candles for {symbol} ({timeframe})..."
+    )
 
     # --- Data Validation (Applicable to both List and DataFrame processing) ---
     validated_list = []
@@ -663,7 +774,11 @@ def _process_ohlcv_data(
 
         # Simple check for obviously bad OHLCV values (e.g., negative price/volume)
         # safe_decimal_conversion could be used here for more robustness if needed, but adds overhead
-        if any(not isinstance(v, (int, float, str)) or (isinstance(v, (int, float)) and v < 0) for v in candle[1:]):
+        if any(
+            not isinstance(v, (int, float, str))
+            or (isinstance(v, (int, float)) and v < 0)
+            for v in candle[1:]
+        ):
             # logger.debug(f"[{func_name}] Skipping invalid entry (negative or non-numeric OHLCV) at index {i}: {candle}")
             invalid_entries += 1
             continue
@@ -709,8 +824,12 @@ def _process_ohlcv_data(
         df = pd.DataFrame(validated_list, columns=cols)
 
         # Convert timestamp to DatetimeIndex (UTC)
-        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True, errors="coerce")
-        df.dropna(subset=["timestamp"], inplace=True)  # Remove rows where timestamp conversion failed
+        df["timestamp"] = pd.to_datetime(
+            df["timestamp"], unit="ms", utc=True, errors="coerce"
+        )
+        df.dropna(
+            subset=["timestamp"], inplace=True
+        )  # Remove rows where timestamp conversion failed
         if df.empty:
             logger.error(
                 f"{Fore.RED}[{func_name}] DataFrame became empty after timestamp conversion/dropna for {symbol}.{Style.RESET_ALL}"
@@ -755,7 +874,9 @@ def _process_ohlcv_data(
 
         # Final trim (redundant if list was trimmed, but safe)
         if max_candles is not None and len(df) > max_candles:
-            logger.debug(f"[{func_name}] Trimming DataFrame from {len(df)} to the last {max_candles} candles.")
+            logger.debug(
+                f"[{func_name}] Trimming DataFrame from {len(df)} to the last {max_candles} candles."
+            )
             df = df.iloc[-max_candles:]
 
         if df.empty:  # Check again after potential trimming/dropna
@@ -771,7 +892,8 @@ def _process_ohlcv_data(
 
     except Exception as e:
         logger.error(
-            f"{Fore.RED}[{func_name}] Error processing OHLCV list into DataFrame: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Fore.RED}[{func_name}] Error processing OHLCV list into DataFrame: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
         # Return None or an empty DF? Let's return empty DF for consistency.
         return _get_empty_ohlcv_df()
@@ -791,8 +913,14 @@ def _get_empty_ohlcv_df() -> pd.DataFrame:
 # ============================================================================
 # Function 11: Fetch Funding Rate
 # ============================================================================
-@retry_api_call(max_retries=3, initial_delay=1.0, caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError))
-def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Optional[Dict[str, Any]]:
+@retry_api_call(
+    max_retries=3,
+    initial_delay=1.0,
+    caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError),
+)
+def fetch_funding_rate(
+    exchange: ccxt.bybit, symbol: str, config: Config
+) -> Optional[Dict[str, Any]]:
     """
     Fetches the current funding rate details for a perpetual swap symbol on Bybit V5.
 
@@ -832,7 +960,9 @@ def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Opt
             return None
 
         params = {"category": category}
-        logger.debug(f"[{func_name}] Calling fetch_funding_rate with symbol='{symbol}', params={params}")
+        logger.debug(
+            f"[{func_name}] Calling fetch_funding_rate with symbol='{symbol}', params={params}"
+        )
 
         # Fetch the funding rate using ccxt
         funding_rate_info = exchange.fetch_funding_rate(symbol, params=params)
@@ -848,9 +978,15 @@ def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Opt
         errors: List[str] = []
 
         # Process and validate essential fields
-        processed_fr["symbol"] = funding_rate_info.get("symbol", symbol)  # Use original symbol as fallback
-        processed_fr["fundingTimestamp"] = funding_rate_info.get("fundingTimestamp")  # Milliseconds UTC
-        processed_fr["fundingDatetime"] = funding_rate_info.get("fundingDatetime")  # ISO8601 String
+        processed_fr["symbol"] = funding_rate_info.get(
+            "symbol", symbol
+        )  # Use original symbol as fallback
+        processed_fr["fundingTimestamp"] = funding_rate_info.get(
+            "fundingTimestamp"
+        )  # Milliseconds UTC
+        processed_fr["fundingDatetime"] = funding_rate_info.get(
+            "fundingDatetime"
+        )  # ISO8601 String
 
         fr_val = funding_rate_info.get("fundingRate")
         processed_fr["fundingRate"] = safe_decimal_conversion(fr_val)
@@ -861,19 +997,25 @@ def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Opt
         processed_fr["markPrice"] = safe_decimal_conversion(mp_val)
         if processed_fr["markPrice"] is None:
             # Mark price might be temporarily unavailable? Log warning.
-            logger.warning(f"[{func_name}] Could not parse 'markPrice' ({mp_val}) for {symbol}.")
+            logger.warning(
+                f"[{func_name}] Could not parse 'markPrice' ({mp_val}) for {symbol}."
+            )
 
         ip_val = funding_rate_info.get("indexPrice")
         processed_fr["indexPrice"] = safe_decimal_conversion(ip_val)
         if processed_fr["indexPrice"] is None:
-            logger.warning(f"[{func_name}] Could not parse 'indexPrice' ({ip_val}) for {symbol}.")
+            logger.warning(
+                f"[{func_name}] Could not parse 'indexPrice' ({ip_val}) for {symbol}."
+            )
 
         # Handle next funding time (CCXT might return 'nextFundingTimestamp' or similar)
         next_ts_key = "nextFundingTimestamp"  # Common key from ccxt structure
         next_ts_val = funding_rate_info.get(next_ts_key) or funding_rate_info.get(
             "nextFundingTime"
         )  # Check alternative if needed
-        processed_fr["nextFundingTime"] = next_ts_val  # Store raw timestamp (milliseconds)
+        processed_fr["nextFundingTime"] = (
+            next_ts_val  # Store raw timestamp (milliseconds)
+        )
         processed_fr["nextFundingDatetime"] = None  # Initialize
 
         if next_ts_val and isinstance(next_ts_val, (int, float)) and next_ts_val > 0:
@@ -888,8 +1030,12 @@ def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Opt
                     # Basic formatting without pandas (less robust)
                     import datetime
 
-                    next_dt_basic = datetime.datetime.fromtimestamp(next_ts_val / 1000, tz=datetime.timezone.utc)
-                    processed_fr["nextFundingDatetime"] = next_dt_basic.strftime("%Y-%m-%d %H:%M:%S %Z")
+                    next_dt_basic = datetime.datetime.fromtimestamp(
+                        next_ts_val / 1000, tz=datetime.timezone.utc
+                    )
+                    processed_fr["nextFundingDatetime"] = next_dt_basic.strftime(
+                        "%Y-%m-%d %H:%M:%S %Z"
+                    )
             except Exception as dt_err:
                 logger.warning(
                     f"[{func_name}] Could not format next funding datetime from timestamp {next_ts_val}: {dt_err}"
@@ -921,7 +1067,9 @@ def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Opt
         return processed_fr
 
     except ccxt.BadSymbol as e:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for funding rate fetch: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for funding rate fetch: {e}{Style.RESET_ALL}"
+        )
         return None
     except (ccxt.NetworkError, ccxt.ExchangeError) as e:
         logger.warning(
@@ -939,7 +1087,11 @@ def fetch_funding_rate(exchange: ccxt.bybit, symbol: str, config: Config) -> Opt
 # ============================================================================
 # Function 13: Fetch L2 Order Book (Validated)
 # ============================================================================
-@retry_api_call(max_retries=2, initial_delay=0.5, caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError, ValueError))
+@retry_api_call(
+    max_retries=2,
+    initial_delay=0.5,
+    caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError, ValueError),
+)
 def fetch_l2_order_book_validated(
     exchange: ccxt.bybit, symbol: str, limit: int, config: Config
 ) -> Optional[Dict[str, List[Tuple[Decimal, Decimal]]]]:
@@ -964,9 +1116,13 @@ def fetch_l2_order_book_validated(
         Re-raises ccxt.NetworkError, ccxt.ExchangeError, ValueError for the retry decorator.
     """
     func_name = "fetch_l2_order_book_validated"
-    logger.debug(f"[{func_name}] Fetching L2 Order Book for {symbol} (Requested Limit: {limit})...")
+    logger.debug(
+        f"[{func_name}] Fetching L2 Order Book for {symbol} (Requested Limit: {limit})..."
+    )
 
-    if not hasattr(exchange, "fetch_order_book") or not exchange.has.get("fetchOrderBook"):
+    if not hasattr(exchange, "fetch_order_book") or not exchange.has.get(
+        "fetchOrderBook"
+    ):
         logger.error(
             f"{Fore.RED}[{func_name}] Exchange '{exchange.id}' does not support fetchOrderBook.{Style.RESET_ALL}"
         )
@@ -995,8 +1151,12 @@ def fetch_l2_order_book_validated(
         # Validate and clamp the requested limit
         effective_limit = limit
         if not isinstance(limit, int) or limit <= 0:
-            default_limit = getattr(config, "ORDER_BOOK_FETCH_LIMIT", 25)  # Use config default
-            logger.warning(f"[{func_name}] Invalid limit requested ({limit}). Using default: {default_limit}.")
+            default_limit = getattr(
+                config, "ORDER_BOOK_FETCH_LIMIT", 25
+            )  # Use config default
+            logger.warning(
+                f"[{func_name}] Invalid limit requested ({limit}). Using default: {default_limit}."
+            )
             effective_limit = default_limit
 
         if effective_limit > max_limit:
@@ -1009,15 +1169,25 @@ def fetch_l2_order_book_validated(
         logger.debug(
             f"[{func_name}] Calling fetchOrderBook with symbol='{symbol}', limit={effective_limit}, params={params}"
         )
-        order_book = exchange.fetch_order_book(symbol, limit=effective_limit, params=params)
+        order_book = exchange.fetch_order_book(
+            symbol, limit=effective_limit, params=params
+        )
 
         # --- Basic Structure Validation ---
-        if not isinstance(order_book, dict) or "bids" not in order_book or "asks" not in order_book:
+        if (
+            not isinstance(order_book, dict)
+            or "bids" not in order_book
+            or "asks" not in order_book
+        ):
             logger.error(
                 f"{Fore.RED}[{func_name}] Invalid order book structure received: Keys missing or not a dict.{Style.RESET_ALL}"
             )
-            raise ValueError("Invalid order book structure received (missing bids/asks or not dict).")
-        if not isinstance(order_book["bids"], list) or not isinstance(order_book["asks"], list):
+            raise ValueError(
+                "Invalid order book structure received (missing bids/asks or not dict)."
+            )
+        if not isinstance(order_book["bids"], list) or not isinstance(
+            order_book["asks"], list
+        ):
             logger.error(
                 f"{Fore.RED}[{func_name}] Bids or asks are not lists: bids_type={type(order_book['bids'])}, asks_type={type(order_book['asks'])}{Style.RESET_ALL}"
             )
@@ -1032,12 +1202,19 @@ def fetch_l2_order_book_validated(
         for i, entry in enumerate(order_book.get("bids", [])):
             if not isinstance(entry, list) or len(entry) != 2:
                 conversion_errors += 1
-                logger.debug(f"[{func_name}] Skipping invalid bid entry format at index {i}: {entry}")
+                logger.debug(
+                    f"[{func_name}] Skipping invalid bid entry format at index {i}: {entry}"
+                )
                 continue
             price = safe_decimal_conversion(entry[0])
             amount = safe_decimal_conversion(entry[1])
             # Validate: Price must be positive, Amount must be non-negative
-            if price is None or amount is None or price <= Decimal("0") or amount < Decimal("0"):
+            if (
+                price is None
+                or amount is None
+                or price <= Decimal("0")
+                or amount < Decimal("0")
+            ):
                 conversion_errors += 1
                 logger.debug(
                     f"[{func_name}] Skipping invalid bid values at index {i}: Price={entry[0]}, Amount={entry[1]}"
@@ -1049,12 +1226,19 @@ def fetch_l2_order_book_validated(
         for i, entry in enumerate(order_book.get("asks", [])):
             if not isinstance(entry, list) or len(entry) != 2:
                 conversion_errors += 1
-                logger.debug(f"[{func_name}] Skipping invalid ask entry format at index {i}: {entry}")
+                logger.debug(
+                    f"[{func_name}] Skipping invalid ask entry format at index {i}: {entry}"
+                )
                 continue
             price = safe_decimal_conversion(entry[0])
             amount = safe_decimal_conversion(entry[1])
             # Validate: Price must be positive, Amount must be non-negative
-            if price is None or amount is None or price <= Decimal("0") or amount < Decimal("0"):
+            if (
+                price is None
+                or amount is None
+                or price <= Decimal("0")
+                or amount < Decimal("0")
+            ):
                 conversion_errors += 1
                 logger.debug(
                     f"[{func_name}] Skipping invalid ask values at index {i}: Price={entry[0]}, Amount={entry[1]}"
@@ -1070,14 +1254,20 @@ def fetch_l2_order_book_validated(
         # --- Sorting Validation (CCXT usually guarantees this) ---
         # Bids should be descending by price, Asks ascending by price
         if validated_bids and any(
-            validated_bids[i][0] < validated_bids[i + 1][0] for i in range(len(validated_bids) - 1)
+            validated_bids[i][0] < validated_bids[i + 1][0]
+            for i in range(len(validated_bids) - 1)
         ):
-            logger.warning(f"{Fore.YELLOW}[{func_name}] Bids order incorrect. Re-sorting descending.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}[{func_name}] Bids order incorrect. Re-sorting descending.{Style.RESET_ALL}"
+            )
             validated_bids.sort(key=lambda x: x[0], reverse=True)
         if validated_asks and any(
-            validated_asks[i][0] > validated_asks[i + 1][0] for i in range(len(validated_asks) - 1)
+            validated_asks[i][0] > validated_asks[i + 1][0]
+            for i in range(len(validated_asks) - 1)
         ):
-            logger.warning(f"{Fore.YELLOW}[{func_name}] Asks order incorrect. Re-sorting ascending.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}[{func_name}] Asks order incorrect. Re-sorting ascending.{Style.RESET_ALL}"
+            )
             validated_asks.sort(key=lambda x: x[0])
 
         # --- Crossed Book Validation ---
@@ -1091,11 +1281,17 @@ def fetch_l2_order_book_validated(
                 )
                 # Depending on strategy, either raise ValueError, return None, or return the flawed data
                 # Raising ValueError allows the retry decorator to potentially catch transient crossed books
-                raise ValueError(f"Order book crossed: Best Bid {best_bid} >= Best Ask {best_ask}")
+                raise ValueError(
+                    f"Order book crossed: Best Bid {best_bid} >= Best Ask {best_ask}"
+                )
                 # return None # Alternative: Fail silently without retry
 
         # Check if bids/asks became empty after validation
-        if not validated_bids and not validated_asks and (order_book["bids"] or order_book["asks"]):
+        if (
+            not validated_bids
+            and not validated_asks
+            and (order_book["bids"] or order_book["asks"])
+        ):
             logger.warning(
                 f"{Fore.YELLOW}[{func_name}] All bid/ask entries failed validation for {symbol}. Returning empty book.{Style.RESET_ALL}"
             )
@@ -1107,7 +1303,9 @@ def fetch_l2_order_book_validated(
         return {"bids": validated_bids, "asks": validated_asks}
 
     except ccxt.BadSymbol as e:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for order book fetch: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for order book fetch: {e}{Style.RESET_ALL}"
+        )
         return None
     except (ccxt.NetworkError, ccxt.ExchangeError, ValueError) as e:
         # Log as warning/error depending on type, raise for retry decorator
@@ -1119,7 +1317,8 @@ def fetch_l2_order_book_validated(
         raise  # Re-raise for retry decorator
     except Exception as e:
         logger.error(
-            f"{Fore.RED}[{func_name}] Unexpected error fetching L2 OB for {symbol}: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Fore.RED}[{func_name}] Unexpected error fetching L2 OB for {symbol}: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
         return None
 
@@ -1127,7 +1326,11 @@ def fetch_l2_order_book_validated(
 # ============================================================================
 # Function 17: Fetch Ticker (Validated)
 # ============================================================================
-@retry_api_call(max_retries=2, initial_delay=0.5, caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError, ValueError))
+@retry_api_call(
+    max_retries=2,
+    initial_delay=0.5,
+    caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError, ValueError),
+)
 def fetch_ticker_validated(
     exchange: ccxt.bybit, symbol: str, config: Config, max_age_seconds: int = 30
 ) -> Optional[Dict[str, Any]]:
@@ -1152,7 +1355,9 @@ def fetch_ticker_validated(
         ValueError is raised for critical validation failures (stale, bad prices, crossed spread).
     """
     func_name = "fetch_ticker_validated"
-    logger.debug(f"[{func_name}] Fetching and validating ticker for {symbol} (Max Age: {max_age_seconds}s)...")
+    logger.debug(
+        f"[{func_name}] Fetching and validating ticker for {symbol} (Max Age: {max_age_seconds}s)..."
+    )
 
     try:
         market = exchange.market(symbol)  # Can raise BadSymbol
@@ -1167,7 +1372,9 @@ def fetch_ticker_validated(
             )
 
         # --- Fetch Ticker ---
-        logger.debug(f"[{func_name}] Calling fetch_ticker with symbol='{symbol}', params={params}")
+        logger.debug(
+            f"[{func_name}] Calling fetch_ticker with symbol='{symbol}', params={params}"
+        )
         ticker = exchange.fetch_ticker(symbol, params=params)
 
         # --- Basic Structure Validation ---
@@ -1181,7 +1388,11 @@ def fetch_ticker_validated(
         timestamp_ms = ticker.get("timestamp")
         current_time_ms = time.time() * 1000
 
-        if timestamp_ms is None or not isinstance(timestamp_ms, (int, float)) or timestamp_ms <= 0:
+        if (
+            timestamp_ms is None
+            or not isinstance(timestamp_ms, (int, float))
+            or timestamp_ms <= 0
+        ):
             logger.warning(
                 f"{Fore.YELLOW}[{func_name}] Ticker for {symbol} has missing or invalid timestamp: {timestamp_ms}. Proceeding cautiously.{Style.RESET_ALL}"
             )
@@ -1203,7 +1414,9 @@ def fetch_ticker_validated(
                 raise ValueError(error_msg)  # Clock sync issue is critical
 
         # --- Price and Volume Validation ---
-        validated_ticker: Dict[str, Any] = {"symbol": ticker.get("symbol", symbol)}  # Start building validated dict
+        validated_ticker: Dict[str, Any] = {
+            "symbol": ticker.get("symbol", symbol)
+        }  # Start building validated dict
         errors: List[str] = []
 
         # Essential prices
@@ -1215,10 +1428,14 @@ def fetch_ticker_validated(
             errors.append(f"Invalid or missing 'last' price: {ticker.get('last')}")
         if bid_price is None or bid_price <= Decimal("0"):
             # Bid/Ask might be None in illiquid markets, log warning but don't necessarily fail validation unless needed
-            logger.warning(f"[{func_name}] Ticker for {symbol} has invalid or missing 'bid' price: {ticker.get('bid')}")
+            logger.warning(
+                f"[{func_name}] Ticker for {symbol} has invalid or missing 'bid' price: {ticker.get('bid')}"
+            )
             # errors.append(f"Invalid or missing 'bid' price: {ticker.get('bid')}") # Uncomment if bid is essential
         if ask_price is None or ask_price <= Decimal("0"):
-            logger.warning(f"[{func_name}] Ticker for {symbol} has invalid or missing 'ask' price: {ticker.get('ask')}")
+            logger.warning(
+                f"[{func_name}] Ticker for {symbol} has invalid or missing 'ask' price: {ticker.get('ask')}"
+            )
             # errors.append(f"Invalid or missing 'ask' price: {ticker.get('ask')}") # Uncomment if ask is essential
 
         validated_ticker.update(
@@ -1244,8 +1461,14 @@ def fetch_ticker_validated(
                 spread = ask_price - bid_price
                 try:
                     # Use ask price for percentage denominator for stability? Or mid-price? Bid is common.
-                    spread_pct = (spread / ask_price) * Decimal("100") if ask_price > 0 else Decimal("inf")
-                except InvalidOperation:  # Catch potential issues if ask is extremely small
+                    spread_pct = (
+                        (spread / ask_price) * Decimal("100")
+                        if ask_price > 0
+                        else Decimal("inf")
+                    )
+                except (
+                    InvalidOperation
+                ):  # Catch potential issues if ask is extremely small
                     spread_pct = Decimal("inf")
         validated_ticker["spread"] = spread
         validated_ticker["spread_pct"] = spread_pct
@@ -1267,11 +1490,19 @@ def fetch_ticker_validated(
             val = safe_decimal_conversion(ticker.get(source_key))
             # Volumes should be non-negative
             if "Volume" in key and val is not None and val < Decimal("0"):
-                logger.warning(f"[{func_name}] Ticker for {symbol} has negative {key}: {val}. Setting to 0.")
+                logger.warning(
+                    f"[{func_name}] Ticker for {symbol} has negative {key}: {val}. Setting to 0."
+                )
                 val = Decimal("0.0")
             # Prices (high, low, open, average) should ideally be positive if not None
-            elif key in ["high", "low", "open", "average"] and val is not None and val <= Decimal("0"):
-                logger.warning(f"[{func_name}] Ticker for {symbol} has non-positive {key}: {val}.")
+            elif (
+                key in ["high", "low", "open", "average"]
+                and val is not None
+                and val <= Decimal("0")
+            ):
+                logger.warning(
+                    f"[{func_name}] Ticker for {symbol} has non-positive {key}: {val}."
+                )
                 # Decide if this is an error or just a warning
             validated_ticker[key] = val
 
@@ -1283,13 +1514,23 @@ def fetch_ticker_validated(
 
         # --- Final Validation Check ---
         if errors:
-            error_summary = f"Ticker validation failed for {symbol}: {'; '.join(errors)}"
+            error_summary = (
+                f"Ticker validation failed for {symbol}: {'; '.join(errors)}"
+            )
             logger.error(f"{Fore.RED}[{func_name}] {error_summary}{Style.RESET_ALL}")
             raise ValueError(error_summary)  # Raise for retry/failure
 
         # --- Logging Success ---
-        spread_str = f"{spread_pct:.4f}%" if spread_pct is not None and spread_pct != Decimal("inf") else "N/A"
-        age_str = f"{age_seconds:.1f}s" if age_seconds != float("inf") else "Timestamp Invalid"
+        spread_str = (
+            f"{spread_pct:.4f}%"
+            if spread_pct is not None and spread_pct != Decimal("inf")
+            else "N/A"
+        )
+        age_str = (
+            f"{age_seconds:.1f}s"
+            if age_seconds != float("inf")
+            else "Timestamp Invalid"
+        )
         logger.info(
             f"{Fore.GREEN}[{func_name}] Ticker validation OK for {symbol}: Last={format_price(exchange, symbol, last_price)}, "
             f"Bid={format_price(exchange, symbol, bid_price)}, Ask={format_price(exchange, symbol, ask_price)}, "
@@ -1298,7 +1539,9 @@ def fetch_ticker_validated(
         return validated_ticker
 
     except ccxt.BadSymbol as e:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for ticker fetch: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for ticker fetch: {e}{Style.RESET_ALL}"
+        )
         return None
     except (ccxt.NetworkError, ccxt.ExchangeError, ValueError) as e:
         log_level = logging.ERROR if isinstance(e, ValueError) else logging.WARNING
@@ -1318,9 +1561,17 @@ def fetch_ticker_validated(
 # ============================================================================
 # Function 21: Fetch Recent Trades
 # ============================================================================
-@retry_api_call(max_retries=2, initial_delay=0.5, caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError))
+@retry_api_call(
+    max_retries=2,
+    initial_delay=0.5,
+    caught_exceptions=(ccxt.NetworkError, ccxt.ExchangeError),
+)
 def fetch_recent_trades(
-    exchange: ccxt.bybit, symbol: str, config: Config, limit: int = 100, min_size_filter: Optional[Decimal] = None
+    exchange: ccxt.bybit,
+    symbol: str,
+    config: Config,
+    limit: int = 100,
+    min_size_filter: Optional[Decimal] = None,
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Fetches recent public trades for a symbol from Bybit V5, validates data,
@@ -1349,14 +1600,18 @@ def fetch_recent_trades(
         if min_size_filter
         else ""
     )
-    logger.debug(f"[{func_name}] Fetching recent trades for {symbol} (Requested Limit: {limit}) {filter_log}...")
+    logger.debug(
+        f"[{func_name}] Fetching recent trades for {symbol} (Requested Limit: {limit}) {filter_log}..."
+    )
 
     # Validate and clamp limit
     # Bybit V5 limit for public trades (market execution history) is typically 1000
     max_trade_limit = 1000
     effective_limit = limit
     if not isinstance(limit, int) or limit <= 0:
-        logger.warning(f"[{func_name}] Invalid limit requested ({limit}). Using default: 100.")
+        logger.warning(
+            f"[{func_name}] Invalid limit requested ({limit}). Using default: 100."
+        )
         effective_limit = 100
     elif limit > max_trade_limit:
         logger.warning(
@@ -1392,7 +1647,9 @@ def fetch_recent_trades(
             )
             return None  # Treat None response as failure
         if not trades_raw:  # Empty list is valid, means no trades found
-            logger.info(f"[{func_name}] No recent trades found for {symbol} with current parameters.")
+            logger.info(
+                f"[{func_name}] No recent trades found for {symbol} with current parameters."
+            )
             return []
 
         # --- Process and Validate Trades ---
@@ -1412,12 +1669,20 @@ def fetch_recent_trades(
         for i, trade in enumerate(trades_raw):
             if not isinstance(trade, dict):
                 conversion_errors += 1
-                logger.debug(f"[{func_name}] Skipping non-dict trade entry at index {i}: {trade}")
+                logger.debug(
+                    f"[{func_name}] Skipping non-dict trade entry at index {i}: {trade}"
+                )
                 continue
 
             # Check for essential keys before processing
-            if not all(key in trade and trade[key] is not None for key in required_keys):
-                missing = [key for key in required_keys if key not in trade or trade[key] is None]
+            if not all(
+                key in trade and trade[key] is not None for key in required_keys
+            ):
+                missing = [
+                    key
+                    for key in required_keys
+                    if key not in trade or trade[key] is None
+                ]
                 conversion_errors += 1
                 logger.debug(
                     f"[{func_name}] Skipping trade with missing essential keys ({missing}) at index {i}: {trade}"
@@ -1428,12 +1693,19 @@ def fetch_recent_trades(
                 # Validate and convert core fields
                 trade_id = str(trade["id"])  # Ensure ID is string
                 timestamp = int(trade["timestamp"])  # Ensure timestamp is int
-                side = str(trade["side"]).lower()  # Normalize side to lowercase ('buy' or 'sell')
+                side = str(
+                    trade["side"]
+                ).lower()  # Normalize side to lowercase ('buy' or 'sell')
                 price = safe_decimal_conversion(trade["price"])
                 amount = safe_decimal_conversion(trade["amount"])
 
                 # Check numeric values are valid
-                if price is None or amount is None or price <= Decimal("0") or amount <= Decimal("0"):
+                if (
+                    price is None
+                    or amount is None
+                    or price <= Decimal("0")
+                    or amount <= Decimal("0")
+                ):
                     conversion_errors += 1
                     logger.debug(
                         f"[{func_name}] Skipping trade with invalid price/amount at index {i}: Price={trade['price']}, Amount={trade['amount']}"
@@ -1441,7 +1713,9 @@ def fetch_recent_trades(
                     continue
                 if side not in ["buy", "sell"]:
                     conversion_errors += 1
-                    logger.debug(f"[{func_name}] Skipping trade with invalid side '{trade['side']}' at index {i}")
+                    logger.debug(
+                        f"[{func_name}] Skipping trade with invalid side '{trade['side']}' at index {i}"
+                    )
                     continue
 
                 # Apply size filter if specified
@@ -1454,7 +1728,9 @@ def fetch_recent_trades(
                 calculated_cost = price * amount
                 # Use calculated cost if original 'cost' is missing or significantly different
                 # Allow a small relative tolerance (e.g., 0.1%) for rounding differences
-                if cost is None or abs(cost - calculated_cost) > (calculated_cost * Decimal("0.001")):
+                if cost is None or abs(cost - calculated_cost) > (
+                    calculated_cost * Decimal("0.001")
+                ):
                     if cost is not None:
                         logger.trace(
                             f"[{func_name}] Trade cost mismatch (Provided: {cost}, Calculated: {calculated_cost}) for trade {trade_id}. Using calculated cost."
@@ -1466,13 +1742,19 @@ def fetch_recent_trades(
                         "id": trade_id,
                         "timestamp": timestamp,  # Milliseconds UTC
                         "datetime": trade.get("datetime"),  # ISO8601 string
-                        "symbol": trade.get("symbol", symbol),  # Use original symbol as fallback
+                        "symbol": trade.get(
+                            "symbol", symbol
+                        ),  # Use original symbol as fallback
                         "side": side,
                         "price": price,
                         "amount": amount,
                         "cost": cost,
-                        "takerOrMaker": trade.get("takerOrMaker"),  # 'taker' or 'maker' or None
-                        "info": trade.get("info", {}),  # Raw exchange response for this trade
+                        "takerOrMaker": trade.get(
+                            "takerOrMaker"
+                        ),  # 'taker' or 'maker' or None
+                        "info": trade.get(
+                            "info", {}
+                        ),  # Raw exchange response for this trade
                     }
                 )
             except (ValueError, TypeError, KeyError, InvalidOperation) as proc_err:
@@ -1506,7 +1788,9 @@ def fetch_recent_trades(
         return processed_trades
 
     except ccxt.BadSymbol as e:
-        logger.error(f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for trades fetch: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}[{func_name}] Invalid symbol '{symbol}' for trades fetch: {e}{Style.RESET_ALL}"
+        )
         return None
     except (ccxt.NetworkError, ccxt.ExchangeError) as e:
         logger.warning(

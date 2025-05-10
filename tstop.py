@@ -104,7 +104,9 @@ except ValueError as e:
 
 CATEGORY = os.getenv("CATEGORY", "linear").lower()
 if CATEGORY not in ["linear", "inverse", "spot"]:
-    logger.error(f"Unsupported CATEGORY: {CATEGORY}. Must be 'linear', 'inverse', or 'spot'.")
+    logger.error(
+        f"Unsupported CATEGORY: {CATEGORY}. Must be 'linear', 'inverse', or 'spot'."
+    )
     # Exit on critical configuration errors
     raise SystemExit(1)
 if CATEGORY == "spot":
@@ -130,7 +132,13 @@ logger.info(
 # --- SIGNING HELPERS ---
 
 
-def sign_v5(api_key: str, api_secret: str, timestamp: str, params: Dict[str, Any], recv_window: str) -> str:
+def sign_v5(
+    api_key: str,
+    api_secret: str,
+    timestamp: str,
+    params: Dict[str, Any],
+    recv_window: str,
+) -> str:
     """
     Generates the signature for Bybit V5 API requests.
 
@@ -154,19 +162,26 @@ def sign_v5(api_key: str, api_secret: str, timestamp: str, params: Dict[str, Any
             param_list.append(f"{k}={str(v).lower()}")
         else:
             # urlencode handles string conversion for other types appropriately
-            param_list.append(f"{k}={requests.utils.quote(str(v))}")  # Use requests' quote for consistency
+            param_list.append(
+                f"{k}={requests.utils.quote(str(v))}"
+            )  # Use requests' quote for consistency
 
     param_str = "&".join(param_list)
 
     to_sign = f"{timestamp}{api_key}{recv_window}{param_str}"
     logger.debug(f"String to sign: {to_sign}")
 
-    signature = hmac.new(api_secret.encode("utf-8"), to_sign.encode("utf-8"), hashlib.sha256).hexdigest()
+    signature = hmac.new(
+        api_secret.encode("utf-8"), to_sign.encode("utf-8"), hashlib.sha256
+    ).hexdigest()
     return signature
 
 
 def make_request(
-    method: str, endpoint: str, params: Optional[Dict[str, Any]] = None, retries: int = MAX_RETRIES
+    method: str,
+    endpoint: str,
+    params: Optional[Dict[str, Any]] = None,
+    retries: int = MAX_RETRIES,
 ) -> Optional[Dict]:
     """
     Makes a signed request to the Bybit V5 API with retry logic.
@@ -206,10 +221,14 @@ def make_request(
             response = None
             if method == "GET":
                 # GET parameters go in the query string for the actual request
-                response = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
+                response = requests.get(
+                    url, headers=headers, params=params, timeout=REQUEST_TIMEOUT
+                )
             elif method == "POST":
                 # POST parameters go in the JSON body for the actual request
-                response = requests.post(url, headers=headers, json=params, timeout=REQUEST_TIMEOUT)
+                response = requests.post(
+                    url, headers=headers, json=params, timeout=REQUEST_TIMEOUT
+                )
             else:
                 logger.error(f"Unsupported HTTP method: {method}")
                 return None
@@ -234,7 +253,9 @@ def make_request(
                 retryable_codes = [10001, 10004, 10006]
                 if ret_code in retryable_codes and attempt < retries:
                     sleep_time = RETRY_BACKOFF_FACTOR * (2 ** (attempt - 1))
-                    logger.info(f"Retrying in {sleep_time:.2f} seconds due to retCode {ret_code}...")
+                    logger.info(
+                        f"Retrying in {sleep_time:.2f} seconds due to retCode {ret_code}..."
+                    )
                     time.sleep(sleep_time)
                     continue  # Go to next attempt
                 else:
@@ -245,31 +266,43 @@ def make_request(
                     return None
 
         except requests.exceptions.Timeout:
-            logger.warning(f"Request timed out for {endpoint}. Attempt {attempt}/{retries}.")
+            logger.warning(
+                f"Request timed out for {endpoint}. Attempt {attempt}/{retries}."
+            )
             if attempt < retries:
                 sleep_time = RETRY_BACKOFF_FACTOR * (2 ** (attempt - 1))
                 logger.info(f"Retrying in {sleep_time:.2f} seconds due to timeout...")
                 time.sleep(sleep_time)
                 continue  # Go to next attempt
             else:
-                logger.error(f"Max retries reached for timeout on {endpoint}. Giving up.")
+                logger.error(
+                    f"Max retries reached for timeout on {endpoint}. Giving up."
+                )
                 return None
 
         except requests.exceptions.RequestException as e:
             # Catch other requests exceptions (connection errors, http errors etc.)
-            logger.error(f"Request failed for {endpoint} (attempt {attempt}/{retries}): {e}")
+            logger.error(
+                f"Request failed for {endpoint} (attempt {attempt}/{retries}): {e}"
+            )
             if response is not None:
-                logger.error(f"Status Code: {response.status_code}, Response Body: {response.text}")
+                logger.error(
+                    f"Status Code: {response.status_code}, Response Body: {response.text}"
+                )
             if attempt < retries:
                 sleep_time = RETRY_BACKOFF_FACTOR * (2 ** (attempt - 1))
-                logger.info(f"Retrying in {sleep_time:.2f} seconds due to request exception...")
+                logger.info(
+                    f"Retrying in {sleep_time:.2f} seconds due to request exception..."
+                )
                 time.sleep(sleep_time)
             else:
                 logger.error(f"Max retries reached for {endpoint}. Giving up.")
                 return None
         except Exception as e:
             # Catch unexpected errors during request processing (e.g., JSON parsing)
-            logger.exception(f"Unexpected error during request processing for {endpoint}: {e}")
+            logger.exception(
+                f"Unexpected error during request processing for {endpoint}: {e}"
+            )
             return None  # Do not retry on unexpected errors unless specifically handled
 
 
@@ -292,7 +325,9 @@ def fetch_positions() -> Optional[Dict]:
         if result and isinstance(result.get("list"), list):
             return result
         else:
-            logger.error(f"Unexpected position list response structure: {response}. Missing 'result' or 'list'.")
+            logger.error(
+                f"Unexpected position list response structure: {response}. Missing 'result' or 'list'."
+            )
             return None
     # make_request already logged the error if response is None or retCode != 0
     return None
@@ -358,7 +393,9 @@ def check_server_time_sync() -> bool:
             if server_time_nano == 0:
                 logger.warning("Received invalid server time (0) for clock sync check.")
                 return False
-            server_time_ms = server_time_nano // 1_000_000  # Convert nanoseconds to milliseconds
+            server_time_ms = (
+                server_time_nano // 1_000_000
+            )  # Convert nanoseconds to milliseconds
             local_time_ms = int(time.time() * 1000)
             time_diff = abs(server_time_ms - local_time_ms)
 
@@ -373,7 +410,9 @@ def check_server_time_sync() -> bool:
                     "Consider using NTP or similar to synchronize your system clock. API errors (like retCode 10004) may occur."
                 )
                 return False
-            logger.debug(f"System clock synchronized (diff: {time_diff}ms < {recv_window_int}ms)")
+            logger.debug(
+                f"System clock synchronized (diff: {time_diff}ms < {recv_window_int}ms)"
+            )
             return True
         except (ValueError, TypeError) as e:
             logger.error(f"Error parsing server time response: {e}")
@@ -400,7 +439,9 @@ def manage_trailing_stops():
         pass
 
     while True:
-        logger.info(f"--- Checking positions at {time.strftime('%Y-%m-%d %H:%M:%S')} ---")
+        logger.info(
+            f"--- Checking positions at {time.strftime('%Y-%m-%d %H:%M:%S')} ---"
+        )
 
         position_data = fetch_positions()
 
@@ -429,11 +470,15 @@ def manage_trailing_stops():
                 unrealised_pnl_str = pos.get("unrealisedPnl", "0")
                 mark_price_str = pos.get("markPrice", "0")
                 # 'trailingStop' from the list endpoint is the parameter distance, not the actual price
-                current_trailing_stop_param = pos.get("trailingStop", "")  # Can be '', '0', or a number string
+                current_trailing_stop_param = pos.get(
+                    "trailingStop", ""
+                )  # Can be '', '0', or a number string
 
                 # Validate essential fields
                 if not symbol or not side:
-                    logger.warning(f"Skipping position with missing symbol or side: {pos}")
+                    logger.warning(
+                        f"Skipping position with missing symbol or side: {pos}"
+                    )
                     continue
 
                 # Convert numeric fields, handling potential errors
@@ -442,7 +487,9 @@ def manage_trailing_stops():
                     unrealised_pnl = float(unrealised_pnl_str)
                     mark_price = float(mark_price_str)
                 except (ValueError, TypeError):
-                    logger.error(f"Skipping position {symbol} [{side}] due to invalid numeric data. Raw data: {pos}")
+                    logger.error(
+                        f"Skipping position {symbol} [{side}] due to invalid numeric data. Raw data: {pos}"
+                    )
                     continue  # Skip this position
 
                 if size == 0:
@@ -489,7 +536,9 @@ def manage_trailing_stops():
                         )
 
                         # Set the trailing stop distance via API
-                        success = set_trailing_stop(symbol, side, trailing_distance_to_set)
+                        success = set_trailing_stop(
+                            symbol, side, trailing_distance_to_set
+                        )
                         if not success:
                             logger.error(
                                 f"  -> Failed to set trailing stop for {symbol} [{side}]. Will retry on next cycle."
@@ -505,7 +554,9 @@ def manage_trailing_stops():
 
                 else:
                     # Position is not profitable or PnL is zero.
-                    logger.debug(f"{log_msg} - Not profitable. No trailing stop action needed.")
+                    logger.debug(
+                        f"{log_msg} - Not profitable. No trailing stop action needed."
+                    )
 
             except Exception as e:
                 logger.exception(
@@ -523,7 +574,9 @@ def manage_trailing_stops():
         else:
             logger.info("No positions to process.")
 
-        logger.info(f"--- Finished checking positions. Waiting {CHECK_INTERVAL} seconds. ---")
+        logger.info(
+            f"--- Finished checking positions. Waiting {CHECK_INTERVAL} seconds. ---"
+        )
         time.sleep(CHECK_INTERVAL)
 
 

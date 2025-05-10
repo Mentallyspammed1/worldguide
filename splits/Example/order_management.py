@@ -19,7 +19,9 @@ except ImportError:
 try:
     from colorama import Fore, Style, Back
 except ImportError:
-    print("Warning: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print(
+        "Warning: colorama library not found. Logs will not be colored. Install: pip install colorama"
+    )
 
     class DummyColor:
         def __getattr__(self, name: str) -> str:
@@ -45,7 +47,9 @@ logger = logging.getLogger(__name__)
 
 
 # Snippet 4 / Function 4: Place Market Order with Slippage Check
-@retry_api_call(max_retries=1, initial_delay=0)  # Market orders usually not retried automatically
+@retry_api_call(
+    max_retries=1, initial_delay=0
+)  # Market orders usually not retried automatically
 def place_market_order_slippage_check(
     exchange: ccxt.bybit,
     symbol: str,
@@ -77,7 +81,11 @@ def place_market_order_slippage_check(
     market_base = symbol.split("/")[0]
     action = "CLOSE" if is_reduce_only else "ENTRY"
     log_prefix = f"[Market Order {action} {side.upper()}]"
-    effective_max_slippage = max_slippage_pct if max_slippage_pct is not None else config.DEFAULT_SLIPPAGE_PCT
+    effective_max_slippage = (
+        max_slippage_pct
+        if max_slippage_pct is not None
+        else config.DEFAULT_SLIPPAGE_PCT
+    )
 
     logger.info(
         f"{Fore.BLUE}{log_prefix} Init for {format_amount(exchange, symbol, amount)} {symbol}. "
@@ -85,7 +93,9 @@ def place_market_order_slippage_check(
     )
 
     if amount <= config.POSITION_QTY_EPSILON:
-        logger.error(f"{Fore.RED}{log_prefix} Amount is zero or negative ({amount}). Aborting.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}{log_prefix} Amount is zero or negative ({amount}). Aborting.{Style.RESET_ALL}"
+        )
         return None
 
     try:
@@ -98,16 +108,24 @@ def place_market_order_slippage_check(
             return None
 
         # 1. Perform Slippage Check using validated L2 OB fetch
-        logger.debug(f"[{func_name}] Performing pre-order slippage check (Depth: {config.SHALLOW_OB_FETCH_DEPTH})...")
+        logger.debug(
+            f"[{func_name}] Performing pre-order slippage check (Depth: {config.SHALLOW_OB_FETCH_DEPTH})..."
+        )
         # Note: This adds API call latency before placing the order. Consider the trade-off.
         # Use the imported function from market_data module
-        ob_data = fetch_l2_order_book_validated(exchange, symbol, config.SHALLOW_OB_FETCH_DEPTH, config)
+        ob_data = fetch_l2_order_book_validated(
+            exchange, symbol, config.SHALLOW_OB_FETCH_DEPTH, config
+        )
 
         if ob_data and ob_data.get("bids") and ob_data.get("asks"):
             # Ensure lists are not empty before accessing index 0
             best_bid = ob_data["bids"][0][0]
             best_ask = ob_data["asks"][0][0]
-            spread = (best_ask - best_bid) / best_bid if best_bid > Decimal("0") else Decimal("inf")
+            spread = (
+                (best_ask - best_bid) / best_bid
+                if best_bid > Decimal("0")
+                else Decimal("inf")
+            )
 
             logger.debug(
                 f"[{func_name}] Current shallow OB: Best Bid={format_price(exchange, symbol, best_bid)}, "
@@ -120,7 +138,8 @@ def place_market_order_slippage_check(
                     f"Current Spread {spread:.4%} > Max Allowed {effective_max_slippage:.4%}.{Style.RESET_ALL}"
                 )
                 send_sms_alert(
-                    f"[{market_base}] ORDER ABORT ({side.upper()} {action}): High Slippage {spread:.4%}", config
+                    f"[{market_base}] ORDER ABORT ({side.upper()} {action}): High Slippage {spread:.4%}",
+                    config,
                 )
                 return None
         else:
@@ -163,7 +182,9 @@ def place_market_order_slippage_check(
         client_oid_resp = order.get("clientOrderId", params.get("clientOrderId", "N/A"))
         status = order.get("status", "?")  # e.g., 'open', 'closed', 'canceled'
         filled_qty = safe_decimal_conversion(order.get("filled", "0.0"))
-        avg_price = safe_decimal_conversion(order.get("average"))  # May be None initially
+        avg_price = safe_decimal_conversion(
+            order.get("average")
+        )  # May be None initially
 
         # Use logger.info for success
         logger.info(
@@ -174,12 +195,20 @@ def place_market_order_slippage_check(
         )
         return order
 
-    except (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.ExchangeError, ccxt.NetworkError) as e:
+    except (
+        ccxt.InsufficientFunds,
+        ccxt.InvalidOrder,
+        ccxt.ExchangeError,
+        ccxt.NetworkError,
+    ) as e:
         # Log specific CCXT exceptions clearly
         logger.error(
             f"{Fore.RED}{log_prefix} API Error placing market order: {type(e).__name__} - {e}{Style.RESET_ALL}"
         )
-        send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()} {action}): {type(e).__name__}", config)
+        send_sms_alert(
+            f"[{market_base}] ORDER FAIL ({side.upper()} {action}): {type(e).__name__}",
+            config,
+        )
         # Don't raise here as market orders are typically not retried by the decorator
         return None
     except Exception as e:
@@ -187,13 +216,18 @@ def place_market_order_slippage_check(
             f"{Back.RED}[{func_name}] Unexpected critical error placing market order: {e}{Style.RESET_ALL}",
             exc_info=True,
         )
-        send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()} {action}): Unexpected {type(e).__name__}.", config)
+        send_sms_alert(
+            f"[{market_base}] ORDER FAIL ({side.upper()} {action}): Unexpected {type(e).__name__}.",
+            config,
+        )
         return None
 
 
 # Snippet 5 / Function 5: Cancel All Open Orders
 @retry_api_call(max_retries=2, initial_delay=1.0)  # Decorator for fetch/network issues
-def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason: str = "Cleanup") -> bool:
+def cancel_all_orders(
+    exchange: ccxt.bybit, symbol: str, config: Config, reason: str = "Cleanup"
+) -> bool:
     """
     Cancels all open orders for a specific symbol on Bybit V5.
 
@@ -233,7 +267,9 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
         # Or use the unified cancel_all_orders endpoint if available and suitable.
         # For now, focuses on regular limit/market orders pending execution.
         fetch_params = {"category": category, "orderFilter": "Order"}  # Default filter
-        logger.debug(f"[{func_name}] Fetching open regular orders for {symbol} with params: {fetch_params}")
+        logger.debug(
+            f"[{func_name}] Fetching open regular orders for {symbol} with params: {fetch_params}"
+        )
         open_orders = exchange.fetch_open_orders(symbol, params=fetch_params)
 
         if not open_orders:
@@ -253,7 +289,13 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
         fail_count = 0
         # Calculate a small delay based on rate limit to avoid hammering
         cancel_delay = max(
-            0.05, 1.0 / (exchange.rateLimit if exchange.rateLimit and exchange.rateLimit > 0 else 20)
+            0.05,
+            1.0
+            / (
+                exchange.rateLimit
+                if exchange.rateLimit and exchange.rateLimit > 0
+                else 20
+            ),
         )  # e.g., 50ms
 
         # V5 requires category for cancellation as well
@@ -268,14 +310,20 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
             )
 
             if not order_id:
-                logger.warning(f"[{func_name}] Skipping order with missing ID in fetched data: {order}")
+                logger.warning(
+                    f"[{func_name}] Skipping order with missing ID in fetched data: {order}"
+                )
                 continue
 
             try:
-                logger.debug(f"[{func_name}] Cancelling order {order_info_log} with params: {cancel_params}")
+                logger.debug(
+                    f"[{func_name}] Cancelling order {order_info_log} with params: {cancel_params}"
+                )
                 # Use cancel_order for individual cancellation
                 exchange.cancel_order(order_id, symbol, params=cancel_params)
-                logger.info(f"{Fore.CYAN}{log_prefix} Successfully cancelled order {order_info_log}{Style.RESET_ALL}")
+                logger.info(
+                    f"{Fore.CYAN}{log_prefix} Successfully cancelled order {order_info_log}{Style.RESET_ALL}"
+                )
                 success_count += 1
             except ccxt.OrderNotFound:
                 # This is not an error in the context of 'cancel all' - the order is already gone.
@@ -309,8 +357,12 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
         if fail_count > 0:
             # If failures occurred, re-fetch to see if they were transient or persistent
             try:
-                logger.warning(f"[{func_name}] Re-checking open orders after {fail_count} cancellation failure(s)...")
-                remaining_orders = exchange.fetch_open_orders(symbol, params=fetch_params)
+                logger.warning(
+                    f"[{func_name}] Re-checking open orders after {fail_count} cancellation failure(s)..."
+                )
+                remaining_orders = exchange.fetch_open_orders(
+                    symbol, params=fetch_params
+                )
                 if not remaining_orders:
                     logger.warning(
                         f"{Fore.YELLOW}[{func_name}] {log_prefix}: Initial cancellation reported {fail_count} failures, but re-check shows no open orders remain. Likely transient errors.{Style.RESET_ALL}"
@@ -322,7 +374,8 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
                         f"Failed: {fail_count}, Success/Gone: {success_count}. {len(remaining_orders)} order(s) might still remain.{Style.RESET_ALL}"
                     )
                     send_sms_alert(
-                        f"[{market_base}] ERROR: Failed to cancel {fail_count} orders ({reason}). Check logs.", config
+                        f"[{market_base}] ERROR: Failed to cancel {fail_count} orders ({reason}). Check logs.",
+                        config,
                     )
                     return False
             except Exception as e_recheck:
@@ -330,7 +383,8 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
                     f"{Fore.RED}[{func_name}] Error re-checking orders after failures: {e_recheck}. Assuming failures persist."
                 )
                 send_sms_alert(
-                    f"[{market_base}] ERROR: Failed to cancel {fail_count} orders ({reason}). Check logs.", config
+                    f"[{market_base}] ERROR: Failed to cancel {fail_count} orders ({reason}). Check logs.",
+                    config,
                 )
                 return False
         else:
@@ -356,7 +410,9 @@ def cancel_all_orders(exchange: ccxt.bybit, symbol: str, config: Config, reason:
 
 
 # Snippet 7 / Function 7: Place Limit Order with TIF/Flags
-@retry_api_call(max_retries=1, initial_delay=0)  # Limit orders usually not retried automatically
+@retry_api_call(
+    max_retries=1, initial_delay=0
+)  # Limit orders usually not retried automatically
 def place_limit_order_tif(
     exchange: ccxt.bybit,
     symbol: str,
@@ -397,10 +453,14 @@ def place_limit_order_tif(
 
     # Validate inputs
     if amount <= config.POSITION_QTY_EPSILON:
-        logger.error(f"{Fore.RED}{log_prefix} Invalid amount: {amount}. Must be positive.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}{log_prefix} Invalid amount: {amount}. Must be positive.{Style.RESET_ALL}"
+        )
         return None
     if price <= Decimal("0"):
-        logger.error(f"{Fore.RED}{log_prefix} Invalid price: {price}. Must be positive.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}{log_prefix} Invalid price: {price}. Must be positive.{Style.RESET_ALL}"
+        )
         return None
 
     try:
@@ -428,7 +488,9 @@ def place_limit_order_tif(
         if tif_upper in valid_tif:
             params["timeInForce"] = tif_upper
         else:
-            logger.warning(f"[{func_name}] Unsupported TimeInForce '{time_in_force}' specified. Defaulting to GTC.")
+            logger.warning(
+                f"[{func_name}] Unsupported TimeInForce '{time_in_force}' specified. Defaulting to GTC."
+            )
             params["timeInForce"] = "GTC"
 
         # Handle Post-Only flag
@@ -453,7 +515,9 @@ def place_limit_order_tif(
         )
 
         # Place the limit order
-        order = exchange.create_limit_order(symbol, side, amount_float, price_float, params=params)
+        order = exchange.create_limit_order(
+            symbol, side, amount_float, price_float, params=params
+        )
 
         # Log the result
         order_id = order.get("id")
@@ -484,9 +548,19 @@ def place_limit_order_tif(
             # Decide whether to raise or return None
             # raise e # Re-raise if this is unexpected
             return None
-    except (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.ExchangeError, ccxt.NetworkError) as e:
-        logger.error(f"{Fore.RED}{log_prefix} API Error placing limit order: {type(e).__name__} - {e}{Style.RESET_ALL}")
-        send_sms_alert(f"[{symbol.split('/')[0]}] ORDER FAIL (Limit {side.upper()}): {type(e).__name__}", config)
+    except (
+        ccxt.InsufficientFunds,
+        ccxt.InvalidOrder,
+        ccxt.ExchangeError,
+        ccxt.NetworkError,
+    ) as e:
+        logger.error(
+            f"{Fore.RED}{log_prefix} API Error placing limit order: {type(e).__name__} - {e}{Style.RESET_ALL}"
+        )
+        send_sms_alert(
+            f"[{symbol.split('/')[0]}] ORDER FAIL (Limit {side.upper()}): {type(e).__name__}",
+            config,
+        )
         return None  # Don't raise as limit orders usually not retried
     except Exception as e:
         logger.critical(
@@ -494,13 +568,16 @@ def place_limit_order_tif(
             exc_info=True,
         )
         send_sms_alert(
-            f"[{symbol.split('/')[0]}] ORDER FAIL (Limit {side.upper()}): Unexpected {type(e).__name__}.", config
+            f"[{symbol.split('/')[0]}] ORDER FAIL (Limit {side.upper()}): Unexpected {type(e).__name__}.",
+            config,
         )
         return None
 
 
 # Snippet 14 / Function 14: Place Native Stop Loss Order (Stop Market)
-@retry_api_call(max_retries=1, initial_delay=0)  # Stop orders usually not retried automatically
+@retry_api_call(
+    max_retries=1, initial_delay=0
+)  # Stop orders usually not retried automatically
 def place_native_stop_loss(
     exchange: ccxt.bybit,
     symbol: str,
@@ -539,10 +616,14 @@ def place_native_stop_loss(
 
     # Validate inputs
     if amount <= config.POSITION_QTY_EPSILON:
-        logger.error(f"{Fore.RED}{log_prefix} Invalid amount: {amount}. Must be positive.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}{log_prefix} Invalid amount: {amount}. Must be positive.{Style.RESET_ALL}"
+        )
         return None
     if stop_price <= Decimal("0"):
-        logger.error(f"{Fore.RED}{log_prefix} Invalid stop price: {stop_price}. Must be positive.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}{log_prefix} Invalid stop price: {stop_price}. Must be positive.{Style.RESET_ALL}"
+        )
         return None
 
     try:
@@ -576,7 +657,9 @@ def place_native_stop_loss(
             valid_coid = client_order_id[:36]
             params["clientOrderId"] = valid_coid
             if len(valid_coid) < len(client_order_id):
-                logger.warning(f"[{func_name}] Client Order ID '{client_order_id}' truncated: '{valid_coid}'")
+                logger.warning(
+                    f"[{func_name}] Client Order ID '{client_order_id}' truncated: '{valid_coid}'"
+                )
 
         bg = Back.YELLOW
         fg = Fore.BLACK
@@ -600,14 +683,22 @@ def place_native_stop_loss(
 
         # Log the result - response structure might vary based on CCXT version / exchange behavior
         order_id = sl_order.get("id")  # This might be the ID of the trigger order
-        client_oid_resp = sl_order.get("clientOrderId", params.get("clientOrderId", "N/A"))
-        status = sl_order.get("status", "?")  # Status of the trigger order ('untriggered', 'triggered', 'active'?)
+        client_oid_resp = sl_order.get(
+            "clientOrderId", params.get("clientOrderId", "N/A")
+        )
+        status = sl_order.get(
+            "status", "?"
+        )  # Status of the trigger order ('untriggered', 'triggered', 'active'?)
 
         # Try to confirm trigger price and type from response info
         info = sl_order.get("info", {})
-        returned_stop_price_str = info.get("stopLoss", sl_order.get("stopPrice"))  # Check info first
+        returned_stop_price_str = info.get(
+            "stopLoss", sl_order.get("stopPrice")
+        )  # Check info first
         returned_stop_price = safe_decimal_conversion(returned_stop_price_str, None)
-        returned_trigger = info.get("slTriggerBy", trigger_by)  # Fallback to input if not in response
+        returned_trigger = info.get(
+            "slTriggerBy", trigger_by
+        )  # Fallback to input if not in response
 
         # Use logger.info for success
         logger.info(
@@ -617,17 +708,27 @@ def place_native_stop_loss(
         )
         return sl_order
 
-    except (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.ExchangeError, ccxt.NetworkError, ccxt.BadSymbol) as e:
-        logger.error(f"{Fore.RED}{log_prefix} API Error placing native SL: {type(e).__name__} - {e}{Style.RESET_ALL}")
+    except (
+        ccxt.InsufficientFunds,
+        ccxt.InvalidOrder,
+        ccxt.ExchangeError,
+        ccxt.NetworkError,
+        ccxt.BadSymbol,
+    ) as e:
+        logger.error(
+            f"{Fore.RED}{log_prefix} API Error placing native SL: {type(e).__name__} - {e}{Style.RESET_ALL}"
+        )
         # Consider sending SMS alert for critical SL failures
         # send_sms_alert(f"[{symbol.split('/')[0]}] SL PLACE FAIL ({side.upper()}): {type(e).__name__}", config)
         return None
     except Exception as e:
         logger.critical(
-            f"{Back.RED}[{func_name}] Unexpected critical error placing native SL: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Back.RED}[{func_name}] Unexpected critical error placing native SL: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
         send_sms_alert(
-            f"[{symbol.split('/')[0]}] SL PLACE FAIL ({side.upper()}): Unexpected {type(e).__name__}", config
+            f"[{symbol.split('/')[0]}] SL PLACE FAIL ({side.upper()}): Unexpected {type(e).__name__}",
+            config,
         )
         return None
 
@@ -661,8 +762,12 @@ def fetch_open_orders_filtered(
         Returns an empty list if no matching orders are found.
     """
     func_name = "fetch_open_orders_filtered"
-    v5_filter = order_filter if order_filter else "Order"  # Default to regular orders if not specified
-    filter_log = f"(Side:{side or 'Any'}, Type:{order_type or 'Any'}, V5Filter:{v5_filter})"
+    v5_filter = (
+        order_filter if order_filter else "Order"
+    )  # Default to regular orders if not specified
+    filter_log = (
+        f"(Side:{side or 'Any'}, Type:{order_type or 'Any'}, V5Filter:{v5_filter})"
+    )
     logger.debug(f"[{func_name}] Fetching open orders for {symbol} {filter_log}...")
 
     try:
@@ -678,11 +783,15 @@ def fetch_open_orders_filtered(
         params: Dict[str, Any] = {"category": category}
         params["orderFilter"] = v5_filter  # Use the determined V5 filter
 
-        logger.debug(f"[{func_name}] Calling fetch_open_orders with symbol='{symbol}', params={params}")
+        logger.debug(
+            f"[{func_name}] Calling fetch_open_orders with symbol='{symbol}', params={params}"
+        )
         open_orders = exchange.fetch_open_orders(symbol=symbol, params=params)
 
         if not open_orders:
-            logger.debug(f"[{func_name}] No open orders found matching V5 filter '{v5_filter}' for {symbol}.")
+            logger.debug(
+                f"[{func_name}] No open orders found matching V5 filter '{v5_filter}' for {symbol}."
+            )
             return []
 
         # Apply client-side filtering based on optional 'side' and 'order_type' args
@@ -692,8 +801,12 @@ def fetch_open_orders_filtered(
         # Filter by side
         if side:
             side_lower = side.lower()
-            filtered_orders = [o for o in filtered_orders if o.get("side", "").lower() == side_lower]
-            logger.debug(f"[{func_name}] Filtered by side='{side}'. Count: {initial_count} -> {len(filtered_orders)}.")
+            filtered_orders = [
+                o for o in filtered_orders if o.get("side", "").lower() == side_lower
+            ]
+            logger.debug(
+                f"[{func_name}] Filtered by side='{side}'. Count: {initial_count} -> {len(filtered_orders)}."
+            )
             initial_count = len(filtered_orders)  # Update count for next filter log
 
         # Filter by CCXT order type (more complex due to variations like 'stop_market')
@@ -717,7 +830,9 @@ def fetch_open_orders_filtered(
                     or order.get("info", {}).get("triggerPrice")
                 )
 
-                if ("stop" in norm_type_filter or "takeprofit" in norm_type_filter) and has_trigger_price:
+                if (
+                    "stop" in norm_type_filter or "takeprofit" in norm_type_filter
+                ) and has_trigger_price:
                     # If filter is 'stopmarket', check if order type is 'market' and has trigger
                     if "market" in norm_type_filter and o_type == "market":
                         return True
@@ -735,11 +850,15 @@ def fetch_open_orders_filtered(
                 f"[{func_name}] Filtered by type='{order_type}'. Count: {count_before_type_filter} -> {len(filtered_orders)}."
             )
 
-        logger.info(f"[{func_name}] Fetched and filtered {len(filtered_orders)} open orders for {symbol} {filter_log}.")
+        logger.info(
+            f"[{func_name}] Fetched and filtered {len(filtered_orders)} open orders for {symbol} {filter_log}."
+        )
         return filtered_orders
 
     except (ccxt.NetworkError, ccxt.ExchangeError, ccxt.BadSymbol) as e:
-        logger.warning(f"{Fore.YELLOW}[{func_name}] API Error fetching open orders for {symbol}: {e}{Style.RESET_ALL}")
+        logger.warning(
+            f"{Fore.YELLOW}[{func_name}] API Error fetching open orders for {symbol}: {e}{Style.RESET_ALL}"
+        )
         raise  # Re-raise for retry decorator
     except Exception as e:
         logger.error(
@@ -750,7 +869,9 @@ def fetch_open_orders_filtered(
 
 
 # Snippet 18 / Function 18: Place Native Trailing Stop Order
-@retry_api_call(max_retries=1, initial_delay=0)  # Stop orders usually not retried automatically
+@retry_api_call(
+    max_retries=1, initial_delay=0
+)  # Stop orders usually not retried automatically
 def place_native_trailing_stop(
     exchange: ccxt.bybit,
     symbol: str,
@@ -796,7 +917,9 @@ def place_native_trailing_stop(
     if amount <= config.POSITION_QTY_EPSILON:
         raise ValueError(f"{log_prefix} Invalid amount: {amount}. Must be positive.")
     if activation_price is not None and activation_price <= Decimal("0"):
-        raise ValueError(f"{log_prefix} Activation price, if provided, must be positive: {activation_price}")
+        raise ValueError(
+            f"{log_prefix} Activation price, if provided, must be positive: {activation_price}"
+        )
 
     params: Dict[str, Any] = {}
     trail_log_str = ""  # For logging the type of trail
@@ -808,17 +931,23 @@ def place_native_trailing_stop(
             percent_val = Decimal(percent_val_str)
             # Bybit V5 percentage range: 0.1% to 10% (adjust if needed based on docs) - Let's use 0.01% to 10% for broader range check
             if not (Decimal("0.01") <= percent_val <= Decimal("10.0")):
-                raise ValueError(f"Percentage must be between 0.01% and 10.0%. Got: {percent_val}%")
+                raise ValueError(
+                    f"Percentage must be between 0.01% and 10.0%. Got: {percent_val}%"
+                )
             # Bybit expects percentage as string value, e.g., "1.5" for 1.5%
             params["trailingStop"] = str(
                 percent_val.quantize(Decimal("0.01"))
             )  # Format to 2 decimal places for percentage string
             trail_log_str = f"{percent_val}%"
         except (ValueError, InvalidOperation) as e:
-            raise ValueError(f"{log_prefix} Invalid trailing percentage '{trailing_offset}': {e}") from e
+            raise ValueError(
+                f"{log_prefix} Invalid trailing percentage '{trailing_offset}': {e}"
+            ) from e
     elif isinstance(trailing_offset, Decimal):
         if trailing_offset <= Decimal("0"):
-            raise ValueError(f"{log_prefix} Absolute trailing delta must be positive: {trailing_offset}")
+            raise ValueError(
+                f"{log_prefix} Absolute trailing delta must be positive: {trailing_offset}"
+            )
         try:
             # Format the absolute delta using market price precision
             delta_str = format_price(exchange, symbol, trailing_offset)
@@ -835,7 +964,11 @@ def place_native_trailing_stop(
         )
 
     # --- Log Initialization ---
-    act_px_log = format_price(exchange, symbol, activation_price) if activation_price else "Immediate"
+    act_px_log = (
+        format_price(exchange, symbol, activation_price)
+        if activation_price
+        else "Immediate"
+    )
     logger.info(
         f"{Fore.CYAN}{log_prefix} Init: {format_amount(exchange, symbol, amount)} {symbol}, Trail:{trail_log_str}, "
         f"ActPx:{act_px_log}, TriggerBy:{trigger_by}, PosIdx:{position_idx}, Coid:{client_order_id or 'None'}...{Style.RESET_ALL}"
@@ -852,7 +985,11 @@ def place_native_trailing_stop(
         # Format amount and activation price
         amount_str = format_amount(exchange, symbol, amount)
         amount_float = float(amount_str)
-        activation_price_str = format_price(exchange, symbol, activation_price) if activation_price else None
+        activation_price_str = (
+            format_price(exchange, symbol, activation_price)
+            if activation_price
+            else None
+        )
 
         # --- Assemble V5 Parameters ---
         # Update params dict with common TSL settings
@@ -867,13 +1004,17 @@ def place_native_trailing_stop(
             }
         )
         if activation_price_str is not None:
-            params["activePrice"] = activation_price_str  # V5 param for activation price
+            params["activePrice"] = (
+                activation_price_str  # V5 param for activation price
+            )
 
         if client_order_id:
             valid_coid = client_order_id[:36]
             params["clientOrderId"] = valid_coid
             if len(valid_coid) < len(client_order_id):
-                logger.warning(f"[{func_name}] Client Order ID '{client_order_id}' truncated: '{valid_coid}'")
+                logger.warning(
+                    f"[{func_name}] Client Order ID '{client_order_id}' truncated: '{valid_coid}'"
+                )
 
         # --- Place Order ---
         bg = Back.YELLOW
@@ -895,13 +1036,21 @@ def place_native_trailing_stop(
 
         # --- Log Result ---
         order_id = tsl_order.get("id")
-        client_oid_resp = tsl_order.get("clientOrderId", params.get("clientOrderId", "N/A"))
-        status = tsl_order.get("status", "?")  # Status of the trigger ('untriggered', etc.)
+        client_oid_resp = tsl_order.get(
+            "clientOrderId", params.get("clientOrderId", "N/A")
+        )
+        status = tsl_order.get(
+            "status", "?"
+        )  # Status of the trigger ('untriggered', etc.)
 
         # Confirm parameters from response info
         info = tsl_order.get("info", {})
-        returned_trail_value = info.get("trailingStop") or info.get("trailingMove")  # Check both params
-        returned_act_price_str = info.get("activePrice", tsl_order.get("activationPrice"))
+        returned_trail_value = info.get("trailingStop") or info.get(
+            "trailingMove"
+        )  # Check both params
+        returned_act_price_str = info.get(
+            "activePrice", tsl_order.get("activationPrice")
+        )
         returned_act_price = safe_decimal_conversion(returned_act_price_str, None)
         returned_trigger = info.get("triggerBy", trigger_by)
 
@@ -929,16 +1078,20 @@ def place_native_trailing_stop(
     # Catch unexpected errors
     except Exception as e:
         logger.critical(
-            f"{Back.RED}[{func_name}] Unexpected critical error placing native TSL: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Back.RED}[{func_name}] Unexpected critical error placing native TSL: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
         send_sms_alert(
-            f"[{symbol.split('/')[0]}] TSL PLACE FAIL ({side.upper()}): Unexpected {type(e).__name__}", config
+            f"[{symbol.split('/')[0]}] TSL PLACE FAIL ({side.upper()}): Unexpected {type(e).__name__}",
+            config,
         )
         return None
 
 
 # Snippet 22 / Function 22: Update Limit Order (Edit Order)
-@retry_api_call(max_retries=1, initial_delay=0)  # Edits usually not retried automatically
+@retry_api_call(
+    max_retries=1, initial_delay=0
+)  # Edits usually not retried automatically
 def update_limit_order(
     exchange: ccxt.bybit,
     symbol: str,
@@ -975,12 +1128,18 @@ def update_limit_order(
     if new_amount is None and new_price is None:
         raise ValueError(f"{log_prefix} No new amount or price provided for update.")
     if new_amount is not None and new_amount <= config.POSITION_QTY_EPSILON:
-        raise ValueError(f"{log_prefix} Invalid new amount specified: {new_amount}. Must be positive.")
+        raise ValueError(
+            f"{log_prefix} Invalid new amount specified: {new_amount}. Must be positive."
+        )
     if new_price is not None and new_price <= Decimal("0"):
-        raise ValueError(f"{log_prefix} Invalid new price specified: {new_price}. Must be positive.")
+        raise ValueError(
+            f"{log_prefix} Invalid new price specified: {new_price}. Must be positive."
+        )
 
     # Log intent
-    amount_log = format_amount(exchange, symbol, new_amount) if new_amount else "NoChange"
+    amount_log = (
+        format_amount(exchange, symbol, new_amount) if new_amount else "NoChange"
+    )
     price_log = format_price(exchange, symbol, new_price) if new_price else "NoChange"
     coid_log = new_client_order_id or "NoChange"
     logger.info(
@@ -1007,11 +1166,15 @@ def update_limit_order(
         # Validate current order state
         status = current_order.get("status")
         order_type = current_order.get("type")
-        filled_qty = safe_decimal_conversion(current_order.get("filled", "0.0"), Decimal("0.0"))
+        filled_qty = safe_decimal_conversion(
+            current_order.get("filled", "0.0"), Decimal("0.0")
+        )
 
         if status != "open":
             # Cannot modify orders that are not open (e.g., filled, canceled, rejected)
-            raise ccxt.InvalidOrder(f"{log_prefix} Cannot update order. Current status is '{status}' (must be 'open').")
+            raise ccxt.InvalidOrder(
+                f"{log_prefix} Cannot update order. Current status is '{status}' (must be 'open')."
+            )
         if order_type != "limit":
             # Bybit typically only allows modifying limit orders
             raise ccxt.InvalidOrder(
@@ -1020,7 +1183,9 @@ def update_limit_order(
 
         # Check for partial fills (Bybit V5 might allow modifying partially filled, but can be complex)
         # Default behavior: Disallow modification if partially filled.
-        allow_partial_fill_update = False  # Set to True to attempt modification even if partially filled
+        allow_partial_fill_update = (
+            False  # Set to True to attempt modification even if partially filled
+        )
         if not allow_partial_fill_update and filled_qty > config.POSITION_QTY_EPSILON:
             logger.warning(
                 f"{Fore.YELLOW}[{func_name}] Update aborted: Order ...{format_order_id(order_id)} is partially filled "
@@ -1030,15 +1195,25 @@ def update_limit_order(
 
         # Determine the final amount and price for the edit call
         final_amount_dec = (
-            new_amount if new_amount is not None else safe_decimal_conversion(current_order.get("amount"))
+            new_amount
+            if new_amount is not None
+            else safe_decimal_conversion(current_order.get("amount"))
         )
-        final_price_dec = new_price if new_price is not None else safe_decimal_conversion(current_order.get("price"))
+        final_price_dec = (
+            new_price
+            if new_price is not None
+            else safe_decimal_conversion(current_order.get("price"))
+        )
 
         # Ensure final values are valid after potentially using current values
         if final_amount_dec is None or final_amount_dec <= config.POSITION_QTY_EPSILON:
-            raise ValueError(f"Invalid final amount calculated for update: {final_amount_dec}")
+            raise ValueError(
+                f"Invalid final amount calculated for update: {final_amount_dec}"
+            )
         if final_price_dec is None or final_price_dec <= Decimal("0"):
-            raise ValueError(f"Invalid final price calculated for update: {final_price_dec}")
+            raise ValueError(
+                f"Invalid final price calculated for update: {final_price_dec}"
+            )
 
         # Prepare parameters for edit_order
         edit_params: Dict[str, Any] = {"category": category}
@@ -1046,7 +1221,9 @@ def update_limit_order(
             valid_coid = new_client_order_id[:36]
             edit_params["clientOrderId"] = valid_coid
             if len(valid_coid) < len(new_client_order_id):
-                logger.warning(f"[{func_name}] New Client Order ID '{new_client_order_id}' truncated: '{valid_coid}'")
+                logger.warning(
+                    f"[{func_name}] New Client Order ID '{new_client_order_id}' truncated: '{valid_coid}'"
+                )
 
         # Convert final amount/price to float for CCXT call
         final_amount_float = float(format_amount(exchange, symbol, final_amount_dec))
@@ -1071,9 +1248,13 @@ def update_limit_order(
 
         # Process the response
         if updated_order:
-            new_id = updated_order.get("id", order_id)  # ID might change on some exchanges after edit
+            new_id = updated_order.get(
+                "id", order_id
+            )  # ID might change on some exchanges after edit
             status_after = updated_order.get("status", "?")
-            new_client_oid_resp = updated_order.get("clientOrderId", edit_params.get("clientOrderId", "N/A"))
+            new_client_oid_resp = updated_order.get(
+                "clientOrderId", edit_params.get("clientOrderId", "N/A")
+            )
             # Use logger.info for success
             logger.info(
                 f"{Fore.GREEN}[{func_name}] Update successful. New/Current ID:...{format_order_id(new_id)}, "

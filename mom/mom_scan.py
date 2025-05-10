@@ -49,23 +49,36 @@ import numpy as np
 try:
     import pandas_ta as ta  # Technical analysis library
 except ImportError:
-    print("Error: 'pandas_ta' library not found. Please install it: pip install pandas_ta")
+    print(
+        "Error: 'pandas_ta' library not found. Please install it: pip install pandas_ta"
+    )
     sys.exit(1)
 try:
     # Use V5 unified_trading API
     from pybit.unified_trading import HTTP, WebSocket
 except ImportError:
-    print("Error: 'pybit' library not found or out of date. Please install/upgrade it: pip install -U pybit")
+    print(
+        "Error: 'pybit' library not found or out of date. Please install/upgrade it: pip install -U pybit"
+    )
     sys.exit(1)
 try:
-    from colorama import init as colorama_init, Fore, Style, Back  # Colored console output
+    from colorama import (
+        init as colorama_init,
+        Fore,
+        Style,
+        Back,
+    )  # Colored console output
 except ImportError:
-    print("Error: 'colorama' library not found. Please install it: pip install colorama")
+    print(
+        "Error: 'colorama' library not found. Please install it: pip install colorama"
+    )
     sys.exit(1)
 try:
     from dotenv import load_dotenv  # Load environment variables from .env file
 except ImportError:
-    print("Error: 'python-dotenv' library not found. Please install it: pip install python-dotenv")
+    print(
+        "Error: 'python-dotenv' library not found. Please install it: pip install python-dotenv"
+    )
     sys.exit(1)
 
 # --- Load Environment Variables ---
@@ -88,7 +101,9 @@ MIN_KLINE_RECORDS_FOR_CALC = 2  # Minimum records needed for most basic calculat
 # --- Logging Setup ---
 
 # Base Logger Configuration (File Handler, no colors in file, UTF-8 encoded)
-log_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+log_formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 file_handler = logging.FileHandler(LOG_FILE, mode="a", encoding="utf-8")
 file_handler.setFormatter(log_formatter)
 
@@ -99,7 +114,9 @@ logger.setLevel(logging.INFO)  # Default level, can be overridden by --debug
 logger.propagate = False  # Prevent duplicate logs if root logger is configured
 
 # Metrics Logger Configuration (CSV-like format, UTF-8 encoded)
-metrics_formatter = logging.Formatter("%(asctime)s,%(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+metrics_formatter = logging.Formatter(
+    "%(asctime)s,%(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 metrics_handler = logging.FileHandler(METRICS_LOG_FILE, mode="a", encoding="utf-8")
 metrics_handler.setFormatter(metrics_formatter)
 
@@ -133,12 +150,21 @@ def get_symbol_color(symbol: Optional[str]) -> str:
     if symbol in SYMBOL_COLORS:
         return SYMBOL_COLORS[symbol]
     if symbol not in _symbol_color_map:
-        _symbol_color_map[symbol] = _symbol_color_cycle[_color_index % len(_symbol_color_cycle)] + Style.BRIGHT
+        _symbol_color_map[symbol] = (
+            _symbol_color_cycle[_color_index % len(_symbol_color_cycle)] + Style.BRIGHT
+        )
         _color_index += 1
     return _symbol_color_map[symbol]
 
 
-def log_console(level: int, message: Any, symbol: Optional[str] = None, exc_info: bool = False, *args, **kwargs):
+def log_console(
+    level: int,
+    message: Any,
+    symbol: Optional[str] = None,
+    exc_info: bool = False,
+    *args,
+    **kwargs,
+):
     """
     Logs messages to the console with level-specific colors and optional
     symbol highlighting. Also forwards the message to the file logger.
@@ -178,8 +204,13 @@ def log_console(level: int, message: Any, symbol: Optional[str] = None, exc_info
             formatted_message = message.format(*args, **kwargs)
     except Exception as fmt_e:
         # Log formatting errors without crashing, include original message
-        print(f"{Fore.RED}LOG FORMATTING ERROR:{Style.RESET_ALL} {fmt_e} | Original Msg: {message_str}")
-        logger.error(f"Log formatting error: {fmt_e} | Original Msg: {message_str}", exc_info=False)
+        print(
+            f"{Fore.RED}LOG FORMATTING ERROR:{Style.RESET_ALL} {fmt_e} | Original Msg: {message_str}"
+        )
+        logger.error(
+            f"Log formatting error: {fmt_e} | Original Msg: {message_str}",
+            exc_info=False,
+        )
         # Use the unformatted string message for console output
         formatted_message = message_str
 
@@ -211,7 +242,10 @@ API_SECRET = os.environ.get("BYBIT_API_SECRET")
 # Check if API keys are loaded
 if not API_KEY or not API_SECRET:
     # Use log_console for consistency, even at critical level before full logging setup
-    log_console(logging.CRITICAL, "BYBIT_API_KEY or BYBIT_API_SECRET not found in environment variables or .env file.")
+    log_console(
+        logging.CRITICAL,
+        "BYBIT_API_KEY or BYBIT_API_SECRET not found in environment variables or .env file.",
+    )
     sys.exit(1)
 else:
     log_console(logging.INFO, "API keys loaded successfully.")
@@ -250,7 +284,9 @@ def load_config(config_path: str) -> Dict[str, Any]:
 
         for symbol_cfg in symbols_cfg:
             if not isinstance(symbol_cfg, dict) or "SYMBOL" not in symbol_cfg:
-                raise ValueError("Each item in 'SYMBOLS' must be a dictionary with a 'SYMBOL' key.")
+                raise ValueError(
+                    "Each item in 'SYMBOLS' must be a dictionary with a 'SYMBOL' key."
+                )
 
             symbol = symbol_cfg["SYMBOL"]
             strategy_cfg = symbol_cfg.get("STRATEGY_CONFIG", {})
@@ -280,7 +316,9 @@ def load_config(config_path: str) -> Dict[str, Any]:
             ]
 
             # Filter out invalid or non-numeric periods
-            valid_periods = [p for p in periods if isinstance(p, (int, float)) and p > 0]
+            valid_periods = [
+                p for p in periods if isinstance(p, (int, float)) and p > 0
+            ]
             if not valid_periods:
                 log_console(
                     logging.WARNING,
@@ -292,7 +330,9 @@ def load_config(config_path: str) -> Dict[str, Any]:
                 max_period = max(valid_periods)
 
             # Ensure kline limit is at least a minimum value for basic operations + buffer
-            kline_limit = max(MIN_KLINE_RECORDS_FOR_CALC, int(max_period + kline_limit_buffer))
+            kline_limit = max(
+                MIN_KLINE_RECORDS_FOR_CALC, int(max_period + kline_limit_buffer)
+            )
 
             # Store calculated limit within the symbol's config (internal use)
             symbol_cfg.setdefault("INTERNAL", {})["KLINE_LIMIT"] = kline_limit
@@ -310,13 +350,20 @@ def load_config(config_path: str) -> Dict[str, Any]:
         log_console(logging.CRITICAL, f"Configuration file not found: {config_path}")
         sys.exit(1)
     except json.JSONDecodeError as e:
-        log_console(logging.CRITICAL, f"Error decoding JSON configuration file {config_path}: {e}")
+        log_console(
+            logging.CRITICAL,
+            f"Error decoding JSON configuration file {config_path}: {e}",
+        )
         sys.exit(1)
     except ValueError as e:
         log_console(logging.CRITICAL, f"Configuration error: {e}")
         sys.exit(1)
     except Exception as e:
-        log_console(logging.CRITICAL, f"Unexpected error loading configuration: {e}", exc_info=True)
+        log_console(
+            logging.CRITICAL,
+            f"Unexpected error loading configuration: {e}",
+            exc_info=True,
+        )
         sys.exit(1)
 
 
@@ -339,7 +386,10 @@ def super_smoother(series: pd.Series, period: int) -> pd.Series:
         log_console(logging.DEBUG, "Super Smoother: Input series is invalid or empty.")
         return pd.Series(np.nan, index=series.index, dtype=np.float64)
     if not isinstance(period, int) or period < 2:
-        log_console(logging.WARNING, f"Super Smoother: Period must be an integer >= 2, got {period}. Returning NaNs.")
+        log_console(
+            logging.WARNING,
+            f"Super Smoother: Period must be an integer >= 2, got {period}. Returning NaNs.",
+        )
         return pd.Series(np.nan, index=series.index, dtype=np.float64)
 
     # Drop NaNs for length check, but calculate on original series with NaNs handled
@@ -385,7 +435,11 @@ def super_smoother(series: pd.Series, period: int) -> pd.Series:
 
         return pd.Series(ss, index=series.index, dtype=np.float64)
     except Exception as e:
-        log_console(logging.ERROR, f"Super Smoother calculation error for period {period}: {e}", exc_info=True)
+        log_console(
+            logging.ERROR,
+            f"Super Smoother calculation error for period {period}: {e}",
+            exc_info=True,
+        )
         return pd.Series(np.nan, index=series.index, dtype=np.float64)
 
 
@@ -402,11 +456,16 @@ def instantaneous_trendline(series: pd.Series, period: int) -> pd.Series:
         pandas Series with Instantaneous Trendline values, or Series of NaNs on error/invalid input.
     """
     if not isinstance(series, pd.Series) or series.empty:
-        log_console(logging.DEBUG, "Instantaneous Trendline: Input series is invalid or empty.")
-        return pd.Series(np.nan, index=series.index, dtype=np.float64)
-    if not isinstance(period, int) or period < 4:  # Ehlers IT generally needs more points
         log_console(
-            logging.WARNING, f"Instantaneous Trendline: Period must be an integer >= 4, got {period}. Returning NaNs."
+            logging.DEBUG, "Instantaneous Trendline: Input series is invalid or empty."
+        )
+        return pd.Series(np.nan, index=series.index, dtype=np.float64)
+    if (
+        not isinstance(period, int) or period < 4
+    ):  # Ehlers IT generally needs more points
+        log_console(
+            logging.WARNING,
+            f"Instantaneous Trendline: Period must be an integer >= 4, got {period}. Returning NaNs.",
         )
         return pd.Series(np.nan, index=series.index, dtype=np.float64)
 
@@ -431,9 +490,13 @@ def instantaneous_trendline(series: pd.Series, period: int) -> pd.Series:
         if len(series_float) > 1 and not np.isnan(series_float.iloc[1]):
             it[1] = series_float.iloc[1]
         if len(series_float) > 2 and not np.any(np.isnan(series_float.iloc[0:3])):
-            it[2] = (series_float.iloc[2] + 2.0 * series_float.iloc[1] + series_float.iloc[0]) / 4.0
+            it[2] = (
+                series_float.iloc[2] + 2.0 * series_float.iloc[1] + series_float.iloc[0]
+            ) / 4.0
         if len(series_float) > 3 and not np.any(np.isnan(series_float.iloc[1:4])):
-            it[3] = (series_float.iloc[3] + 2.0 * series_float.iloc[2] + series_float.iloc[1]) / 4.0
+            it[3] = (
+                series_float.iloc[3] + 2.0 * series_float.iloc[2] + series_float.iloc[1]
+            ) / 4.0
 
         # Calculation loop - check for NaNs rigorously
         for i in range(4, len(series_float)):
@@ -463,7 +526,11 @@ def instantaneous_trendline(series: pd.Series, period: int) -> pd.Series:
 
         return pd.Series(it, index=series.index, dtype=np.float64)
     except Exception as e:
-        log_console(logging.ERROR, f"Instantaneous Trendline calculation error for period {period}: {e}", exc_info=True)
+        log_console(
+            logging.ERROR,
+            f"Instantaneous Trendline calculation error for period {period}: {e}",
+            exc_info=True,
+        )
         return pd.Series(np.nan, index=series.index, dtype=np.float64)
 
 
@@ -496,12 +563,18 @@ def calculate_indicators_momentum(
         return None
     if not isinstance(df.index, pd.DatetimeIndex):
         try:
-            log_console(logging.DEBUG, "Indicator Calc: DataFrame index is not DatetimeIndex, attempting conversion.")
+            log_console(
+                logging.DEBUG,
+                "Indicator Calc: DataFrame index is not DatetimeIndex, attempting conversion.",
+            )
             df.index = pd.to_datetime(df.index)
             if not isinstance(df.index, pd.DatetimeIndex):  # Check conversion success
                 raise ValueError("Index conversion to DatetimeIndex failed.")
         except Exception as idx_e:
-            log_console(logging.ERROR, f"Indicator Calc: Failed to convert DataFrame index to DatetimeIndex: {idx_e}")
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Failed to convert DataFrame index to DatetimeIndex: {idx_e}",
+            )
             return None
 
     # Use a copy to avoid modifying the original DataFrame passed to the function
@@ -511,10 +584,15 @@ def calculate_indicators_momentum(
     try:
         for col in required_cols:
             if col not in df_out.columns:
-                log_console(logging.ERROR, f"Indicator Calc: Missing required column: '{col}'.")
+                log_console(
+                    logging.ERROR, f"Indicator Calc: Missing required column: '{col}'."
+                )
                 return None  # Critical column missing
             if not pd.api.types.is_numeric_dtype(df_out[col]):
-                log_console(logging.DEBUG, f"Indicator Calc: Converting non-numeric column '{col}' to numeric.")
+                log_console(
+                    logging.DEBUG,
+                    f"Indicator Calc: Converting non-numeric column '{col}' to numeric.",
+                )
                 df_out[col] = pd.to_numeric(df_out[col], errors="coerce")
 
         # Drop rows where essential conversions failed (resulted in NaNs)
@@ -534,12 +612,17 @@ def calculate_indicators_momentum(
             )
             return None
         if df_out.empty:
-            log_console(logging.ERROR, "Indicator Calc: DataFrame empty after NaN drop from numeric conversion.")
+            log_console(
+                logging.ERROR,
+                "Indicator Calc: DataFrame empty after NaN drop from numeric conversion.",
+            )
             return None
 
     except Exception as e:
         log_console(
-            logging.ERROR, f"Indicator Calc: Failed during data validation/numeric conversion: {e}", exc_info=True
+            logging.ERROR,
+            f"Indicator Calc: Failed during data validation/numeric conversion: {e}",
+            exc_info=True,
         )
         return None
 
@@ -547,10 +630,18 @@ def calculate_indicators_momentum(
         price_source = strategy_cfg.get("PRICE_SOURCE", "close")
         if price_source not in df_out.columns or df_out[price_source].isnull().all():
             log_console(
-                logging.ERROR, f"Indicator Calc: Price source '{price_source}' not found or contains only NaNs."
+                logging.ERROR,
+                f"Indicator Calc: Price source '{price_source}' not found or contains only NaNs.",
             )
-            if price_source != "close" and "close" in df_out.columns and not df_out["close"].isnull().all():
-                log_console(logging.WARNING, "Indicator Calc: Falling back to 'close' as price source.")
+            if (
+                price_source != "close"
+                and "close" in df_out.columns
+                and not df_out["close"].isnull().all()
+            ):
+                log_console(
+                    logging.WARNING,
+                    "Indicator Calc: Falling back to 'close' as price source.",
+                )
                 price_source = "close"
             else:
                 return None  # Cannot proceed without a valid price source
@@ -583,7 +674,11 @@ def calculate_indicators_momentum(
                 else:
                     indicator_series = ta.ema(df_out[price_source], length=length)
 
-                if indicator_series is None or indicator_series.empty or indicator_series.isnull().all():
+                if (
+                    indicator_series is None
+                    or indicator_series.empty
+                    or indicator_series.isnull().all()
+                ):
                     log_console(
                         logging.WARNING,
                         f"Indicator Calc: {col_name} (length {length}) calculation resulted in empty or all NaNs.",
@@ -633,21 +728,33 @@ def calculate_indicators_momentum(
             # Fill NaNs before smoothing ROC, use 0 as neutral momentum
             df_out["roc_smooth"] = ta.sma(df_out["roc"].fillna(0.0), length=3)
         except Exception as e:
-            log_console(logging.ERROR, f"Indicator Calc: Error calculating ROC: {e}", exc_info=False)
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Error calculating ROC: {e}",
+                exc_info=False,
+            )
             df_out["roc"] = np.nan
             df_out["roc_smooth"] = np.nan
 
         try:
             atr_period_risk = strategy_cfg.get("ATR_PERIOD_RISK", 14)
-            atr_series = ta.atr(df_out["high"], df_out["low"], df_out["close"], length=atr_period_risk)
+            atr_series = ta.atr(
+                df_out["high"], df_out["low"], df_out["close"], length=atr_period_risk
+            )
             # Use .ffill() as per deprecation warning, then fill remaining with 0
             df_out["atr_risk"] = atr_series.ffill().fillna(0.0)
             # Normalized ATR
             # Avoid division by zero/NaN: replace 0 with NaN, ffill, then fill remaining start NaNs with 1
             close_safe = df_out["close"].replace(0, np.nan).ffill().fillna(1.0)
-            df_out["norm_atr"] = ((df_out["atr_risk"] / close_safe) * 100).ffill().fillna(0.0)
+            df_out["norm_atr"] = (
+                ((df_out["atr_risk"] / close_safe) * 100).ffill().fillna(0.0)
+            )
         except Exception as e:
-            log_console(logging.ERROR, f"Indicator Calc: Error calculating ATR: {e}", exc_info=False)
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Error calculating ATR: {e}",
+                exc_info=False,
+            )
             df_out["atr_risk"] = np.nan
             df_out["norm_atr"] = np.nan
 
@@ -656,27 +763,45 @@ def calculate_indicators_momentum(
             rsi_series = ta.rsi(df_out[price_source], length=rsi_period)
             df_out["rsi"] = rsi_series  # Handle NaNs later in bulk fill
         except Exception as e:
-            log_console(logging.ERROR, f"Indicator Calc: Error calculating RSI: {e}", exc_info=False)
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Error calculating RSI: {e}",
+                exc_info=False,
+            )
             df_out["rsi"] = np.nan
 
         try:
             vol_period = strategy_cfg.get("VOLUME_SMA_PERIOD", 20)
-            df_out["volume_sma"] = ta.sma(df_out["volume"], length=vol_period)  # Handle NaNs later
+            df_out["volume_sma"] = ta.sma(
+                df_out["volume"], length=vol_period
+            )  # Handle NaNs later
             min_periods_vol = max(1, vol_period // 2)
             # Handle NaNs later, ensure min_periods for rolling quantile
             df_out["volume_percentile_75"] = (
-                df_out["volume"].rolling(window=vol_period, min_periods=min_periods_vol).quantile(0.75)
+                df_out["volume"]
+                .rolling(window=vol_period, min_periods=min_periods_vol)
+                .quantile(0.75)
             )
         except Exception as e:
-            log_console(logging.ERROR, f"Indicator Calc: Error calculating Volume Indicators: {e}", exc_info=False)
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Error calculating Volume Indicators: {e}",
+                exc_info=False,
+            )
             df_out["volume_sma"] = np.nan
             df_out["volume_percentile_75"] = np.nan
 
         try:
             adx_period = strategy_cfg.get("ADX_PERIOD", 14)
-            adx_df = ta.adx(df_out["high"], df_out["low"], df_out["close"], length=adx_period)
+            adx_df = ta.adx(
+                df_out["high"], df_out["low"], df_out["close"], length=adx_period
+            )
             adx_col_name = f"ADX_{adx_period}"
-            if adx_df is not None and not adx_df.empty and adx_col_name in adx_df.columns:
+            if (
+                adx_df is not None
+                and not adx_df.empty
+                and adx_col_name in adx_df.columns
+            ):
                 df_out["adx"] = adx_df[adx_col_name]  # Handle NaNs later
             else:
                 log_console(
@@ -685,7 +810,11 @@ def calculate_indicators_momentum(
                 )
                 df_out["adx"] = np.nan
         except Exception as e:
-            log_console(logging.ERROR, f"Indicator Calc: Error calculating ADX: {e}", exc_info=False)
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Error calculating ADX: {e}",
+                exc_info=False,
+            )
             df_out["adx"] = np.nan
 
         try:
@@ -700,13 +829,24 @@ def calculate_indicators_momentum(
                 and all(c in bbands.columns for c in [bbu_col, bbl_col, bbm_col])
             ):
                 # Calculate width safely, handle NaNs and potential division by zero later
-                bbm_safe = bbands[bbm_col].replace(0, np.nan)  # Replace 0 with NaN before division
-                df_out["bb_width"] = (bbands[bbu_col] - bbands[bbl_col]) / bbm_safe * 100
+                bbm_safe = bbands[bbm_col].replace(
+                    0, np.nan
+                )  # Replace 0 with NaN before division
+                df_out["bb_width"] = (
+                    (bbands[bbu_col] - bbands[bbl_col]) / bbm_safe * 100
+                )
             else:
-                log_console(logging.WARNING, "Indicator Calc: Bollinger Bands calculation failed or missing columns.")
+                log_console(
+                    logging.WARNING,
+                    "Indicator Calc: Bollinger Bands calculation failed or missing columns.",
+                )
                 df_out["bb_width"] = np.nan
         except Exception as e:
-            log_console(logging.ERROR, f"Indicator Calc: Error calculating Bollinger Bands: {e}", exc_info=False)
+            log_console(
+                logging.ERROR,
+                f"Indicator Calc: Error calculating Bollinger Bands: {e}",
+                exc_info=False,
+            )
             df_out["bb_width"] = np.nan
 
         # --- Fill NaNs in Key Numeric Columns BEFORE calculating signals ---
@@ -736,10 +876,12 @@ def calculate_indicators_momentum(
 
         # Calculate high_volume after filling volume_sma and percentile
         # Fill volume NaNs with 0 for comparison
-        df_out["high_volume"] = (df_out["volume"].fillna(0.0) > df_out["volume_percentile_75"]) & (
-            df_out["volume"].fillna(0.0) > df_out["volume_sma"]
-        )
-        df_out["high_volume"] = df_out["high_volume"].fillna(False).astype(bool)  # Ensure boolean
+        df_out["high_volume"] = (
+            df_out["volume"].fillna(0.0) > df_out["volume_percentile_75"]
+        ) & (df_out["volume"].fillna(0.0) > df_out["volume_sma"])
+        df_out["high_volume"] = (
+            df_out["high_volume"].fillna(False).astype(bool)
+        )  # Ensure boolean
 
         # --- Dynamic Thresholds based on Volatility ---
         atr_period_volatility = strategy_cfg.get("ATR_PERIOD_VOLATILITY", 14)
@@ -757,14 +899,18 @@ def calculate_indicators_momentum(
         rsi_base_low = strategy_cfg.get("RSI_LOW_THRESHOLD", 40)
         rsi_base_high = strategy_cfg.get("RSI_HIGH_THRESHOLD", 75)
         # Use pd.Series constructor to ensure index alignment
-        rsi_low = pd.Series(np.clip(rsi_base_low - (5 * volatility_factor), 10, 50), index=df_out.index)
-        rsi_high = pd.Series(np.clip(rsi_base_high + (5 * volatility_factor), 60, 90), index=df_out.index)
+        rsi_low = pd.Series(
+            np.clip(rsi_base_low - (5 * volatility_factor), 10, 50), index=df_out.index
+        )
+        rsi_high = pd.Series(
+            np.clip(rsi_base_high + (5 * volatility_factor), 60, 90), index=df_out.index
+        )
 
         roc_base_threshold = strategy_cfg.get("MOM_THRESHOLD_PERCENT", 0.1)
         # Use pd.Series constructor to ensure index alignment, default to base threshold
-        roc_threshold = pd.Series(abs(roc_base_threshold) * volatility_factor, index=df_out.index).fillna(
-            abs(roc_base_threshold)
-        )
+        roc_threshold = pd.Series(
+            abs(roc_base_threshold) * volatility_factor, index=df_out.index
+        ).fillna(abs(roc_base_threshold))
 
         # --- Trend Definition ---
         fast_ma_col = f"{smoother_prefix}_fast"
@@ -785,7 +931,9 @@ def calculate_indicators_momentum(
         else:
             # NaNs already filled in MA/trendline columns
             # Fill initial shift NaN with the first available trendline value
-            trendline_shift = df_out[trendline_col].shift(1).ffill().fillna(method="bfill")
+            trendline_shift = (
+                df_out[trendline_col].shift(1).ffill().fillna(method="bfill")
+            )
 
             trend_up_cond = (
                 (df_out[fast_ma_col] > df_out[mid_ma_col])
@@ -833,8 +981,12 @@ def calculate_indicators_momentum(
             )
         else:
             # Ensure trendline_shift is available (recalculate or use previous one)
-            if "trendline_shift" not in locals():  # Check if calculated in trend section
-                trendline_shift = df_out[trendline_col].shift(1).ffill().fillna(method="bfill")
+            if (
+                "trendline_shift" not in locals()
+            ):  # Check if calculated in trend section
+                trendline_shift = (
+                    df_out[trendline_col].shift(1).ffill().fillna(method="bfill")
+                )
 
             # Conditions (NaNs already handled in source columns)
             long_cond_trend = df_out[fast_ma_col] > df_out[mid_ma_col]
@@ -895,8 +1047,12 @@ def calculate_indicators_momentum(
             # Ensure division by zero is handled if len is 0 (shouldn't happen here)
             num_conditions = len(long_conditions)
             if num_conditions > 0:
-                df_out["long_signal_strength"] = sum(cond.astype(int) for cond in long_conditions) / num_conditions
-                df_out["short_signal_strength"] = sum(cond.astype(int) for cond in short_conditions) / num_conditions
+                df_out["long_signal_strength"] = (
+                    sum(cond.astype(int) for cond in long_conditions) / num_conditions
+                )
+                df_out["short_signal_strength"] = (
+                    sum(cond.astype(int) for cond in short_conditions) / num_conditions
+                )
             else:
                 df_out["long_signal_strength"] = 0.0
                 df_out["short_signal_strength"] = 0.0
@@ -913,17 +1069,23 @@ def calculate_indicators_momentum(
         else:
             # Ensure trendline_shift is available
             if "trendline_shift" not in locals():
-                trendline_shift = df_out[trendline_col].shift(1).ffill().fillna(method="bfill")
+                trendline_shift = (
+                    df_out[trendline_col].shift(1).ffill().fillna(method="bfill")
+                )
 
             exit_long_cond1 = df_out[fast_ma_col] < df_out[mid_ma_col]
             exit_long_cond2 = df_out[roc_smooth_col] < 0
             exit_long_cond3 = df_out[trendline_col] < trendline_shift
-            df_out["exit_long_signal"] = (exit_long_cond1 | exit_long_cond2 | exit_long_cond3).astype(bool)
+            df_out["exit_long_signal"] = (
+                exit_long_cond1 | exit_long_cond2 | exit_long_cond3
+            ).astype(bool)
 
             exit_short_cond1 = df_out[fast_ma_col] > df_out[mid_ma_col]
             exit_short_cond2 = df_out[roc_smooth_col] > 0
             exit_short_cond3 = df_out[trendline_col] > trendline_shift
-            df_out["exit_short_signal"] = (exit_short_cond1 | exit_short_cond2 | exit_short_cond3).astype(bool)
+            df_out["exit_short_signal"] = (
+                exit_short_cond1 | exit_short_cond2 | exit_short_cond3
+            ).astype(bool)
 
         # --- Final Processing & Validation ---
         # Ensure boolean columns are boolean type
@@ -946,10 +1108,18 @@ def calculate_indicators_momentum(
         df_out["short_signal_strength"] = df_out["short_signal_strength"].fillna(0.0)
 
         # Final check for validity - ensure required columns for trading exist and have valid data in last two rows
-        final_check_cols = ["close", "atr_risk", "long_signal", "short_signal", "exit_long_signal", "exit_short_signal"]
+        final_check_cols = [
+            "close",
+            "atr_risk",
+            "long_signal",
+            "short_signal",
+            "exit_long_signal",
+            "exit_short_signal",
+        ]
         if df_out.empty or not all(col in df_out.columns for col in final_check_cols):
             log_console(
-                logging.ERROR, "Indicator Calc: DataFrame empty or missing critical columns after final processing."
+                logging.ERROR,
+                "Indicator Calc: DataFrame empty or missing critical columns after final processing.",
             )
             return None
 
@@ -962,25 +1132,33 @@ def calculate_indicators_momentum(
                     f"Indicator Calc: Critical columns contain NaN in the last {min_rows_for_check} rows after processing. Check calculations.",
                 )
                 log_console(
-                    logging.DEBUG, f"Last {min_rows_for_check} rows tail:\n{df_out.iloc[-min_rows_for_check:]}"
+                    logging.DEBUG,
+                    f"Last {min_rows_for_check} rows tail:\n{df_out.iloc[-min_rows_for_check:]}",
                 )  # Log problematic rows
                 return None
         elif len(df_out) == 1:  # Handle case with only one row
             if df_out.iloc[-1:][final_check_cols].isnull().any().any():
                 log_console(
-                    logging.ERROR, "Indicator Calc: Critical columns contain NaN in the only row after processing."
+                    logging.ERROR,
+                    "Indicator Calc: Critical columns contain NaN in the only row after processing.",
                 )
                 return None
 
         return df_out
 
     except Exception as e:
-        log_console(logging.ERROR, f"Indicator calculation failed unexpectedly: {e}", exc_info=True)
+        log_console(
+            logging.ERROR,
+            f"Indicator calculation failed unexpectedly: {e}",
+            exc_info=True,
+        )
         return None
 
 
 # --- Bybit API Interaction Helpers ---
-def get_available_balance(session: HTTP, coin: str = "USDT", account_type: str = "UNIFIED") -> float:
+def get_available_balance(
+    session: HTTP, coin: str = "USDT", account_type: str = "UNIFIED"
+) -> float:
     """
     Fetches the available balance for a specific coin from the Bybit wallet using V5 API.
     Handles UNIFIED, CONTRACT, and SPOT account structures.
@@ -994,7 +1172,9 @@ def get_available_balance(session: HTTP, coin: str = "USDT", account_type: str =
         The available balance as a float, or 0.0 if fetch fails, coin not found, or balance is zero/negative.
     """
     try:
-        balance_info = session.get_wallet_balance(accountType=account_type.upper(), coin=coin)
+        balance_info = session.get_wallet_balance(
+            accountType=account_type.upper(), coin=coin
+        )
 
         if balance_info and balance_info.get("retCode") == 0:
             result = balance_info.get("result", {})
@@ -1026,7 +1206,10 @@ def get_available_balance(session: HTTP, coin: str = "USDT", account_type: str =
                 coin_list = account_data.get("coin", [])
 
             if not coin_list:
-                log_console(logging.WARNING, f"No coin list found within balance data for {account_type}.")
+                log_console(
+                    logging.WARNING,
+                    f"No coin list found within balance data for {account_type}.",
+                )
                 return 0.0
 
             for coin_data in coin_list:
@@ -1049,7 +1232,10 @@ def get_available_balance(session: HTTP, coin: str = "USDT", account_type: str =
 
                     # Handle if all relevant balance fields are empty/missing
                     if balance_str is None or balance_str == "":
-                        log_console(logging.WARNING, f"Could not find a valid balance field for {coin}. Balance is 0.")
+                        log_console(
+                            logging.WARNING,
+                            f"Could not find a valid balance field for {coin}. Balance is 0.",
+                        )
                         balance_str = "0"
 
                     try:
@@ -1063,17 +1249,29 @@ def get_available_balance(session: HTTP, coin: str = "USDT", account_type: str =
                         )
                         return 0.0
 
-            log_console(logging.WARNING, f"Coin {coin} not found in {account_type} wallet balance details.")
+            log_console(
+                logging.WARNING,
+                f"Coin {coin} not found in {account_type} wallet balance details.",
+            )
             return 0.0
 
         else:
-            error_msg = balance_info.get("retMsg", "Unknown error") if balance_info else "Empty response"
+            error_msg = (
+                balance_info.get("retMsg", "Unknown error")
+                if balance_info
+                else "Empty response"
+            )
             error_code = balance_info.get("retCode", "N/A")
-            log_console(logging.ERROR, f"Failed to fetch wallet balance: {error_msg} (Code: {error_code})")
+            log_console(
+                logging.ERROR,
+                f"Failed to fetch wallet balance: {error_msg} (Code: {error_code})",
+            )
             return 0.0
 
     except Exception as e:
-        log_console(logging.ERROR, f"Exception fetching wallet balance: {e}", exc_info=True)
+        log_console(
+            logging.ERROR, f"Exception fetching wallet balance: {e}", exc_info=True
+        )
         return 0.0
 
 
@@ -1109,15 +1307,33 @@ def calculate_position_size_atr(
     # Input validation
     if not all(
         isinstance(x, (int, float))
-        for x in [balance, risk_percent, sl_distance_price, entry_price, min_order_qty, qty_step_float]
+        for x in [
+            balance,
+            risk_percent,
+            sl_distance_price,
+            entry_price,
+            min_order_qty,
+            qty_step_float,
+        ]
     ):
-        log_console(logging.DEBUG, "Position Size Calc: Invalid input types. Returning size 0.")
+        log_console(
+            logging.DEBUG, "Position Size Calc: Invalid input types. Returning size 0."
+        )
         return 0.0
     if not isinstance(qty_precision, int) or qty_precision < 0:
-        log_console(logging.ERROR, f"Position Size Calc: Invalid qty_precision ({qty_precision}). Returning size 0.")
+        log_console(
+            logging.ERROR,
+            f"Position Size Calc: Invalid qty_precision ({qty_precision}). Returning size 0.",
+        )
         return 0.0
 
-    if balance <= 0 or risk_percent <= 0 or entry_price <= 0 or min_order_qty <= 0 or qty_step_float <= 0:
+    if (
+        balance <= 0
+        or risk_percent <= 0
+        or entry_price <= 0
+        or min_order_qty <= 0
+        or qty_step_float <= 0
+    ):
         # Use DEBUG as this might happen normally with zero balance
         log_console(
             logging.DEBUG,
@@ -1140,9 +1356,15 @@ def calculate_position_size_atr(
     # Calculate initial position size
     try:
         position_size = risk_amount_usdt / sl_distance_price
-        log_console(logging.DEBUG, f"Position Size Calc: Initial size (Risk/SL): {position_size:.{qty_precision + 4}f}")
+        log_console(
+            logging.DEBUG,
+            f"Position Size Calc: Initial size (Risk/SL): {position_size:.{qty_precision + 4}f}",
+        )
     except ZeroDivisionError:  # Should be caught by check above, but safeguard
-        log_console(logging.WARNING, "Position Size Calc: SL distance is effectively zero. Cannot calculate size.")
+        log_console(
+            logging.WARNING,
+            "Position Size Calc: SL distance is effectively zero. Cannot calculate size.",
+        )
         return 0.0
 
     # Apply Constraints
@@ -1164,7 +1386,8 @@ def calculate_position_size_atr(
                     position_size = max_size_by_value
         except ZeroDivisionError:
             log_console(
-                logging.WARNING, "Position Size Calc: Entry price is zero. Cannot apply Max Position USDT constraint."
+                logging.WARNING,
+                "Position Size Calc: Entry price is zero. Cannot apply Max Position USDT constraint.",
             )
 
     # 2. Minimum Order Quantity Constraint (Check BEFORE step rounding)
@@ -1186,7 +1409,9 @@ def calculate_position_size_atr(
             # Return 0.0 as we cannot guarantee adherence to step size
             return 0.0
         # Use math.floor for explicit round down, then multiply by step
-        position_size_adjusted = math.floor(position_size / qty_step_float) * qty_step_float
+        position_size_adjusted = (
+            math.floor(position_size / qty_step_float) * qty_step_float
+        )
         log_console(
             logging.DEBUG,
             f"Position Size Calc: Size after step rounding DOWN ({qty_step_float}): {position_size_adjusted:.{qty_precision + 4}f}",
@@ -1194,7 +1419,8 @@ def calculate_position_size_atr(
         position_size = position_size_adjusted
     except ZeroDivisionError:
         log_console(
-            logging.ERROR, "Position Size Calc: Quantity step is zero during rounding. Cannot apply step constraint."
+            logging.ERROR,
+            "Position Size Calc: Quantity step is zero during rounding. Cannot apply step constraint.",
         )
         return 0.0
 
@@ -1241,7 +1467,10 @@ class TradeMetrics:
         """
         self.trades: List[Dict[str, Any]] = []
         if not isinstance(fee_rate, (int, float)) or fee_rate < 0:
-            log_console(logging.ERROR, f"Metrics Init: Invalid fee rate ({fee_rate}). Setting to 0.0006 (0.06%).")
+            log_console(
+                logging.ERROR,
+                f"Metrics Init: Invalid fee rate ({fee_rate}). Setting to 0.0006 (0.06%).",
+            )
             fee_rate = 0.0006
         self.fee_rate = fee_rate
         self.total_trades = 0
@@ -1313,7 +1542,11 @@ class TradeMetrics:
                     return
 
                 abs_qty = abs(qty)
-                price_diff = exit_price - entry_price if side == "Buy" else entry_price - exit_price
+                price_diff = (
+                    exit_price - entry_price
+                    if side == "Buy"
+                    else entry_price - exit_price
+                )
                 # P&L for Linear Contracts (Quantity * Price Difference)
                 gross_pnl = price_diff * abs_qty
 
@@ -1371,14 +1604,18 @@ class TradeMetrics:
                     exc_info=True,
                 )
 
-    def log_summary(self, symbol: Optional[str] = None, force: bool = False, interval: int = 3600):
+    def log_summary(
+        self, symbol: Optional[str] = None, force: bool = False, interval: int = 3600
+    ):
         """Logs summary performance metrics if interval elapsed or forced."""
         with self.lock:
             current_time = dt.datetime.now(dt.timezone.utc)
             log_now = force or self.total_trades == 0  # Log if forced or first time
 
             if not log_now and self.last_summary_time:
-                time_since_last = (current_time - self.last_summary_time).total_seconds()
+                time_since_last = (
+                    current_time - self.last_summary_time
+                ).total_seconds()
                 if time_since_last >= interval:
                     log_now = True
 
@@ -1386,11 +1623,19 @@ class TradeMetrics:
                 return
 
             if self.total_trades > 0:
-                win_rate = (self.wins / self.total_trades * 100) if self.total_trades > 0 else 0.0
-                avg_pnl = self.total_pnl / self.total_trades if self.total_trades > 0 else 0.0
+                win_rate = (
+                    (self.wins / self.total_trades * 100)
+                    if self.total_trades > 0
+                    else 0.0
+                )
+                avg_pnl = (
+                    self.total_pnl / self.total_trades if self.total_trades > 0 else 0.0
+                )
                 profit_factor = 0.0
                 total_gains = sum(t["net_pnl"] for t in self.trades if t["is_win"])
-                total_losses = abs(sum(t["net_pnl"] for t in self.trades if not t["is_win"]))
+                total_losses = abs(
+                    sum(t["net_pnl"] for t in self.trades if not t["is_win"])
+                )
                 if total_losses > 1e-9:  # Avoid division by zero
                     profit_factor = total_gains / total_losses
                 elif total_gains > 1e-9:  # Handle case with wins but no losses
@@ -1478,22 +1723,38 @@ class SymbolTrader:
         self.kline_df: Optional[pd.DataFrame] = None
         self.higher_tf_cache: Optional[bool] = None
         self.higher_tf_cache_time: Optional[dt.datetime] = None
-        self.current_trade: Optional[Dict[str, Any]] = None  # Real or simulated position state
+        self.current_trade: Optional[Dict[str, Any]] = (
+            None  # Real or simulated position state
+        )
         self.order_confirm_retries: int = self.bot_cfg.get("ORDER_CONFIRM_RETRIES", 3)
-        self.order_confirm_delay: float = float(self.bot_cfg.get("ORDER_CONFIRM_DELAY_SECONDS", 2.0))
+        self.order_confirm_delay: float = float(
+            self.bot_cfg.get("ORDER_CONFIRM_DELAY_SECONDS", 2.0)
+        )
         self.initialization_successful: bool = False
         self.last_kline_update_time: Optional[dt.datetime] = None
 
         if self.dry_run:
-            log_console(logging.WARNING, "DRY RUN MODE enabled. No real orders will be placed.", symbol=self.symbol)
+            log_console(
+                logging.WARNING,
+                "DRY RUN MODE enabled. No real orders will be placed.",
+                symbol=self.symbol,
+            )
 
         try:
             if not self._fetch_instrument_info():
-                raise RuntimeError(f"Failed to fetch essential instrument info for {self.symbol}.")
-            if not self.dry_run and self.category != "spot":  # Leverage/margin setup not applicable to spot
+                raise RuntimeError(
+                    f"Failed to fetch essential instrument info for {self.symbol}."
+                )
+            if (
+                not self.dry_run and self.category != "spot"
+            ):  # Leverage/margin setup not applicable to spot
                 self._initial_setup()
             self.initialization_successful = True
-            log_console(logging.DEBUG, f"Trader for {self.symbol} initialized successfully.", symbol=self.symbol)
+            log_console(
+                logging.DEBUG,
+                f"Trader for {self.symbol} initialized successfully.",
+                symbol=self.symbol,
+            )
         except Exception as e:
             log_console(
                 logging.CRITICAL,
@@ -1508,7 +1769,9 @@ class SymbolTrader:
         """Fetches instrument details (V5 API)."""
         log_console(logging.DEBUG, "Fetching instrument info...", symbol=self.symbol)
         try:
-            info = self.session.get_instruments_info(category=self.category, symbol=self.symbol)
+            info = self.session.get_instruments_info(
+                category=self.category, symbol=self.symbol
+            )
 
             if info and info.get("retCode") == 0:
                 result_list = info.get("result", {}).get("list", [])
@@ -1518,7 +1781,9 @@ class SymbolTrader:
                     price_filter = instrument.get("priceFilter", {})
 
                     try:
-                        self.min_order_qty = float(lot_size_filter.get("minOrderQty", "0"))
+                        self.min_order_qty = float(
+                            lot_size_filter.get("minOrderQty", "0")
+                        )
                         self.qty_step = lot_size_filter.get("qtyStep", "1")
                         self.qty_step_float = float(self.qty_step)
                         self.tick_size = price_filter.get("tickSize", "1")
@@ -1527,13 +1792,17 @@ class SymbolTrader:
                         # Calculate precision safely based on decimal places of the step/tick size string
                         if "." in self.qty_step and self.qty_step_float > 0:
                             decimal_part = self.qty_step.split(".")[-1]
-                            self.qty_precision = len(decimal_part) if decimal_part != "0" else 0
+                            self.qty_precision = (
+                                len(decimal_part) if decimal_part != "0" else 0
+                            )
                         else:
                             self.qty_precision = 0
 
                         if "." in self.tick_size and tick_size_float > 0:
                             decimal_part = self.tick_size.split(".")[-1]
-                            self.price_precision = len(decimal_part) if decimal_part != "0" else 0
+                            self.price_precision = (
+                                len(decimal_part) if decimal_part != "0" else 0
+                            )
                         else:
                             self.price_precision = 0
 
@@ -1546,7 +1815,11 @@ class SymbolTrader:
                         return False
 
                     # Validate fetched values
-                    if self.min_order_qty <= 0 or self.qty_step_float <= 0 or tick_size_float <= 0:
+                    if (
+                        self.min_order_qty <= 0
+                        or self.qty_step_float <= 0
+                        or tick_size_float <= 0
+                    ):
                         log_console(
                             logging.ERROR,
                             f"Fetched invalid instrument details: MinQty={self.min_order_qty}, QtyStep={self.qty_step_float}, TickSize={tick_size_float}",
@@ -1573,7 +1846,9 @@ class SymbolTrader:
                 error_msg = info.get("retMsg", "N/A") if info else "Empty response"
                 error_code = info.get("retCode", "N/A")
                 log_console(
-                    logging.ERROR, f"Instrument info fetch failed: {error_msg} (Code: {error_code})", symbol=self.symbol
+                    logging.ERROR,
+                    f"Instrument info fetch failed: {error_msg} (Code: {error_code})",
+                    symbol=self.symbol,
                 )
                 # Specific check for invalid symbol error (e.g., 10001 or relevant message)
                 if error_code == 10001 or "invalid symbol" in error_msg.lower():
@@ -1585,7 +1860,10 @@ class SymbolTrader:
                 return False
         except Exception as e:
             log_console(
-                logging.ERROR, f"Exception during instrument info fetch: {e}", symbol=self.symbol, exc_info=True
+                logging.ERROR,
+                f"Exception during instrument info fetch: {e}",
+                symbol=self.symbol,
+                exc_info=True,
             )
             return False
 
@@ -1595,10 +1873,16 @@ class SymbolTrader:
             return  # Skip for spot
 
         log_console(
-            logging.INFO, f"Performing initial setup: Setting leverage to {self.leverage}x...", symbol=self.symbol
+            logging.INFO,
+            f"Performing initial setup: Setting leverage to {self.leverage}x...",
+            symbol=self.symbol,
         )
         if self.dry_run:
-            log_console(logging.INFO, "Skipping leverage setting in dry run mode.", symbol=self.symbol)
+            log_console(
+                logging.INFO,
+                "Skipping leverage setting in dry run mode.",
+                symbol=self.symbol,
+            )
             return
 
         try:
@@ -1609,9 +1893,15 @@ class SymbolTrader:
                 sellLeverage=str(self.leverage),
             )
             if response and response.get("retCode") == 0:
-                log_console(logging.INFO, f"Leverage successfully set to {self.leverage}x.", symbol=self.symbol)
+                log_console(
+                    logging.INFO,
+                    f"Leverage successfully set to {self.leverage}x.",
+                    symbol=self.symbol,
+                )
             else:
-                error_msg = response.get("retMsg", "N/A") if response else "Empty response"
+                error_msg = (
+                    response.get("retMsg", "N/A") if response else "Empty response"
+                )
                 error_code = response.get("retCode", "N/A")
                 # V5 Error Code 110043: leverage not modified
                 if (
@@ -1674,14 +1964,20 @@ class SymbolTrader:
                     continue
 
                 is_confirmed = kline_raw.get("confirm", False)
-                process_confirmed_only = self.bot_cfg.get("PROCESS_CONFIRMED_KLINE_ONLY", True)
+                process_confirmed_only = self.bot_cfg.get(
+                    "PROCESS_CONFIRMED_KLINE_ONLY", True
+                )
 
                 # Process only confirmed candles if configured, otherwise process all
-                if not process_confirmed_only or (process_confirmed_only and is_confirmed):
+                if not process_confirmed_only or (
+                    process_confirmed_only and is_confirmed
+                ):
                     try:
                         timestamp_ms = int(kline_raw["start"])
                         kline_processed = {
-                            "timestamp": pd.to_datetime(timestamp_ms, unit="ms", utc=True),
+                            "timestamp": pd.to_datetime(
+                                timestamp_ms, unit="ms", utc=True
+                            ),
                             "open": float(kline_raw["open"]),
                             "high": float(kline_raw["high"]),
                             "low": float(kline_raw["low"]),
@@ -1702,7 +1998,10 @@ class SymbolTrader:
 
         except Exception as e:
             log_console(
-                logging.ERROR, f"Unexpected error in WebSocket callback: {e}", symbol=self.symbol, exc_info=True
+                logging.ERROR,
+                f"Unexpected error in WebSocket callback: {e}",
+                symbol=self.symbol,
+                exc_info=True,
             )
 
     def _process_kline_queue(self) -> bool:
@@ -1715,7 +2014,9 @@ class SymbolTrader:
         df_updated = False
         recalculated_ok = False
         processed_count = 0
-        max_items_per_cycle = 100  # Limit processing per call to avoid blocking main loop
+        max_items_per_cycle = (
+            100  # Limit processing per call to avoid blocking main loop
+        )
 
         while not self.kline_queue.empty() and processed_count < max_items_per_cycle:
             try:
@@ -1726,7 +2027,11 @@ class SymbolTrader:
                 new_row = pd.DataFrame([kline_dict]).set_index("timestamp")
 
                 if self.kline_df is None or self.kline_df.empty:
-                    log_console(logging.DEBUG, "kline_df empty, initializing from first WS kline.", symbol=self.symbol)
+                    log_console(
+                        logging.DEBUG,
+                        "kline_df empty, initializing from first WS kline.",
+                        symbol=self.symbol,
+                    )
                     self.kline_df = new_row
                     df_updated = True
                 else:
@@ -1753,11 +2058,17 @@ class SymbolTrader:
                         self.kline_df = pd.concat([self.kline_df, new_row])
                         # Ensure index remains sorted after appending
                         self.kline_df.sort_index(inplace=True)
-                        log_console(logging.DEBUG, f"WS appended new kline: {idx_to_check}", symbol=self.symbol)
+                        log_console(
+                            logging.DEBUG,
+                            f"WS appended new kline: {idx_to_check}",
+                            symbol=self.symbol,
+                        )
 
                         # Trim DataFrame to maintain reasonable size
                         # Use calculated KLINE_LIMIT + buffer
-                        max_rows = self.internal_cfg.get("KLINE_LIMIT", 120) + 50  # Increased buffer
+                        max_rows = (
+                            self.internal_cfg.get("KLINE_LIMIT", 120) + 50
+                        )  # Increased buffer
                         if len(self.kline_df) > max_rows:
                             self.kline_df = self.kline_df.iloc[-max_rows:]
                         df_updated = True
@@ -1765,7 +2076,12 @@ class SymbolTrader:
             except Empty:
                 break  # Queue is empty
             except Exception as e:
-                log_console(logging.ERROR, f"Error processing kline queue item: {e}", symbol=self.symbol, exc_info=True)
+                log_console(
+                    logging.ERROR,
+                    f"Error processing kline queue item: {e}",
+                    symbol=self.symbol,
+                    exc_info=True,
+                )
 
         # Recalculate indicators only if DF was updated AND is not empty
         if df_updated and self.kline_df is not None and not self.kline_df.empty:
@@ -1775,12 +2091,18 @@ class SymbolTrader:
                 symbol=self.symbol,
             )
             # Pass a copy to the calculation function to avoid side effects if needed
-            calculated_df = calculate_indicators_momentum(self.kline_df.copy(), self.strategy_cfg, self.config)
+            calculated_df = calculate_indicators_momentum(
+                self.kline_df.copy(), self.strategy_cfg, self.config
+            )
             if calculated_df is not None and not calculated_df.empty:
                 self.kline_df = calculated_df  # Replace internal DF with the one containing new indicators
                 self.last_kline_update_time = dt.datetime.now(dt.timezone.utc)
                 recalculated_ok = True
-                log_console(logging.DEBUG, "Indicators recalculated successfully after WS update.", symbol=self.symbol)
+                log_console(
+                    logging.DEBUG,
+                    "Indicators recalculated successfully after WS update.",
+                    symbol=self.symbol,
+                )
             else:
                 log_console(
                     logging.WARNING,
@@ -1791,14 +2113,18 @@ class SymbolTrader:
                 recalculated_ok = False
         elif df_updated:  # df_updated is True but kline_df became None or empty (should not happen ideally)
             log_console(
-                logging.ERROR, "kline_df became empty/None after WS processing. Cannot recalculate.", symbol=self.symbol
+                logging.ERROR,
+                "kline_df became empty/None after WS processing. Cannot recalculate.",
+                symbol=self.symbol,
             )
             recalculated_ok = False
 
         # Return True only if DF updated AND indicators recalculated successfully
         return df_updated and recalculated_ok
 
-    def get_ohlcv_rest(self, timeframe: Optional[str] = None, limit: Optional[int] = None) -> Optional[pd.DataFrame]:
+    def get_ohlcv_rest(
+        self, timeframe: Optional[str] = None, limit: Optional[int] = None
+    ) -> Optional[pd.DataFrame]:
         """Fetches historical OHLCV via REST (V5), calculates indicators."""
         tf = timeframe or self.timeframe
         # Use calculated KLINE_LIMIT + small buffer for fetching
@@ -1806,10 +2132,16 @@ class SymbolTrader:
         # Cap limit at Bybit's max per request and ensure it's positive
         lim = max(1, min(limit or default_lim, MAX_KLINE_LIMIT_PER_REQUEST))
 
-        log_console(logging.DEBUG, f"Fetching {lim} klines for timeframe {tf} via REST API...", symbol=self.symbol)
+        log_console(
+            logging.DEBUG,
+            f"Fetching {lim} klines for timeframe {tf} via REST API...",
+            symbol=self.symbol,
+        )
 
         try:
-            response = self.session.get_kline(category=self.category, symbol=self.symbol, interval=tf, limit=lim)
+            response = self.session.get_kline(
+                category=self.category, symbol=self.symbol, interval=tf, limit=lim
+            )
 
             if response and response.get("retCode") == 0:
                 kline_list = response.get("result", {}).get("list", [])
@@ -1817,7 +2149,15 @@ class SymbolTrader:
                     # V5 format: [timestamp_ms_str, open_str, high_str, low_str, close_str, volume_str, turnover_str]
                     df = pd.DataFrame(
                         kline_list,
-                        columns=["timestamp", "open", "high", "low", "close", "volume", "turnover"],
+                        columns=[
+                            "timestamp",
+                            "open",
+                            "high",
+                            "low",
+                            "close",
+                            "volume",
+                            "turnover",
+                        ],
                     )
                     # V5 returns newest first, reverse to have oldest first for TA libraries
                     df = df.iloc[::-1].reset_index(drop=True)
@@ -1826,11 +2166,15 @@ class SymbolTrader:
                     try:
                         # Convert timestamp first, coerce errors to NaT
                         df["timestamp"] = pd.to_datetime(
-                            pd.to_numeric(df["timestamp"], errors="coerce"), unit="ms", utc=True
+                            pd.to_numeric(df["timestamp"], errors="coerce"),
+                            unit="ms",
+                            utc=True,
                         )
                     except Exception as ts_e:
                         log_console(
-                            logging.ERROR, f"REST KLine: Failed timestamp conversion: {ts_e}", symbol=self.symbol
+                            logging.ERROR,
+                            f"REST KLine: Failed timestamp conversion: {ts_e}",
+                            symbol=self.symbol,
                         )
                         return None
                     # Drop rows where timestamp conversion failed
@@ -1861,13 +2205,18 @@ class SymbolTrader:
                         )
                     if df.empty:
                         log_console(
-                            logging.WARNING, "REST KLine: DataFrame empty after OHLCV dropna.", symbol=self.symbol
+                            logging.WARNING,
+                            "REST KLine: DataFrame empty after OHLCV dropna.",
+                            symbol=self.symbol,
                         )
                         return None
 
                     # Check Minimum Length required for calculations
                     min_len_for_calc = max(
-                        MIN_KLINE_RECORDS_FOR_CALC, self.internal_cfg.get("KLINE_LIMIT", MIN_KLINE_RECORDS_FOR_CALC)
+                        MIN_KLINE_RECORDS_FOR_CALC,
+                        self.internal_cfg.get(
+                            "KLINE_LIMIT", MIN_KLINE_RECORDS_FOR_CALC
+                        ),
                     )
                     if len(df) < min_len_for_calc:
                         log_console(
@@ -1878,13 +2227,21 @@ class SymbolTrader:
                         return None  # Return None if not enough data for indicators
 
                     log_console(
-                        logging.DEBUG, f"REST Fetch successful. Cleaned data shape: {df.shape}", symbol=self.symbol
+                        logging.DEBUG,
+                        f"REST Fetch successful. Cleaned data shape: {df.shape}",
+                        symbol=self.symbol,
                     )
 
                     # Calculate Indicators
-                    df_with_indicators = calculate_indicators_momentum(df, self.strategy_cfg, self.config)
+                    df_with_indicators = calculate_indicators_momentum(
+                        df, self.strategy_cfg, self.config
+                    )
                     if df_with_indicators is None or df_with_indicators.empty:
-                        log_console(logging.WARNING, "REST KLine: Indicator calculation failed.", symbol=self.symbol)
+                        log_console(
+                            logging.WARNING,
+                            "REST KLine: Indicator calculation failed.",
+                            symbol=self.symbol,
+                        )
                         return None  # Return None if indicator calculation fails
                     else:
                         self.last_kline_update_time = dt.datetime.now(dt.timezone.utc)
@@ -1898,10 +2255,14 @@ class SymbolTrader:
                     )
                     return None
             else:  # API error
-                error_msg = response.get("retMsg", "N/A") if response else "Empty response"
+                error_msg = (
+                    response.get("retMsg", "N/A") if response else "Empty response"
+                )
                 error_code = response.get("retCode", "N/A")
                 log_console(
-                    logging.WARNING, f"REST KLine fetch failed: {error_msg} (Code: {error_code})", symbol=self.symbol
+                    logging.WARNING,
+                    f"REST KLine fetch failed: {error_msg} (Code: {error_code})",
+                    symbol=self.symbol,
                 )
                 if error_code == 10001 or "invalid symbol" in error_msg.lower():
                     log_console(
@@ -1911,7 +2272,12 @@ class SymbolTrader:
                     )
                 return None
         except Exception as e:
-            log_console(logging.ERROR, f"Exception during REST KLine fetch: {e}", symbol=self.symbol, exc_info=True)
+            log_console(
+                logging.ERROR,
+                f"Exception during REST KLine fetch: {e}",
+                symbol=self.symbol,
+                exc_info=True,
+            )
             return None
 
     def get_ohlcv(self) -> Optional[pd.DataFrame]:
@@ -1931,19 +2297,32 @@ class SymbolTrader:
         needs_rest_fetch = False
         if self.kline_df is None or self.kline_df.empty:
             needs_rest_fetch = True
-            log_console(logging.DEBUG, "kline_df is empty, attempting REST fetch.", symbol=self.symbol)
+            log_console(
+                logging.DEBUG,
+                "kline_df is empty, attempting REST fetch.",
+                symbol=self.symbol,
+            )
         elif not self.use_websocket:
             # Always fetch via REST if WS disabled, but use existing DF if available and recent
             staleness_limit = self.bot_cfg.get("KLINE_STALENESS_SECONDS", 300)
             now_utc = dt.datetime.now(dt.timezone.utc)
             if (
                 self.last_kline_update_time is None
-                or (now_utc - self.last_kline_update_time).total_seconds() > staleness_limit
+                or (now_utc - self.last_kline_update_time).total_seconds()
+                > staleness_limit
             ):
                 needs_rest_fetch = True
-                log_console(logging.DEBUG, "WS disabled and data stale, using REST for kline data.", symbol=self.symbol)
+                log_console(
+                    logging.DEBUG,
+                    "WS disabled and data stale, using REST for kline data.",
+                    symbol=self.symbol,
+                )
             else:
-                log_console(logging.DEBUG, "WS disabled, using recent REST data.", symbol=self.symbol)
+                log_console(
+                    logging.DEBUG,
+                    "WS disabled, using recent REST data.",
+                    symbol=self.symbol,
+                )
 
         elif self.use_websocket and not ws_processed_and_recalculated:
             # WS enabled, but queue empty OR processing/recalc failed. Check staleness.
@@ -1951,7 +2330,8 @@ class SymbolTrader:
             now_utc = dt.datetime.now(dt.timezone.utc)
             if (
                 self.last_kline_update_time is None
-                or (now_utc - self.last_kline_update_time).total_seconds() > staleness_limit
+                or (now_utc - self.last_kline_update_time).total_seconds()
+                > staleness_limit
             ):
                 needs_rest_fetch = True
                 log_console(
@@ -1963,12 +2343,21 @@ class SymbolTrader:
         # Perform REST fetch if needed
         if needs_rest_fetch:
             rest_df_with_indicators = self.get_ohlcv_rest()
-            if rest_df_with_indicators is not None and not rest_df_with_indicators.empty:
+            if (
+                rest_df_with_indicators is not None
+                and not rest_df_with_indicators.empty
+            ):
                 self.kline_df = rest_df_with_indicators  # Update internal state
-                log_console(logging.DEBUG, "Updated kline_df successfully via REST API.", symbol=self.symbol)
+                log_console(
+                    logging.DEBUG,
+                    "Updated kline_df successfully via REST API.",
+                    symbol=self.symbol,
+                )
             else:
                 log_console(
-                    logging.WARNING, "REST API fetch failed. Kline data may be missing or stale.", symbol=self.symbol
+                    logging.WARNING,
+                    "REST API fetch failed. Kline data may be missing or stale.",
+                    symbol=self.symbol,
                 )
                 # Don't return here, let it return the potentially stale kline_df if it exists
 
@@ -1982,7 +2371,9 @@ class SymbolTrader:
             return deepcopy(self.current_trade) if self.current_trade else None
 
         try:
-            response = self.session.get_positions(category=self.category, symbol=self.symbol)
+            response = self.session.get_positions(
+                category=self.category, symbol=self.symbol
+            )
 
             if response and response.get("retCode") == 0:
                 position_list = response.get("result", {}).get("list", [])
@@ -1997,14 +2388,23 @@ class SymbolTrader:
 
                             # Check if position exists (significant size and valid side)
                             # Use a small fraction of min_order_qty as threshold for significance
-                            min_significant_qty = self.min_order_qty * 0.01 if self.min_order_qty > 0 else 1e-9
+                            min_significant_qty = (
+                                self.min_order_qty * 0.01
+                                if self.min_order_qty > 0
+                                else 1e-9
+                            )
 
-                            if pos_side in ["Buy", "Sell"] and abs(pos_size) > min_significant_qty:
+                            if (
+                                pos_side in ["Buy", "Sell"]
+                                and abs(pos_size) > min_significant_qty
+                            ):
                                 # Convert fields and store consistently
                                 pos["size"] = pos_size  # Store as float
                                 pos["avgPrice"] = float(pos.get("avgPrice", "0"))
                                 pos["side"] = pos_side
-                                pos["leverage"] = pos.get("leverage", str(self.leverage))  # Store leverage as string
+                                pos["leverage"] = pos.get(
+                                    "leverage", str(self.leverage)
+                                )  # Store leverage as string
 
                                 # Attempt to add entry time
                                 pos["entry_time"] = None  # Initialize
@@ -2014,11 +2414,15 @@ class SymbolTrader:
                                     and self.current_trade.get("symbol") == self.symbol
                                     and self.current_trade.get("side") == pos_side
                                 ):
-                                    pos["entry_time"] = self.current_trade.get("entry_time")
+                                    pos["entry_time"] = self.current_trade.get(
+                                        "entry_time"
+                                    )
                                 # Fallback to API createdTime (convert ms string to datetime)
                                 elif pos.get("createdTime"):
                                     try:
-                                        pos["entry_time"] = pd.to_datetime(int(pos["createdTime"]), unit="ms", utc=True)
+                                        pos["entry_time"] = pd.to_datetime(
+                                            int(pos["createdTime"]), unit="ms", utc=True
+                                        )
                                     except (ValueError, TypeError):
                                         pass  # Ignore parsing errors
 
@@ -2034,25 +2438,44 @@ class SymbolTrader:
                 return None  # No active position found for symbol
             else:
                 if log_error:
-                    error_msg = response.get("retMsg", "N/A") if response else "Empty response"
+                    error_msg = (
+                        response.get("retMsg", "N/A") if response else "Empty response"
+                    )
                     error_code = response.get("retCode", "N/A")
                     log_console(
-                        logging.ERROR, f"Position fetch failed: {error_msg} (Code: {error_code})", symbol=self.symbol
+                        logging.ERROR,
+                        f"Position fetch failed: {error_msg} (Code: {error_code})",
+                        symbol=self.symbol,
                     )
                 return None
         except Exception as e:
             if log_error:
-                log_console(logging.ERROR, f"Exception during position fetch: {e}", symbol=self.symbol, exc_info=True)
+                log_console(
+                    logging.ERROR,
+                    f"Exception during position fetch: {e}",
+                    symbol=self.symbol,
+                    exc_info=True,
+                )
             return None
 
-    def confirm_order(self, order_id: str, expected_qty: float) -> Tuple[float, Optional[float]]:
+    def confirm_order(
+        self, order_id: str, expected_qty: float
+    ) -> Tuple[float, Optional[float]]:
         """Confirms order status by polling history (V5 API), returns filled qty and avg price."""
         if not order_id:
-            log_console(logging.ERROR, "Confirm Order: Invalid Order ID provided.", symbol=self.symbol)
+            log_console(
+                logging.ERROR,
+                "Confirm Order: Invalid Order ID provided.",
+                symbol=self.symbol,
+            )
             return 0.0, None
 
         if self.dry_run:
-            log_console(logging.INFO, f"[DRY RUN] Simulating confirmation for order {order_id}", symbol=self.symbol)
+            log_console(
+                logging.INFO,
+                f"[DRY RUN] Simulating confirmation for order {order_id}",
+                symbol=self.symbol,
+            )
             sim_entry_price: Optional[float] = None
             # Try to get a realistic price from latest kline data
             if self.kline_df is not None and not self.kline_df.empty:
@@ -2069,7 +2492,9 @@ class SymbolTrader:
                     symbol=self.symbol,
                 )
             log_console(
-                logging.DEBUG, f"[DRY RUN] Using simulated avg fill price: {sim_entry_price}", symbol=self.symbol
+                logging.DEBUG,
+                f"[DRY RUN] Using simulated avg fill price: {sim_entry_price}",
+                symbol=self.symbol,
             )
             # Assume full fill in dry run
             return expected_qty, sim_entry_price
@@ -2108,7 +2533,9 @@ class SymbolTrader:
 
                         try:
                             filled_qty_str = order.get("cumExecQty", "0")
-                            filled_qty = float(filled_qty_str) if filled_qty_str else 0.0
+                            filled_qty = (
+                                float(filled_qty_str) if filled_qty_str else 0.0
+                            )
                             avg_price_str = order.get("avgPrice", "0")
                             # Use avgPrice only if valid positive number string and qty > 0
                             if avg_price_str and filled_qty > 1e-9:
@@ -2144,17 +2571,34 @@ class SymbolTrader:
                                 f"Order {order_id} Partially Filled ({filled_qty:.{self.qty_precision}f}/{order.get('qty', '?')}). Waiting...",
                                 symbol=self.symbol,
                             )
-                        elif status in ["New", "Untriggered", "Active", "Created", "Triggered"]:
+                        elif status in [
+                            "New",
+                            "Untriggered",
+                            "Active",
+                            "Created",
+                            "Triggered",
+                        ]:
                             log_console(
-                                logging.DEBUG, f"Order {order_id} status '{status}'. Waiting...", symbol=self.symbol
+                                logging.DEBUG,
+                                f"Order {order_id} status '{status}'. Waiting...",
+                                symbol=self.symbol,
                             )
-                        elif status in ["Rejected", "Cancelled", "PartiallyFilledCanceled", "Deactivated", "Expired"]:
+                        elif status in [
+                            "Rejected",
+                            "Cancelled",
+                            "PartiallyFilledCanceled",
+                            "Deactivated",
+                            "Expired",
+                        ]:
                             log_console(
                                 logging.WARNING,
                                 f"Order {order_id} failed/cancelled: '{status}'. Final Filled: {filled_qty:.{self.qty_precision}f}",
                                 symbol=self.symbol,
                             )
-                            return filled_qty, last_avg_price  # Return what was filled, even if zero
+                            return (
+                                filled_qty,
+                                last_avg_price,
+                            )  # Return what was filled, even if zero
                         else:
                             log_console(
                                 logging.WARNING,
@@ -2171,7 +2615,9 @@ class SymbolTrader:
                         # Consider querying open orders as well if history is slow?
                         # response_open = self.session.get_open_orders(category=self.category, orderId=order_id) ...
                 else:  # API call failed
-                    error_msg = response.get("retMsg", "N/A") if response else "Empty response"
+                    error_msg = (
+                        response.get("retMsg", "N/A") if response else "Empty response"
+                    )
                     error_code = response.get("retCode", "N/A")
                     log_console(
                         logging.WARNING,
@@ -2210,10 +2656,16 @@ class SymbolTrader:
     ) -> Optional[str]:
         """Places market order with optional SL/TP (V5 API), confirms execution."""
         if side not in ["Buy", "Sell"]:
-            log_console(logging.ERROR, f"Invalid order side: {side}", symbol=self.symbol)
+            log_console(
+                logging.ERROR, f"Invalid order side: {side}", symbol=self.symbol
+            )
             return None
         if not isinstance(qty, (float, int)) or qty <= 0:
-            log_console(logging.ERROR, f"Order qty must be positive, got: {qty}", symbol=self.symbol)
+            log_console(
+                logging.ERROR,
+                f"Order qty must be positive, got: {qty}",
+                symbol=self.symbol,
+            )
             return None
         # Check against min_order_qty with tolerance
         if qty < self.min_order_qty * (1 - 1e-5):
@@ -2229,27 +2681,46 @@ class SymbolTrader:
         sl_str: Optional[str] = None
         if stop_loss_price is not None:
             if not isinstance(stop_loss_price, (float, int)) or stop_loss_price <= 0:
-                log_console(logging.WARNING, f"Invalid SL price ({stop_loss_price}). SL not set.", symbol=self.symbol)
+                log_console(
+                    logging.WARNING,
+                    f"Invalid SL price ({stop_loss_price}). SL not set.",
+                    symbol=self.symbol,
+                )
             else:
                 sl_str = f"{stop_loss_price:.{self.price_precision}f}"
 
         tp_str: Optional[str] = None
         if take_profit_price is not None:
-            if not isinstance(take_profit_price, (float, int)) or take_profit_price <= 0:
-                log_console(logging.WARNING, f"Invalid TP price ({take_profit_price}). TP not set.", symbol=self.symbol)
+            if (
+                not isinstance(take_profit_price, (float, int))
+                or take_profit_price <= 0
+            ):
+                log_console(
+                    logging.WARNING,
+                    f"Invalid TP price ({take_profit_price}). TP not set.",
+                    symbol=self.symbol,
+                )
             else:
                 tp_str = f"{take_profit_price:.{self.price_precision}f}"
 
-        log_prefix = f"{Fore.YELLOW + Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} " if self.dry_run else ""
+        log_prefix = (
+            f"{Fore.YELLOW + Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} "
+            if self.dry_run
+            else ""
+        )
         side_color = Fore.GREEN if side == "Buy" else Fore.RED
         log_msg = f"{log_prefix}{side_color}{Style.BRIGHT}{side.upper()} MARKET ORDER:{Style.RESET_ALL} Qty={qty_str}"
         if sl_str:
             log_msg += f", SL={sl_str}"
         if tp_str:
             log_msg += f", TP={tp_str}"
-        action_prefix = f"{Fore.MAGENTA + Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
+        action_prefix = (
+            f"{Fore.MAGENTA + Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
+        )
         print(action_prefix + log_msg)  # Print action immediately
-        log_console(logging.INFO, log_msg.replace(log_prefix, "").strip(), symbol=self.symbol)  # Log without prefix
+        log_console(
+            logging.INFO, log_msg.replace(log_prefix, "").strip(), symbol=self.symbol
+        )  # Log without prefix
 
         if self.dry_run:
             order_id = f"dry_run_{side.lower()}_{self.symbol}_{int(time.time() * 1000)}"
@@ -2296,16 +2767,24 @@ class SymbolTrader:
             # Add SL/TP parameters if provided
             if sl_str:
                 order_params["stopLoss"] = sl_str
-                order_params["slTriggerBy"] = self.strategy_cfg.get("SL_TRIGGER_BY", "LastPrice")
+                order_params["slTriggerBy"] = self.strategy_cfg.get(
+                    "SL_TRIGGER_BY", "LastPrice"
+                )
             if tp_str:
                 order_params["takeProfit"] = tp_str
-                order_params["tpTriggerBy"] = self.strategy_cfg.get("TP_TRIGGER_BY", "LastPrice")
+                order_params["tpTriggerBy"] = self.strategy_cfg.get(
+                    "TP_TRIGGER_BY", "LastPrice"
+                )
             # Set TPSL mode if either SL or TP is set (default to Full position)
             if sl_str or tp_str:
-                order_params["tpslMode"] = self.strategy_cfg.get("TPSL_MODE", "Full")  # "Full" or "Partial"
+                order_params["tpslMode"] = self.strategy_cfg.get(
+                    "TPSL_MODE", "Full"
+                )  # "Full" or "Partial"
 
             # Generate unique order link ID
-            order_params["orderLinkId"] = order_link_id or f"momscan_{self.symbol}_{int(time.time() * 1000)}"
+            order_params["orderLinkId"] = (
+                order_link_id or f"momscan_{self.symbol}_{int(time.time() * 1000)}"
+            )
 
             response = self.session.place_order(**order_params)
 
@@ -2313,7 +2792,9 @@ class SymbolTrader:
                 order_id = response.get("result", {}).get("orderId")
                 if order_id:
                     log_console(
-                        logging.INFO, f"Order {order_id} submitted. Confirming execution...", symbol=self.symbol
+                        logging.INFO,
+                        f"Order {order_id} submitted. Confirming execution...",
+                        symbol=self.symbol,
                     )
                     # Confirm the order execution and get actual filled qty/price
                     filled_qty, avg_price = self.confirm_order(order_id, qty)
@@ -2332,8 +2813,12 @@ class SymbolTrader:
                             "symbol": self.symbol,
                             "side": side,
                             "size": filled_qty,  # Use actual filled quantity
-                            "avgPrice": avg_price if avg_price else 0.0,  # Use actual average price
-                            "entry_time": dt.datetime.now(dt.timezone.utc),  # Record entry time
+                            "avgPrice": avg_price
+                            if avg_price
+                            else 0.0,  # Use actual average price
+                            "entry_time": dt.datetime.now(
+                                dt.timezone.utc
+                            ),  # Record entry time
                             "stopLoss": sl_str,
                             "takeProfit": tp_str,  # Store intended SL/TP
                             "leverage": str(self.leverage),
@@ -2358,19 +2843,33 @@ class SymbolTrader:
                     )
                     return None
             else:  # API call to place order failed
-                error_msg = response.get("retMsg", "N/A") if response else "Empty response"
+                error_msg = (
+                    response.get("retMsg", "N/A") if response else "Empty response"
+                )
                 error_code = response.get("retCode", "N/A")
                 log_console(
-                    logging.ERROR, f"Order placement failed: {error_msg} (Code: {error_code})", symbol=self.symbol
+                    logging.ERROR,
+                    f"Order placement failed: {error_msg} (Code: {error_code})",
+                    symbol=self.symbol,
                 )
                 # Provide context for common V5 error codes
                 if error_code == 110007:
-                    log_console(logging.CRITICAL, "ORDER REJECTED: INSUFFICIENT BALANCE!", symbol=self.symbol)
+                    log_console(
+                        logging.CRITICAL,
+                        "ORDER REJECTED: INSUFFICIENT BALANCE!",
+                        symbol=self.symbol,
+                    )
                 elif error_code in [110013, 110014]:
-                    log_console(logging.ERROR, "ORDER REJECTED: Quantity issue (min/max/step).", symbol=self.symbol)
+                    log_console(
+                        logging.ERROR,
+                        "ORDER REJECTED: Quantity issue (min/max/step).",
+                        symbol=self.symbol,
+                    )
                 elif error_code == 110017:
                     log_console(
-                        logging.ERROR, "ORDER REJECTED: Risk control triggered by exchange.", symbol=self.symbol
+                        logging.ERROR,
+                        "ORDER REJECTED: Risk control triggered by exchange.",
+                        symbol=self.symbol,
                     )
                 elif error_code == 110040:
                     log_console(
@@ -2380,19 +2879,33 @@ class SymbolTrader:
                     )
                 elif error_code == 110073:
                     log_console(
-                        logging.ERROR, "ORDER REJECTED: TP/SL price invalid or too close to market.", symbol=self.symbol
+                        logging.ERROR,
+                        "ORDER REJECTED: TP/SL price invalid or too close to market.",
+                        symbol=self.symbol,
                     )
                 return None
         except Exception as e:
-            log_console(logging.ERROR, f"Exception during order placement: {e}", symbol=self.symbol, exc_info=True)
+            log_console(
+                logging.ERROR,
+                f"Exception during order placement: {e}",
+                symbol=self.symbol,
+                exc_info=True,
+            )
             return None
 
     def close_position(
-        self, position_data: Dict[str, Any], exit_reason: str = "Signal", exit_price_est: Optional[float] = None
+        self,
+        position_data: Dict[str, Any],
+        exit_reason: str = "Signal",
+        exit_price_est: Optional[float] = None,
     ) -> bool:
         """Closes position using market order with reduceOnly=True (V5 API), logs metrics."""
         if not isinstance(position_data, dict):
-            log_console(logging.WARNING, "Close attempt failed: No valid position data provided.", symbol=self.symbol)
+            log_console(
+                logging.WARNING,
+                "Close attempt failed: No valid position data provided.",
+                symbol=self.symbol,
+            )
             return False
 
         # Extract necessary info safely
@@ -2417,13 +2930,19 @@ class SymbolTrader:
             )
             # Clear potentially inconsistent internal state if it matches the symbol
             if self.current_trade and self.current_trade.get("symbol") == self.symbol:
-                log_console(logging.WARNING, "Clearing inconsistent internal trade state.", symbol=self.symbol)
+                log_console(
+                    logging.WARNING,
+                    "Clearing inconsistent internal trade state.",
+                    symbol=self.symbol,
+                )
                 self.current_trade = None
             return False
 
         abs_size = abs(size)
         # Check if position size is negligible (e.g., dust)
-        min_significant_qty = self.min_order_qty * 0.01 if self.min_order_qty > 0 else 1e-9
+        min_significant_qty = (
+            self.min_order_qty * 0.01 if self.min_order_qty > 0 else 1e-9
+        )
         if abs_size < min_significant_qty:
             log_console(
                 logging.INFO,
@@ -2438,15 +2957,23 @@ class SymbolTrader:
         close_side = "Sell" if side == "Buy" else "Buy"
         qty_str = f"{abs_size:.{self.qty_precision}f}"
 
-        log_prefix = f"{Fore.YELLOW + Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} " if self.dry_run else ""
+        log_prefix = (
+            f"{Fore.YELLOW + Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} "
+            if self.dry_run
+            else ""
+        )
         side_color = Fore.RED if close_side == "Sell" else Fore.GREEN
         log_msg = (
             f"{log_prefix}{side_color}{Style.BRIGHT}CLOSE {side.upper()} POSITION ({close_side} MARKET):"
             f"{Style.RESET_ALL} Qty={qty_str} | Reason: {exit_reason}"
         )
-        action_prefix = f"{Fore.MAGENTA + Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
+        action_prefix = (
+            f"{Fore.MAGENTA + Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
+        )
         print(action_prefix + log_msg)
-        log_console(logging.INFO, log_msg.replace(log_prefix, "").strip(), symbol=self.symbol)
+        log_console(
+            logging.INFO, log_msg.replace(log_prefix, "").strip(), symbol=self.symbol
+        )
 
         if self.dry_run:
             # Check if there's a simulated trade to close
@@ -2461,7 +2988,9 @@ class SymbolTrader:
                             pass
                 # Fallback to entry price if still no valid exit price
                 if sim_exit_price is None or sim_exit_price <= 0:
-                    sim_exit_price = self.current_trade.get("avgPrice", 1.0)  # Use entry as fallback
+                    sim_exit_price = self.current_trade.get(
+                        "avgPrice", 1.0
+                    )  # Use entry as fallback
                     log_console(
                         logging.WARNING,
                         f"[DRY RUN] Cannot estimate exit price, using entry ({sim_exit_price}). P&L inaccurate.",
@@ -2478,7 +3007,9 @@ class SymbolTrader:
                     dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=15)
                 )  # Fallback entry time
                 sim_leverage = self.current_trade.get("leverage", str(self.leverage))
-                sim_entry_price = self.current_trade.get("avgPrice", sim_exit_price)  # Use stored entry price
+                sim_entry_price = self.current_trade.get(
+                    "avgPrice", sim_exit_price
+                )  # Use stored entry price
                 sim_qty = self.current_trade.get("size", abs_size)  # Use stored size
                 original_side = self.current_trade.get("side", side)  # Use stored side
 
@@ -2522,7 +3053,11 @@ class SymbolTrader:
             if response and response.get("retCode") == 0:
                 order_id = response.get("result", {}).get("orderId")
                 if order_id:
-                    log_console(logging.INFO, f"Close order {order_id} submitted. Confirming...", symbol=self.symbol)
+                    log_console(
+                        logging.INFO,
+                        f"Close order {order_id} submitted. Confirming...",
+                        symbol=self.symbol,
+                    )
                     # Confirm the close order execution
                     filled_qty, avg_exit_price = self.confirm_order(order_id, abs_size)
 
@@ -2545,7 +3080,9 @@ class SymbolTrader:
                         self.last_exit_time = exit_time
                         # Use confirmed average exit price if available and valid, else fallback
                         final_exit_price_log = (
-                            avg_exit_price if avg_exit_price is not None and avg_exit_price > 0 else exit_price_est
+                            avg_exit_price
+                            if avg_exit_price is not None and avg_exit_price > 0
+                            else exit_price_est
                         )
                         # If still no valid price, fallback to entry price (P&L will be inaccurate)
                         if final_exit_price_log is None or final_exit_price_log <= 0:
@@ -2560,7 +3097,10 @@ class SymbolTrader:
                         entry_time_log = entry_time
                         if not isinstance(entry_time_log, dt.datetime):
                             # Try getting from internal state if API didn't provide it
-                            if self.current_trade and self.current_trade.get("symbol") == self.symbol:
+                            if (
+                                self.current_trade
+                                and self.current_trade.get("symbol") == self.symbol
+                            ):
                                 entry_time_log = self.current_trade.get("entry_time")
                             # Final fallback if still missing
                             if not isinstance(entry_time_log, dt.datetime):
@@ -2569,7 +3109,9 @@ class SymbolTrader:
                                     "Entry time missing for metrics. Using fallback time.",
                                     symbol=self.symbol,
                                 )
-                                entry_time_log = exit_time - dt.timedelta(minutes=15)  # Arbitrary fallback
+                                entry_time_log = exit_time - dt.timedelta(
+                                    minutes=15
+                                )  # Arbitrary fallback
 
                         self.metrics.add_trade(
                             symbol=self.symbol,
@@ -2581,7 +3123,9 @@ class SymbolTrader:
                             qty=filled_qty,  # Use actual filled qty for metrics
                             leverage=leverage,
                         )
-                        self.current_trade = None  # Clear internal state after successful close
+                        self.current_trade = (
+                            None  # Clear internal state after successful close
+                        )
                         return True
                     else:
                         log_console(
@@ -2599,10 +3143,16 @@ class SymbolTrader:
                     )
                     return False
             else:  # API call to place close order failed
-                error_msg = response.get("retMsg", "N/A") if response else "Empty response"
+                error_msg = (
+                    response.get("retMsg", "N/A") if response else "Empty response"
+                )
                 error_code = response.get("retCode", "N/A")
                 # Check for specific V5 errors indicating position already closed or size mismatch
-                pos_already_closed_codes = [110025, 110066, 3400074]  # Add relevant codes as found
+                pos_already_closed_codes = [
+                    110025,
+                    110066,
+                    3400074,
+                ]  # Add relevant codes as found
                 already_closed_msg_fragments = [
                     "position size is zero",
                     "order qty exceeded position size",
@@ -2619,17 +3169,24 @@ class SymbolTrader:
                         symbol=self.symbol,
                     )
                     # If we have internal state, log the trade based on that state as it likely closed externally (e.g., SL/TP hit)
-                    if self.current_trade and self.current_trade.get("symbol") == self.symbol:
+                    if (
+                        self.current_trade
+                        and self.current_trade.get("symbol") == self.symbol
+                    ):
                         exit_time = dt.datetime.now(dt.timezone.utc)
                         # Use estimated exit price or entry price as fallback
                         final_exit_price = (
-                            exit_price_est if exit_price_est is not None and exit_price_est > 0 else entry_price
+                            exit_price_est
+                            if exit_price_est is not None and exit_price_est > 0
+                            else entry_price
                         )
                         entry_time_actual = self.current_trade.get("entry_time") or (
                             exit_time - dt.timedelta(minutes=15)
                         )
                         internal_pos_size = self.current_trade.get("size", abs_size)
-                        internal_entry_price = self.current_trade.get("avgPrice", entry_price)
+                        internal_entry_price = self.current_trade.get(
+                            "avgPrice", entry_price
+                        )
                         internal_side = self.current_trade.get("side", side)
                         internal_leverage = self.current_trade.get("leverage", leverage)
                         log_console(
@@ -2647,8 +3204,12 @@ class SymbolTrader:
                             qty=abs(internal_pos_size),
                             leverage=internal_leverage,
                         )
-                        self.current_trade = None  # Clear state as it's confirmed closed
-                    self.last_exit_time = dt.datetime.now(dt.timezone.utc)  # Set cooldown timer
+                        self.current_trade = (
+                            None  # Clear state as it's confirmed closed
+                        )
+                    self.last_exit_time = dt.datetime.now(
+                        dt.timezone.utc
+                    )  # Set cooldown timer
                     return True  # Treat as successful closure
                 else:
                     log_console(
@@ -2658,7 +3219,12 @@ class SymbolTrader:
                     )
                     return False
         except Exception as e:
-            log_console(logging.ERROR, f"Exception during position close: {e}", symbol=self.symbol, exc_info=True)
+            log_console(
+                logging.ERROR,
+                f"Exception during position close: {e}",
+                symbol=self.symbol,
+                exc_info=True,
+            )
             return False
 
     def get_higher_tf_trend(self) -> bool:
@@ -2684,7 +3250,9 @@ class SymbolTrader:
         higher_tf = str(self.strategy_cfg.get("HIGHER_TIMEFRAME", "60"))
         if higher_tf == self.timeframe:
             log_console(
-                logging.WARNING, "HTF same as base timeframe. Disabling MTF check for this symbol.", symbol=self.symbol
+                logging.WARNING,
+                "HTF same as base timeframe. Disabling MTF check for this symbol.",
+                symbol=self.symbol,
             )
             # Cache as True (allow) and update time
             self.higher_tf_cache = True
@@ -2693,12 +3261,20 @@ class SymbolTrader:
 
         # Fetch slightly more data for HTF to ensure indicator calculation is robust
         htf_kline_limit = self.internal_cfg.get("KLINE_LIMIT", 120) + 20
-        log_console(logging.INFO, f"Fetching HTF ({higher_tf}) data for trend analysis...", symbol=self.symbol)
+        log_console(
+            logging.INFO,
+            f"Fetching HTF ({higher_tf}) data for trend analysis...",
+            symbol=self.symbol,
+        )
         # Use the REST fetcher which also calculates indicators
         df_higher = self.get_ohlcv_rest(timeframe=higher_tf, limit=htf_kline_limit)
 
         # Check if fetch and indicator calculation succeeded
-        if df_higher is None or df_higher.empty or len(df_higher) < MIN_KLINE_RECORDS_FOR_CALC:
+        if (
+            df_higher is None
+            or df_higher.empty
+            or len(df_higher) < MIN_KLINE_RECORDS_FOR_CALC
+        ):
             log_console(
                 logging.WARNING,
                 f"Could not get sufficient HTF ({higher_tf}) data or indicators failed. Allowing trade (neutral).",
@@ -2716,7 +3292,10 @@ class SymbolTrader:
             mid_ma_col = f"{smoother_prefix_htf}_mid"
 
             # Check if the required MA columns exist after calculation
-            if fast_ma_col not in df_higher.columns or mid_ma_col not in df_higher.columns:
+            if (
+                fast_ma_col not in df_higher.columns
+                or mid_ma_col not in df_higher.columns
+            ):
                 log_console(
                     logging.ERROR,
                     f"Required MA cols ({fast_ma_col}, {mid_ma_col}) not found in HTF ({higher_tf}) data after calculation. Allowing trade.",
@@ -2743,7 +3322,11 @@ class SymbolTrader:
                 # Define favorable trend (Allow trade only if HTF trend aligns with potential long entries)
                 # Simple example: Allow trade only if HTF fast MA > mid MA (uptrend)
                 trend_is_favorable = fast_ma_prev > mid_ma_prev
-                trend_desc = "Bullish (Fast>Mid)" if trend_is_favorable else "Bearish/Neutral (Fast<=Mid)"
+                trend_desc = (
+                    "Bullish (Fast>Mid)"
+                    if trend_is_favorable
+                    else "Bearish/Neutral (Fast<=Mid)"
+                )
                 log_console(
                     logging.INFO,
                     f"HTF ({higher_tf}) trend (@ {candle_to_check.name}): "
@@ -2782,7 +3365,13 @@ class SymbolTrader:
 class MomentumScannerTrader:
     """Orchestrates trading across multiple symbols using Bybit V5 API."""
 
-    def __init__(self, api_key: str, api_secret: str, config: Dict[str, Any], dry_run: bool = False):
+    def __init__(
+        self,
+        api_key: str,
+        api_secret: str,
+        config: Dict[str, Any],
+        dry_run: bool = False,
+    ):
         """Initializes the main bot."""
         self.config = config
         self.dry_run = dry_run
@@ -2831,31 +3420,47 @@ class MomentumScannerTrader:
             # Configure HTTP session with receive window from config
             recv_window = self.bot_cfg.get("API_RECV_WINDOW", 10000)  # Default 10s
             self.session = HTTP(
-                testnet=self.use_testnet, api_key=self.api_key, api_secret=self.api_secret, recv_window=recv_window
+                testnet=self.use_testnet,
+                api_key=self.api_key,
+                api_secret=self.api_secret,
+                recv_window=recv_window,
             )
             self._test_api_connection()  # Test REST API connection early
             self._initialize_traders()  # Initialize traders for configured symbols
 
             # Start WebSocket if needed and traders initialized successfully
-            if self.traders and any(trader.use_websocket for trader in self.traders.values()):
+            if self.traders and any(
+                trader.use_websocket for trader in self.traders.values()
+            ):
                 log_console(logging.INFO, "Starting WebSocket connection thread...")
                 self.ws_connection_thread = threading.Thread(
-                    target=self._start_and_monitor_websocket, name="WebSocketMonitor", daemon=True
+                    target=self._start_and_monitor_websocket,
+                    name="WebSocketMonitor",
+                    daemon=True,
                 )
                 self.ws_connection_thread.start()
                 # Allow some time for the connection attempt and initial subscriptions
                 time.sleep(self.bot_cfg.get("WS_STARTUP_DELAY_SECONDS", 5.0))
             else:
-                log_console(logging.INFO, "WebSocket disabled or no traders configured for WS. Using REST API only.")
+                log_console(
+                    logging.INFO,
+                    "WebSocket disabled or no traders configured for WS. Using REST API only.",
+                )
 
         except (ConnectionError, RuntimeError, ValueError) as init_e:
-            log_console(logging.CRITICAL, f"Bot initialization failed: {init_e}", exc_info=False)
+            log_console(
+                logging.CRITICAL, f"Bot initialization failed: {init_e}", exc_info=False
+            )
             self.running = False
             self.shutdown_requested = True
             self._cleanup_resources()  # Attempt cleanup even on init failure
             raise init_e  # Re-raise to stop execution
         except Exception as e:
-            log_console(logging.CRITICAL, f"Unexpected error during bot initialization: {e}", exc_info=True)
+            log_console(
+                logging.CRITICAL,
+                f"Unexpected error during bot initialization: {e}",
+                exc_info=True,
+            )
             self.running = False
             self.shutdown_requested = True
             self._cleanup_resources()
@@ -2882,18 +3487,30 @@ class MomentumScannerTrader:
                         logging.WARNING,
                         f"System clock differs from server by {time_diff:.1f}s (>{max_allowable_skew}s). Check time synchronization (e.g., NTP).",
                     )
-                log_console(logging.INFO, f"API connection successful. Server Time: {server_dt.isoformat()}")
+                log_console(
+                    logging.INFO,
+                    f"API connection successful. Server Time: {server_dt.isoformat()}",
+                )
             else:
-                error_msg = server_time_resp.get("retMsg", "N/A") if server_time_resp else "Empty Response"
+                error_msg = (
+                    server_time_resp.get("retMsg", "N/A")
+                    if server_time_resp
+                    else "Empty Response"
+                )
                 error_code = server_time_resp.get("retCode", "N/A")
-                raise ConnectionError(f"API test failed: {error_msg} (Code: {error_code})")
+                raise ConnectionError(
+                    f"API test failed: {error_msg} (Code: {error_code})"
+                )
         except ConnectionError as ce:
             log_console(
-                logging.CRITICAL, f"API connection failed: {ce}. Check keys, permissions, network, and time sync."
+                logging.CRITICAL,
+                f"API connection failed: {ce}. Check keys, permissions, network, and time sync.",
             )
             raise ce
         except Exception as e:
-            log_console(logging.CRITICAL, f"API test failed unexpectedly: {e}.", exc_info=True)
+            log_console(
+                logging.CRITICAL, f"API test failed unexpectedly: {e}.", exc_info=True
+            )
             raise ConnectionError("Failed API connection test.") from e
 
     def _initialize_traders(self):
@@ -2902,29 +3519,44 @@ class MomentumScannerTrader:
         if not isinstance(symbols_cfg_list, list) or not symbols_cfg_list:
             raise ValueError("BYBIT_CONFIG.SYMBOLS is missing, empty, or not a list.")
 
-        log_console(logging.INFO, f"Initializing traders for {len(symbols_cfg_list)} configured symbol(s)...")
+        log_console(
+            logging.INFO,
+            f"Initializing traders for {len(symbols_cfg_list)} configured symbol(s)...",
+        )
         successful_traders = 0
         temp_traders: Dict[str, SymbolTrader] = {}
 
         # Use deepcopy to avoid modifying the original config dict during iteration
         for i, symbol_cfg in enumerate(deepcopy(symbols_cfg_list)):
             if not isinstance(symbol_cfg, dict):
-                log_console(logging.ERROR, f"Symbol config #{i} invalid (not a dictionary). Skipping.")
+                log_console(
+                    logging.ERROR,
+                    f"Symbol config #{i} invalid (not a dictionary). Skipping.",
+                )
                 continue
             symbol = symbol_cfg.get("SYMBOL")
             if not symbol or not isinstance(symbol, str):
-                log_console(logging.ERROR, f"Symbol config #{i} missing/invalid 'SYMBOL' key. Skipping.")
+                log_console(
+                    logging.ERROR,
+                    f"Symbol config #{i} missing/invalid 'SYMBOL' key. Skipping.",
+                )
                 continue
             if symbol in temp_traders:
                 log_console(
-                    logging.WARNING, f"Duplicate symbol '{symbol}' in config. Skipping subsequent entry.", symbol=symbol
+                    logging.WARNING,
+                    f"Duplicate symbol '{symbol}' in config. Skipping subsequent entry.",
+                    symbol=symbol,
                 )
                 continue
 
-            log_console(logging.INFO, f"--- Initializing trader for {symbol} ---", symbol=symbol)
+            log_console(
+                logging.INFO, f"--- Initializing trader for {symbol} ---", symbol=symbol
+            )
             try:
                 if not self.session:
-                    raise RuntimeError("HTTP session not available for trader initialization.")
+                    raise RuntimeError(
+                        "HTTP session not available for trader initialization."
+                    )
                 # Pass the shared HTTP session and category
                 trader = SymbolTrader(
                     self.api_key,
@@ -2940,17 +3572,25 @@ class MomentumScannerTrader:
                 if trader.initialization_successful:
                     temp_traders[symbol] = trader
                     successful_traders += 1
-                    log_console(logging.INFO, f"--- Trader {symbol} initialized successfully ---", symbol=symbol)
+                    log_console(
+                        logging.INFO,
+                        f"--- Trader {symbol} initialized successfully ---",
+                        symbol=symbol,
+                    )
                 else:
                     # Should have been raised as RuntimeError from SymbolTrader, but catch here just in case
                     log_console(
-                        logging.ERROR, f"Trader initialization reported failure for {symbol}. Skipping.", symbol=symbol
+                        logging.ERROR,
+                        f"Trader initialization reported failure for {symbol}. Skipping.",
+                        symbol=symbol,
                     )
 
             except RuntimeError as trader_init_e:
                 # Catch specific RuntimeError raised by SymbolTrader on failure
                 log_console(
-                    logging.ERROR, f"Initialization failed for {symbol}: {trader_init_e}. Skipping.", symbol=symbol
+                    logging.ERROR,
+                    f"Initialization failed for {symbol}: {trader_init_e}. Skipping.",
+                    symbol=symbol,
                 )
             except Exception as e:
                 log_console(
@@ -2961,7 +3601,9 @@ class MomentumScannerTrader:
                 )
 
         if successful_traders == 0:
-            raise RuntimeError("CRITICAL: No traders could be initialized successfully. Check config and logs.")
+            raise RuntimeError(
+                "CRITICAL: No traders could be initialized successfully. Check config and logs."
+            )
 
         self.traders = temp_traders  # Assign successfully initialized traders
         log_console(
@@ -2976,7 +3618,8 @@ class MomentumScannerTrader:
         ws_channel_type = self.category.lower()
         if ws_channel_type not in ["linear", "inverse", "spot", "option"]:
             log_console(
-                logging.ERROR, f"Unsupported category '{self.category}' for WS channel_type. Defaulting to 'linear'."
+                logging.ERROR,
+                f"Unsupported category '{self.category}' for WS channel_type. Defaulting to 'linear'.",
             )
             ws_channel_type = "linear"
 
@@ -2989,7 +3632,10 @@ class MomentumScannerTrader:
                 ws_conn_active = self.ws is not None and self.ws_active
 
             if not ws_conn_active:
-                log_console(logging.INFO, f"Attempting WS connection (Channel: {ws_channel_type})...")
+                log_console(
+                    logging.INFO,
+                    f"Attempting WS connection (Channel: {ws_channel_type})...",
+                )
                 try:
                     # Create a new WebSocket instance for each connection attempt
                     temp_ws = WebSocket(
@@ -3014,8 +3660,14 @@ class MomentumScannerTrader:
                             topic = f"kline.{trader.timeframe}.{symbol}"
                             topics_to_subscribe.append(topic)
                             # Subscribe using the trader's specific callback method
-                            temp_ws.subscribe(topic, callback=trader._websocket_callback)
-                            log_console(logging.DEBUG, f"WS prepared subscription: {topic}", symbol=symbol)
+                            temp_ws.subscribe(
+                                topic, callback=trader._websocket_callback
+                            )
+                            log_console(
+                                logging.DEBUG,
+                                f"WS prepared subscription: {topic}",
+                                symbol=symbol,
+                            )
 
                     if topics_to_subscribe:
                         # Assign the WS object just before starting interaction
@@ -3025,7 +3677,8 @@ class MomentumScannerTrader:
                         # Start the WebSocket connection implicitly by interacting (e.g., subscribing handled above)
                         # The on_open callback will set self.ws_active = True
                         log_console(
-                            logging.INFO, f"WebSocket connection initiated for {len(topics_to_subscribe)} streams."
+                            logging.INFO,
+                            f"WebSocket connection initiated for {len(topics_to_subscribe)} streams.",
                         )
 
                         # Wait for connection to establish or fail (check ws_active flag)
@@ -3045,27 +3698,40 @@ class MomentumScannerTrader:
                         with self.ws_lock:
                             ws_established = self.ws_active
                         if ws_established:
-                            log_console(logging.INFO, "WebSocket connection established. Monitor active.")
-                            retry_delay = 10  # Reset retry delay on successful connection
+                            log_console(
+                                logging.INFO,
+                                "WebSocket connection established. Monitor active.",
+                            )
+                            retry_delay = (
+                                10  # Reset retry delay on successful connection
+                            )
                             # Keep monitor thread alive, checking active flag periodically
                             while not self.shutdown_requested:
                                 with self.ws_lock:
                                     ws_still_active = self.ws_active
                                 if not ws_still_active:
-                                    log_console(logging.INFO, "WS inactive detected by monitor, triggering reconnect.")
+                                    log_console(
+                                        logging.INFO,
+                                        "WS inactive detected by monitor, triggering reconnect.",
+                                    )
                                     break  # Break inner loop to reconnect
                                 time.sleep(5)  # Check interval
                         else:
                             log_console(
-                                logging.ERROR, f"WS connection failed to establish within {max_wait}s. Retrying..."
+                                logging.ERROR,
+                                f"WS connection failed to establish within {max_wait}s. Retrying...",
                             )
                             self._close_websocket_connection()  # Ensure cleanup before retry
                             if not self.shutdown_requested:
                                 time.sleep(retry_delay)
-                            retry_delay = min(max_retry_delay, retry_delay * 2)  # Exponential backoff
+                            retry_delay = min(
+                                max_retry_delay, retry_delay * 2
+                            )  # Exponential backoff
 
                     else:  # No symbols configured for WebSocket
-                        log_console(logging.INFO, "No symbols use WebSocket. WS thread exiting.")
+                        log_console(
+                            logging.INFO, "No symbols use WebSocket. WS thread exiting."
+                        )
                         break  # Exit monitoring loop
 
                 except Exception as e:
@@ -3077,7 +3743,9 @@ class MomentumScannerTrader:
                     self._close_websocket_connection()  # Ensure cleanup
                     if not self.shutdown_requested:
                         time.sleep(retry_delay)
-                    retry_delay = min(max_retry_delay, retry_delay * 2)  # Exponential backoff
+                    retry_delay = min(
+                        max_retry_delay, retry_delay * 2
+                    )  # Exponential backoff
 
             else:  # WS is active, sleep and check later
                 time.sleep(10)  # Check less frequently when connection is stable
@@ -3094,7 +3762,9 @@ class MomentumScannerTrader:
                     # Use the exit() method provided by pybit's WebSocket class
                     self.ws.exit()
                 except Exception as e:
-                    log_console(logging.ERROR, f"Error closing WS object: {e}", exc_info=False)
+                    log_console(
+                        logging.ERROR, f"Error closing WS object: {e}", exc_info=False
+                    )
                 finally:
                     # Ensure variables are reset even if exit() fails
                     self.ws = None
@@ -3114,8 +3784,14 @@ class MomentumScannerTrader:
 
     def _populate_initial_kline_data_async(self):
         """Starts a background thread to fetch initial Kline data via REST post-WS connection."""
-        log_console(logging.DEBUG, "Starting thread for initial REST kline population...")
-        thread = threading.Thread(target=self._fetch_initial_data_worker, name="InitialDataFetcher", daemon=True)
+        log_console(
+            logging.DEBUG, "Starting thread for initial REST kline population..."
+        )
+        thread = threading.Thread(
+            target=self._fetch_initial_data_worker,
+            name="InitialDataFetcher",
+            daemon=True,
+        )
         thread.start()
 
     def _fetch_initial_data_worker(self):
@@ -3127,15 +3803,25 @@ class MomentumScannerTrader:
         for symbol, trader in traders_to_fetch:
             if self.shutdown_requested:
                 break  # Check for shutdown signal
-            if trader.use_websocket and (trader.kline_df is None or trader.kline_df.empty):
-                log_console(logging.DEBUG, f"Fetching initial REST data for {symbol}...", symbol=symbol)
+            if trader.use_websocket and (
+                trader.kline_df is None or trader.kline_df.empty
+            ):
+                log_console(
+                    logging.DEBUG,
+                    f"Fetching initial REST data for {symbol}...",
+                    symbol=symbol,
+                )
                 try:
                     # Use the trader's own method to fetch and calculate indicators
                     initial_df = trader.get_ohlcv_rest()
                     if initial_df is not None and not initial_df.empty:
                         # Update the trader's internal DataFrame directly
                         trader.kline_df = initial_df
-                        log_console(logging.INFO, f"Initialized kline data for {symbol} from REST.", symbol=symbol)
+                        log_console(
+                            logging.INFO,
+                            f"Initialized kline data for {symbol} from REST.",
+                            symbol=symbol,
+                        )
                     else:
                         log_console(
                             logging.WARNING,
@@ -3161,9 +3847,15 @@ class MomentumScannerTrader:
                 # Handle auth response
                 if op == "auth":
                     success = message.get("success", False)
-                    log_console(logging.INFO, f"WebSocket Auth: {'Success' if success else 'Failed'}")
+                    log_console(
+                        logging.INFO,
+                        f"WebSocket Auth: {'Success' if success else 'Failed'}",
+                    )
                     if not success:
-                        log_console(logging.ERROR, f"WS Auth Fail: {message.get('ret_msg', 'N/A')}")
+                        log_console(
+                            logging.ERROR,
+                            f"WS Auth Fail: {message.get('ret_msg', 'N/A')}",
+                        )
                 # Handle subscription response
                 elif op == "subscribe":
                     success = message.get("success", False)
@@ -3172,19 +3864,30 @@ class MomentumScannerTrader:
                     if not topic_info and "req_id" in message:
                         topic_info = f"ReqID: {message['req_id']}"
                     if success:
-                        log_console(logging.DEBUG, f"WS Subscribe Success: {topic_info}")
+                        log_console(
+                            logging.DEBUG, f"WS Subscribe Success: {topic_info}"
+                        )
                     else:
-                        log_console(logging.ERROR, f"WS Subscribe Fail: {topic_info} - {message.get('ret_msg', 'N/A')}")
+                        log_console(
+                            logging.ERROR,
+                            f"WS Subscribe Fail: {topic_info} - {message.get('ret_msg', 'N/A')}",
+                        )
                 # Handle other potential ops if necessary (e.g., 'ping')
                 # else: log_console(logging.DEBUG, f"Unhandled WS Op: {op}")
 
         except Exception as e:
-            log_console(logging.ERROR, f"Error handling generic WS message: {e}", exc_info=True)
+            log_console(
+                logging.ERROR, f"Error handling generic WS message: {e}", exc_info=True
+            )
 
     def _handle_ws_error(self, error):
         """Callback executed on WebSocket error."""
         # Log the error, including exception info if it's an exception object
-        log_console(logging.ERROR, f"WebSocket Error Encountered: {error}", exc_info=isinstance(error, Exception))
+        log_console(
+            logging.ERROR,
+            f"WebSocket Error Encountered: {error}",
+            exc_info=isinstance(error, Exception),
+        )
         # Set active flag to False to trigger reconnection attempt by the monitor thread
         with self.ws_lock:
             self.ws_active = False
@@ -3196,12 +3899,16 @@ class MomentumScannerTrader:
             log_console(logging.WARNING, "WebSocket connection closed unexpectedly.")
             # Set active flag to False to trigger reconnection by the monitor thread
             with self.ws_lock:
-                if self.ws is not None:  # Ensure we only log state change if WS object existed
+                if (
+                    self.ws is not None
+                ):  # Ensure we only log state change if WS object existed
                     log_console(logging.INFO, "WS state set to inactive due to close.")
                 self.ws_active = False
                 self.ws = None  # Clear the WS object reference
         else:
-            log_console(logging.INFO, "WebSocket connection closed (shutdown requested).")
+            log_console(
+                logging.INFO, "WebSocket connection closed (shutdown requested)."
+            )
             with self.ws_lock:  # Ensure state is consistent even on expected close
                 self.ws_active = False
                 self.ws = None
@@ -3215,11 +3922,18 @@ class MomentumScannerTrader:
             self._cleanup_resources()
             return
 
-        log_console(logging.INFO, f"--- Starting Trading Cycles ({len(self.traders)} Symbols) ---")
+        log_console(
+            logging.INFO,
+            f"--- Starting Trading Cycles ({len(self.traders)} Symbols) ---",
+        )
         sleep_interval: float = float(self.bot_cfg.get("SLEEP_INTERVAL_SECONDS", 60.0))
-        metrics_interval: int = int(self.bot_cfg.get("METRICS_LOG_INTERVAL_SECONDS", 3600))
+        metrics_interval: int = int(
+            self.bot_cfg.get("METRICS_LOG_INTERVAL_SECONDS", 3600)
+        )
         last_balance_check_time: float = 0.0
-        balance_check_interval: int = self.bot_cfg.get("BALANCE_CHECK_INTERVAL_SECONDS", 300)
+        balance_check_interval: int = self.bot_cfg.get(
+            "BALANCE_CHECK_INTERVAL_SECONDS", 300
+        )
         balance: float = 0.0  # Initialize balance
 
         # Initial Balance Check
@@ -3229,7 +3943,10 @@ class MomentumScannerTrader:
         else:
             balance = get_available_balance(self.session, "USDT", self.account_type)
             if balance > 0:
-                log_console(logging.INFO, f"Initial Balance Check ({self.account_type}): {balance:.2f} USDT Available")
+                log_console(
+                    logging.INFO,
+                    f"Initial Balance Check ({self.account_type}): {balance:.2f} USDT Available",
+                )
                 last_balance_check_time = time.time()
             else:
                 log_console(
@@ -3250,29 +3967,48 @@ class MomentumScannerTrader:
                 with self.ws_lock:
                     ws_currently_active = self.ws_active
                 if self.ws_connection_thread and not ws_currently_active:
-                    log_console(logging.WARNING, "WebSocket connection inactive. Strategy relies on REST API polling.")
+                    log_console(
+                        logging.WARNING,
+                        "WebSocket connection inactive. Strategy relies on REST API polling.",
+                    )
 
                 # Get Global State (Balance) - Periodically
                 current_time = time.time()
-                if not self.dry_run and (current_time - last_balance_check_time > balance_check_interval):
-                    fetched_balance = get_available_balance(self.session, "USDT", self.account_type)
-                    if abs(fetched_balance - balance) > 0.01:  # Log if changed significantly
+                if not self.dry_run and (
+                    current_time - last_balance_check_time > balance_check_interval
+                ):
+                    fetched_balance = get_available_balance(
+                        self.session, "USDT", self.account_type
+                    )
+                    if (
+                        abs(fetched_balance - balance) > 0.01
+                    ):  # Log if changed significantly
                         log_console(
-                            logging.INFO, f"Checked Balance ({self.account_type}): {fetched_balance:.2f} USDT Available"
+                            logging.INFO,
+                            f"Checked Balance ({self.account_type}): {fetched_balance:.2f} USDT Available",
                         )
                     balance = fetched_balance
                     last_balance_check_time = current_time
                     if balance <= 0:
                         log_console(
-                            logging.WARNING, f"{self.account_type} USDT balance is zero. No new trades can be sized."
+                            logging.WARNING,
+                            f"{self.account_type} USDT balance is zero. No new trades can be sized.",
                         )
 
                 # Balance Allocation per Trader
                 num_active_traders = len(self.traders)
-                balance_per_trader = balance / num_active_traders if num_active_traders > 0 and balance > 0 else 0.0
+                balance_per_trader = (
+                    balance / num_active_traders
+                    if num_active_traders > 0 and balance > 0
+                    else 0.0
+                )
                 max_pos_usdt_config = self.risk_cfg.get("MAX_POSITION_USDT")
                 max_pos_usdt_per_trader: Optional[float] = None
-                if isinstance(max_pos_usdt_config, (int, float)) and max_pos_usdt_config > 0 and num_active_traders > 0:
+                if (
+                    isinstance(max_pos_usdt_config, (int, float))
+                    and max_pos_usdt_config > 0
+                    and num_active_traders > 0
+                ):
                     max_pos_usdt_per_trader = max_pos_usdt_config / num_active_traders
                     log_console(
                         logging.DEBUG,
@@ -3289,15 +4025,21 @@ class MomentumScannerTrader:
                     if not self.running or self.shutdown_requested:
                         break  # Check shutdown flag within loop
                     trader = self.traders[symbol]
-                    symbol_color_prefix = f"{get_symbol_color(symbol)}[{symbol}]{Style.RESET_ALL}"
+                    symbol_color_prefix = (
+                        f"{get_symbol_color(symbol)}[{symbol}]{Style.RESET_ALL}"
+                    )
                     print(f"{symbol_color_prefix} --- Processing Symbol ---")
 
                     try:
                         # Cooldown Check: Skip processing if recently exited this symbol
                         if trader.last_exit_time:
-                            cooldown_seconds = trader.bot_cfg.get("COOLDOWN_PERIOD_SECONDS", 300)
+                            cooldown_seconds = trader.bot_cfg.get(
+                                "COOLDOWN_PERIOD_SECONDS", 300
+                            )
                             if cooldown_seconds > 0:
-                                time_since_exit = (current_dt_utc - trader.last_exit_time).total_seconds()
+                                time_since_exit = (
+                                    current_dt_utc - trader.last_exit_time
+                                ).total_seconds()
                                 if time_since_exit < cooldown_seconds:
                                     log_console(
                                         logging.INFO,
@@ -3342,7 +4084,10 @@ class MomentumScannerTrader:
                             "exit_long_signal",
                             "exit_short_signal",
                         ]
-                        if any(pd.isna(last_closed_candle.get(ind)) for ind in critical_indicators):
+                        if any(
+                            pd.isna(last_closed_candle.get(ind))
+                            for ind in critical_indicators
+                        ):
                             log_console(
                                 logging.WARNING,
                                 f"Critical indicator NaN on closed candle ({last_closed_candle.name}). Skipping cycle.",
@@ -3355,12 +4100,16 @@ class MomentumScannerTrader:
                             current_price = last_closed_candle.get("close")  # Fallback
                             if pd.isnull(current_price) or current_price <= 0:
                                 log_console(
-                                    logging.ERROR, "Cannot get valid current price. Skipping cycle.", symbol=symbol
+                                    logging.ERROR,
+                                    "Cannot get valid current price. Skipping cycle.",
+                                    symbol=symbol,
                                 )
                                 continue
 
                         # Position Management: Check current position status
-                        position = trader.get_position(log_error=True)  # Log errors on position fetch
+                        position = trader.get_position(
+                            log_error=True
+                        )  # Log errors on position fetch
 
                         if position:
                             # --- Manage Existing Position ---
@@ -3382,7 +4131,9 @@ class MomentumScannerTrader:
                                     symbol=symbol,
                                 )
                                 trader.current_trade = None
-                                position = None  # Clear state and proceed as if no position
+                                position = (
+                                    None  # Clear state and proceed as if no position
+                                )
                                 continue  # Re-evaluate in next cycle if needed
 
                             pos_size_abs = abs(pos_size)
@@ -3394,8 +4145,12 @@ class MomentumScannerTrader:
 
                             # Check Exit Conditions based on last closed candle
                             exit_reason: Optional[str] = None
-                            exit_long_sig = last_closed_candle.get("exit_long_signal", False)
-                            exit_short_sig = last_closed_candle.get("exit_short_signal", False)
+                            exit_long_sig = last_closed_candle.get(
+                                "exit_long_signal", False
+                            )
+                            exit_short_sig = last_closed_candle.get(
+                                "exit_short_signal", False
+                            )
                             if pos_side == "Buy" and exit_long_sig:
                                 exit_reason = "Strategy Exit (Long)"
                             elif pos_side == "Sell" and exit_short_sig:
@@ -3414,10 +4169,14 @@ class MomentumScannerTrader:
                                 )
                                 # Attempt to close the position
                                 if trader.close_position(
-                                    position, exit_reason=exit_reason, exit_price_est=current_price
+                                    position,
+                                    exit_reason=exit_reason,
+                                    exit_price_est=current_price,
                                 ):
                                     log_console(
-                                        logging.INFO, "Position closed successfully based on signal.", symbol=symbol
+                                        logging.INFO,
+                                        "Position closed successfully based on signal.",
+                                        symbol=symbol,
                                     )
                                 else:
                                     # Critical log if closure fails after signal
@@ -3429,7 +4188,11 @@ class MomentumScannerTrader:
                                 # Continue to next symbol after close attempt (successful or not)
                                 continue
                             else:
-                                log_console(logging.DEBUG, "Holding position. No exit signal detected.", symbol=symbol)
+                                log_console(
+                                    logging.DEBUG,
+                                    "Holding position. No exit signal detected.",
+                                    symbol=symbol,
+                                )
 
                         else:  # No Position Open
                             # --- Check Entry Conditions ---
@@ -3437,7 +4200,9 @@ class MomentumScannerTrader:
                             htf_allows_trade = trader.get_higher_tf_trend()
                             if not htf_allows_trade:
                                 log_console(
-                                    logging.INFO, "HTF filter unfavorable. Skipping entry check.", symbol=symbol
+                                    logging.INFO,
+                                    "HTF filter unfavorable. Skipping entry check.",
+                                    symbol=symbol,
                                 )
                                 continue  # Skip entry if HTF filter blocks
 
@@ -3445,37 +4210,59 @@ class MomentumScannerTrader:
                             atr_val = last_closed_candle.get("atr_risk", 0.0)
                             long_signal = last_closed_candle.get("long_signal", False)
                             short_signal = last_closed_candle.get("short_signal", False)
-                            long_strength = last_closed_candle.get("long_signal_strength", 0.0)
-                            short_strength = last_closed_candle.get("short_signal_strength", 0.0)
+                            long_strength = last_closed_candle.get(
+                                "long_signal_strength", 0.0
+                            )
+                            short_strength = last_closed_candle.get(
+                                "short_signal_strength", 0.0
+                            )
 
                             # Get risk parameters
-                            risk_percent = float(trader.risk_cfg.get("RISK_PER_TRADE_PERCENT", 1.0))
-                            sl_mult = float(trader.risk_cfg.get("ATR_MULTIPLIER_SL", 1.5))
-                            tp_mult = float(trader.risk_cfg.get("ATR_MULTIPLIER_TP", 2.0))
-                            min_strength = float(trader.strategy_cfg.get("MIN_SIGNAL_STRENGTH", 0.5))
+                            risk_percent = float(
+                                trader.risk_cfg.get("RISK_PER_TRADE_PERCENT", 1.0)
+                            )
+                            sl_mult = float(
+                                trader.risk_cfg.get("ATR_MULTIPLIER_SL", 1.5)
+                            )
+                            tp_mult = float(
+                                trader.risk_cfg.get("ATR_MULTIPLIER_TP", 2.0)
+                            )
+                            min_strength = float(
+                                trader.strategy_cfg.get("MIN_SIGNAL_STRENGTH", 0.5)
+                            )
 
                             entry_side: Optional[str] = None
                             stop_loss_price: Optional[float] = None
                             take_profit_price: Optional[float] = None
                             signal_strength: float = 0.0
-                            entry_price_est = current_price  # Use latest price for SL/TP calculation
+                            entry_price_est = (
+                                current_price  # Use latest price for SL/TP calculation
+                            )
 
                             # Determine entry side based on signals and strength
                             if long_signal and long_strength >= min_strength:
                                 entry_side = "Buy"
                                 signal_strength = long_strength
                                 if atr_val > 0 and sl_mult > 0:
-                                    stop_loss_price = entry_price_est - (atr_val * sl_mult)
+                                    stop_loss_price = entry_price_est - (
+                                        atr_val * sl_mult
+                                    )
                                 # TP is optional, calculate only if multiplier > 0
                                 if atr_val > 0 and tp_mult > 0:
-                                    take_profit_price = entry_price_est + (atr_val * tp_mult)
+                                    take_profit_price = entry_price_est + (
+                                        atr_val * tp_mult
+                                    )
                             elif short_signal and short_strength >= min_strength:
                                 entry_side = "Sell"
                                 signal_strength = short_strength
                                 if atr_val > 0 and sl_mult > 0:
-                                    stop_loss_price = entry_price_est + (atr_val * sl_mult)
+                                    stop_loss_price = entry_price_est + (
+                                        atr_val * sl_mult
+                                    )
                                 if atr_val > 0 and tp_mult > 0:
-                                    take_profit_price = entry_price_est - (atr_val * tp_mult)
+                                    take_profit_price = entry_price_est - (
+                                        atr_val * tp_mult
+                                    )
 
                             if entry_side:
                                 log_console(
@@ -3501,14 +4288,20 @@ class MomentumScannerTrader:
                                             symbol=symbol,
                                         )
                                         take_profit_price = None
-                                    elif entry_side == "Buy" and take_profit_price <= entry_price_est:
+                                    elif (
+                                        entry_side == "Buy"
+                                        and take_profit_price <= entry_price_est
+                                    ):
                                         log_console(
                                             logging.DEBUG,
                                             f"Long TP ({take_profit_price}) <= Entry ({entry_price_est}). TP not set.",
                                             symbol=symbol,
                                         )
                                         take_profit_price = None
-                                    elif entry_side == "Sell" and take_profit_price >= entry_price_est:
+                                    elif (
+                                        entry_side == "Sell"
+                                        and take_profit_price >= entry_price_est
+                                    ):
                                         log_console(
                                             logging.DEBUG,
                                             f"Short TP ({take_profit_price}) >= Entry ({entry_price_est}). TP not set.",
@@ -3517,7 +4310,9 @@ class MomentumScannerTrader:
                                         take_profit_price = None
 
                                 # Calculate Position Size
-                                sl_distance_price_abs = abs(entry_price_est - stop_loss_price)
+                                sl_distance_price_abs = abs(
+                                    entry_price_est - stop_loss_price
+                                )
                                 qty_to_trade = calculate_position_size_atr(
                                     balance=balance_per_trader,
                                     risk_percent=risk_percent,
@@ -3536,7 +4331,9 @@ class MomentumScannerTrader:
                                         if take_profit_price
                                         else "None"
                                     )
-                                    sl_log_str = f"{stop_loss_price:.{trader.price_precision}f}"
+                                    sl_log_str = (
+                                        f"{stop_loss_price:.{trader.price_precision}f}"
+                                    )
                                     log_console(
                                         logging.INFO,
                                         f"{entry_side.upper()} ENTRY SIGNAL. Str={signal_strength:.2f}. Size={qty_to_trade:.{trader.qty_precision}f}. SL={sl_log_str}, TP={tp_log_str}",
@@ -3544,7 +4341,10 @@ class MomentumScannerTrader:
                                     )
                                     # Place the order
                                     order_id = trader.place_order(
-                                        entry_side, qty_to_trade, stop_loss_price, take_profit_price
+                                        entry_side,
+                                        qty_to_trade,
+                                        stop_loss_price,
+                                        take_profit_price,
                                     )
                                     if order_id:
                                         log_console(
@@ -3575,15 +4375,25 @@ class MomentumScannerTrader:
 
                     except Exception as symbol_e:
                         log_console(
-                            logging.ERROR, f"Error processing symbol {symbol}: {symbol_e}", symbol=symbol, exc_info=True
+                            logging.ERROR,
+                            f"Error processing symbol {symbol}: {symbol_e}",
+                            symbol=symbol,
+                            exc_info=True,
                         )
                         # Continue to the next symbol
 
-                    log_console(logging.DEBUG, f"--- Finished Processing Symbol: {symbol} ---", symbol=symbol)
+                    log_console(
+                        logging.DEBUG,
+                        f"--- Finished Processing Symbol: {symbol} ---",
+                        symbol=symbol,
+                    )
                 # End of symbol loop
 
             except KeyboardInterrupt:
-                log_console(logging.INFO, "KeyboardInterrupt detected in main loop. Initiating shutdown...")
+                log_console(
+                    logging.INFO,
+                    "KeyboardInterrupt detected in main loop. Initiating shutdown...",
+                )
                 self.shutdown_requested = True
                 self.running = False
                 break  # Exit the main loop
@@ -3605,16 +4415,22 @@ class MomentumScannerTrader:
                 # Calculate sleep duration
                 end_time = time.time()
                 cycle_duration = end_time - start_time
-                sleep_duration = max(0.1, sleep_interval - cycle_duration)  # Ensure minimum sleep
+                sleep_duration = max(
+                    0.1, sleep_interval - cycle_duration
+                )  # Ensure minimum sleep
                 log_console(
-                    logging.DEBUG, f"Cycle duration: {cycle_duration:.2f}s. Sleeping for {sleep_duration:.2f}s..."
+                    logging.DEBUG,
+                    f"Cycle duration: {cycle_duration:.2f}s. Sleeping for {sleep_duration:.2f}s...",
                 )
                 print(f"{Fore.BLUE}{Style.BRIGHT}===== CYCLE END =====")
                 try:
                     # Sleep, but allow KeyboardInterrupt to break sleep
                     time.sleep(sleep_duration)
                 except KeyboardInterrupt:
-                    log_console(logging.INFO, "KeyboardInterrupt detected during sleep. Initiating shutdown...")
+                    log_console(
+                        logging.INFO,
+                        "KeyboardInterrupt detected during sleep. Initiating shutdown...",
+                    )
                     self.shutdown_requested = True
                     self.running = False
                     break  # Exit the main loop
@@ -3647,7 +4463,10 @@ class MomentumScannerTrader:
             # Wait for the thread to finish, with a timeout
             self.ws_connection_thread.join(timeout=15)
             if self.ws_connection_thread.is_alive():
-                log_console(logging.WARNING, "WebSocket thread join timed out. Forcing WS closure.")
+                log_console(
+                    logging.WARNING,
+                    "WebSocket thread join timed out. Forcing WS closure.",
+                )
                 # Force close WS object if thread is stuck (should be rare)
                 self._close_websocket_connection()
             else:
@@ -3661,20 +4480,28 @@ class MomentumScannerTrader:
         # Optional: Close open positions if configured
         close_on_exit = self.bot_cfg.get("CLOSE_POSITIONS_ON_SHUTDOWN", False)
         if close_on_exit and not self.dry_run:
-            log_console(logging.WARNING, "Attempting to close open positions on shutdown...")
+            log_console(
+                logging.WARNING, "Attempting to close open positions on shutdown..."
+            )
             closed_count = 0
             failed_closes = []
             # Iterate over a copy of trader items
             for symbol, trader in list(self.traders.items()):
                 try:
                     # Fetch position, retry once with short delay if first attempt fails
-                    position = trader.get_position(log_error=False)  # Don't flood logs initially
+                    position = trader.get_position(
+                        log_error=False
+                    )  # Don't flood logs initially
                     if position is None:
                         time.sleep(0.5)
                         position = trader.get_position(log_error=True)
 
                     if position:
-                        log_console(logging.WARNING, f"Closing position for {symbol} due to shutdown...", symbol=symbol)
+                        log_console(
+                            logging.WARNING,
+                            f"Closing position for {symbol} due to shutdown...",
+                            symbol=symbol,
+                        )
                         # Get last price estimate for metrics fallback
                         last_price: Optional[float] = None
                         if trader.kline_df is not None and not trader.kline_df.empty:
@@ -3683,22 +4510,32 @@ class MomentumScannerTrader:
                             except (IndexError, ValueError, TypeError):
                                 pass
                         # Attempt close
-                        if trader.close_position(position, exit_reason="Shutdown", exit_price_est=last_price):
+                        if trader.close_position(
+                            position, exit_reason="Shutdown", exit_price_est=last_price
+                        ):
                             closed_count += 1
                             time.sleep(0.5)  # Small delay between close attempts
                         else:
                             failed_closes.append(symbol)
                             log_console(
-                                logging.ERROR, f"Failed to confirm closure for {symbol} during shutdown.", symbol=symbol
+                                logging.ERROR,
+                                f"Failed to confirm closure for {symbol} during shutdown.",
+                                symbol=symbol,
                             )
                 except Exception as e:
                     log_console(
-                        logging.ERROR, f"Error closing {symbol} during shutdown: {e}", symbol=symbol, exc_info=False
+                        logging.ERROR,
+                        f"Error closing {symbol} during shutdown: {e}",
+                        symbol=symbol,
+                        exc_info=False,
                     )
                     failed_closes.append(symbol)
 
             if closed_count > 0:
-                log_console(logging.WARNING, f"Submitted close orders for {closed_count} positions.")
+                log_console(
+                    logging.WARNING,
+                    f"Submitted close orders for {closed_count} positions.",
+                )
             if failed_closes:
                 log_console(
                     logging.CRITICAL,
@@ -3714,7 +4551,9 @@ class MomentumScannerTrader:
             for symbol, trader in list(self.traders.items()):
                 if trader.current_trade:
                     log_console(
-                        logging.INFO, f"[DRY RUN] Logging final metrics for simulated position {symbol}", symbol=symbol
+                        logging.INFO,
+                        f"[DRY RUN] Logging final metrics for simulated position {symbol}",
+                        symbol=symbol,
                     )
                     # Simulate close at last known price for metrics
                     last_price_sim: Optional[float] = None
@@ -3728,7 +4567,9 @@ class MomentumScannerTrader:
 
                     trader.metrics.add_trade(
                         symbol=symbol,
-                        entry_time=trader.current_trade.get("entry_time", dt.datetime.now(dt.timezone.utc)),
+                        entry_time=trader.current_trade.get(
+                            "entry_time", dt.datetime.now(dt.timezone.utc)
+                        ),
                         exit_time=dt.datetime.now(dt.timezone.utc),
                         side=trader.current_trade.get("side", "Buy"),
                         entry_price=trader.current_trade.get("avgPrice", 0),
@@ -3739,16 +4580,23 @@ class MomentumScannerTrader:
                     trader.current_trade = None  # Clear simulated trade
                     closed_sim_count += 1
             if closed_sim_count > 0:
-                log_console(logging.INFO, f"[DRY RUN] Logged final metrics for {closed_sim_count} simulated positions.")
+                log_console(
+                    logging.INFO,
+                    f"[DRY RUN] Logged final metrics for {closed_sim_count} simulated positions.",
+                )
 
         else:  # Close on exit disabled
-            log_console(logging.INFO, "Close on shutdown disabled. Positions may remain open.")
+            log_console(
+                logging.INFO, "Close on shutdown disabled. Positions may remain open."
+            )
 
         # Save final metrics summary
         try:
             self.metrics.save_on_shutdown()
         except Exception as metrics_e:
-            log_console(logging.ERROR, f"Error saving final metrics: {metrics_e}", exc_info=True)
+            log_console(
+                logging.ERROR, f"Error saving final metrics: {metrics_e}", exc_info=True
+            )
 
         log_console(logging.INFO, "--- Bot Shutdown Complete ---")
 
@@ -3759,14 +4607,27 @@ if __name__ == "__main__":
         description="Bybit Enhanced Momentum Scanner Bot (V5 API)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--config", type=str, default=DEFAULT_CONFIG_FILE, help="Path to JSON config file.")
-    parser.add_argument("--dry-run", action="store_true", help="Enable dry run mode (simulation only).")
-    parser.add_argument("--debug", action="store_true", help="Enable DEBUG level logging for console and file.")
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=DEFAULT_CONFIG_FILE,
+        help="Path to JSON config file.",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Enable dry run mode (simulation only)."
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable DEBUG level logging for console and file.",
+    )
     args = parser.parse_args()
 
     # Set logging level based on --debug flag
     log_level_console = logging.DEBUG if args.debug else logging.INFO
-    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)  # Set file logger level too
+    logger.setLevel(
+        logging.DEBUG if args.debug else logging.INFO
+    )  # Set file logger level too
 
     log_console(log_level_console, f"{Fore.CYAN}{Style.BRIGHT}--- Bot Starting ---")
     log_console(log_level_console, f"Using configuration file: {args.config}")
@@ -3788,14 +4649,22 @@ if __name__ == "__main__":
 
         # --- Detailed Validation of Loaded Config ---
         log_console(logging.INFO, "Validating configuration sections...")
-        required_sections = {"BYBIT_CONFIG": dict, "RISK_CONFIG": dict, "BOT_CONFIG": dict}
+        required_sections = {
+            "BYBIT_CONFIG": dict,
+            "RISK_CONFIG": dict,
+            "BOT_CONFIG": dict,
+        }
         for section, expected_type in required_sections.items():
             if section not in config:
                 validation_errors.append(f"Missing required section '{section}'.")
             elif not isinstance(config.get(section), expected_type):
-                validation_errors.append(f"Section '{section}' must be a {expected_type.__name__}.")
+                validation_errors.append(
+                    f"Section '{section}' must be a {expected_type.__name__}."
+                )
 
-        if not validation_errors:  # Proceed with detailed checks only if top sections are okay
+        if (
+            not validation_errors
+        ):  # Proceed with detailed checks only if top sections are okay
             bybit_cfg = config.get("BYBIT_CONFIG", {})
             risk_cfg = config.get("RISK_CONFIG", {})
             bot_cfg = config.get("BOT_CONFIG", {})
@@ -3803,7 +4672,9 @@ if __name__ == "__main__":
 
             # Bybit Config Validation
             if not isinstance(bybit_cfg.get("USE_TESTNET", False), bool):
-                validation_errors.append("BYBIT_CONFIG: USE_TESTNET must be true or false.")
+                validation_errors.append(
+                    "BYBIT_CONFIG: USE_TESTNET must be true or false."
+                )
             account_type = bybit_cfg.get("ACCOUNT_TYPE", "UNIFIED").upper()
             valid_account_types = ["UNIFIED", "CONTRACT", "SPOT"]  # V5 relevant types
             if account_type not in valid_account_types:
@@ -3813,21 +4684,30 @@ if __name__ == "__main__":
 
             # Risk Config Validation
             risk_percent = risk_cfg.get("RISK_PER_TRADE_PERCENT")
-            if not isinstance(risk_percent, (int, float)) or not (0 < risk_percent <= 10):
+            if not isinstance(risk_percent, (int, float)) or not (
+                0 < risk_percent <= 10
+            ):
                 validation_errors.append(
                     f"RISK_CONFIG: RISK_PER_TRADE_PERCENT ({risk_percent}) invalid (must be a positive number, e.g., 0.1 to 10)."
                 )
             fee_rate = risk_cfg.get("FEE_RATE")
             if not isinstance(fee_rate, (int, float)) or fee_rate < 0:
-                validation_errors.append(f"RISK_CONFIG: FEE_RATE ({fee_rate}) must be a non-negative number.")
+                validation_errors.append(
+                    f"RISK_CONFIG: FEE_RATE ({fee_rate}) must be a non-negative number."
+                )
             max_pos_usdt = risk_cfg.get("MAX_POSITION_USDT")
-            if max_pos_usdt is not None and (not isinstance(max_pos_usdt, (int, float)) or max_pos_usdt <= 0):
+            if max_pos_usdt is not None and (
+                not isinstance(max_pos_usdt, (int, float)) or max_pos_usdt <= 0
+            ):
                 validation_errors.append(
                     f"RISK_CONFIG: MAX_POSITION_USDT ({max_pos_usdt}) must be a positive number if set."
                 )
             if args.dry_run:
                 dry_run_balance = risk_cfg.get("DRY_RUN_DUMMY_BALANCE")
-                if dry_run_balance is None or (not isinstance(dry_run_balance, (int, float)) or dry_run_balance <= 0):
+                if dry_run_balance is None or (
+                    not isinstance(dry_run_balance, (int, float))
+                    or dry_run_balance <= 0
+                ):
                     validation_errors.append(
                         f"RISK_CONFIG: DRY_RUN_DUMMY_BALANCE ({dry_run_balance}) must be a positive number when using --dry-run."
                     )
@@ -3835,14 +4715,20 @@ if __name__ == "__main__":
                 not isinstance(risk_cfg.get("ATR_MULTIPLIER_SL", 1.5), (int, float))
                 or risk_cfg.get("ATR_MULTIPLIER_SL", 1.5) <= 0
             ):
-                validation_errors.append("RISK_CONFIG: ATR_MULTIPLIER_SL must be a positive number.")
+                validation_errors.append(
+                    "RISK_CONFIG: ATR_MULTIPLIER_SL must be a positive number."
+                )
             if (
                 not isinstance(risk_cfg.get("ATR_MULTIPLIER_TP", 2.0), (int, float))
                 or risk_cfg.get("ATR_MULTIPLIER_TP", 2.0) < 0
             ):
-                validation_errors.append("RISK_CONFIG: ATR_MULTIPLIER_TP must be a non-negative number (0 to disable).")
+                validation_errors.append(
+                    "RISK_CONFIG: ATR_MULTIPLIER_TP must be a non-negative number (0 to disable)."
+                )
             if not isinstance(risk_cfg.get("ENABLE_TRAILING_STOP", False), bool):
-                validation_errors.append("RISK_CONFIG: ENABLE_TRAILING_STOP must be true or false.")
+                validation_errors.append(
+                    "RISK_CONFIG: ENABLE_TRAILING_STOP must be true or false."
+                )
             # Add validation for TSL parameters if TSL is enabled
 
             # Bot Config Validation
@@ -3850,90 +4736,160 @@ if __name__ == "__main__":
                 not isinstance(bot_cfg.get("SLEEP_INTERVAL_SECONDS"), (int, float))
                 or bot_cfg.get("SLEEP_INTERVAL_SECONDS") <= 0
             ):
-                validation_errors.append("BOT_CONFIG: SLEEP_INTERVAL_SECONDS must be a positive number.")
-            if not isinstance(bot_cfg.get("KLINE_LIMIT_BUFFER"), int) or bot_cfg.get("KLINE_LIMIT_BUFFER") < 0:
-                validation_errors.append("BOT_CONFIG: KLINE_LIMIT_BUFFER must be a non-negative integer.")
-            if not isinstance(bot_cfg.get("API_RECV_WINDOW", 10000), int) or bot_cfg.get("API_RECV_WINDOW", 10000) <= 0:
-                validation_errors.append("BOT_CONFIG: API_RECV_WINDOW must be a positive integer.")
-            if not isinstance(bot_cfg.get("WS_PING_INTERVAL", 20), int) or bot_cfg.get("WS_PING_INTERVAL", 20) <= 0:
-                validation_errors.append("BOT_CONFIG: WS_PING_INTERVAL must be a positive integer.")
-            if not isinstance(bot_cfg.get("WS_PING_TIMEOUT", 10), int) or bot_cfg.get("WS_PING_TIMEOUT", 10) <= 0:
-                validation_errors.append("BOT_CONFIG: WS_PING_TIMEOUT must be a positive integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: SLEEP_INTERVAL_SECONDS must be a positive number."
+                )
             if (
-                not isinstance(bot_cfg.get("WS_STARTUP_DELAY_SECONDS", 5.0), (int, float))
+                not isinstance(bot_cfg.get("KLINE_LIMIT_BUFFER"), int)
+                or bot_cfg.get("KLINE_LIMIT_BUFFER") < 0
+            ):
+                validation_errors.append(
+                    "BOT_CONFIG: KLINE_LIMIT_BUFFER must be a non-negative integer."
+                )
+            if (
+                not isinstance(bot_cfg.get("API_RECV_WINDOW", 10000), int)
+                or bot_cfg.get("API_RECV_WINDOW", 10000) <= 0
+            ):
+                validation_errors.append(
+                    "BOT_CONFIG: API_RECV_WINDOW must be a positive integer."
+                )
+            if (
+                not isinstance(bot_cfg.get("WS_PING_INTERVAL", 20), int)
+                or bot_cfg.get("WS_PING_INTERVAL", 20) <= 0
+            ):
+                validation_errors.append(
+                    "BOT_CONFIG: WS_PING_INTERVAL must be a positive integer."
+                )
+            if (
+                not isinstance(bot_cfg.get("WS_PING_TIMEOUT", 10), int)
+                or bot_cfg.get("WS_PING_TIMEOUT", 10) <= 0
+            ):
+                validation_errors.append(
+                    "BOT_CONFIG: WS_PING_TIMEOUT must be a positive integer."
+                )
+            if (
+                not isinstance(
+                    bot_cfg.get("WS_STARTUP_DELAY_SECONDS", 5.0), (int, float)
+                )
                 or bot_cfg.get("WS_STARTUP_DELAY_SECONDS", 5.0) < 0
             ):
-                validation_errors.append("BOT_CONFIG: WS_STARTUP_DELAY_SECONDS must be non-negative.")
+                validation_errors.append(
+                    "BOT_CONFIG: WS_STARTUP_DELAY_SECONDS must be non-negative."
+                )
             if (
                 not isinstance(bot_cfg.get("ORDER_CONFIRM_RETRIES", 3), int)
                 or bot_cfg.get("ORDER_CONFIRM_RETRIES", 3) < 0
             ):
-                validation_errors.append("BOT_CONFIG: ORDER_CONFIRM_RETRIES must be a non-negative integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: ORDER_CONFIRM_RETRIES must be a non-negative integer."
+                )
             if (
-                not isinstance(bot_cfg.get("ORDER_CONFIRM_DELAY_SECONDS", 2.0), (int, float))
+                not isinstance(
+                    bot_cfg.get("ORDER_CONFIRM_DELAY_SECONDS", 2.0), (int, float)
+                )
                 or bot_cfg.get("ORDER_CONFIRM_DELAY_SECONDS", 2.0) <= 0
             ):
-                validation_errors.append("BOT_CONFIG: ORDER_CONFIRM_DELAY_SECONDS must be a positive number.")
+                validation_errors.append(
+                    "BOT_CONFIG: ORDER_CONFIRM_DELAY_SECONDS must be a positive number."
+                )
             if not isinstance(bot_cfg.get("PROCESS_CONFIRMED_KLINE_ONLY", True), bool):
-                validation_errors.append("BOT_CONFIG: PROCESS_CONFIRMED_KLINE_ONLY must be true or false.")
+                validation_errors.append(
+                    "BOT_CONFIG: PROCESS_CONFIRMED_KLINE_ONLY must be true or false."
+                )
             if not isinstance(bot_cfg.get("CLOSE_POSITIONS_ON_SHUTDOWN", False), bool):
-                validation_errors.append("BOT_CONFIG: CLOSE_POSITIONS_ON_SHUTDOWN must be true or false.")
+                validation_errors.append(
+                    "BOT_CONFIG: CLOSE_POSITIONS_ON_SHUTDOWN must be true or false."
+                )
             if (
                 not isinstance(bot_cfg.get("HIGHER_TF_CACHE_SECONDS", 3600), int)
                 or bot_cfg.get("HIGHER_TF_CACHE_SECONDS", 3600) < 0
             ):
-                validation_errors.append("BOT_CONFIG: HIGHER_TF_CACHE_SECONDS must be a non-negative integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: HIGHER_TF_CACHE_SECONDS must be a non-negative integer."
+                )
             if (
                 not isinstance(bot_cfg.get("KLINE_STALENESS_SECONDS", 300), int)
                 or bot_cfg.get("KLINE_STALENESS_SECONDS", 300) <= 0
             ):
-                validation_errors.append("BOT_CONFIG: KLINE_STALENESS_SECONDS must be a positive integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: KLINE_STALENESS_SECONDS must be a positive integer."
+                )
             if (
                 not isinstance(bot_cfg.get("BALANCE_CHECK_INTERVAL_SECONDS", 300), int)
                 or bot_cfg.get("BALANCE_CHECK_INTERVAL_SECONDS", 300) <= 0
             ):
-                validation_errors.append("BOT_CONFIG: BALANCE_CHECK_INTERVAL_SECONDS must be a positive integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: BALANCE_CHECK_INTERVAL_SECONDS must be a positive integer."
+                )
             if (
                 not isinstance(bot_cfg.get("COOLDOWN_PERIOD_SECONDS", 300), int)
                 or bot_cfg.get("COOLDOWN_PERIOD_SECONDS", 300) < 0
             ):
-                validation_errors.append("BOT_CONFIG: COOLDOWN_PERIOD_SECONDS must be a non-negative integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: COOLDOWN_PERIOD_SECONDS must be a non-negative integer."
+                )
             if (
                 not isinstance(bot_cfg.get("METRICS_LOG_INTERVAL_SECONDS", 3600), int)
                 or bot_cfg.get("METRICS_LOG_INTERVAL_SECONDS", 3600) <= 0
             ):
-                validation_errors.append("BOT_CONFIG: METRICS_LOG_INTERVAL_SECONDS must be a positive integer.")
+                validation_errors.append(
+                    "BOT_CONFIG: METRICS_LOG_INTERVAL_SECONDS must be a positive integer."
+                )
 
             # Symbol Configs Validation
             if not isinstance(symbols, list):
                 validation_errors.append("BYBIT_CONFIG: SYMBOLS must be a list.")
             elif not symbols:
-                validation_errors.append("BYBIT_CONFIG: SYMBOLS list is empty. Add at least one symbol configuration.")
+                validation_errors.append(
+                    "BYBIT_CONFIG: SYMBOLS list is empty. Add at least one symbol configuration."
+                )
             else:
                 seen_symbols = set()
                 # Define valid timeframes based on Bybit V5 API documentation
-                valid_timeframes = {"1", "3", "5", "15", "30", "60", "120", "240", "360", "720", "D", "W", "M"}
+                valid_timeframes = {
+                    "1",
+                    "3",
+                    "5",
+                    "15",
+                    "30",
+                    "60",
+                    "120",
+                    "240",
+                    "360",
+                    "720",
+                    "D",
+                    "W",
+                    "M",
+                }
                 for i, symbol_cfg in enumerate(symbols):
                     if not isinstance(symbol_cfg, dict):
-                        validation_errors.append(f"SYMBOLS entry {i}: Must be a dictionary.")
+                        validation_errors.append(
+                            f"SYMBOLS entry {i}: Must be a dictionary."
+                        )
                         continue
                     symbol = symbol_cfg.get("SYMBOL")
                     if not symbol or not isinstance(symbol, str):
-                        validation_errors.append(f"SYMBOLS entry {i}: Missing/invalid 'SYMBOL' key (must be a string).")
+                        validation_errors.append(
+                            f"SYMBOLS entry {i}: Missing/invalid 'SYMBOL' key (must be a string)."
+                        )
                         continue
                     if symbol in seen_symbols:
                         validation_errors.append(f"Duplicate symbol found: {symbol}")
                         continue
                     seen_symbols.add(symbol)
 
-                    if "STRATEGY_CONFIG" not in symbol_cfg or not isinstance(symbol_cfg.get("STRATEGY_CONFIG"), dict):
+                    if "STRATEGY_CONFIG" not in symbol_cfg or not isinstance(
+                        symbol_cfg.get("STRATEGY_CONFIG"), dict
+                    ):
                         validation_errors.append(
                             f"Symbol {symbol}: Missing or invalid 'STRATEGY_CONFIG' (must be a dictionary)."
                         )
                     leverage = symbol_cfg.get("LEVERAGE")
                     # Allow leverage 0 or 1 for spot? Check Bybit rules. Assuming 1-100 for derivatives.
                     # For spot, leverage is irrelevant, maybe validate based on category later?
-                    if account_type != "SPOT" and (not isinstance(leverage, int) or not (1 <= leverage <= 100)):
+                    if account_type != "SPOT" and (
+                        not isinstance(leverage, int) or not (1 <= leverage <= 100)
+                    ):
                         validation_errors.append(
                             f"Symbol {symbol}: LEVERAGE ({leverage}) invalid (must be an integer between 1 and 100 for {account_type})."
                         )
@@ -3943,21 +4899,26 @@ if __name__ == "__main__":
                             f"Symbol {symbol}: Invalid TIMEFRAME '{timeframe}' (must be one of {valid_timeframes})"
                         )
                     if not isinstance(symbol_cfg.get("USE_WEBSOCKET", True), bool):
-                        validation_errors.append(f"Symbol {symbol}: USE_WEBSOCKET must be true or false.")
+                        validation_errors.append(
+                            f"Symbol {symbol}: USE_WEBSOCKET must be true or false."
+                        )
 
                     # Validate Strategy Config parameters
                     strategy_cfg = symbol_cfg.get("STRATEGY_CONFIG", {})
                     if isinstance(strategy_cfg, dict):
                         # Check indicator periods
                         for k, v in strategy_cfg.items():
-                            if "PERIOD" in k.upper() and (not isinstance(v, int) or v <= 0):
+                            if "PERIOD" in k.upper() and (
+                                not isinstance(v, int) or v <= 0
+                            ):
                                 validation_errors.append(
                                     f"Symbol {symbol}: Strategy param '{k}' ({v}) must be a positive integer."
                                 )
                             # Check boolean flags
-                            if k.upper() in ["USE_EHLERS_SMOOTHER", "ENABLE_MULTI_TIMEFRAME"] and not isinstance(
-                                v, bool
-                            ):
+                            if k.upper() in [
+                                "USE_EHLERS_SMOOTHER",
+                                "ENABLE_MULTI_TIMEFRAME",
+                            ] and not isinstance(v, bool):
                                 validation_errors.append(
                                     f"Symbol {symbol}: Strategy param '{k}' ({v}) must be true or false."
                                 )
@@ -3973,13 +4934,23 @@ if __name__ == "__main__":
                                     f"Symbol {symbol}: Strategy param '{k}' ({v}) must be a number."
                                 )
                             # Check trigger price types
-                            valid_trigger_types = ["LastPrice", "MarkPrice", "IndexPrice"]
-                            if k.upper() in ["SL_TRIGGER_BY", "TP_TRIGGER_BY"] and v not in valid_trigger_types:
+                            valid_trigger_types = [
+                                "LastPrice",
+                                "MarkPrice",
+                                "IndexPrice",
+                            ]
+                            if (
+                                k.upper() in ["SL_TRIGGER_BY", "TP_TRIGGER_BY"]
+                                and v not in valid_trigger_types
+                            ):
                                 validation_errors.append(
                                     f"Symbol {symbol}: Strategy param '{k}' ({v}) must be one of {valid_trigger_types}."
                                 )
                             # Check TPSL mode
-                            if k.upper() == "TPSL_MODE" and v not in ["Full", "Partial"]:
+                            if k.upper() == "TPSL_MODE" and v not in [
+                                "Full",
+                                "Partial",
+                            ]:
                                 validation_errors.append(
                                     f"Symbol {symbol}: Strategy param 'TPSL_MODE' ({v}) must be 'Full' or 'Partial'."
                                 )
@@ -4004,7 +4975,11 @@ if __name__ == "__main__":
     except SystemExit:  # Raised by load_config on file/JSON errors
         sys.exit(1)
     except Exception as cfg_e:
-        log_console(logging.CRITICAL, f"Unexpected error loading or validating config: {cfg_e}", exc_info=True)
+        log_console(
+            logging.CRITICAL,
+            f"Unexpected error loading or validating config: {cfg_e}",
+            exc_info=True,
+        )
         sys.exit(1)
 
     # Report Validation Results
@@ -4025,38 +5000,59 @@ if __name__ == "__main__":
     try:
         log_console(logging.INFO, "Initializing main trader instance...")
         # Pass the validated config object
-        trader_instance = MomentumScannerTrader(API_KEY, API_SECRET, config, args.dry_run)
+        trader_instance = MomentumScannerTrader(
+            API_KEY, API_SECRET, config, args.dry_run
+        )
 
         # Check if initialization succeeded (trader_instance.running should be True)
         if trader_instance and trader_instance.running:
             trader_instance.run()  # This call blocks until shutdown
         else:
             # This case should ideally be caught by exceptions during init, but safeguard here
-            log_console(logging.CRITICAL, "Trader initialization failed or did not start. Bot cannot run.")
+            log_console(
+                logging.CRITICAL,
+                "Trader initialization failed or did not start. Bot cannot run.",
+            )
             exit_code = 1
 
     except KeyboardInterrupt:
-        log_console(logging.INFO, "\nKeyboardInterrupt detected. Initiating shutdown...")
+        log_console(
+            logging.INFO, "\nKeyboardInterrupt detected. Initiating shutdown..."
+        )
         if trader_instance:
             trader_instance.shutdown()  # Trigger graceful shutdown
         else:
-            log_console(logging.WARNING, "Trader instance was not fully initialized before interrupt.")
+            log_console(
+                logging.WARNING,
+                "Trader instance was not fully initialized before interrupt.",
+            )
         exit_code = 0  # Clean exit on user interrupt
     except (ConnectionError, RuntimeError, ValueError) as critical_e:
         # Catch specific critical errors that might occur during runtime or init
-        log_console(logging.CRITICAL, f"Caught critical error: {critical_e}. Bot stopped.", exc_info=False)
+        log_console(
+            logging.CRITICAL,
+            f"Caught critical error: {critical_e}. Bot stopped.",
+            exc_info=False,
+        )
         if trader_instance:
             trader_instance.shutdown()  # Attempt shutdown
         exit_code = 1
     except Exception as e:
         # Catch any other unexpected exceptions in the main execution flow
-        log_console(logging.CRITICAL, f"Unexpected critical error in main execution: {e}", exc_info=True)
+        log_console(
+            logging.CRITICAL,
+            f"Unexpected critical error in main execution: {e}",
+            exc_info=True,
+        )
         if trader_instance:
             trader_instance.shutdown()  # Attempt shutdown
         exit_code = 1
     finally:
         # This block executes regardless of how the try block exits
-        log_console(log_level_console, f"{Fore.CYAN}{Style.BRIGHT}--- Bot Execution Finished ---")
+        log_console(
+            log_level_console,
+            f"{Fore.CYAN}{Style.BRIGHT}--- Bot Execution Finished ---",
+        )
         # Ensure logging resources are released
         logging.shutdown()
         # Exit with the determined exit code

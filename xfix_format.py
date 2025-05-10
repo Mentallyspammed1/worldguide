@@ -95,7 +95,9 @@ def process_files(directory, file_pattern, api_key, max_calls):
             continue
 
     print(f"\nProcessing complete at {datetime.now()}")
-    print(f"Processed {processed_files} file(s), modified {len(modified_files)} file(s)")
+    print(
+        f"Processed {processed_files} file(s), modified {len(modified_files)} file(s)"
+    )
     if modified_files:
         print("Modified files:")
         for filepath in modified_files:

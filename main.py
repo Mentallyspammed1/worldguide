@@ -21,7 +21,9 @@ try:
 
     init(autoreset=True)  # Initialize colorama
 except ImportError:
-    print("Warning: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print(
+        "Warning: colorama library not found. Logs will not be colored. Install: pip install colorama"
+    )
 
     # Define dummy color constants if colorama is not available
     class DummyColor:
@@ -33,17 +35,29 @@ try:
     from dotenv import load_dotenv
 
     load_dotenv()
-    print(f"{Fore.CYAN}Attempted to load environment variables from .env file.{Style.RESET_ALL}")
+    print(
+        f"{Fore.CYAN}Attempted to load environment variables from .env file.{Style.RESET_ALL}"
+    )
 except ImportError:
-    print(f"{Fore.YELLOW}dotenv library not found, relying on system environment variables only.{Style.RESET_ALL}")
+    print(
+        f"{Fore.YELLOW}dotenv library not found, relying on system environment variables only.{Style.RESET_ALL}"
+    )
 
 # --- Local Module Imports ---
 # Import necessary components from the split modules
 from config import Config
-from utils import validate_market, format_order_id, send_sms_alert  # Import placeholders/utils
+from utils import (
+    validate_market,
+    format_order_id,
+    send_sms_alert,
+)  # Import placeholders/utils
 from exchange_setup import initialize_bybit
 from account_config import set_leverage, fetch_account_info_bybit_v5
-from market_data import fetch_usdt_balance, fetch_ohlcv_paginated, fetch_ticker_validated
+from market_data import (
+    fetch_usdt_balance,
+    fetch_ohlcv_paginated,
+    fetch_ticker_validated,
+)
 from order_management import (
     place_market_order_slippage_check,
     cancel_all_orders,
@@ -51,7 +65,11 @@ from order_management import (
     place_native_stop_loss,
     fetch_open_orders_filtered,
 )
-from position_management import get_current_position_bybit_v5, close_position_reduce_only, fetch_position_risk_bybit_v5
+from position_management import (
+    get_current_position_bybit_v5,
+    close_position_reduce_only,
+    fetch_position_risk_bybit_v5,
+)
 
 # --- Logger Setup ---
 # Configure logging for the main script and potentially set level for imported modules
@@ -72,7 +90,9 @@ handler.setFormatter(formatter)
 if not main_logger.hasHandlers():
     main_logger.addHandler(handler)
 
-main_logger.info(f"{Fore.YELLOW}{Style.BRIGHT}--- Main Script Execution Started ---{Style.RESET_ALL}")
+main_logger.info(
+    f"{Fore.YELLOW}{Style.BRIGHT}--- Main Script Execution Started ---{Style.RESET_ALL}"
+)
 
 # --- Real Implementation of Placeholders (CRITICAL) ---
 # The helper modules rely on these being correctly defined and available.
@@ -177,7 +197,9 @@ try:
 
     # 4. Set Leverage
     main_logger.info("\n--- 4. Setting Leverage ---")
-    lev_ok = set_leverage(exchange_instance, config.SYMBOL, config.DEFAULT_LEVERAGE, config)
+    lev_ok = set_leverage(
+        exchange_instance, config.SYMBOL, config.DEFAULT_LEVERAGE, config
+    )
     if not lev_ok:
         # This might fail legitimately on some account types (e.g., UTA Isolated)
         main_logger.warning(
@@ -192,7 +214,9 @@ try:
     main_logger.info("\n--- 5. Fetching Ticker ---")
     ticker = fetch_ticker_validated(exchange_instance, config.SYMBOL, config)
     if not ticker:
-        main_logger.warning(f"{Fore.YELLOW}Fetch Ticker failed after retries.{Style.RESET_ALL}")
+        main_logger.warning(
+            f"{Fore.YELLOW}Fetch Ticker failed after retries.{Style.RESET_ALL}"
+        )
     else:
         main_logger.info(
             f"{Fore.GREEN}Fetch Ticker OK: Last={ticker.get('last')}, Bid={ticker.get('bid')}, Ask={ticker.get('ask')}, Spread={ticker.get('spread_pct'):.4f}%{Style.RESET_ALL}"
@@ -230,7 +254,9 @@ try:
     run_advanced_tests = True  # Set to False to skip these
 
     if run_advanced_tests:
-        main_logger.info(f"\n{Style.BRIGHT}--- Running Advanced Tests ---{Style.RESET_ALL}")
+        main_logger.info(
+            f"\n{Style.BRIGHT}--- Running Advanced Tests ---{Style.RESET_ALL}"
+        )
 
         # Fetch Account Info
         main_logger.info("\n--- Adv 1. Fetching Account Info ---")
@@ -250,7 +276,9 @@ try:
                 f"{Fore.GREEN}Fetch OHLCV OK: Fetched {len(ohlcv_df)} candles. Last Close: {ohlcv_df['close'].iloc[-1]}{Style.RESET_ALL}"
             )
         elif ohlcv_df is not None and ohlcv_df.empty:
-            main_logger.info(f"{Fore.CYAN}Fetch OHLCV OK: No candles returned for the period.{Style.RESET_ALL}")
+            main_logger.info(
+                f"{Fore.CYAN}Fetch OHLCV OK: No candles returned for the period.{Style.RESET_ALL}"
+            )
         else:
             main_logger.warning(f"{Fore.YELLOW}Fetch OHLCV failed.{Style.RESET_ALL}")
 
@@ -264,31 +292,47 @@ try:
 
             # Ensure position is flat before starting tests
             main_logger.info("\n--- Pre-Test: Ensure Flat Position ---")
-            initial_pos = get_current_position_bybit_v5(exchange_instance, config.SYMBOL, config)
+            initial_pos = get_current_position_bybit_v5(
+                exchange_instance, config.SYMBOL, config
+            )
             if initial_pos["side"] != config.POS_NONE:
                 main_logger.warning(
                     f"Existing {initial_pos['side']} position found ({initial_pos['qty']}). Attempting to close..."
                 )
                 close_result = close_position_reduce_only(
-                    exchange_instance, config.SYMBOL, config, position_to_close=initial_pos, reason="Test Prep Close"
+                    exchange_instance,
+                    config.SYMBOL,
+                    config,
+                    position_to_close=initial_pos,
+                    reason="Test Prep Close",
                 )
                 time.sleep(3)  # Wait for closure to process
-                current_pos_check = get_current_position_bybit_v5(exchange_instance, config.SYMBOL, config)
+                current_pos_check = get_current_position_bybit_v5(
+                    exchange_instance, config.SYMBOL, config
+                )
                 if current_pos_check["side"] != config.POS_NONE:
                     main_logger.error(
                         f"{Back.RED}Failed to close pre-existing position. Aborting order tests.{Style.RESET_ALL}"
                     )
                     sys.exit(1)  # Abort if cleanup fails
                 else:
-                    main_logger.info(f"{Fore.GREEN}Pre-existing position closed successfully.{Style.RESET_ALL}")
+                    main_logger.info(
+                        f"{Fore.GREEN}Pre-existing position closed successfully.{Style.RESET_ALL}"
+                    )
             else:
-                main_logger.info(f"{Fore.CYAN}Position confirmed flat. Proceeding with order tests.{Style.RESET_ALL}")
+                main_logger.info(
+                    f"{Fore.CYAN}Position confirmed flat. Proceeding with order tests.{Style.RESET_ALL}"
+                )
 
             # Test Limit Order Placement
             main_logger.info("\n--- Test 8a. Place Limit Order ---")
-            current_ticker = fetch_ticker_validated(exchange_instance, config.SYMBOL, config)
+            current_ticker = fetch_ticker_validated(
+                exchange_instance, config.SYMBOL, config
+            )
             if current_ticker and current_ticker.get("bid"):
-                limit_buy_price = current_ticker["bid"] * Decimal("0.995")  # Place 0.5% below current bid
+                limit_buy_price = current_ticker["bid"] * Decimal(
+                    "0.995"
+                )  # Place 0.5% below current bid
                 limit_qty = Decimal("0.001")  # Small BTC test quantity
                 limit_order = place_limit_order_tif(
                     exchange_instance,
@@ -310,7 +354,12 @@ try:
                     # Test Fetch Open Orders (Filtered)
                     main_logger.info("\n--- Test 8b. Fetch Open Limit Order ---")
                     open_limit_orders = fetch_open_orders_filtered(
-                        exchange_instance, config.SYMBOL, config, side="buy", order_type="limit", order_filter="Order"
+                        exchange_instance,
+                        config.SYMBOL,
+                        config,
+                        side="buy",
+                        order_type="limit",
+                        order_filter="Order",
                     )
                     found_order = False
                     if open_limit_orders:
@@ -328,9 +377,16 @@ try:
 
                     # Test Cancel All Orders (should cancel the limit order)
                     main_logger.info("\n--- Test 8c. Cancel All Orders ---")
-                    cancel_ok = cancel_all_orders(exchange_instance, config.SYMBOL, config, reason="Test Cancel Limit")
+                    cancel_ok = cancel_all_orders(
+                        exchange_instance,
+                        config.SYMBOL,
+                        config,
+                        reason="Test Cancel Limit",
+                    )
                     if cancel_ok:
-                        main_logger.info(f"{Fore.GREEN}Cancel All Orders executed successfully.{Style.RESET_ALL}")
+                        main_logger.info(
+                            f"{Fore.GREEN}Cancel All Orders executed successfully.{Style.RESET_ALL}"
+                        )
                     else:
                         main_logger.warning(
                             f"{Fore.YELLOW}Cancel All Orders reported potential issues. Check logs.{Style.RESET_ALL}"
@@ -355,7 +411,9 @@ try:
                     )
 
             else:
-                main_logger.error("Cannot get current ticker bid price for limit order test.")
+                main_logger.error(
+                    "Cannot get current ticker bid price for limit order test."
+                )
 
             # Test Market Order Entry
             main_logger.info("\n--- Test 9a. Place Market Order (Entry) ---")
@@ -374,8 +432,12 @@ try:
                 time.sleep(3)  # Wait for position to update
 
                 # Verify position opened
-                pos_after_entry = get_current_position_bybit_v5(exchange_instance, config.SYMBOL, config)
-                if pos_after_entry["side"] != config.POS_LONG or pos_after_entry["qty"] < entry_qty * Decimal("0.9"):
+                pos_after_entry = get_current_position_bybit_v5(
+                    exchange_instance, config.SYMBOL, config
+                )
+                if pos_after_entry["side"] != config.POS_LONG or pos_after_entry[
+                    "qty"
+                ] < entry_qty * Decimal("0.9"):
                     main_logger.error(
                         f"{Back.RED}Position check after market buy failed! Side: {pos_after_entry['side']}, Qty: {pos_after_entry['qty']}. Aborting.{Style.RESET_ALL}"
                     )
@@ -386,7 +448,9 @@ try:
 
                     # Test Native Stop Loss
                     main_logger.info("\n--- Test 9b. Place Native Stop Loss ---")
-                    sl_price = pos_after_entry["entry_price"] * Decimal("0.95")  # 5% below entry for test
+                    sl_price = pos_after_entry["entry_price"] * Decimal(
+                        "0.95"
+                    )  # 5% below entry for test
                     sl_order = place_native_stop_loss(
                         exchange_instance,
                         config.SYMBOL,
@@ -404,9 +468,16 @@ try:
 
                         # Fetch Stop Orders to verify
                         open_stops = fetch_open_orders_filtered(
-                            exchange_instance, config.SYMBOL, config, order_filter="StopOrder"
+                            exchange_instance,
+                            config.SYMBOL,
+                            config,
+                            order_filter="StopOrder",
                         )
-                        found_sl = any(o.get("id") == sl_order_id for o in open_stops) if open_stops else False
+                        found_sl = (
+                            any(o.get("id") == sl_order_id for o in open_stops)
+                            if open_stops
+                            else False
+                        )
                         if found_sl:
                             main_logger.info(
                                 f"{Fore.GREEN}Verified SL order exists via fetch (StopOrder filter).{Style.RESET_ALL}"
@@ -422,22 +493,34 @@ try:
                         )
                         try:
                             cancel_params = {"category": _get_v5_category(market_info)}
-                            main_logger.info(f"Attempting to cancel SL order ID: {sl_order_id}...")
-                            exchange_instance.cancel_order(sl_order_id, config.SYMBOL, params=cancel_params)
+                            main_logger.info(
+                                f"Attempting to cancel SL order ID: {sl_order_id}..."
+                            )
+                            exchange_instance.cancel_order(
+                                sl_order_id, config.SYMBOL, params=cancel_params
+                            )
                             main_logger.info(
                                 f"{Fore.GREEN}Specific SL order cancellation request sent.{Style.RESET_ALL}"
                             )
                         except Exception as cancel_err:
-                            main_logger.error(f"Failed to cancel specific SL order: {cancel_err}")
+                            main_logger.error(
+                                f"Failed to cancel specific SL order: {cancel_err}"
+                            )
                         time.sleep(1)
 
                     else:
-                        main_logger.warning(f"{Fore.YELLOW}Native Stop Loss Placement Failed.{Style.RESET_ALL}")
+                        main_logger.warning(
+                            f"{Fore.YELLOW}Native Stop Loss Placement Failed.{Style.RESET_ALL}"
+                        )
 
                     # Test Close Position
-                    main_logger.info("\n--- Test 9d. Close Position (Market ReduceOnly) ---")
+                    main_logger.info(
+                        "\n--- Test 9d. Close Position (Market ReduceOnly) ---"
+                    )
                     # Fetch position again before closing, in case SL triggered or something changed
-                    pos_before_close = get_current_position_bybit_v5(exchange_instance, config.SYMBOL, config)
+                    pos_before_close = get_current_position_bybit_v5(
+                        exchange_instance, config.SYMBOL, config
+                    )
                     if pos_before_close["side"] == config.POS_NONE:
                         main_logger.info(
                             f"{Fore.CYAN}Position already closed before final close attempt. Skipping.{Style.RESET_ALL}"
@@ -461,7 +544,9 @@ try:
 
                     # Final position check
                     time.sleep(2)
-                    final_pos_check = get_current_position_bybit_v5(exchange_instance, config.SYMBOL, config)
+                    final_pos_check = get_current_position_bybit_v5(
+                        exchange_instance, config.SYMBOL, config
+                    )
                     if final_pos_check["side"] == config.POS_NONE:
                         main_logger.info(
                             f"{Fore.GREEN}{Style.BRIGHT}Position Confirmed Flat After All Tests.{Style.RESET_ALL}"
@@ -472,32 +557,52 @@ try:
                         )
 
         elif run_order_tests:
-            main_logger.error(f"{Back.RED}Order tests skipped because TESTNET_MODE is False.{Style.RESET_ALL}")
+            main_logger.error(
+                f"{Back.RED}Order tests skipped because TESTNET_MODE is False.{Style.RESET_ALL}"
+            )
         else:
-            main_logger.info(f"{Fore.CYAN}Order placement tests were disabled.{Style.RESET_ALL}")
+            main_logger.info(
+                f"{Fore.CYAN}Order placement tests were disabled.{Style.RESET_ALL}"
+            )
 
     main_logger.info(
         f"\n{Fore.GREEN}{Style.BRIGHT}--- Main Script Execution Completed Successfully ---{Style.RESET_ALL}"
     )
 
 except ccxt.AuthenticationError as e:
-    main_logger.critical(f"\n{Back.RED}{Fore.WHITE}--- Authentication Error ---{Style.RESET_ALL}")
-    main_logger.critical(f"Failed to authenticate with Bybit. Check API Key/Secret and permissions: {e}")
-    main_logger.critical("Ensure keys are correctly set in environment variables or .env file.")
+    main_logger.critical(
+        f"\n{Back.RED}{Fore.WHITE}--- Authentication Error ---{Style.RESET_ALL}"
+    )
+    main_logger.critical(
+        f"Failed to authenticate with Bybit. Check API Key/Secret and permissions: {e}"
+    )
+    main_logger.critical(
+        "Ensure keys are correctly set in environment variables or .env file."
+    )
     sys.exit(1)
 except (ccxt.NetworkError, ccxt.ExchangeNotAvailable) as e:
-    main_logger.critical(f"\n{Back.RED}{Fore.WHITE}--- Network/Exchange Error ---{Style.RESET_ALL}")
+    main_logger.critical(
+        f"\n{Back.RED}{Fore.WHITE}--- Network/Exchange Error ---{Style.RESET_ALL}"
+    )
     main_logger.critical(f"Could not connect to Bybit or exchange is unavailable: {e}")
     sys.exit(1)
 except ccxt.BadSymbol as e:
-    main_logger.critical(f"\n{Back.RED}{Fore.WHITE}--- Bad Symbol Error ---{Style.RESET_ALL}")
-    main_logger.critical(f"Invalid or inactive symbol used: {config.SYMBOL}. Error: {e}")
+    main_logger.critical(
+        f"\n{Back.RED}{Fore.WHITE}--- Bad Symbol Error ---{Style.RESET_ALL}"
+    )
+    main_logger.critical(
+        f"Invalid or inactive symbol used: {config.SYMBOL}. Error: {e}"
+    )
     sys.exit(1)
 except Exception as e:
-    main_logger.critical(f"\n{Back.RED}{Fore.WHITE}--- Main Script Execution Failed ---{Style.RESET_ALL}")
+    main_logger.critical(
+        f"\n{Back.RED}{Fore.WHITE}--- Main Script Execution Failed ---{Style.RESET_ALL}"
+    )
     main_logger.critical(f"An unexpected error occurred: {e}", exc_info=True)
     # Optional: Send SMS on critical failure
-    send_sms_alert(f"[BybitApp] CRITICAL FAILURE in main script: {type(e).__name__}", config)
+    send_sms_alert(
+        f"[BybitApp] CRITICAL FAILURE in main script: {type(e).__name__}", config
+    )
     sys.exit(1)
 
 finally:
@@ -508,6 +613,8 @@ finally:
             # exchange_instance.close()
             main_logger.debug("Exchange instance cleanup (if necessary).")
         except Exception as close_err:
-            main_logger.warning(f"Error during exchange instance cleanup (ignored): {close_err}")
+            main_logger.warning(
+                f"Error during exchange instance cleanup (ignored): {close_err}"
+            )
     print("-" * 60)
     main_logger.info(f"{Fore.YELLOW}Finished main script execution.{Style.RESET_ALL}")

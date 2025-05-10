@@ -173,7 +173,9 @@ class TradingConfig:
                 if not isinstance(value, (int, float)):
                     raise ValueError(f"Configuration value '{key}' must be numeric")
                 if value < min_val or value > max_val:
-                    raise ValueError(f"Configuration value '{key}' must be between {min_val} and {max_val}")
+                    raise ValueError(
+                        f"Configuration value '{key}' must be between {min_val} and {max_val}"
+                    )
 
         # Validate weight sets
         for strategy, weights in config.get("weight_sets", {}).items():
@@ -184,7 +186,9 @@ class TradingConfig:
 
 # API Client
 class BybitAPIClient:
-    def __init__(self, api_key: str, api_secret: str, base_url: str = "https://api.bybit.com") -> None:
+    def __init__(
+        self, api_key: str, api_secret: str, base_url: str = "https://api.bybit.com"
+    ) -> None:
         self.api_key = api_key
         self.api_secret = api_secret
         self.base_url = base_url
@@ -202,14 +206,20 @@ class BybitAPIClient:
         session.mount("https://", HTTPAdapter(max_retries=retries))
         return session
 
-    def _sign_request(self, method: str, endpoint: str, params: dict | None = None) -> dict:
+    def _sign_request(
+        self, method: str, endpoint: str, params: dict | None = None
+    ) -> dict:
         """Signs API requests with HMAC signature."""
         timestamp = str(int(datetime.now().timestamp() * 1000))
         params = params or {}
         signature_params = params.copy()
         signature_params["timestamp"] = timestamp
-        param_str = "&".join(f"{key}={value}" for key, value in sorted(signature_params.items()))
-        signature = hmac.new(self.api_secret.encode(), param_str.encode(), hashlib.sha256).hexdigest()
+        param_str = "&".join(
+            f"{key}={value}" for key, value in sorted(signature_params.items())
+        )
+        signature = hmac.new(
+            self.api_secret.encode(), param_str.encode(), hashlib.sha256
+        ).hexdigest()
 
         return {
             "X-BAPI-API-KEY": self.api_key,
@@ -251,7 +261,9 @@ class BybitAPIClient:
                 ret_code = json_response.get("retCode")
                 ret_msg = json_response.get("retMsg")
                 if logger:
-                    logger.error(f"Bybit API error: [bold red]{ret_code}[/bold red] - [yellow]{ret_msg}[/yellow]")
+                    logger.error(
+                        f"Bybit API error: [bold red]{ret_code}[/bold red] - [yellow]{ret_msg}[/yellow]"
+                    )
                 return None
 
         except requests.exceptions.HTTPError as http_err:
@@ -270,7 +282,9 @@ class BybitAPIClient:
             return None
         except Exception as e:
             if logger:
-                logger.exception(f"[bold red]Unexpected error in API request:[/bold red] {e}")
+                logger.exception(
+                    f"[bold red]Unexpected error in API request:[/bold red] {e}"
+                )
             return None
 
 
@@ -303,13 +317,19 @@ class TradingAnalyzer:
             return "[yellow]Orderbook data not available.[/yellow]"
 
         try:
-            bids = pd.DataFrame(orderbook["bids"], columns=["price", "size"], dtype=float)
-            asks = pd.DataFrame(orderbook["asks"], columns=["price", "size"], dtype=float)
+            bids = pd.DataFrame(
+                orderbook["bids"], columns=["price", "size"], dtype=float
+            )
+            asks = pd.DataFrame(
+                orderbook["asks"], columns=["price", "size"], dtype=float
+            )
 
             analysis_output = ""
             threshold = self.config["orderbook_cluster_threshold"]
 
-            def check_cluster_at_level(level_name: str, level_price: float) -> str | None:
+            def check_cluster_at_level(
+                level_name: str, level_price: float
+            ) -> str | None:
                 """Checks for significant orderbook clusters at a given price level."""
                 bid_volume_at_level = bids[
                     (bids["price"] <= level_price + (level_price * 0.0005))
@@ -328,18 +348,24 @@ class TradingAnalyzer:
                 return None
 
             for level_type, levels in self.levels.get("Support", {}).items():
-                cluster_analysis = check_cluster_at_level(f"Support {level_type}", levels)
+                cluster_analysis = check_cluster_at_level(
+                    f"Support {level_type}", levels
+                )
                 if cluster_analysis:
                     analysis_output += f"  {cluster_analysis}\n"
 
             for level_type, levels in self.levels.get("Resistance", {}).items():
-                cluster_analysis = check_cluster_at_level(f"Resistance {level_type}", levels)
+                cluster_analysis = check_cluster_at_level(
+                    f"Resistance {level_type}", levels
+                )
                 if cluster_analysis:
                     analysis_output += f"  {cluster_analysis}\n"
 
             for level_name, level_price in self.levels.items():
                 if isinstance(level_price, (float, int)):
-                    cluster_analysis = check_cluster_at_level(f"Pivot {level_name}", level_price)
+                    cluster_analysis = check_cluster_at_level(
+                        f"Pivot {level_name}", level_price
+                    )
                     if cluster_analysis:
                         analysis_output += f"  {cluster_analysis}\n"
 
@@ -364,10 +390,14 @@ class TradingAnalyzer:
                 "adx": [self.calculate_adx()] * 3,
                 "adi": self.calculate_adi().tail(3).tolist(),
                 "mom": [self.determine_trend_momentum()] * 3,
-                "sma": [self.calculate_sma(10).iloc[-1]] if not self.calculate_sma(10).empty else [np.nan],
+                "sma": [self.calculate_sma(10).iloc[-1]]
+                if not self.calculate_sma(10).empty
+                else [np.nan],
                 "psar": self.calculate_psar().tail(3).tolist(),
                 "fve": self.calculate_fve().tail(3).tolist(),
-                "macd": self.calculate_macd().tail(3).values.tolist() if not self.calculate_macd().empty else [],
+                "macd": self.calculate_macd().tail(3).values.tolist()
+                if not self.calculate_macd().empty
+                else [],
                 "bollinger_bands": self.calculate_bollinger_bands(
                     window=self.config["bollinger_bands_period"],
                     num_std_dev=self.config["bollinger_bands_std_dev"],
@@ -382,7 +412,9 @@ class TradingAnalyzer:
                 "stoch_rsi_d": self.calculate_stoch_rsi()["d"].tail(3).tolist()
                 if not self.calculate_stoch_rsi().empty
                 else [np.nan] * 3,
-                "vwap": self.calculate_vwap().tail(3).tolist() if not self.calculate_vwap().empty else [np.nan] * 3,
+                "vwap": self.calculate_vwap().tail(3).tolist()
+                if not self.calculate_vwap().empty
+                else [np.nan] * 3,
                 "ema_20": self.calculate_ema(window=20).tail(3).tolist()
                 if not self.calculate_ema(window=20).empty
                 else [np.nan] * 3,
@@ -402,11 +434,17 @@ class TradingAnalyzer:
         close = self.df["close"].iloc[-1]
 
         self._calculate_levels(high, low, close)
-        nearest_supports, nearest_resistances = self.find_nearest_levels(self.current_price)
+        nearest_supports, nearest_resistances = self.find_nearest_levels(
+            self.current_price
+        )
 
         self.indicator_values = self.calculate_indicators()
-        orderbook_data = fetch_orderbook(self.symbol, self.config["orderbook_limit"], self.logger)
-        orderbook_analysis_str = self.analyze_orderbook_levels(orderbook_data, current_price)
+        orderbook_data = fetch_orderbook(
+            self.symbol, self.config["orderbook_limit"], self.logger
+        )
+        orderbook_analysis_str = self.analyze_orderbook_levels(
+            orderbook_data, current_price
+        )
 
         analysis_output_str = self._format_analysis_output(
             timestamp,
@@ -496,9 +534,17 @@ class TradingAnalyzer:
 
         return analysis_output + levels_output + orderbook_output
 
-    def interpret_indicator(self, indicator_name: str, values: list[float]) -> str | None:
+    def interpret_indicator(
+        self, indicator_name: str, values: list[float]
+    ) -> str | None:
         """Interprets indicator values and returns a Rich-formatted string."""
-        if values is None or not values or all(np.isnan(v) if isinstance(v, (float, int)) else False for v in values):
+        if (
+            values is None
+            or not values
+            or all(
+                np.isnan(v) if isinstance(v, (float, int)) else False for v in values
+            )
+        ):
             return f"[yellow]{indicator_name.upper()}: No data or calculation error.[/yellow]"
 
         try:
@@ -531,7 +577,9 @@ class TradingAnalyzer:
             elif indicator_name == "bollinger_bands":
                 return self._interpret_bollinger_bands(values[-1])
             elif indicator_name == "stoch_rsi_k":
-                return self._interpret_stoch_rsi_k(values, self.indicator_values.get("stoch_rsi_d", []))
+                return self._interpret_stoch_rsi_k(
+                    values, self.indicator_values.get("stoch_rsi_d", [])
+                )
             elif indicator_name == "vwap":
                 return self._interpret_vwap()
             elif indicator_name == "ema_20":
@@ -610,7 +658,9 @@ class TradingAnalyzer:
 
     def _interpret_fve(self, fve_value: float) -> str:
         """Interprets FVE values."""
-        return f"[blue]FVE:[/blue] [repr.number]{fve_value:.0f}[/repr.number] (Last Value)"
+        return (
+            f"[blue]FVE:[/blue] [repr.number]{fve_value:.0f}[/repr.number] (Last Value)"
+        )
 
     def _interpret_macd(self, macd_values: list[float]) -> str:
         """Interprets MACD values."""
@@ -625,9 +675,7 @@ class TradingAnalyzer:
         if len(bb_values) == 3:
             upper_band, middle_band, lower_band = bb_values[0]
             if self.current_price > upper_band:
-                return (
-                    f"[red]Bollinger Bands:[/red] Price above Upper Band ([repr.number]{upper_band:.2f}[/repr.number])"
-                )
+                return f"[red]Bollinger Bands:[/red] Price above Upper Band ([repr.number]{upper_band:.2f}[/repr.number])"
             elif self.current_price < lower_band:
                 return f"[green]Bollinger Bands:[/green] Price below Lower Band ([repr.number]{lower_band:.2f}[/repr.number])"
             else:
@@ -635,7 +683,9 @@ class TradingAnalyzer:
         else:
             return "[red]Bollinger Bands:[/red] Calculation issue."
 
-    def _interpret_stoch_rsi_k(self, k_values: list[float], d_values: list[float]) -> str:
+    def _interpret_stoch_rsi_k(
+        self, k_values: list[float], d_values: list[float]
+    ) -> str:
         """Interprets Stochastic RSI K values and crossovers."""
         if len(k_values) >= 2 and len(d_values) >= 2:
             if k_values[-1] > d_values[-1] and k_values[-2] <= d_values[-2]:
@@ -689,11 +739,21 @@ def analyze_market_data_signals(
     signal_config.get("overbought_stoch_rsi_threshold", 0.8)
     signal_config.get("stoch_rsi_crossover_lookback", 2)
     stop_loss_atr_multiplier = signal_config.get("stop_loss_atr_multiplier", 2)
-    take_profit_risk_reward_ratio = signal_config.get("take_profit_risk_reward_ratio", 2)
-    fib_level_proximity_threshold_long = signal_config.get("fib_level_proximity_threshold_long", 0.005)
-    fib_level_proximity_threshold_short = signal_config.get("fib_level_proximity_threshold_short", 0.005)
-    pivot_level_proximity_threshold_long = signal_config.get("pivot_level_proximity_threshold_long", 0.005)
-    pivot_level_proximity_threshold_short = signal_config.get("pivot_level_proximity_threshold_short", 0.005)
+    take_profit_risk_reward_ratio = signal_config.get(
+        "take_profit_risk_reward_ratio", 2
+    )
+    fib_level_proximity_threshold_long = signal_config.get(
+        "fib_level_proximity_threshold_long", 0.005
+    )
+    fib_level_proximity_threshold_short = signal_config.get(
+        "fib_level_proximity_threshold_short", 0.005
+    )
+    pivot_level_proximity_threshold_long = signal_config.get(
+        "pivot_level_proximity_threshold_long", 0.005
+    )
+    pivot_level_proximity_threshold_short = signal_config.get(
+        "pivot_level_proximity_threshold_short", 0.005
+    )
     signal_config.get("bollinger_band_breakout_lookback", 1)
     signal_config.get("trend_confirmation_lookback", 3)
 
@@ -738,29 +798,43 @@ def analyze_market_data_signals(
             level_data = support_resistance.get(level_name)
             if level_data and current_price:
                 proximity_threshold = (
-                    fib_level_proximity_threshold_long if "Fib" in level_name else pivot_level_proximity_threshold_long
+                    fib_level_proximity_threshold_long
+                    if "Fib" in level_name
+                    else pivot_level_proximity_threshold_long
                 )
-                if abs(current_price - level_data["price"]) / current_price <= proximity_threshold:
+                if (
+                    abs(current_price - level_data["price"]) / current_price
+                    <= proximity_threshold
+                ):
                     entry_level_name = level_name
                     entry_price = level_data["price"]
                     break
 
         is_stoch_rsi_bullish_crossover = stoch_rsi_status == "Bullish crossover"
 
-        if entry_level_name and (is_oversold_stoch_rsi or is_stoch_rsi_bullish_crossover) and is_ema_above_sma:
+        if (
+            entry_level_name
+            and (is_oversold_stoch_rsi or is_stoch_rsi_bullish_crossover)
+            and is_ema_above_sma
+        ):
             signal_type = "Long"
             stop_loss = (
-                round(current_price - stop_loss_atr_multiplier * atr_value, 4) if atr_value and current_price else None
+                round(current_price - stop_loss_atr_multiplier * atr_value, 4)
+                if atr_value and current_price
+                else None
             )
             take_profit = (
                 round(
-                    current_price + (take_profit_risk_reward_ratio * (current_price - stop_loss)),
+                    current_price
+                    + (take_profit_risk_reward_ratio * (current_price - stop_loss)),
                     4,
                 )
                 if stop_loss and current_price
                 else None
             )
-            confidence = "Medium" if is_oversold_stoch_rsi and is_ema_above_sma else "Low"
+            confidence = (
+                "Medium" if is_oversold_stoch_rsi and is_ema_above_sma else "Low"
+            )
             rationale_parts.extend(
                 [
                     f"Detected [bold signal.long]Significant bid volume[/bold signal.long] near [level.support]{entry_level_name}[/level.support] at [repr.number]${entry_price:.2f}[/repr.number].",
@@ -802,27 +876,39 @@ def analyze_market_data_signals(
                     if "Fib" in level_name
                     else pivot_level_proximity_threshold_short
                 )
-                if abs(current_price - level_data["price"]) / current_price <= proximity_threshold:
+                if (
+                    abs(current_price - level_data["price"]) / current_price
+                    <= proximity_threshold
+                ):
                     entry_level_name = level_name
                     entry_price = level_data["price"]
                     break
 
         is_stoch_rsi_bearish_crossover = stoch_rsi_status == "Bearish crossover"
 
-        if entry_level_name and (is_overbought_stoch_rsi or is_stoch_rsi_bearish_crossover) and is_ema_below_sma:
+        if (
+            entry_level_name
+            and (is_overbought_stoch_rsi or is_stoch_rsi_bearish_crossover)
+            and is_ema_below_sma
+        ):
             signal_type = "Short"
             stop_loss = (
-                round(current_price + stop_loss_atr_multiplier * atr_value, 4) if atr_value and current_price else None
+                round(current_price + stop_loss_atr_multiplier * atr_value, 4)
+                if atr_value and current_price
+                else None
             )
             take_profit = (
                 round(
-                    current_price - (take_profit_risk_reward_ratio * (stop_loss - current_price)),
+                    current_price
+                    - (take_profit_risk_reward_ratio * (stop_loss - current_price)),
                     4,
                 )
                 if stop_loss and current_price
                 else None
             )
-            confidence = "Medium" if is_overbought_stoch_rsi and is_ema_above_sma else "Low"
+            confidence = (
+                "Medium" if is_overbought_stoch_rsi and is_ema_above_sma else "Low"
+            )
             rationale_parts.extend(
                 [
                     f"Detected [bold signal.short]Significant ask volume[/bold signal.short] near [level.resistance]{entry_level_name}[/level.resistance] at [repr.number]${entry_price:.2f}[/repr.number].",
@@ -849,13 +935,22 @@ def analyze_market_data_signals(
         is_uptrend = trend_status == "Uptrend" or trend_status == "Neutral"
         is_breaking_resistance = False
 
-        if (is_oversold_stoch_rsi or is_stoch_rsi_bullish_crossover) and is_breaking_resistance and is_uptrend:
+        if (
+            (is_oversold_stoch_rsi or is_stoch_rsi_bullish_crossover)
+            and is_breaking_resistance
+            and is_uptrend
+        ):
             signal_type = "Long"
             entry_price = current_price
-            stop_loss = bb_middle if bb_middle else round(current_price - stop_loss_atr_multiplier * atr_value, 4)
+            stop_loss = (
+                bb_middle
+                if bb_middle
+                else round(current_price - stop_loss_atr_multiplier * atr_value, 4)
+            )
             take_profit = (
                 round(
-                    current_price + (take_profit_risk_reward_ratio * (current_price - stop_loss)),
+                    current_price
+                    + (take_profit_risk_reward_ratio * (current_price - stop_loss)),
                     4,
                 )
                 if stop_loss and current_price
@@ -888,13 +983,22 @@ def analyze_market_data_signals(
         is_downtrend = trend_status == "Downtrend" or trend_status == "Neutral"
         is_breaking_support = False
 
-        if (is_overbought_stoch_rsi or is_stoch_rsi_bearish_crossover) and is_breaking_support and is_downtrend:
+        if (
+            (is_overbought_stoch_rsi or is_stoch_rsi_bearish_crossover)
+            and is_breaking_support
+            and is_downtrend
+        ):
             signal_type = "Short"
             entry_price = current_price
-            stop_loss = bb_middle if bb_middle else round(current_price + stop_loss_atr_multiplier * atr_value, 4)
+            stop_loss = (
+                bb_middle
+                if bb_middle
+                else round(current_price + stop_loss_atr_multiplier * atr_value, 4)
+            )
             take_profit = (
                 round(
-                    current_price - (take_profit_risk_reward_ratio * (stop_loss - current_price)),
+                    current_price
+                    - (take_profit_risk_reward_ratio * (stop_loss - current_price)),
                     4,
                 )
                 if stop_loss and current_price
@@ -935,9 +1039,15 @@ def format_signal_output(signal: dict | None, indicators: dict) -> None:
         table.add_column("Rationale", style="green", justify="left")
 
         table.add_row(
-            f"[bold]{signal['entry_price']:.4f}[/bold]" if signal.get("entry_price") is not None else "N/A",
-            f"[bold]{signal['stop_loss']:.4f}[/bold]" if signal.get("stop_loss") is not None else "N/A",
-            f"[bold]{signal['take_profit']:.4f}[/bold]" if signal.get("take_profit") is not None else "N/A",
+            f"[bold]{signal['entry_price']:.4f}[/bold]"
+            if signal.get("entry_price") is not None
+            else "N/A",
+            f"[bold]{signal['stop_loss']:.4f}[/bold]"
+            if signal.get("stop_loss") is not None
+            else "N/A",
+            f"[bold]{signal['take_profit']:.4f}[/bold]"
+            if signal.get("take_profit") is not None
+            else "N/A",
             f"[bold]{signal['confidence']}[/bold]",
             signal["rationale"],
         )
@@ -976,18 +1086,24 @@ def setup_logger(symbol: str) -> logging.Logger:
     log_dir = "logs"
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    log_file = os.path.join(log_dir, f"trading_bot_{symbol}_{datetime.now().strftime('%Y%m%d')}.log")
+    log_file = os.path.join(
+        log_dir, f"trading_bot_{symbol}_{datetime.now().strftime('%Y%m%d')}.log"
+    )
 
     logging.basicConfig(
         level=numeric_level,
         format="%(asctime)s - %(levelname)s - %(message)s",
         handlers=[
-            RotatingFileHandler(log_file, maxBytes=1024 * 1024 * 5, backupCount=7),  # 5MB log files, 7 backups
+            RotatingFileHandler(
+                log_file, maxBytes=1024 * 1024 * 5, backupCount=7
+            ),  # 5MB log files, 7 backups
             RichHandler(console=console),
         ],
     )
     logger = logging.getLogger(__name__)
-    logger.info(f"Starting trading bot with log level: {logging.getLevelName(logger.getEffectiveLevel())}")
+    logger.info(
+        f"Starting trading bot with log level: {logging.getLevelName(logger.getEffectiveLevel())}"
+    )
     return logger
 
 
@@ -999,11 +1115,17 @@ def fetch_klines(symbol: str, interval: str, logger: logging.Logger) -> pd.DataF
     client = BybitAPIClient(os.getenv("BYBIT_API_KEY"), os.getenv("BYBIT_API_SECRET"))
     response_data = client.request("GET", endpoint, params, logger)
 
-    if response_data and response_data.get("retCode") == 0 and response_data.get("result"):
+    if (
+        response_data
+        and response_data.get("retCode") == 0
+        and response_data.get("result")
+    ):
         klines_data = response_data["result"]["list"]
         return pd.DataFrame(klines_data)
     else:
-        logger.error(f"Failed to fetch klines for {symbol}. API response: {response_data}")
+        logger.error(
+            f"Failed to fetch klines for {symbol}. API response: {response_data}"
+        )
         return pd.DataFrame()
 
 
@@ -1015,10 +1137,16 @@ def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | N
     client = BybitAPIClient(os.getenv("BYBIT_API_KEY"), os.getenv("BYBIT_API_SECRET"))
     response_data = client.request("GET", endpoint, params, logger)
 
-    if response_data and response_data.get("retCode") == 0 and response_data.get("result"):
+    if (
+        response_data
+        and response_data.get("retCode") == 0
+        and response_data.get("result")
+    ):
         return response_data["result"]
     else:
-        logger.error(f"Failed to fetch orderbook for {symbol}. API response: {response_data}")
+        logger.error(
+            f"Failed to fetch orderbook for {symbol}. API response: {response_data}"
+        )
         return None
 
 
@@ -1038,7 +1166,9 @@ def fetch_current_price(symbol: str, logger: logging.Logger) -> Decimal | None:
         ticker_info = response_data["result"]["list"][0]
         return Decimal(ticker_info["lastPrice"])
     else:
-        logger.error(f"Failed to fetch current price for {symbol}. API response: {response_data}")
+        logger.error(
+            f"Failed to fetch current price for {symbol}. API response: {response_data}"
+        )
         return None
 
 
@@ -1075,17 +1205,25 @@ def main() -> None:
     # Get user input for symbol and interval
     symbol = ""
     while True:
-        symbol = console.input("[cyan]Enter trading symbol (e.g., BTCUSDT):[/cyan] ").upper().strip()
+        symbol = (
+            console.input("[cyan]Enter trading symbol (e.g., BTCUSDT):[/cyan] ")
+            .upper()
+            .strip()
+        )
         if symbol:
             break
         console.print("[bold red]Symbol cannot be empty.[/bold red]")
 
     interval = ""
     while True:
-        interval = console.input(f"[cyan]Enter timeframe (e.g., {', '.join(VALID_INTERVALS)}):[/cyan] ").strip()
+        interval = console.input(
+            f"[cyan]Enter timeframe (e.g., {', '.join(VALID_INTERVALS)}):[/cyan] "
+        ).strip()
         if not interval:
             interval = CONFIG["interval"]
-            console.print(f"[bold yellow]No interval provided. Using default of {interval}[/bold yellow]")
+            console.print(
+                f"[bold yellow]No interval provided. Using default of {interval}[/bold yellow]"
+            )
             break
         if interval in VALID_INTERVALS:
             break
@@ -1136,10 +1274,14 @@ def main() -> None:
                     {"Symbol": symbol, "Interval": interval, "Exchange": "Bybit"},
                 )
 
-                time.sleep(analysis_interval * 60)  # Sleep for analysis interval minutes
+                time.sleep(
+                    analysis_interval * 60
+                )  # Sleep for analysis interval minutes
 
             except requests.exceptions.RequestException as e:
-                logger.error(f"[bold red]Network error: {e}. Retrying in {retry_delay} seconds...[/bold red]")
+                logger.error(
+                    f"[bold red]Network error: {e}. Retrying in {retry_delay} seconds...[/bold red]"
+                )
                 time.sleep(retry_delay)
             except KeyboardInterrupt:
                 console.print("[bold yellow]Analysis stopped by user.[/bold yellow]")
@@ -1153,7 +1295,9 @@ def main() -> None:
 
     except Exception as e:
         logger.exception(f"[bold red]Fatal error in main execution: {e}[/bold red]")
-        console.print(Panel(f"[bold red]Fatal error: {str(e)}[/bold red]", border_style="red"))
+        console.print(
+            Panel(f"[bold red]Fatal error: {str(e)}[/bold red]", border_style="red")
+        )
         raise
 
     # Text-based Mermaid Diagram using Rich for styling

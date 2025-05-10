@@ -56,7 +56,11 @@ class StrategyConfig(BaseModel):
     timeframe: str = "5m"
     risk_per_trade: Decimal = Decimal("0.01")
     loop_delay_seconds: float = 5.0
-    indicator_settings: Dict[str, Any] = {"evt_length": 7, "evt_multiplier": 2.5, "atr_period": 14}
+    indicator_settings: Dict[str, Any] = {
+        "evt_length": 7,
+        "evt_multiplier": 2.5,
+        "atr_period": 14,
+    }
 
 
 class SmsConfig(BaseModel):
@@ -67,7 +71,10 @@ class SmsConfig(BaseModel):
 
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_nested_delimiter="__", case_sensitive=False
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        case_sensitive=False,
     )
     api_config: ApiConfig
     strategy_config: StrategyConfig
@@ -84,7 +91,9 @@ def setup_logger(log_dir: str, log_level: str) -> logging.Logger:
     log_file = Path(log_dir) / "trading_bot.log"
     file_handler = logging.FileHandler(log_file)
     stream_handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     file_handler.setFormatter(formatter)
     stream_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -98,7 +107,10 @@ def load_config() -> AppConfig:
         config = AppConfig()
         return config
     except Exception as e:
-        print(f"{Fore.RED}Error loading configuration: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Fore.RED}Error loading configuration: {e}{Style.RESET_ALL}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
@@ -117,15 +129,25 @@ class BybitHelper:
 
         # Initialize pybit HTTP session
         try:
-            self.session = HTTP(testnet=self.testnet, api_key=self.api_key, api_secret=self.api_secret)
+            self.session = HTTP(
+                testnet=self.testnet, api_key=self.api_key, api_secret=self.api_secret
+            )
             self.logger.info("Initialized pybit HTTP session")
         except Exception as e:
-            self.logger.critical(f"Failed to initialize pybit session: {e}", exc_info=True)
+            self.logger.critical(
+                f"Failed to initialize pybit session: {e}", exc_info=True
+            )
             sys.exit(1)
 
         # Initialize ccxt exchange
         try:
-            self.exchange = ccxt.bybit({"apiKey": self.api_key, "secret": self.api_secret, "enableRateLimit": True})
+            self.exchange = ccxt.bybit(
+                {
+                    "apiKey": self.api_key,
+                    "secret": self.api_secret,
+                    "enableRateLimit": True,
+                }
+            )
             if self.testnet:
                 self.exchange.set_sandbox_mode(True)
             self.exchange.load_markets()
@@ -141,7 +163,9 @@ class BybitHelper:
     def _initialize_websocket(self):
         """Initialize WebSocket connection."""
         try:
-            self.ws = WebSocket(api_key=self.api_key, api_secret=self.api_secret, testnet=self.testnet)
+            self.ws = WebSocket(
+                api_key=self.api_key, api_secret=self.api_secret, testnet=self.testnet
+            )
             self.logger.info("Initialized WebSocket")
         except Exception as e:
             self.logger.error(f"Failed to initialize WebSocket: {e}", exc_info=True)
@@ -151,7 +175,9 @@ class BybitHelper:
         try:
             server_time = self.session.get_server_time()
             if server_time.get("retCode") != 0:
-                self.logger.error(f"Server time fetch failed: {server_time.get('retMsg')}")
+                self.logger.error(
+                    f"Server time fetch failed: {server_time.get('retMsg')}"
+                )
                 return False
             if self.symbol not in self.exchange.markets:
                 self.logger.error(f"Symbol {self.symbol} not available")
@@ -164,7 +190,10 @@ class BybitHelper:
 
     def send_sms_alert(self, message: str, priority: str = "normal") -> bool:
         """Send SMS alert via Termux API."""
-        if not self.config.sms_config.enable_sms_alerts or not self.config.sms_config.termux_phone_number:
+        if (
+            not self.config.sms_config.enable_sms_alerts
+            or not self.config.sms_config.termux_phone_number
+        ):
             return False
         try:
             priority_level = self.config.sms_config.priority_levels.get(priority, 3)
@@ -213,22 +242,35 @@ class BybitHelper:
             return []
 
     def calculate_indicators(
-        self, df: pd.DataFrame, incremental: bool = False, prev_df: Optional[pd.DataFrame] = None
+        self,
+        df: pd.DataFrame,
+        incremental: bool = False,
+        prev_df: Optional[pd.DataFrame] = None,
     ) -> pd.DataFrame:
         """Calculate indicators using indicators.py."""
         try:
             config = {
                 "indicator_settings": {
                     "min_data_periods": 50,
-                    "atr_period": self.config.strategy_config.indicator_settings.get("atr_period", 14),
-                    "evt_length": self.config.strategy_config.indicator_settings.get("evt_length", 7),
-                    "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5),
+                    "atr_period": self.config.strategy_config.indicator_settings.get(
+                        "atr_period", 14
+                    ),
+                    "evt_length": self.config.strategy_config.indicator_settings.get(
+                        "evt_length", 7
+                    ),
+                    "evt_multiplier": self.config.strategy_config.indicator_settings.get(
+                        "evt_multiplier", 2.5
+                    ),
                 },
                 "analysis_flags": {"use_atr": True, "use_evt": True},
                 "strategy_params": {
                     "ehlers_volumetric": {
-                        "evt_length": self.config.strategy_config.indicator_settings.get("evt_length", 7),
-                        "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5),
+                        "evt_length": self.config.strategy_config.indicator_settings.get(
+                            "evt_length", 7
+                        ),
+                        "evt_multiplier": self.config.strategy_config.indicator_settings.get(
+                            "evt_multiplier", 2.5
+                        ),
                     }
                 },
             }
@@ -256,10 +298,14 @@ class BybitHelper:
             }
             df_new = pd.DataFrame([kline])
             prev_df = self.ohlcv_cache.get(timeframe)
-            df_updated = self.calculate_indicators(df_new, incremental=True, prev_df=prev_df)
+            df_updated = self.calculate_indicators(
+                df_new, incremental=True, prev_df=prev_df
+            )
             if prev_df is not None:
                 self.ohlcv_cache[timeframe] = (
-                    pd.concat([prev_df, df_updated]).drop_duplicates(subset="timestamp").tail(200)
+                    pd.concat([prev_df, df_updated])
+                    .drop_duplicates(subset="timestamp")
+                    .tail(200)
                 )
             else:
                 self.ohlcv_cache[timeframe] = df_updated
@@ -274,7 +320,9 @@ class BybitHelper:
             response = self.session.get_positions(category="linear", symbol=self.symbol)
             if response.get("retCode") == 0:
                 return response
-            self.logger.error(f"Failed to fetch position info: {response.get('retMsg')}")
+            self.logger.error(
+                f"Failed to fetch position info: {response.get('retMsg')}"
+            )
             return {}
         except Exception as e:
             self.logger.error(f"Error fetching position info: {e}", exc_info=True)
@@ -283,7 +331,9 @@ class BybitHelper:
     def get_open_orders(self) -> Dict[str, Any]:
         """Fetch open orders."""
         try:
-            response = self.session.get_open_orders(category="linear", symbol=self.symbol)
+            response = self.session.get_open_orders(
+                category="linear", symbol=self.symbol
+            )
             if response.get("retCode") == 0:
                 return response
             self.logger.error(f"Failed to fetch open orders: {response.get('retMsg')}")
@@ -296,18 +346,27 @@ class BybitHelper:
         """Place a market order."""
         try:
             response = self.session.place_order(
-                category="linear", symbol=self.symbol, side=side, orderType="Market", qty=str(qty), reduceOnly=False
+                category="linear",
+                symbol=self.symbol,
+                side=side,
+                orderType="Market",
+                qty=str(qty),
+                reduceOnly=False,
             )
             if response.get("retCode") == 0:
                 self.logger.info(f"Placed market order: {side} {qty} {self.symbol}")
             else:
-                self.logger.error(f"Failed to place market order: {response.get('retMsg')}")
+                self.logger.error(
+                    f"Failed to place market order: {response.get('retMsg')}"
+                )
             return response
         except Exception as e:
             self.logger.error(f"Error placing market order: {e}", exc_info=True)
             return {"retCode": -1, "retMsg": str(e)}
 
-    def subscribe_to_stream(self, topics: List[str], callback: callable, channel_type: str = "public"):
+    def subscribe_to_stream(
+        self, topics: List[str], callback: callable, channel_type: str = "public"
+    ):
         """Subscribe to WebSocket stream."""
         try:
             if channel_type == "public":
@@ -328,7 +387,10 @@ class BybitHelper:
             "ohlcv": self.fetch_ohlcv(self.config.strategy_config.timeframe),
         }
         if context.get("ohlcv"):
-            df = pd.DataFrame(context["ohlcv"], columns=["timestamp", "open", "high", "low", "close", "volume"])
+            df = pd.DataFrame(
+                context["ohlcv"],
+                columns=["timestamp", "open", "high", "low", "close", "volume"],
+            )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             df = self.calculate_indicators(df)
             context["indicators"] = df
@@ -354,7 +416,9 @@ def setup_env():
     env_content.append("# Bybit API Configuration")
     api_key = input("Enter Bybit API Key: ").strip()
     api_secret = input("Enter Bybit API Secret: ").strip()
-    symbol = input("Enter trading symbol (e.g., BTCUSDT) [BTCUSDT]: ").strip() or "BTCUSDT"
+    symbol = (
+        input("Enter trading symbol (e.g., BTCUSDT) [BTCUSDT]: ").strip() or "BTCUSDT"
+    )
     testnet = input("Use testnet? (y/n) [y]: ").strip().lower() in ["", "y"]
     env_content.append(f"BOT_API_CONFIG__API_KEY={api_key}")
     env_content.append(f"BOT_API_CONFIG__API_SECRET={api_secret}")
@@ -373,7 +437,11 @@ def setup_env():
 
     env_content.append("\n# SMS Configuration")
     enable_sms = input("Enable SMS alerts? (y/n) [n]: ").strip().lower() == "y"
-    phone = input("Enter phone number for SMS alerts (or leave blank): ").strip() if enable_sms else ""
+    phone = (
+        input("Enter phone number for SMS alerts (or leave blank): ").strip()
+        if enable_sms
+        else ""
+    )
     env_content.append(f"BOT_SMS_CONFIG__ENABLE_SMS_ALERTS={str(enable_sms).lower()}")
     env_content.append(f"BOT_SMS_CONFIG__TERMUX_PHONE_NUMBER={phone}")
     env_content.append("BOT_SMS_CONFIG__PRIORITY_LEVELS__CRITICAL=1")
@@ -389,14 +457,18 @@ def setup_env():
             f.write("\n".join(env_content))
         print(f"{Fore.GREEN}.env file created successfully.{Style.RESET_ALL}")
     except Exception as e:
-        print(f"{Fore.RED}Error writing .env file: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Fore.RED}Error writing .env file: {e}{Style.RESET_ALL}", file=sys.stderr
+        )
         sys.exit(1)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Bybit Trading Bot")
     parser.add_argument("--setup", action="store_true", help="Setup .env configuration")
-    parser.add_argument("--view-positions", action="store_true", help="View open positions")
+    parser.add_argument(
+        "--view-positions", action="store_true", help="View open positions"
+    )
     parser.add_argument("--view-orders", action="store_true", help="View open orders")
     args = parser.parse_args()
 

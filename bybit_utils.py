@@ -10,7 +10,9 @@ import functools
 logger = logging.getLogger(__name__)
 
 
-def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Optional[Decimal]:
+def safe_decimal_conversion(
+    value: Any, default: Optional[Decimal] = None
+) -> Optional[Decimal]:
     """
     Convert various inputs to Decimal, returning default or None on failure.
 
@@ -26,7 +28,9 @@ def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Op
             return default
         return Decimal(str(value))
     except (ValueError, TypeError, InvalidOperation):
-        logger.debug(f"{Fore.YELLOW}Failed to convert {value} to Decimal, returning {default}{Style.RESET_ALL}")
+        logger.debug(
+            f"{Fore.YELLOW}Failed to convert {value} to Decimal, returning {default}{Style.RESET_ALL}"
+        )
         return default
 
 
@@ -47,11 +51,15 @@ def format_price(exchange: ccxt.Exchange, symbol: str, price: Any) -> str:
         precision = market["precision"]["price"]
         price_decimal = safe_decimal_conversion(price, Decimal("0"))
         if price_decimal is None:
-            logger.error(f"{Fore.RED}Invalid price {price} for {symbol}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Invalid price {price} for {symbol}{Style.RESET_ALL}"
+            )
             raise ValueError(f"Invalid price {price}")
         return f"{price_decimal:.{precision}f}"
     except Exception as e:
-        logger.critical(f"{Fore.RED}Error formatting price {price} for {symbol}: {e}{Style.RESET_ALL}")
+        logger.critical(
+            f"{Fore.RED}Error formatting price {price} for {symbol}: {e}{Style.RESET_ALL}"
+        )
         raise
 
 
@@ -72,11 +80,15 @@ def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Any) -> str:
         precision = market["precision"]["amount"]
         amount_decimal = safe_decimal_conversion(amount, Decimal("0"))
         if amount_decimal is None:
-            logger.error(f"{Fore.RED}Invalid amount {amount} for {symbol}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Invalid amount {amount} for {symbol}{Style.RESET_ALL}"
+            )
             raise ValueError(f"Invalid amount {amount}")
         return f"{amount_decimal:.{precision}f}"
     except Exception as e:
-        logger.critical(f"{Fore.RED}Error formatting amount {amount} for {symbol}: {e}{Style.RESET_ALL}")
+        logger.critical(
+            f"{Fore.RED}Error formatting amount {amount} for {symbol}: {e}{Style.RESET_ALL}"
+        )
         raise
 
 
@@ -95,7 +107,9 @@ def format_order_id(order_id: Any) -> str:
             return "UNKNOWN"
         return str(order_id)[-6:]
     except Exception as e:
-        logger.error(f"{Fore.RED}Error formatting order ID {order_id}: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Error formatting order ID {order_id}: {e}{Style.RESET_ALL}"
+        )
         return "UNKNOWN"
 
 
@@ -125,7 +139,9 @@ def send_sms_alert(message: str, config: Optional[Any] = None) -> bool:
         """
         return True
     except Exception as e:
-        logger.critical(f"{Fore.RED}Failed to send SMS alert '{message}': {e}{Style.RESET_ALL}")
+        logger.critical(
+            f"{Fore.RED}Failed to send SMS alert '{message}': {e}{Style.RESET_ALL}"
+        )
         return False
 
 
@@ -149,9 +165,13 @@ def retry_api_call(func: Callable[..., T]) -> Callable[..., T]:
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> T:
         # Assume config is passed in kwargs or args (e.g., as in snippets)
-        config = kwargs.get("config") or next((arg for arg in args if hasattr(arg, "RETRY_COUNT")), None)
+        config = kwargs.get("config") or next(
+            (arg for arg in args if hasattr(arg, "RETRY_COUNT")), None
+        )
         if not config:
-            logger.error(f"{Fore.RED}No config provided for retry_api_call in {func.__name__}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}No config provided for retry_api_call in {func.__name__}{Style.RESET_ALL}"
+            )
             raise ValueError("Config object required for retry_api_call")
 
         max_retries = config.RETRY_COUNT
@@ -168,8 +188,13 @@ def retry_api_call(func: Callable[..., T]) -> Callable[..., T]:
                     f"{Fore.YELLOW}Rate limit exceeded in {func.__name__}. Retry {attempt}/{max_retries} after {delay:.2f}s: {e}{Style.RESET_ALL}"
                 )
                 if attempt == max_retries:
-                    logger.error(f"{Fore.RED}Max retries reached for {func.__name__}.{Style.RESET_ALL}")
-                    send_sms_alert(f"Rate limit exceeded for {func.__name__} after {max_retries} retries.", config)
+                    logger.error(
+                        f"{Fore.RED}Max retries reached for {func.__name__}.{Style.RESET_ALL}"
+                    )
+                    send_sms_alert(
+                        f"Rate limit exceeded for {func.__name__} after {max_retries} retries.",
+                        config,
+                    )
                     raise
                 time.sleep(delay)
             except ccxt.NetworkError as e:
@@ -179,8 +204,13 @@ def retry_api_call(func: Callable[..., T]) -> Callable[..., T]:
                     f"{Fore.RED}Network error in {func.__name__}. Retry {attempt}/{max_retries} after {delay:.2f}s: {e}{Style.RESET_ALL}"
                 )
                 if attempt == max_retries:
-                    logger.error(f"{Fore.RED}Max retries reached for {func.__name__}.{Style.RESET_ALL}")
-                    send_sms_alert(f"Network error in {func.__name__} after {max_retries} retries.", config)
+                    logger.error(
+                        f"{Fore.RED}Max retries reached for {func.__name__}.{Style.RESET_ALL}"
+                    )
+                    send_sms_alert(
+                        f"Network error in {func.__name__} after {max_retries} retries.",
+                        config,
+                    )
                     raise
                 time.sleep(delay)
             except ccxt.ExchangeNotAvailable as e:
@@ -190,13 +220,22 @@ def retry_api_call(func: Callable[..., T]) -> Callable[..., T]:
                     f"{Fore.RED}Exchange not available in {func.__name__}. Retry {attempt}/{max_retries} after {delay:.2f}s: {e}{Style.RESET_ALL}"
                 )
                 if attempt == max_retries:
-                    logger.error(f"{Fore.RED}Max retries reached for {func.__name__}.{Style.RESET_ALL}")
-                    send_sms_alert(f"Exchange not available in {func.__name__} after {max_retries} retries.", config)
+                    logger.error(
+                        f"{Fore.RED}Max retries reached for {func.__name__}.{Style.RESET_ALL}"
+                    )
+                    send_sms_alert(
+                        f"Exchange not available in {func.__name__} after {max_retries} retries.",
+                        config,
+                    )
                     raise
                 time.sleep(delay)
             except Exception as e:
-                logger.critical(f"{Fore.RED}Unexpected error in {func.__name__}: {e}{Style.RESET_ALL}")
+                logger.critical(
+                    f"{Fore.RED}Unexpected error in {func.__name__}: {e}{Style.RESET_ALL}"
+                )
                 raise
-        raise Exception(f"Failed to execute {func.__name__} after {max_retries} retries")
+        raise Exception(
+            f"Failed to execute {func.__name__} after {max_retries} retries"
+        )
 
     return wrapper

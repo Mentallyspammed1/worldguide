@@ -28,28 +28,44 @@ def calculate_position_size(
     size_unit = "Contracts" if is_contract else base_currency
 
     if not (isinstance(balance, Decimal) and balance > 0):
-        lg.error(f"Position sizing failed ({symbol}): Invalid or non-positive balance ({balance}).")
+        lg.error(
+            f"Position sizing failed ({symbol}): Invalid or non-positive balance ({balance})."
+        )
         return None
 
     try:
         risk_value_decimal = Decimal(str(risk_per_trade))
         if not (Decimal(0) <= risk_value_decimal <= Decimal(1)):
-            raise ValueError(f"risk_per_trade ({risk_value_decimal}) must be between 0 and 1 (e.g., 0.01 for 1%).")
+            raise ValueError(
+                f"risk_per_trade ({risk_value_decimal}) must be between 0 and 1 (e.g., 0.01 for 1%)."
+            )
     except (InvalidOperation, ValueError, TypeError) as e:
-        lg.error(f"Position sizing failed ({symbol}): Invalid risk_per_trade ('{risk_per_trade}'). Error: {e}")
+        lg.error(
+            f"Position sizing failed ({symbol}): Invalid risk_per_trade ('{risk_per_trade}'). Error: {e}"
+        )
         return None
 
-    if not (isinstance(initial_stop_loss_price, Decimal) and initial_stop_loss_price > 0):
-        lg.error(f"Position sizing failed ({symbol}): Invalid initial_stop_loss_price ({initial_stop_loss_price}).")
+    if not (
+        isinstance(initial_stop_loss_price, Decimal) and initial_stop_loss_price > 0
+    ):
+        lg.error(
+            f"Position sizing failed ({symbol}): Invalid initial_stop_loss_price ({initial_stop_loss_price})."
+        )
         return None
     if not (isinstance(entry_price, Decimal) and entry_price > 0):
-        lg.error(f"Position sizing failed ({symbol}): Invalid entry_price ({entry_price}).")
+        lg.error(
+            f"Position sizing failed ({symbol}): Invalid entry_price ({entry_price})."
+        )
         return None
     if initial_stop_loss_price == entry_price:
-        lg.error(f"Position sizing failed ({symbol}): Stop loss price cannot be equal to entry price.")
+        lg.error(
+            f"Position sizing failed ({symbol}): Stop loss price cannot be equal to entry price."
+        )
         return None
     if "limits" not in market_info or "precision" not in market_info:
-        lg.error(f"Position sizing failed ({symbol}): Market info missing 'limits' or 'precision'.")
+        lg.error(
+            f"Position sizing failed ({symbol}): Market info missing 'limits' or 'precision'."
+        )
         return None
 
     try:
@@ -61,7 +77,9 @@ def calculate_position_size(
 
         sl_distance_per_unit = abs(entry_price - initial_stop_loss_price)
         if sl_distance_per_unit <= 0:
-            lg.error(f"Position sizing failed ({symbol}): Stop loss distance non-positive ({sl_distance_per_unit}).")
+            lg.error(
+                f"Position sizing failed ({symbol}): Stop loss distance non-positive ({sl_distance_per_unit})."
+            )
             return None
 
         contract_size_str = market_info.get("contractSize", "1")
@@ -80,11 +98,15 @@ def calculate_position_size(
             if denominator > 0:
                 calculated_size = risk_amount_quote / denominator
             else:
-                lg.error(f"Pos sizing denom err ({symbol}): SLDist={sl_distance_per_unit}, ContrSize={contract_size}.")
+                lg.error(
+                    f"Pos sizing denom err ({symbol}): SLDist={sl_distance_per_unit}, ContrSize={contract_size}."
+                )
                 return None
         elif market_info.get("inverse", False):
             if entry_price == 0 or initial_stop_loss_price == 0:
-                lg.error(f"Pos sizing err ({symbol}): Entry or SL price zero for inverse contract.")
+                lg.error(
+                    f"Pos sizing err ({symbol}): Entry or SL price zero for inverse contract."
+                )
                 return None
             loss_per_contract_in_quote = contract_size * abs(
                 Decimal("1") / entry_price - Decimal("1") / initial_stop_loss_price
@@ -92,10 +114,14 @@ def calculate_position_size(
             if loss_per_contract_in_quote > 0:
                 calculated_size = risk_amount_quote / loss_per_contract_in_quote
             else:
-                lg.error(f"Pos sizing err ({symbol}): Loss per contract zero/neg for inverse.")
+                lg.error(
+                    f"Pos sizing err ({symbol}): Loss per contract zero/neg for inverse."
+                )
                 return None
         else:
-            lg.error(f"Unsupported market type for sizing {symbol}. Market: {market_info.get('type')}")
+            lg.error(
+                f"Unsupported market type for sizing {symbol}. Market: {market_info.get('type')}"
+            )
             return None
 
         if not (calculated_size and calculated_size > 0):
@@ -111,7 +137,9 @@ def calculate_position_size(
         lg.info(
             f"  Entry={entry_price:.{price_precision_for_log}f}, SL={initial_stop_loss_price:.{price_precision_for_log}f}, SL Dist Per Unit={sl_distance_per_unit:.{price_precision_for_log}f}"
         )
-        lg.info(f"  ContractSize={contract_size}, Initial Calculated Size = {calculated_size:.8f} {size_unit}")
+        lg.info(
+            f"  ContractSize={contract_size}, Initial Calculated Size = {calculated_size:.8f} {size_unit}"
+        )
 
         limits = market_info.get("limits", {})
         amount_limits = limits.get("amount", {}) if isinstance(limits, dict) else {}
@@ -129,7 +157,9 @@ def calculate_position_size(
                 if val >= 0:
                     min_amount = val
             except InvalidOperation:
-                lg.warning(f"Invalid min_amount_str '{min_amount_str}' for {symbol}. Using 0.")
+                lg.warning(
+                    f"Invalid min_amount_str '{min_amount_str}' for {symbol}. Using 0."
+                )
                 min_amount = Decimal("0")
 
         max_amount: Optional[Decimal] = None
@@ -139,7 +169,9 @@ def calculate_position_size(
                 if val > 0:
                     max_amount = val
             except InvalidOperation:
-                lg.warning(f"Invalid max_amount_str '{max_amount_str}' for {symbol}. No upper amount limit.")
+                lg.warning(
+                    f"Invalid max_amount_str '{max_amount_str}' for {symbol}. No upper amount limit."
+                )
 
         min_cost = Decimal("0")
         if min_cost_str is not None and str(min_cost_str).strip():
@@ -148,7 +180,9 @@ def calculate_position_size(
                 if val >= 0:
                     min_cost = val
             except InvalidOperation:
-                lg.warning(f"Invalid min_cost_str '{min_cost_str}' for {symbol}. Using 0.")
+                lg.warning(
+                    f"Invalid min_cost_str '{min_cost_str}' for {symbol}. Using 0."
+                )
                 min_cost = Decimal("0")
 
         max_cost: Optional[Decimal] = None
@@ -158,7 +192,9 @@ def calculate_position_size(
                 if val > 0:
                     max_cost = val
             except InvalidOperation:
-                lg.warning(f"Invalid max_cost_str '{max_cost_str}' for {symbol}. No upper cost limit.")
+                lg.warning(
+                    f"Invalid max_cost_str '{max_cost_str}' for {symbol}. No upper cost limit."
+                )
 
         adjusted_size = calculated_size
         if min_amount > 0 and adjusted_size < min_amount:
@@ -182,31 +218,45 @@ def calculate_position_size(
                 estimated_cost = adjusted_size * contract_size / cost_calc_price
 
         if estimated_cost is None:
-            lg.error(f"Could not estimate cost for {symbol} (price or contract size invalid).")
+            lg.error(
+                f"Could not estimate cost for {symbol} (price or contract size invalid)."
+            )
             return None
-        lg.debug(f"  Size after amount limits: {adjusted_size:.8f}. Est. Cost: {estimated_cost:.4f} {quote_currency}")
+        lg.debug(
+            f"  Size after amount limits: {adjusted_size:.8f}. Est. Cost: {estimated_cost:.4f} {quote_currency}"
+        )
 
         if min_cost > 0 and estimated_cost < min_cost:
-            lg.warning(f"Est. cost {estimated_cost:.4f} < min_cost {min_cost} for {symbol}. Trying to meet min_cost.")
+            lg.warning(
+                f"Est. cost {estimated_cost:.4f} < min_cost {min_cost} for {symbol}. Trying to meet min_cost."
+            )
             required_size_for_min_cost: Optional[Decimal] = None
             cost_per_unit_denom: Optional[Decimal] = None
             if market_info.get("linear", True) or not is_contract:
                 cost_per_unit_denom = cost_calc_price * contract_size
             elif market_info.get("inverse", False) and cost_calc_price > 0:
                 if contract_size > 0:
-                    required_size_for_min_cost = (min_cost * cost_calc_price) / contract_size
+                    required_size_for_min_cost = (
+                        min_cost * cost_calc_price
+                    ) / contract_size
                 cost_per_unit_denom = None
 
             if cost_per_unit_denom and cost_per_unit_denom > 0:
                 required_size_for_min_cost = min_cost / cost_per_unit_denom
 
             if not (required_size_for_min_cost and required_size_for_min_cost > 0):
-                lg.error(f"Cannot calc required size for min_cost for {symbol} (denom/price invalid).")
+                lg.error(
+                    f"Cannot calc required size for min_cost for {symbol} (denom/price invalid)."
+                )
                 return None
-            lg.info(f"  Required size for min_cost {min_cost}: {required_size_for_min_cost:.8f} {size_unit}")
+            lg.info(
+                f"  Required size for min_cost {min_cost}: {required_size_for_min_cost:.8f} {size_unit}"
+            )
 
             if max_amount and required_size_for_min_cost > max_amount:
-                lg.error(f"Cannot meet min_cost for {symbol} without exceeding max_amount. Aborted.")
+                lg.error(
+                    f"Cannot meet min_cost for {symbol} without exceeding max_amount. Aborted."
+                )
                 return None
             if min_amount > 0 and required_size_for_min_cost < min_amount:
                 lg.error(
@@ -214,7 +264,9 @@ def calculate_position_size(
                 )
                 return None
             adjusted_size = required_size_for_min_cost
-            lg.info(f"  Adjusted size to meet min_cost: {adjusted_size:.8f} {size_unit}")
+            lg.info(
+                f"  Adjusted size to meet min_cost: {adjusted_size:.8f} {size_unit}"
+            )
             if market_info.get("linear", True) or not is_contract:
                 estimated_cost = adjusted_size * cost_calc_price * contract_size
             elif market_info.get("inverse", False) and cost_calc_price > 0:
@@ -224,14 +276,20 @@ def calculate_position_size(
                 return None
 
         if max_cost and estimated_cost > max_cost:
-            lg.warning(f"Est. cost {estimated_cost:.4f} > max_cost {max_cost} for {symbol}. Reducing size.")
+            lg.warning(
+                f"Est. cost {estimated_cost:.4f} > max_cost {max_cost} for {symbol}. Reducing size."
+            )
             size_for_max_cost: Optional[Decimal] = None
             cost_per_unit_denom_mc: Optional[Decimal] = None
             if market_info.get("linear", True) or not is_contract:
                 cost_per_unit_denom_mc = cost_calc_price * contract_size
                 if cost_per_unit_denom_mc and cost_per_unit_denom_mc > 0:
                     size_for_max_cost = max_cost / cost_per_unit_denom_mc
-            elif market_info.get("inverse", False) and cost_calc_price > 0 and contract_size > 0:
+            elif (
+                market_info.get("inverse", False)
+                and cost_calc_price > 0
+                and contract_size > 0
+            ):
                 size_for_max_cost = (max_cost * cost_calc_price) / contract_size
 
             if not (size_for_max_cost and size_for_max_cost > 0):
@@ -250,18 +308,27 @@ def calculate_position_size(
         try:
             final_size_str = exchange.amount_to_precision(symbol, float(adjusted_size))
             final_size = Decimal(final_size_str)
-            lg.info(f"Applied exchange amount precision: {adjusted_size:.8f} -> {final_size} {size_unit}")
+            lg.info(
+                f"Applied exchange amount precision: {adjusted_size:.8f} -> {final_size} {size_unit}"
+            )
         except Exception as e_ccxt_prec:
             lg.error(
                 f"Error applying CCXT amount_to_precision for {symbol} on size {adjusted_size}: {e_ccxt_prec}. Attempting manual quantization."
             )
-            amount_precision_places = market_info.get("amountPrecision", 8)  # Fallback if not in market_info
-            if not (isinstance(amount_precision_places, int) and amount_precision_places >= 0):
+            amount_precision_places = market_info.get(
+                "amountPrecision", 8
+            )  # Fallback if not in market_info
+            if not (
+                isinstance(amount_precision_places, int)
+                and amount_precision_places >= 0
+            ):
                 amount_precision_places = 8
 
             quant_factor = Decimal("1e-" + str(amount_precision_places))
             final_size = adjusted_size.quantize(quant_factor, rounding=ROUND_DOWN)
-            lg.info(f"Applied manual amount quantization: {adjusted_size:.8f} -> {final_size} {size_unit}")
+            lg.info(
+                f"Applied manual amount quantization: {adjusted_size:.8f} -> {final_size} {size_unit}"
+            )
 
         if not (final_size and final_size > 0):
             lg.error(
@@ -269,7 +336,9 @@ def calculate_position_size(
             )
             return None
         if min_amount > 0 and final_size < min_amount:
-            lg.error(f"Final size {final_size} < min amount {min_amount} after precision for {symbol}. Aborted.")
+            lg.error(
+                f"Final size {final_size} < min amount {min_amount} after precision for {symbol}. Aborted."
+            )
             return None
 
         final_cost_est: Optional[Decimal] = None
@@ -287,11 +356,19 @@ def calculate_position_size(
             )
             return None
 
-        lg.info(f"{NEON_GREEN}Final calculated position size for {symbol}: {final_size} {size_unit}{RESET}")
+        lg.info(
+            f"{NEON_GREEN}Final calculated position size for {symbol}: {final_size} {size_unit}{RESET}"
+        )
         return final_size
 
     except (InvalidOperation, ValueError, TypeError) as e:
-        lg.error(f"Error during position size calculation ({symbol}) (Decimal/Type Error): {e}", exc_info=False)
+        lg.error(
+            f"Error during position size calculation ({symbol}) (Decimal/Type Error): {e}",
+            exc_info=False,
+        )
     except Exception as e:
-        lg.error(f"Unexpected error calculating position size for {symbol}: {e}", exc_info=True)
+        lg.error(
+            f"Unexpected error calculating position size for {symbol}: {e}",
+            exc_info=True,
+        )
     return None

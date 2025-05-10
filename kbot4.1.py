@@ -36,7 +36,16 @@ try:
     from rich.table import Table
     from rich import box
 
-    COMMON_PACKAGES = ["ccxt", "python-dotenv", "pandas", "numpy", "tabulate", "colorama", "rich", "matplotlib"]
+    COMMON_PACKAGES = [
+        "ccxt",
+        "python-dotenv",
+        "pandas",
+        "numpy",
+        "tabulate",
+        "colorama",
+        "rich",
+        "matplotlib",
+    ]
 except ImportError as e:
     init(autoreset=True)  # Initialize colorama here for the error message
     missing_pkg = e.name
@@ -80,7 +89,9 @@ if log_level_str not in valid_log_levels:
     print(f"{Fore.YELLOW}Invalid LOG_LEVEL '{log_level_str}'. Defaulting to INFO.")
     log_level_str = "INFO"
 
-log_level = TRADE_LEVEL_NUM if log_level_str == "TRADE" else getattr(logging, log_level_str)
+log_level = (
+    TRADE_LEVEL_NUM if log_level_str == "TRADE" else getattr(logging, log_level_str)
+)
 logger.setLevel(log_level)
 
 # Ensure handler is added only once
@@ -99,21 +110,33 @@ class JournalManager:
     def __init__(self, file_path: str, enabled: bool):
         self.file_path = Path(file_path)  # Use pathlib
         self.enabled = enabled
-        self.headers = ["timestamp", "symbol", "side", "price", "quantity", "pnl", "reason"]
+        self.headers = [
+            "timestamp",
+            "symbol",
+            "side",
+            "price",
+            "quantity",
+            "pnl",
+            "reason",
+        ]
         if enabled:
             self._initialize_file()
 
     def _initialize_file(self):
         """Creates the journal file with headers if it doesn't exist."""
         try:
-            self.file_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+            self.file_path.parent.mkdir(
+                parents=True, exist_ok=True
+            )  # Ensure directory exists
             if not self.file_path.exists():
                 with open(self.file_path, "w", newline="", encoding="utf-8") as f:
                     writer = csv.writer(f)
                     writer.writerow(self.headers)
                 logger.info(f"Initialized journal file: {self.file_path}")
         except OSError as e:
-            logger.error(f"{Fore.RED}Failed to initialize journal file {self.file_path}: {e}")
+            logger.error(
+                f"{Fore.RED}Failed to initialize journal file {self.file_path}: {e}"
+            )
             self.enabled = False  # Disable journaling if file cannot be created
 
     def log_trade(self, trade: Dict):
@@ -172,22 +195,33 @@ class TradingConfig:
                 # This allows env vars to override file settings if both exist
                 for key, value in config_from_file.items():
                     env_key = key.upper()
-                    if env_key not in os.environ:  # Only set if not already set by environment
+                    if (
+                        env_key not in os.environ
+                    ):  # Only set if not already set by environment
                         os.environ[env_key] = str(value)
                 logger.info(f"Loaded base configuration from {self.config_file}")
             except json.JSONDecodeError as e:
-                logger.error(f"{Fore.RED}Error decoding JSON from {self.config_file}: {e}")
+                logger.error(
+                    f"{Fore.RED}Error decoding JSON from {self.config_file}: {e}"
+                )
             except Exception as e:
-                logger.error(f"{Fore.RED}Failed to load config file {self.config_file}: {e}")
+                logger.error(
+                    f"{Fore.RED}Failed to load config file {self.config_file}: {e}"
+                )
 
     def _fetch_parameters(self):
         """Fetches all parameters using the _get_env helper."""
         # Market & Connection
         self.symbol = self._get_env("SYMBOL", "BTC/USDT:USDT", Fore.YELLOW)
         self.market_type = self._get_env(
-            "MARKET_TYPE", "linear", Fore.YELLOW, allowed_values=["linear", "inverse", "swap"]
+            "MARKET_TYPE",
+            "linear",
+            Fore.YELLOW,
+            allowed_values=["linear", "inverse", "swap"],
         ).lower()
-        self.interval = self._get_env("INTERVAL", "1m", Fore.YELLOW)  # e.g., 1m, 5m, 1h, 1d
+        self.interval = self._get_env(
+            "INTERVAL", "1m", Fore.YELLOW
+        )  # e.g., 1m, 5m, 1h, 1d
         self.api_key = self._get_env("BYBIT_API_KEY", None, Fore.RED)
         self.api_secret = self._get_env("BYBIT_API_SECRET", None, Fore.RED)
 
@@ -201,7 +235,12 @@ class TradingConfig:
             max_val=Decimal("0.5"),
         )
         self.sl_atr_multiplier = self._get_env(
-            "SL_ATR_MULTIPLIER", "1.5", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")
+            "SL_ATR_MULTIPLIER",
+            "1.5",
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.1"),
+            max_val=Decimal("20.0"),
         )
         self.tsl_activation_atr_multiplier = self._get_env(
             "TSL_ACTIVATION_ATR_MULTIPLIER",
@@ -234,29 +273,54 @@ class TradingConfig:
             max_val=Decimal("1.0"),
         )
         self.sl_trigger_by = self._get_env(
-            "SL_TRIGGER_BY", "LastPrice", Fore.YELLOW, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"]
+            "SL_TRIGGER_BY",
+            "LastPrice",
+            Fore.YELLOW,
+            allowed_values=["LastPrice", "MarkPrice", "IndexPrice"],
         )
         self.tsl_trigger_by = self._get_env(
-            "TSL_TRIGGER_BY", "LastPrice", Fore.YELLOW, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"]
+            "TSL_TRIGGER_BY",
+            "LastPrice",
+            Fore.YELLOW,
+            allowed_values=["LastPrice", "MarkPrice", "IndexPrice"],
         )
         self.leverage = self._get_env(
-            "LEVERAGE", "10", Fore.YELLOW, cast_type=Decimal, min_val=Decimal("1"), max_val=Decimal("100")
+            "LEVERAGE",
+            "10",
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("1"),
+            max_val=Decimal("100"),
         )
         self.dynamic_leverage = self._get_env(
             "DYNAMIC_LEVERAGE", False, Fore.YELLOW, cast_type=bool
         )  # Use False default
 
         # Multi-Timeframe & Indicators
-        self.multi_timeframe_interval = self._get_env("MULTI_TIMEFRAME_INTERVAL", "5m", Fore.YELLOW)
+        self.multi_timeframe_interval = self._get_env(
+            "MULTI_TIMEFRAME_INTERVAL", "5m", Fore.YELLOW
+        )
         self.trend_ema_period = self._get_env(
             "TREND_EMA_PERIOD", 12, Fore.YELLOW, cast_type=int, min_val=5, max_val=500
         )
-        self.fast_ema_period = self._get_env("FAST_EMA_PERIOD", 9, Fore.YELLOW, cast_type=int, min_val=1, max_val=200)
-        self.slow_ema_period = self._get_env("SLOW_EMA_PERIOD", 21, Fore.YELLOW, cast_type=int, min_val=2, max_val=500)
-        self.stoch_period = self._get_env("STOCH_PERIOD", 7, Fore.YELLOW, cast_type=int, min_val=1, max_val=100)
-        self.stoch_smooth_k = self._get_env("STOCH_SMOOTH_K", 3, Fore.YELLOW, cast_type=int, min_val=1, max_val=10)
-        self.stoch_smooth_d = self._get_env("STOCH_SMOOTH_D", 3, Fore.YELLOW, cast_type=int, min_val=1, max_val=10)
-        self.atr_period = self._get_env("ATR_PERIOD", 5, Fore.YELLOW, cast_type=int, min_val=1, max_val=100)
+        self.fast_ema_period = self._get_env(
+            "FAST_EMA_PERIOD", 9, Fore.YELLOW, cast_type=int, min_val=1, max_val=200
+        )
+        self.slow_ema_period = self._get_env(
+            "SLOW_EMA_PERIOD", 21, Fore.YELLOW, cast_type=int, min_val=2, max_val=500
+        )
+        self.stoch_period = self._get_env(
+            "STOCH_PERIOD", 7, Fore.YELLOW, cast_type=int, min_val=1, max_val=100
+        )
+        self.stoch_smooth_k = self._get_env(
+            "STOCH_SMOOTH_K", 3, Fore.YELLOW, cast_type=int, min_val=1, max_val=10
+        )
+        self.stoch_smooth_d = self._get_env(
+            "STOCH_SMOOTH_D", 3, Fore.YELLOW, cast_type=int, min_val=1, max_val=10
+        )
+        self.atr_period = self._get_env(
+            "ATR_PERIOD", 5, Fore.YELLOW, cast_type=int, min_val=1, max_val=100
+        )
 
         # Signal Thresholds & Filters
         self.stoch_oversold_threshold = self._get_env(
@@ -299,10 +363,14 @@ class TradingConfig:
             min_val=Decimal("0.1"),
             max_val=Decimal("20.0"),
         )  # Wider range?
-        self.trade_only_with_trend = self._get_env("TRADE_ONLY_WITH_TREND", True, Fore.YELLOW, cast_type=bool)
+        self.trade_only_with_trend = self._get_env(
+            "TRADE_ONLY_WITH_TREND", True, Fore.YELLOW, cast_type=bool
+        )
 
         # Operational Parameters
-        self.ohlcv_limit = self._get_env("OHLCV_LIMIT", 200, Fore.YELLOW, cast_type=int, min_val=50, max_val=1000)
+        self.ohlcv_limit = self._get_env(
+            "OHLCV_LIMIT", 200, Fore.YELLOW, cast_type=int, min_val=50, max_val=1000
+        )
         self.loop_sleep_seconds = self._get_env(
             "LOOP_SLEEP_SECONDS", 15, Fore.YELLOW, cast_type=int, min_val=5, max_val=300
         )
@@ -312,20 +380,35 @@ class TradingConfig:
         self.position_qty_epsilon = Decimal("1E-12")  # For float comparisons
 
         # Journaling
-        self.journal_file_path = self._get_env("JOURNAL_FILE_PATH", "bybit_trading_journal.csv", Fore.YELLOW)
-        self.enable_journaling = self._get_env("ENABLE_JOURNALING", True, Fore.YELLOW, cast_type=bool)
+        self.journal_file_path = self._get_env(
+            "JOURNAL_FILE_PATH", "bybit_trading_journal.csv", Fore.YELLOW
+        )
+        self.enable_journaling = self._get_env(
+            "ENABLE_JOURNALING", True, Fore.YELLOW, cast_type=bool
+        )
 
         # Backtesting
-        self.backtest_enabled = self._get_env("BACKTEST_ENABLED", False, Fore.YELLOW, cast_type=bool)
-        self.backtest_data_path = self._get_env("BACKTEST_DATA_PATH", "backtest_data.csv", Fore.YELLOW)
+        self.backtest_enabled = self._get_env(
+            "BACKTEST_ENABLED", False, Fore.YELLOW, cast_type=bool
+        )
+        self.backtest_data_path = self._get_env(
+            "BACKTEST_DATA_PATH", "backtest_data.csv", Fore.YELLOW
+        )
 
         # Health Check
         self.health_check_port = self._get_env(
-            "HEALTH_CHECK_PORT", 8080, Fore.YELLOW, cast_type=int, min_val=1024, max_val=65535
+            "HEALTH_CHECK_PORT",
+            8080,
+            Fore.YELLOW,
+            cast_type=int,
+            min_val=1024,
+            max_val=65535,
         )
 
         # Termux SMS Notification (Replaces Telegram)
-        self.termux_sms_recipient = self._get_env("TERMUX_SMS_RECIPIENT", None, Fore.YELLOW)  # Phone number
+        self.termux_sms_recipient = self._get_env(
+            "TERMUX_SMS_RECIPIENT", None, Fore.YELLOW
+        )  # Phone number
 
         # Check for required API keys after trying to load them
         if not self.api_key or not self.api_secret:
@@ -383,12 +466,17 @@ class TradingConfig:
             # No need to log for missing optional sensitive vars like SMS recipient
         else:
             # Value found in environment
-            log_value = "****" if "SECRET" in key.upper() or "KEY" in key.upper() else value_str
+            log_value = (
+                "****" if "SECRET" in key.upper() or "KEY" in key.upper() else value_str
+            )
             logger.info(f"{color}Fetched {key}: {log_value} (from {source})")
 
         if value_str is None:
             # This happens if default was None and env var was missing
-            if key in ["BYBIT_API_KEY", "BYBIT_API_SECRET"]:  # Check required keys explicitly
+            if key in [
+                "BYBIT_API_KEY",
+                "BYBIT_API_SECRET",
+            ]:  # Check required keys explicitly
                 # Error logged later in _fetch_parameters
                 self.config_data[key] = ("Missing", Fore.RED)
                 return None
@@ -407,7 +495,9 @@ class TradingConfig:
             elif cast_type == int:
                 # Cast to float first to handle potential decimals in input (e.g., "10.0")
                 casted_value = int(float(value_str))
-            elif callable(cast_type) and cast_type != str:  # Handle custom casting functions (like list parser)
+            elif (
+                callable(cast_type) and cast_type != str
+            ):  # Handle custom casting functions (like list parser)
                 casted_value = cast_type(value_str)
             else:  # Default to string
                 casted_value = str(value_str)
@@ -417,7 +507,9 @@ class TradingConfig:
             # Validation: Allowed Values
             if allowed_values:
                 # Case-insensitive comparison for allowed values
-                if str(casted_value).lower() not in [str(v).lower() for v in allowed_values]:
+                if str(casted_value).lower() not in [
+                    str(v).lower() for v in allowed_values
+                ]:
                     logger.warning(
                         f"{Fore.YELLOW}Invalid value '{casted_value}' for {key}. Allowed: {allowed_values}. Using default: {default}"
                     )
@@ -425,7 +517,9 @@ class TradingConfig:
                     source += "+validation_fallback"
 
             # Validation: Min/Max (only for numeric types, excluding lists)
-            if isinstance(final_value, (Decimal, int, float)) and not isinstance(final_value, list):
+            if isinstance(final_value, (Decimal, int, float)) and not isinstance(
+                final_value, list
+            ):
                 # Use Decimal for comparison to handle precision correctly
                 compare_value = Decimal(str(final_value))
                 valid = True
@@ -438,7 +532,9 @@ class TradingConfig:
                         final_value = default
                         source += "+min_fallback"
                         valid = False
-                if valid and max_val is not None:  # Only check max if min was okay or not present
+                if (
+                    valid and max_val is not None
+                ):  # Only check max if min was okay or not present
                     max_val_comp = Decimal(str(max_val))
                     if compare_value > max_val_comp:
                         logger.warning(
@@ -453,15 +549,27 @@ class TradingConfig:
             )
             final_value = default  # Revert to default on casting error
             source += "+cast_fallback"
-        except Exception as e:  # Catch any other unexpected errors during casting/validation
-            logger.error(f"{Fore.RED}Unexpected error processing {key} ('{value_str}'): {e}. Using default: {default}")
+        except (
+            Exception
+        ) as e:  # Catch any other unexpected errors during casting/validation
+            logger.error(
+                f"{Fore.RED}Unexpected error processing {key} ('{value_str}'): {e}. Using default: {default}"
+            )
             final_value = default
             source += "+error_fallback"
 
         # Store final value and color for summary table
-        final_color = Fore.GREEN if source == "env" else color if "fallback" not in source else Fore.RED
+        final_color = (
+            Fore.GREEN
+            if source == "env"
+            else color
+            if "fallback" not in source
+            else Fore.RED
+        )
         display_value = (
-            "****" if ("SECRET" in key.upper() or "KEY" in key.upper()) and final_value else str(final_value)
+            "****"
+            if ("SECRET" in key.upper() or "KEY" in key.upper()) and final_value
+            else str(final_value)
         )
         self.config_data[key] = (display_value, final_color)
 
@@ -470,7 +578,12 @@ class TradingConfig:
     def print_config_summary(self):
         """Prints a summary of the loaded configuration using Rich."""
         console = Console()
-        table = Table(title="Configuration Summary", show_header=True, header_style="bold magenta", box=box.ROUNDED)
+        table = Table(
+            title="Configuration Summary",
+            show_header=True,
+            header_style="bold magenta",
+            box=box.ROUNDED,
+        )
         table.add_column("Parameter", style="dim", width=30)
         table.add_column("Value")
         table.add_column("Source/Status", width=20)
@@ -514,7 +627,9 @@ class ExchangeInterface(ABC):
         pass
 
     @abstractmethod
-    async def create_market_order(self, symbol: str, side: str, amount: float, params: Dict) -> Optional[Dict]:
+    async def create_market_order(
+        self, symbol: str, side: str, amount: float, params: Dict
+    ) -> Optional[Dict]:
         """Place a market order."""
         pass
 
@@ -534,7 +649,9 @@ class ExchangeInterface(ABC):
         pass
 
     @abstractmethod
-    def amount_to_precision(self, symbol: str, amount: Union[float, Decimal], rounding_mode: Any) -> str:
+    def amount_to_precision(
+        self, symbol: str, amount: Union[float, Decimal], rounding_mode: Any
+    ) -> str:
         """Format amount to exchange precision."""
         pass
 
@@ -592,7 +709,9 @@ class BybitExchange(ExchangeInterface):
                 logger.info("Leverage setting skipped for spot market.")
 
         except ccxt.AuthenticationError as e:
-            logger.critical(f"{Fore.RED}Bybit Authentication Error: {e}. Check API Key/Secret. Exiting.")
+            logger.critical(
+                f"{Fore.RED}Bybit Authentication Error: {e}. Check API Key/Secret. Exiting."
+            )
             await self.close()
             sys.exit(1)
         except ccxt.ExchangeNotAvailable as e:
@@ -600,7 +719,9 @@ class BybitExchange(ExchangeInterface):
             await self.close()
             sys.exit(1)
         except Exception as e:
-            logger.critical(f"{Fore.RED}Failed to initialize Bybit exchange: {e}", exc_info=True)
+            logger.critical(
+                f"{Fore.RED}Failed to initialize Bybit exchange: {e}", exc_info=True
+            )
             await self.close()
             sys.exit(1)
 
@@ -610,19 +731,26 @@ class BybitExchange(ExchangeInterface):
         try:
             # Bybit v5 API requires category for setting leverage
             await self.exchange.set_leverage(
-                symbol_leverage, self.config.symbol, params={"category": self.config.market_type}
+                symbol_leverage,
+                self.config.symbol,
+                params={"category": self.config.market_type},
             )
             logger.info(f"Set leverage for {self.config.symbol} to {symbol_leverage}x")
         except ccxt.ExchangeError as e:
             # Handle common leverage errors specifically if possible
             if "leverage not modified" in str(e).lower():
-                logger.info(f"Leverage for {self.config.symbol} already set to {symbol_leverage}x.")
+                logger.info(
+                    f"Leverage for {self.config.symbol} already set to {symbol_leverage}x."
+                )
             else:
                 logger.error(
                     f"{Fore.YELLOW}Could not set leverage for {self.config.symbol} to {symbol_leverage}x: {e}. Manual adjustment might be needed."
                 )
         except Exception as e:
-            logger.error(f"{Fore.RED}An unexpected error occurred while setting leverage: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}An unexpected error occurred while setting leverage: {e}",
+                exc_info=True,
+            )
 
     async def _fetch_with_retries(self, method: callable, *args, **kwargs) -> Any:
         """Wrapper for exchange calls with retry logic."""
@@ -632,9 +760,15 @@ class BybitExchange(ExchangeInterface):
                 return None
             try:
                 return await method(*args, **kwargs)
-            except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.ExchangeNotAvailable) as e:
+            except (
+                ccxt.NetworkError,
+                ccxt.RequestTimeout,
+                ccxt.ExchangeNotAvailable,
+            ) as e:
                 if attempt < self.config.max_fetch_retries:
-                    wait_time = (2**attempt) + (random.random() * 0.5)  # Exponential backoff with jitter
+                    wait_time = (2**attempt) + (
+                        random.random() * 0.5
+                    )  # Exponential backoff with jitter
                     logger.warning(
                         f"{Fore.YELLOW}Network/Timeout Error ({type(e).__name__}) calling {method.__name__} (Attempt {attempt + 1}/{self.config.max_fetch_retries}): {e}. Retrying in {wait_time:.2f}s..."
                     )
@@ -649,7 +783,9 @@ class BybitExchange(ExchangeInterface):
                     f"{Fore.YELLOW}Rate Limit Exceeded calling {method.__name__}: {e}. Retrying after recommended delay..."
                 )
                 # ccxt might automatically handle retry-after header, but explicit sleep is safer
-                await asyncio.sleep(self.exchange.rateLimit / 1000 * 1.1)  # Sleep a bit longer than required
+                await asyncio.sleep(
+                    self.exchange.rateLimit / 1000 * 1.1
+                )  # Sleep a bit longer than required
                 # Rerun the current attempt
                 continue  # Don't increment attempt count for rate limit retry
             except ccxt.AuthenticationError as e:
@@ -664,34 +800,53 @@ class BybitExchange(ExchangeInterface):
                 logger.error(f"{Fore.RED}Exchange Error calling {method.__name__}: {e}")
                 return None  # Usually non-recoverable without state change
             except Exception as e:
-                logger.error(f"{Fore.RED}Unexpected Error calling {method.__name__}: {e}", exc_info=True)
+                logger.error(
+                    f"{Fore.RED}Unexpected Error calling {method.__name__}: {e}",
+                    exc_info=True,
+                )
                 return None  # Failed due to unexpected issue
         return None  # Should not be reached if retries > 0
 
     async def fetch_ohlcv(self, symbol: str, timeframe: str, limit: int) -> List:
         """Fetch OHLCV data with retries."""
         # Add category param for Bybit v5 API if needed (depends on ccxt version/implementation)
-        params = {"category": self.config.market_type} if self.config.market_type != "spot" else {}
+        params = (
+            {"category": self.config.market_type}
+            if self.config.market_type != "spot"
+            else {}
+        )
         # Limit adjustment: Bybit v5 allows up to 1000, but default might be lower.
         # Ensure limit doesn't exceed exchange max.
         exchange_limit = self.exchange.limits.get("fetchOHLCV", {}).get("max", 1000)
         actual_limit = min(limit, exchange_limit)
         if limit > exchange_limit:
-            logger.debug(f"Requested OHLCV limit {limit} exceeds exchange max {exchange_limit}. Using {actual_limit}.")
+            logger.debug(
+                f"Requested OHLCV limit {limit} exceeds exchange max {exchange_limit}. Using {actual_limit}."
+            )
 
         data = await self._fetch_with_retries(
-            self.exchange.fetch_ohlcv, symbol, timeframe, limit=actual_limit, params=params
+            self.exchange.fetch_ohlcv,
+            symbol,
+            timeframe,
+            limit=actual_limit,
+            params=params,
         )
         return data if data else []  # Return empty list on failure
 
     async def fetch_balance(self) -> Tuple[Optional[Decimal], Optional[Decimal]]:
         """Fetch balance with retries."""
-        params = {"type": self.config.market_type}  # Use 'type' for Bybit (or 'category' depending on ccxt needs)
+        params = {
+            "type": self.config.market_type
+        }  # Use 'type' for Bybit (or 'category' depending on ccxt needs)
         # Bybit v5 uses account type: UNIFIED or CONTRACT
-        account_type = "CONTRACT" if self.config.market_type != "spot" else "UNIFIED"  # Adjust if using Unified account
+        account_type = (
+            "CONTRACT" if self.config.market_type != "spot" else "UNIFIED"
+        )  # Adjust if using Unified account
         params = {"accountType": account_type}
 
-        balance_data = await self._fetch_with_retries(self.exchange.fetch_balance, params=params)
+        balance_data = await self._fetch_with_retries(
+            self.exchange.fetch_balance, params=params
+        )
         if balance_data:
             try:
                 quote_currency = self.exchange.market(self.config.symbol)["quote"]
@@ -702,37 +857,58 @@ class BybitExchange(ExchangeInterface):
                     total = Decimal(str(balance_data[quote_currency].get("total", "0")))
                     # For derivatives, 'total' often represents equity more accurately than 'free' + 'used'
                     equity = (
-                        Decimal(str(balance_data["info"].get("result", {}).get("list", [{}])[0].get("equity", "0")))
+                        Decimal(
+                            str(
+                                balance_data["info"]
+                                .get("result", {})
+                                .get("list", [{}])[0]
+                                .get("equity", "0")
+                            )
+                        )
                         if self.config.market_type != "spot"
                         else total
                     )
 
                     # Use equity if available for derivatives, otherwise total
-                    balance_total = equity if self.config.market_type != "spot" and equity > 0 else total
+                    balance_total = (
+                        equity
+                        if self.config.market_type != "spot" and equity > 0
+                        else total
+                    )
 
                     logger.debug(
                         f"Fetched balance: Free={free} {quote_currency}, Total/Equity={balance_total} {quote_currency}"
                     )
                     return free, balance_total
                 else:
-                    logger.warning(f"Quote currency '{quote_currency}' not found in balance response: {balance_data}")
+                    logger.warning(
+                        f"Quote currency '{quote_currency}' not found in balance response: {balance_data}"
+                    )
                     return Decimal("0"), Decimal("0")
 
             except KeyError as e:
-                logger.error(f"{Fore.RED}Error parsing balance response structure: {e}. Response: {balance_data}")
+                logger.error(
+                    f"{Fore.RED}Error parsing balance response structure: {e}. Response: {balance_data}"
+                )
                 return None, None
             except Exception as e:
-                logger.error(f"{Fore.RED}Error processing balance data: {e}", exc_info=True)
+                logger.error(
+                    f"{Fore.RED}Error processing balance data: {e}", exc_info=True
+                )
                 return None, None
         return None, None  # Return None if fetch failed
 
-    async def create_market_order(self, symbol: str, side: str, amount: float, params: Dict = {}) -> Optional[Dict]:
+    async def create_market_order(
+        self, symbol: str, side: str, amount: float, params: Dict = {}
+    ) -> Optional[Dict]:
         """Place market order with retries."""
         # Ensure category is included for v5 API
         params["category"] = self.config.market_type
         # Bybit may require positionIdx for hedge mode, typically 0 for one-way
         params["positionIdx"] = params.get("positionIdx", 0)
-        order = await self._fetch_with_retries(self.exchange.create_market_order, symbol, side, amount, params=params)
+        order = await self._fetch_with_retries(
+            self.exchange.create_market_order, symbol, side, amount, params=params
+        )
         return order
 
     async def set_trading_stop(self, symbol: str, params: Dict) -> Optional[Dict]:
@@ -740,44 +916,59 @@ class BybitExchange(ExchangeInterface):
         params["category"] = self.config.market_type
         params["symbol"] = symbol
         # Use the specific v5 endpoint: POST /v5/position/trading-stop
-        response = await self._fetch_with_retries(self.exchange.private_post_position_trading_stop, params=params)
+        response = await self._fetch_with_retries(
+            self.exchange.private_post_position_trading_stop, params=params
+        )
         # Check response structure for success (e.g., retCode == 0)
         if response and response.get("retCode") == 0:
             logger.debug(f"Successfully set trading stop: {params}")
             return response
         else:
-            logger.error(f"Failed to set trading stop. Params: {params}, Response: {response}")
+            logger.error(
+                f"Failed to set trading stop. Params: {params}, Response: {response}"
+            )
             return None
 
     async def fetch_ticker(self, symbol: str) -> Optional[Dict]:
         """Fetch ticker with retries."""
         params = {"category": self.config.market_type}
-        ticker = await self._fetch_with_retries(self.exchange.fetch_ticker, symbol, params=params)
+        ticker = await self._fetch_with_retries(
+            self.exchange.fetch_ticker, symbol, params=params
+        )
         return ticker
 
     async def fetch_position(self, symbol: str) -> Optional[Dict]:
         """Fetch current position for the symbol."""
         params = {"category": self.config.market_type, "symbol": symbol}
         try:
-            positions = await self._fetch_with_retries(self.exchange.fetch_positions, symbols=[symbol], params=params)
+            positions = await self._fetch_with_retries(
+                self.exchange.fetch_positions, symbols=[symbol], params=params
+            )
             if positions and len(positions) > 0:
                 # Find the position matching the symbol (fetch_positions might return others)
                 for pos in positions:
                     # Position structure might vary slightly; adapt as needed
                     # Check 'contracts', 'contractSize', 'side', 'unrealizedPnl', etc.
                     # Example check based on common ccxt structure:
-                    if pos.get("symbol") == symbol or pos.get("info", {}).get("symbol") == symbol:
+                    if (
+                        pos.get("symbol") == symbol
+                        or pos.get("info", {}).get("symbol") == symbol
+                    ):
                         logger.debug(
                             f"Fetched position for {symbol}: Size={pos.get('contracts', 0)}, Side={pos.get('side')}, Entry={pos.get('entryPrice')}"
                         )
                         return pos
-                logger.debug(f"No specific position found for {symbol} among fetched positions: {positions}")
+                logger.debug(
+                    f"No specific position found for {symbol} among fetched positions: {positions}"
+                )
                 return None  # No position found for the specific symbol
             else:
                 logger.debug(f"No open positions found for {symbol}.")
                 return None
         except Exception as e:
-            logger.error(f"{Fore.RED}Error fetching position for {symbol}: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Error fetching position for {symbol}: {e}", exc_info=True
+            )
             return None
 
     def price_to_precision(self, symbol: str, price: Union[float, Decimal]) -> str:
@@ -785,17 +976,25 @@ class BybitExchange(ExchangeInterface):
         try:
             return self.exchange.price_to_precision(symbol, float(price))
         except Exception as e:
-            logger.warning(f"Could not get precision for {symbol} from exchange: {e}. Using default formatting.")
+            logger.warning(
+                f"Could not get precision for {symbol} from exchange: {e}. Using default formatting."
+            )
             # Fallback formatting
             return f"{Decimal(str(price)):.8f}"  # Adjust decimal places as needed
 
-    def amount_to_precision(self, symbol: str, amount: Union[float, Decimal], rounding_mode=ccxt.TRUNCATE) -> str:
+    def amount_to_precision(
+        self, symbol: str, amount: Union[float, Decimal], rounding_mode=ccxt.TRUNCATE
+    ) -> str:
         """Format amount to exchange precision."""
         try:
             # Ensure rounding_mode is passed correctly if needed, default is TRUNCATE
-            return self.exchange.amount_to_precision(symbol, float(amount), rounding_mode=rounding_mode)
+            return self.exchange.amount_to_precision(
+                symbol, float(amount), rounding_mode=rounding_mode
+            )
         except Exception as e:
-            logger.warning(f"Could not get amount precision for {symbol} from exchange: {e}. Using default formatting.")
+            logger.warning(
+                f"Could not get amount precision for {symbol} from exchange: {e}. Using default formatting."
+            )
             # Fallback formatting
             return f"{Decimal(str(amount)):.8f}"  # Adjust decimal places as needed
 
@@ -836,7 +1035,9 @@ class IndicatorRegistry:
             valid_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
             return self.indicators[name](df, **valid_kwargs)
         except Exception as e:
-            logger.error(f"{Fore.RED}Error calculating indicator '{name}': {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Error calculating indicator '{name}': {e}", exc_info=True
+            )
             # Return a default value that signals an error, e.g., NaN or None
             # The type depends on what the calling code expects
             return None  # Or pd.NA, or (pd.NA, pd.NA) for multi-return functions
@@ -855,16 +1056,22 @@ class IndicatorCalculator:
         self.registry.register("stochastic", self._calculate_stochastic)
         logger.info("Indicator calculator initialized.")
 
-    def calculate_indicators(self, df: pd.DataFrame) -> Optional[Dict[str, Union[Decimal, bool, int, None]]]:
+    def calculate_indicators(
+        self, df: pd.DataFrame
+    ) -> Optional[Dict[str, Union[Decimal, bool, int, None]]]:
         """Calculates all registered indicators for the given DataFrame."""
         required_length = self._get_max_required_period()
         if df.empty or len(df) < required_length:
-            logger.warning(f"Insufficient data for indicator calculation. Need {required_length}, have {len(df)}.")
+            logger.warning(
+                f"Insufficient data for indicator calculation. Need {required_length}, have {len(df)}."
+            )
             return None
 
         # Validate data integrity (optional but recommended)
         if df[["open", "high", "low", "close"]].isnull().values.any():
-            logger.warning("NaN values found in OHLC data. Indicator results may be inaccurate.")
+            logger.warning(
+                "NaN values found in OHLC data. Indicator results may be inaccurate."
+            )
             # Optionally drop rows with NaNs or fill them, depending on strategy
             # df.dropna(subset=['open', 'high', 'low', 'close'], inplace=True)
             # if len(df) < required_length: return None # Recheck length after dropping
@@ -873,7 +1080,9 @@ class IndicatorCalculator:
         time_diff = df.index.to_series().diff()
         expected_interval = pd.Timedelta(self.config.interval)
         if (time_diff > (2 * expected_interval)).any():
-            logger.warning("Gaps detected in OHLCV data timestamps. Results may be inaccurate.")
+            logger.warning(
+                "Gaps detected in OHLCV data timestamps. Results may be inaccurate."
+            )
 
         try:
             df_calc = df.copy()  # Work on a copy
@@ -885,10 +1094,18 @@ class IndicatorCalculator:
 
             indicators = {}
             # Calculate indicators using the registry
-            indicators["trend_ema"] = self.registry.calculate("ema", df_calc, period=self.config.trend_ema_period)
-            indicators["fast_ema"] = self.registry.calculate("ema", df_calc, period=self.config.fast_ema_period)
-            indicators["slow_ema"] = self.registry.calculate("ema", df_calc, period=self.config.slow_ema_period)
-            indicators["atr"] = self.registry.calculate("atr", df_calc, period=self.config.atr_period)
+            indicators["trend_ema"] = self.registry.calculate(
+                "ema", df_calc, period=self.config.trend_ema_period
+            )
+            indicators["fast_ema"] = self.registry.calculate(
+                "ema", df_calc, period=self.config.fast_ema_period
+            )
+            indicators["slow_ema"] = self.registry.calculate(
+                "ema", df_calc, period=self.config.slow_ema_period
+            )
+            indicators["atr"] = self.registry.calculate(
+                "atr", df_calc, period=self.config.atr_period
+            )
 
             stoch_result = self.registry.calculate(
                 "stochastic",
@@ -907,35 +1124,70 @@ class IndicatorCalculator:
             else:
                 stoch_k_series, stoch_d_series = stoch_result
                 # Get the last non-NaN value if possible
-                last_k = stoch_k_series.dropna().iloc[-1] if not stoch_k_series.dropna().empty else None
-                last_d = stoch_d_series.dropna().iloc[-1] if not stoch_d_series.dropna().empty else None
-                prev_k = stoch_k_series.dropna().iloc[-2] if len(stoch_k_series.dropna()) >= 2 else None
-                prev_d = stoch_d_series.dropna().iloc[-2] if len(stoch_d_series.dropna()) >= 2 else None
+                last_k = (
+                    stoch_k_series.dropna().iloc[-1]
+                    if not stoch_k_series.dropna().empty
+                    else None
+                )
+                last_d = (
+                    stoch_d_series.dropna().iloc[-1]
+                    if not stoch_d_series.dropna().empty
+                    else None
+                )
+                prev_k = (
+                    stoch_k_series.dropna().iloc[-2]
+                    if len(stoch_k_series.dropna()) >= 2
+                    else None
+                )
+                prev_d = (
+                    stoch_d_series.dropna().iloc[-2]
+                    if len(stoch_d_series.dropna()) >= 2
+                    else None
+                )
 
-                indicators["stoch_k"] = Decimal(str(last_k)) if last_k is not None else None
-                indicators["stoch_d"] = Decimal(str(last_d)) if last_d is not None else None
+                indicators["stoch_k"] = (
+                    Decimal(str(last_k)) if last_k is not None else None
+                )
+                indicators["stoch_d"] = (
+                    Decimal(str(last_d)) if last_d is not None else None
+                )
 
                 # Calculate K/D crossover conditions safely
                 indicators["stoch_kd_bullish"] = (
-                    last_k is not None and last_d is not None and prev_k is not None and prev_d is not None
+                    last_k is not None
+                    and last_d is not None
+                    and prev_k is not None
+                    and prev_d is not None
                 ) and (last_k > last_d and prev_k <= prev_d)
                 indicators["stoch_kd_bearish"] = (
-                    last_k is not None and last_d is not None and prev_k is not None and prev_d is not None
+                    last_k is not None
+                    and last_d is not None
+                    and prev_k is not None
+                    and prev_d is not None
                 ) and (last_k < last_d and prev_k >= prev_d)
 
             # Check if any essential indicator failed
             if any(
-                v is None for k, v in indicators.items() if k not in ["stoch_kd_bullish", "stoch_kd_bearish"]
+                v is None
+                for k, v in indicators.items()
+                if k not in ["stoch_kd_bullish", "stoch_kd_bearish"]
             ):  # Exclude boolean flags
-                logger.error(f"{Fore.RED}One or more essential indicators failed calculation.")
+                logger.error(
+                    f"{Fore.RED}One or more essential indicators failed calculation."
+                )
                 return None
 
-            indicators["atr_period"] = self.config.atr_period  # Add period for context if needed
+            indicators["atr_period"] = (
+                self.config.atr_period
+            )  # Add period for context if needed
             logger.debug("Indicators calculated successfully.")
             return indicators
 
         except Exception as e:
-            logger.error(f"{Fore.RED}Critical error during indicator calculation: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Critical error during indicator calculation: {e}",
+                exc_info=True,
+            )
             return None
 
     def _calculate_ema(self, df: pd.DataFrame, period: int) -> Optional[Decimal]:
@@ -974,7 +1226,9 @@ class IndicatorCalculator:
         self, df: pd.DataFrame, k_period: int, smooth_k: int, smooth_d: int
     ) -> Optional[Tuple[pd.Series, pd.Series]]:
         """Calculates Stochastic Oscillator (%K and %D). Returns the full series."""
-        required = k_period + smooth_k + smooth_d - 2  # Min length needed for calculation
+        required = (
+            k_period + smooth_k + smooth_d - 2
+        )  # Min length needed for calculation
         if k_period <= 0 or smooth_k <= 0 or smooth_d <= 0 or len(df) < required:
             return None, None
         try:
@@ -982,18 +1236,32 @@ class IndicatorCalculator:
             high_max = df["high"].rolling(window=k_period).max()
             # Calculate %K, handle division by zero
             delta = high_max - low_min
-            k = pd.Series(np.where(delta == 0, 0, 100 * (df["close"] - low_min) / delta), index=df.index)
+            k = pd.Series(
+                np.where(delta == 0, 0, 100 * (df["close"] - low_min) / delta),
+                index=df.index,
+            )
             k_smooth = k.rolling(window=smooth_k).mean()  # %K (smoothed)
             d = k_smooth.rolling(window=smooth_d).mean()  # %D
             return k_smooth, d
         except Exception as e:
-            logger.error(f"Error calculating Stochastic(k={k_period}, sk={smooth_k}, sd={smooth_d}): {e}")
+            logger.error(
+                f"Error calculating Stochastic(k={k_period}, sk={smooth_k}, sd={smooth_d}): {e}"
+            )
             return None, None
 
     def _get_max_required_period(self) -> int:
         """Determines the minimum DataFrame length needed for all indicators."""
-        stoch_req = self.config.stoch_period + self.config.stoch_smooth_k + self.config.stoch_smooth_d - 2
-        ema_req = max(self.config.trend_ema_period, self.config.fast_ema_period, self.config.slow_ema_period)
+        stoch_req = (
+            self.config.stoch_period
+            + self.config.stoch_smooth_k
+            + self.config.stoch_smooth_d
+            - 2
+        )
+        ema_req = max(
+            self.config.trend_ema_period,
+            self.config.fast_ema_period,
+            self.config.slow_ema_period,
+        )
         atr_req = self.config.atr_period + 1
         return max(stoch_req, ema_req, atr_req, 1)  # Ensure at least 1
 
@@ -1063,7 +1331,9 @@ class EMAStochasticStrategy(StrategyBase):
         ]
         if any(indicators.get(key) is None for key in required_keys):
             signals["reason"] = "Indicators Incomplete"
-            logger.warning(f"Signal generation skipped: Incomplete indicators - {indicators}")
+            logger.warning(
+                f"Signal generation skipped: Incomplete indicators - {indicators}"
+            )
             return signals
 
         try:
@@ -1074,22 +1344,32 @@ class EMAStochasticStrategy(StrategyBase):
             k = indicators["stoch_k"]
             d = indicators["stoch_d"]
             atr = indicators["atr"]
-            stoch_kd_bullish = indicators["stoch_kd_bullish"]  # K crossed above D in the last candle
-            stoch_kd_bearish = indicators["stoch_kd_bearish"]  # K crossed below D in the last candle
+            stoch_kd_bullish = indicators[
+                "stoch_kd_bullish"
+            ]  # K crossed above D in the last candle
+            stoch_kd_bearish = indicators[
+                "stoch_kd_bearish"
+            ]  # K crossed below D in the last candle
 
             # --- Core Conditions ---
             ema_bullish_cross = fast_ema > slow_ema
             ema_bearish_cross = fast_ema < slow_ema
             # Stochastic entry: Cross OR deep in oversold/overbought territory
-            stoch_entry_long_cond = stoch_kd_bullish or k < self.config.stoch_oversold_threshold
-            stoch_entry_short_cond = stoch_kd_bearish or k > self.config.stoch_overbought_threshold
+            stoch_entry_long_cond = (
+                stoch_kd_bullish or k < self.config.stoch_oversold_threshold
+            )
+            stoch_entry_short_cond = (
+                stoch_kd_bearish or k > self.config.stoch_overbought_threshold
+            )
             # Stochastic exit: Opposite cross (more sensitive exit)
             stoch_exit_long_cond = stoch_kd_bearish  # Exit long if K crosses below D
             stoch_exit_short_cond = stoch_kd_bullish  # Exit short if K crosses above D
 
             # --- Trend Filter ---
             # Price relative to the longer-term trend EMA
-            buffer_points = trend_ema * (self.config.trend_filter_buffer_percent / Decimal("100"))
+            buffer_points = trend_ema * (
+                self.config.trend_filter_buffer_percent / Decimal("100")
+            )
             price_above_trend = current_price > trend_ema  # Simple check
             price_below_trend = current_price < trend_ema  # Simple check
             price_within_trend_buffer_long = current_price >= trend_ema - buffer_points
@@ -1097,15 +1377,17 @@ class EMAStochasticStrategy(StrategyBase):
 
             # --- Volatility Filter ---
             # Check if ATR is too high relative to price (potential whipsaw)
-            max_allowed_atr = current_price * (self.config.volatility_threshold / Decimal("100"))
-            volatility_ok = atr <= max_allowed_atr
-            volatility_reason = (
-                f"Volatility {'OK' if volatility_ok else 'High'} (ATR={atr:.{8}f} vs Max={max_allowed_atr:.{8}f})"
+            max_allowed_atr = current_price * (
+                self.config.volatility_threshold / Decimal("100")
             )
+            volatility_ok = atr <= max_allowed_atr
+            volatility_reason = f"Volatility {'OK' if volatility_ok else 'High'} (ATR={atr:.{8}f} vs Max={max_allowed_atr:.{8}f})"
 
             # --- Significant Move Filter (Optional) ---
             # Check if the last candle's move was significant compared to ATR
-            is_significant_move = True  # Default to true if filter not used or data insufficient
+            is_significant_move = (
+                True  # Default to true if filter not used or data insufficient
+            )
             atr_move_reason = "Move Filter N/A"
             if len(df) >= 2 and self.config.atr_move_filter_multiplier > 0:
                 prev_close = Decimal(str(df["close"].iloc[-2]))
@@ -1118,7 +1400,11 @@ class EMAStochasticStrategy(StrategyBase):
             mtf_confirm_long = True  # Default to true if MTF disabled or data missing
             mtf_confirm_short = True
             mtf_reason = "MTF N/A"
-            if mtf_indicators and "trend_ema" in mtf_indicators and mtf_indicators["trend_ema"] is not None:
+            if (
+                mtf_indicators
+                and "trend_ema" in mtf_indicators
+                and mtf_indicators["trend_ema"] is not None
+            ):
                 mtf_trend_ema = mtf_indicators["trend_ema"]
                 # Long entries confirmed if primary price is above MTF trend
                 mtf_confirm_long = current_price > mtf_trend_ema
@@ -1134,8 +1420,14 @@ class EMAStochasticStrategy(StrategyBase):
                 if current_position and "contracts" in current_position
                 else Decimal("0")
             )
-            is_long = position_size > self.config.position_qty_epsilon and current_position.get("side") == "long"
-            is_short = position_size > self.config.position_qty_epsilon and current_position.get("side") == "short"
+            is_long = (
+                position_size > self.config.position_qty_epsilon
+                and current_position.get("side") == "long"
+            )
+            is_short = (
+                position_size > self.config.position_qty_epsilon
+                and current_position.get("side") == "short"
+            )
             in_position = is_long or is_short
 
             # --- Signal Logic ---
@@ -1152,15 +1444,23 @@ class EMAStochasticStrategy(StrategyBase):
                     and mtf_confirm_long
                 )
                 if self.config.trade_only_with_trend:
-                    can_enter_long = can_enter_long and price_within_trend_buffer_long  # Must be near or above trend
+                    can_enter_long = (
+                        can_enter_long and price_within_trend_buffer_long
+                    )  # Must be near or above trend
 
                 if can_enter_long:
                     signals["entry_long"] = True
                     reason_parts.append(f"{Fore.GREEN}Long Entry:")
-                    reason_parts.append(f"EMA Bullish ({fast_ema:.{6}f} > {slow_ema:.{6}f})")
-                    reason_parts.append(f"Stoch OK (K={k:.2f} < {self.config.stoch_oversold_threshold} or K/D Cross)")
+                    reason_parts.append(
+                        f"EMA Bullish ({fast_ema:.{6}f} > {slow_ema:.{6}f})"
+                    )
+                    reason_parts.append(
+                        f"Stoch OK (K={k:.2f} < {self.config.stoch_oversold_threshold} or K/D Cross)"
+                    )
                     if self.config.trade_only_with_trend:
-                        reason_parts.append(f"Trend OK (P={current_price:.{6}f} >= TrendEMA={trend_ema:.{6}f})")
+                        reason_parts.append(
+                            f"Trend OK (P={current_price:.{6}f} >= TrendEMA={trend_ema:.{6}f})"
+                        )
                     reason_parts.append(volatility_reason)
                     reason_parts.append(atr_move_reason)
                     reason_parts.append(mtf_reason)
@@ -1181,12 +1481,16 @@ class EMAStochasticStrategy(StrategyBase):
                     if can_enter_short:
                         signals["entry_short"] = True
                         reason_parts.append(f"{Fore.RED}Short Entry:")
-                        reason_parts.append(f"EMA Bearish ({fast_ema:.{6}f} < {slow_ema:.{6}f})")
+                        reason_parts.append(
+                            f"EMA Bearish ({fast_ema:.{6}f} < {slow_ema:.{6}f})"
+                        )
                         reason_parts.append(
                             f"Stoch OK (K={k:.2f} > {self.config.stoch_overbought_threshold} or K/D Cross)"
                         )
                         if self.config.trade_only_with_trend:
-                            reason_parts.append(f"Trend OK (P={current_price:.{6}f} <= TrendEMA={trend_ema:.{6}f})")
+                            reason_parts.append(
+                                f"Trend OK (P={current_price:.{6}f} <= TrendEMA={trend_ema:.{6}f})"
+                            )
                         reason_parts.append(volatility_reason)
                         reason_parts.append(atr_move_reason)
                         reason_parts.append(mtf_reason)
@@ -1198,26 +1502,42 @@ class EMAStochasticStrategy(StrategyBase):
                     signals["exit_long"] = True
                     reason_parts.append(f"{Fore.YELLOW}Exit Long:")
                     if ema_bearish_cross:
-                        reason_parts.append(f"EMA Bearish Cross ({fast_ema:.{6}f} < {slow_ema:.{6}f})")
+                        reason_parts.append(
+                            f"EMA Bearish Cross ({fast_ema:.{6}f} < {slow_ema:.{6}f})"
+                        )
                     if stoch_exit_long_cond:
-                        reason_parts.append(f"Stoch Bearish Cross (K={k:.2f}, D={d:.2f})")
+                        reason_parts.append(
+                            f"Stoch Bearish Cross (K={k:.2f}, D={d:.2f})"
+                        )
             elif is_short:
                 # Exit Short Conditions: EMA bullish cross OR Stochastic bullish cross
                 if ema_bullish_cross or stoch_exit_short_cond:
                     signals["exit_short"] = True
                     reason_parts.append(f"{Fore.YELLOW}Exit Short:")
                     if ema_bullish_cross:
-                        reason_parts.append(f"EMA Bullish Cross ({fast_ema:.{6}f} > {slow_ema:.{6}f})")
+                        reason_parts.append(
+                            f"EMA Bullish Cross ({fast_ema:.{6}f} > {slow_ema:.{6}f})"
+                        )
                     if stoch_exit_short_cond:
-                        reason_parts.append(f"Stoch Bullish Cross (K={k:.2f}, D={d:.2f})")
+                        reason_parts.append(
+                            f"Stoch Bullish Cross (K={k:.2f}, D={d:.2f})"
+                        )
 
             # --- Final Reason Construction ---
             if not reason_parts:
                 # Provide basic status if no entry/exit signal generated
-                trend_status = "Above" if price_above_trend else "Below" if price_below_trend else "Neutral"
+                trend_status = (
+                    "Above"
+                    if price_above_trend
+                    else "Below"
+                    if price_below_trend
+                    else "Neutral"
+                )
                 ema_status = "Bullish" if ema_bullish_cross else "Bearish"
                 stoch_status = f"K={k:.2f} D={d:.2f}"
-                pos_status = f"Pos: {'Long' if is_long else 'Short' if is_short else 'None'}"
+                pos_status = (
+                    f"Pos: {'Long' if is_long else 'Short' if is_short else 'None'}"
+                )
                 signals["reason"] = (
                     f"No Signal | {pos_status} | EMA: {ema_status} | Trend: {trend_status} | Stoch: {stoch_status} | {volatility_reason}"
                 )
@@ -1254,13 +1574,24 @@ class EMAStochasticStrategy(StrategyBase):
 class TradeExecutor:
     """Handles placing orders, managing positions, and calculating PnL."""
 
-    def __init__(self, config: TradingConfig, exchange: ExchangeInterface, journal: JournalManager):
+    def __init__(
+        self,
+        config: TradingConfig,
+        exchange: ExchangeInterface,
+        journal: JournalManager,
+    ):
         self.config = config
         self.exchange = exchange
         self.journal = journal
         # Simple state tracking (can be enhanced)
         self.current_position = None  # Store position details fetched from exchange
-        self.performance = {"trades": 0, "wins": 0, "losses": 0, "pnl": Decimal("0"), "equity_history": []}
+        self.performance = {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "pnl": Decimal("0"),
+            "equity_history": [],
+        }
         logger.info("Trade executor initialized.")
 
     async def update_position_state(self):
@@ -1272,21 +1603,31 @@ class TradeExecutor:
             side = self.current_position.get("side", "none")
             entry = self.current_position.get("entryPrice", 0)
             pnl = self.current_position.get("unrealizedPnl", 0)
-            logger.debug(f"Current Position: Side={side}, Size={size}, Entry={entry}, uPnL={pnl}")
+            logger.debug(
+                f"Current Position: Side={side}, Size={size}, Entry={entry}, uPnL={pnl}"
+            )
         else:
             logger.debug("No active position found.")
 
     async def execute_entry(self, side: str, indicators: Dict):
         """Executes an entry order based on calculated risk."""
         logger.info(f"Attempting {side.upper()} entry...")
-        if "atr" not in indicators or indicators["atr"] is None or indicators["atr"] <= 0:
-            logger.error(f"{Fore.RED}Cannot calculate position size: ATR is invalid ({indicators.get('atr')}).")
+        if (
+            "atr" not in indicators
+            or indicators["atr"] is None
+            or indicators["atr"] <= 0
+        ):
+            logger.error(
+                f"{Fore.RED}Cannot calculate position size: ATR is invalid ({indicators.get('atr')})."
+            )
             return False
 
         try:
             balance, equity = await self.exchange.fetch_balance()
             if equity is None or equity <= Decimal("0"):
-                logger.error(f"{Fore.RED}Cannot place order: Invalid equity ({equity}).")
+                logger.error(
+                    f"{Fore.RED}Cannot place order: Invalid equity ({equity})."
+                )
                 return False
 
             atr = indicators["atr"]
@@ -1307,18 +1648,26 @@ class TradeExecutor:
             # Apply max position size constraint relative to equity
             ticker = await self.exchange.fetch_ticker(self.config.symbol)
             if not ticker or "last" not in ticker:
-                logger.error(f"{Fore.RED}Cannot place order: Failed to fetch current price.")
+                logger.error(
+                    f"{Fore.RED}Cannot place order: Failed to fetch current price."
+                )
                 return False
             current_price = Decimal(str(ticker["last"]))
             max_position_value = equity * self.config.max_position_percentage
-            max_qty_allowed = max_position_value / current_price  # Max quantity based on equity %
+            max_qty_allowed = (
+                max_position_value / current_price
+            )  # Max quantity based on equity %
             qty_decimal = min(qty_decimal, max_qty_allowed)
             qty_str = self.format_amount(
                 self.config.symbol, qty_decimal, rounding_mode=ROUND_DOWN
             )  # Use ROUND_DOWN for orders
             qty_final = Decimal(qty_str)  # Use the precision-adjusted value
 
-            if qty_final <= Decimal(self.exchange.exchange.markets[self.config.symbol]["limits"]["amount"]["min"]):
+            if qty_final <= Decimal(
+                self.exchange.exchange.markets[self.config.symbol]["limits"]["amount"][
+                    "min"
+                ]
+            ):
                 logger.warning(
                     f"{Fore.YELLOW}Calculated order quantity ({qty_final}) is below minimum allowed. Skipping entry."
                 )
@@ -1365,23 +1714,36 @@ class TradeExecutor:
                     }
                 )
                 self.performance["trades"] += 1
-                self.performance["equity_history"].append(equity)  # Record equity before trade impact
+                self.performance["equity_history"].append(
+                    equity
+                )  # Record equity before trade impact
                 await self.send_termux_sms(
                     f"✅ ENTRY: {side.upper()} {qty_final} {self.config.symbol} @ {entry_price:.4f}"
                 )
                 await self.update_position_state()  # Update position state immediately
                 return True
             else:
-                logger.error(f"{Fore.RED}Market {side.upper()} order placement failed. Response: {order}")
-                await self.send_termux_sms(f"⚠️ ORDER FAIL: {side.upper()} {self.config.symbol}")
+                logger.error(
+                    f"{Fore.RED}Market {side.upper()} order placement failed. Response: {order}"
+                )
+                await self.send_termux_sms(
+                    f"⚠️ ORDER FAIL: {side.upper()} {self.config.symbol}"
+                )
                 return False
 
         except ccxt.InsufficientFunds as e:
-            logger.error(f"{Fore.RED}Insufficient funds to place {side.upper()} order: {e}")
-            await self.send_termux_sms(f"❌ INSUFFICIENT FUNDS: {side.upper()} {self.config.symbol}")
+            logger.error(
+                f"{Fore.RED}Insufficient funds to place {side.upper()} order: {e}"
+            )
+            await self.send_termux_sms(
+                f"❌ INSUFFICIENT FUNDS: {side.upper()} {self.config.symbol}"
+            )
             return False
         except Exception as e:
-            logger.error(f"{Fore.RED}Error during {side.upper()} entry execution: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Error during {side.upper()} entry execution: {e}",
+                exc_info=True,
+            )
             return False
 
     async def execute_exit(self, side_to_close: str, reason: str):
@@ -1394,10 +1756,14 @@ class TradeExecutor:
         position_side = self.current_position.get("side")  # 'long' or 'short'
 
         if position_size <= self.config.position_qty_epsilon:
-            logger.warning(f"Exit requested for {side_to_close} but position size is zero.")
+            logger.warning(
+                f"Exit requested for {side_to_close} but position size is zero."
+            )
             return False
         if position_side != side_to_close:
-            logger.warning(f"Exit requested for {side_to_close} but current position is {position_side}.")
+            logger.warning(
+                f"Exit requested for {side_to_close} but current position is {position_side}."
+            )
             return False
 
         exit_side = "sell" if side_to_close == "long" else "buy"
@@ -1410,11 +1776,16 @@ class TradeExecutor:
             # Use reduceOnly flag to ensure it only closes the position
             order_params = {"reduceOnly": True, "positionIdx": 0}  # Add positionIdx
             order = await self.exchange.create_market_order(
-                symbol=self.config.symbol, side=exit_side, amount=qty_to_close, params=order_params
+                symbol=self.config.symbol,
+                side=exit_side,
+                amount=qty_to_close,
+                params=order_params,
             )
 
             if order and order.get("id"):
-                exit_price = Decimal(str(order.get("average", order.get("price", "0"))))  # Get fill price
+                exit_price = Decimal(
+                    str(order.get("average", order.get("price", "0")))
+                )  # Get fill price
                 entry_price = Decimal(str(self.current_position.get("entryPrice", "0")))
                 pnl = (
                     (exit_price - entry_price) * position_size
@@ -1456,22 +1827,33 @@ class TradeExecutor:
                 # Optionally cancel remaining TP orders here if any
                 return True
             else:
-                logger.error(f"{Fore.RED}Market {exit_side.upper()} (close) order placement failed. Response: {order}")
-                await self.send_termux_sms(f"⚠️ CLOSE FAIL: {side_to_close.upper()} {self.config.symbol}")
+                logger.error(
+                    f"{Fore.RED}Market {exit_side.upper()} (close) order placement failed. Response: {order}"
+                )
+                await self.send_termux_sms(
+                    f"⚠️ CLOSE FAIL: {side_to_close.upper()} {self.config.symbol}"
+                )
                 # Position might still be open, re-fetch state in next cycle
                 await self.update_position_state()
                 return False
 
         except ccxt.OrderNotFound as e:
-            logger.warning(f"{Fore.YELLOW}Order to close position might have already been filled or cancelled: {e}")
+            logger.warning(
+                f"{Fore.YELLOW}Order to close position might have already been filled or cancelled: {e}"
+            )
             # Potentially already closed by SL/TP, re-fetch state
             await self.update_position_state()
             return True  # Assume closed successfully if order not found
         except Exception as e:
-            logger.error(f"{Fore.RED}Error during {exit_side.upper()} (close) execution: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Error during {exit_side.upper()} (close) execution: {e}",
+                exc_info=True,
+            )
             return False
 
-    async def set_stop_loss(self, side: str, entry_price: Decimal, atr: Decimal) -> bool:
+    async def set_stop_loss(
+        self, side: str, entry_price: Decimal, atr: Decimal
+    ) -> bool:
         """Sets the initial stop-loss order based on ATR."""
         if atr <= 0:
             logger.error("Cannot set SL: Invalid ATR value.")
@@ -1492,24 +1874,34 @@ class TradeExecutor:
                 # 'tpslMode': 'Full' # Ensure it applies to the whole position
             }
             logger.debug(f"Setting SL with params: {params}")
-            response = await self.exchange.set_trading_stop(symbol=self.config.symbol, params=params)
+            response = await self.exchange.set_trading_stop(
+                symbol=self.config.symbol, params=params
+            )
 
-            if response:  # Check if response is not None (success checked within exchange method)
+            if (
+                response
+            ):  # Check if response is not None (success checked within exchange method)
                 logger.trade(
                     f"{Fore.YELLOW}STOP LOSS set for {side.upper()} position at {sl_price_str} (Trigger: {self.config.sl_trigger_by})"
                 )
                 return True
             else:
-                logger.error(f"{Fore.RED}Failed to set Stop Loss for {side.upper()} position.")
+                logger.error(
+                    f"{Fore.RED}Failed to set Stop Loss for {side.upper()} position."
+                )
                 return False
         except Exception as e:
             logger.error(f"{Fore.RED}Error setting Stop Loss: {e}", exc_info=True)
             return False
 
-    async def set_take_profits(self, side: str, entry_price: Decimal, atr: Decimal, total_qty: Decimal) -> bool:
+    async def set_take_profits(
+        self, side: str, entry_price: Decimal, atr: Decimal, total_qty: Decimal
+    ) -> bool:
         """Sets multiple take-profit levels based on ATR multipliers."""
         if not self.config.take_profit_atr_multipliers or atr <= 0:
-            logger.info("Take profit setting skipped (no multipliers configured or invalid ATR).")
+            logger.info(
+                "Take profit setting skipped (no multipliers configured or invalid ATR)."
+            )
             return True  # Not an error if TP is disabled
 
         num_tps = len(self.config.take_profit_atr_multipliers)
@@ -1527,7 +1919,9 @@ class TradeExecutor:
         try:
             first_tp_multiplier = self.config.take_profit_atr_multipliers[0]
             if first_tp_multiplier <= 0:
-                logger.warning("First TP multiplier is zero or negative, skipping TP set.")
+                logger.warning(
+                    "First TP multiplier is zero or negative, skipping TP set."
+                )
                 return True
 
             tp_price = (
@@ -1546,19 +1940,31 @@ class TradeExecutor:
                 # 'tpslMode': 'Full' # Or 'Partial' if supported and desired, but API might not allow qty specification here
             }
             logger.debug(f"Setting TP1 with params: {params}")
-            response = await self.exchange.set_trading_stop(symbol=self.config.symbol, params=params)
+            response = await self.exchange.set_trading_stop(
+                symbol=self.config.symbol, params=params
+            )
 
             if response:
                 logger.trade(
                     f"{Fore.GREEN}TAKE PROFIT 1 set for {side.upper()} position at {tp_price_str} (Trigger: {self.config.sl_trigger_by})"
                 )
                 # Log other intended TPs for manual reference or future implementation
-                for i, mult in enumerate(self.config.take_profit_atr_multipliers[1:], start=2):
-                    tp_level_price = entry_price + (atr * mult) if side == "buy" else entry_price - (atr * mult)
-                    logger.info(f"Intended TP{i} level: {self.format_price(self.config.symbol, tp_level_price)}")
+                for i, mult in enumerate(
+                    self.config.take_profit_atr_multipliers[1:], start=2
+                ):
+                    tp_level_price = (
+                        entry_price + (atr * mult)
+                        if side == "buy"
+                        else entry_price - (atr * mult)
+                    )
+                    logger.info(
+                        f"Intended TP{i} level: {self.format_price(self.config.symbol, tp_level_price)}"
+                    )
                 return True
             else:
-                logger.error(f"{Fore.RED}Failed to set Take Profit 1 for {side.upper()} position.")
+                logger.error(
+                    f"{Fore.RED}Failed to set Take Profit 1 for {side.upper()} position."
+                )
                 return False
 
         except Exception as e:
@@ -1575,25 +1981,54 @@ class TradeExecutor:
         except Exception as e:
             # Fallback if precision info not available
             precision = 8  # Default precision
-            if self.exchange.exchange.markets and symbol in self.exchange.exchange.markets:
-                precision = self.exchange.exchange.markets[symbol].get("precision", {}).get("price", 8)
-            logger.debug(f"Using fallback price formatting for {symbol} (precision {precision}): {e}")
+            if (
+                self.exchange.exchange.markets
+                and symbol in self.exchange.exchange.markets
+            ):
+                precision = (
+                    self.exchange.exchange.markets[symbol]
+                    .get("precision", {})
+                    .get("price", 8)
+                )
+            logger.debug(
+                f"Using fallback price formatting for {symbol} (precision {precision}): {e}"
+            )
             return f"{Decimal(str(price)):.{precision}f}"
 
-    def format_amount(self, symbol: str, amount: Union[Decimal, str, float, int], rounding_mode=ROUND_DOWN) -> str:
+    def format_amount(
+        self,
+        symbol: str,
+        amount: Union[Decimal, str, float, int],
+        rounding_mode=ROUND_DOWN,
+    ) -> str:
         """Safely format amount/quantity to exchange precision."""
         try:
-            if isinstance(amount, Decimal) and (amount.is_nan() or amount.is_infinite()):
+            if isinstance(amount, Decimal) and (
+                amount.is_nan() or amount.is_infinite()
+            ):
                 return "NaN"  # Or handle as error
             # Map Decimal rounding modes to CCXT rounding modes if necessary, or use default
-            ccxt_rounding = ccxt.TRUNCATE if rounding_mode == ROUND_DOWN else ccxt.ROUND  # Example mapping
-            return self.exchange.amount_to_precision(symbol, float(amount), rounding_mode=ccxt_rounding)
+            ccxt_rounding = (
+                ccxt.TRUNCATE if rounding_mode == ROUND_DOWN else ccxt.ROUND
+            )  # Example mapping
+            return self.exchange.amount_to_precision(
+                symbol, float(amount), rounding_mode=ccxt_rounding
+            )
         except Exception as e:
             # Fallback if precision info not available
             precision = 8  # Default precision
-            if self.exchange.exchange.markets and symbol in self.exchange.exchange.markets:
-                precision = self.exchange.exchange.markets[symbol].get("precision", {}).get("amount", 8)
-            logger.debug(f"Using fallback amount formatting for {symbol} (precision {precision}): {e}")
+            if (
+                self.exchange.exchange.markets
+                and symbol in self.exchange.exchange.markets
+            ):
+                precision = (
+                    self.exchange.exchange.markets[symbol]
+                    .get("precision", {})
+                    .get("amount", 8)
+                )
+            logger.debug(
+                f"Using fallback amount formatting for {symbol} (precision {precision}): {e}"
+            )
             # Apply rounding mode manually for fallback
             quantizer = Decimal("1e-" + str(precision))
             return str(Decimal(str(amount)).quantize(quantizer, rounding=rounding_mode))
@@ -1607,13 +2042,17 @@ class TradeExecutor:
 
         # Check if running in Termux (basic check)
         if "com.termux" not in os.environ.get("PREFIX", ""):
-            logger.warning("Not running in Termux environment. Skipping SMS notification.")
+            logger.warning(
+                "Not running in Termux environment. Skipping SMS notification."
+            )
             return
 
         try:
             # Limit message length if necessary (SMS limits apply)
             max_len = 150  # Conservative limit
-            truncated_message = message[:max_len] + "..." if len(message) > max_len else message
+            truncated_message = (
+                message[:max_len] + "..." if len(message) > max_len else message
+            )
 
             command = [
                 "termux-sms-send",
@@ -1630,7 +2069,9 @@ class TradeExecutor:
             stdout, stderr = await process.communicate()
 
             if process.returncode == 0:
-                logger.info(f"Sent Termux SMS notification to {self.config.termux_sms_recipient}.")
+                logger.info(
+                    f"Sent Termux SMS notification to {self.config.termux_sms_recipient}."
+                )
             else:
                 stderr_str = stderr.decode().strip() if stderr else "No stderr"
                 logger.error(
@@ -1638,16 +2079,25 @@ class TradeExecutor:
                 )
 
         except FileNotFoundError:
-            logger.error(f"{Fore.RED}'termux-sms-send' command not found. Is Termux:API installed and configured?")
+            logger.error(
+                f"{Fore.RED}'termux-sms-send' command not found. Is Termux:API installed and configured?"
+            )
         except Exception as e:
-            logger.error(f"{Fore.RED}Failed to send Termux SMS notification: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Failed to send Termux SMS notification: {e}", exc_info=True
+            )
 
 
 # --- Backtesting ---
 class Backtester:
     """Simulates trading strategy execution on historical data."""
 
-    def __init__(self, config: TradingConfig, indicator_calculator: IndicatorCalculator, strategy: StrategyBase):
+    def __init__(
+        self,
+        config: TradingConfig,
+        indicator_calculator: IndicatorCalculator,
+        strategy: StrategyBase,
+    ):
         self.config = config
         self.indicator_calculator = indicator_calculator
         self.strategy = strategy
@@ -1658,7 +2108,9 @@ class Backtester:
         logger.info(f"Starting backtest using data from: {data_path}")
         try:
             # Load data
-            df = pd.read_csv(data_path, parse_dates=["timestamp"], index_col="timestamp")
+            df = pd.read_csv(
+                data_path, parse_dates=["timestamp"], index_col="timestamp"
+            )
             # Basic data validation
             required_cols = ["open", "high", "low", "close", "volume"]
             if not all(col in df.columns for col in required_cols):
@@ -1668,16 +2120,16 @@ class Backtester:
                 return None
             df = df[required_cols].dropna()  # Ensure only needed columns and no NaNs
             if df.empty:
-                logger.critical(f"{Fore.RED}Backtest data is empty or contains only NaNs after cleaning.")
+                logger.critical(
+                    f"{Fore.RED}Backtest data is empty or contains only NaNs after cleaning."
+                )
                 return None
             logger.info(f"Loaded {len(df)} data points for backtesting.")
 
             # Simulation parameters
             initial_equity = Decimal("10000")  # Starting capital
             equity = initial_equity
-            position = (
-                None  # Holds current position details: {'side': 'long'/'short', 'qty': Decimal, 'entry_price': Decimal}
-            )
+            position = None  # Holds current position details: {'side': 'long'/'short', 'qty': Decimal, 'entry_price': Decimal}
             trades = []  # List to store details of closed trades
             equity_curve = [initial_equity]  # Track equity over time
 
@@ -1696,7 +2148,9 @@ class Backtester:
                 # Calculate indicators for the current window
                 indicators = self.indicator_calculator.calculate_indicators(window_df)
                 if not indicators:
-                    logger.debug(f"Skipping step {i}: Insufficient data or indicator error.")
+                    logger.debug(
+                        f"Skipping step {i}: Insufficient data or indicator error."
+                    )
                     continue  # Skip if indicators can't be calculated
 
                 # Simulate MTF (using same data for simplicity, real backtest needs separate MTF data)
@@ -1706,7 +2160,11 @@ class Backtester:
                 # Generate signals based on current state and indicators
                 # Pass simulated position state to strategy
                 sim_position_state = (
-                    {"contracts": position["qty"], "side": position["side"], "entryPrice": position["entry_price"]}
+                    {
+                        "contracts": position["qty"],
+                        "side": position["side"],
+                        "entryPrice": position["entry_price"],
+                    }
                     if position
                     else None
                 )
@@ -1728,7 +2186,8 @@ class Backtester:
                         pnl = (
                             (current_price - position["entry_price"]) * position["qty"]
                             if position["side"] == "long"
-                            else (position["entry_price"] - current_price) * position["qty"]
+                            else (position["entry_price"] - current_price)
+                            * position["qty"]
                         )
                         equity += pnl
                         trades.append(
@@ -1742,7 +2201,9 @@ class Backtester:
                                 "pnl": pnl,
                             }
                         )
-                        logger.debug(f"Backtest: Closed {position['side']} @ {current_price:.4f}, PnL: {pnl:.4f}")
+                        logger.debug(
+                            f"Backtest: Closed {position['side']} @ {current_price:.4f}, PnL: {pnl:.4f}"
+                        )
                         position = None  # Clear position
 
                 # Simulate Entries (only if not in position)
@@ -1761,7 +2222,9 @@ class Backtester:
                         if sl_distance > 0:
                             qty_to_trade = risk_amount / sl_distance
                             # Apply max position constraint (simplified)
-                            max_qty = (equity * self.config.max_position_percentage) / current_price
+                            max_qty = (
+                                equity * self.config.max_position_percentage
+                            ) / current_price
                             qty_to_trade = min(qty_to_trade, max_qty)
 
                             # Simulate entry
@@ -1771,9 +2234,13 @@ class Backtester:
                                 "entry_price": current_price,
                                 "entry_time": current_time,
                             }
-                            logger.debug(f"Backtest: Entered {entry_side} {qty_to_trade:.4f} @ {current_price:.4f}")
+                            logger.debug(
+                                f"Backtest: Entered {entry_side} {qty_to_trade:.4f} @ {current_price:.4f}"
+                            )
                         else:
-                            logger.warning("Backtest: Skipping entry due to zero SL distance.")
+                            logger.warning(
+                                "Backtest: Skipping entry due to zero SL distance."
+                            )
 
                 equity_curve.append(equity)  # Record equity at each step
 
@@ -1781,7 +2248,9 @@ class Backtester:
             logger.info(f"Backtest finished. Total Trades: {len(trades)}")
 
             # --- Calculate Metrics ---
-            results = self._calculate_backtest_metrics(initial_equity, equity_curve, trades)
+            results = self._calculate_backtest_metrics(
+                initial_equity, equity_curve, trades
+            )
 
             # --- Plot Equity Curve ---
             self._plot_equity_curve(equity_curve, df.index[min_data_length:])
@@ -1795,23 +2264,34 @@ class Backtester:
             logger.critical(f"{Fore.RED}Backtest data file is empty: {data_path}")
             return None
         except Exception as e:
-            logger.error(f"{Fore.RED}An error occurred during backtesting: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}An error occurred during backtesting: {e}", exc_info=True
+            )
             return None
 
     def _calculate_backtest_metrics(self, initial_equity, equity_curve, trades):
         """Calculates performance metrics from backtest results."""
         final_equity = equity_curve[-1] if equity_curve else initial_equity
-        total_return_pct = ((final_equity / initial_equity) - 1) * 100 if initial_equity > 0 else 0
+        total_return_pct = (
+            ((final_equity / initial_equity) - 1) * 100 if initial_equity > 0 else 0
+        )
         num_trades = len(trades)
         wins = sum(1 for t in trades if t["pnl"] > 0)
         losses = num_trades - wins
         win_rate = (wins / num_trades) * 100 if num_trades > 0 else 0
         total_pnl = sum(t["pnl"] for t in trades)
         avg_pnl_per_trade = total_pnl / num_trades if num_trades > 0 else 0
-        avg_win = sum(t["pnl"] for t in trades if t["pnl"] > 0) / wins if wins > 0 else 0
-        avg_loss = sum(t["pnl"] for t in trades if t["pnl"] < 0) / losses if losses > 0 else 0
+        avg_win = (
+            sum(t["pnl"] for t in trades if t["pnl"] > 0) / wins if wins > 0 else 0
+        )
+        avg_loss = (
+            sum(t["pnl"] for t in trades if t["pnl"] < 0) / losses if losses > 0 else 0
+        )
         profit_factor = (
-            abs(sum(t["pnl"] for t in trades if t["pnl"] > 0) / sum(t["pnl"] for t in trades if t["pnl"] < 0))
+            abs(
+                sum(t["pnl"] for t in trades if t["pnl"] > 0)
+                / sum(t["pnl"] for t in trades if t["pnl"] < 0)
+            )
             if losses > 0 and sum(t["pnl"] for t in trades if t["pnl"] < 0) != 0
             else float("inf")
         )
@@ -1896,7 +2376,10 @@ class Dashboard:
         """Starts the live updating dashboard."""
         # Initial table structure
         self.live = Live(
-            self._generate_table(), console=self.console, refresh_per_second=1, vertical_overflow="visible"
+            self._generate_table(),
+            console=self.console,
+            refresh_per_second=1,
+            vertical_overflow="visible",
         )
         try:
             self.live.start(refresh=True)
@@ -1940,15 +2423,21 @@ class Dashboard:
 
         # --- Populate Table ---
         # Market Info
-        table.add_row("Symbol", f"[bold white]{data.get('symbol', self.config.symbol)}[/]")
+        table.add_row(
+            "Symbol", f"[bold white]{data.get('symbol', self.config.symbol)}[/]"
+        )
         price = data.get("price")
-        price_str = f"{price:.{8}f}" if isinstance(price, Decimal) else str(price or "-")
+        price_str = (
+            f"{price:.{8}f}" if isinstance(price, Decimal) else str(price or "-")
+        )
         table.add_row("Current Price", price_str)
         table.add_row("Interval", self.config.interval)
 
         # Account & Position
         equity = data.get("equity")
-        equity_str = f"{equity:.4f}" if isinstance(equity, Decimal) else str(equity or "-")
+        equity_str = (
+            f"{equity:.4f}" if isinstance(equity, Decimal) else str(equity or "-")
+        )
         table.add_row("Equity (Quote)", equity_str)
         pos = data.get("position")
         if pos and isinstance(pos, dict):
@@ -1956,7 +2445,13 @@ class Dashboard:
             pos_size = Decimal(str(pos.get("contracts", "0")))
             pos_entry = Decimal(str(pos.get("entryPrice", "0")))
             pos_pnl = Decimal(str(pos.get("unrealizedPnl", "0")))
-            color = "green" if pos_side == "long" else "red" if pos_side == "short" else "white"
+            color = (
+                "green"
+                if pos_side == "long"
+                else "red"
+                if pos_side == "short"
+                else "white"
+            )
             table.add_row("Position Side", f"[bold {color}]{pos_side.upper()}[/]")
             table.add_row("Position Size", f"{pos_size:.{8}f}")
             table.add_row("Entry Price", f"{pos_entry:.{8}f}")
@@ -2026,12 +2521,20 @@ async def run_health_check(port: int, status_dict_ref: Dict):
                     self.send_response(500)
                     self.send_header("Content-type", "application/json")
                     self.end_headers()
-                    self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+                    self.wfile.write(
+                        json.dumps({"status": "error", "message": str(e)}).encode(
+                            "utf-8"
+                        )
+                    )
             else:
                 self.send_response(404)
                 self.send_header("Content-type", "application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": "Not Found"}).encode("utf-8"))
+                self.wfile.write(
+                    json.dumps({"status": "error", "message": "Not Found"}).encode(
+                        "utf-8"
+                    )
+                )
 
         # Suppress standard request logging to keep console clean
         def log_message(self, format, *args):
@@ -2040,10 +2543,14 @@ async def run_health_check(port: int, status_dict_ref: Dict):
     def start_server():
         try:
             with HTTPServer(("0.0.0.0", port), HealthCheckHandler) as server:
-                logger.info(f"Health check server started on http://0.0.0.0:{port}/health")
+                logger.info(
+                    f"Health check server started on http://0.0.0.0:{port}/health"
+                )
                 server.serve_forever()
         except OSError as e:
-            logger.critical(f"{Fore.RED}Could not start health check server on port {port}: {e}. Port might be in use.")
+            logger.critical(
+                f"{Fore.RED}Could not start health check server on port {port}: {e}. Port might be in use."
+            )
             # Don't exit the whole bot, just disable health check
         except Exception as e:
             logger.error(f"{Fore.RED}Health check server failed: {e}", exc_info=True)
@@ -2074,18 +2581,29 @@ class TradingBot:
         if self._initialized:
             return
 
-        print(f"{Fore.GREEN}{Style.BRIGHT}--- Initializing Pyrmethus Trading Bot v4.0 (Enhanced) ---{Style.RESET_ALL}")
+        print(
+            f"{Fore.GREEN}{Style.BRIGHT}--- Initializing Pyrmethus Trading Bot v4.0 (Enhanced) ---{Style.RESET_ALL}"
+        )
         self.config = TradingConfig(config_file)  # Handles its own logging
         self.exchange = BybitExchange(self.config)
-        self.journal = JournalManager(self.config.journal_file_path, self.config.enable_journaling)
+        self.journal = JournalManager(
+            self.config.journal_file_path, self.config.enable_journaling
+        )
         self.indicator_calculator = IndicatorCalculator(self.config)
         self.strategy = EMAStochasticStrategy(self.config)
         self.trade_executor = TradeExecutor(self.config, self.exchange, self.journal)
-        self.backtester = Backtester(self.config, self.indicator_calculator, self.strategy)
+        self.backtester = Backtester(
+            self.config, self.indicator_calculator, self.strategy
+        )
         self.dashboard = Dashboard(self.config)
         self.shutdown_requested = False
         self.config.shutdown_requested = False  # Share shutdown flag
-        self.status = {"running": False, "last_cycle_time": None, "cycle_count": 0, "symbol": self.config.symbol}
+        self.status = {
+            "running": False,
+            "last_cycle_time": None,
+            "cycle_count": 0,
+            "symbol": self.config.symbol,
+        }
         self.cycle_count = 0
         self._initialized = True  # Mark as initialized
         logger.info("Trading bot components initialized.")
@@ -2094,12 +2612,16 @@ class TradingBot:
         """Initializes the exchange connection and dashboard."""
         logger.info("Performing bot initialization...")
         try:
-            await self.exchange.initialize()  # Handles its own logging and exit on failure
+            await (
+                self.exchange.initialize()
+            )  # Handles its own logging and exit on failure
             logger.info(f"{Fore.GREEN}Exchange connection established.")
             self.dashboard.start()  # Start CLI dashboard
             # Start health check server (runs in background thread)
             # No await needed here because it starts a thread
-            asyncio.create_task(run_health_check(self.config.health_check_port, self.status))
+            asyncio.create_task(
+                run_health_check(self.config.health_check_port, self.status)
+            )
             self.status["running"] = True
             logger.info("Bot initialization complete.")
         except Exception as e:
@@ -2111,7 +2633,9 @@ class TradingBot:
         """Executes a single trading cycle."""
         self.cycle_count += 1
         start_time = time.monotonic()
-        logger.info(f"{Fore.MAGENTA}--- Cycle {self.cycle_count} Started ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.MAGENTA}--- Cycle {self.cycle_count} Started ---{Style.RESET_ALL}"
+        )
         self.status["cycle_count"] = self.cycle_count
 
         try:
@@ -2124,7 +2648,10 @@ class TradingBot:
                 logger.warning("Failed to fetch primary OHLCV data, skipping cycle.")
                 return  # Skip cycle if data fetch fails
 
-            df = pd.DataFrame(df_ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+            df = pd.DataFrame(
+                df_ohlcv,
+                columns=["timestamp", "open", "high", "low", "close", "volume"],
+            )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             df.set_index("timestamp", inplace=True)
             # Convert columns to appropriate types for calculations
@@ -2135,12 +2662,19 @@ class TradingBot:
             mtf_df = None
             mtf_indicators = None
             if self.config.multi_timeframe_interval:
-                logger.debug(f"Fetching MTF OHLCV data ({self.config.multi_timeframe_interval})...")
+                logger.debug(
+                    f"Fetching MTF OHLCV data ({self.config.multi_timeframe_interval})..."
+                )
                 mtf_ohlcv = await self.exchange.fetch_ohlcv(
-                    self.config.symbol, self.config.multi_timeframe_interval, self.config.ohlcv_limit
+                    self.config.symbol,
+                    self.config.multi_timeframe_interval,
+                    self.config.ohlcv_limit,
                 )
                 if mtf_ohlcv:
-                    mtf_df = pd.DataFrame(mtf_ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+                    mtf_df = pd.DataFrame(
+                        mtf_ohlcv,
+                        columns=["timestamp", "open", "high", "low", "close", "volume"],
+                    )
                     mtf_df["timestamp"] = pd.to_datetime(mtf_df["timestamp"], unit="ms")
                     mtf_df.set_index("timestamp", inplace=True)
                     for col in ["open", "high", "low", "close", "volume"]:
@@ -2152,25 +2686,35 @@ class TradingBot:
             logger.debug("Calculating indicators...")
             indicators = self.indicator_calculator.calculate_indicators(df)
             if mtf_df is not None:
-                mtf_indicators = self.indicator_calculator.calculate_indicators(mtf_df)  # Assuming same calc method
+                mtf_indicators = self.indicator_calculator.calculate_indicators(
+                    mtf_df
+                )  # Assuming same calc method
 
             if not indicators:
-                logger.warning("Indicator calculation failed, skipping strategy execution.")
+                logger.warning(
+                    "Indicator calculation failed, skipping strategy execution."
+                )
                 return
 
             # 3. Update State (Balance & Position)
             logger.debug("Fetching balance and position...")
             _, equity = await self.exchange.fetch_balance()
-            await self.trade_executor.update_position_state()  # Fetches position into trade_executor.current_position
+            await (
+                self.trade_executor.update_position_state()
+            )  # Fetches position into trade_executor.current_position
             current_position_state = self.trade_executor.current_position
 
             if equity is None:
-                logger.error("Failed to fetch equity, cannot proceed with signal generation.")
+                logger.error(
+                    "Failed to fetch equity, cannot proceed with signal generation."
+                )
                 return
 
             # 4. Generate Signals
             logger.debug("Generating trading signals...")
-            signals = self.strategy.generate_signals(df, indicators, current_position_state, equity, mtf_indicators)
+            signals = self.strategy.generate_signals(
+                df, indicators, current_position_state, equity, mtf_indicators
+            )
 
             # 5. Execute Trades
             logger.debug("Executing trades based on signals...")
@@ -2179,9 +2723,13 @@ class TradingBot:
             elif signals["entry_short"]:
                 await self.trade_executor.execute_entry("sell", indicators)
             elif signals["exit_long"]:
-                await self.trade_executor.execute_exit("long", signals.get("reason", "Exit Signal"))
+                await self.trade_executor.execute_exit(
+                    "long", signals.get("reason", "Exit Signal")
+                )
             elif signals["exit_short"]:
-                await self.trade_executor.execute_exit("short", signals.get("reason", "Exit Signal"))
+                await self.trade_executor.execute_exit(
+                    "short", signals.get("reason", "Exit Signal")
+                )
             else:
                 logger.debug("No entry or exit signals generated.")
 
@@ -2189,7 +2737,9 @@ class TradingBot:
             logger.debug("Updating dashboard...")
             cycle_time = datetime.now()
             self.status["last_cycle_time"] = cycle_time.isoformat()
-            self.status["equity"] = f"{equity:.4f}" if equity else "N/A"  # Update status dict for health check
+            self.status["equity"] = (
+                f"{equity:.4f}" if equity else "N/A"
+            )  # Update status dict for health check
             dashboard_data = {
                 "symbol": self.config.symbol,
                 "price": Decimal(str(df["close"].iloc[-1])) if not df.empty else None,
@@ -2208,20 +2758,27 @@ class TradingBot:
             self.dashboard.update(dashboard_data)
 
         except Exception as e:
-            logger.error(f"{Fore.RED}!!! Unhandled exception in trading cycle {self.cycle_count}: {e}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}!!! Unhandled exception in trading cycle {self.cycle_count}: {e}",
+                exc_info=True,
+            )
             # Consider adding a counter for consecutive errors to potentially halt the bot
 
         finally:
             end_time = time.monotonic()
             duration = end_time - start_time
-            logger.info(f"{Fore.MAGENTA}--- Cycle {self.cycle_count} Finished ({duration:.2f}s) ---{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.MAGENTA}--- Cycle {self.cycle_count} Finished ({duration:.2f}s) ---{Style.RESET_ALL}"
+            )
 
     async def main_loop(self):
         """The main execution loop of the trading bot."""
         await self.initialize()  # Perform startup tasks
 
         if self.config.backtest_enabled:
-            logger.info(f"{Style.BRIGHT}--- Starting Backtest Mode ---{Style.RESET_ALL}")
+            logger.info(
+                f"{Style.BRIGHT}--- Starting Backtest Mode ---{Style.RESET_ALL}"
+            )
             results = self.backtester.run_backtest(self.config.backtest_data_path)
             if results:
                 logger.info(f"{Style.BRIGHT}--- Backtest Complete ---{Style.RESET_ALL}")
@@ -2231,10 +2788,16 @@ class TradingBot:
             await self.shutdown(graceful=True)  # Shutdown after backtest
             return  # Exit after backtest
 
-        logger.info(f"{Style.BRIGHT}--- Starting Live Trading Mode ---{Style.RESET_ALL}")
-        logger.info(f"Trading Symbol: {self.config.symbol}, Interval: {self.config.interval}")
+        logger.info(
+            f"{Style.BRIGHT}--- Starting Live Trading Mode ---{Style.RESET_ALL}"
+        )
+        logger.info(
+            f"Trading Symbol: {self.config.symbol}, Interval: {self.config.interval}"
+        )
         logger.info(f"Loop Interval: {self.config.loop_sleep_seconds} seconds")
-        await self.trade_executor.send_termux_sms(f"🚀 Bot Started: {self.config.symbol} ({self.config.interval})")
+        await self.trade_executor.send_termux_sms(
+            f"🚀 Bot Started: {self.config.symbol} ({self.config.interval})"
+        )
 
         while not self.shutdown_requested:
             await self.trading_cycle()
@@ -2259,7 +2822,9 @@ class TradingBot:
         self.shutdown_requested = True
         self.config.shutdown_requested = True  # Ensure flag is set in config too
         signal_name = f" (Signal: {signal.Signals(signum).name})" if signum else ""
-        logger.warning(f"{Fore.YELLOW}{Style.BRIGHT}--- Initiating Shutdown{signal_name}... ---{Style.RESET_ALL}")
+        logger.warning(
+            f"{Fore.YELLOW}{Style.BRIGHT}--- Initiating Shutdown{signal_name}... ---{Style.RESET_ALL}"
+        )
         self.status["running"] = False
 
         # Stop components
@@ -2277,7 +2842,9 @@ class TradingBot:
                 state = {"last_equity": str(final_equity)}
                 with open("bot_final_state.json", "w") as f:
                     json.dump(state, f)
-                logger.info(f"Saved final state (Equity: {final_equity}) to bot_final_state.json")
+                logger.info(
+                    f"Saved final state (Equity: {final_equity}) to bot_final_state.json"
+                )
             # Log final performance summary
             logger.info("--- Final Performance ---")
             logger.info(f"Total Trades: {self.trade_executor.performance['trades']}")
@@ -2289,8 +2856,12 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Error during final state saving/logging: {e}")
 
-        await self.trade_executor.send_termux_sms(f"🛑 Bot Shutdown: {self.config.symbol}{signal_name}")
-        logger.warning(f"{Fore.YELLOW}{Style.BRIGHT}--- Shutdown Complete ---{Style.RESET_ALL}")
+        await self.trade_executor.send_termux_sms(
+            f"🛑 Bot Shutdown: {self.config.symbol}{signal_name}"
+        )
+        logger.warning(
+            f"{Fore.YELLOW}{Style.BRIGHT}--- Shutdown Complete ---{Style.RESET_ALL}"
+        )
 
         # Required to ensure asyncio loop stops cleanly after shutdown tasks
         # Gather all pending tasks and cancel them
@@ -2307,7 +2878,9 @@ class TradingBot:
 def handle_signal(signum, frame, bot_instance):
     """Signal handler to initiate graceful shutdown."""
     if bot_instance and not bot_instance.shutdown_requested:
-        logger.warning(f"Received signal {signal.Signals(signum).name}. Initiating shutdown...")
+        logger.warning(
+            f"Received signal {signal.Signals(signum).name}. Initiating shutdown..."
+        )
         # Schedule the shutdown coroutine to run in the event loop
         asyncio.create_task(bot_instance.shutdown(signum, frame))
     else:
@@ -2320,9 +2893,7 @@ def handle_signal(signum, frame, bot_instance):
 async def run_bot():
     """Sets up and runs the trading bot."""
     # Use a config file if specified, otherwise defaults apply
-    config_file_path = (
-        "config.json"  # Or get from command line args: sys.argv[1] if len(sys.argv) > 1 else 'config.json'
-    )
+    config_file_path = "config.json"  # Or get from command line args: sys.argv[1] if len(sys.argv) > 1 else 'config.json'
     bot = TradingBot(config_file=config_file_path)
 
     # Set up signal handlers to call the bot's shutdown method
@@ -2334,7 +2905,9 @@ async def run_bot():
     except asyncio.CancelledError:
         logger.info("Main execution task cancelled.")
     except Exception as e:
-        logger.critical(f"{Fore.RED}Critical unhandled error in main execution: {e}", exc_info=True)
+        logger.critical(
+            f"{Fore.RED}Critical unhandled error in main execution: {e}", exc_info=True
+        )
         # Ensure shutdown is attempted even on critical error
         if bot and not bot.shutdown_requested:
             await bot.shutdown(graceful=False)

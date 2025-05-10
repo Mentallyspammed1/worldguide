@@ -29,7 +29,9 @@ import pandas as pd
 try:
     import pandas_ta as ta  # type: ignore[import]
 except ImportError:
-    print("Error: 'pandas_ta' library not found. Please install it: pip install pandas_ta")
+    print(
+        "Error: 'pandas_ta' library not found. Please install it: pip install pandas_ta"
+    )
     sys.exit(1)
 
 
@@ -38,13 +40,17 @@ except ImportError:
 logger = logging.getLogger(__name__)
 if not logger.hasHandlers():
     handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)  # Default level
 
 # --- Constants ---
-MIN_PERIODS_DEFAULT = 50  # Default minimum number of data points for reliable calculations
+MIN_PERIODS_DEFAULT = (
+    50  # Default minimum number of data points for reliable calculations
+)
 
 # --- Helper Functions ---
 # (Removed safe_decimal_conversion as we'll primarily use float64 for performance,
@@ -54,7 +60,9 @@ MIN_PERIODS_DEFAULT = 50  # Default minimum number of data points for reliable c
 # --- Pivot Point Calculations ---
 
 
-def calculate_standard_pivot_points(high: float, low: float, close: float) -> dict[str, float]:
+def calculate_standard_pivot_points(
+    high: float, low: float, close: float
+) -> dict[str, float]:
     """Calculates standard pivot points for the *next* period based on the
     *current* or *previous* period's High, Low, Close (HLC).
 
@@ -68,11 +76,15 @@ def calculate_standard_pivot_points(high: float, low: float, close: float) -> di
         Resistance (R1, R2, R3) and Support (S1, S2, S3) levels.
         Returns an empty dictionary if inputs are invalid.
     """
-    if not all(isinstance(v, (int, float)) and not np.isnan(v) for v in [high, low, close]):
+    if not all(
+        isinstance(v, (int, float)) and not np.isnan(v) for v in [high, low, close]
+    ):
         logger.warning("Invalid input for standard pivot points (NaN or non-numeric).")
         return {}
     if low > high:
-        logger.warning(f"Low price ({low}) is higher than High price ({high}) for pivot calculation.")
+        logger.warning(
+            f"Low price ({low}) is higher than High price ({high}) for pivot calculation."
+        )
         # Optionally swap or return empty, here we proceed but results might be weird
         # low, high = high, low
 
@@ -92,7 +104,9 @@ def calculate_standard_pivot_points(high: float, low: float, close: float) -> di
     return pivots
 
 
-def calculate_fib_pivot_points(high: float, low: float, close: float) -> dict[str, float]:
+def calculate_fib_pivot_points(
+    high: float, low: float, close: float
+) -> dict[str, float]:
     """Calculates Fibonacci pivot points for the *next* period based on the
     *current* or *previous* period's High, Low, Close (HLC).
 
@@ -106,11 +120,15 @@ def calculate_fib_pivot_points(high: float, low: float, close: float) -> dict[st
         Resistance (R1, R2, R3) and Support (S1, S2, S3) levels.
         Returns an empty dictionary if inputs are invalid or range is zero.
     """
-    if not all(isinstance(v, (int, float)) and not np.isnan(v) for v in [high, low, close]):
+    if not all(
+        isinstance(v, (int, float)) and not np.isnan(v) for v in [high, low, close]
+    ):
         logger.warning("Invalid input for Fibonacci pivot points (NaN or non-numeric).")
         return {}
     if low > high:
-        logger.warning(f"Low price ({low}) is higher than High price ({high}) for Fib pivot calculation.")
+        logger.warning(
+            f"Low price ({low}) is higher than High price ({high}) for Fib pivot calculation."
+        )
         # low, high = high, low # Optional swap
 
     fib_pivots = {}
@@ -120,7 +138,9 @@ def calculate_fib_pivot_points(high: float, low: float, close: float) -> dict[st
 
         # Avoid division by zero or issues with flat candles
         if abs(fib_range) < 1e-9:  # Use a small threshold
-            logger.warning("Range (High - Low) is zero or near-zero, cannot calculate Fibonacci Pivots accurately.")
+            logger.warning(
+                "Range (High - Low) is zero or near-zero, cannot calculate Fibonacci Pivots accurately."
+            )
             fib_pivots["PP"] = pivot  # Still return the pivot point
             return fib_pivots
 
@@ -129,8 +149,12 @@ def calculate_fib_pivot_points(high: float, low: float, close: float) -> dict[st
         fib_pivots["R1"] = pivot + (0.382 * fib_range)
         fib_pivots["S2"] = pivot - (0.618 * fib_range)
         fib_pivots["R2"] = pivot + (0.618 * fib_range)
-        fib_pivots["S3"] = pivot - (1.000 * fib_range)  # S3 = Low - (High - Pivot)? -> Equivalent to Pivot - Range
-        fib_pivots["R3"] = pivot + (1.000 * fib_range)  # R3 = High + (Pivot - Low)? -> Equivalent to Pivot + Range
+        fib_pivots["S3"] = pivot - (
+            1.000 * fib_range
+        )  # S3 = Low - (High - Pivot)? -> Equivalent to Pivot - Range
+        fib_pivots["R3"] = pivot + (
+            1.000 * fib_range
+        )  # R3 = High + (Pivot - Low)? -> Equivalent to Pivot + Range
 
     except Exception as e:
         logger.error(f"Error calculating Fibonacci pivot points: {e}", exc_info=True)
@@ -141,7 +165,9 @@ def calculate_fib_pivot_points(high: float, low: float, close: float) -> dict[st
 # --- Support / Resistance Level Calculation ---
 
 
-def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None) -> dict[str, Any]:
+def calculate_levels(
+    df_period: pd.DataFrame, current_price: float | None = None
+) -> dict[str, Any]:
     """Calculates various support/resistance levels based on historical data
     for a given period (e.g., daily, weekly) and the current price.
 
@@ -176,11 +202,19 @@ def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None
         "fib_pivots": {},
     }
     required_cols = ["high", "low", "close"]
-    if df_period is None or df_period.empty or not all(col in df_period.columns for col in required_cols):
-        logger.warning("Cannot calculate levels: DataFrame is empty or missing HLC columns.")
+    if (
+        df_period is None
+        or df_period.empty
+        or not all(col in df_period.columns for col in required_cols)
+    ):
+        logger.warning(
+            "Cannot calculate levels: DataFrame is empty or missing HLC columns."
+        )
         return levels
     if len(df_period) < 2:
-        logger.warning("Cannot calculate pivot points: Need at least 2 data points for previous candle HLC.")
+        logger.warning(
+            "Cannot calculate pivot points: Need at least 2 data points for previous candle HLC."
+        )
         # Proceed with only retracements if possible
 
     try:
@@ -189,7 +223,9 @@ def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None
         prev_low = df_period["low"].iloc[-2]
         prev_close = df_period["close"].iloc[-2]
 
-        standard_pivots = calculate_standard_pivot_points(prev_high, prev_low, prev_close)
+        standard_pivots = calculate_standard_pivot_points(
+            prev_high, prev_low, prev_close
+        )
         if standard_pivots:
             levels["standard_pivots"] = standard_pivots
             levels["pivot"] = standard_pivots.get("PP")  # Store main pivot separately
@@ -209,7 +245,8 @@ def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None
         if abs(period_diff) > 1e-9:
             levels["fib_retracements"] = {
                 "High": period_high,
-                "Fib 78.6%": period_low + period_diff * 0.786,  # Common alternative/addition
+                "Fib 78.6%": period_low
+                + period_diff * 0.786,  # Common alternative/addition
                 "Fib 61.8%": period_low + period_diff * 0.618,
                 "Fib 50.0%": period_low + period_diff * 0.5,
                 "Fib 38.2%": period_low + period_diff * 0.382,
@@ -224,7 +261,9 @@ def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None
         if current_price is not None and isinstance(current_price, (int, float)):
             all_calculated_levels = {
                 **{f"Std {k}": v for k, v in standard_pivots.items()},
-                **{f"Fib {k}": v for k, v in fib_pivots.items() if k != "PP"},  # Avoid duplicate PP label
+                **{
+                    f"Fib {k}": v for k, v in fib_pivots.items() if k != "PP"
+                },  # Avoid duplicate PP label
                 **levels["fib_retracements"],
             }
 
@@ -272,14 +311,20 @@ def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None
                     "Low": period_low,
                 }
         except Exception as e_retr:
-            logger.error(f"Error calculating Fibonacci retracements even after initial failure: {e_retr}")
+            logger.error(
+                f"Error calculating Fibonacci retracements even after initial failure: {e_retr}"
+            )
 
     except Exception as e:
         logger.error(f"Unexpected error calculating S/R levels: {e}", exc_info=True)
 
     # Sort support descending, resistance ascending for clarity
-    levels["support"] = dict(sorted(levels["support"].items(), key=lambda item: item[1], reverse=True))
-    levels["resistance"] = dict(sorted(levels["resistance"].items(), key=lambda item: item[1]))
+    levels["support"] = dict(
+        sorted(levels["support"].items(), key=lambda item: item[1], reverse=True)
+    )
+    levels["resistance"] = dict(
+        sorted(levels["resistance"].items(), key=lambda item: item[1])
+    )
 
     return levels
 
@@ -287,7 +332,9 @@ def calculate_levels(df_period: pd.DataFrame, current_price: float | None = None
 # --- Custom Indicator Example ---
 
 
-def calculate_vwma(close: pd.Series, volume: pd.Series, length: int) -> pd.Series | None:
+def calculate_vwma(
+    close: pd.Series, volume: pd.Series, length: int
+) -> pd.Series | None:
     """Calculates Volume Weighted Moving Average (VWMA)."""
     if (
         close is None
@@ -298,7 +345,9 @@ def calculate_vwma(close: pd.Series, volume: pd.Series, length: int) -> pd.Serie
         or len(close) < length
         or len(close) != len(volume)
     ):
-        logger.warning(f"VWMA calculation skipped: Invalid inputs or insufficient length (need {length}).")
+        logger.warning(
+            f"VWMA calculation skipped: Invalid inputs or insufficient length (need {length})."
+        )
         return None
     try:
         # pandas_ta doesn't have a dedicated VWMA, implement manually
@@ -316,7 +365,9 @@ def calculate_vwma(close: pd.Series, volume: pd.Series, length: int) -> pd.Serie
         return None
 
 
-def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float | int) -> pd.DataFrame:
+def ehlers_volumetric_trend(
+    df: pd.DataFrame, length: int, multiplier: float | int
+) -> pd.DataFrame:
     """Calculate Ehlers Volumetric Trend indicator using VWMA and a SuperSmoother filter.
     Adds columns directly to the input DataFrame:
     - f'vwma_{length}'
@@ -334,13 +385,20 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float | i
         The input DataFrame with EVT columns added, or the original DataFrame if calculation fails.
     """
     required_cols = ["close", "volume"]
-    if not all(col in df.columns for col in required_cols) or df.empty or length <= 1 or multiplier <= 0:
+    if (
+        not all(col in df.columns for col in required_cols)
+        or df.empty
+        or length <= 1
+        or multiplier <= 0
+    ):
         logger.warning(
             f"EVT calculation skipped: Missing columns, empty df, or invalid params (len={length}, mult={multiplier})."
         )
         return df  # Return original df without modification
 
-    df_out = df.copy()  # Work on a copy to avoid modifying original if errors occur mid-way
+    df_out = (
+        df.copy()
+    )  # Work on a copy to avoid modifying original if errors occur mid-way
     vwma_col = f"vwma_{length}"
     smooth_col = f"smooth_vwma_{length}"
     trend_col = f"evt_trend_{length}"
@@ -393,10 +451,14 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float | i
 
         # Conditions for trend change (only where smooth and shifted_smooth are valid)
         up_trend_condition = (
-            (df_out[smooth_col] > shifted_smooth * mult_h) & pd.notna(df_out[smooth_col]) & pd.notna(shifted_smooth)
+            (df_out[smooth_col] > shifted_smooth * mult_h)
+            & pd.notna(df_out[smooth_col])
+            & pd.notna(shifted_smooth)
         )
         down_trend_condition = (
-            (df_out[smooth_col] < shifted_smooth * mult_l) & pd.notna(df_out[smooth_col]) & pd.notna(shifted_smooth)
+            (df_out[smooth_col] < shifted_smooth * mult_l)
+            & pd.notna(df_out[smooth_col])
+            & pd.notna(shifted_smooth)
         )
 
         # Apply trend logic iteratively or vectorized if possible (iterative for clarity here)
@@ -410,7 +472,9 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float | i
                 current_trend = -1
             # Handle initial NaNs - keep trend 0 until a signal occurs
             if pd.isna(df_out[smooth_col].iloc[i]) or pd.isna(shifted_smooth.iloc[i]):
-                current_trend = 0  # Or ffill? Paper implies reset. Let's use 0 for undefined.
+                current_trend = (
+                    0  # Or ffill? Paper implies reset. Let's use 0 for undefined.
+                )
 
             trend.iloc[i] = current_trend
             last_trend = current_trend  # Update for next iteration
@@ -423,15 +487,21 @@ def ehlers_volumetric_trend(df: pd.DataFrame, length: int, multiplier: float | i
         df_out[trend_col] = trend
 
         # Buy/Sell Signal Generation (Trend Initiation)
-        trend_shifted = df_out[trend_col].shift(1).fillna(0)  # Fill NaN for first comparison
+        trend_shifted = (
+            df_out[trend_col].shift(1).fillna(0)
+        )  # Fill NaN for first comparison
         df_out[buy_col] = (df_out[trend_col] == 1) & (trend_shifted != 1)
         df_out[sell_col] = (df_out[trend_col] == -1) & (trend_shifted != -1)
 
-        logger.debug(f"Ehlers Volumetric Trend (len={length}, mult={multiplier}) calculated.")
+        logger.debug(
+            f"Ehlers Volumetric Trend (len={length}, mult={multiplier}) calculated."
+        )
         return df_out
 
     except Exception as e:
-        logger.error(f"Error in EVT(len={length}, mult={multiplier}): {e}", exc_info=True)
+        logger.error(
+            f"Error in EVT(len={length}, mult={multiplier}): {e}", exc_info=True
+        )
         # Add NaN columns to original df before returning to signal failure
         df[vwma_col] = np.nan
         df[smooth_col] = np.nan
@@ -467,7 +537,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
     required_cols = ["open", "high", "low", "close", "volume"]
     if not all(col in df.columns for col in required_cols):
         missing = [col for col in required_cols if col not in df.columns]
-        logger.error(f"Input DataFrame missing required columns: {missing}. Cannot calculate indicators.")
+        logger.error(
+            f"Input DataFrame missing required columns: {missing}. Cannot calculate indicators."
+        )
         # Consider returning df.copy() or raising error depending on desired behavior
         return df.copy()  # Return a copy to avoid modifying original on failure
 
@@ -515,8 +587,12 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
             if hma_len > 0:
                 df_out.ta.hma(length=hma_len, append=True)
         if flags.get("use_vwap"):  # Example flag name (Rolling VWAP)
-            vwap_len = get_param("vwap_length")  # Can be None for standard calc, or int for rolling
-            df_out.ta.vwap(length=vwap_len, append=True)  # pandas_ta handles OHLCV input
+            vwap_len = get_param(
+                "vwap_length"
+            )  # Can be None for standard calc, or int for rolling
+            df_out.ta.vwap(
+                length=vwap_len, append=True
+            )  # pandas_ta handles OHLCV input
     except Exception as e:
         logger.error(f"Error calculating Moving Averages: {e}", exc_info=True)
 
@@ -532,7 +608,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
             k = get_param("stoch_k_period", 3)
             d = get_param("stoch_d_period", 3)
             if stoch_len > 0 and rsi_len_stoch > 0 and k > 0 and d > 0:
-                df_out.ta.stochrsi(length=stoch_len, rsi_length=rsi_len_stoch, k=k, d=d, append=True)
+                df_out.ta.stochrsi(
+                    length=stoch_len, rsi_length=rsi_len_stoch, k=k, d=d, append=True
+                )
         if flags.get("use_cci"):
             cci_len = get_param("cci_period", 20)
             if cci_len > 0:
@@ -576,7 +654,11 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
     try:
         # ATR is often needed by other indicators/strategies, calculate if needed or always?
         # Let's calculate it if any dependent flag is true or if explicitly requested.
-        atr_needed = flags.get("use_atr") or flags.get("use_bollinger_bands") or flags.get("use_keltner_channels")
+        atr_needed = (
+            flags.get("use_atr")
+            or flags.get("use_bollinger_bands")
+            or flags.get("use_keltner_channels")
+        )
         if atr_needed:
             atr_len = get_param("atr_period", 14)
             if atr_len > 0:
@@ -593,7 +675,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
 
         if flags.get("use_keltner_channels"):
             kc_len = get_param("kc_length", 20)
-            kc_atr_len = get_param("kc_atr_length", 10)  # Often uses different ATR length
+            kc_atr_len = get_param(
+                "kc_atr_length", 10
+            )  # Often uses different ATR length
             kc_mult = float(get_param("kc_multiplier", 2.0))
             # Ensure ATR for KC is calculated if needed
             if f"ATRr_{kc_atr_len}" not in df_out.columns and kc_atr_len > 0:
@@ -630,7 +714,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
                 if psar_results is not None and isinstance(psar_results, pd.DataFrame):
                     # Choose columns to append, e.g., PSAR value, trend direction, reversals
                     # Example: Append the main PSAR line
-                    psar_col_name = f"PSARl_{step}_{max_step}"  # Long entry PSAR (adjust if needed)
+                    psar_col_name = (
+                        f"PSARl_{step}_{max_step}"  # Long entry PSAR (adjust if needed)
+                    )
                     psar_col_name_s = f"PSARs_{step}_{max_step}"  # Short entry PSAR
                     if psar_col_name in psar_results:
                         df_out[psar_col_name] = psar_results[psar_col_name]
@@ -655,7 +741,9 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
             vol_ma_len = get_param("volume_ma_period", 20)
             if vol_ma_len > 0 and "volume" in df_out.columns:
                 df_out[f"VOLUME_MA_{vol_ma_len}"] = (
-                    df_out["volume"].rolling(window=vol_ma_len, min_periods=vol_ma_len).mean()
+                    df_out["volume"]
+                    .rolling(window=vol_ma_len, min_periods=vol_ma_len)
+                    .mean()
                 )
 
     except Exception as e:
@@ -683,22 +771,33 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
                     df_out = pd.concat([df_out, ichi_lines], axis=1)
                 if ichi_spans is not None:
                     # Spans are shifted, handle concatenation carefully
-                    df_out = pd.concat([df_out, ichi_spans], axis=1)  # Check if index aligns correctly
+                    df_out = pd.concat(
+                        [df_out, ichi_spans], axis=1
+                    )  # Check if index aligns correctly
 
     except Exception as e:
         logger.error(f"Error calculating Ichimoku Cloud: {e}", exc_info=True)
 
     # --- Custom Indicators ---
     # Example: Ehlers Volumetric Trend (check if needed based on strategy config)
-    strategy_config = config.get("strategy_params", {}).get(config.get("strategy", {}).get("name", "").lower(), {})
-    if config.get("strategy", {}).get("name", "").lower() == "dual_ehlers_volumetric" or flags.get("use_evt"):
+    strategy_config = config.get("strategy_params", {}).get(
+        config.get("strategy", {}).get("name", "").lower(), {}
+    )
+    if config.get("strategy", {}).get(
+        "name", ""
+    ).lower() == "dual_ehlers_volumetric" or flags.get("use_evt"):
         try:
             # Primary EVT
             evt_len = strategy_config.get("evt_length", get_param("evt_length", 7))
-            evt_mult = strategy_config.get("evt_multiplier", get_param("evt_multiplier", 2.5))
+            evt_mult = strategy_config.get(
+                "evt_multiplier", get_param("evt_multiplier", 2.5)
+            )
             df_out = ehlers_volumetric_trend(df_out, evt_len, float(evt_mult))
             # Rename columns for clarity if dual strategy
-            if config.get("strategy", {}).get("name", "").lower() == "dual_ehlers_volumetric":
+            if (
+                config.get("strategy", {}).get("name", "").lower()
+                == "dual_ehlers_volumetric"
+            ):
                 df_out = df_out.rename(
                     columns={
                         f"evt_trend_{evt_len}": "primary_trend",
@@ -710,10 +809,19 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
                 )
 
             # Confirmation EVT (if applicable for the strategy)
-            if config.get("strategy", {}).get("name", "").lower() == "dual_ehlers_volumetric":
-                conf_evt_len = strategy_config.get("confirm_evt_length", get_param("confirm_evt_length", 5))
-                conf_evt_mult = strategy_config.get("confirm_evt_multiplier", get_param("confirm_evt_multiplier", 2.0))
-                df_out = ehlers_volumetric_trend(df_out, conf_evt_len, float(conf_evt_mult))
+            if (
+                config.get("strategy", {}).get("name", "").lower()
+                == "dual_ehlers_volumetric"
+            ):
+                conf_evt_len = strategy_config.get(
+                    "confirm_evt_length", get_param("confirm_evt_length", 5)
+                )
+                conf_evt_mult = strategy_config.get(
+                    "confirm_evt_multiplier", get_param("confirm_evt_multiplier", 2.0)
+                )
+                df_out = ehlers_volumetric_trend(
+                    df_out, conf_evt_len, float(conf_evt_mult)
+                )
                 df_out = df_out.rename(
                     columns={
                         f"evt_trend_{conf_evt_len}": "confirm_trend",
@@ -725,9 +833,13 @@ def calculate_all_indicators(df: pd.DataFrame, config: dict[str, Any]) -> pd.Dat
                 )
 
         except Exception as e:
-            logger.error(f"Error calculating Ehlers Volumetric Trend: {e}", exc_info=True)
+            logger.error(
+                f"Error calculating Ehlers Volumetric Trend: {e}", exc_info=True
+            )
 
-    logger.debug(f"Finished calculating indicators. Final DataFrame shape: {df_out.shape}")
+    logger.debug(
+        f"Finished calculating indicators. Final DataFrame shape: {df_out.shape}"
+    )
     # logger.debug(f"Columns: {df_out.columns.to_list()}") # Optional: Log all columns for debugging
     return df_out
 
@@ -824,7 +936,9 @@ if __name__ == "__main__":
     prices = start_price * np.exp(np.cumsum(returns))
 
     data = {
-        "timestamp": pd.date_range(start="2023-01-01", periods=periods, freq="H", tz="UTC"),
+        "timestamp": pd.date_range(
+            start="2023-01-01", periods=periods, freq="H", tz="UTC"
+        ),
         "open": prices[:-1],
         "close": prices[1:],
     }
@@ -835,8 +949,12 @@ if __name__ == "__main__":
     df_test = pd.DataFrame(data).set_index("timestamp")
 
     # Simulate High, Low, Volume
-    df_test["high"] = df_test[["open", "close"]].max(axis=1) * (1 + np.random.uniform(0, 0.01, periods - 1))
-    df_test["low"] = df_test[["open", "close"]].min(axis=1) * (1 - np.random.uniform(0, 0.01, periods - 1))
+    df_test["high"] = df_test[["open", "close"]].max(axis=1) * (
+        1 + np.random.uniform(0, 0.01, periods - 1)
+    )
+    df_test["low"] = df_test[["open", "close"]].min(axis=1) * (
+        1 - np.random.uniform(0, 0.01, periods - 1)
+    )
     # Ensure H >= max(O,C) and L <= min(O,C)
     df_test["high"] = np.maximum.reduce(
         [
@@ -875,8 +993,12 @@ if __name__ == "__main__":
     last_row_nans = df_results.iloc[-1].isnull().sum()
     print(f"NaNs in last row: {last_row_nans} / {len(df_results.columns)}")
     if last_row_nans > 0:
-        nan_cols_last_row = df_results.iloc[-1][df_results.iloc[-1].isnull()].index.tolist()
-        print(f"Columns with NaNs in last row ({len(nan_cols_last_row)}):\n{nan_cols_last_row}")
+        nan_cols_last_row = df_results.iloc[-1][
+            df_results.iloc[-1].isnull()
+        ].index.tolist()
+        print(
+            f"Columns with NaNs in last row ({len(nan_cols_last_row)}):\n{nan_cols_last_row}"
+        )
 
     # --- Test Pivot Points and Levels ---
     print("-" * 60)

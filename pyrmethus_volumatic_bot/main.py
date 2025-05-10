@@ -14,7 +14,14 @@ import datetime
 import logging
 import signal
 import threading
-from decimal import Decimal, ROUND_DOWN, ROUND_UP, InvalidOperation, getcontext, DivisionByZero
+from decimal import (
+    Decimal,
+    ROUND_DOWN,
+    ROUND_UP,
+    InvalidOperation,
+    getcontext,
+    DivisionByZero,
+)
 from typing import Dict, Optional, Any, Tuple  # Added Union
 
 import pandas as pd
@@ -29,7 +36,10 @@ try:
 except ImportError as e:
     # Use print for early errors before logging might be configured
     print(f"ERROR: Could not import from strategy.py: {e}", file=sys.stderr)
-    print("Ensure strategy.py is in the same directory or accessible via PYTHONPATH.", file=sys.stderr)
+    print(
+        "Ensure strategy.py is in the same directory or accessible via PYTHONPATH.",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 # --- Initialize Colorama ---
@@ -46,7 +56,9 @@ getcontext().prec = 18
 if load_dotenv():
     print("Loaded environment variables from .env file.")
 else:
-    print("WARN: .env file not found or empty. Ensure API keys and settings are set as environment variables.")
+    print(
+        "WARN: .env file not found or empty. Ensure API keys and settings are set as environment variables."
+    )
 
 API_KEY = os.getenv("BYBIT_API_KEY")
 API_SECRET = os.getenv("BYBIT_API_SECRET")
@@ -63,7 +75,9 @@ latest_dataframe: Optional[pd.DataFrame] = None
 strategy_instance: Optional[VolumaticOBStrategy] = None
 market_info: Optional[Dict[str, Any]] = None
 data_lock = threading.Lock()  # Protects access to latest_dataframe
-order_lock = threading.Lock()  # Protects order placement/closing logic to prevent race conditions
+order_lock = (
+    threading.Lock()
+)  # Protects order placement/closing logic to prevent race conditions
 last_position_check_time: float = 0.0  # Initialize to 0.0
 POSITION_CHECK_INTERVAL: int = 10  # Default, overridden by config
 
@@ -81,7 +95,10 @@ def setup_logging(level_str: str = "INFO"):
     except AttributeError:
         log_level = logging.INFO
         # Use print here as logging might not be fully set up
-        print(f"WARN: Invalid log level '{level_str}'. Defaulting to INFO.", file=sys.stderr)
+        print(
+            f"WARN: Invalid log level '{level_str}'. Defaulting to INFO.",
+            file=sys.stderr,
+        )
 
     log.setLevel(log_level)
     log.handlers.clear()  # Clear existing handlers to prevent duplicates
@@ -89,7 +106,10 @@ def setup_logging(level_str: str = "INFO"):
     # Console Handler (StreamHandler)
     ch = logging.StreamHandler(sys.stdout)  # Use stdout for console logs
     ch.setLevel(log_level)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     ch.setFormatter(formatter)
     log.addHandler(ch)
 
@@ -117,7 +137,16 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
         log.info(f"Configuration loaded successfully from '{path}'.")
 
         # --- Comprehensive Validation ---
-        required_keys = ["symbol", "interval", "mode", "log_level", "order", "strategy", "data", "websocket"]
+        required_keys = [
+            "symbol",
+            "interval",
+            "mode",
+            "log_level",
+            "order",
+            "strategy",
+            "data",
+            "websocket",
+        ]
         missing = [key for key in required_keys if key not in conf]
         if missing:
             raise ValueError(f"Config file missing required top-level keys: {missing}")
@@ -127,19 +156,29 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
         req_order_keys = ["risk_per_trade_percent", "leverage", "type", "tp_ratio"]
         missing_order = [k for k in req_order_keys if k not in order_conf]
         if missing_order:
-            raise ValueError(f"Config 'order' section missing required keys: {missing_order}")
+            raise ValueError(
+                f"Config 'order' section missing required keys: {missing_order}"
+            )
         if order_conf["type"] not in ["Market", "Limit"]:
-            raise ValueError(f"Invalid order type '{order_conf['type']}'. Must be 'Market' or 'Limit'.")
+            raise ValueError(
+                f"Invalid order type '{order_conf['type']}'. Must be 'Market' or 'Limit'."
+            )
         if (
             not isinstance(order_conf["risk_per_trade_percent"], (int, float))
             or not 0 < order_conf["risk_per_trade_percent"] <= 100
         ):
             raise ValueError("risk_per_trade_percent must be a number > 0 and <= 100.")
         if (
-            not isinstance(order_conf["leverage"], int) or not 1 <= order_conf["leverage"] <= 100
+            not isinstance(order_conf["leverage"], int)
+            or not 1 <= order_conf["leverage"] <= 100
         ):  # Adjust max based on Bybit limits/tier
-            raise ValueError("leverage must be an integer between 1 and 100 (check Bybit limits).")
-        if not isinstance(order_conf["tp_ratio"], (int, float)) or order_conf["tp_ratio"] <= 0:
+            raise ValueError(
+                "leverage must be an integer between 1 and 100 (check Bybit limits)."
+            )
+        if (
+            not isinstance(order_conf["tp_ratio"], (int, float))
+            or order_conf["tp_ratio"] <= 0
+        ):
             raise ValueError("tp_ratio must be a positive number.")
 
         # Strategy Section
@@ -147,7 +186,9 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
         req_strategy_keys = ["params", "stop_loss"]
         missing_strategy = [k for k in req_strategy_keys if k not in strategy_conf]
         if missing_strategy:
-            raise ValueError(f"Config 'strategy' section missing required keys: {missing_strategy}")
+            raise ValueError(
+                f"Config 'strategy' section missing required keys: {missing_strategy}"
+            )
         if not isinstance(strategy_conf["params"], dict):
             raise ValueError("strategy 'params' must be a dictionary.")
         if not isinstance(strategy_conf["stop_loss"], dict):
@@ -155,38 +196,62 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
         req_sl_keys = ["method", "atr_multiplier"]
         missing_sl = [k for k in req_sl_keys if k not in strategy_conf["stop_loss"]]
         if missing_sl:
-            raise ValueError(f"Config 'strategy.stop_loss' section missing required keys: {missing_sl}")
+            raise ValueError(
+                f"Config 'strategy.stop_loss' section missing required keys: {missing_sl}"
+            )
         if strategy_conf["stop_loss"]["method"] not in ["ATR", "OB"]:
             raise ValueError("strategy stop_loss method must be 'ATR' or 'OB'.")
         if (
             not isinstance(strategy_conf["stop_loss"]["atr_multiplier"], (int, float))
             or strategy_conf["stop_loss"]["atr_multiplier"] <= 0
         ):
-            raise ValueError("strategy stop_loss atr_multiplier must be a positive number.")
+            raise ValueError(
+                "strategy stop_loss atr_multiplier must be a positive number."
+            )
 
         # Data Section
         data_conf = conf["data"]
         req_data_keys = ["fetch_limit", "max_df_len"]
         missing_data = [k for k in req_data_keys if k not in data_conf]
         if missing_data:
-            raise ValueError(f"Config 'data' section missing required keys: {missing_data}")
-        if not isinstance(data_conf["fetch_limit"], int) or data_conf["fetch_limit"] <= 0:
+            raise ValueError(
+                f"Config 'data' section missing required keys: {missing_data}"
+            )
+        if (
+            not isinstance(data_conf["fetch_limit"], int)
+            or data_conf["fetch_limit"] <= 0
+        ):
             raise ValueError("data fetch_limit must be a positive integer.")
         if (
-            not isinstance(data_conf["max_df_len"], int) or data_conf["max_df_len"] <= 50
+            not isinstance(data_conf["max_df_len"], int)
+            or data_conf["max_df_len"] <= 50
         ):  # Ensure reasonable minimum length
-            raise ValueError("data max_df_len must be a positive integer (recommended > 50).")
+            raise ValueError(
+                "data max_df_len must be a positive integer (recommended > 50)."
+            )
 
         # WebSocket Section
         ws_conf = conf["websocket"]
         req_ws_keys = ["ping_interval", "connect_timeout"]
         missing_ws = [k for k in req_ws_keys if k not in ws_conf]
         if missing_ws:
-            raise ValueError(f"Config 'websocket' section missing required keys: {missing_ws}")
-        if not isinstance(ws_conf["ping_interval"], int) or ws_conf["ping_interval"] <= 0:
-            raise ValueError("websocket ping_interval must be a positive integer (seconds).")
-        if not isinstance(ws_conf["connect_timeout"], int) or ws_conf["connect_timeout"] <= 0:
-            raise ValueError("websocket connect_timeout must be a positive integer (seconds).")
+            raise ValueError(
+                f"Config 'websocket' section missing required keys: {missing_ws}"
+            )
+        if (
+            not isinstance(ws_conf["ping_interval"], int)
+            or ws_conf["ping_interval"] <= 0
+        ):
+            raise ValueError(
+                "websocket ping_interval must be a positive integer (seconds)."
+            )
+        if (
+            not isinstance(ws_conf["connect_timeout"], int)
+            or ws_conf["connect_timeout"] <= 0
+        ):
+            raise ValueError(
+                "websocket connect_timeout must be a positive integer (seconds)."
+            )
 
         # Optional Settings
         POSITION_CHECK_INTERVAL = int(conf.get("position_check_interval", 10))
@@ -196,7 +261,9 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
 
         conf["close_position_on_exit"] = conf.get("close_position_on_exit", False)
         if not isinstance(conf["close_position_on_exit"], bool):
-            log.warning("close_position_on_exit should be true or false. Defaulting to false.")
+            log.warning(
+                "close_position_on_exit should be true or false. Defaulting to false."
+            )
             conf["close_position_on_exit"] = False
 
         return conf
@@ -204,13 +271,18 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
         log.critical(f"CRITICAL: Configuration file '{path}' not found.")
         sys.exit(1)
     except json.JSONDecodeError as e:
-        log.critical(f"CRITICAL: Configuration file '{path}' contains invalid JSON: {e}")
+        log.critical(
+            f"CRITICAL: Configuration file '{path}' contains invalid JSON: {e}"
+        )
         sys.exit(1)
     except (ValueError, KeyError, TypeError) as e:  # Catch validation errors
         log.critical(f"CRITICAL: Configuration error in '{path}': {e}")
         sys.exit(1)
     except Exception as e:
-        log.critical(f"CRITICAL: Unexpected error loading configuration from '{path}': {e}", exc_info=True)
+        log.critical(
+            f"CRITICAL: Unexpected error loading configuration from '{path}': {e}",
+            exc_info=True,
+        )
         sys.exit(1)
 
 
@@ -218,19 +290,27 @@ def load_config(path: str = "config.json") -> Dict[str, Any]:
 def connect_bybit() -> Optional[HTTP]:
     """Establishes and tests connection to Bybit HTTP API."""
     if not API_KEY or not API_SECRET:
-        log.critical("CRITICAL: Bybit API Key or Secret not found. Check .env file or environment variables.")
+        log.critical(
+            "CRITICAL: Bybit API Key or Secret not found. Check .env file or environment variables."
+        )
         sys.exit(1)
     try:
-        log.info(f"Connecting to Bybit {'Testnet' if TESTNET else 'Mainnet'} HTTP API...")
+        log.info(
+            f"Connecting to Bybit {'Testnet' if TESTNET else 'Mainnet'} HTTP API..."
+        )
         s = HTTP(testnet=TESTNET, api_key=API_KEY, api_secret=API_SECRET)
         # Test connection with a simple read-only call
         server_time_resp = s.get_server_time()
         if server_time_resp.get("retCode") == 0:
             server_ts_nano = server_time_resp.get("result", {}).get("timeNano", "0")
             # Handle potential non-numeric value gracefully
-            server_ts = int(server_ts_nano) / 1e9 if server_ts_nano.isdigit() else time.time()
+            server_ts = (
+                int(server_ts_nano) / 1e9 if server_ts_nano.isdigit() else time.time()
+            )
             server_dt = datetime.datetime.fromtimestamp(server_ts)
-            log.info(f"Successfully connected. Server time: {server_dt.strftime('%Y-%m-%d %H:%M:%S.%f')}")
+            log.info(
+                f"Successfully connected. Server time: {server_dt.strftime('%Y-%m-%d %H:%M:%S.%f')}"
+            )
             return s
         else:
             log.critical(
@@ -238,7 +318,9 @@ def connect_bybit() -> Optional[HTTP]:
             )
             return None
     except Exception as e:
-        log.critical(f"CRITICAL: Exception during Bybit HTTP API connection: {e}", exc_info=True)
+        log.critical(
+            f"CRITICAL: Exception during Bybit HTTP API connection: {e}", exc_info=True
+        )
         return None
 
 
@@ -253,7 +335,9 @@ def get_market_info(symbol: str) -> Optional[Dict[str, Any]]:
         if response.get("retCode") == 0 and response.get("result", {}).get("list"):
             info_list = response["result"]["list"]
             if not info_list:
-                log.error(f"Market info list is empty for {symbol}. Is the symbol correct for linear perpetuals?")
+                log.error(
+                    f"Market info list is empty for {symbol}. Is the symbol correct for linear perpetuals?"
+                )
                 return None
             info = info_list[0]  # Assume first item is the correct one for the symbol
             log.info(f"Fetched market info for {symbol}.")
@@ -263,7 +347,9 @@ def get_market_info(symbol: str) -> Optional[Dict[str, Any]]:
             price_filter = info.get("priceFilter")
             lot_filter = info.get("lotSizeFilter")
             if not price_filter or not lot_filter:
-                log.error(f"Market info for {symbol} is missing priceFilter or lotSizeFilter. Cannot proceed.")
+                log.error(
+                    f"Market info for {symbol} is missing priceFilter or lotSizeFilter. Cannot proceed."
+                )
                 return None
 
             required_price_keys = ["tickSize"]
@@ -283,10 +369,21 @@ def get_market_info(symbol: str) -> Optional[Dict[str, Any]]:
             try:
                 info["priceFilter"]["tickSize"] = Decimal(price_filter["tickSize"])
                 info["lotSizeFilter"]["qtyStep"] = Decimal(lot_filter["qtyStep"])
-                info["lotSizeFilter"]["minOrderQty"] = Decimal(lot_filter["minOrderQty"])
-                info["lotSizeFilter"]["maxOrderQty"] = Decimal(lot_filter["maxOrderQty"])
-            except (InvalidOperation, TypeError, KeyError, ValueError) as e:  # Added ValueError
-                log.error(f"Could not convert market info filter values to Decimal for {symbol}: {e}")
+                info["lotSizeFilter"]["minOrderQty"] = Decimal(
+                    lot_filter["minOrderQty"]
+                )
+                info["lotSizeFilter"]["maxOrderQty"] = Decimal(
+                    lot_filter["maxOrderQty"]
+                )
+            except (
+                InvalidOperation,
+                TypeError,
+                KeyError,
+                ValueError,
+            ) as e:  # Added ValueError
+                log.error(
+                    f"Could not convert market info filter values to Decimal for {symbol}: {e}"
+                )
                 return None
 
             # Check if values are positive as expected
@@ -296,7 +393,9 @@ def get_market_info(symbol: str) -> Optional[Dict[str, Any]]:
                 or info["lotSizeFilter"]["minOrderQty"] <= 0
                 or info["lotSizeFilter"]["maxOrderQty"] <= 0
             ):
-                log.error(f"Market info for {symbol} contains non-positive filter values. Cannot proceed.")
+                log.error(
+                    f"Market info for {symbol} contains non-positive filter values. Cannot proceed."
+                )
                 return None
 
             return info
@@ -308,11 +407,16 @@ def get_market_info(symbol: str) -> Optional[Dict[str, Any]]:
             return None
     except Exception as e:
         # Log traceback only if debug level is enabled
-        log.error(f"Exception fetching market info for {symbol}: {e}", exc_info=(log_level <= logging.DEBUG))
+        log.error(
+            f"Exception fetching market info for {symbol}: {e}",
+            exc_info=(log_level <= logging.DEBUG),
+        )
         return None
 
 
-def fetch_initial_data(symbol: str, interval: str, limit: int) -> Optional[pd.DataFrame]:
+def fetch_initial_data(
+    symbol: str, interval: str, limit: int
+) -> Optional[pd.DataFrame]:
     """
     Fetches historical Klines data and prepares the initial DataFrame.
     Note: Bybit V5 API has a limit of 1000 klines per request.
@@ -331,16 +435,28 @@ def fetch_initial_data(symbol: str, interval: str, limit: int) -> Optional[pd.Da
         )
         # Consider implementing pagination here if needed
 
-    log.info(f"Fetching initial {actual_limit} klines for {symbol} (interval: {interval})...")
+    log.info(
+        f"Fetching initial {actual_limit} klines for {symbol} (interval: {interval})..."
+    )
     try:
-        response = session.get_kline(category="linear", symbol=symbol, interval=interval, limit=actual_limit)
-        if response.get("retCode") == 0 and "result" in response and "list" in response["result"]:
+        response = session.get_kline(
+            category="linear", symbol=symbol, interval=interval, limit=actual_limit
+        )
+        if (
+            response.get("retCode") == 0
+            and "result" in response
+            and "list" in response["result"]
+        ):
             kline_list = response["result"]["list"]
             if not kline_list:
-                log.warning(f"Received empty kline list from Bybit for initial fetch of {symbol}/{interval}.")
+                log.warning(
+                    f"Received empty kline list from Bybit for initial fetch of {symbol}/{interval}."
+                )
                 # Return an empty DataFrame with expected columns and index type
                 return (
-                    pd.DataFrame(columns=["open", "high", "low", "close", "volume", "turnover"])
+                    pd.DataFrame(
+                        columns=["open", "high", "low", "close", "volume", "turnover"]
+                    )
                     .astype(
                         {
                             "open": "float64",
@@ -354,7 +470,18 @@ def fetch_initial_data(symbol: str, interval: str, limit: int) -> Optional[pd.Da
                     .set_index(pd.to_datetime([]))
                 )
 
-            df = pd.DataFrame(kline_list, columns=["timestamp", "open", "high", "low", "close", "volume", "turnover"])
+            df = pd.DataFrame(
+                kline_list,
+                columns=[
+                    "timestamp",
+                    "open",
+                    "high",
+                    "low",
+                    "close",
+                    "volume",
+                    "turnover",
+                ],
+            )
             # Convert types immediately after creation for safety
             df = df.astype(
                 {
@@ -372,7 +499,9 @@ def fetch_initial_data(symbol: str, interval: str, limit: int) -> Optional[pd.Da
             df = df.set_index("timestamp")
             # Bybit V5 returns oldest first, so sort chronologically (should already be sorted but good practice)
             df = df.sort_index()
-            log.info(f"Fetched {len(df)} initial candles. Data spans from {df.index.min()} to {df.index.max()}")
+            log.info(
+                f"Fetched {len(df)} initial candles. Data spans from {df.index.min()} to {df.index.max()}"
+            )
             return df
         else:
             log.error(
@@ -381,7 +510,10 @@ def fetch_initial_data(symbol: str, interval: str, limit: int) -> Optional[pd.Da
             )
             return None
     except Exception as e:
-        log.error(f"Exception fetching initial klines: {e}", exc_info=(log_level <= logging.DEBUG))
+        log.error(
+            f"Exception fetching initial klines: {e}",
+            exc_info=(log_level <= logging.DEBUG),
+        )
         return None
 
 
@@ -428,7 +560,9 @@ def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
             # Bybit returns a list, even when filtering by symbol. Assume first entry is the relevant one.
             position_list = response["result"]["list"]
             if not position_list:
-                log.warning(f"Received empty position list for {symbol}. Assuming flat.")
+                log.warning(
+                    f"Received empty position list for {symbol}. Assuming flat."
+                )
                 return _get_flat_position_representation()
 
             position = position_list[0]
@@ -437,16 +571,24 @@ def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
                 "size": Decimal(position.get("size", "0")),
                 "side": position.get("side", "None"),  # 'Buy', 'Sell', or 'None'
                 "avgPrice": Decimal(position.get("avgPrice", "0")),
-                "liqPrice": Decimal(position.get("liqPrice", "0")) if position.get("liqPrice") else Decimal(0),
+                "liqPrice": Decimal(position.get("liqPrice", "0"))
+                if position.get("liqPrice")
+                else Decimal(0),
                 "unrealisedPnl": Decimal(position.get("unrealisedPnl", "0")),
-                "markPrice": Decimal(position.get("markPrice", "0")),  # Useful for context
-                "leverage": Decimal(position.get("leverage", "0")),  # Confirm leverage setting
+                "markPrice": Decimal(
+                    position.get("markPrice", "0")
+                ),  # Useful for context
+                "leverage": Decimal(
+                    position.get("leverage", "0")
+                ),  # Confirm leverage setting
                 # Add other fields if needed (e.g., positionValue, riskId, riskLimitValue)
             }
             # Treat negligible size as flat (compare against minOrderQty)
             min_qty = market_info["lotSizeFilter"]["minOrderQty"]
             if pos_data["size"] < min_qty:
-                if pos_data["size"] > 0:  # Log only if size is non-zero but below minimum
+                if (
+                    pos_data["size"] > 0
+                ):  # Log only if size is non-zero but below minimum
                     log.debug(
                         f"Position size {pos_data['size']} is below minimum order quantity ({min_qty}), treating as flat."
                     )
@@ -456,26 +598,39 @@ def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
                 f"Position Data: Size={pos_data['size']}, Side={pos_data['side']}, AvgPrice={pos_data['avgPrice']}"
             )
             return pos_data
-        elif response.get("retCode") == 110001:  # Parameter error (e.g., invalid symbol)
-            log.error(f"Parameter error fetching position for {symbol}. Is symbol valid? {response.get('retMsg', '')}")
+        elif (
+            response.get("retCode") == 110001
+        ):  # Parameter error (e.g., invalid symbol)
+            log.error(
+                f"Parameter error fetching position for {symbol}. Is symbol valid? {response.get('retMsg', '')}"
+            )
             return _get_flat_position_representation()  # Assume flat on symbol error
         else:
             log.error(
                 f"Failed to get position for {symbol}: {response.get('retMsg', 'Error')} "
                 f"(Code: {response.get('retCode', 'N/A')})"
             )
-            return _get_flat_position_representation()  # Return flat representation on API error
+            return (
+                _get_flat_position_representation()
+            )  # Return flat representation on API error
     except (InvalidOperation, TypeError, ValueError) as e:  # Catch conversion errors
         last_position_check_time = time.time()  # Update time even on exception
         log.error(f"Error converting position data to Decimal for {symbol}: {e}")
         return _get_flat_position_representation()
     except Exception as e:
         last_position_check_time = time.time()  # Update time even on exception
-        log.error(f"Exception fetching position for {symbol}: {e}", exc_info=(log_level <= logging.DEBUG))
-        return _get_flat_position_representation()  # Return flat representation on exception
+        log.error(
+            f"Exception fetching position for {symbol}: {e}",
+            exc_info=(log_level <= logging.DEBUG),
+        )
+        return (
+            _get_flat_position_representation()
+        )  # Return flat representation on exception
 
 
-def get_wallet_balance(account_type: str = "UNIFIED", coin: str = "USDT") -> Optional[Decimal]:
+def get_wallet_balance(
+    account_type: str = "UNIFIED", coin: str = "USDT"
+) -> Optional[Decimal]:
     """Fetches account equity for risk calculation (assumes UNIFIED account type)."""
     if not session:
         log.error("HTTP session not available for get_wallet_balance.")
@@ -486,13 +641,19 @@ def get_wallet_balance(account_type: str = "UNIFIED", coin: str = "USDT") -> Opt
         if response.get("retCode") == 0 and response.get("result", {}).get("list"):
             balance_info_list = response["result"]["list"]
             if not balance_info_list:
-                log.error(f"Empty balance list received for account type {account_type}, coin {coin}.")
+                log.error(
+                    f"Empty balance list received for account type {account_type}, coin {coin}."
+                )
                 return None
             # Find the specific coin balance info within the list
-            balance_info = next((item for item in balance_info_list if item.get("coin") == coin), None)
+            balance_info = next(
+                (item for item in balance_info_list if item.get("coin") == coin), None
+            )
 
             if not balance_info:
-                log.error(f"Could not find balance info for coin {coin} in the response list.")
+                log.error(
+                    f"Could not find balance info for coin {coin} in the response list."
+                )
                 return None
 
             # Use 'equity' as the basis for risk calculation in Unified account
@@ -509,17 +670,23 @@ def get_wallet_balance(account_type: str = "UNIFIED", coin: str = "USDT") -> Opt
                 # return max(Decimal(0), equity)
                 return equity
             else:
-                log.warning(f"Could not find 'equity' field in wallet balance response for {account_type}/{coin}.")
+                log.warning(
+                    f"Could not find 'equity' field in wallet balance response for {account_type}/{coin}."
+                )
                 # Fallback: Try 'walletBalance'? Less accurate for risk based on margin.
                 if "walletBalance" in balance_info:
                     wallet_balance_str = balance_info["walletBalance"]
                     if wallet_balance_str is None or wallet_balance_str == "":
-                        log.error(f"Fallback 'walletBalance' field is null or empty for {coin}.")
+                        log.error(
+                            f"Fallback 'walletBalance' field is null or empty for {coin}."
+                        )
                         return None
                     wallet_balance = Decimal(wallet_balance_str)
                     log.warning(f"Falling back to walletBalance: {wallet_balance}")
                     return wallet_balance  # return max(Decimal(0), wallet_balance)
-                log.error("Neither 'equity' nor 'walletBalance' found in balance response for {coin}.")
+                log.error(
+                    "Neither 'equity' nor 'walletBalance' found in balance response for {coin}."
+                )
                 return None
         else:
             log.error(
@@ -531,22 +698,33 @@ def get_wallet_balance(account_type: str = "UNIFIED", coin: str = "USDT") -> Opt
         log.error(f"Error converting wallet balance to Decimal: {e}")
         return None
     except Exception as e:
-        log.error(f"Exception fetching wallet balance: {e}", exc_info=(log_level <= logging.DEBUG))
+        log.error(
+            f"Exception fetching wallet balance: {e}",
+            exc_info=(log_level <= logging.DEBUG),
+        )
         return None
 
 
-def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float) -> Optional[float]:
+def calculate_order_qty(
+    entry_price: float, sl_price: float, risk_percent: float
+) -> Optional[float]:
     """
     Calculates order quantity based on risk percentage, SL distance, and account equity.
     Rounds down to the nearest valid quantity step and checks against min/max limits.
     Uses Decimal for precision. Returns the final quantity as a float.
     """
     if not market_info or not strategy_instance:
-        log.error("Market info or strategy instance not available for quantity calculation.")
+        log.error(
+            "Market info or strategy instance not available for quantity calculation."
+        )
         return None
     # Validate inputs rigorously
-    if not all(isinstance(p, (float, int)) and np.isfinite(p) for p in [entry_price, sl_price]):
-        log.error(f"Invalid input for quantity calculation: entry={entry_price}, sl={sl_price} must be finite numbers.")
+    if not all(
+        isinstance(p, (float, int)) and np.isfinite(p) for p in [entry_price, sl_price]
+    ):
+        log.error(
+            f"Invalid input for quantity calculation: entry={entry_price}, sl={sl_price} must be finite numbers."
+        )
         return None
     if not isinstance(risk_percent, (float, int)) or not 0 < risk_percent <= 100:
         log.error(f"Invalid risk percentage: {risk_percent}. Must be > 0 and <= 100.")
@@ -571,10 +749,14 @@ def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float
 
         balance = get_wallet_balance()
         if balance is None:
-            log.error("Cannot calculate order quantity: Failed to retrieve wallet balance.")
+            log.error(
+                "Cannot calculate order quantity: Failed to retrieve wallet balance."
+            )
             return None
         if balance <= 0:
-            log.warning(f"Cannot calculate order quantity: Account balance is zero or negative ({balance}).")
+            log.warning(
+                f"Cannot calculate order quantity: Account balance is zero or negative ({balance})."
+            )
             return None
 
         risk_amount = balance * (Decimal(str(risk_percent)) / 100)
@@ -585,15 +767,25 @@ def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float
         # Qty (in Base Asset, e.g., BTC) = Risk Amount / SL_Distance
         # Handle potential division by zero although checked earlier
         if sl_distance_points <= 0:
-            log.error("Stop loss distance calculated as zero or negative. Cannot calculate quantity.")
+            log.error(
+                "Stop loss distance calculated as zero or negative. Cannot calculate quantity."
+            )
             return None
         qty_base = risk_amount / sl_distance_points
 
-    except (InvalidOperation, DivisionByZero, TypeError, ValueError) as e:  # Added ValueError
+    except (
+        InvalidOperation,
+        DivisionByZero,
+        TypeError,
+        ValueError,
+    ) as e:  # Added ValueError
         log.error(f"Error during quantity calculation math: {e}")
         return None
     except Exception as e:  # Catch any other unexpected errors
-        log.error(f"Unexpected error during quantity calculation: {e}", exc_info=(log_level <= logging.DEBUG))
+        log.error(
+            f"Unexpected error during quantity calculation: {e}",
+            exc_info=(log_level <= logging.DEBUG),
+        )
         return None
 
     # --- Rounding and Limit Checks ---
@@ -605,31 +797,41 @@ def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float
 
     # Check against min/max order quantity
     if qty_rounded_decimal < min_qty_decimal:
-        log.warning(f"Calculated quantity {qty_rounded_decimal} is below minimum ({min_qty_decimal}).")
+        log.warning(
+            f"Calculated quantity {qty_rounded_decimal} is below minimum ({min_qty_decimal})."
+        )
         # Decision: Use min_qty (higher risk) or skip trade?
         # Current behavior: Use min_qty but warn about increased risk.
         qty_final_decimal = min_qty_decimal
         # Recalculate actual risk if using min_qty
         actual_risk_amount = min_qty_decimal * sl_distance_points
         try:
-            actual_risk_percent = (actual_risk_amount / balance) * 100 if balance > 0 else Decimal(0)
+            actual_risk_percent = (
+                (actual_risk_amount / balance) * 100 if balance > 0 else Decimal(0)
+            )
             log.warning(
                 f"Using minimum quantity {min_qty_decimal}. "
                 f"Actual Risk: {actual_risk_amount:.4f} USDT ({actual_risk_percent:.2f}%) "
                 f"(Original target: {risk_percent}%)"
             )
         except DivisionByZero:
-            log.error("Division by zero calculating actual risk percentage.")  # Should not happen if balance > 0
+            log.error(
+                "Division by zero calculating actual risk percentage."
+            )  # Should not happen if balance > 0
             # Continue with min_qty anyway? Or return None? Let's continue but log error.
 
     elif qty_rounded_decimal > max_qty_decimal:
-        log.warning(f"Calculated quantity {qty_rounded_decimal} exceeds maximum ({max_qty_decimal}). Using maximum.")
+        log.warning(
+            f"Calculated quantity {qty_rounded_decimal} exceeds maximum ({max_qty_decimal}). Using maximum."
+        )
         qty_final_decimal = max_qty_decimal
     else:
         qty_final_decimal = qty_rounded_decimal
 
     if qty_final_decimal <= 0:
-        log.error(f"Final calculated quantity is zero or negative ({qty_final_decimal}). Cannot place order.")
+        log.error(
+            f"Final calculated quantity is zero or negative ({qty_final_decimal}). Cannot place order."
+        )
         return None
 
     # Convert final Decimal quantity back to float for use elsewhere (API requires string anyway)
@@ -661,7 +863,9 @@ def place_order(
     Returns the API response dictionary, or None on critical failure before API call.
     """
     if not session or not strategy_instance or not market_info:
-        log.error("Cannot place order: Session, strategy instance, or market info missing.")
+        log.error(
+            "Cannot place order: Session, strategy instance, or market info missing."
+        )
         return None
     if side not in ["Buy", "Sell"]:
         log.error(f"Invalid order side: {side}. Must be 'Buy' or 'Sell'.")
@@ -670,14 +874,25 @@ def place_order(
     # --- Paper Trading Simulation ---
     if config.get("mode", "Live").lower() == "paper":
         qty_str = f"{qty:.{strategy_instance.qty_precision}f}" if qty else "N/A"
-        price_str = f"{price:.{strategy_instance.price_precision}f}" if price else "(Market)"
-        sl_str = f"{sl_price:.{strategy_instance.price_precision}f}" if sl_price else "N/A"
-        tp_str = f"{tp_price:.{strategy_instance.price_precision}f}" if tp_price else "N/A"
+        price_str = (
+            f"{price:.{strategy_instance.price_precision}f}" if price else "(Market)"
+        )
+        sl_str = (
+            f"{sl_price:.{strategy_instance.price_precision}f}" if sl_price else "N/A"
+        )
+        tp_str = (
+            f"{tp_price:.{strategy_instance.price_precision}f}" if tp_price else "N/A"
+        )
         log.warning(
             f"[PAPER MODE] Simulating {side} order placement: Qty={qty_str}, Symbol={symbol}, Price={price_str}, SL={sl_str}, TP={tp_str}"
         )
         # Simulate a successful response for paper trading state management
-        return {"retCode": 0, "retMsg": "OK", "result": {"orderId": f"paper_{int(time.time())}"}, "paperTrade": True}
+        return {
+            "retCode": 0,
+            "retMsg": "OK",
+            "result": {"orderId": f"paper_{int(time.time())}"},
+            "paperTrade": True,
+        }
 
     # --- Live Trading Logic ---
     # Acquire lock to ensure only one order placement happens at a time
@@ -688,7 +903,9 @@ def place_order(
 
         # Final quantity validation and rounding before placing order
         if not isinstance(qty, (float, int)) or not np.isfinite(qty) or qty <= 0:
-            log.error(f"Invalid quantity provided for order: {qty}. Must be a positive number.")
+            log.error(
+                f"Invalid quantity provided for order: {qty}. Must be a positive number."
+            )
             return None
 
         # Use the strategy's rounding function which should handle precision correctly
@@ -706,7 +923,12 @@ def place_order(
 
         # Determine reference price for SL/TP validation (use provided price for limit, estimate for market)
         ref_entry_price: Optional[float] = None
-        if order_type == "Limit" and price and isinstance(price, (float, int)) and np.isfinite(price):
+        if (
+            order_type == "Limit"
+            and price
+            and isinstance(price, (float, int))
+            and np.isfinite(price)
+        ):
             ref_entry_price = price  # Use the specified limit price as reference
         else:  # Market order or missing/invalid limit price
             # Try getting current mark price first (more up-to-date than last close)
@@ -714,14 +936,18 @@ def place_order(
             pos_data = get_current_position(symbol)
             if pos_data and pos_data.get("markPrice", Decimal(0)) > 0:
                 ref_entry_price = float(pos_data["markPrice"])
-                log.debug(f"Using current mark price {ref_entry_price} as reference for SL/TP validation.")
+                log.debug(
+                    f"Using current mark price {ref_entry_price} as reference for SL/TP validation."
+                )
             else:  # Fallback to last candle close if mark price unavailable or zero
                 with data_lock:
                     if latest_dataframe is not None and not latest_dataframe.empty:
                         last_close = latest_dataframe["close"].iloc[-1]
                         if pd.notna(last_close):
                             ref_entry_price = float(last_close)
-                            log.debug(f"Using last close price {ref_entry_price} as reference for SL/TP validation.")
+                            log.debug(
+                                f"Using last close price {ref_entry_price} as reference for SL/TP validation."
+                            )
 
         if ref_entry_price is None:
             log.error(
@@ -752,14 +978,18 @@ def place_order(
                 # Round limit price according to tick size
                 # Be slightly aggressive on limit entry: round UP for BUY, DOWN for SELL
                 limit_rounding = ROUND_UP if side == "Buy" else ROUND_DOWN
-                limit_price_rounded = strategy_instance.round_price(price, rounding_mode=limit_rounding)
+                limit_price_rounded = strategy_instance.round_price(
+                    price, rounding_mode=limit_rounding
+                )
                 if limit_price_rounded is None:
                     log.error(f"Failed to round limit price {price}. Order cancelled.")
                     return None
                 limit_price_str = str(limit_price_rounded)
                 params["price"] = limit_price_str
             else:
-                log.error(f"Limit order requires a valid price. Got: {price}. Order cancelled.")
+                log.error(
+                    f"Limit order requires a valid price. Got: {price}. Order cancelled."
+                )
                 return None
 
         # Add SL/TP using Bybit's parameters, with validation against reference price
@@ -767,16 +997,18 @@ def place_order(
         if sl_price and isinstance(sl_price, (float, int)) and np.isfinite(sl_price):
             # Round SL price (away from entry: DOWN for Buy, UP for Sell)
             sl_rounding = ROUND_DOWN if side == "Buy" else ROUND_UP
-            sl_price_rounded = strategy_instance.round_price(sl_price, rounding_mode=sl_rounding)
+            sl_price_rounded = strategy_instance.round_price(
+                sl_price, rounding_mode=sl_rounding
+            )
 
             if sl_price_rounded is None:
                 log.error(f"Failed to round SL price {sl_price}. SL skipped.")
             elif ref_entry_price is not None:
                 # Validate SL relative to reference entry price (allow SL to be equal if needed?)
                 # Let's require SL to be strictly worse than entry
-                is_invalid_sl = (side == "Buy" and sl_price_rounded >= ref_entry_price) or (
-                    side == "Sell" and sl_price_rounded <= ref_entry_price
-                )
+                is_invalid_sl = (
+                    side == "Buy" and sl_price_rounded >= ref_entry_price
+                ) or (side == "Sell" and sl_price_rounded <= ref_entry_price)
                 if is_invalid_sl:
                     log.error(
                         f"Invalid SL price {sl_price_rounded:.{strategy_instance.price_precision}f} for {side} order "
@@ -788,21 +1020,25 @@ def place_order(
             else:  # Cannot validate if ref_entry_price is unknown, proceed with caution
                 sl_price_str = str(sl_price_rounded)
                 params["stopLoss"] = sl_price_str
-                log.warning(f"Setting StopLoss at: {sl_price_str} (Could not validate against reference entry price).")
+                log.warning(
+                    f"Setting StopLoss at: {sl_price_str} (Could not validate against reference entry price)."
+                )
 
         tp_price_str: Optional[str] = None
         if tp_price and isinstance(tp_price, (float, int)) and np.isfinite(tp_price):
             # Round TP price (towards profit: UP for Buy, DOWN for Sell)
             tp_rounding = ROUND_UP if side == "Buy" else ROUND_DOWN
-            tp_price_rounded = strategy_instance.round_price(tp_price, rounding_mode=tp_rounding)
+            tp_price_rounded = strategy_instance.round_price(
+                tp_price, rounding_mode=tp_rounding
+            )
 
             if tp_price_rounded is None:
                 log.error(f"Failed to round TP price {tp_price}. TP skipped.")
             elif ref_entry_price is not None:
                 # Validate TP relative to reference entry price (require TP > entry for Buy, TP < entry for Sell)
-                is_invalid_tp = (side == "Buy" and tp_price_rounded <= ref_entry_price) or (
-                    side == "Sell" and tp_price_rounded >= ref_entry_price
-                )
+                is_invalid_tp = (
+                    side == "Buy" and tp_price_rounded <= ref_entry_price
+                ) or (side == "Sell" and tp_price_rounded >= ref_entry_price)
                 if is_invalid_tp:
                     log.error(
                         f"Invalid TP price {tp_price_rounded:.{strategy_instance.price_precision}f} for {side} order "
@@ -826,36 +1062,54 @@ def place_order(
         )
         try:
             response = session.place_order(**params)
-            log.debug(f"Place Order Response: {json.dumps(response, indent=2)}")  # Log full response in debug
+            log.debug(
+                f"Place Order Response: {json.dumps(response, indent=2)}"
+            )  # Log full response in debug
 
             if response.get("retCode") == 0:
                 order_id = response.get("result", {}).get("orderId")
-                log.info(f"{Fore.GREEN}Order placed successfully! OrderID: {order_id}{Style.RESET_ALL}")
+                log.info(
+                    f"{Fore.GREEN}Order placed successfully! OrderID: {order_id}{Style.RESET_ALL}"
+                )
                 # Optional: Store order ID for tracking, wait for fill via WS?
                 return response
             else:
                 # Log specific Bybit error messages
                 error_msg = response.get("retMsg", "Unknown Error")
                 error_code = response.get("retCode", "N/A")
-                log.error(f"{Fore.RED}Failed to place order: {error_msg} (Code: {error_code}){Style.RESET_ALL}")
+                log.error(
+                    f"{Fore.RED}Failed to place order: {error_msg} (Code: {error_code}){Style.RESET_ALL}"
+                )
                 # Provide hints for common errors
                 if error_code == 110007:
                     log.error(
                         "Hint: Check available margin, leverage, position size limits, and potential open orders."
                     )
                 if error_code == 110045:
-                    log.error("Hint: Cannot place order with SL/TP if position size is zero or if it increases risk.")
+                    log.error(
+                        "Hint: Cannot place order with SL/TP if position size is zero or if it increases risk."
+                    )
                 if "position mode not modified" in error_msg:
-                    log.error("Hint: Ensure Bybit account is set to One-Way position mode for linear perpetuals.")
+                    log.error(
+                        "Hint: Ensure Bybit account is set to One-Way position mode for linear perpetuals."
+                    )
                 if "risk limit" in error_msg.lower():
                     log.error(
                         "Hint: Position size might exceed Bybit's risk limits for the current tier. Check Bybit settings."
                     )
-                if "order cost" in error_msg.lower() or "insufficient available balance" in error_msg.lower():
-                    log.error("Hint: Insufficient margin for order cost. Check balance and leverage.")
+                if (
+                    "order cost" in error_msg.lower()
+                    or "insufficient available balance" in error_msg.lower()
+                ):
+                    log.error(
+                        "Hint: Insufficient margin for order cost. Check balance and leverage."
+                    )
                 return response  # Return error response for potential handling upstream
         except Exception as e:
-            log.error(f"Exception occurred during order placement: {e}", exc_info=(log_level <= logging.DEBUG))
+            log.error(
+                f"Exception occurred during order placement: {e}",
+                exc_info=(log_level <= logging.DEBUG),
+            )
             return None  # Indicate failure to make API call
 
 
@@ -894,7 +1148,12 @@ def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional[Dict]
                 f"Attempting to close position for {symbol}, but position data indicates it's already flat or size is zero/negative. No action taken."
             )
             # Return a simulated success response indicating it was already flat
-            return {"retCode": 0, "retMsg": "Position already flat or zero size", "result": {}, "alreadyFlat": True}
+            return {
+                "retCode": 0,
+                "retMsg": "Position already flat or zero size",
+                "result": {},
+                "alreadyFlat": True,
+            }
 
         # Determine the side needed to close the position
         side_to_close = "Sell" if current_side == "Buy" else "Buy"
@@ -906,7 +1165,9 @@ def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional[Dict]
         try:
             qty_to_close_float = float(qty_to_close_decimal)
         except (TypeError, ValueError):
-            log.error(f"Invalid position size for closing: {current_size}. Cannot place closing order.")
+            log.error(
+                f"Invalid position size for closing: {current_size}. Cannot place closing order."
+            )
             return None
 
         # Use default rounding (usually round down) for closing order
@@ -925,15 +1186,21 @@ def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional[Dict]
         # --- Cancel Existing SL/TP Orders ---
         # Optional but recommended: Cancel existing SL/TP orders before closing market order
         # This might prevent conflicts or unexpected partial fills of SL/TP
-        log.info(f"Attempting to cancel existing Stop Orders (SL/TP) for {symbol} before closing...")
+        log.info(
+            f"Attempting to cancel existing Stop Orders (SL/TP) for {symbol} before closing..."
+        )
         try:
             # Use orderFilter="StopOrder" to target only SL/TP
-            response_cancel = session.cancel_all_orders(category="linear", symbol=symbol, orderFilter="StopOrder")
+            response_cancel = session.cancel_all_orders(
+                category="linear", symbol=symbol, orderFilter="StopOrder"
+            )
             log.debug(f"Cancel SL/TP Response: {json.dumps(response_cancel, indent=2)}")
             if response_cancel.get("retCode") != 0:
                 # Log warning but proceed with close attempt anyway
                 # Common reason: No active stop orders found (retCode 110001, retMsg "No order found") - this is OK.
-                if response_cancel.get("retCode") == 110001 and "No order found" in response_cancel.get("retMsg", ""):
+                if response_cancel.get(
+                    "retCode"
+                ) == 110001 and "No order found" in response_cancel.get("retMsg", ""):
                     log.info("No active stop orders found to cancel.")
                 else:
                     log.warning(
@@ -941,11 +1208,16 @@ def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional[Dict]
                     )
             else:
                 cancelled_count = len(response_cancel.get("result", {}).get("list", []))
-                log.info(f"Successfully cancelled {cancelled_count} open stop order(s).")
-            time.sleep(0.5)  # Brief pause after cancellation attempt before placing close order
+                log.info(
+                    f"Successfully cancelled {cancelled_count} open stop order(s)."
+                )
+            time.sleep(
+                0.5
+            )  # Brief pause after cancellation attempt before placing close order
         except Exception as cancel_e:
             log.error(
-                f"Exception occurred during stop order cancellation: {cancel_e}", exc_info=(log_level <= logging.DEBUG)
+                f"Exception occurred during stop order cancellation: {cancel_e}",
+                exc_info=(log_level <= logging.DEBUG),
             )
             log.warning("Proceeding with close attempt despite cancellation error.")
 
@@ -962,16 +1234,22 @@ def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional[Dict]
         }
         try:
             response = session.place_order(**params)
-            log.debug(f"Close Position Order Response: {json.dumps(response, indent=2)}")
+            log.debug(
+                f"Close Position Order Response: {json.dumps(response, indent=2)}"
+            )
 
             if response.get("retCode") == 0:
                 order_id = response.get("result", {}).get("orderId")
-                log.info(f"{Fore.YELLOW}Position close order placed successfully! OrderID: {order_id}{Style.RESET_ALL}")
+                log.info(
+                    f"{Fore.YELLOW}Position close order placed successfully! OrderID: {order_id}{Style.RESET_ALL}"
+                )
                 return response
             else:
                 error_msg = response.get("retMsg", "Unknown Error")
                 error_code = response.get("retCode", "N/A")
-                log.error(f"{Fore.RED}Failed to place close order: {error_msg} (Code: {error_code}){Style.RESET_ALL}")
+                log.error(
+                    f"{Fore.RED}Failed to place close order: {error_msg} (Code: {error_code}){Style.RESET_ALL}"
+                )
                 # Handle common reduce-only errors (often mean position changed or closed already)
                 # 110043: Reduce-only order qty exceeds open position size
                 # 3400070: Position has been closed
@@ -987,7 +1265,10 @@ def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional[Dict]
                     response["alreadyFlatHint"] = True
                 return response  # Return error response
         except Exception as e:
-            log.error(f"Exception occurred during position closing: {e}", exc_info=(log_level <= logging.DEBUG))
+            log.error(
+                f"Exception occurred during position closing: {e}",
+                exc_info=(log_level <= logging.DEBUG),
+            )
             return None  # Indicate failure to make API call
 
 
@@ -999,15 +1280,22 @@ def set_leverage(symbol: str, leverage: int):
     # Validate leverage value (adjust range based on Bybit's limits if necessary)
     # Leverage is already validated during config load, but double-check here.
     if not 1 <= leverage <= 100:  # Re-check just in case
-        log.error(f"Invalid leverage value: {leverage}. Must be between 1 and 100 (check Bybit limits).")
+        log.error(
+            f"Invalid leverage value: {leverage}. Must be between 1 and 100 (check Bybit limits)."
+        )
         return
 
     log.info(f"Attempting to set leverage for {symbol} to {leverage}x...")
     try:
         # Bybit V5 requires setting buy and sell leverage equally for one-way mode
-        leverage_str = str(float(leverage))  # API expects string representation of a float (e.g., "25.0")
+        leverage_str = str(
+            float(leverage)
+        )  # API expects string representation of a float (e.g., "25.0")
         response = session.set_leverage(
-            category="linear", symbol=symbol, buyLeverage=leverage_str, sellLeverage=leverage_str
+            category="linear",
+            symbol=symbol,
+            buyLeverage=leverage_str,
+            sellLeverage=leverage_str,
         )
         log.debug(f"Set Leverage Response: {json.dumps(response, indent=2)}")
         if response.get("retCode") == 0:
@@ -1018,16 +1306,22 @@ def set_leverage(symbol: str, leverage: int):
             # Common error: 110043 means leverage not modified (it was already set to this value)
             # Note: Log showed 110043 in original problem description, let's use that code.
             if error_code == 110043:  # Leverage not modified
-                log.warning(f"Leverage for {symbol} already set to {leverage}x (Code: {error_code} - Not modified).")
+                log.warning(
+                    f"Leverage for {symbol} already set to {leverage}x (Code: {error_code} - Not modified)."
+                )
             # Error 110045 might indicate trying to change leverage with open position/orders
             elif error_code == 110045:
                 log.error(
                     f"Failed to set leverage for {symbol}: Cannot modify leverage with open positions or orders. (Code: {error_code})"
                 )
             else:
-                log.error(f"Failed to set leverage for {symbol}: {error_msg} (Code: {error_code})")
+                log.error(
+                    f"Failed to set leverage for {symbol}: {error_msg} (Code: {error_code})"
+                )
     except Exception as e:
-        log.error(f"Exception setting leverage: {e}", exc_info=(log_level <= logging.DEBUG))
+        log.error(
+            f"Exception setting leverage: {e}", exc_info=(log_level <= logging.DEBUG)
+        )
 
 
 # --- WebSocket Handling ---
@@ -1072,7 +1366,9 @@ def handle_ws_message(msg: Dict):
                 # --- Acquire Lock to Update DataFrame ---
                 with data_lock:
                     if latest_dataframe is None:
-                        log.warning("DataFrame not initialized yet, skipping WS kline processing.")
+                        log.warning(
+                            "DataFrame not initialized yet, skipping WS kline processing."
+                        )
                         return
 
                     # Check if this candle timestamp already exists (can happen on reconnect)
@@ -1090,7 +1386,9 @@ def handle_ws_message(msg: Dict):
                         "low": float(kline_item["low"]),
                         "close": float(kline_item["close"]),
                         "volume": float(kline_item["volume"]),
-                        "turnover": float(kline_item.get("turnover", 0.0)),  # Turnover might not always be present
+                        "turnover": float(
+                            kline_item.get("turnover", 0.0)
+                        ),  # Turnover might not always be present
                     }
                     # Create a new DataFrame row with the timestamp as index
                     new_row = pd.DataFrame([new_data], index=[ts])
@@ -1115,17 +1413,31 @@ def handle_ws_message(msg: Dict):
                 # --- Process Signals (outside data_lock) ---
                 if df_copy_for_analysis is not None and strategy_instance:
                     try:
-                        analysis_results = strategy_instance.update(df_copy_for_analysis)
+                        analysis_results = strategy_instance.update(
+                            df_copy_for_analysis
+                        )
                         # Process the generated signals to potentially execute trades
                         process_signals(analysis_results)
                     except Exception as e:
                         # Log the full traceback for strategy errors
-                        log.error(f"Error during strategy analysis triggered by WS update: {e}", exc_info=True)
+                        log.error(
+                            f"Error during strategy analysis triggered by WS update: {e}",
+                            exc_info=True,
+                        )
 
-            except (KeyError, ValueError, TypeError, IndexError) as e:  # Added IndexError
-                log.error(f"Error parsing kline data from WS message: {e} - Data: {kline_item}")
+            except (
+                KeyError,
+                ValueError,
+                TypeError,
+                IndexError,
+            ) as e:  # Added IndexError
+                log.error(
+                    f"Error parsing kline data from WS message: {e} - Data: {kline_item}"
+                )
             except Exception as e:
-                log.error(f"Unexpected error handling kline WS message: {e}", exc_info=True)
+                log.error(
+                    f"Unexpected error handling kline WS message: {e}", exc_info=True
+                )
 
         # --- Handle Position Updates ---
         # Topic format: position.{symbol} (Private topic)
@@ -1167,7 +1479,13 @@ def handle_ws_message(msg: Dict):
                         )
                         # Can use this to track fills, cancellations, SL/TP triggers etc.
                         # Example: If orderStatus is 'Filled' and it matches an expected entry/exit order ID.
-                        if order_status in ["Filled", "PartiallyFilled", "Cancelled", "Rejected", "Triggered"]:
+                        if order_status in [
+                            "Filled",
+                            "PartiallyFilled",
+                            "Cancelled",
+                            "Rejected",
+                            "Triggered",
+                        ]:
                             # Potentially trigger position check or update internal state
                             # If an order is filled/triggered, a position check might be useful soon.
                             if order_status in ["Filled", "Triggered"]:
@@ -1184,7 +1502,9 @@ def handle_ws_message(msg: Dict):
             op = msg.get("op")
             if op == "auth":
                 if msg.get("success"):
-                    log.info(f"{Fore.GREEN}WebSocket authenticated successfully.{Style.RESET_ALL}")
+                    log.info(
+                        f"{Fore.GREEN}WebSocket authenticated successfully.{Style.RESET_ALL}"
+                    )
                     # Authentication success doesn't mean subscriptions are ready yet.
                 else:
                     log.error(
@@ -1194,8 +1514,12 @@ def handle_ws_message(msg: Dict):
                     ws_connected.clear()  # Ensure connection status reflects failure
             elif op == "subscribe":
                 if msg.get("success"):
-                    subscribed_topics = msg.get("ret_msg") or msg.get("args")  # Location varies slightly
-                    log.info(f"{Fore.GREEN}WebSocket subscribed successfully to: {subscribed_topics}{Style.RESET_ALL}")
+                    subscribed_topics = msg.get("ret_msg") or msg.get(
+                        "args"
+                    )  # Location varies slightly
+                    log.info(
+                        f"{Fore.GREEN}WebSocket subscribed successfully to: {subscribed_topics}{Style.RESET_ALL}"
+                    )
                     # This is the point where we can consider the connection fully ready
                     ws_connected.set()
                 else:
@@ -1208,9 +1532,13 @@ def handle_ws_message(msg: Dict):
                 log.debug("WebSocket Pong received (heartbeat OK)")
             elif "success" in msg and not msg.get("success"):
                 # Catch other potential operation failures (e.g., unsubscribe)
-                log.error(f"{Fore.RED}WebSocket operation '{op}' failed: {msg.get('ret_msg', msg)}{Style.RESET_ALL}")
+                log.error(
+                    f"{Fore.RED}WebSocket operation '{op}' failed: {msg.get('ret_msg', msg)}{Style.RESET_ALL}"
+                )
             else:
-                log.debug(f"Received WS operation response: {msg}")  # Log other ops if needed
+                log.debug(
+                    f"Received WS operation response: {msg}"
+                )  # Log other ops if needed
 
         # --- Handle other message types if necessary ---
         # E.g., execution reports, wallet updates (if subscribed)
@@ -1249,7 +1577,9 @@ def run_websocket_loop():
 
             # Define required subscriptions
             kline_topic = f"kline.{config['interval']}.{config['symbol']}"
-            position_topic = f"position.{config['symbol']}"  # Specific symbol position updates
+            position_topic = (
+                f"position.{config['symbol']}"  # Specific symbol position updates
+            )
             order_topic = "order"  # All order updates for the account
             # Add other topics if needed (e.g., public trades, orderbook)
             topics_to_subscribe = [kline_topic, position_topic, order_topic]
@@ -1260,8 +1590,12 @@ def run_websocket_loop():
 
             # Start the blocking run_forever loop
             # This handles the connection, pinging, and message dispatching
-            log.info(f"WebSocket run_forever starting (ping interval: {ping_interval}s)...")
-            ws.run_forever(ping_interval=ping_interval)  # This blocks until exit() or error
+            log.info(
+                f"WebSocket run_forever starting (ping interval: {ping_interval}s)..."
+            )
+            ws.run_forever(
+                ping_interval=ping_interval
+            )  # This blocks until exit() or error
 
         except TypeError as te:
             # Specifically catch TypeError which might indicate the message_handler issue
@@ -1293,7 +1627,9 @@ def run_websocket_loop():
             break  # Exit loop if stopping
 
         reconnect_delay = 15  # Seconds
-        log.info(f"Attempting to reconnect WebSocket after error in {reconnect_delay} seconds...")
+        log.info(
+            f"Attempting to reconnect WebSocket after error in {reconnect_delay} seconds..."
+        )
         # Use stop_event.wait() for interruptible sleep
         interrupted = stop_event.wait(timeout=reconnect_delay)
         if interrupted:
@@ -1328,14 +1664,22 @@ def start_websocket_connection() -> bool:
 
     try:
         # The run_websocket_loop now handles initialization and subscription
-        ws_thread = threading.Thread(target=run_websocket_loop, daemon=True, name="WebSocketThread")
+        ws_thread = threading.Thread(
+            target=run_websocket_loop, daemon=True, name="WebSocketThread"
+        )
         ws_thread.start()
 
         # Wait for the connection and subscription confirmation (signaled by ws_connected event)
-        connect_timeout = config["websocket"].get("connect_timeout", 20)  # Use configured timeout
-        log.info(f"Waiting up to {connect_timeout}s for WebSocket connection and subscription confirmation...")
+        connect_timeout = config["websocket"].get(
+            "connect_timeout", 20
+        )  # Use configured timeout
+        log.info(
+            f"Waiting up to {connect_timeout}s for WebSocket connection and subscription confirmation..."
+        )
         if ws_connected.wait(timeout=connect_timeout):
-            log.info(f"{Fore.GREEN}WebSocket connected and subscribed successfully.{Style.RESET_ALL}")
+            log.info(
+                f"{Fore.GREEN}WebSocket connected and subscribed successfully.{Style.RESET_ALL}"
+            )
             return True
         else:
             # This block is reached if ws_connected.wait() times out
@@ -1376,9 +1720,13 @@ def stop_websocket_connection():
 
     if current_thread and current_thread.is_alive():
         log.info(f"Waiting for WebSocket thread '{current_thread.name}' to join...")
-        current_thread.join(timeout=10)  # Wait up to 10 seconds for the thread to finish
+        current_thread.join(
+            timeout=10
+        )  # Wait up to 10 seconds for the thread to finish
         if current_thread.is_alive():
-            log.warning(f"WebSocket thread '{current_thread.name}' did not stop gracefully after 10 seconds.")
+            log.warning(
+                f"WebSocket thread '{current_thread.name}' did not stop gracefully after 10 seconds."
+            )
         else:
             log.info(f"WebSocket thread '{current_thread.name}' joined successfully.")
     elif current_thread:
@@ -1422,9 +1770,15 @@ def calculate_sl_tp(
         entry_decimal = Decimal(str(entry_price))
         sl_method = strategy_instance.sl_method
         sl_atr_multiplier = Decimal(str(strategy_instance.sl_atr_multiplier))
-        tp_ratio = Decimal(str(config["order"].get("tp_ratio", 2.0)))  # Get TP ratio from config
+        tp_ratio = Decimal(
+            str(config["order"].get("tp_ratio", 2.0))
+        )  # Get TP ratio from config
         tick_size = strategy_instance.tick_size  # Already Decimal
-        last_atr_decimal = Decimal(str(last_atr)) if last_atr and np.isfinite(last_atr) and last_atr > 0 else None
+        last_atr_decimal = (
+            Decimal(str(last_atr))
+            if last_atr and np.isfinite(last_atr) and last_atr > 0
+            else None
+        )
 
         # --- Calculate Stop Loss ---
         sl_target_price_decimal: Optional[Decimal] = None
@@ -1432,21 +1786,31 @@ def calculate_sl_tp(
         if sl_method == "ATR":
             if last_atr_decimal:
                 sl_distance = last_atr_decimal * sl_atr_multiplier
-                sl_target_price_decimal = entry_decimal - sl_distance if side == "Buy" else entry_decimal + sl_distance
+                sl_target_price_decimal = (
+                    entry_decimal - sl_distance
+                    if side == "Buy"
+                    else entry_decimal + sl_distance
+                )
             else:
-                log.error(f"Cannot calculate ATR Stop Loss: Invalid or missing last_atr value ({last_atr}).")
+                log.error(
+                    f"Cannot calculate ATR Stop Loss: Invalid or missing last_atr value ({last_atr})."
+                )
                 return None, None  # Cannot proceed without valid SL calculation method
 
         elif sl_method == "OB":
             # Define buffers using Decimal
             sl_buffer_atr_fraction = Decimal("0.1")  # Buffer as fraction of ATR
-            sl_buffer_price_fraction = Decimal("0.0005")  # Buffer as fraction of price (fallback)
+            sl_buffer_price_fraction = Decimal(
+                "0.0005"
+            )  # Buffer as fraction of price (fallback)
             buffer: Decimal
             if last_atr_decimal:
                 buffer = last_atr_decimal * sl_buffer_atr_fraction
             else:
                 buffer = entry_decimal * sl_buffer_price_fraction
-                log.warning("ATR unavailable for OB SL buffer, using price fraction fallback.")
+                log.warning(
+                    "ATR unavailable for OB SL buffer, using price fraction fallback."
+                )
             # Ensure buffer is at least one tick size
             buffer = max(buffer, tick_size)
 
@@ -1454,7 +1818,11 @@ def calculate_sl_tp(
             if side == "Buy":
                 # Find lowest bottom of active bull OBs below entry
                 active_bull_boxes = results.get("active_bull_boxes", [])
-                relevant_obs = [b for b in active_bull_boxes if Decimal(str(b["bottom"])) < entry_decimal]
+                relevant_obs = [
+                    b
+                    for b in active_bull_boxes
+                    if Decimal(str(b["bottom"])) < entry_decimal
+                ]
                 if relevant_obs:
                     lowest_bottom = min(Decimal(str(b["bottom"])) for b in relevant_obs)
                     ob_sl_target_price = lowest_bottom - buffer
@@ -1469,7 +1837,11 @@ def calculate_sl_tp(
             else:  # side == "Sell"
                 # Find highest top of active bear OBs above entry
                 active_bear_boxes = results.get("active_bear_boxes", [])
-                relevant_obs = [b for b in active_bear_boxes if Decimal(str(b["top"])) > entry_decimal]
+                relevant_obs = [
+                    b
+                    for b in active_bear_boxes
+                    if Decimal(str(b["top"])) > entry_decimal
+                ]
                 if relevant_obs:
                     highest_top = max(Decimal(str(b["top"])) for b in relevant_obs)
                     ob_sl_target_price = highest_top + buffer
@@ -1487,12 +1859,18 @@ def calculate_sl_tp(
                 sl_target_price_decimal = ob_sl_target_price
             elif last_atr_decimal:  # Fallback to ATR if OB not found/applicable
                 sl_distance = last_atr_decimal * sl_atr_multiplier
-                sl_target_price_decimal = entry_decimal - sl_distance if side == "Buy" else entry_decimal + sl_distance
+                sl_target_price_decimal = (
+                    entry_decimal - sl_distance
+                    if side == "Buy"
+                    else entry_decimal + sl_distance
+                )
                 log.debug(
                     f"OB SL fallback to ATR: ATR={last_atr_decimal}, Multiplier={sl_atr_multiplier}, Target SL={sl_target_price_decimal}"
                 )
             else:
-                log.error("Cannot set SL: OB method failed and fallback ATR is unavailable.")
+                log.error(
+                    "Cannot set SL: OB method failed and fallback ATR is unavailable."
+                )
                 return None, None
 
         else:  # Should not happen if config validation is correct
@@ -1501,14 +1879,16 @@ def calculate_sl_tp(
 
         # Check if a valid SL target was determined
         if sl_target_price_decimal is None:
-            log.error("Stop Loss price could not be calculated. Cannot determine trade parameters.")
+            log.error(
+                "Stop Loss price could not be calculated. Cannot determine trade parameters."
+            )
             return None, None
 
         # --- Validate and Round SL ---
         # Ensure SL is on the correct side of the entry price and at least one tick away
-        is_invalid_raw_sl = (side == "Buy" and sl_target_price_decimal >= entry_decimal - tick_size) or (
-            side == "Sell" and sl_target_price_decimal <= entry_decimal + tick_size
-        )
+        is_invalid_raw_sl = (
+            side == "Buy" and sl_target_price_decimal >= entry_decimal - tick_size
+        ) or (side == "Sell" and sl_target_price_decimal <= entry_decimal + tick_size)
 
         if is_invalid_raw_sl:
             # If the calculated SL is invalid, log error. Consider if a fallback is possible/desirable here.
@@ -1520,12 +1900,22 @@ def calculate_sl_tp(
             if sl_method != "ATR" and last_atr_decimal:
                 log.warning("Attempting final ATR fallback for invalid SL...")
                 sl_distance = last_atr_decimal * sl_atr_multiplier
-                sl_target_price_decimal = entry_decimal - sl_distance if side == "Buy" else entry_decimal + sl_distance
-                is_invalid_raw_sl = (side == "Buy" and sl_target_price_decimal >= entry_decimal - tick_size) or (
-                    side == "Sell" and sl_target_price_decimal <= entry_decimal + tick_size
+                sl_target_price_decimal = (
+                    entry_decimal - sl_distance
+                    if side == "Buy"
+                    else entry_decimal + sl_distance
+                )
+                is_invalid_raw_sl = (
+                    side == "Buy"
+                    and sl_target_price_decimal >= entry_decimal - tick_size
+                ) or (
+                    side == "Sell"
+                    and sl_target_price_decimal <= entry_decimal + tick_size
                 )
                 if is_invalid_raw_sl:
-                    log.error("Final ATR fallback SL is also invalid. Cannot determine SL.")
+                    log.error(
+                        "Final ATR fallback SL is also invalid. Cannot determine SL."
+                    )
                     return None, None
                 else:
                     log.info("Using final ATR fallback SL.")
@@ -1537,11 +1927,15 @@ def calculate_sl_tp(
 
         # Round SL price (away from entry: DOWN for Buy, UP for Sell)
         sl_rounding = ROUND_DOWN if side == "Buy" else ROUND_UP
-        sl_price_final = strategy_instance.round_price(sl_price_raw, rounding_mode=sl_rounding)
+        sl_price_final = strategy_instance.round_price(
+            sl_price_raw, rounding_mode=sl_rounding
+        )
         if sl_price_final is None or not np.isfinite(sl_price_final):
             log.error(f"Failed to round valid SL price {sl_price_raw}.")
             return None, None  # Cannot proceed without valid rounded SL
-        log.info(f"Calculated SL price for {side}: {sl_price_final:.{strategy_instance.price_precision}f}")
+        log.info(
+            f"Calculated SL price for {side}: {sl_price_final:.{strategy_instance.price_precision}f}"
+        )
 
         # --- Calculate Take Profit ---
         sl_price_final_decimal = Decimal(str(sl_price_final))
@@ -1549,15 +1943,23 @@ def calculate_sl_tp(
 
         if sl_distance_decimal > 0 and tp_ratio > 0:
             tp_distance = sl_distance_decimal * tp_ratio
-            tp_price_decimal = entry_decimal + tp_distance if side == "Buy" else entry_decimal - tp_distance
+            tp_price_decimal = (
+                entry_decimal + tp_distance
+                if side == "Buy"
+                else entry_decimal - tp_distance
+            )
             tp_price_raw = float(tp_price_decimal)
 
             # Round TP price (towards profit: UP for Buy, DOWN for Sell)
             tp_rounding = ROUND_UP if side == "Buy" else ROUND_DOWN
-            tp_price_final = strategy_instance.round_price(tp_price_raw, rounding_mode=tp_rounding)
+            tp_price_final = strategy_instance.round_price(
+                tp_price_raw, rounding_mode=tp_rounding
+            )
 
             if tp_price_final is None or not np.isfinite(tp_price_final):
-                log.warning(f"Failed to round TP price {tp_price_raw}. TP will not be set.")
+                log.warning(
+                    f"Failed to round TP price {tp_price_raw}. TP will not be set."
+                )
                 tp_price_final = None
             else:
                 # Final validation for TP vs Entry (TP must be better than entry)
@@ -1574,14 +1976,24 @@ def calculate_sl_tp(
                         f"Calculated TP price for {side}: {tp_price_final:.{strategy_instance.price_precision}f} (Ratio: {tp_ratio})"
                     )
         else:
-            log.warning("Cannot calculate TP: SL distance is zero or TP ratio is not positive.")
+            log.warning(
+                "Cannot calculate TP: SL distance is zero or TP ratio is not positive."
+            )
             tp_price_final = None
 
-    except (InvalidOperation, TypeError, DivisionByZero, ValueError) as e:  # Added ValueError
+    except (
+        InvalidOperation,
+        TypeError,
+        DivisionByZero,
+        ValueError,
+    ) as e:  # Added ValueError
         log.error(f"Decimal or calculation error during SL/TP calculation: {e}")
         return None, None
     except Exception as e:
-        log.error(f"Unexpected error during SL/TP calculation: {e}", exc_info=(log_level <= logging.DEBUG))
+        log.error(
+            f"Unexpected error during SL/TP calculation: {e}",
+            exc_info=(log_level <= logging.DEBUG),
+        )
         return None, None
 
     # Return final rounded float values
@@ -1594,7 +2006,9 @@ def process_signals(results: AnalysisResults):
     checks current position state, and executes trades or closes positions.
     """
     if not results or not strategy_instance or not market_info:
-        log.warning("Signal processing skipped: Missing results, strategy instance, or market info.")
+        log.warning(
+            "Signal processing skipped: Missing results, strategy instance, or market info."
+        )
         return
     if stop_event.is_set():
         log.warning("Signal processing skipped: Stop event is set.")
@@ -1605,7 +2019,9 @@ def process_signals(results: AnalysisResults):
     last_atr = results.get("last_atr")  # May be None if not calculated/available
     symbol = config["symbol"]
 
-    log.debug(f"Processing Signal: {signal}, Last Close: {last_close}, Last ATR: {last_atr}")
+    log.debug(
+        f"Processing Signal: {signal}, Last Close: {last_close}, Last ATR: {last_atr}"
+    )
 
     # Validate essential data from results
     if signal is None:
@@ -1622,7 +2038,9 @@ def process_signals(results: AnalysisResults):
     # Crucial for deciding whether to enter or exit. Rate limiting is handled internally.
     position_data = get_current_position(symbol)
     if position_data is None:
-        log.warning("Position check skipped due to rate limit. Will re-evaluate on next candle.")
+        log.warning(
+            "Position check skipped due to rate limit. Will re-evaluate on next candle."
+        )
         return  # Wait for next cycle if check was skipped
 
     # Use the fetched position data (which uses Decimal)
@@ -1643,34 +2061,62 @@ def process_signals(results: AnalysisResults):
 
     # BUY Signal: Enter Long if Flat
     if signal == "BUY" and is_flat:
-        log.warning(f"{Fore.GREEN}{Style.BRIGHT}BUY Signal Received - Attempting to Enter Long.{Style.RESET_ALL}")
+        log.warning(
+            f"{Fore.GREEN}{Style.BRIGHT}BUY Signal Received - Attempting to Enter Long.{Style.RESET_ALL}"
+        )
         sl_price, tp_price = calculate_sl_tp("Buy", last_close, last_atr, results)
-        if sl_price is None:  # calculate_sl_tp returns None for SL if it cannot be determined
+        if (
+            sl_price is None
+        ):  # calculate_sl_tp returns None for SL if it cannot be determined
             log.error("Failed to calculate valid SL for BUY signal. Order cancelled.")
             return
 
-        qty = calculate_order_qty(last_close, sl_price, config["order"]["risk_per_trade_percent"])
+        qty = calculate_order_qty(
+            last_close, sl_price, config["order"]["risk_per_trade_percent"]
+        )
         if qty and qty > 0:
             # Use last_close as the reference price for Limit orders if applicable
             limit_price = last_close if config["order"]["type"] == "Limit" else None
-            place_order(symbol, "Buy", qty, price=limit_price, sl_price=sl_price, tp_price=tp_price)
+            place_order(
+                symbol,
+                "Buy",
+                qty,
+                price=limit_price,
+                sl_price=sl_price,
+                tp_price=tp_price,
+            )
         else:
-            log.error("Order quantity calculation failed or resulted in zero/negative. Cannot place BUY order.")
+            log.error(
+                "Order quantity calculation failed or resulted in zero/negative. Cannot place BUY order."
+            )
 
     # SELL Signal: Enter Short if Flat
     elif signal == "SELL" and is_flat:
-        log.warning(f"{Fore.RED}{Style.BRIGHT}SELL Signal Received - Attempting to Enter Short.{Style.RESET_ALL}")
+        log.warning(
+            f"{Fore.RED}{Style.BRIGHT}SELL Signal Received - Attempting to Enter Short.{Style.RESET_ALL}"
+        )
         sl_price, tp_price = calculate_sl_tp("Sell", last_close, last_atr, results)
         if sl_price is None:
             log.error("Failed to calculate valid SL for SELL signal. Order cancelled.")
             return
 
-        qty = calculate_order_qty(last_close, sl_price, config["order"]["risk_per_trade_percent"])
+        qty = calculate_order_qty(
+            last_close, sl_price, config["order"]["risk_per_trade_percent"]
+        )
         if qty and qty > 0:
             limit_price = last_close if config["order"]["type"] == "Limit" else None
-            place_order(symbol, "Sell", qty, price=limit_price, sl_price=sl_price, tp_price=tp_price)
+            place_order(
+                symbol,
+                "Sell",
+                qty,
+                price=limit_price,
+                sl_price=sl_price,
+                tp_price=tp_price,
+            )
         else:
-            log.error("Order quantity calculation failed or resulted in zero/negative. Cannot place SELL order.")
+            log.error(
+                "Order quantity calculation failed or resulted in zero/negative. Cannot place SELL order."
+            )
 
     # EXIT_LONG Signal: Close Long Position if Currently Long
     elif signal == "EXIT_LONG" and is_long:
@@ -1715,10 +2161,14 @@ def process_signals(results: AnalysisResults):
 # --- Graceful Shutdown ---
 def handle_shutdown_signal(signum, frame):
     """Handles termination signals (SIGINT, SIGTERM) for graceful shutdown."""
-    if stop_event.is_set():  # Prevent running multiple times if signal received repeatedly
+    if (
+        stop_event.is_set()
+    ):  # Prevent running multiple times if signal received repeatedly
         log.warning("Shutdown already in progress.")
         return
-    log.warning(f"Shutdown signal {signal.Signals(signum).name} ({signum}) received. Initiating graceful shutdown...")
+    log.warning(
+        f"Shutdown signal {signal.Signals(signum).name} ({signum}) received. Initiating graceful shutdown..."
+    )
     stop_event.set()  # Signal all loops and threads to stop
 
     # 1. Stop WebSocket first to prevent processing new data/signals
@@ -1728,7 +2178,9 @@ def handle_shutdown_signal(signum, frame):
     #    USE WITH EXTREME CAUTION - unexpected closure can lead to losses.
     close_on_exit = config.get("close_position_on_exit", False)
     if close_on_exit and config.get("mode", "Live").lower() != "paper":
-        log.warning("Attempting to close open position on exit (close_position_on_exit=True)...")
+        log.warning(
+            "Attempting to close open position on exit (close_position_on_exit=True)..."
+        )
         # Need to ensure we get the latest position data, might need retry if rate limited
         pos_data = None
         max_retries = 3
@@ -1736,20 +2188,28 @@ def handle_shutdown_signal(signum, frame):
         retry_delay = max(1.0, POSITION_CHECK_INTERVAL / 3.0)  # Wait at least 1 second
 
         for attempt in range(max_retries):
-            if stop_event.is_set() and attempt > 0:  # Check if stop was re-triggered during wait
-                log.warning("Shutdown signal received again during position check retries. Aborting close attempt.")
+            if (
+                stop_event.is_set() and attempt > 0
+            ):  # Check if stop was re-triggered during wait
+                log.warning(
+                    "Shutdown signal received again during position check retries. Aborting close attempt."
+                )
                 break
 
             # Force position check by resetting timer
             global last_position_check_time
             last_position_check_time = 0.0  # Force check on next call
-            log.info(f"Checking position status for shutdown close (Attempt {attempt + 1}/{max_retries})...")
+            log.info(
+                f"Checking position status for shutdown close (Attempt {attempt + 1}/{max_retries})..."
+            )
             pos_data = get_current_position(config["symbol"])
 
             if pos_data is not None:  # Got data (even if flat), break retry
                 break
 
-            log.warning(f"Position check rate limited or failed during shutdown. Retrying in {retry_delay:.1f}s...")
+            log.warning(
+                f"Position check rate limited or failed during shutdown. Retrying in {retry_delay:.1f}s..."
+            )
             # Use interruptible sleep
             interrupted = stop_event.wait(timeout=retry_delay)
             if interrupted:
@@ -1759,22 +2219,34 @@ def handle_shutdown_signal(signum, frame):
                 break  # Exit retry loop if interrupted
 
         # Check if position data was successfully retrieved and if position is open
-        if pos_data and pos_data.get("size", Decimal(0)) > 0 and pos_data.get("side") != "None":
+        if (
+            pos_data
+            and pos_data.get("size", Decimal(0)) > 0
+            and pos_data.get("side") != "None"
+        ):
             log.warning(
                 f"Found open {pos_data.get('side')} position (Size: {pos_data.get('size')}). Attempting market close."
             )
-            close_response = close_position(config["symbol"], pos_data)  # Pass the fetched data
+            close_response = close_position(
+                config["symbol"], pos_data
+            )  # Pass the fetched data
 
             # Check response from close_position
             if close_response and close_response.get("retCode") == 0:
                 if close_response.get("alreadyFlat"):
-                    log.info("Position was already closed before shutdown close attempt could execute.")
+                    log.info(
+                        "Position was already closed before shutdown close attempt could execute."
+                    )
                 else:
-                    log.info("Position close order placed successfully during shutdown.")
+                    log.info(
+                        "Position close order placed successfully during shutdown."
+                    )
                     # Optionally wait briefly to see if WS confirms closure?
                     time.sleep(2)  # Short wait, WS might already be stopped
             elif close_response and close_response.get("alreadyFlatHint"):
-                log.warning("Close order failed, likely because position was already closed or size changed.")
+                log.warning(
+                    "Close order failed, likely because position was already closed or size changed."
+                )
             elif close_response:  # Close order failed for other reasons
                 log.error(
                     f"Failed to place position close order during shutdown. Response Code: {close_response.get('retCode')}, Msg: {close_response.get('retMsg')}"
@@ -1798,7 +2270,12 @@ def handle_shutdown_signal(signum, frame):
 
 # --- Main Execution Block ---
 if __name__ == "__main__":
-    print(Fore.MAGENTA + Style.BRIGHT + "\n~~~ Pyrmethus Volumatic+OB Trading Bot Initializing ~~~" + Style.RESET_ALL)
+    print(
+        Fore.MAGENTA
+        + Style.BRIGHT
+        + "\n~~~ Pyrmethus Volumatic+OB Trading Bot Initializing ~~~"
+        + Style.RESET_ALL
+    )
 
     # Load configuration first, as it dictates logging level etc.
     # load_config handles its own logging and exits on critical error
@@ -1816,7 +2293,9 @@ if __name__ == "__main__":
         signal.signal(signal.SIGTERM, handle_shutdown_signal)
         log.info("Registered shutdown signal handlers.")
     except Exception as e:
-        log.error(f"Could not register signal handlers: {e}. Shutdown might not be graceful.")
+        log.error(
+            f"Could not register signal handlers: {e}. Shutdown might not be graceful."
+        )
 
     # Connect to Bybit HTTP API
     session = connect_bybit()
@@ -1843,15 +2322,22 @@ if __name__ == "__main__":
     # Initialize Strategy Engine
     try:
         # Pass market info and strategy-specific parameters
-        strategy_instance = VolumaticOBStrategy(market_info=market_info, **config["strategy"])
-        log.info(f"Strategy '{type(strategy_instance).__name__}' initialized successfully.")
+        strategy_instance = VolumaticOBStrategy(
+            market_info=market_info, **config["strategy"]
+        )
+        log.info(
+            f"Strategy '{type(strategy_instance).__name__}' initialized successfully."
+        )
         # Log calculated precision from strategy instance
         log.info(
             f"Strategy using Price Precision: {strategy_instance.price_precision}, Qty Precision: {strategy_instance.qty_precision}"
         )
         log.info(f"Strategy requires minimum {strategy_instance.min_data_len} candles.")
     except (ValueError, KeyError, TypeError) as e:
-        log.critical(f"Failed to initialize strategy: {e}. Check config.json strategy params. Exiting.", exc_info=True)
+        log.critical(
+            f"Failed to initialize strategy: {e}. Check config.json strategy params. Exiting.",
+            exc_info=True,
+        )
         sys.exit(1)
     except Exception as e:
         log.critical(f"Unexpected error initializing strategy: {e}", exc_info=True)
@@ -1859,10 +2345,14 @@ if __name__ == "__main__":
 
     # Fetch Initial Historical Data
     with data_lock:  # Protect dataframe initialization
-        latest_dataframe = fetch_initial_data(config["symbol"], config["interval"], config["data"]["fetch_limit"])
+        latest_dataframe = fetch_initial_data(
+            config["symbol"], config["interval"], config["data"]["fetch_limit"]
+        )
 
     if latest_dataframe is None:  # Check for None specifically (indicates fetch error)
-        log.critical("Failed to fetch initial historical data. Cannot proceed. Exiting.")
+        log.critical(
+            "Failed to fetch initial historical data. Cannot proceed. Exiting."
+        )
         sys.exit(1)
     if latest_dataframe.empty:
         log.warning(
@@ -1915,7 +2405,9 @@ if __name__ == "__main__":
             except Exception as e:
                 log.error(f"Error during initial strategy analysis: {e}", exc_info=True)
         else:
-            log.error("Failed to copy dataframe for initial analysis.")  # Should not happen if checks passed
+            log.error(
+                "Failed to copy dataframe for initial analysis."
+            )  # Should not happen if checks passed
     else:
         log.info("Skipping initial analysis due to insufficient historical data.")
 
@@ -1945,7 +2437,9 @@ if __name__ == "__main__":
                     stop_websocket_connection()  # Ensure old resources are cleaned
                     time.sleep(5)  # Wait before restarting
                     if not start_websocket_connection():
-                        log.critical("Failed to restart WebSocket after failure. Stopping bot.")
+                        log.critical(
+                            "Failed to restart WebSocket after failure. Stopping bot."
+                        )
                         handle_shutdown_signal(signal.SIGTERM, None)  # Trigger shutdown
                         break  # Exit main loop
                     else:
@@ -1977,7 +2471,9 @@ if __name__ == "__main__":
             break  # Exit loop
         except Exception as e:
             # Catch unexpected errors in the main loop
-            log.error(f"An unexpected error occurred in the main loop: {e}", exc_info=True)
+            log.error(
+                f"An unexpected error occurred in the main loop: {e}", exc_info=True
+            )
             log.warning("Attempting to continue after error...")
             # Wait a bit longer after an unexpected error before resuming checks
             stop_event.wait(timeout=15.0)  # Use interruptible wait
@@ -1985,10 +2481,19 @@ if __name__ == "__main__":
     # --- End of Script ---
     # Shutdown sequence is handled by handle_shutdown_signal
     # If loop exited normally (e.g. stop_event set without signal), ensure shutdown runs
-    if not stop_event.is_set():  # Should not happen if loop condition is correct, but safety check
-        log.warning("Main loop exited unexpectedly without stop_event set. Triggering shutdown.")
+    if (
+        not stop_event.is_set()
+    ):  # Should not happen if loop condition is correct, but safety check
+        log.warning(
+            "Main loop exited unexpectedly without stop_event set. Triggering shutdown."
+        )
         handle_shutdown_signal(signal.SIGTERM, None)  # Or SIGINT?
 
     log.info("Main loop terminated.")
     # Final confirmation message (might not be reached if sys.exit called in handler)
-    print(Fore.MAGENTA + Style.BRIGHT + "\n~~~ Pyrmethus Volumatic+OB Trading Bot Stopped ~~~" + Style.RESET_ALL)
+    print(
+        Fore.MAGENTA
+        + Style.BRIGHT
+        + "\n~~~ Pyrmethus Volumatic+OB Trading Bot Stopped ~~~"
+        + Style.RESET_ALL
+    )

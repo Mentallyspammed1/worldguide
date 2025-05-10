@@ -251,9 +251,12 @@ def setup_logger(name: str) -> logging.Logger:
         return logger
     logger.setLevel(logging.DEBUG)
     try:
-        fh = RotatingFileHandler(log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8")
+        fh = RotatingFileHandler(
+            log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+        )
         ff = SensitiveFormatter(
-            "%(asctime)s.%(msecs)03d %(levelname)-8s [%(name)s:%(lineno)d] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+            "%(asctime)s.%(msecs)03d %(levelname)-8s [%(name)s:%(lineno)d] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         ff.converter = time.gmtime  # type: ignore
         fh.setFormatter(ff)
@@ -294,7 +297,9 @@ def setup_logger(name: str) -> logging.Logger:
 
 
 init_logger = setup_logger("init")
-init_logger.info(f"{Fore.MAGENTA}{BRIGHT}Pyrmethus Volumatic Bot v{BOT_VERSION} Initializing...{Style.RESET_ALL}")
+init_logger.info(
+    f"{Fore.MAGENTA}{BRIGHT}Pyrmethus Volumatic Bot v{BOT_VERSION} Initializing...{Style.RESET_ALL}"
+)
 init_logger.info(f"Using Timezone: {TIMEZONE_STR}")
 
 
@@ -308,9 +313,15 @@ def _ensure_config_keys(
         if key not in updated_config:
             updated_config[key] = default_value
             changed = True
-            init_logger.info(f"{NEON_YELLOW}Config Update: Added '{full_key_path}' = {repr(default_value)}{RESET}")
-        elif isinstance(default_value, dict) and isinstance(updated_config.get(key), dict):
-            nested_config, nested_changed = _ensure_config_keys(updated_config[key], default_value, full_key_path)
+            init_logger.info(
+                f"{NEON_YELLOW}Config Update: Added '{full_key_path}' = {repr(default_value)}{RESET}"
+            )
+        elif isinstance(default_value, dict) and isinstance(
+            updated_config.get(key), dict
+        ):
+            nested_config, nested_changed = _ensure_config_keys(
+                updated_config[key], default_value, full_key_path
+            )
             if nested_changed:
                 updated_config[key] = nested_config
                 changed = True
@@ -318,7 +329,9 @@ def _ensure_config_keys(
 
 
 def load_config(filepath: str) -> dict[str, Any]:
-    init_logger.info(f"{Fore.CYAN}# Loading configuration from '{filepath}'...{Style.RESET_ALL}")
+    init_logger.info(
+        f"{Fore.CYAN}# Loading configuration from '{filepath}'...{Style.RESET_ALL}"
+    )
     default_config = {
         "trading_pairs": ["BTC/USDT"],
         "interval": "5",
@@ -363,7 +376,9 @@ def load_config(filepath: str) -> dict[str, Any]:
     config_needs_saving: bool = False
     loaded_config: dict[str, Any] = {}
     if not os.path.exists(filepath):
-        init_logger.warning(f"{NEON_YELLOW}Config file '{filepath}' not found. Creating default.{RESET}")
+        init_logger.warning(
+            f"{NEON_YELLOW}Config file '{filepath}' not found. Creating default.{RESET}"
+        )
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=4, ensure_ascii=False)
@@ -372,7 +387,9 @@ def load_config(filepath: str) -> dict[str, Any]:
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             return default_config
         except OSError as e:
-            init_logger.critical(f"{NEON_RED}FATAL: Error creating config '{filepath}': {e}{RESET}")
+            init_logger.critical(
+                f"{NEON_RED}FATAL: Error creating config '{filepath}': {e}{RESET}"
+            )
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             return default_config
     try:
@@ -381,7 +398,9 @@ def load_config(filepath: str) -> dict[str, Any]:
         if not isinstance(loaded_config, dict):
             raise TypeError("Config is not a JSON object.")
     except json.JSONDecodeError as e:
-        init_logger.error(f"{NEON_RED}Error decoding JSON from '{filepath}': {e}. Recreating default.{RESET}")
+        init_logger.error(
+            f"{NEON_RED}Error decoding JSON from '{filepath}': {e}. Recreating default.{RESET}"
+        )
         try:
             with open(filepath, "w", encoding="utf-8") as f_create:
                 json.dump(default_config, f_create, indent=4, ensure_ascii=False)
@@ -395,7 +414,10 @@ def load_config(filepath: str) -> dict[str, Any]:
             QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
             return default_config
     except Exception as e:
-        init_logger.critical(f"{NEON_RED}FATAL: Error loading config '{filepath}': {e}{RESET}", exc_info=True)
+        init_logger.critical(
+            f"{NEON_RED}FATAL: Error loading config '{filepath}': {e}{RESET}",
+            exc_info=True,
+        )
         QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
         return default_config
     try:
@@ -404,7 +426,13 @@ def load_config(filepath: str) -> dict[str, Any]:
             config_needs_saving = True
 
         def validate_numeric(
-            cfg: dict, key_path: str, min_val, max_val, is_strict_min=False, is_int=False, allow_zero=False
+            cfg: dict,
+            key_path: str,
+            min_val,
+            max_val,
+            is_strict_min=False,
+            is_int=False,
+            allow_zero=False,
         ) -> bool:
             nonlocal config_needs_saving
             keys = key_path.split(".")
@@ -418,7 +446,9 @@ def load_config(filepath: str) -> dict[str, Any]:
                 original_val = current_level.get(leaf_key)
                 default_val = default_level.get(leaf_key)
             except (KeyError, TypeError):
-                init_logger.error(f"Config validation error: Invalid path '{key_path}'.")
+                init_logger.error(
+                    f"Config validation error: Invalid path '{key_path}'."
+                )
                 return False
             if original_val is None:
                 init_logger.warning(
@@ -465,8 +495,9 @@ def load_config(filepath: str) -> dict[str, Any]:
                     final_val = converted_val
                     corrected = True
             except (ValueError, InvalidOperation, TypeError) as e:
-                range_str = f"{'(' if is_strict_min else '['}{min_val}, {max_val}{']'}" + (
-                    " or 0" if allow_zero else ""
+                range_str = (
+                    f"{'(' if is_strict_min else '['}{min_val}, {max_val}{']'}"
+                    + (" or 0" if allow_zero else "")
                 )
                 init_logger.warning(
                     f"{NEON_YELLOW}Config Validation: Invalid '{key_path}'='{repr(original_val)}'. Using default: {repr(default_val)}. Err: {e}. Expected: {'int' if is_int else 'float'}, Range: {range_str}{RESET}"
@@ -480,59 +511,112 @@ def load_config(filepath: str) -> dict[str, Any]:
 
         init_logger.debug("# Validating configuration parameters...")
         if not isinstance(updated_config.get("trading_pairs"), list) or not all(
-            isinstance(s, str) and s and "/" in s for s in updated_config.get("trading_pairs", [])
+            isinstance(s, str) and s and "/" in s
+            for s in updated_config.get("trading_pairs", [])
         ):
-            init_logger.warning(f"Invalid 'trading_pairs'. Using default {default_config['trading_pairs']}.")
+            init_logger.warning(
+                f"Invalid 'trading_pairs'. Using default {default_config['trading_pairs']}."
+            )
             updated_config["trading_pairs"] = default_config["trading_pairs"]
             config_needs_saving = True
         if updated_config.get("interval") not in VALID_INTERVALS:
-            init_logger.warning(f"Invalid 'interval'. Using default '{default_config['interval']}'.")
+            init_logger.warning(
+                f"Invalid 'interval'. Using default '{default_config['interval']}'."
+            )
             updated_config["interval"] = default_config["interval"]
             config_needs_saving = True
         validate_numeric(updated_config, "retry_delay", 1, 60, is_int=True)
         validate_numeric(updated_config, "fetch_limit", 50, MAX_DF_LEN, is_int=True)
-        validate_numeric(updated_config, "risk_per_trade", Decimal("0"), Decimal("0.5"), is_strict_min=True)
-        validate_numeric(updated_config, "leverage", 0, 200, is_int=True, allow_zero=True)
+        validate_numeric(
+            updated_config,
+            "risk_per_trade",
+            Decimal("0"),
+            Decimal("0.5"),
+            is_strict_min=True,
+        )
+        validate_numeric(
+            updated_config, "leverage", 0, 200, is_int=True, allow_zero=True
+        )
         validate_numeric(updated_config, "loop_delay_seconds", 1, 3600, is_int=True)
-        validate_numeric(updated_config, "position_confirm_delay_seconds", 1, 60, is_int=True)
-        if not isinstance(updated_config.get("quote_currency"), str) or not updated_config.get("quote_currency"):
-            init_logger.warning(f"Invalid 'quote_currency'. Using default '{default_config['quote_currency']}'.")
+        validate_numeric(
+            updated_config, "position_confirm_delay_seconds", 1, 60, is_int=True
+        )
+        if not isinstance(
+            updated_config.get("quote_currency"), str
+        ) or not updated_config.get("quote_currency"):
+            init_logger.warning(
+                f"Invalid 'quote_currency'. Using default '{default_config['quote_currency']}'."
+            )
             updated_config["quote_currency"] = default_config["quote_currency"]
             config_needs_saving = True
         if not isinstance(updated_config.get("enable_trading"), bool):
-            init_logger.warning(f"Invalid 'enable_trading'. Using default '{default_config['enable_trading']}'.")
+            init_logger.warning(
+                f"Invalid 'enable_trading'. Using default '{default_config['enable_trading']}'."
+            )
             updated_config["enable_trading"] = default_config["enable_trading"]
             config_needs_saving = True
         if not isinstance(updated_config.get("use_sandbox"), bool):
-            init_logger.warning(f"Invalid 'use_sandbox'. Using default '{default_config['use_sandbox']}'.")
+            init_logger.warning(
+                f"Invalid 'use_sandbox'. Using default '{default_config['use_sandbox']}'."
+            )
             updated_config["use_sandbox"] = default_config["use_sandbox"]
             config_needs_saving = True
-        validate_numeric(updated_config, "strategy_params.vt_length", 1, 1000, is_int=True)
-        validate_numeric(updated_config, "strategy_params.vt_atr_period", 1, MAX_DF_LEN, is_int=True)
-        validate_numeric(updated_config, "strategy_params.vt_vol_ema_length", 1, MAX_DF_LEN, is_int=True)
+        validate_numeric(
+            updated_config, "strategy_params.vt_length", 1, 1000, is_int=True
+        )
+        validate_numeric(
+            updated_config, "strategy_params.vt_atr_period", 1, MAX_DF_LEN, is_int=True
+        )
+        validate_numeric(
+            updated_config,
+            "strategy_params.vt_vol_ema_length",
+            1,
+            MAX_DF_LEN,
+            is_int=True,
+        )
         validate_numeric(updated_config, "strategy_params.vt_atr_multiplier", 0.1, 20.0)
         validate_numeric(updated_config, "strategy_params.ph_left", 1, 100, is_int=True)
-        validate_numeric(updated_config, "strategy_params.ph_right", 1, 100, is_int=True)
+        validate_numeric(
+            updated_config, "strategy_params.ph_right", 1, 100, is_int=True
+        )
         validate_numeric(updated_config, "strategy_params.pl_left", 1, 100, is_int=True)
-        validate_numeric(updated_config, "strategy_params.pl_right", 1, 100, is_int=True)
-        validate_numeric(updated_config, "strategy_params.ob_max_boxes", 1, 500, is_int=True)
-        validate_numeric(updated_config, "strategy_params.ob_entry_proximity_factor", 1.0, 1.1)
-        validate_numeric(updated_config, "strategy_params.ob_exit_proximity_factor", 1.0, 1.1)
+        validate_numeric(
+            updated_config, "strategy_params.pl_right", 1, 100, is_int=True
+        )
+        validate_numeric(
+            updated_config, "strategy_params.ob_max_boxes", 1, 500, is_int=True
+        )
+        validate_numeric(
+            updated_config, "strategy_params.ob_entry_proximity_factor", 1.0, 1.1
+        )
+        validate_numeric(
+            updated_config, "strategy_params.ob_exit_proximity_factor", 1.0, 1.1
+        )
         if updated_config["strategy_params"].get("ob_source") not in ["Wicks", "Body"]:
-            init_logger.warning(f"Invalid ob_source. Using default '{DEFAULT_OB_SOURCE}'.")
+            init_logger.warning(
+                f"Invalid ob_source. Using default '{DEFAULT_OB_SOURCE}'."
+            )
             updated_config["strategy_params"]["ob_source"] = DEFAULT_OB_SOURCE
             config_needs_saving = True
         if not isinstance(updated_config["strategy_params"].get("ob_extend"), bool):
-            init_logger.warning(f"Invalid ob_extend. Using default '{DEFAULT_OB_EXTEND}'.")
+            init_logger.warning(
+                f"Invalid ob_extend. Using default '{DEFAULT_OB_EXTEND}'."
+            )
             updated_config["strategy_params"]["ob_extend"] = DEFAULT_OB_EXTEND
             config_needs_saving = True
-        if not isinstance(updated_config["protection"].get("enable_trailing_stop"), bool):
+        if not isinstance(
+            updated_config["protection"].get("enable_trailing_stop"), bool
+        ):
             init_logger.warning("Invalid enable_trailing_stop. Using default.")
-            updated_config["protection"]["enable_trailing_stop"] = default_config["protection"]["enable_trailing_stop"]
+            updated_config["protection"]["enable_trailing_stop"] = default_config[
+                "protection"
+            ]["enable_trailing_stop"]
             config_needs_saving = True
         if not isinstance(updated_config["protection"].get("enable_break_even"), bool):
             init_logger.warning("Invalid enable_break_even. Using default.")
-            updated_config["protection"]["enable_break_even"] = default_config["protection"]["enable_break_even"]
+            updated_config["protection"]["enable_break_even"] = default_config[
+                "protection"
+            ]["enable_break_even"]
             config_needs_saving = True
         validate_numeric(
             updated_config,
@@ -548,8 +632,20 @@ def load_config(filepath: str) -> dict[str, Any]:
             Decimal("0.1"),
             allow_zero=True,
         )
-        validate_numeric(updated_config, "protection.break_even_trigger_atr_multiple", Decimal("0.1"), Decimal("10.0"))
-        validate_numeric(updated_config, "protection.break_even_offset_ticks", 0, 1000, is_int=True, allow_zero=True)
+        validate_numeric(
+            updated_config,
+            "protection.break_even_trigger_atr_multiple",
+            Decimal("0.1"),
+            Decimal("10.0"),
+        )
+        validate_numeric(
+            updated_config,
+            "protection.break_even_offset_ticks",
+            0,
+            1000,
+            is_int=True,
+            allow_zero=True,
+        )
         validate_numeric(
             updated_config,
             "protection.initial_stop_loss_atr_multiple",
@@ -568,18 +664,26 @@ def load_config(filepath: str) -> dict[str, Any]:
             try:
                 with open(filepath, "w", encoding="utf-8") as f_write:
                     json.dump(updated_config, f_write, indent=4, ensure_ascii=False)
-                init_logger.info(f"{NEON_GREEN}Config file '{filepath}' updated.{RESET}")
+                init_logger.info(
+                    f"{NEON_GREEN}Config file '{filepath}' updated.{RESET}"
+                )
             except Exception as save_err:
                 init_logger.error(
-                    f"{NEON_RED}Error saving updated config to '{filepath}': {save_err}{RESET}", exc_info=True
+                    f"{NEON_RED}Error saving updated config to '{filepath}': {save_err}{RESET}",
+                    exc_info=True,
                 )
         global QUOTE_CURRENCY
         QUOTE_CURRENCY = updated_config.get("quote_currency", "USDT")
         init_logger.info(f"Quote currency set: {NEON_YELLOW}{QUOTE_CURRENCY}{RESET}")
-        init_logger.info(f"{Fore.CYAN}# Configuration loading/validation complete.{Style.RESET_ALL}")
+        init_logger.info(
+            f"{Fore.CYAN}# Configuration loading/validation complete.{Style.RESET_ALL}"
+        )
         return updated_config
     except Exception as e:
-        init_logger.critical(f"{NEON_RED}FATAL: Error processing config: {e}. Using defaults.{RESET}", exc_info=True)
+        init_logger.critical(
+            f"{NEON_RED}FATAL: Error processing config: {e}. Using defaults.{RESET}",
+            exc_info=True,
+        )
         QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")
         return default_config
 
@@ -621,29 +725,46 @@ def initialize_exchange(logger: logging.Logger) -> ccxt.Exchange | None:
                 lg.debug(f"Market load attempt {attempt + 1}...")
                 exchange.load_markets(reload=(attempt > 0))
                 if exchange.markets and len(exchange.markets) > 0:
-                    lg.info(f"{NEON_GREEN}Market data loaded ({len(exchange.markets)} symbols).{RESET}")
+                    lg.info(
+                        f"{NEON_GREEN}Market data loaded ({len(exchange.markets)} symbols).{RESET}"
+                    )
                     markets_loaded = True
                     break
                 else:
                     last_market_error = ValueError("Market data empty.")
-                    lg.warning(f"Market data empty (Attempt {attempt + 1}). Retrying...")
-            except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
+                    lg.warning(
+                        f"Market data empty (Attempt {attempt + 1}). Retrying..."
+                    )
+            except (
+                ccxt.NetworkError,
+                ccxt.RequestTimeout,
+                requests.exceptions.RequestException,
+            ) as e:
                 last_market_error = e
-                lg.warning(f"Network error loading markets (Attempt {attempt + 1}): {e}.")
+                lg.warning(
+                    f"Network error loading markets (Attempt {attempt + 1}): {e}."
+                )
             except ccxt.AuthenticationError as e:
                 last_market_error = e
-                lg.critical(f"{NEON_RED}Auth error loading markets: {e}. Exiting.{RESET}")
+                lg.critical(
+                    f"{NEON_RED}Auth error loading markets: {e}. Exiting.{RESET}"
+                )
                 return None
             except Exception as e:
                 last_market_error = e
-                lg.critical(f"{NEON_RED}Unexpected error loading markets: {e}. Exiting.{RESET}", exc_info=True)
+                lg.critical(
+                    f"{NEON_RED}Unexpected error loading markets: {e}. Exiting.{RESET}",
+                    exc_info=True,
+                )
                 return None
             if not markets_loaded and attempt < MAX_API_RETRIES:
                 delay = RETRY_DELAY_SECONDS * (attempt + 1)
                 lg.warning(f"Retrying market load in {delay}s...")
                 time.sleep(delay)
         if not markets_loaded:
-            lg.critical(f"{NEON_RED}Failed to load markets. Last error: {last_market_error}. Exiting.{RESET}")
+            lg.critical(
+                f"{NEON_RED}Failed to load markets. Last error: {last_market_error}. Exiting.{RESET}"
+            )
             return None
         lg.info(f"Exchange initialized: {exchange.id} | Sandbox: {is_sandbox}")
         lg.info(f"Checking initial balance ({QUOTE_CURRENCY})...")
@@ -651,22 +772,37 @@ def initialize_exchange(logger: logging.Logger) -> ccxt.Exchange | None:
         try:
             initial_balance = fetch_balance(exchange, QUOTE_CURRENCY, lg)
         except ccxt.AuthenticationError as auth_err:
-            lg.critical(f"{NEON_RED}Auth error during balance check: {auth_err}. Exiting.{RESET}")
+            lg.critical(
+                f"{NEON_RED}Auth error during balance check: {auth_err}. Exiting.{RESET}"
+            )
             return None
         except Exception as balance_err:
-            lg.warning(f"{NEON_YELLOW}Initial balance check error: {balance_err}.{RESET}", exc_info=False)
+            lg.warning(
+                f"{NEON_YELLOW}Initial balance check error: {balance_err}.{RESET}",
+                exc_info=False,
+            )
         if initial_balance is not None:
-            lg.info(f"{NEON_GREEN}Initial balance: {initial_balance.normalize()} {QUOTE_CURRENCY}{RESET}")
+            lg.info(
+                f"{NEON_GREEN}Initial balance: {initial_balance.normalize()} {QUOTE_CURRENCY}{RESET}"
+            )
             lg.info(f"{Fore.CYAN}# Exchange init complete.{Style.RESET_ALL}")
             return exchange
         else:
-            lg.error(f"{NEON_RED}Initial balance check FAILED ({QUOTE_CURRENCY}).{RESET}")
+            lg.error(
+                f"{NEON_RED}Initial balance check FAILED ({QUOTE_CURRENCY}).{RESET}"
+            )
             if CONFIG.get("enable_trading", False):
-                lg.critical(f"{NEON_RED}Trading enabled, but balance check failed. Exiting.{RESET}")
+                lg.critical(
+                    f"{NEON_RED}Trading enabled, but balance check failed. Exiting.{RESET}"
+                )
                 return None
             else:
-                lg.warning(f"{NEON_YELLOW}Trading disabled. Proceeding without balance check.{RESET}")
-                lg.info(f"{Fore.CYAN}# Exchange init complete (no balance confirmation).{Style.RESET_ALL}")
+                lg.warning(
+                    f"{NEON_YELLOW}Trading disabled. Proceeding without balance check.{RESET}"
+                )
+                lg.info(
+                    f"{Fore.CYAN}# Exchange init complete (no balance confirmation).{Style.RESET_ALL}"
+                )
                 return exchange
     except Exception as e:
         lg.critical(f"{NEON_RED}Exchange init failed: {e}{RESET}", exc_info=True)
@@ -674,7 +810,10 @@ def initialize_exchange(logger: logging.Logger) -> ccxt.Exchange | None:
 
 
 def _safe_market_decimal(
-    value: Any | None, field_name: str, allow_zero: bool = True, allow_negative: bool = False
+    value: Any | None,
+    field_name: str,
+    allow_zero: bool = True,
+    allow_negative: bool = False,
 ) -> Decimal | None:
     if value is None:
         return None
@@ -692,7 +831,9 @@ def _safe_market_decimal(
         return None
 
 
-def _format_price(exchange: ccxt.Exchange, symbol: str, price: Decimal | float | str) -> str | None:
+def _format_price(
+    exchange: ccxt.Exchange, symbol: str, price: Decimal | float | str
+) -> str | None:
     try:
         price_decimal = Decimal(str(price))
         if price_decimal <= Decimal("0"):
@@ -704,7 +845,9 @@ def _format_price(exchange: ccxt.Exchange, symbol: str, price: Decimal | float |
         return None
 
 
-def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Decimal | None:
+def fetch_current_price_ccxt(
+    exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
+) -> Decimal | None:
     lg = logger
     attempts = 0
     last_exception = None
@@ -716,7 +859,9 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
             source = "N/A"
 
             def safe_decimal_from_ticker(val: Any | None, name: str) -> Decimal | None:
-                return _safe_market_decimal(val, f"ticker.{name}", allow_zero=False, allow_negative=False)
+                return _safe_market_decimal(
+                    val, f"ticker.{name}", allow_zero=False, allow_negative=False
+                )
 
             price = safe_decimal_from_ticker(ticker.get("last"), "last")
             source = "'last'" if price else source
@@ -738,14 +883,24 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
                 return normalized_price
             else:
                 last_exception = ValueError("No valid price source in ticker.")
-                lg.warning(f"No valid price ({symbol}, Attempt {attempts + 1}). Ticker: {ticker}. Retrying...")
-        except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
+                lg.warning(
+                    f"No valid price ({symbol}, Attempt {attempts + 1}). Ticker: {ticker}. Retrying..."
+                )
+        except (
+            ccxt.NetworkError,
+            ccxt.RequestTimeout,
+            requests.exceptions.RequestException,
+        ) as e:
             last_exception = e
-            lg.warning(f"{NEON_YELLOW}Net error fetching price ({symbol}): {e}. Retry {attempts + 1}...{RESET}")
+            lg.warning(
+                f"{NEON_YELLOW}Net error fetching price ({symbol}): {e}. Retry {attempts + 1}...{RESET}"
+            )
         except ccxt.RateLimitExceeded as e:
             last_exception = e
             wait = RETRY_DELAY_SECONDS * 3
-            lg.warning(f"{NEON_YELLOW}Rate limit price ({symbol}): {e}. Wait {wait}s...{RESET}")
+            lg.warning(
+                f"{NEON_YELLOW}Rate limit price ({symbol}): {e}. Wait {wait}s...{RESET}"
+            )
             time.sleep(wait)
             continue
         except ccxt.AuthenticationError as e:
@@ -757,7 +912,10 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
             lg.error(f"{NEON_RED}Exch error price ({symbol}): {e}{RESET}")
         except Exception as e:
             last_exception = e
-            lg.error(f"{NEON_RED}Unexpected error price ({symbol}): {e}{RESET}", exc_info=True)
+            lg.error(
+                f"{NEON_RED}Unexpected error price ({symbol}): {e}{RESET}",
+                exc_info=True,
+            )
             return None
         attempts += 1
         if attempts <= MAX_API_RETRIES:
@@ -769,10 +927,16 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
 
 
 def fetch_klines_ccxt(
-    exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int, logger: logging.Logger
+    exchange: ccxt.Exchange,
+    symbol: str,
+    timeframe: str,
+    limit: int,
+    logger: logging.Logger,
 ) -> pd.DataFrame:
     lg = logger
-    lg.info(f"{Fore.CYAN}# Fetching klines for {symbol} | TF: {timeframe} | Target: {limit}...{Style.RESET_ALL}")
+    lg.info(
+        f"{Fore.CYAN}# Fetching klines for {symbol} | TF: {timeframe} | Target: {limit}...{Style.RESET_ALL}"
+    )
     if not hasattr(exchange, "fetch_ohlcv") or not exchange.has.get("fetchOHLCV"):
         lg.error(f"Exchange {exchange.id} lacks fetchOHLCV.")
         return pd.DataFrame()
@@ -793,13 +957,21 @@ def fetch_klines_ccxt(
     except Exception as e:
         lg.warning(f"Could not estimate min candles: {e}")
     if limit < min_required:
-        lg.warning(f"{NEON_YELLOW}Req limit ({limit}) < est strategy need ({min_required}). Accuracy risk.{RESET}")
+        lg.warning(
+            f"{NEON_YELLOW}Req limit ({limit}) < est strategy need ({min_required}). Accuracy risk.{RESET}"
+        )
     category = "spot"
     market_id = symbol
     try:
         market = exchange.market(symbol)
         market_id = market["id"]
-        category = "linear" if market.get("linear") else "inverse" if market.get("inverse") else "spot"
+        category = (
+            "linear"
+            if market.get("linear")
+            else "inverse"
+            if market.get("inverse")
+            else "spot"
+        )
         lg.debug(f"Using category '{category}', market ID '{market_id}'.")
     except Exception as e:
         lg.warning(f"Could not get market category/ID ({symbol}): {e}.")
@@ -820,7 +992,9 @@ def fetch_klines_ccxt(
         chunk_data = None
         while attempts <= MAX_API_RETRIES:
             try:
-                params = {"category": category} if "bybit" in exchange.id.lower() else {}
+                params = (
+                    {"category": category} if "bybit" in exchange.id.lower() else {}
+                )
                 fetch_args: dict[str, Any] = {
                     "symbol": symbol,
                     "timeframe": timeframe,
@@ -835,11 +1009,15 @@ def fetch_klines_ccxt(
                 if chunk_data:
                     if chunk_num == 1:
                         try:
-                            last_ts = pd.to_datetime(chunk_data[-1][0], unit="ms", utc=True)
+                            last_ts = pd.to_datetime(
+                                chunk_data[-1][0], unit="ms", utc=True
+                            )
                             interval_seconds = exchange.parse_timeframe(timeframe)
                             if interval_seconds:
                                 max_lag = interval_seconds * 2.5
-                                actual_lag = (pd.Timestamp.utcnow() - last_ts).total_seconds()
+                                actual_lag = (
+                                    pd.Timestamp.utcnow() - last_ts
+                                ).total_seconds()
                                 if actual_lag > max_lag:
                                     last_exception = ValueError(
                                         f"Stale data? Lag {actual_lag:.1f}s > Max {max_lag:.1f}s"
@@ -853,12 +1031,16 @@ def fetch_klines_ccxt(
                             else:
                                 break
                         except Exception as ts_err:
-                            lg.warning(f"Lag check failed ({symbol}): {ts_err}. Proceeding.")
+                            lg.warning(
+                                f"Lag check failed ({symbol}): {ts_err}. Proceeding."
+                            )
                             break
                     else:
                         break
                 else:
-                    lg.debug(f"API returned no data for chunk {chunk_num}. End of history?")
+                    lg.debug(
+                        f"API returned no data for chunk {chunk_num}. End of history?"
+                    )
                     remaining_limit = 0
                     break
             except (ccxt.NetworkError, ccxt.RequestTimeout) as e:
@@ -869,7 +1051,9 @@ def fetch_klines_ccxt(
             except ccxt.RateLimitExceeded as e:
                 last_exception = e
                 wait = RETRY_DELAY_SECONDS * 3
-                lg.warning(f"{NEON_YELLOW}Rate limit klines chunk {chunk_num} ({symbol}): {e}. Wait {wait}s...{RESET}")
+                lg.warning(
+                    f"{NEON_YELLOW}Rate limit klines chunk {chunk_num} ({symbol}): {e}. Wait {wait}s...{RESET}"
+                )
                 time.sleep(wait)
                 continue
             except ccxt.AuthenticationError as e:
@@ -878,14 +1062,25 @@ def fetch_klines_ccxt(
                 return pd.DataFrame()
             except ccxt.ExchangeError as e:
                 last_exception = e
-                lg.error(f"{NEON_RED}Exch error klines chunk {chunk_num} ({symbol}): {e}{RESET}")
+                lg.error(
+                    f"{NEON_RED}Exch error klines chunk {chunk_num} ({symbol}): {e}{RESET}"
+                )
                 err_str = str(e).lower()
-                if "invalid timeframe" in err_str or "interval not supported" in err_str or "symbol invalid" in err_str:
-                    lg.critical(f"{NEON_RED}Non-retryable kline error: {e}. Stop.{RESET}")
+                if (
+                    "invalid timeframe" in err_str
+                    or "interval not supported" in err_str
+                    or "symbol invalid" in err_str
+                ):
+                    lg.critical(
+                        f"{NEON_RED}Non-retryable kline error: {e}. Stop.{RESET}"
+                    )
                     return pd.DataFrame()
             except Exception as e:
                 last_exception = e
-                lg.error(f"{NEON_RED}Unexpected error klines chunk {chunk_num} ({symbol}): {e}{RESET}", exc_info=True)
+                lg.error(
+                    f"{NEON_RED}Unexpected error klines chunk {chunk_num} ({symbol}): {e}{RESET}",
+                    exc_info=True,
+                )
                 return pd.DataFrame()
             attempts += 1
             if attempts <= MAX_API_RETRIES and chunk_data is None:
@@ -897,7 +1092,9 @@ def fetch_klines_ccxt(
             total_fetched += chunk_len
             end_timestamp_ms = chunk_data[0][0] - 1
             if chunk_len < fetch_size:
-                lg.debug("Received fewer candles than requested. Assuming end of history.")
+                lg.debug(
+                    "Received fewer candles than requested. Assuming end of history."
+                )
                 remaining_limit = 0
         else:
             lg.error(
@@ -907,7 +1104,9 @@ def fetch_klines_ccxt(
                 lg.error(f"Failed first chunk ({symbol}). Cannot proceed.")
                 return pd.DataFrame()
             else:
-                lg.warning(f"Proceeding with {total_fetched} candles fetched before error.")
+                lg.warning(
+                    f"Proceeding with {total_fetched} candles fetched before error."
+                )
                 break
         if remaining_limit > 0:
             time.sleep(0.5)
@@ -924,7 +1123,9 @@ def fetch_klines_ccxt(
             unique_data.append(candle)
             seen_timestamps.add(candle[0])
     if len(unique_data) != len(all_ohlcv_data):
-        lg.warning(f"Removed {len(all_ohlcv_data) - len(unique_data)} duplicate candles ({symbol}).")
+        lg.warning(
+            f"Removed {len(all_ohlcv_data) - len(unique_data)} duplicate candles ({symbol})."
+        )
     unique_data.sort(key=lambda x: x[0])
     if len(unique_data) > limit:
         lg.debug(f"Fetched {len(unique_data)}, trimming to {limit}.")
@@ -933,7 +1134,9 @@ def fetch_klines_ccxt(
         lg.debug(f"Processing {len(unique_data)} final candles ({symbol})...")
         cols = ["timestamp", "open", "high", "low", "close", "volume"]
         df = pd.DataFrame(unique_data, columns=cols[: len(unique_data[0])])
-        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True, errors="coerce")
+        df["timestamp"] = pd.to_datetime(
+            df["timestamp"], unit="ms", utc=True, errors="coerce"
+        )
         df.dropna(subset=["timestamp"], inplace=True)
         if df.empty:
             lg.error(f"DF empty after timestamp conv ({symbol}).")
@@ -944,7 +1147,9 @@ def fetch_klines_ccxt(
             if col in df.columns:
                 numeric_series = pd.to_numeric(df[col], errors="coerce")
                 df[col] = numeric_series.apply(
-                    lambda x: Decimal(str(x)) if pd.notna(x) and np.isfinite(x) else Decimal("NaN")
+                    lambda x: Decimal(str(x))
+                    if pd.notna(x) and np.isfinite(x)
+                    else Decimal("NaN")
                 )
             else:
                 lg.warning(f"Missing col '{col}' ({symbol}).")
@@ -970,7 +1175,9 @@ def fetch_klines_ccxt(
         lg.info(f"{NEON_GREEN}Processed {len(df)} klines ({symbol} {timeframe}){RESET}")
         return df
     except Exception as e:
-        lg.error(f"{NEON_RED}Error processing klines ({symbol}): {e}{RESET}", exc_info=True)
+        lg.error(
+            f"{NEON_RED}Error processing klines ({symbol}): {e}{RESET}", exc_info=True
+        )
         return pd.DataFrame()
 
 
@@ -978,7 +1185,9 @@ def fetch_klines_ccxt(
 # Placeholder for the rest of the functions and classes (from the previous enhanced version)
 # For a runnable script, paste the full function/class definitions here, then minify them.
 # Example placeholders (replace with actual minified code):
-def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> MarketInfo | None:
+def get_market_info(
+    exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
+) -> MarketInfo | None:
     return None
 
 
@@ -998,14 +1207,18 @@ def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
 def _handle_shutdown_signal(signum, frame) -> None:
     global _shutdown_requested
     signal_name = signal.Signals(signum).name
-    init_logger.warning(f"\n{NEON_RED}{BRIGHT}Shutdown signal ({signal_name}) received! Exiting...{RESET}")
+    init_logger.warning(
+        f"\n{NEON_RED}{BRIGHT}Shutdown signal ({signal_name}) received! Exiting...{RESET}"
+    )
     _shutdown_requested = True
 
 
 def main() -> None:
     global CONFIG, _shutdown_requested
     main_logger = setup_logger("main")
-    main_logger.info(f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Bot v{BOT_VERSION} Starting ---{Style.RESET_ALL}")
+    main_logger.info(
+        f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Bot v{BOT_VERSION} Starting ---{Style.RESET_ALL}"
+    )
     signal.signal(signal.SIGINT, _handle_shutdown_signal)
     signal.signal(signal.SIGTERM, _handle_shutdown_signal)
     exchange = initialize_exchange(main_logger)
@@ -1026,15 +1239,23 @@ def main() -> None:
             market_infos[pair] = market_info
             main_logger.info(f" -> {NEON_GREEN}{pair} valid.{RESET}")
             try:
-                strategy_engines[pair] = VolumaticOBStrategy(CONFIG, market_info, setup_logger(pair))
-                signal_generators[pair] = SignalGenerator(CONFIG, market_info, setup_logger(pair))
+                strategy_engines[pair] = VolumaticOBStrategy(
+                    CONFIG, market_info, setup_logger(pair)
+                )
+                signal_generators[pair] = SignalGenerator(
+                    CONFIG, market_info, setup_logger(pair)
+                )
             except ValueError as init_err:
-                main_logger.error(f" -> {NEON_RED}Failed init for {pair}: {init_err}. Skipping.{RESET}")
+                main_logger.error(
+                    f" -> {NEON_RED}Failed init for {pair}: {init_err}. Skipping.{RESET}"
+                )
                 all_valid = False
                 valid_pairs.remove(pair)
                 market_infos.pop(pair, None)
         else:
-            main_logger.error(f" -> {NEON_RED}{pair} invalid/inactive. Skipping.{RESET}")
+            main_logger.error(
+                f" -> {NEON_RED}{pair} invalid/inactive. Skipping.{RESET}"
+            )
             all_valid = False
     if not valid_pairs:
         main_logger.critical("No valid pairs. Shutting down.")
@@ -1070,11 +1291,16 @@ def main() -> None:
                     position_states,
                 )
             except ccxt.AuthenticationError as e:
-                symbol_logger.critical(f"{NEON_RED}Auth Error ({symbol}): {e}. Stopping bot.{RESET}")
+                symbol_logger.critical(
+                    f"{NEON_RED}Auth Error ({symbol}): {e}. Stopping bot.{RESET}"
+                )
                 _shutdown_requested = True
                 break
             except Exception as symbol_err:
-                symbol_logger.error(f"{NEON_RED}!! Unhandled error ({symbol}): {symbol_err} !!{RESET}", exc_info=True)
+                symbol_logger.error(
+                    f"{NEON_RED}!! Unhandled error ({symbol}): {symbol_err} !!{RESET}",
+                    exc_info=True,
+                )
             finally:
                 symbol_logger.info(f"--- Finished: {symbol} ---")
             if _shutdown_requested:
@@ -1086,14 +1312,18 @@ def main() -> None:
         cycle_dur = end_time - start_time
         loop_delay = CONFIG.get("loop_delay_seconds", LOOP_DELAY_SECONDS)
         wait_time = max(0, loop_delay - cycle_dur)
-        main_logger.info(f"Cycle {loop_count} duration: {cycle_dur:.2f}s. Waiting {wait_time:.2f}s...")
+        main_logger.info(
+            f"Cycle {loop_count} duration: {cycle_dur:.2f}s. Waiting {wait_time:.2f}s..."
+        )
         for _ in range(int(wait_time)):
             if _shutdown_requested:
                 break
             time.sleep(1)
         if not _shutdown_requested and wait_time % 1 > 0:
             time.sleep(wait_time % 1)
-    main_logger.info(f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Bot Shutting Down ---{Style.RESET_ALL}")
+    main_logger.info(
+        f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Bot Shutting Down ---{Style.RESET_ALL}"
+    )
     main_logger.info("Shutdown complete.")
     sys.exit(0)
 
@@ -1126,17 +1356,30 @@ def analyze_and_trade_symbol(
         lg.warning(f"Invalid strategy analysis ({symbol}). Skipping cycle.")
         return
     current_position = get_open_position(exchange, symbol, market_info, lg)
-    symbol_state = position_states.setdefault(symbol, {"be_activated": False, "tsl_activated": False})
+    symbol_state = position_states.setdefault(
+        symbol, {"be_activated": False, "tsl_activated": False}
+    )
     if current_position:
-        symbol_state["tsl_activated"] = bool(current_position.get("trailingStopLoss"))  # Update TSL state from API
-        manage_existing_position(exchange, symbol, market_info, current_position, analysis, symbol_state, lg)
+        symbol_state["tsl_activated"] = bool(
+            current_position.get("trailingStopLoss")
+        )  # Update TSL state from API
+        manage_existing_position(
+            exchange, symbol, market_info, current_position, analysis, symbol_state, lg
+        )
     else:
         if symbol_state["be_activated"] or symbol_state["tsl_activated"]:
             lg.debug(f"Resetting BE/TSL state for {symbol} (no position).")
         position_states[symbol] = {"be_activated": False, "tsl_activated": False}
     signal_info = signal_generator.generate_signal(analysis, current_position, symbol)
     execute_trade_action(
-        exchange, symbol, market_info, current_position, signal_info, analysis, symbol_state, lg
+        exchange,
+        symbol,
+        market_info,
+        current_position,
+        signal_info,
+        analysis,
+        symbol_state,
+        lg,
     )  # Pass state to execution
 
 
@@ -1157,16 +1400,27 @@ def manage_existing_position(
     last_close = analysis_results["last_close"]
     be_activated = position_state["be_activated"]
     position_state["tsl_activated"]
-    tsl_active_on_exchange = bool(position_info.get("trailingStopLoss"))  # Check current API state
-    if not isinstance(entry_price_any, (Decimal, int, float)) or Decimal(str(entry_price_any)) <= 0:
+    tsl_active_on_exchange = bool(
+        position_info.get("trailingStopLoss")
+    )  # Check current API state
+    if (
+        not isinstance(entry_price_any, (Decimal, int, float))
+        or Decimal(str(entry_price_any)) <= 0
+    ):
         lg.warning(f"Pos Mgmt ({symbol}): Invalid entry price ({entry_price_any}).")
         return
     entry_price = Decimal(str(entry_price_any))
     if not isinstance(atr, Decimal) or not atr.is_finite() or atr <= 0:
         lg.warning(f"Pos Mgmt ({symbol}): Invalid ATR ({atr}). Skipping BE/TSL.")
         return
-    if not isinstance(last_close, Decimal) or not last_close.is_finite() or last_close <= 0:
-        lg.warning(f"Pos Mgmt ({symbol}): Invalid close price ({last_close}). Skipping BE/TSL.")
+    if (
+        not isinstance(last_close, Decimal)
+        or not last_close.is_finite()
+        or last_close <= 0
+    ):
+        lg.warning(
+            f"Pos Mgmt ({symbol}): Invalid close price ({last_close}). Skipping BE/TSL."
+        )
         return
     protection_cfg = CONFIG.get("protection", {})
     price_tick = market_info["price_precision_step_decimal"]
@@ -1175,7 +1429,9 @@ def manage_existing_position(
         return
     enable_be = protection_cfg.get("enable_break_even", False) and not be_activated
     if enable_be and not tsl_active_on_exchange:
-        be_trigger_mult = Decimal(str(protection_cfg.get("break_even_trigger_atr_multiple", 1.0)))
+        be_trigger_mult = Decimal(
+            str(protection_cfg.get("break_even_trigger_atr_multiple", 1.0))
+        )
         be_offset_ticks = int(protection_cfg.get("break_even_offset_ticks", 2))
         profit_distance = abs(last_close - entry_price)
         profit_in_atr = profit_distance / atr if atr > 0 else Decimal(0)
@@ -1183,16 +1439,26 @@ def manage_existing_position(
             f"  BE Check ({symbol}): ProfitATR={profit_in_atr.normalize()} vs Trigger={be_trigger_mult.normalize()}, Offset={be_offset_ticks} ticks"
         )
         if profit_in_atr >= be_trigger_mult:
-            lg.info(f"{NEON_YELLOW}BE Triggered ({symbol}): Profit ATR >= Trigger.{RESET}")
-            offset_amount = price_tick * be_offset_ticks
-            be_sl_price = entry_price + offset_amount if pos_side == "long" else entry_price - offset_amount
-            be_sl_price = quantize_price(be_sl_price, price_tick, pos_side, is_tp=False)
-            valid_be_sl = (pos_side == "long" and be_sl_price > entry_price - price_tick) or (
-                pos_side == "short" and be_sl_price < entry_price + price_tick
+            lg.info(
+                f"{NEON_YELLOW}BE Triggered ({symbol}): Profit ATR >= Trigger.{RESET}"
             )
+            offset_amount = price_tick * be_offset_ticks
+            be_sl_price = (
+                entry_price + offset_amount
+                if pos_side == "long"
+                else entry_price - offset_amount
+            )
+            be_sl_price = quantize_price(be_sl_price, price_tick, pos_side, is_tp=False)
+            valid_be_sl = (
+                pos_side == "long" and be_sl_price > entry_price - price_tick
+            ) or (pos_side == "short" and be_sl_price < entry_price + price_tick)
             if valid_be_sl and be_sl_price > 0:
                 current_sl_str = position_info.get("stopLossPrice")
-                current_sl = _safe_market_decimal(current_sl_str, "current_sl", False) if current_sl_str else None
+                current_sl = (
+                    _safe_market_decimal(current_sl_str, "current_sl", False)
+                    if current_sl_str
+                    else None
+                )
                 needs_update = (
                     current_sl is None
                     or (pos_side == "long" and be_sl_price > current_sl)
@@ -1206,7 +1472,8 @@ def manage_existing_position(
                         current_tp_str = position_info.get("takeProfitPrice")
                         current_tp_dec = (
                             Decimal(current_tp_str)
-                            if current_tp_str and _safe_market_decimal(current_tp_str, "current_tp")
+                            if current_tp_str
+                            and _safe_market_decimal(current_tp_str, "current_tp")
                             else None
                         )
                         success = _set_position_protection(
@@ -1224,7 +1491,9 @@ def manage_existing_position(
                             position_state["be_activated"] = True
                             lg.info(f"{NEON_GREEN}BE SL set ({symbol}).{RESET}")
                         else:
-                            lg.error(f"{NEON_RED}Failed to set BE SL ({symbol})!{RESET}")
+                            lg.error(
+                                f"{NEON_RED}Failed to set BE SL ({symbol})!{RESET}"
+                            )
                     else:
                         lg.warning(f"Trading disabled: Would set BE SL ({symbol}).")
                 else:
@@ -1232,19 +1501,33 @@ def manage_existing_position(
                         f"BE ({symbol}): Current SL ({current_sl.normalize() if current_sl else 'N/A'}) already better than BE ({be_sl_price.normalize()}). No update."
                     )
             else:
-                lg.error(f"BE triggered but calc BE SL invalid ({symbol}): {be_sl_price.normalize()}.")
+                lg.error(
+                    f"BE triggered but calc BE SL invalid ({symbol}): {be_sl_price.normalize()}."
+                )
     enable_tsl = (
-        protection_cfg.get("enable_trailing_stop", False) and not tsl_active_on_exchange and not be_activated
+        protection_cfg.get("enable_trailing_stop", False)
+        and not tsl_active_on_exchange
+        and not be_activated
     )  # Don't activate TSL if BE already activated by bot
     if enable_tsl:
-        tsl_act_perc = Decimal(str(protection_cfg.get("trailing_stop_activation_percentage", 0.003)))
-        tsl_cb_rate = Decimal(str(protection_cfg.get("trailing_stop_callback_rate", 0.005)))
-        profit_perc = (
-            (last_close - entry_price) / entry_price if pos_side == "long" else (entry_price - last_close) / entry_price
+        tsl_act_perc = Decimal(
+            str(protection_cfg.get("trailing_stop_activation_percentage", 0.003))
         )
-        lg.debug(f"  TSL Check ({symbol}): Profit%={profit_perc:.4%} vs Activation%={tsl_act_perc:.4%}")
+        tsl_cb_rate = Decimal(
+            str(protection_cfg.get("trailing_stop_callback_rate", 0.005))
+        )
+        profit_perc = (
+            (last_close - entry_price) / entry_price
+            if pos_side == "long"
+            else (entry_price - last_close) / entry_price
+        )
+        lg.debug(
+            f"  TSL Check ({symbol}): Profit%={profit_perc:.4%} vs Activation%={tsl_act_perc:.4%}"
+        )
         if profit_perc >= tsl_act_perc:
-            lg.info(f"{NEON_YELLOW}TSL Activation Triggered ({symbol}): Profit >= Activation%.{RESET}")
+            lg.info(
+                f"{NEON_YELLOW}TSL Activation Triggered ({symbol}): Profit >= Activation%.{RESET}"
+            )
             activation_price = last_close  # Use current price to activate
             tsl_distance = activation_price * tsl_cb_rate
             tsl_distance = max(tsl_distance, price_tick)
@@ -1260,7 +1543,8 @@ def manage_existing_position(
                     current_tp_str = position_info.get("takeProfitPrice")
                     current_tp_dec = (
                         Decimal(current_tp_str)
-                        if current_tp_str and _safe_market_decimal(current_tp_str, "current_tp")
+                        if current_tp_str
+                        and _safe_market_decimal(current_tp_str, "current_tp")
                         else None
                     )
                     success = _set_position_protection(
@@ -1282,7 +1566,9 @@ def manage_existing_position(
                 else:
                     lg.warning(f"Trading disabled: Would activate TSL ({symbol}).")
             else:
-                lg.error(f"TSL calculation invalid ({symbol}): Dist={q_tsl_dist}, Act={q_act_price}.")
+                lg.error(
+                    f"TSL calculation invalid ({symbol}): Dist={q_tsl_dist}, Act={q_act_price}."
+                )
 
 
 def execute_trade_action(
@@ -1306,29 +1592,47 @@ def execute_trade_action(
         return
     if signal in ["EXIT_LONG", "EXIT_SHORT"]:
         if not current_position:
-            lg.warning(f"Received {signal} signal ({symbol}), but no position found. Ignoring.")
+            lg.warning(
+                f"Received {signal} signal ({symbol}), but no position found. Ignoring."
+            )
             return
         pos_side = current_position["side"]
         pos_size_dec = current_position["size_decimal"]
-        if (signal == "EXIT_LONG" and pos_side != "long") or (signal == "EXIT_SHORT" and pos_side != "short"):
-            lg.error(f"Signal mismatch: {signal} vs {pos_side} pos ({symbol}). Ignoring.")
+        if (signal == "EXIT_LONG" and pos_side != "long") or (
+            signal == "EXIT_SHORT" and pos_side != "short"
+        ):
+            lg.error(
+                f"Signal mismatch: {signal} vs {pos_side} pos ({symbol}). Ignoring."
+            )
             return
         exit_size = abs(pos_size_dec)
-        if exit_size <= market_info.get("amount_precision_step_decimal", Decimal("1e-9")):
-            lg.error(f"Cannot {signal} ({symbol}): Pos size near zero ({pos_size_dec}).")
+        if exit_size <= market_info.get(
+            "amount_precision_step_decimal", Decimal("1e-9")
+        ):
+            lg.error(
+                f"Cannot {signal} ({symbol}): Pos size near zero ({pos_size_dec})."
+            )
             return
-        lg.warning(f"{BRIGHT}>>> Executing {signal} for {symbol} <<< Reason: {signal_info['reason']}")
+        lg.warning(
+            f"{BRIGHT}>>> Executing {signal} for {symbol} <<< Reason: {signal_info['reason']}"
+        )
         lg.info(f"  Closing {pos_side} size: {exit_size.normalize()}")
-        order_result = place_trade(exchange, symbol, signal, exit_size, market_info, lg, reduce_only=True)
+        order_result = place_trade(
+            exchange, symbol, signal, exit_size, market_info, lg, reduce_only=True
+        )
         if order_result:
-            lg.info(f"Exit order placed ({symbol}). ID: {order_result.get('id', 'N/A')}")
+            lg.info(
+                f"Exit order placed ({symbol}). ID: {order_result.get('id', 'N/A')}"
+            )
             position_state["be_activated"] = False
             position_state["tsl_activated"] = False  # Reset state on exit attempt
         else:
             lg.error(f"{NEON_RED}Failed to place {signal} order ({symbol}).{RESET}")
     elif signal in ["BUY", "SELL"]:
         if current_position:
-            lg.warning(f"Received {signal} ({symbol}), but position exists. Ignoring entry.")
+            lg.warning(
+                f"Received {signal} ({symbol}), but position exists. Ignoring entry."
+            )
             return
         balance = fetch_balance(exchange, QUOTE_CURRENCY, lg)
         if balance is None or balance <= 0:
@@ -1341,7 +1645,13 @@ def execute_trade_action(
             lg.error(f"Cannot place {signal} ({symbol}): Missing initial SL.")
             return
         position_size = calculate_position_size(
-            balance, CONFIG["risk_per_trade"], initial_sl, entry_price, market_info, exchange, lg
+            balance,
+            CONFIG["risk_per_trade"],
+            initial_sl,
+            entry_price,
+            market_info,
+            exchange,
+            lg,
         )
         if position_size is None or position_size <= 0:
             lg.error(f"Cannot place {signal} ({symbol}): Position sizing failed.")
@@ -1349,23 +1659,33 @@ def execute_trade_action(
         leverage = CONFIG.get("leverage", 0)
         if market_info.get("is_contract") and leverage > 0:
             if not set_leverage_ccxt(exchange, symbol, leverage, market_info, lg):
-                lg.warning(f"Leverage set failed ({symbol}). Continuing entry attempt...")
+                lg.warning(
+                    f"Leverage set failed ({symbol}). Continuing entry attempt..."
+                )
         lg.warning(
             f"{BRIGHT}>>> Initiating {signal} Entry for {symbol} | Size: {position_size.normalize()} <<< Reason: {signal_info['reason']}"
         )
         lg.info(
             f"  Initial SL: {initial_sl.normalize()}, Initial TP: {initial_tp.normalize() if initial_tp else 'Disabled'}"
         )
-        order_result = place_trade(exchange, symbol, signal, position_size, market_info, lg, reduce_only=False)
+        order_result = place_trade(
+            exchange, symbol, signal, position_size, market_info, lg, reduce_only=False
+        )
         if order_result:
-            lg.info(f"Entry order placed ({symbol}). ID: {order_result.get('id', 'N/A')}")
-            confirm_delay = CONFIG.get("position_confirm_delay_seconds", POSITION_CONFIRM_DELAY_SECONDS)
+            lg.info(
+                f"Entry order placed ({symbol}). ID: {order_result.get('id', 'N/A')}"
+            )
+            confirm_delay = CONFIG.get(
+                "position_confirm_delay_seconds", POSITION_CONFIRM_DELAY_SECONDS
+            )
             lg.debug(f"Waiting {confirm_delay}s to confirm {symbol} position...")
             time.sleep(confirm_delay)
             new_position = None
             for attempt in range(2):
                 temp_pos = get_open_position(exchange, symbol, market_info, lg)
-                if temp_pos and temp_pos.get("side") == ("long" if signal == "BUY" else "short"):
+                if temp_pos and temp_pos.get("side") == (
+                    "long" if signal == "BUY" else "short"
+                ):
                     new_position = temp_pos
                     break
                 if attempt == 0:
@@ -1391,7 +1711,9 @@ def execute_trade_action(
                     position_state["be_activated"] = False
                     position_state["tsl_activated"] = False  # Reset state for new pos
                 else:
-                    lg.error(f"{NEON_RED}Failed to set initial SL/TP for {symbol}!{RESET}")
+                    lg.error(
+                        f"{NEON_RED}Failed to set initial SL/TP for {symbol}!{RESET}"
+                    )
             else:
                 lg.error(
                     f"{NEON_RED}Failed to confirm open position ({symbol}) after entry order {order_result.get('id', 'N/A')}. Manual check required!{RESET}"
@@ -1416,7 +1738,9 @@ def _handle_shutdown_signal(signum, frame) -> None:
 def main() -> None:
     global CONFIG, _shutdown_requested
     main_logger = setup_logger("main")
-    main_logger.info(f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Volumatic Bot v{BOT_VERSION} Starting ---{Style.RESET_ALL}")
+    main_logger.info(
+        f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Volumatic Bot v{BOT_VERSION} Starting ---{Style.RESET_ALL}"
+    )
     signal.signal(signal.SIGINT, _handle_shutdown_signal)
     signal.signal(signal.SIGTERM, _handle_shutdown_signal)
     exchange = initialize_exchange(main_logger)
@@ -1437,15 +1761,23 @@ def main() -> None:
             market_infos[pair] = market_info
             main_logger.info(f" -> {NEON_GREEN}{pair} valid.{RESET}")
             try:
-                strategy_engines[pair] = VolumaticOBStrategy(CONFIG, market_info, setup_logger(pair))
-                signal_generators[pair] = SignalGenerator(CONFIG, market_info, setup_logger(pair))
+                strategy_engines[pair] = VolumaticOBStrategy(
+                    CONFIG, market_info, setup_logger(pair)
+                )
+                signal_generators[pair] = SignalGenerator(
+                    CONFIG, market_info, setup_logger(pair)
+                )
             except ValueError as init_err:
-                main_logger.error(f" -> {NEON_RED}Failed init for {pair}: {init_err}. Skipping.{RESET}")
+                main_logger.error(
+                    f" -> {NEON_RED}Failed init for {pair}: {init_err}. Skipping.{RESET}"
+                )
                 all_valid = False
                 valid_pairs.remove(pair)
                 market_infos.pop(pair, None)
         else:
-            main_logger.error(f" -> {NEON_RED}{pair} invalid/inactive. Skipping.{RESET}")
+            main_logger.error(
+                f" -> {NEON_RED}{pair} invalid/inactive. Skipping.{RESET}"
+            )
             all_valid = False
     if not valid_pairs:
         main_logger.critical("No valid pairs. Shutting down.")
@@ -1481,11 +1813,16 @@ def main() -> None:
                     position_states,
                 )
             except ccxt.AuthenticationError as e:
-                symbol_logger.critical(f"{NEON_RED}Auth Error ({symbol}): {e}. Stopping bot.{RESET}")
+                symbol_logger.critical(
+                    f"{NEON_RED}Auth Error ({symbol}): {e}. Stopping bot.{RESET}"
+                )
                 _shutdown_requested = True
                 break
             except Exception as symbol_err:
-                symbol_logger.error(f"{NEON_RED}!! Unhandled error ({symbol}): {symbol_err} !!{RESET}", exc_info=True)
+                symbol_logger.error(
+                    f"{NEON_RED}!! Unhandled error ({symbol}): {symbol_err} !!{RESET}",
+                    exc_info=True,
+                )
             finally:
                 symbol_logger.info(f"--- Finished: {symbol} ---")
             if _shutdown_requested:
@@ -1497,14 +1834,18 @@ def main() -> None:
         cycle_dur = end_time - start_time
         loop_delay = CONFIG.get("loop_delay_seconds", LOOP_DELAY_SECONDS)
         wait_time = max(0, loop_delay - cycle_dur)
-        main_logger.info(f"Cycle {loop_count} duration: {cycle_dur:.2f}s. Waiting {wait_time:.2f}s...")
+        main_logger.info(
+            f"Cycle {loop_count} duration: {cycle_dur:.2f}s. Waiting {wait_time:.2f}s..."
+        )
         for _ in range(int(wait_time)):
             if _shutdown_requested:
                 break
             time.sleep(1)
         if not _shutdown_requested and wait_time % 1 > 0:
             time.sleep(wait_time % 1)
-    main_logger.info(f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Bot Shutting Down ---{Style.RESET_ALL}")
+    main_logger.info(
+        f"{Fore.MAGENTA}{BRIGHT}--- Pyrmethus Bot Shutting Down ---{Style.RESET_ALL}"
+    )
     logging.shutdown()  # Flush and close handlers
     main_logger.info("Shutdown complete.")
     sys.exit(0)
@@ -1517,5 +1858,8 @@ if __name__ == "__main__":
         init_logger.info("KeyboardInterrupt caught in __main__. Exiting.")
         sys.exit(0)
     except Exception as global_err:
-        init_logger.critical(f"{NEON_RED}{BRIGHT}FATAL UNHANDLED EXCEPTION:{RESET} {global_err}", exc_info=True)
+        init_logger.critical(
+            f"{NEON_RED}{BRIGHT}FATAL UNHANDLED EXCEPTION:{RESET} {global_err}",
+            exc_info=True,
+        )
         sys.exit(1)

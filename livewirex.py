@@ -42,7 +42,9 @@ API_KEY = os.getenv("BYBIT_API_KEY")
 API_SECRET = os.getenv("BYBIT_API_SECRET")
 if not API_KEY or not API_SECRET:
     logging.basicConfig(level=logging.CRITICAL, format="%(levelname)s: %(message)s")
-    logging.critical(f"{NEON_RED}CRITICAL: BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env file.{RESET}")
+    logging.critical(
+        f"{NEON_RED}CRITICAL: BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env file.{RESET}"
+    )
     raise ValueError("API keys not set.")
 
 CONFIG_FILE = "config.json"
@@ -257,7 +259,9 @@ def load_config(filepath: str) -> dict[str, Any]:
         "Invalid symbol '{value}' for '{key}'. Reset to '{default}'.",
     )
     validate_param(
-        "interval", lambda v: v in VALID_INTERVALS, "Invalid interval '{value}' for '{key}'. Reset to '{default}'."
+        "interval",
+        lambda v: v in VALID_INTERVALS,
+        "Invalid interval '{value}' for '{key}'. Reset to '{default}'.",
     )
     validate_param(
         "entry_order_type",
@@ -357,7 +361,9 @@ def _merge_configs(loaded_config: dict, default_config: dict) -> dict:
 
 
 # --- Logging Setup ---
-def setup_logger(name: str, config: dict[str, Any] = None, level: int = logging.INFO) -> logging.Logger:
+def setup_logger(
+    name: str, config: dict[str, Any] = None, level: int = logging.INFO
+) -> logging.Logger:
     """Sets up a logger with file and console handlers."""
     logger = logging.getLogger(name)
     if logger.hasHandlers():
@@ -368,9 +374,12 @@ def setup_logger(name: str, config: dict[str, Any] = None, level: int = logging.
 
     # File handler (UTC)
     log_filename = os.path.join(LOG_DIRECTORY, f"{name}.log")
-    file_handler = RotatingFileHandler(log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8")
+    file_handler = RotatingFileHandler(
+        log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+    )
     file_formatter = SensitiveFormatter(
-        "%(asctime)s.%(msecs)03dZ %(levelname)-8s [%(name)s:%(lineno)d] %(message)s", datefmt="%Y-%m-%dT%H:%M:%S"
+        "%(asctime)s.%(msecs)03dZ %(levelname)-8s [%(name)s:%(lineno)d] %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
     )
     file_formatter.converter = time.gmtime
     file_handler.setFormatter(file_formatter)
@@ -378,7 +387,9 @@ def setup_logger(name: str, config: dict[str, Any] = None, level: int = logging.
     logger.addHandler(file_handler)
 
     # Console handler (local time)
-    console_tz = ZoneInfo(config.get("timezone", "America/Chicago")) if config else TIMEZONE
+    console_tz = (
+        ZoneInfo(config.get("timezone", "America/Chicago")) if config else TIMEZONE
+    )
     stream_handler = logging.StreamHandler()
     console_formatter = SensitiveFormatter(
         f"{NEON_BLUE}%(asctime)s{RESET} {NEON_YELLOW}%(levelname)-8s{RESET} {NEON_PURPLE}[%(name)s]{RESET} %(message)s",
@@ -394,7 +405,9 @@ def setup_logger(name: str, config: dict[str, Any] = None, level: int = logging.
 
 
 # --- CCXT Exchange Setup ---
-def initialize_exchange(config: dict[str, Any], logger: logging.Logger) -> ccxt.Exchange | None:
+def initialize_exchange(
+    config: dict[str, Any], logger: logging.Logger
+) -> ccxt.Exchange | None:
     """Initializes the CCXT Bybit exchange object."""
     lg = logger
     try:
@@ -444,7 +457,9 @@ def initialize_exchange(config: dict[str, Any], logger: logging.Logger) -> ccxt.
             lg.critical(f"{NEON_RED}Balance fetch failed.{RESET}")
             return None
 
-        lg.info(f"{NEON_GREEN}Exchange initialized. Balance: {balance:.4f} {config['quote_currency']}{RESET}")
+        lg.info(
+            f"{NEON_GREEN}Exchange initialized. Balance: {balance:.4f} {config['quote_currency']}{RESET}"
+        )
         return exchange
     except Exception as e:
         lg.critical(f"{NEON_RED}Exchange init failed: {e}{RESET}", exc_info=True)
@@ -463,23 +478,31 @@ def safe_api_call(func: callable, logger: logging.Logger, *args, **kwargs) -> An
             return func(*args, **kwargs)
         except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.ExchangeNotAvailable) as e:
             if attempt == max_retries:
-                lg.error(f"{NEON_RED}API call failed after {max_retries} retries: {e}{RESET}")
+                lg.error(
+                    f"{NEON_RED}API call failed after {max_retries} retries: {e}{RESET}"
+                )
                 return None
             delay = base_delay * (2**attempt)
-            lg.warning(f"Retryable error (Attempt {attempt + 1}/{max_retries}): {e}. Retrying in {delay}s...")
+            lg.warning(
+                f"Retryable error (Attempt {attempt + 1}/{max_retries}): {e}. Retrying in {delay}s..."
+            )
             time.sleep(delay)
         except Exception as e:
             lg.error(f"{NEON_RED}API call error: {e}{RESET}", exc_info=True)
             return None
 
 
-def fetch_balance(exchange: ccxt.Exchange, quote_currency: str, logger: logging.Logger) -> Decimal | None:
+def fetch_balance(
+    exchange: ccxt.Exchange, quote_currency: str, logger: logging.Logger
+) -> Decimal | None:
     """Fetches available balance with retries."""
     lg = logger
     try:
         balance_data = safe_api_call(exchange.fetch_balance, lg)
         if balance_data:
-            free_balance = Decimal(str(balance_data.get("free", {}).get(quote_currency, 0)))
+            free_balance = Decimal(
+                str(balance_data.get("free", {}).get(quote_currency, 0))
+            )
             return free_balance if free_balance.is_finite() else None
     except Exception as e:
         lg.error(f"Balance fetch failed: {e}", exc_info=True)
@@ -487,24 +510,32 @@ def fetch_balance(exchange: ccxt.Exchange, quote_currency: str, logger: logging.
 
 
 def fetch_klines_ccxt(
-    exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int, logger: logging.Logger
+    exchange: ccxt.Exchange,
+    symbol: str,
+    timeframe: str,
+    limit: int,
+    logger: logging.Logger,
 ) -> pd.DataFrame:
     """Fetches OHLCV data."""
     lg = logger
     try:
         klines = safe_api_call(exchange.fetch_ohlcv, lg, symbol, timeframe, limit=limit)
         if klines:
-            df = pd.DataFrame(klines, columns=["timestamp", "open", "high", "low", "close", "volume"])
-            df[["open", "high", "low", "close", "volume"]] = df[["open", "high", "low", "close", "volume"]].apply(
-                lambda x: x.astype(str).map(Decimal)
+            df = pd.DataFrame(
+                klines, columns=["timestamp", "open", "high", "low", "close", "volume"]
             )
+            df[["open", "high", "low", "close", "volume"]] = df[
+                ["open", "high", "low", "close", "volume"]
+            ].apply(lambda x: x.astype(str).map(Decimal))
             return df
     except Exception as e:
         lg.error(f"Klines fetch failed: {e}", exc_info=True)
     return pd.DataFrame()
 
 
-def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> Decimal | None:
+def fetch_current_price_ccxt(
+    exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
+) -> Decimal | None:
     """Fetches current ticker price."""
     lg = logger
     try:
@@ -516,22 +547,30 @@ def fetch_current_price_ccxt(exchange: ccxt.Exchange, symbol: str, logger: loggi
     return None
 
 
-def fetch_orderbook_ccxt(exchange: ccxt.Exchange, symbol: str, limit: int, logger: logging.Logger) -> dict | None:
+def fetch_orderbook_ccxt(
+    exchange: ccxt.Exchange, symbol: str, limit: int, logger: logging.Logger
+) -> dict | None:
     """Fetches order book data."""
     lg = logger
     try:
         orderbook = safe_api_call(exchange.fetch_order_book, lg, symbol, limit=limit)
         if orderbook:
             return {
-                "bids": [[Decimal(str(p)), Decimal(str(v))] for p, v in orderbook["bids"]],
-                "asks": [[Decimal(str(p)), Decimal(str(v))] for p, v in orderbook["asks"]],
+                "bids": [
+                    [Decimal(str(p)), Decimal(str(v))] for p, v in orderbook["bids"]
+                ],
+                "asks": [
+                    [Decimal(str(p)), Decimal(str(v))] for p, v in orderbook["asks"]
+                ],
             }
     except Exception as e:
         lg.error(f"Orderbook fetch failed: {e}", exc_info=True)
     return None
 
 
-def get_market_info(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> dict | None:
+def get_market_info(
+    exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
+) -> dict | None:
     """Retrieves market info with enhanced validation."""
     lg = logger
     try:
@@ -559,7 +598,11 @@ class TradingAnalyzer:
     """Analyzes market data and generates trading signals."""
 
     def __init__(
-        self, klines_df: pd.DataFrame, logger: logging.Logger, config: dict[str, Any], market_info: dict
+        self,
+        klines_df: pd.DataFrame,
+        logger: logging.Logger,
+        config: dict[str, Any],
+        market_info: dict,
     ) -> None:
         self.df = klines_df
         self.lg = logger
@@ -650,7 +693,9 @@ class TradingAnalyzer:
             d=self.config["stoch_rsi_d_period"],
         )
         if stochrsi is not None and "STOCHRSI" in stochrsi:
-            self.indicator_values["StochRSI"] = Decimal(str(stochrsi["STOCHRSI"].iloc[-1]))
+            self.indicator_values["StochRSI"] = Decimal(
+                str(stochrsi["STOCHRSI"].iloc[-1])
+            )
 
     def _calculate_rsi(self) -> None:
         df = self.df
@@ -661,7 +706,9 @@ class TradingAnalyzer:
     def _calculate_bbands(self) -> None:
         df = self.df
         bbands = ta.bbands(
-            df["close"], length=self.config["bollinger_bands_period"], std=self.config["bollinger_bands_std_dev"]
+            df["close"],
+            length=self.config["bollinger_bands_period"],
+            std=self.config["bollinger_bands_std_dev"],
         )
         if bbands is not None:
             self.indicator_values["BB_upper"] = Decimal(str(bbands["BBU"].iloc[-1]))
@@ -676,21 +723,34 @@ class TradingAnalyzer:
 
     def _calculate_cci(self) -> None:
         df = self.df
-        cci = ta.cci(df["high"], df["low"], df["close"], length=self.config["cci_period"])
+        cci = ta.cci(
+            df["high"], df["low"], df["close"], length=self.config["cci_period"]
+        )
         if cci is not None:
             self.indicator_values["CCI"] = Decimal(str(cci.iloc[-1]))
 
     def _calculate_williams_r(self) -> None:
         df = self.df
-        wr = ta.willr(df["high"], df["low"], df["close"], length=self.config["williams_r_period"])
+        wr = ta.willr(
+            df["high"], df["low"], df["close"], length=self.config["williams_r_period"]
+        )
         if wr is not None:
             self.indicator_values["Williams_R"] = Decimal(str(wr.iloc[-1]))
 
     def _calculate_psar(self) -> None:
         df = self.df
-        psar = ta.psar(df["high"], df["low"], af=self.config["psar_step"], max_af=self.config["psar_max_step"])
+        psar = ta.psar(
+            df["high"],
+            df["low"],
+            af=self.config["psar_step"],
+            max_af=self.config["psar_max_step"],
+        )
         if psar is not None and "PSARl" in psar:
-            latest_psar = psar["PSARl"].iloc[-1] if not pd.isna(psar["PSARl"].iloc[-1]) else psar["PSARs"].iloc[-1]
+            latest_psar = (
+                psar["PSARl"].iloc[-1]
+                if not pd.isna(psar["PSARl"].iloc[-1])
+                else psar["PSARs"].iloc[-1]
+            )
             self.indicator_values["PSAR"] = Decimal(str(latest_psar))
 
     def _calculate_sma(self) -> None:
@@ -701,13 +761,21 @@ class TradingAnalyzer:
 
     def _calculate_mfi(self) -> None:
         df = self.df
-        mfi = ta.mfi(df["high"], df["low"], df["close"], df["volume"], length=self.config["mfi_period"])
+        mfi = ta.mfi(
+            df["high"],
+            df["low"],
+            df["close"],
+            df["volume"],
+            length=self.config["mfi_period"],
+        )
         if mfi is not None:
             self.indicator_values["MFI"] = Decimal(str(mfi.iloc[-1]))
 
     def _calculate_atr(self) -> None:
         df = self.df
-        atr = ta.atr(df["high"], df["low"], df["close"], length=self.config["atr_period"])
+        atr = ta.atr(
+            df["high"], df["low"], df["close"], length=self.config["atr_period"]
+        )
         if atr is not None:
             self.indicator_values["ATR"] = Decimal(str(atr.iloc[-1]))
 
@@ -715,7 +783,9 @@ class TradingAnalyzer:
         short_ema = self.indicator_values.get("EMA_short")
         long_ema = self.indicator_values.get("EMA_long")
         if short_ema and long_ema:
-            return 1.0 if short_ema > long_ema else -1.0 if short_ema < long_ema else 0.0
+            return (
+                1.0 if short_ema > long_ema else -1.0 if short_ema < long_ema else 0.0
+            )
         return 0.0
 
     def _check_momentum(self) -> float:
@@ -737,7 +807,9 @@ class TradingAnalyzer:
         if stoch_rsi:
             oversold = self.config["stoch_rsi_oversold_threshold"]
             overbought = self.config["stoch_rsi_overbought_threshold"]
-            return 1.0 if stoch_rsi < oversold else -1.0 if stoch_rsi > overbought else 0.0
+            return (
+                1.0 if stoch_rsi < oversold else -1.0 if stoch_rsi > overbought else 0.0
+            )
         return 0.0
 
     def _check_rsi(self) -> float:
@@ -750,13 +822,17 @@ class TradingAnalyzer:
         upper = self.indicator_values.get("BB_upper")
         lower = self.indicator_values.get("BB_lower")
         if upper and lower and current_price:
-            return 1.0 if current_price < lower else -1.0 if current_price > upper else 0.0
+            return (
+                1.0 if current_price < lower else -1.0 if current_price > upper else 0.0
+            )
         return 0.0
 
     def _check_vwap(self, current_price: Decimal) -> float:
         vwap = self.indicator_values.get("VWAP")
         if vwap and current_price:
-            return 1.0 if current_price > vwap else -1.0 if current_price < vwap else 0.0
+            return (
+                1.0 if current_price > vwap else -1.0 if current_price < vwap else 0.0
+            )
         return 0.0
 
     def _check_cci(self) -> float:
@@ -774,7 +850,9 @@ class TradingAnalyzer:
     def _check_psar(self, current_price: Decimal) -> float:
         psar = self.indicator_values.get("PSAR")
         if psar and current_price:
-            return 1.0 if current_price > psar else -1.0 if current_price < psar else 0.0
+            return (
+                1.0 if current_price > psar else -1.0 if current_price < psar else 0.0
+            )
         return 0.0
 
     def _check_sma(self, current_price: Decimal) -> float:
@@ -789,14 +867,26 @@ class TradingAnalyzer:
             return 1.0 if mfi < 20 else -1.0 if mfi > 80 else 0.0
         return 0.0
 
-    def _check_orderbook(self, orderbook_data: dict | None, current_price: Decimal) -> float:
+    def _check_orderbook(
+        self, orderbook_data: dict | None, current_price: Decimal
+    ) -> float:
         if orderbook_data and current_price:
-            bid_vol = sum(v for p, v in orderbook_data["bids"] if p >= current_price * Decimal("0.995"))
-            ask_vol = sum(v for p, v in orderbook_data["asks"] if p <= current_price * Decimal("1.005"))
+            bid_vol = sum(
+                v
+                for p, v in orderbook_data["bids"]
+                if p >= current_price * Decimal("0.995")
+            )
+            ask_vol = sum(
+                v
+                for p, v in orderbook_data["asks"]
+                if p <= current_price * Decimal("1.005")
+            )
             return 1.0 if bid_vol > ask_vol else -1.0 if ask_vol > bid_vol else 0.0
         return 0.0
 
-    def generate_trading_signal(self, current_price: Decimal, orderbook_data: dict | None) -> str:
+    def generate_trading_signal(
+        self, current_price: Decimal, orderbook_data: dict | None
+    ) -> str:
         """Generates a trading signal based on weighted indicator scores."""
         weights = self.config["weight_sets"].get(self.config["active_weight_set"], {})
         scores = {}
@@ -827,9 +917,19 @@ class TradingAnalyzer:
         if self.config["indicators"].get("orderbook"):
             scores["orderbook"] = self._check_orderbook(orderbook_data, current_price)
 
-        total_score = sum(float(weights.get(k, 0)) * v for k, v in scores.items() if weights.get(k, 0) != 0)
+        total_score = sum(
+            float(weights.get(k, 0)) * v
+            for k, v in scores.items()
+            if weights.get(k, 0) != 0
+        )
         threshold = self.config["signal_score_threshold"]
-        signal = "BUY" if total_score >= threshold else "SELL" if total_score <= -threshold else "HOLD"
+        signal = (
+            "BUY"
+            if total_score >= threshold
+            else "SELL"
+            if total_score <= -threshold
+            else "HOLD"
+        )
         if signal != "HOLD":
             self.lg.info(
                 f"Signal: {signal}, Score: {total_score:.2f}, Components: {', '.join(f'{k}={v:.1f}' for k, v in scores.items())}"
@@ -900,7 +1000,9 @@ def calculate_position_size(
         return None
 
 
-def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logger) -> dict | None:
+def get_open_position(
+    exchange: ccxt.Exchange, symbol: str, logger: logging.Logger
+) -> dict | None:
     """Fetches open position details."""
     lg = logger
     try:
@@ -909,19 +1011,31 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logg
             return None
 
         for pos in positions:
-            size = Decimal(str(pos.get("contracts", pos.get("info", {}).get("size", "0"))))
+            size = Decimal(
+                str(pos.get("contracts", pos.get("info", {}).get("size", "0")))
+            )
             if abs(size) > Decimal("1e-9"):
                 pos["contractsDecimal"] = size
                 pos["side"] = "long" if size > 0 else "short"
                 pos["entryPriceDecimal"] = Decimal(str(pos.get("entryPrice", "0")))
-                pos["unrealizedPnlDecimal"] = Decimal(str(pos.get("unrealizedPnl", "0")))
+                pos["unrealizedPnlDecimal"] = Decimal(
+                    str(pos.get("unrealizedPnl", "0"))
+                )
                 info = pos.get("info", {})
-                pos["stopLossPriceDecimal"] = Decimal(str(info.get("stopLoss", "0"))) if info.get("stopLoss") else None
+                pos["stopLossPriceDecimal"] = (
+                    Decimal(str(info.get("stopLoss", "0")))
+                    if info.get("stopLoss")
+                    else None
+                )
                 pos["takeProfitPriceDecimal"] = (
-                    Decimal(str(info.get("takeProfit", "0"))) if info.get("takeProfit") else None
+                    Decimal(str(info.get("takeProfit", "0")))
+                    if info.get("takeProfit")
+                    else None
                 )
                 pos["trailingStopLossValueDecimal"] = (
-                    Decimal(str(info.get("trailingStop", "0"))) if info.get("trailingStop") else None
+                    Decimal(str(info.get("trailingStop", "0")))
+                    if info.get("trailingStop")
+                    else None
                 )
                 lg.info(f"Active {pos['side']} position: {size}")
                 return pos
@@ -932,7 +1046,11 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str, logger: logging.Logg
 
 
 def set_leverage_ccxt(
-    exchange: ccxt.Exchange, symbol: str, leverage: int, market_info: dict, logger: logging.Logger
+    exchange: ccxt.Exchange,
+    symbol: str,
+    leverage: int,
+    market_info: dict,
+    logger: logging.Logger,
 ) -> bool:
     """Sets leverage for the symbol."""
     lg = logger
@@ -940,7 +1058,11 @@ def set_leverage_ccxt(
         lg.debug("Not a contract market.")
         return True
     try:
-        params = {"buyLeverage": str(leverage), "sellLeverage": str(leverage)} if exchange.id == "bybit" else {}
+        params = (
+            {"buyLeverage": str(leverage), "sellLeverage": str(leverage)}
+            if exchange.id == "bybit"
+            else {}
+        )
         safe_api_call(exchange.set_leverage, lg, leverage, symbol, params=params)
         lg.info(f"Leverage set to {leverage}x")
         return True
@@ -1003,7 +1125,12 @@ def _set_position_protection(
         lg.error("Protection only for Bybit.")
         return False
     try:
-        params = {"category": "linear", "symbol": market_info["id"], "tpslMode": "Full", "positionIdx": 0}
+        params = {
+            "category": "linear",
+            "symbol": market_info["id"],
+            "tpslMode": "Full",
+            "positionIdx": 0,
+        }
         if trailing_stop_distance and tsl_activation_price:
             params["trailingStop"] = str(trailing_stop_distance)
             params["activePrice"] = str(tsl_activation_price)
@@ -1012,7 +1139,9 @@ def _set_position_protection(
         if take_profit_price:
             params["takeProfit"] = str(take_profit_price)
 
-        response = safe_api_call(exchange.private_post, lg, "/v5/position/set-trading-stop", params=params)
+        response = safe_api_call(
+            exchange.private_post, lg, "/v5/position/set-trading-stop", params=params
+        )
         if response and response.get("retCode") == 0:
             lg.info("Protection set successfully.")
             return True
@@ -1044,11 +1173,21 @@ def set_trailing_stop_loss(
 
         analyzer = TradingAnalyzer(pd.DataFrame(), lg, config, market_info)
         tick = analyzer.get_min_tick_size()
-        act_price = (entry + entry * act_pct if side == "long" else entry - entry * act_pct).quantize(tick)
+        act_price = (
+            entry + entry * act_pct if side == "long" else entry - entry * act_pct
+        ).quantize(tick)
         dist = (act_price * cb_rate).quantize(tick)
 
         return _set_position_protection(
-            exchange, symbol, market_info, position_info, lg, None, take_profit_price, dist, act_price
+            exchange,
+            symbol,
+            market_info,
+            position_info,
+            lg,
+            None,
+            take_profit_price,
+            dist,
+            act_price,
         )
     except Exception as e:
         lg.error(f"TSL error: {e}", exc_info=True)
@@ -1067,11 +1206,16 @@ def analyze_and_trade_symbol(
         if not market_info:
             raise ValueError("Market info missing.")
 
-        klines_df = fetch_klines_ccxt(exchange, symbol, CCXT_INTERVAL_MAP[config["interval"]], 500, lg)
+        klines_df = fetch_klines_ccxt(
+            exchange, symbol, CCXT_INTERVAL_MAP[config["interval"]], 500, lg
+        )
         if klines_df.empty:
             raise ValueError("Klines data missing.")
 
-        current_price = fetch_current_price_ccxt(exchange, symbol, lg) or klines_df["close"].iloc[-1]
+        current_price = (
+            fetch_current_price_ccxt(exchange, symbol, lg)
+            or klines_df["close"].iloc[-1]
+        )
         orderbook_data = (
             fetch_orderbook_ccxt(exchange, symbol, config["orderbook_limit"], lg)
             if config["indicators"].get("orderbook")
@@ -1082,7 +1226,9 @@ def analyze_and_trade_symbol(
         signal = analyzer.generate_trading_signal(current_price, orderbook_data)
         _, tp_calc, sl_calc = analyzer.calculate_entry_tp_sl(current_price, signal)
 
-        lg.info(f"Price: {current_price}, ATR: {analyzer.indicator_values.get('ATR', 'N/A')}, Signal: {signal}")
+        lg.info(
+            f"Price: {current_price}, ATR: {analyzer.indicator_values.get('ATR', 'N/A')}, Signal: {signal}"
+        )
 
         if not config.get("enable_trading"):
             lg.debug("Trading disabled.")
@@ -1095,19 +1241,45 @@ def analyze_and_trade_symbol(
                 if not balance:
                     raise ValueError("Balance fetch failed.")
                 size = calculate_position_size(
-                    balance, config["risk_per_trade"], sl_calc, current_price, market_info, exchange, lg
+                    balance,
+                    config["risk_per_trade"],
+                    sl_calc,
+                    current_price,
+                    market_info,
+                    exchange,
+                    lg,
                 )
                 if size:
-                    set_leverage_ccxt(exchange, symbol, config["leverage"], market_info, lg)
-                    order = place_trade(exchange, symbol, signal, size, market_info, lg, config["entry_order_type"])
+                    set_leverage_ccxt(
+                        exchange, symbol, config["leverage"], market_info, lg
+                    )
+                    order = place_trade(
+                        exchange,
+                        symbol,
+                        signal,
+                        size,
+                        market_info,
+                        lg,
+                        config["entry_order_type"],
+                    )
                     if order:
                         time.sleep(config["position_confirm_delay_seconds"])
                         new_pos = get_open_position(exchange, symbol, lg)
                         if new_pos:
-                            set_trailing_stop_loss(exchange, symbol, market_info, new_pos, config, lg, tp_calc)
+                            set_trailing_stop_loss(
+                                exchange,
+                                symbol,
+                                market_info,
+                                new_pos,
+                                config,
+                                lg,
+                                tp_calc,
+                            )
         else:
             side = position["side"]
-            if (side == "long" and signal == "SELL") or (side == "short" and signal == "BUY"):
+            if (side == "long" and signal == "SELL") or (
+                side == "short" and signal == "BUY"
+            ):
                 close_sig = "SELL" if side == "long" else "BUY"
                 place_trade(
                     exchange,
@@ -1119,7 +1291,9 @@ def analyze_and_trade_symbol(
                     "market",
                     reduce_only=True,
                 )
-            elif config["enable_break_even"] and not position.get("trailingStopLossValueDecimal"):
+            elif config["enable_break_even"] and not position.get(
+                "trailingStopLossValueDecimal"
+            ):
                 atr = analyzer.indicator_values.get("ATR")
                 profit = (
                     (current_price - position["entryPriceDecimal"]) / atr
@@ -1129,11 +1303,19 @@ def analyze_and_trade_symbol(
                 if profit >= Decimal(str(config["break_even_trigger_atr_multiple"])):
                     tick = analyzer.get_min_tick_size()
                     be_sl = (
-                        (position["entryPriceDecimal"] + tick * config["break_even_offset_ticks"]).quantize(tick)
+                        (
+                            position["entryPriceDecimal"]
+                            + tick * config["break_even_offset_ticks"]
+                        ).quantize(tick)
                         if side == "long"
-                        else (position["entryPriceDecimal"] - tick * config["break_even_offset_ticks"]).quantize(tick)
+                        else (
+                            position["entryPriceDecimal"]
+                            - tick * config["break_even_offset_ticks"]
+                        ).quantize(tick)
                     )
-                    _set_position_protection(exchange, symbol, market_info, position, lg, be_sl)
+                    _set_position_protection(
+                        exchange, symbol, market_info, position, lg, be_sl
+                    )
 
     except Exception as e:
         lg.error(f"Cycle error: {e}", exc_info=True)
@@ -1148,7 +1330,9 @@ def main() -> None:
     try:
         config = load_config(CONFIG_FILE)
         symbol = config["symbol"]
-        main_logger = setup_logger(f"ScalpXRX_{symbol.replace('/', '_').replace(':', '-')}", config)
+        main_logger = setup_logger(
+            f"ScalpXRX_{symbol.replace('/', '_').replace(':', '-')}", config
+        )
 
         exchange = initialize_exchange(config, main_logger)
         if not exchange:

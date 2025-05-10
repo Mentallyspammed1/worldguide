@@ -133,7 +133,12 @@ strategy_instance: Optional[VolumaticOBStrategy] = None
 market: Optional[Dict[str, Any]] = None  # CCXT market structure
 latest_dataframe: Optional[pd.DataFrame] = None  # Holds OHLCV data
 # Store position info using Decimal for precision
-current_position: Dict[str, Any] = {"size": Decimal(0), "side": SIDE_NONE, "entry_price": Decimal(0), "timestamp": 0.0}
+current_position: Dict[str, Any] = {
+    "size": Decimal(0),
+    "side": SIDE_NONE,
+    "entry_price": Decimal(0),
+    "timestamp": 0.0,
+}
 last_position_check_time: float = 0.0  # Track REST API calls (monotonic time)
 last_health_check_time: float = 0.0  # Track health checks (monotonic time)
 last_ws_update_time: float = 0.0  # Track WebSocket health (monotonic time)
@@ -144,7 +149,9 @@ stop_event = asyncio.Event()  # Event to signal shutdown
 # --- Locks for Shared Resources ---
 # Use asyncio locks to prevent race conditions in async operations
 data_lock = asyncio.Lock()  # Protects latest_dataframe
-position_lock = asyncio.Lock()  # Protects current_position and REST position fetches/updates
+position_lock = (
+    asyncio.Lock()
+)  # Protects current_position and REST position fetches/updates
 order_lock = asyncio.Lock()  # Protects order placement/cancellation/closing
 
 
@@ -171,13 +178,16 @@ def setup_logging(level_str: str = "INFO"):
         ch = logging.StreamHandler()
         ch.setLevel(log_level)
         formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         ch.setFormatter(formatter)
         log.addHandler(ch)
 
         # Optional File Handler (configure path as needed)
-        log_filename_template = config.get("log_filename")  # Get filename template from config
+        log_filename_template = config.get(
+            "log_filename"
+        )  # Get filename template from config
         if log_filename_template:
             try:
                 # Append timestamp to filename if desired (e.g., using placeholder)
@@ -187,7 +197,9 @@ def setup_logging(level_str: str = "INFO"):
                 else:
                     log_filename = log_filename_template
 
-                log_path = Path(log_filename).resolve()  # Use pathlib for path manipulation
+                log_path = Path(
+                    log_filename
+                ).resolve()  # Use pathlib for path manipulation
 
                 # Ensure log directory exists
                 log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -199,7 +211,10 @@ def setup_logging(level_str: str = "INFO"):
                 log.addHandler(fh)
                 log.info(f"Logging to file: {log_path}")
             except Exception as e:
-                log.error(f"Failed to set up file logging to '{log_filename_template}': {e}", exc_info=True)
+                log.error(
+                    f"Failed to set up file logging to '{log_filename_template}': {e}",
+                    exc_info=True,
+                )
 
     # Prevent log messages from propagating to the root logger
     log.propagate = False
@@ -241,16 +256,31 @@ def load_config(path_str: str = "config.json") -> Dict[str, Any]:
                 raise ValueError("Config file missing 'strategy.stop_loss.method'.")
 
             order_conf = conf.get("order", {})
-            required_order_keys = ["type", "risk_per_trade_percent", "leverage", "tp_ratio"]
+            required_order_keys = [
+                "type",
+                "risk_per_trade_percent",
+                "leverage",
+                "tp_ratio",
+            ]
             missing_order_keys = [k for k in required_order_keys if k not in order_conf]
             if missing_order_keys:
-                raise ValueError(f"Config file missing required keys in 'order': {', '.join(missing_order_keys)}")
+                raise ValueError(
+                    f"Config file missing required keys in 'order': {', '.join(missing_order_keys)}"
+                )
 
             checks_conf = conf.get("checks", {})
-            required_check_keys = ["health_check_interval", "position_check_interval", "ws_timeout_factor"]
-            missing_check_keys = [k for k in required_check_keys if k not in checks_conf]
+            required_check_keys = [
+                "health_check_interval",
+                "position_check_interval",
+                "ws_timeout_factor",
+            ]
+            missing_check_keys = [
+                k for k in required_check_keys if k not in checks_conf
+            ]
             if missing_check_keys:
-                raise ValueError(f"Config file missing required keys in 'checks': {', '.join(missing_check_keys)}")
+                raise ValueError(
+                    f"Config file missing required keys in 'checks': {', '.join(missing_check_keys)}"
+                )
 
             # Validate numeric types where expected and positivity
             try:
@@ -268,25 +298,35 @@ def load_config(path_str: str = "config.json") -> Dict[str, Any]:
                 if not (health_interval > 0):
                     raise ValueError("'checks.health_check_interval' must be positive.")
                 if not (pos_interval > 0):
-                    raise ValueError("'checks.position_check_interval' must be positive.")
+                    raise ValueError(
+                        "'checks.position_check_interval' must be positive."
+                    )
                 if not (ws_timeout_factor > 0):
                     raise ValueError("'checks.ws_timeout_factor' must be positive.")
                 # Validate leverage format roughly (numeric string or number)
                 float(leverage)  # Check if convertible to float
 
             except (ValueError, TypeError, KeyError) as e:
-                raise ValueError(f"Invalid numeric, missing, or non-positive value in config: {e}")
+                raise ValueError(
+                    f"Invalid numeric, missing, or non-positive value in config: {e}"
+                )
 
-            log.info(f"Configuration loaded and validated successfully from '{config_path}'.")
+            log.info(
+                f"Configuration loaded and validated successfully from '{config_path}'."
+            )
             return conf
     except FileNotFoundError:
         log.critical(f"CRITICAL: Configuration file '{config_path}' not found.")
         sys.exit(1)
     except (json.JSONDecodeError, ValueError) as e:
-        log.critical(f"CRITICAL: Error loading or validating configuration '{config_path}': {e}")
+        log.critical(
+            f"CRITICAL: Error loading or validating configuration '{config_path}': {e}"
+        )
         sys.exit(1)
     except Exception as e:
-        log.critical(f"CRITICAL: Unexpected error loading configuration: {e}", exc_info=True)
+        log.critical(
+            f"CRITICAL: Unexpected error loading configuration: {e}", exc_info=True
+        )
         sys.exit(1)
 
 
@@ -296,10 +336,14 @@ async def connect_ccxt() -> Optional[ccxt.Exchange]:
     global exchange  # Allow modification of the global variable
     exchange_id = config.get("exchange", "bybit").lower()
     # Use account type from config, default to 'unified' for Bybit V5 flexibility
-    account_type = config.get("account_type", "unified").lower()  # unified, contract, spot etc.
+    account_type = config.get(
+        "account_type", "unified"
+    ).lower()  # unified, contract, spot etc.
 
     if not API_KEY or not API_SECRET:
-        log.critical("CRITICAL: API Key or Secret not found in environment variables (.env file).")
+        log.critical(
+            "CRITICAL: API Key or Secret not found in environment variables (.env file)."
+        )
         return None
 
     if not hasattr(ccxt, exchange_id):
@@ -307,7 +351,9 @@ async def connect_ccxt() -> Optional[ccxt.Exchange]:
         return None
 
     try:
-        log.info(f"Connecting to CCXT exchange '{exchange_id}' (Account: {account_type}, Testnet: {TESTNET})...")
+        log.info(
+            f"Connecting to CCXT exchange '{exchange_id}' (Account: {account_type}, Testnet: {TESTNET})..."
+        )
         exchange_options = {
             "defaultType": account_type,
             "adjustForTimeDifference": True,
@@ -336,7 +382,9 @@ async def connect_ccxt() -> Optional[ccxt.Exchange]:
 
         if TESTNET:
             if hasattr(exchange, "set_sandbox_mode"):
-                log.warning("Attempting to enable Testnet (Sandbox) mode via set_sandbox_mode(True).")
+                log.warning(
+                    "Attempting to enable Testnet (Sandbox) mode via set_sandbox_mode(True)."
+                )
                 try:
                     # Some exchanges might require this method to use testnet URLs
                     exchange.set_sandbox_mode(True)
@@ -374,26 +422,41 @@ async def connect_ccxt() -> Optional[ccxt.Exchange]:
         ]  # Bot cannot function without these
 
         # Conditional requirements based on config
-        if config.get("websockets", {}).get("watch_klines", True):  # Check config if WS is intended
+        if config.get("websockets", {}).get(
+            "watch_klines", True
+        ):  # Check config if WS is intended
             required_methods.append("watchOHLCV")
-            critical_methods.append("watchOHLCV")  # Kline WS is critical for this bot design
+            critical_methods.append(
+                "watchOHLCV"
+            )  # Kline WS is critical for this bot design
         if config.get("websockets", {}).get("watch_positions", True):
             required_methods.append("watchPositions")
         if config.get("websockets", {}).get("watch_orders", True):
             required_methods.append("watchOrders")
         if config["order"]["type"].lower() == ORDER_TYPE_LIMIT:
             # Limit orders might need fetchTicker or fetchOrderBook for price reference
-            required_methods.append("fetchTicker")  # Assume fetchTicker needed for limit orders
+            required_methods.append(
+                "fetchTicker"
+            )  # Assume fetchTicker needed for limit orders
         if config["order"].get("leverage"):
-            required_methods.append("setLeverage")  # Check if leverage setting is intended
-        if exchange.has.get("cancelAllOrders") is False and exchange.has.get("cancelOrders") is False:
+            required_methods.append(
+                "setLeverage"
+            )  # Check if leverage setting is intended
+        if (
+            exchange.has.get("cancelAllOrders") is False
+            and exchange.has.get("cancelOrders") is False
+        ):
             # If neither cancel method is available, closing positions might be problematic
             log.warning(
                 "Exchange supports neither cancelAllOrders nor cancelOrders. Closing positions might leave SL/TP orders active."
             )
 
-        missing_methods = [method for method in required_methods if not exchange.has.get(method)]
-        missing_critical = [method for method in critical_methods if not exchange.has.get(method)]
+        missing_methods = [
+            method for method in required_methods if not exchange.has.get(method)
+        ]
+        missing_critical = [
+            method for method in critical_methods if not exchange.has.get(method)
+        ]
 
         if missing_methods:
             log.warning(
@@ -419,7 +482,9 @@ async def connect_ccxt() -> Optional[ccxt.Exchange]:
         )
         return None
     except Exception as e:
-        log.critical(f"CRITICAL: Failed to initialize CCXT exchange: {e}", exc_info=True)
+        log.critical(
+            f"CRITICAL: Failed to initialize CCXT exchange: {e}", exc_info=True
+        )
         # Ensure exchange object is cleaned up if partially created
         if exchange and hasattr(exchange, "close"):
             try:
@@ -442,7 +507,9 @@ async def load_exchange_market(symbol: str) -> Optional[Dict[str, Any]]:
             market = exchange.markets[symbol]
             # Validate essential market data
             if not market or not market.get("precision") or not market.get("limits"):
-                log.error(f"Market data for {symbol} is incomplete or missing precision/limits.")
+                log.error(
+                    f"Market data for {symbol} is incomplete or missing precision/limits."
+                )
                 return None
             if market.get("active") is False:
                 log.warning(f"Market {symbol} is marked as inactive on the exchange.")
@@ -467,7 +534,9 @@ async def load_exchange_market(symbol: str) -> Optional[Dict[str, Any]]:
             )
             return market
         else:
-            log.error(f"Symbol '{symbol}' not found in loaded markets for {exchange.name}.")
+            log.error(
+                f"Symbol '{symbol}' not found in loaded markets for {exchange.name}."
+            )
             available_symbols = list(exchange.markets.keys())
             # Show a sample of available symbols, ensure list is not excessively long
             sample_size = min(10, len(available_symbols))
@@ -479,17 +548,23 @@ async def load_exchange_market(symbol: str) -> Optional[Dict[str, Any]]:
         log.error(f"Failed to load market data for {symbol}: {e}")
         return None
     except Exception as e:
-        log.error(f"Unexpected error loading market data for {symbol}: {e}", exc_info=True)
+        log.error(
+            f"Unexpected error loading market data for {symbol}: {e}", exc_info=True
+        )
         return None
 
 
-async def fetch_initial_data(symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
+async def fetch_initial_data(
+    symbol: str, timeframe: str, limit: int
+) -> Optional[pd.DataFrame]:
     """Fetches historical OHLCV data using CCXT."""
     if not exchange:
         log.error("Cannot fetch data, exchange not connected.")
         return None
     if not exchange.has.get("fetchOHLCV"):
-        log.error(f"Cannot fetch data: Exchange {exchange.name} does not support fetchOHLCV.")
+        log.error(
+            f"Cannot fetch data: Exchange {exchange.name} does not support fetchOHLCV."
+        )
         return None
 
     log.info(f"Fetching initial {limit} candles for {symbol} ({timeframe})...")
@@ -497,11 +572,18 @@ async def fetch_initial_data(symbol: str, timeframe: str, limit: int) -> Optiona
         # CCXT fetch_ohlcv returns list: [[timestamp, open, high, low, close, volume]]
         ohlcv = await exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
         if not ohlcv:
-            log.warning(f"Received empty list from fetch_ohlcv for {symbol}, {timeframe}. No initial data.")
+            log.warning(
+                f"Received empty list from fetch_ohlcv for {symbol}, {timeframe}. No initial data."
+            )
             # Return an empty DataFrame with correct columns and index type
-            return pd.DataFrame(columns=["open", "high", "low", "close", "volume"], index=pd.to_datetime([], utc=True))
+            return pd.DataFrame(
+                columns=["open", "high", "low", "close", "volume"],
+                index=pd.to_datetime([], utc=True),
+            )
 
-        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
         # Convert timestamp to datetime and set as index (UTC is standard for CCXT timestamps)
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
         df = df.set_index("timestamp")
@@ -513,20 +595,28 @@ async def fetch_initial_data(symbol: str, timeframe: str, limit: int) -> Optiona
         # Check for NaNs which might indicate gaps or exchange issues
         if df.isnull().values.any():
             nan_counts = df.isnull().sum()
-            log.warning(f"NaN values found in fetched OHLCV data:\n{nan_counts[nan_counts > 0]}")
+            log.warning(
+                f"NaN values found in fetched OHLCV data:\n{nan_counts[nan_counts > 0]}"
+            )
             # Option: Fill NaNs (e.g., forward fill) or drop rows, depending on strategy needs
             # df = df.ffill() # Example: Forward fill
             # Drop rows missing essential price data, keep volume NaNs if strategy handles them
             df_original_len = len(df)
             df = df.dropna(subset=["open", "high", "low", "close"])
             if len(df) < df_original_len:
-                log.warning(f"Dropped {df_original_len - len(df)} rows with NaN price data.")
+                log.warning(
+                    f"Dropped {df_original_len - len(df)} rows with NaN price data."
+                )
 
         if df.empty:
-            log.error(f"DataFrame became empty after handling NaNs for {symbol}, {timeframe}.")
+            log.error(
+                f"DataFrame became empty after handling NaNs for {symbol}, {timeframe}."
+            )
             return None
 
-        log.info(f"Fetched {len(df)} initial candles. From {df.index.min()} to {df.index.max()}")
+        log.info(
+            f"Fetched {len(df)} initial candles. From {df.index.min()} to {df.index.max()}"
+        )
         return df
     except ccxt.NetworkError as e:
         log.error(f"Network error fetching initial klines: {e}")
@@ -535,7 +625,11 @@ async def fetch_initial_data(symbol: str, timeframe: str, limit: int) -> Optiona
         log.error(f"Exchange error fetching initial klines: {e}")
         # Check if the error is about the symbol/timeframe combination
         error_str = str(e).lower()
-        if "not supported" in error_str or "invalid" in error_str or "doesn't exist" in error_str:
+        if (
+            "not supported" in error_str
+            or "invalid" in error_str
+            or "doesn't exist" in error_str
+        ):
             log.error(
                 f"The symbol '{symbol}' or timeframe '{timeframe}' might not be supported by {exchange.name} for OHLCV fetching."
             )
@@ -572,7 +666,9 @@ async def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
             # Use fetch_positions for Bybit V5 (even for single symbol) as fetch_position might be deprecated/different
             # Check if the method exists first
             if not exchange.has.get("fetchPositions"):
-                log.error(f"Exchange {exchange.name} does not support fetchPositions. Cannot determine position state.")
+                log.error(
+                    f"Exchange {exchange.name} does not support fetchPositions. Cannot determine position state."
+                )
                 return None  # Critical failure
 
             all_positions = await exchange.fetch_positions([symbol])
@@ -592,8 +688,12 @@ async def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
                 # Common fields: 'contracts' (size in base), 'contractSize' (value of 1 contract),
                 # 'side' ('long'/'short'), 'entryPrice', 'leverage', 'unrealizedPnl', 'initialMargin', etc.
                 # Use .get() with defaults and handle potential None or empty strings
-                size_str = str(pos_data.get("contracts", "0") or "0")  # Size in base currency (e.g., BTC)
-                side = str(pos_data.get("side", "none") or "none").lower()  # 'long', 'short', or 'none'
+                size_str = str(
+                    pos_data.get("contracts", "0") or "0"
+                )  # Size in base currency (e.g., BTC)
+                side = str(
+                    pos_data.get("side", "none") or "none"
+                ).lower()  # 'long', 'short', or 'none'
                 entry_price_str = str(pos_data.get("entryPrice", "0") or "0")
 
                 # Safely convert to Decimal, handling potential errors
@@ -677,18 +777,24 @@ async def get_current_position(symbol: str) -> Optional[Dict[str, Any]]:
             return current_position  # Return the updated state
 
         except ccxt.NetworkError as e:
-            log.warning(f"Network error fetching position: {e}. Returning last known state: {current_position}")
+            log.warning(
+                f"Network error fetching position: {e}. Returning last known state: {current_position}"
+            )
             # Return cached state on temporary network issues, signal processing should handle this
             return current_position
         except ccxt.ExchangeError as e:
-            log.error(f"Exchange error fetching position: {e}. Cannot reliably determine position state.")
+            log.error(
+                f"Exchange error fetching position: {e}. Cannot reliably determine position state."
+            )
             # Returning None signals to callers (like process_signals) that the state is unknown
             # and they should likely skip actions based on potentially stale data.
             return None
         except Exception as e:
             # Catch other unexpected errors.
             log.error(f"Unexpected error fetching/parsing position: {e}", exc_info=True)
-            log.warning("Returning None due to unexpected error, cannot determine position state.")
+            log.warning(
+                "Returning None due to unexpected error, cannot determine position state."
+            )
             # Returning None is safer than returning potentially incorrect cached state
             return None
 
@@ -702,7 +808,9 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
     try:
         # fetch_balance structure depends heavily on exchange and account type
         if not exchange.has.get("fetchBalance"):
-            log.error(f"Exchange {exchange.name} does not support fetchBalance. Cannot get balance.")
+            log.error(
+                f"Exchange {exchange.name} does not support fetchBalance. Cannot get balance."
+            )
             return Decimal(0)
 
         balance_data = await exchange.fetch_balance()
@@ -716,7 +824,9 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
             try:
                 total_equity_val = balance_data["total"][quote_currency]
                 if total_equity_val is not None:  # Check for None before converting
-                    total_equity = Decimal(str(total_equity_val))  # Use string conversion
+                    total_equity = Decimal(
+                        str(total_equity_val)
+                    )  # Use string conversion
                     log.debug(f"Parsed CCXT 'total' balance: {total_equity}")
             except (InvalidOperation, TypeError):
                 log.warning(
@@ -726,7 +836,9 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
             try:
                 free_balance_val = balance_data["free"][quote_currency]
                 if free_balance_val is not None:  # Check for None before converting
-                    free_balance = Decimal(str(free_balance_val))  # Use string conversion
+                    free_balance = Decimal(
+                        str(free_balance_val)
+                    )  # Use string conversion
                     log.debug(f"Parsed CCXT 'free' balance: {free_balance}")
             except (InvalidOperation, TypeError):
                 log.warning(
@@ -745,20 +857,29 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
                 and isinstance(result["list"], list)
                 and len(result["list"]) > 0
             ):
-                log.debug(f"Checking Bybit 'info.result.list' for balance (found {len(result['list'])} items)...")
+                log.debug(
+                    f"Checking Bybit 'info.result.list' for balance (found {len(result['list'])} items)..."
+                )
                 # Find the account info matching the quote currency (e.g., USDT)
                 account_info = None
                 for account in result["list"]:
                     # Unified/Spot accounts often list by 'coin'
-                    if isinstance(account, dict) and account.get("coin") == quote_currency:
-                        log.debug(f"Found account info matching coin '{quote_currency}': {account}")
+                    if (
+                        isinstance(account, dict)
+                        and account.get("coin") == quote_currency
+                    ):
+                        log.debug(
+                            f"Found account info matching coin '{quote_currency}': {account}"
+                        )
                         account_info = account
                         break
                     # Contract accounts might not have 'coin' per item, check common equity keys
                     elif isinstance(account, dict) and "coin" not in account:
                         equity_keys_check = ["totalEquity", "equity", "walletBalance"]
                         if any(key in account for key in equity_keys_check):
-                            log.debug(f"Found account info without specific coin, checking equity keys: {account}")
+                            log.debug(
+                                f"Found account info without specific coin, checking equity keys: {account}"
+                            )
                             account_info = account
                             # Assume first relevant dict is the main one for contract
                             break
@@ -777,19 +898,29 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
                                 equity_val = account_info[key]
                                 # Handle potential None or empty string values
                                 if equity_val is not None and equity_val != "":
-                                    bybit_specific_equity = Decimal(str(equity_val))  # Use string conversion
-                                    if bybit_specific_equity > Decimal(0):  # Compare with Decimal(0)
+                                    bybit_specific_equity = Decimal(
+                                        str(equity_val)
+                                    )  # Use string conversion
+                                    if bybit_specific_equity > Decimal(
+                                        0
+                                    ):  # Compare with Decimal(0)
                                         log.debug(
                                             f"Found valid Bybit balance using key '{key}': {bybit_specific_equity}"
                                         )
                                         break  # Use the first valid one found
                                 else:
-                                    log.debug(f"Bybit balance key '{key}' found but value is None or empty.")
+                                    log.debug(
+                                        f"Bybit balance key '{key}' found but value is None or empty."
+                                    )
                             except (InvalidOperation, TypeError):
-                                log.warning(f"Could not parse Bybit balance key '{key}': {account_info.get(key)}")
+                                log.warning(
+                                    f"Could not parse Bybit balance key '{key}': {account_info.get(key)}"
+                                )
                                 continue
                         else:
-                            log.debug(f"Bybit balance key '{key}' not found in account info.")
+                            log.debug(
+                                f"Bybit balance key '{key}' not found in account info."
+                            )
                 else:
                     log.debug(
                         f"No specific account info found in Bybit 'info.result.list' matching '{quote_currency}' or generic contract structure."
@@ -802,7 +933,9 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
         # --- Determine which balance to use ---
         # Prefer Bybit specific equity if found and positive
         if bybit_specific_equity > Decimal(0):
-            log.debug(f"Using Bybit specific equity: {bybit_specific_equity} {quote_currency}")
+            log.debug(
+                f"Using Bybit specific equity: {bybit_specific_equity} {quote_currency}"
+            )
             return bybit_specific_equity
         # Fallback to CCXT total equity
         elif total_equity > Decimal(0):
@@ -815,8 +948,12 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
             )
             return free_balance
         else:
-            log.error(f"Could not determine a valid balance/equity for {quote_currency}. Found 0 or less.")
-            log.debug(f"Full balance data: {balance_data}")  # Log full structure for debugging
+            log.error(
+                f"Could not determine a valid balance/equity for {quote_currency}. Found 0 or less."
+            )
+            log.debug(
+                f"Full balance data: {balance_data}"
+            )  # Log full structure for debugging
             return Decimal(0)  # Return 0 if no balance found
 
     except (ccxt.NetworkError, ccxt.ExchangeError) as e:
@@ -831,19 +968,27 @@ async def get_wallet_balance(quote_currency: str = "USDT") -> Decimal:
         return Decimal(0)
 
 
-async def calculate_order_qty(entry_price: float, sl_price: float, risk_percent: float) -> Optional[float]:
+async def calculate_order_qty(
+    entry_price: float, sl_price: float, risk_percent: float
+) -> Optional[float]:
     """Calculates order quantity based on risk, SL distance, and equity using Decimal for precision. Returns float."""
     if not market or not strategy_instance:
-        log.error("Cannot calculate quantity: Market or strategy instance not available.")
+        log.error(
+            "Cannot calculate quantity: Market or strategy instance not available."
+        )
         return None
     # Ensure strategy instance has necessary Decimal attributes/methods
-    if not hasattr(strategy_instance, "price_tick") or not isinstance(strategy_instance.price_tick, Decimal):
+    if not hasattr(strategy_instance, "price_tick") or not isinstance(
+        strategy_instance.price_tick, Decimal
+    ):
         log.error("Strategy instance missing valid 'price_tick' Decimal attribute.")
         return None
     if strategy_instance.price_tick <= Decimal(0):
         log.error("Strategy instance 'price_tick' must be positive.")
         return None
-    if not hasattr(strategy_instance, "round_amount") or not callable(strategy_instance.round_amount):
+    if not hasattr(strategy_instance, "round_amount") or not callable(
+        strategy_instance.round_amount
+    ):
         log.error("Strategy instance missing callable 'round_amount' method.")
         return None
     # format_amount is used for logging, not critical for calculation
@@ -874,7 +1019,9 @@ async def calculate_order_qty(entry_price: float, sl_price: float, risk_percent:
     quote_currency = market.get("quote", "USDT")  # e.g., USDT in BTC/USDT
     balance = await get_wallet_balance(quote_currency)  # Returns Decimal(0) on failure
     if balance <= Decimal(0):
-        log.error(f"Cannot calculate order quantity: Invalid or zero balance ({balance}) for {quote_currency}.")
+        log.error(
+            f"Cannot calculate order quantity: Invalid or zero balance ({balance}) for {quote_currency}."
+        )
         return None
 
     log.debug(
@@ -894,11 +1041,15 @@ async def calculate_order_qty(entry_price: float, sl_price: float, risk_percent:
         # Calculate quantity in base asset (e.g., BTC for BTC/USDT)
         # Qty (Base) = Risk Amount (Quote) / SL Distance per Unit (Quote/Base)
         qty_base = risk_amount / sl_distance_per_unit
-        log.debug(f"Calculated Raw Qty: {qty_base} (RiskAmt={risk_amount:.4f}, SLDist={sl_distance_per_unit})")
+        log.debug(
+            f"Calculated Raw Qty: {qty_base} (RiskAmt={risk_amount:.4f}, SLDist={sl_distance_per_unit})"
+        )
 
     except (InvalidOperation, ValueError, ZeroDivisionError, TypeError) as e:
         log.error(f"Error during quantity calculation math: {e}")
-        log.error(f"Inputs: balance={balance}, risk%={risk_percent_decimal}, entry={entry_decimal}, sl={sl_decimal}")
+        log.error(
+            f"Inputs: balance={balance}, risk%={risk_percent_decimal}, entry={entry_decimal}, sl={sl_decimal}"
+        )
         return None
 
     # Round the calculated quantity DOWN to the market's amount precision/tick size
@@ -925,7 +1076,9 @@ async def calculate_order_qty(entry_price: float, sl_price: float, risk_percent:
         if max_qty_val is not None:
             max_qty = float(max_qty_val)
     except (ValueError, TypeError):
-        log.warning("Could not parse market amount limits. Using defaults (min=0, max=inf).")
+        log.warning(
+            "Could not parse market amount limits. Using defaults (min=0, max=inf)."
+        )
 
     qty_final = qty_rounded
 
@@ -945,29 +1098,41 @@ async def calculate_order_qty(entry_price: float, sl_price: float, risk_percent:
         try:
             # Use Decimal for risk calculation
             actual_risk_amount = Decimal(str(min_qty)) * sl_distance_per_unit
-            actual_risk_percent = (actual_risk_amount / balance) * 100 if balance > Decimal(0) else Decimal(0)
+            actual_risk_percent = (
+                (actual_risk_amount / balance) * 100
+                if balance > Decimal(0)
+                else Decimal(0)
+            )
             log.warning(
                 f"{Fore.YELLOW}Adjusting order quantity to minimum: {qty_final}. "
                 f"Actual Risk: {actual_risk_amount:.2f} {quote_currency} ({actual_risk_percent:.2f}%){Style.RESET_ALL}"
             )
             # Check if adjusted risk is acceptable (e.g., not > 2x intended risk)
-            max_acceptable_risk_mult = Decimal(str(config.get("order", {}).get("max_min_qty_risk_multiplier", 2.0)))
+            max_acceptable_risk_mult = Decimal(
+                str(config.get("order", {}).get("max_min_qty_risk_multiplier", 2.0))
+            )
             if actual_risk_percent > (risk_percent_decimal * max_acceptable_risk_mult):
                 log.error(
                     f"Risk after adjusting to min qty ({actual_risk_percent:.2f}%) exceeds acceptable threshold ({risk_percent_decimal * max_acceptable_risk_mult:.2f}%). Aborting trade."
                 )
                 return None
         except (InvalidOperation, TypeError) as e:
-            log.error(f"Error calculating risk after adjusting to min qty: {e}. Aborting trade.")
+            log.error(
+                f"Error calculating risk after adjusting to min qty: {e}. Aborting trade."
+            )
             return None
 
     elif max_qty > 0 and qty_final > max_qty:
-        log.warning(f"Calculated qty {qty_final} exceeds market maximum ({max_qty}). Adjusting down to max.")
+        log.warning(
+            f"Calculated qty {qty_final} exceeds market maximum ({max_qty}). Adjusting down to max."
+        )
         qty_final = max_qty  # Use max allowed quantity
 
     # Final check: Ensure quantity is not zero after adjustments
     if qty_final <= 0:
-        log.error(f"Final quantity is zero or negative ({qty_final}) after limit adjustments. Aborting trade.")
+        log.error(
+            f"Final quantity is zero or negative ({qty_final}) after limit adjustments. Aborting trade."
+        )
         return None
 
     # Log the final calculated quantity using strategy formatting
@@ -991,9 +1156,13 @@ def safe_format(method_name: str, value: Any, default_str: str = "N/A") -> str:
         and callable(getattr(strategy_instance, method_name))
     ):
         try:
-            return str(getattr(strategy_instance, method_name)(value))  # Ensure result is string
+            return str(
+                getattr(strategy_instance, method_name)(value)
+            )  # Ensure result is string
         except Exception as e:
-            log.warning(f"Error calling strategy formatter '{method_name}' for value '{value}': {e}")
+            log.warning(
+                f"Error calling strategy formatter '{method_name}' for value '{value}': {e}"
+            )
             # Fallback to reasonably formatted string representation
             if isinstance(value, Decimal):
                 return f"{value:.8f}"  # Example precision for Decimal
@@ -1026,16 +1195,27 @@ async def place_order(
         log.error("Cannot place order: Exchange, strategy, or market not ready.")
         return None
     # Check for required strategy methods/attributes
-    if not all(hasattr(strategy_instance, attr) for attr in ["round_amount", "round_price", "price_tick"]):
+    if not all(
+        hasattr(strategy_instance, attr)
+        for attr in ["round_amount", "round_price", "price_tick"]
+    ):
         log.error(
             "Cannot place order: Strategy instance missing required methods/attributes (round_amount, round_price, price_tick)."
         )
         return None
-    if not isinstance(strategy_instance.price_tick, Decimal) or strategy_instance.price_tick <= Decimal(0):
-        log.error("Cannot place order: Strategy instance 'price_tick' must be a positive Decimal.")
+    if not isinstance(
+        strategy_instance.price_tick, Decimal
+    ) or strategy_instance.price_tick <= Decimal(0):
+        log.error(
+            "Cannot place order: Strategy instance 'price_tick' must be a positive Decimal."
+        )
         return None
-    if not callable(strategy_instance.round_amount) or not callable(strategy_instance.round_price):
-        log.error("Cannot place order: Strategy instance 'round_amount' or 'round_price' is not callable.")
+    if not callable(strategy_instance.round_amount) or not callable(
+        strategy_instance.round_price
+    ):
+        log.error(
+            "Cannot place order: Strategy instance 'round_amount' or 'round_price' is not callable."
+        )
         return None
 
     mode = config.get("mode", MODE_LIVE).lower()
@@ -1050,7 +1230,11 @@ async def place_order(
 
     # Use strategy's formatting methods for logging
     qty_str = safe_format("format_amount", qty)
-    price_str = f" @{safe_format('format_price', price)}" if price and order_type == ORDER_TYPE_LIMIT else ""
+    price_str = (
+        f" @{safe_format('format_price', price)}"
+        if price and order_type == ORDER_TYPE_LIMIT
+        else ""
+    )
     sl_str = f" SL={safe_format('format_price', sl_price)}" if sl_price else ""
     tp_str = f" TP={safe_format('format_price', tp_price)}" if tp_price else ""
 
@@ -1061,7 +1245,9 @@ async def place_order(
             f"{qty_str} {symbol}{price_str}{sl_str}{tp_str}{Style.RESET_ALL}"
         )
         # Simulate immediate fill at desired price or last price
-        simulated_fill_price = price if price and order_type == ORDER_TYPE_LIMIT else None
+        simulated_fill_price = (
+            price if price and order_type == ORDER_TYPE_LIMIT else None
+        )
         if not simulated_fill_price:
             try:
                 if exchange.has.get("fetchTicker"):
@@ -1073,11 +1259,15 @@ async def place_order(
                     )
                     simulated_fill_price = price or 0
             except Exception as e:
-                log.error(f"[PAPER MODE] Could not fetch ticker for simulated fill price: {e}")
+                log.error(
+                    f"[PAPER MODE] Could not fetch ticker for simulated fill price: {e}"
+                )
                 simulated_fill_price = price or 0  # Fallback
 
         if simulated_fill_price is None or simulated_fill_price <= 0:
-            log.error("[PAPER MODE] Could not determine a valid simulated fill price. Aborting simulation.")
+            log.error(
+                "[PAPER MODE] Could not determine a valid simulated fill price. Aborting simulation."
+            )
             return None
 
         # Update paper position state (needs a dedicated paper trading state manager for accuracy)
@@ -1100,7 +1290,12 @@ async def place_order(
             "status": "closed",
             "fee": None,
             "cost": qty * simulated_fill_price,
-            "info": {"paperTrade": True, "simulated": True, "slPrice": sl_price, "tpPrice": tp_price},
+            "info": {
+                "paperTrade": True,
+                "simulated": True,
+                "slPrice": sl_price,
+                "tpPrice": tp_price,
+            },
         }
 
     # --- Live/Testnet Order Placement ---
@@ -1110,16 +1305,22 @@ async def place_order(
         try:
             amount_rounded = strategy_instance.round_amount(qty)  # Expects float return
             limit_price_rounded = (
-                strategy_instance.round_price(price) if price and order_type == ORDER_TYPE_LIMIT else None
+                strategy_instance.round_price(price)
+                if price and order_type == ORDER_TYPE_LIMIT
+                else None
             )  # Expects float return
         except Exception as e:
-            log.error(f"Error rounding amount/price using strategy methods: {e}. Using raw values.")
+            log.error(
+                f"Error rounding amount/price using strategy methods: {e}. Using raw values."
+            )
             amount_rounded = qty
             limit_price_rounded = price if order_type == ORDER_TYPE_LIMIT else None
 
         # --- Final Validation Before Placing Order ---
         if amount_rounded <= 0:
-            log.error(f"Attempted to place order with zero/negative amount after rounding: {amount_rounded}. Aborting.")
+            log.error(
+                f"Attempted to place order with zero/negative amount after rounding: {amount_rounded}. Aborting."
+            )
             return None
         # Check min quantity again after final rounding
         min_qty = 0.0
@@ -1131,7 +1332,9 @@ async def place_order(
             pass  # Ignore parsing errors, keep default 0.0
 
         if min_qty > 0 and amount_rounded < min_qty:
-            log.error(f"Final order amount {amount_rounded} is below minimum {min_qty} after rounding. Aborting order.")
+            log.error(
+                f"Final order amount {amount_rounded} is below minimum {min_qty} after rounding. Aborting order."
+            )
             return None
         # Check min cost if applicable (amount * price)
         min_cost = 0.0
@@ -1174,7 +1377,9 @@ async def place_order(
         # Syntax varies significantly by exchange (Bybit V5 Unified/Contract example)
         ccxt_params = {
             # 'positionIdx': 0, # 0: One-Way Mode. Set later from config if needed.
-            "timeInForce": config["order"].get("time_in_force", "GTC"),  # GoodTillCancel, ImmediateOrCancel, FillOrKill
+            "timeInForce": config["order"].get(
+                "time_in_force", "GTC"
+            ),  # GoodTillCancel, ImmediateOrCancel, FillOrKill
             # 'orderLinkId': f'bot_{int(time.time()*1000)}' # Optional client order ID
         }
         # Add positionIdx based on config if needed (e.g., for Bybit Hedge Mode)
@@ -1184,12 +1389,16 @@ async def place_order(
                 ccxt_params["positionIdx"] = int(position_idx)
                 log.debug(f"Using positionIdx: {ccxt_params['positionIdx']}")
             except (ValueError, TypeError):
-                log.error(f"Invalid positionIdx '{position_idx}' in config. Must be an integer. Ignoring.")
+                log.error(
+                    f"Invalid positionIdx '{position_idx}' in config. Must be an integer. Ignoring."
+                )
 
         sl_price_rounded = None
         if sl_price:
             try:
-                sl_price_rounded = strategy_instance.round_price(sl_price)  # Expects float return
+                sl_price_rounded = strategy_instance.round_price(
+                    sl_price
+                )  # Expects float return
             except Exception as e:
                 log.error(f"Error rounding SL price: {e}. Using raw value {sl_price}.")
                 sl_price_rounded = sl_price
@@ -1207,12 +1416,18 @@ async def place_order(
             if check_price and sl_price_rounded:
                 # Add a small buffer based on price tick to avoid immediate trigger due to rounding/slippage
                 # Ensure price_tick is positive before using
-                sl_buffer = float(strategy_instance.price_tick) * 2  # Use 2 ticks buffer
+                sl_buffer = (
+                    float(strategy_instance.price_tick) * 2
+                )  # Use 2 ticks buffer
                 try:
                     check_price_float = float(check_price)
                     # SL for buy must be below check price, SL for sell must be above
-                    if (order_side_lower == ORDER_SIDE_BUY and sl_price_rounded >= (check_price_float - sl_buffer)) or (
-                        order_side_lower == ORDER_SIDE_SELL and sl_price_rounded <= (check_price_float + sl_buffer)
+                    if (
+                        order_side_lower == ORDER_SIDE_BUY
+                        and sl_price_rounded >= (check_price_float - sl_buffer)
+                    ) or (
+                        order_side_lower == ORDER_SIDE_SELL
+                        and sl_price_rounded <= (check_price_float + sl_buffer)
                     ):
                         log.error(
                             f"Invalid SL price {sl_price_rounded} relative to order side '{order_side_lower}' and current/limit price '{check_price_float}' (Buffer: {sl_buffer}). Aborting."
@@ -1224,11 +1439,15 @@ async def place_order(
             if sl_price_rounded:
                 # Ensure SL price is not zero or negative after rounding/validation
                 if sl_price_rounded <= 0:
-                    log.error(f"Invalid SL price {sl_price_rounded} (zero or negative). Aborting.")
+                    log.error(
+                        f"Invalid SL price {sl_price_rounded} (zero or negative). Aborting."
+                    )
                     return None
                 ccxt_params.update(
                     {
-                        "stopLoss": str(sl_price_rounded),  # Use string representation for price for robustness
+                        "stopLoss": str(
+                            sl_price_rounded
+                        ),  # Use string representation for price for robustness
                         "slTriggerBy": config["order"].get(
                             "sl_trigger_type", "LastPrice"
                         ),  # MarkPrice, IndexPrice, LastPrice (check exchange support)
@@ -1236,12 +1455,16 @@ async def place_order(
                         # 'slOrderType': 'Market', # Bybit might require specifying SL order type (Market or Limit)
                     }
                 )
-                log.info(f"Prepared SL: Price={sl_price_rounded}, Trigger={ccxt_params['slTriggerBy']}")
+                log.info(
+                    f"Prepared SL: Price={sl_price_rounded}, Trigger={ccxt_params['slTriggerBy']}"
+                )
 
         tp_price_rounded = None
         if tp_price:
             try:
-                tp_price_rounded = strategy_instance.round_price(tp_price)  # Expects float return
+                tp_price_rounded = strategy_instance.round_price(
+                    tp_price
+                )  # Expects float return
             except Exception as e:
                 log.error(f"Error rounding TP price: {e}. Using raw value {tp_price}.")
                 tp_price_rounded = tp_price
@@ -1250,7 +1473,9 @@ async def place_order(
             check_price = limit_price_rounded if limit_price_rounded else None
             # Fetch ticker only if needed and not already fetched for SL check
             if (
-                not check_price and exchange.has.get("fetchTicker") and not (sl_price and check_price)
+                not check_price
+                and exchange.has.get("fetchTicker")
+                and not (sl_price and check_price)
             ):  # Avoid double fetch
                 try:
                     ticker = await exchange.fetch_ticker(symbol)
@@ -1260,12 +1485,18 @@ async def place_order(
 
             if check_price and tp_price_rounded:
                 # Add a small buffer based on price tick
-                tp_buffer = float(strategy_instance.price_tick) * 2  # Use 2 ticks buffer
+                tp_buffer = (
+                    float(strategy_instance.price_tick) * 2
+                )  # Use 2 ticks buffer
                 try:
                     check_price_float = float(check_price)
                     # TP for buy must be above check price, TP for sell must be below
-                    if (order_side_lower == ORDER_SIDE_BUY and tp_price_rounded <= (check_price_float + tp_buffer)) or (
-                        order_side_lower == ORDER_SIDE_SELL and tp_price_rounded >= (check_price_float - tp_buffer)
+                    if (
+                        order_side_lower == ORDER_SIDE_BUY
+                        and tp_price_rounded <= (check_price_float + tp_buffer)
+                    ) or (
+                        order_side_lower == ORDER_SIDE_SELL
+                        and tp_price_rounded >= (check_price_float - tp_buffer)
                     ):
                         log.error(
                             f"Invalid TP price {tp_price_rounded} relative to order side '{order_side_lower}' and current/limit price '{check_price_float}' (Buffer: {tp_buffer}). Aborting."
@@ -1277,17 +1508,25 @@ async def place_order(
             if tp_price_rounded:
                 # Ensure TP price is not zero or negative
                 if tp_price_rounded <= 0:
-                    log.error(f"Invalid TP price {tp_price_rounded} (zero or negative). Setting TP to None.")
+                    log.error(
+                        f"Invalid TP price {tp_price_rounded} (zero or negative). Setting TP to None."
+                    )
                     tp_price_rounded = None  # Do not send invalid TP
                 else:
                     ccxt_params.update(
                         {
-                            "takeProfit": str(tp_price_rounded),  # Use string representation
-                            "tpTriggerBy": config["order"].get("tp_trigger_type", "LastPrice"),
+                            "takeProfit": str(
+                                tp_price_rounded
+                            ),  # Use string representation
+                            "tpTriggerBy": config["order"].get(
+                                "tp_trigger_type", "LastPrice"
+                            ),
                             # 'tpOrderType': 'Market',
                         }
                     )
-                    log.info(f"Prepared TP: Price={tp_price_rounded}, Trigger={ccxt_params['tpTriggerBy']}")
+                    log.info(
+                        f"Prepared TP: Price={tp_price_rounded}, Trigger={ccxt_params['tpTriggerBy']}"
+                    )
 
         # Log the attempt
         log.warning(
@@ -1304,7 +1543,9 @@ async def place_order(
             # Place the order using ccxt.create_order
             # Ensure required methods exist
             if not exchange.has.get("createOrder"):
-                log.error(f"Order Failed: Exchange {exchange.name} does not support createOrder.")
+                log.error(
+                    f"Order Failed: Exchange {exchange.name} does not support createOrder."
+                )
                 return None
 
             order = await exchange.create_order(
@@ -1315,7 +1556,9 @@ async def place_order(
                 price=limit_price_rounded,  # Pass None for market orders (float or None)
                 params=ccxt_params,  # Pass exchange-specific params here
             )
-            log.info(f"{Fore.GREEN}Order placed successfully! ID: {order.get('id')}{Style.RESET_ALL}")
+            log.info(
+                f"{Fore.GREEN}Order placed successfully! ID: {order.get('id')}{Style.RESET_ALL}"
+            )
             log.debug(f"Order details: {json.dumps(order, indent=2)}")
 
             # Force position check soon after placing order to confirm state change
@@ -1327,7 +1570,9 @@ async def place_order(
             return order  # Return the order details dictionary
 
         except ccxt.InsufficientFunds as e:
-            log.error(f"{Fore.RED}Order Failed: Insufficient Funds.{Style.RESET_ALL} {e}")
+            log.error(
+                f"{Fore.RED}Order Failed: Insufficient Funds.{Style.RESET_ALL} {e}"
+            )
             # Log available balance for debugging
             await get_wallet_balance(market["quote"])
             return None
@@ -1341,25 +1586,42 @@ async def place_order(
             # Common issues: Price/amount precision, below min size/cost, invalid SL/TP params for the exchange/market, invalid TimeInForce.
             return None
         except ccxt.ExchangeNotAvailable as e:
-            log.error(f"{Fore.RED}Order Failed: Exchange Not Available (Maintenance?).{Style.RESET_ALL} {e}")
+            log.error(
+                f"{Fore.RED}Order Failed: Exchange Not Available (Maintenance?).{Style.RESET_ALL} {e}"
+            )
             # Consider implementing retry logic or pausing trading.
             return None
         except (ccxt.NetworkError, ccxt.ExchangeError) as e:
-            log.error(f"{Fore.RED}Order Failed: {type(e).__name__} - {e}{Style.RESET_ALL}")
+            log.error(
+                f"{Fore.RED}Order Failed: {type(e).__name__} - {e}{Style.RESET_ALL}"
+            )
             # Consider retrying network errors. Exchange errors might be permanent (e.g., invalid symbol, API key issue).
             error_str = str(e).lower()
             if "margin check failed" in error_str:
-                log.error("Margin check failed - potentially insufficient funds or leverage issue.")
+                log.error(
+                    "Margin check failed - potentially insufficient funds or leverage issue."
+                )
                 await get_wallet_balance(market["quote"])  # Log balance
             elif "order cost" in error_str and "too small" in error_str:
-                log.error("Order cost too small - check minimum cost limit for the market.")
-            elif "size" in error_str and ("too small" in error_str or "below min" in error_str):
-                log.error("Order size too small - check minimum amount limit for the market.")
+                log.error(
+                    "Order cost too small - check minimum cost limit for the market."
+                )
+            elif "size" in error_str and (
+                "too small" in error_str or "below min" in error_str
+            ):
+                log.error(
+                    "Order size too small - check minimum amount limit for the market."
+                )
             elif "precision" in error_str:
-                log.error("Precision error - check amount or price rounding against market rules.")
+                log.error(
+                    "Precision error - check amount or price rounding against market rules."
+                )
             return None
         except Exception as e:
-            log.error(f"{Fore.RED}Unexpected error placing order: {e}{Style.RESET_ALL}", exc_info=True)
+            log.error(
+                f"{Fore.RED}Unexpected error placing order: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             return None
 
 
@@ -1372,16 +1634,22 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
     mode = config.get("mode", MODE_LIVE).lower()
     # Use Decimal for size comparison
     current_size = position_data.get("size", Decimal(0))
-    current_side = position_data.get("side", SIDE_NONE)  # Expect 'Buy' or 'Sell' from get_current_position
+    current_side = position_data.get(
+        "side", SIDE_NONE
+    )  # Expect 'Buy' or 'Sell' from get_current_position
 
     if mode == MODE_PAPER:
         if current_size > Decimal(0):
-            closing_side = ORDER_SIDE_SELL if current_side == SIDE_BUY else ORDER_SIDE_BUY
+            closing_side = (
+                ORDER_SIDE_SELL if current_side == SIDE_BUY else ORDER_SIDE_BUY
+            )
             log.warning(
                 f"{Fore.YELLOW}[PAPER MODE] Simulating closing {current_side} position for {symbol} (Size: {current_size}) via {closing_side.upper()} order.{Style.RESET_ALL}"
             )
             # Update paper trading state
-            log.info("[PAPER MODE] Assuming position closed. Update paper state.")  # Placeholder
+            log.info(
+                "[PAPER MODE] Assuming position closed. Update paper state."
+            )  # Placeholder
             # Simulate a response
             return {
                 "id": f"paper_close_{int(time.time())}",
@@ -1398,7 +1666,11 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
                 "status": "closed",
                 "fee": None,
                 "cost": None,
-                "info": {"paperTrade": True, "simulatedClose": True, "reduceOnly": True},
+                "info": {
+                    "paperTrade": True,
+                    "simulatedClose": True,
+                    "reduceOnly": True,
+                },
             }
         else:
             log.info("[PAPER MODE] Attempted to close position, but already flat.")
@@ -1415,14 +1687,18 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
         latest_pos_data = await get_current_position(symbol)
         # If fetch fails critically, abort the close attempt
         if latest_pos_data is None:
-            log.error("Could not re-fetch position state before closing due to API error. Aborting close.")
+            log.error(
+                "Could not re-fetch position state before closing due to API error. Aborting close."
+            )
             return None
 
         current_size = latest_pos_data.get("size", Decimal(0))
         current_side = latest_pos_data.get("side", SIDE_NONE)
 
         if current_size <= Decimal(0) or current_side == SIDE_NONE:
-            log.info(f"Attempted to close position for {symbol}, but re-check shows it's already flat.")
+            log.info(
+                f"Attempted to close position for {symbol}, but re-check shows it's already flat."
+            )
             return {"info": {"alreadyFlat": True}}
 
         # Determine the side and amount for the closing order
@@ -1434,11 +1710,15 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
             if amount_to_close <= 0:  # Sanity check
                 raise ValueError("Position size is zero or negative.")
         except (ValueError, TypeError) as e:
-            log.error(f"Invalid position size for closing: {current_size}. Error: {e}. Aborting.")
+            log.error(
+                f"Invalid position size for closing: {current_size}. Error: {e}. Aborting."
+            )
             return None
 
         # Format amount for logging
-        formatted_amount = safe_format("format_amount", amount_to_close, str(amount_to_close))
+        formatted_amount = safe_format(
+            "format_amount", amount_to_close, str(amount_to_close)
+        )
         log.warning(
             f"{Fore.YELLOW}Attempting to close {current_side} position for {symbol} (Size: {formatted_amount}). Placing {side_to_close.upper()} Market order...{Style.RESET_ALL}"
         )
@@ -1447,20 +1727,30 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
         # This prevents the SL/TP from executing *after* the manual close order.
         # Note: cancel_all_orders might affect other manual orders for the same symbol.
         try:
-            log.info(f"Attempting to cancel ALL existing open orders for {symbol} before closing position...")
+            log.info(
+                f"Attempting to cancel ALL existing open orders for {symbol} before closing position..."
+            )
             # Use cancel_all_orders if supported and appropriate
             if exchange.has.get("cancelAllOrders"):
                 cancel_result = await exchange.cancel_all_orders(symbol)
-                log.info(f"Cancel all orders result: {cancel_result}")  # Log result (might be list of orders or status)
-                await asyncio.sleep(0.5)  # Short delay to allow cancellation processing on the exchange
-            elif exchange.has.get("cancelOrders") and exchange.has.get("fetchOpenOrders"):  # Check fetchOpenOrders too
+                log.info(
+                    f"Cancel all orders result: {cancel_result}"
+                )  # Log result (might be list of orders or status)
+                await asyncio.sleep(
+                    0.5
+                )  # Short delay to allow cancellation processing on the exchange
+            elif exchange.has.get("cancelOrders") and exchange.has.get(
+                "fetchOpenOrders"
+            ):  # Check fetchOpenOrders too
                 log.warning(
                     "Exchange does not support cancel_all_orders, attempting to fetch and cancel open orders individually..."
                 )
                 open_orders = await exchange.fetch_open_orders(symbol)
                 if open_orders:
                     order_ids = [o["id"] for o in open_orders]
-                    log.info(f"Found {len(order_ids)} open orders to cancel: {order_ids}")
+                    log.info(
+                        f"Found {len(order_ids)} open orders to cancel: {order_ids}"
+                    )
                     cancel_results = await exchange.cancel_orders(order_ids, symbol)
                     log.info(f"Individual cancel results: {cancel_results}")
                     await asyncio.sleep(0.5)
@@ -1472,7 +1762,9 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
                 )
         except (ccxt.NetworkError, ccxt.ExchangeError) as e:
             # Log warning but proceed with close attempt - cancellation might fail if no orders exist
-            log.warning(f"Could not cancel orders before closing position (might be none or API issue): {e}")
+            log.warning(
+                f"Could not cancel orders before closing position (might be none or API issue): {e}"
+            )
         except Exception as e:
             # Log error but proceed with close attempt
             log.error(f"Unexpected error cancelling orders: {e}", exc_info=True)
@@ -1490,7 +1782,9 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
         }
         try:
             if not exchange.has.get("createOrder"):
-                log.error(f"Close Order Failed: Exchange {exchange.name} does not support createOrder.")
+                log.error(
+                    f"Close Order Failed: Exchange {exchange.name} does not support createOrder."
+                )
                 return None
 
             order = await exchange.create_order(
@@ -1500,7 +1794,9 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
                 amount=amount_to_close,  # Use float amount
                 params=params,
             )
-            log.info(f"{Fore.GREEN}Position close order placed successfully! ID: {order.get('id')}{Style.RESET_ALL}")
+            log.info(
+                f"{Fore.GREEN}Position close order placed successfully! ID: {order.get('id')}{Style.RESET_ALL}"
+            )
             log.debug(f"Close Order details: {json.dumps(order, indent=2)}")
 
             # Force position check soon after closing attempt to confirm flat state
@@ -1527,11 +1823,16 @@ async def close_position(symbol: str, position_data: Dict[str, Any]) -> Optional
                 last_position_check_time = 0
             return None
         except (ccxt.NetworkError, ccxt.ExchangeError) as e:
-            log.error(f"{Fore.RED}Close order failed: {type(e).__name__} - {e}{Style.RESET_ALL}")
+            log.error(
+                f"{Fore.RED}Close order failed: {type(e).__name__} - {e}{Style.RESET_ALL}"
+            )
             # Consider retry logic for network errors
             return None
         except Exception as e:
-            log.error(f"{Fore.RED}Unexpected error closing position: {e}{Style.RESET_ALL}", exc_info=True)
+            log.error(
+                f"{Fore.RED}Unexpected error closing position: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             return None
 
 
@@ -1551,13 +1852,19 @@ async def set_leverage(symbol: str, leverage: Union[int, float, str]):
         # Allow float leverage for some exchanges, but usually int is expected
         leverage_val = float(leverage)  # Convert string/int to float first
         if leverage_val < 1:
-            log.error(f"Invalid leverage value {leverage}. Must be 1 or greater. Leverage not set.")
+            log.error(
+                f"Invalid leverage value {leverage}. Must be 1 or greater. Leverage not set."
+            )
             return
         # Some exchanges require integer leverage
         # leverage_val_final = int(leverage_val) if leverage_val.is_integer() else leverage_val
-        leverage_val_final = leverage_val  # Use float for flexibility, CCXT might handle conversion
+        leverage_val_final = (
+            leverage_val  # Use float for flexibility, CCXT might handle conversion
+        )
     except (ValueError, TypeError):
-        log.error(f"Invalid leverage value type: {leverage}. Must be numeric. Leverage not set.")
+        log.error(
+            f"Invalid leverage value type: {leverage}. Must be numeric. Leverage not set."
+        )
         return
 
     # Validate leverage against market limits if available
@@ -1565,7 +1872,11 @@ async def set_leverage(symbol: str, leverage: Union[int, float, str]):
     try:
         # Limits structure can vary
         leverage_limits = market.get("limits", {}).get("leverage", {})
-        if leverage_limits and "max" in leverage_limits and leverage_limits["max"] is not None:
+        if (
+            leverage_limits
+            and "max" in leverage_limits
+            and leverage_limits["max"] is not None
+        ):
             max_leverage = float(leverage_limits["max"])
     except (ValueError, TypeError):
         log.warning("Could not parse maximum leverage limit from market data.")
@@ -1588,7 +1899,9 @@ async def set_leverage(symbol: str, leverage: Union[int, float, str]):
         # if config.get('order', {}).get('set_separate_leverage', False):
         #     params = {'buyLeverage': leverage_val_final, 'sellLeverage': leverage_val_final}
 
-        response = await exchange.set_leverage(leverage_val_final, symbol, params=params)
+        response = await exchange.set_leverage(
+            leverage_val_final, symbol, params=params
+        )
         log.info(
             f"{Fore.GREEN}Leverage for {symbol} set to {leverage_val_final}x request sent.{Style.RESET_ALL} (Confirmation may depend on exchange response)"
         )
@@ -1666,20 +1979,29 @@ async def watch_kline_loop(symbol: str, timeframe: str):
             for candle_data in candles:
                 try:
                     # Ensure candle_data is a list/tuple of expected length
-                    if not isinstance(candle_data, (list, tuple)) or len(candle_data) != 6:
-                        log.warning(f"Received malformed candle data via WS: {candle_data}. Skipping.")
+                    if (
+                        not isinstance(candle_data, (list, tuple))
+                        or len(candle_data) != 6
+                    ):
+                        log.warning(
+                            f"Received malformed candle data via WS: {candle_data}. Skipping."
+                        )
                         continue
 
                     ts_ms, o, h, l, c, v = candle_data
                     # Validate data types before processing
-                    if not all(isinstance(x, (int, float)) for x in [ts_ms, o, h, l, c, v]):
+                    if not all(
+                        isinstance(x, (int, float)) for x in [ts_ms, o, h, l, c, v]
+                    ):
                         log.warning(
                             f"Received invalid data types in WS candle: {[type(x) for x in candle_data]}. Skipping."
                         )
                         continue
                     # Check for NaN/inf which shouldn't happen in valid candles
                     if not all(np.isfinite(x) for x in [o, h, l, c, v]):
-                        log.warning(f"Received non-finite values in WS candle: {[o, h, l, c, v]}. Skipping.")
+                        log.warning(
+                            f"Received non-finite values in WS candle: {[o, h, l, c, v]}. Skipping."
+                        )
                         continue
 
                     # Convert timestamp to UTC datetime
@@ -1694,22 +2016,34 @@ async def watch_kline_loop(symbol: str, timeframe: str):
                             "volume": float(v),
                         }
                     except (ValueError, TypeError) as e:
-                        log.error(f"Error converting WS candle values to float: {e}. Candle: {candle_data}. Skipping.")
+                        log.error(
+                            f"Error converting WS candle values to float: {e}. Candle: {candle_data}. Skipping."
+                        )
                         continue
 
-                    log.debug(f"WS Kline Processed: T={ts}, O={o}, H={h}, L={l}, C={c}, V={v}")
+                    log.debug(
+                        f"WS Kline Processed: T={ts}, O={o}, H={h}, L={l}, C={c}, V={v}"
+                    )
 
                     # Process the confirmed candle data asynchronously
                     # Use create_task to avoid blocking WS loop if processing takes time
-                    proc_task = asyncio.create_task(process_candle(ts, new_data), name=f"CandleProcessor_{ts_ms}")
+                    proc_task = asyncio.create_task(
+                        process_candle(ts, new_data), name=f"CandleProcessor_{ts_ms}"
+                    )
                     running_tasks.add(proc_task)
                     proc_task.add_done_callback(running_tasks.discard)
 
                 except (ValueError, TypeError) as e:
-                    log.error(f"Error processing individual WS candle data {candle_data}: {e}", exc_info=True)
+                    log.error(
+                        f"Error processing individual WS candle data {candle_data}: {e}",
+                        exc_info=True,
+                    )
                     continue  # Skip this candle and process the next
                 except Exception as e:
-                    log.error(f"Unexpected error processing WS candle {candle_data}: {e}", exc_info=True)
+                    log.error(
+                        f"Unexpected error processing WS candle {candle_data}: {e}",
+                        exc_info=True,
+                    )
                     continue
 
         except ccxt.NetworkError as e:
@@ -1759,10 +2093,18 @@ async def process_candle(timestamp: pd.Timestamp, data: Dict[str, float]):
             # Append new candle data
             log.debug(f"Adding new candle {timestamp} to DataFrame.")
             # Create a new DataFrame row with the correct index type and timezone
-            new_row = pd.DataFrame([data], index=pd.DatetimeIndex([timestamp], tz="UTC"))
+            new_row = pd.DataFrame(
+                [data], index=pd.DatetimeIndex([timestamp], tz="UTC")
+            )
             # Ensure columns match before concatenating
-            if not all(col in new_row.columns for col in latest_dataframe.columns if col in data):
-                log.warning("Column mismatch between DataFrame and new row. Realigning.")
+            if not all(
+                col in new_row.columns
+                for col in latest_dataframe.columns
+                if col in data
+            ):
+                log.warning(
+                    "Column mismatch between DataFrame and new row. Realigning."
+                )
                 # Potentially reindex or handle differently based on needs
 
             try:
@@ -1794,23 +2136,32 @@ async def process_candle(timestamp: pd.Timestamp, data: Dict[str, float]):
         # Run the strategy's update method
         # It's crucial that strategy.update() does NOT modify the df it receives
         # or works on its own internal copy if modifications are needed.
-        analysis_results: Optional[AnalysisResults] = strategy_instance.update(df_copy_for_analysis)
+        analysis_results: Optional[AnalysisResults] = strategy_instance.update(
+            df_copy_for_analysis
+        )
 
         # Check if results are valid before processing
-        if analysis_results is None or not isinstance(analysis_results, dict) or "last_signal" not in analysis_results:
+        if (
+            analysis_results is None
+            or not isinstance(analysis_results, dict)
+            or "last_signal" not in analysis_results
+        ):
             # This log message suggests the error might be happening inside strategy.update()
             # when calculating indicators and trying to fill NaNs, or returning unexpected type.
             log.error(
                 "Strategy update returned invalid results (None, not dict, or missing 'last_signal'). Check strategy.py for errors (e.g., NaN handling, indicator calculations, return value)."
             )
             # Log the state of df_copy's tail for debugging
-            log.debug(f"DataFrame tail sent to strategy:\n{df_copy_for_analysis.tail()}")
+            log.debug(
+                f"DataFrame tail sent to strategy:\n{df_copy_for_analysis.tail()}"
+            )
             return
 
         # Process the generated signals asynchronously
         # Create a new task to handle signal processing without blocking candle updates
         signal_task = asyncio.create_task(
-            process_signals(analysis_results), name=f"SignalProcessor_{timestamp.value // 10**6}"
+            process_signals(analysis_results),
+            name=f"SignalProcessor_{timestamp.value // 10**6}",
         )  # Use ms timestamp in name
         running_tasks.add(signal_task)
         # Remove task from set when done to prevent memory leak
@@ -1830,10 +2181,14 @@ async def process_candle(timestamp: pd.Timestamp, data: Dict[str, float]):
                 "Please check lines in strategy.py mentioned in the traceback and ensure results are Pandas Series/DataFrame before using .fillna()."
             )
             # Consider stopping the bot here if strategy analysis is critically broken
-            asyncio.create_task(shutdown(signal_type=None), name="StrategyErrorShutdown")
+            asyncio.create_task(
+                shutdown(signal_type=None), name="StrategyErrorShutdown"
+            )
         else:
             # Log other AttributeErrors or unexpected errors
-            log.error(f"AttributeError during strategy analysis update: {e}", exc_info=True)
+            log.error(
+                f"AttributeError during strategy analysis update: {e}", exc_info=True
+            )
     except Exception as e:
         log.error(f"Unexpected error during strategy analysis: {e}", exc_info=True)
         log.debug(f"DataFrame tail sent to strategy:\n{df_copy_for_analysis.tail()}")
@@ -1852,13 +2207,17 @@ async def watch_positions_loop(symbol: str):
     while not stop_event.is_set():
         try:
             # watch_positions usually returns a list of all positions for the account type
-            positions_updates = await exchange.watch_positions([symbol])  # Watch specific symbol if supported
+            positions_updates = await exchange.watch_positions(
+                [symbol]
+            )  # Watch specific symbol if supported
 
             if stop_event.is_set():
                 break
 
             now_mono = time.monotonic()
-            log.debug(f"Position WS received data (Last update: {now_mono - last_ws_update_time:.1f}s ago)")
+            log.debug(
+                f"Position WS received data (Last update: {now_mono - last_ws_update_time:.1f}s ago)"
+            )
             last_ws_update_time = now_mono  # Update health check timestamp
 
             if not positions_updates:
@@ -1876,14 +2235,26 @@ async def watch_positions_loop(symbol: str):
                 # Parse the update carefully using Decimal
                 try:
                     size_str = str(pos_update_for_symbol.get("contracts", "0") or "0")
-                    side = str(pos_update_for_symbol.get("side", "none") or "none").lower()
-                    entry_price_str = str(pos_update_for_symbol.get("entryPrice", "0") or "0")
+                    side = str(
+                        pos_update_for_symbol.get("side", "none") or "none"
+                    ).lower()
+                    entry_price_str = str(
+                        pos_update_for_symbol.get("entryPrice", "0") or "0"
+                    )
 
                     # Use string conversion for robustness
                     ws_size = Decimal(size_str)
                     ws_entry_price = Decimal(entry_price_str)
-                    ws_side = SIDE_BUY if side == "long" else SIDE_SELL if side == "short" else SIDE_NONE
-                    is_flat = ws_size.is_zero() or ws_size < Decimal(0)  # Treat negative size as flat/error
+                    ws_side = (
+                        SIDE_BUY
+                        if side == "long"
+                        else SIDE_SELL
+                        if side == "short"
+                        else SIDE_NONE
+                    )
+                    is_flat = ws_size.is_zero() or ws_size < Decimal(
+                        0
+                    )  # Treat negative size as flat/error
 
                     if is_flat:
                         ws_side = SIDE_NONE
@@ -1897,22 +2268,34 @@ async def watch_positions_loop(symbol: str):
                     async with position_lock:
                         # Log if WS state differs significantly from last known REST state
                         # Compare size and side
-                        if ws_size != current_position["size"] or ws_side != current_position["side"]:
+                        if (
+                            ws_size != current_position["size"]
+                            or ws_side != current_position["side"]
+                        ):
                             log.warning(
                                 f"{Fore.MAGENTA}{log_msg} - Differs from cache ({current_position['side']} {current_position['size']}). Forcing REST check.{Style.RESET_ALL}"
                             )
                             # Force a REST check soon to confirm the change
-                            last_position_check_time = 0  # Reset timer to trigger REST check soon
+                            last_position_check_time = (
+                                0  # Reset timer to trigger REST check soon
+                            )
                         else:
                             log.debug(log_msg + " - Matches cache.")
 
                 except (InvalidOperation, TypeError) as e:
-                    log.error(f"Error parsing WS position update data {pos_update_for_symbol}: {e}")
+                    log.error(
+                        f"Error parsing WS position update data {pos_update_for_symbol}: {e}"
+                    )
                 except Exception as e:
-                    log.error(f"Unexpected error processing WS position update: {e}", exc_info=True)
+                    log.error(
+                        f"Unexpected error processing WS position update: {e}",
+                        exc_info=True,
+                    )
             else:
                 # This might happen if the position for the symbol closes, or initial fetch shows no position
-                log.debug(f"Received position update via WS, but not for {symbol} (or position is flat).")
+                log.debug(
+                    f"Received position update via WS, but not for {symbol} (or position is flat)."
+                )
                 # If we previously had a position according to cache, force a REST check
                 async with position_lock:
                     if current_position["size"] != Decimal(0):
@@ -1954,7 +2337,9 @@ async def watch_orders_loop(symbol: str):
                 break
 
             now_mono = time.monotonic()
-            log.debug(f"Order WS received data (Last update: {now_mono - last_ws_update_time:.1f}s ago)")
+            log.debug(
+                f"Order WS received data (Last update: {now_mono - last_ws_update_time:.1f}s ago)"
+            )
             last_ws_update_time = now_mono  # Update health check timestamp
 
             if not orders:
@@ -1962,12 +2347,16 @@ async def watch_orders_loop(symbol: str):
 
             for order_update in orders:
                 # Process order updates - log fills, SL/TP triggers, cancellations
-                status = order_update.get("status")  # 'open', 'closed', 'canceled', 'expired', 'rejected'
+                status = order_update.get(
+                    "status"
+                )  # 'open', 'closed', 'canceled', 'expired', 'rejected'
                 order_id = order_update.get("id")
                 client_order_id = order_update.get("clientOrderId")
                 filled_val = order_update.get("filled")
                 filled_str = (
-                    safe_format("format_amount", filled_val, str(filled_val)) if filled_val is not None else "N/A"
+                    safe_format("format_amount", filled_val, str(filled_val))
+                    if filled_val is not None
+                    else "N/A"
                 )
                 avg_price_val = order_update.get("average")
                 avg_price_str = (
@@ -1977,7 +2366,9 @@ async def watch_orders_loop(symbol: str):
                 )
                 order_type = order_update.get("type")
                 order_side = order_update.get("side")
-                reduce_only = order_update.get("reduceOnly", False)  # Default to False if missing
+                reduce_only = order_update.get(
+                    "reduceOnly", False
+                )  # Default to False if missing
                 order_update.get("postOnly", False)  # Default to False if missing
 
                 log.info(
@@ -2020,16 +2411,24 @@ async def process_signals(results: AnalysisResults):
         log.warning("Signal processing skipped: Stop event is set.")
         return
     if not results or not strategy_instance or not market:
-        log.warning("Signal processing skipped: Missing analysis results, strategy, or market data.")
+        log.warning(
+            "Signal processing skipped: Missing analysis results, strategy, or market data."
+        )
         return
     # Check for essential strategy attributes needed for SL/TP calculation
-    if not all(hasattr(strategy_instance, attr) for attr in ["price_tick", "round_price"]):
+    if not all(
+        hasattr(strategy_instance, attr) for attr in ["price_tick", "round_price"]
+    ):
         log.error(
             "Signal processing skipped: Strategy instance missing required attributes/methods (price_tick, round_price)."
         )
         return
-    if not isinstance(strategy_instance.price_tick, Decimal) or strategy_instance.price_tick <= Decimal(0):
-        log.error("Signal processing skipped: Strategy instance 'price_tick' must be a positive Decimal.")
+    if not isinstance(
+        strategy_instance.price_tick, Decimal
+    ) or strategy_instance.price_tick <= Decimal(0):
+        log.error(
+            "Signal processing skipped: Strategy instance 'price_tick' must be a positive Decimal."
+        )
         return
 
     # Extract data from results (handle potential missing keys gracefully)
@@ -2041,8 +2440,15 @@ async def process_signals(results: AnalysisResults):
     symbol = config["symbol"]
 
     # Validate essential data
-    if last_close is None or pd.isna(last_close) or not np.isfinite(last_close) or last_close <= 0:
-        log.warning(f"Cannot process signal '{signal}': Invalid or non-positive last close price ({last_close}).")
+    if (
+        last_close is None
+        or pd.isna(last_close)
+        or not np.isfinite(last_close)
+        or last_close <= 0
+    ):
+        log.warning(
+            f"Cannot process signal '{signal}': Invalid or non-positive last close price ({last_close})."
+        )
         return
     # ATR might be NaN initially, handle that in SL calculation
     if last_atr is not None and (pd.isna(last_atr) or not np.isfinite(last_atr)):
@@ -2051,7 +2457,9 @@ async def process_signals(results: AnalysisResults):
 
     # Format price for logging using strategy method if available
     formatted_close = safe_format("format_price", last_close, str(last_close))
-    log.debug(f"Processing Signal: {signal}, Last Close: {formatted_close}, Last ATR: {last_atr}")
+    log.debug(
+        f"Processing Signal: {signal}, Last Close: {formatted_close}, Last ATR: {last_atr}"
+    )
 
     # --- Get Current Position State (Crucial Step - Use REST API Fetch) ---
     # Lock is acquired within get_current_position if needed
@@ -2064,7 +2472,9 @@ async def process_signals(results: AnalysisResults):
     # If get_current_position returned None, it means a critical error occurred fetching state.
     # Do not proceed with actions based on potentially stale cached data.
     if pos_data is None:
-        log.error("Could not get reliable position data due to API error. Skipping signal action to avoid errors.")
+        log.error(
+            "Could not get reliable position data due to API error. Skipping signal action to avoid errors."
+        )
         return
 
     # Use Decimal for position size comparison
@@ -2085,12 +2495,24 @@ async def process_signals(results: AnalysisResults):
         risk_percent = float(
             config["order"].get("risk_per_trade_percent", 1.0)
         )  # Keep as float for calculate_order_qty
-        sl_method = config.get("strategy", {}).get("stop_loss", {}).get("method", "ATR").upper()
-        sl_atr_multiplier = float(config.get("strategy", {}).get("stop_loss", {}).get("atr_multiplier", 1.5))
-        sl_ob_buffer_atr_mult = float(config.get("strategy", {}).get("stop_loss", {}).get("ob_buffer_atr_mult", 0.1))
-        sl_ob_buffer_ticks = int(config.get("strategy", {}).get("stop_loss", {}).get("ob_buffer_ticks", 5))
+        sl_method = (
+            config.get("strategy", {}).get("stop_loss", {}).get("method", "ATR").upper()
+        )
+        sl_atr_multiplier = float(
+            config.get("strategy", {}).get("stop_loss", {}).get("atr_multiplier", 1.5)
+        )
+        sl_ob_buffer_atr_mult = float(
+            config.get("strategy", {})
+            .get("stop_loss", {})
+            .get("ob_buffer_atr_mult", 0.1)
+        )
+        sl_ob_buffer_ticks = int(
+            config.get("strategy", {}).get("stop_loss", {}).get("ob_buffer_ticks", 5)
+        )
     except (ValueError, TypeError, KeyError) as e:
-        log.error(f"Error parsing configuration values for signal processing: {e}. Using defaults.")
+        log.error(
+            f"Error parsing configuration values for signal processing: {e}. Using defaults."
+        )
         tp_ratio = Decimal("2.0")
         risk_percent = 1.0
         sl_method = "ATR"
@@ -2114,7 +2536,9 @@ async def process_signals(results: AnalysisResults):
 
         # Validate entry price
         if entry_price is None or not np.isfinite(entry_price) or entry_price <= 0:
-            log.error(f"Cannot calculate SL/TP: Invalid entry price provided ({entry_price}).")
+            log.error(
+                f"Cannot calculate SL/TP: Invalid entry price provided ({entry_price})."
+            )
             return None, None
 
         # Calculate SL
@@ -2122,7 +2546,11 @@ async def process_signals(results: AnalysisResults):
             if atr and atr > 0 and np.isfinite(atr):
                 try:
                     sl_delta = atr * sl_atr_multiplier
-                    sl_price_raw = entry_price - sl_delta if is_buy_signal else entry_price + sl_delta
+                    sl_price_raw = (
+                        entry_price - sl_delta
+                        if is_buy_signal
+                        else entry_price + sl_delta
+                    )
                     log.debug(
                         f"Calculated ATR SL: {entry_price} {'-' if is_buy_signal else '+'} ({atr} * {sl_atr_multiplier}) = {sl_price_raw}"
                     )
@@ -2132,7 +2560,9 @@ async def process_signals(results: AnalysisResults):
                     )
                     return None, None
             else:
-                log.warning(f"ATR SL method selected, but ATR ({atr}) is invalid or zero. Cannot calculate SL.")
+                log.warning(
+                    f"ATR SL method selected, but ATR ({atr}) is invalid or zero. Cannot calculate SL."
+                )
                 return None, None
         elif sl_method == "OB":
             try:
@@ -2145,7 +2575,9 @@ async def process_signals(results: AnalysisResults):
                 # Ensure buffer is positive and non-zero
                 sl_buffer = abs(sl_buffer)
                 if sl_buffer.is_zero():
-                    log.warning("OB SL buffer calculated to zero. Using one price tick instead.")
+                    log.warning(
+                        "OB SL buffer calculated to zero. Using one price tick instead."
+                    )
                     sl_buffer = price_tick_decimal
 
                 entry_price_dec = Decimal(str(entry_price))
@@ -2196,7 +2628,9 @@ async def process_signals(results: AnalysisResults):
                         )
                         return None, None
             except (ValueError, TypeError, KeyError, InvalidOperation) as e:
-                log.error(f"Error calculating OB SL: {e}. OB Data: Bull={active_bull_boxes}, Bear={active_bear_boxes}")
+                log.error(
+                    f"Error calculating OB SL: {e}. OB Data: Bull={active_bull_boxes}, Bear={active_bear_boxes}"
+                )
                 return None, None
         else:
             log.error(f"Unknown SL method '{sl_method}'. Cannot calculate SL.")
@@ -2204,32 +2638,48 @@ async def process_signals(results: AnalysisResults):
 
         # Validate and Round SL Price
         if sl_price_raw is None or not np.isfinite(sl_price_raw) or sl_price_raw <= 0:
-            log.error(f"Invalid or non-positive raw SL price calculated: {sl_price_raw}. Aborting entry.")
+            log.error(
+                f"Invalid or non-positive raw SL price calculated: {sl_price_raw}. Aborting entry."
+            )
             return None, None
         # Check SL validity relative to entry price (SL must be worse than entry)
-        if (is_buy_signal and sl_price_raw >= entry_price) or (not is_buy_signal and sl_price_raw <= entry_price):
+        if (is_buy_signal and sl_price_raw >= entry_price) or (
+            not is_buy_signal and sl_price_raw <= entry_price
+        ):
             log.error(
                 f"Invalid SL price calculated for {'BUY' if is_buy_signal else 'SELL'} signal (SL={sl_price_raw}, Entry={entry_price}). SL must be below entry for BUY, above for SELL. Aborting entry."
             )
             return None, None
 
         try:
-            sl_price_final = strategy_instance.round_price(sl_price_raw)  # Expects float return
+            sl_price_final = strategy_instance.round_price(
+                sl_price_raw
+            )  # Expects float return
         except Exception as e:
             log.error(f"Error rounding SL price {sl_price_raw}: {e}. Using raw value.")
             sl_price_final = sl_price_raw
 
-        if sl_price_final is None or not np.isfinite(sl_price_final) or sl_price_final <= 0:
-            log.error(f"Invalid or non-positive final SL price after rounding: {sl_price_final}. Aborting entry.")
+        if (
+            sl_price_final is None
+            or not np.isfinite(sl_price_final)
+            or sl_price_final <= 0
+        ):
+            log.error(
+                f"Invalid or non-positive final SL price after rounding: {sl_price_final}. Aborting entry."
+            )
             return None, None
         # Re-validate after rounding
-        if (is_buy_signal and sl_price_final >= entry_price) or (not is_buy_signal and sl_price_final <= entry_price):
+        if (is_buy_signal and sl_price_final >= entry_price) or (
+            not is_buy_signal and sl_price_final <= entry_price
+        ):
             log.error(
                 f"Invalid SL price after rounding for {'BUY' if is_buy_signal else 'SELL'} signal (SL={sl_price_final}, Entry={entry_price}). Aborting entry."
             )
             return None, None
 
-        log.info(f"Calculated Entry SL: {safe_format('format_price', sl_price_final)} (Raw: {sl_price_raw})")
+        log.info(
+            f"Calculated Entry SL: {safe_format('format_price', sl_price_final)} (Raw: {sl_price_raw})"
+        )
 
         # Calculate TP Price based on final SL
         try:
@@ -2241,17 +2691,29 @@ async def process_signals(results: AnalysisResults):
             # Check if distance is meaningful (greater than half a price tick)
             if sl_distance > price_tick_decimal / Decimal(2):
                 tp_delta = sl_distance * tp_ratio
-                tp_price_raw_dec = entry_price_dec + tp_delta if is_buy_signal else entry_price_dec - tp_delta
+                tp_price_raw_dec = (
+                    entry_price_dec + tp_delta
+                    if is_buy_signal
+                    else entry_price_dec - tp_delta
+                )
                 tp_price_raw = float(tp_price_raw_dec)
 
                 try:
-                    tp_price_final = strategy_instance.round_price(tp_price_raw)  # Expects float return
+                    tp_price_final = strategy_instance.round_price(
+                        tp_price_raw
+                    )  # Expects float return
                 except Exception as e:
-                    log.error(f"Error rounding TP price {tp_price_raw}: {e}. Using raw value.")
+                    log.error(
+                        f"Error rounding TP price {tp_price_raw}: {e}. Using raw value."
+                    )
                     tp_price_final = tp_price_raw
 
                 # Basic TP validation
-                if tp_price_final is None or not np.isfinite(tp_price_final) or tp_price_final <= 0:
+                if (
+                    tp_price_final is None
+                    or not np.isfinite(tp_price_final)
+                    or tp_price_final <= 0
+                ):
                     log.warning(
                         f"Invalid or non-positive final TP price after rounding: {tp_price_final}. Setting TP to None."
                     )
@@ -2268,7 +2730,9 @@ async def process_signals(results: AnalysisResults):
                         f"Calculated Entry TP: {safe_format('format_price', tp_price_final)} (Raw: {tp_price_raw}, Ratio: {tp_ratio})"
                     )
             else:
-                log.warning("SL distance is zero or negative after rounding. Cannot calculate TP.")
+                log.warning(
+                    "SL distance is zero or negative after rounding. Cannot calculate TP."
+                )
                 tp_price_final = None
         except (InvalidOperation, TypeError, AttributeError) as e:
             log.error(f"Error calculating TP distance: {e}. Setting TP to None.")
@@ -2280,17 +2744,25 @@ async def process_signals(results: AnalysisResults):
 
     # --- BUY Signal ---
     if signal == SIGNAL_BUY and is_flat:
-        log.warning(f"{Fore.GREEN}{Style.BRIGHT}BUY Signal received - Attempting to Enter Long.{Style.RESET_ALL}")
+        log.warning(
+            f"{Fore.GREEN}{Style.BRIGHT}BUY Signal received - Attempting to Enter Long.{Style.RESET_ALL}"
+        )
         entry_price_for_calc = last_close  # Use last close as entry estimate for calcs
-        sl_price, tp_price = calculate_sl_tp(is_buy_signal=True, entry_price=entry_price_for_calc, atr=last_atr)
+        sl_price, tp_price = calculate_sl_tp(
+            is_buy_signal=True, entry_price=entry_price_for_calc, atr=last_atr
+        )
 
         if sl_price is not None:
             # Calculate Quantity (Pass entry and final rounded SL)
-            qty = await calculate_order_qty(entry_price_for_calc, sl_price, risk_percent)
+            qty = await calculate_order_qty(
+                entry_price_for_calc, sl_price, risk_percent
+            )
             if qty and qty > 0:
                 # Determine entry price for order placement (limit or market)
                 order_entry_price = (
-                    entry_price_for_calc if config["order"]["type"].lower() == ORDER_TYPE_LIMIT else None
+                    entry_price_for_calc
+                    if config["order"]["type"].lower() == ORDER_TYPE_LIMIT
+                    else None
                 )
                 # Place the order (lock acquired within place_order)
                 await place_order(
@@ -2302,23 +2774,33 @@ async def process_signals(results: AnalysisResults):
                     tp_price=tp_price,
                 )
             else:
-                log.error("BUY order cancelled: Quantity calculation failed or resulted in zero/None.")
+                log.error(
+                    "BUY order cancelled: Quantity calculation failed or resulted in zero/None."
+                )
         else:
             log.error("BUY order cancelled: Failed to calculate valid Stop Loss.")
 
     # --- SELL Signal ---
     elif signal == SIGNAL_SELL and is_flat:
-        log.warning(f"{Fore.RED}{Style.BRIGHT}SELL Signal received - Attempting to Enter Short.{Style.RESET_ALL}")
+        log.warning(
+            f"{Fore.RED}{Style.BRIGHT}SELL Signal received - Attempting to Enter Short.{Style.RESET_ALL}"
+        )
         entry_price_for_calc = last_close
-        sl_price, tp_price = calculate_sl_tp(is_buy_signal=False, entry_price=entry_price_for_calc, atr=last_atr)
+        sl_price, tp_price = calculate_sl_tp(
+            is_buy_signal=False, entry_price=entry_price_for_calc, atr=last_atr
+        )
 
         if sl_price is not None:
             # Calculate Quantity
-            qty = await calculate_order_qty(entry_price_for_calc, sl_price, risk_percent)
+            qty = await calculate_order_qty(
+                entry_price_for_calc, sl_price, risk_percent
+            )
             if qty and qty > 0:
                 # Determine entry price for order placement (limit or market)
                 order_entry_price = (
-                    entry_price_for_calc if config["order"]["type"].lower() == ORDER_TYPE_LIMIT else None
+                    entry_price_for_calc
+                    if config["order"]["type"].lower() == ORDER_TYPE_LIMIT
+                    else None
                 )
                 # Place the order (lock acquired within place_order)
                 await place_order(
@@ -2330,7 +2812,9 @@ async def process_signals(results: AnalysisResults):
                     tp_price=tp_price,
                 )
             else:
-                log.error("SELL order cancelled: Quantity calculation failed or resulted in zero/None.")
+                log.error(
+                    "SELL order cancelled: Quantity calculation failed or resulted in zero/None."
+                )
         else:
             log.error("SELL order cancelled: Failed to calculate valid Stop Loss.")
 
@@ -2376,9 +2860,14 @@ async def periodic_check_loop():
     global last_health_check_time, last_position_check_time, last_ws_update_time
     try:
         check_interval = int(config.get("checks", {}).get("health_check_interval", 60))
-        pos_check_interval = int(config.get("checks", {}).get("position_check_interval", 30))
+        pos_check_interval = int(
+            config.get("checks", {}).get("position_check_interval", 30)
+        )
         # Consider WS dead if no message received for longer than health check interval + buffer
-        ws_timeout = float(config.get("checks", {}).get("ws_timeout_factor", 1.5)) * check_interval
+        ws_timeout = (
+            float(config.get("checks", {}).get("ws_timeout_factor", 1.5))
+            * check_interval
+        )
         if check_interval <= 0 or pos_check_interval <= 0 or ws_timeout <= 0:
             raise ValueError("Check intervals and timeout factor must be positive.")
     except (ValueError, TypeError, KeyError) as e:
@@ -2409,7 +2898,9 @@ async def periodic_check_loop():
                 break  # Exit if stop signal received during sleep
 
             now_mono = time.monotonic()
-            log.debug(f"Running periodic checks (Time since last: {now_mono - last_health_check_time:.1f}s)...")
+            log.debug(
+                f"Running periodic checks (Time since last: {now_mono - last_health_check_time:.1f}s)..."
+            )
             last_health_check_time = now_mono
 
             force_pos_check = False
@@ -2425,32 +2916,50 @@ async def periodic_check_loop():
                     # Forcing a REST position check is prudent here.
                     force_pos_check = True
                 else:
-                    log.debug(f"WebSocket health check OK (last update {time_since_last_ws:.1f}s ago).")
+                    log.debug(
+                        f"WebSocket health check OK (last update {time_since_last_ws:.1f}s ago)."
+                    )
             else:
                 # If WS hasn't sent anything after a reasonable startup period (e.g., > ws_timeout), force check.
-                if startup_time > 0 and now_mono - startup_time > ws_timeout:  # Check startup_time is set
+                if (
+                    startup_time > 0 and now_mono - startup_time > ws_timeout
+                ):  # Check startup_time is set
                     log.warning(
                         f"WebSocket health check: No WS messages received after {now_mono - startup_time:.1f}s. Forcing position check."
                     )
                     force_pos_check = True
                 else:
-                    log.debug("WebSocket health check: No WS messages received yet (within startup grace period).")
+                    log.debug(
+                        "WebSocket health check: No WS messages received yet (within startup grace period)."
+                    )
 
             # 2. Force Position Check if REST data is stale OR if WS seems stale
             time_since_last_pos_check = (
-                now_mono - last_position_check_time if last_position_check_time > 0 else float("inf")
+                now_mono - last_position_check_time
+                if last_position_check_time > 0
+                else float("inf")
             )  # Treat 0 as infinitely long ago
             if force_pos_check or time_since_last_pos_check >= pos_check_interval:
-                if force_pos_check and not (time_since_last_pos_check >= pos_check_interval):
-                    log.warning("Periodic check forcing REST position update due to potential WS timeout...")
+                if force_pos_check and not (
+                    time_since_last_pos_check >= pos_check_interval
+                ):
+                    log.warning(
+                        "Periodic check forcing REST position update due to potential WS timeout..."
+                    )
                 else:
-                    log.info("Periodic check forcing REST position update (interval or WS timeout)...")
+                    log.info(
+                        "Periodic check forcing REST position update (interval or WS timeout)..."
+                    )
                 # Run the check non-blockingly
-                pos_check_task = asyncio.create_task(get_current_position(config["symbol"]), name="PeriodicPosCheck")
+                pos_check_task = asyncio.create_task(
+                    get_current_position(config["symbol"]), name="PeriodicPosCheck"
+                )
                 running_tasks.add(pos_check_task)
                 pos_check_task.add_done_callback(running_tasks.discard)
             else:
-                log.debug(f"Periodic position check skipped (last check {time_since_last_pos_check:.1f}s ago).")
+                log.debug(
+                    f"Periodic position check skipped (last check {time_since_last_pos_check:.1f}s ago)."
+                )
 
             # 3. Add other checks as needed:
             #    - Check available balance periodically? (Could be added to get_current_position or here)
@@ -2465,7 +2974,9 @@ async def periodic_check_loop():
         except Exception as e:
             log.error(f"Unexpected error in periodic check loop: {e}", exc_info=True)
             # Avoid tight loop on persistent error - sleep until next planned check time
-            wait_time = max(1.0, next_check_time - time.monotonic())  # Ensure at least 1s sleep
+            wait_time = max(
+                1.0, next_check_time - time.monotonic()
+            )  # Ensure at least 1s sleep
             log.info(f"Sleeping for {wait_time:.1f}s after error in periodic check.")
             await asyncio.sleep(wait_time)
 
@@ -2507,11 +3018,15 @@ async def shutdown(signal_type: Optional[signal.Signals] = None):
                 task.cancel()
                 cancelled_task_count += 1
         # Wait for tasks to finish cancelling with a timeout
-        log.info(f"Waiting up to 10 seconds for {cancelled_task_count} tasks to cancel...")
+        log.info(
+            f"Waiting up to 10 seconds for {cancelled_task_count} tasks to cancel..."
+        )
         # Use return_exceptions=True to prevent gather from stopping if one task raises non-CancelledError
         # gather itself doesn't have a timeout, so wrap it
         try:
-            results = await asyncio.wait_for(asyncio.gather(*tasks_to_cancel, return_exceptions=True), timeout=10.0)
+            results = await asyncio.wait_for(
+                asyncio.gather(*tasks_to_cancel, return_exceptions=True), timeout=10.0
+            )
             log.info(f"Gather results received for cancelled tasks: {len(results)}")
             # Log any exceptions that occurred during task cancellation/execution
             for i, result in enumerate(results):
@@ -2535,7 +3050,9 @@ async def shutdown(signal_type: Optional[signal.Signals] = None):
                     )
                 # else: log task result if needed
         except asyncio.TimeoutError:
-            log.error("Timeout waiting for background tasks to cancel. Some tasks may not have terminated cleanly.")
+            log.error(
+                "Timeout waiting for background tasks to cancel. Some tasks may not have terminated cleanly."
+            )
         except Exception as e:
             log.error(f"Error gathering cancelled tasks: {e}", exc_info=True)
 
@@ -2552,7 +3069,10 @@ async def shutdown(signal_type: Optional[signal.Signals] = None):
             except asyncio.TimeoutError:
                 log.error("Timeout closing exchange connection during shutdown.")
             except Exception as e:
-                log.error(f"Error closing exchange connection during shutdown: {e}", exc_info=True)
+                log.error(
+                    f"Error closing exchange connection during shutdown: {e}",
+                    exc_info=True,
+                )
         else:
             log.info("Exchange connection already closed.")
 
@@ -2571,11 +3091,15 @@ async def close_open_position_on_exit():
     log.warning("Executing close_open_position_on_exit (Configurable feature)...")
     # Ensure exchange is still usable (might fail if connection closed early)
     if not exchange or not market:
-        log.error("Cannot check/close position on exit: Exchange or market not available.")
+        log.error(
+            "Cannot check/close position on exit: Exchange or market not available."
+        )
         return
     # Check if connection seems closed
     if getattr(exchange, "closed", True):
-        log.error("Cannot check/close position on exit: Exchange connection appears closed.")
+        log.error(
+            "Cannot check/close position on exit: Exchange connection appears closed."
+        )
         return
 
     try:
@@ -2598,7 +3122,9 @@ async def close_open_position_on_exit():
             close_order_info = await close_position(config["symbol"], pos_data)
             if close_order_info and not close_order_info.get("info", {}).get("error"):
                 log.info("Close order placed successfully on exit.")
-                await asyncio.sleep(2.0)  # Give order time to process and potentially fill
+                await asyncio.sleep(
+                    2.0
+                )  # Give order time to process and potentially fill
                 # Final check (best effort)
                 async with position_lock:
                     last_position_check_time = 0
@@ -2606,11 +3132,19 @@ async def close_open_position_on_exit():
                 if final_pos and final_pos.get("size", Decimal(0)).is_zero():
                     log.info("Position confirmed closed on exit.")
                 elif final_pos is None:
-                    log.error("Failed to confirm position closure on exit: Could not fetch final position state.")
+                    log.error(
+                        "Failed to confirm position closure on exit: Could not fetch final position state."
+                    )
                 else:
-                    log.error(f"Failed to confirm position closure on exit. Final state: {final_pos}")
-            elif close_order_info and close_order_info.get("info", {}).get("alreadyFlatOrChanged"):
-                log.warning("Position was already flat or changed when attempting close on exit.")
+                    log.error(
+                        f"Failed to confirm position closure on exit. Final state: {final_pos}"
+                    )
+            elif close_order_info and close_order_info.get("info", {}).get(
+                "alreadyFlatOrChanged"
+            ):
+                log.warning(
+                    "Position was already flat or changed when attempting close on exit."
+                )
             else:
                 log.error("Failed to place close order on exit.")
         elif pos_data is None:
@@ -2635,7 +3169,9 @@ async def main():
         startup_time, \
         current_position
 
-    startup_time = time.monotonic()  # Record startup time for WS health check grace period
+    startup_time = (
+        time.monotonic()
+    )  # Record startup time for WS health check grace period
 
     print(
         Fore.MAGENTA
@@ -2656,7 +3192,9 @@ async def main():
 
     # Validate API Keys early
     if not API_KEY or not API_SECRET:
-        log.critical("CRITICAL: BYBIT_API_KEY or BYBIT_API_SECRET not set in .env file.")
+        log.critical(
+            "CRITICAL: BYBIT_API_KEY or BYBIT_API_SECRET not set in .env file."
+        )
         sys.exit(1)
     log.info(f"API Key found (ending with ...{API_KEY[-4:]})")
 
@@ -2680,22 +3218,30 @@ async def main():
         if leverage_to_set:  # Only set if leverage is specified in config
             await set_leverage(config["symbol"], leverage_to_set)
         else:
-            log.info("Leverage setting skipped: 'leverage' not specified in config['order'].")
+            log.info(
+                "Leverage setting skipped: 'leverage' not specified in config['order']."
+            )
     except (ValueError, TypeError, KeyError) as e:
         log.error(f"Invalid leverage configuration: {e}. Skipping leverage setting.")
     except Exception as e:
-        log.error(f"Unexpected error during initial leverage setting: {e}", exc_info=True)
+        log.error(
+            f"Unexpected error during initial leverage setting: {e}", exc_info=True
+        )
 
     # Initialize Strategy Engine
     try:
         strategy_params = config.get("strategy", {}).get("params", {})
         # Pass market data and potentially config to strategy for precision/limits/settings access
-        strategy_instance = VolumaticOBStrategy(market=market, config=config, **strategy_params)
+        strategy_instance = VolumaticOBStrategy(
+            market=market, config=config, **strategy_params
+        )
         log.info(f"Strategy '{type(strategy_instance).__name__}' initialized.")
         # Log strategy parameters being used
         log.debug(f"Strategy Params: {strategy_params}")
         # Log min data length required by strategy
-        min_data_len_strat = getattr(strategy_instance, "min_data_len", 50)  # Use strategy's min_len or default
+        min_data_len_strat = getattr(
+            strategy_instance, "min_data_len", 50
+        )  # Use strategy's min_len or default
         log.info(f"Strategy requires minimum {min_data_len_strat} data points.")
 
     except Exception as e:
@@ -2711,16 +3257,24 @@ async def main():
     async with data_lock:  # Lock dataframe during initial population
         initial_fetch_limit = config.get("data", {}).get("fetch_limit", 750)
         # Ensure fetch limit is at least what the strategy needs + buffer
-        required_fetch_limit = min_data_len_strat + config.get("data", {}).get("fetch_buffer", 50)
+        required_fetch_limit = min_data_len_strat + config.get("data", {}).get(
+            "fetch_buffer", 50
+        )
         if initial_fetch_limit < required_fetch_limit:
             log.warning(
                 f"Configured fetch_limit ({initial_fetch_limit}) is less than required by strategy + buffer ({required_fetch_limit}). Increasing fetch limit."
             )
             initial_fetch_limit = required_fetch_limit
 
-        latest_dataframe = await fetch_initial_data(config["symbol"], config["timeframe"], initial_fetch_limit)
-        if latest_dataframe is None or latest_dataframe.empty:  # Check for None or empty DF
-            log.critical("Failed to fetch initial market data or data was empty. Exiting.")
+        latest_dataframe = await fetch_initial_data(
+            config["symbol"], config["timeframe"], initial_fetch_limit
+        )
+        if (
+            latest_dataframe is None or latest_dataframe.empty
+        ):  # Check for None or empty DF
+            log.critical(
+                "Failed to fetch initial market data or data was empty. Exiting."
+            )
             if exchange and hasattr(exchange, "close"):
                 await exchange.close()
             sys.exit(1)
@@ -2740,11 +3294,19 @@ async def main():
 
             # --- Check for errors during initial analysis ---
             if initial_results is None or not isinstance(initial_results, dict):
-                log.error("Initial strategy analysis returned None or invalid type. Check strategy logic and data.")
+                log.error(
+                    "Initial strategy analysis returned None or invalid type. Check strategy logic and data."
+                )
                 # Decide whether to proceed or exit - Proceeding for now, strategy might recover
             else:
                 trend_val = initial_results.get("current_trend")
-                trend_str = "UP" if trend_val is True else "DOWN" if trend_val is False else "UNDETERMINED"
+                trend_str = (
+                    "UP"
+                    if trend_val is True
+                    else "DOWN"
+                    if trend_val is False
+                    else "UNDETERMINED"
+                )
                 # Get precision from strategy or default
                 price_prec_attr = getattr(strategy_instance, "price_precision", None)
                 # Fallback to market precision if strategy doesn't provide it
@@ -2778,15 +3340,24 @@ async def main():
                     await exchange.close()
                 sys.exit(1)
             else:
-                log.error(f"AttributeError during initial strategy analysis: {e}", exc_info=True)
+                log.error(
+                    f"AttributeError during initial strategy analysis: {e}",
+                    exc_info=True,
+                )
         except Exception as e:
-            log.error(f"Unexpected error during initial strategy analysis: {e}", exc_info=True)
+            log.error(
+                f"Unexpected error during initial strategy analysis: {e}", exc_info=True
+            )
             # Decide whether to continue or exit based on severity - Proceeding for now
 
     # Fetch initial position state (REST call)
-    initial_pos_data = await get_current_position(config["symbol"])  # Updates global current_position
+    initial_pos_data = await get_current_position(
+        config["symbol"]
+    )  # Updates global current_position
     if initial_pos_data is None:
-        log.critical("Failed to fetch initial position state due to API error. Exiting.")
+        log.critical(
+            "Failed to fetch initial position state due to API error. Exiting."
+        )
         if exchange and hasattr(exchange, "close"):
             await exchange.close()
         sys.exit(1)
@@ -2796,7 +3367,9 @@ async def main():
     )
 
     # --- Start Background Tasks ---
-    log.info(f"{Fore.CYAN}Setup complete. Starting WebSocket watchers and periodic checks...{Style.RESET_ALL}")
+    log.info(
+        f"{Fore.CYAN}Setup complete. Starting WebSocket watchers and periodic checks...{Style.RESET_ALL}"
+    )
     log.info(f"Trading Mode: {config.get('mode', MODE_LIVE)}")
     log.info(f"Symbol: {config['symbol']} | Timeframe: {config['timeframe']}")
 
@@ -2807,23 +3380,43 @@ async def main():
     # Use specific names for easier debugging/monitoring
     tasks_to_start = []
     # Kline watcher is critical
-    kline_task = asyncio.create_task(watch_kline_loop(config["symbol"], config["timeframe"]), name="KlineWatcher")
+    kline_task = asyncio.create_task(
+        watch_kline_loop(config["symbol"], config["timeframe"]), name="KlineWatcher"
+    )
     tasks_to_start.append(kline_task)
 
     # Optional watchers based on config/needs and exchange support
-    if config.get("websockets", {}).get("watch_positions", True):  # Default to true if key missing
+    if config.get("websockets", {}).get(
+        "watch_positions", True
+    ):  # Default to true if key missing
         if exchange.has.get("watchPositions"):
-            tasks_to_start.append(asyncio.create_task(watch_positions_loop(config["symbol"]), name="PositionWatcher"))
+            tasks_to_start.append(
+                asyncio.create_task(
+                    watch_positions_loop(config["symbol"]), name="PositionWatcher"
+                )
+            )
         else:
-            log.warning("Position watching via WebSocket configured but not supported by exchange. Skipping.")
-    if config.get("websockets", {}).get("watch_orders", True):  # Default to true if key missing
+            log.warning(
+                "Position watching via WebSocket configured but not supported by exchange. Skipping."
+            )
+    if config.get("websockets", {}).get(
+        "watch_orders", True
+    ):  # Default to true if key missing
         if exchange.has.get("watchOrders"):
-            tasks_to_start.append(asyncio.create_task(watch_orders_loop(config["symbol"]), name="OrderWatcher"))
+            tasks_to_start.append(
+                asyncio.create_task(
+                    watch_orders_loop(config["symbol"]), name="OrderWatcher"
+                )
+            )
         else:
-            log.warning("Order watching via WebSocket configured but not supported by exchange. Skipping.")
+            log.warning(
+                "Order watching via WebSocket configured but not supported by exchange. Skipping."
+            )
 
     # Periodic health/position check
-    tasks_to_start.append(asyncio.create_task(periodic_check_loop(), name="PeriodicChecker"))
+    tasks_to_start.append(
+        asyncio.create_task(periodic_check_loop(), name="PeriodicChecker")
+    )
 
     # Add tasks to the global set
     running_tasks.update(tasks_to_start)
@@ -2841,19 +3434,27 @@ async def main():
                 # This will raise the exception if the task failed
                 kline_task.result()
             except asyncio.CancelledError:
-                log.warning("Kline watcher was cancelled (likely during shutdown).")  # Expected during shutdown
+                log.warning(
+                    "Kline watcher was cancelled (likely during shutdown)."
+                )  # Expected during shutdown
             except Exception as e:
                 # Log the actual error that caused the task to terminate
-                log.critical(f"Kline watcher failed with error: {e}", exc_info=True)  # Log traceback
+                log.critical(
+                    f"Kline watcher failed with error: {e}", exc_info=True
+                )  # Log traceback
 
-            log.critical("Attempting to stop bot gracefully due to essential task failure...")
+            log.critical(
+                "Attempting to stop bot gracefully due to essential task failure..."
+            )
             # Trigger shutdown without waiting for OS signal
             # Use create_task to avoid blocking main loop if shutdown takes time
             # Ensure shutdown task itself is not added to running_tasks to avoid self-cancellation issues
             # Check if shutdown isn't already running
             if not stop_event.is_set():
                 # Use a local variable to avoid potential race condition with global shutdown_task_ref
-                _shutdown_task = asyncio.create_task(shutdown(signal_type=None), name="CriticalShutdown")
+                _shutdown_task = asyncio.create_task(
+                    shutdown(signal_type=None), name="CriticalShutdown"
+                )
                 # Optionally add to running_tasks if you want shutdown itself to be cancellable? No, usually not.
             break  # Exit main monitoring loop
 
@@ -2876,12 +3477,16 @@ if __name__ == "__main__":
 
     # Setup signal handlers for graceful shutdown (SIGINT: Ctrl+C, SIGTERM: kill)
     sig_handled = False
-    shutdown_task_ref: Optional[asyncio.Task] = None  # Keep track of the shutdown task to prevent duplicates
+    shutdown_task_ref: Optional[asyncio.Task] = (
+        None  # Keep track of the shutdown task to prevent duplicates
+    )
 
     def _handle_signal(sig: signal.Signals):
         """Internal function to handle OS signals and initiate shutdown."""
         global shutdown_task_ref
-        if not stop_event.is_set() and (shutdown_task_ref is None or shutdown_task_ref.done()):
+        if not stop_event.is_set() and (
+            shutdown_task_ref is None or shutdown_task_ref.done()
+        ):
             log.warning(f"Received signal {sig.name}. Initiating shutdown...")
             # Ensure shutdown runs within the loop's context
             # Check if loop is running before creating task
@@ -2889,14 +3494,22 @@ if __name__ == "__main__":
                 current_loop = asyncio.get_running_loop()
                 if current_loop.is_running():
                     # Create shutdown task but don't await it here
-                    shutdown_task_ref = current_loop.create_task(shutdown(sig), name=f"ShutdownHandler_{sig.name}")
+                    shutdown_task_ref = current_loop.create_task(
+                        shutdown(sig), name=f"ShutdownHandler_{sig.name}"
+                    )
                 else:
                     # This case should be rare if signal is handled by running loop
-                    log.error(f"Cannot initiate shutdown for signal {sig.name}: Event loop is not running.")
+                    log.error(
+                        f"Cannot initiate shutdown for signal {sig.name}: Event loop is not running."
+                    )
             except RuntimeError:
-                log.error(f"Cannot initiate shutdown for signal {sig.name}: No running event loop.")
+                log.error(
+                    f"Cannot initiate shutdown for signal {sig.name}: No running event loop."
+                )
         else:
-            log.warning(f"Received signal {sig.name}, but shutdown already in progress or requested.")
+            log.warning(
+                f"Received signal {sig.name}, but shutdown already in progress or requested."
+            )
 
     for sig in (signal.SIGINT, signal.SIGTERM):
         try:
@@ -2906,11 +3519,18 @@ if __name__ == "__main__":
             log.debug(f"Asyncio signal handler for {sig.name} added.")
         except NotImplementedError:
             # Fallback for platforms where add_signal_handler might fail (e.g., some Windows setups)
-            log.warning(f"Asyncio signal handler for {sig.name} not supported. Using signal.signal fallback.")
+            log.warning(
+                f"Asyncio signal handler for {sig.name} not supported. Using signal.signal fallback."
+            )
             try:
                 # Wrap the handler call in loop.call_soon_threadsafe if signal might arrive from different thread
                 # This is generally safer for the fallback.
-                signal.signal(sig, lambda s, f: loop.call_soon_threadsafe(_handle_signal, signal.Signals(s)))
+                signal.signal(
+                    sig,
+                    lambda s, f: loop.call_soon_threadsafe(
+                        _handle_signal, signal.Signals(s)
+                    ),
+                )
                 sig_handled = True
             except (ValueError, OSError, RuntimeError, AttributeError, TypeError) as e:
                 # ValueError: signal only works in main thread
@@ -2921,7 +3541,9 @@ if __name__ == "__main__":
                 log.error(f"Failed to set fallback signal handler for {sig.name}: {e}")
 
     if not sig_handled:
-        log.warning("No signal handlers could be set. Graceful shutdown via Ctrl+C or SIGTERM might not work reliably.")
+        log.warning(
+            "No signal handlers could be set. Graceful shutdown via Ctrl+C or SIGTERM might not work reliably."
+        )
 
     main_task = None
     try:
@@ -2934,7 +3556,9 @@ if __name__ == "__main__":
         log.info("Main task cancelled (likely during shutdown).")
     except KeyboardInterrupt:  # Catch Ctrl+C if signal handler fails or isn't set
         log.warning("KeyboardInterrupt caught directly. Initiating shutdown...")
-        if not stop_event.is_set() and (shutdown_task_ref is None or shutdown_task_ref.done()):
+        if not stop_event.is_set() and (
+            shutdown_task_ref is None or shutdown_task_ref.done()
+        ):
             # Manually trigger shutdown coroutine if KeyboardInterrupt bypasses signal handler
             # Ensure loop is running to schedule shutdown
             try:
@@ -2942,7 +3566,8 @@ if __name__ == "__main__":
                 if current_loop.is_running():
                     # Create and run the shutdown task until completion
                     shutdown_task_ref = current_loop.create_task(
-                        shutdown(signal.SIGINT), name="ShutdownHandler_KeyboardInterrupt"
+                        shutdown(signal.SIGINT),
+                        name="ShutdownHandler_KeyboardInterrupt",
                     )
                     try:
                         loop.run_until_complete(shutdown_task_ref)
@@ -2951,13 +3576,19 @@ if __name__ == "__main__":
                             f"Error running shutdown task after KeyboardInterrupt: {e}"
                         )  # e.g., loop stopped unexpectedly
                 else:
-                    log.error("Loop not running, cannot initiate shutdown via KeyboardInterrupt.")
+                    log.error(
+                        "Loop not running, cannot initiate shutdown via KeyboardInterrupt."
+                    )
             except RuntimeError:
-                log.error("No running loop, cannot initiate shutdown via KeyboardInterrupt.")
+                log.error(
+                    "No running loop, cannot initiate shutdown via KeyboardInterrupt."
+                )
     except Exception as e:
         log.critical(f"Unhandled exception in main execution: {e}", exc_info=True)
         # Attempt graceful shutdown even on unexpected main errors
-        if not stop_event.is_set() and (shutdown_task_ref is None or shutdown_task_ref.done()):
+        if not stop_event.is_set() and (
+            shutdown_task_ref is None or shutdown_task_ref.done()
+        ):
             log.critical("Attempting shutdown after unhandled main exception...")
             try:
                 current_loop = asyncio.get_running_loop()
@@ -2969,11 +3600,17 @@ if __name__ == "__main__":
                     try:
                         loop.run_until_complete(shutdown_task_ref)
                     except RuntimeError as e:
-                        log.error(f"Error running shutdown task after main exception: {e}")
+                        log.error(
+                            f"Error running shutdown task after main exception: {e}"
+                        )
                 else:
-                    log.error("Loop not running, cannot initiate shutdown after main exception.")
+                    log.error(
+                        "Loop not running, cannot initiate shutdown after main exception."
+                    )
             except RuntimeError:
-                log.error("No running loop, cannot initiate shutdown after main exception.")
+                log.error(
+                    "No running loop, cannot initiate shutdown after main exception."
+                )
     finally:
         log.info("Entering final cleanup phase...")
 
@@ -2991,8 +3628,14 @@ if __name__ == "__main__":
                 log.error(f"Error waiting for shutdown task: {e}")
 
         # Final check to ensure exchange connection is closed
-        if exchange and hasattr(exchange, "close") and not getattr(exchange, "closed", True):
-            log.warning("Exchange connection still open after main loop exit. Attempting final close.")
+        if (
+            exchange
+            and hasattr(exchange, "close")
+            and not getattr(exchange, "closed", True)
+        ):
+            log.warning(
+                "Exchange connection still open after main loop exit. Attempting final close."
+            )
             try:
                 # Run close within the loop if it's still running
                 current_loop = asyncio.get_running_loop()
@@ -3000,9 +3643,13 @@ if __name__ == "__main__":
                     loop.run_until_complete(exchange.close())
                 else:
                     # If loop is stopped, cannot run async close cleanly.
-                    log.error("Event loop stopped. Cannot run final exchange close asynchronously.")
+                    log.error(
+                        "Event loop stopped. Cannot run final exchange close asynchronously."
+                    )
             except RuntimeError:
-                log.error("Event loop stopped or unavailable. Cannot run final exchange close asynchronously.")
+                log.error(
+                    "Event loop stopped or unavailable. Cannot run final exchange close asynchronously."
+                )
             except Exception as e:
                 log.error(f"Error during final exchange close: {e}")
 
@@ -3011,15 +3658,23 @@ if __name__ == "__main__":
             # Check if loop is available and running before accessing tasks
             current_loop = asyncio.get_running_loop()
             if current_loop and not current_loop.is_closed():
-                current_task = asyncio.current_task(loop=current_loop)  # Get current task if any
+                current_task = asyncio.current_task(
+                    loop=current_loop
+                )  # Get current task if any
                 all_tasks = asyncio.all_tasks(loop=current_loop)
                 # Exclude self, main_task, shutdown_task if they exist and are tasks
                 tasks_to_exclude = {
-                    t for t in [current_task, main_task, shutdown_task_ref] if isinstance(t, asyncio.Task)
+                    t
+                    for t in [current_task, main_task, shutdown_task_ref]
+                    if isinstance(t, asyncio.Task)
                 }
-                remaining_tasks = [t for t in all_tasks if t not in tasks_to_exclude and not t.done()]
+                remaining_tasks = [
+                    t for t in all_tasks if t not in tasks_to_exclude and not t.done()
+                ]
                 if remaining_tasks:
-                    log.warning(f"Cancelling {len(remaining_tasks)} potentially lingering tasks...")
+                    log.warning(
+                        f"Cancelling {len(remaining_tasks)} potentially lingering tasks..."
+                    )
                     for task in remaining_tasks:
                         task.cancel()
                     # Wait briefly for cancellations if loop is running
@@ -3028,19 +3683,27 @@ if __name__ == "__main__":
                         try:
                             # Need an async context to await gather
                             async def gather_remaining():
-                                await asyncio.gather(*remaining_tasks, return_exceptions=True)
+                                await asyncio.gather(
+                                    *remaining_tasks, return_exceptions=True
+                                )
 
                             # Run this temporary async function within the loop
-                            loop.run_until_complete(asyncio.wait_for(gather_remaining(), timeout=5.0))
+                            loop.run_until_complete(
+                                asyncio.wait_for(gather_remaining(), timeout=5.0)
+                            )
                             log.info("Lingering task cancellation complete.")
                         except asyncio.TimeoutError:
                             log.error("Timeout waiting for lingering tasks to cancel.")
                         except Exception as gather_exc:
                             log.error(f"Error gathering lingering tasks: {gather_exc}")
                     else:
-                        log.warning("Loop stopped, cannot wait for lingering task cancellation.")
+                        log.warning(
+                            "Loop stopped, cannot wait for lingering task cancellation."
+                        )
             else:
-                log.warning("Event loop closed or unavailable, cannot perform final task cleanup.")
+                log.warning(
+                    "Event loop closed or unavailable, cannot perform final task cleanup."
+                )
         except RuntimeError:
             log.warning("Event loop unavailable, cannot perform final task cleanup.")
         except Exception as e:
@@ -3058,5 +3721,7 @@ if __name__ == "__main__":
         except Exception as e:
             log.error(f"Error closing event loop: {e}")
 
-        log.info(f"{Fore.MAGENTA}~~~ Pyrmethus Volumatic+OB Trading Bot Finished ~~~{Style.RESET_ALL}")
+        log.info(
+            f"{Fore.MAGENTA}~~~ Pyrmethus Volumatic+OB Trading Bot Finished ~~~{Style.RESET_ALL}"
+        )
         logging.shutdown()  # Ensure all handlers are flushed/closed

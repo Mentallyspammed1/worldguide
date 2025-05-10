@@ -17,7 +17,9 @@ except ImportError:
 try:
     from colorama import Fore, Style, Back
 except ImportError:
-    print("Warning: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print(
+        "Warning: colorama library not found. Logs will not be colored. Install: pip install colorama"
+    )
 
     class DummyColor:
         def __getattr__(self, name: str) -> str:
@@ -51,7 +53,9 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
         `retry_api_call` decorator for retries, raising the final exception on failure.
     """
     func_name = "initialize_bybit"
-    logger.info(f"{Fore.BLUE}[{func_name}] Initializing Bybit (V5) exchange instance...{Style.RESET_ALL}")
+    logger.info(
+        f"{Fore.BLUE}[{func_name}] Initializing Bybit (V5) exchange instance...{Style.RESET_ALL}"
+    )
     try:
         exchange_class = getattr(ccxt, config.EXCHANGE_ID)
         exchange = exchange_class(
@@ -76,10 +80,14 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
         exchange.load_markets(reload=True)  # Force reload initially
         if not exchange.markets:
             raise ccxt.ExchangeError(f"[{func_name}] Failed to load markets.")
-        logger.debug(f"[{func_name}] Markets loaded successfully ({len(exchange.markets)} symbols).")
+        logger.debug(
+            f"[{func_name}] Markets loaded successfully ({len(exchange.markets)} symbols)."
+        )
 
         # Perform an initial API call to validate credentials and connectivity
-        logger.debug(f"[{func_name}] Performing initial balance fetch for validation...")
+        logger.debug(
+            f"[{func_name}] Performing initial balance fetch for validation..."
+        )
         # Use V5 UNIFIED account type for the initial check
         exchange.fetch_balance({"accountType": "UNIFIED"})
         logger.debug(f"[{func_name}] Initial balance check successful.")
@@ -94,7 +102,9 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
                 )
                 params = {"category": category}
                 # Use set_margin_mode for cross/isolated (might fail on UTA isolated, which is ok)
-                exchange.set_margin_mode(config.DEFAULT_MARGIN_MODE, config.SYMBOL, params=params)
+                exchange.set_margin_mode(
+                    config.DEFAULT_MARGIN_MODE, config.SYMBOL, params=params
+                )
                 logger.info(
                     f"[{func_name}] Initial margin mode potentially set to '{config.DEFAULT_MARGIN_MODE}' for {config.SYMBOL}."
                 )
@@ -102,7 +112,12 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
                 logger.warning(
                     f"[{func_name}] Cannot determine contract category for {config.SYMBOL} ({category}). Skipping initial margin mode set."
                 )
-        except (ccxt.NotSupported, ccxt.ExchangeError, ccxt.ArgumentsRequired, ccxt.BadSymbol) as e_margin:
+        except (
+            ccxt.NotSupported,
+            ccxt.ExchangeError,
+            ccxt.ArgumentsRequired,
+            ccxt.BadSymbol,
+        ) as e_margin:
             logger.warning(
                 f"{Fore.YELLOW}[{func_name}] Could not set initial margin mode for {config.SYMBOL}: {e_margin}. "
                 f"This might be expected (e.g., UTA Isolated accounts require per-symbol setup). Verify account settings.{Style.RESET_ALL}"
@@ -114,7 +129,12 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
         )
         return exchange
 
-    except (ccxt.AuthenticationError, ccxt.NetworkError, ccxt.ExchangeNotAvailable, ccxt.ExchangeError) as e:
+    except (
+        ccxt.AuthenticationError,
+        ccxt.NetworkError,
+        ccxt.ExchangeNotAvailable,
+        ccxt.ExchangeError,
+    ) as e:
         logger.error(
             f"{Fore.RED}[{func_name}] Initialization attempt failed: {type(e).__name__} - {e}{Style.RESET_ALL}"
         )
@@ -125,7 +145,10 @@ def initialize_bybit(config: Config) -> Optional[ccxt.bybit]:
             f"{Back.RED}[{func_name}] Unexpected critical error during Bybit initialization: {e}{Style.RESET_ALL}",
             exc_info=True,
         )
-        send_sms_alert(f"[BybitHelper] CRITICAL: Bybit init failed! Unexpected: {type(e).__name__}", config)
+        send_sms_alert(
+            f"[BybitHelper] CRITICAL: Bybit init failed! Unexpected: {type(e).__name__}",
+            config,
+        )
         return None  # Return None on critical unexpected failure
 
 

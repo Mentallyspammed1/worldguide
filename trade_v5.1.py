@@ -78,10 +78,14 @@ try:
     file_handler.setLevel(logging.DEBUG)
     logger.addHandler(file_handler)
 except OSError as e:
-    logger.error(f"{Fore.RED}Fatal: Failed to conjure log file {LOG_FILE_NAME}: {e}{Style.RESET_ALL}")
+    logger.error(
+        f"{Fore.RED}Fatal: Failed to conjure log file {LOG_FILE_NAME}: {e}{Style.RESET_ALL}"
+    )
     file_handler = None
 except Exception as e:
-    logger.error(f"{Fore.RED}Fatal: Unexpected error setting up file logging: {e}{Style.RESET_ALL}")
+    logger.error(
+        f"{Fore.RED}Fatal: Unexpected error setting up file logging: {e}{Style.RESET_ALL}"
+    )
     file_handler = None
 
 # Load environment variables
@@ -92,7 +96,10 @@ else:
 
 
 # --- API Retry Decorator ---
-def retry_api_call(max_retries: int = DEFAULT_RETRY_MAX, initial_delay: int = DEFAULT_RETRY_DELAY_SECONDS) -> Callable:
+def retry_api_call(
+    max_retries: int = DEFAULT_RETRY_MAX,
+    initial_delay: int = DEFAULT_RETRY_DELAY_SECONDS,
+) -> Callable:
     """Decorator for retrying CCXT API calls with exponential backoff."""
 
     def decorator(func: Callable) -> Callable:
@@ -109,7 +116,12 @@ def retry_api_call(max_retries: int = DEFAULT_RETRY_MAX, initial_delay: int = DE
                         f"{Fore.YELLOW}Rate limit veil encountered ({func.__name__}). Pausing {delay}s... "
                         f"(Attempt {retries + 1}/{max_retries}) Error: {e}{Style.RESET_ALL}"
                     )
-                except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.ExchangeNotAvailable, ccxt.DDoSProtection) as e:
+                except (
+                    ccxt.NetworkError,
+                    ccxt.RequestTimeout,
+                    ccxt.ExchangeNotAvailable,
+                    ccxt.DDoSProtection,
+                ) as e:
                     logger.error(
                         f"{Fore.RED}Network ether disturbed ({func.__name__}: {type(e).__name__}). Pausing {delay}s... "
                         f"(Attempt {retries + 1}/{max_retries}){Style.RESET_ALL}"
@@ -132,7 +144,11 @@ def retry_api_call(max_retries: int = DEFAULT_RETRY_MAX, initial_delay: int = DE
                         return None  # OrderNotFound is often final
                     elif any(
                         phrase in err_str
-                        for phrase in ["insufficient balance", "insufficient margin", "margin is insufficient"]
+                        for phrase in [
+                            "insufficient balance",
+                            "insufficient margin",
+                            "margin is insufficient",
+                        ]
                     ):
                         logger.error(
                             f"{Fore.RED}Insufficient essence (funds/margin) for {func.__name__}: {e}. Aborting (no retry).{Style.RESET_ALL}"
@@ -189,9 +205,13 @@ class ScalpingBot:
     and refined order management with TSL via edit_order (verification required).
     """
 
-    def __init__(self, config_file: str = CONFIG_FILE_NAME, state_file: str = STATE_FILE_NAME) -> None:
+    def __init__(
+        self, config_file: str = CONFIG_FILE_NAME, state_file: str = STATE_FILE_NAME
+    ) -> None:
         """Initializes the bot, loading config, state, and connecting to the exchange."""
-        logger.info(f"{Fore.MAGENTA}--- Pyrmethus Scalping Bot v4 Awakening ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.MAGENTA}--- Pyrmethus Scalping Bot v4 Awakening ---{Style.RESET_ALL}"
+        )
         self.config: dict[str, Any] = {}
         self.state_file: str = state_file
         self.load_config(config_file)
@@ -201,18 +221,30 @@ class ScalpingBot:
         self.api_key: str | None = os.getenv("BYBIT_API_KEY")
         self.api_secret: str | None = os.getenv("BYBIT_API_SECRET")
         self.exchange_id: str = self.config["exchange"]["exchange_id"]
-        self.testnet_mode: bool = self.config["exchange"]["testnet_mode"]  # New explicit flag
+        self.testnet_mode: bool = self.config["exchange"][
+            "testnet_mode"
+        ]  # New explicit flag
         self.symbol: str = self.config["trading"]["symbol"]
-        self.simulation_mode: bool = self.config["trading"]["simulation_mode"]  # Keep for internal logic simulation
+        self.simulation_mode: bool = self.config["trading"][
+            "simulation_mode"
+        ]  # Keep for internal logic simulation
         self.entry_order_type: str = self.config["trading"]["entry_order_type"]
-        self.limit_order_entry_offset_pct_buy: float = self.config["trading"]["limit_order_offset_buy"]
-        self.limit_order_entry_offset_pct_sell: float = self.config["trading"]["limit_order_offset_sell"]
+        self.limit_order_entry_offset_pct_buy: float = self.config["trading"][
+            "limit_order_offset_buy"
+        ]
+        self.limit_order_entry_offset_pct_sell: float = self.config["trading"][
+            "limit_order_offset_sell"
+        ]
         self.timeframe: str = self.config["trading"]["timeframe"]
         self.order_book_depth: int = self.config["order_book"]["depth"]
-        self.imbalance_threshold: float = self.config["order_book"]["imbalance_threshold"]
+        self.imbalance_threshold: float = self.config["order_book"][
+            "imbalance_threshold"
+        ]
         # Indicators
         self.volatility_window: int = self.config["indicators"]["volatility_window"]
-        self.volatility_multiplier: float = self.config["indicators"]["volatility_multiplier"]
+        self.volatility_multiplier: float = self.config["indicators"][
+            "volatility_multiplier"
+        ]
         self.ema_period: int = self.config["indicators"]["ema_period"]
         self.rsi_period: int = self.config["indicators"]["rsi_period"]
         self.macd_short_period: int = self.config["indicators"]["macd_short_period"]
@@ -224,10 +256,18 @@ class ScalpingBot:
         self.atr_period: int = self.config["indicators"]["atr_period"]
         # Risk Management
         self.use_atr_sl_tp: bool = self.config["risk_management"]["use_atr_sl_tp"]
-        self.atr_sl_multiplier: float = self.config["risk_management"]["atr_sl_multiplier"]
-        self.atr_tp_multiplier: float = self.config["risk_management"]["atr_tp_multiplier"]
-        self.base_stop_loss_pct: float | None = self.config["risk_management"].get("stop_loss_percentage")
-        self.base_take_profit_pct: float | None = self.config["risk_management"].get("take_profit_percentage")
+        self.atr_sl_multiplier: float = self.config["risk_management"][
+            "atr_sl_multiplier"
+        ]
+        self.atr_tp_multiplier: float = self.config["risk_management"][
+            "atr_tp_multiplier"
+        ]
+        self.base_stop_loss_pct: float | None = self.config["risk_management"].get(
+            "stop_loss_percentage"
+        )
+        self.base_take_profit_pct: float | None = self.config["risk_management"].get(
+            "take_profit_percentage"
+        )
         self.sl_trigger_by: str | None = self.config["risk_management"].get(
             "sl_trigger_by"
         )  # e.g., MarkPrice, LastPrice
@@ -237,15 +277,25 @@ class ScalpingBot:
         self.enable_trailing_stop_loss: bool = self.config["risk_management"][
             "enable_trailing_stop_loss"
         ]  # New TSL flag
-        self.trailing_stop_loss_percentage: float | None = self.config["risk_management"].get(
-            "trailing_stop_loss_percentage"
+        self.trailing_stop_loss_percentage: float | None = self.config[
+            "risk_management"
+        ].get("trailing_stop_loss_percentage")
+        self.max_open_positions: int = self.config["risk_management"][
+            "max_open_positions"
+        ]
+        self.time_based_exit_minutes: int | None = self.config["risk_management"].get(
+            "time_based_exit_minutes"
         )
-        self.max_open_positions: int = self.config["risk_management"]["max_open_positions"]
-        self.time_based_exit_minutes: int | None = self.config["risk_management"].get("time_based_exit_minutes")
-        self.order_size_percentage: float = self.config["risk_management"]["order_size_percentage"]
+        self.order_size_percentage: float = self.config["risk_management"][
+            "order_size_percentage"
+        ]
         # Signal adjustments (kept simple for now)
-        self.strong_signal_adjustment_factor: float = self.config["risk_management"]["strong_signal_adjustment_factor"]
-        self.weak_signal_adjustment_factor: float = self.config["risk_management"]["weak_signal_adjustment_factor"]
+        self.strong_signal_adjustment_factor: float = self.config["risk_management"][
+            "strong_signal_adjustment_factor"
+        ]
+        self.weak_signal_adjustment_factor: float = self.config["risk_management"][
+            "weak_signal_adjustment_factor"
+        ]
 
         # --- Bot State ---
         self.iteration: int = 0
@@ -272,12 +322,20 @@ class ScalpingBot:
         # --- Final Mode Logging ---
         sim_color = Fore.YELLOW if self.simulation_mode else Fore.CYAN
         test_color = Fore.YELLOW if self.testnet_mode else Fore.GREEN
-        logger.warning(f"{sim_color}--- INTERNAL SIMULATION MODE: {self.simulation_mode} ---{Style.RESET_ALL}")
-        logger.warning(f"{test_color}--- EXCHANGE TESTNET MODE: {self.testnet_mode} ---{Style.RESET_ALL}")
+        logger.warning(
+            f"{sim_color}--- INTERNAL SIMULATION MODE: {self.simulation_mode} ---{Style.RESET_ALL}"
+        )
+        logger.warning(
+            f"{test_color}--- EXCHANGE TESTNET MODE: {self.testnet_mode} ---{Style.RESET_ALL}"
+        )
         if not self.simulation_mode and not self.testnet_mode:
-            logger.warning(f"{Fore.RED}--- LIVE TRADING ON MAINNET ACTIVE ---{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.RED}--- LIVE TRADING ON MAINNET ACTIVE ---{Style.RESET_ALL}"
+            )
         elif not self.simulation_mode and self.testnet_mode:
-            logger.warning(f"{Fore.YELLOW}--- LIVE TRADING ON TESTNET ACTIVE ---{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}--- LIVE TRADING ON TESTNET ACTIVE ---{Style.RESET_ALL}"
+            )
 
         logger.info(
             f"{Fore.CYAN}Scalping Bot V4 initialized. Symbol: {self.symbol}, Timeframe: {self.timeframe}{Style.RESET_ALL}"
@@ -295,11 +353,17 @@ class ScalpingBot:
         if file_handler:
             file_handler.setLevel(logging.DEBUG)  # File log remains detailed
         logger.info(f"Logging level enchanted to: {log_level_str}")
-        logger.debug(f"Root logger level: {logging.getLevelName(logging.getLogger().level)}")
+        logger.debug(
+            f"Root logger level: {logging.getLevelName(logging.getLogger().level)}"
+        )
         logger.debug(f"Bot logger level: {logging.getLevelName(logger.level)}")
-        logger.debug(f"Console handler level: {logging.getLevelName(console_handler.level)}")
+        logger.debug(
+            f"Console handler level: {logging.getLevelName(console_handler.level)}"
+        )
         if file_handler:
-            logger.debug(f"File handler level: {logging.getLevelName(file_handler.level)}")
+            logger.debug(
+                f"File handler level: {logging.getLevelName(file_handler.level)}"
+            )
 
     def _load_state(self) -> None:
         """Loads bot state from file, with backup on corruption."""
@@ -328,11 +392,15 @@ class ScalpingBot:
                             try:
                                 os.remove(state_backup_file)
                             except OSError:
-                                logger.warning(f"Could not remove old state backup file: {state_backup_file}")
+                                logger.warning(
+                                    f"Could not remove old state backup file: {state_backup_file}"
+                                )
                     else:
                         raise ValueError("Invalid state format - expected a list.")
             else:
-                logger.info(f"No prior state file found ({self.state_file}). Beginning anew.")
+                logger.info(
+                    f"No prior state file found ({self.state_file}). Beginning anew."
+                )
                 self.open_positions = []
         except (json.JSONDecodeError, ValueError) as e:
             logger.error(
@@ -356,25 +424,35 @@ class ScalpingBot:
             else:
                 # No backup exists, create backup of corrupted file and start fresh
                 try:
-                    shutil.copyfile(self.state_file, f"{self.state_file}.corrupted_{int(time.time())}")
+                    shutil.copyfile(
+                        self.state_file,
+                        f"{self.state_file}.corrupted_{int(time.time())}",
+                    )
                     logger.warning(
                         f"{Fore.YELLOW}Backed up corrupted state file to {self.state_file}.corrupted_... Starting fresh.{Style.RESET_ALL}"
                     )
                 except Exception as backup_err:
-                    logger.error(f"{Fore.RED}Could not back up corrupted state file: {backup_err}{Style.RESET_ALL}")
+                    logger.error(
+                        f"{Fore.RED}Could not back up corrupted state file: {backup_err}{Style.RESET_ALL}"
+                    )
                 self.open_positions = []
                 self._save_state()  # Create a fresh state file
         except Exception as e:
             logger.error(
-                f"{Fore.RED}Fatal: Failed to load state from {self.state_file}: {e}{Style.RESET_ALL}", exc_info=True
+                f"{Fore.RED}Fatal: Failed to load state from {self.state_file}: {e}{Style.RESET_ALL}",
+                exc_info=True,
             )
-            logger.warning("Proceeding with empty state due to unexpected load failure.")
+            logger.warning(
+                "Proceeding with empty state due to unexpected load failure."
+            )
             self.open_positions = []
 
     def _save_state(self) -> None:
         """Saves the current bot state to the state file."""
         # Avoid saving empty state if initialization failed badly? Maybe not necessary.
-        logger.debug(f"Recording current state ({len(self.open_positions)} positions) to {self.state_file}...")
+        logger.debug(
+            f"Recording current state ({len(self.open_positions)} positions) to {self.state_file}..."
+        )
         state_backup_file = f"{self.state_file}.bak"
         try:
             # Create backup before overwriting
@@ -387,10 +465,13 @@ class ScalpingBot:
                 )  # Use default=str for non-serializable types if any sneak in
             logger.debug("State recorded successfully.")
         except OSError as e:
-            logger.error(f"{Fore.RED}Could not scribe state to {self.state_file}: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Could not scribe state to {self.state_file}: {e}{Style.RESET_ALL}"
+            )
         except Exception as e:
             logger.error(
-                f"{Fore.RED}An unexpected error occurred while recording state: {e}{Style.RESET_ALL}", exc_info=True
+                f"{Fore.RED}An unexpected error occurred while recording state: {e}{Style.RESET_ALL}",
+                exc_info=True,
             )
 
     def load_config(self, config_file: str) -> None:
@@ -399,11 +480,17 @@ class ScalpingBot:
             with open(config_file, encoding="utf-8") as f:
                 self.config = yaml.safe_load(f)
             if not isinstance(self.config, dict):
-                logger.critical(f"{Fore.RED}Config file {config_file} structure invalid. Aborting.{Style.RESET_ALL}")
+                logger.critical(
+                    f"{Fore.RED}Config file {config_file} structure invalid. Aborting.{Style.RESET_ALL}"
+                )
                 sys.exit(1)
-            logger.info(f"{Fore.GREEN}Configuration spellbook loaded from {config_file}{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Configuration spellbook loaded from {config_file}{Style.RESET_ALL}"
+            )
         except FileNotFoundError:
-            logger.warning(f"{Fore.YELLOW}Configuration spellbook '{config_file}' not found.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}Configuration spellbook '{config_file}' not found.{Style.RESET_ALL}"
+            )
             try:
                 self.create_default_config(config_file)
                 logger.info(
@@ -411,7 +498,9 @@ class ScalpingBot:
                     f"Review and tailor its enchantments (API keys, symbol, risk settings), then restart.{Style.RESET_ALL}"
                 )
             except Exception as e:
-                logger.error(f"{Fore.RED}Failed to craft default spellbook: {e}{Style.RESET_ALL}")
+                logger.error(
+                    f"{Fore.RED}Failed to craft default spellbook: {e}{Style.RESET_ALL}"
+                )
             sys.exit(1)  # Exit after creating default config
         except yaml.YAMLError as e:
             logger.critical(
@@ -419,7 +508,10 @@ class ScalpingBot:
             )
             sys.exit(1)
         except Exception as e:
-            logger.critical(f"{Fore.RED}Unexpected chaos loading config: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.critical(
+                f"{Fore.RED}Unexpected chaos loading config: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             sys.exit(1)
 
     def create_default_config(self, config_file: str) -> None:
@@ -436,9 +528,15 @@ class ScalpingBot:
                 "timeframe": os.getenv("TIMEFRAME", DEFAULT_TIMEFRAME),
                 "simulation_mode": os.getenv("SIMULATION_MODE", "True").lower()
                 in ("true", "1", "yes"),  # Internal simulation
-                "entry_order_type": os.getenv("ENTRY_ORDER_TYPE", "limit").lower(),  # 'limit' or 'market'
-                "limit_order_offset_buy": float(os.getenv("LIMIT_ORDER_OFFSET_BUY", 0.0005)),
-                "limit_order_offset_sell": float(os.getenv("LIMIT_ORDER_OFFSET_SELL", 0.0005)),
+                "entry_order_type": os.getenv(
+                    "ENTRY_ORDER_TYPE", "limit"
+                ).lower(),  # 'limit' or 'market'
+                "limit_order_offset_buy": float(
+                    os.getenv("LIMIT_ORDER_OFFSET_BUY", 0.0005)
+                ),
+                "limit_order_offset_sell": float(
+                    os.getenv("LIMIT_ORDER_OFFSET_SELL", 0.0005)
+                ),
             },
             "order_book": {"depth": 10, "imbalance_threshold": 1.5},
             "indicators": {
@@ -475,15 +573,25 @@ class ScalpingBot:
         # --- Auto-fill from Env Vars ---
         # (This part could be more sophisticated, iterating through nested dicts)
         if os.getenv("ORDER_SIZE_PERCENTAGE"):
-            default_config["risk_management"]["order_size_percentage"] = float(os.environ["ORDER_SIZE_PERCENTAGE"])
+            default_config["risk_management"]["order_size_percentage"] = float(
+                os.environ["ORDER_SIZE_PERCENTAGE"]
+            )
         # ... add more overrides from env if desired ...
 
         try:
             with open(config_file, "w", encoding="utf-8") as f:
-                yaml.dump(default_config, f, indent=4, sort_keys=False, default_flow_style=False)
+                yaml.dump(
+                    default_config,
+                    f,
+                    indent=4,
+                    sort_keys=False,
+                    default_flow_style=False,
+                )
             logger.info(f"Default spellbook '{config_file}' crafted.")
         except OSError as e:
-            logger.error(f"{Fore.RED}Could not scribe default spellbook {config_file}: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Could not scribe default spellbook {config_file}: {e}{Style.RESET_ALL}"
+            )
             raise
 
     def validate_config(self) -> None:
@@ -571,7 +679,9 @@ class ScalpingBot:
             if not is_non_negative(cfg.get("volatility_multiplier")):
                 raise ValueError("indicators.volatility_multiplier non-negative")
             if cfg["macd_short_period"] >= cfg["macd_long_period"]:
-                raise ValueError("indicators.macd_short_period < macd_long_period required")
+                raise ValueError(
+                    "indicators.macd_short_period < macd_long_period required"
+                )
 
             # --- Risk Management ---
             cfg = self.config["risk_management"]
@@ -579,16 +689,29 @@ class ScalpingBot:
                 raise ValueError("risk.use_atr_sl_tp must be boolean")
             if cfg["use_atr_sl_tp"]:
                 if not is_positive(cfg.get("atr_sl_multiplier")):
-                    raise ValueError("risk.atr_sl_multiplier positive required if using ATR")
+                    raise ValueError(
+                        "risk.atr_sl_multiplier positive required if using ATR"
+                    )
                 if not is_positive(cfg.get("atr_tp_multiplier")):
-                    raise ValueError("risk.atr_tp_multiplier positive required if using ATR")
+                    raise ValueError(
+                        "risk.atr_tp_multiplier positive required if using ATR"
+                    )
             else:
                 if not is_percentage(cfg.get("stop_loss_percentage")):
-                    raise ValueError("risk.stop_loss_percentage (0-1) required if not using ATR")
+                    raise ValueError(
+                        "risk.stop_loss_percentage (0-1) required if not using ATR"
+                    )
                 if not is_percentage(cfg.get("take_profit_percentage")):
-                    raise ValueError("risk.take_profit_percentage (0-1) required if not using ATR")
+                    raise ValueError(
+                        "risk.take_profit_percentage (0-1) required if not using ATR"
+                    )
 
-            valid_triggers = ["MarkPrice", "LastPrice", "IndexPrice", None]  # Allow None if not specified
+            valid_triggers = [
+                "MarkPrice",
+                "LastPrice",
+                "IndexPrice",
+                None,
+            ]  # Allow None if not specified
             if cfg.get("sl_trigger_by") not in valid_triggers:
                 raise ValueError(f"risk.sl_trigger_by invalid, use: {valid_triggers}")
             if cfg.get("tp_trigger_by") not in valid_triggers:
@@ -599,7 +722,9 @@ class ScalpingBot:
             if cfg["enable_trailing_stop_loss"]:
                 tsl_pct = cfg.get("trailing_stop_loss_percentage")
                 if not (is_positive(tsl_pct) and tsl_pct < 1):
-                    raise ValueError("risk.trailing_stop_loss_percentage (0 < pct < 1) required if TSL enabled")
+                    raise ValueError(
+                        "risk.trailing_stop_loss_percentage (0 < pct < 1) required if TSL enabled"
+                    )
 
             if not is_percentage(cfg.get("order_size_percentage")):
                 raise ValueError("risk.order_size_percentage (0-1) required")
@@ -608,11 +733,15 @@ class ScalpingBot:
             if not is_non_neg_int(cfg.get("time_based_exit_minutes")):
                 raise ValueError("risk.time_based_exit_minutes >= 0 required")
             if not is_positive(cfg.get("strong_signal_adjustment_factor")):
-                raise ValueError("risk.strong_signal_adjustment_factor positive required")
+                raise ValueError(
+                    "risk.strong_signal_adjustment_factor positive required"
+                )
             if not is_positive(cfg.get("weak_signal_adjustment_factor")):
                 raise ValueError("risk.weak_signal_adjustment_factor positive required")
 
-            logger.info(f"{Fore.GREEN}Configuration spellbook deemed valid and potent.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Configuration spellbook deemed valid and potent.{Style.RESET_ALL}"
+            )
 
         except ValueError as e:
             logger.critical(
@@ -620,7 +749,10 @@ class ScalpingBot:
             )
             sys.exit(1)
         except Exception as e:
-            logger.critical(f"{Fore.RED}Unexpected chaos during config validation: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.critical(
+                f"{Fore.RED}Unexpected chaos during config validation: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             sys.exit(1)
 
     def _initialize_exchange(self) -> ccxt.Exchange:
@@ -636,7 +768,9 @@ class ScalpingBot:
             logger.warning(
                 f"{Fore.YELLOW}API Key/Secret missing. Running in full simulation mode only.{Style.RESET_ALL}"
             )
-            self.simulation_mode = True  # Force simulation if no keys, regardless of config
+            self.simulation_mode = (
+                True  # Force simulation if no keys, regardless of config
+            )
 
         try:
             exchange_class = getattr(ccxt, self.exchange_id)
@@ -673,18 +807,24 @@ class ScalpingBot:
                     f"{Fore.RED}Symbol '{self.symbol}' not found on {self.exchange_id}. Available: {available[:10]}... Check config. Aborting.{Style.RESET_ALL}"
                 )
                 sys.exit(1)
-            logger.info(f"Symbol '{self.symbol}' and timeframe '{self.timeframe}' confirmed.")
+            logger.info(
+                f"Symbol '{self.symbol}' and timeframe '{self.timeframe}' confirmed."
+            )
 
             # Final connection check
             try:
                 server_time = exchange.fetch_time()
-                logger.debug(f"Exchange time crystal synchronized: {pd.to_datetime(server_time, unit='ms', utc=True)}")
+                logger.debug(
+                    f"Exchange time crystal synchronized: {pd.to_datetime(server_time, unit='ms', utc=True)}"
+                )
             except Exception as e:
                 logger.warning(
                     f"{Fore.YELLOW}Optional check: Failed to fetch server time, proceeding cautiously: {e}{Style.RESET_ALL}"
                 )
 
-            logger.info(f"{Fore.GREEN}Connection established with {self.exchange_id.upper()}.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Connection established with {self.exchange_id.upper()}.{Style.RESET_ALL}"
+            )
             return exchange
 
         except ccxt.AuthenticationError as e:
@@ -692,7 +832,12 @@ class ScalpingBot:
                 f"{Fore.RED}Authentication failed for {self.exchange_id.upper()}: {e}. Check API keys/permissions. Aborting.{Style.RESET_ALL}"
             )
             sys.exit(1)
-        except (ccxt.ExchangeNotAvailable, ccxt.RequestTimeout, ccxt.NetworkError, ccxt.DDoSProtection) as e:
+        except (
+            ccxt.ExchangeNotAvailable,
+            ccxt.RequestTimeout,
+            ccxt.NetworkError,
+            ccxt.DDoSProtection,
+        ) as e:
             logger.critical(
                 f"{Fore.RED}Could not connect to {self.exchange_id.upper()} ({type(e).__name__}): {e}. Check network/exchange status. Aborting.{Style.RESET_ALL}"
             )
@@ -710,15 +855,17 @@ class ScalpingBot:
         try:
             self.market_info = self.exchange.market(self.symbol)
             # Pre-validate required precision/limits info
-            if not self.market_info.get("precision", {}).get("amount") or not self.market_info.get("precision", {}).get(
-                "price"
-            ):
+            if not self.market_info.get("precision", {}).get(
+                "amount"
+            ) or not self.market_info.get("precision", {}).get("price"):
                 raise ValueError("Amount or Price precision missing in market info.")
             # Log key limits for reference
             limits = self.market_info.get("limits", {})
             min_amount = limits.get("amount", {}).get("min")
             min_cost = limits.get("cost", {}).get("min")
-            logger.info(f"Market Limits for {self.symbol}: Min Amount={min_amount}, Min Cost={min_cost}")
+            logger.info(
+                f"Market Limits for {self.symbol}: Min Amount={min_amount}, Min Cost={min_cost}"
+            )
             logger.debug("Market details loaded and cached.")
         except Exception as e:
             logger.critical(
@@ -751,33 +898,54 @@ class ScalpingBot:
     @retry_api_call()
     def fetch_order_book(self) -> dict[str, Any] | None:
         """Fetches order book data (bids, asks, imbalance)."""
-        logger.debug(f"Fetching order book for {self.symbol} (depth: {self.order_book_depth})...")
+        logger.debug(
+            f"Fetching order book for {self.symbol} (depth: {self.order_book_depth})..."
+        )
         try:
-            orderbook = self.exchange.fetch_order_book(self.symbol, limit=self.order_book_depth)
+            orderbook = self.exchange.fetch_order_book(
+                self.symbol, limit=self.order_book_depth
+            )
             bids = orderbook.get("bids", [])
             asks = orderbook.get("asks", [])
             result = {"bids": bids, "asks": asks, "imbalance": None}
 
             if bids and asks:
-                bid_volume = sum(float(bid[1]) for bid in bids if bid and len(bid) > 1 and bid[1] is not None)
-                ask_volume = sum(float(ask[1]) for ask in asks if ask and len(ask) > 1 and ask[1] is not None)
+                bid_volume = sum(
+                    float(bid[1])
+                    for bid in bids
+                    if bid and len(bid) > 1 and bid[1] is not None
+                )
+                ask_volume = sum(
+                    float(ask[1])
+                    for ask in asks
+                    if ask and len(ask) > 1 and ask[1] is not None
+                )
 
                 if bid_volume > 1e-9:
                     imbalance_ratio = ask_volume / bid_volume
                     result["imbalance"] = imbalance_ratio
-                    logger.debug(f"Order Book ({self.symbol}) Imbalance (Ask/Bid): {imbalance_ratio:.3f}")
+                    logger.debug(
+                        f"Order Book ({self.symbol}) Imbalance (Ask/Bid): {imbalance_ratio:.3f}"
+                    )
                 elif ask_volume > 1e-9:
                     result["imbalance"] = float("inf")
-                    logger.debug(f"Order Book ({self.symbol}) Imbalance: Infinity (Zero Bid Vol)")
+                    logger.debug(
+                        f"Order Book ({self.symbol}) Imbalance: Infinity (Zero Bid Vol)"
+                    )
                 else:
-                    logger.debug(f"Order Book ({self.symbol}) Imbalance: N/A (Zero Bid/Ask Vol)")
+                    logger.debug(
+                        f"Order Book ({self.symbol}) Imbalance: N/A (Zero Bid/Ask Vol)"
+                    )
             else:
                 logger.warning(
                     f"{Fore.YELLOW}Order book data incomplete for {self.symbol}. Bids: {len(bids)}, Asks: {len(asks)}{Style.RESET_ALL}"
                 )
             return result
         except Exception as e:
-            logger.error(f"{Fore.RED}Error fetching order book for {self.symbol}: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Error fetching order book for {self.symbol}: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             return None  # Return None on failure
 
     @retry_api_call(max_retries=2, initial_delay=1)
@@ -791,21 +959,34 @@ class ScalpingBot:
                     self.ema_period,
                     self.rsi_period + 1,
                     self.macd_long_period + self.macd_signal_period,
-                    self.stoch_rsi_period + self.stoch_rsi_k_period + self.stoch_rsi_d_period + 1,
+                    self.stoch_rsi_period
+                    + self.stoch_rsi_k_period
+                    + self.stoch_rsi_d_period
+                    + 1,
                     self.atr_period + 1,
                 )
                 + 20
             )  # Buffer
 
-        logger.debug(f"Fetching {required_limit} historical candles for {self.symbol} ({self.timeframe})...")
+        logger.debug(
+            f"Fetching {required_limit} historical candles for {self.symbol} ({self.timeframe})..."
+        )
         try:
-            ohlcv = self.exchange.fetch_ohlcv(self.symbol, timeframe=self.timeframe, limit=required_limit)
+            ohlcv = self.exchange.fetch_ohlcv(
+                self.symbol, timeframe=self.timeframe, limit=required_limit
+            )
             if not ohlcv:
-                logger.warning(f"{Fore.YELLOW}No historical data returned for {self.symbol}.{Style.RESET_ALL}")
+                logger.warning(
+                    f"{Fore.YELLOW}No historical data returned for {self.symbol}.{Style.RESET_ALL}"
+                )
                 return None
 
-            df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
-            df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)  # Ensure UTC
+            df = pd.DataFrame(
+                ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+            )
+            df["timestamp"] = pd.to_datetime(
+                df["timestamp"], unit="ms", utc=True
+            )  # Ensure UTC
             df.set_index("timestamp", inplace=True)
             for col in ["open", "high", "low", "close", "volume"]:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -813,21 +994,28 @@ class ScalpingBot:
             initial_len = len(df)
             df.dropna(inplace=True)
             if len(df) < initial_len:
-                logger.debug(f"Dropped {initial_len - len(df)} rows with NaNs from history.")
+                logger.debug(
+                    f"Dropped {initial_len - len(df)} rows with NaNs from history."
+                )
 
-            min_required_len = max(self.rsi_period + 1, self.macd_long_period, self.atr_period + 1)
+            min_required_len = max(
+                self.rsi_period + 1, self.macd_long_period, self.atr_period + 1
+            )
             if len(df) < min_required_len:
                 logger.warning(
                     f"{Fore.YELLOW}Insufficient history after cleaning for {self.symbol}. Got {len(df)}, needed ~{min_required_len}. Indicators may fail.{Style.RESET_ALL}"
                 )
                 return None
 
-            logger.debug(f"Fetched and processed {len(df)} historical candles for {self.symbol}.")
+            logger.debug(
+                f"Fetched and processed {len(df)} historical candles for {self.symbol}."
+            )
             return df
 
         except Exception as e:
             logger.error(
-                f"{Fore.RED}Error fetching/processing history for {self.symbol}: {e}{Style.RESET_ALL}", exc_info=True
+                f"{Fore.RED}Error fetching/processing history for {self.symbol}: {e}{Style.RESET_ALL}",
+                exc_info=True,
             )
             return None
 
@@ -842,7 +1030,10 @@ class ScalpingBot:
             free_balance = balance_data.get(quote_currency, {}).get("free")
             if free_balance is None or free_balance == 0.0:
                 usable_balance = (
-                    balance_data.get("info", {}).get("result", {}).get("list", [{}])[0].get("totalAvailableBalance")
+                    balance_data.get("info", {})
+                    .get("result", {})
+                    .get("list", [{}])[0]
+                    .get("totalAvailableBalance")
                 )  # Example for Bybit V5 Unified
                 if usable_balance is not None:
                     logger.debug(
@@ -861,14 +1052,21 @@ class ScalpingBot:
                 )
                 return 10000.0
             else:
-                logger.error(f"{Fore.RED}Authentication failed fetching balance for {quote_currency}.{Style.RESET_ALL}")
+                logger.error(
+                    f"{Fore.RED}Authentication failed fetching balance for {quote_currency}.{Style.RESET_ALL}"
+                )
                 return 0.0
         except Exception as e:
-            logger.error(f"{Fore.RED}Could not fetch balance for {quote_currency}: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Could not fetch balance for {quote_currency}: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             return 0.0
 
     @retry_api_call(max_retries=1)
-    def fetch_order_status(self, order_id: str, symbol: str | None = None) -> dict[str, Any] | None:
+    def fetch_order_status(
+        self, order_id: str, symbol: str | None = None
+    ) -> dict[str, Any] | None:
         """Fetches the status of a specific order by its ID."""
         if not order_id:
             return None  # No ID to fetch
@@ -880,7 +1078,9 @@ class ScalpingBot:
             status = order_info.get("status", STATUS_UNKNOWN)
             filled = order_info.get("filled", 0.0)
             avg_price = order_info.get("average")
-            logger.debug(f"Order {order_id} status: {status}, Filled: {filled}, AvgPrice: {avg_price}")
+            logger.debug(
+                f"Order {order_id} status: {status}, Filled: {filled}, AvgPrice: {avg_price}"
+            )
             return order_info
         except ccxt.OrderNotFound:
             logger.warning(
@@ -888,7 +1088,9 @@ class ScalpingBot:
             )
             return None  # Return None, let calling function decide how to handle
         except Exception as e:
-            logger.error(f"{Fore.RED}Error fetching status for order {order_id}: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Error fetching status for order {order_id}: {e}{Style.RESET_ALL}"
+            )
             # Don't log full trace usually, retry handles network/rate limits
             return None  # Status is unknown
 
@@ -921,8 +1123,12 @@ class ScalpingBot:
             return None
         try:
             delta = close_prices.diff(1)
-            gain = delta.where(delta > 0, 0.0).ewm(alpha=1 / period, adjust=False).mean()
-            loss = -delta.where(delta < 0, 0.0).ewm(alpha=1 / period, adjust=False).mean()
+            gain = (
+                delta.where(delta > 0, 0.0).ewm(alpha=1 / period, adjust=False).mean()
+            )
+            loss = (
+                -delta.where(delta < 0, 0.0).ewm(alpha=1 / period, adjust=False).mean()
+            )
             rs = gain / loss.replace(0, 1e-9)
             rsi = 100.0 - (100.0 / (1.0 + rs))
             return float(rsi.iloc[-1]) if pd.notna(rsi.iloc[-1]) else None
@@ -942,7 +1148,11 @@ class ScalpingBot:
             macd_line = ema_short - ema_long
             signal_line = macd_line.ewm(span=signal_period, adjust=False).mean()
             histogram = macd_line - signal_line
-            macd_val, signal_val, hist_val = macd_line.iloc[-1], signal_line.iloc[-1], histogram.iloc[-1]
+            macd_val, signal_val, hist_val = (
+                macd_line.iloc[-1],
+                signal_line.iloc[-1],
+                histogram.iloc[-1],
+            )
             if pd.isna(macd_val) or pd.isna(signal_val) or pd.isna(hist_val):
                 return None, None, None
             return float(macd_val), float(signal_val), float(hist_val)
@@ -951,7 +1161,11 @@ class ScalpingBot:
 
     @staticmethod
     def calculate_stoch_rsi(
-        close_prices: pd.Series, rsi_period: int, stoch_period: int, k_period: int, d_period: int
+        close_prices: pd.Series,
+        rsi_period: int,
+        stoch_period: int,
+        k_period: int,
+        d_period: int,
     ) -> tuple[float | None, float | None]:
         min_len = rsi_period + stoch_period + max(k_period, d_period)
         if close_prices is None or len(close_prices) < min_len:
@@ -962,8 +1176,16 @@ class ScalpingBot:
                 return None, None  # Need RSI first
             # Need series for rolling calculation, re-calculate RSI series here
             delta = close_prices.diff(1)
-            gain = delta.where(delta > 0, 0.0).ewm(alpha=1 / rsi_period, adjust=False).mean()
-            loss = -delta.where(delta < 0, 0.0).ewm(alpha=1 / rsi_period, adjust=False).mean()
+            gain = (
+                delta.where(delta > 0, 0.0)
+                .ewm(alpha=1 / rsi_period, adjust=False)
+                .mean()
+            )
+            loss = (
+                -delta.where(delta < 0, 0.0)
+                .ewm(alpha=1 / rsi_period, adjust=False)
+                .mean()
+            )
             rs = gain / loss.replace(0, 1e-9)
             rsi_series = (100.0 - (100.0 / (1.0 + rs))).dropna()
             if len(rsi_series) < stoch_period:
@@ -971,7 +1193,9 @@ class ScalpingBot:
 
             min_rsi = rsi_series.rolling(window=stoch_period).min()
             max_rsi = rsi_series.rolling(window=stoch_period).max()
-            stoch_rsi = (100.0 * (rsi_series - min_rsi) / (max_rsi - min_rsi).replace(0, 1e-9)).dropna()
+            stoch_rsi = (
+                100.0 * (rsi_series - min_rsi) / (max_rsi - min_rsi).replace(0, 1e-9)
+            ).dropna()
             if len(stoch_rsi) < max(k_period, d_period):
                 return None, None
 
@@ -986,7 +1210,10 @@ class ScalpingBot:
 
     @staticmethod
     def calculate_atr(
-        high_prices: pd.Series, low_prices: pd.Series, close_prices: pd.Series, period: int
+        high_prices: pd.Series,
+        low_prices: pd.Series,
+        close_prices: pd.Series,
+        period: int,
     ) -> float | None:
         min_len = period + 1
         if (
@@ -1031,7 +1258,9 @@ class ScalpingBot:
             hist_data_vol = self.fetch_historical_data(limit=self.volatility_window + 5)
             volatility = None
             if hist_data_vol is not None and not hist_data_vol.empty:
-                volatility = self.calculate_volatility(hist_data_vol["close"], self.volatility_window)
+                volatility = self.calculate_volatility(
+                    hist_data_vol["close"], self.volatility_window
+                )
             if volatility is not None and volatility > 1e-9:
                 size_factor = 1 / (1 + volatility * self.volatility_multiplier * 100)
                 size_factor = max(0.25, min(1.75, size_factor))
@@ -1040,7 +1269,9 @@ class ScalpingBot:
                     f"Volatility ({volatility:.5f}) adjusted size factor: {size_factor:.3f}. Adjusted size: {final_size_quote:.4f} {quote_currency}"
                 )
             else:
-                logger.debug("Volatility adjustment skipped (no data or low volatility).")
+                logger.debug(
+                    "Volatility adjustment skipped (no data or low volatility)."
+                )
         else:
             logger.debug("Volatility adjustment disabled.")
 
@@ -1057,7 +1288,9 @@ class ScalpingBot:
             return 0.0
         order_size_base = final_size_quote / current_price
         try:
-            amount_precise_str = self.exchange.amount_to_precision(self.symbol, order_size_base)
+            amount_precise_str = self.exchange.amount_to_precision(
+                self.symbol, order_size_base
+            )
             amount_precise = float(amount_precise_str)
             min_amount = self.market_info.get("limits", {}).get("amount", {}).get("min")
             if min_amount is not None and amount_precise < min_amount:
@@ -1066,7 +1299,9 @@ class ScalpingBot:
                 )
                 return 0.0
         except Exception as e:
-            logger.error(f"{Fore.RED}Error checking/applying amount precision/limits: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Error checking/applying amount precision/limits: {e}{Style.RESET_ALL}"
+            )
             return 0.0
 
         logger.info(
@@ -1118,9 +1353,13 @@ class ScalpingBot:
         # Apply precision
         try:
             if stop_loss_price is not None:
-                stop_loss_price = float(self.exchange.price_to_precision(self.symbol, stop_loss_price))
+                stop_loss_price = float(
+                    self.exchange.price_to_precision(self.symbol, stop_loss_price)
+                )
             if take_profit_price is not None:
-                take_profit_price = float(self.exchange.price_to_precision(self.symbol, take_profit_price))
+                take_profit_price = float(
+                    self.exchange.price_to_precision(self.symbol, take_profit_price)
+                )
         except Exception as e:
             logger.error(
                 f"{Fore.RED}Error applying precision to SL/TP prices: {e}. SL={stop_loss_price}, TP={take_profit_price}{Style.RESET_ALL}"
@@ -1128,20 +1367,34 @@ class ScalpingBot:
             return None, None
 
         # Sanity check & adjustment
-        if side == "buy" and stop_loss_price is not None and stop_loss_price >= current_price:
+        if (
+            side == "buy"
+            and stop_loss_price is not None
+            and stop_loss_price >= current_price
+        ):
             adj_sl = current_price * 0.999
             logger.warning(
                 f"{Fore.YELLOW}Calculated SL ({stop_loss_price:.{price_precision}f}) >= current price ({current_price:.{price_precision}f}) for LONG. Adjusting to {adj_sl:.{price_precision}f}.{Style.RESET_ALL}"
             )
-            stop_loss_price = float(self.exchange.price_to_precision(self.symbol, adj_sl))
-        elif side == "sell" and stop_loss_price is not None and stop_loss_price <= current_price:
+            stop_loss_price = float(
+                self.exchange.price_to_precision(self.symbol, adj_sl)
+            )
+        elif (
+            side == "sell"
+            and stop_loss_price is not None
+            and stop_loss_price <= current_price
+        ):
             adj_sl = current_price * 1.001
             logger.warning(
                 f"{Fore.YELLOW}Calculated SL ({stop_loss_price:.{price_precision}f}) <= current price ({current_price:.{price_precision}f}) for SHORT. Adjusting to {adj_sl:.{price_precision}f}.{Style.RESET_ALL}"
             )
-            stop_loss_price = float(self.exchange.price_to_precision(self.symbol, adj_sl))
+            stop_loss_price = float(
+                self.exchange.price_to_precision(self.symbol, adj_sl)
+            )
 
-        logger.debug(f"Calculated SL={stop_loss_price}, TP={take_profit_price} for {side} entry at {entry_price}")
+        logger.debug(
+            f"Calculated SL={stop_loss_price}, TP={take_profit_price} for {side} entry at {entry_price}"
+        )
         return stop_loss_price, take_profit_price
 
     def compute_trade_signal_score(
@@ -1171,7 +1424,9 @@ class ScalpingBot:
                     f"{Fore.RED}[-1.0] OB Sell Pressure (Imb: {orderbook_imbalance:.2f} > {self.imbalance_threshold:.2f}){Style.RESET_ALL}"
                 )
             else:
-                reasons.append(f"{Fore.WHITE}[ 0.0] OB Balanced (Imb: {orderbook_imbalance:.2f}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.WHITE}[ 0.0] OB Balanced (Imb: {orderbook_imbalance:.2f}){Style.RESET_ALL}"
+                )
         else:
             reasons.append(f"{Fore.WHITE}[ 0.0] OB Data N/A{Style.RESET_ALL}")
 
@@ -1180,12 +1435,18 @@ class ScalpingBot:
         if ema is not None:
             if price > ema * 1.0002:
                 score += 1.0
-                reasons.append(f"{Fore.GREEN}[+1.0] Price > EMA ({price:.2f} > {ema:.2f}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.GREEN}[+1.0] Price > EMA ({price:.2f} > {ema:.2f}){Style.RESET_ALL}"
+                )
             elif price < ema * 0.9998:
                 score -= 1.0
-                reasons.append(f"{Fore.RED}[-1.0] Price < EMA ({price:.2f} < {ema:.2f}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.RED}[-1.0] Price < EMA ({price:.2f} < {ema:.2f}){Style.RESET_ALL}"
+                )
             else:
-                reasons.append(f"{Fore.WHITE}[ 0.0] Price near EMA ({price:.2f} ~ {ema:.2f}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.WHITE}[ 0.0] Price near EMA ({price:.2f} ~ {ema:.2f}){Style.RESET_ALL}"
+                )
         else:
             reasons.append(f"{Fore.WHITE}[ 0.0] EMA N/A{Style.RESET_ALL}")
 
@@ -1194,17 +1455,26 @@ class ScalpingBot:
         if rsi is not None:
             if rsi < RSI_OVERSOLD:
                 score += 1.0
-                reasons.append(f"{Fore.GREEN}[+1.0] RSI Oversold ({rsi:.1f} < {RSI_OVERSOLD}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.GREEN}[+1.0] RSI Oversold ({rsi:.1f} < {RSI_OVERSOLD}){Style.RESET_ALL}"
+                )
             elif rsi > RSI_OVERBOUGHT:
                 score -= 1.0
-                reasons.append(f"{Fore.RED}[-1.0] RSI Overbought ({rsi:.1f} > {RSI_OVERBOUGHT}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.RED}[-1.0] RSI Overbought ({rsi:.1f} > {RSI_OVERBOUGHT}){Style.RESET_ALL}"
+                )
             else:
-                reasons.append(f"{Fore.WHITE}[ 0.0] RSI Neutral ({rsi:.1f}){Style.RESET_ALL}")
+                reasons.append(
+                    f"{Fore.WHITE}[ 0.0] RSI Neutral ({rsi:.1f}){Style.RESET_ALL}"
+                )
         else:
             reasons.append(f"{Fore.WHITE}[ 0.0] RSI N/A{Style.RESET_ALL}")
 
         # 4. MACD Momentum/Cross (+/- 1)
-        macd_line, macd_signal = indicators.get("macd_line"), indicators.get("macd_signal")
+        macd_line, macd_signal = (
+            indicators.get("macd_line"),
+            indicators.get("macd_signal"),
+        )
         if macd_line is not None and macd_signal is not None:
             if macd_line > macd_signal:
                 score += 1.0
@@ -1269,28 +1539,42 @@ class ScalpingBot:
         # --- Prepare Base Parameters and Precision ---
         params = {}
         try:
-            amount_precise_str = self.exchange.amount_to_precision(self.symbol, order_size_base)
+            amount_precise_str = self.exchange.amount_to_precision(
+                self.symbol, order_size_base
+            )
             amount_precise = float(amount_precise_str)
 
             limit_price_precise = None
             if order_type == "limit":
                 offset = (
-                    self.limit_order_entry_offset_pct_buy if side == "buy" else self.limit_order_entry_offset_pct_sell
+                    self.limit_order_entry_offset_pct_buy
+                    if side == "buy"
+                    else self.limit_order_entry_offset_pct_sell
                 )
                 price_factor = (1 - offset) if side == "buy" else (1 + offset)
                 limit_price = current_price * price_factor
-                limit_price_precise_str = self.exchange.price_to_precision(self.symbol, limit_price)
+                limit_price_precise_str = self.exchange.price_to_precision(
+                    self.symbol, limit_price
+                )
                 limit_price_precise = float(limit_price_precise_str)
 
             # --- Add Bybit V5 SL/TP & Trigger Params ---
             if stop_loss_price is not None:
-                params["stopLossPrice"] = self.exchange.price_to_precision(self.symbol, stop_loss_price)
+                params["stopLossPrice"] = self.exchange.price_to_precision(
+                    self.symbol, stop_loss_price
+                )
                 if self.sl_trigger_by:
-                    params["slTriggerBy"] = self.sl_trigger_by  # Add trigger type if configured
+                    params["slTriggerBy"] = (
+                        self.sl_trigger_by
+                    )  # Add trigger type if configured
             if take_profit_price is not None:
-                params["takeProfitPrice"] = self.exchange.price_to_precision(self.symbol, take_profit_price)
+                params["takeProfitPrice"] = self.exchange.price_to_precision(
+                    self.symbol, take_profit_price
+                )
                 if self.tp_trigger_by:
-                    params["tpTriggerBy"] = self.tp_trigger_by  # Add trigger type if configured
+                    params["tpTriggerBy"] = (
+                        self.tp_trigger_by
+                    )  # Add trigger type if configured
 
             # Check limits
             limits = self.market_info.get("limits", {})
@@ -1309,7 +1593,10 @@ class ScalpingBot:
                 return None
 
         except Exception as e:
-            logger.error(f"{Fore.RED}Error preparing entry order values/params: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Error preparing entry order values/params: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             return None
 
         log_color = Fore.GREEN if side == "buy" else Fore.RED
@@ -1319,7 +1606,9 @@ class ScalpingBot:
         # --- Simulation ---
         if self.simulation_mode:
             sim_id = f"sim_entry_{int(time.time() * 1000)}_{side[:1]}"
-            sim_entry_price = limit_price_precise if order_type == "limit" else current_price
+            sim_entry_price = (
+                limit_price_precise if order_type == "limit" else current_price
+            )
             sim_cost = amount_precise * sim_entry_price
             sim_status = "open" if order_type == "limit" else "closed"
             simulated_order = {
@@ -1357,17 +1646,25 @@ class ScalpingBot:
 
         # --- Live Trading ---
         else:
-            logger.info(f"{log_color}Attempting to place LIVE {action_desc} order with {sl_tp_info}...")
+            logger.info(
+                f"{log_color}Attempting to place LIVE {action_desc} order with {sl_tp_info}..."
+            )
             logger.info(
                 f" -> Details: Size={amount_precise:.{amount_precision}f} {base_currency}, Limit={limit_price_precise}, Params={params}"
             )
             order = None
             try:
                 if order_type == "market":
-                    order = self.exchange.create_market_order(self.symbol, side, amount_precise, params=params)
+                    order = self.exchange.create_market_order(
+                        self.symbol, side, amount_precise, params=params
+                    )
                 elif order_type == "limit":
                     order = self.exchange.create_limit_order(
-                        self.symbol, side, amount_precise, limit_price_precise, params=params
+                        self.symbol,
+                        side,
+                        amount_precise,
+                        limit_price_precise,
+                        params=params,
                     )
 
                 if order:
@@ -1380,10 +1677,18 @@ class ScalpingBot:
                     oavg = order.get("average")
                     ocost = order.get("cost", 0.0)
                     ostatus = order.get("status", STATUS_UNKNOWN)
-                    info_sl = order.get("info", {}).get("stopLossPrice", params.get("stopLossPrice", "N/A"))
-                    info_tp = order.get("info", {}).get("takeProfitPrice", params.get("takeProfitPrice", "N/A"))
-                    info_sl_trig = order.get("info", {}).get("slTriggerBy", params.get("slTriggerBy", "Def"))
-                    info_tp_trig = order.get("info", {}).get("tpTriggerBy", params.get("tpTriggerBy", "Def"))
+                    info_sl = order.get("info", {}).get(
+                        "stopLossPrice", params.get("stopLossPrice", "N/A")
+                    )
+                    info_tp = order.get("info", {}).get(
+                        "takeProfitPrice", params.get("takeProfitPrice", "N/A")
+                    )
+                    info_sl_trig = order.get("info", {}).get(
+                        "slTriggerBy", params.get("slTriggerBy", "Def")
+                    )
+                    info_tp_trig = order.get("info", {}).get(
+                        "tpTriggerBy", params.get("tpTriggerBy", "Def")
+                    )
 
                     log_price = (
                         f"Price: {oprice:.{price_precision}f}"
@@ -1399,7 +1704,10 @@ class ScalpingBot:
                         f"Amount: {oamt:.{amount_precision}f}, Filled: {ofilled:.{amount_precision}f}, {log_price}, Cost: {ocost:.2f}, "
                         f"Status: {ostatus}, SL: {info_sl} ({info_sl_trig}), TP: {info_tp} ({info_tp_trig}), Confidence: {confidence_level}{Style.RESET_ALL}"
                     )
-                    order["bot_custom_info"] = {"confidence": confidence_level, "initial_quote_size": order_size_quote}
+                    order["bot_custom_info"] = {
+                        "confidence": confidence_level,
+                        "initial_quote_size": order_size_quote,
+                    }
                     return order
                 else:
                     logger.error(
@@ -1408,7 +1716,9 @@ class ScalpingBot:
                     return None
 
             except (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.ExchangeError) as e:
-                logger.error(f"{Fore.RED}LIVE {action_desc} Order Failed ({type(e).__name__}): {e}{Style.RESET_ALL}")
+                logger.error(
+                    f"{Fore.RED}LIVE {action_desc} Order Failed ({type(e).__name__}): {e}{Style.RESET_ALL}"
+                )
                 if isinstance(e, ccxt.InvalidOrder):
                     logger.error(f" -> Params Sent: {params}")
                 if isinstance(e, ccxt.InsufficientFunds):
@@ -1416,7 +1726,8 @@ class ScalpingBot:
                 return None
             except Exception as e:
                 logger.error(
-                    f"{Fore.RED}LIVE {action_desc} Order Failed (Unexpected Error): {e}{Style.RESET_ALL}", exc_info=True
+                    f"{Fore.RED}LIVE {action_desc} Order Failed (Unexpected Error): {e}{Style.RESET_ALL}",
+                    exc_info=True,
                 )
                 return None
 
@@ -1426,11 +1737,15 @@ class ScalpingBot:
         if not order_id:
             return False
         target_symbol = symbol or self.symbol
-        logger.info(f"{Fore.YELLOW}Attempting to cancel order {order_id} ({target_symbol})...{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.YELLOW}Attempting to cancel order {order_id} ({target_symbol})...{Style.RESET_ALL}"
+        )
         try:
             # Some exchanges might need params for cancellation (e.g., {'orderType': 'Limit'}) - check docs if needed
             self.exchange.cancel_order(order_id, target_symbol)
-            logger.info(f"{Fore.YELLOW}---> Successfully cancelled order {order_id}.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.YELLOW}---> Successfully cancelled order {order_id}.{Style.RESET_ALL}"
+            )
             return True
         except ccxt.OrderNotFound:
             logger.warning(
@@ -1444,10 +1759,15 @@ class ScalpingBot:
             raise e
         except ccxt.ExchangeError as e:
             # Log specific exchange errors during cancellation
-            logger.error(f"{Fore.RED}Exchange error cancelling order {order_id}: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Exchange error cancelling order {order_id}: {e}{Style.RESET_ALL}"
+            )
             return False
         except Exception as e:
-            logger.error(f"{Fore.RED}Unexpected error cancelling order {order_id}: {e}{Style.RESET_ALL}", exc_info=True)
+            logger.error(
+                f"{Fore.RED}Unexpected error cancelling order {order_id}: {e}{Style.RESET_ALL}",
+                exc_info=True,
+            )
             return False
 
     @retry_api_call()
@@ -1498,12 +1818,16 @@ class ScalpingBot:
 
     def _check_pending_entries(self, indicators: dict) -> None:
         """Checks status of pending limit entry orders and updates state if filled."""
-        if not any(pos["status"] == STATUS_PENDING_ENTRY for pos in self.open_positions):
+        if not any(
+            pos["status"] == STATUS_PENDING_ENTRY for pos in self.open_positions
+        ):
             return
 
         logger.debug("Checking status of pending entry orders...")
         positions_to_update = []
-        current_price = self.fetch_market_price()  # Needed for SL/TP calculation context
+        current_price = (
+            self.fetch_market_price()
+        )  # Needed for SL/TP calculation context
 
         for position in self.open_positions:
             if position["status"] == STATUS_PENDING_ENTRY:
@@ -1514,7 +1838,9 @@ class ScalpingBot:
                     logger.warning(
                         f"{Fore.YELLOW}Pending entry order {entry_order_id} status unknown/not found. Removing.{Style.RESET_ALL}"
                     )
-                    positions_to_update.append({"id": entry_order_id, "action": "remove"})
+                    positions_to_update.append(
+                        {"id": entry_order_id, "action": "remove"}
+                    )
                     continue
 
                 order_status = order_info.get("status")
@@ -1526,12 +1852,17 @@ class ScalpingBot:
                         logger.error(
                             f"{Fore.RED}Entry order {entry_order_id} closed but average price missing! Cannot manage. Removing.{Style.RESET_ALL}"
                         )
-                        positions_to_update.append({"id": entry_order_id, "action": "remove"})
+                        positions_to_update.append(
+                            {"id": entry_order_id, "action": "remove"}
+                        )
                         continue
 
-                    orig_size = position.get("original_size", position["size"])  # Use original if stored, else current
+                    orig_size = position.get(
+                        "original_size", position["size"]
+                    )  # Use original if stored, else current
                     if (
-                        filled_amount is None or abs(filled_amount - orig_size) / orig_size > 0.05
+                        filled_amount is None
+                        or abs(filled_amount - orig_size) / orig_size > 0.05
                     ):  # Check > 5% deviation
                         logger.warning(
                             f"{Fore.YELLOW}Entry order {entry_order_id} closed but filled amount ({filled_amount}) differs >5% from requested ({orig_size}). Using filled amount.{Style.RESET_ALL}"
@@ -1561,26 +1892,40 @@ class ScalpingBot:
                         )
                         position["stop_loss_price"] = sl_price
                         position["take_profit_price"] = tp_price
-                        logger.info(f"Stored SL={sl_price}, TP={tp_price} for activated position {entry_order_id}")
+                        logger.info(
+                            f"Stored SL={sl_price}, TP={tp_price} for activated position {entry_order_id}"
+                        )
                     else:
                         logger.error(
                             f"{Fore.RED}Could not fetch current price after entry fill for {entry_order_id}. SL/TP prices not calculated!{Style.RESET_ALL}"
                         )
 
-                    positions_to_update.append({"id": entry_order_id, "action": "update", "data": position})
+                    positions_to_update.append(
+                        {"id": entry_order_id, "action": "update", "data": position}
+                    )
 
                 elif order_status in ["canceled", "rejected", "expired"]:
-                    reason = order_info.get("info", {}).get("rejectReason", "Unknown")  # Try to get rejection reason
+                    reason = order_info.get("info", {}).get(
+                        "rejectReason", "Unknown"
+                    )  # Try to get rejection reason
                     logger.warning(
                         f"{Fore.YELLOW}Pending entry order {entry_order_id} failed (Status: {order_status}, Reason: {reason}). Removing.{Style.RESET_ALL}"
                     )
-                    positions_to_update.append({"id": entry_order_id, "action": "remove"})
+                    positions_to_update.append(
+                        {"id": entry_order_id, "action": "remove"}
+                    )
 
         # Apply updates
         if positions_to_update:
             new_positions_list = []
-            ids_to_remove = {p["id"] for p in positions_to_update if p["action"] == "remove"}
-            updates_dict = {p["id"]: p["data"] for p in positions_to_update if p["action"] == "update"}
+            ids_to_remove = {
+                p["id"] for p in positions_to_update if p["action"] == "remove"
+            }
+            updates_dict = {
+                p["id"]: p["data"]
+                for p in positions_to_update
+                if p["action"] == "update"
+            }
             for pos in self.open_positions:
                 if pos["id"] in ids_to_remove:
                     continue
@@ -1627,22 +1972,30 @@ class ScalpingBot:
                 )
                 exit_reason = f"Main Order Vanished ({pos_id})"
             elif order_info.get("status") == "closed":
-                exit_price = order_info.get("average") or current_price  # Use current as fallback
-                stop_loss_hit_price = order_info.get("info", {}).get("stopLossPrice")  # Check if SL price is in info
+                exit_price = (
+                    order_info.get("average") or current_price
+                )  # Use current as fallback
+                stop_loss_hit_price = order_info.get("info", {}).get(
+                    "stopLossPrice"
+                )  # Check if SL price is in info
                 take_profit_hit_price = order_info.get("info", {}).get(
                     "takeProfitPrice"
                 )  # Check if TP price is in info
 
                 # Infer reason more reliably if possible
                 if (
-                    stop_loss_hit_price and abs(float(stop_loss_hit_price) - exit_price) / exit_price < 0.001
+                    stop_loss_hit_price
+                    and abs(float(stop_loss_hit_price) - exit_price) / exit_price
+                    < 0.001
                 ):  # SL triggered
                     exit_reason = f"Stop Loss Triggered (Order {pos_id})"
                     logger.info(
                         f"{Fore.RED}{exit_reason} at ~{exit_price:.{self.market_info['precision']['price']}f}{Style.RESET_ALL}"
                     )
                 elif (
-                    take_profit_hit_price and abs(float(take_profit_hit_price) - exit_price) / exit_price < 0.001
+                    take_profit_hit_price
+                    and abs(float(take_profit_hit_price) - exit_price) / exit_price
+                    < 0.001
                 ):  # TP triggered
                     exit_reason = f"Take Profit Triggered (Order {pos_id})"
                     logger.info(
@@ -1660,16 +2013,26 @@ class ScalpingBot:
                     if sl_triggered:
                         exit_reason = f"Stop Loss Triggered (Inferred - Order {pos_id})"
                     elif tp_triggered:
-                        exit_reason = f"Take Profit Triggered (Inferred - Order {pos_id})"
+                        exit_reason = (
+                            f"Take Profit Triggered (Inferred - Order {pos_id})"
+                        )
                     else:
                         exit_reason = f"Order Closed (Reason unclear - {pos_id})"
-                    log_color = Fore.RED if sl_triggered else (Fore.GREEN if tp_triggered else Fore.YELLOW)
+                    log_color = (
+                        Fore.RED
+                        if sl_triggered
+                        else (Fore.GREEN if tp_triggered else Fore.YELLOW)
+                    )
                     logger.info(
                         f"{log_color}{exit_reason} at ~{exit_price:.{self.market_info['precision']['price']}f}{Style.RESET_ALL}"
                     )
 
             # --- 2. Time-Based Exit Check (if order still open) ---
-            elif not exit_reason and self.time_based_exit_minutes and self.time_based_exit_minutes > 0:
+            elif (
+                not exit_reason
+                and self.time_based_exit_minutes
+                and self.time_based_exit_minutes > 0
+            ):
                 time_elapsed_minutes = (time.time() - entry_time) / 60
                 if time_elapsed_minutes >= self.time_based_exit_minutes:
                     logger.info(
@@ -1677,9 +2040,13 @@ class ScalpingBot:
                     )
                     exit_reason = "Time Limit Reached"
                     if self.cancel_order_by_id(pos_id):  # Cancel original order first
-                        market_close_order = self._place_market_close_order(position, current_price)
+                        market_close_order = self._place_market_close_order(
+                            position, current_price
+                        )
                         if market_close_order:
-                            exit_price = market_close_order.get("average", current_price)
+                            exit_price = market_close_order.get(
+                                "average", current_price
+                            )
                         else:
                             exit_reason = None
                             logger.critical(
@@ -1714,11 +2081,19 @@ class ScalpingBot:
                             else (1 + self.trailing_stop_loss_percentage)
                         )
                         potential_tsl = current_price * tsl_factor
-                        breakeven_plus = entry_price * (1 + 0.0005) if side == "buy" else entry_price * (1 - 0.0005)
-                        new_tsl_price = (
-                            max(potential_tsl, breakeven_plus) if side == "buy" else min(potential_tsl, breakeven_plus)
+                        breakeven_plus = (
+                            entry_price * (1 + 0.0005)
+                            if side == "buy"
+                            else entry_price * (1 - 0.0005)
                         )
-                        new_tsl_price = float(self.exchange.price_to_precision(self.symbol, new_tsl_price))
+                        new_tsl_price = (
+                            max(potential_tsl, breakeven_plus)
+                            if side == "buy"
+                            else min(potential_tsl, breakeven_plus)
+                        )
+                        new_tsl_price = float(
+                            self.exchange.price_to_precision(self.symbol, new_tsl_price)
+                        )
                         logger.info(
                             f"{Fore.MAGENTA}Trailing Stop ACTIVATED for {side.upper()} {pos_id} at {new_tsl_price:.{self.market_info['precision']['price']}f} (Price: {current_price:.{self.market_info['precision']['price']}f}){Style.RESET_ALL}"
                         )
@@ -1733,7 +2108,9 @@ class ScalpingBot:
                     if (side == "buy" and potential_tsl > trailing_sl_price) or (
                         side == "sell" and potential_tsl < trailing_sl_price
                     ):
-                        new_tsl_price = float(self.exchange.price_to_precision(self.symbol, potential_tsl))
+                        new_tsl_price = float(
+                            self.exchange.price_to_precision(self.symbol, potential_tsl)
+                        )
                         logger.info(
                             f"{Fore.MAGENTA}Trailing Stop UPDATED for {side.upper()} {pos_id} to {new_tsl_price:.{self.market_info['precision']['price']}f} (Price: {current_price:.{self.market_info['precision']['price']}f}){Style.RESET_ALL}"
                         )
@@ -1744,9 +2121,15 @@ class ScalpingBot:
                         f"{Fore.YELLOW}Attempting TSL update via edit_order for {pos_id} to SL={new_tsl_price}. VERIFY EXCHANGE/CCXT SUPPORT!{Style.RESET_ALL}"
                     )
                     try:
-                        edit_params = {"stopLossPrice": self.exchange.price_to_precision(self.symbol, new_tsl_price)}
+                        edit_params = {
+                            "stopLossPrice": self.exchange.price_to_precision(
+                                self.symbol, new_tsl_price
+                            )
+                        }
                         if self.sl_trigger_by:
-                            edit_params["slTriggerBy"] = self.sl_trigger_by  # Include trigger type if set
+                            edit_params["slTriggerBy"] = (
+                                self.sl_trigger_by
+                            )  # Include trigger type if set
                         # Pass other required params for edit_order (might need type, side, amount etc.) - CHECK CCXT DOCS
                         edited_order = self.exchange.edit_order(
                             id=pos_id,
@@ -1754,7 +2137,9 @@ class ScalpingBot:
                             type=order_info.get("type"),  # Pass original type
                             side=order_info.get("side"),  # Pass original side
                             amount=order_info.get("amount"),  # Pass original amount
-                            price=order_info.get("price"),  # Pass original price (for limit)
+                            price=order_info.get(
+                                "price"
+                            ),  # Pass original price (for limit)
                             params=edit_params,
                         )
                         if edited_order:
@@ -1778,7 +2163,8 @@ class ScalpingBot:
                         # self.enable_trailing_stop_loss = False
                     except Exception as e:
                         logger.error(
-                            f"{Fore.RED}Error modifying order {pos_id} for TSL: {e}{Style.RESET_ALL}", exc_info=True
+                            f"{Fore.RED}Error modifying order {pos_id} for TSL: {e}{Style.RESET_ALL}",
+                            exc_info=True,
                         )
 
             # --- 4. Process Exit ---
@@ -1821,7 +2207,9 @@ class ScalpingBot:
             self.open_positions = new_positions_list
             self._save_state()
 
-    def _place_market_close_order(self, position: dict[str, Any], current_price: float) -> dict[str, Any] | None:
+    def _place_market_close_order(
+        self, position: dict[str, Any], current_price: float
+    ) -> dict[str, Any] | None:
         """Places a market order to close a given position."""
         # (Implementation remains same as V3 Bybit-mod)
         pos_id = position["id"]
@@ -1857,7 +2245,9 @@ class ScalpingBot:
             order = None
             try:
                 params = {"reduce_only": True}
-                order = self.exchange.create_market_order(self.symbol, close_side, size, params=params)
+                order = self.exchange.create_market_order(
+                    self.symbol, close_side, size, params=params
+                )
                 if order:
                     oid = order.get("id", "N/A")
                     oavg = order.get("average", current_price)
@@ -1872,11 +2262,14 @@ class ScalpingBot:
                     )
                     return None
             except (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.ExchangeError) as e:
-                logger.error(f"{Fore.RED}LIVE Market Close Order Failed ({type(e).__name__}): {e}{Style.RESET_ALL}")
+                logger.error(
+                    f"{Fore.RED}LIVE Market Close Order Failed ({type(e).__name__}): {e}{Style.RESET_ALL}"
+                )
                 return None
             except Exception as e:
                 logger.error(
-                    f"{Fore.RED}LIVE Market Close Order Failed (Unexpected Error): {e}{Style.RESET_ALL}", exc_info=True
+                    f"{Fore.RED}LIVE Market Close Order Failed (Unexpected Error): {e}{Style.RESET_ALL}",
+                    exc_info=True,
                 )
                 return None
 
@@ -1889,8 +2282,15 @@ class ScalpingBot:
         order_book_data = self.fetch_order_book()
         historical_data = self.fetch_historical_data()
 
-        if current_price is None or historical_data is None or historical_data.empty or order_book_data is None:
-            logger.warning(f"{Fore.YELLOW}Incomplete market data fetched. Skipping iteration.{Style.RESET_ALL}")
+        if (
+            current_price is None
+            or historical_data is None
+            or historical_data.empty
+            or order_book_data is None
+        ):
+            logger.warning(
+                f"{Fore.YELLOW}Incomplete market data fetched. Skipping iteration.{Style.RESET_ALL}"
+            )
             return None
 
         return {
@@ -1907,20 +2307,32 @@ class ScalpingBot:
         high = historical_data["high"]
         low = historical_data["low"]
 
-        indicators["volatility"] = self.calculate_volatility(close, self.volatility_window)
+        indicators["volatility"] = self.calculate_volatility(
+            close, self.volatility_window
+        )
         indicators["ema"] = self.calculate_ema(close, self.ema_period)
         indicators["rsi"] = self.calculate_rsi(close, self.rsi_period)
-        indicators["macd_line"], indicators["macd_signal"], indicators["macd_hist"] = self.calculate_macd(
-            close, self.macd_short_period, self.macd_long_period, self.macd_signal_period
+        indicators["macd_line"], indicators["macd_signal"], indicators["macd_hist"] = (
+            self.calculate_macd(
+                close,
+                self.macd_short_period,
+                self.macd_long_period,
+                self.macd_signal_period,
+            )
         )
         indicators["stoch_k"], indicators["stoch_d"] = self.calculate_stoch_rsi(
-            close, self.rsi_period, self.stoch_rsi_period, self.stoch_rsi_k_period, self.stoch_rsi_d_period
+            close,
+            self.rsi_period,
+            self.stoch_rsi_period,
+            self.stoch_rsi_k_period,
+            self.stoch_rsi_d_period,
         )
         indicators["atr"] = self.calculate_atr(high, low, close, self.atr_period)
 
         # Log indicators
         log_inds = {
-            k: f"{v:.4f}" if isinstance(v, float) else ("N/A" if v is None else v) for k, v in indicators.items()
+            k: f"{v:.4f}" if isinstance(v, float) else ("N/A" if v is None else v)
+            for k, v in indicators.items()
         }
         self.market_info["precision"]["price"]
         logger.info(
@@ -1940,7 +2352,9 @@ class ScalpingBot:
         can_trade = order_size_quote > 0
 
         # Compute signal score
-        signal_score, reasons = self.compute_trade_signal_score(current_price, indicators, orderbook_imbalance)
+        signal_score, reasons = self.compute_trade_signal_score(
+            current_price, indicators, orderbook_imbalance
+        )
         logger.info(f"Trade Signal Score: {signal_score}")
         if abs(signal_score) >= 1 or logger.isEnabledFor(logging.DEBUG):
             for reason in reasons:
@@ -1954,7 +2368,9 @@ class ScalpingBot:
             )
             return
         if not can_trade:
-            logger.warning(f"{Fore.YELLOW}Cannot enter trade: Calculated order size is zero.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}Cannot enter trade: Calculated order size is zero.{Style.RESET_ALL}"
+            )
             return
 
         # --- Entry Logic ---
@@ -1979,7 +2395,9 @@ class ScalpingBot:
                 atr=atr_value,
             )
             if sl_price is None and tp_price is None:
-                logger.error(f"{Fore.RED}Failed to calculate SL/TP prices. Cannot place entry order.{Style.RESET_ALL}")
+                logger.error(
+                    f"{Fore.RED}Failed to calculate SL/TP prices. Cannot place entry order.{Style.RESET_ALL}"
+                )
                 return
 
             # --- Place Entry Order with SL/TP Params ---
@@ -1998,17 +2416,25 @@ class ScalpingBot:
                 order_id = entry_order["id"]
                 entry_order.get("filled", 0.0)
                 # Use average fill price if available (especially for market), else use limit price or current price
-                actual_entry_price = entry_order.get("average") or entry_order.get("price") or current_price
+                actual_entry_price = (
+                    entry_order.get("average")
+                    or entry_order.get("price")
+                    or current_price
+                )
 
                 # --- Add to Bot State ---
                 new_position = {
                     "id": order_id,
                     "side": entry_side,
                     "size": entry_order.get("amount"),  # Requested amount
-                    "original_size": entry_order.get("amount"),  # Store requested amount
+                    "original_size": entry_order.get(
+                        "amount"
+                    ),  # Store requested amount
                     "entry_price": actual_entry_price,  # Best guess entry price
                     "entry_time": time.time(),
-                    "status": STATUS_PENDING_ENTRY if order_status == "open" else STATUS_ACTIVE,
+                    "status": STATUS_PENDING_ENTRY
+                    if order_status == "open"
+                    else STATUS_ACTIVE,
                     "entry_order_type": self.entry_order_type,
                     # Store the calculated SL/TP prices that were *sent* with the order
                     "stop_loss_price": sl_price,
@@ -2018,13 +2444,21 @@ class ScalpingBot:
                     "last_update_time": time.time(),
                 }
                 self.open_positions.append(new_position)
-                logger.info(f"Position {order_id} added to state with status: {new_position['status']}")
+                logger.info(
+                    f"Position {order_id} added to state with status: {new_position['status']}"
+                )
 
                 # If entry was market and filled immediately, update entry price/time more accurately
                 if new_position["status"] == STATUS_ACTIVE:
-                    new_position["entry_price"] = entry_order.get("average", actual_entry_price)  # Prefer average
-                    new_position["size"] = entry_order.get("filled", new_position["size"])  # Update to filled size
-                    new_position["entry_time"] = entry_order.get("timestamp", time.time() * 1000) / 1000
+                    new_position["entry_price"] = entry_order.get(
+                        "average", actual_entry_price
+                    )  # Prefer average
+                    new_position["size"] = entry_order.get(
+                        "filled", new_position["size"]
+                    )  # Update to filled size
+                    new_position["entry_time"] = (
+                        entry_order.get("timestamp", time.time() * 1000) / 1000
+                    )
 
                 self._save_state()
         else:
@@ -2032,14 +2466,20 @@ class ScalpingBot:
 
     def run(self) -> None:
         """Starts the main trading loop."""
-        logger.info(f"{Fore.CYAN}--- Initiating Trading Loop (Symbol: {self.symbol}) ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.CYAN}--- Initiating Trading Loop (Symbol: {self.symbol}) ---{Style.RESET_ALL}"
+        )
         # ... (Initial cleanup logic can remain) ...
 
         while True:
             self.iteration += 1
             start_time = time.time()
-            loop_prefix = f"{Fore.BLUE}===== Iteration {self.iteration} ===={Style.RESET_ALL}"
-            logger.info(f"\n{loop_prefix} Time: {pd.Timestamp.now(tz='UTC').isoformat()}")
+            loop_prefix = (
+                f"{Fore.BLUE}===== Iteration {self.iteration} ===={Style.RESET_ALL}"
+            )
+            logger.info(
+                f"\n{loop_prefix} Time: {pd.Timestamp.now(tz='UTC').isoformat()}"
+            )
 
             try:
                 # --- 1. Fetch Data ---
@@ -2068,23 +2508,30 @@ class ScalpingBot:
                 end_time = time.time()
                 execution_time = end_time - start_time
                 wait_time = max(0.1, DEFAULT_SLEEP_INTERVAL_SECONDS - execution_time)
-                logger.debug(f"{loop_prefix} Loop took {execution_time:.2f}s. Waiting {wait_time:.2f}s...")
+                logger.debug(
+                    f"{loop_prefix} Loop took {execution_time:.2f}s. Waiting {wait_time:.2f}s..."
+                )
                 time.sleep(wait_time)
 
             except KeyboardInterrupt:
                 raise
             except Exception as e:
                 logger.critical(
-                    f"{Fore.RED}{loop_prefix} Critical error in main loop: {e}{Style.RESET_ALL}", exc_info=True
+                    f"{Fore.RED}{loop_prefix} Critical error in main loop: {e}{Style.RESET_ALL}",
+                    exc_info=True,
                 )
-                logger.warning(f"{Fore.YELLOW}Pausing for 60 seconds due to critical error...{Style.RESET_ALL}")
+                logger.warning(
+                    f"{Fore.YELLOW}Pausing for 60 seconds due to critical error...{Style.RESET_ALL}"
+                )
                 time.sleep(60)
 
         # logger.info("Main trading loop concluded.") # Unreachable in normal operation
 
     def shutdown(self) -> None:
         """Performs graceful shutdown procedures."""
-        logger.warning(f"{Fore.YELLOW}--- Initiating Graceful Shutdown Sequence ---{Style.RESET_ALL}")
+        logger.warning(
+            f"{Fore.YELLOW}--- Initiating Graceful Shutdown Sequence ---{Style.RESET_ALL}"
+        )
 
         # 1. Cancel All Open Orders (associated with known positions)
         logger.info("Attempting to cancel orders linked to known positions...")
@@ -2093,7 +2540,9 @@ class ScalpingBot:
         for pos in list(self.open_positions):
             # Only cancel if the order is likely still open (pending entry or active)
             if pos.get("status") in [STATUS_PENDING_ENTRY, STATUS_ACTIVE]:
-                if self.cancel_order_by_id(pos.get("id")):  # Cancel main order (entry or active with SL/TP)
+                if self.cancel_order_by_id(
+                    pos.get("id")
+                ):  # Cancel main order (entry or active with SL/TP)
                     cancelled_count += 1
         logger.info(f"Cancelled {cancelled_count} orders linked to known positions.")
         # Optional: Attempt broader cancellation if needed
@@ -2102,7 +2551,9 @@ class ScalpingBot:
 
         # 2. Optionally Close Open Positions (Market Order)
         CLOSE_POSITIONS_ON_EXIT = False  # Default to False for safety
-        active_positions = [p for p in self.open_positions if p.get("status") == STATUS_ACTIVE]
+        active_positions = [
+            p for p in self.open_positions if p.get("status") == STATUS_ACTIVE
+        ]
         if CLOSE_POSITIONS_ON_EXIT and active_positions:
             logger.warning(
                 f"{Fore.YELLOW}Attempting market close for {len(active_positions)} active position(s)...{Style.RESET_ALL}"
@@ -2110,13 +2561,17 @@ class ScalpingBot:
             current_price = self.fetch_market_price()
             if current_price:
                 for position in list(active_positions):  # Iterate copy
-                    close_order = self._place_market_close_order(position, current_price)
+                    close_order = self._place_market_close_order(
+                        position, current_price
+                    )
                     if close_order:
                         logger.info(
                             f"{Fore.YELLOW}Market close order placed for position {position['id']}.{Style.RESET_ALL}"
                         )
                         # Find and remove the position from the main list
-                        self.open_positions = [p for p in self.open_positions if p["id"] != position["id"]]
+                        self.open_positions = [
+                            p for p in self.open_positions if p["id"] != position["id"]
+                        ]
                     else:
                         logger.error(
                             f"{Fore.RED}Failed market close for {position['id']}. Manual check needed!{Style.RESET_ALL}"
@@ -2130,13 +2585,17 @@ class ScalpingBot:
                 f"{Fore.YELLOW}{len(active_positions)} position(s) remain active. Manual management required.{Style.RESET_ALL}"
             )
             for pos in active_positions:
-                logger.warning(f" -> ID={pos['id']}, Side={pos['side']}, Size={pos['size']}")
+                logger.warning(
+                    f" -> ID={pos['id']}, Side={pos['side']}, Size={pos['size']}"
+                )
 
         # 3. Final State Save
         logger.info("Saving final state...")
         self._save_state()
 
-        logger.info(f"{Fore.CYAN}--- Scalping Bot Shutdown Complete ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.CYAN}--- Scalping Bot Shutdown Complete ---{Style.RESET_ALL}"
+        )
         logging.shutdown()
 
 
@@ -2151,11 +2610,15 @@ if __name__ == "__main__":
             logger.info(f"Creating state directory: {state_dir}")
             os.makedirs(state_dir)
 
-        bot_instance = ScalpingBot(config_file=CONFIG_FILE_NAME, state_file=STATE_FILE_NAME)
+        bot_instance = ScalpingBot(
+            config_file=CONFIG_FILE_NAME, state_file=STATE_FILE_NAME
+        )
         bot_instance.run()
 
     except KeyboardInterrupt:
-        logger.warning(f"\n{Fore.YELLOW}Shutdown signal received (Ctrl+C).{Style.RESET_ALL}")
+        logger.warning(
+            f"\n{Fore.YELLOW}Shutdown signal received (Ctrl+C).{Style.RESET_ALL}"
+        )
 
     except SystemExit as e:
         # Log SystemExit if it wasn't from a clean exit (code 0)
@@ -2167,7 +2630,8 @@ if __name__ == "__main__":
 
     except Exception as e:
         logger.critical(
-            f"{Fore.RED}An unhandled critical error broke the main spell: {e}{Style.RESET_ALL}", exc_info=True
+            f"{Fore.RED}An unhandled critical error broke the main spell: {e}{Style.RESET_ALL}",
+            exc_info=True,
         )
         exit_code = 1
 

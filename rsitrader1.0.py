@@ -30,7 +30,9 @@ try:
     RESET: str = Style.RESET_ALL  # Although autoreset is on, good practice
     COLORAMA_AVAILABLE: bool = True
 except ImportError:
-    print("Warning: colorama not found. Neon styling will be disabled. Install with: pip install colorama")
+    print(
+        "Warning: colorama not found. Neon styling will be disabled. Install with: pip install colorama"
+    )
     # Define dummy colors if colorama is not available
     NEON_GREEN = NEON_PINK = NEON_CYAN = NEON_RED = NEON_YELLOW = NEON_BLUE = RESET = ""
     COLORAMA_AVAILABLE = False
@@ -38,7 +40,9 @@ except ImportError:
 # --- Logging Configuration ---
 log_format_base: str = "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s"
 # Configure root logger - handlers can be added later if needed (e.g., file handler)
-logging.basicConfig(level=logging.INFO, format=log_format_base, datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format=log_format_base, datefmt="%Y-%m-%d %H:%M:%S"
+)
 logger: logging.Logger = logging.getLogger(__name__)  # Get logger for this module
 
 # --- Neon Display Functions ---
@@ -47,7 +51,9 @@ logger: logging.Logger = logging.getLogger(__name__)  # Get logger for this modu
 def print_neon_header() -> None:
     """Prints a neon-styled header banner."""
     print(f"{NEON_CYAN}{'=' * 70}{RESET}")
-    print(f"{NEON_PINK}{Style.BRIGHT}     Enhanced RSI/OB Trader Neon Bot - Configurable v2     {RESET}")
+    print(
+        f"{NEON_PINK}{Style.BRIGHT}     Enhanced RSI/OB Trader Neon Bot - Configurable v2     {RESET}"
+    )
     print(f"{NEON_CYAN}{'=' * 70}{RESET}")
 
 
@@ -97,21 +103,35 @@ def print_cycle_divider(timestamp: pd.Timestamp) -> None:
     """Prints a neon divider for each trading cycle."""
     box_width = 70
     print(f"\n{NEON_BLUE}{'=' * box_width}{RESET}")
-    print(f"{NEON_CYAN}Cycle Start: {timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')}{RESET}")
+    print(
+        f"{NEON_CYAN}Cycle Start: {timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')}{RESET}"
+    )
     print(f"{NEON_BLUE}{'=' * box_width}{RESET}")
 
 
-def display_position_status(position: Dict[str, Any], price_precision: int = 4, amount_precision: int = 8) -> None:
+def display_position_status(
+    position: Dict[str, Any], price_precision: int = 4, amount_precision: int = 8
+) -> None:
     """Displays position status with neon colors and formatted values."""
     status: Optional[str] = position.get("status")
     entry_price: Optional[float] = position.get("entry_price")
     quantity: Optional[float] = position.get("quantity")
     sl: Optional[float] = position.get("stop_loss")
     tp: Optional[float] = position.get("take_profit")
-    tsl: Optional[float] = position.get("current_trailing_sl_price")  # Added TSL display
+    tsl: Optional[float] = position.get(
+        "current_trailing_sl_price"
+    )  # Added TSL display
 
-    entry_str: str = f"{entry_price:.{price_precision}f}" if isinstance(entry_price, (float, int)) else "N/A"
-    qty_str: str = f"{quantity:.{amount_precision}f}" if isinstance(quantity, (float, int)) else "N/A"
+    entry_str: str = (
+        f"{entry_price:.{price_precision}f}"
+        if isinstance(entry_price, (float, int))
+        else "N/A"
+    )
+    qty_str: str = (
+        f"{quantity:.{amount_precision}f}"
+        if isinstance(quantity, (float, int))
+        else "N/A"
+    )
     sl_str: str = f"{sl:.{price_precision}f}" if isinstance(sl, (float, int)) else "N/A"
     tp_str: str = f"{tp:.{price_precision}f}" if isinstance(tp, (float, int)) else "N/A"
     tsl_str: str = (
@@ -134,7 +154,12 @@ def display_position_status(position: Dict[str, Any], price_precision: int = 4, 
 
 
 def display_market_stats(
-    current_price: float, rsi: float, stoch_k: float, stoch_d: float, atr: Optional[float], price_precision: int
+    current_price: float,
+    rsi: float,
+    stoch_k: float,
+    stoch_d: float,
+    atr: Optional[float],
+    price_precision: int,
 ) -> None:
     """Displays market stats in a neon-styled panel."""
     print(f"{NEON_PINK}--- Market Stats ---{RESET}")
@@ -149,7 +174,9 @@ def display_market_stats(
 
 
 def display_order_blocks(
-    bullish_ob: Optional[Dict[str, Any]], bearish_ob: Optional[Dict[str, Any]], price_precision: int
+    bullish_ob: Optional[Dict[str, Any]],
+    bearish_ob: Optional[Dict[str, Any]],
+    price_precision: int,
 ) -> None:
     """Displays identified order blocks with neon colors."""
     found: bool = False
@@ -177,12 +204,16 @@ def display_signal(signal_type: str, direction: str, reason: str) -> None:
     else:  # e.g., Exit, Warning
         color = NEON_YELLOW
 
-    print(f"{color}{Style.BRIGHT}*** {signal_type.upper()} {direction.upper()} SIGNAL ***{RESET}\n   Reason: {reason}")
+    print(
+        f"{color}{Style.BRIGHT}*** {signal_type.upper()} {direction.upper()} SIGNAL ***{RESET}\n   Reason: {reason}"
+    )
 
 
 def neon_sleep_timer(seconds: int) -> None:
     """Displays a neon countdown timer in the console."""
-    if not COLORAMA_AVAILABLE or seconds <= 0:  # Fallback if colorama not installed or zero sleep
+    if (
+        not COLORAMA_AVAILABLE or seconds <= 0
+    ):  # Fallback if colorama not installed or zero sleep
         if seconds > 0:
             print(f"Sleeping for {seconds} seconds...")
             time.sleep(seconds)
@@ -194,7 +225,10 @@ def neon_sleep_timer(seconds: int) -> None:
         remaining_seconds: int = max(0, int(i * interval))  # Ensure non-negative
         # Flashing effect for last 5 seconds
         color: str = NEON_RED if remaining_seconds <= 5 and i % 2 == 0 else NEON_YELLOW
-        print(f"{color}Next cycle in: {remaining_seconds} seconds... {Style.RESET_ALL}", end="\r")
+        print(
+            f"{color}Next cycle in: {remaining_seconds} seconds... {Style.RESET_ALL}",
+            end="\r",
+        )
         time.sleep(interval)
     print(" " * 50, end="\r")  # Clear line after countdown
 
@@ -203,14 +237,18 @@ def print_shutdown_message() -> None:
     """Prints a neon shutdown message."""
     box_width = 70
     print(f"\n{NEON_PINK}{'=' * box_width}{RESET}")
-    print(f"{NEON_CYAN}{Style.BRIGHT}{'RSI/OB Trader Bot Stopped - Goodbye!':^{box_width}}{RESET}")
+    print(
+        f"{NEON_CYAN}{Style.BRIGHT}{'RSI/OB Trader Bot Stopped - Goodbye!':^{box_width}}{RESET}"
+    )
     print(f"{NEON_PINK}{'=' * box_width}{RESET}")
 
 
 # --- Constants ---
 DEFAULT_PRICE_PRECISION: int = 4
 DEFAULT_AMOUNT_PRECISION: int = 8
-POSITION_STATE_FILE: str = "position_state.json"  # Define filename for state persistence
+POSITION_STATE_FILE: str = (
+    "position_state.json"  # Define filename for state persistence
+)
 CONFIG_FILE: str = "config.json"
 
 # --- Retry Decorator ---
@@ -224,7 +262,9 @@ RETRYABLE_EXCEPTIONS: Tuple[type[ccxt.NetworkError], ...] = (
 )
 
 
-def retry_api_call(max_retries: int = 3, initial_delay: float = 5.0, backoff_factor: float = 2.0) -> Callable:
+def retry_api_call(
+    max_retries: int = 3, initial_delay: float = 5.0, backoff_factor: float = 2.0
+) -> Callable:
     """
     Decorator factory to create retry decorators for API calls.
     Handles specific RETRYABLE_EXCEPTIONS with exponential backoff.
@@ -270,7 +310,8 @@ def retry_api_call(max_retries: int = 3, initial_delay: float = 5.0, backoff_fac
                 except Exception as e:
                     # Handle non-retryable exceptions immediately
                     log_error(
-                        f"Non-retryable error in API call '{func.__name__}': {type(e).__name__}: {e}", exc_info=True
+                        f"Non-retryable error in API call '{func.__name__}': {type(e).__name__}: {e}",
+                        exc_info=True,
                     )
                     raise  # Re-raise immediately
 
@@ -279,7 +320,9 @@ def retry_api_call(max_retries: int = 3, initial_delay: float = 5.0, backoff_fac
                 raise last_exception  # Ensure the last error is raised if loop finishes
             else:
                 # Should ideally not happen if max_retries > 0
-                raise RuntimeError(f"API call '{func.__name__}' failed unexpectedly after retries.")
+                raise RuntimeError(
+                    f"API call '{func.__name__}' failed unexpectedly after retries."
+                )
 
         return wrapper
 
@@ -329,19 +372,28 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
             "entry_volume_confirmation_enabled",
             # Conditional keys are checked later where used
         ]
-        missing_keys: List[str] = [key for key in required_keys if key not in config_data]
+        missing_keys: List[str] = [
+            key for key in required_keys if key not in config_data
+        ]
         if missing_keys:
-            log_error(f"CRITICAL: Missing required configuration keys in '{filename}': {missing_keys}")
+            log_error(
+                f"CRITICAL: Missing required configuration keys in '{filename}': {missing_keys}"
+            )
             sys.exit(1)
 
         # --- More Specific Validation (Examples - uncomment/expand as needed) ---
         # TODO: Add more comprehensive type and range validation based on requirements
-        if not isinstance(config_data["risk_percentage"], (float, int)) or not (0 < config_data["risk_percentage"] < 1):
+        if not isinstance(config_data["risk_percentage"], (float, int)) or not (
+            0 < config_data["risk_percentage"] < 1
+        ):
             log_error(
                 f"CRITICAL: 'risk_percentage' ({config_data['risk_percentage']}) must be a number between 0 and 1 (exclusive)."
             )
             sys.exit(1)
-        if not isinstance(config_data["sleep_interval_seconds"], int) or config_data["sleep_interval_seconds"] <= 0:
+        if (
+            not isinstance(config_data["sleep_interval_seconds"], int)
+            or config_data["sleep_interval_seconds"] <= 0
+        ):
             log_error(
                 f"CRITICAL: 'sleep_interval_seconds' ({config_data['sleep_interval_seconds']}) must be a positive integer."
             )
@@ -358,10 +410,15 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
         log_error(f"CRITICAL: Configuration file '{filename}' not found.")
         sys.exit(1)
     except json.JSONDecodeError as e:
-        log_error(f"CRITICAL: Error decoding JSON from configuration file '{filename}': {e}")
+        log_error(
+            f"CRITICAL: Error decoding JSON from configuration file '{filename}': {e}"
+        )
         sys.exit(1)
     except Exception as e:
-        log_error(f"CRITICAL: An unexpected error occurred loading configuration: {e}", exc_info=True)
+        log_error(
+            f"CRITICAL: An unexpected error occurred loading configuration: {e}",
+            exc_info=True,
+        )
         sys.exit(1)
 
 
@@ -383,7 +440,9 @@ log_info("Attempting to load environment variables from .env file (for API keys)
 exchange_id: str = config.get("exchange_id", "bybit").lower()
 api_key_env_var: str = f"{exchange_id.upper()}_API_KEY"
 secret_key_env_var: str = f"{exchange_id.upper()}_SECRET_KEY"
-passphrase_env_var: str = f"{exchange_id.upper()}_PASSPHRASE"  # Some exchanges like kucoin, okx use this
+passphrase_env_var: str = (
+    f"{exchange_id.upper()}_PASSPHRASE"  # Some exchanges like kucoin, okx use this
+)
 
 api_key: Optional[str] = os.getenv(api_key_env_var)
 secret: Optional[str] = os.getenv(secret_key_env_var)
@@ -406,14 +465,17 @@ try:
         "options": {
             # Determine defaultType more dynamically
             "defaultType": "swap"
-            if ":" in config.get("symbol", "") or "SWAP" in config.get("symbol", "").upper()
+            if ":" in config.get("symbol", "")
+            or "SWAP" in config.get("symbol", "").upper()
             else "spot",
             "adjustForTimeDifference": True,  # Recommended for avoiding timestamp issues
         },
     }
     if passphrase:
         log_info("Passphrase detected, adding to exchange configuration.")
-        exchange_config["password"] = passphrase  # CCXT uses 'password' field for passphrase
+        exchange_config["password"] = (
+            passphrase  # CCXT uses 'password' field for passphrase
+        )
 
     exchange = exchange_class(exchange_config)
 
@@ -432,10 +494,14 @@ try:
     )
 
 except ccxt.AuthenticationError as e:
-    log_error(f"Authentication failed connecting to {exchange_id}. Check API Key/Secret/Passphrase. Error: {e}")
+    log_error(
+        f"Authentication failed connecting to {exchange_id}. Check API Key/Secret/Passphrase. Error: {e}"
+    )
     sys.exit(1)
 except ccxt.ExchangeNotAvailable as e:
-    log_error(f"Exchange {exchange_id} is not available or timed out during initial connection. Error: {e}")
+    log_error(
+        f"Exchange {exchange_id} is not available or timed out during initial connection. Error: {e}"
+    )
     sys.exit(1)
 except AttributeError:
     log_error(f"Exchange ID '{exchange_id}' not found in ccxt library.")
@@ -443,7 +509,10 @@ except AttributeError:
 except Exception as e:
     # Check if it's a retryable error that failed all retries (already logged by decorator)
     if not isinstance(e, RETRYABLE_EXCEPTIONS):
-        log_error(f"An unexpected error occurred during exchange initialization or market loading: {e}", exc_info=True)
+        log_error(
+            f"An unexpected error occurred during exchange initialization or market loading: {e}",
+            exc_info=True,
+        )
     sys.exit(1)  # Exit if any error occurs during setup
 
 
@@ -461,12 +530,20 @@ min_tick: float = 1 / (10**DEFAULT_PRICE_PRECISION)  # Default fallback
 
 try:
     if symbol not in exchange.markets:
-        log_warning(f"Symbol '{symbol}' from config not found or not supported on {exchange_id}.")
+        log_warning(
+            f"Symbol '{symbol}' from config not found or not supported on {exchange_id}."
+        )
         available_symbols: List[str] = list(exchange.markets.keys())
         # Filter for potential swap markets if needed based on symbol format or default type
         if exchange.options.get("defaultType") == "swap":
-            available_symbols = [s for s in available_symbols if ":" in s or exchange.markets[s].get("swap")]
-        log_info(f"Some available symbols ({len(available_symbols)} total): {available_symbols[:15]}...")
+            available_symbols = [
+                s
+                for s in available_symbols
+                if ":" in s or exchange.markets[s].get("swap")
+            ]
+        log_info(
+            f"Some available symbols ({len(available_symbols)} total): {available_symbols[:15]}..."
+        )
         sys.exit(1)
 
     log_info(f"Using trading symbol from config: {symbol}")
@@ -474,30 +551,51 @@ try:
     market_info = exchange.markets[symbol]
 
     # Get precision digits robustly
-    price_precision_digits = int(market_info.get("precision", {}).get("price", DEFAULT_PRICE_PRECISION))
-    amount_precision_digits = int(market_info.get("precision", {}).get("amount", DEFAULT_AMOUNT_PRECISION))
+    price_precision_digits = int(
+        market_info.get("precision", {}).get("price", DEFAULT_PRICE_PRECISION)
+    )
+    amount_precision_digits = int(
+        market_info.get("precision", {}).get("amount", DEFAULT_AMOUNT_PRECISION)
+    )
 
     # Calculate min_tick robustly from precision value if possible
     min_tick_value_str: Optional[str] = market_info.get("precision", {}).get("price")
     if min_tick_value_str is not None:
         try:
-            min_tick = float(min_tick_value_str)  # Use precision value directly if available
-            if min_tick <= 0:  # Handle cases where precision might be 0 or negative exponent string
-                min_tick = 1 / (10**price_precision_digits) if price_precision_digits >= 0 else 0.01
+            min_tick = float(
+                min_tick_value_str
+            )  # Use precision value directly if available
+            if (
+                min_tick <= 0
+            ):  # Handle cases where precision might be 0 or negative exponent string
+                min_tick = (
+                    1 / (10**price_precision_digits)
+                    if price_precision_digits >= 0
+                    else 0.01
+                )
         except (ValueError, TypeError):
             log_warning(
                 f"Could not parse 'precision.price' value '{min_tick_value_str}' to float. Using default min_tick calculation."
             )
-            min_tick = 1 / (10**price_precision_digits) if price_precision_digits >= 0 else 0.01
+            min_tick = (
+                1 / (10**price_precision_digits)
+                if price_precision_digits >= 0
+                else 0.01
+            )
     else:
-        min_tick = 1 / (10**price_precision_digits) if price_precision_digits >= 0 else 0.01  # Fallback
+        min_tick = (
+            1 / (10**price_precision_digits) if price_precision_digits >= 0 else 0.01
+        )  # Fallback
 
     log_info(
         f"Symbol Precision | Price: {price_precision_digits} decimals (Min Tick: {min_tick:.{price_precision_digits + 2}f}), Amount: {amount_precision_digits} decimals"
     )
 
 except Exception as e:
-    log_error(f"An error occurred while validating the symbol or getting precision: {e}", exc_info=True)
+    log_error(
+        f"An error occurred while validating the symbol or getting precision: {e}",
+        exc_info=True,
+    )
     sys.exit(1)
 
 timeframe: str = config.get("timeframe", "1h")
@@ -510,13 +608,19 @@ stoch_smooth_k: int = int(config["stoch_smooth_k"])
 stoch_overbought: int = int(config["stoch_overbought"])
 stoch_oversold: int = int(config["stoch_oversold"])
 data_limit: int = int(config["data_limit"])
-sleep_interval_seconds: int = int(config["sleep_interval_seconds"])  # Already validated > 0
-risk_percentage: float = float(config["risk_percentage"])  # Already validated 0 < risk < 1
+sleep_interval_seconds: int = int(
+    config["sleep_interval_seconds"]
+)  # Already validated > 0
+risk_percentage: float = float(
+    config["risk_percentage"]
+)  # Already validated 0 < risk < 1
 
 # SL/TP and Trailing Stop Parameters (Conditional loading and validation)
 enable_atr_sl_tp: bool = config.get("enable_atr_sl_tp", False)
 enable_trailing_stop: bool = config.get("enable_trailing_stop", False)
-atr_length: int = int(config.get("atr_length", 14))  # Needed if either ATR SL/TP or TSL is enabled
+atr_length: int = int(
+    config.get("atr_length", 14)
+)  # Needed if either ATR SL/TP or TSL is enabled
 
 needs_atr: bool = enable_atr_sl_tp or enable_trailing_stop
 if needs_atr:
@@ -535,7 +639,9 @@ take_profit_percentage: float = 0.0
 if enable_atr_sl_tp:
     atr_sl_multiplier = float(config.get("atr_sl_multiplier", 2.0))
     atr_tp_multiplier = float(config.get("atr_tp_multiplier", 3.0))
-    log_info(f"Using ATR-based Stop Loss ({atr_sl_multiplier}x ATR) and Take Profit ({atr_tp_multiplier}x ATR).")
+    log_info(
+        f"Using ATR-based Stop Loss ({atr_sl_multiplier}x ATR) and Take Profit ({atr_tp_multiplier}x ATR)."
+    )
     if (
         not isinstance(atr_sl_multiplier, (float, int))
         or atr_sl_multiplier <= 0
@@ -564,8 +670,12 @@ trailing_stop_atr_multiplier: float = 0.0
 trailing_stop_activation_atr_multiplier: float = 0.0
 
 if enable_trailing_stop:
-    trailing_stop_atr_multiplier = float(config.get("trailing_stop_atr_multiplier", 1.5))
-    trailing_stop_activation_atr_multiplier = float(config.get("trailing_stop_activation_atr_multiplier", 1.0))
+    trailing_stop_atr_multiplier = float(
+        config.get("trailing_stop_atr_multiplier", 1.5)
+    )
+    trailing_stop_activation_atr_multiplier = float(
+        config.get("trailing_stop_activation_atr_multiplier", 1.0)
+    )
     log_info(
         f"Trailing Stop Loss is ENABLED (Activate @ {trailing_stop_activation_atr_multiplier}x ATR profit, Trail @ {trailing_stop_atr_multiplier}x ATR)."
     )
@@ -588,7 +698,10 @@ ob_lookback: int = int(config["ob_lookback"])
 if not isinstance(ob_lookback, int) or ob_lookback <= 0:
     log_error("CRITICAL: 'ob_lookback' must be a positive integer.")
     sys.exit(1)
-if not isinstance(ob_volume_threshold_multiplier, (float, int)) or ob_volume_threshold_multiplier <= 0:
+if (
+    not isinstance(ob_volume_threshold_multiplier, (float, int))
+    or ob_volume_threshold_multiplier <= 0
+):
     log_error("CRITICAL: 'ob_volume_threshold_multiplier' must be a positive number.")
     sys.exit(1)
 
@@ -597,7 +710,9 @@ entry_volume_confirmation_enabled: bool = config["entry_volume_confirmation_enab
 entry_volume_ma_length: int = int(config.get("entry_volume_ma_length", 20))
 entry_volume_multiplier: float = float(config.get("entry_volume_multiplier", 1.2))
 if entry_volume_confirmation_enabled:
-    log_info(f"Entry Volume Confirmation: ENABLED (Vol > {entry_volume_multiplier}x MA({entry_volume_ma_length}))")
+    log_info(
+        f"Entry Volume Confirmation: ENABLED (Vol > {entry_volume_multiplier}x MA({entry_volume_ma_length}))"
+    )
     if (
         not isinstance(entry_volume_ma_length, int)
         or entry_volume_ma_length <= 0
@@ -614,26 +729,38 @@ else:
 # --- Simulation Mode ---
 SIMULATION_MODE: bool = config["simulation_mode"]
 if SIMULATION_MODE:
-    log_warning("SIMULATION MODE IS ACTIVE (set in config.json). No real orders will be placed.")
+    log_warning(
+        "SIMULATION MODE IS ACTIVE (set in config.json). No real orders will be placed."
+    )
 else:
-    log_warning("!!! LIVE TRADING MODE IS ACTIVE (set in config.json). REAL ORDERS WILL BE PLACED. !!!")
+    log_warning(
+        "!!! LIVE TRADING MODE IS ACTIVE (set in config.json). REAL ORDERS WILL BE PLACED. !!!"
+    )
     # Add confirmation step for live trading
     try:
         # Ask for confirmation only if running interactively
         if sys.stdin.isatty():
-            user_confirm = input(f"{NEON_RED}TYPE 'LIVE' TO CONFIRM LIVE TRADING or press Enter to exit: {RESET}")
+            user_confirm = input(
+                f"{NEON_RED}TYPE 'LIVE' TO CONFIRM LIVE TRADING or press Enter to exit: {RESET}"
+            )
             if user_confirm.strip().upper() != "LIVE":
                 log_info("Live trading not confirmed. Exiting.")
                 sys.exit(0)
             log_info("Live trading confirmed by user.")
         else:
-            log_warning("Running in non-interactive mode. Assuming confirmation for LIVE TRADING.")
+            log_warning(
+                "Running in non-interactive mode. Assuming confirmation for LIVE TRADING."
+            )
             # Mandatory delay in non-interactive live mode for safety
             log_warning("Pausing for 5 seconds before starting live trading...")
             time.sleep(5)  # Short pause to allow cancellation if started accidentally
 
-    except EOFError:  # Handle environments where input is not possible (e.g., docker without -it)
-        log_error("Cannot get user confirmation in this environment. Exiting live mode for safety.")
+    except (
+        EOFError
+    ):  # Handle environments where input is not possible (e.g., docker without -it)
+        log_error(
+            "Cannot get user confirmation in this environment. Exiting live mode for safety."
+        )
         sys.exit(1)
 
 
@@ -680,16 +807,21 @@ def save_position_state(filename: str = POSITION_STATE_FILE) -> None:
 
         with open(filename, "w") as f:
             json.dump(state_to_save, f, indent=4)
-        log_debug(f"Position state saved successfully to {filename}")  # Use debug for less noise
+        log_debug(
+            f"Position state saved successfully to {filename}"
+        )  # Use debug for less noise
 
     except TypeError as e:
         log_error(
-            f"Serialization error saving position state to {filename}. Check data types. Error: {e}", exc_info=True
+            f"Serialization error saving position state to {filename}. Check data types. Error: {e}",
+            exc_info=True,
         )
     except IOError as e:
         log_error(f"I/O error saving position state to {filename}: {e}", exc_info=True)
     except Exception as e:
-        log_error(f"Unexpected error saving position state to {filename}: {e}", exc_info=True)
+        log_error(
+            f"Unexpected error saving position state to {filename}: {e}", exc_info=True
+        )
 
 
 def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
@@ -708,7 +840,9 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
     position = position_default_structure.copy()
 
     if not os.path.exists(filename):
-        log_info(f"No position state file found at {filename}. Starting with default empty state.")
+        log_info(
+            f"No position state file found at {filename}. Starting with default empty state."
+        )
         return  # Exit function, position is already default
 
     try:
@@ -724,12 +858,16 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
                 ts = pd.Timestamp(entry_time_str)
                 # Ensure it's timezone-aware and converted to UTC for consistency
                 if ts.tzinfo is None:
-                    ts = ts.tz_localize("UTC")  # Assume UTC if no tz info found (less ideal)
+                    ts = ts.tz_localize(
+                        "UTC"
+                    )  # Assume UTC if no tz info found (less ideal)
                 else:
                     ts = ts.tz_convert("UTC")  # Convert to UTC if it had other tz info
                 parsed_entry_time = ts
             except ValueError:
-                log_error(f"Could not parse entry_time '{entry_time_str}' from state file. Setting entry_time to None.")
+                log_error(
+                    f"Could not parse entry_time '{entry_time_str}' from state file. Setting entry_time to None."
+                )
                 # parsed_entry_time remains None
 
         # --- Update the global `position` dict, respecting the default structure ---
@@ -753,7 +891,9 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
                 # Allow int to be loaded into float fields
                 expected_type = type(default_value)
                 is_type_match = isinstance(loaded_value, expected_type)
-                allow_int_for_float = expected_type is float and isinstance(loaded_value, int)
+                allow_int_for_float = expected_type is float and isinstance(
+                    loaded_value, int
+                )
 
                 if (
                     loaded_value is not None
@@ -767,7 +907,9 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
                     # Keep the default value from `position` if type mismatch
                 else:
                     # Assign loaded value (potentially converting int to float)
-                    position[key] = float(loaded_value) if allow_int_for_float else loaded_value
+                    position[key] = (
+                        float(loaded_value) if allow_int_for_float else loaded_value
+                    )
                     if (
                         key != "entry_time" or parsed_entry_time is not None
                     ):  # Count update unless entry_time parse failed
@@ -780,15 +922,25 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
 
         # Log warnings about discrepancies
         if missing_in_file:
-            log_warning(f"Keys missing in state file '{filename}' (using defaults): {missing_in_file}")
+            log_warning(
+                f"Keys missing in state file '{filename}' (using defaults): {missing_in_file}"
+            )
         if extra_in_file:
-            log_warning(f"Extra keys found in state file '{filename}' (ignored): {extra_in_file}")
+            log_warning(
+                f"Extra keys found in state file '{filename}' (ignored): {extra_in_file}"
+            )
         if type_mismatches:
-            log_warning(f"Type mismatches found in state file (using defaults for these): {type_mismatches}")
+            log_warning(
+                f"Type mismatches found in state file (using defaults for these): {type_mismatches}"
+            )
 
         if updated_count > 0 or not missing_in_file:
-            log_info(f"Position state loaded successfully from {filename}. Applied {updated_count} values.")
-            display_position_status(position, price_precision_digits, amount_precision_digits)  # Display loaded state
+            log_info(
+                f"Position state loaded successfully from {filename}. Applied {updated_count} values."
+            )
+            display_position_status(
+                position, price_precision_digits, amount_precision_digits
+            )  # Display loaded state
         else:
             # This case might happen if the file exists but is empty or completely invalid
             log_warning(
@@ -798,12 +950,14 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
 
     except json.JSONDecodeError as e:
         log_error(
-            f"Error decoding JSON from state file {filename}: {e}. Starting with default empty state.", exc_info=False
+            f"Error decoding JSON from state file {filename}: {e}. Starting with default empty state.",
+            exc_info=False,
         )
         position = position_default_structure.copy()  # Reset to default
     except Exception as e:
         log_error(
-            f"Error loading position state from {filename}: {e}. Starting with default empty state.", exc_info=True
+            f"Error loading position state from {filename}: {e}. Starting with default empty state.",
+            exc_info=True,
         )
         position = position_default_structure.copy()  # Reset to default
 
@@ -827,7 +981,9 @@ def fetch_ohlcv_data(
         A pandas DataFrame with OHLCV data indexed by timestamp (UTC),
         or None if fetching or processing fails after retries.
     """
-    log_debug(f"Fetching {limit_count} candles for {trading_symbol} on {tf} timeframe...")
+    log_debug(
+        f"Fetching {limit_count} candles for {trading_symbol} on {tf} timeframe..."
+    )
     try:
         # Check if the market exists locally before fetching (faster than API call)
         if trading_symbol not in exchange_instance.markets:
@@ -837,7 +993,9 @@ def fetch_ohlcv_data(
             return None
 
         # The actual API call is wrapped by the decorator for retries
-        ohlcv: List[list] = exchange_instance.fetch_ohlcv(trading_symbol, tf, limit=limit_count)
+        ohlcv: List[list] = exchange_instance.fetch_ohlcv(
+            trading_symbol, tf, limit=limit_count
+        )
 
         if not ohlcv:
             log_warning(
@@ -846,7 +1004,9 @@ def fetch_ohlcv_data(
             return None
 
         # Create DataFrame
-        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
 
         # Convert timestamp to datetime and set as index (make timezone-aware UTC)
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
@@ -862,13 +1022,19 @@ def fetch_ohlcv_data(
         df.dropna(subset=numeric_cols, inplace=True)
         rows_dropped: int = initial_rows - len(df)
         if rows_dropped > 0:
-            log_debug(f"Dropped {rows_dropped} rows with invalid OHLCV data during initial fetch.")
+            log_debug(
+                f"Dropped {rows_dropped} rows with invalid OHLCV data during initial fetch."
+            )
 
         if df.empty:
-            log_warning(f"DataFrame became empty after cleaning NaN OHLCV data for {trading_symbol} ({tf}).")
+            log_warning(
+                f"DataFrame became empty after cleaning NaN OHLCV data for {trading_symbol} ({tf})."
+            )
             return None
 
-        log_debug(f"Successfully fetched and processed {len(df)} candles for {trading_symbol}.")
+        log_debug(
+            f"Successfully fetched and processed {len(df)} candles for {trading_symbol}."
+        )
         return df
 
     # Handle specific non-retryable CCXT errors after retries have failed
@@ -884,7 +1050,10 @@ def fetch_ohlcv_data(
     # We catch generic Exception here for unexpected issues within this function's logic.
     except Exception as e:
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"An unexpected non-retryable error occurred fetching OHLCV: {e}", exc_info=True)
+            log_error(
+                f"An unexpected non-retryable error occurred fetching OHLCV: {e}",
+                exc_info=True,
+            )
         # If it was a retryable error that failed all retries, the decorator raised it,
         # and it gets caught here. We return None as the operation ultimately failed.
         return None
@@ -924,8 +1093,12 @@ def identify_potential_order_block(
     if df is None or df.empty or not all(col in df.columns for col in required_cols):
         log_debug("Input DataFrame missing required columns (OHLCV) for OB detection.")
         return None, None
-    if len(df) < lookback_len + 2:  # Need at least lookback + prev_candle + impulse_candle
-        log_debug(f"Not enough data for OB detection (need > {lookback_len + 1} rows, got {len(df)}).")
+    if (
+        len(df) < lookback_len + 2
+    ):  # Need at least lookback + prev_candle + impulse_candle
+        log_debug(
+            f"Not enough data for OB detection (need > {lookback_len + 1} rows, got {len(df)})."
+        )
         return None, None
 
     try:
@@ -961,7 +1134,9 @@ def identify_potential_order_block(
         # Limit search depth to avoid excessive computation on large dataframes if needed
         search_depth = min(len(df) - 2, lookback_len * 3)  # Example search depth limit
         start_index = len(df) - 2
-        end_index = max(0, start_index - search_depth)  # Ensure index doesn't go below 0
+        end_index = max(
+            0, start_index - search_depth
+        )  # Ensure index doesn't go below 0
 
         for i in range(start_index, end_index, -1):  # Iterate backwards
             # Use .iloc for position-based indexing, check index validity
@@ -972,23 +1147,29 @@ def identify_potential_order_block(
                 impulse_candle = df.iloc[i]  # The "impulse" or "reversal" candle
                 ob_candle = df.iloc[i - 1]  # The candle forming the potential OB zone
             except IndexError:
-                log_debug(f"IndexError accessing candles at index {i} or {i - 1}. Stopping OB search.")
+                log_debug(
+                    f"IndexError accessing candles at index {i} or {i - 1}. Stopping OB search."
+                )
                 break  # Should not happen with loop bounds, but safety check
 
             # Check for NaN values in the candles being examined
             if impulse_candle.isnull().any() or ob_candle.isnull().any():
-                log_debug(f"Skipping OB check at index {i - 1}-{i} due to NaN values in candles.")
+                log_debug(
+                    f"Skipping OB check at index {i - 1}-{i} due to NaN values in candles."
+                )
                 continue
 
             # Define conditions
             is_high_volume_impulse = impulse_candle["volume"] > volume_threshold
             # Bullish impulse: Strong close, ideally closing above OB candle's high
             is_bullish_impulse = (
-                impulse_candle["close"] > impulse_candle["open"] and impulse_candle["close"] > ob_candle["high"]
+                impulse_candle["close"] > impulse_candle["open"]
+                and impulse_candle["close"] > ob_candle["high"]
             )
             # Bearish impulse: Strong close, ideally closing below OB candle's low
             is_bearish_impulse = (
-                impulse_candle["close"] < impulse_candle["open"] and impulse_candle["close"] < ob_candle["low"]
+                impulse_candle["close"] < impulse_candle["open"]
+                and impulse_candle["close"] < ob_candle["low"]
             )
             # OB candle type
             ob_is_bearish = ob_candle["close"] < ob_candle["open"]
@@ -1052,7 +1233,9 @@ def identify_potential_order_block(
 def calculate_technical_indicators(
     df: Optional[pd.DataFrame],
     rsi_len: int,
-    stoch_params: Dict[str, int],  # Explicitly pass params: {'k': k, 'd': d, 'smooth_k': smooth_k}
+    stoch_params: Dict[
+        str, int
+    ],  # Explicitly pass params: {'k': k, 'd': d, 'smooth_k': smooth_k}
     calc_atr: bool = False,
     atr_len: int = 14,
     calc_vol_ma: bool = False,
@@ -1103,8 +1286,12 @@ def calculate_technical_indicators(
         calculated_indicator_names.append(rsi_col_name)
 
         # --- Calculate Stochastic Oscillator ---
-        stoch_k_col = f"STOCHk_{stoch_params['k']}_{stoch_params['d']}_{stoch_params['smooth_k']}"
-        stoch_d_col = f"STOCHd_{stoch_params['k']}_{stoch_params['d']}_{stoch_params['smooth_k']}"
+        stoch_k_col = (
+            f"STOCHk_{stoch_params['k']}_{stoch_params['d']}_{stoch_params['smooth_k']}"
+        )
+        stoch_d_col = (
+            f"STOCHd_{stoch_params['k']}_{stoch_params['d']}_{stoch_params['smooth_k']}"
+        )
         # Ensure k, d, smooth_k are passed correctly if using default pandas_ta naming
         df_processed.ta.stoch(
             k=stoch_params["k"],
@@ -1131,41 +1318,61 @@ def calculate_technical_indicators(
                 vol_ma_col_name = f"VOL_MA_{vol_ma_len}"
                 # Use pandas rolling mean directly for more control over min_periods and potential NaNs
                 df_processed[vol_ma_col_name] = (
-                    df_processed["volume"].rolling(window=vol_ma_len, min_periods=max(1, vol_ma_len // 2)).mean()
+                    df_processed["volume"]
+                    .rolling(window=vol_ma_len, min_periods=max(1, vol_ma_len // 2))
+                    .mean()
                 )
                 log_debug(f"Volume MA ({vol_ma_len}) calculated.")
                 if vol_ma_col_name:
                     calculated_indicator_names.append(vol_ma_col_name)
             else:
-                log_warning("Volume column not found in DataFrame, cannot calculate Volume MA.")
+                log_warning(
+                    "Volume column not found in DataFrame, cannot calculate Volume MA."
+                )
 
         # --- Verify Columns and Clean NaNs ---
         new_columns: List[str] = list(set(df_processed.columns) - original_columns)
         # Check if expected columns were actually added by pandas_ta
-        missing_calc = [ind_name for ind_name in calculated_indicator_names if ind_name not in new_columns]
+        missing_calc = [
+            ind_name
+            for ind_name in calculated_indicator_names
+            if ind_name not in new_columns
+        ]
         if missing_calc:
-            log_warning(f"Some expected indicators might not have been added to DataFrame by pandas_ta: {missing_calc}")
+            log_warning(
+                f"Some expected indicators might not have been added to DataFrame by pandas_ta: {missing_calc}"
+            )
 
         log_debug(f"Indicators calculated. Columns added: {sorted(new_columns)}")
 
         initial_len: int = len(df_processed)
         # Drop rows with NaN values specifically in the newly calculated indicator columns
         # This handles the lookback period NaNs without dropping rows with NaNs in original OHLCV data (already handled in fetch)
-        valid_indicator_cols_to_check_nan = [col for col in calculated_indicator_names if col in df_processed.columns]
+        valid_indicator_cols_to_check_nan = [
+            col for col in calculated_indicator_names if col in df_processed.columns
+        ]
         if valid_indicator_cols_to_check_nan:
             df_processed.dropna(subset=valid_indicator_cols_to_check_nan, inplace=True)
         else:
-            log_warning("No valid indicator columns found to check for NaNs after calculation.")
+            log_warning(
+                "No valid indicator columns found to check for NaNs after calculation."
+            )
 
         rows_dropped_nan: int = initial_len - len(df_processed)
         if rows_dropped_nan > 0:
-            log_debug(f"Dropped {rows_dropped_nan} rows with NaN values resulting from indicator lookback periods.")
+            log_debug(
+                f"Dropped {rows_dropped_nan} rows with NaN values resulting from indicator lookback periods."
+            )
 
         if df_processed.empty:
-            log_warning("DataFrame became empty after dropping NaN rows from indicator calculations.")
+            log_warning(
+                "DataFrame became empty after dropping NaN rows from indicator calculations."
+            )
             return None
 
-        log_debug(f"Indicator calculation complete. DataFrame now has {len(df_processed)} rows.")
+        log_debug(
+            f"Indicator calculation complete. DataFrame now has {len(df_processed)} rows."
+        )
         return df_processed
 
     except Exception as e:
@@ -1202,7 +1409,9 @@ def calculate_position_size(
         log_error(f"Invalid risk percentage: {risk_perc}. Must be between 0 and 1.")
         return None
     if current_price <= 0 or stop_loss_price <= 0:
-        log_error(f"Invalid prices for size calculation: Current={current_price}, SL={stop_loss_price}")
+        log_error(
+            f"Invalid prices for size calculation: Current={current_price}, SL={stop_loss_price}"
+        )
         return None
 
     try:
@@ -1213,16 +1422,22 @@ def calculate_position_size(
         # --- Fetch Market Info ---
         market = exchange_instance.market(trading_symbol)
         if not market:  # Should not happen if symbol validation passed earlier
-            log_error(f"Market info for {trading_symbol} not found in `exchange.market()` result.")
+            log_error(
+                f"Market info for {trading_symbol} not found in `exchange.market()` result."
+            )
             return None
 
         base_currency: Optional[str] = market.get("base")
         quote_currency: Optional[str] = market.get("quote")
         is_inverse: bool = market.get("inverse", False)
-        contract_size: float = float(market.get("contractSize", 1.0))  # Default to 1 if not specified
+        contract_size: float = float(
+            market.get("contractSize", 1.0)
+        )  # Default to 1 if not specified
 
         if not base_currency or not quote_currency:
-            log_error(f"Could not determine base/quote currency for {trading_symbol} from market info.")
+            log_error(
+                f"Could not determine base/quote currency for {trading_symbol} from market info."
+            )
             return None
         log_debug(
             f"Market details: Base={base_currency}, Quote={quote_currency}, Inverse={is_inverse}, ContractSize={contract_size}"
@@ -1248,7 +1463,10 @@ def calculate_position_size(
             available_balance = float(balance["free"][quote_currency])
             balance_info_to_log = f"balance['free']['{quote_currency}']"
         # 2. Check structure like balance['USDT']['free']
-        elif isinstance(balance.get(quote_currency), dict) and "free" in balance[quote_currency]:
+        elif (
+            isinstance(balance.get(quote_currency), dict)
+            and "free" in balance[quote_currency]
+        ):
             available_balance = float(balance[quote_currency]["free"])
             balance_info_to_log = f"balance['{quote_currency}']['free']"
         # 3. Fallback: Check 'total' if 'free' is zero or missing (less ideal)
@@ -1258,9 +1476,13 @@ def calculate_position_size(
             and available_balance == 0.0
         ):
             available_balance = float(balance[quote_currency]["total"])
-            balance_info_to_log = f"balance['{quote_currency}']['total'] (using total as free was 0)"
+            balance_info_to_log = (
+                f"balance['{quote_currency}']['total'] (using total as free was 0)"
+            )
             if available_balance > 0:
-                log_warning(f"Using 'total' {quote_currency} balance for calculation, 'free' was zero or unavailable.")
+                log_warning(
+                    f"Using 'total' {quote_currency} balance for calculation, 'free' was zero or unavailable."
+                )
         # 4. Exchange-specific checks (Example for Bybit Unified Margin Account - USDT)
         elif exchange_instance.id == "bybit" and quote_currency == "USDT":
             # Check unified account structure (this might change with API updates)
@@ -1278,13 +1500,19 @@ def calculate_position_size(
                     ):
                         # Bybit Unified uses availableToWithdraw or walletBalance - prefer availableToWithdraw
                         available_balance = float(
-                            wallet_info.get("availableToWithdraw", wallet_info.get("walletBalance", 0.0))
+                            wallet_info.get(
+                                "availableToWithdraw",
+                                wallet_info.get("walletBalance", 0.0),
+                            )
                         )
-                        balance_info_to_log = "Bybit Unified 'availableToWithdraw' or 'walletBalance'"
+                        balance_info_to_log = (
+                            "Bybit Unified 'availableToWithdraw' or 'walletBalance'"
+                        )
                         break
             # Check contract account structure (older or non-unified)
             elif (
-                isinstance(balance.get(quote_currency), dict) and "available" in balance[quote_currency]
+                isinstance(balance.get(quote_currency), dict)
+                and "available" in balance[quote_currency]
             ):  # Bybit contracts might use 'available'
                 available_balance = float(balance[quote_currency]["available"])
                 balance_info_to_log = "Bybit Contract 'available'"
@@ -1326,7 +1554,9 @@ def calculate_position_size(
                 f"Calculating size for INVERSE contract ({trading_symbol}). Ensure risk calculation logic matches exchange specifications."
             )
             if current_price == 0:  # Avoid division by zero
-                log_error("Current price is zero, cannot calculate size for inverse contract.")
+                log_error(
+                    "Current price is zero, cannot calculate size for inverse contract."
+                )
                 return None
             # Quantity in contracts = Risk Amount (Quote) / (Price Diff per Contract in Quote)
             # Price Diff per Contract (Quote) = Price Diff (Quote/Base) * Contract Size (Base/Contract) / Entry Price (Quote/Base) ??? -> This gets complicated.
@@ -1343,7 +1573,9 @@ def calculate_position_size(
             # Linear contracts: Risk is in quote, position size is in base.
             # Quantity (in base) = Risk Amount (Quote) / Price Diff (Quote / Base)
             quantity_base = risk_amount_quote / price_diff
-            log_debug(f"Linear contract quantity (base units): {quantity_base:.{amount_precision_digits + 4}f}")
+            log_debug(
+                f"Linear contract quantity (base units): {quantity_base:.{amount_precision_digits + 4}f}"
+            )
 
         # Adjust for contract size if it's not 1 base unit per contract
         # The 'amount' field in orders is usually in BASE currency for CCXT, even for contracts,
@@ -1359,7 +1591,9 @@ def calculate_position_size(
         # --- Adjust for Precision and Limits ---
         try:
             # Use amount_to_precision which should handle rounding according to exchange rules
-            quantity_adjusted = float(exchange_instance.amount_to_precision(trading_symbol, quantity_base))
+            quantity_adjusted = float(
+                exchange_instance.amount_to_precision(trading_symbol, quantity_base)
+            )
             log_debug(
                 f"Quantity adjusted for precision: {quantity_adjusted:.{amount_precision_digits}f} {base_currency}"
             )
@@ -1369,7 +1603,9 @@ def calculate_position_size(
             )
             # Fallback: round manually (less accurate than exchange method)
             quantity_adjusted = round(quantity_base, amount_precision_digits)
-            log_debug(f"Quantity manually rounded: {quantity_adjusted:.{amount_precision_digits}f} {base_currency}")
+            log_debug(
+                f"Quantity manually rounded: {quantity_adjusted:.{amount_precision_digits}f} {base_currency}"
+            )
 
         if quantity_adjusted <= 0:
             log_error(
@@ -1383,7 +1619,9 @@ def calculate_position_size(
         max_amount = limits.get("amount", {}).get("max")
         min_cost = limits.get("cost", {}).get("min")
 
-        log_debug(f"Market Limits: Min Qty={min_amount}, Max Qty={max_amount}, Min Cost={min_cost}")
+        log_debug(
+            f"Market Limits: Min Qty={min_amount}, Max Qty={max_amount}, Min Cost={min_cost}"
+        )
 
         if min_amount is not None and quantity_adjusted < min_amount:
             log_error(
@@ -1395,7 +1633,9 @@ def calculate_position_size(
                 f"Calculated quantity {quantity_adjusted:.{amount_precision_digits}f} exceeds max amount {max_amount}. Capping quantity to max amount."
             )
             # Ensure capped value also meets precision
-            quantity_adjusted = float(exchange_instance.amount_to_precision(trading_symbol, max_amount))
+            quantity_adjusted = float(
+                exchange_instance.amount_to_precision(trading_symbol, max_amount)
+            )
 
         # Check minimum cost if applicable
         estimated_cost = quantity_adjusted * current_price  # Cost in quote currency
@@ -1420,7 +1660,9 @@ def calculate_position_size(
 
     # Handle specific non-retryable errors after decorator has handled retries
     except ccxt.AuthenticationError as e:
-        log_error(f"Authentication error during position size calculation (fetching balance): {e}")
+        log_error(
+            f"Authentication error during position size calculation (fetching balance): {e}"
+        )
         return None
     except ccxt.ExchangeError as e:  # Catch other non-retryable exchange errors
         log_error(f"Exchange error during position size calculation: {e}")
@@ -1428,7 +1670,10 @@ def calculate_position_size(
     except Exception as e:
         # Log unexpected errors that weren't caught by specific handlers or the retry decorator
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected non-retryable error calculating position size: {e}", exc_info=True)
+            log_error(
+                f"Unexpected non-retryable error calculating position size: {e}",
+                exc_info=True,
+            )
         # If it was a retryable error that failed all retries, the decorator raised it.
         return None
 
@@ -1437,7 +1682,9 @@ def calculate_position_size(
 
 
 @api_retry_decorator
-def cancel_order_with_retry(exchange_instance: ccxt.Exchange, order_id: str, trading_symbol: str) -> bool:
+def cancel_order_with_retry(
+    exchange_instance: ccxt.Exchange, order_id: str, trading_symbol: str
+) -> bool:
     """
     Attempts to cancel an order by ID using the exchange API.
     Applies retry logic for network/rate limit errors via the decorator.
@@ -1465,7 +1712,9 @@ def cancel_order_with_retry(exchange_instance: ccxt.Exchange, order_id: str, tra
         return True  # Simulate success
     else:
         # --- LIVE TRADING ---
-        log_warning(f"!!! LIVE MODE: Sending cancellation request for order {order_id}.")
+        log_warning(
+            f"!!! LIVE MODE: Sending cancellation request for order {order_id}."
+        )
         try:
             # The actual API call is wrapped by the decorator
             exchange_instance.cancel_order(order_id, trading_symbol)
@@ -1527,14 +1776,18 @@ def place_market_order(
 
         # Ensure amount conforms to market precision rules BEFORE placing order
         try:
-            amount_formatted = float(exchange_instance.amount_to_precision(trading_symbol, amount))
+            amount_formatted = float(
+                exchange_instance.amount_to_precision(trading_symbol, amount)
+            )
             if amount_formatted <= 0:
                 log_error(
                     f"Amount {amount} became zero or negative ({amount_formatted}) after applying precision. Cannot place order."
                 )
                 return None
         except ccxt.ExchangeError as e:
-            log_error(f"Failed to format amount {amount} to precision for {trading_symbol}: {e}")
+            log_error(
+                f"Failed to format amount {amount} to precision for {trading_symbol}: {e}"
+            )
             return None  # Cannot proceed without correct precision
 
         log_info(
@@ -1543,7 +1796,9 @@ def place_market_order(
 
         # --- Prepare Order Parameters ---
         params = {}
-        is_contract_market = market.get("swap") or market.get("future") or market.get("contract")
+        is_contract_market = (
+            market.get("swap") or market.get("future") or market.get("contract")
+        )
         if reduce_only:
             if is_contract_market:
                 # Check if exchange explicitly supports reduceOnly for market orders (some might not)
@@ -1562,7 +1817,9 @@ def place_market_order(
             log_warning("!!! SIMULATION: Market order placement skipped.")
             # Create a realistic dummy order response
             sim_price: float = 0.0
-            sim_order_id: str = f"sim_market_{pd.Timestamp.now().strftime('%Y%m%d%H%M%S%f')}"
+            sim_order_id: str = (
+                f"sim_market_{pd.Timestamp.now().strftime('%Y%m%d%H%M%S%f')}"
+            )
             try:
                 # Fetch ticker safely with retry for simulation price
                 @api_retry_decorator
@@ -1571,12 +1828,18 @@ def place_market_order(
                     return exch.fetch_ticker(sym)
 
                 ticker = fetch_ticker_for_sim(exchange_instance, trading_symbol)
-                sim_price = ticker.get("last", ticker.get("close", 0.0))  # Use last or close price
+                sim_price = ticker.get(
+                    "last", ticker.get("close", 0.0)
+                )  # Use last or close price
                 if sim_price <= 0:
-                    log_warning("Could not fetch valid ticker price for simulation, using 0.")
+                    log_warning(
+                        "Could not fetch valid ticker price for simulation, using 0."
+                    )
             except Exception as ticker_e:
                 # Error already logged by decorator if retries failed
-                log_warning(f"Could not fetch ticker for simulation price after retries. Last error: {ticker_e}")
+                log_warning(
+                    f"Could not fetch ticker for simulation price after retries. Last error: {ticker_e}"
+                )
 
             sim_cost = amount_formatted * sim_price if sim_price > 0 else 0.0
             order = {
@@ -1596,7 +1859,9 @@ def place_market_order(
                 "remaining": 0.0,
                 "cost": sim_cost,
                 "fee": None,  # Fee simulation could be added if needed
-                "reduceOnly": params.get("reduceOnly", False),  # Store if it was requested
+                "reduceOnly": params.get(
+                    "reduceOnly", False
+                ),  # Store if it was requested
                 "info": {
                     "simulated": True,
                     "reduceOnly_applied": params.get("reduceOnly", False),
@@ -1615,23 +1880,33 @@ def place_market_order(
 
         # --- Log Order Result ---
         if order:
-            log_info(f"{side.capitalize()} market order request processed {'(Simulated)' if SIMULATION_MODE else ''}.")
+            log_info(
+                f"{side.capitalize()} market order request processed {'(Simulated)' if SIMULATION_MODE else ''}."
+            )
             order_id: Optional[str] = order.get("id")
             order_status: Optional[str] = order.get("status")
             # Use 'average' if available (actual filled price), fallback to 'price' (less accurate for market)
             order_price: Optional[float] = order.get("average", order.get("price"))
             order_filled: Optional[float] = order.get("filled")
             order_cost: Optional[float] = order.get("cost")
-            reduce_only_info = order.get("reduceOnly", params.get("reduceOnly", "N/A"))  # Check order response too
+            reduce_only_info = order.get(
+                "reduceOnly", params.get("reduceOnly", "N/A")
+            )  # Check order response too
 
             price_str: str = (
-                f"{order_price:.{price_precision_digits}f}" if isinstance(order_price, (int, float)) else "N/A"
+                f"{order_price:.{price_precision_digits}f}"
+                if isinstance(order_price, (int, float))
+                else "N/A"
             )
             filled_str: str = (
-                f"{order_filled:.{amount_precision_digits}f}" if isinstance(order_filled, (int, float)) else "N/A"
+                f"{order_filled:.{amount_precision_digits}f}"
+                if isinstance(order_filled, (int, float))
+                else "N/A"
             )
             cost_str: str = (
-                f"{order_cost:.{price_precision_digits}f}" if isinstance(order_cost, (int, float)) else "N/A"
+                f"{order_cost:.{price_precision_digits}f}"
+                if isinstance(order_cost, (int, float))
+                else "N/A"
             )
 
             log_info(
@@ -1644,7 +1919,9 @@ def place_market_order(
                 time.sleep(1.5)  # Adjust as needed, e.g., 1-3 seconds
         else:
             # This might happen if the API call returns None or empty dict, even after retries
-            log_error("Market order placement attempt did not return a valid order object.")
+            log_error(
+                "Market order placement attempt did not return a valid order object."
+            )
             return None
 
         return order  # Return the order dictionary (simulated or real)
@@ -1662,18 +1939,27 @@ def place_market_order(
             f"Invalid market order parameters for {side} {amount_formatted:.{amount_precision_digits}f} {trading_symbol}. Check market limits, amount precision, or symbol status. Error: {e}"
         )
         return None
-    except ccxt.OrderNotFound as e:  # Can happen if order rejected immediately or right after placement attempt
+    except (
+        ccxt.OrderNotFound
+    ) as e:  # Can happen if order rejected immediately or right after placement attempt
         log_error(
             f"OrderNotFound error placing {side} {amount_formatted:.{amount_precision_digits}f} {trading_symbol}. Likely rejected by exchange immediately. Error: {e}"
         )
         return None
-    except ccxt.ExchangeError as e:  # Catch other specific non-retryable exchange errors
-        log_error(f"Exchange specific error placing {side} market order for {trading_symbol}: {e}")
+    except (
+        ccxt.ExchangeError
+    ) as e:  # Catch other specific non-retryable exchange errors
+        log_error(
+            f"Exchange specific error placing {side} market order for {trading_symbol}: {e}"
+        )
         return None
     except Exception as e:
         # Log unexpected errors that weren't caught by specific handlers or the retry decorator
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected non-retryable error placing {side} market order: {e}", exc_info=True)
+            log_error(
+                f"Unexpected non-retryable error placing {side} market order: {e}",
+                exc_info=True,
+            )
         # If it was a retryable error that failed all retries, the decorator raised it. Return None.
         return None
 
@@ -1719,10 +2005,14 @@ def place_sl_tp_orders(
 
     # --- Input Validation ---
     if not isinstance(quantity, (float, int)) or quantity <= 0:
-        log_error(f"Invalid quantity for SL/TP placement: {quantity}. Must be positive number.")
+        log_error(
+            f"Invalid quantity for SL/TP placement: {quantity}. Must be positive number."
+        )
         return None, None
     if position_side not in ["long", "short"]:
-        log_error(f"Invalid position_side for SL/TP placement: '{position_side}'. Must be 'long' or 'short'.")
+        log_error(
+            f"Invalid position_side for SL/TP placement: '{position_side}'. Must be 'long' or 'short'."
+        )
         return None, None
     if (
         not isinstance(sl_price, (float, int))
@@ -1730,15 +2020,21 @@ def place_sl_tp_orders(
         or not isinstance(tp_price, (float, int))
         or tp_price <= 0
     ):
-        log_error(f"Invalid SL ({sl_price}) or TP ({tp_price}) price for placement. Must be positive numbers.")
+        log_error(
+            f"Invalid SL ({sl_price}) or TP ({tp_price}) price for placement. Must be positive numbers."
+        )
         return None, None
     # Basic check: SL should be below entry for long, above for short. TP vice-versa.
     # (More robust check against current_price happens before calling this function)
     if position_side == "long" and sl_price >= tp_price:
-        log_error(f"Invalid SL/TP for LONG position: SL ({sl_price}) >= TP ({tp_price}).")
+        log_error(
+            f"Invalid SL/TP for LONG position: SL ({sl_price}) >= TP ({tp_price})."
+        )
         return None, None
     if position_side == "short" and sl_price <= tp_price:
-        log_error(f"Invalid SL/TP for SHORT position: SL ({sl_price}) <= TP ({tp_price}).")
+        log_error(
+            f"Invalid SL/TP for SHORT position: SL ({sl_price}) <= TP ({tp_price})."
+        )
         return None, None
 
     try:
@@ -1746,19 +2042,33 @@ def place_sl_tp_orders(
         base_currency: str = market.get("base", "")
 
         # Determine close side and format values
-        close_side = "sell" if position_side == "long" else "buy"  # Order side needed to close the position
+        close_side = (
+            "sell" if position_side == "long" else "buy"
+        )  # Order side needed to close the position
         try:
-            qty_formatted = float(exchange_instance.amount_to_precision(trading_symbol, quantity))
-            sl_price_formatted = float(exchange_instance.price_to_precision(trading_symbol, sl_price))
-            tp_price_formatted = float(exchange_instance.price_to_precision(trading_symbol, tp_price))
+            qty_formatted = float(
+                exchange_instance.amount_to_precision(trading_symbol, quantity)
+            )
+            sl_price_formatted = float(
+                exchange_instance.price_to_precision(trading_symbol, sl_price)
+            )
+            tp_price_formatted = float(
+                exchange_instance.price_to_precision(trading_symbol, tp_price)
+            )
             if qty_formatted <= 0:
-                raise ValueError("Quantity became non-positive after precision formatting.")
+                raise ValueError(
+                    "Quantity became non-positive after precision formatting."
+                )
         except (ccxt.ExchangeError, ValueError) as fmt_e:
-            log_error(f"Failed to format quantity or prices to precision for {trading_symbol}: {fmt_e}")
+            log_error(
+                f"Failed to format quantity or prices to precision for {trading_symbol}: {fmt_e}"
+            )
             return None, None
 
         # --- Prepare Common Parameters ---
-        is_contract_market = market.get("swap") or market.get("future") or market.get("contract")
+        is_contract_market = (
+            market.get("swap") or market.get("future") or market.get("contract")
+        )
         reduce_only_param = {"reduceOnly": True} if is_contract_market else {}
         if reduce_only_param:
             log_debug("Applying 'reduceOnly=True' to SL/TP orders.")
@@ -1778,26 +2088,40 @@ def place_sl_tp_orders(
         ) and "market" in unified_order_options.get("types", {})
         supports_stop_limit_param = "stopPrice" in unified_order_options.get(
             "params", {}
-        ) and "limit" in unified_order_options.get("types", {})  # Assuming limit type is standard
+        ) and "limit" in unified_order_options.get(
+            "types", {}
+        )  # Assuming limit type is standard
 
         # Heuristic check based on common practice: prefer stop-market via create_order
         # This might need adjustment per exchange based on testing or API docs
-        if exchange_instance.has.get("createStopMarketOrder", False):  # Check explicit method first
+        if exchange_instance.has.get(
+            "createStopMarketOrder", False
+        ):  # Check explicit method first
             stop_loss_order_type = "stopMarket"
-            log_debug("Exchange has explicit createStopMarketOrder method (will use via createOrder if possible).")
+            log_debug(
+                "Exchange has explicit createStopMarketOrder method (will use via createOrder if possible)."
+            )
         elif supports_stop_market_param or exchange_instance.id in [
             "binance",
             "bybit",
             "okx",
         ]:  # Assume common exchanges support via params
             stop_loss_order_type = "stopMarket"
-            log_debug("Assuming stopMarket type for SL via createOrder params is supported.")
-        elif exchange_instance.has.get("createStopLimitOrder", False):  # Fallback to stop-limit method
+            log_debug(
+                "Assuming stopMarket type for SL via createOrder params is supported."
+            )
+        elif exchange_instance.has.get(
+            "createStopLimitOrder", False
+        ):  # Fallback to stop-limit method
             stop_loss_order_type = "stopLimit"
-            log_debug("Exchange has explicit createStopLimitOrder method (will use via createOrder if possible).")
+            log_debug(
+                "Exchange has explicit createStopLimitOrder method (will use via createOrder if possible)."
+            )
         elif supports_stop_limit_param:  # Fallback to stop-limit via params
             stop_loss_order_type = "stopLimit"
-            log_debug("Assuming stopLimit type for SL via createOrder params is supported.")
+            log_debug(
+                "Assuming stopLimit type for SL via createOrder params is supported."
+            )
         else:
             log_error(
                 f"Could not determine a supported stop order type (stopMarket or stopLimit) via createOrder or explicit methods for {exchange_instance.id}. Cannot place automated SL."
@@ -1814,8 +2138,12 @@ def place_sl_tp_orders(
         elif stop_loss_order_type == "stopLimit":
             # Calculate a reasonable limit price for the stop-limit order to increase fill chance
             # Place limit slightly worse than trigger price to avoid missing fill in fast market
-            limit_offset = abs(tp_price_formatted - sl_price_formatted) * 0.10  # 10% of TP-SL range as offset? Risky.
-            limit_offset = max(min_tick * 5, limit_offset)  # Ensure offset is at least a few ticks, capped by range?
+            limit_offset = (
+                abs(tp_price_formatted - sl_price_formatted) * 0.10
+            )  # 10% of TP-SL range as offset? Risky.
+            limit_offset = max(
+                min_tick * 5, limit_offset
+            )  # Ensure offset is at least a few ticks, capped by range?
             # Safer: Place limit very close to stop price or slightly beyond
             limit_offset_ticks = min_tick * 10  # Place limit 10 ticks away from trigger
             sl_limit_price_raw = (
@@ -1823,10 +2151,14 @@ def place_sl_tp_orders(
                 if close_side == "sell"
                 else sl_price_formatted + limit_offset_ticks
             )
-            stop_loss_limit_price = float(exchange_instance.price_to_precision(trading_symbol, sl_limit_price_raw))
+            stop_loss_limit_price = float(
+                exchange_instance.price_to_precision(trading_symbol, sl_limit_price_raw)
+            )
 
             sl_params["stopPrice"] = sl_price_formatted
-            sl_params["price"] = stop_loss_limit_price  # The limit price for the order placed after trigger
+            sl_params["price"] = (
+                stop_loss_limit_price  # The limit price for the order placed after trigger
+            )
             log_warning(
                 f"Using stopLimit type for SL. Trigger: {sl_price_formatted:.{price_precision_digits}f}, Limit: {stop_loss_limit_price:.{price_precision_digits}f}. Fill is not guaranteed if price gaps past limit."
             )
@@ -1856,11 +2188,16 @@ def place_sl_tp_orders(
                     "remaining": qty_formatted,
                     "cost": 0.0,
                     "reduceOnly": sl_params.get("reduceOnly", False),
-                    "info": {"simulated": True, "reduceOnly_applied": sl_params.get("reduceOnly", False)},
+                    "info": {
+                        "simulated": True,
+                        "reduceOnly_applied": sl_params.get("reduceOnly", False),
+                    },
                 }
             else:
                 # --- LIVE TRADING ---
-                log_warning(f"!!! LIVE MODE: Placing real {stop_loss_order_type} stop-loss order.")
+                log_warning(
+                    f"!!! LIVE MODE: Placing real {stop_loss_order_type} stop-loss order."
+                )
                 # The create_order call is wrapped by the main function's decorator for retries
                 sl_order = exchange_instance.create_order(
                     symbol=trading_symbol,
@@ -1901,11 +2238,16 @@ def place_sl_tp_orders(
                     "remaining": qty_formatted,
                     "cost": 0.0,
                     "reduceOnly": tp_params.get("reduceOnly", False),
-                    "info": {"simulated": True, "reduceOnly_applied": tp_params.get("reduceOnly", False)},
+                    "info": {
+                        "simulated": True,
+                        "reduceOnly_applied": tp_params.get("reduceOnly", False),
+                    },
                 }
             else:
                 # --- LIVE TRADING ---
-                log_warning(f"!!! LIVE MODE: Placing real {tp_order_type} take-profit order.")
+                log_warning(
+                    f"!!! LIVE MODE: Placing real {tp_order_type} take-profit order."
+                )
                 # Use create_limit_order for clarity, wrapped by decorator
                 tp_order = exchange_instance.create_limit_order(
                     symbol=trading_symbol,
@@ -1930,18 +2272,29 @@ def place_sl_tp_orders(
         tp_ok = tp_order and tp_order.get("id")
 
         if sl_ok and not tp_ok and exchange_instance.has.get("createLimitOrder", True):
-            log_warning("SL order placed successfully, but TP order placement failed or did not return an ID.")
+            log_warning(
+                "SL order placed successfully, but TP order placement failed or did not return an ID."
+            )
         elif not sl_ok and tp_ok and stop_loss_order_type:
             log_warning(
                 "TP order placed successfully, but SL order placement failed or did not return an ID. POSITION IS UNPROTECTED!"
             )
-        elif not sl_ok and not tp_ok and stop_loss_order_type and exchange_instance.has.get("createLimitOrder", True):
+        elif (
+            not sl_ok
+            and not tp_ok
+            and stop_loss_order_type
+            and exchange_instance.has.get("createLimitOrder", True)
+        ):
             log_error("Both SL and TP order placements failed or did not return IDs.")
-        elif not stop_loss_order_type and tp_ok:  # SL type wasn't supported, but TP worked
+        elif (
+            not stop_loss_order_type and tp_ok
+        ):  # SL type wasn't supported, but TP worked
             log_warning(
                 "TP order placed, but SL order type not supported by exchange config/heuristics. POSITION IS UNPROTECTED!"
             )
-        elif not stop_loss_order_type and not tp_ok:  # Neither SL type supported nor TP worked
+        elif (
+            not stop_loss_order_type and not tp_ok
+        ):  # Neither SL type supported nor TP worked
             log_error("SL order type not supported and TP order placement failed.")
 
         return sl_order, tp_order
@@ -1949,12 +2302,16 @@ def place_sl_tp_orders(
     # --- Handle Specific Non-Retryable Errors (after decorator retries) ---
     # These might occur during the placement of either SL or TP
     except ccxt.InvalidOrder as e:
-        log_error(f"Invalid order parameters placing SL/TP: {e}. Check limits, precision, or params.")
+        log_error(
+            f"Invalid order parameters placing SL/TP: {e}. Check limits, precision, or params."
+        )
         # Return whatever might have succeeded before the error
         return sl_order, tp_order
     except ccxt.InsufficientFunds as e:
         # Should not happen with reduceOnly=True, but catch just in case.
-        log_error(f"Insufficient funds error during SL/TP placement (unexpected for reduceOnly): {e}")
+        log_error(
+            f"Insufficient funds error during SL/TP placement (unexpected for reduceOnly): {e}"
+        )
         return sl_order, tp_order
     except ccxt.ExchangeError as e:  # Catch other non-retryable exchange errors
         log_error(f"Exchange specific error placing SL/TP orders: {e}")
@@ -1962,7 +2319,10 @@ def place_sl_tp_orders(
     except Exception as e:
         # Log unexpected errors
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected non-retryable error in place_sl_tp_orders: {e}", exc_info=True)
+            log_error(
+                f"Unexpected non-retryable error in place_sl_tp_orders: {e}",
+                exc_info=True,
+            )
         # Return None, None to indicate total failure if an exception occurred after retries
         # or an unexpected error happened before any placement.
         return None, None
@@ -1970,7 +2330,9 @@ def place_sl_tp_orders(
 
 # --- Position and Order Check Function (Decorated) ---
 @api_retry_decorator
-def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: str) -> bool:
+def check_position_and_orders(
+    exchange_instance: ccxt.Exchange, trading_symbol: str
+) -> bool:
     """
     Checks consistency between the bot's tracked position state and open orders on the exchange.
     Specifically, it checks if tracked SL or TP orders are still open.
@@ -1995,7 +2357,9 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
         log_debug("No active position state to check.")
         return False  # No active position tracked locally
 
-    log_debug(f"Checking open orders vs local state for active {position['status']} position on {trading_symbol}...")
+    log_debug(
+        f"Checking open orders vs local state for active {position['status']} position on {trading_symbol}..."
+    )
     position_reset_required: bool = False
     order_to_cancel_id: Optional[str] = None
     assumed_close_reason: Optional[str] = None  # 'SL' or 'TP'
@@ -2004,8 +2368,12 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
         # Fetch all open orders for the specific symbol (retried by decorator)
         # Using fetch_open_orders is generally preferred over fetching individual order statuses
         # as it's often a single API call.
-        open_orders: List[Dict[str, Any]] = exchange_instance.fetch_open_orders(trading_symbol)
-        open_order_ids: set[str] = {order["id"] for order in open_orders if "id" in order}
+        open_orders: List[Dict[str, Any]] = exchange_instance.fetch_open_orders(
+            trading_symbol
+        )
+        open_order_ids: set[str] = {
+            order["id"] for order in open_orders if "id" in order
+        }
         log_debug(
             f"Found {len(open_orders)} open orders for {trading_symbol}. IDs: {open_order_ids if open_order_ids else 'None'}"
         )
@@ -2032,8 +2400,12 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
         sl_found_open: bool = sl_order_id in open_order_ids if sl_order_id else False
         tp_found_open: bool = tp_order_id in open_order_ids if tp_order_id else False
 
-        log_debug(f"Tracked SL Order ({sl_order_id or 'None'}) found open: {sl_found_open}")
-        log_debug(f"Tracked TP Order ({tp_order_id or 'None'}) found open: {tp_found_open}")
+        log_debug(
+            f"Tracked SL Order ({sl_order_id or 'None'}) found open: {sl_found_open}"
+        )
+        log_debug(
+            f"Tracked TP Order ({tp_order_id or 'None'}) found open: {tp_found_open}"
+        )
 
         # Condition for reset: If SL was tracked and is NOT open anymore
         if sl_order_id and not sl_found_open:
@@ -2066,7 +2438,9 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
                 )
                 try:
                     # Use the decorated cancel helper (handles retries and OrderNotFound gracefully)
-                    cancel_success = cancel_order_with_retry(exchange_instance, order_to_cancel_id, trading_symbol)
+                    cancel_success = cancel_order_with_retry(
+                        exchange_instance, order_to_cancel_id, trading_symbol
+                    )
                     if cancel_success:
                         log_info(
                             f"Leftover order {order_to_cancel_id} cancellation request sent or order already closed."
@@ -2090,7 +2464,9 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
 
             # Reset the local position state to default values
             log_info("Resetting local position state to default (no position).")
-            position.update(position_default_structure.copy())  # Use update with a copy of defaults
+            position.update(
+                position_default_structure.copy()
+            )  # Use update with a copy of defaults
             save_position_state()  # Persist the reset state
             display_position_status(
                 position, price_precision_digits, amount_precision_digits
@@ -2098,7 +2474,9 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
             return True  # Indicate position state was reset
 
         # If both tracked orders are still open (or only one was tracked and it's still open), state is consistent
-        log_debug("Position state appears consistent with tracked open orders (SL/TP still open or untracked).")
+        log_debug(
+            "Position state appears consistent with tracked open orders (SL/TP still open or untracked)."
+        )
         return False  # Position was not reset
 
     # --- Handle Specific Non-Retryable Errors from fetch_open_orders ---
@@ -2111,7 +2489,10 @@ def check_position_and_orders(exchange_instance: ccxt.Exchange, trading_symbol: 
     except Exception as e:
         # Log unexpected errors
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected non-retryable error checking position/orders: {e}", exc_info=True)
+            log_error(
+                f"Unexpected non-retryable error checking position/orders: {e}",
+                exc_info=True,
+            )
         # If retryable error exhausted retries, decorator raised it. Return False as state is uncertain.
         return False
 
@@ -2144,10 +2525,14 @@ def update_trailing_stop(
         return
     if position.get("sl_order_id") is None:
         # Only warn if TSL is enabled but no SL ID exists (e.g., initial placement failed)
-        log_warning("TSL Check: Cannot perform trailing stop update - No active SL order ID is tracked in state.")
+        log_warning(
+            "TSL Check: Cannot perform trailing stop update - No active SL order ID is tracked in state."
+        )
         return
     if last_atr is None or last_atr <= 0:
-        log_warning(f"TSL Check: Cannot perform trailing stop update - Invalid ATR value ({last_atr}).")
+        log_warning(
+            f"TSL Check: Cannot perform trailing stop update - Invalid ATR value ({last_atr})."
+        )
         return
 
     log_debug(
@@ -2156,31 +2541,45 @@ def update_trailing_stop(
 
     # --- Get Required State Variables ---
     entry_price: Optional[float] = position.get("entry_price")
-    initial_sl_price: Optional[float] = position.get("stop_loss")  # The SL price *before* any TSL updates
+    initial_sl_price: Optional[float] = position.get(
+        "stop_loss"
+    )  # The SL price *before* any TSL updates
     current_tsl_price: Optional[float] = position.get(
         "current_trailing_sl_price"
     )  # The currently active TSL price, if any
 
     if entry_price is None or initial_sl_price is None:
-        log_warning("TSL Check: Cannot proceed - Entry price or initial SL price missing from position state.")
+        log_warning(
+            "TSL Check: Cannot proceed - Entry price or initial SL price missing from position state."
+        )
         return
 
     # Determine the SL price we are comparing against (the *current* effective SL)
     # If TSL has already activated, use current_tsl_price, otherwise use the initial SL.
-    current_effective_sl_price = current_tsl_price if current_tsl_price is not None else initial_sl_price
+    current_effective_sl_price = (
+        current_tsl_price if current_tsl_price is not None else initial_sl_price
+    )
 
     # --- Update Peak Prices Seen Since Entry ---
     if position["status"] == "long":
-        highest_seen = position.get("highest_price_since_entry", entry_price)  # Initialize with entry if missing
+        highest_seen = position.get(
+            "highest_price_since_entry", entry_price
+        )  # Initialize with entry if missing
         if current_price > highest_seen:
             position["highest_price_since_entry"] = current_price
-            log_debug(f"TSL: New high for long position: {current_price:.{price_precision_digits}f}")
+            log_debug(
+                f"TSL: New high for long position: {current_price:.{price_precision_digits}f}"
+            )
             # Defer saving state until TSL actually moves
     elif position["status"] == "short":
-        lowest_seen = position.get("lowest_price_since_entry", entry_price)  # Initialize with entry if missing
+        lowest_seen = position.get(
+            "lowest_price_since_entry", entry_price
+        )  # Initialize with entry if missing
         if current_price < lowest_seen:
             position["lowest_price_since_entry"] = current_price
-            log_debug(f"TSL: New low for short position: {current_price:.{price_precision_digits}f}")
+            log_debug(
+                f"TSL: New low for short position: {current_price:.{price_precision_digits}f}"
+            )
             # Defer saving state
 
     # --- Check Activation Threshold ---
@@ -2188,12 +2587,16 @@ def update_trailing_stop(
     potential_new_tsl_price: Optional[float] = None
 
     if position["status"] == "long":
-        activation_price_threshold = entry_price + (last_atr * trailing_stop_activation_atr_multiplier)
+        activation_price_threshold = entry_price + (
+            last_atr * trailing_stop_activation_atr_multiplier
+        )
         current_high = position.get("highest_price_since_entry", entry_price)
         if current_high > activation_price_threshold:
             tsl_activated = True
             # Calculate potential new TSL based on the highest price seen
-            potential_new_tsl_price = current_high - (last_atr * trailing_stop_atr_multiplier)
+            potential_new_tsl_price = current_high - (
+                last_atr * trailing_stop_atr_multiplier
+            )
             log_debug(
                 f"Long TSL Activation Met. High ({current_high:.{price_precision_digits}f}) > Threshold ({activation_price_threshold:.{price_precision_digits}f}). Potential New TSL: {potential_new_tsl_price:.{price_precision_digits}f}"
             )
@@ -2203,12 +2606,16 @@ def update_trailing_stop(
             )
 
     elif position["status"] == "short":
-        activation_price_threshold = entry_price - (last_atr * trailing_stop_activation_atr_multiplier)
+        activation_price_threshold = entry_price - (
+            last_atr * trailing_stop_activation_atr_multiplier
+        )
         current_low = position.get("lowest_price_since_entry", entry_price)
         if current_low < activation_price_threshold:
             tsl_activated = True
             # Calculate potential new TSL based on the lowest price seen
-            potential_new_tsl_price = current_low + (last_atr * trailing_stop_atr_multiplier)
+            potential_new_tsl_price = current_low + (
+                last_atr * trailing_stop_atr_multiplier
+            )
             log_debug(
                 f"Short TSL Activation Met. Low ({current_low:.{price_precision_digits}f}) < Threshold ({activation_price_threshold:.{price_precision_digits}f}). Potential New TSL: {potential_new_tsl_price:.{price_precision_digits}f}"
             )
@@ -2225,7 +2632,9 @@ def update_trailing_stop(
         try:
             # Format potential new TSL to market precision for valid comparison and placement
             new_tsl_price_formatted = float(
-                exchange_instance.price_to_precision(trading_symbol, potential_new_tsl_price)
+                exchange_instance.price_to_precision(
+                    trading_symbol, potential_new_tsl_price
+                )
             )
         except ccxt.ExchangeError as fmt_e:
             log_error(
@@ -2236,7 +2645,10 @@ def update_trailing_stop(
         # Check if new TSL is strictly better (higher for long, lower for short) than the current effective SL
         # AND ensure the new TSL is not placed beyond the current market price (would cause immediate stop-out)
         if position["status"] == "long":
-            if new_tsl_price_formatted > current_effective_sl_price and new_tsl_price_formatted < current_price:
+            if (
+                new_tsl_price_formatted > current_effective_sl_price
+                and new_tsl_price_formatted < current_price
+            ):
                 should_update_tsl = True
                 log_debug(
                     f"Long TSL Improvement Check: New ({new_tsl_price_formatted:.{price_precision_digits}f}) > Current Eff. SL ({current_effective_sl_price:.{price_precision_digits}f}) AND < Price ({current_price:.{price_precision_digits}f}) -> OK"
@@ -2247,7 +2659,10 @@ def update_trailing_stop(
                 )
 
         elif position["status"] == "short":
-            if new_tsl_price_formatted < current_effective_sl_price and new_tsl_price_formatted > current_price:
+            if (
+                new_tsl_price_formatted < current_effective_sl_price
+                and new_tsl_price_formatted > current_price
+            ):
                 should_update_tsl = True
                 log_debug(
                     f"Short TSL Improvement Check: New ({new_tsl_price_formatted:.{price_precision_digits}f}) < Current Eff. SL ({current_effective_sl_price:.{price_precision_digits}f}) AND > Price ({current_price:.{price_precision_digits}f}) -> OK"
@@ -2262,16 +2677,26 @@ def update_trailing_stop(
         log_info(
             f"{NEON_YELLOW}Trailing Stop Update Triggered! Moving SL from ~{current_effective_sl_price:.{price_precision_digits}f} to {new_tsl_price_formatted:.{price_precision_digits}f}{RESET}"
         )
-        old_sl_order_id = position["sl_order_id"]  # Already confirmed not None at function start
+        old_sl_order_id = position[
+            "sl_order_id"
+        ]  # Already confirmed not None at function start
 
         try:
             # --- Step 1: Cancel the existing SL order ---
-            log_info(f"TSL Update: Attempting to cancel old SL order {old_sl_order_id}...")
-            cancel_success = cancel_order_with_retry(exchange_instance, old_sl_order_id, trading_symbol)
+            log_info(
+                f"TSL Update: Attempting to cancel old SL order {old_sl_order_id}..."
+            )
+            cancel_success = cancel_order_with_retry(
+                exchange_instance, old_sl_order_id, trading_symbol
+            )
             # cancel_order_with_retry returns True if cancelled or already not found
             if cancel_success:
-                log_info(f"TSL Update: Old SL order {old_sl_order_id} cancellation successful or order already closed.")
-                time.sleep(1.0)  # Allow exchange time to process cancellation before placing new order
+                log_info(
+                    f"TSL Update: Old SL order {old_sl_order_id} cancellation successful or order already closed."
+                )
+                time.sleep(
+                    1.0
+                )  # Allow exchange time to process cancellation before placing new order
             else:
                 # This case means cancellation failed unexpectedly after retries
                 log_error(
@@ -2288,8 +2713,14 @@ def update_trailing_stop(
                 close_side = "sell" if position["status"] == "long" else "buy"
                 current_qty = position.get("quantity")
 
-                if current_qty is None or not isinstance(current_qty, (float, int)) or current_qty <= 0:
-                    log_error("TSL Update: Cannot place new TSL order - Invalid quantity in position state.")
+                if (
+                    current_qty is None
+                    or not isinstance(current_qty, (float, int))
+                    or current_qty <= 0
+                ):
+                    log_error(
+                        "TSL Update: Cannot place new TSL order - Invalid quantity in position state."
+                    )
                     raise ValueError(
                         "Invalid position quantity for TSL placement."
                     )  # Raise to prevent state update below
@@ -2297,8 +2728,12 @@ def update_trailing_stop(
                 # Re-use the SL/TP placement logic structure for placing the new SL
                 # Determine stop type and params again (in case exchange state changed, though unlikely)
                 market = exchange_instance.market(trading_symbol)
-                is_contract_market = market.get("swap") or market.get("future") or market.get("contract")
-                new_sl_reduce_only_param = {"reduceOnly": True} if is_contract_market else {}
+                is_contract_market = (
+                    market.get("swap") or market.get("future") or market.get("contract")
+                )
+                new_sl_reduce_only_param = (
+                    {"reduceOnly": True} if is_contract_market else {}
+                )
 
                 new_sl_order_type: Optional[str] = None
                 new_sl_limit_price: Optional[float] = None
@@ -2320,11 +2755,16 @@ def update_trailing_stop(
                 ):
                     new_sl_order_type = "stopMarket"
                     new_sl_params["stopPrice"] = new_tsl_price_formatted
-                elif exchange_instance.has.get("createStopLimitOrder", False) or supports_stop_limit_param:
+                elif (
+                    exchange_instance.has.get("createStopLimitOrder", False)
+                    or supports_stop_limit_param
+                ):
                     new_sl_order_type = "stopLimit"
                     # Calculate limit price for stopLimit (similar logic to place_sl_tp_orders)
                     position.get(
-                        "take_profit", current_price * (1.05 if position["status"] == "long" else 0.95)
+                        "take_profit",
+                        current_price
+                        * (1.05 if position["status"] == "long" else 0.95),
                     )  # Use original TP for range, fallback if missing
                     limit_offset_ticks = min_tick * 10
                     sl_limit_price_raw = (
@@ -2332,7 +2772,11 @@ def update_trailing_stop(
                         if close_side == "sell"
                         else new_tsl_price_formatted + limit_offset_ticks
                     )
-                    new_sl_limit_price = float(exchange_instance.price_to_precision(trading_symbol, sl_limit_price_raw))
+                    new_sl_limit_price = float(
+                        exchange_instance.price_to_precision(
+                            trading_symbol, sl_limit_price_raw
+                        )
+                    )
                     new_sl_params["stopPrice"] = new_tsl_price_formatted
                     new_sl_params["price"] = new_sl_limit_price
                     log_warning(
@@ -2346,12 +2790,16 @@ def update_trailing_stop(
                         f"Exchange {exchange_instance.id} does not support required stop order types for TSL update."
                     )
 
-                log_info(f"TSL Update: Attempting direct placement of new {new_sl_order_type} SL order.")
+                log_info(
+                    f"TSL Update: Attempting direct placement of new {new_sl_order_type} SL order."
+                )
 
                 # --- Place New SL Order (Simulation or Live) ---
                 if SIMULATION_MODE:
                     log_warning("!!! SIMULATION: New TSL order placement skipped.")
-                    new_sl_order_id = f"sim_tsl_{pd.Timestamp.now().strftime('%Y%m%d%H%M%S%f')}"
+                    new_sl_order_id = (
+                        f"sim_tsl_{pd.Timestamp.now().strftime('%Y%m%d%H%M%S%f')}"
+                    )
                     new_sl_order_result = {
                         "id": new_sl_order_id,
                         "status": "open",
@@ -2361,7 +2809,9 @@ def update_trailing_stop(
                         "info": {"simulated": True},
                     }
                 else:
-                    log_warning(f"!!! LIVE MODE: Placing real {new_sl_order_type} TSL order.")
+                    log_warning(
+                        f"!!! LIVE MODE: Placing real {new_sl_order_type} TSL order."
+                    )
 
                     # Apply retry decorator specifically to this critical placement call
                     @api_retry_decorator
@@ -2377,9 +2827,15 @@ def update_trailing_stop(
                         )
 
                     # Format quantity *just before* placing the live order
-                    qty_formatted_live = float(exchange_instance.amount_to_precision(trading_symbol, current_qty))
+                    qty_formatted_live = float(
+                        exchange_instance.amount_to_precision(
+                            trading_symbol, current_qty
+                        )
+                    )
                     if qty_formatted_live <= 0:
-                        raise ValueError("Quantity became non-positive after precision formatting for live TSL order.")
+                        raise ValueError(
+                            "Quantity became non-positive after precision formatting for live TSL order."
+                        )
                     new_sl_order_result = place_new_tsl_order_live(qty_formatted_live)
 
                 # --- Step 3: Update State on Successful Placement ---
@@ -2404,7 +2860,9 @@ def update_trailing_stop(
                         f"TSL Update CRITICAL ERROR: Failed to place new trailing SL order after cancelling old one {old_sl_order_id}. POSITION IS NOW UNPROTECTED."
                     )
                     position["sl_order_id"] = None  # Mark SL as lost
-                    position["current_trailing_sl_price"] = None  # TSL is no longer active
+                    position["current_trailing_sl_price"] = (
+                        None  # TSL is no longer active
+                    )
                     # Keep 'stop_loss' as the last known TSL target? Or revert to initial? Reverting might be confusing. Keep it as the target.
                     save_position_state()  # Save the state reflecting the lost SL order
 
@@ -2435,8 +2893,12 @@ def run_bot():
     # Load position state ONCE at startup
     load_position_state()
     log_info(f"Risk per trade: {risk_percentage * 100:.2f}%")
-    log_info(f"Bot check interval: {sleep_interval_seconds} seconds ({sleep_interval_seconds / 60:.1f} minutes)")
-    log_info(f"ATR SL/TP Enabled: {enable_atr_sl_tp}, Trailing Stop Enabled: {enable_trailing_stop}")
+    log_info(
+        f"Bot check interval: {sleep_interval_seconds} seconds ({sleep_interval_seconds / 60:.1f} minutes)"
+    )
+    log_info(
+        f"ATR SL/TP Enabled: {enable_atr_sl_tp}, Trailing Stop Enabled: {enable_trailing_stop}"
+    )
     log_info(f"{NEON_YELLOW}Press Ctrl+C to stop the bot gracefully.{RESET}")
 
     while True:
@@ -2450,7 +2912,9 @@ def run_bot():
             position_was_reset = check_position_and_orders(exchange, symbol)
 
             # Display status *after* the check, reflecting any resets immediately
-            display_position_status(position, price_precision_digits, amount_precision_digits)
+            display_position_status(
+                position, price_precision_digits, amount_precision_digits
+            )
 
             if position_was_reset:
                 log_info(
@@ -2460,9 +2924,13 @@ def run_bot():
                 continue  # Skip the rest of this cycle's logic
 
             # --- Step 2: Fetch Fresh Market Data ---
-            ohlcv_df: Optional[pd.DataFrame] = fetch_ohlcv_data(exchange, symbol, timeframe, limit_count=data_limit)
+            ohlcv_df: Optional[pd.DataFrame] = fetch_ohlcv_data(
+                exchange, symbol, timeframe, limit_count=data_limit
+            )
             if ohlcv_df is None or ohlcv_df.empty:
-                log_warning(f"Could not fetch valid OHLCV data for {symbol}. Waiting for next cycle...")
+                log_warning(
+                    f"Could not fetch valid OHLCV data for {symbol}. Waiting for next cycle..."
+                )
                 neon_sleep_timer(sleep_interval_seconds)
                 continue  # Skip to next iteration
 
@@ -2482,25 +2950,37 @@ def run_bot():
                 vol_ma_len=entry_volume_ma_length,
             )
             if df_with_indicators is None or df_with_indicators.empty:
-                log_warning(f"Indicator calculation failed or resulted in empty DataFrame for {symbol}. Waiting...")
+                log_warning(
+                    f"Indicator calculation failed or resulted in empty DataFrame for {symbol}. Waiting..."
+                )
                 neon_sleep_timer(sleep_interval_seconds)
                 continue
 
             # --- Step 4: Get Latest Data Point and Values ---
-            if len(df_with_indicators) < 1:  # Should not happen if indicator calc returned df, but safety check
-                log_warning("DataFrame has no rows after indicator calculation. Waiting...")
+            if (
+                len(df_with_indicators) < 1
+            ):  # Should not happen if indicator calc returned df, but safety check
+                log_warning(
+                    "DataFrame has no rows after indicator calculation. Waiting..."
+                )
                 neon_sleep_timer(sleep_interval_seconds)
                 continue
 
             latest_data: pd.Series = df_with_indicators.iloc[-1]
-            latest_timestamp: pd.Timestamp = latest_data.name  # Get timestamp from index
+            latest_timestamp: pd.Timestamp = (
+                latest_data.name
+            )  # Get timestamp from index
 
             # Construct indicator column names dynamically based on config for lookup
             rsi_col_name: str = f"RSI_{rsi_length}"
             stoch_k_col_name: str = f"STOCHk_{stoch_k}_{stoch_d}_{stoch_smooth_k}"
             stoch_d_col_name: str = f"STOCHd_{stoch_k}_{stoch_d}_{stoch_smooth_k}"
-            atr_col_name: Optional[str] = f"ATRr_{atr_length}" if needs_atr_calc else None
-            vol_ma_col_name: Optional[str] = f"VOL_MA_{entry_volume_ma_length}" if needs_vol_ma_calc else None
+            atr_col_name: Optional[str] = (
+                f"ATRr_{atr_length}" if needs_atr_calc else None
+            )
+            vol_ma_col_name: Optional[str] = (
+                f"VOL_MA_{entry_volume_ma_length}" if needs_vol_ma_calc else None
+            )
 
             # Verify that all required columns exist in the final DataFrame
             required_cols_for_logic: List[str] = [
@@ -2518,7 +2998,11 @@ def run_bot():
             if needs_vol_ma_calc and vol_ma_col_name:
                 required_cols_for_logic.append(vol_ma_col_name)
 
-            missing_cols = [col for col in required_cols_for_logic if col not in df_with_indicators.columns]
+            missing_cols = [
+                col
+                for col in required_cols_for_logic
+                if col not in df_with_indicators.columns
+            ]
             if missing_cols:
                 log_error(
                     f"CRITICAL: Required columns missing in DataFrame after indicator calculation: {missing_cols}. Check config/data/indicator logic. Available: {df_with_indicators.columns.tolist()}"
@@ -2539,7 +3023,11 @@ def run_bot():
                 last_atr: Optional[float] = None
                 if needs_atr_calc and atr_col_name:
                     atr_val = latest_data.get(atr_col_name)
-                    if pd.notna(atr_val) and isinstance(atr_val, (float, int)) and atr_val > 0:
+                    if (
+                        pd.notna(atr_val)
+                        and isinstance(atr_val, (float, int))
+                        and atr_val > 0
+                    ):
                         last_atr = float(atr_val)
                     else:
                         log_warning(
@@ -2549,7 +3037,11 @@ def run_bot():
                 last_volume_ma: Optional[float] = None
                 if needs_vol_ma_calc and vol_ma_col_name:
                     vol_ma_val = latest_data.get(vol_ma_col_name)
-                    if pd.notna(vol_ma_val) and isinstance(vol_ma_val, (float, int)) and vol_ma_val > 0:
+                    if (
+                        pd.notna(vol_ma_val)
+                        and isinstance(vol_ma_val, (float, int))
+                        and vol_ma_val > 0
+                    ):
                         last_volume_ma = float(vol_ma_val)
                     else:
                         log_debug(
@@ -2559,7 +3051,9 @@ def run_bot():
                 # Final check for essential NaNs that would break core logic
                 essential_values = [current_price, last_rsi, last_stoch_k, last_stoch_d]
                 if any(pd.isna(v) for v in essential_values):
-                    raise ValueError("Essential indicator value (Price, RSI, StochK, StochD) is NaN.")
+                    raise ValueError(
+                        "Essential indicator value (Price, RSI, StochK, StochD) is NaN."
+                    )
 
             except (KeyError, ValueError, TypeError) as e:
                 log_error(
@@ -2570,7 +3064,14 @@ def run_bot():
                 continue
 
             # Display Market Stats panel
-            display_market_stats(current_price, last_rsi, last_stoch_k, last_stoch_d, last_atr, price_precision_digits)
+            display_market_stats(
+                current_price,
+                last_rsi,
+                last_stoch_k,
+                last_stoch_d,
+                last_atr,
+                price_precision_digits,
+            )
 
             # --- Step 5: Identify Order Blocks ---
             bullish_ob, bearish_ob = identify_potential_order_block(
@@ -2602,19 +3103,17 @@ def run_bot():
                 execute_fallback_exit = False
                 fallback_exit_reason = ""
                 if position["status"] == "long" and last_rsi > rsi_overbought:
-                    fallback_exit_reason = (
-                        f"Fallback Exit Signal: RSI ({last_rsi:.1f}) crossed back above Overbought ({rsi_overbought})"
-                    )
+                    fallback_exit_reason = f"Fallback Exit Signal: RSI ({last_rsi:.1f}) crossed back above Overbought ({rsi_overbought})"
                     execute_fallback_exit = True
                 elif position["status"] == "short" and last_rsi < rsi_oversold:
-                    fallback_exit_reason = (
-                        f"Fallback Exit Signal: RSI ({last_rsi:.1f}) crossed back below Oversold ({rsi_oversold})"
-                    )
+                    fallback_exit_reason = f"Fallback Exit Signal: RSI ({last_rsi:.1f}) crossed back below Oversold ({rsi_oversold})"
                     execute_fallback_exit = True
                 # Add other fallback conditions here if desired (e.g., Stoch cross back over threshold)
 
                 if execute_fallback_exit:
-                    display_signal("Fallback Exit", position["status"], fallback_exit_reason)
+                    display_signal(
+                        "Fallback Exit", position["status"], fallback_exit_reason
+                    )
                     log_warning(
                         f"Attempting to close {position['status'].upper()} position via FALLBACK MARKET ORDER due to indicator signal: {fallback_exit_reason}"
                     )
@@ -2623,29 +3122,40 @@ def run_bot():
                     # 1. Get necessary info from state
                     sl_id_to_cancel = position.get("sl_order_id")
                     tp_id_to_cancel = position.get("tp_order_id")
-                    exit_qty = position.get("quantity")  # Get current quantity from state
+                    exit_qty = position.get(
+                        "quantity"
+                    )  # Get current quantity from state
 
                     if exit_qty is None or exit_qty <= 0:
-                        log_error("Cannot place fallback exit order: Invalid quantity in position state.")
+                        log_error(
+                            "Cannot place fallback exit order: Invalid quantity in position state."
+                        )
                         # Continue monitoring, hoping SL/TP works
                     else:
                         # 2. Attempt to cancel existing SL and TP orders *before* sending market exit
-                        log_info("Attempting to cancel existing SL/TP orders before fallback market exit...")
+                        log_info(
+                            "Attempting to cancel existing SL/TP orders before fallback market exit..."
+                        )
                         orders_cancelled_successfully = True  # Assume success initially
                         try:
                             if sl_id_to_cancel:
                                 log_debug(f"Cancelling fallback SL: {sl_id_to_cancel}")
-                                if not cancel_order_with_retry(exchange, sl_id_to_cancel, symbol):
-                                    orders_cancelled_successfully = (
-                                        False  # Mark failure if helper returns False (unexpected error)
-                                    )
+                                if not cancel_order_with_retry(
+                                    exchange, sl_id_to_cancel, symbol
+                                ):
+                                    orders_cancelled_successfully = False  # Mark failure if helper returns False (unexpected error)
                             if tp_id_to_cancel:
                                 log_debug(f"Cancelling fallback TP: {tp_id_to_cancel}")
-                                if not cancel_order_with_retry(exchange, tp_id_to_cancel, symbol):
+                                if not cancel_order_with_retry(
+                                    exchange, tp_id_to_cancel, symbol
+                                ):
                                     orders_cancelled_successfully = False
                         except Exception as cancel_e:
                             # Catch errors raised by cancel_order_with_retry (e.g., after retries fail)
-                            log_error(f"Error cancelling SL/TP during fallback exit: {cancel_e}", exc_info=False)
+                            log_error(
+                                f"Error cancelling SL/TP during fallback exit: {cancel_e}",
+                                exc_info=False,
+                            )
                             orders_cancelled_successfully = False
 
                         # 3. Place Market Exit Order ONLY if cancellations were successful/not found
@@ -2658,14 +3168,19 @@ def run_bot():
                             log_info(
                                 "SL/TP orders cancelled successfully or already closed. Proceeding with fallback market exit."
                             )
-                            close_side = "sell" if position["status"] == "long" else "buy"
+                            close_side = (
+                                "sell" if position["status"] == "long" else "buy"
+                            )
                             # Place the market order to close the position (use reduceOnly=True)
                             fallback_exit_order_result = place_market_order(
                                 exchange, symbol, close_side, exit_qty, reduce_only=True
                             )
 
                             # Check if market order placement was likely successful
-                            if fallback_exit_order_result and fallback_exit_order_result.get("id"):
+                            if (
+                                fallback_exit_order_result
+                                and fallback_exit_order_result.get("id")
+                            ):
                                 log_info(
                                     f"Fallback {position['status']} position close market order placed/processed: ID {fallback_exit_order_result.get('id', 'N/A')}"
                                 )
@@ -2676,9 +3191,15 @@ def run_bot():
                                 )
                                 position.update(position_default_structure.copy())
                                 save_position_state()
-                                display_position_status(position, price_precision_digits, amount_precision_digits)
+                                display_position_status(
+                                    position,
+                                    price_precision_digits,
+                                    amount_precision_digits,
+                                )
                                 # Go to next cycle immediately after attempting exit
-                                log_info("Proceeding to next cycle after fallback exit attempt.")
+                                log_info(
+                                    "Proceeding to next cycle after fallback exit attempt."
+                                )
                                 continue  # Skip sleep and go to next iteration
                             else:
                                 log_error(
@@ -2706,7 +3227,11 @@ def run_bot():
                 # --- B.1: Volume Confirmation Check ---
                 volume_confirmed = False
                 if entry_volume_confirmation_enabled:
-                    if current_volume is not None and last_volume_ma is not None and last_volume_ma > 0:
+                    if (
+                        current_volume is not None
+                        and last_volume_ma is not None
+                        and last_volume_ma > 0
+                    ):
                         volume_threshold = last_volume_ma * entry_volume_multiplier
                         if current_volume > volume_threshold:
                             volume_confirmed = True
@@ -2718,16 +3243,22 @@ def run_bot():
                                 f"Volume NOT confirmed: Current Vol ({current_volume:.2f}) <= Threshold ({volume_threshold:.2f})"
                             )
                     else:
-                        log_debug("Volume confirmation enabled but current volume or MA data is missing/invalid.")
+                        log_debug(
+                            "Volume confirmation enabled but current volume or MA data is missing/invalid."
+                        )
                 else:
                     volume_confirmed = True  # Always true if disabled in config
 
                 # --- B.2: Base Signal Conditions (RSI + Stoch Oversold/Overbought) ---
                 base_long_signal = (
-                    last_rsi < rsi_oversold and last_stoch_k < stoch_oversold and last_stoch_d < stoch_oversold
+                    last_rsi < rsi_oversold
+                    and last_stoch_k < stoch_oversold
+                    and last_stoch_d < stoch_oversold
                 )  # Added Stoch D check
                 base_short_signal = (
-                    last_rsi > rsi_overbought and last_stoch_k > stoch_overbought and last_stoch_d > stoch_overbought
+                    last_rsi > rsi_overbought
+                    and last_stoch_k > stoch_overbought
+                    and last_stoch_d > stoch_overbought
                 )  # Added Stoch D check
                 if base_long_signal:
                     log_debug(
@@ -2741,14 +3272,18 @@ def run_bot():
                 # --- B.3: Order Block Price Proximity Check ---
                 ob_price_confirmed = False
                 ob_reason_part = ""
-                active_ob_for_entry: Optional[Dict] = None  # Store the OB used for entry signal
+                active_ob_for_entry: Optional[Dict] = (
+                    None  # Store the OB used for entry signal
+                )
 
                 if base_long_signal and bullish_ob:
                     # Define entry zone: price should be near or within the bullish OB
                     bullish_ob["high"] - bullish_ob["low"]
                     # Allow entry if price is within OB or slightly above (e.g., 10% of range or a few ticks)
                     # More conservative: Require price to be *within* the OB range
-                    entry_zone_high = bullish_ob["high"]  # + max(ob_range * 0.10, min_tick * 3) # Allow slightly above?
+                    entry_zone_high = bullish_ob[
+                        "high"
+                    ]  # + max(ob_range * 0.10, min_tick * 3) # Allow slightly above?
                     entry_zone_low = bullish_ob["low"]
                     if entry_zone_low <= current_price <= entry_zone_high:
                         ob_price_confirmed = True
@@ -2760,7 +3295,9 @@ def run_bot():
                             f"Base Long signal met, but Price ({current_price:.{price_precision_digits}f}) outside Bullish OB zone [{entry_zone_low:.{price_precision_digits}f} - {entry_zone_high:.{price_precision_digits}f}]."
                         )
                 elif base_long_signal:
-                    log_debug("Base Long signal met, but no recent Bullish OB found or used for confirmation.")
+                    log_debug(
+                        "Base Long signal met, but no recent Bullish OB found or used for confirmation."
+                    )
                     # Set ob_price_confirmed to True if OB is not required for entry? Or keep False?
                     # Current logic requires OB proximity. If OB optional, change this.
                     # ob_price_confirmed = True # If OB is optional
@@ -2771,7 +3308,9 @@ def run_bot():
                     bearish_ob["high"] - bearish_ob["low"]
                     # Allow entry if price is within OB or slightly below
                     entry_zone_high = bearish_ob["high"]
-                    entry_zone_low = bearish_ob["low"]  # - max(ob_range * 0.10, min_tick * 3) # Allow slightly below?
+                    entry_zone_low = bearish_ob[
+                        "low"
+                    ]  # - max(ob_range * 0.10, min_tick * 3) # Allow slightly below?
                     if entry_zone_low <= current_price <= entry_zone_high:
                         ob_price_confirmed = True
                         ob_reason_part = f"Price ({current_price:.{price_precision_digits}f}) within Bearish OB [{entry_zone_low:.{price_precision_digits}f} - {entry_zone_high:.{price_precision_digits}f}]"
@@ -2782,7 +3321,9 @@ def run_bot():
                             f"Base Short signal met, but Price ({current_price:.{price_precision_digits}f}) outside Bearish OB zone [{entry_zone_low:.{price_precision_digits}f} - {entry_zone_high:.{price_precision_digits}f}]."
                         )
                 elif not ob_price_confirmed and base_short_signal:
-                    log_debug("Base Short signal met, but no recent Bearish OB found or used for confirmation.")
+                    log_debug(
+                        "Base Short signal met, but no recent Bearish OB found or used for confirmation."
+                    )
                     # ob_price_confirmed = True # If OB is optional
 
                 # --- B.4: Combine Conditions for Final Entry Signal ---
@@ -2811,14 +3352,24 @@ def run_bot():
                     entry_reason = (
                         f"RSI ({last_rsi:.1f} < {rsi_oversold}), "
                         f"Stoch ({last_stoch_k:.1f},{last_stoch_d:.1f} < {stoch_oversold}), "
-                        f"{ob_reason_part}" + (", Volume Confirmed" if entry_volume_confirmation_enabled else "")
+                        f"{ob_reason_part}"
+                        + (
+                            ", Volume Confirmed"
+                            if entry_volume_confirmation_enabled
+                            else ""
+                        )
                     )
                 elif short_entry_signal:
                     side_to_enter = "short"
                     entry_reason = (
                         f"RSI ({last_rsi:.1f} > {rsi_overbought}), "
                         f"Stoch ({last_stoch_k:.1f},{last_stoch_d:.1f} > {stoch_overbought}), "
-                        f"{ob_reason_part}" + (", Volume Confirmed" if entry_volume_confirmation_enabled else "")
+                        f"{ob_reason_part}"
+                        + (
+                            ", Volume Confirmed"
+                            if entry_volume_confirmation_enabled
+                            else ""
+                        )
                     )
                 # Log reasons for non-entry if signals were close
                 elif (
@@ -2853,11 +3404,19 @@ def run_bot():
                         sl_tp_method = "ATR"
                         if last_atr:  # Ensure last_atr is valid (positive)
                             if side_to_enter == "long":
-                                stop_loss_price = current_price - (last_atr * atr_sl_multiplier)
-                                take_profit_price = current_price + (last_atr * atr_tp_multiplier)
+                                stop_loss_price = current_price - (
+                                    last_atr * atr_sl_multiplier
+                                )
+                                take_profit_price = current_price + (
+                                    last_atr * atr_tp_multiplier
+                                )
                             else:  # short
-                                stop_loss_price = current_price + (last_atr * atr_sl_multiplier)
-                                take_profit_price = current_price - (last_atr * atr_tp_multiplier)
+                                stop_loss_price = current_price + (
+                                    last_atr * atr_sl_multiplier
+                                )
+                                take_profit_price = current_price - (
+                                    last_atr * atr_tp_multiplier
+                                )
                             log_info(
                                 f"Calculated ATR SL/TP: SL={stop_loss_price:.{price_precision_digits}f} ({atr_sl_multiplier}x ATR), TP={take_profit_price:.{price_precision_digits}f} ({atr_tp_multiplier}x ATR)"
                             )
@@ -2870,10 +3429,14 @@ def run_bot():
                         sl_tp_method = "Fixed %"
                         if side_to_enter == "long":
                             stop_loss_price = current_price * (1 - stop_loss_percentage)
-                            take_profit_price = current_price * (1 + take_profit_percentage)
+                            take_profit_price = current_price * (
+                                1 + take_profit_percentage
+                            )
                         else:  # short
                             stop_loss_price = current_price * (1 + stop_loss_percentage)
-                            take_profit_price = current_price * (1 - take_profit_percentage)
+                            take_profit_price = current_price * (
+                                1 - take_profit_percentage
+                            )
                         log_info(
                             f"Calculated Fixed % SL/TP: SL={stop_loss_price:.{price_precision_digits}f} ({stop_loss_percentage * 100:.1f}%), TP={take_profit_price:.{price_precision_digits}f} ({take_profit_percentage * 100:.1f}%)"
                         )
@@ -2884,13 +3447,18 @@ def run_bot():
                     ob_low = active_ob_for_entry["low"]
                     ob_high = active_ob_for_entry["high"]
                     adjusted_sl: Optional[float] = None
-                    sl_adjustment_buffer_ticks = min_tick * 5  # Buffer in ticks beyond the OB edge
+                    sl_adjustment_buffer_ticks = (
+                        min_tick * 5
+                    )  # Buffer in ticks beyond the OB edge
 
                     if side_to_enter == "long":
                         # Potential OB SL is just below the OB low
                         potential_ob_sl = ob_low - sl_adjustment_buffer_ticks
                         # Use OB SL only if it's TIGHTER (higher) than the calculated SL and still below current price
-                        if potential_ob_sl > stop_loss_price and potential_ob_sl < current_price:
+                        if (
+                            potential_ob_sl > stop_loss_price
+                            and potential_ob_sl < current_price
+                        ):
                             adjusted_sl = potential_ob_sl
                             log_info(
                                 f"Adjusting SL tighter based on Bullish OB low: {adjusted_sl:.{price_precision_digits}f} (Orig: {stop_loss_price:.{price_precision_digits}f})"
@@ -2903,7 +3471,10 @@ def run_bot():
                         # Potential OB SL is just above the OB high
                         potential_ob_sl = ob_high + sl_adjustment_buffer_ticks
                         # Use OB SL only if it's TIGHTER (lower) than the calculated SL and still above current price
-                        if potential_ob_sl < stop_loss_price and potential_ob_sl > current_price:
+                        if (
+                            potential_ob_sl < stop_loss_price
+                            and potential_ob_sl > current_price
+                        ):
                             adjusted_sl = potential_ob_sl
                             log_info(
                                 f"Adjusting SL tighter based on Bearish OB high: {adjusted_sl:.{price_precision_digits}f} (Orig: {stop_loss_price:.{price_precision_digits}f})"
@@ -2916,8 +3487,12 @@ def run_bot():
                     if adjusted_sl is not None:
                         # Format adjusted SL to precision before assigning
                         try:
-                            stop_loss_price = float(exchange.price_to_precision(symbol, adjusted_sl))
-                            log_debug(f"Using OB-adjusted SL: {stop_loss_price:.{price_precision_digits}f}")
+                            stop_loss_price = float(
+                                exchange.price_to_precision(symbol, adjusted_sl)
+                            )
+                            log_debug(
+                                f"Using OB-adjusted SL: {stop_loss_price:.{price_precision_digits}f}"
+                            )
                         except ccxt.ExchangeError as fmt_e:
                             log_error(
                                 f"Failed to format OB-adjusted SL {adjusted_sl} to precision: {fmt_e}. Using original SL {stop_loss_price}."
@@ -2932,20 +3507,30 @@ def run_bot():
                         continue
                     try:
                         # Format prices just before use
-                        sl_price_final = float(exchange.price_to_precision(symbol, stop_loss_price))
-                        tp_price_final = float(exchange.price_to_precision(symbol, take_profit_price))
+                        sl_price_final = float(
+                            exchange.price_to_precision(symbol, stop_loss_price)
+                        )
+                        tp_price_final = float(
+                            exchange.price_to_precision(symbol, take_profit_price)
+                        )
                     except ccxt.ExchangeError as fmt_e:
-                        log_error(f"Failed to format final SL/TP prices to precision: {fmt_e}. Skipping entry.")
+                        log_error(
+                            f"Failed to format final SL/TP prices to precision: {fmt_e}. Skipping entry."
+                        )
                         continue
 
                     # Check logical validity: SL must protect entry, TP must be beyond entry
-                    if side_to_enter == "long" and (sl_price_final >= current_price or tp_price_final <= current_price):
+                    if side_to_enter == "long" and (
+                        sl_price_final >= current_price
+                        or tp_price_final <= current_price
+                    ):
                         log_error(
                             f"Invalid LONG SL/TP after adjustments: SL {sl_price_final:.{price_precision_digits}f}, TP {tp_price_final:.{price_precision_digits}f} relative to Price {current_price:.{price_precision_digits}f}. Skipping entry."
                         )
                         continue
                     if side_to_enter == "short" and (
-                        sl_price_final <= current_price or tp_price_final >= current_price
+                        sl_price_final <= current_price
+                        or tp_price_final >= current_price
                     ):
                         log_error(
                             f"Invalid SHORT SL/TP after adjustments: SL {sl_price_final:.{price_precision_digits}f}, TP {tp_price_final:.{price_precision_digits}f} relative to Price {current_price:.{price_precision_digits}f}. Skipping entry."
@@ -2967,7 +3552,11 @@ def run_bot():
                     # --- Place Entry Market Order ---
                     entry_order_side = "buy" if side_to_enter == "long" else "sell"
                     entry_order_result = place_market_order(
-                        exchange, symbol, entry_order_side, entry_quantity, reduce_only=False
+                        exchange,
+                        symbol,
+                        entry_order_side,
+                        entry_quantity,
+                        reduce_only=False,
                     )  # Entry is never reduceOnly
 
                     # --- Process Entry Result ---
@@ -2975,7 +3564,9 @@ def run_bot():
                     # Market orders might return 'open' initially but fill quickly. Check for ID and positive filled amount.
                     entry_successful = False
                     entry_order_id = None
-                    entry_price_actual = current_price  # Default to current price if avg not available
+                    entry_price_actual = (
+                        current_price  # Default to current price if avg not available
+                    )
                     filled_quantity_actual = entry_quantity  # Default to calculated qty
 
                     if entry_order_result and entry_order_result.get("id"):
@@ -2984,14 +3575,24 @@ def run_bot():
                         avg_price = entry_order_result.get("average")
                         filled_qty = entry_order_result.get("filled")
 
-                        if avg_price and isinstance(avg_price, (float, int)) and avg_price > 0:
+                        if (
+                            avg_price
+                            and isinstance(avg_price, (float, int))
+                            and avg_price > 0
+                        ):
                             entry_price_actual = avg_price
-                        if filled_qty and isinstance(filled_qty, (float, int)) and filled_qty > 0:
+                        if (
+                            filled_qty
+                            and isinstance(filled_qty, (float, int))
+                            and filled_qty > 0
+                        ):
                             filled_quantity_actual = filled_qty
 
                         # Consider entry successful if order has an ID and status is closed or filled > 0
                         # (Some exchanges might return 'open' briefly for market orders)
-                        if order_status == "closed" or (order_status == "open" and filled_quantity_actual > 0):
+                        if order_status == "closed" or (
+                            order_status == "open" and filled_quantity_actual > 0
+                        ):
                             entry_successful = True
                             log_info(
                                 f"{side_to_enter.upper()} position entry order processed: ID {entry_order_id}, Status: {order_status}, AvgPrice: {entry_price_actual:.{price_precision_digits}f}, FilledQty: {filled_quantity_actual:.{amount_precision_digits}f}"
@@ -3008,7 +3609,9 @@ def run_bot():
 
                     # --- Place SL/TP Orders and Update State ONLY if Entry Successful ---
                     if entry_successful:
-                        log_info(f"Entry successful. Placing SL and TP orders for position ID {entry_order_id}...")
+                        log_info(
+                            f"Entry successful. Placing SL and TP orders for position ID {entry_order_id}..."
+                        )
                         # Place SL/TP orders *after* confirming entry fill/placement
                         # Use the actual filled quantity and final SL/TP prices
                         sl_order_result, tp_order_result = place_sl_tp_orders(
@@ -3021,8 +3624,12 @@ def run_bot():
                         )
 
                         # --- Update Position State ---
-                        sl_order_id_final = sl_order_result.get("id") if sl_order_result else None
-                        tp_order_id_final = tp_order_result.get("id") if tp_order_result else None
+                        sl_order_id_final = (
+                            sl_order_result.get("id") if sl_order_result else None
+                        )
+                        tp_order_id_final = (
+                            tp_order_result.get("id") if tp_order_result else None
+                        )
 
                         position.update(
                             {
@@ -3032,7 +3639,9 @@ def run_bot():
                                 "order_id": entry_order_id,  # ID of the entry market order
                                 "stop_loss": sl_price_final,  # Store the calculated/adjusted SL price
                                 "take_profit": tp_price_final,  # Store the calculated TP price
-                                "entry_time": pd.Timestamp.now(tz="UTC"),  # Record entry time
+                                "entry_time": pd.Timestamp.now(
+                                    tz="UTC"
+                                ),  # Record entry time
                                 "sl_order_id": sl_order_id_final,
                                 "tp_order_id": tp_order_id_final,
                                 # Initialize TSL fields upon entry
@@ -3056,10 +3665,14 @@ def run_bot():
                                 "Entry successful, but SL order placement failed or did not return ID. POSITION IS UNPROTECTED!"
                             )
                         if not tp_order_id_final:
-                            log_warning("Entry successful, but TP order placement failed or did not return ID.")
+                            log_warning(
+                                "Entry successful, but TP order placement failed or did not return ID."
+                            )
                     else:
                         # Entry failed, do not update state
-                        log_error(f"Entry attempt for {side_to_enter.upper()} failed. Position state not updated.")
+                        log_error(
+                            f"Entry attempt for {side_to_enter.upper()} failed. Position state not updated."
+                        )
                         # Potential TODO: Should we try to cancel the failed/pending entry order here?
                         # If entry_order_id exists but status wasn't 'closed'/'filled>0'. Risky.
 
@@ -3074,18 +3687,26 @@ def run_bot():
 
         # --- Graceful Shutdown Handling ---
         except KeyboardInterrupt:
-            log_info("Keyboard interrupt detected (Ctrl+C). Initiating graceful shutdown...")
+            log_info(
+                "Keyboard interrupt detected (Ctrl+C). Initiating graceful shutdown..."
+            )
             save_position_state()  # Save final state before exiting
 
             # Attempt to cancel all open orders for the symbol if not in simulation mode
             if not SIMULATION_MODE:
-                log_warning(f"!!! LIVE MODE: Attempting to cancel all open orders for {symbol} on shutdown...")
+                log_warning(
+                    f"!!! LIVE MODE: Attempting to cancel all open orders for {symbol} on shutdown..."
+                )
                 try:
                     # Fetch open orders first (use retry)
                     @api_retry_decorator
-                    def fetch_open_orders_on_exit(exch: ccxt.Exchange, sym: str) -> List[Dict]:
+                    def fetch_open_orders_on_exit(
+                        exch: ccxt.Exchange, sym: str
+                    ) -> List[Dict]:
                         """Fetches open orders for shutdown cancellation with retry."""
-                        log_debug(f"Fetching open orders for {sym} to cancel on exit...")
+                        log_debug(
+                            f"Fetching open orders for {sym} to cancel on exit..."
+                        )
                         return exch.fetch_open_orders(sym)
 
                     open_orders = fetch_open_orders_on_exit(exchange, symbol)
@@ -3093,14 +3714,18 @@ def run_bot():
                     if not open_orders:
                         log_info("No open orders found for {symbol} to cancel.")
                     else:
-                        log_warning(f"Found {len(open_orders)} open orders for {symbol}. Attempting cancellation...")
+                        log_warning(
+                            f"Found {len(open_orders)} open orders for {symbol}. Attempting cancellation..."
+                        )
                         cancelled_count = 0
                         failed_count = 0
                         for order in open_orders:
                             order_id = order.get("id")
                             order_info = f"ID: {order_id} (Type: {order.get('type', 'N/A')}, Side: {order.get('side', 'N/A')}, Price: {order.get('price', 'N/A')})"
                             if not order_id:
-                                log_warning(f"Skipping order cancellation - missing ID: {order}")
+                                log_warning(
+                                    f"Skipping order cancellation - missing ID: {order}"
+                                )
                                 continue
                             try:
                                 log_info(f"Cancelling order -> {order_info}...")
@@ -3110,10 +3735,15 @@ def run_bot():
                                 else:
                                     # This means cancel_order_with_retry encountered an unexpected error after retries
                                     failed_count += 1
-                                time.sleep(0.3)  # Small delay between cancellations to avoid rate limits
+                                time.sleep(
+                                    0.3
+                                )  # Small delay between cancellations to avoid rate limits
                             except Exception as cancel_e:
                                 # Catch errors raised by cancel_order_with_retry (e.g., after retries fail)
-                                log_error(f"Failed to cancel order {order_info} on exit: {cancel_e}", exc_info=False)
+                                log_error(
+                                    f"Failed to cancel order {order_info} on exit: {cancel_e}",
+                                    exc_info=False,
+                                )
                                 failed_count += 1
 
                         log_info(
@@ -3126,8 +3756,13 @@ def run_bot():
 
                 except Exception as e:
                     # Catch errors during fetch_open_orders_on_exit itself
-                    log_error(f"Error fetching or cancelling open orders on exit for {symbol}: {e}", exc_info=True)
-                    log_error("Manual check of open orders on the exchange is strongly recommended.")
+                    log_error(
+                        f"Error fetching or cancelling open orders on exit for {symbol}: {e}",
+                        exc_info=True,
+                    )
+                    log_error(
+                        "Manual check of open orders on the exchange is strongly recommended."
+                    )
             else:
                 log_info("Simulation mode: Skipping order cancellation on exit.")
 
@@ -3145,8 +3780,12 @@ def run_bot():
                 f"Main loop caught NetworkError: {e}. Waiting {sleep_interval_seconds}s and relying on API call retries within next cycle...",
                 exc_info=False,
             )
-            neon_sleep_timer(sleep_interval_seconds)  # Rely on retry decorator within API calls for backoff
-        except ccxt.ExchangeError as e:  # Catch other potentially recoverable exchange issues
+            neon_sleep_timer(
+                sleep_interval_seconds
+            )  # Rely on retry decorator within API calls for backoff
+        except (
+            ccxt.ExchangeError
+        ) as e:  # Catch other potentially recoverable exchange issues
             log_error(
                 f"Main loop caught ExchangeError: {e}. Waiting {sleep_interval_seconds}s and retrying...",
                 exc_info=False,
@@ -3155,12 +3794,20 @@ def run_bot():
             neon_sleep_timer(sleep_interval_seconds)
         except Exception as e:
             # Catch any other unexpected error to prevent the bot from crashing entirely
-            log_error(f"CRITICAL UNEXPECTED ERROR in main loop: {type(e).__name__}: {e}", exc_info=True)
-            log_info("Attempting to recover by saving state and waiting 60s before next cycle...")
+            log_error(
+                f"CRITICAL UNEXPECTED ERROR in main loop: {type(e).__name__}: {e}",
+                exc_info=True,
+            )
+            log_info(
+                "Attempting to recover by saving state and waiting 60s before next cycle..."
+            )
             try:
                 save_position_state()  # Attempt to save state on critical error
             except Exception as save_e:
-                log_error(f"Failed to save state during critical error handling: {save_e}", exc_info=True)
+                log_error(
+                    f"Failed to save state during critical error handling: {save_e}",
+                    exc_info=True,
+                )
             neon_sleep_timer(60)  # Wait a bit before trying next cycle
 
     # --- Bot Exit ---
@@ -3179,7 +3826,8 @@ if __name__ == "__main__":
     except Exception as main_exec_e:
         # Catch any truly unexpected top-level error during setup before the loop
         log_error(
-            f"A critical error occurred outside the main loop during initialization: {main_exec_e}", exc_info=True
+            f"A critical error occurred outside the main loop during initialization: {main_exec_e}",
+            exc_info=True,
         )
         print_shutdown_message()
         sys.exit(1)  # Exit with error code

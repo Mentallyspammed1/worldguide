@@ -5,7 +5,12 @@ import sys
 from datetime import datetime
 from typing import Dict, Tuple, Optional, Any
 import ccxt
-from ccxt.base.error import AuthenticationError, ExchangeError, NetworkError, InsufficientFunds
+from ccxt.base.error import (
+    AuthenticationError,
+    ExchangeError,
+    NetworkError,
+    InsufficientFunds,
+)
 import pandas as pd
 
 # --- Configuration ---
@@ -32,9 +37,7 @@ STRENGTH2_LENGTH = 15
 STRENGTH2_MULTIPLIER = 3.0
 
 # --- Risk Management Parameters ---
-MAX_DAILY_RISK_PERCENT = (
-    2.0  # 2% daily risk (Note: Daily risk tracking is complex; this is risk *per trade* based on balance)
-)
+MAX_DAILY_RISK_PERCENT = 2.0  # 2% daily risk (Note: Daily risk tracking is complex; this is risk *per trade* based on balance)
 STOP_LOSS_ATR_MULTIPLIER = 2.0  # Use 2x ATR below/above entry for stop-loss
 TAKE_PROFIT_PERCENTAGE = 2.5  # 2.5% above/below entry for take-profit
 
@@ -43,7 +46,9 @@ BYBIT_API_KEY = os.getenv("BYBIT_API_KEY")
 BYBIT_API_SECRET = os.getenv("BYBIT_API_SECRET")
 
 if not BYBIT_API_KEY or not BYBIT_API_SECRET:
-    logger.error("Bybit API keys not found in environment variables. Please set BYBIT_API_KEY and BYBIT_API_SECRET.")
+    logger.error(
+        "Bybit API keys not found in environment variables. Please set BYBIT_API_KEY and BYBIT_API_SECRET."
+    )
     sys.exit(1)
 
 # --- Global State ---
@@ -73,7 +78,9 @@ def initialize_exchange(api_key: str, api_secret: str) -> ccxt.Exchange:
         logger.info("Exchange initialized successfully.")
         return exchange
     except AuthenticationError:
-        logger.error("Failed to initialize exchange: Authentication failed. Check API keys.")
+        logger.error(
+            "Failed to initialize exchange: Authentication failed. Check API keys."
+        )
         sys.exit(1)
     except Exception as e:
         logger.error(f"Failed to initialize exchange: {type(e).__name__} - {e}")
@@ -99,7 +106,9 @@ def get_symbol_info(exchange: ccxt.Exchange, symbol: str) -> Optional[Dict]:
         logger.info(f"Symbol info fetched: {symbol_info}")
         return symbol_info
     except Exception as e:
-        logger.error(f"Failed to fetch symbol info for {symbol}: {type(e).__name__} - {e}")
+        logger.error(
+            f"Failed to fetch symbol info for {symbol}: {type(e).__name__} - {e}"
+        )
         return None
 
 
@@ -118,7 +127,9 @@ def adjust_price_to_precision(price: float, precision: float) -> float:
 
 
 # --- Data Fetching ---
-def fetch_klines(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
+def fetch_klines(
+    exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: int
+) -> Optional[pd.DataFrame]:
     """Fetches OHLCV data with retry logic."""
     logger.info(f"Fetching {limit} {timeframe} candles for {symbol}...")
     for attempt in range(5):
@@ -129,7 +140,9 @@ def fetch_klines(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: in
                 logger.warning(f"Fetched empty klines for {symbol} {timeframe}")
                 return pd.DataFrame()
 
-            df = pd.DataFrame(klines, columns=["timestamp", "open", "high", "low", "close", "volume"])
+            df = pd.DataFrame(
+                klines, columns=["timestamp", "open", "high", "low", "close", "volume"]
+            )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             # Set timestamp as index for pandas_ta compatibility if needed, though append=True doesn't require it
             # df.set_index('timestamp', inplace=True)
@@ -137,15 +150,23 @@ def fetch_klines(exchange: ccxt.Exchange, symbol: str, timeframe: str, limit: in
             return df
         except NetworkError as e:
             if attempt < 4:
-                logger.warning(f"Network error fetching klines (attempt {attempt + 1}/5): {e}")
-                time.sleep(exchange.rateLimit / 1000 + 2)  # Wait a bit longer than rate limit
+                logger.warning(
+                    f"Network error fetching klines (attempt {attempt + 1}/5): {e}"
+                )
+                time.sleep(
+                    exchange.rateLimit / 1000 + 2
+                )  # Wait a bit longer than rate limit
             else:
-                logger.error(f"Failed to fetch klines after 5 attempts: {type(e).__name__} - {e}")
+                logger.error(
+                    f"Failed to fetch klines after 5 attempts: {type(e).__name__} - {e}"
+                )
         except ExchangeError as e:
             logger.error(f"Exchange error fetching klines: {type(e).__name__} - {e}")
             break  # Don't retry on exchange errors
         except Exception as e:
-            logger.error(f"An unexpected error occurred while fetching klines: {type(e).__name__} - {e}")
+            logger.error(
+                f"An unexpected error occurred while fetching klines: {type(e).__name__} - {e}"
+            )
             break  # Don't retry on unexpected errors
     return None
 
@@ -156,20 +177,30 @@ def get_current_price(exchange: ccxt.Exchange, symbol: str) -> Optional[float]:
     for attempt in range(5):
         try:
             ticker = exchange.fetch_ticker(symbol)
-            price = float(ticker["last"])  # 'last' is typically the most recent trade price
+            price = float(
+                ticker["last"]
+            )  # 'last' is typically the most recent trade price
             logger.info(f"Current price for {symbol}: {price}")
             return price
         except NetworkError as e:
             if attempt < 4:
-                logger.warning(f"Network error getting current price (attempt {attempt + 1}/5): {e}")
+                logger.warning(
+                    f"Network error getting current price (attempt {attempt + 1}/5): {e}"
+                )
                 time.sleep(exchange.rateLimit / 1000 + 2)
             else:
-                logger.error(f"Failed to get current price after 5 attempts: {type(e).__name__} - {e}")
+                logger.error(
+                    f"Failed to get current price after 5 attempts: {type(e).__name__} - {e}"
+                )
         except ExchangeError as e:
-            logger.error(f"Exchange error getting current price: {type(e).__name__} - {e}")
+            logger.error(
+                f"Exchange error getting current price: {type(e).__name__} - {e}"
+            )
             break
         except Exception as e:
-            logger.error(f"An unexpected error occurred while getting current price: {type(e).__name__} - {e}")
+            logger.error(
+                f"An unexpected error occurred while getting current price: {type(e).__name__} - {e}"
+            )
             break
     return None
 
@@ -187,8 +218,12 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     try:
         # Calculate Dual Supertrend. pandas_ta appends columns with params.
         # Names will be like 'SUPERT_10_2.0', 'SUPERTd_10_2.0', etc.
-        df.ta.supertrend(length=STRENGTH1_LENGTH, multiplier=STRENGTH1_MULTIPLIER, append=True)
-        df.ta.supertrend(length=STRENGTH2_LENGTH, multiplier=STRENGTH2_MULTIPLIER, append=True)
+        df.ta.supertrend(
+            length=STRENGTH1_LENGTH, multiplier=STRENGTH1_MULTIPLIER, append=True
+        )
+        df.ta.supertrend(
+            length=STRENGTH2_LENGTH, multiplier=STRENGTH2_MULTIPLIER, append=True
+        )
 
         # Calculate ATR (Corrected function name)
         df.ta.atr(length=14, append=True)
@@ -214,9 +249,13 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
 def check_entry_signal(df: pd.DataFrame) -> Optional[str]:
     """Checks for buy or sell entry signals based on dual Supertrend."""
     # Need at least enough data for indicators + 1 candle
-    min_data_points = max(STRENGTH1_LENGTH, STRENGTH2_LENGTH, 14) + 1  # 14 is for ATR length
+    min_data_points = (
+        max(STRENGTH1_LENGTH, STRENGTH2_LENGTH, 14) + 1
+    )  # 14 is for ATR length
     if len(df) < min_data_points:
-        logger.info(f"Not enough data ({len(df)} candles) for signal check, need at least {min_data_points}.")
+        logger.info(
+            f"Not enough data ({len(df)} candles) for signal check, need at least {min_data_points}."
+        )
         return None
 
     # Get latest indicator values. pandas_ta names: SUPERT_<length>_<multiplier> and SUPERTd_<length>_<multiplier>
@@ -225,7 +264,9 @@ def check_entry_signal(df: pd.DataFrame) -> Optional[str]:
 
     # Check if indicator columns exist and last values are not NaN
     if st1_direction_col not in df.columns or st2_direction_col not in df.columns:
-        logger.warning(f"Supertrend direction columns not found: {st1_direction_col}, {st2_direction_col}")
+        logger.warning(
+            f"Supertrend direction columns not found: {st1_direction_col}, {st2_direction_col}"
+        )
         return None
 
     latest_st1_direction = df[st1_direction_col].iloc[-1]
@@ -259,7 +300,9 @@ def check_exit_signal(df: pd.DataFrame, position_side: str) -> bool:
     """
     min_data_points = max(STRENGTH1_LENGTH, STRENGTH2_LENGTH, 14) + 1
     if len(df) < min_data_points:
-        logger.info(f"Not enough data ({len(df)} candles) for exit signal check, need at least {min_data_points}.")
+        logger.info(
+            f"Not enough data ({len(df)} candles) for exit signal check, need at least {min_data_points}."
+        )
         return False
 
     st1_direction_col = f"SUPERTd_{STRENGTH1_LENGTH}_{STRENGTH1_MULTIPLIER}"
@@ -280,9 +323,15 @@ def check_exit_signal(df: pd.DataFrame, position_side: str) -> bool:
 
     # Exit if both Supertrends reverse
     if position_side == "buy" and latest_st1_direction < 0 and latest_st2_direction < 0:
-        logger.info("Strategic exit signal detected (both Supertrends reversed to down)")
+        logger.info(
+            "Strategic exit signal detected (both Supertrends reversed to down)"
+        )
         return True
-    elif position_side == "sell" and latest_st1_direction > 0 and latest_st2_direction > 0:
+    elif (
+        position_side == "sell"
+        and latest_st1_direction > 0
+        and latest_st2_direction > 0
+    ):
         logger.info("Strategic exit signal detected (both Supertrends reversed to up)")
         return True
 
@@ -290,7 +339,9 @@ def check_exit_signal(df: pd.DataFrame, position_side: str) -> bool:
 
 
 # --- Position Sizing ---
-def calculate_position_size(balance: float, entry_price: float, atr: float, side: str, symbol_info: Dict) -> float:
+def calculate_position_size(
+    balance: float, entry_price: float, atr: float, side: str, symbol_info: Dict
+) -> float:
     """
     Calculates position size based on risk percentage and ATR-derived stop loss.
     Returns quantity in base asset (e.g., BTC).
@@ -302,7 +353,9 @@ def calculate_position_size(balance: float, entry_price: float, atr: float, side
         logger.warning("Balance is zero or negative, cannot calculate position size.")
         return 0.0
     if entry_price <= 0:
-        logger.warning("Entry price is zero or negative, cannot calculate position size.")
+        logger.warning(
+            "Entry price is zero or negative, cannot calculate position size."
+        )
         return 0.0
 
     # Calculate potential stop loss price based on ATR
@@ -316,7 +369,9 @@ def calculate_position_size(balance: float, entry_price: float, atr: float, side
         return 0.0
 
     # Ensure stop loss price is not too close to entry price (avoids division by zero/tiny stops)
-    min_stop_distance = entry_price * 0.001  # e.g., 0.1% of price as minimum stop distance
+    min_stop_distance = (
+        entry_price * 0.001
+    )  # e.g., 0.1% of price as minimum stop distance
     if abs(entry_price - stop_loss_price) < min_stop_distance:
         logger.warning(
             f"Calculated stop loss distance ({abs(entry_price - stop_loss_price):.8f}) is too small. Cannot calculate position size."
@@ -333,7 +388,9 @@ def calculate_position_size(balance: float, entry_price: float, atr: float, side
     calculated_quantity = total_risk_amount / risk_per_base_unit
 
     # Adjust quantity based on exchange precision and minimum amount
-    quantity = adjust_quantity_to_precision(calculated_quantity, symbol_info["precision_amount"])
+    quantity = adjust_quantity_to_precision(
+        calculated_quantity, symbol_info["precision_amount"]
+    )
 
     # Check against minimum order size (notional value)
     notional_value = quantity * entry_price
@@ -354,14 +411,20 @@ def calculate_position_size(balance: float, entry_price: float, atr: float, side
         )
         return 0.0
 
-    logger.info(f"Position size calculated: {quantity:.8f} {SYMBOL.split('/')[0]} (Risk: {total_risk_amount:.2f} USDT)")
+    logger.info(
+        f"Position size calculated: {quantity:.8f} {SYMBOL.split('/')[0]} (Risk: {total_risk_amount:.2f} USDT)"
+    )
     return quantity
 
 
 # --- Order Execution ---
-def execute_market_order(exchange: ccxt.Exchange, symbol: str, side: str, quantity: float) -> Optional[Dict]:
+def execute_market_order(
+    exchange: ccxt.Exchange, symbol: str, side: str, quantity: float
+) -> Optional[Dict]:
     """Executes a market order with retry logic."""
-    logger.info(f"Attempting to execute {side} market order for {quantity:.8f} {symbol}...")
+    logger.info(
+        f"Attempting to execute {side} market order for {quantity:.8f} {symbol}..."
+    )
     if quantity <= 0:
         logger.warning("Order quantity is zero or negative, skipping execution.")
         return None
@@ -378,7 +441,9 @@ def execute_market_order(exchange: ccxt.Exchange, symbol: str, side: str, quanti
                 logger.info(f"Market order {order_id} filled.")
                 return fetched_order
             else:
-                logger.warning(f"Market order {order_id} status is {fetched_order['status']} after waiting.")
+                logger.warning(
+                    f"Market order {order_id} status is {fetched_order['status']} after waiting."
+                )
                 # In rare cases, market order might not fill immediately or fully.
                 # For simplicity, we assume it fills here. More robust bots check fills.
                 return fetched_order  # Return the order even if not fully closed, main logic should handle this
@@ -388,18 +453,26 @@ def execute_market_order(exchange: ccxt.Exchange, symbol: str, side: str, quanti
             return None  # No point retrying if funds are low
         except NetworkError as e:
             if attempt < 2:
-                logger.warning(f"Network error executing order (attempt {attempt + 1}/3): {e}")
+                logger.warning(
+                    f"Network error executing order (attempt {attempt + 1}/3): {e}"
+                )
                 time.sleep(exchange.rateLimit / 1000 + 2)
             else:
-                logger.error(f"Failed to execute order after 3 attempts: {type(e).__name__} - {e}")
+                logger.error(
+                    f"Failed to execute order after 3 attempts: {type(e).__name__} - {e}"
+                )
         except ExchangeError as e:
             logger.error(f"Exchange error executing order: {type(e).__name__} - {e}")
             # Check for specific errors like minimum order size if precision adjustment failed
             if "minimum quantity" in str(e).lower() or "min_qty" in str(e).lower():
-                logger.error("Order failed due to minimum quantity/notional requirement.")
+                logger.error(
+                    "Order failed due to minimum quantity/notional requirement."
+                )
             break  # Don't retry on exchange errors
         except Exception as e:
-            logger.error(f"An unexpected error occurred while executing order: {type(e).__name__} - {e}")
+            logger.error(
+                f"An unexpected error occurred while executing order: {type(e).__name__} - {e}"
+            )
             break
     return None
 
@@ -414,11 +487,15 @@ def place_contingent_orders(
     take_profit_price: float,
 ) -> Tuple[Optional[Dict], Optional[Dict]]:
     """Places Stop Loss and Take Profit orders for an open position."""
-    logger.info(f"Placing contingent SL/TP orders for {symbol} position (entry: {entry_price:.2f})...")
+    logger.info(
+        f"Placing contingent SL/TP orders for {symbol} position (entry: {entry_price:.2f})..."
+    )
 
     sl_order = None
     tp_order = None
-    order_side = "sell" if side == "buy" else "buy"  # SL/TP side is opposite of position side
+    order_side = (
+        "sell" if side == "buy" else "buy"
+    )  # SL/TP side is opposite of position side
 
     # Adjust prices to precision
     symbol_info = get_symbol_info(exchange, symbol)
@@ -426,11 +503,19 @@ def place_contingent_orders(
         logger.error("Could not get symbol info for placing contingent orders.")
         return None, None
 
-    sl_price_adj = adjust_price_to_precision(stop_loss_price, symbol_info["precision_price"])
-    tp_price_adj = adjust_price_to_precision(take_profit_price, symbol_info["precision_price"])
-    quantity_adj = adjust_quantity_to_precision(quantity, symbol_info["precision_amount"])
+    sl_price_adj = adjust_price_to_precision(
+        stop_loss_price, symbol_info["precision_price"]
+    )
+    tp_price_adj = adjust_price_to_precision(
+        take_profit_price, symbol_info["precision_price"]
+    )
+    quantity_adj = adjust_quantity_to_precision(
+        quantity, symbol_info["precision_amount"]
+    )
 
-    logger.info(f"Attempting to place SL: {sl_price_adj:.2f}, TP: {tp_price_adj:.2f} for quantity {quantity_adj:.8f}")
+    logger.info(
+        f"Attempting to place SL: {sl_price_adj:.2f}, TP: {tp_price_adj:.2f} for quantity {quantity_adj:.8f}"
+    )
 
     # Bybit V5 unified margin/trade supports placing SL/TP directly with main order or separately.
     # Placing separately is often more flexible. Use STOP_MARKET for SL and LIMIT for TP.
@@ -465,7 +550,9 @@ def place_contingent_orders(
                 # 'closeOnTrigger': True # Another way to ensure reduce only on Bybit
             },
         )
-        logger.info(f"Stop Loss order placed: {sl_order['id']} at stop price {sl_price_adj:.2f}")
+        logger.info(
+            f"Stop Loss order placed: {sl_order['id']} at stop price {sl_price_adj:.2f}"
+        )
     except Exception as e:
         logger.error(f"Failed to place Stop Loss order: {type(e).__name__} - {e}")
 
@@ -488,14 +575,18 @@ def place_contingent_orders(
                 # 'closeOnTrigger': True
             },
         )
-        logger.info(f"Take Profit order placed: {tp_order['id']} at stop price {tp_price_adj:.2f}")
+        logger.info(
+            f"Take Profit order placed: {tp_order['id']} at stop price {tp_price_adj:.2f}"
+        )
     except Exception as e:
         logger.error(f"Failed to place Take Profit order: {type(e).__name__} - {e}")
 
     return sl_order, tp_order
 
 
-def close_position(exchange: ccxt.Exchange, symbol: str, side: str, quantity: float) -> Optional[Dict]:
+def close_position(
+    exchange: ccxt.Exchange, symbol: str, side: str, quantity: float
+) -> Optional[Dict]:
     """Closes an open position using a market order."""
     logger.info(f"Attempting to close {side} position for {quantity:.8f} {symbol}...")
     close_side = "sell" if side == "buy" else "buy"  # Opposite side to close
@@ -505,7 +596,9 @@ def close_position(exchange: ccxt.Exchange, symbol: str, side: str, quantity: fl
     if not symbol_info:
         logger.error("Could not get symbol info for closing position.")
         return None
-    quantity_adj = adjust_quantity_to_precision(quantity, symbol_info["precision_amount"])
+    quantity_adj = adjust_quantity_to_precision(
+        quantity, symbol_info["precision_amount"]
+    )
 
     try:
         order = exchange.create_order(
@@ -524,7 +617,9 @@ def cancel_all_orders(exchange: ccxt.Exchange, symbol: str) -> bool:
     try:
         # Bybit V5 requires orderCategory and settleCoin for cancel_all_orders
         # Assuming linear perpetuals with USDT settlement
-        exchange.cancel_all_orders(symbol, params={"category": "linear", "settleCoin": "USDT"})
+        exchange.cancel_all_orders(
+            symbol, params={"category": "linear", "settleCoin": "USDT"}
+        )
         logger.info(f"All open orders for {symbol} cancelled.")
         return True
     except Exception as e:
@@ -540,7 +635,10 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str) -> Optional[Dict]:
         positions = exchange.fetch_positions([symbol])
         # Find the position with non-zero quantity
         for position in positions:
-            if position["symbol"] == symbol and abs(position["info"].get("size", 0)) > 0:  # Bybit V5 uses 'size' field
+            if (
+                position["symbol"] == symbol
+                and abs(position["info"].get("size", 0)) > 0
+            ):  # Bybit V5 uses 'size' field
                 logger.info(
                     f"Found open position: {position['side']} {position['info']['size']} at {position['entryPrice']:.2f}"
                 )
@@ -548,11 +646,15 @@ def get_open_position(exchange: ccxt.Exchange, symbol: str) -> Optional[Dict]:
                 return {
                     "symbol": position["symbol"],
                     "side": position["side"],
-                    "quantity": float(position["info"]["size"]),  # Use 'size' from info dict for V5
+                    "quantity": float(
+                        position["info"]["size"]
+                    ),  # Use 'size' from info dict for V5
                     "entry_price": float(position["entryPrice"]),
                     # Note: SL/TP from exchange are not stored here, rely on exchange to trigger them.
                     # These are just for our internal state representation.
-                    "stop_loss": position.get("stopLoss"),  # These might be None if not set via API field
+                    "stop_loss": position.get(
+                        "stopLoss"
+                    ),  # These might be None if not set via API field
                     "take_profit": position.get("takeProfit"),  # These might be None
                 }
         logger.info(f"No open position found for {symbol}.")
@@ -579,7 +681,9 @@ def main():
         exchange.set_leverage(LEVERAGE, SYMBOL)
         logger.info(f"Leverage set to {LEVERAGE} for {SYMBOL}.")
     except Exception as e:
-        logger.warning(f"Failed to set leverage: {type(e).__name__} - {e}. Please check manually.")
+        logger.warning(
+            f"Failed to set leverage: {type(e).__name__} - {e}. Please check manually."
+        )
 
     # Check for existing position on startup
     current_position = get_open_position(exchange, SYMBOL)
@@ -596,12 +700,16 @@ def main():
     while True:
         try:
             logger.info("-" * 30)
-            logger.info(f"Starting new cycle at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(
+                f"Starting new cycle at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            )
 
             # Fetch data and calculate indicators
             df = fetch_klines(exchange, SYMBOL, TIMEFRAME, CANDLE_LIMIT)
             if df is None or df.empty:
-                logger.warning("Failed to fetch klines or DataFrame is empty. Waiting for next cycle.")
+                logger.warning(
+                    "Failed to fetch klines or DataFrame is empty. Waiting for next cycle."
+                )
                 time.sleep(60)  # Wait longer if data fetching failed
                 continue
 
@@ -616,12 +724,16 @@ def main():
                     "ATR_14",
                 ]
             ):
-                logger.warning("Not enough data or indicators failed to calculate. Waiting for next cycle.")
+                logger.warning(
+                    "Not enough data or indicators failed to calculate. Waiting for next cycle."
+                )
                 time.sleep(60)
                 continue
 
             latest_atr = df["ATR_14"].iloc[-1]
-            latest_close_price = df["close"].iloc[-1]  # Get the latest price from the candle data
+            latest_close_price = df["close"].iloc[
+                -1
+            ]  # Get the latest price from the candle data
 
             # --- Position Management Logic ---
             if current_position is None:
@@ -644,7 +756,9 @@ def main():
                             logger.warning("Could not fetch free USDT balance.")
                             continue  # Skip trade if balance not available
                     except Exception as e:
-                        logger.error(f"Failed to fetch balance: {type(e).__name__} - {e}")
+                        logger.error(
+                            f"Failed to fetch balance: {type(e).__name__} - {e}"
+                        )
                         continue  # Skip trade on balance error
 
                     # Calculate position size, SL, TP
@@ -663,18 +777,25 @@ def main():
                         # Execute entry order
                         order = execute_market_order(exchange, SYMBOL, signal, quantity)
 
-                        if order and order["status"] in [
-                            "closed",
-                            "open",
-                        ]:  # 'open' might mean partially filled for market, but we proceed
+                        if (
+                            order
+                            and order["status"]
+                            in [
+                                "closed",
+                                "open",
+                            ]
+                        ):  # 'open' might mean partially filled for market, but we proceed
                             # Get actual entry price and quantity from the executed order
                             # Use info dict as Bybit V5 often has details there
                             executed_qty = float(
-                                order.get("filled") or order["info"].get("cumExecQty", 0)
+                                order.get("filled")
+                                or order["info"].get("cumExecQty", 0)
                             )  # Use filled or cumExecQty
                             # Use average fill price if available, otherwise entryPrice from order or initial estimate
                             executed_price = float(
-                                order.get("average") or order.get("price") or potential_entry_price
+                                order.get("average")
+                                or order.get("price")
+                                or potential_entry_price
                             )  # average is better if partial fills happen
 
                             if executed_qty > 0 and executed_price > 0:
@@ -683,7 +804,9 @@ def main():
                                 )
 
                                 # Calculate actual SL/TP prices based on the executed entry price
-                                actual_atr_stop_distance = latest_atr * STOP_LOSS_ATR_MULTIPLIER
+                                actual_atr_stop_distance = (
+                                    latest_atr * STOP_LOSS_ATR_MULTIPLIER
+                                )
                                 actual_stop_loss_price = (
                                     executed_price - actual_atr_stop_distance
                                     if signal == "buy"
@@ -692,15 +815,18 @@ def main():
                                 actual_take_profit_price = (
                                     executed_price * (1 + TAKE_PROFIT_PERCENTAGE / 100)
                                     if signal == "buy"
-                                    else executed_price * (1 - TAKE_PROFIT_PERCENTAGE / 100)
+                                    else executed_price
+                                    * (1 - TAKE_PROFIT_PERCENTAGE / 100)
                                 )
 
                                 # Adjust SL/TP prices to exchange precision
                                 actual_stop_loss_price = adjust_price_to_precision(
-                                    actual_stop_loss_price, symbol_info["precision_price"]
+                                    actual_stop_loss_price,
+                                    symbol_info["precision_price"],
                                 )
                                 actual_take_profit_price = adjust_price_to_precision(
-                                    actual_take_profit_price, symbol_info["precision_price"]
+                                    actual_take_profit_price,
+                                    symbol_info["precision_price"],
                                 )
 
                                 logger.info(
@@ -731,13 +857,21 @@ def main():
                                 if sl_order or tp_order:
                                     logger.info("Contingent SL/TP orders placed.")
                                 else:
-                                    logger.warning("Failed to place contingent SL/TP orders. Position is unprotected!")
+                                    logger.warning(
+                                        "Failed to place contingent SL/TP orders. Position is unprotected!"
+                                    )
                             else:
-                                logger.error("Entry order did not report executed quantity or price.")
+                                logger.error(
+                                    "Entry order did not report executed quantity or price."
+                                )
                         else:
-                            logger.warning("Entry order execution failed or did not complete.")
+                            logger.warning(
+                                "Entry order execution failed or did not complete."
+                            )
                     else:
-                        logger.info("Position size calculation resulted in zero quantity. Skipping trade.")
+                        logger.info(
+                            "Position size calculation resulted in zero quantity. Skipping trade."
+                        )
 
             else:
                 # Position is open, check for strategic exit signal
@@ -751,11 +885,16 @@ def main():
                     logger.info("Strategic exit signal detected!")
                     # Close the position
                     close_order = close_position(
-                        exchange, SYMBOL, current_position["side"], current_position["quantity"]
+                        exchange,
+                        SYMBOL,
+                        current_position["side"],
+                        current_position["quantity"],
                     )
 
                     if close_order:
-                        logger.info("Position closing order placed. Cancelling contingent orders...")
+                        logger.info(
+                            "Position closing order placed. Cancelling contingent orders..."
+                        )
                         cancel_all_orders(exchange, SYMBOL)  # Cancel SL/TP orders
                         current_position = None  # Clear position state
                         logger.info("Position closed and state cleared.")
@@ -770,7 +909,9 @@ def main():
                     logger.info("Performing periodic check for open position status...")
                     actual_position = get_open_position(exchange, SYMBOL)
                     if actual_position is None:
-                        logger.info("Periodic check found no open position on exchange. Clearing local state.")
+                        logger.info(
+                            "Periodic check found no open position on exchange. Clearing local state."
+                        )
                         current_position = None
                         # Also cancel any leftover orders just in case
                         cancel_all_orders(exchange, SYMBOL)
@@ -790,7 +931,10 @@ def main():
             # cancel_all_orders(exchange, SYMBOL) # Consider cancelling orders
             sys.exit(0)
         except Exception as e:
-            logger.error(f"An unhandled error occurred in the main loop: {type(e).__name__} - {e}", exc_info=True)
+            logger.error(
+                f"An unhandled error occurred in the main loop: {type(e).__name__} - {e}",
+                exc_info=True,
+            )
             # Log the full traceback for unhandled exceptions
             time.sleep(60)  # Wait longer on unexpected errors
 

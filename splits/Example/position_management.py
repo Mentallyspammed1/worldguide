@@ -18,7 +18,9 @@ except ImportError:
 try:
     from colorama import Fore, Style, Back
 except ImportError:
-    print("Warning: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print(
+        "Warning: colorama library not found. Logs will not be colored. Install: pip install colorama"
+    )
 
     class DummyColor:
         def __getattr__(self, name: str) -> str:
@@ -43,7 +45,9 @@ logger = logging.getLogger(__name__)
 
 # Snippet 8 / Function 8: Fetch Current Position (Bybit V5 Specific)
 @retry_api_call(max_retries=3, initial_delay=1.0)
-def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Config) -> Dict[str, Any]:
+def get_current_position_bybit_v5(
+    exchange: ccxt.bybit, symbol: str, config: Config
+) -> Dict[str, Any]:
     """
     Fetches the current position details for a specific symbol using Bybit V5's fetchPositions logic.
     Focuses on One-Way position mode (positionIdx=0) by default.
@@ -90,7 +94,9 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
             return default_position
 
         # Check if fetchPositions is supported (should be for Bybit V5 in recent CCXT)
-        if not hasattr(exchange, "fetch_positions") or not exchange.has.get("fetchPositions"):
+        if not hasattr(exchange, "fetch_positions") or not exchange.has.get(
+            "fetchPositions"
+        ):
             logger.error(
                 f"{Fore.RED}[{func_name}] Exchange object does not support 'fetchPositions'. Cannot get position.{Style.RESET_ALL}"
             )
@@ -118,7 +124,9 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
                 # Check if size is significant (above epsilon)
                 if abs(pos_size) > config.POSITION_QTY_EPSILON:
                     active_position_data = pos
-                    logger.debug(f"[{func_name}] Found active One-Way (idx 0) position data for {symbol}.")
+                    logger.debug(
+                        f"[{func_name}] Found active One-Way (idx 0) position data for {symbol}."
+                    )
                     break  # Found the one-way position, stop searching
 
         # If an active one-way position was found, parse it
@@ -126,7 +134,9 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
             try:
                 info = active_position_data.get("info", {})
                 size = safe_decimal_conversion(info.get("size"))
-                entry_price = safe_decimal_conversion(info.get("avgPrice"))  # V5 uses avgPrice
+                entry_price = safe_decimal_conversion(
+                    info.get("avgPrice")
+                )  # V5 uses avgPrice
                 liq_price = safe_decimal_conversion(info.get("liqPrice"))
                 mark_price = safe_decimal_conversion(info.get("markPrice"))
                 pnl = safe_decimal_conversion(info.get("unrealisedPnl"))
@@ -137,14 +147,19 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
                 position_side = (
                     config.POS_LONG
                     if pos_side_str == "Buy"
-                    else (config.POS_SHORT if pos_side_str == "Sell" else config.POS_NONE)
+                    else (
+                        config.POS_SHORT if pos_side_str == "Sell" else config.POS_NONE
+                    )
                 )
 
                 # Quantity should always be positive, side indicates direction
                 quantity = abs(size) if size is not None else Decimal("0.0")
 
                 # Final check if parsed position is valid
-                if position_side == config.POS_NONE or quantity <= config.POSITION_QTY_EPSILON:
+                if (
+                    position_side == config.POS_NONE
+                    or quantity <= config.POSITION_QTY_EPSILON
+                ):
                     logger.info(
                         f"[{func_name}] Parsed position for {symbol} has negligible size or side 'None'. Treating as flat."
                     )
@@ -152,12 +167,22 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
 
                 # Log the found position details
                 log_color = Fore.GREEN if position_side == config.POS_LONG else Fore.RED
-                logger.info(f"{log_color}[{func_name}] ACTIVE {position_side} Position {symbol}:{Style.RESET_ALL}")
+                logger.info(
+                    f"{log_color}[{func_name}] ACTIVE {position_side} Position {symbol}:{Style.RESET_ALL}"
+                )
                 logger.info(f"  Qty: {format_amount(exchange, symbol, quantity)}")
-                logger.info(f"  Entry Price: {format_price(exchange, symbol, entry_price)}")
-                logger.info(f"  Mark Price: {format_price(exchange, symbol, mark_price)}")
-                logger.info(f"  Liq. Price: {format_price(exchange, symbol, liq_price)}")
-                logger.info(f"  Unrealized PNL: {format_price(exchange, config.USDT_SYMBOL, pnl)} {config.USDT_SYMBOL}")
+                logger.info(
+                    f"  Entry Price: {format_price(exchange, symbol, entry_price)}"
+                )
+                logger.info(
+                    f"  Mark Price: {format_price(exchange, symbol, mark_price)}"
+                )
+                logger.info(
+                    f"  Liq. Price: {format_price(exchange, symbol, liq_price)}"
+                )
+                logger.info(
+                    f"  Unrealized PNL: {format_price(exchange, config.USDT_SYMBOL, pnl)} {config.USDT_SYMBOL}"
+                )
                 logger.info(f"  Leverage: {leverage}x")
 
                 return {
@@ -178,11 +203,15 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
                 return default_position  # Return default on parsing error
         else:
             # No active one-way position found in the fetched data
-            logger.info(f"[{func_name}] No active One-Way position found for {symbol} after checking fetched data.")
+            logger.info(
+                f"[{func_name}] No active One-Way position found for {symbol} after checking fetched data."
+            )
             return default_position
 
     except (ccxt.NetworkError, ccxt.ExchangeError, ccxt.BadSymbol) as e:
-        logger.warning(f"{Fore.YELLOW}[{func_name}] API Error fetching position for {symbol}: {e}{Style.RESET_ALL}")
+        logger.warning(
+            f"{Fore.YELLOW}[{func_name}] API Error fetching position for {symbol}: {e}{Style.RESET_ALL}"
+        )
         raise  # Re-raise for retry decorator
     except Exception as e:
         logger.error(
@@ -193,7 +222,9 @@ def get_current_position_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Con
 
 
 # Snippet 9 / Function 9: Close Position (Reduce-Only Market)
-@retry_api_call(max_retries=2, initial_delay=1)  # Allow retry for closure attempt if network fails
+@retry_api_call(
+    max_retries=2, initial_delay=1
+)  # Allow retry for closure attempt if network fails
 def close_position_reduce_only(
     exchange: ccxt.bybit,
     symbol: str,
@@ -222,7 +253,9 @@ def close_position_reduce_only(
     func_name = "close_position_reduce_only"
     market_base = symbol.split("/")[0]
     log_prefix = f"[Close Position ({reason})]"
-    logger.info(f"{Fore.YELLOW}{log_prefix} Initiating closure for {symbol}...{Style.RESET_ALL}")
+    logger.info(
+        f"{Fore.YELLOW}{log_prefix} Initiating closure for {symbol}...{Style.RESET_ALL}"
+    )
 
     live_position_data: Dict[str, Any]
 
@@ -304,7 +337,9 @@ def close_position_reduce_only(
 
         if not close_order:
             # This case might occur if the API call itself fails without raising ccxt exception
-            raise ValueError("create_market_order returned None unexpectedly during close attempt.")
+            raise ValueError(
+                "create_market_order returned None unexpectedly during close attempt."
+            )
 
         # 5. Log Success and Return Order Info
         fill_price = safe_decimal_conversion(close_order.get("average"))
@@ -332,7 +367,9 @@ def close_position_reduce_only(
         logger.error(
             f"{Fore.RED}[{func_name}] Close Order Error ({reason}) for {symbol}: {type(e).__name__} - {e}{Style.RESET_ALL}"
         )
-        send_sms_alert(f"[{market_base}] CLOSE FAIL ({live_side}): {type(e).__name__}", config)
+        send_sms_alert(
+            f"[{market_base}] CLOSE FAIL ({live_side}): {type(e).__name__}", config
+        )
         # Decide whether to raise or return None. Raising might trigger outer retries.
         # raise e
         return None
@@ -358,7 +395,9 @@ def close_position_reduce_only(
             logger.error(
                 f"{Fore.RED}[{func_name}] Close Order ExchangeError ({reason}) for {symbol}: {e}{Style.RESET_ALL}"
             )
-            send_sms_alert(f"[{market_base}] CLOSE FAIL ({live_side}): ExchangeError - {e}", config)
+            send_sms_alert(
+                f"[{market_base}] CLOSE FAIL ({live_side}): ExchangeError - {e}", config
+            )
             raise e  # Re-raise other exchange errors for potential retry or handling
     except (ccxt.NetworkError, ValueError) as e:
         # Network errors or value errors (e.g., from category determination)
@@ -372,13 +411,18 @@ def close_position_reduce_only(
             f"{Back.RED}[{func_name}] Close Order Unexpected Error ({reason}) for {symbol}: {e}{Style.RESET_ALL}",
             exc_info=True,
         )
-        send_sms_alert(f"[{market_base}] CLOSE FAIL ({live_side}): Unexpected Error - {type(e).__name__}", config)
+        send_sms_alert(
+            f"[{market_base}] CLOSE FAIL ({live_side}): Unexpected Error - {type(e).__name__}",
+            config,
+        )
         return None
 
 
 # Snippet 23 / Function 23: Fetch Position Risk (Bybit V5 Specific)
 @retry_api_call(max_retries=3, initial_delay=1.0)
-def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Config) -> Optional[Dict[str, Any]]:
+def fetch_position_risk_bybit_v5(
+    exchange: ccxt.bybit, symbol: str, config: Config
+) -> Optional[Dict[str, Any]]:
     """
     Fetches detailed risk metrics for the current position of a specific symbol using Bybit V5 logic.
     Attempts to use `fetch_positions_risk` first, falls back to `fetch_positions` if unavailable/fails.
@@ -407,7 +451,9 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
         }
     """
     func_name = "fetch_position_risk_bybit_v5"
-    logger.debug(f"[{func_name}] Fetching detailed position risk for {symbol} (Bybit V5)...")
+    logger.debug(
+        f"[{func_name}] Fetching detailed position risk for {symbol} (Bybit V5)..."
+    )
 
     try:
         market = exchange.market(symbol)
@@ -427,8 +473,12 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
         # Try fetchPositionsRisk first (preferred as it's specific)
         if exchange.has.get("fetchPositionsRisk"):
             try:
-                logger.debug(f"[{func_name}] Attempting fetch_positions_risk with params: {params}")
-                position_data = exchange.fetch_positions_risk(symbols=[symbol], params=params)
+                logger.debug(
+                    f"[{func_name}] Attempting fetch_positions_risk with params: {params}"
+                )
+                position_data = exchange.fetch_positions_risk(
+                    symbols=[symbol], params=params
+                )
                 fetch_method_used = "fetchPositionsRisk"
             except Exception as e:
                 logger.warning(
@@ -436,14 +486,20 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
                 )
                 position_data = None  # Ensure fallback occurs
         else:
-            logger.debug(f"[{func_name}] fetch_positions_risk not available in this CCXT version.")
+            logger.debug(
+                f"[{func_name}] fetch_positions_risk not available in this CCXT version."
+            )
 
         # Fallback to fetchPositions if fetchPositionsRisk failed or is unavailable
         if position_data is None:
             if exchange.has.get("fetchPositions"):
-                logger.debug(f"[{func_name}] Attempting fallback fetch_positions with params: {params}")
+                logger.debug(
+                    f"[{func_name}] Attempting fallback fetch_positions with params: {params}"
+                )
                 try:
-                    position_data = exchange.fetch_positions(symbols=[symbol], params=params)
+                    position_data = exchange.fetch_positions(
+                        symbols=[symbol], params=params
+                    )
                     fetch_method_used = "fetchPositions (Fallback)"
                 except Exception as e:
                     logger.error(
@@ -468,7 +524,9 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
         for pos in position_data:
             pos_info = pos.get("info", {})
             pos_symbol = pos_info.get("symbol")
-            pos_v5_side = pos_info.get("side", "None")  # Bybit side: 'Buy', 'Sell', 'None'
+            pos_v5_side = pos_info.get(
+                "side", "None"
+            )  # Bybit side: 'Buy', 'Sell', 'None'
             pos_size_str = pos_info.get("size")
             pos_idx = int(pos_info.get("positionIdx", -1))
 
@@ -483,7 +541,9 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
                     break
 
         if not active_pos_risk:
-            logger.info(f"[{func_name}] No active One-Way position found for {symbol} in the fetched data.")
+            logger.info(
+                f"[{func_name}] No active One-Way position found for {symbol} in the fetched data."
+            )
             return None  # Return None if no active position
 
         # Parse the details from the found position risk data
@@ -491,11 +551,21 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
             info = active_pos_risk.get("info", {})
 
             # Extract common fields, checking both CCXT standard keys and V5 info keys
-            size = safe_decimal_conversion(active_pos_risk.get("contracts", info.get("size")))
-            entry_price = safe_decimal_conversion(active_pos_risk.get("entryPrice", info.get("avgPrice")))
-            mark_price = safe_decimal_conversion(active_pos_risk.get("markPrice", info.get("markPrice")))
-            liq_price = safe_decimal_conversion(active_pos_risk.get("liquidationPrice", info.get("liqPrice")))
-            leverage = safe_decimal_conversion(active_pos_risk.get("leverage", info.get("leverage")))
+            size = safe_decimal_conversion(
+                active_pos_risk.get("contracts", info.get("size"))
+            )
+            entry_price = safe_decimal_conversion(
+                active_pos_risk.get("entryPrice", info.get("avgPrice"))
+            )
+            mark_price = safe_decimal_conversion(
+                active_pos_risk.get("markPrice", info.get("markPrice"))
+            )
+            liq_price = safe_decimal_conversion(
+                active_pos_risk.get("liquidationPrice", info.get("liqPrice"))
+            )
+            leverage = safe_decimal_conversion(
+                active_pos_risk.get("leverage", info.get("leverage"))
+            )
             # Margins
             initial_margin = safe_decimal_conversion(
                 active_pos_risk.get("initialMargin", info.get("positionIM"))
@@ -504,9 +574,13 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
                 active_pos_risk.get("maintenanceMargin", info.get("positionMM"))
             )  # positionMM in V5
             # PNL
-            pnl = safe_decimal_conversion(active_pos_risk.get("unrealizedPnl", info.get("unrealisedPnl")))
+            pnl = safe_decimal_conversion(
+                active_pos_risk.get("unrealizedPnl", info.get("unrealisedPnl"))
+            )
             # Margin Rates
-            imr = safe_decimal_conversion(active_pos_risk.get("initialMarginPercentage", info.get("imr")))  # imr in V5
+            imr = safe_decimal_conversion(
+                active_pos_risk.get("initialMarginPercentage", info.get("imr"))
+            )  # imr in V5
             mmr = safe_decimal_conversion(
                 active_pos_risk.get("maintenanceMarginPercentage", info.get("mmr"))
             )  # mmr in V5
@@ -514,7 +588,9 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
             pos_value = safe_decimal_conversion(
                 active_pos_risk.get("contractsValue", info.get("positionValue"))
             )  # positionValue in V5
-            risk_limit = safe_decimal_conversion(info.get("riskLimitValue"))  # V5 specific
+            risk_limit = safe_decimal_conversion(
+                info.get("riskLimitValue")
+            )  # V5 specific
 
             # Determine standardized side
             pos_side_str = info.get("side")  # 'Buy' or 'Sell'
@@ -528,7 +604,10 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
             quantity = abs(size) if size is not None else Decimal("0.0")
 
             # Final validation on parsed data
-            if position_side == config.POS_NONE or quantity <= config.POSITION_QTY_EPSILON:
+            if (
+                position_side == config.POS_NONE
+                or quantity <= config.POSITION_QTY_EPSILON
+            ):
                 logger.info(
                     f"[{func_name}] Parsed position risk for {symbol} resulted in negligible size or side 'None'."
                 )
@@ -537,13 +616,21 @@ def fetch_position_risk_bybit_v5(exchange: ccxt.bybit, symbol: str, config: Conf
             # Log detailed risk information
             log_color = Fore.GREEN if position_side == config.POS_LONG else Fore.RED
             quote_curr = market.get("quote", config.USDT_SYMBOL)
-            logger.info(f"{log_color}[{func_name}] Position Risk Details {symbol} ({position_side}):{Style.RESET_ALL}")
+            logger.info(
+                f"{log_color}[{func_name}] Position Risk Details {symbol} ({position_side}):{Style.RESET_ALL}"
+            )
             logger.info(
                 f"  Qty: {format_amount(exchange, symbol, quantity)}, Entry: {format_price(exchange, symbol, entry_price)}, Mark: {format_price(exchange, symbol, mark_price)}"
             )
-            logger.info(f"  Liq. Price: {format_price(exchange, symbol, liq_price)}, Leverage: {leverage}x")
-            logger.info(f"  Position Value: {format_price(exchange, quote_curr, pos_value)} {quote_curr}")
-            logger.info(f"  Unrealized PNL: {format_price(exchange, quote_curr, pnl)} {quote_curr}")
+            logger.info(
+                f"  Liq. Price: {format_price(exchange, symbol, liq_price)}, Leverage: {leverage}x"
+            )
+            logger.info(
+                f"  Position Value: {format_price(exchange, quote_curr, pos_value)} {quote_curr}"
+            )
+            logger.info(
+                f"  Unrealized PNL: {format_price(exchange, quote_curr, pnl)} {quote_curr}"
+            )
             logger.info(
                 f"  Initial Margin (IM): {format_price(exchange, quote_curr, initial_margin)} {quote_curr} (IMR: {imr:.4% if imr else 'N/A'})"
             )

@@ -40,7 +40,10 @@ except ImportError:
     Back = DummyColor()
     Style = DummyColor()
     COLORAMA_AVAILABLE = False
-    print("Warning: 'colorama' library not found. Neon console logging disabled.", file=sys.stderr)
+    print(
+        "Warning: 'colorama' library not found. Neon console logging disabled.",
+        file=sys.stderr,
+    )
     print("         Install using: pip install colorama", file=sys.stderr)
 
 # --- Custom Log Level ---
@@ -77,9 +80,17 @@ class ColoredConsoleFormatter(logging.Formatter):
     only if colorama is available and output is a TTY.
     """
 
-    def __init__(self, fmt: str | None = None, datefmt: str | None = None, style: str = "%", validate: bool = True):
+    def __init__(
+        self,
+        fmt: str | None = None,
+        datefmt: str | None = None,
+        style: str = "%",
+        validate: bool = True,
+    ):
         super().__init__(fmt=fmt, datefmt=datefmt, style=style, validate=validate)
-        self.use_colors = COLORAMA_AVAILABLE and hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+        self.use_colors = (
+            COLORAMA_AVAILABLE and hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+        )
 
     def format(self, record: logging.LogRecord) -> str:
         """Formats the record and applies colors to the level name."""
@@ -171,11 +182,17 @@ def setup_logger(
             f"\033[91mError [{func_name}]: Failed converting log level strings: {e}. Using defaults.\033[0m",
             file=sys.stderr,
         )
-        console_level, file_level, third_party_log_level = logging.INFO, logging.DEBUG, logging.WARNING
+        console_level, file_level, third_party_log_level = (
+            logging.INFO,
+            logging.DEBUG,
+            logging.WARNING,
+        )
 
     # --- Get Logger and Set Base Level/Propagation ---
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)  # Set logger to lowest level to capture all messages for handlers
+    logger.setLevel(
+        logging.DEBUG
+    )  # Set logger to lowest level to capture all messages for handlers
     logger.propagate = propagate
 
     # --- Clear Existing Handlers (if re-configuring) ---
@@ -189,7 +206,10 @@ def setup_logger(
                 handler.close()  # Close file handles etc.
                 logger.removeHandler(handler)
             except Exception as e:
-                print(f"\033[93mWarning [{func_name}]: Error removing/closing handler: {e}\033[0m", file=sys.stderr)
+                print(
+                    f"\033[93mWarning [{func_name}]: Error removing/closing handler: {e}\033[0m",
+                    file=sys.stderr,
+                )
 
     # --- Console Handler ---
     if console_level is not None and console_level >= 0:
@@ -202,7 +222,10 @@ def setup_logger(
                 f"\033[94m[{func_name}] Console logging active at level [{logging.getLevelName(console_level)}].\033[0m"
             )
         except Exception as e:
-            print(f"\033[91mError [{func_name}] setting up console handler: {e}\033[0m", file=sys.stderr)
+            print(
+                f"\033[91mError [{func_name}] setting up console handler: {e}\033[0m",
+                file=sys.stderr,
+            )
     else:
         print(f"\033[94m[{func_name}] Console logging disabled.\033[0m")
 
@@ -252,7 +275,13 @@ def setup_logger(
 
     # --- Configure Third-Party Log Levels ---
     if third_party_log_level is not None and third_party_log_level >= 0:
-        noisy_libraries = ["ccxt", "urllib3", "requests", "asyncio", "websockets"]  # Add others if needed
+        noisy_libraries = [
+            "ccxt",
+            "urllib3",
+            "requests",
+            "asyncio",
+            "websockets",
+        ]  # Add others if needed
         print(
             f"\033[94m[{func_name}] Setting third-party library log level to [{logging.getLevelName(third_party_log_level)}].\033[0m"
         )
@@ -261,7 +290,9 @@ def setup_logger(
                 lib_logger = logging.getLogger(lib_name)
                 if lib_logger:  # Check if logger exists
                     lib_logger.setLevel(third_party_log_level)
-                    lib_logger.propagate = False  # Stop noisy logs from reaching our handlers
+                    lib_logger.propagate = (
+                        False  # Stop noisy logs from reaching our handlers
+                    )
             except Exception as e_lib:
                 # Non-critical error
                 print(
@@ -269,7 +300,9 @@ def setup_logger(
                     file=sys.stderr,
                 )
     else:
-        print(f"\033[94m[{func_name}] Third-party library log level control disabled.\033[0m")
+        print(
+            f"\033[94m[{func_name}] Third-party library log level control disabled.\033[0m"
+        )
 
     # --- Log Test Messages ---
     # logger.debug("--- Logger Setup Complete (DEBUG Test) ---")
@@ -311,14 +344,18 @@ if __name__ == "__main__":
     try:
         1 / 0
     except ZeroDivisionError:
-        logger_instance.critical("A critical error (division by zero) happened!", exc_info=True)
+        logger_instance.critical(
+            "A critical error (division by zero) happened!", exc_info=True
+        )
 
     # Test third-party level suppression (if ccxt installed)
     try:
         import ccxt
 
         ccxt_logger = logging.getLogger("ccxt")
-        print(f"CCXT logger level: {logging.getLevelName(ccxt_logger.getEffectiveLevel())}")
+        print(
+            f"CCXT logger level: {logging.getLevelName(ccxt_logger.getEffectiveLevel())}"
+        )
         ccxt_logger.info("This CCXT INFO message should be suppressed by default.")
         ccxt_logger.warning("This CCXT WARNING message should appear.")
     except ImportError:

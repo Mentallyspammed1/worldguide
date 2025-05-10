@@ -31,11 +31,15 @@ except ImportError:
 logger = logging.getLogger(__name__)
 if not logger.hasHandlers():  # Add a basic handler if none exist yet
     handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)  # Default to INFO if not configured
-    logger.info(f"Placeholder logger initialized for {__name__}. Main logger setup expected.")
+    logger.info(
+        f"Placeholder logger initialized for {__name__}. Main logger setup expected."
+    )
 
 
 # Placeholder TypeVar for Config object (structure defined in importing script)
@@ -58,7 +62,9 @@ except ImportError:
 # --- Utility Functions ---
 
 
-def safe_decimal_conversion(value: Any, default: Decimal | None = None) -> Decimal | None:
+def safe_decimal_conversion(
+    value: Any, default: Decimal | None = None
+) -> Decimal | None:
     """Convert various inputs to Decimal, returning default or None on failure."""
     if value is None:
         return default
@@ -91,7 +97,9 @@ def format_price(exchange: ccxt.Exchange, symbol: str, price: Any) -> str:
         # Fallback: format to a reasonable number of decimal places
         return f"{price_dec:.8f}"
     except Exception as e:
-        logger.critical(f"Error formatting price '{price}' for {symbol}: {e}", exc_info=True)
+        logger.critical(
+            f"Error formatting price '{price}' for {symbol}: {e}", exc_info=True
+        )
         return "Error"
 
 
@@ -108,7 +116,9 @@ def format_amount(exchange: ccxt.Exchange, symbol: str, amount: Any) -> str:
         # Fallback: format to a reasonable number of decimal places
         return f"{amount_dec:.8f}"
     except Exception as e:
-        logger.critical(f"Error formatting amount '{amount}' for {symbol}: {e}", exc_info=True)
+        logger.critical(
+            f"Error formatting amount '{amount}' for {symbol}: {e}", exc_info=True
+        )
         return "Error"
 
 
@@ -131,11 +141,19 @@ def send_sms_alert(message: str, config: ConfigPlaceholder | None = None) -> boo
         return False
 
     # Use attributes directly from ConfigPlaceholder (or the real AppConfig)
-    enabled = getattr(config, "ENABLE_SMS_ALERTS", getattr(config.sms_config, "enable_sms_alerts", False))
+    enabled = getattr(
+        config,
+        "ENABLE_SMS_ALERTS",
+        getattr(config.sms_config, "enable_sms_alerts", False),
+    )
     if not enabled:
         return True  # Return True if disabled, as no action failed
 
-    recipient = getattr(config, "SMS_RECIPIENT_NUMBER", getattr(config.sms_config, "sms_recipient_number", None))
+    recipient = getattr(
+        config,
+        "SMS_RECIPIENT_NUMBER",
+        getattr(config.sms_config, "sms_recipient_number", None),
+    )
     if not recipient:
         logger.warning("SMS alerts enabled but no SMS_RECIPIENT_NUMBER configured.")
         return False
@@ -147,14 +165,22 @@ def send_sms_alert(message: str, config: ConfigPlaceholder | None = None) -> boo
         logger.warning("SMS enabled but Termux method not selected/configured.")
         return False  # Only Termux is implemented here
 
-    timeout = getattr(config, "SMS_TIMEOUT_SECONDS", getattr(config.sms_config, "sms_timeout_seconds", 30))
+    timeout = getattr(
+        config,
+        "SMS_TIMEOUT_SECONDS",
+        getattr(config.sms_config, "sms_timeout_seconds", 30),
+    )
 
     try:
         logger.info(f"Attempting to send SMS alert via Termux to {recipient}...")
         command = ["termux-sms-send", "-n", recipient, message]
-        result = subprocess.run(command, timeout=timeout, check=True, capture_output=True, text=True)
+        result = subprocess.run(
+            command, timeout=timeout, check=True, capture_output=True, text=True
+        )
         log_output = result.stdout.strip() if result.stdout else "(No output)"
-        logger.info(f"{Fore.GREEN}SMS Alert Sent Successfully via Termux.{Style.RESET_ALL} Output: {log_output}")
+        logger.info(
+            f"{Fore.GREEN}SMS Alert Sent Successfully via Termux.{Style.RESET_ALL} Output: {log_output}"
+        )
         return True
     except FileNotFoundError:
         logger.error(
@@ -162,16 +188,23 @@ def send_sms_alert(message: str, config: ConfigPlaceholder | None = None) -> boo
         )
         return False
     except subprocess.TimeoutExpired:
-        logger.error(f"{Fore.RED}Termux SMS command timed out after {timeout} seconds.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Termux SMS command timed out after {timeout} seconds.{Style.RESET_ALL}"
+        )
         return False
     except subprocess.CalledProcessError as e:
         stderr_log = e.stderr.strip() if e.stderr else "(No stderr)"
-        logger.error(f"{Fore.RED}Termux SMS command failed with exit code {e.returncode}.{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Termux SMS command failed with exit code {e.returncode}.{Style.RESET_ALL}"
+        )
         logger.error(f"Command: {' '.join(e.cmd)}")
         logger.error(f"Stderr: {stderr_log}")
         return False
     except Exception as e:
-        logger.critical(f"{Fore.RED}Unexpected error sending SMS alert via Termux: {e}{Style.RESET_ALL}", exc_info=True)
+        logger.critical(
+            f"{Fore.RED}Unexpected error sending SMS alert via Termux: {e}{Style.RESET_ALL}",
+            exc_info=True,
+        )
         return False
 
 
@@ -182,7 +215,12 @@ T = TypeVar("T")
 def retry_api_call(
     max_retries_override: int | None = None,
     initial_delay_override: float | None = None,
-    handled_exceptions=(ccxt.RateLimitExceeded, ccxt.NetworkError, ccxt.ExchangeNotAvailable, ccxt.RequestTimeout),
+    handled_exceptions=(
+        ccxt.RateLimitExceeded,
+        ccxt.NetworkError,
+        ccxt.ExchangeNotAvailable,
+        ccxt.RequestTimeout,
+    ),
     error_message_prefix: str = "API Call Failed",
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """Decorator factory to retry synchronous API calls with configurable settings.
@@ -195,7 +233,14 @@ def retry_api_call(
             # Find config object (accept AppConfig or legacy Config)
             config_obj = kwargs.get("app_config") or kwargs.get("config")
             if not config_obj:
-                config_obj = next((arg for arg in args if isinstance(arg, (AppConfig, ConfigPlaceholder))), None)  # type: ignore
+                config_obj = next(
+                    (
+                        arg
+                        for arg in args
+                        if isinstance(arg, (AppConfig, ConfigPlaceholder))
+                    ),
+                    None,
+                )  # type: ignore
 
             if not config_obj:
                 logger.error(
@@ -208,14 +253,20 @@ def retry_api_call(
                 api_conf = config_obj.api_config
                 sms_conf = config_obj.sms_config
                 effective_max_retries = (
-                    max_retries_override if max_retries_override is not None else api_conf.retry_count
+                    max_retries_override
+                    if max_retries_override is not None
+                    else api_conf.retry_count
                 )
                 effective_base_delay = (
-                    initial_delay_override if initial_delay_override is not None else api_conf.retry_delay_seconds
+                    initial_delay_override
+                    if initial_delay_override is not None
+                    else api_conf.retry_delay_seconds
                 )
             else:  # Assume legacy Config object
                 effective_max_retries = (
-                    max_retries_override if max_retries_override is not None else getattr(config_obj, "RETRY_COUNT", 3)
+                    max_retries_override
+                    if max_retries_override is not None
+                    else getattr(config_obj, "RETRY_COUNT", 3)
                 )
                 effective_base_delay = (
                     initial_delay_override
@@ -230,8 +281,12 @@ def retry_api_call(
             for attempt in range(effective_max_retries + 1):
                 try:
                     if attempt > 0:
-                        logger.debug(f"Retrying {func_name} (Attempt {attempt + 1}/{effective_max_retries + 1})")
-                    return func(*args, **kwargs)  # Execute the original synchronous function
+                        logger.debug(
+                            f"Retrying {func_name} (Attempt {attempt + 1}/{effective_max_retries + 1})"
+                        )
+                    return func(
+                        *args, **kwargs
+                    )  # Execute the original synchronous function
                 except handled_exceptions as e:
                     last_exception = e
                     if attempt >= effective_max_retries:
@@ -240,12 +295,15 @@ def retry_api_call(
                         )
                         # Use the potentially legacy config directly for SMS
                         send_sms_alert(
-                            f"{error_message_prefix}: Max retries for {func_name} ({type(e).__name__})", sms_conf
+                            f"{error_message_prefix}: Max retries for {func_name} ({type(e).__name__})",
+                            sms_conf,
                         )
                         break  # Exit loop, will raise last_exception below
 
                     # Calculate delay with exponential backoff + jitter
-                    delay = (effective_base_delay * (2**attempt)) + (effective_base_delay * random.uniform(0.1, 0.5))
+                    delay = (effective_base_delay * (2**attempt)) + (
+                        effective_base_delay * random.uniform(0.1, 0.5)
+                    )
                     log_level = logging.WARNING
                     log_color = Fore.YELLOW
 
@@ -255,7 +313,14 @@ def retry_api_call(
                             log_level,
                             f"{log_color}Rate limit exceeded in {func_name}. Retry {attempt + 1}/{effective_max_retries + 1} after {delay:.2f}s: {e}{Style.RESET_ALL}",
                         )
-                    elif isinstance(e, (ccxt.NetworkError, ccxt.ExchangeNotAvailable, ccxt.RequestTimeout)):
+                    elif isinstance(
+                        e,
+                        (
+                            ccxt.NetworkError,
+                            ccxt.ExchangeNotAvailable,
+                            ccxt.RequestTimeout,
+                        ),
+                    ):
                         log_level = logging.ERROR
                         log_color = Fore.RED
                         logger.log(
@@ -276,7 +341,9 @@ def retry_api_call(
                         f"{Back.RED}{Fore.WHITE}Unexpected critical error in {func_name}: {type(e).__name__} - {e}{Style.RESET_ALL}",
                         exc_info=True,
                     )
-                    send_sms_alert(f"CRITICAL Error in {func_name}: {type(e).__name__}", sms_conf)
+                    send_sms_alert(
+                        f"CRITICAL Error in {func_name}: {type(e).__name__}", sms_conf
+                    )
                     raise e  # Re-raise unexpected exceptions immediately
 
             # If loop finished without returning, raise the last handled exception
@@ -330,26 +397,40 @@ def analyze_order_book(
         # Ensure fetch_limit is at least the analysis depth
         effective_fetch_limit = max(depth, fetch_limit)
         # Bybit V5 needs category for fetch_order_book
-        category = market_cache.get_category(symbol)  # Assumes market cache is populated elsewhere
+        category = market_cache.get_category(
+            symbol
+        )  # Assumes market cache is populated elsewhere
         if not category:
-            logger.warning(f"{log_prefix} Category unknown for {symbol}. Fetch may fail.")
+            logger.warning(
+                f"{log_prefix} Category unknown for {symbol}. Fetch may fail."
+            )
             params = {}
         else:
             params = {"category": category}
 
-        order_book = exchange.fetch_order_book(symbol, limit=effective_fetch_limit, params=params)
+        order_book = exchange.fetch_order_book(
+            symbol, limit=effective_fetch_limit, params=params
+        )
 
-        if not isinstance(order_book, dict) or "bids" not in order_book or "asks" not in order_book:
+        if (
+            not isinstance(order_book, dict)
+            or "bids" not in order_book
+            or "asks" not in order_book
+        ):
             raise ValueError("Invalid order book structure received.")
 
-        analysis_result["timestamp"] = order_book.get("timestamp")  # Store timestamp if available
+        analysis_result["timestamp"] = order_book.get(
+            "timestamp"
+        )  # Store timestamp if available
 
         bids_raw = order_book["bids"]
         asks_raw = order_book["asks"]
         if not isinstance(bids_raw, list) or not isinstance(asks_raw, list):
             raise ValueError("Order book 'bids' or 'asks' data is not a list.")
         if not bids_raw or not asks_raw:
-            logger.warning(f"{log_prefix} Order book side empty (Bids:{len(bids_raw)}, Asks:{len(asks_raw)}).")
+            logger.warning(
+                f"{log_prefix} Order book side empty (Bids:{len(bids_raw)}, Asks:{len(asks_raw)})."
+            )
             return analysis_result  # Return defaults
 
         # Process bids and asks, converting to Decimal
@@ -371,7 +452,9 @@ def analyze_order_book(
         # asks.sort(key=lambda x: x[0]) # Optional verification
 
         if not bids or not asks:
-            logger.warning(f"{log_prefix} Order book validated bids/asks empty after conversion.")
+            logger.warning(
+                f"{log_prefix} Order book validated bids/asks empty after conversion."
+            )
             return analysis_result
 
         best_bid = bids[0][0]
@@ -400,7 +483,9 @@ def analyze_order_book(
         analysis_result["bid_volume_depth"] = bid_vol_depth
         analysis_result["ask_volume_depth"] = ask_vol_depth
         analysis_result["bid_ask_ratio_depth"] = (
-            (bid_vol_depth / ask_vol_depth) if ask_vol_depth and ask_vol_depth > 0 else None
+            (bid_vol_depth / ask_vol_depth)
+            if ask_vol_depth and ask_vol_depth > 0
+            else None
         )
 
         ratio_str = (
@@ -415,7 +500,9 @@ def analyze_order_book(
         return analysis_result
 
     except (ccxt.NetworkError, ccxt.ExchangeError, ValueError, TypeError) as e:
-        logger.warning(f"{Fore.YELLOW}{log_prefix} Error fetching/analyzing: {e}{Style.RESET_ALL}")
+        logger.warning(
+            f"{Fore.YELLOW}{log_prefix} Error fetching/analyzing: {e}{Style.RESET_ALL}"
+        )
         raise  # Re-raise handled exceptions for the decorator
     except Exception as e:
         logger.critical(

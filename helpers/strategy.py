@@ -41,7 +41,9 @@ except ImportError as e:
 logger: logging.Logger | None = None
 strategy_instance: ExampleMACDRSIStrategy | None = None
 main_task: asyncio.Task | None = None
-exchange_instance_ref: bybit.ccxt.bybit | None = None  # Keep reference for final cleanup
+exchange_instance_ref: bybit.ccxt.bybit | None = (
+    None  # Keep reference for final cleanup
+)
 
 
 # --- Signal Handling for Graceful Shutdown ---
@@ -60,7 +62,9 @@ def handle_signal(sig, frame):
         f"\n{Fore.YELLOW}{Style.BRIGHT}>>> Signal {signal_name} ({sig}) received. Initiating graceful shutdown... <<< {Style.RESET_ALL}"
     )
     if logger:
-        logger.warning(f"Signal {signal_name} ({sig}) received. Initiating graceful shutdown...")
+        logger.warning(
+            f"Signal {signal_name} ({sig}) received. Initiating graceful shutdown..."
+        )
 
     # Request strategy loop to stop
     if strategy_instance and strategy_instance.is_running:
@@ -91,7 +95,9 @@ async def main():
         log_config = getattr(cfg, "LOGGING_CONFIG", {})
         log_console_level_str = log_config.get("CONSOLE_LEVEL_STR", "INFO").upper()
         log_file_level_str = log_config.get("FILE_LEVEL_STR", "DEBUG").upper()
-        log_third_party_level_str = log_config.get("THIRD_PARTY_LOG_LEVEL_STR", "WARNING").upper()
+        log_third_party_level_str = log_config.get(
+            "THIRD_PARTY_LOG_LEVEL_STR", "WARNING"
+        ).upper()
 
         log_console_level = logging.getLevelName(log_console_level_str)
         log_file_level = logging.getLevelName(log_file_level_str)
@@ -100,14 +106,22 @@ async def main():
         logger = setup_logger(
             logger_name=log_config.get("LOGGER_NAME", "TradingBot"),
             log_file=log_config.get("LOG_FILE", "trading_bot.log"),
-            console_level=log_console_level if isinstance(log_console_level, int) else logging.INFO,
-            file_level=log_file_level if isinstance(log_file_level, int) else logging.DEBUG,
+            console_level=log_console_level
+            if isinstance(log_console_level, int)
+            else logging.INFO,
+            file_level=log_file_level
+            if isinstance(log_file_level, int)
+            else logging.DEBUG,
             log_rotation_bytes=log_config.get("LOG_ROTATION_BYTES", 5 * 1024 * 1024),
             log_backup_count=log_config.get("LOG_BACKUP_COUNT", 5),
-            third_party_log_level=log_third_party_level if isinstance(log_third_party_level, int) else logging.WARNING,
+            third_party_log_level=log_third_party_level
+            if isinstance(log_third_party_level, int)
+            else logging.WARNING,
         )
         logger.info("=" * 60)
-        logger.info(f"=== {log_config.get('LOGGER_NAME', 'Trading Bot')} Initializing ===")
+        logger.info(
+            f"=== {log_config.get('LOGGER_NAME', 'Trading Bot')} Initializing ==="
+        )
         # Load actual config values (assuming config.py uses simple dicts or a class instance)
         # This assumes cfg is the module itself or an instance holding the dicts/attrs
         api_conf = getattr(cfg, "API_CONFIG", {})
@@ -119,7 +133,10 @@ async def main():
         logger.info("=" * 60)
 
     except Exception as e:
-        print(f"{Back.RED}{Fore.WHITE}FATAL: Logger setup failed: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Back.RED}{Fore.WHITE}FATAL: Logger setup failed: {e}{Style.RESET_ALL}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # --- 2. Load Full Configuration ---
@@ -150,7 +167,9 @@ async def main():
         main_task = asyncio.create_task(strategy_instance.run_loop())
         # Keep reference to exchange instance after initialization inside strategy
         # This relies on _initialize() setting self.exchange correctly
-        await asyncio.sleep(0.1)  # Allow loop to start and potentially initialize exchange
+        await asyncio.sleep(
+            0.1
+        )  # Allow loop to start and potentially initialize exchange
         exchange_instance_ref = strategy_instance.exchange
 
         await main_task
@@ -160,12 +179,19 @@ async def main():
         logger.info("Strategy run_loop finished normally.")
 
     except asyncio.CancelledError:
-        logger.warning("Main strategy task was cancelled (likely due to shutdown signal).")
+        logger.warning(
+            "Main strategy task was cancelled (likely due to shutdown signal)."
+        )
         # Allow finally block to handle cleanup
-        run_success = True  # Consider cancellation successful completion for cleanup purposes
+        run_success = (
+            True  # Consider cancellation successful completion for cleanup purposes
+        )
 
     except Exception as e:
-        logger.critical(f"Strategy execution loop encountered an unhandled error: {e}", exc_info=True)
+        logger.critical(
+            f"Strategy execution loop encountered an unhandled error: {e}",
+            exc_info=True,
+        )
         run_success = False  # Mark as failed
 
     finally:
@@ -177,21 +203,33 @@ async def main():
             try:
                 await strategy_instance._cleanup()
             except Exception as strategy_cleanup_err:
-                logger.error(f"Error during strategy internal cleanup: {strategy_cleanup_err}", exc_info=True)
+                logger.error(
+                    f"Error during strategy internal cleanup: {strategy_cleanup_err}",
+                    exc_info=True,
+                )
 
         # Final attempt to close the exchange connection using the reference
-        if exchange_instance_ref and hasattr(exchange_instance_ref, "close") and callable(exchange_instance_ref.close):
+        if (
+            exchange_instance_ref
+            and hasattr(exchange_instance_ref, "close")
+            and callable(exchange_instance_ref.close)
+        ):
             if not exchange_instance_ref.closed:
                 logger.info("Attempting final exchange connection close...")
                 try:
                     await exchange_instance_ref.close()
                     logger.info("Final exchange connection close successful.")
                 except Exception as final_close_err:
-                    logger.error(f"Error during final exchange connection close: {final_close_err}", exc_info=True)
+                    logger.error(
+                        f"Error during final exchange connection close: {final_close_err}",
+                        exc_info=True,
+                    )
             else:
                 logger.info("Exchange connection already closed.")
         else:
-            logger.warning("Exchange instance reference not available for final cleanup or close method missing.")
+            logger.warning(
+                "Exchange instance reference not available for final cleanup or close method missing."
+            )
 
         logger.info(f"Run success status: {run_success}")
 
@@ -204,11 +242,16 @@ if __name__ == "__main__":
     for s in signals:
         try:
             # Use add_signal_handler for async compatibility
-            loop.add_signal_handler(s, lambda s=s: asyncio.create_task(handle_signal(s, None)))
+            loop.add_signal_handler(
+                s, lambda s=s: asyncio.create_task(handle_signal(s, None))
+            )
             # loop.add_signal_handler(s, handle_signal, s, None) # Alternative if lambda causes issues
         except NotImplementedError:
             # Windows might not support all signals
-            print(f"Warning: Signal {s} registration not supported on this platform.", file=sys.stderr)
+            print(
+                f"Warning: Signal {s} registration not supported on this platform.",
+                file=sys.stderr,
+            )
 
     print(f"{Fore.CYAN}Starting Asynchronous Trading Bot...{Style.RESET_ALL}")
     start_time = time.monotonic()
@@ -220,7 +263,9 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # This catches Ctrl+C if it happens *before* the signal handler is registered
         # or if the handler fails to stop the loop quickly enough.
-        print(f"\n{Fore.YELLOW}KeyboardInterrupt caught at top level. Exiting immediately.{Style.RESET_ALL}")
+        print(
+            f"\n{Fore.YELLOW}KeyboardInterrupt caught at top level. Exiting immediately.{Style.RESET_ALL}"
+        )
         # Cleanup might not fully complete here
 
     except Exception as top_level_exc:
@@ -239,4 +284,6 @@ if __name__ == "__main__":
             f"{Fore.CYAN}Application shutdown complete. Total runtime: {end_time - start_time:.2f} seconds.{Style.RESET_ALL}"
         )
         if logger:
-            logger.info(f"--- Application Shutdown Complete (Runtime: {end_time - start_time:.2f}s) ---")
+            logger.info(
+                f"--- Application Shutdown Complete (Runtime: {end_time - start_time:.2f}s) ---"
+            )

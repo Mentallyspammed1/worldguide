@@ -89,7 +89,9 @@ def create_directory(path) -> None:
 def rename_files(file_paths, query):
     """Renames files with progress tracking."""
     renamed_paths = []
-    for idx, path in enumerate(tqdm(file_paths, desc=Fore.BLUE + "🔄 Renaming Files", unit="file"), start=1):
+    for idx, path in enumerate(
+        tqdm(file_paths, desc=Fore.BLUE + "🔄 Renaming Files", unit="file"), start=1
+    ):
         try:
             new_name = f"{query.replace(' ', '_')}_{idx}{os.path.splitext(path)[1]}"
             new_path = os.path.join(os.path.dirname(path), new_name)
@@ -145,7 +147,9 @@ def extract_metadata(image_paths):
     metadata_list = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = [executor.submit(get_image_metadata, path) for path in image_paths]
-        for i, future in enumerate(tqdm(futures, desc=Fore.BLUE + "📄 Extracting Metadata", unit="file")):
+        for i, future in enumerate(
+            tqdm(futures, desc=Fore.BLUE + "📄 Extracting Metadata", unit="file")
+        ):
             try:
                 metadata_list.append({"path": image_paths[i], **future.result()})
             except Exception as e:
@@ -183,7 +187,12 @@ def main() -> None:
 
     # Get user inputs with color prompts
     query = input(Fore.CYAN + "⌨  Search Query: " + Fore.WHITE).strip()
-    output_dir = input(Fore.CYAN + "📂 Output Directory (default: downloads): " + Fore.WHITE).strip() or "downloads"
+    output_dir = (
+        input(
+            Fore.CYAN + "📂 Output Directory (default: downloads): " + Fore.WHITE
+        ).strip()
+        or "downloads"
+    )
     output_dir = os.path.join(output_dir, query.replace(" ", "_"))
     create_directory(output_dir)
 
@@ -195,29 +204,50 @@ def main() -> None:
         print_error("Invalid numerical input")
         sys.exit(1)
 
-    adult_filter_off = input(Fore.CYAN + "🔞 Disable adult filter? (y/n): " + Fore.WHITE).lower() == "y"
+    adult_filter_off = (
+        input(Fore.CYAN + "🔞 Disable adult filter? (y/n): " + Fore.WHITE).lower()
+        == "y"
+    )
 
     # Filter inputs
     print_header("🎨 Search Filters")
     filters = {
-        "size": input(Fore.CYAN + "📏 Size (small/medium/large/wallpaper): " + Fore.WHITE).strip(),
-        "layout": input(Fore.CYAN + "🖼  Layout (square/wide/tall): " + Fore.WHITE).strip(),
-        "site": input(Fore.CYAN + "🌐 Site filter (example.com): " + Fore.WHITE).strip(),
-        "location": input(Fore.CYAN + "📍 Location (e.g., 'New York'): " + Fore.WHITE).strip(),
-        "file_type": input(Fore.CYAN + "📁 File Type (jpg/png/gif): " + Fore.WHITE).strip(),
-        "date_filter": input(Fore.CYAN + "📅 Date Range (YYYYMMDD..YYYYMMDD): " + Fore.WHITE).strip(),
+        "size": input(
+            Fore.CYAN + "📏 Size (small/medium/large/wallpaper): " + Fore.WHITE
+        ).strip(),
+        "layout": input(
+            Fore.CYAN + "🖼  Layout (square/wide/tall): " + Fore.WHITE
+        ).strip(),
+        "site": input(
+            Fore.CYAN + "🌐 Site filter (example.com): " + Fore.WHITE
+        ).strip(),
+        "location": input(
+            Fore.CYAN + "📍 Location (e.g., 'New York'): " + Fore.WHITE
+        ).strip(),
+        "file_type": input(
+            Fore.CYAN + "📁 File Type (jpg/png/gif): " + Fore.WHITE
+        ).strip(),
+        "date_filter": input(
+            Fore.CYAN + "📅 Date Range (YYYYMMDD..YYYYMMDD): " + Fore.WHITE
+        ).strip(),
     }
     filter_query = apply_filters(**filters)
 
     # Download process
     try:
-        with tqdm(total=limit, desc=Fore.BLUE + "📥 Downloading Images", unit="img") as pbar:
-            image_paths = download_images(query, output_dir, limit, timeout, adult_filter_off, filter_query)
+        with tqdm(
+            total=limit, desc=Fore.BLUE + "📥 Downloading Images", unit="img"
+        ) as pbar:
+            image_paths = download_images(
+                query, output_dir, limit, timeout, adult_filter_off, filter_query
+            )
             if image_paths:
                 pbar.update(len(image_paths))
 
         if not image_paths:
-            print_error("No images downloaded. Check filters or try different keywords.")
+            print_error(
+                "No images downloaded. Check filters or try different keywords."
+            )
             return
 
         renamed_paths = rename_files(image_paths, query)

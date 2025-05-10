@@ -8,7 +8,16 @@ import json
 import sys
 import math
 from pathlib import Path  # For cleaner path handling
-from typing import Optional, Tuple, Dict, Any, List, Union, Callable, Final  # Added Final
+from typing import (
+    Optional,
+    Tuple,
+    Dict,
+    Any,
+    List,
+    Union,
+    Callable,
+    Final,
+)  # Added Final
 import functools
 
 # --- Load Environment Variables FIRST ---
@@ -35,7 +44,9 @@ if not load_success:
             f"Warning: Found .env file at {dotenv_path}, but load_dotenv() reported failure. Check file permissions or content formatting."
         )
     else:
-        print(f"Warning: .env file not found at {dotenv_path}. Environment variables must be set externally.")
+        print(
+            f"Warning: .env file not found at {dotenv_path}. Environment variables must be set externally."
+        )
 else:
     print(f"Successfully processed .env file check at: {dotenv_path}")
 
@@ -55,14 +66,18 @@ try:
     RESET: Final[str] = Style.RESET_ALL
     COLORAMA_AVAILABLE: Final[bool] = True
 except ImportError:
-    print("Warning: colorama library not found. Neon styling disabled. Consider installing it: `pip install colorama`")
+    print(
+        "Warning: colorama library not found. Neon styling disabled. Consider installing it: `pip install colorama`"
+    )
     # Define empty strings as fallbacks
     NEON_GREEN = NEON_PINK = NEON_CYAN = NEON_RED = NEON_YELLOW = NEON_BLUE = RESET = ""
     COLORAMA_AVAILABLE = False
 
 # --- Logging Configuration ---
 log_format_base: str = "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s"
-logging.basicConfig(level=logging.INFO, format=log_format_base, datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format=log_format_base, datefmt="%Y-%m-%d %H:%M:%S"
+)
 logger: logging.Logger = logging.getLogger(__name__)
 
 # --- Constants ---
@@ -78,7 +93,9 @@ def print_neon_header() -> None:
     """Prints a visually appealing header for the bot."""
     box_width = 70
     print(f"{NEON_CYAN}{'=' * box_width}{RESET}")
-    print(f"{NEON_PINK}{Style.BRIGHT}{'Enhanced RSI/OB Trader Neon Bot - v1.2':^{box_width}}{RESET}")
+    print(
+        f"{NEON_PINK}{Style.BRIGHT}{'Enhanced RSI/OB Trader Neon Bot - v1.2':^{box_width}}{RESET}"
+    )
     print(f"{NEON_CYAN}{'=' * box_width}{RESET}")
 
 
@@ -122,29 +139,57 @@ def print_cycle_divider(timestamp: pd.Timestamp) -> None:
     """Prints a divider indicating the start of a new trading cycle."""
     box_width = 70
     print(f"\n{NEON_BLUE}{'=' * box_width}{RESET}")
-    print(f"{NEON_CYAN}Cycle Start: {timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')}{RESET}")
+    print(
+        f"{NEON_CYAN}Cycle Start: {timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')}{RESET}"
+    )
     print(f"{NEON_BLUE}{'=' * box_width}{RESET}")
 
 
-def display_position_status(position: Dict[str, Any], price_precision: int, amount_precision: int) -> None:
+def display_position_status(
+    position: Dict[str, Any], price_precision: int, amount_precision: int
+) -> None:
     """Displays enhanced position status, including tracked order IDs and warnings."""
     status = position.get("status")
     entry_price = position.get("entry_price")
     quantity = position.get("quantity")
     sl_target = position.get("stop_loss")  # The target SL price
     tp_target = position.get("take_profit")  # The target TP price
-    tsl_active_price = position.get("current_trailing_sl_price")  # Current TSL if active
+    tsl_active_price = position.get(
+        "current_trailing_sl_price"
+    )  # Current TSL if active
     entry_time = position.get("entry_time")
 
     # Format numbers safely, handling None
-    entry_str = f"{entry_price:.{price_precision}f}" if isinstance(entry_price, (float, int)) else "N/A"
-    qty_str = f"{quantity:.{amount_precision}f}" if isinstance(quantity, (float, int)) else "N/A"
-    sl_str = f"{sl_target:.{price_precision}f}" if isinstance(sl_target, (float, int)) else "N/A"
-    tp_str = f"{tp_target:.{price_precision}f}" if isinstance(tp_target, (float, int)) else "N/A"
-    tsl_str = (
-        f" | Active TSL: {tsl_active_price:.{price_precision}f}" if isinstance(tsl_active_price, (float, int)) else ""
+    entry_str = (
+        f"{entry_price:.{price_precision}f}"
+        if isinstance(entry_price, (float, int))
+        else "N/A"
     )
-    time_str = f" | Entered: {entry_time.strftime('%Y-%m-%d %H:%M')}" if isinstance(entry_time, pd.Timestamp) else ""
+    qty_str = (
+        f"{quantity:.{amount_precision}f}"
+        if isinstance(quantity, (float, int))
+        else "N/A"
+    )
+    sl_str = (
+        f"{sl_target:.{price_precision}f}"
+        if isinstance(sl_target, (float, int))
+        else "N/A"
+    )
+    tp_str = (
+        f"{tp_target:.{price_precision}f}"
+        if isinstance(tp_target, (float, int))
+        else "N/A"
+    )
+    tsl_str = (
+        f" | Active TSL: {tsl_active_price:.{price_precision}f}"
+        if isinstance(tsl_active_price, (float, int))
+        else ""
+    )
+    time_str = (
+        f" | Entered: {entry_time.strftime('%Y-%m-%d %H:%M')}"
+        if isinstance(entry_time, pd.Timestamp)
+        else ""
+    )
 
     if status == "long":
         status_color, status_text = NEON_GREEN, "LONG"
@@ -158,7 +203,11 @@ def display_position_status(position: Dict[str, Any], price_precision: int, amou
     )
 
     # Display protection order IDs
-    sl_id, tp_id, oco_id = position.get("sl_order_id"), position.get("tp_order_id"), position.get("oco_order_id")
+    sl_id, tp_id, oco_id = (
+        position.get("sl_order_id"),
+        position.get("tp_order_id"),
+        position.get("oco_order_id"),
+    )
     protection_info = []
     if oco_id:
         protection_info.append(f"OCO ID: {oco_id}")
@@ -177,7 +226,12 @@ def display_position_status(position: Dict[str, Any], price_precision: int, amou
 
 
 def display_market_stats(
-    current_price: float, rsi: float, stoch_k: float, stoch_d: float, atr: Optional[float], price_precision: int
+    current_price: float,
+    rsi: float,
+    stoch_k: float,
+    stoch_d: float,
+    atr: Optional[float],
+    price_precision: int,
 ) -> None:
     """Displays key market indicators."""
     print(f"{NEON_PINK}--- Market Stats ---{RESET}")
@@ -186,12 +240,16 @@ def display_market_stats(
     print(f"{NEON_YELLOW}StochK:{RESET} {stoch_k:.2f}")
     print(f"{NEON_YELLOW}StochD:{RESET} {stoch_d:.2f}")
     if atr is not None:
-        print(f"{NEON_BLUE}ATR:{RESET}    {atr:.{price_precision}f}")  # Use price precision for ATR
+        print(
+            f"{NEON_BLUE}ATR:{RESET}    {atr:.{price_precision}f}"
+        )  # Use price precision for ATR
     print(f"{NEON_PINK}--------------------{RESET}")
 
 
 def display_order_blocks(
-    bullish_ob: Optional[Dict[str, Any]], bearish_ob: Optional[Dict[str, Any]], price_precision: int
+    bullish_ob: Optional[Dict[str, Any]],
+    bearish_ob: Optional[Dict[str, Any]],
+    price_precision: int,
 ) -> None:
     """Displays identified potential order blocks."""
     found = False
@@ -211,8 +269,16 @@ def display_order_blocks(
 
 def display_signal(signal_type: str, direction: str, reason: str) -> None:
     """Displays an entry or exit signal."""
-    color = NEON_GREEN if direction.lower() == "long" else NEON_RED if direction.lower() == "short" else NEON_YELLOW
-    print(f"{color}{Style.BRIGHT}*** {signal_type.upper()} {direction.upper()} SIGNAL ***{RESET}\n   Reason: {reason}")
+    color = (
+        NEON_GREEN
+        if direction.lower() == "long"
+        else NEON_RED
+        if direction.lower() == "short"
+        else NEON_YELLOW
+    )
+    print(
+        f"{color}{Style.BRIGHT}*** {signal_type.upper()} {direction.upper()} SIGNAL ***{RESET}\n   Reason: {reason}"
+    )
 
 
 def neon_sleep_timer(seconds: int) -> None:
@@ -247,7 +313,9 @@ def print_shutdown_message() -> None:
     """Prints a clean shutdown message."""
     box_width = 70
     print(f"\n{NEON_PINK}{'=' * box_width}{RESET}")
-    print(f"{NEON_CYAN}{Style.BRIGHT}{'RSI/OB Trader Bot Stopped - Goodbye!':^{box_width}}{RESET}")
+    print(
+        f"{NEON_CYAN}{Style.BRIGHT}{'RSI/OB Trader Bot Stopped - Goodbye!':^{box_width}}{RESET}"
+    )
     print(f"{NEON_PINK}{'=' * box_width}{RESET}")
 
 
@@ -262,7 +330,9 @@ RETRYABLE_EXCEPTIONS: Tuple[Type[ccxt.NetworkError], ...] = (
 )
 
 
-def retry_api_call(max_retries: int = 3, initial_delay: float = 5.0, backoff_factor: float = 2.0) -> Callable:
+def retry_api_call(
+    max_retries: int = 3, initial_delay: float = 5.0, backoff_factor: float = 2.0
+) -> Callable:
     """Decorator for retrying CCXT API calls on specific network/rate limit errors."""
 
     def decorator(func: Callable) -> Callable:
@@ -290,7 +360,8 @@ def retry_api_call(max_retries: int = 3, initial_delay: float = 5.0, backoff_fac
                 except Exception as e:
                     # Log and re-raise non-retryable exceptions immediately
                     log_error(
-                        f"Non-retryable error in API call '{func.__name__}': {type(e).__name__}: {e}", exc_info=True
+                        f"Non-retryable error in API call '{func.__name__}': {type(e).__name__}: {e}",
+                        exc_info=True,
                     )
                     raise
             # This part should ideally be unreachable if max_retries >= 0
@@ -311,7 +382,9 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
     log_info(f"Loading configuration from '{filename}'...")
     config_path = Path(filename)
     if not config_path.exists():
-        log_error(f"CRITICAL: Configuration file '{filename}' not found. Please create it.")
+        log_error(
+            f"CRITICAL: Configuration file '{filename}' not found. Please create it."
+        )
         sys.exit(1)
 
     try:
@@ -334,9 +407,13 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
                 return  # Skip further checks if missing and not required
             val = cfg[key]
             if not isinstance(val, types):
-                errors.append(f"Key '{key}': Expected type {types}, but got {type(val).__name__}.")
+                errors.append(
+                    f"Key '{key}': Expected type {types}, but got {type(val).__name__}."
+                )
             elif condition and not condition(val):
-                errors.append(f"Key '{key}' (value: {val}) failed validation condition.")
+                errors.append(
+                    f"Key '{key}' (value: {val}) failed validation condition."
+                )
 
         # Core settings
         validate("exchange_id", str, lambda x: len(x) > 0)
@@ -385,19 +462,33 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
         validate("enable_trailing_stop", bool)
         needs_atr = cfg.get("enable_atr_sl_tp") or cfg.get("enable_trailing_stop")
         if needs_atr:
-            validate("atr_length", int, lambda x: x > 0, required=True)  # Required if ATR features used
+            validate(
+                "atr_length", int, lambda x: x > 0, required=True
+            )  # Required if ATR features used
 
         if cfg.get("enable_atr_sl_tp"):
             validate("atr_sl_multiplier", (float, int), lambda x: x > 0, required=True)
             validate("atr_tp_multiplier", (float, int), lambda x: x > 0, required=True)
         else:  # Fixed % SL/TP required if ATR SL/TP is disabled
-            validate("stop_loss_percentage", (float, int), lambda x: x > 0, required=True)
-            validate("take_profit_percentage", (float, int), lambda x: x > 0, required=True)
+            validate(
+                "stop_loss_percentage", (float, int), lambda x: x > 0, required=True
+            )
+            validate(
+                "take_profit_percentage", (float, int), lambda x: x > 0, required=True
+            )
 
         if cfg.get("enable_trailing_stop"):
-            validate("trailing_stop_atr_multiplier", (float, int), lambda x: x > 0, required=True)
             validate(
-                "trailing_stop_activation_atr_multiplier", (float, int), lambda x: x >= 0, required=True
+                "trailing_stop_atr_multiplier",
+                (float, int),
+                lambda x: x > 0,
+                required=True,
+            )
+            validate(
+                "trailing_stop_activation_atr_multiplier",
+                (float, int),
+                lambda x: x >= 0,
+                required=True,
             )  # Can be 0 to activate immediately
 
         # Optional Retry settings
@@ -408,7 +499,9 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
         # --- Report Validation Results ---
         if errors:
             error_str = "\n - ".join(errors)
-            log_error(f"CRITICAL: Configuration validation failed with {len(errors)} errors:\n - {error_str}")
+            log_error(
+                f"CRITICAL: Configuration validation failed with {len(errors)} errors:\n - {error_str}"
+            )
             sys.exit(1)
         else:
             log_info("Configuration validation passed.")
@@ -420,7 +513,10 @@ def load_config(filename: str = CONFIG_FILE) -> Dict[str, Any]:
         )
         sys.exit(1)
     except Exception as e:
-        log_error(f"CRITICAL: Unexpected error loading or validating config file '{filename}': {e}", exc_info=True)
+        log_error(
+            f"CRITICAL: Unexpected error loading or validating config file '{filename}': {e}",
+            exc_info=True,
+        )
         sys.exit(1)
 
 
@@ -439,7 +535,9 @@ exchange_id: str = config["exchange_id"].lower()
 # Construct environment variable names dynamically based on exchange_id
 api_key_env: str = f"{exchange_id.upper()}_API_KEY"
 secret_key_env: str = f"{exchange_id.upper()}_SECRET_KEY"
-passphrase_env: str = f"{exchange_id.upper()}_PASSPHRASE"  # Common for exchanges like KuCoin, Bybit V3
+passphrase_env: str = (
+    f"{exchange_id.upper()}_PASSPHRASE"  # Common for exchanges like KuCoin, Bybit V3
+)
 
 api_key: Optional[str] = os.getenv(api_key_env)
 secret: Optional[str] = os.getenv(secret_key_env)
@@ -462,9 +560,18 @@ try:
     # Dynamically guess market type based on symbol format for defaultType
     symbol_upper = config["symbol"].upper()
     # More robust check for perpetual swaps/futures
-    is_perp = ":" in symbol_upper or "PERP" in symbol_upper or "SWAP" in symbol_upper or "-P" in symbol_upper
-    market_type_guess = "swap" if is_perp else "spot"  # Default to spot if not clearly a derivative
-    log_info(f"Guessed market type from symbol '{config['symbol']}': {market_type_guess} (used for `defaultType`)")
+    is_perp = (
+        ":" in symbol_upper
+        or "PERP" in symbol_upper
+        or "SWAP" in symbol_upper
+        or "-P" in symbol_upper
+    )
+    market_type_guess = (
+        "swap" if is_perp else "spot"
+    )  # Default to spot if not clearly a derivative
+    log_info(
+        f"Guessed market type from symbol '{config['symbol']}': {market_type_guess} (used for `defaultType`)"
+    )
 
     # Base configuration for ccxt exchange instance
     exchange_config: Dict[str, Any] = {
@@ -494,9 +601,15 @@ try:
     log_info(f"Successfully connected to {exchange.name} ({exchange_id}).")
     log_info(f"Using Market Type: {exchange.options.get('defaultType')}")
     log_info(f"Exchange supports OCO orders: {exchange.has.get('oco', False)}")
-    log_info(f"Exchange supports fetchPositions: {exchange.has.get('fetchPositions', False)}")
-    log_info(f"Exchange supports createStopMarketOrder: {exchange.has.get('createStopMarketOrder', False)}")
-    log_info(f"Exchange supports createStopLimitOrder: {exchange.has.get('createStopLimitOrder', False)}")
+    log_info(
+        f"Exchange supports fetchPositions: {exchange.has.get('fetchPositions', False)}"
+    )
+    log_info(
+        f"Exchange supports createStopMarketOrder: {exchange.has.get('createStopMarketOrder', False)}"
+    )
+    log_info(
+        f"Exchange supports createStopLimitOrder: {exchange.has.get('createStopLimitOrder', False)}"
+    )
 
 
 except AttributeError:
@@ -511,7 +624,10 @@ except ccxt.ExchangeNotAvailable as e:
     log_error(f"CRITICAL: Exchange {exchange_id} is currently unavailable. Error: {e}")
     sys.exit(1)
 except Exception as e:  # Catch potential errors during load_markets too
-    log_error(f"CRITICAL: Unexpected error during exchange setup or market loading: {e}", exc_info=True)
+    log_error(
+        f"CRITICAL: Unexpected error during exchange setup or market loading: {e}",
+        exc_info=True,
+    )
     sys.exit(1)
 
 # --- Trading Parameters & Validation ---
@@ -531,7 +647,11 @@ try:
     # Validate symbol exists on the loaded markets
     if symbol not in exchange.markets:
         available_symbols = list(exchange.markets.keys())
-        hint = f"Available examples: {available_symbols[:10]}" if available_symbols else "No markets loaded?"
+        hint = (
+            f"Available examples: {available_symbols[:10]}"
+            if available_symbols
+            else "No markets loaded?"
+        )
         log_error(f"CRITICAL: Symbol '{symbol}' not found on {exchange.name}. {hint}")
         sys.exit(1)
     market_info = exchange.markets[symbol]
@@ -539,8 +659,14 @@ try:
     # Validate timeframe is supported
     if timeframe not in exchange.timeframes:
         available_tfs = list(exchange.timeframes.keys())
-        hint = f"Available timeframes: {available_tfs}" if available_tfs else "No timeframes listed?"
-        log_error(f"CRITICAL: Timeframe '{timeframe}' not supported by {exchange.name}. {hint}")
+        hint = (
+            f"Available timeframes: {available_tfs}"
+            if available_tfs
+            else "No timeframes listed?"
+        )
+        log_error(
+            f"CRITICAL: Timeframe '{timeframe}' not supported by {exchange.name}. {hint}"
+        )
         sys.exit(1)
 
     log_info(f"Validated Symbol: {symbol}, Timeframe: {timeframe}")
@@ -552,11 +678,15 @@ try:
     if price_prec is not None:
         # Use ROUND mode, some exchanges might require TRUNCATE (check precisionMode)
         price_precision_digits = int(
-            exchange.decimal_to_precision(price_prec, ccxt.ROUND, counting_mode=exchange.precisionMode)
+            exchange.decimal_to_precision(
+                price_prec, ccxt.ROUND, counting_mode=exchange.precisionMode
+            )
         )
     if amount_prec is not None:
         amount_precision_digits = int(
-            exchange.decimal_to_precision(amount_prec, ccxt.ROUND, counting_mode=exchange.precisionMode)
+            exchange.decimal_to_precision(
+                amount_prec, ccxt.ROUND, counting_mode=exchange.precisionMode
+            )
         )
 
     # Extract Tick Size (smallest price change)
@@ -567,8 +697,12 @@ try:
         min_tick = 1 / (10**price_precision_digits)
     # Ensure min_tick is positive
     if min_tick <= 0:
-        min_tick = 1 / (10**price_precision_digits) if price_precision_digits >= 0 else 0.01  # Safe default
-        log_warning(f"Could not determine valid min_tick from market info, using calculated value: {min_tick}")
+        min_tick = (
+            1 / (10**price_precision_digits) if price_precision_digits >= 0 else 0.01
+        )  # Safe default
+        log_warning(
+            f"Could not determine valid min_tick from market info, using calculated value: {min_tick}"
+        )
 
     # Extract Limits
     min_amount = market_info.get("limits", {}).get("amount", {}).get("min")
@@ -591,7 +725,9 @@ try:
         )
 
     # Log extracted parameters
-    log_info(f"Market Info | Base: {base_currency}, Quote: {quote_currency}, Contract Market: {is_contract_market}")
+    log_info(
+        f"Market Info | Base: {base_currency}, Quote: {quote_currency}, Contract Market: {is_contract_market}"
+    )
     log_info(
         f"Precision   | Price: {price_precision_digits} decimals (Tick Size: {min_tick:.{price_precision_digits + 2}f}), Amount: {amount_precision_digits} decimals"
     )  # Show tick size better
@@ -602,11 +738,15 @@ try:
 
 except KeyError as e:
     log_error(
-        f"CRITICAL: Error accessing market info for {symbol}. Market data might be incomplete. Key: {e}", exc_info=True
+        f"CRITICAL: Error accessing market info for {symbol}. Market data might be incomplete. Key: {e}",
+        exc_info=True,
     )
     sys.exit(1)
 except Exception as e:
-    log_error(f"CRITICAL: Error processing symbol/timeframe/precision details: {e}", exc_info=True)
+    log_error(
+        f"CRITICAL: Error processing symbol/timeframe/precision details: {e}",
+        exc_info=True,
+    )
     sys.exit(1)
 
 # --- Assign Config Variables (with type safety and defaults) ---
@@ -629,7 +769,9 @@ risk_percentage: float = float(config["risk_percentage"])  # Ensure float
 enable_atr_sl_tp: bool = config["enable_atr_sl_tp"]
 enable_trailing_stop: bool = config["enable_trailing_stop"]
 needs_atr: bool = enable_atr_sl_tp or enable_trailing_stop  # Convenience flag
-atr_length: int = config.get("atr_length", 14) if needs_atr else 0  # Default ATR length if needed
+atr_length: int = (
+    config.get("atr_length", 14) if needs_atr else 0
+)  # Default ATR length if needed
 
 # Conditional SL/TP multipliers
 if enable_atr_sl_tp:
@@ -646,7 +788,9 @@ else:
 # Conditional TSL multipliers
 if enable_trailing_stop:
     trailing_stop_atr_multiplier: float = float(config["trailing_stop_atr_multiplier"])
-    trailing_stop_activation_atr_multiplier: float = float(config["trailing_stop_activation_atr_multiplier"])
+    trailing_stop_activation_atr_multiplier: float = float(
+        config["trailing_stop_activation_atr_multiplier"]
+    )
 else:
     trailing_stop_atr_multiplier: float = 0.0  # Not used
     trailing_stop_activation_atr_multiplier: float = 0.0  # Not used
@@ -658,8 +802,12 @@ ob_lookback: int = config["ob_lookback"]
 # Volume Confirmation Settings
 entry_volume_confirmation_enabled: bool = config["entry_volume_confirmation_enabled"]
 if entry_volume_confirmation_enabled:
-    entry_volume_ma_length: int = int(config.get("entry_volume_ma_length", 20))  # Default MA length
-    entry_volume_multiplier: float = float(config.get("entry_volume_multiplier", 1.2))  # Default multiplier
+    entry_volume_ma_length: int = int(
+        config.get("entry_volume_ma_length", 20)
+    )  # Default MA length
+    entry_volume_multiplier: float = float(
+        config.get("entry_volume_multiplier", 1.2)
+    )  # Default multiplier
 else:
     entry_volume_ma_length: int = 0
     entry_volume_multiplier: float = 0.0
@@ -688,12 +836,16 @@ else:
             log_info("Live trading confirmed by user.")
         else:
             # Non-interactive environment (e.g., docker, systemd)
-            log_warning("Non-interactive mode detected. Assuming confirmation for live trading.")
+            log_warning(
+                "Non-interactive mode detected. Assuming confirmation for live trading."
+            )
             log_warning("Pausing for 5 seconds before starting...")
             time.sleep(5)
     except EOFError:
         # Handle case where input is expected but not possible (e.g., piped input)
-        log_error("Cannot get user confirmation in this environment. Exiting to prevent accidental live trading.")
+        log_error(
+            "Cannot get user confirmation in this environment. Exiting to prevent accidental live trading."
+        )
         sys.exit(1)
 
 # --- Position State ---
@@ -729,12 +881,20 @@ def save_position_state(filename: str = POSITION_STATE_FILE) -> None:
             state_to_save["entry_time"] = state_to_save["entry_time"].isoformat()
 
         with open(filename, "w") as f:
-            json.dump(state_to_save, f, indent=4, default=str)  # Add default=str as fallback
+            json.dump(
+                state_to_save, f, indent=4, default=str
+            )  # Add default=str as fallback
         log_debug(f"Position state successfully saved to '{filename}'")
     except IOError as e:
-        log_error(f"Error saving position state to '{filename}': File I/O error - {e}", exc_info=True)
+        log_error(
+            f"Error saving position state to '{filename}': File I/O error - {e}",
+            exc_info=True,
+        )
     except TypeError as e:
-        log_error(f"Error saving position state to '{filename}': Serialization error - {e}", exc_info=True)
+        log_error(
+            f"Error saving position state to '{filename}': Serialization error - {e}",
+            exc_info=True,
+        )
     except Exception as e:
         log_error(f"Unexpected error saving position state: {e}", exc_info=True)
 
@@ -757,20 +917,28 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
 
         log_info(f"State file '{filename}' found. Validating content...")
         issues_found: List[str] = []
-        validated_state: Dict[str, Any] = position_default_structure.copy()  # Use a temporary dict for validation
+        validated_state: Dict[str, Any] = (
+            position_default_structure.copy()
+        )  # Use a temporary dict for validation
 
         # Validate each key from the loaded state against the default structure
         for key, loaded_value in loaded_state.items():
             if key in validated_state:
-                default_value = validated_state[key]  # Get default value for type comparison
-                expected_type = type(default_value) if default_value is not None else None
+                default_value = validated_state[
+                    key
+                ]  # Get default value for type comparison
+                expected_type = (
+                    type(default_value) if default_value is not None else None
+                )
 
                 # Handle timestamp deserialization separately
                 if key == "entry_time" and isinstance(loaded_value, str):
                     try:
                         ts = pd.Timestamp(loaded_value)
                         # Ensure timezone is UTC, localize if naive
-                        validated_state[key] = ts.tz_convert("UTC") if ts.tzinfo else ts.tz_localize("UTC")
+                        validated_state[key] = (
+                            ts.tz_convert("UTC") if ts.tzinfo else ts.tz_localize("UTC")
+                        )
                         continue  # Skip normal type check for timestamp
                     except ValueError:
                         issues_found.append(
@@ -783,23 +951,34 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
                 if expected_type is None and loaded_value is not None:
                     # Attempt to infer type or just assign if structure allows None
                     validated_state[key] = loaded_value  # Be lenient if default is None
-                    log_debug(f"Key '{key}' default is None, loaded value '{loaded_value}' assigned.")
+                    log_debug(
+                        f"Key '{key}' default is None, loaded value '{loaded_value}' assigned."
+                    )
                     continue
 
                 # Check type consistency (allow int to be loaded into float fields)
                 if loaded_value is not None and expected_type is not None:
-                    allow_int_for_float = expected_type is float and isinstance(loaded_value, int)
-                    if not isinstance(loaded_value, expected_type) and not allow_int_for_float:
+                    allow_int_for_float = expected_type is float and isinstance(
+                        loaded_value, int
+                    )
+                    if (
+                        not isinstance(loaded_value, expected_type)
+                        and not allow_int_for_float
+                    ):
                         issues_found.append(
                             f"Key '{key}': Type mismatch. Expected {expected_type.__name__}, got {type(loaded_value).__name__}. Resetting to default."
                         )
                         # Keep the default value in validated_state for this key
                         continue
                     # Assign validated value (convert int to float if needed)
-                    validated_state[key] = float(loaded_value) if allow_int_for_float else loaded_value
+                    validated_state[key] = (
+                        float(loaded_value) if allow_int_for_float else loaded_value
+                    )
 
             else:
-                issues_found.append(f"Ignoring unknown key '{key}' found in state file.")
+                issues_found.append(
+                    f"Ignoring unknown key '{key}' found in state file."
+                )
 
         # Check for essential data consistency if a position is supposedly active
         if validated_state.get("status") is not None:
@@ -812,24 +991,36 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
                 issues_found.append(
                     f"Active position ('{validated_state.get('status')}') found, but essential data (entry_price, quantity, stop_loss, take_profit) is missing or invalid. Resetting status to None."
                 )
-                validated_state["status"] = None  # Invalidate the position if core data is bad
+                validated_state["status"] = (
+                    None  # Invalidate the position if core data is bad
+                )
 
         # Report issues and update global state
         if issues_found:
-            log_warning("Issues found during state file validation:\n - " + "\n - ".join(issues_found))
-            log_warning("Using validated state with defaults applied for problematic keys.")
+            log_warning(
+                "Issues found during state file validation:\n - "
+                + "\n - ".join(issues_found)
+            )
+            log_warning(
+                "Using validated state with defaults applied for problematic keys."
+            )
 
         position = validated_state  # Update the global state with the validated data
 
         if position["status"]:
             log_info("Position state loaded and validated successfully.")
-            display_position_status(position, price_precision_digits, amount_precision_digits)
+            display_position_status(
+                position, price_precision_digits, amount_precision_digits
+            )
         else:
-            log_info("Loaded state file, but no active position found or state was invalidated.")
+            log_info(
+                "Loaded state file, but no active position found or state was invalidated."
+            )
 
     except json.JSONDecodeError as e:
         log_error(
-            f"Error decoding JSON from state file '{filename}': {e}. Starting with a fresh state.", exc_info=False
+            f"Error decoding JSON from state file '{filename}': {e}. Starting with a fresh state.",
+            exc_info=False,
         )
         position = position_default_structure.copy()
     except Exception as e:
@@ -842,13 +1033,17 @@ def load_position_state(filename: str = POSITION_STATE_FILE) -> None:
 
 # --- Data Fetching & Indicator Calculation ---
 @api_retry_decorator
-def fetch_ohlcv_data(exch: ccxt.Exchange, sym: str, tf: str, limit: int) -> Optional[pd.DataFrame]:
+def fetch_ohlcv_data(
+    exch: ccxt.Exchange, sym: str, tf: str, limit: int
+) -> Optional[pd.DataFrame]:
     """Fetches, cleans, and returns OHLCV data as a Pandas DataFrame."""
     log_debug(f"Fetching {limit} OHLCV candles for {sym} ({tf})...")
     try:
         # Double-check symbol existence before fetching
         if sym not in exch.markets:
-            log_error(f"Symbol '{sym}' not found in exchange markets during OHLCV fetch.")
+            log_error(
+                f"Symbol '{sym}' not found in exchange markets during OHLCV fetch."
+            )
             return None
 
         ohlcv = exch.fetch_ohlcv(sym, tf, limit=limit)
@@ -856,7 +1051,9 @@ def fetch_ohlcv_data(exch: ccxt.Exchange, sym: str, tf: str, limit: int) -> Opti
             log_warning(f"No OHLCV data returned from exchange for {sym} ({tf}).")
             return None
 
-        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
         # Convert timestamp to datetime objects (UTC)
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
         # Set timestamp as the index
@@ -869,7 +1066,9 @@ def fetch_ohlcv_data(exch: ccxt.Exchange, sym: str, tf: str, limit: int) -> Opti
         df.dropna(subset=numeric_cols, inplace=True)
 
         if df.empty:
-            log_warning(f"DataFrame became empty after cleaning OHLCV data for {sym} ({tf}).")
+            log_warning(
+                f"DataFrame became empty after cleaning OHLCV data for {sym} ({tf})."
+            )
             return None
 
         log_debug(f"Successfully fetched and cleaned {len(df)} candles for {sym}.")
@@ -883,7 +1082,9 @@ def fetch_ohlcv_data(exch: ccxt.Exchange, sym: str, tf: str, limit: int) -> Opti
     except Exception as e:
         # Avoid logging retryable exceptions twice if they slip through
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected error fetching OHLCV data for {sym}: {e}", exc_info=True)
+            log_error(
+                f"Unexpected error fetching OHLCV data for {sym}: {e}", exc_info=True
+            )
         return None  # Return None on any error
 
 
@@ -948,7 +1149,9 @@ def calculate_technical_indicators(
                 vol_ma_col_name = f"VOL_MA_{vol_ma_l}"
                 # Ensure min_periods is reasonable (e.g., at least half the window)
                 min_p = max(1, vol_ma_l // 2)
-                df_ind[vol_ma_col_name] = df_ind["volume"].rolling(window=vol_ma_l, min_periods=min_p).mean()
+                df_ind[vol_ma_col_name] = (
+                    df_ind["volume"].rolling(window=vol_ma_l, min_periods=min_p).mean()
+                )
                 indicator_columns_added.append(vol_ma_col_name)
             else:
                 # This was checked earlier, but log warning if volume somehow disappeared
@@ -956,22 +1159,30 @@ def calculate_technical_indicators(
 
         # Drop rows with NaN values *only* in the newly added indicator columns
         # This preserves earlier data rows that might be needed for lookbacks
-        valid_indicator_cols = [col for col in indicator_columns_added if col in df_ind.columns]
+        valid_indicator_cols = [
+            col for col in indicator_columns_added if col in df_ind.columns
+        ]
         if valid_indicator_cols:
             initial_rows = len(df_ind)
             df_ind.dropna(subset=valid_indicator_cols, inplace=True)
             rows_after_na = len(df_ind)
             if rows_after_na < initial_rows:
-                log_debug(f"Dropped {initial_rows - rows_after_na} rows due to NaN in indicators.")
+                log_debug(
+                    f"Dropped {initial_rows - rows_after_na} rows due to NaN in indicators."
+                )
         else:
             log_warning("No valid indicator columns were generated or found.")
             return None  # Should not happen if RSI/Stoch always calculated
 
         if df_ind.empty:
-            log_warning("DataFrame became empty after dropping rows with NaN indicators.")
+            log_warning(
+                "DataFrame became empty after dropping rows with NaN indicators."
+            )
             return None
 
-        log_debug(f"Indicator calculation complete. Resulting DataFrame rows: {len(df_ind)}")
+        log_debug(
+            f"Indicator calculation complete. Resulting DataFrame rows: {len(df_ind)}"
+        )
         return df_ind
 
     except Exception as e:
@@ -997,16 +1208,24 @@ def identify_potential_order_block(
         return None, None
     # Need at least lookback + 2 candles (1 for OB, 1 for imbalance, lookback for avg vol)
     if len(df) < lookback + 2:
-        log_debug(f"OB Detection: Not enough data ({len(df)} rows) for lookback ({lookback}) + 2 candles.")
+        log_debug(
+            f"OB Detection: Not enough data ({len(df)} rows) for lookback ({lookback}) + 2 candles."
+        )
         return None, None
 
     try:
         # Calculate average volume over the lookback period (excluding the latest, possibly incomplete candle)
         df_completed = df.iloc[:-1]  # Use only completed candles for volume average
         avg_volume = 0.0
-        min_vol_periods = max(1, lookback // 2)  # Require at least half the lookback period for avg calc
+        min_vol_periods = max(
+            1, lookback // 2
+        )  # Require at least half the lookback period for avg calc
         if len(df_completed) >= min_vol_periods:
-            rolling_volume = df_completed["volume"].rolling(window=lookback, min_periods=min_vol_periods).mean()
+            rolling_volume = (
+                df_completed["volume"]
+                .rolling(window=lookback, min_periods=min_vol_periods)
+                .mean()
+            )
             if not rolling_volume.empty and pd.notna(rolling_volume.iloc[-1]):
                 avg_volume = rolling_volume.iloc[-1]
 
@@ -1017,18 +1236,26 @@ def identify_potential_order_block(
                 avg_volume = mean_vol
 
         # Define the volume threshold for the imbalance candle
-        volume_threshold = avg_volume * vol_thresh_mult if avg_volume > 0 else float("inf")  # Avoid threshold=0
+        volume_threshold = (
+            avg_volume * vol_thresh_mult if avg_volume > 0 else float("inf")
+        )  # Avoid threshold=0
         log_debug(
             f"OB Analysis | Lookback: {lookback}, Avg Volume (completed candles): {avg_volume:.2f}, Volume Threshold: {volume_threshold:.2f}"
         )
 
         # Search backwards for potential OBs (limit search depth for performance)
         # Search up to ~3 times the lookback period, but not exceeding available data
-        search_depth = min(len(df) - 2, lookback * 3)  # -2 because we need OB candle (i-1) and Imbalance candle (i)
-        search_start_index = len(df) - 2  # Start from the second to last candle (potential imbalance candle)
+        search_depth = min(
+            len(df) - 2, lookback * 3
+        )  # -2 because we need OB candle (i-1) and Imbalance candle (i)
+        search_start_index = (
+            len(df) - 2
+        )  # Start from the second to last candle (potential imbalance candle)
         search_end_index = max(0, search_start_index - search_depth)
 
-        for i in range(search_start_index, search_end_index - 1, -1):  # Iterate backwards
+        for i in range(
+            search_start_index, search_end_index - 1, -1
+        ):  # Iterate backwards
             if i < 1:
                 break  # Need index i and i-1
 
@@ -1036,7 +1263,9 @@ def identify_potential_order_block(
                 imbalance_candle = df.iloc[i]
                 ob_candidate_candle = df.iloc[i - 1]
             except IndexError:
-                log_warning(f"OB Search: IndexError at index {i} or {i - 1}. Stopping search.")
+                log_warning(
+                    f"OB Search: IndexError at index {i} or {i - 1}. Stopping search."
+                )
                 break  # Should not happen with loop bounds, but safety check
 
             # Skip if data is missing in either candle
@@ -1060,14 +1289,22 @@ def identify_potential_order_block(
             )
 
             # 3. OB Candidate Candle Type (Opposite of imbalance direction)
-            ob_is_bearish = ob_candidate_candle["close"] < ob_candidate_candle["open"]  # Down candle
-            ob_is_bullish = ob_candidate_candle["close"] > ob_candidate_candle["open"]  # Up candle
+            ob_is_bearish = (
+                ob_candidate_candle["close"] < ob_candidate_candle["open"]
+            )  # Down candle
+            ob_is_bullish = (
+                ob_candidate_candle["close"] > ob_candidate_candle["open"]
+            )  # Up candle
 
             # 4. Imbalance Candle "Sweeps" Liquidity (optional but common pattern)
             # Bullish: Imbalance low goes below OB low
-            imbalance_sweeps_ob_low = imbalance_candle["low"] < ob_candidate_candle["low"]
+            imbalance_sweeps_ob_low = (
+                imbalance_candle["low"] < ob_candidate_candle["low"]
+            )
             # Bearish: Imbalance high goes above OB high
-            imbalance_sweeps_ob_high = imbalance_candle["high"] > ob_candidate_candle["high"]
+            imbalance_sweeps_ob_high = (
+                imbalance_candle["high"] > ob_candidate_candle["high"]
+            )
 
             # --- Check for Bullish OB ---
             # Needs: Bearish OB candle, followed by strong Bullish Imbalance candle (high vol, sweeps low)
@@ -1123,7 +1360,9 @@ def identify_potential_order_block(
 
 # --- Position Sizing ---
 @api_retry_decorator  # Apply retry logic to balance fetching within this function
-def calculate_position_size(exch: ccxt.Exchange, sym: str, entry: float, sl: float, risk_pct: float) -> Optional[float]:
+def calculate_position_size(
+    exch: ccxt.Exchange, sym: str, entry: float, sl: float, risk_pct: float
+) -> Optional[float]:
     """
     Calculates the position size in the base currency based on risk percentage,
     available balance, entry price, and stop-loss price.
@@ -1142,10 +1381,14 @@ def calculate_position_size(exch: ccxt.Exchange, sym: str, entry: float, sl: flo
 
     # --- Input Validation ---
     if not (0 < risk_pct < 1):
-        log_error(f"Invalid risk percentage: {risk_pct}. Must be between 0 and 1 (exclusive).")
+        log_error(
+            f"Invalid risk percentage: {risk_pct}. Must be between 0 and 1 (exclusive)."
+        )
         return None
     if entry <= 0 or sl <= 0:
-        log_error(f"Invalid entry or SL price for size calculation: Entry={entry}, SL={sl}. Must be positive.")
+        log_error(
+            f"Invalid entry or SL price for size calculation: Entry={entry}, SL={sl}. Must be positive."
+        )
         return None
     price_difference = abs(entry - sl)
     # Ensure SL is not too close to entry (avoid division by zero or tiny number)
@@ -1169,13 +1412,24 @@ def calculate_position_size(exch: ccxt.Exchange, sym: str, entry: float, sl: flo
 
         # Try common locations for free quote currency balance
         if quote_currency:
-            if quote_currency in balance_info and isinstance(balance_info[quote_currency], dict):
-                available_balance_quote = float(balance_info[quote_currency].get("free", 0.0))
+            if quote_currency in balance_info and isinstance(
+                balance_info[quote_currency], dict
+            ):
+                available_balance_quote = float(
+                    balance_info[quote_currency].get("free", 0.0)
+                )
                 balance_source_info = f"['{quote_currency}']['free']"
                 # Fallback to 'total' if 'free' is zero but 'total' exists and is positive (might indicate isolated margin?)
-                if available_balance_quote == 0.0 and balance_info[quote_currency].get("total", 0.0) > 0:
-                    available_balance_quote = float(balance_info[quote_currency]["total"])
-                    balance_source_info = f"['{quote_currency}']['total'] (used as 'free' was zero)"
+                if (
+                    available_balance_quote == 0.0
+                    and balance_info[quote_currency].get("total", 0.0) > 0
+                ):
+                    available_balance_quote = float(
+                        balance_info[quote_currency]["total"]
+                    )
+                    balance_source_info = (
+                        f"['{quote_currency}']['total'] (used as 'free' was zero)"
+                    )
                     log_warning(
                         f"Using 'total' {quote_currency} balance ({available_balance_quote}), as 'free' was zero."
                     )
@@ -1185,7 +1439,9 @@ def calculate_position_size(exch: ccxt.Exchange, sym: str, entry: float, sl: flo
                 and quote_currency in balance_info["free"]
             ):
                 # Some exchanges structure it as balance['free']['USDT']
-                available_balance_quote = float(balance_info["free"].get(quote_currency, 0.0))
+                available_balance_quote = float(
+                    balance_info["free"].get(quote_currency, 0.0)
+                )
                 balance_source_info = f"['free']['{quote_currency}']"
             elif "info" in balance_info and isinstance(balance_info["info"], dict):
                 # Fallback: Check raw 'info' field for common patterns (exchange-specific)
@@ -1200,9 +1456,7 @@ def calculate_position_size(exch: ccxt.Exchange, sym: str, entry: float, sl: flo
                             available_balance_quote = float(
                                 asset_info.get("availableToWithdraw", 0.0)
                             )  # Or 'walletBalance'? Check Bybit docs
-                            balance_source_info = (
-                                f"['info']['result']['list'][coin={quote_currency}]['availableToWithdraw'] (Bybit UMA?)"
-                            )
+                            balance_source_info = f"['info']['result']['list'][coin={quote_currency}]['availableToWithdraw'] (Bybit UMA?)"
                             break
                 # Add more exchange-specific checks here if needed based on `balance_info['info']` structure
 
@@ -1276,12 +1530,16 @@ def calculate_position_size(exch: ccxt.Exchange, sym: str, entry: float, sl: flo
     # Handle potential errors during balance fetch or calculations
     except (ccxt.AuthenticationError, ccxt.ExchangeError) as e:
         # These might be caught by the decorator, but handle them here too for clarity
-        log_error(f"Error calculating position size due to exchange communication issue: {e}")
+        log_error(
+            f"Error calculating position size due to exchange communication issue: {e}"
+        )
         return None
     except Exception as e:
         # Catch any other unexpected errors
         if not isinstance(e, RETRYABLE_EXCEPTIONS):  # Avoid double logging
-            log_error(f"Unexpected error during position size calculation: {e}", exc_info=True)
+            log_error(
+                f"Unexpected error during position size calculation: {e}", exc_info=True
+            )
         return None
 
 
@@ -1294,7 +1552,9 @@ def cancel_order_with_retry(exch: ccxt.Exchange, order_id: str, sym: str) -> boo
     succeeded or the order was already not found, False otherwise.
     """
     if not order_id or not isinstance(order_id, str):
-        log_debug(f"Invalid order ID provided for cancellation: '{order_id}'. Skipping.")
+        log_debug(
+            f"Invalid order ID provided for cancellation: '{order_id}'. Skipping."
+        )
         return False  # Invalid ID cannot be cancelled
 
     log_info(f"Attempting to cancel order ID {order_id} for symbol {sym}...")
@@ -1311,7 +1571,9 @@ def cancel_order_with_retry(exch: ccxt.Exchange, order_id: str, sym: str) -> boo
         return True
     except ccxt.OrderNotFound:
         # This is not an error in our context; the order is already gone.
-        log_info(f"Order {order_id} not found on the exchange. Assumed already closed or cancelled.")
+        log_info(
+            f"Order {order_id} not found on the exchange. Assumed already closed or cancelled."
+        )
         return True
     except (ccxt.InvalidOrder, ccxt.ExchangeError) as e:
         # Log specific ccxt errors but return False as cancellation failed
@@ -1321,7 +1583,9 @@ def cancel_order_with_retry(exch: ccxt.Exchange, order_id: str, sym: str) -> boo
     # Catch unexpected errors
     except Exception as e:
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected error cancelling order {order_id}: {e}", exc_info=True)
+            log_error(
+                f"Unexpected error cancelling order {order_id}: {e}", exc_info=True
+            )
         return False  # Return False on unexpected errors
 
 
@@ -1337,24 +1601,35 @@ def place_market_order(
     Places a market order with retry logic, simulation handling, and basic error checking.
     Returns the order dictionary from ccxt if successful, None otherwise.
     """
-    global base_currency, quote_currency, amount_precision_digits, price_precision_digits, is_contract_market
+    global \
+        base_currency, \
+        quote_currency, \
+        amount_precision_digits, \
+        price_precision_digits, \
+        is_contract_market
 
     # --- Input Validation ---
     if side not in ["buy", "sell"]:
         log_error(f"Invalid side '{side}' for market order. Must be 'buy' or 'sell'.")
         return None
     if not isinstance(amount, (float, int)) or amount <= 0:
-        log_error(f"Invalid amount '{amount}' for market order. Must be a positive number.")
+        log_error(
+            f"Invalid amount '{amount}' for market order. Must be a positive number."
+        )
         return None
 
     # --- Format Amount ---
     try:
         amount_formatted = float(exch.amount_to_precision(sym, amount))
         if amount_formatted <= 0:
-            log_error(f"Amount {amount} formatted to {amount_formatted}, which is <= 0. Cannot place order.")
+            log_error(
+                f"Amount {amount} formatted to {amount_formatted}, which is <= 0. Cannot place order."
+            )
             return None
     except Exception as fmt_e:
-        log_error(f"Failed to format order amount {amount} using exchange precision rules: {fmt_e}")
+        log_error(
+            f"Failed to format order amount {amount} using exchange precision rules: {fmt_e}"
+        )
         return None
 
     # --- Prepare Order Parameters ---
@@ -1365,7 +1640,13 @@ def place_market_order(
             # Check if the exchange explicitly supports 'reduceOnly' in params
             # Note: Some exchanges might need it at the top level, some in 'params'
             # This is a common way, but might need adjustment per exchange.
-            if exch.id in ["bybit", "binance", "kucoinfutures", "okx", "gateio"]:  # Add others known to use params
+            if exch.id in [
+                "bybit",
+                "binance",
+                "kucoinfutures",
+                "okx",
+                "gateio",
+            ]:  # Add others known to use params
                 params["reduceOnly"] = True
                 reduce_only_applied = True
             else:  # Assume top-level argument might be needed (less common now)
@@ -1375,11 +1656,15 @@ def place_market_order(
                 # We'll pass it to create_market_order anyway, ccxt might handle it.
                 reduce_only_applied = True  # Mark as intended
         else:
-            log_warning("ReduceOnly flag ignored: Market is not identified as a contract market.")
+            log_warning(
+                "ReduceOnly flag ignored: Market is not identified as a contract market."
+            )
 
     log_info(f"Attempting MARKET {side.upper()} order:")
     log_info(f"  Symbol: {sym}")
-    log_info(f"  Amount: {amount_formatted:.{amount_precision_digits}f} {base_currency or 'Base'}")
+    log_info(
+        f"  Amount: {amount_formatted:.{amount_precision_digits}f} {base_currency or 'Base'}"
+    )
     if reduce_only_applied:
         log_info("  Type: Reduce-Only")
 
@@ -1398,11 +1683,17 @@ def place_market_order(
                 return e.fetch_ticker(s)
 
             ticker = fetch_sim_ticker(exch, sym)
-            sim_price = ticker.get("last", ticker.get("close", 0.0))  # Use last or close price
+            sim_price = ticker.get(
+                "last", ticker.get("close", 0.0)
+            )  # Use last or close price
             if sim_price <= 0:
-                sim_price = ticker.get("bid", 0.0) if side == "sell" else ticker.get("ask", 0.0)  # Fallback to bid/ask
+                sim_price = (
+                    ticker.get("bid", 0.0) if side == "sell" else ticker.get("ask", 0.0)
+                )  # Fallback to bid/ask
         except Exception as e:
-            log_warning(f"Simulation price fetch failed: {e}. Using 0.0 for simulated price.")
+            log_warning(
+                f"Simulation price fetch failed: {e}. Using 0.0 for simulated price."
+            )
 
         sim_cost = amount_formatted * sim_price if sim_price > 0 else 0.0
         order_result = {
@@ -1423,13 +1714,18 @@ def place_market_order(
             "cost": sim_cost,  # Estimated cost
             "fee": None,  # Fee simulation is complex, omit for now
             "reduceOnly": reduce_only_applied,
-            "info": {"simulated": True, "simulated_price": sim_price},  # Add simulation flag
+            "info": {
+                "simulated": True,
+                "simulated_price": sim_price,
+            },  # Add simulation flag
         }
         log_info(f"Simulated market order result generated (ID: {sim_order_id}).")
 
     else:  # Live Trading Mode
         try:
-            log_warning(f"!!! LIVE MODE: Placing real market order{' (Reduce-Only)' if reduce_only_applied else ''}.")
+            log_warning(
+                f"!!! LIVE MODE: Placing real market order{' (Reduce-Only)' if reduce_only_applied else ''}."
+            )
             # Pass reduce_only as a direct argument if applicable, and also in params
             # ccxt aims to abstract this, but being explicit can help
             order_result = exch.create_market_order(
@@ -1440,7 +1736,9 @@ def place_market_order(
             )
             log_info("Market order request sent to exchange.")
             # Optional: Add a small delay to allow the order to potentially fill before next steps
-            time.sleep(1.5)  # Adjust as needed, helps avoid immediate status checks returning 'open'
+            time.sleep(
+                1.5
+            )  # Adjust as needed, helps avoid immediate status checks returning 'open'
 
         except (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.ExchangeError) as e:
             # Handle specific, common CCXT order placement errors
@@ -1457,15 +1755,31 @@ def place_market_order(
         # Log details from the returned order dictionary
         o_id = order_result.get("id", "N/A")
         o_status = order_result.get("status", "N/A")
-        o_avg_price = order_result.get("average", order_result.get("price"))  # Use average if available
+        o_avg_price = order_result.get(
+            "average", order_result.get("price")
+        )  # Use average if available
         o_filled = order_result.get("filled")
         o_cost = order_result.get("cost")
-        o_reduce = order_result.get("reduceOnly", params.get("reduceOnly", "N/A"))  # Check result or original param
+        o_reduce = order_result.get(
+            "reduceOnly", params.get("reduceOnly", "N/A")
+        )  # Check result or original param
 
         # Format numbers safely for logging
-        p_str = f"{o_avg_price:.{price_precision_digits}f}" if isinstance(o_avg_price, (float, int)) else "N/A"
-        f_str = f"{o_filled:.{amount_precision_digits}f}" if isinstance(o_filled, (float, int)) else "N/A"
-        c_str = f"{o_cost:.{price_precision_digits}f}" if isinstance(o_cost, (float, int)) else "N/A"
+        p_str = (
+            f"{o_avg_price:.{price_precision_digits}f}"
+            if isinstance(o_avg_price, (float, int))
+            else "N/A"
+        )
+        f_str = (
+            f"{o_filled:.{amount_precision_digits}f}"
+            if isinstance(o_filled, (float, int))
+            else "N/A"
+        )
+        c_str = (
+            f"{o_cost:.{price_precision_digits}f}"
+            if isinstance(o_cost, (float, int))
+            else "N/A"
+        )
 
         log_info(
             f"Order Result | ID: {o_id}, Status: {o_status}, Avg Fill Px: {p_str}, Filled Qty: {f_str} {base_currency or ''}, Cost: {c_str} {quote_currency or ''}, ReduceOnly: {o_reduce}"
@@ -1507,7 +1821,12 @@ def place_sl_tp_orders(
     If separate orders are used, sl_order_id and/or tp_order_id will be populated.
     Returns (None, None, None) on complete failure.
     """
-    global base_currency, min_tick, is_contract_market, amount_precision_digits, price_precision_digits
+    global \
+        base_currency, \
+        min_tick, \
+        is_contract_market, \
+        amount_precision_digits, \
+        price_precision_digits
 
     sl_order_id: Optional[str] = None
     tp_order_id: Optional[str] = None
@@ -1520,17 +1839,26 @@ def place_sl_tp_orders(
     if not (isinstance(qty, (float, int)) and qty > 0):
         log_error(f"Invalid quantity '{qty}' for SL/TP placement.")
         return None, None, None
-    if not (isinstance(sl_pr, (float, int)) and sl_pr > 0 and isinstance(tp_pr, (float, int)) and tp_pr > 0):
+    if not (
+        isinstance(sl_pr, (float, int))
+        and sl_pr > 0
+        and isinstance(tp_pr, (float, int))
+        and tp_pr > 0
+    ):
         log_error(f"Invalid SL ({sl_pr}) or TP ({tp_pr}) price for placement.")
         return None, None, None
 
     # Logical validation: SL should be below entry for long, above for short. TP opposite.
     # Note: This assumes entry price is between SL and TP. We check against the prices themselves.
     if pos_side == "long" and sl_pr >= tp_pr:
-        log_error(f"Invalid SL/TP logic for LONG position: SL ({sl_pr}) must be < TP ({tp_pr}).")
+        log_error(
+            f"Invalid SL/TP logic for LONG position: SL ({sl_pr}) must be < TP ({tp_pr})."
+        )
         return None, None, None
     if pos_side == "short" and sl_pr <= tp_pr:
-        log_error(f"Invalid SL/TP logic for SHORT position: SL ({sl_pr}) must be > TP ({tp_pr}).")
+        log_error(
+            f"Invalid SL/TP logic for SHORT position: SL ({sl_pr}) must be > TP ({tp_pr})."
+        )
         return None, None, None
 
     # Determine the side for the closing orders
@@ -1547,13 +1875,17 @@ def place_sl_tp_orders(
         if (pos_side == "long" and sl_price_formatted >= tp_price_formatted) or (
             pos_side == "short" and sl_price_formatted <= tp_price_formatted
         ):
-            raise ValueError(f"SL/TP logic invalid after formatting: SL={sl_price_formatted}, TP={tp_price_formatted}")
+            raise ValueError(
+                f"SL/TP logic invalid after formatting: SL={sl_price_formatted}, TP={tp_price_formatted}"
+            )
 
     except ValueError as ve:
         log_error(f"SL/TP input validation failed after formatting: {ve}")
         return None, None, None
     except Exception as fmt_e:
-        log_error(f"Failed to format SL/TP quantity or prices using exchange rules: {fmt_e}")
+        log_error(
+            f"Failed to format SL/TP quantity or prices using exchange rules: {fmt_e}"
+        )
         return None, None, None
 
     # --- Prepare Common Parameters ---
@@ -1576,27 +1908,43 @@ def place_sl_tp_orders(
 
     if has_stop_market or has_generic_stop:
         # Prefer Stop Market if available or if generic stop exists (assume it can act as market)
-        sl_order_type = "stopMarket" if has_stop_market else "stop"  # Use specific if known, else generic 'stop'
-        log_debug(f"Selected SL order type: {sl_order_type} (preferred). Trigger: {sl_price_formatted}")
+        sl_order_type = (
+            "stopMarket" if has_stop_market else "stop"
+        )  # Use specific if known, else generic 'stop'
+        log_debug(
+            f"Selected SL order type: {sl_order_type} (preferred). Trigger: {sl_price_formatted}"
+        )
     elif has_stop_limit:
         # Fallback to Stop Limit if Stop Market is unavailable
         sl_order_type = "stopLimit"
         # Calculate a sensible limit price slightly beyond the stop trigger to increase fill chance
-        limit_offset = min_tick * 10  # Example: 10 ticks away (adjust multiplier as needed)
+        limit_offset = (
+            min_tick * 10
+        )  # Example: 10 ticks away (adjust multiplier as needed)
         limit_price_raw = (
-            sl_price_formatted - limit_offset if close_side == "sell" else sl_price_formatted + limit_offset
+            sl_price_formatted - limit_offset
+            if close_side == "sell"
+            else sl_price_formatted + limit_offset
         )
         # Ensure limit price stays on the correct side of the trigger
         if (close_side == "sell" and limit_price_raw >= sl_price_formatted) or (
             close_side == "buy" and limit_price_raw <= sl_price_formatted
         ):
-            limit_price_raw = sl_price_formatted - min_tick if close_side == "sell" else sl_price_formatted + min_tick
-            log_warning("Calculated SL limit offset crossed trigger price. Using 1 tick offset.")
+            limit_price_raw = (
+                sl_price_formatted - min_tick
+                if close_side == "sell"
+                else sl_price_formatted + min_tick
+            )
+            log_warning(
+                "Calculated SL limit offset crossed trigger price. Using 1 tick offset."
+            )
 
         try:  # Format the calculated limit price
             sl_limit_price = float(exch.price_to_precision(sym, limit_price_raw))
         except Exception as fmt_e:
-            log_error(f"Failed to format SL limit price {limit_price_raw}: {fmt_e}. Cannot place Stop Limit SL.")
+            log_error(
+                f"Failed to format SL limit price {limit_price_raw}: {fmt_e}. Cannot place Stop Limit SL."
+            )
             return None, None, None
         log_warning(
             f"Using fallback SL order type: {sl_order_type}. Trigger: {sl_price_formatted}, Limit: {sl_limit_price}. Fill depends on market liquidity."
@@ -1635,23 +1983,31 @@ def place_sl_tp_orders(
             # These are common names, adjust based on your exchange:
             oco_params["stopPrice"] = sl_price_formatted  # SL trigger price
             if sl_order_type == "stopLimit" and sl_limit_price is not None:
-                oco_params["stopLimitPrice"] = sl_limit_price  # SL limit price (for STOP_LOSS_LIMIT type)
+                oco_params["stopLimitPrice"] = (
+                    sl_limit_price  # SL limit price (for STOP_LOSS_LIMIT type)
+                )
 
             # The `type` for create_order for OCO also varies. Common guesses:
             # - 'limit' (where TP price is the main price argument, SL info in params)
             # - Some exchanges might have a dedicated 'oco' type.
             # CONSULT YOUR EXCHANGE'S CCXT IMPLEMENTATION / API DOCS!
-            oco_order_type_guess = "limit"  # Default guess - VERIFY THIS FOR YOUR EXCHANGE
+            oco_order_type_guess = (
+                "limit"  # Default guess - VERIFY THIS FOR YOUR EXCHANGE
+            )
 
             # --- Simulation Handling for OCO ---
             if SIMULATION_MODE:
                 log_warning("!!! SIMULATION: OCO order placement skipped.")
-                sim_oco_id = f"{SIMULATION_ORDER_PREFIX}oco_{close_side}_{int(time.time())}"
+                sim_oco_id = (
+                    f"{SIMULATION_ORDER_PREFIX}oco_{close_side}_{int(time.time())}"
+                )
                 oco_ref_id = sim_oco_id  # Use the simulated ID as the reference
                 oco_succeeded = True
             else:
                 # --- !!! Replace below with the CORRECT ccxt call for YOUR exchange !!! ---
-                log_warning(f"!!! LIVE MODE: Attempting OCO order using generic structure for {exch.id}.")
+                log_warning(
+                    f"!!! LIVE MODE: Attempting OCO order using generic structure for {exch.id}."
+                )
                 log_warning(
                     f"!!! VERIFY this structure works for {exch.id} before relying on it! Type='{oco_order_type_guess}', Params={oco_params}"
                 )
@@ -1697,11 +2053,16 @@ def place_sl_tp_orders(
                 f"OCO not supported by {exch.id} or structure used is incorrect: {e}. Falling back to separate SL/TP orders."
             )
         except (ccxt.InvalidOrder, ccxt.ExchangeError) as e:
-            log_error(f"OCO order placement failed: {type(e).__name__} - {e}. Falling back to separate SL/TP orders.")
+            log_error(
+                f"OCO order placement failed: {type(e).__name__} - {e}. Falling back to separate SL/TP orders."
+            )
         # Let network errors be handled by decorator
         except Exception as e:
             if not isinstance(e, RETRYABLE_EXCEPTIONS):
-                log_error(f"Unexpected error during OCO placement: {e}. Falling back.", exc_info=True)
+                log_error(
+                    f"Unexpected error during OCO placement: {e}. Falling back.",
+                    exc_info=True,
+                )
             # Fallback will occur naturally after this block if oco_succeeded is False
 
     # --- Return if OCO Succeeded ---
@@ -1712,7 +2073,9 @@ def place_sl_tp_orders(
     if oco_attempted:  # Only log fallback message if OCO was tried
         log_info("Placing separate SL and TP orders as OCO fallback.")
     else:
-        log_info("Placing separate SL and TP orders (OCO not supported or not attempted).")
+        log_info(
+            "Placing separate SL and TP orders (OCO not supported or not attempted)."
+        )
 
     sl_placed_ok = False
     tp_placed_ok = False
@@ -1728,11 +2091,15 @@ def place_sl_tp_orders(
             log_info(f"  Params: {params}")
 
         sl_params_separate = params.copy()
-        sl_params_separate["stopPrice"] = sl_price_formatted  # Ensure stopPrice is in params
+        sl_params_separate["stopPrice"] = (
+            sl_price_formatted  # Ensure stopPrice is in params
+        )
 
         if SIMULATION_MODE:
             sl_order_id = f"{SIMULATION_ORDER_PREFIX}sl_{close_side}_{int(time.time())}"
-            log_warning(f"!!! SIMULATION: Separate SL order skipped. Assigned mock ID: {sl_order_id}")
+            log_warning(
+                f"!!! SIMULATION: Separate SL order skipped. Assigned mock ID: {sl_order_id}"
+            )
             sl_placed_ok = True
         else:
             log_warning(f"!!! LIVE MODE: Placing separate {sl_order_type} SL order.")
@@ -1747,7 +2114,9 @@ def place_sl_tp_orders(
             if sl_order and sl_order.get("id"):
                 sl_order_id = sl_order["id"]
                 sl_placed_ok = True
-                log_info(f"Separate SL ({sl_order_type}) order placed successfully. ID: {sl_order_id}")
+                log_info(
+                    f"Separate SL ({sl_order_type}) order placed successfully. ID: {sl_order_id}"
+                )
                 time.sleep(0.5)  # Small delay between orders
             else:
                 log_error(
@@ -1755,10 +2124,15 @@ def place_sl_tp_orders(
                 )
 
     except (ccxt.InvalidOrder, ccxt.ExchangeError) as e:
-        log_error(f"Error placing separate SL ({sl_order_type}) order: {type(e).__name__} - {e}")
+        log_error(
+            f"Error placing separate SL ({sl_order_type}) order: {type(e).__name__} - {e}"
+        )
     except Exception as e:
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected error placing separate SL ({sl_order_type}): {e}", exc_info=True)
+            log_error(
+                f"Unexpected error placing separate SL ({sl_order_type}): {e}",
+                exc_info=True,
+            )
 
     # 2. Place Take Profit Order (Limit Order)
     try:
@@ -1772,42 +2146,62 @@ def place_sl_tp_orders(
 
         if SIMULATION_MODE:
             tp_order_id = f"{SIMULATION_ORDER_PREFIX}tp_{close_side}_{int(time.time())}"
-            log_warning(f"!!! SIMULATION: Separate TP order skipped. Assigned mock ID: {tp_order_id}")
+            log_warning(
+                f"!!! SIMULATION: Separate TP order skipped. Assigned mock ID: {tp_order_id}"
+            )
             tp_placed_ok = True
         else:
             log_warning("!!! LIVE MODE: Placing separate limit TP order.")
             # Use create_limit_order for clarity
             tp_order = exch.create_limit_order(
-                symbol=sym, side=close_side, amount=qty_formatted, price=tp_price_formatted, params=tp_params_separate
+                symbol=sym,
+                side=close_side,
+                amount=qty_formatted,
+                price=tp_price_formatted,
+                params=tp_params_separate,
             )
             if tp_order and tp_order.get("id"):
                 tp_order_id = tp_order["id"]
                 tp_placed_ok = True
-                log_info(f"Separate TP (Limit) order placed successfully. ID: {tp_order_id}")
+                log_info(
+                    f"Separate TP (Limit) order placed successfully. ID: {tp_order_id}"
+                )
                 time.sleep(0.5)  # Small delay
             else:
-                log_error(f"Separate TP (Limit) placement failed or did not return an ID. Response: {tp_order}")
+                log_error(
+                    f"Separate TP (Limit) placement failed or did not return an ID. Response: {tp_order}"
+                )
 
     except (ccxt.InvalidOrder, ccxt.ExchangeError) as e:
         log_error(f"Error placing separate TP (Limit) order: {type(e).__name__} - {e}")
     except Exception as e:
         if not isinstance(e, RETRYABLE_EXCEPTIONS):
-            log_error(f"Unexpected error placing separate TP (Limit): {e}", exc_info=True)
+            log_error(
+                f"Unexpected error placing separate TP (Limit): {e}", exc_info=True
+            )
 
     # --- Final Outcome Assessment ---
     if not sl_placed_ok and not tp_placed_ok:
         log_error("Both separate SL and TP order placements failed.")
         return None, None, None  # Complete failure
     elif not sl_placed_ok:
-        log_warning("Separate TP order placed, but SL order FAILED. Position is only partially protected (TP only).")
+        log_warning(
+            "Separate TP order placed, but SL order FAILED. Position is only partially protected (TP only)."
+        )
         # Attempt to cancel the successful TP order to avoid inconsistent state? Risky.
         # cancel_order_with_retry(exch, tp_order_id, sym) # Consider this carefully
     elif not tp_placed_ok:
-        log_warning("Separate SL order placed, but TP order FAILED. Position is only partially protected (SL only).")
+        log_warning(
+            "Separate SL order placed, but TP order FAILED. Position is only partially protected (SL only)."
+        )
         # Attempt to cancel the successful SL order? Risky.
         # cancel_order_with_retry(exch, sl_order_id, sym) # Consider this carefully
 
-    return sl_order_id, tp_order_id, None  # Return the IDs of the separately placed orders
+    return (
+        sl_order_id,
+        tp_order_id,
+        None,
+    )  # Return the IDs of the separately placed orders
 
 
 # --- Position & Order Check ---
@@ -1828,10 +2222,14 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
     if position.get("status") is None:
         return False
 
-    log_debug(f"Checking state consistency for active {position['status']} position on {sym}...")
+    log_debug(
+        f"Checking state consistency for active {position['status']} position on {sym}..."
+    )
     reset_required = False
     closure_reason = "Unknown"
-    order_to_cancel: Optional[str] = None  # ID of the counterpart order to cancel if one filled
+    order_to_cancel: Optional[str] = (
+        None  # ID of the counterpart order to cancel if one filled
+    )
     cancel_label: str = ""  # Label ('SL' or 'TP') for logging cancellation attempt
 
     try:
@@ -1840,10 +2238,14 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
         tp_id = position.get("tp_order_id")
         oco_id = position.get("oco_order_id")
         has_tracked_orders = bool(sl_id or tp_id or oco_id)
-        protection_order_still_open = False  # Flag if we find any tracked protection order open
+        protection_order_still_open = (
+            False  # Flag if we find any tracked protection order open
+        )
 
         if has_tracked_orders:
-            log_debug(f"Fetching open orders for {sym} to check tracked IDs: SL={sl_id}, TP={tp_id}, OCO={oco_id}")
+            log_debug(
+                f"Fetching open orders for {sym} to check tracked IDs: SL={sl_id}, TP={tp_id}, OCO={oco_id}"
+            )
             open_orders = exch.fetch_open_orders(sym)
             open_order_ids = {o["id"] for o in open_orders if "id" in o}
             log_debug(
@@ -1859,24 +2261,34 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                     log_debug(f"Tracked OCO order {oco_id} appears to be open.")
                 else:
                     reset_required = True
-                    closure_reason = f"Tracked OCO order {oco_id} not found among open orders"
-                    log_info(f"{NEON_YELLOW}Closure detected: {closure_reason}. Assuming OCO filled/cancelled.{RESET}")
+                    closure_reason = (
+                        f"Tracked OCO order {oco_id} not found among open orders"
+                    )
+                    log_info(
+                        f"{NEON_YELLOW}Closure detected: {closure_reason}. Assuming OCO filled/cancelled.{RESET}"
+                    )
             else:
                 # Check separate SL and TP orders
                 sl_is_open = sl_id in open_order_ids if sl_id else False
                 tp_is_open = tp_id in open_order_ids if tp_id else False
-                log_debug(f"Separate Order Check: SL Open = {sl_is_open}, TP Open = {tp_is_open}")
+                log_debug(
+                    f"Separate Order Check: SL Open = {sl_is_open}, TP Open = {tp_is_open}"
+                )
 
                 if sl_id and not sl_is_open and tp_id and not tp_is_open:
                     # Both SL and TP are gone - position must be closed
                     reset_required = True
                     closure_reason = f"Neither tracked SL ({sl_id}) nor TP ({tp_id}) orders found open"
-                    log_info(f"{NEON_YELLOW}Closure detected: {closure_reason}. Assuming position closed.{RESET}")
+                    log_info(
+                        f"{NEON_YELLOW}Closure detected: {closure_reason}. Assuming position closed.{RESET}"
+                    )
                 elif sl_id and not sl_is_open:
                     # SL is gone, TP might still be open (or ID was None)
                     reset_required = True
                     closure_reason = f"Tracked SL order {sl_id} not found open"
-                    log_info(f"{NEON_YELLOW}Closure detected: {closure_reason}. Assuming SL was hit.{RESET}")
+                    log_info(
+                        f"{NEON_YELLOW}Closure detected: {closure_reason}. Assuming SL was hit.{RESET}"
+                    )
                     if tp_is_open:  # If TP is still open, mark it for cancellation
                         order_to_cancel = tp_id
                         cancel_label = "TP"
@@ -1893,7 +2305,9 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                 elif sl_is_open or tp_is_open:
                     # At least one of the tracked separate orders is still open
                     protection_order_still_open = True
-                    log_debug("At least one tracked separate protection order (SL/TP) is still open.")
+                    log_debug(
+                        "At least one tracked separate protection order (SL/TP) is still open."
+                    )
 
         # --- 2. Fallback/Confirmation: Check Actual Position (Contracts Only) ---
         # When is this check useful?
@@ -1914,7 +2328,9 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
             try:
                 # Use explicit retry decorator for safety on this critical check
                 @api_retry_decorator
-                def fetch_positions_safe(e: ccxt.Exchange, s_list: List[str]) -> List[Dict]:
+                def fetch_positions_safe(
+                    e: ccxt.Exchange, s_list: List[str]
+                ) -> List[Dict]:
                     # Some exchanges need symbols, some don't. Passing symbol is safer.
                     return e.fetch_positions(symbols=s_list)
 
@@ -1940,7 +2356,9 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                                 ),
                             )  # Default to 0 if not found
                             try:
-                                current_pos_size = float(size_val) if size_val is not None else 0.0
+                                current_pos_size = (
+                                    float(size_val) if size_val is not None else 0.0
+                                )
                             except (ValueError, TypeError):
                                 log_warning(
                                     f"Could not parse position size ('{size_val}') from fetchPositions data for {sym}. Assuming 0."
@@ -1961,7 +2379,9 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                                 and "info" in pos_info
                                 and "positionAmt" in pos_info["info"]
                             ):
-                                pos_amt_sign = float(pos_info["info"].get("positionAmt", 0.0))
+                                pos_amt_sign = float(
+                                    pos_info["info"].get("positionAmt", 0.0)
+                                )
                                 if pos_amt_sign > 0:
                                     pos_side_on_exchange = "long"
                                 elif pos_amt_sign < 0:
@@ -1994,10 +2414,16 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                                     # Mismatch! Local state says one thing, exchange says another. Critical error.
                                     log_error("!!! STATE MISMATCH DETECTED !!!")
                                     log_error(f"  Local State: {position['status']}")
-                                    log_error(f"  Exchange Position: {pos_side_on_exchange} (Size: {current_pos_size})")
-                                    log_error("  Resetting local state to None. MANUAL REVIEW STRONGLY ADVISED.")
+                                    log_error(
+                                        f"  Exchange Position: {pos_side_on_exchange} (Size: {current_pos_size})"
+                                    )
+                                    log_error(
+                                        "  Resetting local state to None. MANUAL REVIEW STRONGLY ADVISED."
+                                    )
                                     reset_required = True
-                                    closure_reason = "State Mismatch detected via fetchPositions"
+                                    closure_reason = (
+                                        "State Mismatch detected via fetchPositions"
+                                    )
                                     # Mark any tracked orders for cancellation due to mismatch
                                     order_to_cancel = oco_id or sl_id or tp_id
                                     cancel_label = "SL/TP/OCO due to state mismatch"
@@ -2006,12 +2432,21 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                         #     log_debug(f"fetchPositions entry skipped: Symbol '{pos_info.get('symbol')}' != '{sym}'")
 
                     # After checking all returned positions: if we expected a position but found none active
-                    if not position_found_on_exchange and position["status"] is not None:
-                        log_info(f"Position check via fetchPositions confirmed no active position found for {sym}.")
-                        if not reset_required:  # If order check didn't already flag reset
+                    if (
+                        not position_found_on_exchange
+                        and position["status"] is not None
+                    ):
+                        log_info(
+                            f"Position check via fetchPositions confirmed no active position found for {sym}."
+                        )
+                        if (
+                            not reset_required
+                        ):  # If order check didn't already flag reset
                             reset_required = True
                             closure_reason = "Position not found via fetchPositions"
-                            log_info(f"{NEON_YELLOW}Closure confirmed: {closure_reason}. Resetting state.{RESET}")
+                            log_info(
+                                f"{NEON_YELLOW}Closure confirmed: {closure_reason}. Resetting state.{RESET}"
+                            )
                             # Mark any tracked orders for cancellation
                             order_to_cancel = oco_id or sl_id or tp_id
                             cancel_label = "SL/TP/OCO as position closed"
@@ -2022,7 +2457,8 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                 )
             except Exception as e:
                 log_error(
-                    f"Error during fetchPositions check: {e}. Relying solely on order status check.", exc_info=False
+                    f"Error during fetchPositions check: {e}. Relying solely on order status check.",
+                    exc_info=False,
                 )  # Decorator logs full trace if needed
 
         # --- 3. Perform State Reset and Cleanup if Required ---
@@ -2031,7 +2467,9 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
 
             # Attempt to cancel the counterpart order if identified
             if order_to_cancel and cancel_label:
-                log_info(f"Attempting to cancel potentially lingering {cancel_label} order: {order_to_cancel}")
+                log_info(
+                    f"Attempting to cancel potentially lingering {cancel_label} order: {order_to_cancel}"
+                )
                 try:
                     # Use the robust cancel function
                     cancelled = cancel_order_with_retry(exch, order_to_cancel, sym)
@@ -2046,7 +2484,8 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
                 except Exception as e:
                     # Catch errors during the cancellation attempt itself
                     log_error(
-                        f"Error occurred while trying to cancel lingering order {order_to_cancel}: {e}", exc_info=True
+                        f"Error occurred while trying to cancel lingering order {order_to_cancel}: {e}",
+                        exc_info=True,
                     )
 
             # Reset the global position state to default
@@ -2059,7 +2498,9 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
             return True  # Indicate that state was reset
 
         # If we reached here without reset_required being True, the position is assumed active and consistent
-        log_debug("Position state appears consistent with tracked orders/position check.")
+        log_debug(
+            "Position state appears consistent with tracked orders/position check."
+        )
         return False  # State was not reset
 
     except (ccxt.AuthenticationError, ccxt.ExchangeError) as e:
@@ -2080,13 +2521,19 @@ def check_position_and_orders(exch: ccxt.Exchange, sym: str) -> bool:
 
 
 # --- Trailing Stop ---
-def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, current_atr: Optional[float]) -> None:
+def update_trailing_stop(
+    exch: ccxt.Exchange, sym: str, current_price: float, current_atr: Optional[float]
+) -> None:
     """
     Checks if the trailing stop loss needs to be updated based on price movement and ATR.
     If an update is required, it cancels the existing protection order(s) and
     places new ones with the updated stop loss price.
     """
-    global position, enable_trailing_stop, trailing_stop_atr_multiplier, trailing_stop_activation_atr_multiplier
+    global \
+        position, \
+        enable_trailing_stop, \
+        trailing_stop_atr_multiplier, \
+        trailing_stop_activation_atr_multiplier
     global price_precision_digits, amount_precision_digits  # For logging/formatting
 
     # --- Pre-checks ---
@@ -2095,7 +2542,9 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
     if position.get("status") is None:
         return  # No active position
     if current_atr is None or current_atr <= 0:
-        log_warning("TSL Check: Cannot update trailing stop, invalid ATR value received.")
+        log_warning(
+            "TSL Check: Cannot update trailing stop, invalid ATR value received."
+        )
         return
 
     # --- Get Required Position State ---
@@ -2104,17 +2553,30 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
     initial_sl_price = position.get("stop_loss")  # Original SL target
     original_tp_price = position.get("take_profit")  # Need original TP for replacement
     position_qty = position.get("quantity")
-    current_tsl_price = position.get("current_trailing_sl_price")  # The SL price after last TSL update
+    current_tsl_price = position.get(
+        "current_trailing_sl_price"
+    )  # The SL price after last TSL update
     highest_seen = position.get("highest_price_since_entry")
     lowest_seen = position.get("lowest_price_since_entry")
 
     # Check if essential data is present
-    if None in [entry_price, initial_sl_price, original_tp_price, position_qty, highest_seen, lowest_seen]:
-        log_warning("TSL Check: Missing essential position data (entry, SL, TP, qty, peak prices). Cannot proceed.")
+    if None in [
+        entry_price,
+        initial_sl_price,
+        original_tp_price,
+        position_qty,
+        highest_seen,
+        lowest_seen,
+    ]:
+        log_warning(
+            "TSL Check: Missing essential position data (entry, SL, TP, qty, peak prices). Cannot proceed."
+        )
         return
 
     # Determine the current effective SL price (either initial SL or the last TSL price)
-    effective_sl_price = current_tsl_price if current_tsl_price is not None else initial_sl_price
+    effective_sl_price = (
+        current_tsl_price if current_tsl_price is not None else initial_sl_price
+    )
     log_debug(
         f"TSL Check ({pos_side}): Current Price={current_price:.{price_precision_digits}f}, Eff SL={effective_sl_price:.{price_precision_digits}f}, ATR={current_atr:.{price_precision_digits}f}"
     )
@@ -2122,38 +2584,54 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
     # --- Update Peak Prices Reached Since Entry ---
     if pos_side == "long" and current_price > highest_seen:
         position["highest_price_since_entry"] = current_price
-        log_debug(f"TSL: New high price detected: {current_price:.{price_precision_digits}f}")
+        log_debug(
+            f"TSL: New high price detected: {current_price:.{price_precision_digits}f}"
+        )
     elif pos_side == "short" and current_price < lowest_seen:
         position["lowest_price_since_entry"] = current_price
-        log_debug(f"TSL: New low price detected: {current_price:.{price_precision_digits}f}")
+        log_debug(
+            f"TSL: New low price detected: {current_price:.{price_precision_digits}f}"
+        )
 
     # --- Check TSL Activation Threshold ---
     tsl_activated = False
     potential_new_tsl_price: Optional[float] = None
     if pos_side == "long":
         # Activation threshold: Price must move X ATRs above entry
-        activation_threshold = entry_price + (current_atr * trailing_stop_activation_atr_multiplier)
+        activation_threshold = entry_price + (
+            current_atr * trailing_stop_activation_atr_multiplier
+        )
         current_high = position["highest_price_since_entry"]  # Use updated high
         if current_high > activation_threshold:
             tsl_activated = True
             # Calculate potential new TSL: Peak Price - Y ATRs
-            potential_new_tsl_price = current_high - (current_atr * trailing_stop_atr_multiplier)
+            potential_new_tsl_price = current_high - (
+                current_atr * trailing_stop_atr_multiplier
+            )
             log_debug(
                 f"Long TSL potentially active. High ({current_high:.{price_precision_digits}f}) > Threshold ({activation_threshold:.{price_precision_digits}f})."
             )
-            log_debug(f"  Potential New TSL Price: {potential_new_tsl_price:.{price_precision_digits}f}")
+            log_debug(
+                f"  Potential New TSL Price: {potential_new_tsl_price:.{price_precision_digits}f}"
+            )
     else:  # Short position
         # Activation threshold: Price must move X ATRs below entry
-        activation_threshold = entry_price - (current_atr * trailing_stop_activation_atr_multiplier)
+        activation_threshold = entry_price - (
+            current_atr * trailing_stop_activation_atr_multiplier
+        )
         current_low = position["lowest_price_since_entry"]  # Use updated low
         if current_low < activation_threshold:
             tsl_activated = True
             # Calculate potential new TSL: Peak Price + Y ATRs
-            potential_new_tsl_price = current_low + (current_atr * trailing_stop_atr_multiplier)
+            potential_new_tsl_price = current_low + (
+                current_atr * trailing_stop_atr_multiplier
+            )
             log_debug(
                 f"Short TSL potentially active. Low ({current_low:.{price_precision_digits}f}) < Threshold ({activation_threshold:.{price_precision_digits}f})."
             )
-            log_debug(f"  Potential New TSL Price: {potential_new_tsl_price:.{price_precision_digits}f}")
+            log_debug(
+                f"  Potential New TSL Price: {potential_new_tsl_price:.{price_precision_digits}f}"
+            )
 
     # --- Check if Potential New TSL is an Improvement and Valid ---
     should_update_tsl = False
@@ -2161,26 +2639,40 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
     if tsl_activated and potential_new_tsl_price is not None:
         # Format the potential new TSL price to exchange precision
         try:
-            new_tsl_price_formatted = float(exch.price_to_precision(sym, potential_new_tsl_price))
+            new_tsl_price_formatted = float(
+                exch.price_to_precision(sym, potential_new_tsl_price)
+            )
         except Exception as fmt_e:
-            log_error(f"TSL Update: Failed to format potential new TSL price {potential_new_tsl_price}: {fmt_e}")
+            log_error(
+                f"TSL Update: Failed to format potential new TSL price {potential_new_tsl_price}: {fmt_e}"
+            )
             return  # Cannot proceed without formatted price
 
         # Check if the new TSL is strictly better than the current effective SL
         # AND ensure the new TSL hasn't crossed the current price (which would cause immediate stop out)
         if pos_side == "long":
-            if new_tsl_price_formatted > effective_sl_price and new_tsl_price_formatted < current_price:
+            if (
+                new_tsl_price_formatted > effective_sl_price
+                and new_tsl_price_formatted < current_price
+            ):
                 should_update_tsl = True
         else:  # Short position
-            if new_tsl_price_formatted < effective_sl_price and new_tsl_price_formatted > current_price:
+            if (
+                new_tsl_price_formatted < effective_sl_price
+                and new_tsl_price_formatted > current_price
+            ):
                 should_update_tsl = True
 
         if should_update_tsl:
             log_info(f"{NEON_YELLOW}Trailing Stop Update Triggered!{RESET}")
             log_info(f"  Position: {pos_side.upper()}")
             log_info(f"  Current Price: {current_price:.{price_precision_digits}f}")
-            log_info(f"  Current Eff SL: {effective_sl_price:.{price_precision_digits}f}")
-            log_info(f"  Potential New TSL: {new_tsl_price_formatted:.{price_precision_digits}f}")
+            log_info(
+                f"  Current Eff SL: {effective_sl_price:.{price_precision_digits}f}"
+            )
+            log_info(
+                f"  Potential New TSL: {new_tsl_price_formatted:.{price_precision_digits}f}"
+            )
         else:
             log_debug(
                 f"TSL Update Condition Check: New TSL ({new_tsl_price_formatted:.{price_precision_digits}f if new_tsl_price_formatted else 'N/A'}) vs Effective SL ({effective_sl_price:.{price_precision_digits}f}) vs Price ({current_price:.{price_precision_digits}f}). No update needed."
@@ -2205,7 +2697,9 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
             # Consider resetting state or trying to close position? Very risky state.
             return
 
-        log_info(f"TSL: Proceeding with update. Moving SL to {new_tsl_price_formatted:.{price_precision_digits}f}")
+        log_info(
+            f"TSL: Proceeding with update. Moving SL to {new_tsl_price_formatted:.{price_precision_digits}f}"
+        )
 
         # 1. Cancel Existing Protection Order(s)
         all_cancelled_successfully = True
@@ -2244,10 +2738,14 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
         )
 
         # 3. Update State Based on New Order Placement Result
-        protection_placed = bool(new_oco_id or new_sl_id)  # Consider success if at least SL or OCO is placed
+        protection_placed = bool(
+            new_oco_id or new_sl_id
+        )  # Consider success if at least SL or OCO is placed
 
         if protection_placed:
-            log_info(f"{NEON_GREEN}TSL Update Successful: New protection orders placed.{RESET}")
+            log_info(
+                f"{NEON_GREEN}TSL Update Successful: New protection orders placed.{RESET}"
+            )
             if new_oco_id:
                 log_info(f"  New OCO Ref ID: {new_oco_id}")
             if new_sl_id:
@@ -2266,22 +2764,34 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
                 }
             )
             save_position_state()  # Persist the updated state
-            display_position_status(position, price_precision_digits, amount_precision_digits)
+            display_position_status(
+                position, price_precision_digits, amount_precision_digits
+            )
 
             # Warn if only partial protection was placed (e.g., SL ok, but separate TP failed)
             if not new_oco_id and not new_tp_id and new_sl_id:
-                log_warning("TSL Update Warning: New SL order placed, but separate TP order failed. Check manually.")
-            elif not new_oco_id and not new_sl_id:  # Should not happen if protection_placed is True, but safety check
-                log_error("TSL Update Error: Logic error - protection marked as placed but no SL/OCO ID returned.")
+                log_warning(
+                    "TSL Update Warning: New SL order placed, but separate TP order failed. Check manually."
+                )
+            elif (
+                not new_oco_id and not new_sl_id
+            ):  # Should not happen if protection_placed is True, but safety check
+                log_error(
+                    "TSL Update Error: Logic error - protection marked as placed but no SL/OCO ID returned."
+                )
         else:
             # --- CRITICAL FAILURE ---
             # Old orders were cancelled, but placing new ones failed. Position is unprotected!
             log_error("!!! TSL CRITICAL FAILURE !!!")
-            log_error(f"  Successfully cancelled old protection order(s): {ids_to_cancel}")
+            log_error(
+                f"  Successfully cancelled old protection order(s): {ids_to_cancel}"
+            )
             log_error(
                 f"  BUT FAILED to place new protection orders (SL={new_tsl_price_formatted}, TP={original_tp_price})."
             )
-            log_error(f"  !!! POSITION '{pos_side.upper()}' IS CURRENTLY UNPROTECTED !!!")
+            log_error(
+                f"  !!! POSITION '{pos_side.upper()}' IS CURRENTLY UNPROTECTED !!!"
+            )
             # Update state to reflect unprotected status
             position.update(
                 {
@@ -2294,7 +2804,9 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
                 }
             )
             save_position_state()  # Save the unprotected state
-            log_error("State saved reflecting unprotected status. MANUAL INTERVENTION REQUIRED IMMEDIATELY.")
+            log_error(
+                "State saved reflecting unprotected status. MANUAL INTERVENTION REQUIRED IMMEDIATELY."
+            )
             # Consider adding an emergency market close attempt here?
             # emergency_close_position(exch, sym, pos_side, position_qty)
 
@@ -2306,7 +2818,9 @@ def update_trailing_stop(exch: ccxt.Exchange, sym: str, current_price: float, cu
 # --- Main Trading Loop ---
 def run_bot():
     """Main execution function containing the trading loop."""
-    log_info(f"Initializing RSI/OB Trader Bot for {symbol} on {exchange.name} ({timeframe})...")
+    log_info(
+        f"Initializing RSI/OB Trader Bot for {symbol} on {exchange.name} ({timeframe})..."
+    )
     load_position_state()  # Load state at startup
 
     log_info("-" * 70)
@@ -2317,18 +2831,30 @@ def run_bot():
     log_info(f"  Cycle Interval: {sleep_interval_seconds} seconds")
     log_info(f"  SL/TP Mode: {'ATR Based' if enable_atr_sl_tp else 'Fixed Percentage'}")
     if enable_atr_sl_tp:
-        log_info(f"    ATR SL: {atr_sl_multiplier}x, ATR TP: {atr_tp_multiplier}x (ATR Length: {atr_length})")
+        log_info(
+            f"    ATR SL: {atr_sl_multiplier}x, ATR TP: {atr_tp_multiplier}x (ATR Length: {atr_length})"
+        )
     else:
-        log_info(f"    Fixed SL: {stop_loss_percentage * 100:.2f}%, Fixed TP: {take_profit_percentage * 100:.2f}%")
-    log_info(f"  Trailing Stop Loss: {'Enabled' if enable_trailing_stop else 'Disabled'}")
+        log_info(
+            f"    Fixed SL: {stop_loss_percentage * 100:.2f}%, Fixed TP: {take_profit_percentage * 100:.2f}%"
+        )
+    log_info(
+        f"  Trailing Stop Loss: {'Enabled' if enable_trailing_stop else 'Disabled'}"
+    )
     if enable_trailing_stop:
         log_info(
             f"    TSL Activation: {trailing_stop_activation_atr_multiplier}x ATR, TSL Distance: {trailing_stop_atr_multiplier}x ATR"
         )
-    log_info(f"  Order Block Volume Multiplier: {ob_volume_threshold_multiplier}x Avg Vol")
-    log_info(f"  Entry Volume Confirmation: {'Enabled' if entry_volume_confirmation_enabled else 'Disabled'}")
+    log_info(
+        f"  Order Block Volume Multiplier: {ob_volume_threshold_multiplier}x Avg Vol"
+    )
+    log_info(
+        f"  Entry Volume Confirmation: {'Enabled' if entry_volume_confirmation_enabled else 'Disabled'}"
+    )
     if entry_volume_confirmation_enabled:
-        log_info(f"    Vol MA Length: {entry_volume_ma_length}, Vol Multiplier: {entry_volume_multiplier}x")
+        log_info(
+            f"    Vol MA Length: {entry_volume_ma_length}, Vol Multiplier: {entry_volume_multiplier}x"
+        )
     log_info("-" * 70)
 
     if not SIMULATION_MODE:
@@ -2348,10 +2874,14 @@ def run_bot():
             position_was_reset = check_position_and_orders(exchange, symbol)
 
             # Always display current status after check/reset
-            display_position_status(position, price_precision_digits, amount_precision_digits)
+            display_position_status(
+                position, price_precision_digits, amount_precision_digits
+            )
 
             if position_was_reset:
-                log_info("Position state was reset in this cycle. Proceeding to check for new signals.")
+                log_info(
+                    "Position state was reset in this cycle. Proceeding to check for new signals."
+                )
                 # Optional: Add a small delay here if needed after a reset
                 # time.sleep(1)
                 # Continue to the start of the next loop iteration immediately
@@ -2363,7 +2893,9 @@ def run_bot():
             # === 2. Fetch Fresh Market Data ===
             df_ohlcv = fetch_ohlcv_data(exchange, symbol, timeframe, data_limit)
             if df_ohlcv is None or df_ohlcv.empty:
-                log_warning("Failed to fetch or process valid OHLCV data. Waiting for next cycle.")
+                log_warning(
+                    "Failed to fetch or process valid OHLCV data. Waiting for next cycle."
+                )
                 neon_sleep_timer(sleep_interval_seconds)
                 continue  # Skip rest of the cycle
 
@@ -2379,7 +2911,9 @@ def run_bot():
                 calc_vol_ma=entry_volume_confirmation_enabled,  # Only calculate if needed
             )
             if df_indicators is None or df_indicators.empty:
-                log_warning("Failed to calculate technical indicators. Waiting for next cycle.")
+                log_warning(
+                    "Failed to calculate technical indicators. Waiting for next cycle."
+                )
                 neon_sleep_timer(sleep_interval_seconds)
                 continue  # Skip rest of the cycle
 
@@ -2392,14 +2926,22 @@ def run_bot():
             stoch_k_col = f"STOCHk_{stoch_k}_{stoch_d}_{stoch_smooth_k}"
             stoch_d_col = f"STOCHd_{stoch_k}_{stoch_d}_{stoch_smooth_k}"
             atr_col_name = f"ATRr_{atr_length}" if needs_atr else None
-            vol_ma_col_name = f"VOL_MA_{entry_volume_ma_length}" if entry_volume_confirmation_enabled else None
+            vol_ma_col_name = (
+                f"VOL_MA_{entry_volume_ma_length}"
+                if entry_volume_confirmation_enabled
+                else None
+            )
 
             # Safely extract latest values, checking for existence and validity
             try:
                 current_price = float(latest_candle["close"])
                 float(latest_candle["high"])  # Needed for OB context
                 float(latest_candle["low"])  # Needed for OB context
-                current_volume = float(latest_candle["volume"]) if "volume" in latest_candle else None
+                current_volume = (
+                    float(latest_candle["volume"])
+                    if "volume" in latest_candle
+                    else None
+                )
 
                 latest_rsi = float(latest_candle[rsi_col_name])
                 latest_stoch_k = float(latest_candle[stoch_k_col])
@@ -2428,7 +2970,10 @@ def run_bot():
                         latest_vol_ma = None  # Treat non-positive MA as invalid
 
                 # Check for NaN in essential values after extraction
-                if any(math.isnan(v) for v in [current_price, latest_rsi, latest_stoch_k, latest_stoch_d]):
+                if any(
+                    math.isnan(v)
+                    for v in [current_price, latest_rsi, latest_stoch_k, latest_stoch_d]
+                ):
                     raise ValueError("NaN value found in essential indicator data.")
 
             except (KeyError, ValueError, TypeError) as e:
@@ -2451,13 +2996,20 @@ def run_bot():
 
             # Display current market stats
             display_market_stats(
-                current_price, latest_rsi, latest_stoch_k, latest_stoch_d, latest_atr, price_precision_digits
+                current_price,
+                latest_rsi,
+                latest_stoch_k,
+                latest_stoch_d,
+                latest_atr,
+                price_precision_digits,
             )
 
             # === 5. Identify Potential Order Blocks ===
             # Pass the DataFrame with indicators calculated
             bullish_ob, bearish_ob = identify_potential_order_block(
-                df=df_indicators, vol_thresh_mult=ob_volume_threshold_multiplier, lookback=ob_lookback
+                df=df_indicators,
+                vol_thresh_mult=ob_volume_threshold_multiplier,
+                lookback=ob_lookback,
             )
             display_order_blocks(bullish_ob, bearish_ob, price_precision_digits)
 
@@ -2471,7 +3023,9 @@ def run_bot():
                 # Check and potentially update the trailing stop loss
                 update_trailing_stop(exchange, symbol, current_price, latest_atr)
                 # No new entries considered while in a position
-                log_debug("Position active. Waiting for SL/TP/TSL or manual intervention.")
+                log_debug(
+                    "Position active. Waiting for SL/TP/TSL or manual intervention."
+                )
 
             # --- B. If NOT in a Position: Check for Entry Signals ---
             else:
@@ -2482,17 +3036,23 @@ def run_bot():
                 volume_condition_met = True  # Assume true if disabled
                 if entry_volume_confirmation_enabled:
                     if current_volume is not None and latest_vol_ma is not None:
-                        volume_condition_met = current_volume > latest_vol_ma * entry_volume_multiplier
+                        volume_condition_met = (
+                            current_volume > latest_vol_ma * entry_volume_multiplier
+                        )
                         log_debug(
                             f"Volume Check: Current Vol={current_volume:.2f}, Vol MA={latest_vol_ma:.2f}, Threshold={latest_vol_ma * entry_volume_multiplier:.2f} -> {'OK' if volume_condition_met else 'FAILED'}"
                         )
                     else:
                         volume_condition_met = False  # Fail if data missing
-                        log_debug("Volume Check: FAILED (Missing volume or Vol MA data)")
+                        log_debug(
+                            "Volume Check: FAILED (Missing volume or Vol MA data)"
+                        )
 
                 # 2. Base RSI & Stochastic Oversold/Overbought Signals
                 base_long_signal = (
-                    latest_rsi < rsi_oversold and latest_stoch_k < stoch_oversold and latest_stoch_d < stoch_oversold
+                    latest_rsi < rsi_oversold
+                    and latest_stoch_k < stoch_oversold
+                    and latest_stoch_d < stoch_oversold
                 )
                 base_short_signal = (
                     latest_rsi > rsi_overbought
@@ -2507,7 +3067,9 @@ def run_bot():
                 # 3. Order Block Confirmation
                 ob_confirmation_met = False
                 ob_entry_reason = ""
-                entry_order_block: Optional[Dict] = None  # Store the OB used for entry/SL refinement
+                entry_order_block: Optional[Dict] = (
+                    None  # Store the OB used for entry/SL refinement
+                )
 
                 if base_long_signal and bullish_ob:
                     # Check if current price is within the bullish OB range
@@ -2515,7 +3077,9 @@ def run_bot():
                         ob_confirmation_met = True
                         entry_order_block = bullish_ob
                         ob_entry_reason = f"Price ({current_price:.{price_precision_digits}f}) entered Bullish OB ({bullish_ob['low']:.{price_precision_digits}f} - {bullish_ob['high']:.{price_precision_digits}f})"
-                        log_debug(f"OB Confirmation: LONG Signal OK ({ob_entry_reason})")
+                        log_debug(
+                            f"OB Confirmation: LONG Signal OK ({ob_entry_reason})"
+                        )
                     else:
                         log_debug(
                             f"OB Confirmation: LONG Signal FAILED (Price {current_price:.{price_precision_digits}f} outside Bullish OB)"
@@ -2526,25 +3090,39 @@ def run_bot():
                         ob_confirmation_met = True
                         entry_order_block = bearish_ob
                         ob_entry_reason = f"Price ({current_price:.{price_precision_digits}f}) entered Bearish OB ({bearish_ob['low']:.{price_precision_digits}f} - {bearish_ob['high']:.{price_precision_digits}f})"
-                        log_debug(f"OB Confirmation: SHORT Signal OK ({ob_entry_reason})")
+                        log_debug(
+                            f"OB Confirmation: SHORT Signal OK ({ob_entry_reason})"
+                        )
                     else:
                         log_debug(
                             f"OB Confirmation: SHORT Signal FAILED (Price {current_price:.{price_precision_digits}f} outside Bearish OB)"
                         )
                 elif base_long_signal or base_short_signal:
                     # Base signal present, but no corresponding OB found or price not inside
-                    log_debug("OB Confirmation: FAILED (No suitable OB found or price outside range)")
+                    log_debug(
+                        "OB Confirmation: FAILED (No suitable OB found or price outside range)"
+                    )
 
                 # 4. Final Entry Decision
                 entry_side: Optional[str] = None  # 'long' or 'short'
                 entry_reason: str = ""
 
-                if base_long_signal and ob_confirmation_met and volume_condition_met and entry_order_block:
+                if (
+                    base_long_signal
+                    and ob_confirmation_met
+                    and volume_condition_met
+                    and entry_order_block
+                ):
                     entry_side = "long"
                     entry_reason = f"RSI({latest_rsi:.1f})<OS({rsi_oversold}), Stoch({latest_stoch_k:.1f},{latest_stoch_d:.1f})<OS({stoch_oversold}), {ob_entry_reason}"
                     if entry_volume_confirmation_enabled:
                         entry_reason += ", Volume Confirmed"
-                elif base_short_signal and ob_confirmation_met and volume_condition_met and entry_order_block:
+                elif (
+                    base_short_signal
+                    and ob_confirmation_met
+                    and volume_condition_met
+                    and entry_order_block
+                ):
                     entry_side = "short"
                     entry_reason = f"RSI({latest_rsi:.1f})>OB({rsi_overbought}), Stoch({latest_stoch_k:.1f},{latest_stoch_d:.1f})>OB({stoch_overbought}), {ob_entry_reason}"
                     if entry_volume_confirmation_enabled:
@@ -2573,26 +3151,38 @@ def run_bot():
                             sl_distance = latest_atr * atr_sl_multiplier
                             tp_distance = latest_atr * atr_tp_multiplier
                             initial_sl_price = (
-                                current_price - sl_distance if entry_side == "long" else current_price + sl_distance
+                                current_price - sl_distance
+                                if entry_side == "long"
+                                else current_price + sl_distance
                             )
                             initial_tp_price = (
-                                current_price + tp_distance if entry_side == "long" else current_price - tp_distance
+                                current_price + tp_distance
+                                if entry_side == "long"
+                                else current_price - tp_distance
                             )
                         else:
-                            log_error("Cannot calculate ATR-based SL/TP: Invalid ATR value. Aborting entry.")
+                            log_error(
+                                "Cannot calculate ATR-based SL/TP: Invalid ATR value. Aborting entry."
+                            )
                             continue  # Skip to next cycle
                     else:  # Fixed Percentage SL/TP
                         sl_multiplier = (
-                            1.0 - stop_loss_percentage if entry_side == "long" else 1.0 + stop_loss_percentage
+                            1.0 - stop_loss_percentage
+                            if entry_side == "long"
+                            else 1.0 + stop_loss_percentage
                         )
                         tp_multiplier = (
-                            1.0 + take_profit_percentage if entry_side == "long" else 1.0 - take_profit_percentage
+                            1.0 + take_profit_percentage
+                            if entry_side == "long"
+                            else 1.0 - take_profit_percentage
                         )
                         initial_sl_price = current_price * sl_multiplier
                         initial_tp_price = current_price * tp_multiplier
 
                     if initial_sl_price is None or initial_tp_price is None:
-                        log_error("Failed to calculate initial SL/TP prices. Aborting entry.")
+                        log_error(
+                            "Failed to calculate initial SL/TP prices. Aborting entry."
+                        )
                         continue
 
                     log_info(
@@ -2612,7 +3202,10 @@ def run_bot():
                     if entry_side == "long":
                         potential_refined_sl = ob_low - sl_buffer
                         # Use refined SL only if it's further away (safer) than initial calc AND still below entry
-                        if potential_refined_sl < initial_sl_price and potential_refined_sl < current_price:
+                        if (
+                            potential_refined_sl < initial_sl_price
+                            and potential_refined_sl < current_price
+                        ):
                             refined_sl_price = potential_refined_sl
                             log_info(
                                 f"Refining SL based on Bullish OB low ({ob_low:.{price_precision_digits}f}) to: {refined_sl_price:.{price_precision_digits}f}"
@@ -2620,7 +3213,10 @@ def run_bot():
                     else:  # Short entry
                         potential_refined_sl = ob_high + sl_buffer
                         # Use refined SL only if it's further away (safer) than initial calc AND still above entry
-                        if potential_refined_sl > initial_sl_price and potential_refined_sl > current_price:
+                        if (
+                            potential_refined_sl > initial_sl_price
+                            and potential_refined_sl > current_price
+                        ):
                             refined_sl_price = potential_refined_sl
                             log_info(
                                 f"Refining SL based on Bearish OB high ({ob_high:.{price_precision_digits}f}) to: {refined_sl_price:.{price_precision_digits}f}"
@@ -2631,23 +3227,35 @@ def run_bot():
 
                     # --- Step 3: Final SL/TP Validation & Formatting ---
                     try:
-                        final_sl_price_fmt = float(exchange.price_to_precision(symbol, final_sl_price))
-                        final_tp_price_fmt = float(exchange.price_to_precision(symbol, final_tp_price))
+                        final_sl_price_fmt = float(
+                            exchange.price_to_precision(symbol, final_sl_price)
+                        )
+                        final_tp_price_fmt = float(
+                            exchange.price_to_precision(symbol, final_tp_price)
+                        )
 
                         # Final logical check after formatting
                         if (
                             entry_side == "long"
-                            and (final_sl_price_fmt >= current_price or final_tp_price_fmt <= current_price)
+                            and (
+                                final_sl_price_fmt >= current_price
+                                or final_tp_price_fmt <= current_price
+                            )
                         ) or (
                             entry_side == "short"
-                            and (final_sl_price_fmt <= current_price or final_tp_price_fmt >= current_price)
+                            and (
+                                final_sl_price_fmt <= current_price
+                                or final_tp_price_fmt >= current_price
+                            )
                         ):
                             raise ValueError(
                                 f"Invalid final SL/TP logic after formatting: SL={final_sl_price_fmt}, TP={final_tp_price_fmt}, Entry={current_price}"
                             )
 
                     except ValueError as ve:
-                        log_error(f"Final SL/TP validation failed: {ve}. Aborting entry.")
+                        log_error(
+                            f"Final SL/TP validation failed: {ve}. Aborting entry."
+                        )
                         continue
                     except Exception as fmt_e:
                         log_error(
@@ -2668,7 +3276,9 @@ def run_bot():
                         risk_pct=risk_percentage,
                     )
                     if entry_quantity is None or entry_quantity <= 0:
-                        log_error("Position size calculation failed or returned zero/negative. Aborting entry.")
+                        log_error(
+                            "Position size calculation failed or returned zero/negative. Aborting entry."
+                        )
                         continue
 
                     # --- Step 5: Place Entry Market Order ---
@@ -2686,31 +3296,42 @@ def run_bot():
                         entry_order_id = entry_order_result["id"]
                         entry_status = entry_order_result.get("status")
                         # Use actual average fill price if available, else fallback to target entry price
-                        actual_entry_price = entry_order_result.get("average", entry_order_result.get("price"))
+                        actual_entry_price = entry_order_result.get(
+                            "average", entry_order_result.get("price")
+                        )
                         if actual_entry_price is None or actual_entry_price <= 0:
                             log_warning(
                                 f"Entry order {entry_order_id} filled, but average price not available. Using initial target price {current_price} for state."
                             )
                             actual_entry_price = current_price
                         else:
-                            actual_entry_price = float(actual_entry_price)  # Ensure float
+                            actual_entry_price = float(
+                                actual_entry_price
+                            )  # Ensure float
 
                         # Use actual filled quantity if available, else fallback to requested amount
                         actual_filled_quantity = entry_order_result.get("filled")
-                        if actual_filled_quantity is None or actual_filled_quantity <= 0:
+                        if (
+                            actual_filled_quantity is None
+                            or actual_filled_quantity <= 0
+                        ):
                             log_warning(
                                 f"Entry order {entry_order_id} filled, but filled quantity not available or zero. Using requested quantity {entry_quantity} for state."
                             )
                             actual_filled_quantity = entry_quantity
                         else:
-                            actual_filled_quantity = float(actual_filled_quantity)  # Ensure float
+                            actual_filled_quantity = float(
+                                actual_filled_quantity
+                            )  # Ensure float
 
                         log_info(
                             f"Entry market order placed/filled (ID: {entry_order_id}, Status: {entry_status}). Actual Entry Px: ~{actual_entry_price:.{price_precision_digits}f}, Filled Qty: {actual_filled_quantity:.{amount_precision_digits}f}"
                         )
 
                         # --- Place SL/TP Orders ---
-                        log_info(f"Placing protection orders for the new {entry_side.upper()} position...")
+                        log_info(
+                            f"Placing protection orders for the new {entry_side.upper()} position..."
+                        )
                         sl_id, tp_id, oco_id = place_sl_tp_orders(
                             exch=exchange,
                             sym=symbol,
@@ -2721,8 +3342,12 @@ def run_bot():
                         )
 
                         # --- Step 7: Update Position State (ONLY if protection placed) ---
-                        if oco_id or sl_id:  # Success if at least OCO or separate SL was placed
-                            log_info("Protection order(s) placed successfully. Updating position state.")
+                        if (
+                            oco_id or sl_id
+                        ):  # Success if at least OCO or separate SL was placed
+                            log_info(
+                                "Protection order(s) placed successfully. Updating position state."
+                            )
                             position.update(
                                 {
                                     "status": entry_side,
@@ -2731,7 +3356,9 @@ def run_bot():
                                     "order_id": entry_order_id,  # ID of the entry market order
                                     "stop_loss": final_sl_price_fmt,  # Final target SL
                                     "take_profit": final_tp_price_fmt,  # Final target TP
-                                    "entry_time": pd.Timestamp.now(tz="UTC"),  # Record entry time
+                                    "entry_time": pd.Timestamp.now(
+                                        tz="UTC"
+                                    ),  # Record entry time
                                     "sl_order_id": sl_id,  # Will be None if OCO used
                                     "tp_order_id": tp_id,  # Will be None if OCO used
                                     "oco_order_id": oco_id,  # Will be None if separate orders used
@@ -2741,12 +3368,20 @@ def run_bot():
                                 }
                             )
                             save_position_state()  # Persist the new active state
-                            display_position_status(position, price_precision_digits, amount_precision_digits)
-                            log_info(f"Successfully opened {entry_side.upper()} position and saved state.")
+                            display_position_status(
+                                position,
+                                price_precision_digits,
+                                amount_precision_digits,
+                            )
+                            log_info(
+                                f"Successfully opened {entry_side.upper()} position and saved state."
+                            )
 
                             # Optional warning if separate TP failed
                             if not oco_id and not tp_id and sl_id:
-                                log_warning("Entry and SL placement successful, but separate TP order failed.")
+                                log_warning(
+                                    "Entry and SL placement successful, but separate TP order failed."
+                                )
 
                         else:
                             # --- CRITICAL FAILURE: Entry filled, but protection failed ---
@@ -2754,11 +3389,17 @@ def run_bot():
                             log_error(
                                 f"  Entry order {entry_order_id} filled for {actual_filled_quantity:.{amount_precision_digits}f} {base_currency}"
                             )
-                            log_error("  BUT FAILED to place required SL/TP/OCO protection orders.")
+                            log_error(
+                                "  BUT FAILED to place required SL/TP/OCO protection orders."
+                            )
                             log_error("  !!! POSITION IS ACTIVE BUT UNPROTECTED !!!")
                             # Attempt Emergency Close
-                            log_warning("Attempting to place emergency market close order...")
-                            emergency_close_side = "sell" if entry_side == "long" else "buy"
+                            log_warning(
+                                "Attempting to place emergency market close order..."
+                            )
+                            emergency_close_side = (
+                                "sell" if entry_side == "long" else "buy"
+                            )
                             emergency_order = place_market_order(
                                 exch=exchange,
                                 sym=symbol,
@@ -2797,7 +3438,9 @@ def run_bot():
                 log_info(f"Waiting {wait_time_seconds:.1f} seconds until next cycle...")
                 neon_sleep_timer(int(round(wait_time_seconds)))
             else:
-                log_info("Cycle took longer than interval, starting next cycle immediately.")
+                log_info(
+                    "Cycle took longer than interval, starting next cycle immediately."
+                )
 
         # --- Graceful Shutdown Handling ---
         except KeyboardInterrupt:
@@ -2807,16 +3450,22 @@ def run_bot():
 
             # Attempt to cancel open orders only in live mode
             if not SIMULATION_MODE:
-                log_warning(f"Attempting to cancel any open orders for {symbol} on {exchange.name}...")
+                log_warning(
+                    f"Attempting to cancel any open orders for {symbol} on {exchange.name}..."
+                )
                 try:
                     # Use retry decorator for fetching orders on exit
                     @api_retry_decorator
-                    def fetch_open_orders_on_exit(e: ccxt.Exchange, s: str) -> List[Dict]:
+                    def fetch_open_orders_on_exit(
+                        e: ccxt.Exchange, s: str
+                    ) -> List[Dict]:
                         return e.fetch_open_orders(s)
 
                     open_orders = fetch_open_orders_on_exit(exchange, symbol)
                     if open_orders:
-                        log_info(f"Found {len(open_orders)} open orders for {symbol}. Attempting cancellation...")
+                        log_info(
+                            f"Found {len(open_orders)} open orders for {symbol}. Attempting cancellation..."
+                        )
                         cancelled_count = 0
                         failed_count = 0
                         for order in open_orders:
@@ -2836,12 +3485,19 @@ def run_bot():
                             f"Exit cancellation summary: {cancelled_count} cancelled/closed, {failed_count} failed."
                         )
                         if failed_count > 0:
-                            log_error("Some orders failed to cancel. Manual check on the exchange is recommended.")
+                            log_error(
+                                "Some orders failed to cancel. Manual check on the exchange is recommended."
+                            )
                     else:
                         log_info("No open orders found for {symbol} to cancel.")
                 except Exception as e:
-                    log_error(f"An error occurred during open order cancellation on exit: {e}", exc_info=True)
-                    log_error("Manual check of open orders on the exchange is strongly recommended.")
+                    log_error(
+                        f"An error occurred during open order cancellation on exit: {e}",
+                        exc_info=True,
+                    )
+                    log_error(
+                        "Manual check of open orders on the exchange is strongly recommended."
+                    )
             else:
                 log_info("Simulation mode: No orders to cancel on exit.")
 
@@ -2856,30 +3512,46 @@ def run_bot():
             ccxt.DDoSProtection,
         ) as e:
             log_error(
-                f"Recoverable CCXT Error encountered: {type(e).__name__}: {e}. Waiting and retrying...", exc_info=False
+                f"Recoverable CCXT Error encountered: {type(e).__name__}: {e}. Waiting and retrying...",
+                exc_info=False,
             )
             # Wait longer after rate limit errors
             wait_time = (
-                sleep_interval_seconds + 60 if isinstance(e, ccxt.RateLimitExceeded) else sleep_interval_seconds + 15
+                sleep_interval_seconds + 60
+                if isinstance(e, ccxt.RateLimitExceeded)
+                else sleep_interval_seconds + 15
             )
-            log_warning(f"Waiting for {wait_time} seconds before next cycle due to error.")
+            log_warning(
+                f"Waiting for {wait_time} seconds before next cycle due to error."
+            )
             neon_sleep_timer(wait_time)
         except ccxt.AuthenticationError as e:
             log_error(
-                f"!!! CRITICAL AUTHENTICATION ERROR: {e} !!! Check API credentials. Stopping bot.", exc_info=False
+                f"!!! CRITICAL AUTHENTICATION ERROR: {e} !!! Check API credentials. Stopping bot.",
+                exc_info=False,
             )
             save_position_state()  # Attempt to save state before exiting
             break  # Stop the bot on auth errors
         except ccxt.ExchangeError as e:
-            log_error(f"Unhandled CCXT Exchange Error: {type(e).__name__}: {e}. Waiting...", exc_info=True)
-            neon_sleep_timer(sleep_interval_seconds + 30)  # Wait longer for generic exchange errors
+            log_error(
+                f"Unhandled CCXT Exchange Error: {type(e).__name__}: {e}. Waiting...",
+                exc_info=True,
+            )
+            neon_sleep_timer(
+                sleep_interval_seconds + 30
+            )  # Wait longer for generic exchange errors
         except Exception as e:
-            log_error(f"!!! CRITICAL UNEXPECTED LOOP ERROR: {type(e).__name__}: {e} !!!", exc_info=True)
+            log_error(
+                f"!!! CRITICAL UNEXPECTED LOOP ERROR: {type(e).__name__}: {e} !!!",
+                exc_info=True,
+            )
             log_info("Attempting to save state before waiting...")
             try:
                 save_position_state()
             except Exception as save_err:
-                log_error(f"Failed to save state during critical error handling: {save_err}")
+                log_error(
+                    f"Failed to save state during critical error handling: {save_err}"
+                )
             log_warning("Waiting for 60 seconds before attempting to continue...")
             neon_sleep_timer(60)
 
@@ -2897,7 +3569,10 @@ if __name__ == "__main__":
         log_info(f"Bot exited via SystemExit (Code: {e.code}).")
     except Exception as main_exec_error:
         # Catch any critical errors during initial setup before the main loop starts
-        log_error(f"Critical error during bot initialization or top-level execution: {main_exec_error}", exc_info=True)
+        log_error(
+            f"Critical error during bot initialization or top-level execution: {main_exec_error}",
+            exc_info=True,
+        )
         sys.exit(1)  # Exit with error code
     finally:
         # Ensure logging resources are released cleanly

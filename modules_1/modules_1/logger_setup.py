@@ -3,7 +3,10 @@ import logging
 import os
 import sys
 from logging.handlers import RotatingFileHandler
-from datetime import datetime, timezone as dt_timezone  # For timezone aware datetime objects
+from datetime import (
+    datetime,
+    timezone as dt_timezone,
+)  # For timezone aware datetime objects
 
 # Import utility functions and classes
 from utils import LOG_DIRECTORY, SensitiveFormatter, get_timezone
@@ -19,7 +22,9 @@ class TimezoneAwareFormatter(SensitiveFormatter):
 
     def __init__(self, fmt=None, datefmt=None, style="%", timezone=None):
         super().__init__(fmt, datefmt, style)
-        self.timezone = timezone or get_timezone()  # Use provided TZ or default from utils
+        self.timezone = (
+            timezone or get_timezone()
+        )  # Use provided TZ or default from utils
 
     # Override formatTime to use timezone-aware datetime
     def formatTime(self, record, datefmt=None):
@@ -69,7 +74,10 @@ def configure_logging(config: dict):
                 handler.close()
                 root_logger.removeHandler(handler)
             except Exception as e:
-                print(f"Warning: Error removing/closing root handler: {e}", file=sys.stderr)
+                print(
+                    f"Warning: Error removing/closing root handler: {e}",
+                    file=sys.stderr,
+                )
 
     # Ensure log directory exists
     os.makedirs(LOG_DIRECTORY, exist_ok=True)
@@ -88,21 +96,32 @@ def configure_logging(config: dict):
     # --- Error Console Handler (for stderr) ---
     error_console_handler = logging.StreamHandler(sys.stderr)
     error_console_handler.setFormatter(console_formatter)  # Use same formatter
-    error_console_handler.setLevel(logging.WARNING)  # Only show warnings/errors on stderr
+    error_console_handler.setLevel(
+        logging.WARNING
+    )  # Only show warnings/errors on stderr
     # Check if a similar stderr handler already exists to avoid duplicates
-    stderr_exists = any(isinstance(h, logging.StreamHandler) and h.stream == sys.stderr for h in root_logger.handlers)
+    stderr_exists = any(
+        isinstance(h, logging.StreamHandler) and h.stream == sys.stderr
+        for h in root_logger.handlers
+    )
     if not stderr_exists:
         root_logger.addHandler(error_console_handler)
     else:
         for handler in root_logger.handlers:
-            if isinstance(handler, logging.StreamHandler) and handler.stream == sys.stderr:
+            if (
+                isinstance(handler, logging.StreamHandler)
+                and handler.stream == sys.stderr
+            ):
                 handler.setLevel(min(handler.level, logging.WARNING))
 
     # --- Main File Handler ---
     main_log_filename = os.path.join(LOG_DIRECTORY, "xrscalper_bot.log")
     try:
         file_handler = RotatingFileHandler(
-            main_log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+            main_log_filename,
+            maxBytes=10 * 1024 * 1024,
+            backupCount=5,
+            encoding="utf-8",
         )
         file_formatter = TimezoneAwareFormatter(
             "%(asctime)s - %(levelname)s - [%(name)s:%(lineno)d] - %(message)s",
@@ -113,7 +132,10 @@ def configure_logging(config: dict):
         file_handler.setLevel(logging.DEBUG)  # Log everything to file
         root_logger.addHandler(file_handler)
     except Exception as e:
-        print(f"CRITICAL ERROR: Could not set up main file logger {main_log_filename}: {e}", file=sys.stderr)
+        print(
+            f"CRITICAL ERROR: Could not set up main file logger {main_log_filename}: {e}",
+            file=sys.stderr,
+        )
 
     logging.getLogger("xrscalper_bot_init").info(
         f"Logging configured successfully with level: {logging.getLevelName(log_level)}"

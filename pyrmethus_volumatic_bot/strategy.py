@@ -56,9 +56,13 @@ class VolumaticOBStrategy:
             **params: Strategy parameters loaded from the configuration file.
                       See _parse_params for expected keys.
         """
-        self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")  # Specific logger
+        self.log = logging.getLogger(
+            f"{__name__}.{self.__class__.__name__}"
+        )  # Specific logger
         if not market_info:
-            raise ValueError("Market info (tickSize, qtyStep) is required for strategy initialization.")
+            raise ValueError(
+                "Market info (tickSize, qtyStep) is required for strategy initialization."
+            )
         self.market_info = market_info
         self._parse_params(params)
         self._validate_params()
@@ -94,19 +98,25 @@ class VolumaticOBStrategy:
             self.qty_step = Decimal(self.market_info["lotSizeFilter"]["qtyStep"])
         except (KeyError, TypeError) as e:
             self.log.error(f"Failed to extract tickSize/qtyStep from market_info: {e}")
-            raise ValueError("Market info missing required price/lot filter details.") from e
+            raise ValueError(
+                "Market info missing required price/lot filter details."
+            ) from e
 
         self.price_precision = self._get_decimal_places(self.tick_size)
         self.qty_precision = self._get_decimal_places(self.qty_step)
 
-        self.log.info(f"{Fore.MAGENTA}Initializing VolumaticOB Strategy Engine...{Style.RESET_ALL}")
+        self.log.info(
+            f"{Fore.MAGENTA}Initializing VolumaticOB Strategy Engine...{Style.RESET_ALL}"
+        )
         self.log.info(
             f"Params: TrendLen={self.length}, Pivots={self.pivot_left_h}/{self.pivot_right_h}, "
             f"MaxBoxes={self.max_boxes}, OB Source={self.ob_source}"
         )
         self.log.info(f"Minimum data points required: {self.min_data_len}")
         self.log.debug(f"Tick Size: {self.tick_size}, Qty Step: {self.qty_step}")
-        self.log.debug(f"Price Precision: {self.price_precision}, Qty Precision: {self.qty_precision}")
+        self.log.debug(
+            f"Price Precision: {self.price_precision}, Qty Precision: {self.qty_precision}"
+        )
 
     def _parse_params(self, params: Dict[str, Any]):
         """Load and type-cast parameters from the config dictionary."""
@@ -165,13 +175,19 @@ class VolumaticOBStrategy:
         Use ROUND_UP for buy SL/TP.
         """
         if not isinstance(price, (float, int)) or not np.isfinite(price):
-            self.log.warning(f"Invalid price value for rounding: {price}. Returning NaN.")
+            self.log.warning(
+                f"Invalid price value for rounding: {price}. Returning NaN."
+            )
             return np.nan
         try:
             # Use Decimal for precise rounding based on tick_size
-            return float(Decimal(str(price)).quantize(self.tick_size, rounding=rounding_mode))
+            return float(
+                Decimal(str(price)).quantize(self.tick_size, rounding=rounding_mode)
+            )
         except Exception as e:
-            self.log.error(f"Error rounding price {price} with tick_size {self.tick_size}: {e}")
+            self.log.error(
+                f"Error rounding price {price} with tick_size {self.tick_size}: {e}"
+            )
             return np.nan  # Return NaN on error
 
     def round_qty(self, qty: float) -> float:
@@ -180,7 +196,9 @@ class VolumaticOBStrategy:
         Ensures the quantity is a valid multiple of the minimum step.
         """
         if not isinstance(qty, (float, int)) or not np.isfinite(qty) or qty < 0:
-            self.log.warning(f"Invalid quantity value for rounding: {qty}. Returning 0.")
+            self.log.warning(
+                f"Invalid quantity value for rounding: {qty}. Returning 0."
+            )
             return 0.0
         try:
             # Use Decimal division and multiplication to round down to the nearest step
@@ -188,7 +206,9 @@ class VolumaticOBStrategy:
             rounded_qty = (qty_decimal // self.qty_step) * self.qty_step
             return float(rounded_qty)
         except Exception as e:
-            self.log.error(f"Error rounding quantity {qty} with qty_step {self.qty_step}: {e}")
+            self.log.error(
+                f"Error rounding quantity {qty} with qty_step {self.qty_step}: {e}"
+            )
             return 0.0  # Return 0 on error
 
     def _ema_swma(self, series: pd.Series, length: int) -> pd.Series:
@@ -213,7 +233,9 @@ class VolumaticOBStrategy:
         # Reindex to match original series index, filling gaps with NaN
         return ema_of_swma.reindex(series.index)
 
-    def _find_pivots(self, df: pd.DataFrame, left: int, right: int, is_high: bool) -> pd.Series:
+    def _find_pivots(
+        self, df: pd.DataFrame, left: int, right: int, is_high: bool
+    ) -> pd.Series:
         """
         Finds pivot high or pivot low points in a DataFrame series.
         Mimics the logic of Pine Script's ta.pivothigh/low functions.
@@ -235,7 +257,9 @@ class VolumaticOBStrategy:
             source_col = "close" if is_high else "open"
 
         if source_col not in df.columns:
-            self.log.error(f"Source column '{source_col}' not found in DataFrame for pivot calculation.")
+            self.log.error(
+                f"Source column '{source_col}' not found in DataFrame for pivot calculation."
+            )
             return pd.Series(np.nan, index=df.index)
 
         source_series = df[source_col]
@@ -243,7 +267,9 @@ class VolumaticOBStrategy:
 
         # Efficient vectorized approach (faster than Python loop for large data)
         # Pad series to handle boundary conditions during shifts easily
-        padded_source = pd.concat([pd.Series([np.nan] * left), source_series, pd.Series([np.nan] * right)])
+        padded_source = pd.concat(
+            [pd.Series([np.nan] * left), source_series, pd.Series([np.nan] * right)]
+        )
 
         # Check left side: current value must be strictly greater/less than left neighbors
         left_check = True
@@ -293,7 +319,9 @@ class VolumaticOBStrategy:
             return AnalysisResults(
                 dataframe=df_input,  # Return original df
                 last_signal="HOLD",
-                active_bull_boxes=[b for b in self.bull_boxes if b["active"]],  # Return copies of active boxes
+                active_bull_boxes=[
+                    b for b in self.bull_boxes if b["active"]
+                ],  # Return copies of active boxes
                 active_bear_boxes=[b for b in self.bear_boxes if b["active"]],
                 last_close=df_input["close"].iloc[-1] if not df_input.empty else np.nan,
                 current_trend=self.current_trend,
@@ -306,20 +334,28 @@ class VolumaticOBStrategy:
         self.log.debug(f"Analyzing {len(df)} candles ending {df.index[-1]}...")
 
         # --- Volumatic Trend Calculations ---
-        df["atr"] = ta.atr(df["high"], df["low"], df["close"], length=self.vol_atr_period)
+        df["atr"] = ta.atr(
+            df["high"], df["low"], df["close"], length=self.vol_atr_period
+        )
         df["ema1"] = self._ema_swma(df["close"], length=self.length)
-        df["ema2"] = ta.ema(df["close"], length=self.length, adjust=False)  # Use adjust=False
+        df["ema2"] = ta.ema(
+            df["close"], length=self.length, adjust=False
+        )  # Use adjust=False
 
         # Determine trend direction (True=UP, False=DOWN)
         # Use np.select for clarity, ffill to handle initial NaNs
         conditions = [df["ema1"] < df["ema2"], df["ema1"] >= df["ema2"]]
         choices = [True, False]
         df["trend_up"] = np.select(conditions, choices, default=np.nan)
-        df["trend_up"] = df["trend_up"].ffill()  # Forward fill trend after initial calculation
+        df["trend_up"] = df[
+            "trend_up"
+        ].ffill()  # Forward fill trend after initial calculation
 
         # Detect trend change, ignoring NaNs and the very first valid trend
         df["trend_changed"] = (
-            (df["trend_up"] != df["trend_up"].shift(1)) & df["trend_up"].notna() & df["trend_up"].shift(1).notna()
+            (df["trend_up"] != df["trend_up"].shift(1))
+            & df["trend_up"].notna()
+            & df["trend_up"].shift(1).notna()
         )
 
         # --- Update Levels on Trend Change ---
@@ -334,7 +370,9 @@ class VolumaticOBStrategy:
             is_initial_trend = self.current_trend is None
             if is_initial_trend:
                 self.current_trend = current_trend_up
-                self.log.info(f"Initial Trend detected: {'UP' if self.current_trend else 'DOWN'}")
+                self.log.info(
+                    f"Initial Trend detected: {'UP' if self.current_trend else 'DOWN'}"
+                )
                 trend_just_changed = True  # Force level update on first detection
 
             elif trend_just_changed and current_trend_up != self.current_trend:
@@ -345,7 +383,12 @@ class VolumaticOBStrategy:
                 # Level update logic moved inside the trend change block
 
             # Update levels IF trend just changed (or it's the initial trend) AND necessary values are valid
-            if trend_just_changed and pd.notna(current_ema1) and pd.notna(last_atr_value) and last_atr_value > 1e-9:
+            if (
+                trend_just_changed
+                and pd.notna(current_ema1)
+                and pd.notna(last_atr_value)
+                and last_atr_value > 1e-9
+            ):
                 self.upper = current_ema1 + last_atr_value * 3
                 self.lower = current_ema1 - last_atr_value * 3
                 self.lower_vol = self.lower + last_atr_value * 4
@@ -354,8 +397,16 @@ class VolumaticOBStrategy:
                 self.lower_vol = max(self.lower_vol, self.lower)
                 self.upper_vol = min(self.upper_vol, self.upper)
 
-                self.step_up = (self.lower_vol - self.lower) / 100 if self.lower_vol > self.lower else 0
-                self.step_dn = (self.upper - self.upper_vol) / 100 if self.upper > self.upper_vol else 0
+                self.step_up = (
+                    (self.lower_vol - self.lower) / 100
+                    if self.lower_vol > self.lower
+                    else 0
+                )
+                self.step_dn = (
+                    (self.upper - self.upper_vol) / 100
+                    if self.upper > self.upper_vol
+                    else 0
+                )
 
                 self.log.info(
                     f"Levels Updated @ {df.index[-1]}: U={self.upper:.{self.price_precision}f}, L={self.lower:.{self.price_precision}f}"
@@ -370,29 +421,40 @@ class VolumaticOBStrategy:
         # --- Volume Normalization ---
         # Calculate rolling percentile of volume
         roll_window = min(self.vol_percentile_len, len(df))
-        min_periods_vol = max(1, roll_window // 2)  # Require a reasonable number of periods
+        min_periods_vol = max(
+            1, roll_window // 2
+        )  # Require a reasonable number of periods
         # Use np.nanpercentile for robustness against NaNs within the window
         # Rolling apply can be slow; consider alternatives if needed
         df["vol_percentile_val"] = (
             df["volume"]
             .rolling(window=roll_window, min_periods=min_periods_vol)
             .apply(
-                lambda x: np.nanpercentile(x[x > 0], self.vol_percentile) if np.any(x > 0) else np.nan,
+                lambda x: np.nanpercentile(x[x > 0], self.vol_percentile)
+                if np.any(x > 0)
+                else np.nan,
                 raw=True,  # raw=True might be faster
             )
         )
 
         # Normalize volume based on the percentile value
         df["vol_norm"] = np.where(
-            (df["vol_percentile_val"].notna()) & (df["vol_percentile_val"] > 1e-9),  # Avoid division by zero/NaN
+            (df["vol_percentile_val"].notna())
+            & (df["vol_percentile_val"] > 1e-9),  # Avoid division by zero/NaN
             (df["volume"] / df["vol_percentile_val"] * 100),
             0,  # Assign 0 if percentile is NaN or (near) zero
         )
-        df["vol_norm"] = df["vol_norm"].fillna(0).astype(float)  # Ensure float type and fill any remaining NaNs
+        df["vol_norm"] = (
+            df["vol_norm"].fillna(0).astype(float)
+        )  # Ensure float type and fill any remaining NaNs
 
         # --- Pivot Order Block Calculations ---
-        df["ph"] = self._find_pivots(df, self.pivot_left_h, self.pivot_right_h, is_high=True)
-        df["pl"] = self._find_pivots(df, self.pivot_left_l, self.pivot_right_l, is_high=False)
+        df["ph"] = self._find_pivots(
+            df, self.pivot_left_h, self.pivot_right_h, is_high=True
+        )
+        df["pl"] = self._find_pivots(
+            df, self.pivot_left_l, self.pivot_right_l, is_high=False
+        )
 
         # --- Create and Manage Order Blocks ---
         # Use integer indices for easier list management and box IDs
@@ -411,7 +473,9 @@ class VolumaticOBStrategy:
             # Check for Bearish Box (Pivot High confirmation)
             # Pivot occurred at index `i - pivot_right_h`
             bear_pivot_occur_idx = i - self.pivot_right_h
-            if bear_pivot_occur_idx >= 0 and pd.notna(df["ph"].iloc[bear_pivot_occur_idx]):
+            if bear_pivot_occur_idx >= 0 and pd.notna(
+                df["ph"].iloc[bear_pivot_occur_idx]
+            ):
                 # Check if a box for this pivot index already exists
                 if not any(b["id"] == bear_pivot_occur_idx for b in self.bear_boxes):
                     ob_candle = df.iloc[bear_pivot_occur_idx]
@@ -426,7 +490,11 @@ class VolumaticOBStrategy:
                         bottom_price = min(ob_candle["open"], ob_candle["close"])
 
                     # Ensure valid prices and top >= bottom
-                    if pd.notna(top_price) and pd.notna(bottom_price) and top_price >= bottom_price:
+                    if (
+                        pd.notna(top_price)
+                        and pd.notna(bottom_price)
+                        and top_price >= bottom_price
+                    ):
                         # Check for zero-range OB (e.g., doji) - allow small range based on tick size
                         if abs(top_price - bottom_price) > float(
                             self.tick_size / 10
@@ -450,7 +518,9 @@ class VolumaticOBStrategy:
             # Check for Bullish Box (Pivot Low confirmation)
             # Pivot occurred at index `i - pivot_right_l`
             bull_pivot_occur_idx = i - self.pivot_right_l
-            if bull_pivot_occur_idx >= 0 and pd.notna(df["pl"].iloc[bull_pivot_occur_idx]):
+            if bull_pivot_occur_idx >= 0 and pd.notna(
+                df["pl"].iloc[bull_pivot_occur_idx]
+            ):
                 # Check if a box for this pivot index already exists
                 if not any(b["id"] == bull_pivot_occur_idx for b in self.bull_boxes):
                     ob_candle = df.iloc[bull_pivot_occur_idx]
@@ -464,7 +534,11 @@ class VolumaticOBStrategy:
                         top_price = max(ob_candle["open"], ob_candle["close"])
                         bottom_price = min(ob_candle["open"], ob_candle["close"])
 
-                    if pd.notna(top_price) and pd.notna(bottom_price) and top_price >= bottom_price:
+                    if (
+                        pd.notna(top_price)
+                        and pd.notna(bottom_price)
+                        and top_price >= bottom_price
+                    ):
                         if abs(top_price - bottom_price) > float(self.tick_size / 10):
                             new_box = OrderBlock(
                                 id=bull_pivot_occur_idx,
@@ -524,24 +598,50 @@ class VolumaticOBStrategy:
         # --- Prune Order Blocks ---
         # Keep only the 'max_boxes' most recent *active* boxes of each type.
         # Keep a limited number of recent inactive ones for context/debugging.
-        active_bull = sorted([b for b in self.bull_boxes if b["active"]], key=lambda x: x["id"], reverse=True)
-        inactive_bull = sorted([b for b in self.bull_boxes if not b["active"]], key=lambda x: x["id"], reverse=True)
+        active_bull = sorted(
+            [b for b in self.bull_boxes if b["active"]],
+            key=lambda x: x["id"],
+            reverse=True,
+        )
+        inactive_bull = sorted(
+            [b for b in self.bull_boxes if not b["active"]],
+            key=lambda x: x["id"],
+            reverse=True,
+        )
         initial_bull_len = len(self.bull_boxes)
         # Keep max_boxes active + double that number inactive (most recent ones)
-        self.bull_boxes = active_bull[: self.max_boxes] + inactive_bull[: self.max_boxes * 2]
+        self.bull_boxes = (
+            active_bull[: self.max_boxes] + inactive_bull[: self.max_boxes * 2]
+        )
         if len(self.bull_boxes) < initial_bull_len:
-            self.log.debug(f"Pruned {initial_bull_len - len(self.bull_boxes)} older Bull OBs.")
+            self.log.debug(
+                f"Pruned {initial_bull_len - len(self.bull_boxes)} older Bull OBs."
+            )
 
-        active_bear = sorted([b for b in self.bear_boxes if b["active"]], key=lambda x: x["id"], reverse=True)
-        inactive_bear = sorted([b for b in self.bear_boxes if not b["active"]], key=lambda x: x["id"], reverse=True)
+        active_bear = sorted(
+            [b for b in self.bear_boxes if b["active"]],
+            key=lambda x: x["id"],
+            reverse=True,
+        )
+        inactive_bear = sorted(
+            [b for b in self.bear_boxes if not b["active"]],
+            key=lambda x: x["id"],
+            reverse=True,
+        )
         initial_bear_len = len(self.bear_boxes)
-        self.bear_boxes = active_bear[: self.max_boxes] + inactive_bear[: self.max_boxes * 2]
+        self.bear_boxes = (
+            active_bear[: self.max_boxes] + inactive_bear[: self.max_boxes * 2]
+        )
         if len(self.bear_boxes) < initial_bear_len:
-            self.log.debug(f"Pruned {initial_bear_len - len(self.bear_boxes)} older Bear OBs.")
+            self.log.debug(
+                f"Pruned {initial_bear_len - len(self.bear_boxes)} older Bear OBs."
+            )
 
         # --- Signal Generation ---
         signal = "HOLD"  # Default signal
-        active_bull_boxes = [b for b in self.bull_boxes if b["active"]]  # Get currently active boxes
+        active_bull_boxes = [
+            b for b in self.bull_boxes if b["active"]
+        ]  # Get currently active boxes
         active_bear_boxes = [b for b in self.bear_boxes if b["active"]]
 
         # Check conditions only if trend and close price are valid
@@ -549,12 +649,16 @@ class VolumaticOBStrategy:
             # 1. Check for Trend Change Exit first
             if trend_just_changed:
                 # Check internal state to see if we were in a position that needs exiting
-                if not self.current_trend and self.last_signal_state == "BUY":  # Trend flipped DOWN while intended LONG
+                if (
+                    not self.current_trend and self.last_signal_state == "BUY"
+                ):  # Trend flipped DOWN while intended LONG
                     signal = "EXIT_LONG"
                     self.log.warning(
                         f"{Fore.YELLOW}{Style.BRIGHT}*** EXIT LONG Signal (Trend Flip to DOWN) at {current_close:.{self.price_precision}f} ***{Style.RESET_ALL}"
                     )
-                elif self.current_trend and self.last_signal_state == "SELL":  # Trend flipped UP while intended SHORT
+                elif (
+                    self.current_trend and self.last_signal_state == "SELL"
+                ):  # Trend flipped UP while intended SHORT
                     signal = "EXIT_SHORT"
                     self.log.warning(
                         f"{Fore.YELLOW}{Style.BRIGHT}*** EXIT SHORT Signal (Trend Flip to UP) at {current_close:.{self.price_precision}f} ***{Style.RESET_ALL}"
@@ -563,7 +667,9 @@ class VolumaticOBStrategy:
             # 2. Check for Entries only if not exiting and not already in the desired state
             if signal == "HOLD":  # Only look for entries if not exiting
                 if self.current_trend:  # Trend is UP -> Look for Long Entries
-                    if self.last_signal_state != "BUY":  # Only enter if not already intending long
+                    if (
+                        self.last_signal_state != "BUY"
+                    ):  # Only enter if not already intending long
                         # Check if price entered any active Bull OB
                         for box in active_bull_boxes:
                             # Check if close is within the box range (inclusive)
@@ -575,7 +681,9 @@ class VolumaticOBStrategy:
                                 break  # Take the first valid signal
 
                 elif not self.current_trend:  # Trend is DOWN -> Look for Short Entries
-                    if self.last_signal_state != "SELL":  # Only enter if not already intending short
+                    if (
+                        self.last_signal_state != "SELL"
+                    ):  # Only enter if not already intending short
                         # Check if price entered any active Bear OB
                         for box in active_bear_boxes:
                             if box["bottom"] <= current_close <= box["top"]:
@@ -591,9 +699,13 @@ class VolumaticOBStrategy:
         elif signal == "SELL":
             self.last_signal_state = "SELL"
         elif signal in ["EXIT_LONG", "EXIT_SHORT"]:
-            self.last_signal_state = "HOLD"  # After exit, we are neutral until a new entry signal
+            self.last_signal_state = (
+                "HOLD"  # After exit, we are neutral until a new entry signal
+            )
 
-        self.log.debug(f"Signal Generated: {signal} (Internal State: {self.last_signal_state})")
+        self.log.debug(
+            f"Signal Generated: {signal} (Internal State: {self.last_signal_state})"
+        )
 
         # Drop the temporary integer index column before returning
         df.drop(columns=["int_index"], inplace=True, errors="ignore")

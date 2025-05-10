@@ -80,7 +80,9 @@ ATR_STOP_LOSS_MULTIPLIER: float = float(
 ATR_TAKE_PROFIT_MULTIPLIER: float = float(
     os.getenv("ATR_TAKE_PROFIT_MULTIPLIER", 2.0)
 )  # Multiplier for ATR to set TP distance
-MAX_ORDER_USDT_AMOUNT: float = float(os.getenv("MAX_ORDER_USDT_AMOUNT", 500.0))  # Maximum position size in USDT value
+MAX_ORDER_USDT_AMOUNT: float = float(
+    os.getenv("MAX_ORDER_USDT_AMOUNT", 500.0)
+)  # Maximum position size in USDT value
 REQUIRED_MARGIN_BUFFER: float = float(
     os.getenv("REQUIRED_MARGIN_BUFFER", 1.05)
 )  # Margin check buffer (e.g., 1.05 = requires 5% extra free margin)
@@ -89,16 +91,28 @@ REQUIRED_MARGIN_BUFFER: float = float(
 # *** WARNING: Setting this to True enables a DANGEROUS and INACCURATE SL/TP mechanism ***
 # *** suitable ONLY for testing or non-latency-sensitive strategies. ***
 # *** For real scalping, KEEP THIS FALSE and implement exchange-native conditional orders. ***
-ENABLE_LOOP_SLTP_CHECK: bool = os.getenv("ENABLE_LOOP_SLTP_CHECK", "false").lower() == "true"  # Default to False
+ENABLE_LOOP_SLTP_CHECK: bool = (
+    os.getenv("ENABLE_LOOP_SLTP_CHECK", "false").lower() == "true"
+)  # Default to False
 
 # --- Supertrend Indicator Parameters ---
-DEFAULT_ST_ATR_LENGTH: int = int(os.getenv("ST_ATR_LENGTH", 7))  # Primary Supertrend ATR period
-DEFAULT_ST_MULTIPLIER: float = float(os.getenv("ST_MULTIPLIER", 2.5))  # Primary Supertrend ATR multiplier
-CONFIRM_ST_ATR_LENGTH: int = int(os.getenv("CONFIRM_ST_ATR_LENGTH", 5))  # Confirmation Supertrend ATR period
-CONFIRM_ST_MULTIPLIER: float = float(os.getenv("CONFIRM_ST_MULTIPLIER", 2.0))  # Confirmation Supertrend ATR multiplier
+DEFAULT_ST_ATR_LENGTH: int = int(
+    os.getenv("ST_ATR_LENGTH", 7)
+)  # Primary Supertrend ATR period
+DEFAULT_ST_MULTIPLIER: float = float(
+    os.getenv("ST_MULTIPLIER", 2.5)
+)  # Primary Supertrend ATR multiplier
+CONFIRM_ST_ATR_LENGTH: int = int(
+    os.getenv("CONFIRM_ST_ATR_LENGTH", 5)
+)  # Confirmation Supertrend ATR period
+CONFIRM_ST_MULTIPLIER: float = float(
+    os.getenv("CONFIRM_ST_MULTIPLIER", 2.0)
+)  # Confirmation Supertrend ATR multiplier
 
 # --- Volume Analysis Parameters ---
-VOLUME_MA_PERIOD: int = int(os.getenv("VOLUME_MA_PERIOD", 20))  # Moving average period for volume
+VOLUME_MA_PERIOD: int = int(
+    os.getenv("VOLUME_MA_PERIOD", 20)
+)  # Moving average period for volume
 VOLUME_SPIKE_THRESHOLD: float = float(
     os.getenv("VOLUME_SPIKE_THRESHOLD", 1.5)
 )  # Volume must be > this * MA for a spike
@@ -107,7 +121,9 @@ REQUIRE_VOLUME_SPIKE_FOR_ENTRY: bool = (
 )  # Require volume spike for entry signal
 
 # --- Order Book Analysis Parameters ---
-ORDER_BOOK_DEPTH: int = int(os.getenv("ORDER_BOOK_DEPTH", 10))  # Levels of bids/asks to analyze
+ORDER_BOOK_DEPTH: int = int(
+    os.getenv("ORDER_BOOK_DEPTH", 10)
+)  # Levels of bids/asks to analyze
 ORDER_BOOK_RATIO_THRESHOLD_LONG: float = float(
     os.getenv("ORDER_BOOK_RATIO_THRESHOLD_LONG", 1.2)
 )  # Bid/Ask volume ratio must be >= this for long confirmation
@@ -124,16 +140,24 @@ ATR_CALCULATION_PERIOD: int = int(
 )  # ATR period used specifically for SL/TP calculation
 
 # --- Termux SMS Alert Configuration (Set in .env) ---
-ENABLE_SMS_ALERTS: bool = os.getenv("ENABLE_SMS_ALERTS", "false").lower() == "true"  # Master switch for SMS alerts
-SMS_RECIPIENT_NUMBER: Optional[str] = os.getenv("SMS_RECIPIENT_NUMBER")  # Phone number to send alerts to
-SMS_TIMEOUT_SECONDS: int = int(os.getenv("SMS_TIMEOUT_SECONDS", 30))  # Timeout for the termux-sms-send command
+ENABLE_SMS_ALERTS: bool = (
+    os.getenv("ENABLE_SMS_ALERTS", "false").lower() == "true"
+)  # Master switch for SMS alerts
+SMS_RECIPIENT_NUMBER: Optional[str] = os.getenv(
+    "SMS_RECIPIENT_NUMBER"
+)  # Phone number to send alerts to
+SMS_TIMEOUT_SECONDS: int = int(
+    os.getenv("SMS_TIMEOUT_SECONDS", 30)
+)  # Timeout for the termux-sms-send command
 
 # --- CCXT / API Parameters ---
 DEFAULT_RECV_WINDOW: int = 15000  # API receive window (milliseconds)
 ORDER_BOOK_FETCH_LIMIT: int = max(
     25, ORDER_BOOK_DEPTH
 )  # How many OB levels to fetch (API often requires min 25/50/100)
-SHALLOW_OB_FETCH_DEPTH: int = 5  # Depth for quick best bid/ask fetch for entry price estimate
+SHALLOW_OB_FETCH_DEPTH: int = (
+    5  # Depth for quick best bid/ask fetch for entry price estimate
+)
 
 # --- Internal Constants ---
 SIDE_BUY: str = "buy"
@@ -145,10 +169,10 @@ USDT_SYMBOL: str = "USDT"  # Base currency symbol for balance checks
 RETRY_COUNT: int = 3  # Number of retries for certain API calls (e.g., leverage setting)
 RETRY_DELAY_SECONDS: int = 1  # Delay between retries
 API_FETCH_LIMIT_BUFFER: int = 5  # Fetch slightly more OHLCV data than strictly needed for indicator calculation buffer
-POSITION_QTY_EPSILON: float = (
-    1e-9  # Small value for floating point comparisons (e.g., checking if quantity is effectively zero)
+POSITION_QTY_EPSILON: float = 1e-9  # Small value for floating point comparisons (e.g., checking if quantity is effectively zero)
+POST_CLOSE_DELAY_SECONDS: int = (
+    2  # Brief delay after closing a position before potentially opening a new one
 )
-POST_CLOSE_DELAY_SECONDS: int = 2  # Brief delay after closing a position before potentially opening a new one
 
 
 # --- Logger Setup ---
@@ -185,13 +209,24 @@ logging.Logger.success = log_success  # type: ignore
 # ANSI escape codes for colored logging output (adjust based on terminal support)
 # Check if the output stream is a TTY (terminal) before adding colors
 if sys.stdout.isatty():
-    logging.addLevelName(logging.DEBUG, f"\033[90m{logging.getLevelName(logging.DEBUG)}\033[0m")  # Gray
-    logging.addLevelName(logging.INFO, f"\033[96m{logging.getLevelName(logging.INFO)}\033[0m")  # Cyan
-    logging.addLevelName(SUCCESS_LEVEL, f"\033[92m{logging.getLevelName(SUCCESS_LEVEL)}\033[0m")  # Green
-    logging.addLevelName(logging.WARNING, f"\033[93m{logging.getLevelName(logging.WARNING)}\033[0m")  # Yellow
-    logging.addLevelName(logging.ERROR, f"\033[91m{logging.getLevelName(logging.ERROR)}\033[0m")  # Red
     logging.addLevelName(
-        logging.CRITICAL, f"\033[91m\033[1m{logging.getLevelName(logging.CRITICAL)}\033[0m"
+        logging.DEBUG, f"\033[90m{logging.getLevelName(logging.DEBUG)}\033[0m"
+    )  # Gray
+    logging.addLevelName(
+        logging.INFO, f"\033[96m{logging.getLevelName(logging.INFO)}\033[0m"
+    )  # Cyan
+    logging.addLevelName(
+        SUCCESS_LEVEL, f"\033[92m{logging.getLevelName(SUCCESS_LEVEL)}\033[0m"
+    )  # Green
+    logging.addLevelName(
+        logging.WARNING, f"\033[93m{logging.getLevelName(logging.WARNING)}\033[0m"
+    )  # Yellow
+    logging.addLevelName(
+        logging.ERROR, f"\033[91m{logging.getLevelName(logging.ERROR)}\033[0m"
+    )  # Red
+    logging.addLevelName(
+        logging.CRITICAL,
+        f"\033[91m\033[1m{logging.getLevelName(logging.CRITICAL)}\033[0m",
     )  # Bold Red
 
 
@@ -213,7 +248,9 @@ def send_sms_alert(message: str) -> bool:
         logger.debug("SMS alerts disabled via configuration.")
         return False
     if not SMS_RECIPIENT_NUMBER:
-        logger.warning("SMS alerts enabled, but SMS_RECIPIENT_NUMBER not set in .env file.")
+        logger.warning(
+            "SMS alerts enabled, but SMS_RECIPIENT_NUMBER not set in .env file."
+        )
         return False
 
     try:
@@ -221,8 +258,12 @@ def send_sms_alert(message: str) -> bool:
         # No complex shell injection risk here with direct message content, shlex not strictly needed
         command: List[str] = ["termux-sms-send", "-n", SMS_RECIPIENT_NUMBER, message]
 
-        logger.info(f"Attempting to send SMS alert to {SMS_RECIPIENT_NUMBER} (Timeout: {SMS_TIMEOUT_SECONDS}s)...")
-        logger.debug(f"Executing command: {' '.join(command)}")  # Log the command for debugging
+        logger.info(
+            f"Attempting to send SMS alert to {SMS_RECIPIENT_NUMBER} (Timeout: {SMS_TIMEOUT_SECONDS}s)..."
+        )
+        logger.debug(
+            f"Executing command: {' '.join(command)}"
+        )  # Log the command for debugging
 
         result = subprocess.run(
             command,
@@ -233,11 +274,15 @@ def send_sms_alert(message: str) -> bool:
         )
 
         if result.returncode == 0:
-            logger.success(f"Termux API command for SMS to {SMS_RECIPIENT_NUMBER} executed successfully.")
+            logger.success(
+                f"Termux API command for SMS to {SMS_RECIPIENT_NUMBER} executed successfully."
+            )
             return True
         else:
             # Log detailed error information if the command failed
-            logger.error(f"Termux API command 'termux-sms-send' failed. Return code: {result.returncode}")
+            logger.error(
+                f"Termux API command 'termux-sms-send' failed. Return code: {result.returncode}"
+            )
             if result.stderr:
                 logger.error(f"Termux API Stderr: {result.stderr.strip()}")
             if result.stdout:  # Sometimes error info might be on stdout
@@ -262,7 +307,9 @@ def send_sms_alert(message: str) -> bool:
         )
         return False
     except Exception as e:
-        logger.error(f"An unexpected error occurred while sending SMS via Termux API: {e}")
+        logger.error(
+            f"An unexpected error occurred while sending SMS via Termux API: {e}"
+        )
         logger.debug(traceback.format_exc())  # Log full traceback for unexpected errors
         return False
 
@@ -278,7 +325,9 @@ def initialize_exchange() -> Optional[ccxt.Exchange]:
     """
     logger.info("Initializing CCXT Bybit connection...")
     if not BYBIT_API_KEY or not BYBIT_API_SECRET:
-        logger.critical("CRITICAL: BYBIT_API_KEY and/or BYBIT_API_SECRET missing in .env file.")
+        logger.critical(
+            "CRITICAL: BYBIT_API_KEY and/or BYBIT_API_SECRET missing in .env file."
+        )
         send_sms_alert("[ScalpBot] CRITICAL: API keys missing in .env. Bot stopped.")
         return None
 
@@ -301,7 +350,9 @@ def initialize_exchange() -> Optional[ccxt.Exchange]:
         exchange.load_markets()
         logger.debug("Fetching balance (tests authentication)...")
         exchange.fetch_balance()  # Throws AuthenticationError on bad keys
-        logger.info("CCXT Bybit Session Initialized (LIVE FUTURES SCALPING MODE - EXTREME CAUTION!).")
+        logger.info(
+            "CCXT Bybit Session Initialized (LIVE FUTURES SCALPING MODE - EXTREME CAUTION!)."
+        )
         send_sms_alert("[ScalpBot] Initialized successfully and authenticated.")
         return exchange
 
@@ -311,23 +362,33 @@ def initialize_exchange() -> Optional[ccxt.Exchange]:
         )
         send_sms_alert(f"[ScalpBot] CRITICAL: Authentication FAILED: {e}. Bot stopped.")
     except ccxt.NetworkError as e:
-        logger.critical(f"Network error during initialization: {e}. Check internet connection and Bybit status.")
+        logger.critical(
+            f"Network error during initialization: {e}. Check internet connection and Bybit status."
+        )
         send_sms_alert(f"[ScalpBot] CRITICAL: Network Error on Init: {e}. Bot stopped.")
     except ccxt.ExchangeError as e:
         logger.critical(
             f"Exchange error during initialization: {e}. Check Bybit status page or API documentation for details."
         )
-        send_sms_alert(f"[ScalpBot] CRITICAL: Exchange Error on Init: {e}. Bot stopped.")
+        send_sms_alert(
+            f"[ScalpBot] CRITICAL: Exchange Error on Init: {e}. Bot stopped."
+        )
     except Exception as e:
-        logger.critical(f"Failed to initialize exchange due to an unexpected error: {e}")
+        logger.critical(
+            f"Failed to initialize exchange due to an unexpected error: {e}"
+        )
         logger.debug(traceback.format_exc())
-        send_sms_alert(f"[ScalpBot] CRITICAL: Unexpected Init Error: {type(e).__name__}. Bot stopped.")
+        send_sms_alert(
+            f"[ScalpBot] CRITICAL: Unexpected Init Error: {type(e).__name__}. Bot stopped."
+        )
 
     return None
 
 
 # --- Indicator Calculation ---
-def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefix: str = "") -> pd.DataFrame:
+def calculate_supertrend(
+    df: pd.DataFrame, length: int, multiplier: float, prefix: str = ""
+) -> pd.DataFrame:
     """
     Calculates the Supertrend indicator using the pandas_ta library.
 
@@ -356,8 +417,12 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
     # Define the raw column names expected from pandas_ta based on its naming convention
     st_col_name = f"SUPERT_{length}_{multiplier}"  # Supertrend line value
     st_trend_col = f"SUPERTd_{length}_{multiplier}"  # Trend direction (-1 down, 1 up)
-    st_long_col = f"SUPERTl_{length}_{multiplier}"  # Lower band value (used when trend is up)
-    st_short_col = f"SUPERTs_{length}_{multiplier}"  # Upper band value (used when trend is down)
+    st_long_col = (
+        f"SUPERTl_{length}_{multiplier}"  # Lower band value (used when trend is up)
+    )
+    st_short_col = (
+        f"SUPERTs_{length}_{multiplier}"  # Upper band value (used when trend is down)
+    )
 
     # Input validation
     required_input_cols = ["high", "low", "close"]
@@ -382,7 +447,9 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
 
         # Verify that the expected raw columns were created
         if st_col_name not in df.columns or st_trend_col not in df.columns:
-            raise KeyError(f"pandas_ta failed to create expected raw columns: {st_col_name}, {st_trend_col}")
+            raise KeyError(
+                f"pandas_ta failed to create expected raw columns: {st_col_name}, {st_trend_col}"
+            )
 
         # --- Process and Rename Columns ---
         # 1. Rename the main Supertrend value column
@@ -394,13 +461,19 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
         # 3. Calculate flip signals: Signal is True *only* on the candle where the flip occurs
         prev_trend_direction = df[st_trend_col].shift(1)
         # Long signal: Previous was down (-1) and current is up (1)
-        df[f"{col_prefix}st_long"] = (prev_trend_direction == -1) & (df[st_trend_col] == 1)
+        df[f"{col_prefix}st_long"] = (prev_trend_direction == -1) & (
+            df[st_trend_col] == 1
+        )
         # Short signal: Previous was up (1) and current is down (-1)
-        df[f"{col_prefix}st_short"] = (prev_trend_direction == 1) & (df[st_trend_col] == -1)
+        df[f"{col_prefix}st_short"] = (prev_trend_direction == 1) & (
+            df[st_trend_col] == -1
+        )
 
         # --- Clean up intermediate pandas_ta columns ---
         # Identify all columns starting with 'SUPERT_' that are NOT our target columns
-        cols_to_drop = [c for c in df.columns if c.startswith("SUPERT_") and c not in target_cols]
+        cols_to_drop = [
+            c for c in df.columns if c.startswith("SUPERT_") and c not in target_cols
+        ]
         # Also explicitly add the raw trend direction and band value columns if they exist
         cols_to_drop.extend([st_trend_col, st_long_col, st_short_col])
         # Use set to avoid duplicates if target_cols somehow overlapped with raw names, drop safely
@@ -414,7 +487,9 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
         )
 
     except Exception as e:
-        logger.error(f"Indicator Calc: Error calculating {col_prefix}Supertrend({length}, {multiplier}): {e}")
+        logger.error(
+            f"Indicator Calc: Error calculating {col_prefix}Supertrend({length}, {multiplier}): {e}"
+        )
         logger.debug(traceback.format_exc())
         # Ensure target columns exist with NA values on error
         for col in target_cols:
@@ -423,7 +498,9 @@ def calculate_supertrend(df: pd.DataFrame, length: int, multiplier: float, prefi
 
 
 # --- Volume and ATR Analysis ---
-def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[str, Optional[float]]:
+def analyze_volume_atr(
+    df: pd.DataFrame, atr_len: int, vol_ma_len: int
+) -> Dict[str, Optional[float]]:
     """
     Calculates ATR, Volume Moving Average, and checks for volume spikes relative to the MA.
 
@@ -437,7 +514,12 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[
                                      'last_volume', 'volume_ratio'. Values are
                                      None if calculation fails or data is insufficient.
     """
-    results: Dict[str, Optional[float]] = {"atr": None, "volume_ma": None, "last_volume": None, "volume_ratio": None}
+    results: Dict[str, Optional[float]] = {
+        "atr": None,
+        "volume_ma": None,
+        "last_volume": None,
+        "volume_ratio": None,
+    }
     required_cols = ["high", "low", "close", "volume"]
 
     # Input validation
@@ -460,18 +542,26 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[
         if atr_col in df.columns and pd.notna(df[atr_col].iloc[-1]):
             results["atr"] = df[atr_col].iloc[-1]
         else:
-            logger.warning(f"Indicator Calc: Failed to calculate valid ATR({atr_len}). Check input data.")
+            logger.warning(
+                f"Indicator Calc: Failed to calculate valid ATR({atr_len}). Check input data."
+            )
         # Clean up ATR column
         df.drop(columns=[atr_col], errors="ignore", inplace=True)
 
         # Calculate Volume Moving Average
         volume_ma_col = "volume_ma"
         # Use min_periods to get MA sooner, but it might be less stable initially
-        df[volume_ma_col] = df["volume"].rolling(window=vol_ma_len, min_periods=max(1, vol_ma_len // 2)).mean()
+        df[volume_ma_col] = (
+            df["volume"]
+            .rolling(window=vol_ma_len, min_periods=max(1, vol_ma_len // 2))
+            .mean()
+        )
 
         if pd.notna(df[volume_ma_col].iloc[-1]):
             results["volume_ma"] = df[volume_ma_col].iloc[-1]
-            results["last_volume"] = df["volume"].iloc[-1]  # Get the volume of the last candle
+            results["last_volume"] = df["volume"].iloc[
+                -1
+            ]  # Get the volume of the last candle
 
             # Calculate Volume Ratio (Last Volume / Volume MA)
             # Check if MA is not None and significantly greater than zero before dividing
@@ -487,7 +577,9 @@ def analyze_volume_atr(df: pd.DataFrame, atr_len: int, vol_ma_len: int) -> Dict[
                     f"Indicator Calc: Volume ratio calculation skipped (LastVol={results['last_volume']}, VolMA={results['volume_ma']})"
                 )
         else:
-            logger.warning(f"Indicator Calc: Failed to calculate valid Volume MA({vol_ma_len}). Check input data.")
+            logger.warning(
+                f"Indicator Calc: Failed to calculate valid Volume MA({vol_ma_len}). Check input data."
+            )
         # Clean up Volume MA column
         df.drop(columns=[volume_ma_col], errors="ignore", inplace=True)
 
@@ -532,8 +624,15 @@ def analyze_order_book(
         Dict[str, Optional[float]]: Dictionary with 'bid_ask_ratio', 'spread',
                                      'best_bid', 'best_ask'. Values are None on failure.
     """
-    results: Dict[str, Optional[float]] = {"bid_ask_ratio": None, "spread": None, "best_bid": None, "best_ask": None}
-    logger.debug(f"Order Book: Fetching L2 for {symbol} (Analyze Depth: {depth}, API Fetch Limit: {fetch_limit})...")
+    results: Dict[str, Optional[float]] = {
+        "bid_ask_ratio": None,
+        "spread": None,
+        "best_bid": None,
+        "best_ask": None,
+    }
+    logger.debug(
+        f"Order Book: Fetching L2 for {symbol} (Analyze Depth: {depth}, API Fetch Limit: {fetch_limit})..."
+    )
 
     # Check if the exchange instance supports fetching L2 order book
     if not exchange.has.get("fetchL2OrderBook"):
@@ -551,7 +650,9 @@ def analyze_order_book(
             or not isinstance(order_book.get("bids"), list)
             or not isinstance(order_book.get("asks"), list)
         ):
-            logger.warning(f"Order Book: Incomplete or invalid data structure received for {symbol}. OB: {order_book}")
+            logger.warning(
+                f"Order Book: Incomplete or invalid data structure received for {symbol}. OB: {order_book}"
+            )
             return results
 
         bids: List[List[float]] = order_book["bids"]  # List of [price, amount]
@@ -567,7 +668,9 @@ def analyze_order_book(
         if best_bid > 0 and best_ask > 0:
             spread = best_ask - best_bid
             results["spread"] = spread
-            logger.debug(f"Order Book: Best Bid={best_bid:.4f}, Best Ask={best_ask:.4f}, Spread={spread:.4f}")
+            logger.debug(
+                f"Order Book: Best Bid={best_bid:.4f}, Best Ask={best_ask:.4f}, Spread={spread:.4f}"
+            )
         else:
             # Log even if spread calculation isn't possible (e.g., one side is empty)
             logger.debug(
@@ -576,8 +679,16 @@ def analyze_order_book(
 
         # Calculate cumulative volume within the specified analysis depth
         # Sum the 'amount' (index 1) for the top 'depth' levels
-        bid_volume_sum = sum(bid[1] for bid in bids[:depth] if len(bid) > 1 and isinstance(bid[1], (int, float)))
-        ask_volume_sum = sum(ask[1] for ask in asks[:depth] if len(ask) > 1 and isinstance(ask[1], (int, float)))
+        bid_volume_sum = sum(
+            bid[1]
+            for bid in bids[:depth]
+            if len(bid) > 1 and isinstance(bid[1], (int, float))
+        )
+        ask_volume_sum = sum(
+            ask[1]
+            for ask in asks[:depth]
+            if len(ask) > 1 and isinstance(ask[1], (int, float))
+        )
         logger.debug(
             f"Order Book: Analysis (Depth {depth}): Total Bid Vol={bid_volume_sum:.4f}, Total Ask Vol={ask_volume_sum:.4f}"
         )
@@ -588,22 +699,30 @@ def analyze_order_book(
         if ask_volume_sum > POSITION_QTY_EPSILON:
             bid_ask_ratio = bid_volume_sum / ask_volume_sum
             results["bid_ask_ratio"] = bid_ask_ratio
-            logger.debug(f"Order Book: Bid/Ask Ratio (Depth {depth}) = {bid_ask_ratio:.3f}")
+            logger.debug(
+                f"Order Book: Bid/Ask Ratio (Depth {depth}) = {bid_ask_ratio:.3f}"
+            )
         else:
             logger.debug(
                 f"Order Book: Bid/Ask Ratio calculation skipped (Ask volume at depth {depth} is zero or negligible)"
             )
 
     except ccxt.NetworkError as e:
-        logger.warning(f"Order Book: Network error fetching order book for {symbol}: {e}")
+        logger.warning(
+            f"Order Book: Network error fetching order book for {symbol}: {e}"
+        )
     except ccxt.ExchangeError as e:
-        logger.warning(f"Order Book: Exchange error fetching order book for {symbol}: {e}")
+        logger.warning(
+            f"Order Book: Exchange error fetching order book for {symbol}: {e}"
+        )
     except IndexError:
         logger.warning(
             f"Order Book: Index error processing bids/asks for {symbol}. Data might be malformed or empty. Bids: {bids[:2]}, Asks: {asks[:2]}"
         )
     except Exception as e:
-        logger.error(f"Order Book: Unexpected error analyzing order book for {symbol}: {e}")
+        logger.error(
+            f"Order Book: Unexpected error analyzing order book for {symbol}: {e}"
+        )
         logger.debug(traceback.format_exc())
         # Reset results to None on unexpected error
         results = {key: None for key in results}
@@ -611,7 +730,9 @@ def analyze_order_book(
 
 
 # --- Data Fetching ---
-def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: int = 100) -> Optional[pd.DataFrame]:
+def get_market_data(
+    exchange: ccxt.Exchange, symbol: str, interval: str, limit: int = 100
+) -> Optional[pd.DataFrame]:
     """
     Fetches OHLCV (Open, High, Low, Close, Volume) data from the exchange.
 
@@ -626,19 +747,29 @@ def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: 
                                  or None if fetching fails or data is invalid.
     """
     if not exchange.has.get("fetchOHLCV"):
-        logger.error(f"Data Fetch: Exchange '{exchange.id}' does not support fetchOHLCV method.")
+        logger.error(
+            f"Data Fetch: Exchange '{exchange.id}' does not support fetchOHLCV method."
+        )
         return None
     try:
-        logger.debug(f"Data Fetch: Fetching {limit} OHLCV candles for {symbol} (Timeframe: {interval})...")
+        logger.debug(
+            f"Data Fetch: Fetching {limit} OHLCV candles for {symbol} (Timeframe: {interval})..."
+        )
         # Fetch data: Returns a list of lists [timestamp, open, high, low, close, volume]
-        ohlcv: List[List[float]] = exchange.fetch_ohlcv(symbol, timeframe=interval, limit=limit)
+        ohlcv: List[List[float]] = exchange.fetch_ohlcv(
+            symbol, timeframe=interval, limit=limit
+        )
 
         if not ohlcv:
-            logger.warning(f"Data Fetch: No OHLCV data returned from exchange for {symbol} ({interval}).")
+            logger.warning(
+                f"Data Fetch: No OHLCV data returned from exchange for {symbol} ({interval})."
+            )
             return None
 
         # Convert to pandas DataFrame
-        df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
 
         # Convert timestamp to datetime objects (UTC) and set as index
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
@@ -654,10 +785,14 @@ def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: 
             df.ffill(inplace=True)
             # Check again after filling - if NaNs remain (e.g., at the very beginning), data is unusable
             if df.isnull().values.any():
-                logger.error("Data Fetch: NaN values remain after forward fill. Cannot proceed with this data batch.")
+                logger.error(
+                    "Data Fetch: NaN values remain after forward fill. Cannot proceed with this data batch."
+                )
                 return None
 
-        logger.debug(f"Data Fetch: Successfully fetched and processed {len(df)} OHLCV candles for {symbol}.")
+        logger.debug(
+            f"Data Fetch: Successfully fetched and processed {len(df)} OHLCV candles for {symbol}."
+        )
         return df
 
     except ccxt.NetworkError as e:
@@ -665,7 +800,9 @@ def get_market_data(exchange: ccxt.Exchange, symbol: str, interval: str, limit: 
     except ccxt.ExchangeError as e:
         logger.warning(f"Data Fetch: Exchange error fetching OHLCV for {symbol}: {e}")
     except Exception as e:
-        logger.error(f"Data Fetch: Unexpected error fetching market data for {symbol}: {e}")
+        logger.error(
+            f"Data Fetch: Unexpected error fetching market data for {symbol}: {e}"
+        )
         logger.debug(traceback.format_exc())
     return None
 
@@ -688,7 +825,11 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
                         for the specified symbol in One-Way mode.
     """
     # Default return value indicating no active position
-    default_pos: Dict[str, Any] = {"side": POSITION_SIDE_NONE, "qty": 0.0, "entry_price": 0.0}
+    default_pos: Dict[str, Any] = {
+        "side": POSITION_SIDE_NONE,
+        "qty": 0.0,
+        "entry_price": 0.0,
+    }
     ccxt_unified_symbol = symbol
     market_id = None
 
@@ -700,10 +841,14 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
             f"Position Check: Fetching position for CCXT symbol '{ccxt_unified_symbol}' (Target Exchange Market ID: '{market_id}')..."
         )
     except (ccxt.BadSymbol, KeyError) as e:
-        logger.error(f"Position Check: Failed to get market info/ID for '{ccxt_unified_symbol}': {e}")
+        logger.error(
+            f"Position Check: Failed to get market info/ID for '{ccxt_unified_symbol}': {e}"
+        )
         return default_pos
     except Exception as e:  # Catch other potential errors during market lookup
-        logger.error(f"Position Check: Unexpected error getting market info for '{ccxt_unified_symbol}': {e}")
+        logger.error(
+            f"Position Check: Unexpected error getting market info for '{ccxt_unified_symbol}': {e}"
+        )
         logger.debug(traceback.format_exc())
         return default_pos
 
@@ -740,9 +885,15 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
 
             # --- 1. Symbol Check ---
             # CCXT aims to return the unified symbol, but check info.symbol for the raw ID as backup/confirmation
-            pos_symbol_unified = pos.get("symbol")  # CCXT unified symbol (e.g., BTC/USDT:USDT)
-            pos_symbol_raw = pos.get("info", {}).get("symbol")  # Raw exchange symbol ID (e.g., BTCUSDT)
-            logger.debug(f"Position Check: Raw Symbol ID='{pos_symbol_raw}', Unified Symbol='{pos_symbol_unified}'")
+            pos_symbol_unified = pos.get(
+                "symbol"
+            )  # CCXT unified symbol (e.g., BTC/USDT:USDT)
+            pos_symbol_raw = pos.get("info", {}).get(
+                "symbol"
+            )  # Raw exchange symbol ID (e.g., BTCUSDT)
+            logger.debug(
+                f"Position Check: Raw Symbol ID='{pos_symbol_raw}', Unified Symbol='{pos_symbol_unified}'"
+            )
 
             # Match against the target market ID obtained earlier
             if pos_symbol_raw != market_id:
@@ -754,7 +905,9 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
 
             # --- 2. Position Mode Check (Assume One-Way) ---
             # Bybit V5 uses `positionIdx`: 0 for One-Way, 1 for Buy Hedge, 2 for Sell Hedge
-            position_idx = pos.get("info", {}).get("positionIdx", 0)  # Default to 0 (One-Way) if not present
+            position_idx = pos.get("info", {}).get(
+                "positionIdx", 0
+            )  # Default to 0 (One-Way) if not present
             if position_idx != 0:  # Strict check for One-Way mode
                 logger.debug(
                     f"Skipping position entry: Position Index is {position_idx} (Expected 0 for One-Way Mode). This bot only supports One-Way mode."
@@ -764,7 +917,9 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
 
             # --- 3. Strict Side Check (Using Bybit V5 'side' from 'info') ---
             # This is crucial for V5. 'side' indicates the position direction ('Buy', 'Sell') or 'None' if flat.
-            pos_side_v5 = pos.get("info", {}).get("side", "None")  # Expected: 'Buy', 'Sell', or 'None'
+            pos_side_v5 = pos.get("info", {}).get(
+                "side", "None"
+            )  # Expected: 'Buy', 'Sell', or 'None'
             logger.debug(f"Raw position side from info.side: '{pos_side_v5}'")
 
             determined_side = POSITION_SIDE_NONE
@@ -806,10 +961,18 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
                     entry_price_str = pos.get("entryPrice")  # CCXT unified field
                     # Fallback to raw Bybit V5 'avgPrice' if unified 'entryPrice' is missing or invalid
                     try:
-                        if entry_price_str is None or entry_price_str == "" or float(entry_price_str) <= 0:
-                            entry_price_str = pos.get("info", {}).get("avgPrice")  # Raw field often more reliable
+                        if (
+                            entry_price_str is None
+                            or entry_price_str == ""
+                            or float(entry_price_str) <= 0
+                        ):
+                            entry_price_str = pos.get("info", {}).get(
+                                "avgPrice"
+                            )  # Raw field often more reliable
                     except (ValueError, TypeError):
-                        entry_price_str = pos.get("info", {}).get("avgPrice")  # Fallback on conversion error
+                        entry_price_str = pos.get("info", {}).get(
+                            "avgPrice"
+                        )  # Fallback on conversion error
 
                     entry_price = 0.0
                     if entry_price_str is not None and entry_price_str != "":
@@ -825,7 +988,11 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
                     logger.info(
                         f"Position Check: Found ACTIVE position: {determined_side} {qty_abs:.8f} {market_id} @ Entry={entry_price:.4f}"
                     )
-                    return {"side": determined_side, "qty": qty_abs, "entry_price": entry_price}
+                    return {
+                        "side": determined_side,
+                        "qty": qty_abs,
+                        "entry_price": entry_price,
+                    }
                 else:
                     # Size is zero or negligible, even though side was 'Buy' or 'Sell' (possible API state inconsistency or dust)
                     logger.debug(
@@ -848,11 +1015,17 @@ def get_current_position(exchange: ccxt.Exchange, symbol: str) -> Dict[str, Any]
 
     # --- Error Handling for fetch_positions call ---
     except ccxt.NetworkError as e:
-        logger.warning(f"Position Check: Network error during fetch_positions for {symbol}: {e}")
+        logger.warning(
+            f"Position Check: Network error during fetch_positions for {symbol}: {e}"
+        )
     except ccxt.ExchangeError as e:
-        logger.warning(f"Position Check: Exchange error during fetch_positions for {symbol}: {e}")
+        logger.warning(
+            f"Position Check: Exchange error during fetch_positions for {symbol}: {e}"
+        )
     except Exception as e:
-        logger.error(f"Position Check: Unexpected error during position check for {symbol}: {e}")
+        logger.error(
+            f"Position Check: Unexpected error during position check for {symbol}: {e}"
+        )
         logger.debug(traceback.format_exc())
 
     # Return default (no position) if any error occurred during the process
@@ -876,7 +1049,9 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
     Returns:
         bool: True if leverage is successfully set (or was already correct), False otherwise.
     """
-    logger.info(f"Leverage Setting: Attempting to set {leverage}x leverage for {symbol}...")
+    logger.info(
+        f"Leverage Setting: Attempting to set {leverage}x leverage for {symbol}..."
+    )
     try:
         market = exchange.market(symbol)
         # --- Market Type Check ---
@@ -887,13 +1062,19 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
                 f"Leverage Setting: Cannot set leverage for non-contract market: {symbol}. Market type: {market.get('type')}"
             )
             return False
-        logger.debug(f"Market info for {symbol}: Type={market.get('type')}, Contract={market.get('contract')}")
+        logger.debug(
+            f"Market info for {symbol}: Type={market.get('type')}, Contract={market.get('contract')}"
+        )
 
     except (ccxt.BadSymbol, KeyError) as e:
-        logger.error(f"Leverage Setting: Failed to get market info for symbol '{symbol}': {e}")
+        logger.error(
+            f"Leverage Setting: Failed to get market info for symbol '{symbol}': {e}"
+        )
         return False
     except Exception as e:
-        logger.error(f"Leverage Setting: Unexpected error getting market info for {symbol}: {e}")
+        logger.error(
+            f"Leverage Setting: Unexpected error getting market info for {symbol}: {e}"
+        )
         logger.debug(traceback.format_exc())
         return False
 
@@ -906,7 +1087,9 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
             logger.debug(
                 f"Leverage Setting: Calling exchange.set_leverage({leverage}, '{symbol}') (Attempt {attempt + 1}/{RETRY_COUNT})"
             )
-            response = exchange.set_leverage(leverage=leverage, symbol=symbol)  # Named args for clarity
+            response = exchange.set_leverage(
+                leverage=leverage, symbol=symbol
+            )  # Named args for clarity
             # Response format varies by exchange, log it for info
             logger.success(
                 f"Leverage Setting: Successfully set leverage to {leverage}x for {symbol}. Response: {response}"
@@ -928,9 +1111,13 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
                 return True
 
             # Log other exchange errors and retry if attempts remain
-            logger.warning(f"Leverage Setting: Exchange error on attempt {attempt + 1}/{RETRY_COUNT} for {symbol}: {e}")
+            logger.warning(
+                f"Leverage Setting: Exchange error on attempt {attempt + 1}/{RETRY_COUNT} for {symbol}: {e}"
+            )
             if attempt < RETRY_COUNT - 1:
-                logger.debug(f"Retrying leverage setting after {RETRY_DELAY_SECONDS}s...")
+                logger.debug(
+                    f"Retrying leverage setting after {RETRY_DELAY_SECONDS}s..."
+                )
                 time.sleep(RETRY_DELAY_SECONDS)
             else:
                 logger.error(
@@ -940,7 +1127,9 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
                 # send_sms_alert(f"[{symbol.split('/')[0]}] CRITICAL: Leverage set FAILED for {symbol} after retries: {e}")
 
         except ccxt.NetworkError as e:
-            logger.warning(f"Leverage Setting: Network error on attempt {attempt + 1}/{RETRY_COUNT} for {symbol}: {e}")
+            logger.warning(
+                f"Leverage Setting: Network error on attempt {attempt + 1}/{RETRY_COUNT} for {symbol}: {e}"
+            )
             if attempt < RETRY_COUNT - 1:
                 time.sleep(RETRY_DELAY_SECONDS)
             else:
@@ -950,7 +1139,9 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
 
         except Exception as e:
             # Catch any other unexpected exceptions during the process
-            logger.error(f"Leverage Setting: Unexpected error on attempt {attempt + 1} for {symbol}: {e}")
+            logger.error(
+                f"Leverage Setting: Unexpected error on attempt {attempt + 1} for {symbol}: {e}"
+            )
             logger.debug(traceback.format_exc())
             return False  # Exit immediately on unexpected errors
 
@@ -960,7 +1151,10 @@ def set_leverage(exchange: ccxt.Exchange, symbol: str, leverage: int) -> bool:
 
 # --- Close Position ---
 def close_position(
-    exchange: ccxt.Exchange, symbol: str, position_to_close: Dict[str, Any], reason: str = "Signal"
+    exchange: ccxt.Exchange,
+    symbol: str,
+    position_to_close: Dict[str, Any],
+    reason: str = "Signal",
 ) -> Optional[Dict[str, Any]]:
     """
     Closes the specified active position using a market order with reduce_only=True.
@@ -991,13 +1185,18 @@ def close_position(
     # Fetch the position state *again* immediately before attempting to close.
     # This helps prevent errors if the position was closed manually or by another
     # process between the main logic check and this function call.
-    logger.debug(f"Close Position: Re-validating current position state for {symbol}...")
+    logger.debug(
+        f"Close Position: Re-validating current position state for {symbol}..."
+    )
     live_position = get_current_position(exchange, symbol)
     live_position_side = live_position.get("side")
     live_amount_to_close = live_position.get("qty", 0.0)
 
     # Check if the live position still exists and matches the expected side (loosely)
-    if live_position_side == POSITION_SIDE_NONE or live_amount_to_close <= POSITION_QTY_EPSILON:
+    if (
+        live_position_side == POSITION_SIDE_NONE
+        or live_amount_to_close <= POSITION_QTY_EPSILON
+    ):
         logger.warning(
             f"Close Position: Re-validation shows NO active position for {symbol} (Live Side: {live_position_side}, Qty: {live_amount_to_close:.8f}). Aborting close attempt."
         )
@@ -1013,7 +1212,9 @@ def close_position(
     #     logger.warning(f"Close Position: Re-validation shows position side ({live_position_side}) differs from initial ({initial_side}). Closing the live position anyway.")
 
     # Use the freshly validated quantity and determine the closing side
-    side_to_execute_close = SIDE_SELL if live_position_side == POSITION_SIDE_LONG else SIDE_BUY
+    side_to_execute_close = (
+        SIDE_SELL if live_position_side == POSITION_SIDE_LONG else SIDE_BUY
+    )
 
     try:
         # Format the amount to the exchange's required precision
@@ -1034,15 +1235,28 @@ def close_position(
         )
 
         # --- Execute the Closing Market Order ---
-        params = {"reduce_only": True}  # Ensure this order only closes/reduces the position
+        params = {
+            "reduce_only": True
+        }  # Ensure this order only closes/reduces the position
         order = exchange.create_market_order(
-            symbol=symbol, side=side_to_execute_close, amount=amount_float, params=params
+            symbol=symbol,
+            side=side_to_execute_close,
+            amount=amount_float,
+            params=params,
         )
         # --- Post-Order Placement ---
         # Log success and key order details
-        fill_price_str = f"{order.get('average'):.4f}" if order.get("average") is not None else "Market (Check Fills)"
-        filled_qty_str = f"{order.get('filled'):.8f}" if order.get("filled") is not None else "?"
-        order_id_short = str(order.get("id", "N/A"))[-6:]  # Get last 6 chars of ID for brevity
+        fill_price_str = (
+            f"{order.get('average'):.4f}"
+            if order.get("average") is not None
+            else "Market (Check Fills)"
+        )
+        filled_qty_str = (
+            f"{order.get('filled'):.8f}" if order.get("filled") is not None else "?"
+        )
+        order_id_short = str(order.get("id", "N/A"))[
+            -6:
+        ]  # Get last 6 chars of ID for brevity
         cost_str = (
             f"{order.get('cost'):.2f}" if order.get("cost") is not None else "N/A"
         )  # Cost in quote currency (USDT)
@@ -1063,28 +1277,42 @@ def close_position(
     # --- Error Handling for Order Creation ---
     except ccxt.InsufficientFunds as e:
         # This *shouldn't* happen often with reduce_only, but possible in weird margin scenarios
-        logger.error(f"Close Position ({reason}): Insufficient funds error during close attempt: {e}")
-        send_sms_alert(f"[{market_base}] ERROR Closing ({reason}): Insufficient funds! Check margin.")
+        logger.error(
+            f"Close Position ({reason}): Insufficient funds error during close attempt: {e}"
+        )
+        send_sms_alert(
+            f"[{market_base}] ERROR Closing ({reason}): Insufficient funds! Check margin."
+        )
     except ccxt.NetworkError as e:
-        logger.error(f"Close Position ({reason}): Network error placing close order: {e}")
+        logger.error(
+            f"Close Position ({reason}): Network error placing close order: {e}"
+        )
         # SMS might fail here too if network is down
     except ccxt.ExchangeError as e:
         # Log the specific error message from the exchange (e.g., "position is zero", etc.)
-        logger.error(f"Close Position ({reason}): Exchange error placing close order: {e}")
+        logger.error(
+            f"Close Position ({reason}): Exchange error placing close order: {e}"
+        )
         # Check for specific common errors if needed (e.g., position already closed)
         # if "order would not reduce position size" in str(e).lower():
         #     logger.warning(f"Close Position ({reason}): Exchange indicates order would not reduce size. Position likely already closed or closing.")
         #     return None # Treat as potentially already closed
-        send_sms_alert(f"[{market_base}] ERROR Closing ({reason}): Exchange error ({type(e).__name__}). Check logs.")
+        send_sms_alert(
+            f"[{market_base}] ERROR Closing ({reason}): Exchange error ({type(e).__name__}). Check logs."
+        )
     except ValueError as e:
         # Catch potential errors from amount_to_precision or float conversion
         logger.error(
             f"Close Position ({reason}): Value error during amount processing (Qty: {live_amount_to_close}): {e}"
         )
     except Exception as e:
-        logger.error(f"Close Position ({reason}): Unexpected error placing close order: {e}")
+        logger.error(
+            f"Close Position ({reason}): Unexpected error placing close order: {e}"
+        )
         logger.debug(traceback.format_exc())
-        send_sms_alert(f"[{market_base}] ERROR Closing ({reason}): Unexpected error ({type(e).__name__}). Check logs.")
+        send_sms_alert(
+            f"[{market_base}] ERROR Closing ({reason}): Unexpected error ({type(e).__name__}). Check logs."
+        )
 
     # Return None if any exception occurred during order placement
     return None
@@ -1159,7 +1387,9 @@ def calculate_position_size(
     try:
         quantity_precise_str = exchange.amount_to_precision(symbol, quantity)
         quantity_precise = float(quantity_precise_str)
-        logger.debug(f"Risk Calc: Raw Qty={quantity:.8f}, Precise Qty={quantity_precise_str}")
+        logger.debug(
+            f"Risk Calc: Raw Qty={quantity:.8f}, Precise Qty={quantity_precise_str}"
+        )
         quantity = quantity_precise  # Use the precise quantity for further calculations
     except Exception as e:
         logger.warning(
@@ -1220,14 +1450,18 @@ def place_risked_market_order(
         Optional[Dict[str, Any]]: The CCXT order dictionary if the order was successfully placed, None otherwise.
     """
     market_base = symbol.split("/")[0]  # For concise SMS alerts
-    logger.info(f"Place Order: Initiating {side.upper()} market order placement for {symbol}...")
+    logger.info(
+        f"Place Order: Initiating {side.upper()} market order placement for {symbol}..."
+    )
 
     # --- Pre-computation Checks ---
     if current_atr is None or current_atr <= 0:
         logger.error(
             f"Place Order ({side.upper()}): Invalid ATR value ({current_atr}) provided for SL calculation. Cannot place order."
         )
-        send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Invalid ATR provided.")
+        send_sms_alert(
+            f"[{market_base}] ORDER FAIL ({side.upper()}): Invalid ATR provided."
+        )
         return None
 
     entry_price_estimate: Optional[float] = None
@@ -1245,8 +1479,12 @@ def place_risked_market_order(
         price_limits = limits.get("price", {})
         min_qty = amount_limits.get("min")
         max_qty = amount_limits.get("max")
-        qty_precision = market.get("precision", {}).get("amount")  # Number of decimal places for quantity
-        price_precision = market.get("precision", {}).get("price")  # Number of decimal places for price
+        qty_precision = market.get("precision", {}).get(
+            "amount"
+        )  # Number of decimal places for quantity
+        price_precision = market.get("precision", {}).get(
+            "price"
+        )  # Number of decimal places for price
 
         # Get available equity/free balance in USDT
         usdt_balance = balance.get(USDT_SYMBOL, {})
@@ -1267,14 +1505,22 @@ def place_risked_market_order(
             logger.error(
                 f"Place Order ({side.upper()}): Cannot determine valid account equity (USDT total/free is zero, negative, or None)."
             )
-            send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Zero/Invalid equity.")
+            send_sms_alert(
+                f"[{market_base}] ORDER FAIL ({side.upper()}): Zero/Invalid equity."
+            )
             return None
         if usdt_free is None or usdt_free < 0:  # Free margin must be available
-            logger.error(f"Place Order ({side.upper()}): Invalid free margin (USDT free is {usdt_free}).")
-            send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Invalid free margin.")
+            logger.error(
+                f"Place Order ({side.upper()}): Invalid free margin (USDT free is {usdt_free})."
+            )
+            send_sms_alert(
+                f"[{market_base}] ORDER FAIL ({side.upper()}): Invalid free margin."
+            )
             return None
 
-        logger.debug(f"Place Order: Account Balance -> Equity={usdt_equity:.2f} USDT, Free Margin={usdt_free:.2f} USDT")
+        logger.debug(
+            f"Place Order: Account Balance -> Equity={usdt_equity:.2f} USDT, Free Margin={usdt_free:.2f} USDT"
+        )
         logger.debug(
             f"Place Order: Market Limits -> MinQty={min_qty}, MaxQty={max_qty}, QtyPrec={qty_precision}, PricePrec={price_precision}"
         )
@@ -1284,8 +1530,12 @@ def place_risked_market_order(
 
         # --- 2. Estimate Entry Price ---
         # Use a shallow order book fetch for a slightly more realistic entry price estimate than ticker 'last'
-        logger.debug(f"Place Order: Fetching shallow OB (depth {SHALLOW_OB_FETCH_DEPTH}) for entry price estimate...")
-        ob_data = analyze_order_book(exchange, symbol, SHALLOW_OB_FETCH_DEPTH, SHALLOW_OB_FETCH_DEPTH)
+        logger.debug(
+            f"Place Order: Fetching shallow OB (depth {SHALLOW_OB_FETCH_DEPTH}) for entry price estimate..."
+        )
+        ob_data = analyze_order_book(
+            exchange, symbol, SHALLOW_OB_FETCH_DEPTH, SHALLOW_OB_FETCH_DEPTH
+        )
         best_ask = ob_data.get("best_ask")
         best_bid = ob_data.get("best_bid")
 
@@ -1312,7 +1562,9 @@ def place_risked_market_order(
                         f"Place Order: Using ticker 'last' price {entry_price_estimate:.4f} as entry estimate."
                     )
             except Exception as ticker_err:
-                logger.error(f"Place Order: Failed to fetch ticker price as fallback: {ticker_err}")
+                logger.error(
+                    f"Place Order: Failed to fetch ticker price as fallback: {ticker_err}"
+                )
                 entry_price_estimate = None  # Ensure it's None if ticker fails too
 
         # Validate the estimated entry price
@@ -1320,7 +1572,9 @@ def place_risked_market_order(
             logger.error(
                 f"Place Order ({side.upper()}): Could not determine a valid entry price estimate (Estimate: {entry_price_estimate}). Cannot place order."
             )
-            send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): No valid entry price estimate.")
+            send_sms_alert(
+                f"[{market_base}] ORDER FAIL ({side.upper()}): No valid entry price estimate."
+            )
             return None
 
         # --- 3. Calculate Stop Loss Price ---
@@ -1349,19 +1603,25 @@ def place_risked_market_order(
                 logger.error(
                     f"Place Order ({side.upper()}): Calculated SL price is invalid ({stop_loss_price:.4f}) and no minimum price limit found. Cannot place order."
                 )
-                send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Invalid SL price calc.")
+                send_sms_alert(
+                    f"[{market_base}] ORDER FAIL ({side.upper()}): Invalid SL price calc."
+                )
                 return None
 
         # Apply exchange price precision to the calculated SL price
         try:
             stop_loss_price_str = exchange.price_to_precision(symbol, stop_loss_price)
-            stop_loss_price = float(stop_loss_price_str)  # Convert back to float after formatting
+            stop_loss_price = float(
+                stop_loss_price_str
+            )  # Convert back to float after formatting
             logger.info(
                 f"Place Order: Calculated SL -> EntryEst={entry_price_estimate:.4f}, "
                 f"ATR({current_atr:.5f}) * {sl_atr_multiplier} (Dist={stop_loss_distance:.4f}) => SL Price ~ {stop_loss_price_str}"
             )
         except Exception as e:
-            logger.error(f"Place Order: Error applying precision to SL price {stop_loss_price:.4f}: {e}. Aborting.")
+            logger.error(
+                f"Place Order: Error applying precision to SL price {stop_loss_price:.4f}: {e}. Aborting."
+            )
             return None
 
         # --- 4. Calculate Position Size and Estimate Initial Margin ---
@@ -1379,7 +1639,9 @@ def place_risked_market_order(
             logger.error(
                 f"Place Order ({side.upper()}): Failed to calculate valid position size/margin based on risk parameters. Check logs from calculate_position_size."
             )
-            send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Risk calculation failed.")
+            send_sms_alert(
+                f"[{market_base}] ORDER FAIL ({side.upper()}): Risk calculation failed."
+            )
             return None
 
         final_quantity = calculated_quantity  # Start with the risk-calculated quantity
@@ -1421,7 +1683,9 @@ def place_risked_market_order(
                 f"Place Order ({side.upper()}): Final Qty {final_quantity_str} is LESS than exchange minimum quantity {min_qty}. Skipping order."
             )
             # Optionally, could place the minimum qty order, but that deviates from risk calc. Skipping is safer.
-            send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Qty {final_quantity_str} < Min {min_qty}.")
+            send_sms_alert(
+                f"[{market_base}] ORDER FAIL ({side.upper()}): Qty {final_quantity_str} < Min {min_qty}."
+            )
             return None
         if max_qty is not None and final_quantity > max_qty:
             logger.warning(
@@ -1430,10 +1694,14 @@ def place_risked_market_order(
             final_quantity = max_qty
             # Re-apply precision after capping to max_qty
             try:
-                final_quantity_str = exchange.amount_to_precision(symbol, final_quantity)
+                final_quantity_str = exchange.amount_to_precision(
+                    symbol, final_quantity
+                )
                 final_quantity = float(final_quantity_str)
                 # Recalculate estimated margin based on max quantity
-                required_margin_estimate = (final_quantity * entry_price_estimate) / leverage
+                required_margin_estimate = (
+                    final_quantity * entry_price_estimate
+                ) / leverage
                 logger.info(
                     f"Place Order: Quantity capped to exchange max: {final_quantity_str}. New Est. Margin ~ {required_margin_estimate:.2f} USDT."
                 )
@@ -1471,10 +1739,14 @@ def place_risked_market_order(
             )
 
         # --- 8. Place the Market Order ---
-        logger.warning(f"*** Placing {side.upper()} MARKET ORDER: {final_quantity_str} {symbol} ***")
+        logger.warning(
+            f"*** Placing {side.upper()} MARKET ORDER: {final_quantity_str} {symbol} ***"
+        )
         # Ensure no extra params interfere with basic market order unless intended
         params = {}  # Start fresh, add specific params if needed (e.g., timeInForce)
-        order = exchange.create_market_order(symbol=symbol, side=side, amount=final_quantity, params=params)
+        order = exchange.create_market_order(
+            symbol=symbol, side=side, amount=final_quantity, params=params
+        )
 
         # --- 9. Post-Order Handling & Logging ---
         # Extract details from the returned order object (structure varies slightly by exchange/ccxt version)
@@ -1484,7 +1756,9 @@ def place_risked_market_order(
         order_status = order.get("status", "N/A")
         order_cost = order.get("cost", 0.0)  # Cost in quote currency (USDT)
 
-        fill_price_str = f"{avg_fill_price:.4f}" if avg_fill_price is not None else "N/A"
+        fill_price_str = (
+            f"{avg_fill_price:.4f}" if avg_fill_price is not None else "N/A"
+        )
         filled_qty_str = f"{filled_qty:.8f}" if filled_qty is not None else "?"
         order_id_short = str(order_id)[-6:]  # Last 6 chars for brevity
         cost_str = f"{order_cost:.2f}" if order_cost is not None else "N/A"
@@ -1507,15 +1781,23 @@ def place_risked_market_order(
         # The calculated SL/TP based on estimated entry is NOT sufficient.
         # You MUST place exchange-native SL/TP orders *after* this market order fills,
         # using the actual `avg_fill_price` and `filled_qty`.
-        logger.critical("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        logger.critical(f"!!! ACTION REQUIRED: Loop-based SL/TP is active for position ID ...{order_id_short}. !!!")
+        logger.critical(
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        )
+        logger.critical(
+            f"!!! ACTION REQUIRED: Loop-based SL/TP is active for position ID ...{order_id_short}. !!!"
+        )
         logger.critical(
             f"!!! This is UNSAFE. Implement exchange-native SL/TP orders based on fill price {fill_price_str} !!!"
         )
-        logger.critical("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        logger.critical(
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        )
         # Example (Conceptual - Requires specific CCXT implementation for conditional orders):
         if avg_fill_price and filled_qty > 0:
-            actual_sl_price = avg_fill_price - stop_loss_distance  # Recalculate based on fill
+            actual_sl_price = (
+                avg_fill_price - stop_loss_distance
+            )  # Recalculate based on fill
             actual_tp_price = avg_fill_price + tp_distance  # Recalculate based on fill
             exchange.create_order(
                 symbol,
@@ -1538,20 +1820,34 @@ def place_risked_market_order(
     # --- Exception Handling for Order Placement Process ---
     except ccxt.InsufficientFunds as e:
         # This might occur if free margin calculation was slightly off or fees pushed it over
-        logger.error(f"Place Order ({side.upper()}): Insufficient funds error during order placement: {e}")
-        send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Insufficient funds reported by exchange!")
+        logger.error(
+            f"Place Order ({side.upper()}): Insufficient funds error during order placement: {e}"
+        )
+        send_sms_alert(
+            f"[{market_base}] ORDER FAIL ({side.upper()}): Insufficient funds reported by exchange!"
+        )
     except ccxt.NetworkError as e:
-        logger.error(f"Place Order ({side.upper()}): Network error during order placement: {e}")
+        logger.error(
+            f"Place Order ({side.upper()}): Network error during order placement: {e}"
+        )
         # SMS might fail too
     except ccxt.ExchangeError as e:
         # Log specific exchange errors (e.g., invalid order params, margin issues not caught earlier)
-        logger.error(f"Place Order ({side.upper()}): Exchange error during order placement: {e}")
-        send_sms_alert(f"[{market_base}] ORDER FAIL ({side.upper()}): Exchange error ({type(e).__name__}). Check logs.")
+        logger.error(
+            f"Place Order ({side.upper()}): Exchange error during order placement: {e}"
+        )
+        send_sms_alert(
+            f"[{market_base}] ORDER FAIL ({side.upper()}): Exchange error ({type(e).__name__}). Check logs."
+        )
     except ValueError as e:
         # Catch potential errors from precision formatting or float conversions
-        logger.error(f"Place Order ({side.upper()}): Value error during price/amount processing: {e}")
+        logger.error(
+            f"Place Order ({side.upper()}): Value error during price/amount processing: {e}"
+        )
     except Exception as e:
-        logger.error(f"Place Order ({side.upper()}): Unexpected critical error during order placement logic: {e}")
+        logger.error(
+            f"Place Order ({side.upper()}): Unexpected critical error during order placement logic: {e}"
+        )
         logger.debug(traceback.format_exc())
         send_sms_alert(
             f"[{market_base}] ORDER FAIL ({side.upper()}): Unexpected error ({type(e).__name__}). Check logs."
@@ -1605,12 +1901,18 @@ def trade_logic(
         max_order_cap: Max USDT order value cap.
         margin_buffer: Buffer for margin check before placing order.
     """
-    cycle_time_str = df.index[-1].strftime("%Y-%m-%d %H:%M:%S %Z") if not df.empty else "N/A"
-    logger.info(f"========== New Check Cycle: {symbol} | Candle Time: {cycle_time_str} ==========")
+    cycle_time_str = (
+        df.index[-1].strftime("%Y-%m-%d %H:%M:%S %Z") if not df.empty else "N/A"
+    )
+    logger.info(
+        f"========== New Check Cycle: {symbol} | Candle Time: {cycle_time_str} =========="
+    )
 
     # --- Data Validation ---
     # Ensure sufficient data rows for the longest indicator lookback period + buffer
-    required_rows = max(st_len, cf_st_len, atr_len, vol_ma_len) + 5  # Add a small buffer
+    required_rows = (
+        max(st_len, cf_st_len, atr_len, vol_ma_len) + 5
+    )  # Add a small buffer
     if df is None or len(df) < required_rows:
         logger.warning(
             f"Trade Logic: Insufficient data ({len(df) if df is not None else 0} rows, "
@@ -1665,19 +1967,29 @@ def trade_logic(
 
         # === Extract Data from the Last Closed Candle ===
         last_candle = df.iloc[-1]
-        current_price: float = last_candle["close"]  # Price at the close of the last candle
+        current_price: float = last_candle[
+            "close"
+        ]  # Price at the close of the last candle
         primary_st_val: float = last_candle["supertrend"]
         primary_trend_up: bool = last_candle["trend"]
-        primary_long_signal: bool = last_candle["st_long"]  # Primary ST flipped Long THIS candle
-        primary_short_signal: bool = last_candle["st_short"]  # Primary ST flipped Short THIS candle
+        primary_long_signal: bool = last_candle[
+            "st_long"
+        ]  # Primary ST flipped Long THIS candle
+        primary_short_signal: bool = last_candle[
+            "st_short"
+        ]  # Primary ST flipped Short THIS candle
         confirm_st_val: float = last_candle["confirm_supertrend"]
-        confirm_trend_up: bool = last_candle["confirm_trend"]  # Current state of Confirmation ST trend
+        confirm_trend_up: bool = last_candle[
+            "confirm_trend"
+        ]  # Current state of Confirmation ST trend
 
         # === 2. Analyze Order Book (Conditionally) ===
         # Fetch OB if configured to do so every cycle OR if a primary signal just occurred (potential entry)
         if FETCH_ORDER_BOOK_PER_CYCLE or primary_long_signal or primary_short_signal:
             logger.debug("Trade Logic: Fetching and analyzing order book...")
-            ob_data = analyze_order_book(exchange, symbol, ORDER_BOOK_DEPTH, ORDER_BOOK_FETCH_LIMIT)
+            ob_data = analyze_order_book(
+                exchange, symbol, ORDER_BOOK_DEPTH, ORDER_BOOK_FETCH_LIMIT
+            )
         else:
             logger.debug(
                 "Trade Logic: Order book fetch skipped (FETCH_PER_CYCLE=False and no primary signal generated this candle)."
@@ -1693,29 +2005,44 @@ def trade_logic(
         # === 4. Log Current State ===
         # Prepare formatted strings for logging, handling None values
         volume_ratio = vol_atr_data.get("volume_ratio")
-        volume_spike = volume_ratio is not None and volume_ratio > VOLUME_SPIKE_THRESHOLD
+        volume_spike = (
+            volume_ratio is not None and volume_ratio > VOLUME_SPIKE_THRESHOLD
+        )
         bid_ask_ratio = ob_data.get("bid_ask_ratio") if ob_data else None
         spread_val = ob_data.get("spread") if ob_data else None
 
         atr_str = f"{current_atr:.5f}"
         vol_ratio_str = f"{volume_ratio:.2f}" if volume_ratio is not None else "N/A"
         vol_spike_str = f"{volume_spike}" if volume_ratio is not None else "N/A"
-        bid_ask_ratio_str = f"{bid_ask_ratio:.3f}" if bid_ask_ratio is not None else "N/A"
+        bid_ask_ratio_str = (
+            f"{bid_ask_ratio:.3f}" if bid_ask_ratio is not None else "N/A"
+        )
         spread_str = f"{spread_val:.4f}" if spread_val is not None else "N/A"
 
         logger.info(f"State | Price: {current_price:.4f}, ATR({atr_len}): {atr_str}")
-        logger.info(f"State | Volume: Ratio={vol_ratio_str}, Spike={vol_spike_str} (Thr={VOLUME_SPIKE_THRESHOLD:.1f})")
+        logger.info(
+            f"State | Volume: Ratio={vol_ratio_str}, Spike={vol_spike_str} (Thr={VOLUME_SPIKE_THRESHOLD:.1f})"
+        )
         logger.info(
             f"State | ST({st_len},{st_mult}): {'Up' if primary_trend_up else 'Down'} ({primary_st_val:.4f}) | Signal: {'LONG' if primary_long_signal else ('SHORT' if primary_short_signal else 'None')}"
         )
         logger.info(
             f"State | ConfirmST({cf_st_len},{cf_st_mult}): {'Up' if confirm_trend_up else 'Down'} ({confirm_st_val:.4f})"
         )
-        logger.info(f"State | OrderBook(D{ORDER_BOOK_DEPTH}): Ratio={bid_ask_ratio_str}, Spread={spread_str}")
-        logger.info(f"State | Position: Side={position_side}, Qty={position_qty:.8f}, Entry={entry_price:.4f}")
+        logger.info(
+            f"State | OrderBook(D{ORDER_BOOK_DEPTH}): Ratio={bid_ask_ratio_str}, Spread={spread_str}"
+        )
+        logger.info(
+            f"State | Position: Side={position_side}, Qty={position_qty:.8f}, Entry={entry_price:.4f}"
+        )
 
         # === 5. Check Stop-Loss / Take-Profit (Loop-based - HIGH RISK / INACCURATE / DEFAULT OFF) ===
-        if ENABLE_LOOP_SLTP_CHECK and position_side != POSITION_SIDE_NONE and entry_price > 0 and current_atr > 0:
+        if (
+            ENABLE_LOOP_SLTP_CHECK
+            and position_side != POSITION_SIDE_NONE
+            and entry_price > 0
+            and current_atr > 0
+        ):
             logger.warning(
                 "!!! Trade Logic: Checking active position SL/TP based on LAST CLOSED PRICE (LOOP CHECK - UNSAFE FOR SCALPING) !!!"
             )
@@ -1755,7 +2082,9 @@ def trade_logic(
                     "!!! THIS SL TRIGGER IS BASED ON DELAYED CHECK - ACTUAL LOSS MAY BE SIGNIFICANTLY HIGHER !!!"
                 )
                 # Pass the 'position' dict we got at the start of the cycle for info, but close_position re-validates
-                close_result = close_position(exchange, symbol, position, reason="SL (Loop Check)")
+                close_result = close_position(
+                    exchange, symbol, position, reason="SL (Loop Check)"
+                )
                 if close_result:
                     action_taken_this_cycle = True
                 # Exit logic for this cycle after attempting close, regardless of success
@@ -1766,14 +2095,20 @@ def trade_logic(
                 logger.success(
                     f"*** TRADE EXIT (LOOP CHECK): TAKE-PROFIT TRIGGERED! ({reason}). Closing {position_side}. ***"
                 )
-                logger.warning("!!! TAKE PROFIT VIA LOOP CHECK MAY MISS BETTER FILLS OR EXPERIENCE SLIPPAGE !!!")
-                close_result = close_position(exchange, symbol, position, reason="TP (Loop Check)")
+                logger.warning(
+                    "!!! TAKE PROFIT VIA LOOP CHECK MAY MISS BETTER FILLS OR EXPERIENCE SLIPPAGE !!!"
+                )
+                close_result = close_position(
+                    exchange, symbol, position, reason="TP (Loop Check)"
+                )
                 if close_result:
                     action_taken_this_cycle = True
                 # Exit logic for this cycle after attempting close
                 return
             else:
-                logger.debug("Trade Logic: Position SL/TP not triggered based on last close price (Loop Check).")
+                logger.debug(
+                    "Trade Logic: Position SL/TP not triggered based on last close price (Loop Check)."
+                )
         elif position_side != POSITION_SIDE_NONE:
             # Log if position exists but SL/TP check couldn't run (e.g., bad entry price or ATR or disabled)
             if ENABLE_LOOP_SLTP_CHECK:
@@ -1781,7 +2116,9 @@ def trade_logic(
                     f"Trade Logic: Position ({position_side}) exists but loop-based SL/TP check skipped (Entry={entry_price}, ATR={current_atr})."
                 )
             else:
-                logger.debug("Trade Logic: Loop-based SL/TP check is disabled (ENABLE_LOOP_SLTP_CHECK=False).")
+                logger.debug(
+                    "Trade Logic: Loop-based SL/TP check is disabled (ENABLE_LOOP_SLTP_CHECK=False)."
+                )
 
         # === 6. Check for Entry Signals ===
         # Only proceed if no SL/TP exit was triggered above
@@ -1789,10 +2126,16 @@ def trade_logic(
 
         # --- Define Confirmation Conditions ---
         # Order Book Confirmation (only if required and data is available)
-        ob_check_required = FETCH_ORDER_BOOK_PER_CYCLE  # If True, we need OB data every time
+        ob_check_required = (
+            FETCH_ORDER_BOOK_PER_CYCLE  # If True, we need OB data every time
+        )
         ob_available = ob_data is not None and bid_ask_ratio is not None
-        passes_long_ob = not ob_check_required or (ob_available and bid_ask_ratio >= ORDER_BOOK_RATIO_THRESHOLD_LONG)
-        passes_short_ob = not ob_check_required or (ob_available and bid_ask_ratio <= ORDER_BOOK_RATIO_THRESHOLD_SHORT)
+        passes_long_ob = not ob_check_required or (
+            ob_available and bid_ask_ratio >= ORDER_BOOK_RATIO_THRESHOLD_LONG
+        )
+        passes_short_ob = not ob_check_required or (
+            ob_available and bid_ask_ratio <= ORDER_BOOK_RATIO_THRESHOLD_SHORT
+        )
         ob_log_str = f"Ratio={bid_ask_ratio_str} (LongThr={ORDER_BOOK_RATIO_THRESHOLD_LONG}, ShortThr={ORDER_BOOK_RATIO_THRESHOLD_SHORT}, Required={ob_check_required})"
 
         # Volume Confirmation (only if required and data is available)
@@ -1831,22 +2174,36 @@ def trade_logic(
 
         # === 7. Execute Entry / Reversal Actions ===
         if enter_long:
-            logger.success(f"*** TRADE SIGNAL: CONFIRMED LONG ENTRY SIGNAL for {symbol} at ~{current_price:.4f} ***")
+            logger.success(
+                f"*** TRADE SIGNAL: CONFIRMED LONG ENTRY SIGNAL for {symbol} at ~{current_price:.4f} ***"
+            )
             if position_side == POSITION_SIDE_SHORT:
                 # --- Reversal: Close Short, then Enter Long ---
-                logger.warning("Trade Action: LONG signal received while SHORT. Attempting REVERSAL.")
+                logger.warning(
+                    "Trade Action: LONG signal received while SHORT. Attempting REVERSAL."
+                )
                 # 1. Close the existing short position
                 logger.info("Reversal Step 1: Closing existing SHORT position...")
-                close_result = close_position(exchange, symbol, position, reason="Reversal to Long")
+                close_result = close_position(
+                    exchange, symbol, position, reason="Reversal to Long"
+                )
                 action_taken_this_cycle = True  # Attempted an action
                 if close_result:
-                    logger.info(f"Reversal Step 1: Close SHORT order placed. Waiting {POST_CLOSE_DELAY_SECONDS}s...")
-                    time.sleep(POST_CLOSE_DELAY_SECONDS)  # Allow time for closure to process/API update
+                    logger.info(
+                        f"Reversal Step 1: Close SHORT order placed. Waiting {POST_CLOSE_DELAY_SECONDS}s..."
+                    )
+                    time.sleep(
+                        POST_CLOSE_DELAY_SECONDS
+                    )  # Allow time for closure to process/API update
                     # 2. Re-check position state AFTER attempting close
-                    logger.info("Reversal Step 2: Re-checking position status after close attempt...")
+                    logger.info(
+                        "Reversal Step 2: Re-checking position status after close attempt..."
+                    )
                     current_pos_after_close = get_current_position(exchange, symbol)
                     if current_pos_after_close["side"] == POSITION_SIDE_NONE:
-                        logger.success("Reversal Step 2: Confirmed SHORT position closed.")
+                        logger.success(
+                            "Reversal Step 2: Confirmed SHORT position closed."
+                        )
                         # 3. Enter the new long position
                         logger.info("Reversal Step 3: Proceeding with LONG entry.")
                         place_risked_market_order(
@@ -1865,7 +2222,9 @@ def trade_logic(
                             f"Reversal Step 2: Failed to confirm SHORT position closure after reversal signal (Still showing: {current_pos_after_close['side']}). Skipping LONG entry."
                         )
                 else:
-                    logger.error("Reversal Step 1: Failed to place order to close SHORT position. Skipping LONG entry.")
+                    logger.error(
+                        "Reversal Step 1: Failed to place order to close SHORT position. Skipping LONG entry."
+                    )
 
             elif position_side == POSITION_SIDE_NONE:
                 # --- New Entry: Enter Long ---
@@ -1885,25 +2244,39 @@ def trade_logic(
                     action_taken_this_cycle = True
             else:
                 # Should not happen if enter_long condition is correct, but as a safeguard:
-                logger.warning("Trade Action: Signal LONG ignored (already long? Check logic).")
+                logger.warning(
+                    "Trade Action: Signal LONG ignored (already long? Check logic)."
+                )
 
         elif enter_short:
-            logger.success(f"*** TRADE SIGNAL: CONFIRMED SHORT ENTRY SIGNAL for {symbol} at ~{current_price:.4f} ***")
+            logger.success(
+                f"*** TRADE SIGNAL: CONFIRMED SHORT ENTRY SIGNAL for {symbol} at ~{current_price:.4f} ***"
+            )
             if position_side == POSITION_SIDE_LONG:
                 # --- Reversal: Close Long, then Enter Short ---
-                logger.warning("Trade Action: SHORT signal received while LONG. Attempting REVERSAL.")
+                logger.warning(
+                    "Trade Action: SHORT signal received while LONG. Attempting REVERSAL."
+                )
                 # 1. Close the existing long position
                 logger.info("Reversal Step 1: Closing existing LONG position...")
-                close_result = close_position(exchange, symbol, position, reason="Reversal to Short")
+                close_result = close_position(
+                    exchange, symbol, position, reason="Reversal to Short"
+                )
                 action_taken_this_cycle = True  # Attempted an action
                 if close_result:
-                    logger.info(f"Reversal Step 1: Close LONG order placed. Waiting {POST_CLOSE_DELAY_SECONDS}s...")
+                    logger.info(
+                        f"Reversal Step 1: Close LONG order placed. Waiting {POST_CLOSE_DELAY_SECONDS}s..."
+                    )
                     time.sleep(POST_CLOSE_DELAY_SECONDS)
                     # 2. Re-check position state AFTER attempting close
-                    logger.info("Reversal Step 2: Re-checking position status after close attempt...")
+                    logger.info(
+                        "Reversal Step 2: Re-checking position status after close attempt..."
+                    )
                     current_pos_after_close = get_current_position(exchange, symbol)
                     if current_pos_after_close["side"] == POSITION_SIDE_NONE:
-                        logger.success("Reversal Step 2: Confirmed LONG position closed.")
+                        logger.success(
+                            "Reversal Step 2: Confirmed LONG position closed."
+                        )
                         # 3. Enter the new short position
                         logger.info("Reversal Step 3: Proceeding with SHORT entry.")
                         place_risked_market_order(
@@ -1922,7 +2295,9 @@ def trade_logic(
                             f"Reversal Step 2: Failed to confirm LONG position closure after reversal signal (Still showing: {current_pos_after_close['side']}). Skipping SHORT entry."
                         )
                 else:
-                    logger.error("Reversal Step 1: Failed to place order to close LONG position. Skipping SHORT entry.")
+                    logger.error(
+                        "Reversal Step 1: Failed to place order to close LONG position. Skipping SHORT entry."
+                    )
 
             elif position_side == POSITION_SIDE_NONE:
                 # --- New Entry: Enter Short ---
@@ -1942,13 +2317,19 @@ def trade_logic(
                     action_taken_this_cycle = True
             else:
                 # Safeguard
-                logger.warning("Trade Action: Signal SHORT ignored (already short? Check logic).")
+                logger.warning(
+                    "Trade Action: Signal SHORT ignored (already short? Check logic)."
+                )
 
         else:
             # No entry signal this cycle
-            if not action_taken_this_cycle:  # Only log 'no signal' if no other action (like SL/TP close) happened
+            if (
+                not action_taken_this_cycle
+            ):  # Only log 'no signal' if no other action (like SL/TP close) happened
                 if position_side == POSITION_SIDE_NONE:
-                    logger.info("Trade Logic: No confirmed entry signal and no active position. Holding cash.")
+                    logger.info(
+                        "Trade Logic: No confirmed entry signal and no active position. Holding cash."
+                    )
                 else:
                     logger.info(
                         f"Trade Logic: Holding {position_side} position. No new entry or exit signal this cycle."
@@ -1956,10 +2337,14 @@ def trade_logic(
 
     except Exception as e:
         # Catch-all for unexpected errors within the main logic block
-        logger.error(f"Trade Logic: CRITICAL UNEXPECTED ERROR during cycle execution for {symbol}: {e}")
+        logger.error(
+            f"Trade Logic: CRITICAL UNEXPECTED ERROR during cycle execution for {symbol}: {e}"
+        )
         logger.debug(traceback.format_exc())
         # Consider sending an SMS alert for critical logic failures
-        send_sms_alert(f"[{symbol.split('/')[0]}] CRITICAL ERROR in trade_logic: {type(e).__name__}. Check logs!")
+        send_sms_alert(
+            f"[{symbol.split('/')[0]}] CRITICAL ERROR in trade_logic: {type(e).__name__}. Check logs!"
+        )
     finally:
         # Log end of cycle regardless of outcome
         logger.info(f"========== Cycle Check End: {symbol} ==========\n")
@@ -1973,10 +2358,14 @@ def graceful_shutdown(exchange: Optional[ccxt.Exchange], symbol: Optional[str]) 
     """
     logger.warning("Shutdown requested. Initiating graceful exit sequence...")
     market_base = symbol.split("/")[0] if symbol else "Bot"
-    send_sms_alert(f"[{market_base}] Shutdown requested. Attempting to close open position if any.")
+    send_sms_alert(
+        f"[{market_base}] Shutdown requested. Attempting to close open position if any."
+    )
 
     if not exchange or not symbol:
-        logger.warning("Graceful Shutdown: Exchange not initialized or symbol not set. Cannot check or close position.")
+        logger.warning(
+            "Graceful Shutdown: Exchange not initialized or symbol not set. Cannot check or close position."
+        )
         return
 
     try:
@@ -1994,15 +2383,24 @@ def graceful_shutdown(exchange: Optional[ccxt.Exchange], symbol: Optional[str]) 
             close_result = close_position(exchange, symbol, position, reason="Shutdown")
 
             if close_result:
-                logger.info("Graceful Shutdown: Close order placed. Waiting briefly for exchange processing...")
+                logger.info(
+                    "Graceful Shutdown: Close order placed. Waiting briefly for exchange processing..."
+                )
                 # Wait a bit longer on shutdown to increase chance of confirmation
                 time.sleep(POST_CLOSE_DELAY_SECONDS * 2)
                 # --- Final Confirmation Check ---
                 logger.info("Graceful Shutdown: Performing final position check...")
                 final_pos_check = get_current_position(exchange, symbol)
-                if final_pos_check and final_pos_check.get("side") == POSITION_SIDE_NONE:
-                    logger.success("Graceful Shutdown: Position successfully confirmed closed.")
-                    send_sms_alert(f"[{market_base}] Position confirmed CLOSED during shutdown.")
+                if (
+                    final_pos_check
+                    and final_pos_check.get("side") == POSITION_SIDE_NONE
+                ):
+                    logger.success(
+                        "Graceful Shutdown: Position successfully confirmed closed."
+                    )
+                    send_sms_alert(
+                        f"[{market_base}] Position confirmed CLOSED during shutdown."
+                    )
                 else:
                     final_side = final_pos_check.get("side", "N/A")
                     final_qty = final_pos_check.get("qty", 0.0)
@@ -2023,14 +2421,20 @@ def graceful_shutdown(exchange: Optional[ccxt.Exchange], symbol: Optional[str]) 
 
         else:
             # No active position found during the check
-            logger.info(f"Graceful Shutdown: No active position found for {symbol}. No close action needed.")
+            logger.info(
+                f"Graceful Shutdown: No active position found for {symbol}. No close action needed."
+            )
             send_sms_alert(f"[{market_base}] No active position found during shutdown.")
 
     except Exception as e:
         # Catch errors during the shutdown process itself (e.g., API errors during final checks)
-        logger.error(f"Graceful Shutdown: An error occurred during the shutdown process: {e}")
+        logger.error(
+            f"Graceful Shutdown: An error occurred during the shutdown process: {e}"
+        )
         logger.debug(traceback.format_exc())
-        send_sms_alert(f"[{market_base}] Error during graceful shutdown sequence: {type(e).__name__}. Check logs.")
+        send_sms_alert(
+            f"[{market_base}] Error during graceful shutdown sequence: {type(e).__name__}. Check logs."
+        )
 
     logger.info("--- Scalping Bot Shutdown Complete ---")
 
@@ -2042,7 +2446,9 @@ def main() -> None:
     and run the main trading loop. Handles initialization errors and graceful shutdown.
     """
     bot_start_time_str = time.strftime("%Y-%m-%d %H:%M:%S %Z")
-    logger.info(f"--- Bybit Scalping Bot Initializing v2.0.0 ({bot_start_time_str}) ---")
+    logger.info(
+        f"--- Bybit Scalping Bot Initializing v2.0.0 ({bot_start_time_str}) ---"
+    )
     logger.warning("--- !!! LIVE FUTURES SCALPING MODE - EXTREME RISK INVOLVED !!! ---")
     logger.warning("--- ENSURE ALL PARAMETERS IN .env ARE CORRECTLY SET & TESTED ---")
     if ENABLE_LOOP_SLTP_CHECK:
@@ -2083,30 +2489,48 @@ def main() -> None:
             symbol = market["symbol"]  # Use the CCXT canonical symbol format
 
             # Verify it's a contract market (swap/future)
-            if not market.get("contract", False) or market.get("spot", True):  # Double check it's not spot
+            if not market.get("contract", False) or market.get(
+                "spot", True
+            ):  # Double check it's not spot
                 logger.critical(
                     f"Configuration Error: Symbol '{symbol}' is not a valid SWAP or FUTURES market on {exchange.id}. Type: {market.get('type')}"
                 )
-                send_sms_alert(f"[ScalpBot] CRITICAL: Symbol {symbol} is not a contract market. Exiting.")
+                send_sms_alert(
+                    f"[ScalpBot] CRITICAL: Symbol {symbol} is not a contract market. Exiting."
+                )
                 return
-            logger.info(f"Successfully validated symbol: {symbol} (Type: {market.get('type')})")
+            logger.info(
+                f"Successfully validated symbol: {symbol} (Type: {market.get('type')})"
+            )
 
             # Set leverage for the validated symbol
             if not set_leverage(exchange, symbol, DEFAULT_LEVERAGE):
-                logger.critical(f"Leverage setup failed for {symbol} after retries. Cannot proceed safely. Exiting.")
+                logger.critical(
+                    f"Leverage setup failed for {symbol} after retries. Cannot proceed safely. Exiting."
+                )
                 # SMS alert potentially sent by set_leverage on final failure
-                send_sms_alert(f"[{symbol.split('/')[0]}] CRITICAL: Leverage setup FAILED for {symbol}. Exiting.")
+                send_sms_alert(
+                    f"[{symbol.split('/')[0]}] CRITICAL: Leverage setup FAILED for {symbol}. Exiting."
+                )
                 return
             logger.info(f"Leverage confirmed/set to {DEFAULT_LEVERAGE}x for {symbol}.")
 
         except (ccxt.BadSymbol, KeyError) as e:
-            logger.critical(f"Configuration Error: Invalid or unsupported symbol '{symbol_to_validate}'. Error: {e}")
-            send_sms_alert(f"[ScalpBot] CRITICAL: Invalid symbol '{symbol_to_validate}'. Exiting.")
+            logger.critical(
+                f"Configuration Error: Invalid or unsupported symbol '{symbol_to_validate}'. Error: {e}"
+            )
+            send_sms_alert(
+                f"[ScalpBot] CRITICAL: Invalid symbol '{symbol_to_validate}'. Exiting."
+            )
             return
         except Exception as e:
-            logger.critical(f"Configuration Error: Unexpected error during symbol/leverage setup: {e}")
+            logger.critical(
+                f"Configuration Error: Unexpected error during symbol/leverage setup: {e}"
+            )
             logger.debug(traceback.format_exc())
-            send_sms_alert("[ScalpBot] CRITICAL: Symbol/Leverage setup failed unexpectedly. Exiting.")
+            send_sms_alert(
+                "[ScalpBot] CRITICAL: Symbol/Leverage setup failed unexpectedly. Exiting."
+            )
             return
 
         # === Log Configuration Summary ===
@@ -2116,15 +2540,21 @@ def main() -> None:
         logger.info(f"Leverage: {DEFAULT_LEVERAGE}x")
         logger.info(f"Risk Per Trade: {RISK_PER_TRADE_PERCENTAGE:.3%}")
         logger.info(f"Max Position Value (Cap): {MAX_ORDER_USDT_AMOUNT:.2f} USDT")
-        logger.info(f"SL Calculation: {ATR_STOP_LOSS_MULTIPLIER} * ATR({ATR_CALCULATION_PERIOD})")
+        logger.info(
+            f"SL Calculation: {ATR_STOP_LOSS_MULTIPLIER} * ATR({ATR_CALCULATION_PERIOD})"
+        )
         if ENABLE_LOOP_SLTP_CHECK:
             logger.warning(
                 f"TP Calculation: {ATR_TAKE_PROFIT_MULTIPLIER} * ATR({ATR_CALCULATION_PERIOD}) (Loop Check - Unsafe)"
             )
         else:
             logger.info("TP Calculation: Loop Check Disabled")
-        logger.info(f"Primary Supertrend: Length={DEFAULT_ST_ATR_LENGTH}, Multiplier={DEFAULT_ST_MULTIPLIER}")
-        logger.info(f"Confirmation Supertrend: Length={CONFIRM_ST_ATR_LENGTH}, Multiplier={CONFIRM_ST_MULTIPLIER}")
+        logger.info(
+            f"Primary Supertrend: Length={DEFAULT_ST_ATR_LENGTH}, Multiplier={DEFAULT_ST_MULTIPLIER}"
+        )
+        logger.info(
+            f"Confirmation Supertrend: Length={CONFIRM_ST_ATR_LENGTH}, Multiplier={CONFIRM_ST_MULTIPLIER}"
+        )
         logger.info(
             f"Volume Analysis: MA={VOLUME_MA_PERIOD}, Spike > {VOLUME_SPIKE_THRESHOLD}x MA (Required for Entry: {REQUIRE_VOLUME_SPIKE_FOR_ENTRY})"
         )
@@ -2143,21 +2573,31 @@ def main() -> None:
             "ACTION REQUIRED: Review this configuration carefully. Does it align with your strategy and risk tolerance?"
         )
         if ENABLE_LOOP_SLTP_CHECK:
-            logger.critical("RISK WARNING: Loop-based SL/TP check is ACTIVE, INACCURATE & UNSAFE for live scalping.")
+            logger.critical(
+                "RISK WARNING: Loop-based SL/TP check is ACTIVE, INACCURATE & UNSAFE for live scalping."
+            )
         logger.info(f"Current Logging Level: {logging.getLevelName(logger.level)}")
         logger.info("------------------------------------------")
         # Send startup confirmation SMS
         market_base = symbol.split("/")[0]
-        sl_tp_status = "Loop-based SL/TP ACTIVE (HIGH RISK)" if ENABLE_LOOP_SLTP_CHECK else "Loop SL/TP Disabled"
+        sl_tp_status = (
+            "Loop-based SL/TP ACTIVE (HIGH RISK)"
+            if ENABLE_LOOP_SLTP_CHECK
+            else "Loop SL/TP Disabled"
+        )
         send_sms_alert(
             f"[ScalpBot] Configured for {symbol} ({DEFAULT_INTERVAL}, {DEFAULT_LEVERAGE}x). {sl_tp_status}. Starting main loop."
         )
 
         # === Main Trading Loop ===
         while run_bot:
-            cycle_start_time = time.monotonic()  # Use monotonic clock for interval timing
+            cycle_start_time = (
+                time.monotonic()
+            )  # Use monotonic clock for interval timing
             cycle_count += 1
-            logger.debug(f"--- Cycle {cycle_count} Start: {time.strftime('%Y-%m-%d %H:%M:%S %Z')} ---")
+            logger.debug(
+                f"--- Cycle {cycle_count} Start: {time.strftime('%Y-%m-%d %H:%M:%S %Z')} ---"
+            )
 
             try:
                 # 1. Fetch Fresh Market Data
@@ -2172,7 +2612,9 @@ def main() -> None:
                     )
                     + API_FETCH_LIMIT_BUFFER
                 )
-                df_market = get_market_data(exchange, symbol, DEFAULT_INTERVAL, limit=data_limit)
+                df_market = get_market_data(
+                    exchange, symbol, DEFAULT_INTERVAL, limit=data_limit
+                )
 
                 # 2. Execute Trading Logic (only if data is valid)
                 if df_market is not None and not df_market.empty:
@@ -2206,11 +2648,17 @@ def main() -> None:
                 logger.warning(
                     f"RATE LIMIT EXCEEDED (Cycle {cycle_count}): {e}. Sleeping for {DEFAULT_SLEEP_SECONDS * 5} seconds..."
                 )
-                send_sms_alert(f"[{market_base}] WARNING: Rate limit exceeded! Check API usage/frequency.")
-                time.sleep(DEFAULT_SLEEP_SECONDS * 5)  # Longer sleep after rate limit hit
+                send_sms_alert(
+                    f"[{market_base}] WARNING: Rate limit exceeded! Check API usage/frequency."
+                )
+                time.sleep(
+                    DEFAULT_SLEEP_SECONDS * 5
+                )  # Longer sleep after rate limit hit
             except ccxt.NetworkError as e:
                 # Typically recoverable, log and continue after normal delay
-                logger.warning(f"Network error in main loop (Cycle {cycle_count}): {e}. Will retry next cycle.")
+                logger.warning(
+                    f"Network error in main loop (Cycle {cycle_count}): {e}. Will retry next cycle."
+                )
                 # Let the standard sleep handle the delay
             except ccxt.ExchangeNotAvailable as e:
                 # Exchange might be down for maintenance, sleep longer
@@ -2224,13 +2672,19 @@ def main() -> None:
                 logger.critical(
                     f"Authentication Error encountered in main loop (Cycle {cycle_count}): {e}. API keys may be invalid or permissions revoked. Stopping bot."
                 )
-                send_sms_alert(f"[{market_base}] CRITICAL: Authentication Error! Bot stopping NOW.")
+                send_sms_alert(
+                    f"[{market_base}] CRITICAL: Authentication Error! Bot stopping NOW."
+                )
                 run_bot = False  # Stop the main loop permanently
             except ccxt.ExchangeError as e:
                 # Catch other specific exchange errors (e.g., invalid order params, margin issues not caught earlier)
-                logger.error(f"Unhandled Exchange error in main loop (Cycle {cycle_count}): {e}.")
+                logger.error(
+                    f"Unhandled Exchange error in main loop (Cycle {cycle_count}): {e}."
+                )
                 logger.debug(traceback.format_exc())  # Log traceback for details
-                send_sms_alert(f"[{market_base}] ERROR: Unhandled Exchange error: {type(e).__name__}. Check logs.")
+                send_sms_alert(
+                    f"[{market_base}] ERROR: Unhandled Exchange error: {type(e).__name__}. Check logs."
+                )
                 # Continue after normal delay, hoping it's temporary
             except Exception as e:
                 # Catch any other unexpected errors, log traceback, and stop the bot for safety
@@ -2280,16 +2734,22 @@ if __name__ == "__main__":
     print("--- Bybit USDT Futures Scalping Bot v2.0.0 ---")
     print("INFO: Loading configuration from .env file.")
     print("INFO: Ensure API keys (BYBIT_API_KEY, BYBIT_API_SECRET) are set in .env.")
-    print("INFO: For SMS alerts, set ENABLE_SMS_ALERTS=true and SMS_RECIPIENT_NUMBER in .env.")
+    print(
+        "INFO: For SMS alerts, set ENABLE_SMS_ALERTS=true and SMS_RECIPIENT_NUMBER in .env."
+    )
     print(
         "INFO: SMS requires Termux environment with Termux:API installed ('pkg install termux-api') and SMS permission granted."
     )
-    print("\033[93mWARNING: LIVE TRADING IS ACTIVE BY DEFAULT. USE EXTREME CAUTION.\033[0m")
+    print(
+        "\033[93mWARNING: LIVE TRADING IS ACTIVE BY DEFAULT. USE EXTREME CAUTION.\033[0m"
+    )
     if ENABLE_LOOP_SLTP_CHECK:
         print(
             "\033[91m\033[1mCRITICAL: LOOP-BASED SL/TP IS ACTIVE - HIGHLY INACCURATE & UNSAFE FOR LIVE SCALPING.\033[0m"
         )
-        print("\033[91m\033[1mCRITICAL: IMPLEMENT EXCHANGE-NATIVE CONDITIONAL ORDERS FOR SAFE OPERATION.\033[0m")
+        print(
+            "\033[91m\033[1mCRITICAL: IMPLEMENT EXCHANGE-NATIVE CONDITIONAL ORDERS FOR SAFE OPERATION.\033[0m"
+        )
     else:
         print("INFO: Loop-based SL/TP check is DISABLED by default (recommended).")
     print(f"INFO: Initial logging level set to: {logging.getLevelName(LOGGING_LEVEL)}")

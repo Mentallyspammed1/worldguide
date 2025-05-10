@@ -27,21 +27,30 @@ module_logger = logging.getLogger(__name__)
 _market_info_cache: Dict[str, Dict[str, Any]] = {}
 
 
-def _exponential_backoff(attempt: int, base_delay: float = RETRY_DELAY_SECONDS, max_cap: float = 60.0) -> float:
+def _exponential_backoff(
+    attempt: int, base_delay: float = RETRY_DELAY_SECONDS, max_cap: float = 60.0
+) -> float:
     """Calculate delay for exponential backoff with a cap."""
     delay = base_delay * (2**attempt)
     return min(delay, max_cap)
 
 
 async def _handle_fetch_exception(
-    e: Exception, logger: logging.Logger, attempt: int, total_attempts: int, item_desc: str, context_info: str
+    e: Exception,
+    logger: logging.Logger,
+    attempt: int,
+    total_attempts: int,
+    item_desc: str,
+    context_info: str,
 ) -> bool:
     """Helper to log and determine if a fetch exception is retryable for async functions."""
     is_retryable = False
     current_retry_delay = RETRY_DELAY_SECONDS  # Default delay
     error_detail = str(e)
 
-    if isinstance(e, (ccxt_async.NetworkError, ccxt_async.RequestTimeout, asyncio.TimeoutError)):
+    if isinstance(
+        e, (ccxt_async.NetworkError, ccxt_async.RequestTimeout, asyncio.TimeoutError)
+    ):
         log_level_method = logger.warning
         is_retryable = True
         msg = f"Network/Timeout error fetching {item_desc} for {context_info}"
@@ -50,7 +59,9 @@ async def _handle_fetch_exception(
         is_retryable = True
         msg = f"Rate limit/DDoS triggered fetching {item_desc} for {context_info}"
         # Use longer, exponential backoff for rate limits
-        current_retry_delay = _exponential_backoff(attempt, base_delay=RETRY_DELAY_SECONDS * 3, max_cap=180.0)
+        current_retry_delay = _exponential_backoff(
+            attempt, base_delay=RETRY_DELAY_SECONDS * 3, max_cap=180.0
+        )
     elif isinstance(e, ccxt_async.ExchangeError):
         log_level_method = logger.error  # Default to error for ExchangeError
         is_retryable = False
@@ -98,7 +109,9 @@ async def _handle_fetch_exception(
     )
 
     if is_retryable and attempt < total_attempts - 1:
-        logger.warning(f"Waiting {current_retry_delay:.2f}s before retrying {item_desc} fetch for {context_info}...")
+        logger.warning(
+            f"Waiting {current_retry_delay:.2f}s before retrying {item_desc} fetch for {context_info}..."
+        )
         await asyncio.sleep(current_retry_delay)
     return is_retryable
 
@@ -112,11 +125,15 @@ async def initialize_exchange(
             ccxt_version = importlib.metadata.version("ccxt")
             logger.info(f"Using CCXT version: {ccxt_version}")
         except importlib.metadata.PackageNotFoundError:
-            logger.warning("Could not determine CCXT version. Ensure 'ccxt' is installed.")
+            logger.warning(
+                "Could not determine CCXT version. Ensure 'ccxt' is installed."
+            )
 
         exchange_id = config.get("exchange_id", "bybit").lower()
         if not hasattr(ccxt_async, exchange_id):
-            logger.error(f"{NEON_RED}Exchange ID '{exchange_id}' not found in CCXT async library.{RESET}")
+            logger.error(
+                f"{NEON_RED}Exchange ID '{exchange_id}' not found in CCXT async library.{RESET}"
+            )
             return None
 
         exchange_class = getattr(ccxt_async, exchange_id)
@@ -131,10 +148,14 @@ async def initialize_exchange(
                 "adjustForTimeDifference": True,  # Auto-sync time with server
                 # Timeouts for various operations (in milliseconds)
                 "fetchTickerTimeout": config.get("ccxt_fetch_ticker_timeout_ms", 15000),
-                "fetchBalanceTimeout": config.get("ccxt_fetch_balance_timeout_ms", 20000),
+                "fetchBalanceTimeout": config.get(
+                    "ccxt_fetch_balance_timeout_ms", 20000
+                ),
                 "createOrderTimeout": config.get("ccxt_create_order_timeout_ms", 25000),
                 "cancelOrderTimeout": config.get("ccxt_cancel_order_timeout_ms", 20000),
-                "fetchPositionsTimeout": config.get("ccxt_fetch_positions_timeout_ms", 20000),
+                "fetchPositionsTimeout": config.get(
+                    "ccxt_fetch_positions_timeout_ms", 20000
+                ),
                 "fetchOHLCVTimeout": config.get("ccxt_fetch_ohlcv_timeout_ms", 20000),
                 "loadMarketsTimeout": config.get("ccxt_load_markets_timeout_ms", 30000),
             },
@@ -147,11 +168,15 @@ async def initialize_exchange(
 
         if config.get("use_sandbox"):
             logger.warning(f"{NEON_YELLOW}USING SANDBOX MODE (Testnet){RESET}")
-            if hasattr(exchange, "set_sandbox_mode") and callable(exchange.set_sandbox_mode):
+            if hasattr(exchange, "set_sandbox_mode") and callable(
+                exchange.set_sandbox_mode
+            ):
                 try:
                     # Some exchanges have a method to switch to sandbox
                     await exchange.set_sandbox_mode(True)  # CCXT standard way
-                    logger.info(f"Sandbox mode enabled for {exchange.id} via set_sandbox_mode(True).")
+                    logger.info(
+                        f"Sandbox mode enabled for {exchange.id} via set_sandbox_mode(True)."
+                    )
                 except Exception as sandbox_err:
                     logger.warning(
                         f"Error calling set_sandbox_mode(True) for {exchange.id}: {sandbox_err}. "
@@ -159,7 +184,9 @@ async def initialize_exchange(
                     )
                     # Fallback for Bybit if set_sandbox_mode is problematic or not available
                     if exchange.id == "bybit":
-                        testnet_url = exchange.urls.get("test", "https://api-testnet.bybit.com")
+                        testnet_url = exchange.urls.get(
+                            "test", "https://api-testnet.bybit.com"
+                        )
                         exchange.urls["api"] = testnet_url
                         logger.info(f"Manual Bybit testnet URL set: {testnet_url}")
             elif exchange.id == "bybit":  # Direct manual override for Bybit
@@ -173,12 +200,18 @@ async def initialize_exchange(
                 )
 
         logger.info(f"Loading markets for {exchange.id}...")
-        await exchange.load_markets(reload=True)  # reload=True ensures fresh market data
-        logger.info(f"CCXT exchange initialized ({exchange.id}). Sandbox: {config.get('use_sandbox', False)}")
+        await exchange.load_markets(
+            reload=True
+        )  # reload=True ensures fresh market data
+        logger.info(
+            f"CCXT exchange initialized ({exchange.id}). Sandbox: {config.get('use_sandbox', False)}"
+        )
 
         quote_currency = config.get("quote_currency", "USDT")
         default_market_type = exchange.options.get("defaultType", "N/A")
-        logger.info(f"Attempting initial balance fetch for {quote_currency} (context: {default_market_type})...")
+        logger.info(
+            f"Attempting initial balance fetch for {quote_currency} (context: {default_market_type})..."
+        )
         balance_decimal = await fetch_balance(exchange, quote_currency, logger)
         if balance_decimal is not None:
             logger.info(
@@ -191,7 +224,9 @@ async def initialize_exchange(
             )
         return exchange
     except Exception as e:
-        logger.error(f"{NEON_RED}Failed to initialize CCXT exchange: {e}{RESET}", exc_info=True)
+        logger.error(
+            f"{NEON_RED}Failed to initialize CCXT exchange: {e}{RESET}", exc_info=True
+        )
         if exchange:
             await exchange.close()
     return None
@@ -204,7 +239,9 @@ async def fetch_current_price_ccxt(
     total_attempts = MAX_API_RETRIES + 1
     while attempts < total_attempts:
         try:
-            logger.debug(f"Fetching ticker for {symbol}... (Attempt {attempts + 1}/{total_attempts})")
+            logger.debug(
+                f"Fetching ticker for {symbol}... (Attempt {attempts + 1}/{total_attempts})"
+            )
             ticker = await exchange.fetch_ticker(symbol)
 
             price_sources = []
@@ -215,7 +252,10 @@ async def fetch_current_price_ccxt(
                     if bid > 0 and ask > 0 and ask >= bid:
                         price_sources.append((bid + ask) / Decimal("2"))  # Mid-price
                 except (InvalidOperation, TypeError):
-                    logger.debug(f"Could not parse bid/ask for mid-price for {symbol}.", exc_info=True)
+                    logger.debug(
+                        f"Could not parse bid/ask for mid-price for {symbol}.",
+                        exc_info=True,
+                    )
 
             for key in ["last", "close", "ask", "bid"]:
                 if ticker.get(key) is not None:
@@ -236,7 +276,9 @@ async def fetch_current_price_ccxt(
             )
             raise ccxt_async.ExchangeError("No valid price found in ticker data.")
         except Exception as e:
-            if not await _handle_fetch_exception(e, logger, attempts, total_attempts, f"price for {symbol}", symbol):
+            if not await _handle_fetch_exception(
+                e, logger, attempts, total_attempts, f"price for {symbol}", symbol
+            ):
                 return None
         attempts += 1
     logger.error(f"Failed to fetch price for {symbol} after {total_attempts} attempts.")
@@ -249,7 +291,9 @@ async def fetch_klines_ccxt(
     timeframe: str,
     limit: int = 250,
     logger: Optional[logging.Logger] = None,
-) -> Optional[pd.DataFrame]:  # Return Optional[pd.DataFrame] to align with potential empty return
+) -> Optional[
+    pd.DataFrame
+]:  # Return Optional[pd.DataFrame] to align with potential empty return
     import pandas as pd  # Ensure pandas is imported locally if not globally
 
     current_logger = logger or module_logger
@@ -263,7 +307,9 @@ async def fetch_klines_ccxt(
             current_logger.debug(
                 f"Fetching klines for {symbol} (Timeframe: {timeframe}, Limit: {limit}) (Attempt {attempt + 1}/{total_attempts})"
             )
-            ohlcv_data = await exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+            ohlcv_data = await exchange.fetch_ohlcv(
+                symbol, timeframe=timeframe, limit=limit
+            )
 
             if (
                 ohlcv_data
@@ -271,9 +317,14 @@ async def fetch_klines_ccxt(
                 and len(ohlcv_data) > 0
                 and all(isinstance(row, list) and len(row) >= 6 for row in ohlcv_data)
             ):
-                df = pd.DataFrame(ohlcv_data, columns=["timestamp", "open", "high", "low", "close", "volume"])
+                df = pd.DataFrame(
+                    ohlcv_data,
+                    columns=["timestamp", "open", "high", "low", "close", "volume"],
+                )
 
-                df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", errors="coerce", utc=True)
+                df["timestamp"] = pd.to_datetime(
+                    df["timestamp"], unit="ms", errors="coerce", utc=True
+                )
                 df.dropna(subset=["timestamp"], inplace=True)
                 df["timestamp"] = df["timestamp"].dt.tz_localize(None)
                 df.set_index("timestamp", inplace=True)
@@ -283,7 +334,11 @@ async def fetch_klines_ccxt(
                         df[col] = (
                             df[col]
                             .astype(object)
-                            .apply(lambda x: Decimal(str(x)) if pd.notna(x) and str(x).strip() != "" else None)
+                            .apply(
+                                lambda x: Decimal(str(x))
+                                if pd.notna(x) and str(x).strip() != ""
+                                else None
+                            )
                         )
                     except (InvalidOperation, TypeError) as conv_err:
                         current_logger.warning(
@@ -292,12 +347,22 @@ async def fetch_klines_ccxt(
                         )
                         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-                df.dropna(subset=["open", "high", "low", "close"], how="any", inplace=True)
+                df.dropna(
+                    subset=["open", "high", "low", "close"], how="any", inplace=True
+                )
                 df = df[
-                    df["close"].apply(lambda x: isinstance(x, Decimal) and x > Decimal(0) or (pd.notna(x) and x > 0))
+                    df["close"].apply(
+                        lambda x: isinstance(x, Decimal)
+                        and x > Decimal(0)
+                        or (pd.notna(x) and x > 0)
+                    )
                 ].copy()
                 df = df[
-                    df["volume"].apply(lambda x: isinstance(x, Decimal) and x >= Decimal(0) or (pd.notna(x) and x >= 0))
+                    df["volume"].apply(
+                        lambda x: isinstance(x, Decimal)
+                        and x >= Decimal(0)
+                        or (pd.notna(x) and x >= 0)
+                    )
                 ].copy()
 
                 if df.empty:
@@ -307,21 +372,32 @@ async def fetch_klines_ccxt(
                     raise ccxt_async.ExchangeError("Cleaned kline data is empty.")
 
                 df.sort_index(inplace=True)
-                current_logger.info(f"Successfully fetched and processed {len(df)} klines for {symbol} {timeframe}.")
+                current_logger.info(
+                    f"Successfully fetched and processed {len(df)} klines for {symbol} {timeframe}."
+                )
                 return df
             else:
                 current_logger.warning(
                     f"Received empty or invalid kline data structure for {symbol} {timeframe}. "
                     f"Data: {ohlcv_data[:2] if ohlcv_data else 'None'}... (Attempt {attempt + 1})"
                 )
-                raise ccxt_async.ExchangeError("Empty or invalid kline data structure from exchange.")
+                raise ccxt_async.ExchangeError(
+                    "Empty or invalid kline data structure from exchange."
+                )
         except Exception as e:
             if not await _handle_fetch_exception(
-                e, current_logger, attempt, total_attempts, f"klines for {symbol} {timeframe}", symbol
+                e,
+                current_logger,
+                attempt,
+                total_attempts,
+                f"klines for {symbol} {timeframe}",
+                symbol,
             ):
                 return pd.DataFrame()  # Return empty DataFrame on non-retryable error
 
-    current_logger.error(f"Failed to fetch klines for {symbol} {timeframe} after {total_attempts} attempts.")
+    current_logger.error(
+        f"Failed to fetch klines for {symbol} {timeframe} after {total_attempts} attempts."
+    )
     return pd.DataFrame()  # Return empty DataFrame after all attempts fail
 
 
@@ -336,7 +412,9 @@ async def fetch_orderbook_ccxt(
     total_attempts = MAX_API_RETRIES + 1
     while attempts < total_attempts:
         try:
-            logger.debug(f"Fetching order book for {symbol} (Limit: {limit}) (Attempt {attempts + 1}/{total_attempts})")
+            logger.debug(
+                f"Fetching order book for {symbol} (Limit: {limit}) (Attempt {attempts + 1}/{total_attempts})"
+            )
             order_book = await exchange.fetch_order_book(symbol, limit=limit)
 
             if (
@@ -348,7 +426,9 @@ async def fetch_orderbook_ccxt(
                 and isinstance(order_book["asks"], list)
             ):
                 if not order_book["bids"] and not order_book["asks"]:
-                    logger.warning(f"Order book for {symbol} fetched but bids and asks arrays are empty.")
+                    logger.warning(
+                        f"Order book for {symbol} fetched but bids and asks arrays are empty."
+                    )
                 return order_book
             else:
                 logger.warning(
@@ -362,12 +442,17 @@ async def fetch_orderbook_ccxt(
             ):
                 return None
         attempts += 1
-    logger.error(f"Failed to fetch order book for {symbol} after {total_attempts} attempts.")
+    logger.error(
+        f"Failed to fetch order book for {symbol} after {total_attempts} attempts."
+    )
     return None
 
 
 async def fetch_balance(
-    exchange: ccxt_async.Exchange, currency: str, logger: logging.Logger, params: Optional[Dict] = None
+    exchange: ccxt_async.Exchange,
+    currency: str,
+    logger: logging.Logger,
+    params: Optional[Dict] = None,
 ) -> Optional[Decimal]:
     request_params = params.copy() if params is not None else {}
 
@@ -413,7 +498,9 @@ async def fetch_balance(
                     try:
                         final_balance = Decimal(available_balance_str)
                         if final_balance >= Decimal(0):
-                            logger.info(f"Available {currency} balance: {final_balance:.8f}")
+                            logger.info(
+                                f"Available {currency} balance: {final_balance:.8f}"
+                            )
                             return final_balance
                         else:
                             logger.error(
@@ -430,16 +517,22 @@ async def fetch_balance(
                         f"Currency data: {currency_data}"
                     )
             else:
-                logger.error(f"Balance info response was None or empty on attempt {attempts + 1}.")
+                logger.error(
+                    f"Balance info response was None or empty on attempt {attempts + 1}."
+                )
 
-            raise ccxt_async.ExchangeError(f"Balance parsing or fetch failed for {currency}.")
+            raise ccxt_async.ExchangeError(
+                f"Balance parsing or fetch failed for {currency}."
+            )
         except Exception as e:
             if not await _handle_fetch_exception(
                 e, logger, attempts, total_attempts, f"balance for {currency}", currency
             ):
                 return None
         attempts += 1
-    logger.error(f"Failed to fetch balance for {currency} after {total_attempts} attempts.")
+    logger.error(
+        f"Failed to fetch balance for {currency} after {total_attempts} attempts."
+    )
     return None
 
 
@@ -453,7 +546,9 @@ async def get_market_info(
 
     try:
         if not exchange.markets or symbol not in exchange.markets:
-            logger.info(f"Market info for {symbol} not found or markets not loaded. Reloading markets...")
+            logger.info(
+                f"Market info for {symbol} not found or markets not loaded. Reloading markets..."
+            )
             await exchange.load_markets(reload=True)
 
         if symbol not in exchange.markets:
@@ -462,7 +557,9 @@ async def get_market_info(
 
         market = exchange.market(symbol)
         if not market:
-            logger.error(f"exchange.market({symbol}) returned None despite symbol being in markets list.")
+            logger.error(
+                f"exchange.market({symbol}) returned None despite symbol being in markets list."
+            )
             return None
 
         market.setdefault("precision", {})
@@ -473,7 +570,9 @@ async def get_market_info(
         market["limits"].setdefault("amount", {}).setdefault("min", "0")
         market["limits"].setdefault("cost", {}).setdefault("min", "0")
 
-        market["is_contract"] = market.get("contract", False) or market.get("type", "unknown").lower() in [
+        market["is_contract"] = market.get("contract", False) or market.get(
+            "type", "unknown"
+        ).lower() in [
             "swap",
             "future",
             "option",
@@ -481,7 +580,9 @@ async def get_market_info(
             "inverse",
         ]
 
-        if "amountPrecision" not in market or not isinstance(market.get("amountPrecision"), int):
+        if "amountPrecision" not in market or not isinstance(
+            market.get("amountPrecision"), int
+        ):
             amount_step_val = market["precision"].get("amount")
             derived_precision = 8
             if isinstance(amount_step_val, (int)) and amount_step_val >= 0:
@@ -505,12 +606,17 @@ async def get_market_info(
         _market_info_cache[cache_key] = market
         return market
     except Exception as e:
-        logger.error(f"Error getting or processing market info for {symbol}: {e}", exc_info=True)
+        logger.error(
+            f"Error getting or processing market info for {symbol}: {e}", exc_info=True
+        )
         return None
 
 
 async def get_open_position(
-    exchange: ccxt_async.Exchange, symbol: str, market_info: Dict[str, Any], logger: logging.Logger
+    exchange: ccxt_async.Exchange,
+    symbol: str,
+    market_info: Dict[str, Any],
+    logger: logging.Logger,
 ) -> Optional[Dict[str, Any]]:
     if not exchange.has.get("fetchPositions"):
         logger.warning(f"Exchange {exchange.id} does not support fetchPositions.")
@@ -518,7 +624,9 @@ async def get_open_position(
 
     market_id = market_info.get("id")
     if not market_id:
-        logger.error(f"Market ID missing in market_info for {symbol}. Cannot reliably fetch position.")
+        logger.error(
+            f"Market ID missing in market_info for {symbol}. Cannot reliably fetch position."
+        )
         return None
 
     positions: List[Dict[str, Any]] = []
@@ -537,22 +645,36 @@ async def get_open_position(
             positions = [
                 p
                 for p in all_positions
-                if p.get("symbol") == symbol or (p.get("info") and p["info"].get("symbol") == market_id)
+                if p.get("symbol") == symbol
+                or (p.get("info") and p["info"].get("symbol") == market_id)
             ]
         except Exception as e_all:
-            logger.error(f"Error fetching all positions while trying to find {symbol}: {e_all}", exc_info=True)
+            logger.error(
+                f"Error fetching all positions while trying to find {symbol}: {e_all}",
+                exc_info=True,
+            )
             return None
     except ccxt_async.ExchangeError as e:
-        no_pos_indicators = ["position not found", "no position", "position does not exist"]
+        no_pos_indicators = [
+            "position not found",
+            "no position",
+            "position does not exist",
+        ]
         if any(msg in str(e).lower() for msg in no_pos_indicators) or (
             exchange.id == "bybit" and getattr(e, "code", None) in [110025, 10001]
         ):
-            logger.info(f"No open position found for {symbol} (Exchange reported: {e}).")
+            logger.info(
+                f"No open position found for {symbol} (Exchange reported: {e})."
+            )
             return None
-        logger.error(f"Exchange error fetching positions for {symbol}: {e}.", exc_info=True)
+        logger.error(
+            f"Exchange error fetching positions for {symbol}: {e}.", exc_info=True
+        )
         return None
     except Exception as e:
-        logger.error(f"Unexpected error fetching positions for {symbol}: {e}", exc_info=True)
+        logger.error(
+            f"Unexpected error fetching positions for {symbol}: {e}", exc_info=True
+        )
         return None
 
     if not positions:
@@ -570,7 +692,9 @@ async def get_open_position(
 
     for pos_data in positions:
         size_str = (
-            pos_data.get("contracts") or pos_data.get("info", {}).get("size") or pos_data.get("info", {}).get("qty")
+            pos_data.get("contracts")
+            or pos_data.get("info", {}).get("size")
+            or pos_data.get("info", {}).get("qty")
         )
         if size_str is None:
             continue
@@ -578,7 +702,11 @@ async def get_open_position(
         try:
             pos_size_dec = Decimal(str(size_str))
             bybit_v5_pos_side = pos_data.get("info", {}).get("positionSide", "").lower()
-            if exchange.id == "bybit" and bybit_v5_pos_side == "none" and abs(pos_size_dec) <= size_threshold:
+            if (
+                exchange.id == "bybit"
+                and bybit_v5_pos_side == "none"
+                and abs(pos_size_dec) <= size_threshold
+            ):
                 continue
 
             if abs(pos_size_dec) > size_threshold:
@@ -595,15 +723,34 @@ async def get_open_position(
                     else:
                         continue
                 active_position_data["side"] = current_side
-                ep_str = active_position_data.get("entryPrice") or active_position_data.get("info", {}).get("avgPrice")
-                active_position_data["entryPriceDecimal"] = Decimal(str(ep_str)) if ep_str is not None else None
+                ep_str = active_position_data.get(
+                    "entryPrice"
+                ) or active_position_data.get("info", {}).get("avgPrice")
+                active_position_data["entryPriceDecimal"] = (
+                    Decimal(str(ep_str)) if ep_str is not None else None
+                )
 
                 field_map = {
                     "markPriceDecimal": ["markPrice"],
                     "liquidationPriceDecimal": ["liquidationPrice", "liqPrice"],
-                    "unrealizedPnlDecimal": ["unrealizedPnl", "unrealisedPnl", "pnl", ("info", "unrealisedPnl")],
-                    "stopLossPriceDecimal": ["stopLoss", "stopLossPrice", "slPrice", ("info", "stopLoss")],
-                    "takeProfitPriceDecimal": ["takeProfit", "takeProfitPrice", "tpPrice", ("info", "takeProfit")],
+                    "unrealizedPnlDecimal": [
+                        "unrealizedPnl",
+                        "unrealisedPnl",
+                        "pnl",
+                        ("info", "unrealisedPnl"),
+                    ],
+                    "stopLossPriceDecimal": [
+                        "stopLoss",
+                        "stopLossPrice",
+                        "slPrice",
+                        ("info", "stopLoss"),
+                    ],
+                    "takeProfitPriceDecimal": [
+                        "takeProfit",
+                        "takeProfitPrice",
+                        "tpPrice",
+                        ("info", "takeProfit"),
+                    ],
                     "trailingStopLossValue": [
                         ("info", "trailingStop"),
                         ("info", "trailing_stop"),
@@ -619,13 +766,18 @@ async def get_open_position(
                     val_str = None
                     for sk_item in str_keys_list:
                         if isinstance(sk_item, tuple):
-                            val_str = active_position_data.get(sk_item[0], {}).get(sk_item[1])
+                            val_str = active_position_data.get(sk_item[0], {}).get(
+                                sk_item[1]
+                            )
                         else:
                             val_str = active_position_data.get(sk_item)
                         if val_str is not None:
                             break
                     if val_str is not None and str(val_str).strip():
-                        if str(val_str) == "0" and dec_key in ["stopLossPriceDecimal", "takeProfitPriceDecimal"]:
+                        if str(val_str) == "0" and dec_key in [
+                            "stopLossPriceDecimal",
+                            "takeProfitPriceDecimal",
+                        ]:
                             active_position_data[dec_key] = None
                         else:
                             try:
@@ -640,10 +792,15 @@ async def get_open_position(
                     or active_position_data.get("info", {}).get("updated_at")
                     or active_position_data.get("info", {}).get("createTime")
                 )
-                active_position_data["timestamp_ms"] = int(float(ts_str)) if ts_str else None
+                active_position_data["timestamp_ms"] = (
+                    int(float(ts_str)) if ts_str else None
+                )
                 break
         except (InvalidOperation, ValueError, TypeError) as e:
-            logger.warning(f"Error parsing position data for {symbol}: {e}. Data: {pos_data}", exc_info=True)
+            logger.warning(
+                f"Error parsing position data for {symbol}: {e}. Data: {pos_data}",
+                exc_info=True,
+            )
             continue
 
     if active_position_data:
@@ -654,23 +811,35 @@ async def get_open_position(
         )
         return active_position_data
 
-    logger.info(f"No active open position found for {symbol} after filtering (size > {size_threshold:.8f}).")
+    logger.info(
+        f"No active open position found for {symbol} after filtering (size > {size_threshold:.8f})."
+    )
     return None
 
 
 async def set_leverage_ccxt(
-    exchange: ccxt_async.Exchange, symbol: str, leverage: int, market_info: Dict, logger: logging.Logger
+    exchange: ccxt_async.Exchange,
+    symbol: str,
+    leverage: int,
+    market_info: Dict,
+    logger: logging.Logger,
 ) -> bool:
     if not market_info.get("is_contract", False):
-        logger.info(f"Leverage setting skipped for {symbol} as it's not a contract market.")
+        logger.info(
+            f"Leverage setting skipped for {symbol} as it's not a contract market."
+        )
         return True
 
     if not (isinstance(leverage, int) and leverage > 0):
-        logger.warning(f"Invalid leverage value {leverage} for {symbol}. Must be a positive integer.")
+        logger.warning(
+            f"Invalid leverage value {leverage} for {symbol}. Must be a positive integer."
+        )
         return False
 
     if not (hasattr(exchange, "set_leverage") and callable(exchange.set_leverage)):
-        logger.error(f"Exchange {exchange.id} does not support set_leverage method via CCXT.")
+        logger.error(
+            f"Exchange {exchange.id} does not support set_leverage method via CCXT."
+        )
         return False
 
     logger.info(f"Attempting to set leverage for {symbol} to {leverage}x...")
@@ -684,25 +853,48 @@ async def set_leverage_ccxt(
             ret_code = response.get("retCode")
             ret_msg = response.get("retMsg", "").lower()
             if ret_code == 0:
-                logger.info(f"{NEON_GREEN}Leverage for {symbol} successfully set to {leverage}x (Bybit).{RESET}")
+                logger.info(
+                    f"{NEON_GREEN}Leverage for {symbol} successfully set to {leverage}x (Bybit).{RESET}"
+                )
                 return True
-            elif ret_code == 110043 or "leverage not modified" in ret_msg or "same leverage" in ret_msg:
-                logger.info(f"Leverage for {symbol} was already {leverage}x (Bybit: {ret_code} - {ret_msg}).")
+            elif (
+                ret_code == 110043
+                or "leverage not modified" in ret_msg
+                or "same leverage" in ret_msg
+            ):
+                logger.info(
+                    f"Leverage for {symbol} was already {leverage}x (Bybit: {ret_code} - {ret_msg})."
+                )
                 return True
             else:
-                logger.error(f"Bybit error setting leverage for {symbol}: {ret_msg} (Code: {ret_code})")
+                logger.error(
+                    f"Bybit error setting leverage for {symbol}: {ret_msg} (Code: {ret_code})"
+                )
                 return False
 
-        logger.info(f"{NEON_GREEN}Leverage for {symbol} set/requested to {leverage}x (Generic CCXT response).{RESET}")
+        logger.info(
+            f"{NEON_GREEN}Leverage for {symbol} set/requested to {leverage}x (Generic CCXT response).{RESET}"
+        )
         return True
     except ccxt_async.ExchangeError as e:
         err_str, code = str(e).lower(), getattr(e, "code", None)
-        if "leverage not modified" in err_str or "no change" in err_str or (exchange.id == "bybit" and code == 110043):
-            logger.info(f"Leverage for {symbol} already {leverage}x (Confirmed by error: {e}).")
+        if (
+            "leverage not modified" in err_str
+            or "no change" in err_str
+            or (exchange.id == "bybit" and code == 110043)
+        ):
+            logger.info(
+                f"Leverage for {symbol} already {leverage}x (Confirmed by error: {e})."
+            )
             return True
-        logger.error(f"Exchange error setting leverage for {symbol} to {leverage}x: {e} (Code: {code})")
+        logger.error(
+            f"Exchange error setting leverage for {symbol} to {leverage}x: {e} (Code: {code})"
+        )
     except Exception as e:
-        logger.error(f"Unexpected error setting leverage for {symbol} to {leverage}x: {e}", exc_info=True)
+        logger.error(
+            f"Unexpected error setting leverage for {symbol} to {leverage}x: {e}",
+            exc_info=True,
+        )
     return False
 
 
@@ -739,7 +931,8 @@ async def place_trade(
             return None
     except Exception as e:
         current_logger.error(
-            f"Trade aborted for {symbol} ({side}): Error formatting position_size {position_size}: {e}", exc_info=True
+            f"Trade aborted for {symbol} ({side}): Error formatting position_size {position_size}: {e}",
+            exc_info=True,
         )
         return None
 
@@ -758,11 +951,14 @@ async def place_trade(
                 raise ValueError("Formatted limit price is not positive.")
         except Exception as e:
             current_logger.error(
-                f"Trade aborted for {symbol} ({side}): Error formatting limit_price {limit_price}: {e}", exc_info=True
+                f"Trade aborted for {symbol} ({side}): Error formatting limit_price {limit_price}: {e}",
+                exc_info=True,
             )
             return None
     elif order_type.lower() != "market":
-        current_logger.error(f"Unsupported order type '{order_type}' for {symbol}. Only 'market' or 'limit' supported.")
+        current_logger.error(
+            f"Unsupported order type '{order_type}' for {symbol}. Only 'market' or 'limit' supported."
+        )
         return None
 
     final_params = {"reduceOnly": reduce_only}
@@ -772,7 +968,11 @@ async def place_trade(
     if params:
         final_params.update(params)
 
-    if reduce_only and order_type.lower() == "market" and "timeInForce" not in final_params:
+    if (
+        reduce_only
+        and order_type.lower() == "market"
+        and "timeInForce" not in final_params
+    ):
         final_params["timeInForce"] = "IOC"
 
     base_currency = market_info.get("base", "units")
@@ -787,7 +987,12 @@ async def place_trade(
 
     try:
         order = await exchange.create_order(
-            symbol, order_type.lower(), side, amount_for_api, price_for_api, final_params
+            symbol,
+            order_type.lower(),
+            side,
+            amount_for_api,
+            price_for_api,
+            final_params,
         )
         if order:
             current_logger.info(
@@ -796,7 +1001,9 @@ async def place_trade(
             )
             return order
         else:
-            current_logger.error(f"Order placement for {symbol} returned None without raising an exception.")
+            current_logger.error(
+                f"Order placement for {symbol} returned None without raising an exception."
+            )
             return None
     except ccxt_async.InsufficientFunds as e:
         current_logger.error(
@@ -810,11 +1017,13 @@ async def place_trade(
         )
     except ccxt_async.ExchangeError as e:
         current_logger.error(
-            f"{NEON_RED}Exchange error placing {action_description} order for {symbol}: {e}{RESET}", exc_info=True
+            f"{NEON_RED}Exchange error placing {action_description} order for {symbol}: {e}{RESET}",
+            exc_info=True,
         )
     except Exception as e:
         current_logger.error(
-            f"{NEON_RED}Unexpected error placing {action_description} order for {symbol}: {e}{RESET}", exc_info=True
+            f"{NEON_RED}Unexpected error placing {action_description} order for {symbol}: {e}{RESET}",
+            exc_info=True,
         )
     return None
 
@@ -831,14 +1040,18 @@ async def _set_position_protection(
     tsl_activation_price: Optional[Union[Decimal, str]] = None,
 ) -> bool:
     if "bybit" not in exchange.id.lower():
-        logger.error("Position protection logic (_set_position_protection) is currently Bybit V5 specific.")
+        logger.error(
+            "Position protection logic (_set_position_protection) is currently Bybit V5 specific."
+        )
         return False
     if not market_info.get("is_contract", False):
         logger.warning(f"Protection skipped for {symbol}: not a contract market.")
         return True
 
     if not position_info or "side" not in position_info or not position_info["side"]:
-        logger.error(f"Cannot set protection for {symbol}: invalid or missing position_info (especially 'side').")
+        logger.error(
+            f"Cannot set protection for {symbol}: invalid or missing position_info (especially 'side')."
+        )
         return False
 
     pos_side_str = position_info["side"].lower()
@@ -846,7 +1059,9 @@ async def _set_position_protection(
     try:
         position_idx = int(pos_idx_raw)
     except (ValueError, TypeError):
-        logger.warning(f"Invalid positionIdx '{pos_idx_raw}' for {symbol}, defaulting to 0.")
+        logger.warning(
+            f"Invalid positionIdx '{pos_idx_raw}' for {symbol}, defaulting to 0."
+        )
         position_idx = 0
 
     market_type = market_info.get("type", "").lower()
@@ -882,12 +1097,18 @@ async def _set_position_protection(
             min_tick_size_dec = Decimal(f"1e-{price_precision_places}")
 
         def format_price_for_api(price_decimal: Optional[Decimal]) -> Optional[str]:
-            if not (price_decimal and isinstance(price_decimal, Decimal) and price_decimal > 0):
+            if not (
+                price_decimal
+                and isinstance(price_decimal, Decimal)
+                and price_decimal > 0
+            ):
                 return None
             return exchange.price_to_precision(symbol, float(price_decimal))
 
         if isinstance(trailing_stop_distance, Decimal) and trailing_stop_distance > 0:
-            distance_precision_places = abs(min_tick_size_dec.normalize().as_tuple().exponent)
+            distance_precision_places = abs(
+                min_tick_size_dec.normalize().as_tuple().exponent
+            )
             tsl_dist_str = exchange.decimal_to_precision(
                 trailing_stop_distance,
                 ccxt_async.ROUND,  # type: ignore
@@ -896,7 +1117,11 @@ async def _set_position_protection(
                 ccxt_async.NO_PADDING,  # type: ignore
             )
             if Decimal(tsl_dist_str) < min_tick_size_dec:
-                tsl_dist_str = str(min_tick_size_dec.quantize(Decimal(f"1e-{distance_precision_places}")))
+                tsl_dist_str = str(
+                    min_tick_size_dec.quantize(
+                        Decimal(f"1e-{distance_precision_places}")
+                    )
+                )
 
             tsl_act_price_str_final: Optional[str] = None
             if tsl_activation_price == "0":
@@ -904,8 +1129,17 @@ async def _set_position_protection(
             elif isinstance(tsl_activation_price, Decimal) and tsl_activation_price > 0:
                 tsl_act_price_str_final = format_price_for_api(tsl_activation_price)
 
-            if tsl_dist_str and Decimal(tsl_dist_str) > 0 and tsl_act_price_str_final is not None:
-                protection_fields_to_send.update({"trailingStop": tsl_dist_str, "activePrice": tsl_act_price_str_final})
+            if (
+                tsl_dist_str
+                and Decimal(tsl_dist_str) > 0
+                and tsl_act_price_str_final is not None
+            ):
+                protection_fields_to_send.update(
+                    {
+                        "trailingStop": tsl_dist_str,
+                        "activePrice": tsl_act_price_str_final,
+                    }
+                )
                 log_parts.append(
                     f"  - Trailing Stop: Distance={tsl_dist_str}, ActivationPrice={tsl_act_price_str_final}"
                 )
@@ -920,19 +1154,30 @@ async def _set_position_protection(
             log_parts.append("  - Trailing Stop: Removing (distance set to '0')")
 
         if stop_loss_price is not None:
-            sl_price_str = "0" if stop_loss_price == Decimal(0) else format_price_for_api(stop_loss_price)
+            sl_price_str = (
+                "0"
+                if stop_loss_price == Decimal(0)
+                else format_price_for_api(stop_loss_price)
+            )
             if sl_price_str is not None:
                 protection_fields_to_send["stopLoss"] = sl_price_str
                 log_parts.append(f"  - Fixed Stop Loss: {sl_price_str}")
 
         if take_profit_price is not None:
-            tp_price_str = "0" if take_profit_price == Decimal(0) else format_price_for_api(take_profit_price)
+            tp_price_str = (
+                "0"
+                if take_profit_price == Decimal(0)
+                else format_price_for_api(take_profit_price)
+            )
             if tp_price_str is not None:
                 protection_fields_to_send["takeProfit"] = tp_price_str
                 log_parts.append(f"  - Fixed Take Profit: {tp_price_str}")
 
     except Exception as fmt_err:
-        logger.error(f"Error formatting protection parameters for {symbol}: {fmt_err}", exc_info=True)
+        logger.error(
+            f"Error formatting protection parameters for {symbol}: {fmt_err}",
+            exc_info=True,
+        )
         return False
 
     if not protection_fields_to_send:
@@ -941,7 +1186,9 @@ async def _set_position_protection(
 
     api_params.update(protection_fields_to_send)
     logger.info("\n".join(log_parts))
-    logger.debug(f"  API Call to set trading stop/protection for {symbol}: params={api_params}")
+    logger.debug(
+        f"  API Call to set trading stop/protection for {symbol}: params={api_params}"
+    )
 
     try:
         method_name_camel = "v5PrivatePostPositionSetTradingStop"
@@ -975,7 +1222,10 @@ async def _set_position_protection(
             )
             return False
     except Exception as e:
-        logger.error(f"{NEON_RED}Error during API call to set protection for {symbol}: {e}{RESET}", exc_info=True)
+        logger.error(
+            f"{NEON_RED}Error during API call to set protection for {symbol}: {e}{RESET}",
+            exc_info=True,
+        )
         return False
 
 
@@ -990,53 +1240,95 @@ async def set_trailing_stop_loss(
 ) -> bool:
     if not config.get("enable_trailing_stop", False):
         logger.info(f"Trailing Stop Loss is disabled in config for {symbol}.")
-        if take_profit_price and isinstance(take_profit_price, Decimal) and take_profit_price > 0:
-            logger.info(f"TSL disabled, but attempting to set provided Take Profit for {symbol}.")
+        if (
+            take_profit_price
+            and isinstance(take_profit_price, Decimal)
+            and take_profit_price > 0
+        ):
+            logger.info(
+                f"TSL disabled, but attempting to set provided Take Profit for {symbol}."
+            )
             return await _set_position_protection(
-                exchange, symbol, market_info, position_info, logger, take_profit_price=take_profit_price
+                exchange,
+                symbol,
+                market_info,
+                position_info,
+                logger,
+                take_profit_price=take_profit_price,
             )
         return True
 
     if not market_info.get("is_contract", False):
-        logger.warning(f"Trailing Stop Loss is typically for contract markets. Skipped for {symbol} (not a contract).")
-        if take_profit_price and isinstance(take_profit_price, Decimal) and take_profit_price > 0:
-            logger.info(f"Market is not a contract, but attempting to set provided Take Profit for {symbol}.")
+        logger.warning(
+            f"Trailing Stop Loss is typically for contract markets. Skipped for {symbol} (not a contract)."
+        )
+        if (
+            take_profit_price
+            and isinstance(take_profit_price, Decimal)
+            and take_profit_price > 0
+        ):
+            logger.info(
+                f"Market is not a contract, but attempting to set provided Take Profit for {symbol}."
+            )
             return await _set_position_protection(
-                exchange, symbol, market_info, position_info, logger, take_profit_price=take_profit_price
+                exchange,
+                symbol,
+                market_info,
+                position_info,
+                logger,
+                take_profit_price=take_profit_price,
             )
         return True
 
     try:
         callback_rate_str = str(config.get("trailing_stop_callback_rate", "0.005"))
-        activation_percentage_str = str(config.get("trailing_stop_activation_percentage", "0.003"))
+        activation_percentage_str = str(
+            config.get("trailing_stop_activation_percentage", "0.003")
+        )
         callback_rate = Decimal(callback_rate_str)
         activation_percentage = Decimal(activation_percentage_str)
         if callback_rate <= 0:
             raise ValueError("Trailing stop callback rate must be positive.")
         if activation_percentage < 0:
-            raise ValueError("Trailing stop activation percentage must be non-negative.")
+            raise ValueError(
+                "Trailing stop activation percentage must be non-negative."
+            )
     except (InvalidOperation, ValueError, TypeError) as e:
-        logger.error(f"Invalid TSL parameters in configuration for {symbol}: {e}. Please check config.")
+        logger.error(
+            f"Invalid TSL parameters in configuration for {symbol}: {e}. Please check config."
+        )
         return False
 
     try:
         entry_price = position_info.get("entryPriceDecimal")
         position_side = position_info.get("side", "").lower()
         if not (isinstance(entry_price, Decimal) and entry_price > 0):
-            raise ValueError(f"Invalid or missing entry price in position_info: {entry_price}")
+            raise ValueError(
+                f"Invalid or missing entry price in position_info: {entry_price}"
+            )
         if position_side not in ["long", "short"]:
-            raise ValueError(f"Invalid or missing side in position_info: {position_side}")
+            raise ValueError(
+                f"Invalid or missing side in position_info: {position_side}"
+            )
     except (ValueError, TypeError) as e:
-        logger.error(f"Invalid position information for TSL setup ({symbol}): {e}. Position: {position_info}")
+        logger.error(
+            f"Invalid position information for TSL setup ({symbol}): {e}. Position: {position_info}"
+        )
         return False
 
     try:
         price_precision_places = get_price_precision(market_info, logger)
         min_tick_size = get_min_tick_size(market_info, logger)
         quantize_fallback_tick = Decimal(f"1e-{price_precision_places}")
-        effective_tick_size = min_tick_size if min_tick_size and min_tick_size > 0 else quantize_fallback_tick
+        effective_tick_size = (
+            min_tick_size
+            if min_tick_size and min_tick_size > 0
+            else quantize_fallback_tick
+        )
         if not (effective_tick_size > 0):
-            logger.error(f"Could not determine a valid tick size for TSL calculations for {symbol}.")
+            logger.error(
+                f"Could not determine a valid tick size for TSL calculations for {symbol}."
+            )
             return False
 
         current_market_price = await fetch_current_price_ccxt(exchange, symbol, logger)
@@ -1048,14 +1340,19 @@ async def set_trailing_stop_loss(
 
         price_change_for_activation = entry_price * activation_percentage
         raw_activation_price = entry_price + (
-            price_change_for_activation if position_side == "long" else -price_change_for_activation
+            price_change_for_activation
+            if position_side == "long"
+            else -price_change_for_activation
         )
 
         activate_immediately = False
         if config.get("tsl_activate_immediately_if_profitable", True):
             if position_side == "long" and current_market_price >= raw_activation_price:
                 activate_immediately = True
-            elif position_side == "short" and current_market_price <= raw_activation_price:
+            elif (
+                position_side == "short"
+                and current_market_price <= raw_activation_price
+            ):
                 activate_immediately = True
 
         final_activation_price_param: Union[Decimal, str]
@@ -1070,7 +1367,9 @@ async def set_trailing_stop_loss(
             )
         else:
             min_profit_activation_price = (
-                entry_price + effective_tick_size if position_side == "long" else entry_price - effective_tick_size
+                entry_price + effective_tick_size
+                if position_side == "long"
+                else entry_price - effective_tick_size
             )
             if position_side == "long":
                 if raw_activation_price < min_profit_activation_price:
@@ -1085,9 +1384,9 @@ async def set_trailing_stop_loss(
                     raw_activation_price = current_market_price - effective_tick_size  # type: ignore
                 rounding_mode = ROUND_DOWN
 
-            calculated_activation_price = (raw_activation_price / effective_tick_size).quantize(
-                Decimal("1"), rounding=rounding_mode
-            ) * effective_tick_size
+            calculated_activation_price = (
+                raw_activation_price / effective_tick_size
+            ).quantize(Decimal("1"), rounding=rounding_mode) * effective_tick_size
 
             if calculated_activation_price <= 0:
                 logger.error(
@@ -1099,17 +1398,19 @@ async def set_trailing_stop_loss(
                     f"Calculated TSL Activation Price ({calculated_activation_price}) for LONG {symbol} is not profitable vs Entry ({entry_price}). "
                     f"Adjusting to one tick above entry."
                 )
-                calculated_activation_price = ((entry_price + effective_tick_size) / effective_tick_size).quantize(
-                    Decimal("1"), rounding=ROUND_UP
-                ) * effective_tick_size
-            elif position_side == "short" and calculated_activation_price >= entry_price:
+                calculated_activation_price = (
+                    (entry_price + effective_tick_size) / effective_tick_size
+                ).quantize(Decimal("1"), rounding=ROUND_UP) * effective_tick_size
+            elif (
+                position_side == "short" and calculated_activation_price >= entry_price
+            ):
                 logger.warning(
                     f"Calculated TSL Activation Price ({calculated_activation_price}) for SHORT {symbol} is not profitable vs Entry ({entry_price}). "
                     f"Adjusting to one tick below entry."
                 )
-                calculated_activation_price = ((entry_price - effective_tick_size) / effective_tick_size).quantize(
-                    Decimal("1"), rounding=ROUND_DOWN
-                ) * effective_tick_size
+                calculated_activation_price = (
+                    (entry_price - effective_tick_size) / effective_tick_size
+                ).quantize(Decimal("1"), rounding=ROUND_DOWN) * effective_tick_size
 
             if calculated_activation_price <= 0:
                 logger.error(
@@ -1142,8 +1443,14 @@ async def set_trailing_stop_loss(
             f"  Activation Price (for API): '{final_activation_price_param}' (Based on calculated: {log_act_price_str}, from {activation_percentage:.2%})\n"
             f"  Trail Distance: {trail_distance:.{price_precision_places}f} (From callback rate: {callback_rate:.2%})"
         )
-        if take_profit_price and isinstance(take_profit_price, Decimal) and take_profit_price > 0:
-            logger.info(f"  Also setting Take Profit at: {take_profit_price:.{price_precision_places}f}")
+        if (
+            take_profit_price
+            and isinstance(take_profit_price, Decimal)
+            and take_profit_price > 0
+        ):
+            logger.info(
+                f"  Also setting Take Profit at: {take_profit_price:.{price_precision_places}f}"
+            )
 
         return await _set_position_protection(
             exchange,
@@ -1159,5 +1466,7 @@ async def set_trailing_stop_loss(
             tsl_activation_price=final_activation_price_param,
         )
     except Exception as e:
-        logger.error(f"Unexpected error during TSL setup for {symbol}: {e}", exc_info=True)
+        logger.error(
+            f"Unexpected error during TSL setup for {symbol}: {e}", exc_info=True
+        )
         return False

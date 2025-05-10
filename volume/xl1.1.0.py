@@ -179,7 +179,9 @@ class StrategyAnalysisResults(TypedDict):
 
 
 # Extended MarketInfo TypedDict based on ccxt structure + custom fields
-class MarketInfo(TypedDict, total=False):  # Use total=False as not all fields are guaranteed
+class MarketInfo(
+    TypedDict, total=False
+):  # Use total=False as not all fields are guaranteed
     id: str
     symbol: str
     base: str
@@ -206,7 +208,9 @@ class MarketInfo(TypedDict, total=False):  # Use total=False as not all fields a
     expiryDatetime: str | None
     strike: float | None
     optionType: str | None
-    precision: dict[str, Any]  # {'amount': float, 'price': float, 'cost': float, 'base': float, 'quote': float}
+    precision: dict[
+        str, Any
+    ]  # {'amount': float, 'price': float, 'cost': float, 'base': float, 'quote': float}
     limits: dict[
         str, Any
     ]  # {'amount': {'min': float, 'max': float}, 'price': {'min': float, 'max': float}, 'cost': {'min': float, 'max': float}, 'leverage': {'min': float, 'max': float}}
@@ -300,10 +304,14 @@ class SensitiveFormatter(logging.Formatter):
         secret = API_SECRET
         try:
             # Basic redaction: replace the full key/secret if found
-            if key and isinstance(key, str) and len(key) > 4:  # Avoid redacting short strings
+            if (
+                key and isinstance(key, str) and len(key) > 4
+            ):  # Avoid redacting short strings
                 redacted_msg = redacted_msg.replace(key, self._api_key_placeholder)
             if secret and isinstance(secret, str) and len(secret) > 4:
-                redacted_msg = redacted_msg.replace(secret, self._api_secret_placeholder)
+                redacted_msg = redacted_msg.replace(
+                    secret, self._api_secret_placeholder
+                )
         except Exception:
             # Failsafe: if redaction causes an error, return the original message
             return formatted_msg
@@ -321,15 +329,15 @@ class NeonConsoleFormatter(SensitiveFormatter):
         logging.CRITICAL: BRIGHT + NEON_RED,
     }
     _default_color = NEON_BLUE  # Default color for levels not in map
-    _log_format = (
-        f"{DIM}%(asctime)s{RESET} {NEON_PURPLE}[%(name)-15s]{RESET} %(levelcolor)s%(levelname)-8s{RESET} %(message)s"
-    )
+    _log_format = f"{DIM}%(asctime)s{RESET} {NEON_PURPLE}[%(name)-15s]{RESET} %(levelcolor)s%(levelname)-8s{RESET} %(message)s"
     _date_format = "%Y-%m-%d %H:%M:%S"  # Local time format for console
 
     def __init__(self, **kwargs) -> None:
         super().__init__(fmt=self._log_format, datefmt=self._date_format, **kwargs)
         # Use local timezone for console output timestamps
-        self.converter = lambda timestamp, _: datetime.fromtimestamp(timestamp, tz=TIMEZONE).timetuple()
+        self.converter = lambda timestamp, _: datetime.fromtimestamp(
+            timestamp, tz=TIMEZONE
+        ).timetuple()
 
     def format(self, record: logging.LogRecord) -> str:
         # Add level-specific color information to the record before formatting
@@ -352,10 +360,13 @@ def setup_logger(name: str) -> logging.Logger:
 
     # --- File Handler (Rotating File) ---
     try:
-        fh = RotatingFileHandler(log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8")
+        fh = RotatingFileHandler(
+            log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+        )
         fh.setLevel(logging.DEBUG)  # Log everything to file
         file_formatter = SensitiveFormatter(
-            "%(asctime)s.%(msecs)03d UTC [%(name)s:%(lineno)d] %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+            "%(asctime)s.%(msecs)03d UTC [%(name)s:%(lineno)d] %(levelname)-8s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         file_formatter.converter = time.gmtime  # Use UTC for file logs
         fh.setFormatter(file_formatter)
@@ -444,9 +455,13 @@ def _ensure_config_keys(
             init_logger.info(
                 f"{NEON_YELLOW}Config Update: Added missing key '{full_key_path}' with default: {repr(default_value)}{RESET}"
             )
-        elif isinstance(default_value, dict) and isinstance(updated_config.get(key), dict):
+        elif isinstance(default_value, dict) and isinstance(
+            updated_config.get(key), dict
+        ):
             # Recursively check nested dictionaries
-            nested_config, nested_changed = _ensure_config_keys(updated_config[key], default_value, full_key_path)
+            nested_config, nested_changed = _ensure_config_keys(
+                updated_config[key], default_value, full_key_path
+            )
             if nested_changed:
                 updated_config[key] = nested_config
                 changed = True
@@ -480,7 +495,9 @@ def _validate_and_correct_numeric(
         try:
             num_val = Decimal(str(original_val).strip())
         except (InvalidOperation, TypeError, ValueError):
-            raise TypeError(f"Value '{repr(original_val)}' cannot be converted to a number.")
+            raise TypeError(
+                f"Value '{repr(original_val)}' cannot be converted to a number."
+            )
 
         if not num_val.is_finite():
             raise ValueError("Non-finite value (NaN or Infinity) is not allowed.")
@@ -490,32 +507,50 @@ def _validate_and_correct_numeric(
         max_dec = Decimal(str(max_val))
         is_zero = num_val.is_zero()
 
-        min_check_passed = (num_val > min_dec) if is_strict_min else (num_val >= min_dec)
+        min_check_passed = (
+            (num_val > min_dec) if is_strict_min else (num_val >= min_dec)
+        )
         max_check_passed = num_val <= max_dec
         range_check_passed = min_check_passed and max_check_passed
 
         if not range_check_passed and not (allow_zero and is_zero):
             range_str = f"{'(' if is_strict_min else '['}{min_val}, {max_val}{']'}"
             allowed_str = f"{range_str}{' or 0' if allow_zero else ''}"
-            raise ValueError(f"Value {num_val.normalize()} is outside the allowed range {allowed_str}.")
+            raise ValueError(
+                f"Value {num_val.normalize()} is outside the allowed range {allowed_str}."
+            )
 
         # Type and Precision Correction
         needs_type_correction = False
         if is_int:
             if num_val % 1 != 0:  # Check if it has a fractional part
                 needs_type_correction = True
-                final_val = int(num_val.to_integral_value(rounding=ROUND_DOWN))  # Truncate
+                final_val = int(
+                    num_val.to_integral_value(rounding=ROUND_DOWN)
+                )  # Truncate
                 init_logger.info(
                     f"{NEON_YELLOW}Config Update: Truncated '{key_path}' from {repr(original_val)} to integer {repr(final_val)}.{RESET}"
                 )
                 # Re-check range after truncation
                 final_dec_trunc = Decimal(final_val)
-                min_check_passed_trunc = (final_dec_trunc > min_dec) if is_strict_min else (final_dec_trunc >= min_dec)
-                range_check_passed_trunc = min_check_passed_trunc and (final_dec_trunc <= max_dec)
-                if not range_check_passed_trunc and not (allow_zero and final_dec_trunc.is_zero()):
-                    range_str = f"{'(' if is_strict_min else '['}{min_val}, {max_val}{']'}"
+                min_check_passed_trunc = (
+                    (final_dec_trunc > min_dec)
+                    if is_strict_min
+                    else (final_dec_trunc >= min_dec)
+                )
+                range_check_passed_trunc = min_check_passed_trunc and (
+                    final_dec_trunc <= max_dec
+                )
+                if not range_check_passed_trunc and not (
+                    allow_zero and final_dec_trunc.is_zero()
+                ):
+                    range_str = (
+                        f"{'(' if is_strict_min else '['}{min_val}, {max_val}{']'}"
+                    )
                     allowed_str = f"{range_str}{' or 0' if allow_zero else ''}"
-                    raise ValueError(f"Value truncated to {final_val}, which is outside allowed range {allowed_str}.")
+                    raise ValueError(
+                        f"Value truncated to {final_val}, which is outside allowed range {allowed_str}."
+                    )
             elif not isinstance(original_val, int):  # Correct type if it's like 10.0
                 needs_type_correction = True
                 final_val = int(num_val)
@@ -525,7 +560,9 @@ def _validate_and_correct_numeric(
             else:
                 final_val = int(num_val)  # Ensure it's definitely an int
         else:  # Target is float
-            if not isinstance(original_val, (float, int)):  # Allow ints to be treated as floats
+            if not isinstance(
+                original_val, (float, int)
+            ):  # Allow ints to be treated as floats
                 needs_type_correction = True
                 final_val = float(num_val)
                 init_logger.info(
@@ -534,7 +571,9 @@ def _validate_and_correct_numeric(
             elif isinstance(original_val, float):
                 # Check for potential precision issues if converting back and forth
                 converted_float = float(num_val)
-                if abs(original_val - converted_float) > 1e-9:  # Tolerance for float comparison
+                if (
+                    abs(original_val - converted_float) > 1e-9
+                ):  # Tolerance for float comparison
                     needs_type_correction = True
                     final_val = converted_float
                     init_logger.info(
@@ -575,12 +614,16 @@ def _validate_and_correct_numeric(
 def load_config(filepath: str) -> dict[str, Any]:
     """Loads, validates, and potentially updates the configuration file."""
     global QUOTE_CURRENCY  # Allow updating the global constant
-    init_logger.info(f"{Fore.CYAN}# Loading configuration from '{filepath}'...{Style.RESET_ALL}")
+    init_logger.info(
+        f"{Fore.CYAN}# Loading configuration from '{filepath}'...{Style.RESET_ALL}"
+    )
 
     # --- Default Configuration Structure ---
     # Used for comparison, adding missing keys, and validation fallbacks
     default_config = {
-        "trading_pairs": ["BTC/USDT:USDT"],  # Example format, expects Perpetual contracts
+        "trading_pairs": [
+            "BTC/USDT:USDT"
+        ],  # Example format, expects Perpetual contracts
         "interval": "5",  # Default timeframe
         "enable_trading": False,  # Safety default: start in dry-run mode
         "use_sandbox": True,  # Safety default: use testnet/sandbox
@@ -633,7 +676,9 @@ def load_config(filepath: str) -> dict[str, Any]:
 
     # --- Load or Create Config File ---
     if not os.path.exists(filepath):
-        init_logger.warning(f"{NEON_YELLOW}Config file '{filepath}' not found. Creating with defaults.{RESET}")
+        init_logger.warning(
+            f"{NEON_YELLOW}Config file '{filepath}' not found. Creating with defaults.{RESET}"
+        )
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=4, ensure_ascii=False)
@@ -643,7 +688,9 @@ def load_config(filepath: str) -> dict[str, Any]:
             init_logger.critical(
                 f"{NEON_RED}FATAL ERROR: Could not create config file '{filepath}': {e}. Using hardcoded defaults.{RESET}"
             )
-            QUOTE_CURRENCY = default_config.get("quote_currency", "USDT")  # Set global from default
+            QUOTE_CURRENCY = default_config.get(
+                "quote_currency", "USDT"
+            )  # Set global from default
             return default_config  # Return defaults as a fallback
     else:
         try:
@@ -653,14 +700,18 @@ def load_config(filepath: str) -> dict[str, Any]:
                 raise TypeError("Config file root must be a JSON object.")
             init_logger.info(f"Loaded config from '{filepath}'.")
         except json.JSONDecodeError as e:
-            init_logger.error(f"{NEON_RED}JSON decode error in '{filepath}': {e}. Recreating with defaults.{RESET}")
+            init_logger.error(
+                f"{NEON_RED}JSON decode error in '{filepath}': {e}. Recreating with defaults.{RESET}"
+            )
             try:
                 backup_path = f"{filepath}.corrupted_{int(time.time())}.bak"
                 os.replace(filepath, backup_path)  # Backup corrupted file
                 init_logger.info(f"Backed up corrupted config to: {backup_path}")
                 with open(filepath, "w", encoding="utf-8") as f:
                     json.dump(default_config, f, indent=4, ensure_ascii=False)
-                init_logger.info(f"{NEON_GREEN}Recreated default config: {filepath}{RESET}")
+                init_logger.info(
+                    f"{NEON_GREEN}Recreated default config: {filepath}{RESET}"
+                )
                 loaded_config = default_config
             except Exception as e_create:
                 init_logger.critical(
@@ -695,31 +746,73 @@ def load_config(filepath: str) -> dict[str, Any]:
     # Top Level
     changes.append(
         _validate_and_correct_numeric(
-            cfg, def_cfg, "max_concurrent_positions", "max_concurrent_positions", 1, 100, is_int=True
+            cfg,
+            def_cfg,
+            "max_concurrent_positions",
+            "max_concurrent_positions",
+            1,
+            100,
+            is_int=True,
         )
     )
     changes.append(
-        _validate_and_correct_numeric(cfg, def_cfg, "risk_per_trade", "risk_per_trade", 0.0001, 0.2, is_strict_min=True)
+        _validate_and_correct_numeric(
+            cfg,
+            def_cfg,
+            "risk_per_trade",
+            "risk_per_trade",
+            0.0001,
+            0.2,
+            is_strict_min=True,
+        )
     )  # Risk 0.01% to 20%
     changes.append(
-        _validate_and_correct_numeric(cfg, def_cfg, "leverage", "leverage", 1, 125, is_int=True)
+        _validate_and_correct_numeric(
+            cfg, def_cfg, "leverage", "leverage", 1, 125, is_int=True
+        )
     )  # Leverage 1 to 125
-    changes.append(_validate_and_correct_numeric(cfg, def_cfg, "retry_delay", "retry_delay", 1, 60, is_int=True))
-    changes.append(
-        _validate_and_correct_numeric(cfg, def_cfg, "loop_delay_seconds", "loop_delay_seconds", 5, 300, is_int=True)
-    )
     changes.append(
         _validate_and_correct_numeric(
-            cfg, def_cfg, "position_confirm_delay_seconds", "position_confirm_delay_seconds", 1, 60, is_int=True
+            cfg, def_cfg, "retry_delay", "retry_delay", 1, 60, is_int=True
         )
     )
     changes.append(
         _validate_and_correct_numeric(
-            cfg, def_cfg, "fetch_limit", "fetch_limit", 100, BYBIT_API_KLINE_LIMIT, is_int=True
+            cfg,
+            def_cfg,
+            "loop_delay_seconds",
+            "loop_delay_seconds",
+            5,
+            300,
+            is_int=True,
         )
     )
     changes.append(
-        _validate_and_correct_numeric(cfg, def_cfg, "orderbook_limit", "orderbook_limit", 1, 200, is_int=True)
+        _validate_and_correct_numeric(
+            cfg,
+            def_cfg,
+            "position_confirm_delay_seconds",
+            "position_confirm_delay_seconds",
+            1,
+            60,
+            is_int=True,
+        )
+    )
+    changes.append(
+        _validate_and_correct_numeric(
+            cfg,
+            def_cfg,
+            "fetch_limit",
+            "fetch_limit",
+            100,
+            BYBIT_API_KLINE_LIMIT,
+            is_int=True,
+        )
+    )
+    changes.append(
+        _validate_and_correct_numeric(
+            cfg, def_cfg, "orderbook_limit", "orderbook_limit", 1, 200, is_int=True
+        )
     )
 
     # Trading Pairs Validation (Basic)
@@ -753,20 +846,41 @@ def load_config(filepath: str) -> dict[str, Any]:
     sp = cfg["strategy_params"]
     def_sp = def_cfg["strategy_params"]
     changes.append(
-        _validate_and_correct_numeric(sp, def_sp, "vt_length", "strategy_params.vt_length", 5, 500, is_int=True)
-    )
-    changes.append(
         _validate_and_correct_numeric(
-            sp, def_sp, "vt_atr_period", "strategy_params.vt_atr_period", 5, 1000, is_int=True
+            sp, def_sp, "vt_length", "strategy_params.vt_length", 5, 500, is_int=True
         )
     )
     changes.append(
         _validate_and_correct_numeric(
-            sp, def_sp, "vt_vol_ema_length", "strategy_params.vt_vol_ema_length", 10, 2000, is_int=True
+            sp,
+            def_sp,
+            "vt_atr_period",
+            "strategy_params.vt_atr_period",
+            5,
+            1000,
+            is_int=True,
         )
     )
     changes.append(
-        _validate_and_correct_numeric(sp, def_sp, "vt_atr_multiplier", "strategy_params.vt_atr_multiplier", 0.1, 10.0)
+        _validate_and_correct_numeric(
+            sp,
+            def_sp,
+            "vt_vol_ema_length",
+            "strategy_params.vt_vol_ema_length",
+            10,
+            2000,
+            is_int=True,
+        )
+    )
+    changes.append(
+        _validate_and_correct_numeric(
+            sp,
+            def_sp,
+            "vt_atr_multiplier",
+            "strategy_params.vt_atr_multiplier",
+            0.1,
+            10.0,
+        )
     )
     if sp.get("ob_source") not in ["Wicks", "Body"]:
         init_logger.warning(
@@ -774,13 +888,25 @@ def load_config(filepath: str) -> dict[str, Any]:
         )
         sp["ob_source"] = def_sp["ob_source"]
         changes.append(True)
-    changes.append(_validate_and_correct_numeric(sp, def_sp, "ph_left", "strategy_params.ph_left", 1, 50, is_int=True))
     changes.append(
-        _validate_and_correct_numeric(sp, def_sp, "ph_right", "strategy_params.ph_right", 1, 50, is_int=True)
+        _validate_and_correct_numeric(
+            sp, def_sp, "ph_left", "strategy_params.ph_left", 1, 50, is_int=True
+        )
     )
-    changes.append(_validate_and_correct_numeric(sp, def_sp, "pl_left", "strategy_params.pl_left", 1, 50, is_int=True))
     changes.append(
-        _validate_and_correct_numeric(sp, def_sp, "pl_right", "strategy_params.pl_right", 1, 50, is_int=True)
+        _validate_and_correct_numeric(
+            sp, def_sp, "ph_right", "strategy_params.ph_right", 1, 50, is_int=True
+        )
+    )
+    changes.append(
+        _validate_and_correct_numeric(
+            sp, def_sp, "pl_left", "strategy_params.pl_left", 1, 50, is_int=True
+        )
+    )
+    changes.append(
+        _validate_and_correct_numeric(
+            sp, def_sp, "pl_right", "strategy_params.pl_right", 1, 50, is_int=True
+        )
     )
     if not isinstance(sp.get("ob_extend"), bool):
         init_logger.warning(
@@ -789,16 +915,34 @@ def load_config(filepath: str) -> dict[str, Any]:
         sp["ob_extend"] = def_sp["ob_extend"]
         changes.append(True)
     changes.append(
-        _validate_and_correct_numeric(sp, def_sp, "ob_max_boxes", "strategy_params.ob_max_boxes", 1, 200, is_int=True)
-    )
-    changes.append(
         _validate_and_correct_numeric(
-            sp, def_sp, "ob_entry_proximity_factor", "strategy_params.ob_entry_proximity_factor", 1.0, 1.1
+            sp,
+            def_sp,
+            "ob_max_boxes",
+            "strategy_params.ob_max_boxes",
+            1,
+            200,
+            is_int=True,
         )
     )
     changes.append(
         _validate_and_correct_numeric(
-            sp, def_sp, "ob_exit_proximity_factor", "strategy_params.ob_exit_proximity_factor", 1.0, 1.1
+            sp,
+            def_sp,
+            "ob_entry_proximity_factor",
+            "strategy_params.ob_entry_proximity_factor",
+            1.0,
+            1.1,
+        )
+    )
+    changes.append(
+        _validate_and_correct_numeric(
+            sp,
+            def_sp,
+            "ob_exit_proximity_factor",
+            "strategy_params.ob_exit_proximity_factor",
+            1.0,
+            1.1,
         )
     )
 
@@ -807,7 +951,12 @@ def load_config(filepath: str) -> dict[str, Any]:
     def_pp = def_cfg["protection"]
     changes.append(
         _validate_and_correct_numeric(
-            pp, def_pp, "initial_stop_loss_atr_multiple", "protection.initial_stop_loss_atr_multiple", 0.1, 10.0
+            pp,
+            def_pp,
+            "initial_stop_loss_atr_multiple",
+            "protection.initial_stop_loss_atr_multiple",
+            0.1,
+            10.0,
         )
     )
     changes.append(
@@ -829,7 +978,12 @@ def load_config(filepath: str) -> dict[str, Any]:
         changes.append(True)
     changes.append(
         _validate_and_correct_numeric(
-            pp, def_pp, "break_even_trigger_atr_multiple", "protection.break_even_trigger_atr_multiple", 0.1, 10.0
+            pp,
+            def_pp,
+            "break_even_trigger_atr_multiple",
+            "protection.break_even_trigger_atr_multiple",
+            0.1,
+            10.0,
         )
     )
     changes.append(
@@ -852,7 +1006,12 @@ def load_config(filepath: str) -> dict[str, Any]:
         changes.append(True)
     changes.append(
         _validate_and_correct_numeric(
-            pp, def_pp, "trailing_stop_callback_rate", "protection.trailing_stop_callback_rate", 0.0001, 0.1
+            pp,
+            def_pp,
+            "trailing_stop_callback_rate",
+            "protection.trailing_stop_callback_rate",
+            0.0001,
+            0.1,
         )
     )  # e.g., 0.01% to 10%
     changes.append(
@@ -871,7 +1030,9 @@ def load_config(filepath: str) -> dict[str, Any]:
         init_logger.warning(
             f"{NEON_YELLOW}Config Warning: 'notifications.enable_notifications' must be true or false. Using default: {def_cfg['notifications']['enable_notifications']}{RESET}"
         )
-        cfg["notifications"]["enable_notifications"] = def_cfg["notifications"]["enable_notifications"]
+        cfg["notifications"]["enable_notifications"] = def_cfg["notifications"][
+            "enable_notifications"
+        ]
         changes.append(True)
 
     # Backtesting
@@ -886,7 +1047,9 @@ def load_config(filepath: str) -> dict[str, Any]:
     # Basic date format check
     date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
     for date_key in ["start_date", "end_date"]:
-        if not isinstance(bp.get(date_key), str) or not date_pattern.match(bp[date_key]):
+        if not isinstance(bp.get(date_key), str) or not date_pattern.match(
+            bp[date_key]
+        ):
             init_logger.warning(
                 f"{NEON_YELLOW}Config Warning: 'backtesting.{date_key}' ('{bp.get(date_key)}') is invalid. Expected YYYY-MM-DD format. Using default: '{def_bp[date_key]}'{RESET}"
             )
@@ -912,7 +1075,9 @@ def load_config(filepath: str) -> dict[str, Any]:
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(cfg, f, indent=4, ensure_ascii=False)
-            init_logger.info(f"{NEON_GREEN}Saved updated config to '{filepath}'.{RESET}")
+            init_logger.info(
+                f"{NEON_GREEN}Saved updated config to '{filepath}'.{RESET}"
+            )
         except OSError as e:
             init_logger.error(f"{NEON_RED}Failed to save updated config: {e}{RESET}")
 
@@ -921,7 +1086,11 @@ def load_config(filepath: str) -> dict[str, Any]:
 
 # --- Utility Functions ---
 def _safe_market_decimal(
-    value: Any, field_name: str, allow_zero: bool = False, allow_negative: bool = False, default: Decimal | None = None
+    value: Any,
+    field_name: str,
+    allow_zero: bool = False,
+    allow_negative: bool = False,
+    default: Decimal | None = None,
 ) -> Decimal | None:
     """Safely convert market data (limits, precision) to Decimal."""
     if value is None:
@@ -930,13 +1099,17 @@ def _safe_market_decimal(
         # Handle potential string representations like 'inf' or scientific notation
         str_val = str(value).strip().lower()
         if str_val in ["inf", "+inf", "-inf", "nan"]:
-            init_logger.warning(f"Non-finite value '{value}' for {field_name}. Using default: {default}")
+            init_logger.warning(
+                f"Non-finite value '{value}' for {field_name}. Using default: {default}"
+            )
             return default
 
         dec_val = Decimal(str_val)
 
         if not dec_val.is_finite():  # Double check after conversion
-            init_logger.warning(f"Converted value for {field_name} is non-finite: {value}. Using default: {default}")
+            init_logger.warning(
+                f"Converted value for {field_name} is non-finite: {value}. Using default: {default}"
+            )
             return default
         if not allow_zero and dec_val.is_zero():
             # Log as debug because '0' might be valid (e.g. min cost can be 0)
@@ -945,7 +1118,9 @@ def _safe_market_decimal(
             )
             return default if not allow_zero else Decimal("0")  # Return 0 if allowed
         if not allow_negative and dec_val < 0:
-            init_logger.warning(f"Negative value not allowed for {field_name}: {value}. Using default: {default}")
+            init_logger.warning(
+                f"Negative value not allowed for {field_name}: {value}. Using default: {default}"
+            )
             return default
 
         # Quantize to a reasonable precision to avoid floating point issues from source
@@ -964,7 +1139,9 @@ def _format_price(exchange: ccxt.Exchange, symbol: str, price: Decimal) -> str |
         market = exchange.market(symbol)
         price_precision_val = market.get("precision", {}).get("price")
         if price_precision_val is None:
-            init_logger.warning(f"No price precision found for {symbol}. Using raw price string.")
+            init_logger.warning(
+                f"No price precision found for {symbol}. Using raw price string."
+            )
             return str(price.normalize())  # Return normalized decimal string
 
         # CCXT precision can be integer (decimal places) or float (tick size)
@@ -976,11 +1153,15 @@ def _format_price(exchange: ccxt.Exchange, symbol: str, price: Decimal) -> str |
             tick_size = Decimal(str(price_precision_val))
 
         if not tick_size.is_finite() or tick_size <= 0:
-            init_logger.error(f"Invalid price tick size {tick_size} for {symbol}. Cannot format price.")
+            init_logger.error(
+                f"Invalid price tick size {tick_size} for {symbol}. Cannot format price."
+            )
             return None
 
         # Use quantize with the tick size
-        formatted_price = price.quantize(tick_size, rounding=ROUND_DOWN)  # Round down to be conservative
+        formatted_price = price.quantize(
+            tick_size, rounding=ROUND_DOWN
+        )  # Round down to be conservative
         return str(formatted_price.normalize())
 
     except (ccxt.ExchangeError, KeyError, ValueError, InvalidOperation, TypeError) as e:
@@ -998,7 +1179,11 @@ def enhance_market_info(market: dict[str, Any]) -> MarketInfo:
     precision = market.get("precision", {})
 
     # Basic contract type detection
-    is_contract = market.get("contract", False) or market.get("swap", False) or market.get("future", False)
+    is_contract = (
+        market.get("contract", False)
+        or market.get("swap", False)
+        or market.get("future", False)
+    )
     is_linear = market.get("linear", False) and is_contract
     is_inverse = market.get("inverse", False) and is_contract
     contract_type = "Linear" if is_linear else "Inverse" if is_inverse else "Spot"
@@ -1006,7 +1191,9 @@ def enhance_market_info(market: dict[str, Any]) -> MarketInfo:
     # --- Convert precision/limits to Decimal ---
     amount_prec = precision.get("amount")
     price_prec = precision.get("price")
-    contract_size = market.get("contractSize", 1.0)  # Default to 1 for spot/non-specified
+    contract_size = market.get(
+        "contractSize", 1.0
+    )  # Default to 1 for spot/non-specified
 
     # Determine step size (tick size) from precision
     # CCXT precision: int = decimal places, float = tick size
@@ -1014,12 +1201,16 @@ def enhance_market_info(market: dict[str, Any]) -> MarketInfo:
     if isinstance(amount_prec, int):
         amount_step = Decimal("1e-" + str(amount_prec))
     elif isinstance(amount_prec, (float, str)):
-        amount_step = _safe_market_decimal(amount_prec, "precision.amount", allow_zero=False)
+        amount_step = _safe_market_decimal(
+            amount_prec, "precision.amount", allow_zero=False
+        )
     price_step = None
     if isinstance(price_prec, int):
         price_step = Decimal("1e-" + str(price_prec))
     elif isinstance(price_prec, (float, str)):
-        price_step = _safe_market_decimal(price_prec, "precision.price", allow_zero=False)
+        price_step = _safe_market_decimal(
+            price_prec, "precision.price", allow_zero=False
+        )
 
     # Assign enhanced fields
     enhanced["is_contract"] = is_contract
@@ -1029,38 +1220,67 @@ def enhance_market_info(market: dict[str, Any]) -> MarketInfo:
     enhanced["min_amount_decimal"] = _safe_market_decimal(
         amount_limits.get("min"), "limits.amount.min", allow_zero=True
     )
-    enhanced["max_amount_decimal"] = _safe_market_decimal(amount_limits.get("max"), "limits.amount.max")
-    enhanced["min_cost_decimal"] = _safe_market_decimal(cost_limits.get("min"), "limits.cost.min", allow_zero=True)
-    enhanced["max_cost_decimal"] = _safe_market_decimal(cost_limits.get("max"), "limits.cost.max")
+    enhanced["max_amount_decimal"] = _safe_market_decimal(
+        amount_limits.get("max"), "limits.amount.max"
+    )
+    enhanced["min_cost_decimal"] = _safe_market_decimal(
+        cost_limits.get("min"), "limits.cost.min", allow_zero=True
+    )
+    enhanced["max_cost_decimal"] = _safe_market_decimal(
+        cost_limits.get("max"), "limits.cost.max"
+    )
     enhanced["amount_precision_step_decimal"] = amount_step
     enhanced["price_precision_step_decimal"] = price_step
-    enhanced["contract_size_decimal"] = _safe_market_decimal(contract_size, "contractSize", default=Decimal("1"))
+    enhanced["contract_size_decimal"] = _safe_market_decimal(
+        contract_size, "contractSize", default=Decimal("1")
+    )
 
     return enhanced
 
 
-def enhance_position_info(position: dict[str, Any], market_info: MarketInfo) -> PositionInfo:
+def enhance_position_info(
+    position: dict[str, Any], market_info: MarketInfo
+) -> PositionInfo:
     """Adds custom fields and Decimal types to ccxt position dict."""
     enhanced: PositionInfo = position.copy()
 
     # Convert key numeric fields to Decimal
     enhanced["size_decimal"] = _safe_market_decimal(
-        position.get("contracts"), "position.contracts", allow_zero=True, allow_negative=True, default=Decimal("0")
+        position.get("contracts"),
+        "position.contracts",
+        allow_zero=True,
+        allow_negative=True,
+        default=Decimal("0"),
     )
-    enhanced["entryPrice_decimal"] = _safe_market_decimal(position.get("entryPrice"), "position.entryPrice")
-    enhanced["markPrice_decimal"] = _safe_market_decimal(position.get("markPrice"), "position.markPrice")
+    enhanced["entryPrice_decimal"] = _safe_market_decimal(
+        position.get("entryPrice"), "position.entryPrice"
+    )
+    enhanced["markPrice_decimal"] = _safe_market_decimal(
+        position.get("markPrice"), "position.markPrice"
+    )
     enhanced["liquidationPrice_decimal"] = _safe_market_decimal(
         position.get("liquidationPrice"), "position.liquidationPrice"
     )
-    enhanced["leverage_decimal"] = _safe_market_decimal(position.get("leverage"), "position.leverage")
+    enhanced["leverage_decimal"] = _safe_market_decimal(
+        position.get("leverage"), "position.leverage"
+    )
     enhanced["unrealizedPnl_decimal"] = _safe_market_decimal(
-        position.get("unrealizedPnl"), "position.unrealizedPnl", allow_zero=True, allow_negative=True
+        position.get("unrealizedPnl"),
+        "position.unrealizedPnl",
+        allow_zero=True,
+        allow_negative=True,
     )
     enhanced["notional_decimal"] = _safe_market_decimal(
-        position.get("notional"), "position.notional", allow_zero=True, allow_negative=True
+        position.get("notional"),
+        "position.notional",
+        allow_zero=True,
+        allow_negative=True,
     )
     enhanced["collateral_decimal"] = _safe_market_decimal(
-        position.get("collateral"), "position.collateral", allow_zero=True, allow_negative=True
+        position.get("collateral"),
+        "position.collateral",
+        allow_zero=True,
+        allow_negative=True,
     )
     enhanced["initialMargin_decimal"] = _safe_market_decimal(
         position.get("initialMargin"), "position.initialMargin", allow_zero=True
@@ -1085,7 +1305,10 @@ def enhance_position_info(position: dict[str, Any], market_info: MarketInfo) -> 
 
 # --- Strategy Implementation ---
 def analyze_market(
-    df: pd.DataFrame, strategy_params: dict[str, Any], symbol: str, logger: logging.Logger
+    df: pd.DataFrame,
+    strategy_params: dict[str, Any],
+    symbol: str,
+    logger: logging.Logger,
 ) -> StrategyAnalysisResults:
     """Analyzes market data using Volumatic Trend and Order Blocks."""
     lg = logger
@@ -1094,9 +1317,13 @@ def analyze_market(
         strategy_params.get("vt_length", DEFAULT_VT_LENGTH),
         strategy_params.get("vt_atr_period", DEFAULT_VT_ATR_PERIOD),
         strategy_params.get("vt_vol_ema_length", DEFAULT_VT_VOL_EMA_LENGTH),
-        strategy_params.get("ph_left", DEFAULT_PH_LEFT) + strategy_params.get("ph_right", DEFAULT_PH_RIGHT) + 1,
+        strategy_params.get("ph_left", DEFAULT_PH_LEFT)
+        + strategy_params.get("ph_right", DEFAULT_PH_RIGHT)
+        + 1,
     ):
-        lg.warning(f"Insufficient data for analysis ({len(df)} rows). Need more for lookback periods.")
+        lg.warning(
+            f"Insufficient data for analysis ({len(df)} rows). Need more for lookback periods."
+        )
         # Return default/empty results gracefully
         return StrategyAnalysisResults(
             dataframe=df,
@@ -1112,15 +1339,23 @@ def analyze_market(
         )
 
     df = df.copy()  # Avoid modifying the original DataFrame
-    if "timestamp" in df.columns and not pd.api.types.is_datetime64_any_dtype(df["timestamp"]):
+    if "timestamp" in df.columns and not pd.api.types.is_datetime64_any_dtype(
+        df["timestamp"]
+    ):
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
-    df.set_index("timestamp", inplace=True, drop=False)  # Use timestamp index for TA Lib
+    df.set_index(
+        "timestamp", inplace=True, drop=False
+    )  # Use timestamp index for TA Lib
 
     # --- Volumatic Trend Calculation ---
     vt_length = strategy_params.get("vt_length", DEFAULT_VT_LENGTH)
     vt_atr_period = strategy_params.get("vt_atr_period", DEFAULT_VT_ATR_PERIOD)
-    vt_vol_ema_length = strategy_params.get("vt_vol_ema_length", DEFAULT_VT_VOL_EMA_LENGTH)
-    vt_atr_multiplier = strategy_params.get("vt_atr_multiplier", DEFAULT_VT_ATR_MULTIPLIER)
+    vt_vol_ema_length = strategy_params.get(
+        "vt_vol_ema_length", DEFAULT_VT_VOL_EMA_LENGTH
+    )
+    vt_atr_multiplier = strategy_params.get(
+        "vt_atr_multiplier", DEFAULT_VT_ATR_MULTIPLIER
+    )
 
     try:
         df["atr"] = ta.atr(df["high"], df["low"], df["close"], length=vt_atr_period)
@@ -1137,7 +1372,9 @@ def analyze_market(
         # Return empty results on calculation failure
         return StrategyAnalysisResults(
             dataframe=df,
-            last_close=Decimal(str(df["close"].iloc[-1])) if not df.empty else Decimal("0"),
+            last_close=Decimal(str(df["close"].iloc[-1]))
+            if not df.empty
+            else Decimal("0"),
             current_trend_up=None,
             trend_just_changed=False,
             active_bull_boxes=[],
@@ -1157,8 +1394,12 @@ def analyze_market(
         last_row = df.iloc[-1]
         prev_row = df.iloc[-2]
         # Define trend condition: Price > Trend Line AND Volume Ratio > 1 (indicating conviction)
-        current_trend_up = (last_row["close"] > last_row["trend_line"]) and (last_row["vol_ratio"] > 1.0)
-        prev_trend_up = (prev_row["close"] > prev_row["trend_line"]) and (prev_row["vol_ratio"] > 1.0)
+        current_trend_up = (last_row["close"] > last_row["trend_line"]) and (
+            last_row["vol_ratio"] > 1.0
+        )
+        prev_trend_up = (prev_row["close"] > prev_row["trend_line"]) and (
+            prev_row["vol_ratio"] > 1.0
+        )
         trend_just_changed = current_trend_up != prev_trend_up
 
     # --- Order Blocks Detection ---
@@ -1215,7 +1456,9 @@ def analyze_market(
             # Simplified: Use the pivot candle itself for OB boundaries
             ob_id = f"BEAR_{int(ts.timestamp() * 1000)}"
             top = Decimal(str(row["high"]))  # Always use high for top
-            bottom = Decimal(str(row["low"]))  # Always use low for bottom (simplification)
+            bottom = Decimal(
+                str(row["low"])
+            )  # Always use low for bottom (simplification)
             # More complex OB definition might look at prior candle body etc.
             ob = OrderBlock(
                 id=ob_id,
@@ -1249,13 +1492,19 @@ def analyze_market(
             all_bull_boxes.append(ob)
 
     # Limit number of OBs, keeping the most recent ones
-    all_bull_boxes = sorted(all_bull_boxes, key=lambda x: x["timestamp"], reverse=True)[:ob_max_boxes]
-    all_bear_boxes = sorted(all_bear_boxes, key=lambda x: x["timestamp"], reverse=True)[:ob_max_boxes]
+    all_bull_boxes = sorted(all_bull_boxes, key=lambda x: x["timestamp"], reverse=True)[
+        :ob_max_boxes
+    ]
+    all_bear_boxes = sorted(all_bear_boxes, key=lambda x: x["timestamp"], reverse=True)[
+        :ob_max_boxes
+    ]
 
     # --- Check OB Violations & Activity ---
     active_bull_boxes = []
     active_bear_boxes = []
-    last_close_dec = Decimal(str(df["close"].iloc[-1])) if not df.empty else Decimal("0")
+    last_close_dec = (
+        Decimal(str(df["close"].iloc[-1])) if not df.empty else Decimal("0")
+    )
     last_high_dec = Decimal(str(df["high"].iloc[-1])) if not df.empty else Decimal("0")
     last_low_dec = Decimal(str(df["low"].iloc[-1])) if not df.empty else Decimal("0")
     last_ts = df["timestamp"].iloc[-1] if not df.empty else pd.Timestamp.now(tz="UTC")
@@ -1347,14 +1596,20 @@ def generate_signal(
     if current_trend_up is None or atr is None or atr <= 0:
         reason = "Insufficient data or invalid ATR for signal generation."
         lg.debug(f"Signal ({symbol}): HOLD - {reason}")
-        return SignalResult(signal=signal, reason=reason, initial_sl=None, initial_tp=None)
+        return SignalResult(
+            signal=signal, reason=reason, initial_sl=None, initial_tp=None
+        )
 
     # Configurable parameters
     entry_proximity = Decimal(
         str(strategy_params.get("ob_entry_proximity_factor", 1.005))
     )  # e.g., 1.005 means within 0.5%
-    sl_atr_multiple = Decimal(str(protection_params.get("initial_stop_loss_atr_multiple", 1.8)))
-    tp_atr_multiple = Decimal(str(protection_params.get("initial_take_profit_atr_multiple", 0.7)))
+    sl_atr_multiple = Decimal(
+        str(protection_params.get("initial_stop_loss_atr_multiple", 1.8))
+    )
+    tp_atr_multiple = Decimal(
+        str(protection_params.get("initial_take_profit_atr_multiple", 0.7))
+    )
 
     # --- Entry Logic ---
     # Long Entry: Uptrend + Price near active Bull OB
@@ -1370,13 +1625,17 @@ def generate_signal(
                     # Simple ATR based SL from last close:
                     initial_sl = last_close - (atr * sl_atr_multiple)
                     # Ensure SL is below the OB bottom for robustness
-                    initial_sl = min(initial_sl, ob["bottom"] * Decimal("0.999"))  # Place slightly below OB bottom
+                    initial_sl = min(
+                        initial_sl, ob["bottom"] * Decimal("0.999")
+                    )  # Place slightly below OB bottom
                     if tp_atr_multiple > 0:
                         initial_tp = last_close + (atr * tp_atr_multiple)
                     break  # Take the first valid signal
 
     # Short Entry: Downtrend + Price near active Bear OB
-    elif not current_trend_up:  # Explicitly check for downtrend (trend is not None and not True)
+    elif (
+        not current_trend_up
+    ):  # Explicitly check for downtrend (trend is not None and not True)
         for ob in active_bear_boxes:
             if ob["active"]:
                 # Check if price is 'near' the OB (above bottom edge / proximity, but below top edge)
@@ -1387,7 +1646,9 @@ def generate_signal(
                     # Calculate SL: Above OB top or based on ATR from entry
                     initial_sl = last_close + (atr * sl_atr_multiple)
                     # Ensure SL is above the OB top
-                    initial_sl = max(initial_sl, ob["top"] * Decimal("1.001"))  # Place slightly above OB top
+                    initial_sl = max(
+                        initial_sl, ob["top"] * Decimal("1.001")
+                    )  # Place slightly above OB top
                     if tp_atr_multiple > 0:
                         initial_tp = last_close - (atr * tp_atr_multiple)
                     break  # Take the first valid signal
@@ -1405,7 +1666,9 @@ def generate_signal(
     if initial_tp:
         lg.debug(f"  Proposed TP: {initial_tp.normalize()}")
 
-    return SignalResult(signal=signal, reason=reason, initial_sl=initial_sl, initial_tp=initial_tp)
+    return SignalResult(
+        signal=signal, reason=reason, initial_sl=initial_sl, initial_tp=initial_tp
+    )
 
 
 # --- Trading Functions ---
@@ -1428,15 +1691,27 @@ def calculate_position_size(
 
     # --- Input Validation ---
     quote_currency = market_info.get("quote", QUOTE_CURRENCY)
-    size_unit = "Contracts" if market_info["is_contract"] else market_info.get("base", "BASE")
+    size_unit = (
+        "Contracts" if market_info["is_contract"] else market_info.get("base", "BASE")
+    )
 
     if not (isinstance(balance, Decimal) and balance.is_finite() and balance > 0):
-        lg.error(f"Sizing failed ({symbol}): Invalid or non-positive balance ({balance}).")
+        lg.error(
+            f"Sizing failed ({symbol}): Invalid or non-positive balance ({balance})."
+        )
         return None
-    if not (isinstance(risk_decimal, Decimal) and risk_decimal.is_finite() and 0 < risk_decimal <= 1):
-        lg.error(f"Sizing failed ({symbol}): Invalid risk fraction ({risk_decimal}). Must be > 0 and <= 1.")
+    if not (
+        isinstance(risk_decimal, Decimal)
+        and risk_decimal.is_finite()
+        and 0 < risk_decimal <= 1
+    ):
+        lg.error(
+            f"Sizing failed ({symbol}): Invalid risk fraction ({risk_decimal}). Must be > 0 and <= 1."
+        )
         return None
-    if not (isinstance(entry_price, Decimal) and entry_price.is_finite() and entry_price > 0):
+    if not (
+        isinstance(entry_price, Decimal) and entry_price.is_finite() and entry_price > 0
+    ):
         lg.error(f"Sizing failed ({symbol}): Invalid Entry price ({entry_price}).")
         return None
     if not (
@@ -1444,7 +1719,9 @@ def calculate_position_size(
         and initial_stop_loss_price.is_finite()
         and initial_stop_loss_price > 0
     ):
-        lg.error(f"Sizing failed ({symbol}): Invalid Stop Loss price ({initial_stop_loss_price}).")
+        lg.error(
+            f"Sizing failed ({symbol}): Invalid Stop Loss price ({initial_stop_loss_price})."
+        )
         return None
     if initial_stop_loss_price == entry_price:
         lg.error(
@@ -1467,27 +1744,45 @@ def calculate_position_size(
             raise ValueError("Amount precision step (tick size) is invalid or missing.")
         if price_step is None or not (price_step.is_finite() and price_step > 0):
             raise ValueError("Price precision step (tick size) is invalid or missing.")
-        if contract_size is None or not (contract_size.is_finite() and contract_size > 0):
+        if contract_size is None or not (
+            contract_size.is_finite() and contract_size > 0
+        ):
             raise ValueError("Contract size is invalid or missing.")
 
         # Use effective limits (handle None)
-        min_amount_eff = min_amount if min_amount is not None and min_amount >= 0 else Decimal("0")
-        max_amount_eff = max_amount if max_amount is not None and max_amount > 0 else Decimal("inf")
-        min_cost_eff = min_cost if min_cost is not None and min_cost >= 0 else Decimal("0")
-        max_cost_eff = max_cost if max_cost is not None and max_cost > 0 else Decimal("inf")
+        min_amount_eff = (
+            min_amount if min_amount is not None and min_amount >= 0 else Decimal("0")
+        )
+        max_amount_eff = (
+            max_amount if max_amount is not None and max_amount > 0 else Decimal("inf")
+        )
+        min_cost_eff = (
+            min_cost if min_cost is not None and min_cost >= 0 else Decimal("0")
+        )
+        max_cost_eff = (
+            max_cost if max_cost is not None and max_cost > 0 else Decimal("inf")
+        )
 
         lg.debug(f"  Market Constraints ({symbol}):")
-        lg.debug(f"    Amount Step: {amount_step}, Min Amt: {min_amount_eff}, Max Amt: {max_amount_eff}")
+        lg.debug(
+            f"    Amount Step: {amount_step}, Min Amt: {min_amount_eff}, Max Amt: {max_amount_eff}"
+        )
         lg.debug(f"    Price Step: {price_step}")
         lg.debug(f"    Cost Min: {min_cost_eff}, Cost Max: {max_cost_eff}")
-        lg.debug(f"    Contract Size: {contract_size}, Type: {market_info['contract_type_str']}")
+        lg.debug(
+            f"    Contract Size: {contract_size}, Type: {market_info['contract_type_str']}"
+        )
 
     except (KeyError, ValueError, TypeError) as e:
-        lg.error(f"Sizing failed ({symbol}): Error accessing required market details: {e}")
+        lg.error(
+            f"Sizing failed ({symbol}): Error accessing required market details: {e}"
+        )
         return None
 
     # --- Calculation ---
-    risk_amount_quote = (balance * risk_decimal).quantize(Decimal("1e-8"), ROUND_DOWN)  # Risk amount in quote currency
+    risk_amount_quote = (balance * risk_decimal).quantize(
+        Decimal("1e-8"), ROUND_DOWN
+    )  # Risk amount in quote currency
     stop_loss_distance = abs(entry_price - initial_stop_loss_price)
 
     if stop_loss_distance <= Decimal("0"):
@@ -1532,7 +1827,9 @@ def calculate_position_size(
                     f"Inverse value change per contract is too small ({value_change_per_contract})."
                 )
             calculated_size = risk_amount_quote / value_change_per_contract
-            lg.debug("  Inverse Calc: Size = RiskAmt / (ContractSize * abs(1/SL - 1/Entry))")
+            lg.debug(
+                "  Inverse Calc: Size = RiskAmt / (ContractSize * abs(1/SL - 1/Entry))"
+            )
             lg.debug(
                 f"    = {risk_amount_quote.normalize()} / ({contract_size.normalize()} * abs(1/{initial_stop_loss_price.normalize()} - 1/{entry_price.normalize()})) = {calculated_size}"
             )
@@ -1542,10 +1839,14 @@ def calculate_position_size(
         return None
 
     if not calculated_size.is_finite() or calculated_size <= Decimal("0"):
-        lg.error(f"Sizing failed ({symbol}): Calculated size is invalid or non-positive ({calculated_size}).")
+        lg.error(
+            f"Sizing failed ({symbol}): Calculated size is invalid or non-positive ({calculated_size})."
+        )
         return None
 
-    lg.info(f"  Initial Calculated Size ({symbol}) = {calculated_size.normalize()} {size_unit}")
+    lg.info(
+        f"  Initial Calculated Size ({symbol}) = {calculated_size.normalize()} {size_unit}"
+    )
 
     # --- Apply Constraints and Precision ---
     adjusted_size = calculated_size
@@ -1562,17 +1863,23 @@ def calculate_position_size(
                 cost = size * contract_size * price
             else:  # Inverse
                 cost = size * contract_size / price
-            return cost.quantize(Decimal("1e-8"), ROUND_UP)  # Cost usually in quote currency
+            return cost.quantize(
+                Decimal("1e-8"), ROUND_UP
+            )  # Cost usually in quote currency
         except (InvalidOperation, OverflowError, ZeroDivisionError) as cost_err:
             lg.error(f"Cost estimation failed: {cost_err}")
             return None
 
     # 1. Min/Max Amount Limits
     if adjusted_size < min_amount_eff:
-        adjustment_reason.append(f"Adjusted UP to Min Amount {min_amount_eff.normalize()}")
+        adjustment_reason.append(
+            f"Adjusted UP to Min Amount {min_amount_eff.normalize()}"
+        )
         adjusted_size = min_amount_eff
     if adjusted_size > max_amount_eff:
-        adjustment_reason.append(f"Adjusted DOWN to Max Amount {max_amount_eff.normalize()}")
+        adjustment_reason.append(
+            f"Adjusted DOWN to Max Amount {max_amount_eff.normalize()}"
+        )
         adjusted_size = max_amount_eff
 
     if adjusted_size != calculated_size:
@@ -1604,21 +1911,29 @@ def calculate_position_size(
             return None  # Cannot proceed safely
 
         if estimated_cost > max_cost_eff:
-            cost_adjustment_reason.append(f"Cost {estimated_cost.normalize()} > Max Cost {max_cost_eff.normalize()}")
+            cost_adjustment_reason.append(
+                f"Cost {estimated_cost.normalize()} > Max Cost {max_cost_eff.normalize()}"
+            )
             # Reduce size to meet max cost limit
             try:
                 if not is_inverse:
                     denominator = entry_price * contract_size
                     if denominator <= 0:
-                        raise ZeroDivisionError("Invalid price or contract size for max cost calc.")
+                        raise ZeroDivisionError(
+                            "Invalid price or contract size for max cost calc."
+                        )
                     max_size_for_max_cost = max_cost_eff / denominator
                 else:  # Inverse
                     if entry_price <= 0:
-                        raise ZeroDivisionError("Invalid entry price for inverse max cost calc.")
+                        raise ZeroDivisionError(
+                            "Invalid entry price for inverse max cost calc."
+                        )
                     max_size_for_max_cost = max_cost_eff * entry_price / contract_size
 
                 if not max_size_for_max_cost.is_finite() or max_size_for_max_cost <= 0:
-                    raise ValueError(f"Invalid max size calculated for max cost ({max_size_for_max_cost}).")
+                    raise ValueError(
+                        f"Invalid max size calculated for max cost ({max_size_for_max_cost})."
+                    )
 
                 new_adjusted_size = min(adjusted_size, max_size_for_max_cost)
 
@@ -1630,9 +1945,18 @@ def calculate_position_size(
                     return None
 
                 adjusted_size = new_adjusted_size
-                cost_adjustment_reason.append(f"Adjusted DOWN to {adjusted_size.normalize()} to meet Max Cost")
-            except (InvalidOperation, OverflowError, ZeroDivisionError, ValueError) as e:
-                lg.error(f"Sizing failed ({symbol}): Error applying Max Cost limit: {e}.")
+                cost_adjustment_reason.append(
+                    f"Adjusted DOWN to {adjusted_size.normalize()} to meet Max Cost"
+                )
+            except (
+                InvalidOperation,
+                OverflowError,
+                ZeroDivisionError,
+                ValueError,
+            ) as e:
+                lg.error(
+                    f"Sizing failed ({symbol}): Error applying Max Cost limit: {e}."
+                )
                 return None
 
     if adjusted_size != size_before_cost_limits:
@@ -1641,7 +1965,9 @@ def calculate_position_size(
         )
 
     if not adjusted_size.is_finite() or adjusted_size <= Decimal("0"):
-        lg.error(f"Sizing failed ({symbol}): Size became invalid after Cost limits ({adjusted_size}).")
+        lg.error(
+            f"Sizing failed ({symbol}): Size became invalid after Cost limits ({adjusted_size})."
+        )
         return None
 
     # 3. Apply Amount Precision (Tick Size) - Round DOWN
@@ -1659,12 +1985,16 @@ def calculate_position_size(
             )
 
     except (InvalidOperation, ValueError, ZeroDivisionError) as e:
-        lg.error(f"Sizing failed ({symbol}): Error applying amount precision (step={amount_step}): {e}.")
+        lg.error(
+            f"Sizing failed ({symbol}): Error applying amount precision (step={amount_step}): {e}."
+        )
         return None
 
     # --- Final Validation ---
     if not final_size.is_finite() or final_size <= Decimal("0"):
-        lg.error(f"Sizing failed ({symbol}): Final size is invalid or zero after precision ({final_size}).")
+        lg.error(
+            f"Sizing failed ({symbol}): Final size is invalid or zero after precision ({final_size})."
+        )
         return None
     if final_size < min_amount_eff:
         # This check is crucial after rounding down
@@ -1701,14 +2031,18 @@ def calculate_position_size(
     )
     if final_cost:
         lg.info(f"    Estimated Cost: {final_cost.normalize()} {quote_currency}")
-    all_adjustments = "; ".join(filter(None, [", ".join(adjustment_reason), ", ".join(cost_adjustment_reason)]))
+    all_adjustments = "; ".join(
+        filter(None, [", ".join(adjustment_reason), ", ".join(cost_adjustment_reason)])
+    )
     if all_adjustments:
         lg.info(f"    Adjustments Applied: {all_adjustments}")
     lg.info(f"{BRIGHT}--- End Position Sizing ({symbol}) ---{RESET}")
     return final_size
 
 
-def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: logging.Logger) -> bool:
+def cancel_order(
+    exchange: ccxt.Exchange, order_id: str, symbol: str, logger: logging.Logger
+) -> bool:
     """Cancels a specific order with retries."""
     lg = logger
     attempts = 0
@@ -1752,7 +2086,9 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
     while attempts <= MAX_API_RETRIES:
         try:
             exchange.cancel_order(order_id_str, symbol, params=params)
-            lg.info(f"{NEON_GREEN}Successfully cancelled order {order_id_str} ({symbol}).{RESET}")
+            lg.info(
+                f"{NEON_GREEN}Successfully cancelled order {order_id_str} ({symbol}).{RESET}"
+            )
             return True
         except ccxt.OrderNotFound:
             lg.warning(
@@ -1765,7 +2101,11 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
                 f"{NEON_YELLOW}Cannot cancel order '{order_id_str}' ({symbol}): {e}. Assuming completed or already cancelled.{RESET}"
             )
             return True  # Treat as success if invalid state (likely filled/cancelled)
-        except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
+        except (
+            ccxt.NetworkError,
+            ccxt.RequestTimeout,
+            requests.exceptions.RequestException,
+        ) as e:
             last_exception = e
             lg.warning(
                 f"{NEON_YELLOW}Network error cancelling order {order_id_str} ({symbol}): {e}. Retry {attempts + 1}/{MAX_API_RETRIES + 1}...{RESET}"
@@ -1789,13 +2129,16 @@ def cancel_order(exchange: ccxt.Exchange, order_id: str, symbol: str, logger: lo
             return False  # Fatal error for this operation
         except ccxt.ExchangeError as e:
             last_exception = e
-            lg.error(f"{NEON_RED}Exchange error cancelling order {order_id_str} ({symbol}): {e}{RESET}")
+            lg.error(
+                f"{NEON_RED}Exchange error cancelling order {order_id_str} ({symbol}): {e}{RESET}"
+            )
             # Decide if retryable based on error type if possible
             # For now, retry generic exchange errors
         except Exception as e:
             last_exception = e
             lg.error(
-                f"{NEON_RED}Unexpected error cancelling order {order_id_str} ({symbol}): {e}{RESET}", exc_info=True
+                f"{NEON_RED}Unexpected error cancelling order {order_id_str} ({symbol}): {e}{RESET}",
+                exc_info=True,
             )
             # Stop retrying on unexpected errors
             return False
@@ -1842,15 +2185,23 @@ def place_trade(
     if side is None:
         lg.error(f"Invalid trade signal '{trade_signal}' provided for {symbol}.")
         return None
-    if not isinstance(position_size, Decimal) or not position_size.is_finite() or position_size <= 0:
-        lg.error(f"Invalid position size '{position_size}' provided for {symbol}. Must be positive Decimal.")
+    if (
+        not isinstance(position_size, Decimal)
+        or not position_size.is_finite()
+        or position_size <= 0
+    ):
+        lg.error(
+            f"Invalid position size '{position_size}' provided for {symbol}. Must be positive Decimal."
+        )
         return None
 
     order_type = "market"  # Using market orders for simplicity
     is_contract = market_info["is_contract"]
     base_currency = market_info.get("base", "BASE")
     size_unit = "Contracts" if is_contract else base_currency
-    action_desc = f"{trade_signal} ({'Reduce-Only' if reduce_only else 'Open/Increase'})"
+    action_desc = (
+        f"{trade_signal} ({'Reduce-Only' if reduce_only else 'Open/Increase'})"
+    )
     market_id = market_info.get("id")
 
     if not market_id:
@@ -1865,7 +2216,9 @@ def place_trade(
         if amount_step is None or amount_step <= 0:
             raise ValueError("Invalid amount precision step.")
 
-        num_steps = (final_size_decimal / amount_step).to_integral_value(rounding=ROUND_DOWN)
+        num_steps = (final_size_decimal / amount_step).to_integral_value(
+            rounding=ROUND_DOWN
+        )
         rounded_size_decimal = num_steps * amount_step
 
         if rounded_size_decimal <= 0:
@@ -1888,7 +2241,9 @@ def place_trade(
                 if rounded_size_decimal < min_amount:  # Failsafe
                     lg.error("Failed to adjust size to minimum amount correctly.")
                     return None
-                lg.info(f"Adjusted size to minimum amount: {rounded_size_decimal.normalize()} {size_unit}")
+                lg.info(
+                    f"Adjusted size to minimum amount: {rounded_size_decimal.normalize()} {size_unit}"
+                )
             else:
                 lg.error(
                     f"Size {position_size.normalize()} rounded down to zero or less by amount step {amount_step.normalize()}. Cannot place trade."
@@ -1910,7 +2265,9 @@ def place_trade(
             )
 
     except (ValueError, TypeError, InvalidOperation) as e:
-        lg.error(f"Failed to apply precision or convert size {position_size.normalize()} for {symbol}: {e}")
+        lg.error(
+            f"Failed to apply precision or convert size {position_size.normalize()} for {symbol}: {e}"
+        )
         return None
 
     # Base arguments for create_order
@@ -1941,7 +2298,9 @@ def place_trade(
             # if initial_sl: order_params['stopLoss'] = _format_price(exchange, symbol, initial_sl) ... etc
 
         except Exception as e:
-            lg.error(f"Failed to set Bybit V5 params for {symbol} order: {e}. Proceeding without them.")
+            lg.error(
+                f"Failed to set Bybit V5 params for {symbol} order: {e}. Proceeding without them."
+            )
             order_params = {}  # Reset params on error
 
     # Merge external params if provided (external params take precedence)
@@ -1957,7 +2316,9 @@ def place_trade(
     lg.warning(f"  Symbol: {symbol} (Market ID: {market_id})")
     lg.warning(f"  Type: {order_type.upper()}")
     lg.warning(f"  Side: {side.upper()} ({trade_signal})")
-    lg.warning(f"  Size: {final_size_decimal.normalize()} {size_unit} (Float: {amount_float})")
+    lg.warning(
+        f"  Size: {final_size_decimal.normalize()} {size_unit} (Float: {amount_float})"
+    )
     if order_args.get("params"):
         lg.warning(f"  Params: {order_args['params']}")
 
@@ -1976,8 +2337,12 @@ def place_trade(
                 avg_price_raw = order_result.get("average")
                 filled_raw = order_result.get("filled")
 
-                avg_price_dec = _safe_market_decimal(avg_price_raw, "order.average", allow_zero=True)
-                filled_dec = _safe_market_decimal(filled_raw, "order.filled", allow_zero=True)
+                avg_price_dec = _safe_market_decimal(
+                    avg_price_raw, "order.average", allow_zero=True
+                )
+                filled_dec = _safe_market_decimal(
+                    filled_raw, "order.filled", allow_zero=True
+                )
 
                 log_msg_parts = [
                     f"{NEON_GREEN}{action_desc} Order Placed!{RESET}",
@@ -1985,12 +2350,18 @@ def place_trade(
                     f"Status: {status}",
                 ]
                 if avg_price_dec is not None and avg_price_dec > 0:
-                    log_msg_parts.append(f"Avg Fill Price: ~{avg_price_dec.normalize()}")
+                    log_msg_parts.append(
+                        f"Avg Fill Price: ~{avg_price_dec.normalize()}"
+                    )
                 if filled_dec is not None:
-                    log_msg_parts.append(f"Filled: {filled_dec.normalize()} {size_unit}")
+                    log_msg_parts.append(
+                        f"Filled: {filled_dec.normalize()} {size_unit}"
+                    )
 
                 lg.info(" ".join(log_msg_parts))
-                lg.debug(f"Raw Order Result ({symbol}): {json.dumps(order_result, indent=2)}")
+                lg.debug(
+                    f"Raw Order Result ({symbol}): {json.dumps(order_result, indent=2)}"
+                )
 
                 # Send notification on success
                 send_notification(
@@ -2002,14 +2373,18 @@ def place_trade(
                 break  # Exit retry loop on success
             else:
                 # Should not happen if create_order doesn't raise exception, but handle defensively
-                lg.error(f"Order placement for {symbol} returned empty result without exception.")
+                lg.error(
+                    f"Order placement for {symbol} returned empty result without exception."
+                )
                 last_exception = ValueError("Empty order result received.")
                 # Continue retrying
 
         # --- Specific Error Handling ---
         except ccxt.InsufficientFunds as e:
             last_exception = e
-            lg.error(f"{NEON_RED}Order Failed ({symbol}): Insufficient Funds. Check balance and leverage. {e}{RESET}")
+            lg.error(
+                f"{NEON_RED}Order Failed ({symbol}): Insufficient Funds. Check balance and leverage. {e}{RESET}"
+            )
             return None  # Non-retryable error
         except ccxt.InvalidOrder as e:
             last_exception = e
@@ -2023,14 +2398,20 @@ def place_trade(
             lg.warning(
                 f"{NEON_YELLOW}Exchange not available placing order for {symbol}: {e}. Retry {attempts + 1}/{MAX_API_RETRIES + 1}...{RESET}"
             )
-        except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
+        except (
+            ccxt.NetworkError,
+            ccxt.RequestTimeout,
+            requests.exceptions.RequestException,
+        ) as e:
             last_exception = e
             lg.warning(
                 f"{NEON_YELLOW}Network error placing order for {symbol}: {e}. Retry {attempts + 1}/{MAX_API_RETRIES + 1}...{RESET}"
             )
         except ccxt.RateLimitExceeded as e:
             last_exception = e
-            wait_time = RETRY_DELAY_SECONDS * (2**attempts + 2)  # Longer backoff for rate limits
+            wait_time = RETRY_DELAY_SECONDS * (
+                2**attempts + 2
+            )  # Longer backoff for rate limits
             lg.warning(
                 f"{NEON_YELLOW}Rate limit exceeded placing order for {symbol}: {e}. Waiting {wait_time}s...{RESET}"
             )
@@ -2038,15 +2419,22 @@ def place_trade(
             continue  # Continue without incrementing attempts immediately
         except ccxt.AuthenticationError as e:
             last_exception = e
-            lg.critical(f"{NEON_RED}Authentication error placing order for {symbol}: {e}. Cannot continue.{RESET}")
+            lg.critical(
+                f"{NEON_RED}Authentication error placing order for {symbol}: {e}. Cannot continue.{RESET}"
+            )
             return None  # Fatal error
         except ccxt.ExchangeError as e:
             last_exception = e
-            lg.error(f"{NEON_RED}Generic exchange error placing order for {symbol}: {e}{RESET}")
+            lg.error(
+                f"{NEON_RED}Generic exchange error placing order for {symbol}: {e}{RESET}"
+            )
             # Potentially inspect error message for retry decision, for now retry
         except Exception as e:
             last_exception = e
-            lg.error(f"{NEON_RED}Unexpected error placing order for {symbol}: {e}{RESET}", exc_info=True)
+            lg.error(
+                f"{NEON_RED}Unexpected error placing order for {symbol}: {e}{RESET}",
+                exc_info=True,
+            )
             return None  # Stop on unexpected errors
 
         # Standard retry delay
@@ -2088,16 +2476,24 @@ def set_position_protection(
     log_parts = []
     has_changes = False
     if stop_loss_price is not None:
-        log_parts.append(f"SL={stop_loss_price.normalize() if stop_loss_price > 0 else 'REMOVE'}")
+        log_parts.append(
+            f"SL={stop_loss_price.normalize() if stop_loss_price > 0 else 'REMOVE'}"
+        )
         has_changes = True
     if take_profit_price is not None:
-        log_parts.append(f"TP={take_profit_price.normalize() if take_profit_price > 0 else 'REMOVE'}")
+        log_parts.append(
+            f"TP={take_profit_price.normalize() if take_profit_price > 0 else 'REMOVE'}"
+        )
         has_changes = True
     if trailing_stop_distance is not None:
-        log_parts.append(f"TSL Dist={trailing_stop_distance.normalize() if trailing_stop_distance > 0 else 'REMOVE'}")
+        log_parts.append(
+            f"TSL Dist={trailing_stop_distance.normalize() if trailing_stop_distance > 0 else 'REMOVE'}"
+        )
         has_changes = True
     if tsl_activation_price is not None:
-        log_parts.append(f"TSL Act={tsl_activation_price.normalize() if tsl_activation_price > 0 else 'REMOVE'}")
+        log_parts.append(
+            f"TSL Act={tsl_activation_price.normalize() if tsl_activation_price > 0 else 'REMOVE'}"
+        )
         has_changes = True
 
     if not has_changes:
@@ -2133,7 +2529,9 @@ def set_position_protection(
                 "slOrderType": "Market",
                 "tpOrderType": "Market",
             }
-            param_added = False  # Track if any protection values are actually being set/changed
+            param_added = (
+                False  # Track if any protection values are actually being set/changed
+            )
 
             # Stop Loss
             if stop_loss_price is not None:
@@ -2156,7 +2554,9 @@ def set_position_protection(
                     if tp_str:
                         params["takeProfit"] = tp_str
                     else:
-                        raise ValueError(f"Invalid TP price format: {take_profit_price}")
+                        raise ValueError(
+                            f"Invalid TP price format: {take_profit_price}"
+                        )
                 param_added = True
 
             # Trailing Stop Loss Distance
@@ -2171,28 +2571,41 @@ def set_position_protection(
                     # Use the price tick size for formatting the distance.
                     price_tick = market_info.get("price_precision_step_decimal")
                     if not price_tick or price_tick <= 0:
-                        raise ValueError("Invalid price tick size needed for TSL distance formatting.")
+                        raise ValueError(
+                            "Invalid price tick size needed for TSL distance formatting."
+                        )
                     # Format distance like a price difference
                     ts_dist_str = str(
                         trailing_stop_distance.quantize(price_tick, rounding=ROUND_UP)
                     )  # Round up distance slightly? Or match tick?
                     # Validate the formatted string represents a positive number
-                    if _safe_market_decimal(ts_dist_str, "tsl_dist_str", allow_zero=False, allow_negative=False):
+                    if _safe_market_decimal(
+                        ts_dist_str,
+                        "tsl_dist_str",
+                        allow_zero=False,
+                        allow_negative=False,
+                    ):
                         params["trailingStop"] = ts_dist_str
                     else:
-                        raise ValueError(f"Invalid TSL distance format after quantization: {ts_dist_str}")
+                        raise ValueError(
+                            f"Invalid TSL distance format after quantization: {ts_dist_str}"
+                        )
                 param_added = True
 
             # Trailing Stop Activation Price
             if tsl_activation_price is not None:
-                if tsl_activation_price <= 0:  # Request to remove activation price (or set TSL inactive)
+                if (
+                    tsl_activation_price <= 0
+                ):  # Request to remove activation price (or set TSL inactive)
                     params["activePrice"] = "0"
                 else:
                     act_str = _format_price(exchange, symbol, tsl_activation_price)
                     if act_str:
                         params["activePrice"] = act_str
                     else:
-                        raise ValueError(f"Invalid TSL activation price format: {tsl_activation_price}")
+                        raise ValueError(
+                            f"Invalid TSL activation price format: {tsl_activation_price}"
+                        )
                 param_added = True
 
             # --- Make API Call ---
@@ -2204,9 +2617,13 @@ def set_position_protection(
 
                 # Check Bybit V5 response structure
                 if isinstance(response, dict) and response.get("retCode") == 0:
-                    lg.info(f"{NEON_GREEN}Successfully set protection for {symbol}.{RESET}")
+                    lg.info(
+                        f"{NEON_GREEN}Successfully set protection for {symbol}.{RESET}"
+                    )
                     send_notification(
-                        f"Protection Updated: {symbol}", f"Applied protections: {', '.join(log_parts)}", lg
+                        f"Protection Updated: {symbol}",
+                        f"Applied protections: {', '.join(log_parts)}",
+                        lg,
                     )
                     return True
                 else:
@@ -2222,14 +2639,28 @@ def set_position_protection(
                     return False
             else:
                 # This case should have been caught earlier, but included for safety
-                lg.debug("No actual protection parameters were provided or formatted correctly.")
+                lg.debug(
+                    "No actual protection parameters were provided or formatted correctly."
+                )
                 return True  # No action needed is considered success
 
-        except (ccxt.ExchangeError, ccxt.NetworkError, ValueError, TypeError, InvalidOperation) as e:
-            lg.error(f"Error setting protection for {symbol} using Bybit V5 API: {e}", exc_info=True)
+        except (
+            ccxt.ExchangeError,
+            ccxt.NetworkError,
+            ValueError,
+            TypeError,
+            InvalidOperation,
+        ) as e:
+            lg.error(
+                f"Error setting protection for {symbol} using Bybit V5 API: {e}",
+                exc_info=True,
+            )
             return False
         except Exception as e:
-            lg.error(f"Unexpected error during Bybit V5 protection setting for {symbol}: {e}", exc_info=True)
+            lg.error(
+                f"Unexpected error during Bybit V5 protection setting for {symbol}: {e}",
+                exc_info=True,
+            )
             return False
 
     # --- Fallback for other exchanges ---
@@ -2254,7 +2685,9 @@ def run_backtest(
 ) -> BacktestResult | None:
     """Runs a basic backtest of the strategy on historical data."""
     lg = logger
-    lg.info(f"{BRIGHT}--- Starting Backtest for {symbol} ({start_date_str} to {end_date_str}) ---{RESET}")
+    lg.info(
+        f"{BRIGHT}--- Starting Backtest for {symbol} ({start_date_str} to {end_date_str}) ---{RESET}"
+    )
 
     # --- Parameters ---
     strategy_params = config["strategy_params"]
@@ -2269,7 +2702,9 @@ def run_backtest(
     # --- Fetch Historical Data ---
     try:
         start_dt = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=UTC)
-        end_dt = datetime.strptime(end_date_str, "%Y-%m-%d").replace(tzinfo=UTC) + timedelta(days=1)  # Include end date
+        end_dt = datetime.strptime(end_date_str, "%Y-%m-%d").replace(
+            tzinfo=UTC
+        ) + timedelta(days=1)  # Include end date
         start_ts = int(start_dt.timestamp() * 1000)
         end_ts = int(end_dt.timestamp() * 1000)
 
@@ -2278,8 +2713,12 @@ def run_backtest(
         lg.info(f"Fetching historical data for {symbol} ({ccxt_timeframe})...")
         while current_ts < end_ts:
             # Fetch in chunks, respecting exchange limits
-            limit = min(fetch_limit, BYBIT_API_KLINE_LIMIT)  # Adhere to Bybit limit if applicable
-            ohlcv = exchange.fetch_ohlcv(symbol, ccxt_timeframe, since=current_ts, limit=limit)
+            limit = min(
+                fetch_limit, BYBIT_API_KLINE_LIMIT
+            )  # Adhere to Bybit limit if applicable
+            ohlcv = exchange.fetch_ohlcv(
+                symbol, ccxt_timeframe, since=current_ts, limit=limit
+            )
             if not ohlcv:
                 lg.info("No more data found or end date reached.")
                 break
@@ -2290,8 +2729,12 @@ def run_backtest(
 
             all_ohlcv.extend(ohlcv)
             last_fetched_ts = ohlcv[-1][0]
-            current_ts = last_fetched_ts + exchange.parse_timeframe(ccxt_timeframe) * 1000  # Move to next candle start
-            lg.debug(f"Fetched {len(ohlcv)} candles up to {datetime.fromtimestamp(last_fetched_ts / 1000, tz=UTC)}")
+            current_ts = (
+                last_fetched_ts + exchange.parse_timeframe(ccxt_timeframe) * 1000
+            )  # Move to next candle start
+            lg.debug(
+                f"Fetched {len(ohlcv)} candles up to {datetime.fromtimestamp(last_fetched_ts / 1000, tz=UTC)}"
+            )
             time.sleep(exchange.rateLimit / 1000)  # Respect rate limit
 
         if not all_ohlcv:
@@ -2299,17 +2742,28 @@ def run_backtest(
             return None
 
         # Remove duplicates and sort
-        df = pd.DataFrame(all_ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        df = pd.DataFrame(
+            all_ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+        )
         df.drop_duplicates(subset=["timestamp"], inplace=True)
         df.sort_values(by="timestamp", inplace=True)
-        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)  # Convert to datetime
-        lg.info(f"Successfully fetched and prepared {len(df)} unique candles for {symbol}.")
+        df["timestamp"] = pd.to_datetime(
+            df["timestamp"], unit="ms", utc=True
+        )  # Convert to datetime
+        lg.info(
+            f"Successfully fetched and prepared {len(df)} unique candles for {symbol}."
+        )
 
     except (ccxt.ExchangeError, ValueError, TypeError) as e:
-        lg.error(f"Failed to fetch or process historical data for {symbol}: {e}", exc_info=True)
+        lg.error(
+            f"Failed to fetch or process historical data for {symbol}: {e}",
+            exc_info=True,
+        )
         return None
     except Exception as e:
-        lg.error(f"Unexpected error during data fetching for {symbol}: {e}", exc_info=True)
+        lg.error(
+            f"Unexpected error during data fetching for {symbol}: {e}", exc_info=True
+        )
         return None
 
     # --- Backtest Simulation ---
@@ -2318,7 +2772,9 @@ def run_backtest(
     max_drawdown_pct = Decimal("0")
     trades = []  # List to store closed trade details
     position = None  # Current open position {'side': 'long'/'short', 'size': Decimal, 'entry_price': Decimal, 'sl': Decimal, 'tp': Decimal, 'entry_ts': Timestamp}
-    market_info = enhance_market_info(exchange.market(symbol))  # Get market details for sizing/precision
+    market_info = enhance_market_info(
+        exchange.market(symbol)
+    )  # Get market details for sizing/precision
 
     lg.info(f"Simulating strategy on {len(df)} candles...")
     for i in range(1, len(df)):  # Start from 1 to have previous candle data if needed
@@ -2358,16 +2814,23 @@ def run_backtest(
                 # --- Close Position ---
                 if position["side"] == "long":
                     pnl = (
-                        (exit_price - position["entry_price"]) * position["size"] * market_info["contract_size_decimal"]
+                        (exit_price - position["entry_price"])
+                        * position["size"]
+                        * market_info["contract_size_decimal"]
                     )
                 else:  # Short
                     pnl = (
-                        (position["entry_price"] - exit_price) * position["size"] * market_info["contract_size_decimal"]
+                        (position["entry_price"] - exit_price)
+                        * position["size"]
+                        * market_info["contract_size_decimal"]
                     )
 
                 # Simple commission estimate (e.g., 0.06% taker fee)
                 commission = abs(
-                    exit_price * position["size"] * market_info["contract_size_decimal"] * Decimal("0.0006")
+                    exit_price
+                    * position["size"]
+                    * market_info["contract_size_decimal"]
+                    * Decimal("0.0006")
                 )
                 pnl -= commission
                 balance += pnl
@@ -2407,7 +2870,9 @@ def run_backtest(
             continue  # Ensure enough data for indicators
 
         analysis = analyze_market(analysis_df, strategy_params, symbol, lg)
-        signal_result = generate_signal(analysis, strategy_params, protection_params, symbol, lg)
+        signal_result = generate_signal(
+            analysis, strategy_params, protection_params, symbol, lg
+        )
         signal = signal_result["signal"]
         entry_price = current_close  # Assume entry at the close of the current candle for simplicity
         sl_price = signal_result["initial_sl"]
@@ -2417,7 +2882,14 @@ def run_backtest(
         if not position and signal in ["BUY", "SELL"] and sl_price:
             # Calculate size based on current balance and proposed SL
             pos_size = calculate_position_size(
-                exchange, symbol, balance, risk_per_trade, entry_price, sl_price, market_info, lg
+                exchange,
+                symbol,
+                balance,
+                risk_per_trade,
+                entry_price,
+                sl_price,
+                market_info,
+                lg,
             )
 
             if pos_size and pos_size > 0:
@@ -2431,7 +2903,12 @@ def run_backtest(
                     "entry_ts": current_ts,
                 }
                 # Estimate entry commission
-                commission = abs(entry_price * pos_size * market_info["contract_size_decimal"] * Decimal("0.0006"))
+                commission = abs(
+                    entry_price
+                    * pos_size
+                    * market_info["contract_size_decimal"]
+                    * Decimal("0.0006")
+                )
                 balance -= commission  # Deduct entry commission immediately
 
                 lg.info(
@@ -2464,7 +2941,9 @@ def run_backtest(
     gross_profit = sum(t["pnl"] for t in trades if t["pnl"] > 0)
     gross_loss = abs(sum(t["pnl"] for t in trades if t["pnl"] < 0))
 
-    profit_factor = float(gross_profit / gross_loss) if gross_loss > 0 else float("inf")  # Handle division by zero
+    profit_factor = (
+        float(gross_profit / gross_loss) if gross_loss > 0 else float("inf")
+    )  # Handle division by zero
     win_rate = (winning_trades / total_trades) * 100 if total_trades > 0 else 0
 
     # Final Results
@@ -2497,7 +2976,8 @@ def run_backtest(
     try:
         trades_df = pd.DataFrame(trades)
         trades_filename = os.path.join(
-            LOG_DIRECTORY, f"backtest_trades_{symbol.replace('/', '_')}_{start_date_str}_{end_date_str}.csv"
+            LOG_DIRECTORY,
+            f"backtest_trades_{symbol.replace('/', '_')}_{start_date_str}_{end_date_str}.csv",
         )
         trades_df.to_csv(trades_filename, index=False)
         lg.info(f"Saved backtest trades log to: {trades_filename}")
@@ -2520,15 +3000,21 @@ def run_backtest(
 
 
 # --- Main Execution Loop ---
-def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.Logger) -> None:
+def main_loop(
+    exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.Logger
+) -> None:
     """The main operational loop of the trading bot."""
     lg = logger
-    lg.info(f"{Fore.MAGENTA}{BRIGHT}===== Starting Main Bot Loop (Pyrmethus v{BOT_VERSION}) ====={Style.RESET_ALL}")
+    lg.info(
+        f"{Fore.MAGENTA}{BRIGHT}===== Starting Main Bot Loop (Pyrmethus v{BOT_VERSION}) ====={Style.RESET_ALL}"
+    )
 
     # --- Initialization ---
     trading_pairs_config = config.get("trading_pairs", [])
     if not trading_pairs_config:
-        lg.critical(f"{NEON_RED}FATAL: No 'trading_pairs' defined in config.json. Exiting.{RESET}")
+        lg.critical(
+            f"{NEON_RED}FATAL: No 'trading_pairs' defined in config.json. Exiting.{RESET}"
+        )
         return
 
     timeframe_str = config["interval"]
@@ -2552,14 +3038,19 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
     # Validate exchange connection and fetch markets
     try:
         exchange.load_markets()
-        lg.info(f"Connected to {exchange.name} (Sandbox: {config['use_sandbox']}). Markets loaded.")
+        lg.info(
+            f"Connected to {exchange.name} (Sandbox: {config['use_sandbox']}). Markets loaded."
+        )
     except (ccxt.AuthenticationError, ccxt.ExchangeError, ccxt.NetworkError) as e:
         lg.critical(
             f"{NEON_RED}FATAL: Failed to connect to exchange or load markets: {e}. Check API keys and connection.{RESET}"
         )
         return
     except Exception as e:
-        lg.critical(f"{NEON_RED}FATAL: Unexpected error during exchange initialization: {e}{RESET}", exc_info=True)
+        lg.critical(
+            f"{NEON_RED}FATAL: Unexpected error during exchange initialization: {e}{RESET}",
+            exc_info=True,
+        )
         return
 
     # Pre-process trading pairs and get market info
@@ -2570,7 +3061,9 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
             # Expect format like "BTC/USDT:USDT" for perpetuals or "BTC/USDT" for spot
             symbol = pair_config.split(":")[0]
             if symbol not in exchange.markets:
-                lg.error(f"Symbol '{symbol}' (from config: '{pair_config}') not found on {exchange.name}. Skipping.")
+                lg.error(
+                    f"Symbol '{symbol}' (from config: '{pair_config}') not found on {exchange.name}. Skipping."
+                )
                 continue
             market_raw = exchange.market(symbol)
             market_info = enhance_market_info(market_raw)
@@ -2582,7 +3075,10 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                 f"Error processing trading pair '{pair_config}': {e}. Ensure format is correct (e.g., 'BTC/USDT:USDT' or 'ETH/USDT'). Skipping."
             )
         except Exception as e:
-            lg.error(f"Unexpected error processing symbol '{pair_config}': {e}", exc_info=True)
+            lg.error(
+                f"Unexpected error processing symbol '{pair_config}': {e}",
+                exc_info=True,
+            )
 
     if not active_symbols:
         lg.critical(
@@ -2595,7 +3091,9 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
             f"{NEON_YELLOW}{BRIGHT}### TRADING DISABLED ### (enable_trading=False in config.json). Running in analysis-only (dry-run) mode.{RESET}"
         )
     else:
-        lg.warning(f"{NEON_GREEN}{BRIGHT}### TRADING ENABLED ### Live orders will be placed.{RESET}")
+        lg.warning(
+            f"{NEON_GREEN}{BRIGHT}### TRADING ENABLED ### Live orders will be placed.{RESET}"
+        )
 
     # --- Main Loop Start ---
     while not _shutdown_requested:
@@ -2607,7 +3105,9 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                 balance_data = exchange.fetch_balance()
                 free_balance = balance_data.get(quote_ccy, {}).get("free", 0)
                 if free_balance is not None:
-                    balance = _safe_market_decimal(free_balance, f"balance.{quote_ccy}.free", default=Decimal("0"))
+                    balance = _safe_market_decimal(
+                        free_balance, f"balance.{quote_ccy}.free", default=Decimal("0")
+                    )
                     lg.info(f"Current Balance ({quote_ccy}): {balance.normalize()}")
                 else:
                     lg.warning(f"Could not find free balance for {quote_ccy}.")
@@ -2623,13 +3123,19 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                 if exchange.has.get("fetchPositions"):
                     # Bybit V5 needs symbols specified
                     if "bybit" in exchange.id.lower():
-                        all_positions_raw = exchange.fetch_positions(symbols=active_symbols)
+                        all_positions_raw = exchange.fetch_positions(
+                            symbols=active_symbols
+                        )
                     else:
-                        all_positions_raw = exchange.fetch_positions()  # Fetch all if possible
+                        all_positions_raw = (
+                            exchange.fetch_positions()
+                        )  # Fetch all if possible
                 else:
                     lg.debug("Exchange does not support fetch_positions.")
             except (ccxt.ExchangeError, ccxt.NetworkError) as e:
-                lg.error(f"Failed to fetch positions: {e}. Position checks might be incomplete.")
+                lg.error(
+                    f"Failed to fetch positions: {e}. Position checks might be incomplete."
+                )
             except Exception as e:
                 lg.error(f"Unexpected error fetching positions: {e}", exc_info=True)
 
@@ -2642,7 +3148,10 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                     market_info = market_infos[symbol]
                     pos_info = enhance_position_info(pos_raw, market_info)
                     # Check if position has a non-negligible size
-                    if pos_info["size_decimal"] and not pos_info["size_decimal"].is_zero():
+                    if (
+                        pos_info["size_decimal"]
+                        and not pos_info["size_decimal"].is_zero()
+                    ):
                         active_positions_map[symbol] = pos_info
                         current_total_positions += 1
                         lg.info(
@@ -2659,33 +3168,51 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                     break  # Check shutdown flag between symbols
                 lg.info(f"{NEON_BLUE}--- Processing Symbol: {symbol} ---{RESET}")
                 market_info = market_infos[symbol]
-                current_position = active_positions_map.get(symbol)  # Get position info if exists
+                current_position = active_positions_map.get(
+                    symbol
+                )  # Get position info if exists
 
                 # --- Fetch OHLCV Data ---
                 try:
-                    ohlcv = exchange.fetch_ohlcv(symbol, ccxt_timeframe, limit=fetch_limit)
+                    ohlcv = exchange.fetch_ohlcv(
+                        symbol, ccxt_timeframe, limit=fetch_limit
+                    )
                     if not ohlcv or len(ohlcv) < 50:  # Need enough data for indicators
                         lg.warning(
                             f"Insufficient OHLCV data received for {symbol} ({len(ohlcv) if ohlcv else 0} candles). Skipping analysis."
                         )
                         continue
-                    df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+                    df = pd.DataFrame(
+                        ohlcv,
+                        columns=["timestamp", "open", "high", "low", "close", "volume"],
+                    )
                     # Basic data validation
                     if df.isnull().values.any():
-                        lg.warning(f"NaN values found in OHLCV data for {symbol}. Trying to proceed cautiously.")
+                        lg.warning(
+                            f"NaN values found in OHLCV data for {symbol}. Trying to proceed cautiously."
+                        )
                         df.ffill(inplace=True)  # Forward fill NaNs as a basic fix
                 except (ccxt.ExchangeError, ccxt.NetworkError) as e:
-                    lg.error(f"Failed to fetch OHLCV for {symbol}: {e}. Skipping symbol this cycle.")
+                    lg.error(
+                        f"Failed to fetch OHLCV for {symbol}: {e}. Skipping symbol this cycle."
+                    )
                     continue
                 except Exception as e:
-                    lg.error(f"Unexpected error fetching or processing OHLCV for {symbol}: {e}", exc_info=True)
+                    lg.error(
+                        f"Unexpected error fetching or processing OHLCV for {symbol}: {e}",
+                        exc_info=True,
+                    )
                     continue
 
                 # --- Analyze Market and Generate Signal ---
                 analysis = analyze_market(df, strategy_params, symbol, lg)
-                signal_result = generate_signal(analysis, strategy_params, protection_params, symbol, lg)
+                signal_result = generate_signal(
+                    analysis, strategy_params, protection_params, symbol, lg
+                )
                 signal = signal_result["signal"]
-                entry_price_signal = analysis["last_close"]  # Use last close as potential entry price
+                entry_price_signal = analysis[
+                    "last_close"
+                ]  # Use last close as potential entry price
                 sl_price_signal = signal_result["initial_sl"]
                 tp_price_signal = signal_result["initial_tp"]
 
@@ -2704,12 +3231,21 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                         continue
 
                     if not sl_price_signal:
-                        lg.warning(f"Cannot enter {signal} for {symbol}: Stop loss price not generated by strategy.")
+                        lg.warning(
+                            f"Cannot enter {signal} for {symbol}: Stop loss price not generated by strategy."
+                        )
                         continue
 
                     # Calculate position size
                     pos_size = calculate_position_size(
-                        exchange, symbol, balance, risk_per_trade, entry_price_signal, sl_price_signal, market_info, lg
+                        exchange,
+                        symbol,
+                        balance,
+                        risk_per_trade,
+                        entry_price_signal,
+                        sl_price_signal,
+                        market_info,
+                        lg,
                     )
 
                     if pos_size and pos_size > 0:
@@ -2720,7 +3256,13 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                         else:
                             # --- Place Entry Order ---
                             order_result = place_trade(
-                                exchange, symbol, signal, pos_size, market_info, lg, reduce_only=False
+                                exchange,
+                                symbol,
+                                signal,
+                                pos_size,
+                                market_info,
+                                lg,
+                                reduce_only=False,
                             )
 
                             if order_result and order_result.get("id"):
@@ -2732,23 +3274,41 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                                 # Re-fetch position to confirm entry before setting SL/TP
                                 try:
                                     # Fetch only the specific symbol's position
-                                    refetched_positions = exchange.fetch_positions(symbols=[symbol])
+                                    refetched_positions = exchange.fetch_positions(
+                                        symbols=[symbol]
+                                    )
                                     new_position_raw = next(
-                                        (p for p in refetched_positions if p.get("symbol") == symbol), None
+                                        (
+                                            p
+                                            for p in refetched_positions
+                                            if p.get("symbol") == symbol
+                                        ),
+                                        None,
                                     )
 
                                     if new_position_raw:
-                                        new_position = enhance_position_info(new_position_raw, market_info)
-                                        if new_position["size_decimal"] and not new_position["size_decimal"].is_zero():
-                                            lg.info(f"Position confirmed for {symbol}. Setting initial protection...")
-                                            set_protection_success = set_position_protection(
-                                                exchange,
-                                                symbol,
-                                                market_info,
-                                                lg,
-                                                stop_loss_price=sl_price_signal,
-                                                take_profit_price=tp_price_signal,
-                                                # Add TSL params here if needed for initial setting
+                                        new_position = enhance_position_info(
+                                            new_position_raw, market_info
+                                        )
+                                        if (
+                                            new_position["size_decimal"]
+                                            and not new_position[
+                                                "size_decimal"
+                                            ].is_zero()
+                                        ):
+                                            lg.info(
+                                                f"Position confirmed for {symbol}. Setting initial protection..."
+                                            )
+                                            set_protection_success = (
+                                                set_position_protection(
+                                                    exchange,
+                                                    symbol,
+                                                    market_info,
+                                                    lg,
+                                                    stop_loss_price=sl_price_signal,
+                                                    take_profit_price=tp_price_signal,
+                                                    # Add TSL params here if needed for initial setting
+                                                )
                                             )
                                             if not set_protection_success:
                                                 lg.error(
@@ -2774,7 +3334,9 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
                                         exc_info=True,
                                     )
                             else:
-                                lg.error(f"Failed to place {signal} order for {symbol}. See previous logs.")
+                                lg.error(
+                                    f"Failed to place {signal} order for {symbol}. See previous logs."
+                                )
                     else:
                         lg.info(
                             f"Signal {signal} for {symbol} generated, but position size calculation failed or resulted in zero size."
@@ -2782,25 +3344,37 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
 
                 # 3. Add logic for managing existing positions (e.g., updating TSL, BE) if needed
                 elif current_position:
-                    lg.debug(f"Holding existing {current_position.get('side')} position for {symbol}.")
+                    lg.debug(
+                        f"Holding existing {current_position.get('side')} position for {symbol}."
+                    )
                     # Add logic here to check if BE or TSL should be activated/updated based on current price and protection_params
                     # Example: check_and_update_protection(exchange, symbol, market_info, current_position, analysis, protection_params, lg)
 
                 # Brief pause between symbols if many pairs are processed
                 if len(active_symbols) > 1:
-                    time.sleep(max(0.1, loop_delay / (len(active_symbols) * 2)))  # Small delay
+                    time.sleep(
+                        max(0.1, loop_delay / (len(active_symbols) * 2))
+                    )  # Small delay
 
         except KeyboardInterrupt:  # Allow manual interruption via Ctrl+C
             lg.warning("KeyboardInterrupt received during main loop.")
             _shutdown_requested = True  # Trigger graceful shutdown
-        except (ccxt.NetworkError, ccxt.RequestTimeout, requests.exceptions.RequestException) as e:
+        except (
+            ccxt.NetworkError,
+            ccxt.RequestTimeout,
+            requests.exceptions.RequestException,
+        ) as e:
             lg.warning(f"Network issue during main loop: {e}. Retrying after delay...")
             # No sleep here, handled by main loop delay calculation
         except ccxt.AuthenticationError as e:
-            lg.critical(f"{NEON_RED}Authentication Error in main loop: {e}. Bot cannot continue.{RESET}")
+            lg.critical(
+                f"{NEON_RED}Authentication Error in main loop: {e}. Bot cannot continue.{RESET}"
+            )
             _shutdown_requested = True  # Stop the bot
         except ccxt.ExchangeError as e:
-            lg.error(f"Exchange Error in main loop: {e}. Check exchange status and API limits.")
+            lg.error(
+                f"Exchange Error in main loop: {e}. Check exchange status and API limits."
+            )
             # Consider longer sleep or pausing based on error type
         except Exception as e:
             lg.error(f"!!! UNEXPECTED ERROR in main loop: {e}", exc_info=True)
@@ -2816,11 +3390,15 @@ def main_loop(exchange: ccxt.Exchange, config: dict[str, Any], logger: logging.L
         loop_end_time = time.time()
         elapsed_time = loop_end_time - loop_start_time
         sleep_time = max(0, loop_delay - elapsed_time)
-        lg.debug(f"Loop cycle finished in {elapsed_time:.2f}s. Sleeping for {sleep_time:.2f}s...")
+        lg.debug(
+            f"Loop cycle finished in {elapsed_time:.2f}s. Sleeping for {sleep_time:.2f}s..."
+        )
         if sleep_time > 0:
             time.sleep(sleep_time)
 
-    lg.info(f"{Fore.MAGENTA}{BRIGHT}===== Pyrmethus Volumatic Bot Main Loop Finished =====")
+    lg.info(
+        f"{Fore.MAGENTA}{BRIGHT}===== Pyrmethus Volumatic Bot Main Loop Finished ====="
+    )
 
 
 # --- Signal Handling for Graceful Shutdown ---
@@ -2828,7 +3406,9 @@ def signal_handler(sig: int, frame: Any) -> None:
     """Handles termination signals (SIGINT, SIGTERM) for graceful shutdown."""
     global _shutdown_requested
     signal_name = signal.Signals(sig).name
-    init_logger.warning(f"\n{NEON_YELLOW}{BRIGHT}--- Received Signal: {signal_name} ({sig}) ---{RESET}")
+    init_logger.warning(
+        f"\n{NEON_YELLOW}{BRIGHT}--- Received Signal: {signal_name} ({sig}) ---{RESET}"
+    )
     init_logger.warning("Initiating graceful shutdown. Please wait...")
     _shutdown_requested = True
     # Optionally: Add logic here to cancel open orders before exiting if desired
@@ -2855,7 +3435,12 @@ if __name__ == "__main__":
                     "adjustForTimeDifference": True,  # Adjust nonce for clock skew
                 },
                 # Set sandbox mode based on config
-                "urls": {"api": {"public": "https://api-testnet.bybit.com", "private": "https://api-testnet.bybit.com"}}
+                "urls": {
+                    "api": {
+                        "public": "https://api-testnet.bybit.com",
+                        "private": "https://api-testnet.bybit.com",
+                    }
+                }
                 if config.get("use_sandbox", True)
                 else {},
             }
@@ -2864,13 +3449,20 @@ if __name__ == "__main__":
         if hasattr(exchange, "set_sandbox_mode"):
             exchange.set_sandbox_mode(config.get("use_sandbox", True))
 
-        init_logger.info(f"CCXT {exchange.id} instance created. Sandbox mode: {config.get('use_sandbox', True)}")
+        init_logger.info(
+            f"CCXT {exchange.id} instance created. Sandbox mode: {config.get('use_sandbox', True)}"
+        )
 
     except ccxt.AuthenticationError:
-        init_logger.critical(f"{NEON_RED}FATAL: CCXT Authentication Failed. Check API Key/Secret.{RESET}")
+        init_logger.critical(
+            f"{NEON_RED}FATAL: CCXT Authentication Failed. Check API Key/Secret.{RESET}"
+        )
         sys.exit(1)
     except Exception as e:
-        init_logger.critical(f"{NEON_RED}FATAL: Failed to initialize CCXT exchange: {e}{RESET}", exc_info=True)
+        init_logger.critical(
+            f"{NEON_RED}FATAL: Failed to initialize CCXT exchange: {e}{RESET}",
+            exc_info=True,
+        )
         sys.exit(1)
 
     # --- Select Mode: Backtesting or Live/Dry Run ---
@@ -2887,7 +3479,9 @@ if __name__ == "__main__":
             for pair_config in symbols_to_backtest:
                 symbol = pair_config.split(":")[0]  # Extract symbol part
                 if symbol not in exchange.markets:
-                    init_logger.error(f"Symbol '{symbol}' not available on {exchange.name} for backtesting. Skipping.")
+                    init_logger.error(
+                        f"Symbol '{symbol}' not available on {exchange.name} for backtesting. Skipping."
+                    )
                     continue
                 init_logger.info(f"Running backtest for: {symbol}")
                 result = run_backtest(
@@ -2908,7 +3502,9 @@ if __name__ == "__main__":
 
     else:
         # Start the main trading loop
-        main_loop(exchange, config, setup_logger("main"))  # Use a dedicated logger for the main loop
+        main_loop(
+            exchange, config, setup_logger("main")
+        )  # Use a dedicated logger for the main loop
 
     # --- Shutdown ---
     init_logger.info("Bot shutdown sequence complete.")

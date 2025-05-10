@@ -126,13 +126,19 @@ def setup_logger(symbol: str) -> logging.Logger:
     logger = logging.getLogger(symbol)
     logger.setLevel(logging.INFO)
 
-    file_handler = RotatingFileHandler(log_filename, maxBytes=10 * 1024 * 1024, backupCount=5)
-    file_handler.setFormatter(SensitiveFormatter("%(asctime)s - %(levelname)s - %(message)s"))
+    file_handler = RotatingFileHandler(
+        log_filename, maxBytes=10 * 1024 * 1024, backupCount=5
+    )
+    file_handler.setFormatter(
+        SensitiveFormatter("%(asctime)s - %(levelname)s - %(message)s")
+    )
     logger.addHandler(file_handler)
 
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(
-        SensitiveFormatter(NEON_BLUE + "%(asctime)s" + RESET + " - %(levelname)s - %(message)s")
+        SensitiveFormatter(
+            NEON_BLUE + "%(asctime)s" + RESET + " - %(levelname)s - %(message)s"
+        )
     )
     logger.addHandler(stream_handler)
 
@@ -151,8 +157,12 @@ def bybit_request(
         timestamp = str(int(datetime.now(TIMEZONE).timestamp() * 1000))
         signature_params = params.copy()
         signature_params["timestamp"] = timestamp
-        param_str = "&".join(f"{key}={value}" for key, value in sorted(signature_params.items()))
-        signature = hmac.new(API_SECRET.encode(), param_str.encode(), hashlib.sha256).hexdigest()
+        param_str = "&".join(
+            f"{key}={value}" for key, value in sorted(signature_params.items())
+        )
+        signature = hmac.new(
+            API_SECRET.encode(), param_str.encode(), hashlib.sha256
+        ).hexdigest()
         headers = {
             "X-BAPI-API-KEY": API_KEY,
             "X-BAPI-TIMESTAMP": timestamp,
@@ -224,10 +234,23 @@ def fetch_klines(
             "category": "linear",
         }
         response = bybit_request("GET", endpoint, params, logger)
-        if response and response.get("retCode") == 0 and response.get("result") and response["result"].get("list"):
+        if (
+            response
+            and response.get("retCode") == 0
+            and response.get("result")
+            and response["result"].get("list")
+        ):
             data = response["result"]["list"]
             # Convert raw list of lists to list of dictionaries
-            columns = ["start_time", "open", "high", "low", "close", "volume", "turnover"]
+            columns = [
+                "start_time",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "turnover",
+            ]
             kline_data = []
             for row in data:
                 kline_dict = {}
@@ -239,13 +262,21 @@ def fetch_klines(
                                 # Keep as ms timestamp string for now, conversion done later
                                 kline_dict[col_name] = int(row[i])
                             else:
-                                kline_dict[col_name] = float(row[i]) if row[i] else 0.0  # Handle empty turnover etc.
+                                kline_dict[col_name] = (
+                                    float(row[i]) if row[i] else 0.0
+                                )  # Handle empty turnover etc.
                         except (ValueError, TypeError) as e:
                             if logger:
-                                logger.warning(f"Could not convert {col_name}={row[i]} to number: {e}. Setting to 0.")
-                            kline_dict[col_name] = 0.0 if col_name != "start_time" else 0
+                                logger.warning(
+                                    f"Could not convert {col_name}={row[i]} to number: {e}. Setting to 0."
+                                )
+                            kline_dict[col_name] = (
+                                0.0 if col_name != "start_time" else 0
+                            )
                     else:
-                        kline_dict[col_name] = 0.0  # Assign default if column missing in row
+                        kline_dict[col_name] = (
+                            0.0  # Assign default if column missing in row
+                        )
                 kline_data.append(kline_dict)
 
             # Ensure essential keys exist even if API changes response format slightly
@@ -253,7 +284,9 @@ def fetch_klines(
                 for key in ["start_time", "open", "high", "low", "close", "volume"]:
                     if key not in kline:
                         if logger:
-                            logger.warning(f"Key '{key}' missing in kline data, adding default 0.")
+                            logger.warning(
+                                f"Key '{key}' missing in kline data, adding default 0."
+                            )
                         kline[key] = 0.0 if key != "start_time" else 0
 
             return kline_data
@@ -308,7 +341,9 @@ def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | N
             time.sleep(RETRY_DELAY_SECONDS)
             retry_count += 1
 
-    logger.error(f"{NEON_RED}Max retries reached for orderbook fetch using ccxt. Aborting.{RESET}")
+    logger.error(
+        f"{NEON_RED}Max retries reached for orderbook fetch using ccxt. Aborting.{RESET}"
+    )
     return None
 
 
@@ -366,7 +401,9 @@ def calculate_rsi_manual(closes: list[float], window: int = 14) -> list[float]:
     return rsi
 
 
-def calculate_macd_manual(closes: list[float], fast_period=12, slow_period=26, signal_period=9) -> dict:
+def calculate_macd_manual(
+    closes: list[float], fast_period=12, slow_period=26, signal_period=9
+) -> dict:
     ema_fast = calculate_ema_manual(closes, fast_period)
     ema_slow = calculate_ema_manual(closes, slow_period)
 
@@ -385,13 +422,17 @@ def calculate_macd_manual(closes: list[float], fast_period=12, slow_period=26, s
     return {"macd": macd_line, "signal": signal_line, "histogram": histogram}
 
 
-def calculate_stoch_rsi_manual(closes: list[float], rsi_window=14, stoch_window=12, k_window=3, d_window=3) -> dict:
+def calculate_stoch_rsi_manual(
+    closes: list[float], rsi_window=14, stoch_window=12, k_window=3, d_window=3
+) -> dict:
     rsi = calculate_rsi_manual(closes, rsi_window)
 
     stoch_rsi = [np.nan] * len(rsi)
     if len(rsi) >= stoch_window:
         for i in range(stoch_window - 1, len(rsi)):
-            period_rsi = [r for r in rsi[i - stoch_window + 1 : i + 1] if not np.isnan(r)]
+            period_rsi = [
+                r for r in rsi[i - stoch_window + 1 : i + 1] if not np.isnan(r)
+            ]
             if period_rsi:
                 min_rsi = min(period_rsi)
                 max_rsi = max(period_rsi)
@@ -406,7 +447,9 @@ def calculate_stoch_rsi_manual(closes: list[float], rsi_window=14, stoch_window=
     return {"stoch_rsi": stoch_rsi, "k": k_line, "d": d_line}
 
 
-def calculate_bollinger_bands_manual(closes: list[float], window: int = 20, num_std_dev: float = 2.0) -> dict:
+def calculate_bollinger_bands_manual(
+    closes: list[float], window: int = 20, num_std_dev: float = 2.0
+) -> dict:
     if len(closes) < window:
         return {
             "upper_band": [np.nan] * len(closes),
@@ -425,7 +468,11 @@ def calculate_bollinger_bands_manual(closes: list[float], window: int = 20, num_
             upper_band[i] = middle_band[i] + (std_dev * num_std_dev)
             lower_band[i] = middle_band[i] - (std_dev * num_std_dev)
 
-    return {"upper_band": upper_band, "middle_band": middle_band, "lower_band": lower_band}
+    return {
+        "upper_band": upper_band,
+        "middle_band": middle_band,
+        "lower_band": lower_band,
+    }
 
 
 def calculate_atr_manual(klines: list[dict], window: int = 14) -> list[float]:
@@ -496,7 +543,10 @@ class TradingAnalyzer:
         if len(self.closes) < window:
             return [np.nan] * len(self.closes)
 
-        typical_prices = [(h + l + c) / 3 for h, l, c in zip(self.highs, self.lows, self.closes, strict=False)]
+        typical_prices = [
+            (h + l + c) / 3
+            for h, l, c in zip(self.highs, self.lows, self.closes, strict=False)
+        ]
         sma_typical = calculate_sma_manual(typical_prices, window)
 
         cci = [np.nan] * len(typical_prices)
@@ -522,7 +572,9 @@ class TradingAnalyzer:
             current_close = self.closes[i]
 
             if highest_high - lowest_low != 0:
-                val = (highest_high - current_close) / (highest_high - lowest_low) * -100
+                val = (
+                    (highest_high - current_close) / (highest_high - lowest_low) * -100
+                )
                 wr.append(val)
             else:
                 wr.append(np.nan)  # Avoid division by zero
@@ -532,8 +584,13 @@ class TradingAnalyzer:
         if len(self.closes) < window + 1:
             return [np.nan] * len(self.closes)
 
-        typical_prices = [(h + l + c) / 3 for h, l, c in zip(self.highs, self.lows, self.closes, strict=False)]
-        raw_money_flow = [tp * v for tp, v in zip(typical_prices, self.volumes, strict=False)]
+        typical_prices = [
+            (h + l + c) / 3
+            for h, l, c in zip(self.highs, self.lows, self.closes, strict=False)
+        ]
+        raw_money_flow = [
+            tp * v for tp, v in zip(typical_prices, self.volumes, strict=False)
+        ]
 
         positive_flow = [0.0] * len(typical_prices)
         negative_flow = [0.0] * len(typical_prices)
@@ -558,11 +615,15 @@ class TradingAnalyzer:
                 mfi[i] = 100 - (100 / (1 + money_ratio))
         return mfi
 
-    def calculate_fibonacci_retracement(self, high: float, low: float, current_price: float) -> dict[str, float]:
+    def calculate_fibonacci_retracement(
+        self, high: float, low: float, current_price: float
+    ) -> dict[str, float]:
         try:
             diff = high - low
             if diff == 0:
-                self.logger.warning(f"{NEON_YELLOW}Fibonacci calculation warning: High equals Low ({high}).{RESET}")
+                self.logger.warning(
+                    f"{NEON_YELLOW}Fibonacci calculation warning: High equals Low ({high}).{RESET}"
+                )
                 return {}
             fib_levels = {
                 "Fib 23.6%": high - diff * 0.236,
@@ -573,7 +634,10 @@ class TradingAnalyzer:
                 "Fib 88.6%": high - diff * 0.886,  # Less common but added
                 "Fib 94.1%": high - diff * 0.941,  # Less common but added
             }
-            self.levels = {"Support": {}, "Resistance": {}}  # Reset S/R levels specific to Fib
+            self.levels = {
+                "Support": {},
+                "Resistance": {},
+            }  # Reset S/R levels specific to Fib
             for label, value in fib_levels.items():
                 if value < current_price:
                     self.levels["Support"][label] = value
@@ -607,7 +671,9 @@ class TradingAnalyzer:
                 }
             )
         except Exception as e:
-            self.logger.exception(f"{NEON_RED}Pivot point calculation error: {e}{RESET}")
+            self.logger.exception(
+                f"{NEON_RED}Pivot point calculation error: {e}{RESET}"
+            )
             # Don't reset self.levels here, Fib levels might still be valid
 
     def find_nearest_levels(
@@ -633,7 +699,10 @@ class TradingAnalyzer:
 
             # Process Pivot Point levels
             for label, value in self.levels.items():
-                if label not in ["Support", "Resistance"]:  # Avoid reprocessing Fib dicts
+                if label not in [
+                    "Support",
+                    "Resistance",
+                ]:  # Avoid reprocessing Fib dicts
                     process_level(label.upper(), value)  # Process top-level PP values
 
             # Sort by distance and take the nearest N
@@ -644,7 +713,9 @@ class TradingAnalyzer:
             nearest_resistances = resistance_levels[:num_levels]
 
             # Sort by price for cleaner output
-            nearest_supports.sort(key=lambda x: x[1], reverse=True)  # Highest support first
+            nearest_supports.sort(
+                key=lambda x: x[1], reverse=True
+            )  # Highest support first
             nearest_resistances.sort(key=lambda x: x[1])  # Lowest resistance first
 
             return nearest_supports, nearest_resistances
@@ -652,7 +723,9 @@ class TradingAnalyzer:
             self.logger.error(f"{NEON_RED}Error finding nearest levels: {e}{RESET}")
             return [], []
         except Exception as e:
-            self.logger.exception(f"{NEON_RED}Unexpected error finding nearest levels: {e}{RESET}")
+            self.logger.exception(
+                f"{NEON_RED}Unexpected error finding nearest levels: {e}{RESET}"
+            )
             return [], []
 
     def calculate_atr(self, window: int = 14) -> list[float]:  # Default changed from 20
@@ -668,12 +741,18 @@ class TradingAnalyzer:
         k_window: int = 3,
         d_window: int = 3,
     ) -> dict:
-        return calculate_stoch_rsi_manual(self.closes, rsi_window, stoch_window, k_window, d_window)
+        return calculate_stoch_rsi_manual(
+            self.closes, rsi_window, stoch_window, k_window, d_window
+        )
 
     def calculate_momentum_ma(self) -> dict:
         momentum = self.calculate_momentum(self.config["momentum_period"])
-        momentum_ma_short = calculate_sma_manual(momentum, self.config["momentum_ma_short"])
-        momentum_ma_long = calculate_sma_manual(momentum, self.config["momentum_ma_long"])
+        momentum_ma_short = calculate_sma_manual(
+            momentum, self.config["momentum_ma_short"]
+        )
+        momentum_ma_long = calculate_sma_manual(
+            momentum, self.config["momentum_ma_long"]
+        )
         volume_ma = calculate_sma_manual(self.volumes, self.config["volume_ma_period"])
         return {
             "momentum": momentum,
@@ -686,14 +765,23 @@ class TradingAnalyzer:
         return calculate_macd_manual(self.closes)
 
     def detect_macd_divergence(self, macd_data: dict) -> str | None:
-        if not macd_data or len(self.closes) < 30 or len(macd_data.get("histogram", [])) < 2:
+        if (
+            not macd_data
+            or len(self.closes) < 30
+            or len(macd_data.get("histogram", [])) < 2
+        ):
             return None
 
         prices = self.closes
         macd_histogram = macd_data["histogram"]
 
         # Ensure we have valid numbers for comparison
-        if np.isnan(prices[-1]) or np.isnan(prices[-2]) or np.isnan(macd_histogram[-1]) or np.isnan(macd_histogram[-2]):
+        if (
+            np.isnan(prices[-1])
+            or np.isnan(prices[-2])
+            or np.isnan(macd_histogram[-1])
+            or np.isnan(macd_histogram[-2])
+        ):
             return None
 
         # Bullish Divergence: Price makes lower low, Histogram makes higher low
@@ -708,8 +796,14 @@ class TradingAnalyzer:
     def calculate_ema(self, window: int) -> list[float]:
         return calculate_ema_manual(self.closes, window)
 
-    def determine_trend_momentum(self, mom_ma_data: dict, atr_values: list[float]) -> dict:
-        if len(self.closes) < self.config["momentum_ma_long"] or not atr_values or np.isnan(atr_values[-1]):
+    def determine_trend_momentum(
+        self, mom_ma_data: dict, atr_values: list[float]
+    ) -> dict:
+        if (
+            len(self.closes) < self.config["momentum_ma_long"]
+            or not atr_values
+            or np.isnan(atr_values[-1])
+        ):
             return {"trend": "Insufficient Data", "strength": 0}
 
         mom_short = mom_ma_data["momentum_ma_short"][-1]
@@ -727,7 +821,9 @@ class TradingAnalyzer:
             trend = "Neutral"
 
         if last_atr == 0:
-            self.logger.warning(f"{NEON_YELLOW}ATR is zero, cannot calculate trend strength.{RESET}")
+            self.logger.warning(
+                f"{NEON_YELLOW}ATR is zero, cannot calculate trend strength.{RESET}"
+            )
             trend_strength = 0
         else:
             trend_strength = abs(mom_short - mom_long) / last_atr
@@ -743,8 +839,16 @@ class TradingAnalyzer:
         minus_dm = [np.nan]
 
         for i in range(1, len(self.klines)):
-            h, l, _c = self.klines[i]["high"], self.klines[i]["low"], self.klines[i]["close"]
-            ph, pl = self.klines[i - 1]["high"], self.klines[i - 1]["low"], self.klines[i - 1]["close"]
+            h, l, _c = (
+                self.klines[i]["high"],
+                self.klines[i]["low"],
+                self.klines[i]["close"],
+            )
+            ph, pl = (
+                self.klines[i - 1]["high"],
+                self.klines[i - 1]["low"],
+                self.klines[i - 1]["close"],
+            )
 
             tr = max(h - l, abs(h - ph), abs(l - pl))
             tr_values.append(tr)
@@ -786,7 +890,9 @@ class TradingAnalyzer:
         if len(self.closes) < 2:
             return [np.nan] * len(self.closes)
 
-        obv = [0.0] * len(self.closes)  # Start OBV at 0 or use first volume? Let's use 0.
+        obv = [0.0] * len(
+            self.closes
+        )  # Start OBV at 0 or use first volume? Let's use 0.
         for i in range(1, len(self.closes)):
             if self.closes[i] > self.closes[i - 1]:
                 obv[i] = obv[i - 1] + self.volumes[i]
@@ -802,7 +908,12 @@ class TradingAnalyzer:
 
         adi = [0.0] * len(self.closes)
         for i in range(len(self.closes)):
-            high, low, close, volume = self.highs[i], self.lows[i], self.closes[i], self.volumes[i]
+            high, low, close, volume = (
+                self.highs[i],
+                self.lows[i],
+                self.closes[i],
+                self.volumes[i],
+            )
             if high - low != 0:
                 mfm = ((close - low) - (high - close)) / (high - low)
                 mfv = mfm * volume
@@ -887,7 +998,9 @@ class TradingAnalyzer:
     ) -> dict:
         return calculate_bollinger_bands_manual(self.closes, window, num_std_dev)
 
-    def analyze_orderbook_levels(self, orderbook: dict | None, current_price: Decimal) -> str:
+    def analyze_orderbook_levels(
+        self, orderbook: dict | None, current_price: Decimal
+    ) -> str:
         if not orderbook or "bids" not in orderbook or "asks" not in orderbook:
             return f"{NEON_YELLOW}Orderbook data not available or invalid.{RESET}"
 
@@ -897,7 +1010,9 @@ class TradingAnalyzer:
         float(current_price)
 
         analysis_output = ""
-        threshold = float(self.config.get("orderbook_cluster_threshold", 1000))  # Use float threshold
+        threshold = float(
+            self.config.get("orderbook_cluster_threshold", 1000)
+        )  # Use float threshold
 
         def check_cluster_at_level(
             level_name: str,
@@ -911,8 +1026,12 @@ class TradingAnalyzer:
             min_price = level_price - tolerance
             max_price = level_price + tolerance
 
-            bid_volume_at_level = sum(size for price, size in bids_data if min_price <= price <= max_price)
-            ask_volume_at_level = sum(size for price, size in asks_data if min_price <= price <= max_price)
+            bid_volume_at_level = sum(
+                size for price, size in bids_data if min_price <= price <= max_price
+            )
+            ask_volume_at_level = sum(
+                size for price, size in asks_data if min_price <= price <= max_price
+            )
 
             if bid_volume_at_level > cluster_threshold:
                 return f"Significant bid volume ({bid_volume_at_level:.2f}) near {level_name} @ {level_price:.4f}."
@@ -922,18 +1041,26 @@ class TradingAnalyzer:
 
         # Check Fibonacci Levels
         for level_type, levels_dict in self.levels.items():
-            if level_type in ["Support", "Resistance"] and isinstance(levels_dict, dict):
+            if level_type in ["Support", "Resistance"] and isinstance(
+                levels_dict, dict
+            ):
                 for label, price in levels_dict.items():
                     if isinstance(price, (float, int, Decimal)):
-                        cluster_analysis = check_cluster_at_level(f"{label}", float(price), bids, asks, threshold)
+                        cluster_analysis = check_cluster_at_level(
+                            f"{label}", float(price), bids, asks, threshold
+                        )
                         if cluster_analysis:
                             color = NEON_GREEN if level_type == "Support" else NEON_RED
                             analysis_output += f"  {color}{cluster_analysis}{RESET}\n"
 
         # Check Pivot Point Levels
         for label, price in self.levels.items():
-            if label not in ["Support", "Resistance"] and isinstance(price, (float, int, Decimal)):
-                cluster_analysis = check_cluster_at_level(f"Pivot {label.upper()}", float(price), bids, asks, threshold)
+            if label not in ["Support", "Resistance"] and isinstance(
+                price, (float, int, Decimal)
+            ):
+                cluster_analysis = check_cluster_at_level(
+                    f"Pivot {label.upper()}", float(price), bids, asks, threshold
+                )
                 if cluster_analysis:
                     analysis_output += f"  {NEON_BLUE}{cluster_analysis}{RESET}\n"
 
@@ -966,17 +1093,25 @@ class TradingAnalyzer:
         lows = self.lows
 
         # Use recent data for Fib/Pivots if available
-        recent_high = max(highs[-20:]) if len(highs) >= 20 else max(highs) if highs else 0
+        recent_high = (
+            max(highs[-20:]) if len(highs) >= 20 else max(highs) if highs else 0
+        )
         recent_low = min(lows[-20:]) if len(lows) >= 20 else min(lows) if lows else 0
         last_close = closes[-1] if closes else 0
 
-        self.calculate_fibonacci_retracement(recent_high, recent_low, float(current_price))
+        self.calculate_fibonacci_retracement(
+            recent_high, recent_low, float(current_price)
+        )
         if recent_high and recent_low and last_close:
             self.calculate_pivot_points(recent_high, recent_low, last_close)
         else:
-            self.logger.warning(f"{NEON_YELLOW}Cannot calculate Pivot Points due to missing H/L/C data.{RESET}")
+            self.logger.warning(
+                f"{NEON_YELLOW}Cannot calculate Pivot Points due to missing H/L/C data.{RESET}"
+            )
 
-        nearest_supports, nearest_resistances = self.find_nearest_levels(float(current_price))
+        nearest_supports, nearest_resistances = self.find_nearest_levels(
+            float(current_price)
+        )
 
         mom_ma_data = self.calculate_momentum_ma()
         atr = self.calculate_atr(self.config["atr_period"])
@@ -987,7 +1122,9 @@ class TradingAnalyzer:
         obv = self.calculate_obv()
         rsi_20 = self.calculate_rsi(window=20)  # Keep separate RSI calculations
         rsi_100 = self.calculate_rsi(window=100)
-        rsi_conf = self.calculate_rsi(window=self.config["rsi_period"])  # RSI based on config
+        rsi_conf = self.calculate_rsi(
+            window=self.config["rsi_period"]
+        )  # RSI based on config
         mfi = self.calculate_mfi()
         cci = self.calculate_cci()
         wr = self.calculate_williams_r()
@@ -1003,8 +1140,12 @@ class TradingAnalyzer:
         )
         stoch_rsi_df = self.calculate_stoch_rsi()
 
-        orderbook_data = fetch_orderbook(self.symbol, self.config["orderbook_limit"], self.logger)
-        orderbook_analysis_str = self.analyze_orderbook_levels(orderbook_data, current_price)
+        orderbook_data = fetch_orderbook(
+            self.symbol, self.config["orderbook_limit"], self.logger
+        )
+        orderbook_analysis_str = self.analyze_orderbook_levels(
+            orderbook_data, current_price
+        )
 
         # --- Get last 3 values (or fewer if data is short) ---
         def get_last_n(data_list: list, n: int = 3):
@@ -1023,11 +1164,16 @@ class TradingAnalyzer:
             "wr": get_last_n(wr),
             "adx": get_last_n(adx, n=1),  # ADX is usually a single value
             "adi": get_last_n(adi),
-            "mom": [trend_data] * 3,  # Replicate for consistency, interpretation uses latest
+            "mom": [trend_data]
+            * 3,  # Replicate for consistency, interpretation uses latest
             "sma10": get_last_n(sma10, n=1),  # Just need latest SMA
             "psar": get_last_n(psar),
             "fve": get_last_n(fve),
-            "macd": [get_last_n(macd_df["macd"]), get_last_n(macd_df["signal"]), get_last_n(macd_df["histogram"])],
+            "macd": [
+                get_last_n(macd_df["macd"]),
+                get_last_n(macd_df["signal"]),
+                get_last_n(macd_df["histogram"]),
+            ],
             "bollinger_bands": [
                 get_last_n(bollinger_bands_df["upper_band"]),
                 get_last_n(bollinger_bands_df["middle_band"]),
@@ -1067,19 +1213,25 @@ class TradingAnalyzer:
             and not np.isnan(rsi_100_prev)
         ):
             if rsi_20_val > rsi_100_val and rsi_20_prev <= rsi_100_prev:
-                rsi_cross = f"{NEON_GREEN}RSI 20/100:{RESET} RSI 20 crossed ABOVE RSI 100"
+                rsi_cross = (
+                    f"{NEON_GREEN}RSI 20/100:{RESET} RSI 20 crossed ABOVE RSI 100"
+                )
             elif rsi_20_val < rsi_100_val and rsi_20_prev >= rsi_100_prev:
                 rsi_cross = f"{NEON_RED}RSI 20/100:{RESET} RSI 20 crossed BELOW RSI 100"
             else:
                 rsi_cross = f"{NEON_YELLOW}RSI 20/100:{RESET} No recent cross"
         else:
-            rsi_cross = f"{NEON_YELLOW}RSI 20/100:{RESET} Insufficient data for cross check"
+            rsi_cross = (
+                f"{NEON_YELLOW}RSI 20/100:{RESET} Insufficient data for cross check"
+            )
 
         output += rsi_cross + "\n"
 
         # Display indicators
         for indicator_name in indicator_values:
-            interpretation = self.interpret_indicator(self.logger, indicator_name, indicator_values[indicator_name])
+            interpretation = self.interpret_indicator(
+                self.logger, indicator_name, indicator_values[indicator_name]
+            )
             if interpretation:  # Only print if interpretation exists
                 output += interpretation + "\n"
 
@@ -1194,9 +1346,15 @@ class TradingAnalyzer:
             elif indicator_name == "mom":  # Already calculated trend/strength
                 trend = values[0]["trend"]
                 strength = values[0]["strength"]
-                return f"{NEON_PURPLE}Momentum:{RESET} {trend} (Strength: {strength:.2f})"
+                return (
+                    f"{NEON_PURPLE}Momentum:{RESET} {trend} (Strength: {strength:.2f})"
+                )
             elif indicator_name == "macd":
-                macd_line, signal_line, histogram = values[0][-1], values[1][-1], values[2][-1]
+                macd_line, signal_line, histogram = (
+                    values[0][-1],
+                    values[1][-1],
+                    values[2][-1],
+                )
                 if np.isnan(macd_line) or np.isnan(signal_line) or np.isnan(histogram):
                     return f"{NEON_YELLOW}MACD:{RESET} Not Available"
                 cross = ""
@@ -1206,7 +1364,13 @@ class TradingAnalyzer:
                         cross = f" {NEON_GREEN}(Bull Cross){RESET}"
                     if macd_line < signal_line and macd_prev >= signal_prev:
                         cross = f" {NEON_RED}(Bear Cross){RESET}"
-                hist_color = NEON_GREEN if histogram > 0 else NEON_RED if histogram < 0 else NEON_YELLOW
+                hist_color = (
+                    NEON_GREEN
+                    if histogram > 0
+                    else NEON_RED
+                    if histogram < 0
+                    else NEON_YELLOW
+                )
                 return f"{NEON_BLUE}MACD:{RESET} Line={macd_line:.4f}, Signal={signal_line:.4f}, Hist={hist_color}{histogram:.4f}{RESET}{cross}"
 
             # --- Volume ---
@@ -1265,7 +1429,9 @@ class TradingAnalyzer:
                 if np.isnan(val) or np.isnan(last_close):
                     return f"{NEON_YELLOW}PSAR:{RESET} Not Available"
                 trend = (
-                    NEON_GREEN + "Below Price (Uptrend)" if val < last_close else NEON_RED + "Above Price (Downtrend)"
+                    NEON_GREEN + "Below Price (Uptrend)"
+                    if val < last_close
+                    else NEON_RED + "Above Price (Downtrend)"
                 )
                 return f"{NEON_BLUE}PSAR:{RESET} {trend}{RESET} ({val:.4f})"
             elif indicator_name == "sma10":
@@ -1276,7 +1442,9 @@ class TradingAnalyzer:
 
             else:
                 # This case should ideally not be reached if all indicators are handled
-                logger.warning(f"Indicator interpretation not defined for: {indicator_name}")
+                logger.warning(
+                    f"Indicator interpretation not defined for: {indicator_name}"
+                )
                 return None  # Return None for unhandled indicators
 
         except (TypeError, IndexError, KeyError) as e:
@@ -1291,7 +1459,11 @@ def main() -> None:
     symbol = ""
     while True:
         try:
-            symbol = input(f"{NEON_BLUE}Enter trading symbol (e.g., BTCUSDT): {RESET}").upper().strip()
+            symbol = (
+                input(f"{NEON_BLUE}Enter trading symbol (e.g., BTCUSDT): {RESET}")
+                .upper()
+                .strip()
+            )
             if symbol:
                 # Basic validation: Check if it looks like a symbol pair
                 if (
@@ -1314,7 +1486,9 @@ def main() -> None:
                 f"{NEON_BLUE}Enter timeframe (e.g., {', '.join(VALID_INTERVALS)}) [Default: {CONFIG.get('interval', '15')}]: {RESET}"
             ).strip()
             if not interval_input:
-                interval = CONFIG.get("interval", "15")  # Use default from config or fallback
+                interval = CONFIG.get(
+                    "interval", "15"
+                )  # Use default from config or fallback
                 break
             if interval_input in VALID_INTERVALS:
                 interval = interval_input
@@ -1341,19 +1515,27 @@ def main() -> None:
             fetch_start_time = time.time()
             current_price = fetch_current_price(symbol, logger)
             if current_price is None:
-                logger.error(f"{NEON_RED}Failed to fetch current price. Retrying in {retry_delay} seconds...{RESET}")
+                logger.error(
+                    f"{NEON_RED}Failed to fetch current price. Retrying in {retry_delay} seconds...{RESET}"
+                )
                 time.sleep(retry_delay)
                 continue
 
             # Determine limit needed based on longest lookback required
             # Example: Need 100 for RSI 100 + 1 for diff + some buffer = ~150-200
             kline_limit = max(
-                200, CONFIG.get("rsi_period", 14) + 100, CONFIG.get("bollinger_bands_period", 20) + 50
+                200,
+                CONFIG.get("rsi_period", 14) + 100,
+                CONFIG.get("bollinger_bands_period", 20) + 50,
             )  # Robust limit
 
-            kline_data = fetch_klines(symbol, interval, limit=kline_limit, logger=logger)
+            kline_data = fetch_klines(
+                symbol, interval, limit=kline_limit, logger=logger
+            )
             fetch_end_time = time.time()
-            logger.info(f"Data fetch took {fetch_end_time - fetch_start_time:.2f} seconds.")
+            logger.info(
+                f"Data fetch took {fetch_end_time - fetch_start_time:.2f} seconds."
+            )
 
             if not kline_data:
                 logger.error(
@@ -1367,7 +1549,9 @@ def main() -> None:
             analysis_start_time = time.time()
             analyzer.analyze(current_price, timestamp)
             analysis_end_time = time.time()
-            logger.info(f"Analysis took {analysis_end_time - analysis_start_time:.2f} seconds.")
+            logger.info(
+                f"Analysis took {analysis_end_time - analysis_start_time:.2f} seconds."
+            )
 
             # Calculate sleep time considering fetch and analysis time
             elapsed_time = time.time() - fetch_start_time
@@ -1376,7 +1560,9 @@ def main() -> None:
             time.sleep(sleep_duration)
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"{NEON_RED}Network error: {e}. Retrying in {retry_delay} seconds...{RESET}")
+            logger.error(
+                f"{NEON_RED}Network error: {e}. Retrying in {retry_delay} seconds...{RESET}"
+            )
             time.sleep(retry_delay)
         except KeyboardInterrupt:
             logger.info(f"{NEON_YELLOW}Analysis stopped by user.{RESET}")

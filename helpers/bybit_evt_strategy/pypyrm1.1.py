@@ -26,12 +26,18 @@ try:
         pybit_version = "unknown"
 except ImportError:
     # Use basic print before colorama/logger might be available
-    print("FATAL: Pybit library not found. Please install it: pip install pybit", file=sys.stderr)
+    print(
+        "FATAL: Pybit library not found. Please install it: pip install pybit",
+        file=sys.stderr,
+    )
     sys.exit(1)
 try:
     import pandas as pd
 except ImportError:
-    print("FATAL: pandas library not found. Please install it: pip install pandas", file=sys.stderr)
+    print(
+        "FATAL: pandas library not found. Please install it: pip install pandas",
+        file=sys.stderr,
+    )
     sys.exit(1)
 try:
     from dotenv import load_dotenv
@@ -40,7 +46,9 @@ try:
     dotenv_loaded = load_dotenv()
     print(f".env file {'processed' if dotenv_loaded else 'not found or empty'}.")
 except ImportError:
-    print("Warning: python-dotenv not found. Cannot load .env file. Ensure environment variables are set manually.")
+    print(
+        "Warning: python-dotenv not found. Cannot load .env file. Ensure environment variables are set manually."
+    )
 
     # Define a dummy function if dotenv is not available
     def load_dotenv():
@@ -77,26 +85,57 @@ except ImportError:
 try:
     from neon_logger import setup_logger
 except ImportError as e:
-    print(f"{Back.RED}{Fore.WHITE}FATAL: Error importing neon_logger: {e}{Style.RESET_ALL}", file=sys.stderr)
-    print(f"{Fore.YELLOW}Ensure 'neon_logger.py' is present and runnable.{Style.RESET_ALL}")
+    print(
+        f"{Back.RED}{Fore.WHITE}FATAL: Error importing neon_logger: {e}{Style.RESET_ALL}",
+        file=sys.stderr,
+    )
+    print(
+        f"{Fore.YELLOW}Ensure 'neon_logger.py' is present and runnable.{Style.RESET_ALL}"
+    )
     sys.exit(1)
 try:
     import indicators as ind
 except ImportError as e:
-    print(f"{Back.RED}{Fore.WHITE}FATAL: Error importing indicators: {e}{Style.RESET_ALL}", file=sys.stderr)
-    print(f"{Fore.YELLOW}Ensure 'indicators.py' is present and contains 'calculate_all_indicators'.{Style.RESET_ALL}")
+    print(
+        f"{Back.RED}{Fore.WHITE}FATAL: Error importing indicators: {e}{Style.RESET_ALL}",
+        file=sys.stderr,
+    )
+    print(
+        f"{Fore.YELLOW}Ensure 'indicators.py' is present and contains 'calculate_all_indicators'.{Style.RESET_ALL}"
+    )
     sys.exit(1)
 try:
-    from bybit_utils import safe_decimal_conversion, format_price, format_amount, format_order_id, send_sms_alert
+    from bybit_utils import (
+        safe_decimal_conversion,
+        format_price,
+        format_amount,
+        format_order_id,
+        send_sms_alert,
+    )
 except ImportError as e:
-    print(f"{Back.RED}{Fore.WHITE}FATAL: Error importing bybit_utils: {e}{Style.RESET_ALL}", file=sys.stderr)
-    print(f"{Fore.YELLOW}Ensure 'bybit_utils.py' is present and compatible.{Style.RESET_ALL}")
+    print(
+        f"{Back.RED}{Fore.WHITE}FATAL: Error importing bybit_utils: {e}{Style.RESET_ALL}",
+        file=sys.stderr,
+    )
+    print(
+        f"{Fore.YELLOW}Ensure 'bybit_utils.py' is present and compatible.{Style.RESET_ALL}"
+    )
     sys.exit(1)
 try:
     # Assuming config_models.py now includes enhanced StrategyConfig options
-    from config_models import AppConfig, APIConfig, StrategyConfig, load_config, SMSConfig, LoggingConfig
+    from config_models import (
+        AppConfig,
+        APIConfig,
+        StrategyConfig,
+        load_config,
+        SMSConfig,
+        LoggingConfig,
+    )
 except ImportError as e:
-    print(f"{Back.RED}{Fore.WHITE}FATAL: Error importing config_models: {e}{Style.RESET_ALL}", file=sys.stderr)
+    print(
+        f"{Back.RED}{Fore.WHITE}FATAL: Error importing config_models: {e}{Style.RESET_ALL}",
+        file=sys.stderr,
+    )
     print(
         f"{Fore.YELLOW}Ensure 'config_models.py' is present and defines AppConfig, APIConfig, StrategyConfig, SMSConfig, LoggingConfig, load_config.{Style.RESET_ALL}"
     )
@@ -150,21 +189,35 @@ RET_CODE_SIGN_ERROR = 10004
 RET_CODE_TOO_MANY_VISITS = 10006  # Rate limit exceeded
 RET_CODE_ORDER_NOT_FOUND = 110001  # Order does not exist
 RET_CODE_ORDER_NOT_FOUND_OR_CLOSED = 20001  # Order does not exist or finished (Unified)
-RET_CODE_INSUFFICIENT_BALANCE_SPOT = 12131  # Spot insufficient balance (example, verify code)
-RET_CODE_INSUFFICIENT_BALANCE_DERIVATIVES_1 = 110007  # Insufficient available balance (Unified)
-RET_CODE_INSUFFICIENT_BALANCE_DERIVATIVES_2 = 30031  # Position margin is insufficient (Classic)
+RET_CODE_INSUFFICIENT_BALANCE_SPOT = (
+    12131  # Spot insufficient balance (example, verify code)
+)
+RET_CODE_INSUFFICIENT_BALANCE_DERIVATIVES_1 = (
+    110007  # Insufficient available balance (Unified)
+)
+RET_CODE_INSUFFICIENT_BALANCE_DERIVATIVES_2 = (
+    30031  # Position margin is insufficient (Classic)
+)
 RET_CODE_QTY_TOO_SMALL = 110017  # Order qty is not greater than the minimum allowed
 RET_CODE_QTY_INVALID_PRECISION = 110012  # Order qty decimal precision error
 RET_CODE_PRICE_TOO_LOW = 110014  # Order price is lower than the minimum allowed
 RET_CODE_PRICE_INVALID_PRECISION = 110013  # Order price decimal precision error
 RET_CODE_LEVERAGE_NOT_MODIFIED = 110043  # Leverage not modified
 RET_CODE_POSITION_MODE_NOT_MODIFIED = 110048  # Position mode is not modified (Unified)
-RET_CODE_REDUCE_ONLY_MARGIN_ERROR = 30024  # ReduceOnly order Failed. Position margin is insufficient (Classic)
-RET_CODE_REDUCE_ONLY_QTY_ERROR = 30025  # ReduceOnly order Failed. Order qty is greater than position size (Classic)
+RET_CODE_REDUCE_ONLY_MARGIN_ERROR = (
+    30024  # ReduceOnly order Failed. Position margin is insufficient (Classic)
+)
+RET_CODE_REDUCE_ONLY_QTY_ERROR = (
+    30025  # ReduceOnly order Failed. Order qty is greater than position size (Classic)
+)
 RET_CODE_REDUCE_ONLY_QTY_ERROR_UNIFIED = 110025  # Reduce only order qty error (Unified)
-RET_CODE_ORDER_CANCELLED_OR_REJECTED = 110010  # Order has been cancelled or rejected (Unified)
+RET_CODE_ORDER_CANCELLED_OR_REJECTED = (
+    110010  # Order has been cancelled or rejected (Unified)
+)
 RET_CODE_ORDER_FILLED = 110011  # Order has been filled (Unified)
-RET_CODE_NO_NEED_TO_SET_MARGIN_MODE = 110026  # Cross/isolated margin mode is not modified (Unified)
+RET_CODE_NO_NEED_TO_SET_MARGIN_MODE = (
+    110026  # Cross/isolated margin mode is not modified (Unified)
+)
 
 # Set Decimal precision (adjust as needed, 30 should be sufficient for most crypto)
 DECIMAL_CONTEXT = Context(prec=30)
@@ -207,8 +260,12 @@ class EhlersStrategyPybitEnhanced:
 
         # --- Position State Tracking ---
         self.current_side: str = POS_NONE  # 'long', 'short', or 'none'
-        self.current_qty: Decimal = DECIMAL_CONTEXT.create_decimal("0.0")  # Current position size
-        self.entry_price: Optional[Decimal] = None  # Average entry price of current position
+        self.current_qty: Decimal = DECIMAL_CONTEXT.create_decimal(
+            "0.0"
+        )  # Current position size
+        self.entry_price: Optional[Decimal] = (
+            None  # Average entry price of current position
+        )
         # Track order IDs IF placing SL/TP separately (not atomically)
         self.sl_order_id: Optional[str] = None  # ID of the active separate SL order
         self.tp_order_id: Optional[str] = None  # ID of the active separate TP order
@@ -225,8 +282,12 @@ class EhlersStrategyPybitEnhanced:
 
         # --- Enhanced Configurable Options (Defaults if not in AppConfig) ---
         # Use getattr for backward compatibility if config file isn't updated
-        self.attach_sl_tp_to_entry: bool = getattr(self.strategy_config, "attach_sl_tp_to_entry", True)
-        self.sl_trigger_by: str = getattr(self.strategy_config, "sl_trigger_by", TRIGGER_BY_MARK)
+        self.attach_sl_tp_to_entry: bool = getattr(
+            self.strategy_config, "attach_sl_tp_to_entry", True
+        )
+        self.sl_trigger_by: str = getattr(
+            self.strategy_config, "sl_trigger_by", TRIGGER_BY_MARK
+        )
         self.tp_trigger_by: str = getattr(
             self.strategy_config, "tp_trigger_by", TRIGGER_BY_MARK
         )  # TP often uses same trigger as SL
@@ -259,8 +320,12 @@ class EhlersStrategyPybitEnhanced:
         logger.info(
             f"{Fore.CYAN}Pyrmethus enhances the Ehlers Strategy for {self.symbol} (TF: {self.timeframe}) using Pybit HTTP...{Style.RESET_ALL}"
         )
-        logger.info(f"Configuration loaded: Testnet={self.api_config.testnet_mode}, Symbol={self.symbol}")
-        logger.info(f"SL/TP Mode: {'Atomic (Attached to Entry)' if self.attach_sl_tp_to_entry else 'Separate Orders'}")
+        logger.info(
+            f"Configuration loaded: Testnet={self.api_config.testnet_mode}, Symbol={self.symbol}"
+        )
+        logger.info(
+            f"SL/TP Mode: {'Atomic (Attached to Entry)' if self.attach_sl_tp_to_entry else 'Separate Orders'}"
+        )
         logger.info(
             f"SL Trigger: {self.sl_trigger_by}, SL Order Type: {self.sl_order_type}, TP Trigger: {self.tp_trigger_by}"
         )
@@ -277,7 +342,9 @@ class EhlersStrategyPybitEnhanced:
         Returns:
             True if initialization was successful, False otherwise.
         """
-        logger.info(f"{Fore.CYAN}--- Channeling Bybit Spirits (Initialization) ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.CYAN}--- Channeling Bybit Spirits (Initialization) ---{Style.RESET_ALL}"
+        )
         try:
             # --- Connect to Bybit ---
             logger.info(
@@ -294,20 +361,27 @@ class EhlersStrategyPybitEnhanced:
             logger.debug("Checking server time...")
             server_time_resp = self.session.get_server_time()
             if not server_time_resp or server_time_resp.get("retCode") != RET_CODE_OK:
-                logger.critical(f"{Back.RED}Failed to get server time! Response: {server_time_resp}{Style.RESET_ALL}")
+                logger.critical(
+                    f"{Back.RED}Failed to get server time! Response: {server_time_resp}{Style.RESET_ALL}"
+                )
                 self._safe_close_session()
                 return False
             server_time_ms = int(server_time_resp["result"]["timeNano"]) // 1_000_000
             server_dt = pd.to_datetime(server_time_ms, unit="ms", utc=True)
             client_dt = pd.Timestamp.utcnow()
             time_diff = abs((client_dt - server_dt).total_seconds())
-            logger.success(f"Connection successful. Server Time: {server_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-            if time_diff > self.api_config.max_time_sync_diff:  # Check against configured max diff
+            logger.success(
+                f"Connection successful. Server Time: {server_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+            )
+            if (
+                time_diff > self.api_config.max_time_sync_diff
+            ):  # Check against configured max diff
                 logger.critical(
                     f"{Back.RED}CRITICAL: Client-Server time difference ({time_diff:.2f}s) exceeds allowed limit ({self.api_config.max_time_sync_diff}s). Ensure system clock is synchronized via NTP. Halting.{Style.RESET_ALL}"
                 )
                 send_sms_alert(
-                    f"CRITICAL: Clock skew error ({time_diff:.1f}s) for {self.symbol} bot! Halting.", self.sms_config
+                    f"CRITICAL: Clock skew error ({time_diff:.1f}s) for {self.symbol} bot! Halting.",
+                    self.sms_config,
                 )
                 self._safe_close_session()
                 return False
@@ -317,7 +391,9 @@ class EhlersStrategyPybitEnhanced:
                 )
 
             # --- Fetch Market Info & Determine Category ---
-            logger.info(f"{Fore.BLUE}Seeking insights for symbol: {self.symbol}...{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.BLUE}Seeking insights for symbol: {self.symbol}...{Style.RESET_ALL}"
+            )
             if not self._fetch_and_set_market_info():
                 logger.critical(
                     f"{Back.RED}Failed to fetch critical market info for {self.symbol}. Halting initialization.{Style.RESET_ALL}"
@@ -328,7 +404,9 @@ class EhlersStrategyPybitEnhanced:
 
             # --- Configure Derivatives Settings (Leverage, Position Mode, Margin Mode) ---
             if self.category in ["linear", "inverse"]:
-                logger.info(f"{Fore.BLUE}Configuring derivatives settings for {self.category}...{Style.RESET_ALL}")
+                logger.info(
+                    f"{Fore.BLUE}Configuring derivatives settings for {self.category}...{Style.RESET_ALL}"
+                )
 
                 # Set Leverage
                 if not self._set_leverage():
@@ -342,7 +420,9 @@ class EhlersStrategyPybitEnhanced:
                 pos_mode_target_str = self.strategy_config.default_position_mode
                 # Convert string from config ('MergedSingle'/'BothSide') to Bybit mode (0/3)
                 target_pybit_pos_mode = (
-                    POSITION_MODE_ONE_WAY if pos_mode_target_str == "MergedSingle" else POSITION_MODE_HEDGE
+                    POSITION_MODE_ONE_WAY
+                    if pos_mode_target_str == "MergedSingle"
+                    else POSITION_MODE_HEDGE
                 )
                 if target_pybit_pos_mode == POSITION_MODE_HEDGE:
                     logger.error(
@@ -355,22 +435,36 @@ class EhlersStrategyPybitEnhanced:
                         f"{Fore.YELLOW}Could not explicitly set position mode to '{pos_mode_target_str}'. Ensure it's correct in Bybit UI.{Style.RESET_ALL}"
                     )
                 else:
-                    logger.info(f"Position mode alignment to '{pos_mode_target_str}' confirmed for {self.category}.")
+                    logger.info(
+                        f"Position mode alignment to '{pos_mode_target_str}' confirmed for {self.category}."
+                    )
 
                 # Set Margin Mode (Isolated / Cross)
-                margin_mode_target = self.strategy_config.default_margin_mode  # 'ISOLATED' or 'CROSS'
-                leverage_str = str(int(self.strategy_config.leverage))  # Leverage needed for isolated
-                if not self._set_margin_mode(mode=margin_mode_target, leverage=leverage_str):
+                margin_mode_target = (
+                    self.strategy_config.default_margin_mode
+                )  # 'ISOLATED' or 'CROSS'
+                leverage_str = str(
+                    int(self.strategy_config.leverage)
+                )  # Leverage needed for isolated
+                if not self._set_margin_mode(
+                    mode=margin_mode_target, leverage=leverage_str
+                ):
                     logger.warning(
                         f"{Fore.YELLOW}Could not explicitly set margin mode to '{margin_mode_target}'. Ensure it's correct in Bybit UI.{Style.RESET_ALL}"
                     )
                 else:
-                    logger.info(f"Margin mode alignment to '{margin_mode_target}' confirmed for {self.category}.")
+                    logger.info(
+                        f"Margin mode alignment to '{margin_mode_target}' confirmed for {self.category}."
+                    )
 
             # --- Initial State Perception ---
-            logger.info(f"{Fore.BLUE}Gazing into the account's current state...{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.BLUE}Gazing into the account's current state...{Style.RESET_ALL}"
+            )
             if not self._update_state():
-                logger.error("Failed to perceive initial state. Cannot proceed reliably.")
+                logger.error(
+                    "Failed to perceive initial state. Cannot proceed reliably."
+                )
                 self._safe_close_session()
                 return False  # Crucial to know the starting state
             logger.info(
@@ -378,7 +472,9 @@ class EhlersStrategyPybitEnhanced:
             )
 
             # --- Initial Order Cleanup ---
-            logger.info(f"{Fore.BLUE}Dispelling lingering order phantoms (Initial Cleanup)...{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.BLUE}Dispelling lingering order phantoms (Initial Cleanup)...{Style.RESET_ALL}"
+            )
             if not self._cancel_all_open_orders("Initialization Cleanup"):
                 logger.warning(
                     "Initial order cancellation failed or encountered issues. Check Bybit UI for stray orders."
@@ -388,7 +484,9 @@ class EhlersStrategyPybitEnhanced:
             self.tp_order_id = None
 
             self.is_initialized = True
-            logger.success(f"{Fore.GREEN}{Style.BRIGHT}--- Strategy Initialization Complete ---{Style.RESET_ALL}")
+            logger.success(
+                f"{Fore.GREEN}{Style.BRIGHT}--- Strategy Initialization Complete ---{Style.RESET_ALL}"
+            )
             return True
 
         except (InvalidRequestError, FailedRequestError) as pybit_e:
@@ -396,7 +494,9 @@ class EhlersStrategyPybitEnhanced:
                 f"{Back.RED}{Fore.WHITE}Pybit API Error during initialization: {pybit_e}{Style.RESET_ALL}",
                 exc_info=True,
             )
-            logger.critical(f"Status Code: {pybit_e.status_code}, Response: {pybit_e.response}")
+            logger.critical(
+                f"Status Code: {pybit_e.status_code}, Response: {pybit_e.response}"
+            )
             self._safe_close_session()
             return False
         except Exception as e:
@@ -420,7 +520,11 @@ class EhlersStrategyPybitEnhanced:
             return False
 
         # Define categories to try
-        possible_categories: List[Literal["linear", "inverse", "spot"]] = ["linear", "inverse", "spot"]
+        possible_categories: List[Literal["linear", "inverse", "spot"]] = [
+            "linear",
+            "inverse",
+            "spot",
+        ]
         market_data: Optional[Dict] = None
         found_category: Optional[Literal["linear", "inverse", "spot"]] = None
 
@@ -430,15 +534,26 @@ class EhlersStrategyPybitEnhanced:
                 f"Attempting to fetch instruments info for category: {category_attempt}, symbol: {self.symbol}"
             )
             try:
-                response = self.session.get_instruments_info(category=category_attempt, symbol=self.symbol)
+                response = self.session.get_instruments_info(
+                    category=category_attempt, symbol=self.symbol
+                )
 
                 if response and response.get("retCode") == RET_CODE_OK:
                     result_list = response.get("result", {}).get("list", [])
                     if result_list:
                         # Ensure the response is for the correct symbol (API might return multiple if symbol param is ignored/fuzzy)
-                        matched_data = next((item for item in result_list if item.get("symbol") == self.symbol), None)
+                        matched_data = next(
+                            (
+                                item
+                                for item in result_list
+                                if item.get("symbol") == self.symbol
+                            ),
+                            None,
+                        )
                         if matched_data:
-                            logger.info(f"Successfully found {self.symbol} in category '{category_attempt}'.")
+                            logger.info(
+                                f"Successfully found {self.symbol} in category '{category_attempt}'."
+                            )
                             found_category = category_attempt
                             market_data = matched_data
                             break  # Found it, stop trying categories
@@ -447,7 +562,9 @@ class EhlersStrategyPybitEnhanced:
                                 f"Response received for category '{category_attempt}', but symbol {self.symbol} not in the list."
                             )
                     else:
-                        logger.debug(f"Symbol {self.symbol} not found in category '{category_attempt}'.")
+                        logger.debug(
+                            f"Symbol {self.symbol} not found in category '{category_attempt}'."
+                        )
                 else:
                     ret_code = response.get("retCode")
                     ret_msg = response.get("retMsg", "Unknown error")
@@ -456,16 +573,23 @@ class EhlersStrategyPybitEnhanced:
                             f"API Key/Secret error while fetching instruments info (Code: {ret_code}). Halting."
                         )
                         return False
-                    logger.debug(f"API call failed for category '{category_attempt}'. Code: {ret_code}, Msg: {ret_msg}")
+                    logger.debug(
+                        f"API call failed for category '{category_attempt}'. Code: {ret_code}, Msg: {ret_msg}"
+                    )
 
             except (InvalidRequestError, FailedRequestError) as pybit_e:
-                logger.error(f"Pybit API Error fetching instruments info for category '{category_attempt}': {pybit_e}")
+                logger.error(
+                    f"Pybit API Error fetching instruments info for category '{category_attempt}': {pybit_e}"
+                )
                 if pybit_e.status_code in [401, 403]:  # Authentication errors
-                    logger.critical(f"Authentication error (Status: {pybit_e.status_code}). Check API keys.")
+                    logger.critical(
+                        f"Authentication error (Status: {pybit_e.status_code}). Check API keys."
+                    )
                     return False
             except Exception as e:
                 logger.error(
-                    f"Unexpected error fetching instruments info for category '{category_attempt}': {e}", exc_info=True
+                    f"Unexpected error fetching instruments info for category '{category_attempt}': {e}",
+                    exc_info=True,
                 )
 
         if not found_category or not market_data:
@@ -484,9 +608,15 @@ class EhlersStrategyPybitEnhanced:
             # Use Decimal context for precision
             ctx = DECIMAL_CONTEXT
 
-            self.min_qty = safe_decimal_conversion(lot_size_filter.get("minOrderQty"), "min_qty", ctx)
-            self.qty_step = safe_decimal_conversion(lot_size_filter.get("qtyStep"), "qty_step", ctx)
-            self.price_tick = safe_decimal_conversion(price_filter.get("tickSize"), "price_tick", ctx)
+            self.min_qty = safe_decimal_conversion(
+                lot_size_filter.get("minOrderQty"), "min_qty", ctx
+            )
+            self.qty_step = safe_decimal_conversion(
+                lot_size_filter.get("qtyStep"), "qty_step", ctx
+            )
+            self.price_tick = safe_decimal_conversion(
+                price_filter.get("tickSize"), "price_tick", ctx
+            )
             self.base_coin = market_data.get("baseCoin")
             self.quote_coin = market_data.get("quoteCoin")
             # Get contract multiplier (defaults to 1 if not present or invalid)
@@ -507,16 +637,22 @@ class EhlersStrategyPybitEnhanced:
             if not self.quote_coin:
                 missing_details.append("Quote Coin")
             if self.contract_multiplier is None or self.contract_multiplier <= 0:
-                missing_details.append(f"Contract Multiplier ({self.contract_multiplier})")
+                missing_details.append(
+                    f"Contract Multiplier ({self.contract_multiplier})"
+                )
 
             if missing_details:
                 logger.error(
                     f"{Back.RED}Failed to extract or validate essential market details! Issues: {'; '.join(missing_details)}{Style.RESET_ALL}"
                 )
-                logger.error(f"Received Market Data: {market_data}")  # Log raw data for debugging
+                logger.error(
+                    f"Received Market Data: {market_data}"
+                )  # Log raw data for debugging
                 return False
 
-            logger.info(f"Market Details Set: Category={self.category}, Base={self.base_coin}, Quote={self.quote_coin}")
+            logger.info(
+                f"Market Details Set: Category={self.category}, Base={self.base_coin}, Quote={self.quote_coin}"
+            )
             logger.info(
                 f"Min Qty={format_amount(self.symbol, self.min_qty, self.qty_step)}, "
                 f"Qty Step={self.qty_step}, Price Tick={self.price_tick}, Multiplier={self.contract_multiplier}"
@@ -536,9 +672,14 @@ class EhlersStrategyPybitEnhanced:
         try:
             # Ensure leverage is a whole number string for the API
             leverage_str = str(int(self.strategy_config.leverage))
-            logger.info(f"Attempting to set leverage for {self.symbol} to {leverage_str}x...")
+            logger.info(
+                f"Attempting to set leverage for {self.symbol} to {leverage_str}x..."
+            )
             response = self.session.set_leverage(
-                category=self.category, symbol=self.symbol, buyLeverage=leverage_str, sellLeverage=leverage_str
+                category=self.category,
+                symbol=self.symbol,
+                buyLeverage=leverage_str,
+                sellLeverage=leverage_str,
             )
             ret_code = response.get("retCode")
             ret_msg = response.get("retMsg", "").lower()
@@ -546,11 +687,18 @@ class EhlersStrategyPybitEnhanced:
             if ret_code == RET_CODE_OK:
                 logger.success(f"Leverage set to {leverage_str}x successfully.")
                 return True
-            elif ret_code == RET_CODE_LEVERAGE_NOT_MODIFIED or "leverage not modified" in ret_msg:
-                logger.info(f"Leverage already set to {leverage_str}x (no modification needed).")
+            elif (
+                ret_code == RET_CODE_LEVERAGE_NOT_MODIFIED
+                or "leverage not modified" in ret_msg
+            ):
+                logger.info(
+                    f"Leverage already set to {leverage_str}x (no modification needed)."
+                )
                 return True
             else:
-                logger.error(f"Failed to set leverage. Code: {ret_code}, Msg: {response.get('retMsg')}")
+                logger.error(
+                    f"Failed to set leverage. Code: {ret_code}, Msg: {response.get('retMsg')}"
+                )
                 return False
         except (InvalidRequestError, FailedRequestError) as pybit_e:
             logger.error(
@@ -567,7 +715,11 @@ class EhlersStrategyPybitEnhanced:
         if not self.session or self.category not in ["linear", "inverse"]:
             logger.info(f"Position mode setting skipped (Category: {self.category}).")
             return True
-        mode_desc = "One-Way (MergedSingle)" if mode == POSITION_MODE_ONE_WAY else "Hedge (BothSide)"
+        mode_desc = (
+            "One-Way (MergedSingle)"
+            if mode == POSITION_MODE_ONE_WAY
+            else "Hedge (BothSide)"
+        )
         logger.info(
             f"Attempting to set position mode for {self.symbol} (category {self.category}) to {mode} ({mode_desc})..."
         )
@@ -586,14 +738,23 @@ class EhlersStrategyPybitEnhanced:
             ret_msg = response.get("retMsg", "").lower()
 
             if ret_code == RET_CODE_OK:
-                logger.info(f"Position mode successfully set/confirmed to {mode_desc} for {self.category}.")
+                logger.info(
+                    f"Position mode successfully set/confirmed to {mode_desc} for {self.category}."
+                )
                 return True
-            elif ret_code == RET_CODE_POSITION_MODE_NOT_MODIFIED or "position mode is not modified" in ret_msg:
-                logger.info(f"Position mode already set to {mode_desc} for {self.category}.")
+            elif (
+                ret_code == RET_CODE_POSITION_MODE_NOT_MODIFIED
+                or "position mode is not modified" in ret_msg
+            ):
+                logger.info(
+                    f"Position mode already set to {mode_desc} for {self.category}."
+                )
                 return True
             else:
                 # Common failure: Cannot switch mode with active positions/orders
-                logger.error(f"Failed to set position mode. Code: {ret_code}, Msg: {response.get('retMsg')}")
+                logger.error(
+                    f"Failed to set position mode. Code: {ret_code}, Msg: {response.get('retMsg')}"
+                )
                 return False
         except (InvalidRequestError, FailedRequestError) as pybit_e:
             logger.error(
@@ -621,7 +782,9 @@ class EhlersStrategyPybitEnhanced:
         trade_mode = 1 if mode.upper() == "ISOLATED" else 0
         mode_desc = "Isolated" if trade_mode == 1 else "Cross"
 
-        logger.info(f"Attempting to set margin mode for {self.symbol} to {mode_desc}...")
+        logger.info(
+            f"Attempting to set margin mode for {self.symbol} to {mode_desc}..."
+        )
         try:
             response = self.session.switch_margin_mode(
                 category=self.category,
@@ -636,12 +799,19 @@ class EhlersStrategyPybitEnhanced:
             if ret_code == RET_CODE_OK:
                 logger.success(f"Margin mode set to {mode_desc} successfully.")
                 return True
-            elif ret_code == RET_CODE_NO_NEED_TO_SET_MARGIN_MODE or "not modified" in ret_msg:
-                logger.info(f"Margin mode already set to {mode_desc} (no modification needed).")
+            elif (
+                ret_code == RET_CODE_NO_NEED_TO_SET_MARGIN_MODE
+                or "not modified" in ret_msg
+            ):
+                logger.info(
+                    f"Margin mode already set to {mode_desc} (no modification needed)."
+                )
                 return True
             else:
                 # Common failure: Cannot switch with active position/orders
-                logger.error(f"Failed to set margin mode. Code: {ret_code}, Msg: {response.get('retMsg')}")
+                logger.error(
+                    f"Failed to set margin mode. Code: {ret_code}, Msg: {response.get('retMsg')}"
+                )
                 return False
         except (InvalidRequestError, FailedRequestError) as pybit_e:
             logger.error(
@@ -675,16 +845,24 @@ class EhlersStrategyPybitEnhanced:
 
         # Determine account type based on category (primarily for Unified)
         # Bybit V5 often uses 'UNIFIED' for linear/inverse, 'SPOT' for spot, 'CONTRACT' for classic accounts
-        account_type: str = ACCOUNT_TYPE_UNIFIED  # Assume unified by default for linear/inverse
+        account_type: str = (
+            ACCOUNT_TYPE_UNIFIED  # Assume unified by default for linear/inverse
+        )
         if self.category == "spot":
-            account_type = ACCOUNT_TYPE_SPOT  # Or UNIFIED if spot is under unified wallet
+            account_type = (
+                ACCOUNT_TYPE_SPOT  # Or UNIFIED if spot is under unified wallet
+            )
 
         coin_to_check: str = self.quote_coin  # Margin/PnL currency (USDT, USD, etc.)
 
-        logger.debug(f"Fetching balance for Account: {account_type}, Coin: {coin_to_check}...")
+        logger.debug(
+            f"Fetching balance for Account: {account_type}, Coin: {coin_to_check}..."
+        )
         try:
             # Use get_wallet_balance for V5 Unified/Spot
-            bal_response = self.session.get_wallet_balance(accountType=account_type, coin=coin_to_check)
+            bal_response = self.session.get_wallet_balance(
+                accountType=account_type, coin=coin_to_check
+            )
 
             if not (bal_response and bal_response.get("retCode") == RET_CODE_OK):
                 logger.error(
@@ -694,33 +872,56 @@ class EhlersStrategyPybitEnhanced:
 
             balance_list = bal_response.get("result", {}).get("list", [])
             if not balance_list:
-                logger.warning(f"Balance list is empty in the response for {account_type}.")
-                return DECIMAL_CONTEXT.create_decimal("0.0")  # Assume zero if list is empty
+                logger.warning(
+                    f"Balance list is empty in the response for {account_type}."
+                )
+                return DECIMAL_CONTEXT.create_decimal(
+                    "0.0"
+                )  # Assume zero if list is empty
 
             # The structure might contain account info first, then coin list
-            account_balance_data = balance_list[0]  # Assuming the first element contains the relevant account type data
+            account_balance_data = balance_list[
+                0
+            ]  # Assuming the first element contains the relevant account type data
             coin_balance_list = account_balance_data.get("coin", [])
 
-            coin_balance_data = next((item for item in coin_balance_list if item.get("coin") == coin_to_check), None)
+            coin_balance_data = next(
+                (
+                    item
+                    for item in coin_balance_list
+                    if item.get("coin") == coin_to_check
+                ),
+                None,
+            )
 
             if coin_balance_data:
                 # V5 Unified uses 'availableToWithdraw' or 'availableBalance'
                 # 'availableBalance' usually represents the balance usable for margin/new trades
                 available_balance_str = coin_balance_data.get("availableBalance", "0")
-                available_balance = safe_decimal_conversion(available_balance_str, "availableBalance", DECIMAL_CONTEXT)
+                available_balance = safe_decimal_conversion(
+                    available_balance_str, "availableBalance", DECIMAL_CONTEXT
+                )
 
                 if available_balance is None:
-                    logger.error(f"Could not parse 'availableBalance' ({available_balance_str}) for {coin_to_check}.")
+                    logger.error(
+                        f"Could not parse 'availableBalance' ({available_balance_str}) for {coin_to_check}."
+                    )
                     return None  # Treat parsing failure as critical
 
-                equity_str = coin_balance_data.get("equity", "N/A")  # Total equity if available
-                logger.info(f"Available Balance ({coin_to_check}): {available_balance:.4f}, Equity: {equity_str}")
+                equity_str = coin_balance_data.get(
+                    "equity", "N/A"
+                )  # Total equity if available
+                logger.info(
+                    f"Available Balance ({coin_to_check}): {available_balance:.4f}, Equity: {equity_str}"
+                )
                 return available_balance
             else:
                 logger.warning(
                     f"Could not find balance details for coin '{coin_to_check}' within the response list for account {account_type}."
                 )
-                return DECIMAL_CONTEXT.create_decimal("0.0")  # Assume zero if coin not found
+                return DECIMAL_CONTEXT.create_decimal(
+                    "0.0"
+                )  # Assume zero if coin not found
 
         except (InvalidRequestError, FailedRequestError) as pybit_e:
             logger.error(
@@ -750,20 +951,28 @@ class EhlersStrategyPybitEnhanced:
         try:
             # --- Fetch Position ---
             logger.debug(f"Fetching position for {self.category}/{self.symbol}...")
-            pos_response = self.session.get_positions(category=self.category, symbol=self.symbol)
+            pos_response = self.session.get_positions(
+                category=self.category, symbol=self.symbol
+            )
 
             if not (pos_response and pos_response.get("retCode") == RET_CODE_OK):
                 logger.error(
                     f"Failed to fetch position data. Code: {pos_response.get('retCode')}, Msg: {pos_response.get('retMsg')}"
                 )
                 # Don't reset state here, just report failure to fetch
-                self._reset_position_state("Position fetch API call failed.")  # Reset to be safe
-                return False  # Treat position fetch failure as critical for state update
+                self._reset_position_state(
+                    "Position fetch API call failed."
+                )  # Reset to be safe
+                return (
+                    False  # Treat position fetch failure as critical for state update
+                )
             else:
                 position_list = pos_response.get("result", {}).get("list", [])
                 if not position_list:
                     # No position data returned, assume flat
-                    self._reset_position_state("No position data found in API response.")
+                    self._reset_position_state(
+                        "No position data found in API response."
+                    )
                 else:
                     # Assuming One-Way mode: use the first entry.
                     # If Hedge Mode, logic would need to find correct entry based on side or idx.
@@ -783,8 +992,12 @@ class EhlersStrategyPybitEnhanced:
                         old_qty = self.current_qty
 
                         self.current_qty = pos_qty
-                        self.entry_price = safe_decimal_conversion(avg_price_str, "entry price", ctx)
-                        self.current_side = POS_LONG if side_str == SIDE_BUY else POS_SHORT
+                        self.entry_price = safe_decimal_conversion(
+                            avg_price_str, "entry price", ctx
+                        )
+                        self.current_side = (
+                            POS_LONG if side_str == SIDE_BUY else POS_SHORT
+                        )
 
                         if self.entry_price is None:
                             logger.warning(
@@ -816,7 +1029,9 @@ class EhlersStrategyPybitEnhanced:
             # --- Clear Tracked Orders if Flat ---
             if self.current_side == POS_NONE:
                 if self.sl_order_id or self.tp_order_id:
-                    logger.debug("Not in position, clearing tracked separate SL/TP order IDs.")
+                    logger.debug(
+                        "Not in position, clearing tracked separate SL/TP order IDs."
+                    )
                     self.sl_order_id = None
                     self.tp_order_id = None
 
@@ -828,11 +1043,15 @@ class EhlersStrategyPybitEnhanced:
                 f"Pybit API Error during state update: {pybit_e} (Status: {pybit_e.status_code}, Response: {pybit_e.response})",
                 exc_info=False,
             )
-            self._reset_position_state("API error during state update.")  # Reset to be safe
+            self._reset_position_state(
+                "API error during state update."
+            )  # Reset to be safe
             return False
         except Exception as e:
             logger.error(f"Unexpected error during state update: {e}", exc_info=True)
-            self._reset_position_state("Exception during state update.")  # Reset to be safe
+            self._reset_position_state(
+                "Exception during state update."
+            )  # Reset to be safe
             return False
 
     def _reset_position_state(self, reason: str):
@@ -855,8 +1074,15 @@ class EhlersStrategyPybitEnhanced:
             - DataFrame with OHLCV data (or None if fetch fails).
             - Latest price as a Decimal (or None if fetch fails).
         """
-        if not self.session or not self.category or not self.timeframe or not self.symbol:
-            logger.error("Cannot fetch data: Missing session, category, timeframe, or symbol.")
+        if (
+            not self.session
+            or not self.category
+            or not self.timeframe
+            or not self.symbol
+        ):
+            logger.error(
+                "Cannot fetch data: Missing session, category, timeframe, or symbol."
+            )
             return None, None
         logger.debug("Fetching market data...")
         ohlcv_df: Optional[pd.DataFrame] = None
@@ -867,9 +1093,14 @@ class EhlersStrategyPybitEnhanced:
         try:
             limit = self.strategy_config.ohlcv_limit
             limit = min(limit, 1000)  # Bybit API limit for kline
-            logger.debug(f"Fetching Kline: {self.symbol}, Interval: {self.timeframe}, Limit: {limit}")
+            logger.debug(
+                f"Fetching Kline: {self.symbol}, Interval: {self.timeframe}, Limit: {limit}"
+            )
             kline_response = self.session.get_kline(
-                category=self.category, symbol=self.symbol, interval=self.timeframe, limit=limit
+                category=self.category,
+                symbol=self.symbol,
+                interval=self.timeframe,
+                limit=limit,
             )
 
             if not (kline_response and kline_response.get("retCode") == RET_CODE_OK):
@@ -882,17 +1113,31 @@ class EhlersStrategyPybitEnhanced:
                     logger.warning("OHLCV data list is empty in the response.")
                 else:
                     # Bybit V5 Kline: [timestamp, open, high, low, close, volume, turnover]
-                    columns = ["timestamp", "open", "high", "low", "close", "volume", "turnover"]
+                    columns = [
+                        "timestamp",
+                        "open",
+                        "high",
+                        "low",
+                        "close",
+                        "volume",
+                        "turnover",
+                    ]
                     ohlcv_df = pd.DataFrame(kline_list, columns=columns)
                     ohlcv_df["timestamp"] = pd.to_numeric(ohlcv_df["timestamp"])
-                    ohlcv_df["datetime"] = pd.to_datetime(ohlcv_df["timestamp"], unit="ms", utc=True)
+                    ohlcv_df["datetime"] = pd.to_datetime(
+                        ohlcv_df["timestamp"], unit="ms", utc=True
+                    )
                     # Convert OHLCV to numeric, handling potential errors
                     for col in ["open", "high", "low", "close", "volume", "turnover"]:
                         ohlcv_df[col] = pd.to_numeric(ohlcv_df[col], errors="coerce")
                     # Drop rows with NaN in essential columns (open, high, low, close, volume)
-                    ohlcv_df.dropna(subset=["open", "high", "low", "close", "volume"], inplace=True)
+                    ohlcv_df.dropna(
+                        subset=["open", "high", "low", "close", "volume"], inplace=True
+                    )
                     # Ensure data is sorted chronologically (Bybit usually returns descending)
-                    ohlcv_df = ohlcv_df.sort_values(by="timestamp").reset_index(drop=True)
+                    ohlcv_df = ohlcv_df.sort_values(by="timestamp").reset_index(
+                        drop=True
+                    )
                     ohlcv_df.set_index("datetime", inplace=True)
                     if not ohlcv_df.empty:
                         logger.debug(
@@ -915,7 +1160,9 @@ class EhlersStrategyPybitEnhanced:
         # --- Fetch Ticker ---
         try:
             logger.debug(f"Fetching ticker for {self.symbol}...")
-            ticker_response = self.session.get_tickers(category=self.category, symbol=self.symbol)
+            ticker_response = self.session.get_tickers(
+                category=self.category, symbol=self.symbol
+            )
 
             if not (ticker_response and ticker_response.get("retCode") == RET_CODE_OK):
                 logger.warning(
@@ -928,9 +1175,13 @@ class EhlersStrategyPybitEnhanced:
                 else:
                     # Assuming the first ticker in the list is the correct one
                     last_price_str = ticker_list[0].get("lastPrice")
-                    current_price = safe_decimal_conversion(last_price_str, "lastPrice", ctx)
+                    current_price = safe_decimal_conversion(
+                        last_price_str, "lastPrice", ctx
+                    )
                     if current_price is None:
-                        logger.warning(f"Ticker data retrieved but missing valid 'lastPrice' ('{last_price_str}').")
+                        logger.warning(
+                            f"Ticker data retrieved but missing valid 'lastPrice' ('{last_price_str}')."
+                        )
                     else:
                         logger.debug(f"Last Price: {current_price}")
 
@@ -962,11 +1213,16 @@ class EhlersStrategyPybitEnhanced:
             required indicators are missing/NaN.
         """
         if ohlcv_df is None or ohlcv_df.empty:
-            logger.warning("Cannot calculate indicators: Input DataFrame is None or empty.")
+            logger.warning(
+                "Cannot calculate indicators: Input DataFrame is None or empty."
+            )
             return None
         # Ensure enough data for lookbacks + some buffer
         required_len = (
-            max(self.strategy_config.indicator_settings.evt_length, self.strategy_config.indicator_settings.atr_period)
+            max(
+                self.strategy_config.indicator_settings.evt_length,
+                self.strategy_config.indicator_settings.atr_period,
+            )
             + 5
         )
         if len(ohlcv_df) < required_len:
@@ -984,14 +1240,20 @@ class EhlersStrategyPybitEnhanced:
             }
 
             # Call the external calculation function
-            df_with_indicators = ind.calculate_all_indicators(ohlcv_df.copy(), indicator_config_dict)  # Pass a copy
+            df_with_indicators = ind.calculate_all_indicators(
+                ohlcv_df.copy(), indicator_config_dict
+            )  # Pass a copy
 
             # --- Validation ---
             if df_with_indicators is None:
-                logger.error("Indicator calculation script (indicators.py) returned None.")
+                logger.error(
+                    "Indicator calculation script (indicators.py) returned None."
+                )
                 return None
             if df_with_indicators.empty:
-                logger.error("Indicator calculation script returned an empty DataFrame.")
+                logger.error(
+                    "Indicator calculation script returned an empty DataFrame."
+                )
                 return None
 
             # Define expected column names based on config
@@ -1006,7 +1268,9 @@ class EhlersStrategyPybitEnhanced:
             if self.strategy_config.analysis_flags.use_atr:
                 required_cols.append(atr_col)
 
-            missing_cols = [col for col in required_cols if col not in df_with_indicators.columns]
+            missing_cols = [
+                col for col in required_cols if col not in df_with_indicators.columns
+            ]
             if missing_cols:
                 logger.error(
                     f"Required indicator columns missing after calculation: {missing_cols}. Check 'indicators.py'."
@@ -1015,7 +1279,9 @@ class EhlersStrategyPybitEnhanced:
 
             # Check for NaNs in the *latest* row's critical columns
             if df_with_indicators.empty:
-                logger.error("Indicator DataFrame is empty after calculation, cannot check latest row.")
+                logger.error(
+                    "Indicator DataFrame is empty after calculation, cannot check latest row."
+                )
                 return None
             latest_row = df_with_indicators.iloc[-1]
             nan_cols = [col for col in required_cols if pd.isna(latest_row.get(col))]
@@ -1032,7 +1298,9 @@ class EhlersStrategyPybitEnhanced:
             logger.error(f"Error during indicator calculation: {e}", exc_info=True)
             return None
 
-    def _generate_signals(self, df_ind: pd.DataFrame) -> Optional[Literal["long", "short"]]:
+    def _generate_signals(
+        self, df_ind: pd.DataFrame
+    ) -> Optional[Literal["long", "short"]]:
         """
         Generates trading signals ('long' or 'short') based on the last
         indicator data point in the provided DataFrame.
@@ -1044,7 +1312,9 @@ class EhlersStrategyPybitEnhanced:
             'long', 'short', or None if no signal is generated or data is invalid.
         """
         if df_ind is None or df_ind.empty:
-            logger.debug("Cannot generate signals: Indicator DataFrame is missing or empty.")
+            logger.debug(
+                "Cannot generate signals: Indicator DataFrame is missing or empty."
+            )
             return None
         logger.debug("Generating trading signals...")
         try:
@@ -1056,7 +1326,10 @@ class EhlersStrategyPybitEnhanced:
             sell_col = f"evt_sell_{evt_len}"
 
             # Check required columns exist and are not NaN in the latest row
-            if not all(col in latest.index and pd.notna(latest[col]) for col in [buy_col, sell_col]):
+            if not all(
+                col in latest.index and pd.notna(latest[col])
+                for col in [buy_col, sell_col]
+            ):
                 logger.warning(
                     f"EVT Buy/Sell signal columns missing or NaN in latest data ({latest_time}). Cannot generate signal."
                 )
@@ -1085,17 +1358,24 @@ class EhlersStrategyPybitEnhanced:
                 return None
 
         except IndexError:
-            logger.warning("IndexError generating signals (DataFrame likely too short or empty).")
+            logger.warning(
+                "IndexError generating signals (DataFrame likely too short or empty)."
+            )
             return None
         except KeyError as e:
-            logger.error(f"KeyError generating signals: Missing expected column '{e}'. Check indicator calculation.")
+            logger.error(
+                f"KeyError generating signals: Missing expected column '{e}'. Check indicator calculation."
+            )
             return None
         except Exception as e:
             logger.error(f"Unexpected error generating signals: {e}", exc_info=True)
             return None
 
     def _calculate_sl_tp(
-        self, df_ind: pd.DataFrame, side: Literal["long", "short"], entry_price_approx: Decimal
+        self,
+        df_ind: pd.DataFrame,
+        side: Literal["long", "short"],
+        entry_price_approx: Decimal,
     ) -> Tuple[Optional[Decimal], Optional[Decimal]]:
         """
         Calculates Stop Loss (SL) and Take Profit (TP) prices based on ATR,
@@ -1116,13 +1396,19 @@ class EhlersStrategyPybitEnhanced:
             logger.error("Cannot calculate SL/TP: Missing indicator data.")
             return None, None
         if self.price_tick is None or self.price_tick <= ctx.create_decimal(0):
-            logger.error(f"Cannot calculate SL/TP: Invalid price tick ({self.price_tick}).")
+            logger.error(
+                f"Cannot calculate SL/TP: Invalid price tick ({self.price_tick})."
+            )
             return None, None
         if entry_price_approx <= ctx.create_decimal(0):
-            logger.error(f"Cannot calculate SL/TP: Invalid approximate entry price ({entry_price_approx}).")
+            logger.error(
+                f"Cannot calculate SL/TP: Invalid approximate entry price ({entry_price_approx})."
+            )
             return None, None
         if not self.strategy_config.analysis_flags.use_atr:
-            logger.error("Cannot calculate SL/TP: ATR usage is disabled in config (analysis_flags.use_atr).")
+            logger.error(
+                "Cannot calculate SL/TP: ATR usage is disabled in config (analysis_flags.use_atr)."
+            )
             return None, None
 
         logger.debug(f"Calculating SL/TP for {side} entry near {entry_price_approx}...")
@@ -1131,7 +1417,9 @@ class EhlersStrategyPybitEnhanced:
             atr_len = self.strategy_config.indicator_settings.atr_period
             atr_col = f"ATRr_{atr_len}"  # Default pandas_ta name
             if atr_col not in df_ind.columns:
-                logger.error(f"ATR column '{atr_col}' not found in indicator DataFrame.")
+                logger.error(
+                    f"ATR column '{atr_col}' not found in indicator DataFrame."
+                )
                 return None, None
             latest_atr_val = df_ind.iloc[-1].get(atr_col)
             if pd.isna(latest_atr_val):
@@ -1140,17 +1428,23 @@ class EhlersStrategyPybitEnhanced:
 
             latest_atr = safe_decimal_conversion(latest_atr_val, "latest ATR", ctx)
             if latest_atr is None or latest_atr <= ctx.create_decimal(0):
-                logger.warning(f"Invalid ATR value ({latest_atr_val}) for SL/TP calculation. Cannot proceed.")
+                logger.warning(
+                    f"Invalid ATR value ({latest_atr_val}) for SL/TP calculation. Cannot proceed."
+                )
                 return None, None
 
             # --- Stop Loss Calculation ---
-            sl_multiplier = ctx.create_decimal(str(self.strategy_config.stop_loss_atr_multiplier))
+            sl_multiplier = ctx.create_decimal(
+                str(self.strategy_config.stop_loss_atr_multiplier)
+            )
             if sl_multiplier <= 0:
                 logger.error("Stop Loss ATR multiplier must be positive.")
                 return None, None
             sl_offset = latest_atr * sl_multiplier
             stop_loss_price_raw = (
-                (entry_price_approx - sl_offset) if side == POS_LONG else (entry_price_approx + sl_offset)
+                (entry_price_approx - sl_offset)
+                if side == POS_LONG
+                else (entry_price_approx + sl_offset)
             )
 
             if stop_loss_price_raw <= ctx.create_decimal(0):
@@ -1185,37 +1479,57 @@ class EhlersStrategyPybitEnhanced:
 
             # --- Take Profit Calculation ---
             tp_price_adjusted: Optional[Decimal] = None
-            tp_multiplier = ctx.create_decimal(str(self.strategy_config.take_profit_atr_multiplier))
+            tp_multiplier = ctx.create_decimal(
+                str(self.strategy_config.take_profit_atr_multiplier)
+            )
             if tp_multiplier > 0:
                 tp_offset = latest_atr * tp_multiplier
                 take_profit_price_raw = (
-                    (entry_price_approx + tp_offset) if side == POS_LONG else (entry_price_approx - tp_offset)
+                    (entry_price_approx + tp_offset)
+                    if side == POS_LONG
+                    else (entry_price_approx - tp_offset)
                 )
 
-                if (side == POS_LONG and take_profit_price_raw <= entry_price_approx) or (
+                if (
+                    side == POS_LONG and take_profit_price_raw <= entry_price_approx
+                ) or (
                     side == POS_SHORT and take_profit_price_raw >= entry_price_approx
                 ):
                     logger.warning(
                         f"Raw TP price ({take_profit_price_raw}) is not logical relative to approx entry ({entry_price_approx}). Skipping TP."
                     )
                 elif take_profit_price_raw <= ctx.create_decimal(0):
-                    logger.warning(f"Raw TP price ({take_profit_price_raw}) is zero or negative. Skipping TP.")
+                    logger.warning(
+                        f"Raw TP price ({take_profit_price_raw}) is zero or negative. Skipping TP."
+                    )
                 else:
                     # Round TP *away* from entry to be conservative? Or towards?
                     # Let's round DOWN for BUY TP, UP for SELL TP (makes target slightly harder to hit but ensures profit if hit)
                     rounding_mode_tp = ROUND_DOWN if side == POS_LONG else ROUND_UP
-                    tp_price_adjusted_candidate = (take_profit_price_raw / self.price_tick).quantize(
+                    tp_price_adjusted_candidate = (
+                        take_profit_price_raw / self.price_tick
+                    ).quantize(
                         ctx.create_decimal("0"), rounding=rounding_mode_tp
                     ) * self.price_tick
 
                     # Sanity check: Ensure TP didn't cross entry after rounding
-                    if side == POS_LONG and tp_price_adjusted_candidate <= entry_price_approx:
-                        tp_price_adjusted_candidate = entry_price_approx + self.price_tick
+                    if (
+                        side == POS_LONG
+                        and tp_price_adjusted_candidate <= entry_price_approx
+                    ):
+                        tp_price_adjusted_candidate = (
+                            entry_price_approx + self.price_tick
+                        )
                         logger.warning(
                             f"Adjusted Buy TP ({tp_price_adjusted_candidate}) was <= approx entry ({entry_price_approx}). Moved TP one tick above entry."
                         )
-                    elif side == POS_SHORT and tp_price_adjusted_candidate >= entry_price_approx:
-                        tp_price_adjusted_candidate = entry_price_approx - self.price_tick
+                    elif (
+                        side == POS_SHORT
+                        and tp_price_adjusted_candidate >= entry_price_approx
+                    ):
+                        tp_price_adjusted_candidate = (
+                            entry_price_approx - self.price_tick
+                        )
                         logger.warning(
                             f"Adjusted Sell TP ({tp_price_adjusted_candidate}) was >= approx entry ({entry_price_approx}). Moved TP one tick below entry."
                         )
@@ -1227,11 +1541,19 @@ class EhlersStrategyPybitEnhanced:
                     else:
                         tp_price_adjusted = tp_price_adjusted_candidate
             else:
-                logger.info("Take Profit multiplier is zero or negative. TP is disabled.")
+                logger.info(
+                    "Take Profit multiplier is zero or negative. TP is disabled."
+                )
 
             sl_formatted = self._format_price_str(sl_price_adjusted)
-            tp_formatted = self._format_price_str(tp_price_adjusted) if tp_price_adjusted else "None"
-            logger.info(f"Calculated SL: {sl_formatted}, TP: {tp_formatted} (Based on ATR: {latest_atr:.5f})")
+            tp_formatted = (
+                self._format_price_str(tp_price_adjusted)
+                if tp_price_adjusted
+                else "None"
+            )
+            logger.info(
+                f"Calculated SL: {sl_formatted}, TP: {tp_formatted} (Based on ATR: {latest_atr:.5f})"
+            )
 
             return sl_price_adjusted, tp_price_adjusted
 
@@ -1239,7 +1561,9 @@ class EhlersStrategyPybitEnhanced:
             logger.error(f"Error calculating SL/TP: {e}", exc_info=True)
             return None, None
 
-    def _calculate_position_size(self, entry_price_approx: Decimal, stop_loss_price: Decimal) -> Optional[Decimal]:
+    def _calculate_position_size(
+        self, entry_price_approx: Decimal, stop_loss_price: Decimal
+    ) -> Optional[Decimal]:
         """
         Calculates the position size based on configured risk percentage,
         available balance, entry/SL prices, and market constraints.
@@ -1255,9 +1579,18 @@ class EhlersStrategyPybitEnhanced:
         ctx = DECIMAL_CONTEXT
         # --- Input Validation ---
         if not all(
-            [self.qty_step, self.min_qty, self.price_tick, self.base_coin, self.quote_coin, self.contract_multiplier]
+            [
+                self.qty_step,
+                self.min_qty,
+                self.price_tick,
+                self.base_coin,
+                self.quote_coin,
+                self.contract_multiplier,
+            ]
         ):
-            logger.error("Cannot calculate size: Missing critical market details (steps, ticks, coins, multiplier).")
+            logger.error(
+                "Cannot calculate size: Missing critical market details (steps, ticks, coins, multiplier)."
+            )
             return None
         if entry_price_approx <= 0 or stop_loss_price <= 0:
             logger.error(
@@ -1272,7 +1605,9 @@ class EhlersStrategyPybitEnhanced:
             return None
         risk_percent = ctx.create_decimal(str(self.strategy_config.risk_per_trade))
         if risk_percent <= 0 or risk_percent >= 1:
-            logger.error(f"Invalid risk_per_trade ({risk_percent}). Must be between 0 and 1.")
+            logger.error(
+                f"Invalid risk_per_trade ({risk_percent}). Must be between 0 and 1."
+            )
             return None
 
         logger.debug("Calculating position size...")
@@ -1280,7 +1615,9 @@ class EhlersStrategyPybitEnhanced:
             # --- Get Available Balance ---
             available_balance = self._get_available_balance()
             if available_balance is None:
-                logger.error("Cannot calculate position size: Failed to fetch available balance.")
+                logger.error(
+                    "Cannot calculate position size: Failed to fetch available balance."
+                )
                 return None
             if available_balance <= ctx.create_decimal("0"):
                 logger.error(
@@ -1305,33 +1642,47 @@ class EhlersStrategyPybitEnhanced:
                     inv_entry = ctx.power(entry_price_approx, -1)
                     inv_sl = ctx.power(stop_loss_price, -1)
                 except InvalidOperation:
-                    logger.error("Division by zero error during inverse contract size calculation (price likely zero).")
+                    logger.error(
+                        "Division by zero error during inverse contract size calculation (price likely zero)."
+                    )
                     return None
                 size_denominator = self.contract_multiplier * abs(inv_entry - inv_sl)
                 if size_denominator <= 0:
-                    logger.error("Inverse size denominator is zero or negative. Cannot calculate size.")
+                    logger.error(
+                        "Inverse size denominator is zero or negative. Cannot calculate size."
+                    )
                     return None
                 position_size_raw = risk_amount_quote / size_denominator
             elif self.category == "linear":
                 size_denominator = self.contract_multiplier * price_diff
                 if size_denominator <= 0:
-                    logger.error("Linear size denominator is zero or negative. Cannot calculate size.")
+                    logger.error(
+                        "Linear size denominator is zero or negative. Cannot calculate size."
+                    )
                     return None
                 position_size_raw = risk_amount_quote / size_denominator
             elif self.category == "spot":
                 if price_diff <= 0:
-                    logger.error("Spot size denominator (price_diff) is zero or negative.")
+                    logger.error(
+                        "Spot size denominator (price_diff) is zero or negative."
+                    )
                     return None
                 position_size_raw = risk_amount_quote / price_diff
             else:
-                logger.error(f"Position sizing not implemented for category: {self.category}")
+                logger.error(
+                    f"Position sizing not implemented for category: {self.category}"
+                )
                 return None
 
-            logger.debug(f"Raw calculated size: {position_size_raw:.8f} {self.base_coin}")
+            logger.debug(
+                f"Raw calculated size: {position_size_raw:.8f} {self.base_coin}"
+            )
 
             # --- Apply Quantity Constraints (Step and Minimum) ---
             if self.qty_step <= 0:
-                logger.error(f"Invalid quantity step ({self.qty_step}). Cannot adjust size.")
+                logger.error(
+                    f"Invalid quantity step ({self.qty_step}). Cannot adjust size."
+                )
                 return None
 
             # Adjust for quantity step (round DOWN to not exceed risk)
@@ -1346,7 +1697,9 @@ class EhlersStrategyPybitEnhanced:
                 return None
 
             if self.min_qty is None or self.min_qty < 0:
-                logger.error(f"Invalid minimum quantity ({self.min_qty}). Cannot validate size.")
+                logger.error(
+                    f"Invalid minimum quantity ({self.min_qty}). Cannot validate size."
+                )
                 return None
 
             if position_size_adjusted < self.min_qty:
@@ -1373,18 +1726,24 @@ class EhlersStrategyPybitEnhanced:
         if qty is None or qty < ctx.create_decimal(0):
             return None
         if self.qty_step is None or self.qty_step <= ctx.create_decimal(0):
-            logger.warning(f"Cannot format quantity: Invalid qty_step ({self.qty_step}). Returning raw string.")
+            logger.warning(
+                f"Cannot format quantity: Invalid qty_step ({self.qty_step}). Returning raw string."
+            )
             return str(qty)
 
         try:
-            quantized_qty = (qty / self.qty_step).quantize(ctx.create_decimal("0"), rounding=ROUND_DOWN) * self.qty_step
+            quantized_qty = (qty / self.qty_step).quantize(
+                ctx.create_decimal("0"), rounding=ROUND_DOWN
+            ) * self.qty_step
             # Format to string without scientific notation and respecting step decimals
             step_str = str(self.qty_step.normalize())
             decimals = len(step_str.split(".")[-1]) if "." in step_str else 0
             # Use f-string formatting for fixed-point notation
             return f"{quantized_qty:.{decimals}f}"
         except (InvalidOperation, TypeError) as e:
-            logger.error(f"Error formatting quantity {qty} with step {self.qty_step}: {e}")
+            logger.error(
+                f"Error formatting quantity {qty} with step {self.qty_step}: {e}"
+            )
             return None
 
     def _format_price_str(self, price: Optional[Decimal]) -> Optional[str]:
@@ -1396,7 +1755,9 @@ class EhlersStrategyPybitEnhanced:
         if price is None or price <= ctx.create_decimal(0):
             return None
         if self.price_tick is None or self.price_tick <= ctx.create_decimal(0):
-            logger.warning(f"Cannot format price: Invalid price_tick ({self.price_tick}). Returning raw string.")
+            logger.warning(
+                f"Cannot format price: Invalid price_tick ({self.price_tick}). Returning raw string."
+            )
             return str(price)
 
         try:
@@ -1413,7 +1774,9 @@ class EhlersStrategyPybitEnhanced:
             decimals = len(tick_str.split(".")[-1]) if "." in tick_str else 0
             return f"{quantized_price:.{decimals}f}"
         except (InvalidOperation, TypeError) as e:
-            logger.error(f"Error formatting price {price} with tick {self.price_tick}: {e}")
+            logger.error(
+                f"Error formatting price {price} with tick {self.price_tick}: {e}"
+            )
             return None
 
     def _place_order(self, params: Dict[str, Any]) -> Optional[Dict]:
@@ -1434,7 +1797,9 @@ class EhlersStrategyPybitEnhanced:
 
         # --- Basic Parameter Validation ---
         required_params = ["category", "symbol", "side", "orderType", "qty"]
-        missing_params = [p for p in required_params if p not in params or params[p] is None]
+        missing_params = [
+            p for p in required_params if p not in params or params[p] is None
+        ]
         if missing_params:
             logger.error(
                 f"Missing required parameters for placing order: {', '.join(missing_params)}. Params: {params}"
@@ -1443,7 +1808,9 @@ class EhlersStrategyPybitEnhanced:
         # Validate quantity format (string) and value
         qty_str = params["qty"]
         if not isinstance(qty_str, str) or not qty_str:
-            logger.error(f"Invalid 'qty' parameter type or empty value: {qty_str}. Must be non-empty string.")
+            logger.error(
+                f"Invalid 'qty' parameter type or empty value: {qty_str}. Must be non-empty string."
+            )
             return None
         try:
             qty_val = DECIMAL_CONTEXT.create_decimal(qty_str)
@@ -1451,7 +1818,9 @@ class EhlersStrategyPybitEnhanced:
                 logger.error(f"Invalid 'qty' value: {qty_str}. Must be positive.")
                 return None
         except InvalidOperation:
-            logger.error(f"Invalid 'qty' value format: {qty_str}. Must be a valid number string.")
+            logger.error(
+                f"Invalid 'qty' value format: {qty_str}. Must be a valid number string."
+            )
             return None
 
         # Validate price format if it's a limit order or has trigger/sl/tp
@@ -1474,10 +1843,14 @@ class EhlersStrategyPybitEnhanced:
                 try:
                     price_val = DECIMAL_CONTEXT.create_decimal(price_str)
                     if price_val <= 0:
-                        logger.error(f"Invalid '{p_name}' value: {price_str}. Must be positive.")
+                        logger.error(
+                            f"Invalid '{p_name}' value: {price_str}. Must be positive."
+                        )
                         return None
                 except InvalidOperation:
-                    logger.error(f"Invalid '{p_name}' value format: {price_str}. Must be a valid number string.")
+                    logger.error(
+                        f"Invalid '{p_name}' value format: {price_str}. Must be a valid number string."
+                    )
                     return None
 
         # Add default positionIdx for derivatives if not provided (assuming One-Way mode)
@@ -1485,16 +1858,27 @@ class EhlersStrategyPybitEnhanced:
             params["positionIdx"] = POSITION_IDX_ONE_WAY
 
         # --- Build Order Description for Logging ---
-        order_desc_parts = [params["side"], params["orderType"], params["qty"], params["symbol"]]
+        order_desc_parts = [
+            params["side"],
+            params["orderType"],
+            params["qty"],
+            params["symbol"],
+        ]
         if params["orderType"] == ORDER_TYPE_LIMIT and "price" in params:
             order_desc_parts.append(f"@ {params['price']}")
         if params.get("triggerPrice"):
-            order_desc_parts.append(f"(Trig: {params['triggerPrice']} {params.get('triggerBy', '')})")
+            order_desc_parts.append(
+                f"(Trig: {params['triggerPrice']} {params.get('triggerBy', '')})"
+            )
         if params.get("stopLoss"):
             sl_type = f" {params['slOrderType']}" if params.get("slOrderType") else ""
             sl_trig = f" ({params['slTriggerBy']})" if params.get("slTriggerBy") else ""
-            sl_limit = f" Limit:{params['slLimitPrice']}" if params.get("slLimitPrice") else ""
-            order_desc_parts.append(f"SL: {params['stopLoss']}{sl_type}{sl_trig}{sl_limit}")
+            sl_limit = (
+                f" Limit:{params['slLimitPrice']}" if params.get("slLimitPrice") else ""
+            )
+            order_desc_parts.append(
+                f"SL: {params['stopLoss']}{sl_type}{sl_trig}{sl_limit}"
+            )
         if params.get("takeProfit"):
             tp_trig = f" ({params['tpTriggerBy']})" if params.get("tpTriggerBy") else ""
             tp_limit = (
@@ -1509,7 +1893,9 @@ class EhlersStrategyPybitEnhanced:
             order_desc_parts.append(f"LinkID: {params['orderLinkId'][:10]}...")
 
         order_description = " ".join(order_desc_parts)
-        logger.info(f"{Fore.YELLOW}✨ Forging Order: {order_description}...{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.YELLOW}✨ Forging Order: {order_description}...{Style.RESET_ALL}"
+        )
         logger.debug(f"Order Parameters: {params}")
 
         # --- Place Order via API ---
@@ -1552,25 +1938,34 @@ class EhlersStrategyPybitEnhanced:
                 elif ret_code == RET_CODE_QTY_TOO_SMALL:
                     alert_msg = f"ERROR: Order qty {params['qty']} too small for {self.symbol}. Min: {self.min_qty}"
                 elif ret_code == RET_CODE_QTY_INVALID_PRECISION:
-                    alert_msg = (
-                        f"ERROR: Order qty {params['qty']} precision invalid for {self.symbol}. Step: {self.qty_step}"
-                    )
+                    alert_msg = f"ERROR: Order qty {params['qty']} precision invalid for {self.symbol}. Step: {self.qty_step}"
                 elif ret_code == RET_CODE_PRICE_TOO_LOW:
-                    alert_msg = f"ERROR: Order price invalid (too low) for {self.symbol}."
+                    alert_msg = (
+                        f"ERROR: Order price invalid (too low) for {self.symbol}."
+                    )
                 elif ret_code == RET_CODE_PRICE_INVALID_PRECISION:
                     alert_msg = f"ERROR: Order price precision invalid for {self.symbol}. Tick: {self.price_tick}"
                 elif ret_code == RET_CODE_TOO_MANY_VISITS:
                     log_level = logging.WARNING
-                    alert_msg = f"WARNING: Rate Limit Hit for {self.symbol} order! ({ret_code})"
+                    alert_msg = (
+                        f"WARNING: Rate Limit Hit for {self.symbol} order! ({ret_code})"
+                    )
                     time.sleep(1)  # Back off slightly
-                elif ret_code in [RET_CODE_REDUCE_ONLY_QTY_ERROR, RET_CODE_REDUCE_ONLY_QTY_ERROR_UNIFIED]:
+                elif ret_code in [
+                    RET_CODE_REDUCE_ONLY_QTY_ERROR,
+                    RET_CODE_REDUCE_ONLY_QTY_ERROR_UNIFIED,
+                ]:
                     alert_msg = f"ERROR: ReduceOnly order failed for {self.symbol}: Qty {params['qty']} exceeds position size. ({ret_code})"
                 else:
                     # Generic failure message
                     alert_msg = f"ERROR: Order placement failed for {self.symbol}! Code: {ret_code}, Msg: {ret_msg}"
 
-                logger.log(log_level, f"{Back.RED}{Fore.WHITE}❌ {alert_msg}{Style.RESET_ALL}")
-                logger.error(f"Failed Order Parameters: {params}")  # Log params again on failure
+                logger.log(
+                    log_level, f"{Back.RED}{Fore.WHITE}❌ {alert_msg}{Style.RESET_ALL}"
+                )
+                logger.error(
+                    f"Failed Order Parameters: {params}"
+                )  # Log params again on failure
                 if log_level >= logging.ERROR:  # Send SMS for errors/critical
                     send_sms_alert(alert_msg, self.sms_config)
 
@@ -1578,9 +1973,12 @@ class EhlersStrategyPybitEnhanced:
 
         except (InvalidRequestError, FailedRequestError) as pybit_e:
             logger.error(
-                f"{Back.RED}Pybit API Error during order placement: {pybit_e}{Style.RESET_ALL}", exc_info=False
+                f"{Back.RED}Pybit API Error during order placement: {pybit_e}{Style.RESET_ALL}",
+                exc_info=False,
             )
-            logger.error(f"Status Code: {pybit_e.status_code}, Response: {pybit_e.response}")
+            logger.error(
+                f"Status Code: {pybit_e.status_code}, Response: {pybit_e.response}"
+            )
             alert_msg = f"CRITICAL: Pybit API Error placing {self.symbol} order! Status:{pybit_e.status_code}"
             if pybit_e.status_code == 403 and "Timestamp" in str(pybit_e.response):
                 logger.critical(
@@ -1590,14 +1988,20 @@ class EhlersStrategyPybitEnhanced:
             send_sms_alert(alert_msg, self.sms_config)
             return None
         except Exception as e:
-            logger.error(f"Unexpected exception during order placement: {e}", exc_info=True)
+            logger.error(
+                f"Unexpected exception during order placement: {e}", exc_info=True
+            )
             send_sms_alert(
-                f"CRITICAL: Unexpected error placing {self.symbol} order: {type(e).__name__}", self.sms_config
+                f"CRITICAL: Unexpected error placing {self.symbol} order: {type(e).__name__}",
+                self.sms_config,
             )
             return None
 
     def _cancel_single_order(
-        self, order_id: Optional[str] = None, order_link_id: Optional[str] = None, reason: str = "Strategy Action"
+        self,
+        order_id: Optional[str] = None,
+        order_link_id: Optional[str] = None,
+        reason: str = "Strategy Action",
     ) -> bool:
         """
         Cancels a single order by its Order ID or Order Link ID using Pybit.
@@ -1640,10 +2044,12 @@ class EhlersStrategyPybitEnhanced:
             ret_msg = response.get("retMsg", "").lower()
 
             if ret_code == RET_CODE_OK:
-                cancelled_id = response.get("result", {}).get("orderId") or response.get("result", {}).get(
-                    "orderLinkId"
+                cancelled_id = response.get("result", {}).get(
+                    "orderId"
+                ) or response.get("result", {}).get("orderLinkId")
+                logger.info(
+                    f"Order {log_id} cancelled successfully (Confirmed ID: {cancelled_id})."
                 )
-                logger.info(f"Order {log_id} cancelled successfully (Confirmed ID: {cancelled_id}).")
                 return True
             # Treat "order not found", "already closed/filled", "already cancelled" as success
             elif ret_code in [
@@ -1666,9 +2072,12 @@ class EhlersStrategyPybitEnhanced:
                 )
                 return True
             else:
-                logger.error(f"Failed to cancel order {log_id}. Code: {ret_code}, Msg: {response.get('retMsg')}")
+                logger.error(
+                    f"Failed to cancel order {log_id}. Code: {ret_code}, Msg: {response.get('retMsg')}"
+                )
                 send_sms_alert(
-                    f"ERROR: Failed to cancel {self.symbol} order {log_id}! Code:{ret_code}", self.sms_config
+                    f"ERROR: Failed to cancel {self.symbol} order {log_id}! Code:{ret_code}",
+                    self.sms_config,
                 )
                 return False
 
@@ -1683,7 +2092,9 @@ class EhlersStrategyPybitEnhanced:
             )
             return False
         except Exception as e:
-            logger.error(f"Unexpected exception cancelling order {log_id}: {e}", exc_info=True)
+            logger.error(
+                f"Unexpected exception cancelling order {log_id}: {e}", exc_info=True
+            )
             send_sms_alert(
                 f"CRITICAL: Unexpected error cancelling {self.symbol} order {log_id}: {type(e).__name__}",
                 self.sms_config,
@@ -1702,10 +2113,14 @@ class EhlersStrategyPybitEnhanced:
             False if the API call failed.
         """
         if not self.session or not self.category or not self.symbol:
-            logger.error("Cannot cancel all orders: Session, category, or symbol not set.")
+            logger.error(
+                "Cannot cancel all orders: Session, category, or symbol not set."
+            )
             return False
 
-        logger.info(f"Attempting to cancel ALL open orders for {self.symbol} ({self.category}) due to: {reason}...")
+        logger.info(
+            f"Attempting to cancel ALL open orders for {self.symbol} ({self.category}) due to: {reason}..."
+        )
         all_cancelled = True  # Assume success unless an API call fails
 
         # --- Cancel Regular Orders ---
@@ -1722,7 +2137,9 @@ class EhlersStrategyPybitEnhanced:
             if ret_code_reg == RET_CODE_OK:
                 cancelled_list_reg = response_reg.get("result", {}).get("list", [])
                 num_cancelled = len(cancelled_list_reg) if cancelled_list_reg else 0
-                logger.info(f"Cancelled {num_cancelled} regular open order(s) for {self.symbol}.")
+                logger.info(
+                    f"Cancelled {num_cancelled} regular open order(s) for {self.symbol}."
+                )
             else:
                 logger.error(
                     f"Failed to cancel regular orders for {self.symbol}. Code: {ret_code_reg}, Msg: {response_reg.get('retMsg')}"
@@ -1736,7 +2153,9 @@ class EhlersStrategyPybitEnhanced:
             )
             all_cancelled = False
         except Exception as e:
-            logger.error(f"Unexpected exception cancelling regular orders: {e}", exc_info=True)
+            logger.error(
+                f"Unexpected exception cancelling regular orders: {e}", exc_info=True
+            )
             all_cancelled = False
 
         # --- Cancel Conditional Orders (Stop Orders, TP/SL) ---
@@ -1753,9 +2172,15 @@ class EhlersStrategyPybitEnhanced:
                 ret_code_cond = response_cond.get("retCode")
 
                 if ret_code_cond == RET_CODE_OK:
-                    cancelled_list_cond = response_cond.get("result", {}).get("list", [])
-                    num_cancelled = len(cancelled_list_cond) if cancelled_list_cond else 0
-                    logger.info(f"Cancelled {num_cancelled} conditional open order(s) for {self.symbol}.")
+                    cancelled_list_cond = response_cond.get("result", {}).get(
+                        "list", []
+                    )
+                    num_cancelled = (
+                        len(cancelled_list_cond) if cancelled_list_cond else 0
+                    )
+                    logger.info(
+                        f"Cancelled {num_cancelled} conditional open order(s) for {self.symbol}."
+                    )
                 else:
                     logger.error(
                         f"Failed to cancel conditional orders for {self.symbol}. Code: {ret_code_cond}, Msg: {response_cond.get('retMsg')}"
@@ -1769,14 +2194,20 @@ class EhlersStrategyPybitEnhanced:
                 )
                 all_cancelled = False
             except Exception as e:
-                logger.error(f"Unexpected exception cancelling conditional orders: {e}", exc_info=True)
+                logger.error(
+                    f"Unexpected exception cancelling conditional orders: {e}",
+                    exc_info=True,
+                )
                 all_cancelled = False
 
         # --- Final Result ---
         if not all_cancelled:
-            logger.warning("Cancellation of all orders encountered one or more failures.")
+            logger.warning(
+                "Cancellation of all orders encountered one or more failures."
+            )
             send_sms_alert(
-                f"WARNING: Failure cancelling some {self.symbol} orders during '{reason}'. Check UI!", self.sms_config
+                f"WARNING: Failure cancelling some {self.symbol} orders during '{reason}'. Check UI!",
+                self.sms_config,
             )
 
         # Clear tracked IDs regardless of API success, as we intended to cancel them
@@ -1813,7 +2244,9 @@ class EhlersStrategyPybitEnhanced:
             evt_len = self.strategy_config.indicator_settings.evt_length
             trend_col = f"evt_trend_{evt_len}"
             if trend_col not in df_ind.columns:
-                logger.error(f"Cannot check exit: EVT Trend column '{trend_col}' missing.")
+                logger.error(
+                    f"Cannot check exit: EVT Trend column '{trend_col}' missing."
+                )
                 return False
 
             latest_trend_val = df_ind.iloc[-1].get(trend_col)
@@ -1833,7 +2266,9 @@ class EhlersStrategyPybitEnhanced:
             # --- Execute Exit Action ---
             if should_exit:
                 position_side_display = self.current_side.upper()
-                position_qty_display = format_amount(self.symbol, self.current_qty, self.qty_step)
+                position_qty_display = format_amount(
+                    self.symbol, self.current_qty, self.qty_step
+                )
                 logger.warning(
                     f"{Fore.YELLOW}🚨 Exit condition triggered for {position_side_display} position ({position_qty_display}): {exit_reason}{Style.RESET_ALL}"
                 )
@@ -1857,7 +2292,9 @@ class EhlersStrategyPybitEnhanced:
                     )
                     return True  # Indicate exit was attempted but failed critically
 
-                logger.info(f"Placing Market Close Order: {close_side} {close_qty_str} {self.symbol} [ReduceOnly]")
+                logger.info(
+                    f"Placing Market Close Order: {close_side} {close_qty_str} {self.symbol} [ReduceOnly]"
+                )
                 close_params: Dict[str, Any] = {
                     "category": self.category,
                     "symbol": self.symbol,
@@ -1888,7 +2325,9 @@ class EhlersStrategyPybitEnhanced:
                     logger.critical(
                         f"{Back.RED}{Fore.WHITE}❌ Failed to place position Close Market Order ({exit_reason}). Manual intervention likely required!{Style.RESET_ALL}"
                     )
-                    logger.info("Re-checking position state after failed close order placement...")
+                    logger.info(
+                        "Re-checking position state after failed close order placement..."
+                    )
                     time.sleep(self.app_config.api_config.api_rate_limit_delay * 2)
                     state_updated = self._update_state()  # Re-fetch state
                     if state_updated and self.current_side == POS_NONE:
@@ -1910,10 +2349,17 @@ class EhlersStrategyPybitEnhanced:
                 return False  # No exit triggered
 
         except Exception as e:
-            logger.error(f"Error checking or handling exit conditions: {e}", exc_info=True)
+            logger.error(
+                f"Error checking or handling exit conditions: {e}", exc_info=True
+            )
             return False
 
-    def _handle_entry(self, signal: Literal["long", "short"], df_ind: pd.DataFrame, current_price: Decimal) -> bool:
+    def _handle_entry(
+        self,
+        signal: Literal["long", "short"],
+        df_ind: pd.DataFrame,
+        current_price: Decimal,
+    ) -> bool:
         """
         Handles the logic for entering a new position based on a signal.
         Includes calculating SL/TP, position size, and placing the entry order
@@ -1929,13 +2375,19 @@ class EhlersStrategyPybitEnhanced:
             False if entry failed at any step (calculation, placement, confirmation).
         """
         if self.current_side != POS_NONE:
-            logger.debug(f"Ignoring {signal} entry signal: Already in a {self.current_side} position.")
+            logger.debug(
+                f"Ignoring {signal} entry signal: Already in a {self.current_side} position."
+            )
             return False
         if df_ind is None or df_ind.empty or current_price <= 0:
-            logger.warning("Cannot handle entry: Missing indicators or invalid current price.")
+            logger.warning(
+                "Cannot handle entry: Missing indicators or invalid current price."
+            )
             return False
         if not self.price_tick or not self.qty_step or not self.min_qty:
-            logger.error("Cannot enter: Missing critical market details (price_tick/qty_step/min_qty).")
+            logger.error(
+                "Cannot enter: Missing critical market details (price_tick/qty_step/min_qty)."
+            )
             return False
 
         signal_display = signal.upper()
@@ -1946,32 +2398,46 @@ class EhlersStrategyPybitEnhanced:
         # 1. Calculate SL/TP
         sl_price, tp_price = self._calculate_sl_tp(df_ind, signal, current_price)
         if sl_price is None:
-            logger.error(f"Cannot enter {signal_display}: Failed to calculate a valid Stop Loss price. Aborting entry.")
+            logger.error(
+                f"Cannot enter {signal_display}: Failed to calculate a valid Stop Loss price. Aborting entry."
+            )
             return False
 
         # 2. Calculate Position Size
         position_size = self._calculate_position_size(current_price, sl_price)
-        if position_size is None or position_size <= DECIMAL_CONTEXT.create_decimal("0"):
-            logger.error(f"Cannot enter {signal_display}: Failed to calculate a valid position size. Aborting entry.")
+        if position_size is None or position_size <= DECIMAL_CONTEXT.create_decimal(
+            "0"
+        ):
+            logger.error(
+                f"Cannot enter {signal_display}: Failed to calculate a valid position size. Aborting entry."
+            )
             return False
 
         # 3. Format quantities and prices for API (strings)
         entry_qty_str = self._format_qty(position_size)
         sl_price_str = self._format_price_str(sl_price)
-        tp_price_str = self._format_price_str(tp_price) if tp_price is not None else None
+        tp_price_str = (
+            self._format_price_str(tp_price) if tp_price is not None else None
+        )
 
         if not entry_qty_str or not sl_price_str:
-            logger.error("Failed to format entry quantity or SL price to string. Aborting entry.")
+            logger.error(
+                "Failed to format entry quantity or SL price to string. Aborting entry."
+            )
             return False
         if tp_price is not None and not tp_price_str:
-            logger.error("Failed to format TP price to string, but TP was calculated. Aborting entry.")
+            logger.error(
+                "Failed to format TP price to string, but TP was calculated. Aborting entry."
+            )
             return False
 
         # 4. Prepare and Place Entry Order (Market Order)
         entry_side_str = SIDE_BUY if signal == POS_LONG else SIDE_SELL
-        order_link_id = f"{signal[:1]}_{self.symbol.replace('/', '')}_{int(time.time() * 1000)}"[
-            -36:
-        ]  # Max 36 chars for V5
+        order_link_id = (
+            f"{signal[:1]}_{self.symbol.replace('/', '')}_{int(time.time() * 1000)}"[
+                -36:
+            ]
+        )  # Max 36 chars for V5
 
         entry_params: Dict[str, Any] = {
             "category": self.category,
@@ -1992,15 +2458,21 @@ class EhlersStrategyPybitEnhanced:
                 entry_params["slOrderType"] = self.sl_order_type  # Market or Limit
                 # If SL type is Limit, API might require slLimitPrice (often same as trigger)
                 if self.sl_order_type == ORDER_TYPE_LIMIT:
-                    entry_params["slLimitPrice"] = sl_price_str  # Set limit price = trigger price
-                    logger.debug(f"Atomic SL is Limit, setting slLimitPrice: {sl_price_str}")
+                    entry_params["slLimitPrice"] = (
+                        sl_price_str  # Set limit price = trigger price
+                    )
+                    logger.debug(
+                        f"Atomic SL is Limit, setting slLimitPrice: {sl_price_str}"
+                    )
 
             if tp_price_str:
                 entry_params["takeProfit"] = tp_price_str
                 entry_params["tpTriggerBy"] = self.tp_trigger_by
                 entry_params["tpOrderType"] = ORDER_TYPE_LIMIT  # TP is typically Limit
                 # If TP type is Limit, API might require tpLimitPrice (usually same as trigger)
-                entry_params["tpLimitPrice"] = tp_price_str  # Set limit price = trigger price
+                entry_params["tpLimitPrice"] = (
+                    tp_price_str  # Set limit price = trigger price
+                )
                 logger.debug(f"Atomic TP active, setting tpLimitPrice: {tp_price_str}")
 
             # Note: Verify exact parameters required by Bybit V5 `place_order` for atomic SL/TP (esp. limit types)
@@ -2020,8 +2492,12 @@ class EhlersStrategyPybitEnhanced:
         )
 
         # 5. Confirm Entry State (Crucial Step)
-        confirmation_delay = self.app_config.api_config.api_rate_limit_delay * 5  # Increased delay
-        logger.debug(f"Waiting {confirmation_delay:.2f}s before confirming position state...")
+        confirmation_delay = (
+            self.app_config.api_config.api_rate_limit_delay * 5
+        )  # Increased delay
+        logger.debug(
+            f"Waiting {confirmation_delay:.2f}s before confirming position state..."
+        )
         time.sleep(confirmation_delay)
 
         logger.info("Attempting to confirm position state after entry...")
@@ -2072,7 +2548,9 @@ class EhlersStrategyPybitEnhanced:
 
         actual_qty_display = format_amount(self.symbol, self.current_qty, self.qty_step)
         actual_entry_price_display = (
-            format_price(self.symbol, actual_entry_price, self.price_tick) if actual_entry_price else "N/A"
+            format_price(self.symbol, actual_entry_price, self.price_tick)
+            if actual_entry_price
+            else "N/A"
         )
 
         logger.success(
@@ -2087,8 +2565,12 @@ class EhlersStrategyPybitEnhanced:
             logger.info("Placing Stop Loss and Take Profit orders separately...")
             # Re-calculate SL/TP based on the *actual* confirmed entry price for better accuracy
             if actual_entry_price:
-                logger.debug(f"Re-calculating SL/TP based on actual entry price: {actual_entry_price_display}")
-                sl_price_final, tp_price_final = self._calculate_sl_tp(df_ind, signal, actual_entry_price)
+                logger.debug(
+                    f"Re-calculating SL/TP based on actual entry price: {actual_entry_price_display}"
+                )
+                sl_price_final, tp_price_final = self._calculate_sl_tp(
+                    df_ind, signal, actual_entry_price
+                )
                 if sl_price_final is None:
                     logger.critical(
                         f"{Back.RED}{Fore.WHITE}CRITICAL: Failed to calculate FINAL SL price after entry confirmation. POSITION IS OPEN WITHOUT STOP LOSS! Manual intervention required!{Style.RESET_ALL}"
@@ -2102,7 +2584,11 @@ class EhlersStrategyPybitEnhanced:
                     return True  # Entry occurred, but subsequent critical failure.
 
                 sl_price_str_final = self._format_price_str(sl_price_final)
-                tp_price_str_final = self._format_price_str(tp_price_final) if tp_price_final is not None else None
+                tp_price_str_final = (
+                    self._format_price_str(tp_price_final)
+                    if tp_price_final is not None
+                    else None
+                )
             else:
                 logger.warning(
                     "Actual entry price not available, using initially calculated SL/TP for separate orders."
@@ -2110,7 +2596,9 @@ class EhlersStrategyPybitEnhanced:
                 sl_price_str_final = sl_price_str
                 tp_price_str_final = tp_price_str
 
-            position_qty_str_final = self._format_qty(self.current_qty)  # Use actual filled qty
+            position_qty_str_final = self._format_qty(
+                self.current_qty
+            )  # Use actual filled qty
             if not position_qty_str_final or not sl_price_str_final:
                 logger.critical(
                     f"{Back.RED}CRITICAL: Failed to format final quantity or SL price for separate orders. POSITION OPEN WITHOUT SL/TP! Manual intervention!{Style.RESET_ALL}"
@@ -2129,7 +2617,9 @@ class EhlersStrategyPybitEnhanced:
 
             if sl_order_id_placed:
                 self.sl_order_id = sl_order_id_placed
-                logger.info(f"Separate SL order ({format_order_id(self.sl_order_id)}) placed.")
+                logger.info(
+                    f"Separate SL order ({format_order_id(self.sl_order_id)}) placed."
+                )
             else:
                 logger.critical(
                     f"{Back.RED}{Fore.WHITE}CRITICAL: Failed to place separate SL order after entry confirmation. POSITION IS OPEN WITHOUT STOP LOSS! Manual intervention required!{Style.RESET_ALL}"
@@ -2141,7 +2631,9 @@ class EhlersStrategyPybitEnhanced:
 
             if tp_order_id_placed:
                 self.tp_order_id = tp_order_id_placed
-                logger.info(f"Separate TP order ({format_order_id(self.tp_order_id)}) placed.")
+                logger.info(
+                    f"Separate TP order ({format_order_id(self.tp_order_id)}) placed."
+                )
             elif tp_price_final is not None:
                 logger.warning("Failed to place separate TP order after entry.")
 
@@ -2180,8 +2672,12 @@ class EhlersStrategyPybitEnhanced:
             return None, None
 
         exit_side = SIDE_SELL if self.current_side == POS_LONG else SIDE_BUY
-        sl_link_id = f"sl_{self.symbol.replace('/', '')}_{int(time.time() * 1000)}"[-36:]
-        tp_link_id = f"tp_{self.symbol.replace('/', '')}_{int(time.time() * 1000)}"[-36:]
+        sl_link_id = f"sl_{self.symbol.replace('/', '')}_{int(time.time() * 1000)}"[
+            -36:
+        ]
+        tp_link_id = f"tp_{self.symbol.replace('/', '')}_{int(time.time() * 1000)}"[
+            -36:
+        ]
 
         # --- Place Stop Loss Order (Conditional) ---
         logger.info(
@@ -2206,7 +2702,9 @@ class EhlersStrategyPybitEnhanced:
         }
         if self.sl_order_type == ORDER_TYPE_LIMIT:
             sl_params["price"] = sl_price_str  # Set limit price for the triggered order
-            sl_params["slLimitPrice"] = sl_price_str  # Also set the specific SL limit price field if needed
+            sl_params["slLimitPrice"] = (
+                sl_price_str  # Also set the specific SL limit price field if needed
+            )
             logger.info(f"SL is Limit type, setting limit price: {sl_price_str}")
 
         # Use place_order assuming it handles conditional logic via triggerPrice
@@ -2214,7 +2712,9 @@ class EhlersStrategyPybitEnhanced:
         if sl_order_result and sl_order_result.get("orderId"):
             sl_order_id = sl_order_result["orderId"]
         elif sl_order_result:  # OK response but no ID?
-            logger.error(f"Separate SL order placement returned OK but missing OrderID. Result: {sl_order_result}")
+            logger.error(
+                f"Separate SL order placement returned OK but missing OrderID. Result: {sl_order_result}"
+            )
 
         # --- Place Take Profit Order (Conditional Limit) ---
         if tp_price_str is not None:
@@ -2242,17 +2742,23 @@ class EhlersStrategyPybitEnhanced:
             if tp_order_result and tp_order_result.get("orderId"):
                 tp_order_id = tp_order_result["orderId"]
             elif tp_order_result:
-                logger.error(f"Separate TP order placement returned OK but missing OrderID. Result: {tp_order_result}")
+                logger.error(
+                    f"Separate TP order placement returned OK but missing OrderID. Result: {tp_order_result}"
+                )
 
         return sl_order_id, tp_order_id
 
     def _close_position_immediately(self, reason: str):
         """Places an immediate market order to close the current position."""
         if self.current_side == POS_NONE:
-            logger.info(f"Request to close position immediately, but already flat ({reason}).")
+            logger.info(
+                f"Request to close position immediately, but already flat ({reason})."
+            )
             return True
         if not self.session or not self.category or not self.symbol:
-            logger.error(f"Cannot close position immediately: Session/category/symbol missing ({reason}).")
+            logger.error(
+                f"Cannot close position immediately: Session/category/symbol missing ({reason})."
+            )
             return False
 
         logger.warning(
@@ -2262,7 +2768,9 @@ class EhlersStrategyPybitEnhanced:
         # 1. Cancel all orders first
         logger.info("Cancelling all open orders before emergency close...")
         if not self._cancel_all_open_orders(f"Emergency Close: {reason}"):
-            logger.warning("Failed to cancel all orders during emergency close. Proceeding with close attempt anyway.")
+            logger.warning(
+                "Failed to cancel all orders during emergency close. Proceeding with close attempt anyway."
+            )
 
         # 2. Place ReduceOnly Market Order
         close_side = SIDE_SELL if self.current_side == POS_LONG else SIDE_BUY
@@ -2272,11 +2780,14 @@ class EhlersStrategyPybitEnhanced:
                 f"Failed to format current quantity {self.current_qty} for emergency close order ({reason}). Cannot close."
             )
             send_sms_alert(
-                f"CRITICAL: Format error during emergency close of {self.symbol}! Manual check!", self.sms_config
+                f"CRITICAL: Format error during emergency close of {self.symbol}! Manual check!",
+                self.sms_config,
             )
             return False
 
-        logger.info(f"Placing Emergency Market Close Order: {close_side} {close_qty_str} {self.symbol} [ReduceOnly]")
+        logger.info(
+            f"Placing Emergency Market Close Order: {close_side} {close_qty_str} {self.symbol} [ReduceOnly]"
+        )
         close_params: Dict[str, Any] = {
             "category": self.category,
             "symbol": self.symbol,
@@ -2309,7 +2820,8 @@ class EhlersStrategyPybitEnhanced:
                     f"{Back.RED}Emergency close order placed, but state still shows position {self.current_side}! Manual check required!{Style.RESET_ALL}"
                 )
                 send_sms_alert(
-                    f"CRITICAL: Emergency close of {self.symbol} FAILED TO CONFIRM! Manual check!", self.sms_config
+                    f"CRITICAL: Emergency close of {self.symbol} FAILED TO CONFIRM! Manual check!",
+                    self.sms_config,
                 )
                 return False
         else:
@@ -2317,7 +2829,8 @@ class EhlersStrategyPybitEnhanced:
                 f"{Back.RED}{Fore.WHITE}❌ Failed to place Emergency Close Market Order ({reason}). Manual intervention required!{Style.RESET_ALL}"
             )
             send_sms_alert(
-                f"CRITICAL: Failed to place emergency close order for {self.symbol}! Manual check!", self.sms_config
+                f"CRITICAL: Failed to place emergency close order for {self.symbol}! Manual check!",
+                self.sms_config,
             )
             return False
 
@@ -2326,31 +2839,41 @@ class EhlersStrategyPybitEnhanced:
         Executes a single iteration of the strategy logic.
         """
         if not self.is_initialized or not self.session:
-            logger.error("Strategy not initialized or session lost. Cannot run iteration.")
+            logger.error(
+                "Strategy not initialized or session lost. Cannot run iteration."
+            )
             self.is_running = False
             return
 
         iteration_start_time = time.monotonic()
         current_time_utc = pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-        logger.info(f"{Fore.MAGENTA}--- New Strategy Iteration ({current_time_utc}) ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.MAGENTA}--- New Strategy Iteration ({current_time_utc}) ---{Style.RESET_ALL}"
+        )
 
         try:
             # 1. Update State
             if not self._update_state():
-                logger.warning("Failed to update state successfully. Skipping this iteration's logic.")
+                logger.warning(
+                    "Failed to update state successfully. Skipping this iteration's logic."
+                )
                 return
 
             # 2. Fetch Market Data
             ohlcv_df, current_price = self._fetch_data()
             if ohlcv_df is None or ohlcv_df.empty:
-                logger.warning("Failed to fetch valid OHLCV data. Skipping indicator calculation and logic.")
+                logger.warning(
+                    "Failed to fetch valid OHLCV data. Skipping indicator calculation and logic."
+                )
                 return
             # current_price can be None, handled downstream
 
             # 3. Calculate Indicators
             df_with_indicators = self._calculate_indicators(ohlcv_df)
             if df_with_indicators is None:
-                logger.warning("Failed indicator calculation or validation. Skipping trading logic.")
+                logger.warning(
+                    "Failed indicator calculation or validation. Skipping trading logic."
+                )
                 return
 
             # --- Core Trading Logic ---
@@ -2368,7 +2891,9 @@ class EhlersStrategyPybitEnhanced:
                 else:
                     entry_signal = self._generate_signals(df_with_indicators)
                     if entry_signal:
-                        entry_handled = self._handle_entry(entry_signal, df_with_indicators, current_price)
+                        entry_handled = self._handle_entry(
+                            entry_signal, df_with_indicators, current_price
+                        )
                         if entry_handled:
                             logger.info("Entry handled in this iteration.")
                         # else: # Failure logged within _handle_entry
@@ -2377,9 +2902,13 @@ class EhlersStrategyPybitEnhanced:
                     # logger.info("No entry signal generated this iteration.")
             elif self.current_side != POS_NONE and not exit_triggered:
                 # Monitor existing position
-                pos_qty_display = format_amount(self.symbol, self.current_qty, self.qty_step)
+                pos_qty_display = format_amount(
+                    self.symbol, self.current_qty, self.qty_step
+                )
                 entry_price_display = (
-                    format_price(self.symbol, self.entry_price, self.price_tick) if self.entry_price else "N/A"
+                    format_price(self.symbol, self.entry_price, self.price_tick)
+                    if self.entry_price
+                    else "N/A"
                 )
                 logger.info(
                     f"Monitoring {self.current_side.upper()} position ({pos_qty_display} @ {entry_price_display}). Waiting for exit signal or SL/TP."
@@ -2391,7 +2920,9 @@ class EhlersStrategyPybitEnhanced:
                 f"{Back.RED}{Fore.WHITE}💥 Critical unexpected error during strategy iteration: {e}{Style.RESET_ALL}",
                 exc_info=True,
             )
-            alert_msg = f"CRITICAL Error in {self.symbol} strategy loop: {type(e).__name__}"
+            alert_msg = (
+                f"CRITICAL Error in {self.symbol} strategy loop: {type(e).__name__}"
+            )
             send_sms_alert(alert_msg, self.sms_config)
             # Stop the bot on critical loop errors?
             # self.is_running = False
@@ -2399,14 +2930,21 @@ class EhlersStrategyPybitEnhanced:
         finally:
             iteration_end_time = time.monotonic()
             elapsed = iteration_end_time - iteration_start_time
-            logger.info(f"{Fore.MAGENTA}--- Iteration Complete (Took {elapsed:.3f}s) ---{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.MAGENTA}--- Iteration Complete (Took {elapsed:.3f}s) ---{Style.RESET_ALL}"
+            )
 
     def start(self):
         """Initializes the strategy and starts the main execution loop."""
         logger.info("Initiating strategy startup sequence...")
         if not self._initialize():
-            logger.critical(f"{Back.RED}Strategy initialization failed. Cannot start the arcane loop.{Style.RESET_ALL}")
-            send_sms_alert(f"CRITICAL: {self.symbol} strategy FAILED TO INITIALIZE!", self.sms_config)
+            logger.critical(
+                f"{Back.RED}Strategy initialization failed. Cannot start the arcane loop.{Style.RESET_ALL}"
+            )
+            send_sms_alert(
+                f"CRITICAL: {self.symbol} strategy FAILED TO INITIALIZE!",
+                self.sms_config,
+            )
             return
 
         self.is_running = True
@@ -2415,7 +2953,8 @@ class EhlersStrategyPybitEnhanced:
             f"{Fore.GREEN}{Style.BRIGHT}🚀 Strategy ritual commenced for {self.symbol} ({self.timeframe}). Loop delay: {loop_delay}s{Style.RESET_ALL}"
         )
         send_sms_alert(
-            f"INFO: {self.symbol} strategy started. TF:{self.timeframe}, LoopDelay:{loop_delay}s", self.sms_config
+            f"INFO: {self.symbol} strategy started. TF:{self.timeframe}, LoopDelay:{loop_delay}s",
+            self.sms_config,
         )
 
         while self.is_running:
@@ -2437,8 +2976,12 @@ class EhlersStrategyPybitEnhanced:
                     f"Iteration took longer ({elapsed:.2f}s) than loop delay ({loop_delay}s). Running next iteration immediately."
                 )
 
-        logger.warning(f"{Fore.YELLOW}Strategy loop has been terminated.{Style.RESET_ALL}")
-        self.stop(initiated_by_user=False)  # Ensure cleanup, mark as not user-initiated stop
+        logger.warning(
+            f"{Fore.YELLOW}Strategy loop has been terminated.{Style.RESET_ALL}"
+        )
+        self.stop(
+            initiated_by_user=False
+        )  # Ensure cleanup, mark as not user-initiated stop
 
     def stop(self, initiated_by_user: bool = True):
         """Stops the strategy loop and performs cleanup actions."""
@@ -2458,7 +3001,9 @@ class EhlersStrategyPybitEnhanced:
 
         # Option to close position on stop
         if self.close_on_stop and final_position_check_possible:
-            logger.warning("Config 'close_on_stop' is True. Checking final position state...")
+            logger.warning(
+                "Config 'close_on_stop' is True. Checking final position state..."
+            )
             self._update_state()  # Get latest state before deciding to close
             if self.current_side != POS_NONE:
                 logger.warning(
@@ -2472,32 +3017,47 @@ class EhlersStrategyPybitEnhanced:
             if final_position_check_possible:
                 logger.info("Cancelling any remaining open orders...")
                 if not self._cancel_all_open_orders("Strategy Stop"):
-                    logger.warning("Final order cancellation encountered issues. Manual check of Bybit UI advised.")
+                    logger.warning(
+                        "Final order cancellation encountered issues. Manual check of Bybit UI advised."
+                    )
                 # Check final state after cancellations
                 logger.info("Performing final position state check...")
                 self._update_state()
                 if self.current_side != POS_NONE:
-                    pos_qty_display = format_amount(self.symbol, self.current_qty, self.qty_step)
+                    pos_qty_display = format_amount(
+                        self.symbol, self.current_qty, self.qty_step
+                    )
                     entry_price_display = (
-                        format_price(self.symbol, self.entry_price, self.price_tick) if self.entry_price else "N/A"
+                        format_price(self.symbol, self.entry_price, self.price_tick)
+                        if self.entry_price
+                        else "N/A"
                     )
                     warning_msg = f"Strategy stopped with an OPEN {self.current_side.upper()} position for {self.symbol} ({pos_qty_display} @ {entry_price_display}). Manual management may be required."
-                    logger.warning(f"{Back.YELLOW}{Fore.BLACK}{warning_msg}{Style.RESET_ALL}")
+                    logger.warning(
+                        f"{Back.YELLOW}{Fore.BLACK}{warning_msg}{Style.RESET_ALL}"
+                    )
                     send_sms_alert(
                         f"ALERT: {self.symbol} strategy stopped with OPEN {self.current_side.upper()} position!",
                         self.sms_config,
                     )
                 else:
-                    logger.info("Strategy stopped while flat (no open position detected).")
+                    logger.info(
+                        "Strategy stopped while flat (no open position detected)."
+                    )
             else:
-                logger.warning("Skipping final order cancellation/state check: Session/category/symbol not available.")
+                logger.warning(
+                    "Skipping final order cancellation/state check: Session/category/symbol not available."
+                )
 
         # --- Release Resources ---
         self._safe_close_session()
 
         if run_state_before_stop:  # Only send stop alert if it was actually running
             stop_reason = "User Request" if initiated_by_user else "Internal Stop"
-            send_sms_alert(f"INFO: {self.symbol} strategy stopped ({stop_reason}).", self.sms_config)
+            send_sms_alert(
+                f"INFO: {self.symbol} strategy stopped ({stop_reason}).",
+                self.sms_config,
+            )
         logger.info(f"{Fore.CYAN}--- Strategy shutdown complete ---{Style.RESET_ALL}")
 
     def _safe_close_session(self):
@@ -2510,7 +3070,9 @@ class EhlersStrategyPybitEnhanced:
 
 # --- Main Execution Block ---
 if __name__ == "__main__":
-    print(f"{Fore.CYAN}{Style.BRIGHT}--- Bybit EVT Strategy Script (Pybit Enhanced - HTTP) ---{Style.RESET_ALL}")
+    print(
+        f"{Fore.CYAN}{Style.BRIGHT}--- Bybit EVT Strategy Script (Pybit Enhanced - HTTP) ---{Style.RESET_ALL}"
+    )
     print(f"Python Version: {sys.version.split()[0]}")
     print(f"Pandas Version: {pd.__version__}")
     print(f"Pybit Version: {pybit_version}")
@@ -2523,9 +3085,14 @@ if __name__ == "__main__":
         print(f"{Fore.BLUE}Summoning configuration spirits...{Style.RESET_ALL}")
         app_config = load_config()
         if not app_config:
-            print(f"{Back.RED}{Fore.WHITE}FATAL: Configuration loading failed.{Style.RESET_ALL}", file=sys.stderr)
+            print(
+                f"{Back.RED}{Fore.WHITE}FATAL: Configuration loading failed.{Style.RESET_ALL}",
+                file=sys.stderr,
+            )
             sys.exit(1)
-        print(f"{Fore.GREEN}Configuration spirits summoned successfully.{Style.RESET_ALL}")
+        print(
+            f"{Fore.GREEN}Configuration spirits summoned successfully.{Style.RESET_ALL}"
+        )
 
         # --- Setup Logging ---
         print(f"{Fore.BLUE}Awakening Neon Logger...{Style.RESET_ALL}")
@@ -2544,8 +3111,12 @@ if __name__ == "__main__":
         )
         # Re-get the logger by name after setup to ensure we have the configured one
         logger = logging.getLogger(log_conf.logger_name)
-        logger.info(f"{Fore.MAGENTA}--- Neon Logger Awakened and Configured ---{Style.RESET_ALL}")
-        logger.info(f"Logging to Console Level: {log_conf.console_level_str}, File Level: {log_conf.file_level_str}")
+        logger.info(
+            f"{Fore.MAGENTA}--- Neon Logger Awakened and Configured ---{Style.RESET_ALL}"
+        )
+        logger.info(
+            f"Logging to Console Level: {log_conf.console_level_str}, File Level: {log_conf.file_level_str}"
+        )
         logger.info(f"Log File: {log_conf.log_file}")
 
         logger.info(

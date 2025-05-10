@@ -67,7 +67,9 @@ class TradingJournal:
     """
 
     def __init__(self, csv_file=CSV_FILENAME) -> None:
-        logger.info(f"{Fore.MAGENTA}{Style.BRIGHT}Initializing the Trading Journal Chronicle...{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.MAGENTA}{Style.BRIGHT}Initializing the Trading Journal Chronicle...{Style.RESET_ALL}"
+        )
         load_dotenv()
         self.csv_file = csv_file
 
@@ -78,7 +80,9 @@ class TradingJournal:
         if not self.api_key or not self.api_secret:
             error_msg = f"{Back.RED}{Fore.WHITE}Fatal Error:{Style.RESET_ALL}{Fore.RED} BYBIT_API_KEY or BYBIT_API_SECRET not found in .env file or environment.{Style.RESET_ALL}"
             logger.critical(error_msg)  # Use critical for fatal startup errors
-            raise ValueError("API credentials not found. Ensure .env file is configured correctly.")
+            raise ValueError(
+                "API credentials not found. Ensure .env file is configured correctly."
+            )
 
         # Weave the connection to Bybit's realm
         try:
@@ -90,8 +94,12 @@ class TradingJournal:
             )
             # Verify the connection pact by fetching basic account info
             logger.info("Verifying API connection pact...")
-            self._api_call_with_retry(self.session.get_account_info)  # Use retry wrapper here too
-            logger.info(f"{Fore.GREEN}API connection pact sealed successfully.{Style.RESET_ALL}")
+            self._api_call_with_retry(
+                self.session.get_account_info
+            )  # Use retry wrapper here too
+            logger.info(
+                f"{Fore.GREEN}API connection pact sealed successfully.{Style.RESET_ALL}"
+            )
         except ConnectionError as e:  # Catch errors raised by _api_call_with_retry
             logger.critical(
                 f"{Back.RED}{Fore.WHITE}API connection failed during verification:{Style.RESET_ALL}{Fore.RED} {str(e)}{Style.RESET_ALL}"
@@ -101,7 +109,9 @@ class TradingJournal:
             logger.critical(
                 f"{Back.RED}{Fore.WHITE}Unexpected error during API initialization:{Style.RESET_ALL}{Fore.RED} {str(e)}{Style.RESET_ALL}"
             )
-            raise ConnectionError(f"Unexpected API initialization error: {str(e)}")  # Raise as ConnectionError
+            raise ConnectionError(
+                f"Unexpected API initialization error: {str(e)}"
+            )  # Raise as ConnectionError
 
     def _api_call_with_retry(self, method, *args, **kwargs):
         """Invoke an API method with resilience against transient phantoms."""
@@ -124,7 +134,9 @@ class TradingJournal:
                     # Common Bybit rate limit codes: 10002, 10016 (Request freq too high)
                     # Common Bybit timeout code: 10006 (Request timeout)
                     # Add other potentially transient codes if known
-                    is_rate_limit = ret_code in [10002, 10016] or "rate limit" in ret_msg.lower()
+                    is_rate_limit = (
+                        ret_code in [10002, 10016] or "rate limit" in ret_msg.lower()
+                    )
                     is_timeout = ret_code == 10006
                     is_retryable_bybit_error = is_rate_limit or is_timeout
 
@@ -139,11 +151,17 @@ class TradingJournal:
                         logger.error(
                             f"{Fore.RED}API call failed permanently after {attempt + 1} attempts: {error_msg}{Style.RESET_ALL}"
                         )
-                        raise ConnectionError(f"API call failed: {error_msg}")  # Raise specific error
+                        raise ConnectionError(
+                            f"API call failed: {error_msg}"
+                        )  # Raise specific error
 
             except ConnectionError as ce:  # Catch specific connection errors first
                 error_str = str(ce).lower()
-                is_retryable_exception = "timeout" in error_str or "connection" in error_str or "429" in error_str
+                is_retryable_exception = (
+                    "timeout" in error_str
+                    or "connection" in error_str
+                    or "429" in error_str
+                )
 
                 if is_retryable_exception and attempt < MAX_RETRIES - 1:
                     logger.warning(
@@ -169,7 +187,9 @@ class TradingJournal:
                     logger.error(
                         f"{Back.RED}{Fore.WHITE}Giving up after {MAX_RETRIES} attempts due to unexpected error.{Style.RESET_ALL}"
                     )
-                    raise ConnectionError(f"Unexpected API call error after retries: {str(e)}")  # Raise specific error
+                    raise ConnectionError(
+                        f"Unexpected API call error after retries: {str(e)}"
+                    )  # Raise specific error
 
         # If loop finishes without returning/raising (should be unreachable with current logic, but as safeguard)
         logger.error(
@@ -177,9 +197,13 @@ class TradingJournal:
         )
         raise ConnectionError(f"API call failed after {MAX_RETRIES} attempts.")
 
-    def fetch_closed_pnl(self, category="linear", start_time=None, end_time=None, limit=100):
+    def fetch_closed_pnl(
+        self, category="linear", start_time=None, end_time=None, limit=100
+    ):
         """Fetch closed PnL data, navigating the pagination currents with resilience."""
-        logger.info(f"{Fore.CYAN}Summoning closed PnL spirits for realm: {Style.BRIGHT}{category}{Style.RESET_ALL}...")
+        logger.info(
+            f"{Fore.CYAN}Summoning closed PnL spirits for realm: {Style.BRIGHT}{category}{Style.RESET_ALL}..."
+        )
         all_data = []
         cursor = None
         total_fetched = 0
@@ -187,7 +211,9 @@ class TradingJournal:
         try:
             while True:
                 page_count += 1
-                logger.debug(f"Fetching page {page_count} for {category} with cursor: {cursor}")
+                logger.debug(
+                    f"Fetching page {page_count} for {category} with cursor: {cursor}"
+                )
                 result = self._api_call_with_retry(
                     self.session.get_closed_pnl,
                     category=category,
@@ -198,7 +224,9 @@ class TradingJournal:
                 )
 
                 # _api_call_with_retry now raises an exception on permanent failure or non-zero retCode
-                data_list = result.get("result", {}).get("list", [])  # Safely access nested data
+                data_list = result.get("result", {}).get(
+                    "list", []
+                )  # Safely access nested data
                 page_fetched_count = len(data_list)
                 total_fetched += page_fetched_count
                 all_data.extend(data_list)
@@ -208,7 +236,9 @@ class TradingJournal:
                     f"Page {page_count}: Fetched {page_fetched_count} records for {category}. Total so far: {total_fetched}. Next cursor: {'Yes' if cursor else 'No'}"
                 )
 
-                if not cursor:  # Bybit API uses empty string "" or null when no more pages
+                if (
+                    not cursor
+                ):  # Bybit API uses empty string "" or null when no more pages
                     logger.info(
                         f"{Fore.GREEN}Finished summoning. Total {total_fetched} records found for {category} across {page_count} pages.{Style.RESET_ALL}"
                     )
@@ -239,7 +269,9 @@ class TradingJournal:
     def process_data(self, data, category):
         """Transmute raw data into structured insights, adding context."""
         if not data:
-            logger.info(f"{Fore.YELLOW}No raw data provided for processing (Realm: {category}).{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.YELLOW}No raw data provided for processing (Realm: {category}).{Style.RESET_ALL}"
+            )
             return pd.DataFrame()
 
         logger.info(
@@ -286,7 +318,9 @@ class TradingJournal:
             # If closing order side is 'Sell', it closed a 'Long' position.
             # If closing order side is 'Buy', it closed a 'Short' position.
             df["Position_Direction"] = df["side"].apply(
-                lambda x: "Long" if x == "Sell" else ("Short" if x == "Buy" else "Unknown")
+                lambda x: "Long"
+                if x == "Sell"
+                else ("Short" if x == "Buy" else "Unknown")
             )
 
             # Select, reorder, and ensure columns exist
@@ -328,15 +362,24 @@ class TradingJournal:
                         )
 
             # Convert numeric columns, coercing errors to NaN
-            numeric_cols = ["avgEntryPrice", "avgExitPrice", "closedSize", "closedPnl", "leverage"]
+            numeric_cols = [
+                "avgEntryPrice",
+                "avgExitPrice",
+                "closedSize",
+                "closedPnl",
+                "leverage",
+            ]
             for col in numeric_cols:
                 if col in df.columns:
                     original_dtype = df[col].dtype
                     df[col] = pd.to_numeric(df[col], errors="coerce")
-                    if df[col].isnull().any() and not pd.api.types.is_numeric_dtype(original_dtype):
+                    if df[col].isnull().any() and not pd.api.types.is_numeric_dtype(
+                        original_dtype
+                    ):
                         # Log only if conversion actually introduced NaNs from non-numeric types
                         invalid_count = (
-                            df[col].isnull().sum() - pd.to_numeric(data[col], errors="coerce").isnull().sum()
+                            df[col].isnull().sum()
+                            - pd.to_numeric(data[col], errors="coerce").isnull().sum()
                         )  # Approx original NaNs
                         if invalid_count > 0:
                             logger.warning(
@@ -353,18 +396,26 @@ class TradingJournal:
                 if col not in df.columns:  # Only add if not already present
                     df[col] = ""  # Initialize as empty string
 
-            logger.info(f"{Fore.GREEN}Successfully processed {len(df)} records for realm {category}.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Successfully processed {len(df)} records for realm {category}.{Style.RESET_ALL}"
+            )
             return df
 
         except Exception as e:
-            logger.error(f"{Fore.RED}Failed to process data for realm {category}: {str(e)}{Style.RESET_ALL}")
-            logging.exception(f"Traceback for data processing error in realm {category}:")  # Log full traceback to file
+            logger.error(
+                f"{Fore.RED}Failed to process data for realm {category}: {str(e)}{Style.RESET_ALL}"
+            )
+            logging.exception(
+                f"Traceback for data processing error in realm {category}:"
+            )  # Log full traceback to file
             return pd.DataFrame()  # Return empty DataFrame on processing error
 
     def save_to_csv(self, df_new) -> None:
         """Commit the chronicle to the CSV scroll, banishing duplicate echoes."""
         if df_new.empty:
-            logger.info(f"{Fore.YELLOW}No new insights to commit to the scroll.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.YELLOW}No new insights to commit to the scroll.{Style.RESET_ALL}"
+            )
             return
 
         if "orderId" not in df_new.columns:
@@ -387,7 +438,10 @@ class TradingJournal:
                 try:
                     # Read existing data, ensuring orderId is treated as string
                     existing_df = pd.read_csv(
-                        self.csv_file, dtype={"orderId": str}, keep_default_na=False, na_values=[""]
+                        self.csv_file,
+                        dtype={"orderId": str},
+                        keep_default_na=False,
+                        na_values=[""],
                     )
                     if "orderId" not in existing_df.columns:
                         logger.warning(
@@ -417,7 +471,9 @@ class TradingJournal:
                     logger.error(
                         f"{Fore.RED}Error reading existing scroll {self.csv_file}: {str(e)}. Appending might create duplicates if deduplication fails.{Style.RESET_ALL}"
                     )
-                    df_to_append = df_new  # Proceed cautiously by appending all new data
+                    df_to_append = (
+                        df_new  # Proceed cautiously by appending all new data
+                    )
 
             else:
                 # File doesn't exist or is empty, all new data is good to append
@@ -428,7 +484,10 @@ class TradingJournal:
 
             # Append only the non-duplicate records
             if not df_to_append.empty:
-                is_new_file = not os.path.exists(self.csv_file) or os.path.getsize(self.csv_file) == 0
+                is_new_file = (
+                    not os.path.exists(self.csv_file)
+                    or os.path.getsize(self.csv_file) == 0
+                )
                 logger.info(
                     f"{Fore.CYAN}Inscribing {len(df_to_append)} new insights onto the scroll ({self.csv_file})...{Style.RESET_ALL}"
                 )
@@ -441,7 +500,9 @@ class TradingJournal:
                 if not is_new_file and "existing_df" in locals():
                     existing_cols = existing_df.columns.tolist()
                     # Reorder df_to_append columns to match existing_df, adding missing ones with NA
-                    df_to_append = df_to_append.reindex(columns=existing_cols, fill_value=pd.NA)
+                    df_to_append = df_to_append.reindex(
+                        columns=existing_cols, fill_value=pd.NA
+                    )
                     # If df_to_append had *extra* columns, they are now dropped unless added to existing_cols logic
                     # For simplicity, we assume the goal is to match the existing structure when appending.
                     cols_to_write = existing_cols  # Use the existing column order
@@ -453,7 +514,9 @@ class TradingJournal:
                     index=False,
                     columns=cols_to_write,  # Explicitly specify column order
                 )
-                logger.info(f"{Fore.GREEN}Successfully inscribed {len(df_to_append)} new records.{Style.RESET_ALL}")
+                logger.info(
+                    f"{Fore.GREEN}Successfully inscribed {len(df_to_append)} new records.{Style.RESET_ALL}"
+                )
             else:
                 logger.info(
                     f"{Fore.GREEN}No new, unique records found to inscribe after consulting the scroll.{Style.RESET_ALL}"
@@ -479,21 +542,34 @@ class TradingJournal:
             # backup_dir = "backups"
             # os.makedirs(backup_dir, exist_ok=True)
             # backup_file = os.path.join(backup_dir, f"{BACKUP_PREFIX}{timestamp}_{os.path.basename(self.csv_file)}")
-            backup_file = f"{BACKUP_PREFIX}{timestamp}_{os.path.basename(self.csv_file)}"
+            backup_file = (
+                f"{BACKUP_PREFIX}{timestamp}_{os.path.basename(self.csv_file)}"
+            )
 
             # Use simple file copy for backup; avoids pandas reading/writing overhead for just backup
             import shutil
 
-            shutil.copy2(self.csv_file, backup_file)  # copy2 preserves metadata like modification time
-            logger.info(f"{Fore.GREEN}Created a protective echo: {backup_file}{Style.RESET_ALL}")
+            shutil.copy2(
+                self.csv_file, backup_file
+            )  # copy2 preserves metadata like modification time
+            logger.info(
+                f"{Fore.GREEN}Created a protective echo: {backup_file}{Style.RESET_ALL}"
+            )
         except Exception as e:
-            logger.error(f"{Fore.RED}Failed to create protective echo: {str(e)}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Failed to create protective echo: {str(e)}{Style.RESET_ALL}"
+            )
 
     def fetch_historical_data(
-        self, start_date_str=HISTORICAL_START_DATE_STR, end_date_dt=None, categories=CATEGORIES
+        self,
+        start_date_str=HISTORICAL_START_DATE_STR,
+        end_date_dt=None,
+        categories=CATEGORIES,
     ) -> None:
         """Embark on a quest to retrieve ancient chronicles from specified realms, chunk by chunk."""
-        logger.info(f"{Fore.MAGENTA}{Style.BRIGHT}--- Initiating Historical Quest ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.MAGENTA}{Style.BRIGHT}--- Initiating Historical Quest ---{Style.RESET_ALL}"
+        )
         try:
             # Convert start date string to datetime object and then to milliseconds timestamp
             start_date_dt = dt.datetime.strptime(start_date_str, "%Y-%m-%d")
@@ -529,7 +605,9 @@ class TradingJournal:
         total_records_across_realms = 0
 
         for category in categories:
-            logger.info(f"{Fore.BLUE}--- Questing in Realm: {Style.BRIGHT}{category}{Style.RESET_ALL} ---")
+            logger.info(
+                f"{Fore.BLUE}--- Questing in Realm: {Style.BRIGHT}{category}{Style.RESET_ALL} ---"
+            )
             current_start_ms = start_time_ms
             records_this_realm = 0
             chunk_num = 0
@@ -539,8 +617,12 @@ class TradingJournal:
                 # Bybit intervals are often [startTime, endTime) -> endTime should be start + duration
                 current_end_ms = min(current_start_ms + chunk_size_ms, end_time_ms)
 
-                start_chunk_str = dt.datetime.fromtimestamp(current_start_ms / 1000).strftime("%Y-%m-%d %H:%M")
-                end_chunk_str = dt.datetime.fromtimestamp(current_end_ms / 1000).strftime("%Y-%m-%d %H:%M")
+                start_chunk_str = dt.datetime.fromtimestamp(
+                    current_start_ms / 1000
+                ).strftime("%Y-%m-%d %H:%M")
+                end_chunk_str = dt.datetime.fromtimestamp(
+                    current_end_ms / 1000
+                ).strftime("%Y-%m-%d %H:%M")
                 logger.info(
                     f"Chunk {chunk_num}: Fetching {Fore.CYAN}{start_chunk_str}{Style.RESET_ALL} to {Fore.CYAN}{end_chunk_str}{Style.RESET_ALL} for {category}"
                 )
@@ -556,9 +638,13 @@ class TradingJournal:
                     if not df_chunk.empty:
                         all_historical_data.append(df_chunk)
                         records_this_realm += len(df_chunk)
-                        logger.debug(f"Chunk {chunk_num}: Processed {len(df_chunk)} records for {category}.")
+                        logger.debug(
+                            f"Chunk {chunk_num}: Processed {len(df_chunk)} records for {category}."
+                        )
                     else:
-                        logger.info(f"Chunk {chunk_num}: Processing yielded no data for {category}.")
+                        logger.info(
+                            f"Chunk {chunk_num}: Processing yielded no data for {category}."
+                        )
                 else:
                     logger.info(f"Chunk {chunk_num}: No raw data found for {category}.")
 
@@ -567,7 +653,9 @@ class TradingJournal:
                 # Pause slightly between chunks even if data was empty, to be kind to the API
                 time.sleep(API_DELAY)
 
-            logger.info(f"Completed quest in realm {category}. Found {records_this_realm} records.")
+            logger.info(
+                f"Completed quest in realm {category}. Found {records_this_realm} records."
+            )
             total_records_across_realms += records_this_realm
 
         # After fetching all chunks for all categories, combine and save
@@ -576,12 +664,18 @@ class TradingJournal:
                 f"{Fore.CYAN}Combining all fetched historical data ({total_records_across_realms} records across all realms)...{Style.RESET_ALL}"
             )
             combined_df = pd.concat(all_historical_data, ignore_index=True)
-            logger.info(f"Total unique historical records to potentially save: {len(combined_df)}")
+            logger.info(
+                f"Total unique historical records to potentially save: {len(combined_df)}"
+            )
             self.save_to_csv(combined_df)
         else:
-            logger.info(f"{Fore.YELLOW}No historical data found for the specified period and realms.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.YELLOW}No historical data found for the specified period and realms.{Style.RESET_ALL}"
+            )
 
-        logger.info(f"{Fore.GREEN}{Style.BRIGHT}--- Historical Quest Completed ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.GREEN}{Style.BRIGHT}--- Historical Quest Completed ---{Style.RESET_ALL}"
+        )
         self.backup_csv()  # Create a backup after the historical fetch is done
 
     def fetch_daily_data(self, categories=CATEGORIES) -> None:
@@ -605,17 +699,25 @@ class TradingJournal:
         all_new_data = []
         total_records_across_realms = 0
         for category in categories:
-            logger.info(f"{Fore.BLUE}--- Listening in Realm: {Style.BRIGHT}{category}{Style.RESET_ALL} ---")
-            data = self.fetch_closed_pnl(category=category, start_time=start_time_ms, end_time=end_time_ms)
+            logger.info(
+                f"{Fore.BLUE}--- Listening in Realm: {Style.BRIGHT}{category}{Style.RESET_ALL} ---"
+            )
+            data = self.fetch_closed_pnl(
+                category=category, start_time=start_time_ms, end_time=end_time_ms
+            )
             if data:
                 df_daily = self.process_data(data, category)  # Pass category
                 if not df_daily.empty:
                     all_new_data.append(df_daily)
                     records_this_realm = len(df_daily)
                     total_records_across_realms += records_this_realm
-                    logger.info(f"Heard {records_this_realm} new whispers in realm {category}.")
+                    logger.info(
+                        f"Heard {records_this_realm} new whispers in realm {category}."
+                    )
                 else:
-                    logger.info(f"Whispers heard in {category}, but processing yielded no data.")
+                    logger.info(
+                        f"Whispers heard in {category}, but processing yielded no data."
+                    )
             else:
                 logger.info(f"Silence in realm {category} for this period.")
             # Add a small delay between categories even in daily fetch
@@ -627,12 +729,18 @@ class TradingJournal:
                 f"{Fore.CYAN}Combining daily whispers from all realms ({total_records_across_realms} total records)...{Style.RESET_ALL}"
             )
             combined_df = pd.concat(all_new_data, ignore_index=True)
-            logger.info(f"Total unique new records found during daily ritual: {len(combined_df)}")
+            logger.info(
+                f"Total unique new records found during daily ritual: {len(combined_df)}"
+            )
             self.save_to_csv(combined_df)
         else:
-            logger.info(f"{Fore.YELLOW}No new whispers heard in any realm during this daily ritual.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.YELLOW}No new whispers heard in any realm during this daily ritual.{Style.RESET_ALL}"
+            )
 
-        logger.info(f"{Fore.GREEN}{Style.BRIGHT}--- Daily Ritual Completed ---{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.GREEN}{Style.BRIGHT}--- Daily Ritual Completed ---{Style.RESET_ALL}"
+        )
         self.backup_csv()  # Create a backup after the daily fetch
 
 
@@ -677,7 +785,9 @@ def main_spell() -> None:
         # Perform one fetch immediately upon starting to catch up since last run
         journal.fetch_daily_data()
     except Exception as e:
-        logger.error(f"{Fore.RED}Initial daily fetch encountered an unexpected rift: {e}{Style.RESET_ALL}")
+        logger.error(
+            f"{Fore.RED}Initial daily fetch encountered an unexpected rift: {e}{Style.RESET_ALL}"
+        )
         logging.exception("Traceback for initial daily fetch failure:")  # Log details
 
     # Schedule the daily ritual
@@ -687,7 +797,9 @@ def main_spell() -> None:
     schedule.every().day.at(schedule_time).do(journal.fetch_daily_data)
     # Alternatively, run every X hours:
     # schedule.every(DAILY_FETCH_HOURS).hours.do(journal.fetch_daily_data) # Careful with overlap/timing
-    logger.info(f"{Fore.GREEN}Scheduling the daily ritual to commence every day at {schedule_time}.{Style.RESET_ALL}")
+    logger.info(
+        f"{Fore.GREEN}Scheduling the daily ritual to commence every day at {schedule_time}.{Style.RESET_ALL}"
+    )
 
     logger.info(
         f"{Fore.CYAN}The automaton now slumbers, awaiting the scheduled time or a manual interruption (CTRL+C)...{Style.RESET_ALL}"
@@ -710,7 +822,9 @@ def main_spell() -> None:
                 f"{Back.RED}{Fore.WHITE}An unexpected rift occurred in the main scheduling loop:{Style.RESET_ALL}{Fore.RED} {str(e)}{Style.RESET_ALL}"
             )
             logging.exception("Traceback for main loop error:")  # Log details
-            logger.info("Attempting to mend the weave and continue slumbering in 60 seconds...")
+            logger.info(
+                "Attempting to mend the weave and continue slumbering in 60 seconds..."
+            )
             time.sleep(60)  # Wait before potentially retrying the loop
 
 

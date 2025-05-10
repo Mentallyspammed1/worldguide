@@ -18,7 +18,9 @@ except ImportError:
 try:
     from colorama import Fore, Style, Back
 except ImportError:
-    print("Warning: colorama library not found. Logs will not be colored. Install: pip install colorama")
+    print(
+        "Warning: colorama library not found. Logs will not be colored. Install: pip install colorama"
+    )
 
     class DummyColor:
         def __getattr__(self, name: str) -> str:
@@ -89,7 +91,9 @@ def calculate_margin_requirement(
             )
             return None, None
 
-        quote_currency = market.get("quote", config.USDT_SYMBOL)  # Default to config USDT if not found
+        quote_currency = market.get(
+            "quote", config.USDT_SYMBOL
+        )  # Default to config USDT if not found
 
         # Calculate Order Value (Position Value)
         # order_value = amount * price
@@ -103,7 +107,9 @@ def calculate_margin_requirement(
         )
         order_value = safe_decimal_conversion(order_value)
         if order_value is None:
-            logger.warning(f"[{func_name}] Could not use exchange.cost, falling back to amount*price")
+            logger.warning(
+                f"[{func_name}] Could not use exchange.cost, falling back to amount*price"
+            )
             order_value = amount * price
 
         logger.debug(
@@ -157,12 +163,18 @@ def calculate_margin_requirement(
                         f"{format_price(exchange, quote_currency, maintenance_margin_estimate)} {quote_currency}"
                     )
                 else:
-                    logger.warning(f"[{func_name}] Could not parse valid MMR rate from market info: '{mmr_rate_str}'")
+                    logger.warning(
+                        f"[{func_name}] Could not parse valid MMR rate from market info: '{mmr_rate_str}'"
+                    )
             else:
-                logger.debug(f"[{func_name}] Maintenance Margin Rate (MMR) not found in market info for {symbol}.")
+                logger.debug(
+                    f"[{func_name}] Maintenance Margin Rate (MMR) not found in market info for {symbol}."
+                )
 
         except Exception as mm_err:
-            logger.warning(f"[{func_name}] Could not estimate Maintenance Margin due to error: {mm_err}")
+            logger.warning(
+                f"[{func_name}] Could not estimate Maintenance Margin due to error: {mm_err}"
+            )
 
         return total_initial_margin_estimate, maintenance_margin_estimate
 

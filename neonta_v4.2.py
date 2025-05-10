@@ -55,7 +55,9 @@ API_KEY = os.getenv("BYBIT_API_KEY")
 API_SECRET = os.getenv("BYBIT_API_SECRET")
 if not API_KEY or not API_SECRET:
     # Use print here as logger might not be fully set up
-    print(f"{Fore.RED}Error: BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env file{Style.RESET_ALL}")
+    print(
+        f"{Fore.RED}Error: BYBIT_API_KEY and BYBIT_API_SECRET must be set in .env file{Style.RESET_ALL}"
+    )
     raise ValueError("Missing Bybit API credentials in .env file")
 
 API_ENV = os.getenv("API_ENVIRONMENT", "prod").lower()  # 'prod' or 'test'
@@ -66,7 +68,9 @@ _user_tz_str = os.getenv("TIMEZONE", DEFAULT_TIMEZONE_STR)
 try:
     APP_TIMEZONE = ZoneInfo(_user_tz_str)
 except ZoneInfoNotFoundError:
-    print(f"{Fore.YELLOW}Warning: Timezone '{_user_tz_str}' not found. Using UTC.{Style.RESET_ALL}")
+    print(
+        f"{Fore.YELLOW}Warning: Timezone '{_user_tz_str}' not found. Using UTC.{Style.RESET_ALL}"
+    )
     APP_TIMEZONE = ZoneInfo("UTC")
 
 # Paths
@@ -76,12 +80,28 @@ LOG_DIRECTORY = BASE_DIR / LOG_DIRECTORY_NAME
 try:
     LOG_DIRECTORY.mkdir(exist_ok=True)  # Ensure log directory exists
 except OSError as e:
-    print(f"{Fore.RED}Error creating log directory '{LOG_DIRECTORY}': {e}{Style.RESET_ALL}")
+    print(
+        f"{Fore.RED}Error creating log directory '{LOG_DIRECTORY}': {e}{Style.RESET_ALL}"
+    )
     # Decide if this is fatal or if logging can be disabled/redirected
     raise
 
 # Timeframes (Mapping user input to CCXT intervals)
-VALID_INTERVALS = ["1", "3", "5", "15", "30", "60", "120", "240", "360", "720", "D", "W", "M"]
+VALID_INTERVALS = [
+    "1",
+    "3",
+    "5",
+    "15",
+    "30",
+    "60",
+    "120",
+    "240",
+    "360",
+    "720",
+    "D",
+    "W",
+    "M",
+]
 CCXT_INTERVAL_MAP = {
     "1": "1m",
     "3": "3m",
@@ -187,7 +207,9 @@ class AnalysisFlags:
     ema_alignment: bool = True
     momentum_crossover: bool = False  # Requires more complex logic, disabled by default
     volume_confirmation: bool = True
-    rsi_divergence: bool = False  # Basic check implemented, disabled by default (prone to false signals)
+    rsi_divergence: bool = (
+        False  # Basic check implemented, disabled by default (prone to false signals)
+    )
     macd_divergence: bool = True  # Basic check implemented
     stoch_rsi_cross: bool = True
     rsi_threshold: bool = True
@@ -206,13 +228,17 @@ class AnalysisFlags:
 class Thresholds:
     """Threshold values for oscillator indicators."""
 
-    rsi_overbought: float = 70.0  # Use float for direct comparison with pandas_ta results
+    rsi_overbought: float = (
+        70.0  # Use float for direct comparison with pandas_ta results
+    )
     rsi_oversold: float = 30.0
     mfi_overbought: float = 80.0
     mfi_oversold: float = 20.0
     cci_overbought: float = 100.0
     cci_oversold: float = -100.0
-    williams_r_overbought: float = -20.0  # Note: Higher value is Overbought for Williams %R
+    williams_r_overbought: float = (
+        -20.0
+    )  # Note: Higher value is Overbought for Williams %R
     williams_r_oversold: float = -80.0  # Note: Lower value is Oversold for Williams %R
     adx_trending: float = 25.0
     # Volume analysis thresholds (relative to MA)
@@ -225,10 +251,10 @@ class OrderbookSettings:
     """Settings for order book analysis."""
 
     limit: int = 50  # Number of bids/asks levels to fetch
-    cluster_threshold_usd: float = 10000.0  # Minimum USD value to consider a cluster significant (use float)
-    cluster_proximity_pct: float = (
-        0.1  # Proximity percentage around levels to check for clusters (e.g., 0.1 = +/- 0.1%)
+    cluster_threshold_usd: float = (
+        10000.0  # Minimum USD value to consider a cluster significant (use float)
     )
+    cluster_proximity_pct: float = 0.1  # Proximity percentage around levels to check for clusters (e.g., 0.1 = +/- 0.1%)
 
 
 @dataclass
@@ -279,7 +305,8 @@ class AppConfig:
                     merged[key] = cls._merge_dicts(default_value, user_value)
                 # Allow merging if types match, or if user provides a number for a default float/int
                 elif isinstance(user_value, type(default_value)) or (
-                    isinstance(default_value, (float, int)) and isinstance(user_value, (float, int))
+                    isinstance(default_value, (float, int))
+                    and isinstance(user_value, (float, int))
                 ):
                     merged[key] = user_value
                 elif default_value is None:  # Allow setting value if default is None
@@ -306,7 +333,9 @@ class AppConfig:
             if name in data_dict:
                 value = data_dict[name]
                 # If the field type is a dataclass, recursively convert the sub-dict
-                if hasattr(type_hint, "__dataclass_fields__") and isinstance(value, dict):
+                if hasattr(type_hint, "__dataclass_fields__") and isinstance(
+                    value, dict
+                ):
                     init_args[name] = cls._dict_to_dataclass(type_hint, value)
                 else:
                     # Attempt type conversion based on the type hint
@@ -316,7 +345,9 @@ class AppConfig:
                         if origin_type is Union:
                             # Try converting to the first non-None type in Union
                             # This is a simplification, might need refinement for complex Unions
-                            actual_type = next(t for t in type_hint.__args__ if t is not type(None))
+                            actual_type = next(
+                                t for t in type_hint.__args__ if t is not type(None)
+                            )
                         elif origin_type is Optional:
                             actual_type = type_hint.__args__[0]
                         else:
@@ -342,7 +373,12 @@ class AppConfig:
         try:
             return data_class(**init_args)
         except TypeError as e:
-            print(Color.format(f"Error creating dataclass {data_class.__name__} from config: {e}", Color.RED))
+            print(
+                Color.format(
+                    f"Error creating dataclass {data_class.__name__} from config: {e}",
+                    Color.RED,
+                )
+            )
             print(Color.format("Using default values for this section.", Color.YELLOW))
             return data_class()  # Return default instance on error
 
@@ -357,10 +393,20 @@ class AppConfig:
             try:
                 with filepath.open("w", encoding="utf-8") as f:
                     json.dump(default_config_dict, f, indent=2, ensure_ascii=False)
-                print(Color.format(f"Created new config file '{filepath}' with default settings.", Color.GREEN))
+                print(
+                    Color.format(
+                        f"Created new config file '{filepath}' with default settings.",
+                        Color.GREEN,
+                    )
+                )
                 return default_config_obj  # Return the default dataclass object
             except IOError as e:
-                print(Color.format(f"Error creating default config file '{filepath}': {e}", Color.RED))
+                print(
+                    Color.format(
+                        f"Error creating default config file '{filepath}': {e}",
+                        Color.RED,
+                    )
+                )
                 print(Color.format("Loading internal defaults.", Color.YELLOW))
                 return default_config_obj
 
@@ -374,11 +420,19 @@ class AppConfig:
             merged_config_dict = cls._merge_dicts(default_config_dict, user_config)
             # Convert the final merged dict back into the nested dataclass structure
             loaded_config = cls._dict_to_dataclass(cls, merged_config_dict)
-            print(Color.format(f"Successfully loaded configuration from '{filepath}'.", Color.GREEN))
+            print(
+                Color.format(
+                    f"Successfully loaded configuration from '{filepath}'.", Color.GREEN
+                )
+            )
             return loaded_config
 
         except (FileNotFoundError, json.JSONDecodeError, TypeError, IOError) as e:
-            print(Color.format(f"Error loading/parsing config file '{filepath}': {e}", Color.RED))
+            print(
+                Color.format(
+                    f"Error loading/parsing config file '{filepath}': {e}", Color.RED
+                )
+            )
             print(Color.format("Loading internal defaults.", Color.YELLOW))
             return default_config_obj
         except Exception as e:
@@ -426,7 +480,13 @@ class ColorStreamFormatter(logging.Formatter):
     _symbol_color = Color.YELLOW.value
     _reset_color = Color.RESET.value
 
-    def __init__(self, fmt: Optional[str] = None, datefmt: Optional[str] = None, style="%", symbol: str = "GENERAL"):
+    def __init__(
+        self,
+        fmt: Optional[str] = None,
+        datefmt: Optional[str] = None,
+        style="%",
+        symbol: str = "GENERAL",
+    ):
         # Initialize the base class correctly. The base class handles fmt, datefmt, style.
         super().__init__(fmt=fmt, datefmt=datefmt, style=style)
         self.symbol = symbol
@@ -446,7 +506,9 @@ class ColorStreamFormatter(logging.Formatter):
         asctime_part = f"{self._asctime_color}%(asctime)s{self._reset_color}"
         level_part = f"[{level_color}%(levelname)-8s{self._reset_color}]"
         symbol_part = f"{self._symbol_color}{self.symbol}{self._reset_color}"
-        message_part = "%(message)s"  # The actual message will be colored later if needed
+        message_part = (
+            "%(message)s"  # The actual message will be colored later if needed
+        )
 
         # Construct the format string based on the style
         # Note: This assumes the default '%' style for simplicity here.
@@ -474,7 +536,10 @@ class ColorStreamFormatter(logging.Formatter):
 
 def setup_logger(symbol: str) -> logging.Logger:
     """Sets up a logger instance for a specific symbol with file and stream handlers."""
-    log_filename = LOG_DIRECTORY / f"{symbol.replace('/', '_')}_{datetime.now(APP_TIMEZONE).strftime('%Y%m%d')}.log"
+    log_filename = (
+        LOG_DIRECTORY
+        / f"{symbol.replace('/', '_')}_{datetime.now(APP_TIMEZONE).strftime('%Y%m%d')}.log"
+    )
     logger = logging.getLogger(symbol)
 
     # Determine log level from config, default to INFO if invalid
@@ -483,7 +548,8 @@ def setup_logger(symbol: str) -> logging.Logger:
     if log_level is None:
         print(
             Color.format(
-                f"Warning: Invalid log level '{CONFIG.logging.level}' in config. Defaulting to INFO.", Color.YELLOW
+                f"Warning: Invalid log level '{CONFIG.logging.level}' in config. Defaulting to INFO.",
+                Color.YELLOW,
             )
         )
         log_level = logging.INFO
@@ -512,12 +578,23 @@ def setup_logger(symbol: str) -> logging.Logger:
             style="%",
         )
         file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(logging.DEBUG)  # Log everything to file, logger level controls overall
+        file_handler.setLevel(
+            logging.DEBUG
+        )  # Log everything to file, logger level controls overall
         logger.addHandler(file_handler)
     except (IOError, PermissionError) as e:
-        print(Color.format(f"Error setting up file logger for {symbol}: {e}. File logging disabled.", Color.RED))
+        print(
+            Color.format(
+                f"Error setting up file logger for {symbol}: {e}. File logging disabled.",
+                Color.RED,
+            )
+        )
     except Exception as e:
-        print(Color.format(f"Unexpected error setting up file logger for {symbol}: {e}", Color.RED))
+        print(
+            Color.format(
+                f"Unexpected error setting up file logger for {symbol}: {e}", Color.RED
+            )
+        )
         traceback.print_exc()
 
     # Stream Handler (with colors)
@@ -541,7 +618,9 @@ def setup_logger(symbol: str) -> logging.Logger:
 
 
 # --- Utility Functions ---
-async def async_sleep_with_jitter(seconds: float, max_jitter_factor: float = MAX_JITTER_FACTOR) -> None:
+async def async_sleep_with_jitter(
+    seconds: float, max_jitter_factor: float = MAX_JITTER_FACTOR
+) -> None:
     """Asynchronous sleep with random jitter to avoid thundering herd."""
     if seconds <= 0:
         return
@@ -551,7 +630,9 @@ async def async_sleep_with_jitter(seconds: float, max_jitter_factor: float = MAX
 
 
 def format_decimal(
-    value: Optional[Union[Decimal, float, int, str]], precision: int = 2, default_na: str = "N/A"
+    value: Optional[Union[Decimal, float, int, str]],
+    precision: int = 2,
+    default_na: str = "N/A",
 ) -> str:
     """
     Safely formats a numeric value (or string representation) as a Decimal string
@@ -593,7 +674,13 @@ class BybitCCXTClient:
     handling, retry logic, and market loading/management.
     """
 
-    def __init__(self, api_key: str, api_secret: str, is_testnet: bool, logger_instance: logging.Logger):
+    def __init__(
+        self,
+        api_key: str,
+        api_secret: str,
+        is_testnet: bool,
+        logger_instance: logging.Logger,
+    ):
         """
         Initializes the Bybit CCXT client.
 
@@ -626,15 +713,22 @@ class BybitCCXTClient:
         try:
             # Explicitly select bybit class
             self.exchange = ccxt_async.bybit(self._exchange_config)
-            self.logger.info(f"CCXT client initialized for Bybit {'Testnet' if self.is_testnet else 'Mainnet'}.")
+            self.logger.info(
+                f"CCXT client initialized for Bybit {'Testnet' if self.is_testnet else 'Mainnet'}."
+            )
             # Log the actual API endpoint being used by CCXT
             api_url = self.exchange.urls.get("api", "URL not available")
             if isinstance(api_url, dict):  # URLs can be nested dicts
-                api_url = api_url.get("public", api_url.get("private", "Nested URL not found"))
+                api_url = api_url.get(
+                    "public", api_url.get("private", "Nested URL not found")
+                )
             self.logger.debug(f"Using Base API URL: {api_url}")
         except ccxt.AuthenticationError as e:
             self.logger.critical(
-                Color.format(f"CCXT Authentication Error during initialization: {e}. Check API credentials.", Color.RED)
+                Color.format(
+                    f"CCXT Authentication Error during initialization: {e}. Check API credentials.",
+                    Color.RED,
+                )
             )
             raise  # Fatal error
         except Exception as e:
@@ -642,7 +736,9 @@ class BybitCCXTClient:
             raise  # Re-raise the exception to prevent starting with a broken client
 
         self.markets: Optional[Dict[str, Any]] = None
-        self.market_categories: Dict[str, str] = {}  # Cache for market categories (linear, inverse, spot)
+        self.market_categories: Dict[
+            str, str
+        ] = {}  # Cache for market categories (linear, inverse, spot)
 
     async def initialize_markets(self, retries: int = MAX_API_RETRIES) -> bool:
         """
@@ -662,33 +758,55 @@ class BybitCCXTClient:
                 self.markets = await self.exchange.load_markets(reload=True)
                 if not self.markets:
                     # Raise an error if load_markets returns None or empty dict
-                    raise ccxt.ExchangeError("load_markets returned None or an empty dictionary.")
+                    raise ccxt.ExchangeError(
+                        "load_markets returned None or an empty dictionary."
+                    )
 
-                self.logger.info(f"Successfully loaded {len(self.markets)} markets from {self.exchange.name}.")
+                self.logger.info(
+                    f"Successfully loaded {len(self.markets)} markets from {self.exchange.name}."
+                )
                 self._cache_market_categories()  # Populate category cache
                 return True
-            except (ccxt.NetworkError, ccxt.ExchangeNotAvailable, ccxt.RequestTimeout, RequestException) as e:
+            except (
+                ccxt.NetworkError,
+                ccxt.ExchangeNotAvailable,
+                ccxt.RequestTimeout,
+                RequestException,
+            ) as e:
                 self.logger.warning(
                     f"Network/Timeout error loading markets (Attempt {attempt + 1}/{retries}): {e}. Retrying in {current_delay:.1f}s..."
                 )
             except ccxt.AuthenticationError as e:
                 self.logger.error(
-                    Color.format(f"Authentication Error loading markets: {e}. Please check API credentials.", Color.RED)
+                    Color.format(
+                        f"Authentication Error loading markets: {e}. Please check API credentials.",
+                        Color.RED,
+                    )
                 )
                 return False  # Authentication errors are fatal, no point retrying
             except ccxt.ExchangeError as e:
                 # Catch other specific ccxt errors if needed
-                self.logger.error(f"CCXT ExchangeError loading markets (Attempt {attempt + 1}/{retries}): {e}")
+                self.logger.error(
+                    f"CCXT ExchangeError loading markets (Attempt {attempt + 1}/{retries}): {e}"
+                )
             except Exception as e:
                 # Catch any other unexpected errors during market loading
                 # This includes the AttributeError if _cache_market_categories fails internally
-                self.logger.exception(f"Unexpected error loading markets (Attempt {attempt + 1}/{retries}): {e}")
+                self.logger.exception(
+                    f"Unexpected error loading markets (Attempt {attempt + 1}/{retries}): {e}"
+                )
 
             if attempt < retries - 1:
                 await async_sleep_with_jitter(current_delay)
-                current_delay = min(current_delay * 1.5, MAX_RETRY_DELAY_SECONDS)  # Exponential backoff with cap
+                current_delay = min(
+                    current_delay * 1.5, MAX_RETRY_DELAY_SECONDS
+                )  # Exponential backoff with cap
             else:
-                self.logger.error(Color.format(f"Failed to load markets after {retries} attempts.", Color.RED))
+                self.logger.error(
+                    Color.format(
+                        f"Failed to load markets after {retries} attempts.", Color.RED
+                    )
+                )
 
         return False
 
@@ -712,12 +830,16 @@ class BybitCCXTClient:
 
             # Determine category based on CCXT market properties (type, contractType, settle)
             category = "spot"  # Default assumption
-            market_type = details.get("type", "spot").lower()  # spot, linear, inverse, future, option
+            market_type = details.get(
+                "type", "spot"
+            ).lower()  # spot, linear, inverse, future, option
             contract_type = details.get("contractType", "").lower()  # linear, inverse
 
             # FIX: Safely handle potential None value from .get('settle') before calling .upper()
             settle_value = details.get("settle")
-            settle_currency = str(settle_value).upper() if settle_value is not None else ""  # USDT, USD, BTC etc.
+            settle_currency = (
+                str(settle_value).upper() if settle_value is not None else ""
+            )  # USDT, USD, BTC etc.
 
             if market_type == "spot":
                 category = "spot"
@@ -746,7 +868,9 @@ class BybitCCXTClient:
                     )
             elif market_type == "option":
                 category = "option"  # Handle options if needed
-                self.logger.debug(f"Market {symbol} identified as Option. Treating as 'option' category.")
+                self.logger.debug(
+                    f"Market {symbol} identified as Option. Treating as 'option' category."
+                )
             else:
                 # Fallback for unknown market types
                 quote = details.get("quote", "").upper()
@@ -763,7 +887,9 @@ class BybitCCXTClient:
             self.market_categories[symbol] = category
             count += 1
 
-        log_message = f"Cached categories for {count} markets (Spot/Linear/Inverse/Option)."
+        log_message = (
+            f"Cached categories for {count} markets (Spot/Linear/Inverse/Option)."
+        )
         if skipped_none > 0:
             log_message += f" Skipped {skipped_none} markets with None details."
         self.logger.info(log_message)
@@ -776,7 +902,9 @@ class BybitCCXTClient:
             return False
         is_valid = symbol in self.markets and self.markets[symbol] is not None
         if not is_valid:
-            self.logger.debug(f"Symbol '{symbol}' not found or has None details in loaded markets.")
+            self.logger.debug(
+                f"Symbol '{symbol}' not found or has None details in loaded markets."
+            )
         return is_valid
 
     def get_symbol_details(self, symbol: str) -> Optional[dict]:
@@ -811,14 +939,18 @@ class BybitCCXTClient:
             return self.market_categories[symbol]
 
         # Fallback if called before cache is populated or for an unknown symbol
-        self.logger.warning(f"Category for symbol {symbol} not found in cache. Attempting dynamic check.")
+        self.logger.warning(
+            f"Category for symbol {symbol} not found in cache. Attempting dynamic check."
+        )
         details = self.get_symbol_details(symbol)  # Checks validity again
         if details:
             # Re-run the logic from _cache_market_categories for this single symbol
             market_type = details.get("type", "spot").lower()
             contract_type = details.get("contractType", "").lower()
             settle_value = details.get("settle")
-            settle_currency = str(settle_value).upper() if settle_value is not None else ""
+            settle_currency = (
+                str(settle_value).upper() if settle_value is not None else ""
+            )
 
             if market_type == "spot":
                 return "spot"
@@ -844,7 +976,9 @@ class BybitCCXTClient:
                 return "spot"  # If quote exists but isn't USDT/USD, assume spot-like
 
         # Final fallback guess if details are missing or uninformative
-        self.logger.warning(f"Could not reliably determine category for {symbol}, defaulting to 'spot'.")
+        self.logger.warning(
+            f"Could not reliably determine category for {symbol}, defaulting to 'spot'."
+        )
         return "spot"
 
     async def close(self) -> None:
@@ -856,7 +990,9 @@ class BybitCCXTClient:
             except Exception as e:
                 self.logger.error(f"Error closing CCXT connection: {e}")
 
-    async def fetch_with_retry(self, method_name: str, *args: Any, **kwargs: Any) -> Optional[Any]:
+    async def fetch_with_retry(
+        self, method_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[Any]:
         """
         Generic fetch method with retry logic for common transient API errors.
 
@@ -885,17 +1021,26 @@ class BybitCCXTClient:
                 #     self.logger.warning(f"CCXT method {method_name} returned None.")
                 return result
             # Specific, common transient errors first
-            except (ccxt.NetworkError, ccxt.RequestTimeout, ccxt.DDoSProtection, RequestException) as e:
+            except (
+                ccxt.NetworkError,
+                ccxt.RequestTimeout,
+                ccxt.DDoSProtection,
+                RequestException,
+            ) as e:
                 log_msg = f"Network/Timeout/DDoS error calling {method_name} (Attempt {attempt + 1}/{retries}): {type(e).__name__}. Retrying in {current_delay:.1f}s..."
                 self.logger.warning(Color.format(log_msg, Color.YELLOW))
                 last_exception = e
             except ccxt.RateLimitExceeded as e:
                 # Extract retry-after header if available (CCXT might parse it)
-                retry_after_ms = getattr(e, "retry_after", None)  # CCXT sometimes adds this
+                retry_after_ms = getattr(
+                    e, "retry_after", None
+                )  # CCXT sometimes adds this
                 wait_time = current_delay  # Default wait time
                 if retry_after_ms:
                     # Use max of suggested or current backoff, ensure it's within bounds
-                    suggested_wait = max(float(retry_after_ms) / 1000.0, 0.1)  # Min 0.1s
+                    suggested_wait = max(
+                        float(retry_after_ms) / 1000.0, 0.1
+                    )  # Min 0.1s
                     wait_time = max(suggested_wait, current_delay)
                     log_msg = f"Rate limit exceeded calling {method_name} (Attempt {attempt + 1}/{retries}): {e}. Retrying after suggested {wait_time:.1f}s..."
                 else:
@@ -943,21 +1088,28 @@ class BybitCCXTClient:
                 else:
                     # Non-retryable ExchangeError (e.g., invalid symbol, insufficient funds)
                     self.logger.error(
-                        Color.format(f"Non-retryable CCXT ExchangeError calling {method_name}: {e}", Color.RED)
+                        Color.format(
+                            f"Non-retryable CCXT ExchangeError calling {method_name}: {e}",
+                            Color.RED,
+                        )
                     )
                     self.logger.debug(f"Args: {args}, Kwargs: {kwargs}")
                     return None  # Do not retry these errors
             # Catch AuthenticationError separately as it's fatal
             except ccxt.AuthenticationError as e:
                 self.logger.error(
-                    Color.format(f"Authentication Error calling {method_name}: {e}. Check API credentials.", Color.RED)
+                    Color.format(
+                        f"Authentication Error calling {method_name}: {e}. Check API credentials.",
+                        Color.RED,
+                    )
                 )
                 return None  # Fatal error
             # Catch all other unexpected exceptions
             except Exception as e:
                 self.logger.exception(
                     Color.format(
-                        f"Unexpected error calling {method_name} (Attempt {attempt + 1}/{retries}): {e}", Color.RED
+                        f"Unexpected error calling {method_name} (Attempt {attempt + 1}/{retries}): {e}",
+                        Color.RED,
                     )
                 )
                 self.logger.debug(f"Args: {args}, Kwargs: {kwargs}")
@@ -972,7 +1124,8 @@ class BybitCCXTClient:
             else:
                 self.logger.error(
                     Color.format(
-                        f"Max retries ({retries}) reached for {method_name}. Last error: {last_exception}", Color.RED
+                        f"Max retries ({retries}) reached for {method_name}. Last error: {last_exception}",
+                        Color.RED,
                     )
                 )
                 return None  # Max retries exceeded
@@ -990,7 +1143,9 @@ class BybitCCXTClient:
         params = {"category": category}
         # Use fetch_tickers, often more reliable even for single symbols
         # Note: fetch_tickers requires a list/tuple of symbols
-        tickers = await self.fetch_with_retry("fetch_tickers", symbols=[symbol], params=params)
+        tickers = await self.fetch_with_retry(
+            "fetch_tickers", symbols=[symbol], params=params
+        )
 
         if tickers and isinstance(tickers, dict) and symbol in tickers:
             # Ensure the ticker data itself is a dictionary
@@ -1003,7 +1158,9 @@ class BybitCCXTClient:
                 )
                 return None
         else:
-            self.logger.error(f"Could not fetch ticker for {symbol} (category: {category}). Response: {tickers}")
+            self.logger.error(
+                f"Could not fetch ticker for {symbol} (category: {category}). Response: {tickers}"
+            )
             return None
 
     async def fetch_current_price(self, symbol: str) -> Optional[Decimal]:
@@ -1015,13 +1172,19 @@ class BybitCCXTClient:
                 price_str = str(ticker["last"])
                 return Decimal(price_str)
             except (InvalidOperation, TypeError, ValueError) as e:
-                self.logger.error(f"Error converting last price '{ticker['last']}' to Decimal for {symbol}: {e}")
+                self.logger.error(
+                    f"Error converting last price '{ticker['last']}' to Decimal for {symbol}: {e}"
+                )
                 return None
         else:
-            self.logger.warning(f"Last price not found or is null in ticker data for {symbol}.")
+            self.logger.warning(
+                f"Last price not found or is null in ticker data for {symbol}."
+            )
             return None
 
-    async def fetch_klines(self, symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
+    async def fetch_klines(
+        self, symbol: str, timeframe: str, limit: int
+    ) -> pd.DataFrame:
         """
         Fetches OHLCV (kline) data for a symbol and timeframe, returning a processed DataFrame.
 
@@ -1037,14 +1200,18 @@ class BybitCCXTClient:
         """
         ccxt_timeframe = CCXT_INTERVAL_MAP.get(timeframe)
         if not ccxt_timeframe:
-            self.logger.error(f"Invalid timeframe '{timeframe}' provided. Valid options: {VALID_INTERVALS}")
+            self.logger.error(
+                f"Invalid timeframe '{timeframe}' provided. Valid options: {VALID_INTERVALS}"
+            )
             return pd.DataFrame()
         if not self.is_valid_symbol(symbol):
             self.logger.error(f"Cannot fetch klines: Invalid symbol '{symbol}'.")
             return pd.DataFrame()
 
         category = self.get_market_category(symbol)
-        self.logger.debug(f"Fetching {limit} klines for {symbol} | Interval: {ccxt_timeframe} | Category: {category}")
+        self.logger.debug(
+            f"Fetching {limit} klines for {symbol} | Interval: {ccxt_timeframe} | Category: {category}"
+        )
         params = {"category": category}
         # fetch_ohlcv(symbol, timeframe, since, limit, params)
         klines = await self.fetch_with_retry(
@@ -1052,27 +1219,39 @@ class BybitCCXTClient:
         )
 
         if klines is None or not isinstance(klines, list) or len(klines) == 0:
-            self.logger.warning(f"No kline data returned for {symbol} interval {ccxt_timeframe}.")
+            self.logger.warning(
+                f"No kline data returned for {symbol} interval {ccxt_timeframe}."
+            )
             return pd.DataFrame()
 
         try:
-            df = pd.DataFrame(klines, columns=["timestamp", "open", "high", "low", "close", "volume"])
+            df = pd.DataFrame(
+                klines, columns=["timestamp", "open", "high", "low", "close", "volume"]
+            )
             if df.empty:
-                self.logger.warning(f"Kline data for {symbol} resulted in an empty DataFrame initially.")
+                self.logger.warning(
+                    f"Kline data for {symbol} resulted in an empty DataFrame initially."
+                )
                 return pd.DataFrame()
 
             # Convert timestamp to datetime and set timezone
             # Errors='coerce' will turn unparseable timestamps into NaT
-            df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True, errors="coerce")
+            df["timestamp"] = pd.to_datetime(
+                df["timestamp"], unit="ms", utc=True, errors="coerce"
+            )
             # Drop rows where timestamp conversion failed
             initial_rows_ts = len(df)
             df.dropna(subset=["timestamp"], inplace=True)
             dropped_ts_rows = initial_rows_ts - len(df)
             if dropped_ts_rows > 0:
-                self.logger.warning(f"Dropped {dropped_ts_rows} rows with invalid timestamps from klines for {symbol}.")
+                self.logger.warning(
+                    f"Dropped {dropped_ts_rows} rows with invalid timestamps from klines for {symbol}."
+                )
 
             if df.empty:
-                self.logger.warning(f"Kline data for {symbol} had no valid timestamps after conversion.")
+                self.logger.warning(
+                    f"Kline data for {symbol} had no valid timestamps after conversion."
+                )
                 return pd.DataFrame()
 
             # Convert timezone after ensuring timestamps are valid
@@ -1106,7 +1285,9 @@ class BybitCCXTClient:
                 )
 
             if df.empty:
-                self.logger.warning(f"Kline data for {symbol} is empty after cleaning missing values.")
+                self.logger.warning(
+                    f"Kline data for {symbol} is empty after cleaning missing values."
+                )
                 return pd.DataFrame()
 
             # Ensure data types are correct (Decimal for OHLCV, datetime for timestamp)
@@ -1122,14 +1303,18 @@ class BybitCCXTClient:
             # Sort by timestamp just in case API returns them out of order
             df = df.sort_values(by="timestamp").reset_index(drop=True)
 
-            self.logger.debug(f"Successfully fetched and processed {len(df)} klines for {symbol}.")
+            self.logger.debug(
+                f"Successfully fetched and processed {len(df)} klines for {symbol}."
+            )
             return df
 
         except (ValueError, TypeError, KeyError, InvalidOperation) as e:
             self.logger.exception(f"Error processing kline data for {symbol}: {e}")
             return pd.DataFrame()
         except Exception as e:
-            self.logger.exception(f"Unexpected error processing kline data for {symbol}: {e}")
+            self.logger.exception(
+                f"Unexpected error processing kline data for {symbol}: {e}"
+            )
             return pd.DataFrame()
 
     async def fetch_orderbook(self, symbol: str, limit: int) -> Optional[dict]:
@@ -1154,7 +1339,9 @@ class BybitCCXTClient:
         # Note: CCXT might handle this adjustment internally, but being explicit can prevent errors.
         bybit_limit = limit
         if category == "spot" and limit > 50:
-            self.logger.warning(f"Requested orderbook limit {limit} exceeds Bybit V5 spot limit (50). Adjusting to 50.")
+            self.logger.warning(
+                f"Requested orderbook limit {limit} exceeds Bybit V5 spot limit (50). Adjusting to 50."
+            )
             bybit_limit = 50
         elif category in ["linear", "inverse"] and limit > 200:
             self.logger.warning(
@@ -1162,13 +1349,19 @@ class BybitCCXTClient:
             )
             bybit_limit = 200
         elif limit <= 0:
-            self.logger.error(f"Invalid orderbook limit requested ({limit}). Must be positive.")
+            self.logger.error(
+                f"Invalid orderbook limit requested ({limit}). Must be positive."
+            )
             return None
 
-        self.logger.debug(f"Fetching order book for {symbol} | Limit: {bybit_limit} | Category: {category}")
+        self.logger.debug(
+            f"Fetching order book for {symbol} | Limit: {bybit_limit} | Category: {category}"
+        )
         params = {"category": category}
         # fetch_order_book(symbol, limit, params)
-        orderbook = await self.fetch_with_retry("fetch_order_book", symbol, limit=bybit_limit, params=params)
+        orderbook = await self.fetch_with_retry(
+            "fetch_order_book", symbol, limit=bybit_limit, params=params
+        )
 
         if orderbook and isinstance(orderbook, dict):
             # Basic validation: Check for presence and list type of bids/asks
@@ -1178,13 +1371,19 @@ class BybitCCXTClient:
                 # Optional: Deeper validation - check if bids/asks contain [price, size] pairs
                 # And check if the number of levels matches the requested limit (or is close)
                 def valid_levels(levels):
-                    return all(isinstance(level, list) and len(level) == 2 for level in levels)
+                    return all(
+                        isinstance(level, list) and len(level) == 2 for level in levels
+                    )
 
                 if valid_levels(bids) and valid_levels(asks):
-                    self.logger.debug(f"Fetched order book for {symbol} with {len(bids)} bids and {len(asks)} asks.")
+                    self.logger.debug(
+                        f"Fetched order book for {symbol} with {len(bids)} bids and {len(asks)} asks."
+                    )
                     return orderbook
                 else:
-                    self.logger.warning(f"Fetched order book data for {symbol} has invalid level format: {orderbook}")
+                    self.logger.warning(
+                        f"Fetched order book data for {symbol} has invalid level format: {orderbook}"
+                    )
                     return None
             else:
                 self.logger.warning(
@@ -1192,7 +1391,9 @@ class BybitCCXTClient:
                 )
                 return None
         else:
-            self.logger.warning(f"Failed to fetch order book for {symbol} or received invalid data after retries.")
+            self.logger.warning(
+                f"Failed to fetch order book for {symbol} or received invalid data after retries."
+            )
             return None
 
 
@@ -1249,7 +1450,15 @@ class TradingAnalyzer:
             self.col_names["ema_long"] = f"EMA_{is_.ema_long_period}"
         if is_.rsi_period > 0:
             self.col_names["rsi"] = f"RSI_{is_.rsi_period}"
-        if all(p > 0 for p in [is_.stoch_rsi_period, is_.rsi_period, is_.stoch_k_period, is_.stoch_d_period]):
+        if all(
+            p > 0
+            for p in [
+                is_.stoch_rsi_period,
+                is_.rsi_period,
+                is_.stoch_k_period,
+                is_.stoch_d_period,
+            ]
+        ):
             self.col_names["stochrsi_k"] = (
                 f"STOCHRSIk_{is_.stoch_rsi_period}_{is_.rsi_period}_{is_.stoch_k_period}_{is_.stoch_d_period}"
             )
@@ -1257,18 +1466,32 @@ class TradingAnalyzer:
                 f"STOCHRSId_{is_.stoch_rsi_period}_{is_.rsi_period}_{is_.stoch_k_period}_{is_.stoch_d_period}"
             )
         if all(p > 0 for p in [is_.macd_fast, is_.macd_slow, is_.macd_signal]):
-            self.col_names["macd_line"] = f"MACD_{is_.macd_fast}_{is_.macd_slow}_{is_.macd_signal}"
-            self.col_names["macd_signal"] = f"MACDs_{is_.macd_fast}_{is_.macd_slow}_{is_.macd_signal}"
-            self.col_names["macd_hist"] = f"MACDh_{is_.macd_fast}_{is_.macd_slow}_{is_.macd_signal}"
+            self.col_names["macd_line"] = (
+                f"MACD_{is_.macd_fast}_{is_.macd_slow}_{is_.macd_signal}"
+            )
+            self.col_names["macd_signal"] = (
+                f"MACDs_{is_.macd_fast}_{is_.macd_slow}_{is_.macd_signal}"
+            )
+            self.col_names["macd_hist"] = (
+                f"MACDh_{is_.macd_fast}_{is_.macd_slow}_{is_.macd_signal}"
+            )
         if is_.bollinger_bands_period > 0 and is_.bollinger_bands_std_dev > 0:
             bb_std_str = fmt_bb_std(is_.bollinger_bands_std_dev)
-            self.col_names["bb_upper"] = f"BBU_{is_.bollinger_bands_period}_{bb_std_str}"
-            self.col_names["bb_lower"] = f"BBL_{is_.bollinger_bands_period}_{bb_std_str}"
+            self.col_names["bb_upper"] = (
+                f"BBU_{is_.bollinger_bands_period}_{bb_std_str}"
+            )
+            self.col_names["bb_lower"] = (
+                f"BBL_{is_.bollinger_bands_period}_{bb_std_str}"
+            )
             self.col_names["bb_mid"] = f"BBM_{is_.bollinger_bands_period}_{bb_std_str}"
         if is_.atr_period > 0:
-            self.col_names["atr"] = f"ATRr_{is_.atr_period}"  # pandas_ta uses ATRr for the 'True Range average' variant
+            self.col_names["atr"] = (
+                f"ATRr_{is_.atr_period}"  # pandas_ta uses ATRr for the 'True Range average' variant
+            )
         if is_.cci_period > 0:
-            self.col_names["cci"] = f"CCI_{is_.cci_period}_0.015"  # pandas_ta CCI includes the constant
+            self.col_names["cci"] = (
+                f"CCI_{is_.cci_period}_0.015"  # pandas_ta CCI includes the constant
+            )
         if is_.williams_r_period > 0:
             self.col_names["willr"] = f"WILLR_{is_.williams_r_period}"
         if is_.mfi_period > 0:
@@ -1278,15 +1501,21 @@ class TradingAnalyzer:
             self.col_names["dmp"] = f"DMP_{is_.adx_period}"  # +DI component of ADX
             self.col_names["dmn"] = f"DMN_{is_.adx_period}"  # -DI component of ADX
         self.col_names["obv"] = "OBV"  # OBV has no standard parameters in name
-        self.col_names["adosc"] = "ADOSC"  # Accumulation/Distribution Oscillator (no params in name)
+        self.col_names["adosc"] = (
+            "ADOSC"  # Accumulation/Distribution Oscillator (no params in name)
+        )
         if is_.psar_step > 0 and is_.psar_max_step > 0:
             # Format step/max_step consistently (e.g., handle 0.02 vs 0.2)
             psar_step_str = f"{is_.psar_step:.2f}".rstrip("0").rstrip(".")
             psar_max_str = f"{is_.psar_max_step:.2f}".rstrip("0").rstrip(".")
             self.col_names["psar_long"] = f"PSARl_{psar_step_str}_{psar_max_str}"
             self.col_names["psar_short"] = f"PSARs_{psar_step_str}_{psar_max_str}"
-            self.col_names["psar_af"] = f"PSARaf_{psar_step_str}_{psar_max_str}"  # Acceleration Factor
-            self.col_names["psar_rev"] = f"PSARr_{psar_step_str}_{psar_max_str}"  # Reversal signal (1 for reversal)
+            self.col_names["psar_af"] = (
+                f"PSARaf_{psar_step_str}_{psar_max_str}"  # Acceleration Factor
+            )
+            self.col_names["psar_rev"] = (
+                f"PSARr_{psar_step_str}_{psar_max_str}"  # Reversal signal (1 for reversal)
+            )
         if is_.momentum_period > 0:
             self.col_names["mom"] = f"MOM_{is_.momentum_period}"
         if is_.volume_ma_period > 0:
@@ -1304,7 +1533,9 @@ class TradingAnalyzer:
             or the original DataFrame if calculation fails or input is unsuitable.
         """
         if df.empty:
-            self.logger.warning("Cannot calculate indicators: Input DataFrame is empty.")
+            self.logger.warning(
+                "Cannot calculate indicators: Input DataFrame is empty."
+            )
             return df
         required_cols = ["open", "high", "low", "close", "volume"]
         if not all(col in df.columns for col in required_cols):
@@ -1332,7 +1563,9 @@ class TradingAnalyzer:
             )
 
         if df_calc.empty:
-            self.logger.error("DataFrame became empty after converting OHLCV to numeric. Cannot calculate indicators.")
+            self.logger.error(
+                "DataFrame became empty after converting OHLCV to numeric. Cannot calculate indicators."
+            )
             return df  # Return original unmodified df
 
         # Check if enough data points exist for the longest required period
@@ -1344,10 +1577,12 @@ class TradingAnalyzer:
             for p in [
                 is_.sma_long_period,
                 is_.ema_long_period,
-                is_.macd_slow + is_.macd_signal,  # MACD needs signal periods beyond slow EMA
+                is_.macd_slow
+                + is_.macd_signal,  # MACD needs signal periods beyond slow EMA
                 is_.bollinger_bands_period,
                 is_.adx_period * 2,  # ADX often needs 2x period for smoothing
-                is_.stoch_rsi_period + is_.rsi_period,  # StochRSI needs underlying RSI data
+                is_.stoch_rsi_period
+                + is_.rsi_period,  # StochRSI needs underlying RSI data
                 is_.volume_ma_period,
                 is_.atr_period,
                 is_.cci_period,
@@ -1358,23 +1593,35 @@ class TradingAnalyzer:
             if isinstance(p, (int, float)) and p > 0
         ]
 
-        min_data_needed = max(valid_periods) if valid_periods else 1  # Need at least 1 row
+        min_data_needed = (
+            max(valid_periods) if valid_periods else 1
+        )  # Need at least 1 row
 
         if len(df_calc) < min_data_needed:
             self.logger.warning(
                 f"Insufficient data points ({len(df_calc)} < {min_data_needed} estimated needed) for some indicators. Results may be inaccurate or contain NaNs."
             )
         elif len(df_calc) < 2:
-            self.logger.warning("Only one data point available. Most indicators cannot be calculated accurately.")
+            self.logger.warning(
+                "Only one data point available. Most indicators cannot be calculated accurately."
+            )
             # Allow calculation, but expect many NaNs
 
         # Define the strategy using pandas_ta structure
         # Ensure all periods are positive integers/floats and handle potential None values
         strategy_ta = [
-            {"kind": "sma", "length": is_.sma_short_period} if is_.sma_short_period > 0 else None,
-            {"kind": "sma", "length": is_.sma_long_period} if is_.sma_long_period > 0 else None,
-            {"kind": "ema", "length": is_.ema_short_period} if is_.ema_short_period > 0 else None,
-            {"kind": "ema", "length": is_.ema_long_period} if is_.ema_long_period > 0 else None,
+            {"kind": "sma", "length": is_.sma_short_period}
+            if is_.sma_short_period > 0
+            else None,
+            {"kind": "sma", "length": is_.sma_long_period}
+            if is_.sma_long_period > 0
+            else None,
+            {"kind": "ema", "length": is_.ema_short_period}
+            if is_.ema_short_period > 0
+            else None,
+            {"kind": "ema", "length": is_.ema_long_period}
+            if is_.ema_long_period > 0
+            else None,
             {"kind": "rsi", "length": is_.rsi_period} if is_.rsi_period > 0 else None,
             {
                 "kind": "stochrsi",
@@ -1383,17 +1630,36 @@ class TradingAnalyzer:
                 "k": is_.stoch_k_period,
                 "d": is_.stoch_d_period,
             }
-            if all(p > 0 for p in [is_.stoch_rsi_period, is_.rsi_period, is_.stoch_k_period, is_.stoch_d_period])
+            if all(
+                p > 0
+                for p in [
+                    is_.stoch_rsi_period,
+                    is_.rsi_period,
+                    is_.stoch_k_period,
+                    is_.stoch_d_period,
+                ]
+            )
             else None,
-            {"kind": "macd", "fast": is_.macd_fast, "slow": is_.macd_slow, "signal": is_.macd_signal}
+            {
+                "kind": "macd",
+                "fast": is_.macd_fast,
+                "slow": is_.macd_slow,
+                "signal": is_.macd_signal,
+            }
             if all(p > 0 for p in [is_.macd_fast, is_.macd_slow, is_.macd_signal])
             else None,
-            {"kind": "bbands", "length": is_.bollinger_bands_period, "std": float(is_.bollinger_bands_std_dev)}
+            {
+                "kind": "bbands",
+                "length": is_.bollinger_bands_period,
+                "std": float(is_.bollinger_bands_std_dev),
+            }
             if is_.bollinger_bands_period > 0 and is_.bollinger_bands_std_dev > 0
             else None,
             {"kind": "atr", "length": is_.atr_period} if is_.atr_period > 0 else None,
             {"kind": "cci", "length": is_.cci_period} if is_.cci_period > 0 else None,
-            {"kind": "willr", "length": is_.williams_r_period} if is_.williams_r_period > 0 else None,
+            {"kind": "willr", "length": is_.williams_r_period}
+            if is_.williams_r_period > 0
+            else None,
             {"kind": "mfi", "length": is_.mfi_period} if is_.mfi_period > 0 else None,
             {"kind": "adx", "length": is_.adx_period} if is_.adx_period > 0 else None,
             {"kind": "obv"},  # OBV doesn't have a length parameter in the same way
@@ -1401,9 +1667,16 @@ class TradingAnalyzer:
             {"kind": "psar", "step": is_.psar_step, "max_step": is_.psar_max_step}
             if is_.psar_step > 0 and is_.psar_max_step > 0
             else None,
-            {"kind": "mom", "length": is_.momentum_period} if is_.momentum_period > 0 else None,
+            {"kind": "mom", "length": is_.momentum_period}
+            if is_.momentum_period > 0
+            else None,
             # Calculate volume MA using 'sma' kind on 'volume' column, apply custom prefix
-            {"kind": "sma", "close": "volume", "length": is_.volume_ma_period, "prefix": "VOL_MA"}
+            {
+                "kind": "sma",
+                "close": "volume",
+                "length": is_.volume_ma_period,
+                "prefix": "VOL_MA",
+            }
             if is_.volume_ma_period > 0
             else None,
         ]
@@ -1412,12 +1685,16 @@ class TradingAnalyzer:
         valid_strategy_ta = [item for item in strategy_ta if item is not None]
 
         if not valid_strategy_ta:
-            self.logger.error("No valid indicators configured or all periods are invalid. Skipping calculation.")
+            self.logger.error(
+                "No valid indicators configured or all periods are invalid. Skipping calculation."
+            )
             return df  # Return original df
 
         # Create the pandas_ta strategy object
         strategy = ta.Strategy(
-            name="NeontaAnalysis", description="Comprehensive TA using pandas_ta", ta=valid_strategy_ta
+            name="NeontaAnalysis",
+            description="Comprehensive TA using pandas_ta",
+            ta=valid_strategy_ta,
         )
 
         try:
@@ -1432,11 +1709,18 @@ class TradingAnalyzer:
 
             if vol_ma_target_name and vol_ma_generated_name in df_calc.columns:
                 if vol_ma_target_name != vol_ma_generated_name:
-                    df_calc.rename(columns={vol_ma_generated_name: vol_ma_target_name}, inplace=True)
+                    df_calc.rename(
+                        columns={vol_ma_generated_name: vol_ma_target_name},
+                        inplace=True,
+                    )
                     self.logger.debug(
                         f"Renamed volume MA column from '{vol_ma_generated_name}' to '{vol_ma_target_name}'."
                     )
-            elif vol_ma_target_name and vol_ma_generated_name not in df_calc.columns and is_.volume_ma_period > 0:
+            elif (
+                vol_ma_target_name
+                and vol_ma_generated_name not in df_calc.columns
+                and is_.volume_ma_period > 0
+            ):
                 self.logger.warning(
                     f"Expected volume MA column '{vol_ma_generated_name}' or '{vol_ma_target_name}' not found after calculation."
                 )
@@ -1447,16 +1731,25 @@ class TradingAnalyzer:
             # This handles cases where PSAR might only generate one column initially
             psar_l_col = self.col_names.get("psar_long")
             psar_s_col = self.col_names.get("psar_short")
-            if psar_l_col and psar_s_col and psar_l_col in df_calc.columns and psar_s_col in df_calc.columns:
+            if (
+                psar_l_col
+                and psar_s_col
+                and psar_l_col in df_calc.columns
+                and psar_s_col in df_calc.columns
+            ):
                 # Check if one column exists and is entirely NaN while the other is not
                 l_is_nan = df_calc[psar_l_col].isnull().all()
                 s_is_nan = df_calc[psar_s_col].isnull().all()
                 if l_is_nan and not s_is_nan:
                     df_calc[psar_l_col] = df_calc[psar_s_col]  # Fill long from short
-                    self.logger.debug(f"Filled NaN PSAR long column from short column for {self.symbol}")
+                    self.logger.debug(
+                        f"Filled NaN PSAR long column from short column for {self.symbol}"
+                    )
                 elif s_is_nan and not l_is_nan:
                     df_calc[psar_s_col] = df_calc[psar_l_col]  # Fill short from long
-                    self.logger.debug(f"Filled NaN PSAR short column from long column for {self.symbol}")
+                    self.logger.debug(
+                        f"Filled NaN PSAR short column from long column for {self.symbol}"
+                    )
 
             # Result df_calc now contains original OHLCV (as float) + indicators (as float)
             # Return this DataFrame. Interpretation logic will use floats.
@@ -1469,7 +1762,9 @@ class TradingAnalyzer:
                     f"Caught FutureWarning during pandas_ta calculation: {e}. This might relate to internal assignments within the library."
                 )
             else:
-                self.logger.exception(f"Error calculating indicators using pandas_ta strategy for {self.symbol}: {e}")
+                self.logger.exception(
+                    f"Error calculating indicators using pandas_ta strategy for {self.symbol}: {e}"
+                )
             # Return the original DataFrame without indicators on failure
             return df
 
@@ -1487,10 +1782,14 @@ class TradingAnalyzer:
         """
         levels: Dict[str, Any] = {"support": {}, "resistance": {}, "pivot": None}
         if df.empty or len(df) < 1:  # Need at least 1 row for High/Low/Close
-            self.logger.warning("Insufficient data for level calculation (need at least 1 row).")
+            self.logger.warning(
+                "Insufficient data for level calculation (need at least 1 row)."
+            )
             return levels
         if not isinstance(current_price, Decimal) or not current_price.is_finite():
-            self.logger.error("Invalid current_price type or value for level calculation. Expected finite Decimal.")
+            self.logger.error(
+                "Invalid current_price type or value for level calculation. Expected finite Decimal."
+            )
             return levels
 
         try:
@@ -1503,8 +1802,12 @@ class TradingAnalyzer:
             close_val = df.loc[:, "close"].iloc[-1]
 
             # Validate that we have finite numeric values
-            if not all(pd.notna(v) and np.isfinite(v) for v in [high_val, low_val, close_val]):
-                self.logger.warning("NaN or non-finite values found in OHLC data. Cannot calculate levels accurately.")
+            if not all(
+                pd.notna(v) and np.isfinite(v) for v in [high_val, low_val, close_val]
+            ):
+                self.logger.warning(
+                    "NaN or non-finite values found in OHLC data. Cannot calculate levels accurately."
+                )
                 return levels
 
             # Convert valid OHLC values to Decimal for precise level calculations
@@ -1517,13 +1820,21 @@ class TradingAnalyzer:
             # Check for zero or negligible difference to avoid errors/meaningless levels
             if diff > DECIMAL_COMPARISON_THRESHOLD:
                 # Standard Fibonacci levels as Decimals
-                fib_ratios = [Decimal("0.236"), Decimal("0.382"), Decimal("0.5"), Decimal("0.618"), Decimal("0.786")]
+                fib_ratios = [
+                    Decimal("0.236"),
+                    Decimal("0.382"),
+                    Decimal("0.5"),
+                    Decimal("0.618"),
+                    Decimal("0.786"),
+                ]
                 fib_levels = {}
                 # Calculate levels relative to the high/low range
                 for ratio in fib_ratios:
                     # Level based on retracement from high
                     level_down = high - diff * ratio
-                    fib_levels[f"Fib {ratio * 100:.1f}%"] = level_down  # Simplified name
+                    fib_levels[f"Fib {ratio * 100:.1f}%"] = (
+                        level_down  # Simplified name
+                    )
 
                 # Add High and Low as natural S/R
                 fib_levels["Period High"] = high
@@ -1537,7 +1848,9 @@ class TradingAnalyzer:
                         levels["resistance"][label] = value
                     # else: Level is exactly the current price, could be either? Ignore for now.
             else:
-                self.logger.debug("Price range (High - Low) is too small for Fibonacci calculation.")
+                self.logger.debug(
+                    "Price range (High - Low) is too small for Fibonacci calculation."
+                )
 
             # --- Pivot Points (Classical Method) ---
             try:
@@ -1552,7 +1865,14 @@ class TradingAnalyzer:
                 r3 = high + Decimal(2) * (pivot - low)
                 s3 = low - Decimal(2) * (high - pivot)
 
-                pivot_levels = {"R1": r1, "S1": s1, "R2": r2, "S2": s2, "R3": r3, "S3": s3}
+                pivot_levels = {
+                    "R1": r1,
+                    "S1": s1,
+                    "R2": r2,
+                    "S2": s2,
+                    "R3": r3,
+                    "S3": s3,
+                }
 
                 # Classify pivot levels as support or resistance
                 for label, value in pivot_levels.items():
@@ -1567,26 +1887,39 @@ class TradingAnalyzer:
         except (TypeError, ValueError, InvalidOperation, IndexError, KeyError) as e:
             self.logger.error(f"Error calculating levels for {self.symbol}: {e}")
         except Exception as e:
-            self.logger.exception(f"Unexpected error calculating levels for {self.symbol}: {e}")
+            self.logger.exception(
+                f"Unexpected error calculating levels for {self.symbol}: {e}"
+            )
 
         # Sort levels by price for cleaner output later (optional)
         # Ensure values are Decimals before sorting
         levels["support"] = dict(
             sorted(
-                [(k, v) for k, v in levels["support"].items() if isinstance(v, Decimal)],
+                [
+                    (k, v)
+                    for k, v in levels["support"].items()
+                    if isinstance(v, Decimal)
+                ],
                 key=lambda item: item[1],
                 reverse=True,
             )
         )  # Highest support first
         levels["resistance"] = dict(
             sorted(
-                [(k, v) for k, v in levels["resistance"].items() if isinstance(v, Decimal)], key=lambda item: item[1]
+                [
+                    (k, v)
+                    for k, v in levels["resistance"].items()
+                    if isinstance(v, Decimal)
+                ],
+                key=lambda item: item[1],
             )
         )  # Lowest resistance first
 
         return levels
 
-    def _analyze_orderbook(self, orderbook: Optional[dict], current_price: Decimal, levels: dict) -> dict:
+    def _analyze_orderbook(
+        self, orderbook: Optional[dict], current_price: Decimal, levels: dict
+    ) -> dict:
         """
         Analyzes order book data for buy/sell pressure and identifies significant
         clusters of orders near calculated support/resistance levels.
@@ -1609,17 +1942,25 @@ class TradingAnalyzer:
             "total_bid_usd": DECIMAL_ZERO,
             "total_ask_usd": DECIMAL_ZERO,
         }
-        if not orderbook or not isinstance(orderbook.get("bids"), list) or not isinstance(orderbook.get("asks"), list):
+        if (
+            not orderbook
+            or not isinstance(orderbook.get("bids"), list)
+            or not isinstance(orderbook.get("asks"), list)
+        ):
             self.logger.debug("Orderbook data incomplete or unavailable for analysis.")
             return analysis
         if not isinstance(current_price, Decimal) or not current_price.is_finite():
-            self.logger.error("Invalid current_price type or value for orderbook analysis. Expected finite Decimal.")
+            self.logger.error(
+                "Invalid current_price type or value for orderbook analysis. Expected finite Decimal."
+            )
             return analysis
 
         try:
             # Convert bids and asks to DataFrames for easier processing
             # Ensure data is converted to Decimal, handle errors gracefully
-            def to_decimal_df(data: List[List[Union[str, float, int]]], columns: List[str]) -> pd.DataFrame:
+            def to_decimal_df(
+                data: List[List[Union[str, float, int]]], columns: List[str]
+            ) -> pd.DataFrame:
                 if not data:
                     return pd.DataFrame(columns=columns)
                 try:
@@ -1627,7 +1968,9 @@ class TradingAnalyzer:
                     df = pd.DataFrame(data, columns=columns, dtype=object)
                     for col in columns:
                         # Convert via string for precision, coerce errors to pd.NA
-                        df[col] = df[col].apply(lambda x: Decimal(str(x)) if pd.notna(x) else pd.NA)
+                        df[col] = df[col].apply(
+                            lambda x: Decimal(str(x)) if pd.notna(x) else pd.NA
+                        )
                     # Drop rows where essential price/size conversion failed
                     df.dropna(subset=columns, inplace=True)
                     # Filter out zero prices/sizes after conversion
@@ -1637,24 +1980,34 @@ class TradingAnalyzer:
                         df = df[df["size"] > DECIMAL_COMPARISON_THRESHOLD]
                     return df
                 except (ValueError, TypeError, InvalidOperation, KeyError) as e:
-                    self.logger.error(f"Error converting orderbook data to Decimal DataFrame: {e}")
+                    self.logger.error(
+                        f"Error converting orderbook data to Decimal DataFrame: {e}"
+                    )
                     return pd.DataFrame(columns=columns)  # Return empty df on error
 
             bids_df = to_decimal_df(orderbook.get("bids", []), ["price", "size"])
             asks_df = to_decimal_df(orderbook.get("asks", []), ["price", "size"])
 
             if bids_df.empty and asks_df.empty:
-                self.logger.debug("Orderbook is empty after cleaning zero/invalid values.")
-                analysis["pressure"] = Color.format("Neutral Pressure", Color.YELLOW)  # Indicate neutral if empty
+                self.logger.debug(
+                    "Orderbook is empty after cleaning zero/invalid values."
+                )
+                analysis["pressure"] = Color.format(
+                    "Neutral Pressure", Color.YELLOW
+                )  # Indicate neutral if empty
                 return analysis
 
             # Calculate USD value for each level and total pressure
             if not bids_df.empty:
                 # Ensure calculation uses Decimals
-                bids_df["value_usd"] = bids_df["price"].astype(object) * bids_df["size"].astype(object)
+                bids_df["value_usd"] = bids_df["price"].astype(object) * bids_df[
+                    "size"
+                ].astype(object)
                 analysis["total_bid_usd"] = bids_df["value_usd"].sum()
             if not asks_df.empty:
-                asks_df["value_usd"] = asks_df["price"].astype(object) * asks_df["size"].astype(object)
+                asks_df["value_usd"] = asks_df["price"].astype(object) * asks_df[
+                    "size"
+                ].astype(object)
                 analysis["total_ask_usd"] = asks_df["value_usd"].sum()
 
             total_bid_usd = analysis["total_bid_usd"]
@@ -1668,35 +2021,60 @@ class TradingAnalyzer:
                 high_pressure_threshold = Decimal("0.6")
                 low_pressure_threshold = Decimal("0.4")
                 if bid_ask_ratio > high_pressure_threshold:
-                    analysis["pressure"] = Color.format("High Buy Pressure", Color.GREEN)
+                    analysis["pressure"] = Color.format(
+                        "High Buy Pressure", Color.GREEN
+                    )
                 elif bid_ask_ratio < low_pressure_threshold:
                     analysis["pressure"] = Color.format("High Sell Pressure", Color.RED)
                 else:
-                    analysis["pressure"] = Color.format("Neutral Pressure", Color.YELLOW)
+                    analysis["pressure"] = Color.format(
+                        "Neutral Pressure", Color.YELLOW
+                    )
             else:
-                analysis["pressure"] = Color.format("Neutral Pressure", Color.YELLOW)  # Neutral if total value is zero
+                analysis["pressure"] = Color.format(
+                    "Neutral Pressure", Color.YELLOW
+                )  # Neutral if total value is zero
 
             # --- Cluster Analysis ---
             # Use float threshold from config, convert to Decimal
-            cluster_threshold_usd = Decimal(str(self.orderbook_settings.cluster_threshold_usd))
+            cluster_threshold_usd = Decimal(
+                str(self.orderbook_settings.cluster_threshold_usd)
+            )
             # Convert proximity percentage to a Decimal factor
-            proximity_factor = Decimal(str(self.orderbook_settings.cluster_proximity_pct / 100.0))
+            proximity_factor = Decimal(
+                str(self.orderbook_settings.cluster_proximity_pct / 100.0)
+            )
 
             # Combine all calculated support, resistance, and pivot levels for checking
             all_levels_to_check: Dict[str, Decimal] = {}
             # Ensure only valid Decimal levels are included
-            all_levels_to_check.update({k: v for k, v in levels.get("support", {}).items() if isinstance(v, Decimal)})
             all_levels_to_check.update(
-                {k: v for k, v in levels.get("resistance", {}).items() if isinstance(v, Decimal)}
+                {
+                    k: v
+                    for k, v in levels.get("support", {}).items()
+                    if isinstance(v, Decimal)
+                }
+            )
+            all_levels_to_check.update(
+                {
+                    k: v
+                    for k, v in levels.get("resistance", {}).items()
+                    if isinstance(v, Decimal)
+                }
             )
             pivot_level = levels.get("pivot")
             if pivot_level is not None and isinstance(pivot_level, Decimal):
                 all_levels_to_check["Pivot"] = pivot_level
 
-            processed_clusters = set()  # Track processed levels to avoid duplicates if S/R overlap
+            processed_clusters = (
+                set()
+            )  # Track processed levels to avoid duplicates if S/R overlap
 
             for name, level_price in all_levels_to_check.items():
-                if not isinstance(level_price, Decimal) or level_price <= DECIMAL_COMPARISON_THRESHOLD:
+                if (
+                    not isinstance(level_price, Decimal)
+                    or level_price <= DECIMAL_COMPARISON_THRESHOLD
+                ):
                     continue
 
                 # Define the price range around the level to check for clusters
@@ -1707,12 +2085,17 @@ class TradingAnalyzer:
                 # Check for significant bid clusters (potential support confirmation) near the level
                 if not bids_df.empty:
                     # Ensure comparison is between Decimals
-                    bids_near_level = bids_df[(bids_df["price"] >= min_price) & (bids_df["price"] <= max_price)]
+                    bids_near_level = bids_df[
+                        (bids_df["price"] >= min_price)
+                        & (bids_df["price"] <= max_price)
+                    ]
                     bid_cluster_value_usd = bids_near_level["value_usd"].sum()
 
                     if bid_cluster_value_usd >= cluster_threshold_usd:
                         # Use level price for uniqueness check, format consistently
-                        cluster_id = f"BID_{level_price:.8f}"  # Use sufficient precision for ID
+                        cluster_id = (
+                            f"BID_{level_price:.8f}"  # Use sufficient precision for ID
+                        )
                         if cluster_id not in processed_clusters:
                             analysis["clusters"].append(
                                 {
@@ -1720,14 +2103,20 @@ class TradingAnalyzer:
                                     "level_name": name,
                                     "level_price": level_price,
                                     "cluster_value_usd": bid_cluster_value_usd,
-                                    "price_range": (min_price, max_price),  # Store the range checked
+                                    "price_range": (
+                                        min_price,
+                                        max_price,
+                                    ),  # Store the range checked
                                 }
                             )
                             processed_clusters.add(cluster_id)
 
                 # Check for significant ask clusters (potential resistance confirmation) near the level
                 if not asks_df.empty:
-                    asks_near_level = asks_df[(asks_df["price"] >= min_price) & (asks_df["price"] <= max_price)]
+                    asks_near_level = asks_df[
+                        (asks_df["price"] >= min_price)
+                        & (asks_df["price"] <= max_price)
+                    ]
                     ask_cluster_value_usd = asks_near_level["value_usd"].sum()
 
                     if ask_cluster_value_usd >= cluster_threshold_usd:
@@ -1746,10 +2135,14 @@ class TradingAnalyzer:
 
         except (KeyError, ValueError, TypeError, InvalidOperation, AttributeError) as e:
             self.logger.error(f"Error analyzing orderbook for {self.symbol}: {e}")
-            self.logger.debug(traceback.format_exc())  # Log stack trace for debugging OB issues
+            self.logger.debug(
+                traceback.format_exc()
+            )  # Log stack trace for debugging OB issues
         except Exception as e:
             # Catch any unexpected errors during order book analysis
-            self.logger.exception(f"Unexpected error analyzing orderbook for {self.symbol}: {e}")
+            self.logger.exception(
+                f"Unexpected error analyzing orderbook for {self.symbol}: {e}"
+            )
 
         # Sort identified clusters by their USD value (descending) for prominence
         analysis["clusters"] = sorted(
@@ -1784,7 +2177,14 @@ class TradingAnalyzer:
         # pd.isna() handles all these cases
         return default if pd.isna(val) else val
 
-    def _format_signal(self, label: str, value: Any, signal: SignalState, precision: int = 2, details: str = "") -> str:
+    def _format_signal(
+        self,
+        label: str,
+        value: Any,
+        signal: SignalState,
+        precision: int = 2,
+        details: str = "",
+    ) -> str:
         """
         Formats a single line of the analysis summary, applying color based on the signal state.
 
@@ -1839,7 +2239,9 @@ class TradingAnalyzer:
             SignalState.LOW_VOLUME: Color.PURPLE,
             SignalState.NA: Color.YELLOW,  # Default color for N/A or unmapped states
         }
-        color = color_map.get(signal, Color.YELLOW)  # Default to yellow if signal not in map
+        color = color_map.get(
+            signal, Color.YELLOW
+        )  # Default to yellow if signal not in map
 
         # Get the string value from the SignalState enum
         signal_text = signal.value if isinstance(signal, SignalState) else str(signal)
@@ -1853,7 +2255,9 @@ class TradingAnalyzer:
 
         return f"{label_part}{value_part}{signal_part}{details_part}"
 
-    def _interpret_trend(self, last_row: pd.Series, prev_row: pd.Series) -> Tuple[List[str], Dict[str, SignalState]]:
+    def _interpret_trend(
+        self, last_row: pd.Series, prev_row: pd.Series
+    ) -> Tuple[List[str], Dict[str, SignalState]]:
         """Interprets trend indicators (EMAs, ADX, PSAR)."""
         summary_lines: List[str] = []
         signals: Dict[str, SignalState] = {}
@@ -1874,7 +2278,13 @@ class TradingAnalyzer:
 
             if np.isfinite(ema_short) and np.isfinite(ema_long):
                 signal = SignalState.NEUTRAL
-                comparison_char = ">" if ema_short > ema_long else "<" if ema_short < ema_long else "="
+                comparison_char = (
+                    ">"
+                    if ema_short > ema_long
+                    else "<"
+                    if ema_short < ema_long
+                    else "="
+                )
                 if ema_short > ema_long:
                     signal = SignalState.BULLISH
                 elif ema_short < ema_long:
@@ -1885,7 +2295,9 @@ class TradingAnalyzer:
             else:
                 details = "N/A"  # Indicate missing data
 
-            summary_lines.append(self._format_signal(label, value, signal, details=details))
+            summary_lines.append(
+                self._format_signal(label, value, signal, details=details)
+            )
 
         # --- ADX Trend Strength ---
         signal_key = "adx_trend"
@@ -1905,12 +2317,18 @@ class TradingAnalyzer:
                 if adx >= trend_threshold:
                     if dmp > dmn:
                         signal = SignalState.STRONG_BULLISH
-                        details = f"+DI ({format_decimal(dmp)}) > -DI ({format_decimal(dmn)})"
+                        details = (
+                            f"+DI ({format_decimal(dmp)}) > -DI ({format_decimal(dmn)})"
+                        )
                     elif dmn > dmp:
                         signal = SignalState.STRONG_BEARISH
-                        details = f"-DI ({format_decimal(dmn)}) > +DI ({format_decimal(dmp)})"
+                        details = (
+                            f"-DI ({format_decimal(dmn)}) > +DI ({format_decimal(dmp)})"
+                        )
                     else:  # dmp == dmn (unlikely but possible)
-                        signal = SignalState.RANGING  # Treat as ranging if DI lines are equal
+                        signal = (
+                            SignalState.RANGING
+                        )  # Treat as ranging if DI lines are equal
                         details = "+DI == -DI"
                 else:
                     signal = SignalState.RANGING
@@ -1919,7 +2337,9 @@ class TradingAnalyzer:
             else:
                 details = "N/A"
 
-            summary_lines.append(self._format_signal(label, value, signal, details=details))
+            summary_lines.append(
+                self._format_signal(label, value, signal, details=details)
+            )
 
         # --- PSAR Flip ---
         signal_key_trend = "psar_trend"
@@ -1955,26 +2375,41 @@ class TradingAnalyzer:
                 signal = trend_signal  # Base signal is the current trend
 
                 # Check if a reversal occurred on *this* candle by comparing current trend with previous.
-                prev_psar_l = self._get_val(prev_row, cols.get("psar_long"), default=np.nan)
-                prev_psar_s = self._get_val(prev_row, cols.get("psar_short"), default=np.nan)
+                prev_psar_l = self._get_val(
+                    prev_row, cols.get("psar_long"), default=np.nan
+                )
+                prev_psar_s = self._get_val(
+                    prev_row, cols.get("psar_short"), default=np.nan
+                )
                 prev_trend_signal = SignalState.NA
                 if np.isfinite(prev_psar_l):
                     prev_trend_signal = SignalState.BULLISH
                 elif np.isfinite(prev_psar_s):
                     prev_trend_signal = SignalState.BEARISH
 
-                if prev_trend_signal != SignalState.NA and trend_signal != prev_trend_signal:
+                if (
+                    prev_trend_signal != SignalState.NA
+                    and trend_signal != prev_trend_signal
+                ):
                     # Trend flipped between previous and current candle
                     signal = (
-                        SignalState.FLIP_BULLISH if trend_signal == SignalState.BULLISH else SignalState.FLIP_BEARISH
+                        SignalState.FLIP_BULLISH
+                        if trend_signal == SignalState.BULLISH
+                        else SignalState.FLIP_BEARISH
                     )
                     details = "Just Flipped!"
 
-                signals[signal_key_signal] = signal  # Store the final signal (flip or trend)
+                signals[signal_key_signal] = (
+                    signal  # Store the final signal (flip or trend)
+                )
             else:
                 details = "N/A"
 
-            summary_lines.append(self._format_signal(label, psar_display_val, signal, precision=4, details=details))
+            summary_lines.append(
+                self._format_signal(
+                    label, psar_display_val, signal, precision=4, details=details
+                )
+            )
 
         return summary_lines, signals
 
@@ -2070,7 +2505,12 @@ class TradingAnalyzer:
             d_str = format_decimal(d_now)
             value = f"K:{k_str} D:{d_str}" if k_str != "N/A" or d_str != "N/A" else None
 
-            if np.isfinite(k_now) and np.isfinite(d_now) and np.isfinite(k_prev) and np.isfinite(d_prev):
+            if (
+                np.isfinite(k_now)
+                and np.isfinite(d_now)
+                and np.isfinite(k_prev)
+                and np.isfinite(d_prev)
+            ):
                 # Check for bullish crossover: K crosses above D
                 crossed_bullish = k_now > d_now and k_prev <= d_prev
                 # Check for bearish crossover: K crosses below D
@@ -2096,11 +2536,15 @@ class TradingAnalyzer:
             else:
                 details = "N/A"  # Indicate missing data for cross check
 
-            summary_lines.append(self._format_signal(label, value, signal, details=details))
+            summary_lines.append(
+                self._format_signal(label, value, signal, details=details)
+            )
 
         return summary_lines, signals
 
-    def _interpret_macd(self, last_row: pd.Series, prev_row: pd.Series) -> Tuple[List[str], Dict[str, SignalState]]:
+    def _interpret_macd(
+        self, last_row: pd.Series, prev_row: pd.Series
+    ) -> Tuple[List[str], Dict[str, SignalState]]:
         """Interprets MACD line/signal cross and basic divergence."""
         summary_lines: List[str] = []
         signals: Dict[str, SignalState] = {}
@@ -2120,9 +2564,18 @@ class TradingAnalyzer:
             details = ""
             line_str = format_decimal(line_now, 4)
             sig_str = format_decimal(sig_now, 4)
-            value = f"L:{line_str} S:{sig_str}" if line_str != "N/A" or sig_str != "N/A" else None
+            value = (
+                f"L:{line_str} S:{sig_str}"
+                if line_str != "N/A" or sig_str != "N/A"
+                else None
+            )
 
-            if np.isfinite(line_now) and np.isfinite(sig_now) and np.isfinite(line_prev) and np.isfinite(sig_prev):
+            if (
+                np.isfinite(line_now)
+                and np.isfinite(sig_now)
+                and np.isfinite(line_prev)
+                and np.isfinite(sig_prev)
+            ):
                 crossed_bullish = line_now > sig_now and line_prev <= sig_prev
                 crossed_bearish = line_now < sig_now and line_prev >= sig_prev
 
@@ -2161,25 +2614,44 @@ class TradingAnalyzer:
             price_prev = self._get_val(prev_row, "close", default=np.nan)
             signal = SignalState.NA  # Default to NA if data missing
 
-            if np.isfinite(hist_now) and np.isfinite(hist_prev) and np.isfinite(price_now) and np.isfinite(price_prev):
+            if (
+                np.isfinite(hist_now)
+                and np.isfinite(hist_prev)
+                and np.isfinite(price_now)
+                and np.isfinite(price_prev)
+            ):
                 signal = SignalState.NONE  # Default to None (no divergence detected)
 
                 # Basic Bullish Divergence: Lower low in price, higher low in histogram (near/below zero)
-                if price_now < price_prev and hist_now > hist_prev and (hist_prev < 0 or hist_now < 0):
+                if (
+                    price_now < price_prev
+                    and hist_now > hist_prev
+                    and (hist_prev < 0 or hist_now < 0)
+                ):
                     signal = SignalState.BULLISH
-                    summary_lines.append(Color.format("Potential Bullish MACD Divergence", Color.GREEN))
+                    summary_lines.append(
+                        Color.format("Potential Bullish MACD Divergence", Color.GREEN)
+                    )
 
                 # Basic Bearish Divergence: Higher high in price, lower high in histogram (near/above zero)
-                elif price_now > price_prev and hist_now < hist_prev and (hist_prev > 0 or hist_now > 0):
+                elif (
+                    price_now > price_prev
+                    and hist_now < hist_prev
+                    and (hist_prev > 0 or hist_now > 0)
+                ):
                     signal = SignalState.BEARISH
-                    summary_lines.append(Color.format("Potential Bearish MACD Divergence", Color.RED))
+                    summary_lines.append(
+                        Color.format("Potential Bearish MACD Divergence", Color.RED)
+                    )
 
                 signals[signal_key] = signal
             # No separate summary line added unless divergence is detected
 
         return summary_lines, signals
 
-    def _interpret_bbands(self, last_row: pd.Series) -> Tuple[List[str], Dict[str, SignalState]]:
+    def _interpret_bbands(
+        self, last_row: pd.Series
+    ) -> Tuple[List[str], Dict[str, SignalState]]:
         """Interprets Bollinger Bands breakouts/position."""
         summary_lines: List[str] = []
         signals: Dict[str, SignalState] = {}
@@ -2199,7 +2671,12 @@ class TradingAnalyzer:
             details = ""
             value = close_val  # Display current close price relative to bands
 
-            if np.isfinite(upper) and np.isfinite(lower) and np.isfinite(middle) and np.isfinite(close_val):
+            if (
+                np.isfinite(upper)
+                and np.isfinite(lower)
+                and np.isfinite(middle)
+                and np.isfinite(close_val)
+            ):
                 signal = SignalState.WITHIN_BANDS  # Default assumption
                 details = f"L:{format_decimal(lower)} M:{format_decimal(middle)} U:{format_decimal(upper)}"
 
@@ -2221,11 +2698,15 @@ class TradingAnalyzer:
             else:
                 details = "N/A"
 
-            summary_lines.append(self._format_signal(label, value, signal, details=details))
+            summary_lines.append(
+                self._format_signal(label, value, signal, details=details)
+            )
 
         return summary_lines, signals
 
-    def _interpret_volume(self, last_row: pd.Series, prev_row: pd.Series) -> Tuple[List[str], Dict[str, SignalState]]:
+    def _interpret_volume(
+        self, last_row: pd.Series, prev_row: pd.Series
+    ) -> Tuple[List[str], Dict[str, SignalState]]:
         """Interprets volume levels and volume-based indicators (OBV, ADOSC)."""
         summary_lines: List[str] = []
         signals: Dict[str, SignalState] = {}
@@ -2260,14 +2741,18 @@ class TradingAnalyzer:
                     signals[signal_key] = signal
                 else:  # Handle zero or very low MA
                     signal = (
-                        SignalState.LOW_VOLUME if volume < 1 else SignalState.AVERAGE_VOLUME
+                        SignalState.LOW_VOLUME
+                        if volume < 1
+                        else SignalState.AVERAGE_VOLUME
                     )  # Treat as low unless volume itself is substantial
                     details = f"Vol:{format_decimal(volume, 0)} MA: ~0"
                     signals[signal_key] = signal
             else:
                 details = "N/A"
 
-            summary_lines.append(self._format_signal(label, value, signal, precision=0, details=details))
+            summary_lines.append(
+                self._format_signal(label, value, signal, precision=0, details=details)
+            )
 
         # --- OBV Trend ---
         signal_key = "obv_trend"
@@ -2281,9 +2766,13 @@ class TradingAnalyzer:
 
             if np.isfinite(obv_now) and np.isfinite(obv_prev):
                 # Check for significant change (optional, avoids noise)
-                change_threshold = 0.0001  # Example: 0.01% change relative to previous value
+                change_threshold = (
+                    0.0001  # Example: 0.01% change relative to previous value
+                )
                 diff = obv_now - obv_prev
-                relative_diff = abs(diff / obv_prev) if abs(obv_prev) > 1e-9 else abs(diff)
+                relative_diff = (
+                    abs(diff / obv_prev) if abs(obv_prev) > 1e-9 else abs(diff)
+                )
 
                 if relative_diff < change_threshold:
                     signal = SignalState.FLAT
@@ -2328,7 +2817,9 @@ class TradingAnalyzer:
 
         return summary_lines, signals
 
-    def _interpret_levels_orderbook(self, current_price: Decimal, levels: dict, orderbook_analysis: dict) -> List[str]:
+    def _interpret_levels_orderbook(
+        self, current_price: Decimal, levels: dict, orderbook_analysis: dict
+    ) -> List[str]:
         """Formats the calculated levels and orderbook analysis into summary lines."""
         summary_lines = []
         summary_lines.append(Color.format("\n--- Levels & Orderbook ---", Color.BLUE))
@@ -2344,16 +2835,24 @@ class TradingAnalyzer:
             summary_lines.append("Pivot Point: N/A")
 
         # Show nearest levels (e.g., top 3 closest)
-        def get_nearest(level_dict: Dict[str, Decimal], price: Decimal, count: int) -> List[Tuple[str, Decimal]]:
+        def get_nearest(
+            level_dict: Dict[str, Decimal], price: Decimal, count: int
+        ) -> List[Tuple[str, Decimal]]:
             if not level_dict:
                 return []
             # Calculate absolute difference using Decimals
             try:
                 # Filter out non-Decimal values just in case
-                valid_levels = [(k, v) for k, v in level_dict.items() if isinstance(v, Decimal)]
-                return sorted(valid_levels, key=lambda item: abs(item[1] - price))[:count]
+                valid_levels = [
+                    (k, v) for k, v in level_dict.items() if isinstance(v, Decimal)
+                ]
+                return sorted(valid_levels, key=lambda item: abs(item[1] - price))[
+                    :count
+                ]
             except TypeError as e:
-                self.logger.error(f"TypeError sorting levels: {e}. Check level data types.")
+                self.logger.error(
+                    f"TypeError sorting levels: {e}. Check level data types."
+                )
                 return []  # Return empty list on error
 
         nearest_supports = get_nearest(support_levels, current_price, 3)
@@ -2373,8 +2872,14 @@ class TradingAnalyzer:
         else:
             summary_lines.append("Nearest Resistance: None Calculated")
 
-        if not nearest_supports and not nearest_resistances and (not pivot or not isinstance(pivot, Decimal)):
-            summary_lines.append(Color.format("No significant levels calculated.", Color.YELLOW))
+        if (
+            not nearest_supports
+            and not nearest_resistances
+            and (not pivot or not isinstance(pivot, Decimal))
+        ):
+            summary_lines.append(
+                Color.format("No significant levels calculated.", Color.YELLOW)
+            )
 
         # --- Orderbook Summary ---
         summary_lines.append("")  # Add a blank line
@@ -2387,15 +2892,22 @@ class TradingAnalyzer:
             # Pressure is already formatted with color in _analyze_orderbook
             pressure_str = orderbook_analysis.get("pressure", SignalState.NA.value)
             summary_lines.append(f"OB Pressure (Top {ob_limit}): {pressure_str}")
-            summary_lines.append(f"OB Value (Bids): ${format_decimal(total_bid_usd, 0)}")
-            summary_lines.append(f"OB Value (Asks): ${format_decimal(total_ask_usd, 0)}")
+            summary_lines.append(
+                f"OB Value (Bids): ${format_decimal(total_bid_usd, 0)}"
+            )
+            summary_lines.append(
+                f"OB Value (Asks): ${format_decimal(total_ask_usd, 0)}"
+            )
 
             clusters = orderbook_analysis.get("clusters", [])  # List of dicts
             if clusters:
                 # Display top N clusters (e.g., 5)
                 max_clusters_to_show = 5
                 summary_lines.append(
-                    Color.format(f"Significant OB Clusters (Top {max_clusters_to_show}):", Color.PURPLE)
+                    Color.format(
+                        f"Significant OB Clusters (Top {max_clusters_to_show}):",
+                        Color.PURPLE,
+                    )
                 )
                 for cluster in clusters[:max_clusters_to_show]:
                     cluster_type = cluster.get("type", "N/A")
@@ -2415,20 +2927,32 @@ class TradingAnalyzer:
 
                     summary_lines.append(
                         Color.format(
-                            f"  {cluster_type} near {level_name} (${level_price_f}) - Value: ${cluster_val_f}", color
+                            f"  {cluster_type} near {level_name} (${level_price_f}) - Value: ${cluster_val_f}",
+                            color,
                         )
                     )
             else:
-                summary_lines.append(Color.format("No significant OB clusters found near levels.", Color.YELLOW))
+                summary_lines.append(
+                    Color.format(
+                        "No significant OB clusters found near levels.", Color.YELLOW
+                    )
+                )
         else:
             summary_lines.append(
-                Color.format(f"Orderbook analysis unavailable or empty (Top {ob_limit}).", Color.YELLOW)
+                Color.format(
+                    f"Orderbook analysis unavailable or empty (Top {ob_limit}).",
+                    Color.YELLOW,
+                )
             )
 
         return summary_lines
 
     def _interpret_analysis(
-        self, df: pd.DataFrame, current_price: Decimal, levels: dict, orderbook_analysis: dict
+        self,
+        df: pd.DataFrame,
+        current_price: Decimal,
+        levels: dict,
+        orderbook_analysis: dict,
     ) -> dict:
         """
         Combines all interpretation steps into a final summary and signal dictionary.
@@ -2466,19 +2990,29 @@ class TradingAnalyzer:
             "adi_trend",
         ]
         # Initialize all signals to NA enum value
-        interpretation["signals"] = {key: SignalState.NA.value for key in all_signal_keys}
+        interpretation["signals"] = {
+            key: SignalState.NA.value for key in all_signal_keys
+        }
 
         if df.empty or len(df) < 2:
-            self.logger.warning(f"Insufficient data ({len(df)} rows) for full interpretation on {self.symbol}.")
+            self.logger.warning(
+                f"Insufficient data ({len(df)} rows) for full interpretation on {self.symbol}."
+            )
             interpretation["summary"].append(
-                Color.format("Insufficient data for full analysis interpretation.", Color.YELLOW)
+                Color.format(
+                    "Insufficient data for full analysis interpretation.", Color.YELLOW
+                )
             )
             # Keep signals as NA initialized above
             return interpretation
         if not isinstance(current_price, Decimal) or not current_price.is_finite():
             # This check should ideally happen before calling this function
-            self.logger.error("Invalid current_price type or value for interpretation. Expected finite Decimal.")
-            interpretation["summary"].append(Color.format("Invalid current price for interpretation.", Color.RED))
+            self.logger.error(
+                "Invalid current_price type or value for interpretation. Expected finite Decimal."
+            )
+            interpretation["summary"].append(
+                Color.format("Invalid current price for interpretation.", Color.RED)
+            )
             return interpretation
 
         try:
@@ -2496,7 +3030,9 @@ class TradingAnalyzer:
             macd_summary, macd_signals = self._interpret_macd(last_row, prev_row)
             bb_summary, bb_signals = self._interpret_bbands(last_row)
             vol_summary, vol_signals = self._interpret_volume(last_row, prev_row)
-            level_ob_summary = self._interpret_levels_orderbook(current_price, levels, orderbook_analysis)
+            level_ob_summary = self._interpret_levels_orderbook(
+                current_price, levels, orderbook_analysis
+            )
 
             # --- Combine Results ---
             interpretation["summary"].extend(trend_summary)
@@ -2507,13 +3043,23 @@ class TradingAnalyzer:
             interpretation["summary"].extend(level_ob_summary)
 
             # Combine all signal dictionaries, overwriting defaults
-            all_signals_enums = {**trend_signals, **osc_signals, **macd_signals, **bb_signals, **vol_signals}
+            all_signals_enums = {
+                **trend_signals,
+                **osc_signals,
+                **macd_signals,
+                **bb_signals,
+                **vol_signals,
+            }
 
             # Update the interpretation dict, converting Enum members to their string values
             for key, signal_enum in all_signals_enums.items():
-                if key in interpretation["signals"]:  # Ensure we only update expected keys
+                if (
+                    key in interpretation["signals"]
+                ):  # Ensure we only update expected keys
                     interpretation["signals"][key] = (
-                        signal_enum.value if isinstance(signal_enum, SignalState) else SignalState.NA.value
+                        signal_enum.value
+                        if isinstance(signal_enum, SignalState)
+                        else SignalState.NA.value
                     )
                 else:
                     self.logger.warning(
@@ -2524,24 +3070,44 @@ class TradingAnalyzer:
             self.logger.error(
                 f"IndexError during interpretation for {self.symbol}. DataFrame length: {len(df)}. Error: {e}"
             )
-            interpretation["summary"].append(Color.format("Error accessing data rows for interpretation.", Color.RED))
-            # Reset signals to NA on error
-            interpretation["signals"] = {key: SignalState.NA.value for key in all_signal_keys}
-        except KeyError as e:
-            self.logger.error(f"KeyError during interpretation for {self.symbol}. Missing indicator column? Error: {e}")
             interpretation["summary"].append(
-                Color.format(f"Error accessing indicator data ({e}) for interpretation.", Color.RED)
+                Color.format("Error accessing data rows for interpretation.", Color.RED)
             )
-            interpretation["signals"] = {key: SignalState.NA.value for key in all_signal_keys}
+            # Reset signals to NA on error
+            interpretation["signals"] = {
+                key: SignalState.NA.value for key in all_signal_keys
+            }
+        except KeyError as e:
+            self.logger.error(
+                f"KeyError during interpretation for {self.symbol}. Missing indicator column? Error: {e}"
+            )
+            interpretation["summary"].append(
+                Color.format(
+                    f"Error accessing indicator data ({e}) for interpretation.",
+                    Color.RED,
+                )
+            )
+            interpretation["signals"] = {
+                key: SignalState.NA.value for key in all_signal_keys
+            }
         except Exception as e:
-            self.logger.exception(f"Unexpected error during analysis interpretation for {self.symbol}: {e}")
-            interpretation["summary"].append(Color.format(f"Unexpected error during interpretation: {e}", Color.RED))
-            interpretation["signals"] = {key: SignalState.NA.value for key in all_signal_keys}
+            self.logger.exception(
+                f"Unexpected error during analysis interpretation for {self.symbol}: {e}"
+            )
+            interpretation["summary"].append(
+                Color.format(f"Unexpected error during interpretation: {e}", Color.RED)
+            )
+            interpretation["signals"] = {
+                key: SignalState.NA.value for key in all_signal_keys
+            }
 
         return interpretation
 
     def analyze(
-        self, df_klines_decimal: pd.DataFrame, current_price: Optional[Decimal], orderbook: Optional[dict]
+        self,
+        df_klines_decimal: pd.DataFrame,
+        current_price: Optional[Decimal],
+        orderbook: Optional[dict],
     ) -> dict:
         """
         Main analysis function orchestrating data processing, indicator calculation,
@@ -2569,7 +3135,12 @@ class TradingAnalyzer:
                 "total_ask_usd": "N/A",
                 "clusters": [],
             },
-            "interpretation": {"summary": [Color.format("Analysis could not be performed.", Color.RED)], "signals": {}},
+            "interpretation": {
+                "summary": [
+                    Color.format("Analysis could not be performed.", Color.RED)
+                ],
+                "signals": {},
+            },
             "raw_indicators": {},  # Store last row's indicator values (as floats)
         }
         # Initialize signals sub-dictionary
@@ -2590,13 +3161,19 @@ class TradingAnalyzer:
             "obv_trend",
             "adi_trend",
         ]
-        analysis_result["interpretation"]["signals"] = {key: SignalState.NA.value for key in all_signal_keys}
+        analysis_result["interpretation"]["signals"] = {
+            key: SignalState.NA.value for key in all_signal_keys
+        }
 
         # --- Pre-checks ---
         if current_price is None:
-            self.logger.warning(f"Current price is unavailable for {self.symbol}. Analysis will be incomplete.")
+            self.logger.warning(
+                f"Current price is unavailable for {self.symbol}. Analysis will be incomplete."
+            )
             analysis_result["interpretation"]["summary"] = [
-                Color.format("Current price unavailable, analysis incomplete.", Color.YELLOW)
+                Color.format(
+                    "Current price unavailable, analysis incomplete.", Color.YELLOW
+                )
             ]
             # Allow analysis to proceed, but interpretation might be limited
         elif not isinstance(current_price, Decimal) or not current_price.is_finite():
@@ -2604,14 +3181,20 @@ class TradingAnalyzer:
                 f"Invalid current_price type or value ({current_price}) received for {self.symbol}. Cannot proceed."
             )
             analysis_result["interpretation"]["summary"] = [
-                Color.format("Invalid current price type/value, analysis failed.", Color.RED)
+                Color.format(
+                    "Invalid current price type/value, analysis failed.", Color.RED
+                )
             ]
             return analysis_result
         else:
-            analysis_result["current_price"] = format_decimal(current_price, 4)  # Format price early
+            analysis_result["current_price"] = format_decimal(
+                current_price, 4
+            )  # Format price early
 
         if df_klines_decimal.empty:
-            self.logger.error(f"Kline data is empty for {self.symbol}. Cannot perform analysis.")
+            self.logger.error(
+                f"Kline data is empty for {self.symbol}. Cannot perform analysis."
+            )
             # Keep the initial error message in summary
             return analysis_result
         if len(df_klines_decimal) < 2:
@@ -2620,9 +3203,15 @@ class TradingAnalyzer:
                 f"Kline data has only {len(df_klines_decimal)} row(s) for {self.symbol}. Analysis requires >= 2 rows for comparisons; results may be incomplete."
             )
             # Update summary if it's still the default error
-            if "Analysis could not be performed" in analysis_result["interpretation"]["summary"][0]:
+            if (
+                "Analysis could not be performed"
+                in analysis_result["interpretation"]["summary"][0]
+            ):
                 analysis_result["interpretation"]["summary"] = [
-                    Color.format("Warning: Insufficient kline data (< 2 rows) for full analysis.", Color.YELLOW)
+                    Color.format(
+                        "Warning: Insufficient kline data (< 2 rows) for full analysis.",
+                        Color.YELLOW,
+                    )
                 ]
 
         try:
@@ -2653,14 +3242,18 @@ class TradingAnalyzer:
                         interval_key = "W"
                     # Monthly ('M') is harder to infer accurately from timedelta
                     else:
-                        interval_key = f"{interval_timedelta}"  # Fallback to timedelta string
+                        interval_key = (
+                            f"{interval_timedelta}"  # Fallback to timedelta string
+                        )
 
                     analysis_result["kline_interval"] = interval_key
                 else:
                     # Handle cases with only one diff or variable intervals
                     median_diff = time_diffs.median()
                     if pd.notna(median_diff):
-                        analysis_result["kline_interval"] = f"~{str(median_diff)} (Median)"
+                        analysis_result["kline_interval"] = (
+                            f"~{str(median_diff)} (Median)"
+                        )
                     else:
                         analysis_result["kline_interval"] = "Variable/Unknown"
             elif len(df_klines_decimal) == 1:
@@ -2671,8 +3264,13 @@ class TradingAnalyzer:
             df_with_indicators = self._calculate_indicators(df_klines_decimal)
 
             if df_with_indicators.empty or len(df_with_indicators) == 0:
-                self.logger.error(f"Indicator calculation failed or resulted in empty DataFrame for {self.symbol}.")
-                if "Analysis could not be performed" in analysis_result["interpretation"]["summary"][0]:
+                self.logger.error(
+                    f"Indicator calculation failed or resulted in empty DataFrame for {self.symbol}."
+                )
+                if (
+                    "Analysis could not be performed"
+                    in analysis_result["interpretation"]["summary"][0]
+                ):
                     analysis_result["interpretation"]["summary"] = [
                         Color.format("Indicator calculation failed.", Color.RED)
                     ]
@@ -2690,26 +3288,36 @@ class TradingAnalyzer:
                             v.isoformat()
                             if isinstance(v, (pd.Timestamp, datetime))
                             # Format dates
-                            else (str(v) if pd.notna(v) and not isinstance(v, (dict, list, tuple)) else None)
+                            else (
+                                str(v)
+                                if pd.notna(v)
+                                and not isinstance(v, (dict, list, tuple))
+                                else None
+                            )
                         )
                     )  # Stringify others, skip complex/None
                     for k, v in last_row_indicators.items()
                     # Include only expected indicator columns and core OHLCV + timestamp
-                    if k in self.col_names.values() or k in ["timestamp", "open", "high", "low", "close", "volume"]
+                    if k in self.col_names.values()
+                    or k in ["timestamp", "open", "high", "low", "close", "volume"]
                 }
 
             # --- 2. Calculate Levels ---
             # Levels calculation needs Decimal price, and uses the float OHLCV from df_with_indicators
             levels_decimal = {}
             if isinstance(current_price, Decimal) and current_price.is_finite():
-                levels_decimal = self._calculate_levels(df_with_indicators, current_price)
+                levels_decimal = self._calculate_levels(
+                    df_with_indicators, current_price
+                )
                 # Format level prices (which are Decimals) for the result dictionary
                 analysis_result["levels"] = {
                     "support": {
-                        name: format_decimal(price, 4) for name, price in levels_decimal.get("support", {}).items()
+                        name: format_decimal(price, 4)
+                        for name, price in levels_decimal.get("support", {}).items()
                     },
                     "resistance": {
-                        name: format_decimal(price, 4) for name, price in levels_decimal.get("resistance", {}).items()
+                        name: format_decimal(price, 4)
+                        for name, price in levels_decimal.get("resistance", {}).items()
                     },
                     "pivot": format_decimal(levels_decimal.get("pivot"), 4)
                     if levels_decimal.get("pivot") is not None
@@ -2717,31 +3325,51 @@ class TradingAnalyzer:
                 }
             else:
                 # Keep default "N/A" values set during initialization
-                self.logger.warning("Skipping level calculation due to missing or invalid current price.")
+                self.logger.warning(
+                    "Skipping level calculation due to missing or invalid current price."
+                )
 
             # --- 3. Analyze Orderbook ---
             # Orderbook analysis needs Decimal price and Decimal levels
             orderbook_analysis_raw = {}
-            if orderbook and isinstance(current_price, Decimal) and current_price.is_finite():
+            if (
+                orderbook
+                and isinstance(current_price, Decimal)
+                and current_price.is_finite()
+            ):
                 # Pass the levels dictionary containing Decimals
-                orderbook_analysis_raw = self._analyze_orderbook(orderbook, current_price, levels_decimal)
+                orderbook_analysis_raw = self._analyze_orderbook(
+                    orderbook, current_price, levels_decimal
+                )
                 # Format orderbook analysis results for output dictionary
                 analysis_result["orderbook_analysis"] = {
                     "pressure": orderbook_analysis_raw.get(
                         "pressure", SignalState.NA.value
                     ),  # Pressure is already formatted
-                    "total_bid_usd": format_decimal(orderbook_analysis_raw.get("total_bid_usd", DECIMAL_ZERO), 0),
-                    "total_ask_usd": format_decimal(orderbook_analysis_raw.get("total_ask_usd", DECIMAL_ZERO), 0),
+                    "total_bid_usd": format_decimal(
+                        orderbook_analysis_raw.get("total_bid_usd", DECIMAL_ZERO), 0
+                    ),
+                    "total_ask_usd": format_decimal(
+                        orderbook_analysis_raw.get("total_ask_usd", DECIMAL_ZERO), 0
+                    ),
                     "clusters": [
                         {
                             "type": c.get("type", "N/A"),
                             "level_name": c.get("level_name", "N/A"),
-                            "level_price": format_decimal(c.get("level_price"), 4),  # Format Decimal
-                            "cluster_value_usd": format_decimal(c.get("cluster_value_usd"), 0),  # Format Decimal
+                            "level_price": format_decimal(
+                                c.get("level_price"), 4
+                            ),  # Format Decimal
+                            "cluster_value_usd": format_decimal(
+                                c.get("cluster_value_usd"), 0
+                            ),  # Format Decimal
                             # Format the tuple elements (Decimals) for price range
                             "price_range": (
-                                format_decimal(c.get("price_range", (None, None))[0], 4),
-                                format_decimal(c.get("price_range", (None, None))[1], 4),
+                                format_decimal(
+                                    c.get("price_range", (None, None))[0], 4
+                                ),
+                                format_decimal(
+                                    c.get("price_range", (None, None))[1], 4
+                                ),
                             ),
                         }
                         for c in orderbook_analysis_raw.get("clusters", [])
@@ -2757,25 +3385,36 @@ class TradingAnalyzer:
             # Interpretation uses the DataFrame with float indicators and Decimal price/levels/OB analysis
             if isinstance(current_price, Decimal) and current_price.is_finite():
                 interpretation = self._interpret_analysis(
-                    df_with_indicators, current_price, levels_decimal, orderbook_analysis_raw
+                    df_with_indicators,
+                    current_price,
+                    levels_decimal,
+                    orderbook_analysis_raw,
                 )
                 analysis_result["interpretation"] = interpretation
             else:
                 # Interpretation without price is limited, provide placeholder message
-                self.logger.warning("Skipping full interpretation due to missing or invalid current price.")
+                self.logger.warning(
+                    "Skipping full interpretation due to missing or invalid current price."
+                )
                 analysis_result["interpretation"]["summary"] = [
-                    Color.format("Interpretation skipped due to missing/invalid current price.", Color.YELLOW)
+                    Color.format(
+                        "Interpretation skipped due to missing/invalid current price.",
+                        Color.YELLOW,
+                    )
                 ]
                 # Keep signals as NA
 
         except Exception as e:
-            self.logger.exception(f"Critical error during analysis pipeline for {self.symbol}: {e}")
+            self.logger.exception(
+                f"Critical error during analysis pipeline for {self.symbol}: {e}"
+            )
             analysis_result["interpretation"]["summary"] = [
                 Color.format(f"Critical Analysis Pipeline Error: {e}", Color.RED)
             ]
             # Ensure signals are marked as NA in case of pipeline error
             analysis_result["interpretation"]["signals"] = {
-                k: SignalState.NA.value for k in analysis_result["interpretation"].get("signals", {})
+                k: SignalState.NA.value
+                for k in analysis_result["interpretation"].get("signals", {})
             }
 
         return analysis_result
@@ -2811,13 +3450,18 @@ class TradingAnalyzer:
 
         # --- Interpretation Summary ---
         interpretation = analysis_result.get("interpretation", {})
-        summary_lines = interpretation.get("summary", [])  # These lines already contain color formatting
+        summary_lines = interpretation.get(
+            "summary", []
+        )  # These lines already contain color formatting
 
         if summary_lines:
             # Join the formatted lines from the interpretation steps
             interpretation_block = "\n".join(summary_lines) + "\n"
         else:
-            interpretation_block = Color.format("No interpretation summary available.", Color.YELLOW) + "\n"
+            interpretation_block = (
+                Color.format("No interpretation summary available.", Color.YELLOW)
+                + "\n"
+            )
 
         # --- Combine Parts ---
         output = header + info_line + interpretation_block
@@ -2852,10 +3496,14 @@ async def run_analysis_loop(
             f"Analysis interval ({analysis_interval_sec}s) is very short. Ensure system and API rate limits can handle the load."
         )
     if not interval_config or interval_config not in VALID_INTERVALS:
-        logger_instance.critical(f"Invalid interval '{interval_config}' passed to analysis loop. Stopping.")
+        logger_instance.critical(
+            f"Invalid interval '{interval_config}' passed to analysis loop. Stopping."
+        )
         return
 
-    logger_instance.info(f"Starting analysis loop for {symbol} with interval {interval_config}...")
+    logger_instance.info(
+        f"Starting analysis loop for {symbol} with interval {interval_config}..."
+    )
 
     while True:
         cycle_start_time = time.monotonic()
@@ -2870,11 +3518,15 @@ async def run_analysis_loop(
             # --- Fetch Data Concurrently ---
             # Create tasks for fetching data
             price_task = asyncio.create_task(client.fetch_current_price(symbol))
-            klines_task = asyncio.create_task(client.fetch_klines(symbol, interval_config, kline_limit))
+            klines_task = asyncio.create_task(
+                client.fetch_klines(symbol, interval_config, kline_limit)
+            )
             # Only create orderbook task if limit is positive
             orderbook_task = None
             if orderbook_limit > 0:
-                orderbook_task = asyncio.create_task(client.fetch_orderbook(symbol, orderbook_limit))
+                orderbook_task = asyncio.create_task(
+                    client.fetch_orderbook(symbol, orderbook_limit)
+                )
             else:
                 logger_instance.debug("Orderbook fetching disabled (limit <= 0).")
 
@@ -2894,23 +3546,37 @@ async def run_analysis_loop(
 
             # Check price result
             if isinstance(price_result, Exception):
-                logger_instance.error(f"Error fetching current price for {symbol}: {price_result}")
+                logger_instance.error(
+                    f"Error fetching current price for {symbol}: {price_result}"
+                )
                 current_price = None  # Mark as unavailable
             elif price_result is None:
-                logger_instance.warning(f"Failed to fetch current price for {symbol} (returned None).")
+                logger_instance.warning(
+                    f"Failed to fetch current price for {symbol} (returned None)."
+                )
                 current_price = None
             elif isinstance(price_result, Decimal) and price_result.is_finite():
                 current_price = price_result
             else:
-                logger_instance.error(f"Fetched current price for {symbol} is invalid: {price_result}")
+                logger_instance.error(
+                    f"Fetched current price for {symbol} is invalid: {price_result}"
+                )
                 current_price = None
 
             # Check klines result
             if isinstance(klines_result, Exception):
-                logger_instance.error(f"Error fetching klines for {symbol}: {klines_result}")
+                logger_instance.error(
+                    f"Error fetching klines for {symbol}: {klines_result}"
+                )
                 df_klines = pd.DataFrame()  # Use empty DataFrame to signal failure
-            elif klines_result is None or not isinstance(klines_result, pd.DataFrame) or klines_result.empty:
-                logger_instance.error(f"Failed to fetch valid kline data for {symbol}. Skipping analysis cycle.")
+            elif (
+                klines_result is None
+                or not isinstance(klines_result, pd.DataFrame)
+                or klines_result.empty
+            ):
+                logger_instance.error(
+                    f"Failed to fetch valid kline data for {symbol}. Skipping analysis cycle."
+                )
                 df_klines = pd.DataFrame()
             else:
                 df_klines = klines_result
@@ -2918,10 +3584,14 @@ async def run_analysis_loop(
             # Check orderbook result (only if task was created)
             if orderbook_task:
                 if isinstance(orderbook_result, Exception):
-                    logger_instance.error(f"Error fetching orderbook for {symbol}: {orderbook_result}")
+                    logger_instance.error(
+                        f"Error fetching orderbook for {symbol}: {orderbook_result}"
+                    )
                     orderbook = None
                 elif orderbook_result is None:
-                    logger_instance.warning(f"Failed to fetch orderbook for {symbol} (returned None).")
+                    logger_instance.warning(
+                        f"Failed to fetch orderbook for {symbol} (returned None)."
+                    )
                     orderbook = None
                 else:
                     orderbook = orderbook_result
@@ -2931,7 +3601,9 @@ async def run_analysis_loop(
                 # Pass the original klines DataFrame with Decimals
                 analysis_result = analyzer.analyze(df_klines, current_price, orderbook)
             else:
-                logger_instance.error(f"Skipping analysis for {symbol} due to missing or invalid kline data.")
+                logger_instance.error(
+                    f"Skipping analysis for {symbol} due to missing or invalid kline data."
+                )
                 # Optionally sleep longer if klines consistently fail
                 await async_sleep_with_jitter(INITIAL_RETRY_DELAY_SECONDS)
                 continue  # Skip to next cycle iteration
@@ -2955,27 +3627,43 @@ async def run_analysis_loop(
                             # Let the base default method raise the TypeError
                             return json.JSONEncoder().default(obj)
 
-                        log_data_str = json.dumps(analysis_result, default=decimal_default, indent=2)
-                        log_data = json.loads(log_data_str)  # Convert back to dict structure
+                        log_data_str = json.dumps(
+                            analysis_result, default=decimal_default, indent=2
+                        )
+                        log_data = json.loads(
+                            log_data_str
+                        )  # Convert back to dict structure
 
                         # Remove color codes from summary and pressure for clean JSON log
-                        if "interpretation" in log_data and "summary" in log_data["interpretation"]:
+                        if (
+                            "interpretation" in log_data
+                            and "summary" in log_data["interpretation"]
+                        ):
                             log_data["interpretation"]["summary"] = [
                                 SensitiveFormatter._color_code_regex.sub("", line)
                                 for line in log_data["interpretation"]["summary"]
                                 if isinstance(line, str)
                             ]
-                        if "orderbook_analysis" in log_data and "pressure" in log_data["orderbook_analysis"]:
+                        if (
+                            "orderbook_analysis" in log_data
+                            and "pressure" in log_data["orderbook_analysis"]
+                        ):
                             pressure_val = log_data["orderbook_analysis"]["pressure"]
                             if isinstance(pressure_val, str):
-                                log_data["orderbook_analysis"]["pressure"] = SensitiveFormatter._color_code_regex.sub(
-                                    "", pressure_val
+                                log_data["orderbook_analysis"]["pressure"] = (
+                                    SensitiveFormatter._color_code_regex.sub(
+                                        "", pressure_val
+                                    )
                                 )
 
-                        logger_instance.debug(f"Analysis Result JSON:\n{json.dumps(log_data, indent=2)}")
+                        logger_instance.debug(
+                            f"Analysis Result JSON:\n{json.dumps(log_data, indent=2)}"
+                        )
 
                     except (TypeError, ValueError) as json_err:
-                        logger_instance.error(f"Error serializing analysis result for JSON debug logging: {json_err}")
+                        logger_instance.error(
+                            f"Error serializing analysis result for JSON debug logging: {json_err}"
+                        )
                         # Log the problematic structure if possible (careful with large data)
                         # logger_instance.debug(f"Problematic analysis_result structure: {analysis_result}")
                     except Exception as log_json_err:
@@ -2984,7 +3672,9 @@ async def run_analysis_loop(
                         )
             else:
                 # This case should be less likely now analysis runs even with missing price/OB
-                logger_instance.error("Analysis result was None or empty after execution. Skipping output.")
+                logger_instance.error(
+                    "Analysis result was None or empty after execution. Skipping output."
+                )
 
         # --- Specific Exception Handling for the Loop ---
         except ccxt.AuthenticationError as e:
@@ -3007,7 +3697,8 @@ async def run_analysis_loop(
             # These might occur if trading logic were added. Log as error but continue analysis.
             logger_instance.error(
                 Color.format(
-                    f"Order-related CCXT error encountered: {e}. Check parameters or funds if trading.", Color.RED
+                    f"Order-related CCXT error encountered: {e}. Check parameters or funds if trading.",
+                    Color.RED,
                 )
             )
             # Continue the loop for analysis purposes
@@ -3016,7 +3707,10 @@ async def run_analysis_loop(
             break  # Exit the loop cleanly if cancelled
         except Exception as e:
             logger_instance.exception(
-                Color.format(f"An unexpected error occurred in the main analysis loop for {symbol}: {e}", Color.RED)
+                Color.format(
+                    f"An unexpected error occurred in the main analysis loop for {symbol}: {e}",
+                    Color.RED,
+                )
             )
             # Add a longer sleep after unexpected errors to prevent rapid failure loops
             await async_sleep_with_jitter(10.0)
@@ -3070,19 +3764,29 @@ async def main() -> None:
 
         if not markets_loaded or not temp_client.markets:
             init_logger.critical(
-                Color.format("Failed to load markets during initialization. Cannot proceed. Exiting.", Color.RED)
+                Color.format(
+                    "Failed to load markets during initialization. Cannot proceed. Exiting.",
+                    Color.RED,
+                )
             )
             return  # Exit early
 
         # Get valid symbols (where details are not None) and keep market data
         valid_symbols = [s for s, d in temp_client.markets.items() if d is not None]
         loaded_markets_data = temp_client.markets
-        loaded_market_categories = temp_client.market_categories  # Pass cached categories too
-        init_logger.info(f"Market data loaded successfully ({len(valid_symbols)} valid markets found).")
+        loaded_market_categories = (
+            temp_client.market_categories
+        )  # Pass cached categories too
+        init_logger.info(
+            f"Market data loaded successfully ({len(valid_symbols)} valid markets found)."
+        )
 
     except Exception as client_init_err:
         init_logger.critical(
-            Color.format(f"Failed during client initialization or market loading: {client_init_err}", Color.RED),
+            Color.format(
+                f"Failed during client initialization or market loading: {client_init_err}",
+                Color.RED,
+            ),
             exc_info=True,
         )
         return  # Exit early
@@ -3095,7 +3799,15 @@ async def main() -> None:
     while True:
         try:
             print(Color.format("\nPlease enter the symbol to analyze.", Color.BLUE))
-            symbol_input = input(Color.format("Enter trading symbol (e.g., BTC/USDT): ", Color.YELLOW)).strip().upper()
+            symbol_input = (
+                input(
+                    Color.format(
+                        "Enter trading symbol (e.g., BTC/USDT): ", Color.YELLOW
+                    )
+                )
+                .strip()
+                .upper()
+            )
             if not symbol_input:
                 continue  # Ask again if empty input
 
@@ -3103,13 +3815,29 @@ async def main() -> None:
             potential_symbol = symbol_input
             if "/" not in symbol_input and len(symbol_input) > 3:  # Basic check
                 # Common quote currencies
-                quotes = ["USDT", "USD", "USDC", "BTC", "ETH", "EUR", "GBP", "DAI", "BUSD"]  # Add more if needed
+                quotes = [
+                    "USDT",
+                    "USD",
+                    "USDC",
+                    "BTC",
+                    "ETH",
+                    "EUR",
+                    "GBP",
+                    "DAI",
+                    "BUSD",
+                ]  # Add more if needed
                 for quote in quotes:
-                    if symbol_input.endswith(quote) and len(symbol_input) > len(quote):  # Ensure base exists
+                    if symbol_input.endswith(quote) and len(symbol_input) > len(
+                        quote
+                    ):  # Ensure base exists
                         base = symbol_input[: -len(quote)]
                         formatted = f"{base}/{quote}"
                         if formatted in valid_symbols:
-                            print(Color.format(f"Assuming symbol: {formatted}", Color.CYAN))
+                            print(
+                                Color.format(
+                                    f"Assuming symbol: {formatted}", Color.CYAN
+                                )
+                            )
                             potential_symbol = formatted
                             break  # Found a potential match
 
@@ -3119,21 +3847,36 @@ async def main() -> None:
                 print(Color.format(f"Selected symbol: {selected_symbol}", Color.GREEN))
                 break
             else:
-                print(Color.format(f"Invalid or unsupported symbol: '{symbol_input}'.", Color.RED))
+                print(
+                    Color.format(
+                        f"Invalid or unsupported symbol: '{symbol_input}'.", Color.RED
+                    )
+                )
                 # Suggest similar symbols based on simple substring matching (case-insensitive)
                 input_lower = symbol_input.lower().replace("/", "")
-                find_similar = [s for s in valid_symbols if input_lower in s.lower().replace("/", "")][
-                    :10
-                ]  # Limit suggestions
+                find_similar = [
+                    s
+                    for s in valid_symbols
+                    if input_lower in s.lower().replace("/", "")
+                ][:10]  # Limit suggestions
                 if find_similar:
-                    print(Color.format(f"Did you mean one of these? {', '.join(find_similar)}", Color.YELLOW))
+                    print(
+                        Color.format(
+                            f"Did you mean one of these? {', '.join(find_similar)}",
+                            Color.YELLOW,
+                        )
+                    )
 
         except EOFError:
             print(Color.format("\nInput stream closed. Exiting.", Color.YELLOW))
             logging.shutdown()
             return
         except KeyboardInterrupt:
-            print(Color.format("\nOperation cancelled by user during input.", Color.YELLOW))
+            print(
+                Color.format(
+                    "\nOperation cancelled by user during input.", Color.YELLOW
+                )
+            )
             logging.shutdown()
             return
 
@@ -3143,7 +3886,8 @@ async def main() -> None:
     if default_interval not in VALID_INTERVALS:
         print(
             Color.format(
-                f"Warning: Default interval '{default_interval}' from config is invalid. Using '15'.", Color.YELLOW
+                f"Warning: Default interval '{default_interval}' from config is invalid. Using '15'.",
+                Color.YELLOW,
             )
         )
         default_interval = "15"  # Fallback to a known valid interval
@@ -3151,32 +3895,45 @@ async def main() -> None:
     while True:
         try:
             print(Color.format("\nEnter analysis timeframe.", Color.BLUE))
-            interval_prompt = (
-                f"Available: [{', '.join(VALID_INTERVALS)}]\nEnter timeframe (default: {default_interval}): "
-            )
+            interval_prompt = f"Available: [{', '.join(VALID_INTERVALS)}]\nEnter timeframe (default: {default_interval}): "
             interval_input = input(Color.format(interval_prompt, Color.YELLOW)).strip()
 
             if not interval_input:
                 selected_interval_key = default_interval
-                print(Color.format(f"Using default interval: {selected_interval_key}", Color.CYAN))
+                print(
+                    Color.format(
+                        f"Using default interval: {selected_interval_key}", Color.CYAN
+                    )
+                )
                 break
 
             # Check if input is directly in our valid keys ('1', '15', 'D', etc.)
             if interval_input in VALID_INTERVALS:
                 selected_interval_key = interval_input
-                print(Color.format(f"Selected interval: {selected_interval_key}", Color.GREEN))
+                print(
+                    Color.format(
+                        f"Selected interval: {selected_interval_key}", Color.GREEN
+                    )
+                )
                 break
 
             # Check if input is a standard CCXT interval ('1m', '1h', '1d', etc.)
             # Allow case-insensitivity for CCXT intervals (e.g., '1d' or '1D')
             interval_input_lower = interval_input.lower()
             # Handle '1M' specifically as it's uppercase in CCXT map
-            ccxt_interval_to_check = "1M" if interval_input == "1M" else interval_input_lower
+            ccxt_interval_to_check = (
+                "1M" if interval_input == "1M" else interval_input_lower
+            )
 
             if ccxt_interval_to_check in REVERSE_CCXT_INTERVAL_MAP:
-                selected_interval_key = REVERSE_CCXT_INTERVAL_MAP[ccxt_interval_to_check]
+                selected_interval_key = REVERSE_CCXT_INTERVAL_MAP[
+                    ccxt_interval_to_check
+                ]
                 print(
-                    Color.format(f"Using interval {selected_interval_key} (mapped from {interval_input})", Color.CYAN)
+                    Color.format(
+                        f"Using interval {selected_interval_key} (mapped from {interval_input})",
+                        Color.CYAN,
+                    )
                 )
                 break
 
@@ -3192,19 +3949,27 @@ async def main() -> None:
             logging.shutdown()
             return
         except KeyboardInterrupt:
-            print(Color.format("\nOperation cancelled by user during input.", Color.YELLOW))
+            print(
+                Color.format(
+                    "\nOperation cancelled by user during input.", Color.YELLOW
+                )
+            )
             logging.shutdown()
             return
 
     # --- Setup Main Components for the Selected Symbol ---
-    main_logger = setup_logger(selected_symbol)  # Setup logger specific to the chosen symbol
+    main_logger = setup_logger(
+        selected_symbol
+    )  # Setup logger specific to the chosen symbol
     main_logger.info(f"Logger initialized for symbol {selected_symbol}.")
 
     # Create the main client instance, passing the already loaded market data
     client = BybitCCXTClient(API_KEY, API_SECRET, IS_TESTNET, main_logger)
     client.markets = loaded_markets_data  # Assign pre-loaded markets
     client.market_categories = loaded_market_categories  # Assign pre-cached categories
-    main_logger.info(f"CCXT Client initialized for {selected_symbol}. Markets assigned.")
+    main_logger.info(
+        f"CCXT Client initialized for {selected_symbol}. Markets assigned."
+    )
 
     analyzer = TradingAnalyzer(CONFIG, main_logger, selected_symbol)
     main_logger.info("Trading Analyzer initialized.")
@@ -3217,9 +3982,15 @@ async def main() -> None:
         api_url = api_url.get("public", api_url.get("private", "Nested URL not found"))
 
     main_logger.info("--- Starting Analysis ---")
-    main_logger.info(f"Symbol: {Color.format(selected_symbol, Color.PURPLE)} ({market_type.capitalize()})")
-    main_logger.info(f"Interval: {Color.format(selected_interval_key, Color.PURPLE)} (CCXT: {ccxt_interval})")
-    main_logger.info(f"API Env: {Color.format(API_ENV.upper(), Color.YELLOW)} (URL: {api_url})")
+    main_logger.info(
+        f"Symbol: {Color.format(selected_symbol, Color.PURPLE)} ({market_type.capitalize()})"
+    )
+    main_logger.info(
+        f"Interval: {Color.format(selected_interval_key, Color.PURPLE)} (CCXT: {ccxt_interval})"
+    )
+    main_logger.info(
+        f"API Env: {Color.format(API_ENV.upper(), Color.YELLOW)} (URL: {api_url})"
+    )
     main_logger.info(f"Loop Interval: {CONFIG.analysis_interval_seconds} seconds")
     main_logger.info(f"Kline Limit: {CONFIG.kline_limit} candles")
     main_logger.info(f"Orderbook Limit: {CONFIG.orderbook_settings.limit} levels")
@@ -3230,25 +4001,36 @@ async def main() -> None:
     try:
         # Create and run the main analysis task
         main_task = asyncio.create_task(
-            run_analysis_loop(selected_symbol, selected_interval_key, client, analyzer, main_logger)
+            run_analysis_loop(
+                selected_symbol, selected_interval_key, client, analyzer, main_logger
+            )
         )
         await main_task  # Wait for the loop to complete or be cancelled
 
     except KeyboardInterrupt:
-        main_logger.info(Color.format("\nCtrl+C detected. Stopping analysis loop...", Color.YELLOW))
+        main_logger.info(
+            Color.format("\nCtrl+C detected. Stopping analysis loop...", Color.YELLOW)
+        )
         if main_task and not main_task.done():
             main_task.cancel()
             # Wait briefly for cancellation to propagate
             try:
-                await asyncio.wait_for(main_task, timeout=2.0)  # Wait max 2s for task to finish cancelling
+                await asyncio.wait_for(
+                    main_task, timeout=2.0
+                )  # Wait max 2s for task to finish cancelling
             except (asyncio.CancelledError, asyncio.TimeoutError):
                 pass  # Expected exceptions during cancellation
     except asyncio.CancelledError:
-        main_logger.info(Color.format("Main analysis task was cancelled externally.", Color.YELLOW))
+        main_logger.info(
+            Color.format("Main analysis task was cancelled externally.", Color.YELLOW)
+        )
         # Expected during shutdown if cancelled from outside
     except Exception as e:
         main_logger.critical(
-            Color.format(f"A critical error occurred during main execution: {e}", Color.RED), exc_info=True
+            Color.format(
+                f"A critical error occurred during main execution: {e}", Color.RED
+            ),
+            exc_info=True,
         )
         if main_task and not main_task.done():
             main_task.cancel()
@@ -3260,7 +4042,10 @@ async def main() -> None:
         main_logger.info("Initiating shutdown sequence...")
         # Ensure the client connection is closed
         if (
-            "client" in locals() and client and hasattr(client, "exchange") and client.exchange
+            "client" in locals()
+            and client
+            and hasattr(client, "exchange")
+            and client.exchange
         ):  # Check client and exchange exist
             await client.close()
         main_logger.info("Application finished.")
@@ -3297,10 +4082,14 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Handle Ctrl+C if it occurs *before* the main async loop starts
         # or *after* it exits but before the script terminates.
-        print(f"\n{Color.YELLOW.value}Process interrupted by user. Exiting gracefully.{Color.RESET.value}")
+        print(
+            f"\n{Color.YELLOW.value}Process interrupted by user. Exiting gracefully.{Color.RESET.value}"
+        )
     except Exception as e:
         # Catch any other unexpected top-level errors during script execution
-        print(f"\n{Color.RED.value}A critical top-level error occurred: {e}{Color.RESET.value}")
+        print(
+            f"\n{Color.RED.value}A critical top-level error occurred: {e}{Color.RESET.value}"
+        )
         traceback.print_exc()  # Print detailed traceback for top-level errors
     finally:
         # Ensure colorama reset is called on exit

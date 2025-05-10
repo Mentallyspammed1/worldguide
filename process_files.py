@@ -28,21 +28,41 @@ logger = logging.getLogger(__name__)
 def print_wizard_message(message: str, color: str = Fore.CYAN) -> None:
     """Print a styled message to console."""
     logger.info(f"✨ Pyrmethus whispers: {message}")
-    print(color + Style.BRIGHT + "✨ Pyrmethus whispers: " + Style.RESET_ALL + color + message)
+    print(
+        color
+        + Style.BRIGHT
+        + "✨ Pyrmethus whispers: "
+        + Style.RESET_ALL
+        + color
+        + message
+    )
 
 
 def print_error_message(message: str) -> None:
     """Print an error message to console and log."""
     logger.error(f"❌ Arcane Anomaly: {message}")
-    print(Fore.RED + Style.BRIGHT + "❌ Arcane Anomaly: " + Style.RESET_ALL + Fore.RED + message)
+    print(
+        Fore.RED
+        + Style.BRIGHT
+        + "❌ Arcane Anomaly: "
+        + Style.RESET_ALL
+        + Fore.RED
+        + message
+    )
 
 
 def enhance_code_with_gemini(
-    file_path: str, content: str, model: genai.GenerativeModel, max_api_calls: int, calls_made: int
+    file_path: str,
+    content: str,
+    model: genai.GenerativeModel,
+    max_api_calls: int,
+    calls_made: int,
 ) -> Tuple[str, str, int]:
     """Enhance a single Python file's content using Gemini API with rate limiting."""
     if calls_made >= max_api_calls:
-        print_wizard_message(f"Rate limit of {max_api_calls} calls/min reached. Pausing...", Fore.YELLOW)
+        print_wizard_message(
+            f"Rate limit of {max_api_calls} calls/min reached. Pausing...", Fore.YELLOW
+        )
         time.sleep(60 - (time.time() % 60))
         calls_made = 0
 
@@ -73,7 +93,9 @@ def enhance_code_with_gemini(
         if match:
             enhanced_code = match.group(1)
             explanation_start = match.end()
-            explanation = response_text[explanation_start:].strip() or "No explanation provided."
+            explanation = (
+                response_text[explanation_start:].strip() or "No explanation provided."
+            )
         else:
             explanation = response_text
 
@@ -82,7 +104,9 @@ def enhance_code_with_gemini(
     except Exception as e:
         import traceback
 
-        error_message = f"Failed to enhance {file_path}: {str(e)}\n{traceback.format_exc()}"
+        error_message = (
+            f"Failed to enhance {file_path}: {str(e)}\n{traceback.format_exc()}"
+        )
         print_error_message(error_message)
         logger.error(error_message)
         return content, f"Error: {str(e)}", calls_made + 1
@@ -93,16 +117,22 @@ def main() -> None:
     # Ensure log file is created at startup
     logger.info("Initializing enhancement log")
 
-    print_wizard_message("Starting Code Enhancement Spell for Python Files...", Fore.MAGENTA)
+    print_wizard_message(
+        "Starting Code Enhancement Spell for Python Files...", Fore.MAGENTA
+    )
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         print_error_message(f"Usage: {sys.argv[0]} <repository_path> [file_pattern]")
         sys.exit(2)
 
     repo_path = Path(sys.argv[1])
-    file_pattern = sys.argv[2] if len(sys.argv) == 3 else os.getenv("FILE_PATTERN", "**/*.py")
+    file_pattern = (
+        sys.argv[2] if len(sys.argv) == 3 else os.getenv("FILE_PATTERN", "**/*.py")
+    )
 
     if not file_pattern.endswith(".py"):
-        print_error_message("File pattern must target .py files (e.g., '*.py', 'src/*.py')")
+        print_error_message(
+            "File pattern must target .py files (e.g., '*.py', 'src/*.py')"
+        )
         sys.exit(1)
 
     print_wizard_message(f"Repository path: {repo_path}", Fore.CYAN)
@@ -135,10 +165,14 @@ def main() -> None:
 
     try:
         python_files = glob.glob(file_pattern, root_dir=repo_path, recursive=True)
-        print_wizard_message(f"Found {len(python_files)} Python files matching pattern.", Fore.CYAN)
+        print_wizard_message(
+            f"Found {len(python_files)} Python files matching pattern.", Fore.CYAN
+        )
         logger.info(f"Found {len(python_files)} Python files matching pattern.")
     except Exception as e:
-        print_error_message(f"Failed to find Python files with pattern {file_pattern}: {e}")
+        print_error_message(
+            f"Failed to find Python files with pattern {file_pattern}: {e}"
+        )
         sys.exit(1)
 
     if not python_files:
@@ -177,9 +211,12 @@ def main() -> None:
 
     elapsed = time.time() - start_time
     print_wizard_message(
-        f"Enhancement complete. Processed {len(python_files)} Python files in {elapsed:.2f} seconds.", Fore.MAGENTA
+        f"Enhancement complete. Processed {len(python_files)} Python files in {elapsed:.2f} seconds.",
+        Fore.MAGENTA,
     )
-    logger.info(f"Enhancement complete. Processed {len(python_files)} Python files in {elapsed:.2f} seconds.")
+    logger.info(
+        f"Enhancement complete. Processed {len(python_files)} Python files in {elapsed:.2f} seconds."
+    )
 
 
 if __name__ == "__main__":

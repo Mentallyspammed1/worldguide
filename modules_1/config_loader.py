@@ -20,7 +20,10 @@ try:
     )
 except ImportError:
     # Provide fallbacks if utils is missing - prevents crashing but functionality limited
-    print("Warning: Failed to import constants from utils.py. Using default fallbacks.", file=sys.stderr)
+    print(
+        "Warning: Failed to import constants from utils.py. Using default fallbacks.",
+        file=sys.stderr,
+    )
     CONFIG_FILE = "config.json"
     DEFAULT_INDICATOR_PERIODS = {}
     NEON_RED = NEON_YELLOW = RESET_ALL_STYLE = ""
@@ -29,15 +32,21 @@ except ImportError:
     VALID_INTERVALS = ["1", "3", "5", "15", "30", "60", "120", "240", "D", "W", "M"]
 
 
-def _ensure_config_keys(config: Dict[str, Any], default_config: Dict[str, Any]) -> Dict[str, Any]:
+def _ensure_config_keys(
+    config: Dict[str, Any], default_config: Dict[str, Any]
+) -> Dict[str, Any]:
     """Recursively ensures all keys from the default config are present in the loaded config."""
     updated_config = config.copy()
     for key, default_value in default_config.items():
         if key not in updated_config:
             updated_config[key] = default_value
-        elif isinstance(default_value, dict) and isinstance(updated_config.get(key), dict):
+        elif isinstance(default_value, dict) and isinstance(
+            updated_config.get(key), dict
+        ):
             # Recursively check nested dictionaries
-            updated_config[key] = _ensure_config_keys(updated_config[key], default_value)
+            updated_config[key] = _ensure_config_keys(
+                updated_config[key], default_value
+            )
         # Optional: Add type checking here if needed
     return updated_config
 
@@ -56,7 +65,9 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
     default_config = {
         "exchange_id": "bybit",
         "default_market_type": "unified",  # unified, spot, linear, inverse
-        "symbols_to_trade": ["BTC/USDT:USDT"],  # Example for Bybit USDT Linear Perpetual
+        "symbols_to_trade": [
+            "BTC/USDT:USDT"
+        ],  # Example for Bybit USDT Linear Perpetual
         "interval": "5",
         "log_level": "INFO",  # DEBUG, INFO, WARNING, ERROR, CRITICAL
         # --- API & Connection ---
@@ -198,10 +209,14 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=4, ensure_ascii=False)
-            print(f"{NEON_YELLOW}Created default config file: {filepath}{RESET_ALL_STYLE}")
+            print(
+                f"{NEON_YELLOW}Created default config file: {filepath}{RESET_ALL_STYLE}"
+            )
             return default_config
         except IOError as e:
-            print(f"{NEON_RED}Error creating default config file {filepath}: {e}{RESET_ALL_STYLE}")
+            print(
+                f"{NEON_RED}Error creating default config file {filepath}: {e}{RESET_ALL_STYLE}"
+            )
             return default_config  # Return default if creation failed
 
     try:
@@ -216,9 +231,13 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             try:
                 with open(filepath, "w", encoding="utf-8") as f_write:
                     json.dump(updated_config, f_write, indent=4, ensure_ascii=False)
-                print(f"{NEON_YELLOW}Updated config file '{filepath}' with missing default keys.{RESET_ALL_STYLE}")
+                print(
+                    f"{NEON_YELLOW}Updated config file '{filepath}' with missing default keys.{RESET_ALL_STYLE}"
+                )
             except IOError as e:
-                print(f"{NEON_RED}Error writing updated config file {filepath}: {e}{RESET_ALL_STYLE}")
+                print(
+                    f"{NEON_RED}Error writing updated config file {filepath}: {e}{RESET_ALL_STYLE}"
+                )
 
         # --- Perform Basic Validation ---
         save_needed = False  # Flag to save if corrections are made
@@ -232,8 +251,12 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             save_needed = True
 
         # Validate exchange_id
-        if not isinstance(updated_config.get("exchange_id"), str) or not updated_config.get("exchange_id"):
-            print(f"{NEON_RED}Invalid 'exchange_id'. Using default '{default_config['exchange_id']}'.{RESET_ALL_STYLE}")
+        if not isinstance(
+            updated_config.get("exchange_id"), str
+        ) or not updated_config.get("exchange_id"):
+            print(
+                f"{NEON_RED}Invalid 'exchange_id'. Using default '{default_config['exchange_id']}'.{RESET_ALL_STYLE}"
+            )
             updated_config["exchange_id"] = default_config["exchange_id"]
             save_needed = True
 
@@ -243,15 +266,28 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             print(
                 f"{NEON_RED}Invalid 'default_market_type'. Using default '{default_config['default_market_type']}'.{RESET_ALL_STYLE}"
             )
-            updated_config["default_market_type"] = default_config["default_market_type"]
+            updated_config["default_market_type"] = default_config[
+                "default_market_type"
+            ]
             save_needed = True
-        elif market_type.lower() not in ["spot", "margin", "future", "swap", "option", "unified"]:
+        elif market_type.lower() not in [
+            "spot",
+            "margin",
+            "future",
+            "swap",
+            "option",
+            "unified",
+        ]:
             print(
                 f"{NEON_YELLOW}Warning: 'default_market_type' '{market_type}' is not standard. Ensure correctness.{RESET_ALL_STYLE}"
             )
 
         # Validate entry order type
-        if updated_config.get("entry_order_type") not in ["market", "limit", "conditional"]:  # Added conditional
+        if updated_config.get("entry_order_type") not in [
+            "market",
+            "limit",
+            "conditional",
+        ]:  # Added conditional
             print(
                 f"{NEON_RED}Invalid entry_order_type '{updated_config.get('entry_order_type')}'. Using 'market'.{RESET_ALL_STYLE}"
             )
@@ -259,7 +295,9 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             save_needed = True
 
         # Simplified numeric validator function
-        def _validate_numeric(key, cfg, default, min_v=None, max_v=None, is_int=False, allow_none=False):
+        def _validate_numeric(
+            key, cfg, default, min_v=None, max_v=None, is_int=False, allow_none=False
+        ):
             nonlocal save_needed
             value = cfg.get(key)
             if allow_none and value is None:
@@ -284,24 +322,72 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
                 return False
 
         # Use the validator
-        _validate_numeric("max_api_retries", updated_config, default_config["max_api_retries"], min_v=0, is_int=True)
-        _validate_numeric("retry_delay", updated_config, default_config["retry_delay"], min_v=0)
-        _validate_numeric("api_timeout_ms", updated_config, default_config["api_timeout_ms"], min_v=1000, is_int=True)
-        _validate_numeric("risk_per_trade", updated_config, default_config["risk_per_trade"], min_v=0, max_v=1)
+        _validate_numeric(
+            "max_api_retries",
+            updated_config,
+            default_config["max_api_retries"],
+            min_v=0,
+            is_int=True,
+        )
+        _validate_numeric(
+            "retry_delay", updated_config, default_config["retry_delay"], min_v=0
+        )
+        _validate_numeric(
+            "api_timeout_ms",
+            updated_config,
+            default_config["api_timeout_ms"],
+            min_v=1000,
+            is_int=True,
+        )
+        _validate_numeric(
+            "risk_per_trade",
+            updated_config,
+            default_config["risk_per_trade"],
+            min_v=0,
+            max_v=1,
+        )
         _validate_numeric(
             "leverage", updated_config, default_config["leverage"], min_v=1
         )  # Allow float leverage? Usually int. Check exchange. Let's keep > 0.
         _validate_numeric(
-            "max_concurrent_positions", updated_config, default_config["max_concurrent_positions"], min_v=1, is_int=True
+            "max_concurrent_positions",
+            updated_config,
+            default_config["max_concurrent_positions"],
+            min_v=1,
+            is_int=True,
         )
-        _validate_numeric("signal_score_threshold", updated_config, default_config["signal_score_threshold"], min_v=0)
-        _validate_numeric("orderbook_limit", updated_config, default_config["orderbook_limit"], min_v=1, is_int=True)
         _validate_numeric(
-            "kline_limit", updated_config, default_config["kline_limit"], min_v=10, is_int=True
+            "signal_score_threshold",
+            updated_config,
+            default_config["signal_score_threshold"],
+            min_v=0,
+        )
+        _validate_numeric(
+            "orderbook_limit",
+            updated_config,
+            default_config["orderbook_limit"],
+            min_v=1,
+            is_int=True,
+        )
+        _validate_numeric(
+            "kline_limit",
+            updated_config,
+            default_config["kline_limit"],
+            min_v=10,
+            is_int=True,
         )  # Need reasonable min
-        _validate_numeric("min_kline_length", updated_config, default_config["min_kline_length"], min_v=1, is_int=True)
         _validate_numeric(
-            "position_confirm_delay_seconds", updated_config, default_config["position_confirm_delay_seconds"], min_v=0
+            "min_kline_length",
+            updated_config,
+            default_config["min_kline_length"],
+            min_v=1,
+            is_int=True,
+        )
+        _validate_numeric(
+            "position_confirm_delay_seconds",
+            updated_config,
+            default_config["position_confirm_delay_seconds"],
+            min_v=0,
         )
         _validate_numeric(
             "time_based_exit_minutes",
@@ -333,7 +419,11 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             min_v=0,
         )
         _validate_numeric(
-            "break_even_offset_ticks", updated_config, default_config["break_even_offset_ticks"], min_v=0, is_int=True
+            "break_even_offset_ticks",
+            updated_config,
+            default_config["break_even_offset_ticks"],
+            min_v=0,
+            is_int=True,
         )
 
         # Validate Indicator Periods
@@ -346,12 +436,24 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
                 "psar_af_step",
                 "psar_max_af",
             ]
-            min_value = 1 if is_int_param else Decimal("1e-9")  # Int periods >= 1, float params > 0
-            _validate_numeric(key, updated_config, default_config[key], min_v=min_value, is_int=is_int_param)
+            min_value = (
+                1 if is_int_param else Decimal("1e-9")
+            )  # Int periods >= 1, float params > 0
+            _validate_numeric(
+                key,
+                updated_config,
+                default_config[key],
+                min_v=min_value,
+                is_int=is_int_param,
+            )
 
         # Validate symbols_to_trade list
         symbols = updated_config.get("symbols_to_trade")
-        if not isinstance(symbols, list) or not symbols or not all(isinstance(s, str) and s for s in symbols):
+        if (
+            not isinstance(symbols, list)
+            or not symbols
+            or not all(isinstance(s, str) and s for s in symbols)
+        ):
             print(
                 f"{NEON_RED}Invalid 'symbols_to_trade': Must be a non-empty list of non-empty strings.{RESET_ALL_STYLE}"
             )
@@ -363,23 +465,35 @@ def load_config(filepath: str = CONFIG_FILE) -> Dict[str, Any]:
             try:
                 with open(filepath, "w", encoding="utf-8") as f_write:
                     json.dump(updated_config, f_write, indent=4, ensure_ascii=False)
-                print(f"{NEON_YELLOW}Corrected invalid values and saved config: {filepath}{RESET_ALL_STYLE}")
+                print(
+                    f"{NEON_YELLOW}Corrected invalid values and saved config: {filepath}{RESET_ALL_STYLE}"
+                )
             except IOError as e:
-                print(f"{NEON_RED}Error writing corrected config file {filepath}: {e}{RESET_ALL_STYLE}")
+                print(
+                    f"{NEON_RED}Error writing corrected config file {filepath}: {e}{RESET_ALL_STYLE}"
+                )
 
         return updated_config
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"{NEON_RED}Error loading config file {filepath}: {e}. Using default config.{RESET_ALL_STYLE}")
+        print(
+            f"{NEON_RED}Error loading config file {filepath}: {e}. Using default config.{RESET_ALL_STYLE}"
+        )
         # Attempt to recreate default if loading failed badly
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=4, ensure_ascii=False)
-            print(f"{NEON_YELLOW}Created default config file: {filepath}{RESET_ALL_STYLE}")
+            print(
+                f"{NEON_YELLOW}Created default config file: {filepath}{RESET_ALL_STYLE}"
+            )
         except IOError as e_create:
-            print(f"{NEON_RED}Error creating default config file after load error: {e_create}{RESET_ALL_STYLE}")
+            print(
+                f"{NEON_RED}Error creating default config file after load error: {e_create}{RESET_ALL_STYLE}"
+            )
         return default_config
 
     except Exception as e:  # Catch other potential errors like permission denied
-        print(f"{NEON_RED}An unexpected error occurred during config loading: {e}{RESET_ALL_STYLE}")
+        print(
+            f"{NEON_RED}An unexpected error occurred during config loading: {e}{RESET_ALL_STYLE}"
+        )
         print(f"{NEON_YELLOW}Returning default configuration.{RESET_ALL_STYLE}")
         return default_config

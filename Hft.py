@@ -33,7 +33,10 @@ COOLDOWN_SECONDS = 10  # Wait time after a trade closes before new entry attempt
 STOP_LOSS_TRIGGER_METHOD = "LastPrice"
 
 # --- Logging Configuration ---
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
+)
 # Suppress excessively verbose pybit websocket logging if desired
 # logging.getLogger('websockets').setLevel(logging.WARNING)
 
@@ -60,10 +63,14 @@ position_lock = threading.Lock()  # Lock for modifying position state variables
 
 # --- Bybit API Initialization ---
 try:
-    session = HTTP(testnet=USE_TESTNET, api_key=API_KEY, api_secret=API_SECRET, recv_window=10000)
+    session = HTTP(
+        testnet=USE_TESTNET, api_key=API_KEY, api_secret=API_SECRET, recv_window=10000
+    )
     # Check connection
     server_time = session.get_server_time()
-    logging.info(f"HTTP session initialized. Testnet: {USE_TESTNET}. Server Time: {server_time.get('timeNano', 'N/A')}")
+    logging.info(
+        f"HTTP session initialized. Testnet: {USE_TESTNET}. Server Time: {server_time.get('timeNano', 'N/A')}"
+    )
 except Exception:
     logging.exception("Fatal Error: Failed to initialize Bybit HTTP session.")
     exit()
@@ -86,15 +93,23 @@ def handle_public_message(msg) -> None:
                 data = msg.get("data")
                 type = msg.get("type")
                 if type == "snapshot":
-                    latest_order_book["bids"] = [[float(p), float(q)] for p, q in data.get("b", [])]
-                    latest_order_book["asks"] = [[float(p), float(q)] for p, q in data.get("a", [])]
+                    latest_order_book["bids"] = [
+                        [float(p), float(q)] for p, q in data.get("b", [])
+                    ]
+                    latest_order_book["asks"] = [
+                        [float(p), float(q)] for p, q in data.get("a", [])
+                    ]
                 elif type == "delta":
                     # Basic delta handling (less robust than full merge logic)
                     for side, book in [("b", "bids"), ("a", "asks")]:
                         for price_str, qty_str in data.get(side, []):
                             price, qty = float(price_str), float(qty_str)
                             # Remove existing
-                            latest_order_book[book] = [lvl for lvl in latest_order_book[book] if lvl[0] != price]
+                            latest_order_book[book] = [
+                                lvl
+                                for lvl in latest_order_book[book]
+                                if lvl[0] != price
+                            ]
                             if qty > 0:  # Add if quantity > 0
                                 latest_order_book[book].append([price, qty])
                     # Re-sort after delta
@@ -102,8 +117,16 @@ def handle_public_message(msg) -> None:
                     latest_order_book["asks"].sort(key=lambda x: x[0])
 
                 # Update best bid/ask
-                last_best_bid = latest_order_book["bids"][0][0] if latest_order_book["bids"] else None
-                last_best_ask = latest_order_book["asks"][0][0] if latest_order_book["asks"] else None
+                last_best_bid = (
+                    latest_order_book["bids"][0][0]
+                    if latest_order_book["bids"]
+                    else None
+                )
+                last_best_ask = (
+                    latest_order_book["asks"][0][0]
+                    if latest_order_book["asks"]
+                    else None
+                )
         # logging.debug(f"Order book updated. Best Bid: {last_best_bid}, Best Ask: {last_best_ask}")
 
     # Handle Liquidation Updates
@@ -169,7 +192,9 @@ def handle_private_message(msg) -> None:
 
                         in_position = True
                         position_entry_time = time.time()
-                        current_position_side = side  # Confirm side based on filled order
+                        current_position_side = (
+                            side  # Confirm side based on filled order
+                        )
                         # Now place the Take Profit order
                         place_take_profit_order()  # active_order_id will be updated inside
 
@@ -187,11 +212,15 @@ def handle_private_message(msg) -> None:
                     float(filled_qty_str) if filled_qty_str else 0.0
                     # Check if it's our TP order or the server-side SL that filled
                     if active_order_id == order_id:
-                        logging.info(f"TAKE PROFIT Order {order_id} FILLED at {exit_price:.2f}. Exiting position.")
+                        logging.info(
+                            f"TAKE PROFIT Order {order_id} FILLED at {exit_price:.2f}. Exiting position."
+                        )
                     else:
                         # This means the server-side SL must have triggered and filled
                         # (Bybit creates a separate order for the SL execution)
-                        logging.info(f"STOP LOSS Order {order_id} FILLED at {exit_price:.2f}. Exiting position.")
+                        logging.info(
+                            f"STOP LOSS Order {order_id} FILLED at {exit_price:.2f}. Exiting position."
+                        )
                         # We might want to try and cancel our now-redundant TP order
                         # if it hasn't been cancelled automatically by SL fill.
                         cancel_active_order("SL filled, cancelling TP")
@@ -200,7 +229,12 @@ def handle_private_message(msg) -> None:
                     last_trade_exit_time = time.time()
 
                 # --- Handle Reduce-Only Order Cancellation (e.g., manual cancel of TP) ---
-                elif in_position and active_order_id == order_id and reduce_only and status == "Cancelled":
+                elif (
+                    in_position
+                    and active_order_id == order_id
+                    and reduce_only
+                    and status == "Cancelled"
+                ):
                     logging.warning(
                         f"Active TP Order {order_id} was Cancelled externally! Position may still be open without TP."
                     )
@@ -212,9 +246,15 @@ def handle_private_message(msg) -> None:
 def setup_websocket() -> None:
     """Initializes and connects the Public and Private WebSockets."""
     ws_public_url = (
-        "wss://stream-testnet.bybit.com/v5/public/linear" if USE_TESTNET else "wss://stream.bybit.com/v5/public/linear"
+        "wss://stream-testnet.bybit.com/v5/public/linear"
+        if USE_TESTNET
+        else "wss://stream.bybit.com/v5/public/linear"
     )
-    ws_private_url = "wss://stream-testnet.bybit.com/v5/private" if USE_TESTNET else "wss://stream.bybit.com/v5/private"
+    ws_private_url = (
+        "wss://stream-testnet.bybit.com/v5/private"
+        if USE_TESTNET
+        else "wss://stream.bybit.com/v5/private"
+    )
 
     # --- Public WebSocket ---
     ws_public = WebSocket(testnet=USE_TESTNET, channel_type="linear")
@@ -254,7 +294,9 @@ def handle_liquidation_event(liquidation_side, liquidation_qty) -> None:
         now = time.time()
         # Check Cooldown and if already attempting entry or in position
         if active_order_id or in_position:
-            logging.debug("Ignoring liquidation: Already active (order placed or in position).")
+            logging.debug(
+                "Ignoring liquidation: Already active (order placed or in position)."
+            )
             return
         if now - last_trade_exit_time < COOLDOWN_SECONDS:
             logging.debug(
@@ -265,7 +307,9 @@ def handle_liquidation_event(liquidation_side, liquidation_qty) -> None:
 
         # Check Minimum Size
         if liquidation_qty < MIN_LIQUIDATION_QTY:
-            logging.debug(f"Ignoring liquidation: Size {liquidation_qty:.4f} < minimum {MIN_LIQUIDATION_QTY:.4f}.")
+            logging.debug(
+                f"Ignoring liquidation: Size {liquidation_qty:.4f} < minimum {MIN_LIQUIDATION_QTY:.4f}."
+            )
             return
 
         # Determine Trade Direction (Fade the liquidation)
@@ -300,7 +344,9 @@ def handle_liquidation_event(liquidation_side, liquidation_qty) -> None:
             return
         order_qty = round(ORDER_SIZE_USDT / mid_price, ORDER_QTY_PRECISION)
         if order_qty < MIN_ORDER_QTY:
-            logging.warning(f"Calculated order qty {order_qty} is below minimum {MIN_ORDER_QTY}. Skipping trade.")
+            logging.warning(
+                f"Calculated order qty {order_qty} is below minimum {MIN_ORDER_QTY}. Skipping trade."
+            )
             return
 
         # Calculate Stop Loss Price for the entry order
@@ -327,7 +373,9 @@ def handle_liquidation_event(liquidation_side, liquidation_qty) -> None:
             active_order_id = placed_order_id
             # Tentatively set side, will be confirmed on fill by WebSocket
             current_position_side = trade_side
-            logging.info(f"Entry order {active_order_id} placed. Waiting for fill via WebSocket.")
+            logging.info(
+                f"Entry order {active_order_id} placed. Waiting for fill via WebSocket."
+            )
         else:
             logging.error("Failed to place entry order.")
             # Ensure state is clean if placement failed
@@ -370,12 +418,16 @@ def place_limit_order_with_sl(side, price, qty, stop_loss_price):
                 logging.info(f"Entry order with SL placed successfully. ID: {order_id}")
                 return order_id
             else:
-                logging.error(f"Entry order placed but no orderId returned: {order_result}")
+                logging.error(
+                    f"Entry order placed but no orderId returned: {order_result}"
+                )
                 return None
         else:
             err_code = order_result.get("retCode", "N/A")
             err_msg = order_result.get("retMsg", "No Response/Error")
-            logging.error(f"Failed to place entry order: Code={err_code}, Msg='{err_msg}'")
+            logging.error(
+                f"Failed to place entry order: Code={err_code}, Msg='{err_msg}'"
+            )
             return None
     except Exception:
         logging.exception(f"Exception placing {side} entry order with SL.")
@@ -386,7 +438,12 @@ def place_take_profit_order() -> None:
     """Places the reduce-only take profit order after entry confirmation."""
     global active_order_id  # Will store the TP order ID now
 
-    if not in_position or not current_position_side or not entry_price or position_size <= 0:
+    if (
+        not in_position
+        or not current_position_side
+        or not entry_price
+        or position_size <= 0
+    ):
         logging.error("Cannot place TP: Not in a valid position state.")
         # Consider closing market if state is inconsistent
         # close_position_market("Inconsistent state for TP placement")
@@ -407,7 +464,9 @@ def place_take_profit_order() -> None:
     tp_price_str = f"{tp_price:.{max(0, str(TICK_SIZE)[::-1].find('.'))}f}"
     qty_str = f"{position_size:.{ORDER_QTY_PRECISION}f}"  # Use actual filled quantity
 
-    logging.info(f"Placing {tp_side} Take Profit order: Qty={qty_str}, Price={tp_price_str}")
+    logging.info(
+        f"Placing {tp_side} Take Profit order: Qty={qty_str}, Price={tp_price_str}"
+    )
 
     try:
         order_result = session.place_order(
@@ -430,7 +489,9 @@ def place_take_profit_order() -> None:
                 # Update active_order_id to the TP order ID
                 active_order_id = order_id
             else:
-                logging.error(f"TP order placed but no orderId returned: {order_result}")
+                logging.error(
+                    f"TP order placed but no orderId returned: {order_result}"
+                )
                 # Close market if TP placement fails? Critical decision.
                 close_position_market("Failed to get TP order ID")
         else:
@@ -462,7 +523,9 @@ def cancel_active_order(reason="") -> bool | None:
             log_prefix += f" ({reason})"
         logging.info(f"{log_prefix}...")
 
-        cancel_result = session.cancel_order(category="linear", symbol=SYMBOL, orderId=order_id_to_cancel)
+        cancel_result = session.cancel_order(
+            category="linear", symbol=SYMBOL, orderId=order_id_to_cancel
+        )
         logging.debug(f"Cancel order raw result: {cancel_result}")
 
         if cancel_result and cancel_result.get("retCode") == 0:
@@ -512,10 +575,14 @@ def close_position_market(reason="") -> None:
                 pos_list = position_info.get("result", {}).get("list", [])
                 if pos_list and pos_list[0].get("symbol") == SYMBOL:
                     current_pos_size = float(pos_list[0].get("size", "0"))
-                    actual_pos_side = pos_list[0].get("side")  # 'Buy', 'Sell', or 'None'
+                    actual_pos_side = pos_list[0].get(
+                        "side"
+                    )  # 'Buy', 'Sell', or 'None'
             else:
                 err_msg = position_info.get("retMsg", "Failed to get position info")
-                logging.error(f"Could not get position info for market close: {err_msg}")
+                logging.error(
+                    f"Could not get position info for market close: {err_msg}"
+                )
                 # Fallback: try closing based on initially recorded side/size? Risky.
                 # For now, we won't place market order if we can't confirm size.
                 reset_position_state()  # Reset state even if close fails
@@ -530,10 +597,17 @@ def close_position_market(reason="") -> None:
         if current_pos_size > 0 and actual_pos_side in ["Buy", "Sell"]:
             close_side = "Sell" if actual_pos_side == "Buy" else "Buy"
             qty_str = f"{current_pos_size:.{ORDER_QTY_PRECISION}f}"
-            logging.info(f"Position Size: {current_pos_size}. Placing market {close_side} order for {qty_str}.")
+            logging.info(
+                f"Position Size: {current_pos_size}. Placing market {close_side} order for {qty_str}."
+            )
             try:
                 order_result = session.place_order(
-                    category="linear", symbol=SYMBOL, side=close_side, orderType="Market", qty=qty_str, reduceOnly=True
+                    category="linear",
+                    symbol=SYMBOL,
+                    side=close_side,
+                    orderType="Market",
+                    qty=qty_str,
+                    reduceOnly=True,
                 )
                 logging.debug(f"Place market close order raw result: {order_result}")
                 if not (order_result and order_result.get("retCode") == 0):
@@ -549,7 +623,9 @@ def close_position_market(reason="") -> None:
                 logging.exception("CRITICAL: Exception placing market close order!")
                 # Manual intervention likely needed if market order fails
         else:
-            logging.warning("Position size reported as zero or side invalid ('None') before market close attempt.")
+            logging.warning(
+                "Position size reported as zero or side invalid ('None') before market close attempt."
+            )
 
         # 4. Reset state regardless of market order success (to prevent reprocessing)
         # WebSocket message for the market order fill should confirm final state.
@@ -584,7 +660,9 @@ def check_position_timeout() -> None:
             now = time.time()
             duration = now - position_entry_time
             if duration > POSITION_TIMEOUT_SECONDS:
-                logging.warning(f"Position TIMEOUT ({duration:.1f}s > {POSITION_TIMEOUT_SECONDS}s)! Closing market.")
+                logging.warning(
+                    f"Position TIMEOUT ({duration:.1f}s > {POSITION_TIMEOUT_SECONDS}s)! Closing market."
+                )
                 # Use a separate thread or non-blocking call if close_position_market
                 # could block excessively, but for now, call directly.
                 close_position_market("Timeout")
@@ -620,12 +698,16 @@ def run_bot() -> None:
             # Graceful shutdown: Try to close any open position
             with position_lock:
                 if in_position:
-                    logging.warning("Position open during shutdown! Attempting market close.")
+                    logging.warning(
+                        "Position open during shutdown! Attempting market close."
+                    )
                     # This call handles cancelling TP order as well
                     close_position_market("Keyboard Interrupt Shutdown")
                 elif active_order_id:
                     # If an entry or TP order is active but not in position
-                    logging.info(f"Cancelling active order {active_order_id} during shutdown.")
+                    logging.info(
+                        f"Cancelling active order {active_order_id} during shutdown."
+                    )
                     cancel_active_order("Keyboard Interrupt Shutdown")
             logging.info("Exiting bot.")
             break
@@ -633,7 +715,9 @@ def run_bot() -> None:
             # Log unexpected errors in the main loop
             logging.exception("FATAL ERROR in main loop!")
             # Consider adding emergency position closing here as well for safety
-            logging.error("Attempting emergency shutdown procedure after main loop error.")
+            logging.error(
+                "Attempting emergency shutdown procedure after main loop error."
+            )
             try:
                 with position_lock:
                     if in_position:

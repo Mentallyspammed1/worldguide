@@ -48,7 +48,10 @@ from pybit.unified_trading import HTTP, WebSocket
 try:
     from indicators import calculate_all_indicators, update_indicators_incrementally
 except ImportError:
-    print(f"{Fore.RED}Error: indicators.py not found in the same directory.{Style.RESET_ALL}", file=sys.stderr)
+    print(
+        f"{Fore.RED}Error: indicators.py not found in the same directory.{Style.RESET_ALL}",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 # --- Initialize Colorama ---
@@ -87,7 +90,9 @@ class ColoredConsoleFormatter(logging.Formatter):
         original_levelname = record.levelname
         color = LOG_LEVEL_COLORS.get(record.levelno, Fore.WHITE)
         record.levelname = (
-            f"{color}{original_levelname:<8}{Style.RESET_ALL}" if self.use_colors else f"{original_levelname:<8}"
+            f"{color}{original_levelname:<8}{Style.RESET_ALL}"
+            if self.use_colors
+            else f"{original_levelname:<8}"
         )
         formatted_message = super().format(record)
         record.levelname = original_levelname
@@ -127,7 +132,10 @@ def setup_logger(
     if log_file:
         Path(log_file).parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=log_rotation_bytes, backupCount=log_backup_count, encoding="utf-8"
+            log_file,
+            maxBytes=log_rotation_bytes,
+            backupCount=log_backup_count,
+            encoding="utf-8",
         )
         file_handler.setLevel(file_level)
         file_handler.setFormatter(file_formatter)
@@ -152,7 +160,9 @@ class ApiConfig(BaseModel):
 
 class StrategyConfig(BaseModel):
     timeframe: str = Field("5m", description="Kline timeframe")
-    risk_per_trade: Decimal = Field(Decimal("0.01"), description="Risk per trade (fraction)")
+    risk_per_trade: Decimal = Field(
+        Decimal("0.01"), description="Risk per trade (fraction)"
+    )
     loop_delay_seconds: PositiveFloat = Field(5.0, description="Strategy loop delay")
     indicator_settings: Dict[str, Any] = Field(
         default_factory=lambda: {
@@ -187,12 +197,18 @@ class StrategyConfig(BaseModel):
 
 class SmsConfig(BaseModel):
     enable_sms_alerts: bool = Field(False, description="Enable SMS alerts")
-    termux_phone_number: Optional[str] = Field(None, description="Phone number for SMS alerts")
-    sms_cooldown_seconds: PositiveInt = Field(60, description="Cooldown for non-critical SMS")
+    termux_phone_number: Optional[str] = Field(
+        None, description="Phone number for SMS alerts"
+    )
+    sms_cooldown_seconds: PositiveInt = Field(
+        60, description="Cooldown for non-critical SMS"
+    )
 
 
 class AppConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="__", case_sensitive=False, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_nested_delimiter="__", case_sensitive=False, extra="ignore"
+    )
     api_config: ApiConfig
     strategy_config: StrategyConfig
     sms_config: SmsConfig
@@ -201,7 +217,9 @@ class AppConfig(BaseSettings):
 
 
 # --- Utility Functions (Adapted from bybit_utils.py) ---
-def safe_decimal_conversion(value: Any, default: Optional[Decimal] = None) -> Optional[Decimal]:
+def safe_decimal_conversion(
+    value: Any, default: Optional[Decimal] = None
+) -> Optional[Decimal]:
     if value is None or value == "":
         return default
     try:
@@ -241,11 +259,21 @@ def retry_api_call(max_retries: int = 3, initial_delay: float = 1.0):
                     if isinstance(result, dict) and result.get("retCode", 0) != 0:
                         ret_code = result.get("retCode")
                         ret_msg = result.get("retMsg", "Unknown error")
-                        if ret_code in [10001, 10002, 130035]:  # Rate limit, timeout, etc.
-                            raise ccxt.NetworkError(f"Bybit error {ret_code}: {ret_msg}")
+                        if ret_code in [
+                            10001,
+                            10002,
+                            130035,
+                        ]:  # Rate limit, timeout, etc.
+                            raise ccxt.NetworkError(
+                                f"Bybit error {ret_code}: {ret_msg}"
+                            )
                         return result
                     return result
-                except (ccxt.NetworkError, ccxt.RateLimitExceeded, websocket.WebSocketTimeoutException) as e:
+                except (
+                    ccxt.NetworkError,
+                    ccxt.RateLimitExceeded,
+                    websocket.WebSocketTimeoutException,
+                ) as e:
                     attempt += 1
                     if attempt > max_retries:
                         logger = logging.getLogger(__name__)
@@ -253,11 +281,15 @@ def retry_api_call(max_retries: int = 3, initial_delay: float = 1.0):
                         return {"retCode": -1, "retMsg": str(e)}
                     delay = initial_delay * (2 ** (attempt - 1))
                     logger = logging.getLogger(__name__)
-                    logger.warning(f"{func.__name__} failed: {e}. Retrying after {delay:.2f}s")
+                    logger.warning(
+                        f"{func.__name__} failed: {e}. Retrying after {delay:.2f}s"
+                    )
                     time.sleep(delay)
                 except Exception as e:
                     logger = logging.getLogger(__name__)
-                    logger.critical(f"Unexpected error in {func.__name__}: {e}", exc_info=True)
+                    logger.critical(
+                        f"Unexpected error in {func.__name__}: {e}", exc_info=True
+                    )
                     return {"retCode": -1, "retMsg": str(e)}
             return {"retCode": -1, "retMsg": "Max retries exceeded"}
 
@@ -288,21 +320,33 @@ class BybitHelper:
 
         # Initialize pybit HTTP session
         try:
-            self.session = HTTP(testnet=self.testnet, api_key=self.api_key, api_secret=self.api_secret)
+            self.session = HTTP(
+                testnet=self.testnet, api_key=self.api_key, api_secret=self.api_secret
+            )
             self.logger.info("Initialized pybit HTTP session")
         except Exception as e:
-            self.logger.critical(f"Failed to initialize pybit session: {e}", exc_info=True)
+            self.logger.critical(
+                f"Failed to initialize pybit session: {e}", exc_info=True
+            )
             sys.exit(1)
 
         # Initialize ccxt exchange
         try:
-            self.exchange = ccxt.bybit({"apiKey": self.api_key, "secret": self.api_secret, "enableRateLimit": True})
+            self.exchange = ccxt.bybit(
+                {
+                    "apiKey": self.api_key,
+                    "secret": self.api_secret,
+                    "enableRateLimit": True,
+                }
+            )
             if self.testnet:
                 self.exchange.set_sandbox_mode(True)
             self.exchange.load_markets()
             self.logger.info("Initialized ccxt exchange")
         except Exception as e:
-            self.logger.critical(f"Failed to initialize ccxt exchange: {e}", exc_info=True)
+            self.logger.critical(
+                f"Failed to initialize ccxt exchange: {e}", exc_info=True
+            )
             sys.exit(1)
 
         # Initialize WebSocket
@@ -331,7 +375,9 @@ class BybitHelper:
         try:
             server_time = self.session.get_server_time()
             if server_time.get("retCode") != 0:
-                self.logger.error(f"Server time fetch failed: {server_time.get('retMsg')}")
+                self.logger.error(
+                    f"Server time fetch failed: {server_time.get('retMsg')}"
+                )
                 return False
             if self.symbol not in self.exchange.markets:
                 self.logger.error(f"Symbol {self.symbol} not available")
@@ -344,7 +390,10 @@ class BybitHelper:
 
     def send_sms_alert(self, message: str, priority: str = "normal") -> bool:
         """Send SMS alert via Termux API with cooldown."""
-        if not self.config.sms_config.enable_sms_alerts or not self.config.sms_config.termux_phone_number:
+        if (
+            not self.config.sms_config.enable_sms_alerts
+            or not self.config.sms_config.termux_phone_number
+        ):
             return False
         current_time = time.time()
         cooldown = self.config.sms_config.sms_cooldown_seconds
@@ -400,7 +449,10 @@ class BybitHelper:
             return []
 
     def calculate_indicators(
-        self, df: pd.DataFrame, incremental: bool = False, prev_df: Optional[pd.DataFrame] = None
+        self,
+        df: pd.DataFrame,
+        incremental: bool = False,
+        prev_df: Optional[pd.DataFrame] = None,
     ) -> pd.DataFrame:
         """Calculate indicators using indicators.py."""
         try:
@@ -409,8 +461,12 @@ class BybitHelper:
                 "analysis_flags": self.config.strategy_config.analysis_flags,
                 "strategy_params": {
                     "ehlers_volumetric": {
-                        "evt_length": self.config.strategy_config.indicator_settings.get("evt_length", 7),
-                        "evt_multiplier": self.config.strategy_config.indicator_settings.get("evt_multiplier", 2.5),
+                        "evt_length": self.config.strategy_config.indicator_settings.get(
+                            "evt_length", 7
+                        ),
+                        "evt_multiplier": self.config.strategy_config.indicator_settings.get(
+                            "evt_multiplier", 2.5
+                        ),
                     }
                 },
             }
@@ -438,10 +494,14 @@ class BybitHelper:
             }
             df_new = pd.DataFrame([kline])
             prev_df = self.ohlcv_cache.get(timeframe)
-            df_updated = self.calculate_indicators(df_new, incremental=True, prev_df=prev_df)
+            df_updated = self.calculate_indicators(
+                df_new, incremental=True, prev_df=prev_df
+            )
             if prev_df is not None:
                 self.ohlcv_cache[timeframe] = (
-                    pd.concat([prev_df, df_updated]).drop_duplicates(subset="timestamp").tail(200)
+                    pd.concat([prev_df, df_updated])
+                    .drop_duplicates(subset="timestamp")
+                    .tail(200)
                 )
             else:
                 self.ohlcv_cache[timeframe] = df_updated
@@ -457,7 +517,9 @@ class BybitHelper:
             response = self.session.get_positions(category="linear", symbol=self.symbol)
             if response.get("retCode") == 0:
                 return response["result"]
-            self.logger.error(f"Failed to fetch position info: {response.get('retMsg')}")
+            self.logger.error(
+                f"Failed to fetch position info: {response.get('retMsg')}"
+            )
             return {}
         except Exception as e:
             self.logger.error(f"Error fetching position info: {e}", exc_info=True)
@@ -467,7 +529,9 @@ class BybitHelper:
     def get_open_orders(self) -> Dict[str, Any]:
         """Fetch open orders."""
         try:
-            response = self.session.get_open_orders(category="linear", symbol=self.symbol)
+            response = self.session.get_open_orders(
+                category="linear", symbol=self.symbol
+            )
             if response.get("retCode") == 0:
                 return response["result"]
             self.logger.error(f"Failed to fetch open orders: {response.get('retMsg')}")
@@ -477,7 +541,9 @@ class BybitHelper:
             return {}
 
     @retry_api_call()
-    def place_market_order(self, side: str, qty: float, reduce_only: bool = False) -> Dict[str, Any]:
+    def place_market_order(
+        self, side: str, qty: float, reduce_only: bool = False
+    ) -> Dict[str, Any]:
         """Place a market order."""
         try:
             qty_str = format_amount(self.exchange, self.symbol, qty)
@@ -491,17 +557,25 @@ class BybitHelper:
             )
             if response.get("retCode") == 0:
                 self.logger.info(f"Placed market order: {side} {qty_str} {self.symbol}")
-                self.send_sms_alert(f"Order placed: {side} {qty_str} {self.symbol}", priority="normal")
+                self.send_sms_alert(
+                    f"Order placed: {side} {qty_str} {self.symbol}", priority="normal"
+                )
             else:
-                self.logger.error(f"Failed to place market order: {response.get('retMsg')}")
-                self.send_sms_alert(f"Order failed: {side} {qty_str} {self.symbol}", priority="critical")
+                self.logger.error(
+                    f"Failed to place market order: {response.get('retMsg')}"
+                )
+                self.send_sms_alert(
+                    f"Order failed: {side} {qty_str} {self.symbol}", priority="critical"
+                )
             return response
         except Exception as e:
             self.logger.error(f"Error placing market order: {e}", exc_info=True)
             return {"retCode": -1, "retMsg": str(e)}
 
     @retry_api_call()
-    def place_limit_order(self, side: str, qty: float, price: float, reduce_only: bool = False) -> Dict[str, Any]:
+    def place_limit_order(
+        self, side: str, qty: float, price: float, reduce_only: bool = False
+    ) -> Dict[str, Any]:
         """Place a limit order."""
         try:
             qty_str = format_amount(self.exchange, self.symbol, qty)
@@ -516,15 +590,21 @@ class BybitHelper:
                 reduceOnly=reduce_only,
             )
             if response.get("retCode") == 0:
-                self.logger.info(f"Placed limit order: {side} {qty_str} @ {price_str} {self.symbol}")
+                self.logger.info(
+                    f"Placed limit order: {side} {qty_str} @ {price_str} {self.symbol}"
+                )
             else:
-                self.logger.error(f"Failed to place limit order: {response.get('retMsg')}")
+                self.logger.error(
+                    f"Failed to place limit order: {response.get('retMsg')}"
+                )
             return response
         except Exception as e:
             self.logger.error(f"Error placing limit order: {e}", exc_info=True)
             return {"retCode": -1, "retMsg": str(e)}
 
-    def subscribe_to_stream(self, topics: List[str], callback: Callable, channel_type: str = "public"):
+    def subscribe_to_stream(
+        self, topics: List[str], callback: Callable, channel_type: str = "public"
+    ):
         """Subscribe to WebSocket stream with reconnection handling."""
 
         def on_error(ws, error):
@@ -539,9 +619,19 @@ class BybitHelper:
 
         try:
             if channel_type == "public":
-                self.ws.public_stream(topics=topics, callback=callback, on_error=on_error, on_close=on_close)
+                self.ws.public_stream(
+                    topics=topics,
+                    callback=callback,
+                    on_error=on_error,
+                    on_close=on_close,
+                )
             elif channel_type == "private":
-                self.ws.private_stream(topics=topics, callback=callback, on_error=on_error, on_close=on_close)
+                self.ws.private_stream(
+                    topics=topics,
+                    callback=callback,
+                    on_error=on_error,
+                    on_close=on_close,
+                )
             self.logger.info(f"Subscribed to {topics} ({channel_type})")
         except Exception as e:
             self.logger.error(f"Error subscribing to stream: {e}", exc_info=True)
@@ -564,7 +654,10 @@ class BybitHelper:
             "ohlcv": self.fetch_ohlcv(self.config.strategy_config.timeframe),
         }
         if context.get("ohlcv"):
-            df = pd.DataFrame(context["ohlcv"], columns=["timestamp", "open", "high", "low", "close", "volume"])
+            df = pd.DataFrame(
+                context["ohlcv"],
+                columns=["timestamp", "open", "high", "low", "close", "volume"],
+            )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
             df = self.calculate_indicators(df)
             context["indicators"] = df
@@ -592,7 +685,9 @@ def setup_env():
     env_content.append("# Bybit API Configuration")
     api_key = input("Enter Bybit API Key: ").strip()
     api_secret = input("Enter Bybit API Secret: ").strip()
-    symbol = input("Enter trading symbol (e.g., BTCUSDT) [BTCUSDT]: ").strip() or "BTCUSDT"
+    symbol = (
+        input("Enter trading symbol (e.g., BTCUSDT) [BTCUSDT]: ").strip() or "BTCUSDT"
+    )
     testnet = input("Use testnet? (y/n) [y]: ").strip().lower() in ["", "y"]
     env_content.append(f"API_CONFIG__API_KEY={api_key}")
     env_content.append(f"API_CONFIG__API_SECRET={api_secret}")
@@ -624,7 +719,11 @@ def setup_env():
     # SMS Configuration
     env_content.append("\n# SMS Configuration")
     enable_sms = input("Enable SMS alerts? (y/n) [n]: ").strip().lower() == "y"
-    phone = input("Enter phone number for SMS alerts (or leave blank): ").strip() if enable_sms else ""
+    phone = (
+        input("Enter phone number for SMS alerts (or leave blank): ").strip()
+        if enable_sms
+        else ""
+    )
     env_content.append(f"SMS_CONFIG__ENABLE_SMS_ALERTS={str(enable_sms).lower()}")
     env_content.append(f"SMS_CONFIG__TERMUX_PHONE_NUMBER={phone}")
     env_content.append("SMS_CONFIG__SMS_COOLDOWN_SECONDS=60")
@@ -639,7 +738,9 @@ def setup_env():
             f.write("\n".join(env_content))
         print(f"{Fore.GREEN}.env file created successfully.{Style.RESET_ALL}")
     except Exception as e:
-        print(f"{Fore.RED}Error writing .env file: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Fore.RED}Error writing .env file: {e}{Style.RESET_ALL}", file=sys.stderr
+        )
         sys.exit(1)
 
 
@@ -648,16 +749,23 @@ def load_config() -> AppConfig:
     try:
         return AppConfig()
     except Exception as e:
-        print(f"{Fore.RED}Error loading configuration: {e}{Style.RESET_ALL}", file=sys.stderr)
+        print(
+            f"{Fore.RED}Error loading configuration: {e}{Style.RESET_ALL}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Bybit Trading Bot")
     parser.add_argument("--setup", action="store_true", help="Setup .env configuration")
-    parser.add_argument("--view-positions", action="store_true", help="View open positions")
+    parser.add_argument(
+        "--view-positions", action="store_true", help="View open positions"
+    )
     parser.add_argument("--view-orders", action="store_true", help="View open orders")
-    parser.add_argument("--diagnose", action="store_true", help="Run connection diagnostics")
+    parser.add_argument(
+        "--diagnose", action="store_true", help="Run connection diagnostics"
+    )
     args = parser.parse_args()
 
     config = load_config()
@@ -669,7 +777,9 @@ def main():
 
     if args.diagnose:
         result = helper.diagnose_connection()
-        print(f"{Fore.GREEN if result else Fore.RED}Diagnostics: {'Passed' if result else 'Failed'}{Style.RESET_ALL}")
+        print(
+            f"{Fore.GREEN if result else Fore.RED}Diagnostics: {'Passed' if result else 'Failed'}{Style.RESET_ALL}"
+        )
         return
 
     if args.view_positions:
@@ -682,7 +792,9 @@ def main():
         print(json.dumps(orders, indent=2))
         return
 
-    helper.logger.info("BybitHelper initialized. Run strategy separately (e.g., ehlers_volumetric_strategy.py).")
+    helper.logger.info(
+        "BybitHelper initialized. Run strategy separately (e.g., ehlers_volumetric_strategy.py)."
+    )
 
 
 if __name__ == "__main__":
