@@ -1,0 +1,6 @@
+ m WGX
+?? git_resolve.log
+?? git_status.txt
+?? pyrmethus_setup.log
+?? resolvegitc.sh
+?? set_pyrm.sh
