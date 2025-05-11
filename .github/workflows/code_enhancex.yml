@@ -1,4 +1,4 @@
-name: Code Enhancement Workflow
+name: Code Enhancement Workflow Push
 on:
   workflow_dispatch:
     inputs:
