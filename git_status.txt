@@ -1,4 +1,3 @@
  m WGX
  M git_resolve.log
  M git_status.txt
- M resolvegitc.sh
