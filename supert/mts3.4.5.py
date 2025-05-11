@@ -45,15 +45,14 @@ Enhancements in v2.8.2 (Refined by Pyrmethus):
 import json
 import logging
 import os
-import random  # For MockExchange if used, and unique IDs
 import subprocess  # For Termux notifications
 import sys
 import time
 import traceback
 import uuid  # For unique part IDs
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
-from decimal import ROUND_HALF_UP, Decimal, DivisionByZero, InvalidOperation, getcontext
+from datetime import datetime
+from decimal import Decimal, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any, Union, Dict, List, Tuple, Optional, Type
 
@@ -77,10 +76,10 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'. Pyrmethus cannot weave this spell.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
+        "\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
     )
     sys.exit(1)
 
@@ -715,7 +714,7 @@ class TradingStrategy(ABC):
             return False
         if self.required_columns and df.iloc[-1][self.required_columns].isnull().any():
             self.logger.debug(
-                f"Faint runes (NaNs) in last candle for critical columns."
+                "Faint runes (NaNs) in last candle for critical columns."
             )
         return True
 
@@ -816,7 +815,7 @@ class EhlersFisherStrategy(TradingStrategy):
             or pd.isna(fisher_prev)
             or pd.isna(signal_prev)
         ):
-            self.logger.debug(f"Ehlers Fisher/Signal NA.")
+            self.logger.debug("Ehlers Fisher/Signal NA.")
             return signals
         if fisher_prev <= signal_prev and fisher_now > signal_now:
             signals["enter_long"] = True
@@ -1788,7 +1787,7 @@ def close_position_part(
                 f"{NEON['SUCCESS']}Part {part_to_close['part_id']} closed. Exit: {actual_exit_price}, PNL: {pnl:.2f}{NEON['RESET']}"
             )
             config.send_notification_method(
-                f"Pyrmethus Position Closed",
+                "Pyrmethus Position Closed",
                 f"{config.symbol} Part {part_to_close['part_id']} closed. PNL: {pnl:.2f}",
             )
             return True

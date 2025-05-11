@@ -38,16 +38,14 @@ import json
 import logging
 import logging.handlers  # For RotatingFileHandler
 import os
-import random
 import subprocess
 import sys
 import time
 import traceback
-import uuid
 from abc import ABC, abstractmethod
 from collections import deque
-from datetime import datetime, timedelta
-from decimal import ROUND_DOWN, ROUND_UP, Decimal, InvalidOperation, getcontext
+from datetime import datetime
+from decimal import Decimal, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -57,7 +55,6 @@ from cachetools import TTLCache  # For API call caching
 from colorama import Back, Fore, Style  # The Prisms of Perception
 from colorama import init as colorama_init
 from dotenv import load_dotenv  # For whispering secrets
-from retry import retry  # The Art of Tenacious Spellcasting
 
 # Third-party Libraries - The Grimoire of External Magics
 try:
@@ -74,10 +71,10 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'. Pyrmethus cannot weave this spell.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
+        "\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
     )
     sys.exit(1)
 

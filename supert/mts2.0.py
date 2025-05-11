@@ -55,7 +55,7 @@ import time
 import traceback
 from abc import ABC, abstractmethod
 from datetime import datetime
-from decimal import ROUND_HALF_UP, Decimal, DivisionByZero, InvalidOperation, getcontext
+from decimal import Decimal, DivisionByZero, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any
 
@@ -80,11 +80,11 @@ except ImportError as e:
     )
     if missing_pkg == "pandas_ta":
         sys.stderr.write(
-            f"\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
+            "\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
         )
     if missing_pkg == "retry":
         sys.stderr.write(
-            f"\033[91mFor retry decorator, install with: pip install retry\033[0m\n"
+            "\033[91mFor retry decorator, install with: pip install retry\033[0m\n"
         )
     sys.exit(1)
 
@@ -1460,7 +1460,7 @@ def check_account_health(exchange: ccxt.Exchange, config: Config) -> bool:
                     f"{Back.RED}{Fore.WHITE}CRITICAL: Zero/Negative Equity ({_format_for_log(total_equity)}) with Used Margin ({_format_for_log(used_margin)})! Halting.{Style.RESET_ALL}"
                 )
                 send_sms_alert(
-                    f"CRITICAL: Zero/Neg Equity with Used Margin. Bot paused."
+                    "CRITICAL: Zero/Neg Equity with Used Margin. Bot paused."
                 )
                 return False
             return True

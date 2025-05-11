@@ -1,3 +1,303 @@
+
+
+### Analysis of Pyrmethus Trading Bot Log Output (Cycles 1–4, New Session)
+
+The log output from the Pyrmethus trading bot (version 4.5.7, Neon Nexus Edition) covers a new session with four trading cycles for scalping on the `FARTCOIN/USDT:USDT` pair, initialized on 2025-05-10 19:06:20. The configuration aligns with prior optimizations for high-frequency trading on a 1-minute timeframe, but a critical error in Cycle 4 caused a trade to fail due to a missing CCXT method for setting position protections, leading to an emergency position closure. Below, I’ll review the configuration, analyze the cycles, address the protection error and insufficient funds issue, and propose refinements to enhance scalping performance.
+
+---
+
+### Configuration Review
+
+The configuration is loaded from the `.env` file, with a notable correction from previous logs: the `RISK_PERCENTAGE` is now correctly set to `0.5%` (0.005), addressing the oversized position issue seen in earlier logs (e.g., Cycles 18–19 requiring ~408 USDT). Here’s a summary:
+
+#### Trading Setup
+- **Symbol**: `FARTCOIN/USDT:USDT` (linear perpetual futures)  
+- **Market Type**: `linear` (USDT-margined)  
+- **Interval**: `1m`  
+- **Risk Percentage**: `0.5%` (corrected from 50%)  
+  - Risk per trade is now `0.0182 USDT` (0.005 * 3.65 USDT), suitable for low equity.
+
+#### Stop-Loss and Take-Profit
+- **Stop-Loss ATR Multiplier**: `1.0` (SL at 1x ATR)  
+- **Take-Profit ATR Multiplier**: `2.0` (TP at 2x ATR, 2:1 reward-to-risk)  
+- **Trailing Stop Activation ATR Multiplier**: `0.5` (activates after 0.5x ATR move)  
+- **Trailing Stop Percentage**: `0.3%` (trails by 0.3%)  
+- **SL/TSL Trigger**: `MarkPrice` (reduces volatility-induced stop-outs)  
+- **Position Index**: `0` (One-Way mode)  
+
+#### Indicators
+- **EMA Periods**: Fast: `5`, Slow: `13`, Trend: `8`  
+- **Stochastic**: Period: `5`, Smooth K/D: `3`, Oversold: `20`, Overbought: `80`  
+- **ATR Period**: `5`  
+- **ADX Period**: `7`, Min ADX Level: `15`  
+- **Trend Filter Buffer Percent**: `0.2`  
+- **ATR Move Filter Multiplier**: `0.3`  
+
+#### Bot Operation
+- **OHLCV Limit**: `100`  
+- **Loop Sleep Seconds**: `10`  
+- **Order Check Delay**: `2 seconds`  
+- **Order Fill Timeout**: `10 seconds`  
+- **Max Fetch Retries**: `3`, Retry Delay: `3 seconds`  
+- **Trade Only With Trend**: `true`  
+- **Journaling**: Enabled (`pyrmethus_trading_journal.csv`)  
+
+#### Market Info
+- **Formatting**: Amount = 0 DP, Price = 4 DP  
+- **Step Sizes**: Tick Size = `0.0001`, Amount Step = `1`  
+- **Limits**: Min Amount = `1`  
+- **Contract Size**: `1`  
+
+---
+
+### Warnings
+
+The warnings are unchanged:
+1. **TREND_EMA_PERIOD (8) <= SLOW_EMA_PERIOD (13)**: Intentional for scalping; no action needed.
+2. **TSL_ACTIVATION_ATR_MULTIPLIER (0.5) < SL_ATR_MULTIPLIER (1)**: Suitable for scalping but monitor for premature trailing stop triggers.
+
+---
+
+### Trading Cycle Analysis
+
+The log covers four cycles in a new session, with one trade attempt in Cycle 4 that failed due to a CCXT error in setting protections, resulting in an emergency close. Here’s a detailed analysis:
+
+#### Cycle 1 (2025-05-11 00:06:00 UTC)
+- **Price**: `1.4286`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4291/1.4265/1.4279` (Bullish: Fast > Slow)  
+  - Stochastic: `63.0/71.7/74.6` (Bearish K/D crossover, neutral)  
+  - ATR: `0.00976`, ADX: `33.4` (+DI: `18.8`, -DI: `8.6`)  
+- **Position**: `FLAT`  
+- **Status**: No signal (EMA Bullish, but Stochastic K not oversold/overbought, bearish K/D crossover).  
+- **Analysis**: Strong trend (ADX = `33.4`, +DI > -DI), but no trade due to Stochastic conditions.
+
+#### Cycle 2 (2025-05-11 00:06:00 UTC)
+- **Price**: `1.4328`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4305/1.4271/1.4288` (Bullish)  
+  - Stochastic: `70.7/74.3/74.6` (Bearish K/D crossover, near overbought)  
+  - ATR: `0.00976`, ADX: `33.4` (+DI: `18.8`, -DI: `8.6`)  
+- **Position**: `FLAT`  
+- **Status**: No signal (EMA Bullish, Stochastic near overbought, bearish K/D crossover).  
+- **Analysis**: Similar to Cycle 1, no trade due to Stochastic constraints.
+
+#### Cycle 3 (2025-05-11 00:06:00 UTC)
+- **Price**: `1.4300`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4296/1.4267/1.4282` (Bullish)  
+  - Stochastic: `65.5/72.6/74.6` (Bearish K/D crossover, neutral)  
+  - ATR: `0.00976`, ADX: `33.4` (+DI: `18.8`, -DI: `8.6`)  
+- **Position**: `FLAT`  
+- **Status**: No signal (EMA Bullish, Stochastic neutral, bearish K/D crossover).  
+- **Analysis**: Consistent with prior cycles, no trade due to Stochastic conditions.
+
+#### Cycle 4 (2025-05-11 00:07:00 UTC)
+- **Price**: `1.4342`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4314/1.4279/1.4298` (Bullish)  
+  - Stochastic: `84.1/75.6/68.1` (Bullish K/D crossover, overbought)  
+  - ATR: `0.00855`, ADX: `34.0` (+DI: `18.4`, -DI: `8.4`)  
+- **Position**: `FLAT`  
+- **Status**: `FAIL:ENTRY_LONG` (protection setting error, emergency close)  
+- **Details**: 
+  - **Signal**: Long triggered by:
+    - EMA Bullish (`1.4314 > 1.4279`)  
+    - Stochastic K = `84.1` (overbought, but K/D crossover bullish)  
+    - Trend OK (price `1.4342` within `1.4298 ± 0.0029`)  
+    - ATR move OK (`0.0028 > 0.0026`)  
+    - ADX OK (`34.0 > 15`, +DI > -DI)  
+  - **Trade Parameters**: 
+    - Qty: `2`  
+    - Entry Price: `1.4342` (filled at `1.435`)  
+    - SL: `1.4257` (1x ATR = `0.00855` below entry)  
+    - TP: `1.4513` (2x ATR above entry)  
+    - TSL Distance: `0.0043` (0.5x ATR)  
+    - Risk Amount: `0.0182 USDT` (0.5% of 3.65 USDT)  
+  - **Execution**: 
+    - Market buy order (`Qty=2`) submitted successfully (ID: `ef16cc19-1886-4d1d-a4db-61aee1fbb488`).  
+    - Position confirmed: `LONG, Qty=2, AvgEntryPx=1.435`.  
+  - **Error**: Attempt to set SL (`1.4257`) and TP (`1.4513`) failed with:
+    ```
+    Fatal Error: CCXT private method 'privatePostPositionTradingStop' for setting position protection not found. Check CCXT version or Bybit V5 implementation.
+    ```
+    - This caused an emergency close:
+      - Attempted to clear SL/TP/TSL (failed with same CCXT error).  
+      - Market sell order (`Qty=2`, ID: `80bebdeb-63f3-4754-92f9-425c01c26e15`) submitted.  
+      - Position closed successfully (verified FLAT).  
+  - **Outcome**: Equity unchanged (`3.65 USDT`), suggesting the trade closed at breakeven or with negligible loss (likely due to tight spread and no significant price movement during the brief position duration).  
+- **Analysis**: The position sizing issue was resolved (`Qty=2` fits equity), but the CCXT error prevented setting protections, triggering an emergency exit. The bot handled the failure gracefully by closing the position.
+
+---
+
+### Key Observations and Issues
+
+1. **CCXT Protection Error**:
+   - The fatal error in Cycle 4 (`privatePostPositionTradingStop` not found) indicates a compatibility issue between the bot’s CCXT implementation and Bybit’s V5 API. This caused the failure to set SL/TP, leading to an emergency close. This explains the “Protection: None” issue in earlier logs (e.g., Cycles 4, 16).
+
+2. **Low Trade Frequency**:
+   - Only one trade attempt in four cycles, with Cycles 1–3 blocked by Stochastic conditions (K not oversold/overbought, bearish K/D crossover despite bullish EMA). The `TRADE_ONLY_WITH_TREND=true` and strict Stochastic thresholds (`20/80`) limit opportunities.
+
+3. **Low Equity**:
+   - Equity (`3.65 USDT`) is still very low, though the corrected `RISK_PERCENTAGE=0.5%` ensures viable position sizes (`Qty=2`). However, this limits scalability and profitability for scalping.
+
+4. **Market Volatility**:
+   - `FARTCOIN/USDT:USDT` shows moderate volatility (ATR ~0.008–0.009), but the market appears to lack consistent directional movement, reducing trade signals. A more volatile pair like `BTC/USDT:USDT` would likely yield more opportunities.
+
+5. **Stochastic Constraints**:
+   - The Stochastic K values (`63.0–84.1`) rarely hit oversold (`<20`) or overbought (`>80`), and bearish K/D crossovers blocked trades despite bullish EMA and strong ADX (`33.4–34.0`).
+
+---
+
+### Recommendations for Scalping Optimization
+
+To address the CCXT protection error, increase trade frequency, and enhance performance, consider the following:
+
+1. **Fix CCXT Protection Error**:
+   - **Update CCXT**: Ensure the latest CCXT version is installed, as Bybit’s V5 API requires specific methods for setting trading stops. Run:
+     ```bash
+     pip install ccxt --upgrade
+     ```
+   - **Verify Bybit V5 API Implementation**: Check if the bot uses the correct CCXT method for Bybit V5. The `privatePostPositionTradingStop` method may be outdated or misconfigured. Use the Bybit V5 equivalent (e.g., `set_trading_stop` or `private_post_v5_position_trading_stop`). Example:
+     ```python
+     try:
+         response = self.ccxt_exchange.private_post_v5_position_trading_stop({
+             'category': 'linear',
+             'symbol': symbol,
+             'stopLoss': str(stop_loss),
+             'takeProfit': str(take_profit),
+             'trailingStop': str(trailing_stop),
+             'slTriggerBy': 'MarkPrice',
+             'tpTriggerBy': 'MarkPrice'
+         })
+         logger.debug(f"Trading stop response: {response}")
+         if response.get('retCode', -1) != 0:
+             raise Exception(f"Failed to set protections: {response['retMsg']}")
+     except Exception as e:
+         logger.error(f"Failed to set protections: {e}")
+         self.ccxt_exchange.cancel_order(order_id, symbol)
+         return False
+     ```
+   - **Fallback Mechanism**: If protections fail, close the position immediately (as done in Cycle 4) and log the error for debugging.
+   - **Test API Call**: Isolate the trading stop API call in a test script to confirm functionality before running the bot.
+
+2. **Loosen Entry Conditions**:
+   - **Stochastic Thresholds**: Adjust to `25` and `75` to capture more signals:
+     ```env
+     STOCH_OVERSOLD_THRESHOLD=25
+     STOCH_OVERBOUGHT_THRESHOLD=75
+     ```
+   - **Trend Filter**: Increase to `0.5` for more flexibility:
+     ```env
+     TREND_FILTER_BUFFER_PERCENT=0.5
+     ```
+   - **ADX**: Lower to `10` to allow weaker trends:
+     ```env
+     MIN_ADX_LEVEL=10
+     ```
+   - **Trend Restriction**: Temporarily disable `TRADE_ONLY_WITH_TREND` to test increased trade frequency:
+     ```env
+     TRADE_ONLY_WITH_TREND=false
+     ```
+
+3. **Increase Account Equity**:
+   - Fund the testnet account with at least `100 USDT` to support larger position sizes and improve scalability for scalping.
+
+4. **Switch to a Volatile Pair**:
+   - Use `BTC/USDT:USDT` for higher volatility and liquidity:
+     ```env
+     SYMBOL=BTC/USDT:USDT
+     ```
+
+5. **Adjust Trailing Stop**:
+   - Increase `TSL_ACTIVATION_ATR_MULTIPLIER` to `0.75` to reduce premature exits:
+     ```env
+     TSL_ACTIVATION_ATR_MULTIPLIER=0.75
+     ```
+
+---
+
+### Updated `.env` File
+
+Here’s the refined `.env` file incorporating the recommendations:
+
+```env
+# Bybit API Credentials
+BYBIT_API_KEY=your_api_key_here
+BYBIT_API_SECRET=your_api_secret_here
+USE_BYBIT_TESTNET=true  # Use testnet for initial testing
+
+# Trading Symbol and Market Type
+SYMBOL=BTC/USDT:USDT  # Switched to BTC for volatility
+MARKET_TYPE=linear
+
+# Trading Parameters
+RISK_PERCENTAGE=0.005  # 0.5% of equity
+SL_ATR_MULTIPLIER=1.0
+TP_ATR_MULTIPLIER=2.0
+TSL_ACTIVATION_ATR_MULTIPLIER=0.75
+TRAILING_STOP_PERCENT=0.3
+SL_TRIGGER_BY=MarkPrice
+TSL_TRIGGER_BY=MarkPrice
+POSITION_IDX=0
+
+# Strategy Parameters
+INTERVAL=1m
+FAST_EMA_PERIOD=5
+SLOW_EMA_PERIOD=13
+TREND_EMA_PERIOD=8
+STOCH_PERIOD=5
+STOCH_SMOOTH_K=3
+STOCH_SMOOTH_D=3
+ATR_PERIOD=5
+ADX_PERIOD=7
+STOCH_OVERSOLD_THRESHOLD=25
+STOCH_OVERBOUGHT_THRESHOLD=75
+TREND_FILTER_BUFFER_PERCENT=0.5
+ATR_MOVE_FILTER_MULTIPLIER=0.3
+MIN_ADX_LEVEL=10
+TRADE_ONLY_WITH_TREND=false  # Disabled for testing
+
+# Bot Operation
+OHLCV_LIMIT=100
+LOOP_SLEEP_SECONDS=10
+ORDER_CHECK_DELAY_SECONDS=2
+ORDER_FILL_TIMEOUT_SECONDS=10
+MAX_FETCH_RETRIES=3
+RETRY_DELAY_SECONDS=3
+JOURNAL_FILE_PATH=pyrmethus_trading_journal.csv
+ENABLE_JOURNALING=true
+```
+
+---
+
+### Deployment and Testing Plan
+
+1. **Testnet Testing**:
+   - Run with `USE_BYBIT_TESTNET=true` and fund the testnet account with `100 USDT`.
+   - Verify position sizing (`RISK_PERCENTAGE=0.005`) and trade execution.
+
+2. **Debug CCXT Protection Issue**:
+   - Upgrade CCXT and test the `private_post_v5_position_trading_stop` API call in isolation.
+   - Add detailed logging for protection API responses. Ensure trades are canceled if protections fail.
+   - Test a single trade to confirm SL/TP/TSL settings.
+
+3. **Performance Monitoring**:
+   - Monitor trade frequency with `TRADE_ONLY_WITH_TREND=false`. If frequency improves, consider permanent ADX relaxation.
+   - Check `pyrmethus_trading_journal.csv` for trade outcomes and adjust `TSL_ACTIVATION_ATR_MULTIPLIER` if stops are too tight.
+
+4. **Security**:
+   - Update API credentials and secure the `.env` file.
+
+5. **Backtesting**:
+   - Use [backtrader](https://www.backtrader.com/) with `BTC/USDT:USDT` historical data to optimize parameters.
+
+---
+
+### Conclusion
+
+The Pyrmethus bot is well-configured for scalping, with the `RISK_PERCENTAGE` correction resolving the insufficient funds issue. However, the CCXT error in Cycle 4 (`privatePostPositionTradingStop` not found) is a critical blocker, causing failed protections and emergency closures. The updated `.env` file switches to `BTC/USDT:USDT`, loosens entry conditions, and adjusts the trailing stop. Prioritize updating CCXT, fixing the protection API call, and testing with adequate testnet funds (`100 USDT`). Monitor the journal file to refine parameters and ensure robust trade execution.
+
 # -*- coding: utf-8 -*-
 # pylint: disable=logging-fstring-interpolation, too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods, invalid-name, unused-argument, too-many-lines, wrong-import-order, wrong-import-position, unnecessary-pass, unnecessary-lambda-assignment, bad-option-value, line-too-long
 # fmt: off

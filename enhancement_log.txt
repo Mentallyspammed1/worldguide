@@ -2856,3 +2856,28 @@ No changes needed for modules/xrscalper_main.py
 Processing complete at 2025-05-07 19:21:56.942600
 Processed 407 file(s), modified 0 file(s)
 No files were modified
+2025-05-10 14:08:41 - INFO - [main.main] - Starting code enhancement process for directory './supert', pattern '*.py'.
+2025-05-10 14:08:41 - INFO - [main.main] - Log file: /data/data/com.termux/files/home/worldguide/enhancement_log.txt
+2025-05-10 14:08:41 - INFO - [main.main] - Matched files list: /data/data/com.termux/files/home/worldguide/matched_files.txt
+2025-05-10 14:08:41 - INFO - [main.main] - Using MAX_API_CALLS_PER_MINUTE: 59
+2025-05-10 14:08:41 - INFO - [main.configureApi] - Successfully configured Gemini API with model: gemini-1.5-pro-latest
+2025-05-10 14:08:41 - ERROR - [main.getMatchingFiles] - Error during file search with pattern '*.py' in directory '/data/data/com.termux/files/home/worldguide/supert': files.sort is not a function
+2025-05-10 14:16:31 - INFO [enhance_code.js.main] - Starting code enhancement process for directory './supert', pattern '*.py'.
+2025-05-10 14:16:31 - INFO [enhance_code.js.main] - Log file: /data/data/com.termux/files/home/worldguide/enhancement_log.txt
+2025-05-10 14:16:31 - INFO [enhance_code.js.main] - Matched files list: /data/data/com.termux/files/home/worldguide/matched_files.txt
+2025-05-10 14:16:31 - WARN [enhance_code.js.main] - Invalid or no MAX_API_CALLS environment variable found (value: "undefined"). Using default: 59 calls/minute.
+2025-05-10 14:16:31 - INFO [enhance_code.js.main] - API call rate limit: 59 calls/minute.
+2025-05-10 14:16:31 - INFO [enhance_code.js.configureApi] - Successfully configured Gemini API with model: gemini-1.5-pro-latest
+2025-05-10 14:16:31 - ERROR [enhance_code.js.getMatchingFiles] - File search (glob) did not return an array. Received type: object. This may indicate an issue with the 'glob' library version or environment. Expected an array of file paths.
+2025-05-10 14:22:02 - INFO [enhance_code.js.main] - Starting code enhancement process for directory './supert', pattern '*.py'.
+2025-05-10 14:22:02 - INFO [enhance_code.js.main] - Log file: /data/data/com.termux/files/home/worldguide/enhancement_log.txt
+2025-05-10 14:22:02 - INFO [enhance_code.js.main] - Matched files list: /data/data/com.termux/files/home/worldguide/matched_files.txt
+2025-05-10 14:22:02 - WARN [enhance_code.js.main] - Invalid or no MAX_API_CALLS environment variable found (value: "undefined"). Using default: 59 calls/minute.
+2025-05-10 14:22:02 - INFO [enhance_code.js.main] - API call rate limit: 59 calls/minute.
+2025-05-10 14:22:02 - INFO [enhance_code.js.configureApi] - Successfully configured Gemini API with model: gemini-2.5-pro-exp-03-25
+2025-05-10 14:22:02 - INFO [enhance_code.js.getMatchingFiles] - Found 68 files matching pattern '*.py' in '/data/data/com.termux/files/home/worldguide/supert'. See matched_files.txt.
+2025-05-10 14:22:02 - INFO [enhance_code.js.main] - Calculated API call delay: 1.12 seconds per call.
+2025-05-10 14:22:02 - INFO [enhance_code.js.main] - Processing file 1/68: ehlpyrm.py (file: ehlpyrm.py)
+2025-05-10 14:27:03 - ERROR [enhance_code.js.enhanceCode] - API call failed: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent: fetch failed (file: ehlpyrm.py)
+2025-05-10 14:27:03 - INFO [enhance_code.js.main] - No enhancements applied or generated. (file: ehlpyrm.py)
+2025-05-10 14:27:04 - INFO [enhance_code.js.main] - Processing file 2/68: mts1.0.py (file: mts1.0.py)

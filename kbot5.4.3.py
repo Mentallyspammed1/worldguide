@@ -19,7 +19,6 @@ stop-loss, take-profit, and trailing-stop features.
 """
 
 # Standard Library Imports
-import copy
 import csv
 import logging
 import os
@@ -32,7 +31,6 @@ from datetime import datetime, timezone
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
-    ROUND_UP,
     Decimal,
     DivisionByZero,
     InvalidOperation,
@@ -98,7 +96,7 @@ except ImportError as e:
             if "numpy" in COMMON_PACKAGES:
                 termux_pkgs_to_install.append("python-numpy")
                 if 'numpy' in pip_pkgs_to_install: pip_pkgs_to_install.remove('numpy')
-            
+
             install_cmd_parts = []
             if termux_pkgs_to_install:
                 install_cmd_parts.append(f"pkg install python {' '.join(termux_pkgs_to_install)}")
@@ -766,7 +764,7 @@ class ExchangeManager:
         precision_dp = DEFAULT_PRICE_DP # Fallback
         if self.market_info and "precision_dp" in self.market_info and "price" in self.market_info["precision_dp"]:
             precision_dp = self.market_info["precision_dp"]["price"]
-        
+
         # For API calls, it's often better to use exchange.price_to_precision(symbol, price_float).
         # For display or internal use, quantize is fine.
         try:
@@ -790,7 +788,7 @@ class ExchangeManager:
         precision_dp = DEFAULT_AMOUNT_DP # Fallback
         if self.market_info and "precision_dp" in self.market_info and "amount" in self.market_info["precision_dp"]:
             precision_dp = self.market_info["precision_dp"]["amount"]
-        
+
         # Similar to price, exchange.amount_to_precision(symbol, amount_float) is an option for API calls.
         try:
             quantizer = Decimal("1e-" + str(precision_dp))
@@ -1079,7 +1077,7 @@ class ExchangeManager:
             for pos_data_ccxt_unified in fetched_positions_list_ccxt:
                 raw_api_entry = pos_data_ccxt_unified.get("info", {})
                 pos_idx_from_api_str = raw_api_entry.get("positionIdx") # positionIdx from API as string "0", "1", "2"
-                
+
                 try:
                     pos_idx_from_api_int = int(pos_idx_from_api_str) if pos_idx_from_api_str is not None else -1 # Default if missing
                 except ValueError:
@@ -1101,7 +1099,7 @@ class ExchangeManager:
             # Parse details from the matched raw_pos_info_raw_api
             qty_str = target_pos_info_raw_api.get("size", "0")
             api_side_str = target_pos_info_raw_api.get("side", "None").lower() # 'Buy', 'Sell', or 'None' if flat for that idx
-            
+
             qty_decimal = safe_decimal(qty_str)
             # Position size must be positive for our logic; API 'side' determines direction for one-way mode.
             # For hedge mode, positionIdx determines direction.
@@ -1766,7 +1764,7 @@ class OrderManager:
                 # Value per point for 1 unit of base asset. If market_contract_size is 1, this is 1.
                 value_change_per_point_per_base_unit = market_contract_size # Typically 1 for linear futures where qty is base
                 if value_change_per_point_per_base_unit <= 0: logger.error("Invalid contract size for linear quantity."); return None
-                
+
                 risk_per_unit_of_base = sl_distance_from_current_abs * value_change_per_point_per_base_unit
                 if risk_per_unit_of_base <= 0:
                     logger.error(f"Calculated zero or negative risk per unit of base ({risk_per_unit_of_base.normalize()}). Cannot determine quantity.")
@@ -1867,11 +1865,11 @@ class OrderManager:
         # First, format to string with correct precision and rounding.
         qty_str_for_api = self.exchange_manager.format_amount(qty_decimal, rounding_mode=ROUND_DOWN)
         final_qty_decimal_for_log = safe_decimal(qty_str_for_api) # For logging and comparison
-        
+
         if final_qty_decimal_for_log.is_nan() or final_qty_decimal_for_log <= 0:
             logger.error(f"Attempted market order with zero/invalid formatted quantity: '{qty_str_for_api}' (Original Decimal: {qty_decimal.normalize()}). Order aborted.")
             return None
-        
+
         # Convert the precisely formatted string quantity to float for CCXT API
         try:
             amount_float_for_ccxt = float(qty_str_for_api)
@@ -2624,7 +2622,7 @@ class StatusDisplay:
             parts.append(Text("EMA(F/S/T): ").append(fmt_ind('fast_ema', price_display_dp, "cyan")).append("/")
                          .append(fmt_ind('slow_ema', price_display_dp, "magenta")).append("/")
                          .append(fmt_ind('trend_ema', price_display_dp, "yellow")))
-            
+
             stoch_text = Text("Stoch(K/D/PrevK): ").append(fmt_ind('stoch_k', 1, "bright_blue")).append("/")
             stoch_text.append(fmt_ind('stoch_d', 1, "blue")).append("/")
             stoch_text.append(fmt_ind('stoch_k_prev', 1, "dim blue"))
@@ -2641,7 +2639,7 @@ class StatusDisplay:
                          .append(self._format_decimal_for_rich(adx_val_dec, 1, default_style=adx_style))
                          .append(" [+DI:", style="dim").append(fmt_ind('pdi', 1, "bright_green"))
                          .append(" -DI:", style="dim").append(fmt_ind('mdi', 1, "bright_red")).append("]", style="dim"))
-            
+
             panel_content.append(Text(" | ", style="dim").join(parts)); panel_content.append("\n")
         else:
             panel_content.append(Text("Calculating or data unavailable...", style="dim")); panel_content.append("\n")
@@ -2659,7 +2657,7 @@ class StatusDisplay:
                 active_pos_side, active_pos_data = "long", long_data
             elif short_data and safe_decimal(short_data.get('qty', Decimal(0))).copy_abs() >= POSITION_QTY_EPSILON:
                 active_pos_side, active_pos_data = "short", short_data
-        
+
         if active_pos_side and active_pos_data:
             style = "bold bright_green" if active_pos_side == "long" else "bold bright_red"
             pos_display_text = Text(f"{active_pos_side.upper()}: ", style=style)
@@ -2685,10 +2683,10 @@ class StatusDisplay:
                 if exch_sl: sl_tp_parts.append(f"S:{self._format_decimal_for_rich(exch_sl, price_display_dp).plain}")
                 if exch_tp: sl_tp_parts.append(f"T:{self._format_decimal_for_rich(exch_tp, price_display_dp).plain}")
                 if sl_tp_parts: exchange_prot_desc.append(f" ({' '.join(sl_tp_parts)})", style="dim")
-            
+
             prot_status_text.append("Exch:").append(exchange_prot_desc)
             prot_status_text.append(" LocalTrk:").append(Text(str(local_tracker_state) if local_tracker_state else "None", style="blue" if local_tracker_state else "dim"))
-            
+
             # Consistency Check visual cue
             mismatch = False
             if exch_tsl_active and local_tracker_state != "ACTIVE_TSL": mismatch = True
@@ -2709,7 +2707,7 @@ class StatusDisplay:
         elif "Blocked" in status_reason or "FAIL:" in status_reason or "EmergencyClose" in status_reason: status_style_key = "yellow"
         elif "CLOSED_" in status_reason or "HOLDING_" in status_reason or "INFO:" in status_reason: status_style_key = "bright_blue"
         elif "No Signal:" not in status_reason and "Initializing" not in status_reason: status_style_key = "white"
-        
+
         wrapped_status_reason = "\n             ".join(textwrap.wrap(status_reason, width=100, subsequent_indent=""))
         panel_content.append(Text(wrapped_status_reason, style=status_style_key))
 
@@ -2791,7 +2789,7 @@ class TradingBot:
     def run(self):
         """Starts the main trading loop."""
         self._display_startup_info()
-        termux_notify(f"Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
+        termux_notify("Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
         cycle_count = 0
 
         while not self.shutdown_requested:
@@ -2932,7 +2930,7 @@ class TradingBot:
                         return # Action taken (close attempt), end cycle.
                     else:
                         logger.warning(f"Exit signal for {active_pos_side_logical.upper()} but position quantity invalid ({pos_qty_abs}). Cannot close.")
-            
+
             # 4c. Re-check position: Might have been closed by exchange SL/TP/TSL
             # This is important if an exchange stop was hit during this cycle's processing time.
             logger.debug(f"Re-fetching position state for {active_pos_side_logical.upper()} after TSL/exit checks to confirm current status before proceeding to entry checks (if it became flat).")

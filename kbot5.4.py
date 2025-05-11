@@ -19,11 +19,9 @@ stop-loss, take-profit, and trailing-stop features.
 """
 
 # Standard Library Imports
-import copy
 import csv
 import logging
 import os
-import platform # Not actively used, but kept for potential future use
 import signal
 import subprocess
 import sys
@@ -33,7 +31,6 @@ from datetime import datetime, timezone
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
-    ROUND_UP,
     Decimal,
     DivisionByZero,
     InvalidOperation,
@@ -2757,7 +2754,7 @@ class TradingBot:
     def run(self):
         """Starts the main trading loop."""
         self._display_startup_info() # Show config summary
-        termux_notify(f"Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
+        termux_notify("Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
         cycle_count = 0
 
         while not self.shutdown_requested:

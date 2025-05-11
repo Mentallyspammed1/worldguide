@@ -43,15 +43,11 @@ import random
 import subprocess
 import sys
 import time
-import traceback
-import uuid
 from abc import ABC, abstractmethod
-from collections import deque
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_UP,
-    ROUND_UP,
     Decimal,
     InvalidOperation,
     getcontext,
@@ -65,7 +61,6 @@ from cachetools import TTLCache
 from colorama import Back, Fore, Style
 from colorama import init as colorama_init
 from dotenv import load_dotenv
-from retry import retry
 
 try:
     import ccxt
@@ -81,10 +76,10 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'. Pyrmethus cannot weave this spell.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
+        "\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
     )
     sys.exit(1)
 
@@ -1262,7 +1257,7 @@ class DualSupertrendMomentumStrategy(TradingStrategy):  # Copied from v3.0.4
                     and (latest_close - st_line_val) > max_allowed_distance
                 ):
                     price_proximity_ok = False
-                    self.logger.debug(f"Long ST proximity fail.")
+                    self.logger.debug("Long ST proximity fail.")
             elif primary_short_flip:
                 st_line_val = safe_decimal_conversion(last.get(f"{st_p_base}s"))
                 if (
@@ -1270,7 +1265,7 @@ class DualSupertrendMomentumStrategy(TradingStrategy):  # Copied from v3.0.4
                     and (st_line_val - latest_close) > max_allowed_distance
                 ):
                     price_proximity_ok = False
-                    self.logger.debug(f"Short ST proximity fail.")
+                    self.logger.debug("Short ST proximity fail.")
         if (
             primary_long_flip
             and stable_confirm_trend is True
@@ -1339,14 +1334,14 @@ class EhlersFisherStrategy(TradingStrategy):  # Copied from v3.0.4
         if not is_fisher_extreme:
             if fisher_prev <= signal_prev and fisher_now > signal_now:
                 signals["enter_long"] = True
-                self.logger.info(f"EhlersFisher Signal: LONG Entry.")
+                self.logger.info("EhlersFisher Signal: LONG Entry.")
             elif fisher_prev >= signal_prev and fisher_now < signal_now:
                 signals["enter_short"] = True
-                self.logger.info(f"EhlersFisher Signal: SHORT Entry.")
+                self.logger.info("EhlersFisher Signal: SHORT Entry.")
         elif (fisher_prev <= signal_prev and fisher_now > signal_now) or (
             fisher_prev >= signal_prev and fisher_now < signal_now
         ):
-            self.logger.info(f"EhlersFisher: Crossover ignored in extreme zone.")
+            self.logger.info("EhlersFisher: Crossover ignored in extreme zone.")
         if fisher_prev >= signal_prev and fisher_now < signal_now:
             signals["exit_long"] = True
             signals["exit_reason"] = "Ehlers Fisher crossed BELOW Signal"

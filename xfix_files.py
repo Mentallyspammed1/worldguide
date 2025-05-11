@@ -295,7 +295,7 @@ def main(base_dir: str, file_pattern: str) -> None:
                 )
                 time.sleep(delay_seconds)
 
-    logger.info(f"--- Enhancement Process Completed ---")
+    logger.info("--- Enhancement Process Completed ---")
     logger.info(f"Total files matched: {len(files_to_process)}")
     logger.info(f"Files processed: {processed_files_count}")
     logger.info(f"Files modified: {modified_files_count}")

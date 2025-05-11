@@ -37,15 +37,13 @@ import json
 import logging
 import logging.handlers
 import os
-import random
 import subprocess
 import sys
 import time
-import traceback
 import uuid
 from abc import ABC, abstractmethod
 from collections import deque
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
@@ -53,7 +51,6 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import ccxt
 import ccxt.async_support as ccxt_async
 import pandas as pd
-import pandas_ta as ta
 from cachetools import TTLCache
 from colorama import Back, Fore, Style
 from colorama import init as colorama_init
@@ -192,7 +189,7 @@ def flush_notifications() -> None:
             "--id",
             str(notification_buffer[0]["id"]),
         ]
-        logger.debug(f"Attempting to send batched Termux notification")
+        logger.debug("Attempting to send batched Termux notification")
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
@@ -1263,7 +1260,7 @@ def close_position_part(
                 f"Part {part_id} unraveled. Exit: {actual_exit_price}, PNL: {pnl:.2f} {config.usdt_symbol}"
             )
             send_termux_notification(
-                f"Pyrmethus Position Closed",
+                "Pyrmethus Position Closed",
                 f"{config.exchange['symbol']} Part {part_id}. PNL: {pnl:.2f}. Reason: {reason}",
             )
             return True

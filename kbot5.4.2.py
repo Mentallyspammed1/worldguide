@@ -19,7 +19,6 @@ stop-loss, take-profit, and trailing-stop features.
 """
 
 # Standard Library Imports
-import copy
 import csv
 import logging
 import os
@@ -33,7 +32,6 @@ from datetime import datetime, timezone
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
-    ROUND_UP,
     Decimal,
     DivisionByZero,
     InvalidOperation,
@@ -749,7 +747,7 @@ class ExchangeManager:
         precision_dp = DEFAULT_PRICE_DP
         if self.market_info and "precision_dp" in self.market_info and "price" in self.market_info["precision_dp"]:
             precision_dp = self.market_info["precision_dp"]["price"]
-        
+
         # For APIs, it's often better to use the exchange's own rounding if available,
         # or ensure the value is a multiple of tick_size.
         # CCXT's `exchange.price_to_precision(symbol, price)` handles this.
@@ -775,7 +773,7 @@ class ExchangeManager:
         precision_dp = DEFAULT_AMOUNT_DP
         if self.market_info and "precision_dp" in self.market_info and "amount" in self.market_info["precision_dp"]:
             precision_dp = self.market_info["precision_dp"]["amount"]
-        
+
         # Similar to price, `exchange.amount_to_precision(symbol, amount)` is an option.
         try:
             quantizer = Decimal("1e-" + str(precision_dp))
@@ -1657,7 +1655,7 @@ class OrderManager:
             market_contract_size = self.market_info['contract_size'] # From CCXT market info
             quantity_calculated: Decimal
             if self.config.market_type == "inverse": # Quantity in contracts (e.g., USD for BTC/USD contracts)
-                if market_contract_size <= 0: 
+                if market_contract_size <= 0:
                     logger.error(f"Invalid market_contract_size ({market_contract_size}) for inverse quantity calculation.")
                     return None
                 # Formula for inverse contracts (qty in contracts, e.g., USD for BTC/USD if contract_size = 1 USD):
@@ -2760,7 +2758,7 @@ class TradingBot:
     def run(self):
         """Starts the main trading loop."""
         self._display_startup_info() # Show config summary
-        termux_notify(f"Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
+        termux_notify("Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
         cycle_count = 0
 
         while not self.shutdown_requested:

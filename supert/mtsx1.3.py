@@ -40,7 +40,6 @@ Enhancements in v2.9.1 (by Pyrmethus):
 import json
 import logging
 import os
-import random
 import subprocess
 import sys
 import time
@@ -49,7 +48,7 @@ import uuid
 from abc import ABC, abstractmethod
 from collections import deque
 from datetime import datetime, timedelta
-from decimal import ROUND_HALF_UP, Decimal, DivisionByZero, InvalidOperation, getcontext
+from decimal import Decimal, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -73,10 +72,10 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'. Pyrmethus cannot weave this spell.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
+        "\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
     )
     sys.exit(1)
 
@@ -915,7 +914,7 @@ class DualSupertrendMomentumStrategy(TradingStrategy):
                     and (latest_close - st_line_val) > max_allowed_distance
                 ):
                     price_proximity_ok = False
-                    self.logger.debug(f"Long ST proximity fail.")
+                    self.logger.debug("Long ST proximity fail.")
             elif primary_short_flip:
                 st_line_val = safe_decimal_conversion(last.get(f"{st_p_base}s"))
                 if (
@@ -923,7 +922,7 @@ class DualSupertrendMomentumStrategy(TradingStrategy):
                     and (st_line_val - latest_close) > max_allowed_distance
                 ):
                     price_proximity_ok = False
-                    self.logger.debug(f"Short ST proximity fail.")
+                    self.logger.debug("Short ST proximity fail.")
         if (
             primary_long_flip
             and stable_confirm_trend is True
@@ -985,7 +984,7 @@ class EhlersFisherStrategy(TradingStrategy):
             or pd.isna(fisher_prev)
             or pd.isna(signal_prev)
         ):
-            self.logger.debug(f"Ehlers Fisher or Signal rune is NA.")
+            self.logger.debug("Ehlers Fisher or Signal rune is NA.")
             return signals
         is_fisher_extreme = False
         if (
@@ -1008,7 +1007,7 @@ class EhlersFisherStrategy(TradingStrategy):
             fisher_prev >= signal_prev and fisher_now < signal_now
         ):
             self.logger.info(
-                f"EhlersFisher: Crossover ignored due to Fisher in extreme zone."
+                "EhlersFisher: Crossover ignored due to Fisher in extreme zone."
             )
         if fisher_prev >= signal_prev and fisher_now < signal_now:
             signals["exit_long"] = True
@@ -2239,7 +2238,7 @@ def close_position_part(
                 f"{NEON['SUCCESS']}Part {part_id} unraveled. Exit: {NEON['PRICE']}{actual_exit_price}{NEON['RESET']}, PNL: {NEON[pnl_color_key]}{pnl:.2f} {config.usdt_symbol}{NEON['RESET']}"
             )  # type: ignore [attr-defined]
             config.send_notification_method(
-                f"Pyrmethus Position Closed",
+                "Pyrmethus Position Closed",
                 f"{config.symbol} Part {part_id}. PNL: {pnl:.2f}. Reason: {reason}",
             )
             return True
@@ -2470,7 +2469,7 @@ def modify_position_sl_tp(
             e
         ) or "Take profit price is not valid" in str(e):
             logger.warning(
-                f"Position SL/TP rejected (likely too close to market or invalid). Original SL/TP may remain."
+                "Position SL/TP rejected (likely too close to market or invalid). Original SL/TP may remain."
             )
     except Exception as e:
         logger.error(
@@ -3382,7 +3381,7 @@ if __name__ == "__main__":
         logger.critical(
             f"{NEON['CRITICAL']}Authentication failed! Check API keys: {e_auth}{NEON['RESET']}"
         )
-        CONFIG.send_notification_method("Pyrmethus Auth Fail", f"API Auth Error.")
+        CONFIG.send_notification_method("Pyrmethus Auth Fail", "API Auth Error.")
         sys.exit(1)
     except ccxt.NetworkError as e_net:
         logger.critical(

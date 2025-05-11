@@ -43,7 +43,6 @@ Enhancements in v2.9.0 (by Pyrmethus):
 import json
 import logging
 import os
-import random
 import subprocess
 import sys
 import time
@@ -52,7 +51,7 @@ import uuid
 from abc import ABC, abstractmethod
 from collections import deque
 from datetime import datetime, timedelta
-from decimal import ROUND_HALF_UP, Decimal, DivisionByZero, InvalidOperation, getcontext
+from decimal import Decimal, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -80,10 +79,10 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'. Pyrmethus cannot weave this spell.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
+        "\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
     )
     sys.exit(1)
 
@@ -4162,7 +4161,7 @@ if __name__ == "__main__":
         )
         if hasattr(CONFIG, "send_notification_method"):
             CONFIG.send_notification_method(
-                "Pyrmethus Auth Fail", f"API Authentication Error. Check keys."
+                "Pyrmethus Auth Fail", "API Authentication Error. Check keys."
             )
         sys.exit(1)
     except ccxt.NetworkError as e_net:  # Connectivity issues

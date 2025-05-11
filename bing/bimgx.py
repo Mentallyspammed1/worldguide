@@ -148,7 +148,7 @@ def rename_files(file_paths: list[str], base_query: str) -> list[str]:
          return list(file_paths) # Return original paths as is, though they are problematic
     elif first_valid_dir is None and not file_paths: # Should be caught by earlier check
          return []
-    
+
     dir_name = first_valid_dir if first_valid_dir is not None else "." # Fallback to CWD if all paths were relative without dir
 
     print_info(f"Attempting to rename {len(file_paths)} files in '{dir_name}' with prefix '{sanitized_query}'...")
@@ -156,7 +156,7 @@ def rename_files(file_paths: list[str], base_query: str) -> list[str]:
     # Sort to ensure consistent numbering (e.g., _1, _2, _3)
     # Original file_paths order might not be alphabetical/numerical.
     sorted_file_paths = sorted(file_paths)
-    
+
     actual_renames_count = 0
 
     for idx, old_path in enumerate(
@@ -185,7 +185,7 @@ def rename_files(file_paths: list[str], base_query: str) -> list[str]:
 
             target_path_for_rename = potential_new_path
             collision_counter = 1
-            
+
             # Handle potential filename collisions
             while os.path.exists(target_path_for_rename):
                 # Check if it's the *same* file we are trying to rename
@@ -209,7 +209,7 @@ def rename_files(file_paths: list[str], base_query: str) -> list[str]:
                     print_error(f"Could not find unique name for {os.path.basename(old_path)} after 100 attempts. Skipping rename for this file.")
                     target_path_for_rename = old_path # Fallback to original path
                     break
-            
+
             # At this point, target_path_for_rename is either a unique new path,
             # or old_path if it was samefile or collision resolution failed.
 
@@ -229,7 +229,7 @@ def rename_files(file_paths: list[str], base_query: str) -> list[str]:
                 except Exception as e: # Catch any other unexpected error during rename
                     print_error(f"Unexpected error renaming {os.path.basename(old_path)} to {os.path.basename(target_path_for_rename)}: {e}")
                     # current_file_final_path remains old_path
-            
+
             final_paths_after_rename.append(current_file_final_path)
 
         except Exception as e: # Catch errors in the processing of a single file
@@ -246,7 +246,7 @@ def rename_files(file_paths: list[str], base_query: str) -> list[str]:
     elif file_paths: # Input was not empty, but output is
         print_warning("No files were successfully processed for renaming (e.g., all source files missing).")
     # If file_paths was empty, initial warning already shown.
-    
+
     return final_paths_after_rename
 
 
@@ -534,7 +534,7 @@ def get_user_input() -> dict[str, Any]:
     print_info("Layout: Square, Wide, Tall | People: Face, Portrait")
     print_info("Date: PastDay, PastWeek, PastMonth, PastYear")
     print_info("License: Any, Public, Share, ShareCommercially, Modify, ModifyCommercially")
-    
+
     inputs["filters"] = {
         "size": input(Fore.CYAN + "📏 Size: " + Fore.WHITE).strip(),
         "color": input(Fore.CYAN + "🎨 Color: " + Fore.WHITE).strip(),

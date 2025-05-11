@@ -85,11 +85,11 @@ except ImportError as e:
     )
     if missing_pkg == "pandas_ta":
         sys.stderr.write(
-            f"\033[91mFor pandas_ta, you might also need TA-Lib. Consult the scrolls (pandas_ta documentation) for installation instructions.\033[0m\n"
+            "\033[91mFor pandas_ta, you might also need TA-Lib. Consult the scrolls (pandas_ta documentation) for installation instructions.\033[0m\n"
         )
     if missing_pkg == "retry":
         sys.stderr.write(
-            f"\033[91mFor the retry decorator, install with: 'pip install retry'\033[0m\n"
+            "\033[91mFor the retry decorator, install with: 'pip install retry'\033[0m\n"
         )
     sys.exit(1)
 
@@ -2637,7 +2637,7 @@ def calculate_position_size(
         position_value_usdt = precise_quantity * estimated_entry_price
         margin_required = position_value_usdt / Decimal(leverage)
 
-        logger.debug(f"Mana Allocation Details:")
+        logger.debug("Mana Allocation Details:")
         logger.debug(
             f"  Equity: {_format_for_log(usdt_equity, 2)} USDT, Risk Per Trade: {risk_per_trade_pct:.2%}, Risk Amount: {_format_for_log(risk_amount_usdt, 2)} USDT"
         )

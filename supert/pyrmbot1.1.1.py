@@ -30,11 +30,10 @@ import random
 import subprocess
 import sys
 import time
-import traceback
 import uuid
 from abc import ABC, abstractmethod
 from collections import deque
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_UP,
@@ -69,10 +68,10 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'. Pyrmethus cannot weave this spell.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries (runes) are installed and up to date.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
+        "\033[91mConsult the scrolls (README or comments) for 'pkg install' and 'pip install' incantations.\033[0m\n"
     )
     sys.exit(1)
 

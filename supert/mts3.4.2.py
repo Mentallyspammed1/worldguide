@@ -32,13 +32,11 @@ import json
 import logging
 import os
 import random  # For MockExchange
-import shutil
-import subprocess
 import sys
 import time
 import traceback
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, DivisionByZero, InvalidOperation, getcontext
 from enum import Enum
 from typing import Any, Union, Dict, List, Tuple, Optional, Type
@@ -63,7 +61,7 @@ except ImportError as e:
         f"\033[91mCRITICAL ERROR: Missing/Incompatible Essence: '{missing_pkg}'.\033[0m\n"
     )
     sys.stderr.write(
-        f"\033[91mPlease ensure all required libraries are installed and up to date.\033[0m\n"
+        "\033[91mPlease ensure all required libraries are installed and up to date.\033[0m\n"
     )
     sys.exit(1)
 

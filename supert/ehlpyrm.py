@@ -69,7 +69,7 @@ except ImportError as e:
     )
     if missing_pkg == "pandas_ta":
         sys.stderr.write(
-            f"\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
+            "\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
         )
     sys.exit(1)
 

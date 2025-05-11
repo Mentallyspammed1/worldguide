@@ -70,7 +70,7 @@ except ImportError as e:
     )
     if missing_pkg == "pandas_ta":
         sys.stderr.write(
-            f"\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
+            "\033[91mFor pandas_ta, you might also need TA-Lib. See pandas_ta documentation.\033[0m\n"
         )
     sys.exit(1)
 
@@ -2733,7 +2733,7 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, df: pd.DataFrame) -> None:
 
         # === Enhanced Indicator Output ===
         logger.info(f"{Fore.MAGENTA}--- Indicator Snapshot ---{Style.RESET_ALL}")
-        logger.info(f"  Market State:")
+        logger.info("  Market State:")
         logger.info(f"    Close Price: {_format_for_log(current_price, 4)}")
         logger.info(
             f"    ATR({CONFIG.atr_calculation_period}): {_format_for_log(current_atr, 5)}"

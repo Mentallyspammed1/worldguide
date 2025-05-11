@@ -18,11 +18,9 @@ and utilizing V5 position-based stop-loss/take-profit/trailing-stop features.
 """
 
 # Standard Library Imports
-import copy
 import csv
 import logging
 import os
-import platform # Not actively used, but kept for potential future use
 import signal
 import subprocess
 import sys
@@ -32,7 +30,6 @@ from datetime import datetime, timezone
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
-    ROUND_UP,
     Decimal,
     DivisionByZero,
     InvalidOperation,
@@ -100,7 +97,7 @@ except ImportError as e:
             install_cmd_parts = []
             if termux_pkgs_to_install: install_cmd_parts.append(f"pkg install python {' '.join(termux_pkgs_to_install)}")
             if pip_pkgs_to_install: install_cmd_parts.append(f"pip install {' '.join(pip_pkgs_to_install)}")
-            
+
             install_cmd = " && ".join(install_cmd_parts)
             if not install_cmd_parts: # Should not happen if COMMON_PACKAGES is not empty
                  install_cmd = f"pip install {' '.join(COMMON_PACKAGES)}" # Fallback
@@ -1190,7 +1187,7 @@ class IndicatorCalculator:
             k_now = indicators_out["stoch_k"]
             d_now = indicators_out["stoch_d"]
             k_prev = indicators_out["stoch_k_prev"] # K at t-1
-            
+
             stoch_d_valid_series = stoch_d_s.dropna()
             d_prev_val = Decimal("NaN") # D at t-1
             if len(stoch_d_valid_series) >=2:
@@ -1467,7 +1464,7 @@ class SignalGenerator:
                 )
             elif stoch_k_current <= oversold_level: # type: ignore
                 logger.debug(f"Exit Check (Short): Stoch K ({stoch_k_current.normalize():.1f}) is at/below Oversold ({oversold_level.normalize()}), awaiting bullish cross for potential exit signal.")
-        
+
         if exit_reason:
             logger.trade(f"{Fore.YELLOW}{exit_reason}{Style.RESET_ALL}")
         return exit_reason
@@ -2431,7 +2428,7 @@ class StatusDisplay:
 
         panel_content.append("Signal/Status: ", style="bold bright_cyan")
         signal_reason_str = signal_check_result.get("reason", Text("No signal/status info available", style="dim").plain) # Get plain string
-        
+
         # Determine style based on keywords in the reason string
         signal_text_style = "dim" # Default
         if signal_check_result.get("long") or "Long Signal" in signal_reason_str or "ENTERED_BUY" in signal_reason_str:
@@ -2532,7 +2529,7 @@ class TradingBot:
     def run(self):
         """Starts the main trading loop."""
         self._display_startup_info()
-        termux_notify(f"Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
+        termux_notify("Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval} interval.")
         cycle_count = 0
 
         while not self.shutdown_requested:
@@ -2623,7 +2620,7 @@ class TradingBot:
             current_cycle_status_dict = {"reason": "FAIL:FETCH_EQUITY_INVALID"}
             self.status_display.print_status_panel(cycle_num, last_candle_timestamp, current_market_price, indicators, None, total_equity, current_cycle_status_dict, self.order_manager.protection_tracker, self.exchange_manager.market_info)
             return
-        
+
         current_positions_summary = self.exchange_manager.get_current_position()
         if current_positions_summary is None:
             logger.error(f"{Fore.RED}Cycle {cycle_num} Aborted: Failed to fetch current position state.{Style.RESET_ALL}")
@@ -2643,7 +2640,7 @@ class TradingBot:
         elif short_pos_data and safe_decimal(short_pos_data.get("qty", "0")).copy_abs() >= POSITION_QTY_EPSILON:
             active_pos_side_logical = "short"
             active_pos_details = short_pos_data
-        
+
         # 4. If in an Active Position: Manage Exits and TSL
         if active_pos_side_logical and active_pos_details:
             pos_qty = safe_decimal(active_pos_details.get("qty"))
@@ -2688,7 +2685,7 @@ class TradingBot:
                         return # Action taken for this cycle
                     else:
                         logger.warning(f"Exit signal for {active_pos_side_logical.upper()} but position quantity invalid ({pos_qty}). Cannot close.")
-            
+
             # After TSL/exit checks, position might have been closed by exchange (SL/TP/TSL hit). Re-fetch state.
             logger.debug(f"Re-fetching position state for {active_pos_side_logical.upper()} after TSL/exit checks to confirm status.")
             current_positions_summary = self.exchange_manager.get_current_position()
@@ -2722,7 +2719,7 @@ class TradingBot:
                 if (total_equity and not total_equity.is_nan() and total_equity > 0 and
                     current_atr and isinstance(current_atr, Decimal) and not current_atr.is_nan() and current_atr > 0 and
                     current_market_price and not current_market_price.is_nan() and current_market_price > 0):
-                    
+
                     entry_success = self.order_manager.place_risked_market_order(
                         target_entry_side_order, current_atr, total_equity, current_market_price
                     )

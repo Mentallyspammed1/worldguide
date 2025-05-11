@@ -1,0 +1,12 @@
+2025-05-10 23:47:41.472 [[36mINFO[0m] ConfigModule                           [35m[1m--- Summoning Configuration Runes v3.0.1 ---[0m
+2025-05-10 23:47:41.475 [[36mINFO[0m] ConfigModule                           [35m[1m--- Configuration Runes v3.0.1 Summoned and Verified ---[0m
+2025-05-10 23:47:41.476 [[36mINFO[0m] Strategy.DualSupertrendMomentumStrategy [35mStrategy Form 'DualSupertrendMomentumStrategy' materializing...[0m
+2025-05-10 23:47:41.477 [[36mINFO[0m] PyrmethusCore                          [33m[1mNo state journal found, starting anew.[0m
+2025-05-10 23:47:41.477 [[36mINFO[0m] PyrmethusCore                          [35m[1mSummoning Exchange Jinn...[0m
+2025-05-10 23:47:50.129 [[41m[37m[1mCRITICAL[0m] PyrmethusCore                          [41m[37m[1mFailed to initialize Bybit exchange: 'dict' object is not callable[0m
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/pot2.0.py", line 832, in _init_exchange
+    markets = api_retry_logic(bybit.load_markets, True)()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'dict' object is not callable
+2025-05-10 23:47:50.174 [[36mINFO[0m] TermuxNotify                           [32m[1mTermux notification 'Pyrmethus FATAL' dispatched.[0m

@@ -18,7 +18,6 @@ V5 position-based protection features (Stop-Loss, Take-Profit, Trailing Stop).
 """
 
 # Standard Library Imports
-import copy
 import csv
 import logging
 import os
@@ -31,7 +30,6 @@ from datetime import datetime, timezone
 from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
-    ROUND_UP,
     Decimal,
     DivisionByZero,
     InvalidOperation,
@@ -1128,7 +1126,7 @@ class SignalGenerator:
             ind: Dict[str, Decimal] = {}
             nan_keys = [k for k in req_dec_keys if not isinstance(indicators.get(k), Decimal) or indicators[k].is_nan()] # type: ignore
             if nan_keys:
-                result["reason"] = f"No Signal: Required indicator(s) NaN/Missing: {', '.join(nan_keys)}.";
+                result["reason"] = f"No Signal: Required indicator(s) NaN/Missing: {', '.join(nan_keys)}."
                 logger.warning(result["reason"]); return result
             for k in req_dec_keys: ind[k] = indicators[k] # type: ignore
 
@@ -1921,7 +1919,7 @@ class TradingBot:
     def run(self):
         """Starts the main trading loop."""
         self._display_startup_info()
-        termux_notify(f"Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval}.")
+        termux_notify("Pyrmethus Started", f"Trading {self.config.symbol} on {self.config.interval}.")
         cycle_count = 0
 
         while not self.shutdown_requested:
