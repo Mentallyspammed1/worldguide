@@ -11,6 +11,8 @@ import time
 from datetime import datetime
 from tqdm import tqdm
 import diff_match_patch as dmp_module
+import tempfile
+import subprocess
 
 # Initialize Colorama for vibrant terminal output
 init()
@@ -61,10 +63,11 @@ def configure_api(api_key):
 def load_config(config_path):
     """Load configuration from a JSON file."""
     default_config = {
-        "model": "gemini-1.5-pro",
+        "model": "gemini-2.5-pro-exp-03-25",
         "max_calls_per_minute": 59,
         "enhancement_mode": "comprehensive",
-        "backup_dir": ".enhancement_backups"
+        "backup_dir": ".enhancement_backups",
+        "max_retries": 3
     }
     if config_path and os.path.exists(config_path):
         try:
@@ -101,8 +104,26 @@ def compute_diff(original, enhanced):
             diff_text.append(Fore.RED + f"- {data}" + Style.RESET_ALL)
     return '\n'.join(diff_text)
 
-async def enhance_code(file_path, model_name, mode, rate_limiter, dry_run=False):
-    """Enhance a Python file using the generative AI model."""
+def validate_syntax(code, file_path):
+    """Validate Python code syntax using py_compile."""
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as temp_file:
+        temp_file.write(code)
+        temp_file_path = temp_file.name
+    try:
+        result = subprocess.run(
+            ['python3', '-m', 'py_compile', temp_file_path],
+            capture_output=True, text=True, check=True
+        )
+        os.unlink(temp_file_path)
+        return True, ""
+    except subprocess.CalledProcessError as e:
+        os.unlink(temp_file_path)
+        error_message = e.stderr or str(e)
+        logger.error(Fore.RED + f"# Syntax error in {file_path}: {error_message}" + Style.RESET_ALL)
+        return False, error_message
+
+async def enhance_code(file_path, model_name, mode, rate_limiter, max_retries, dry_run=False):
+    """Enhance a Python file with retries and syntax validation."""
     try:
         logger.info(Fore.BLUE + f"# Summoning enhancements for {file_path} (Mode: {mode})..." + Style.RESET_ALL)
         if not os.path.exists(file_path):
@@ -115,31 +136,51 @@ async def enhance_code(file_path, model_name, mode, rate_limiter, dry_run=False)
 
         # Define enhancement prompts based on mode
         prompts = {
-            "readability": """Fix syntax errors and enhance the Python code for readability and maintainability. Follow PEP 8, add clear comments, and improve variable names. Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
-            "performance": """Fix syntax errors and optimize the Python code for performance. Reduce time complexity, minimize memory usage, and use efficient data structures. Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
-            "type_hints": """Fix syntax errors and add type hints to the Python code to improve type safety, following PEP 484. Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
-            "comprehensive": """Fix syntax errors and enhance the Python code comprehensively: improve readability (PEP 8, comments, naming), optimize performance, and add type hints (PEP 484). Preserve functionality. Return only the enhanced code wrapped in ```python ... ```."""
+            "readability": """Fix all syntax errors and enhance the Python code for readability and maintainability. Follow PEP 8 strictly, add clear docstrings and comments, and use meaningful variable names. Ensure the code is syntactically correct and preserves functionality. Return only the enhanced code wrapped in ```python ... ```.""",
+            "performance": """Fix all syntax errors and optimize the Python code for performance. Reduce time complexity, minimize memory usage, and use efficient data structures. Ensure the code is syntactically correct and preserves functionality. Return only the enhanced code wrapped in ```python ... ```.""",
+            "type_hints": """Fix all syntax errors and add type hints to the Python code per PEP 484, ensuring type safety. Ensure the code is syntactically correct and preserves functionality. Return only the enhanced code wrapped in ```python ... ```.""",
+            "comprehensive": """Fix all syntax errors and enhance the Python code comprehensively: ensure strict PEP 8 compliance, add docstrings and comments, optimize performance (efficient algorithms and data structures), and add type hints per PEP 484. Ensure the code is syntactically correct and preserves functionality. Return only the enhanced code wrapped in ```python ... ```."""
         }
         prompt_template = prompts.get(mode, prompts["comprehensive"])
         prompt = f"{prompt_template}\n\n```python\n{original_code}\n```"
 
-        # Rate limiting
-        await rate_limiter.acquire()
+        enhanced_code = None
+        for attempt in range(max_retries):
+            logger.info(Fore.CYAN + f"# Attempt {attempt + 1}/{max_retries} for {file_path}..." + Style.RESET_ALL)
+            await rate_limiter.acquire()
 
-        # Call the AI model
-        model = genai.GenerativeModel(model_name)
-        response = model.generate_content(prompt)
+            # Call the AI model
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                if not response or not hasattr(response, 'text') or not response.text:
+                    logger.warning(Fore.YELLOW + f"# No valid response from AI on attempt {attempt + 1}." + Style.RESET_ALL)
+                    continue
+            except Exception as e:
+                logger.warning(Fore.YELLOW + f"# API error on attempt {attempt + 1}: {str(e)}" + Style.RESET_ALL)
+                continue
 
-        if not response or not hasattr(response, 'text') or not response.text:
-            logger.error(Fore.RED + f"Error: No valid response from AI for {file_path}." + Style.RESET_ALL)
+            # Extract enhanced code
+            candidate_code = response.text.strip()
+            if candidate_code.startswith('```python') and candidate_code.endswith('```'):
+                candidate_code = candidate_code[10:-3].strip()
+            else:
+                logger.warning(Fore.YELLOW + f"# Response not properly formatted on attempt {attempt + 1}." + Style.RESET_ALL)
+                continue
+
+            # Validate syntax
+            is_valid, error_message = validate_syntax(candidate_code, file_path)
+            if is_valid:
+                enhanced_code = candidate_code
+                break
+            else:
+                logger.error(Fore.RED + f"# Syntax error on attempt {attempt + 1}: {error_message}" + Style.RESET_ALL)
+                if attempt < max_retries - 1:
+                    logger.info(Fore.YELLOW + f"# Retrying enhancement for {file_path}..." + Style.RESET_ALL)
+
+        if enhanced_code is None:
+            logger.error(Fore.RED + f"# Failed to produce valid code for {file_path} after {max_retries} attempts." + Style.RESET_ALL)
             return False
-
-        # Extract enhanced code
-        enhanced_code = response.text.strip()
-        if enhanced_code.startswith('```python') and enhanced_code.endswith('```'):
-            enhanced_code = enhanced_code[10:-3].strip()
-        else:
-            logger.warning(Fore.YELLOW + f"# Response not properly formatted; assuming raw code." + Style.RESET_ALL)
 
         # Compute and log diff
         diff = compute_diff(original_code, enhanced_code)
@@ -168,7 +209,7 @@ async def main():
     """Main function to parse arguments and enhance files."""
     parser = argparse.ArgumentParser(description="Pyrmethus Advanced Code Enhancer")
     parser.add_argument("file_path", help="Path to the Python file to enhance")
-    parser.add_argument("--model", default="gemini-1.5-pro", help="AI model to use")
+    parser.add_argument("--model", default="gemini-2.5-pro-exp-03-25", help="AI model to use")
     parser.add_argument("--max-calls", type=int, default=59, help="Max API calls per minute (1-60)")
     parser.add_argument("--mode", choices=["readability", "performance", "type_hints", "comprehensive"], default="comprehensive", help="Enhancement mode")
     parser.add_argument("--config", help="Path to JSON config file")
@@ -182,6 +223,7 @@ async def main():
     model_name = args.model or config["model"]
     max_calls = args.max_calls or config["max_calls_per_minute"]
     mode = args.mode or config["enhancement_mode"]
+    max_retries = config.get("max_retries", 3)
 
     # Validate max_calls
     if not 1 <= max_calls <= 60:
@@ -197,7 +239,7 @@ async def main():
 
     # Enhance file with progress feedback
     with tqdm(total=1, desc="Enhancing", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}]") as pbar:
-        success = await enhance_code(args.file_path, model_name, mode, rate_limiter, args.dry_run)
+        success = await enhance_code(args.file_path, model_name, mode, rate_limiter, max_retries, args.dry_run)
         pbar.update(1)
 
     if success:
