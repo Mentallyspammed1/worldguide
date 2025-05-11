@@ -1,0 +1,338 @@
+name: Pyrmethusx Code Enhancement Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_directory:
+        description: 'Base directory relative to repository root to search for Python files (e.g., ., src, app/utils).'
+        required: true
+        default: '.'
+      file_pattern:
+        description: 'Glob pattern for Python files, used with `git ls-files` (e.g., *.py, **/*.py, specific_module/**/*.py).'
+        required: true
+        default: '**/*.py'
+      enhancement_script_path:
+        description: 'Path to the Python enhancement script (must be executable, e.g., ./xfix_files.py).'
+        required: true
+        default: './xfix_files.py'
+      enhancement_script_args:
+        description: 'Additional arguments to pass to the enhancement script (e.g., --model gemini-1.5-pro --mode performance).'
+        required: false
+        default: ''
+      google_api_key:
+        description: 'Google API Key for the enhancement script. Leave blank to use repository secret `GOOGLE_API_KEY`.'
+        required: false
+      max_api_calls_per_minute:
+        description: 'Maximum API calls per minute for the enhancement script (1-60).'
+        required: false
+        default: '59'
+      batch_size:
+        description: 'Number of files to process in each batch.'
+        required: false
+        default: '10'
+      commit_message:
+        description: 'Custom commit message for the enhancement changes.'
+        required: false
+        default: 'Apply automated code enhancements via Pyrmethus'
+      pull_request_config:
+        description: 'JSON string for PR configuration, e.g., {"title": "Automated Enhancements", "labels": "enhancement,automated"}.'
+        required: false
+        default: '{"title": "Automated Code Enhancements by Pyrmethus", "labels": "enhancement,automated,ai-assisted"}'
+      target_branch:
+        description: 'The branch to base enhancements off of and create a PR against.'
+        required: true
+        default: 'main'
+
+jobs:
+  enhance_python_code:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      branch_name: ${{ steps.commit-changes.outputs.branch_name }}
+      pull_request_url: ${{ steps.create-pr.outputs.pull-request-url }}
+      files_processed_count: ${{ steps.run-enhancement.outputs.processed_count }}
+      files_failed_enhancement_count: ${{ steps.run-enhancement.outputs.failed_enhancement_count }}
+      syntax_error_count: ${{ steps.validate-enhanced-files.outputs.syntax_error_count }}
+
+    steps:
+      - name: Initialize Logging
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Pyrmethus Workflow Initiated" > enhancement_log.txt
+          echo "Workflow Run ID: ${{ github.run_id }}" >> enhancement_log.txt
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          ref: ${{ inputs.target_branch }}
+
+      - name: Sync Target Branch
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Syncing with remote ${{ inputs.target_branch }}..." >> enhancement_log.txt
+          git pull origin ${{ inputs.target_branch }} --rebase
+          echo "Synced with remote ${{ inputs.target_branch }}." >> enhancement_log.txt
+
+      - name: Debug Repository Contents
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Listing repository contents..." >> enhancement_log.txt
+          ls -R >> enhancement_log.txt
+          echo "Checking for enhancement script at '${{ inputs.enhancement_script_path }}'..." >> enhancement_log.txt
+          if [ -f "${{ inputs.enhancement_script_path }}" ]; then
+            echo "Script found." >> enhancement_log.txt
+          else
+            echo "Warning: Script not found at '${{ inputs.enhancement_script_path }}'." >> enhancement_log.txt
+          fi
+
+      - name: Validate Inputs
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Validating inputs..." >> enhancement_log.txt
+          if [[ ! "${{ inputs.batch_size }}" =~ ^[0-9]+$ ]] || [ "${{ inputs.batch_size }}" -lt 1 ]; then
+            echo "Error: batch_size must be a positive integer, got '${{ inputs.batch_size }}'." | tee -a enhancement_log.txt
+            exit 1
+          fi
+          if [[ ! "${{ inputs.max_api_calls_per_minute }}" =~ ^[0-9]+$ ]] || [ "${{ inputs.max_api_calls_per_minute }}" -lt 1 ] || [ "${{ inputs.max_api_calls_per_minute }}" -gt 60 ]; then
+            echo "Error: max_api_calls_per_minute must be between 1 and 60, got '${{ inputs.max_api_calls_per_minute }}'." | tee -a enhancement_log.txt
+            exit 1
+          fi
+          if [ ! -f "${{ inputs.enhancement_script_path }}" ]; then
+            echo "Error: Enhancement script '${{ inputs.enhancement_script_path }}' not found." | tee -a enhancement_log.txt
+            echo "Repository contents:" >> enhancement_log.txt
+            ls -R >> enhancement_log.txt
+            exit 1
+          fi
+          # Validate pull_request_config JSON
+          apt-get update && apt-get install -y jq
+          echo "${{ inputs.pull_request_config }}" | jq . > /dev/null 2>&1 || {
+            echo "Error: pull_request_config must be valid JSON, got '${{ inputs.pull_request_config }}'." | tee -a enhancement_log.txt
+            exit 1
+          }
+          echo "Input validation completed successfully." >> enhancement_log.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Installing dependencies..." >> enhancement_log.txt
+          python -m pip install --upgrade pip
+          pip install google-generativeai aiohttp colorama tqdm diff-match-patch
+          echo "Installed Python packages:" >> enhancement_log.txt
+          pip list >> enhancement_log.txt
+
+      - name: Make Enhancement Script Executable
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Setting executable permissions for ${{ inputs.enhancement_script_path }}..." >> enhancement_log.txt
+          chmod +x "${{ inputs.enhancement_script_path }}"
+          echo "Made ${{ inputs.enhancement_script_path }} executable." >> enhancement_log.txt
+
+      - name: List Matched Python Files
+        id: list_files
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Listing Python files in '${{ inputs.base_directory }}' with pattern '${{ inputs.file_pattern }}'..." >> enhancement_log.txt
+          normalized_base_dir=$(echo "${{ inputs.base_directory }}" | sed 's:/*$::')
+          if [ "$normalized_base_dir" == "." ] || [ -z "$normalized_base_dir" ]; then
+            full_pattern="${{ inputs.file_pattern }}"
+          else
+            full_pattern="${normalized_base_dir}/${{ inputs.file_pattern }}"
+          fi
+          full_pattern=$(echo "$full_pattern" | sed 's#^\./##' | sed 's#//\+#/#g')
+          echo "Effective pattern: '$full_pattern'" | tee -a enhancement_log.txt matched_files.txt
+
+          git ls-files -- "$full_pattern" | grep '\.py$' | sort > matched_files_list.txt
+          file_count=$(wc -l < matched_files_list.txt)
+          if [ "$file_count" -eq 0 ]; then
+            echo "Warning: No Python files matched the pattern '$full_pattern'." | tee -a enhancement_log.txt matched_files.txt
+          else
+            echo "Found $file_count Python file(s)." | tee -a enhancement_log.txt matched_files.txt
+            cat matched_files_list.txt >> matched_files.txt
+          fi
+          echo "file_count=$file_count" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Files for Batching
+        id: prepare_batching
+        if: steps.list_files.outputs.file_count > 0
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Preparing files for batching..." >> enhancement_log.txt
+          mv matched_files_list.txt files_to_process.txt
+          if [ ! -s files_to_process.txt ]; then
+            echo "No files available for processing." | tee -a enhancement_log.txt
+            echo "files_available_for_batching=false" >> $GITHUB_OUTPUT
+          else
+            echo "Files prepared for batching." | tee -a enhancement_log.txt
+            echo "files_available_for_batching=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Split Files into Batches
+        if: steps.prepare_batching.outputs.files_available_for_batching == 'true'
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Splitting files into batches of ${{ inputs.batch_size }}..." >> enhancement_log.txt
+          split -l ${{ inputs.batch_size }} files_to_process.txt batch_
+          ls batch_* > batch_list.txt
+          batch_count=$(wc -l < batch_list.txt)
+          echo "Created $batch_count batches." | tee -a enhancement_log.txt
+
+      - name: Run Code Enhancement Script in Batches
+        id: run-enhancement
+        if: steps.prepare_batching.outputs.files_available_for_batching == 'true'
+        env:
+          GOOGLE_API_KEY: ${{ inputs.google_api_key || secrets.GOOGLE_API_KEY }}
+          MAX_API_CALLS_PER_MINUTE: ${{ inputs.max_api_calls_per_minute }}
+          ENHANCEMENT_SCRIPT_ARGS: ${{ inputs.enhancement_script_args }}
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Running enhancement script on batches..." >> enhancement_log.txt
+          if [ -z "$GOOGLE_API_KEY" ]; then
+            echo "Error: GOOGLE_API_KEY is not set." | tee -a enhancement_log.txt
+            exit 1
+          fi
+          processed_count=0
+          failed_enhancement_count=0
+          > failed_enhancement_files.txt
+
+          while read -r batch_file; do
+            if [ ! -s "$batch_file" ]; then
+              echo "Skipping empty batch: $batch_file" | tee -a enhancement_log.txt
+              continue
+            fi
+            echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Processing batch: $batch_file" >> enhancement_log.txt
+            while IFS= read -r file_path || [[ -n "$file_path" ]]; do
+              if [ -z "$file_path" ]; then continue; fi
+              echo "Enhancing: $file_path" | tee -a enhancement_log.txt
+              if ! python3 "${{ inputs.enhancement_script_path }}" "$file_path" $ENHANCEMENT_SCRIPT_ARGS >> enhancement_log.txt 2>&1; then
+                echo "Failed to enhance: $file_path" | tee -a enhancement_log.txt
+                echo "$file_path" >> failed_enhancement_files.txt
+                failed_enhancement_count=$((failed_enhancement_count + 1))
+              else
+                processed_count=$((processed_count + 1))
+              fi
+            done < "$batch_file"
+          done < batch_list.txt
+
+          echo "Processed $processed_count files, $failed_enhancement_count failed." | tee -a enhancement_log.txt
+          echo "processed_count=$processed_count" >> $GITHUB_OUTPUT
+          echo "failed_enhancement_count=$failed_enhancement_count" >> $GITHUB_OUTPUT
+
+      - name: Validate Enhanced Files
+        id: validate-enhanced-files
+        if: steps.prepare_batching.outputs.files_available_for_batching == 'true' && steps.run-enhancement.outputs.processed_count > 0
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Validating Python files for syntax errors..." >> enhancement_log.txt
+          syntax_error_count=0
+          > syntax_error_files.txt
+          while IFS= read -r file_path || [[ -n "$file_path" ]]; do
+            if [ -z "$file_path" ]; then continue; fi
+            if [ -f "$file_path" ]; then
+              is_failed=$(grep -Fx "$file_path" failed_enhancement_files.txt && echo "true" || echo "false")
+              echo "Validating: $file_path (Enhancement failed: $is_failed)" | tee -a enhancement_log.txt
+              if ! python3 -m py_compile "$file_path" >> enhancement_log.txt 2>&1; then
+                echo "Syntax error in: $file_path" | tee -a enhancement_log.txt
+                echo "$file_path" >> syntax_error_files.txt
+                syntax_error_count=$((syntax_error_count + 1))
+              fi
+            else
+              echo "Warning: File $file_path not found." | tee -a enhancement_log.txt
+            fi
+          done < files_to_process.txt
+
+          echo "syntax_error_count=$syntax_error_count" >> $GITHUB_OUTPUT
+          if [ "$syntax_error_count" -gt 0 ]; then
+            echo "Critical: $syntax_error_count syntax errors found. See syntax_error_files.txt." | tee -a enhancement_log.txt
+            exit 1
+          fi
+          echo "No syntax errors detected." | tee -a enhancement_log.txt
+
+      - name: Check for Changes
+        id: git_status
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Checking for changes..." >> enhancement_log.txt
+          git add .
+          git status >> enhancement_log.txt
+          if ! git diff --cached --quiet; then
+            echo "Changes detected." | tee -a enhancement_log.txt
+            echo "changes_made=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes to commit." | tee -a enhancement_log.txt
+            echo "changes_made=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure Git User
+        if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Configuring Git user..." >> enhancement_log.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit Changes
+        if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
+        id: commit-changes
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Committing changes..." >> enhancement_log.txt
+          branch_name="pyrmethus/enhance-${{ github.run_id }}-${{ github.run_attempt }}-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$branch_name"
+          git commit -m "${{ inputs.commit_message }}"
+          echo "Committed to $branch_name" | tee -a enhancement_log.txt
+          echo "branch_name=$branch_name" >> "$GITHUB_OUTPUT"
+
+      - name: Push Changes
+        if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Pushing branch ${{ steps.commit-changes.outputs.branch_name }}..." >> enhancement_log.txt
+          git push origin "${{ steps.commit-changes.outputs.branch_name }}" --force-with-lease
+          echo "Branch pushed." >> enhancement_log.txt
+
+      - name: Create Pull Request
+        if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
+        id: create-pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.commit-changes.outputs.branch_name }}
+          base: ${{ inputs.target_branch }}
+          title: ${{ fromJson(inputs.pull_request_config).title }}
+          body: |
+            This PR contains automated code enhancements by Pyrmethus.
+
+            **Workflow Run Details:**
+            - Run ID: ${{ github.run_id }}
+            - Triggered by: ${{ github.actor }}
+            - Target Branch: ${{ inputs.target_branch }}
+
+            **Enhancement Configuration:**
+            - Base directory: ${{ inputs.base_directory }}
+            - File pattern: ${{ inputs.file_pattern }}
+            - Script: ${{ inputs.enhancement_script_path }}
+            - Script args: ${{ inputs.enhancement_script_args || 'N/A' }}
+            - Max API calls/min: ${{ inputs.max_api_calls_per_minute }}
+            - Batch size: ${{ inputs.batch_size }}
+
+            **Summary:**
+            - Files matched: ${{ steps.list_files.outputs.file_count }}
+            - Files enhanced: ${{ steps.run-enhancement.outputs.processed_count }}
+            - Files failed: ${{ steps.run-enhancement.outputs.failed_enhancement_count }}
+            - Syntax errors: ${{ steps.validate-enhanced-files.outputs.syntax_error_count }}
+
+            Review the changes. Logs and file lists are available as artifacts.
+          labels: ${{ fromJson(inputs.pull_request_config).labels }}
+          assignees: ${{ github.actor }}
+          delete-branch: true
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyrmethus-artifacts-${{ github.run_id }}
+          path: |
+            matched_files.txt
+            enhancement_log.txt
+            files_to_process.txt
+            batch_*
+            batch_list.txt
+            failed_enhancement_files.txt
+            syntax_error_files.txt
+          if-no-files-found: ignore
+          retention-days: 7
