@@ -1,17 +1,6 @@
-This enhanced GitHub Actions workflow automates Python code enhancement using a specified script. It includes robust file handling, batch processing, syntax validation, detailed logging, and automated pull request creation.
-
-**Key Improvements in this Version:**
-
-1.  **Reliable Output Propagation:** Correctly uses step outputs (`GITHUB_OUTPUT`) for `processed_count` and `failed_count`, ensuring these values are accurately reflected in job outputs and the Pull Request body.
-2.  **Enhanced Clarity in PR:** The Pull Request body now consistently refers to step outputs for processing statistics.
-3.  **Step ID for Clarity:** Added an `id` to the "Run Code Enhancement Script in Batches" step for better referencing of its outputs.
-4.  **Minor Comment Addition:** Added a comment to clarify the `tail -n +3` usage in the "Prepare Files for Batching" step.
-5.  **Maintained Best Practices:** Retains strong features like using `git ls-files` (respecting `.gitignore`), detailed input parameters, comprehensive logging to artifacts, conditional execution of steps, unique branch naming, and use of `force-with-lease`.
-
-```yaml
 # This workflow automates the enhancement of Python code using a specified script.
 # It processes files in batches, validates syntax, commits changes, and creates a pull request.
-name: Pyrmethus Enhancement Workflow
+name: GFix Workflow
 
 on:
   workflow_dispatch:
@@ -330,4 +319,3 @@ jobs:
             failed_files.txt
           if-no-files-found: ignore # Don't fail if some files don't exist (e.g., no failures -> failed_files.txt might be empty or not created)
           retention-days: 7
-```
