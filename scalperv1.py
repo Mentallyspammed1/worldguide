@@ -121,13 +121,15 @@ class ImprovedTradingBot:
     def initialize_exchange(self) -> ccxt.Exchange:
         """Initialize exchange connection with enhanced error handling."""
         try:
-            exchange = ccxt.bybit({
-                "apiKey": os.getenv("BYBIT_API_KEY"),
-                "secret": os.getenv("BYBIT_API_SECRET"),
-                "options": {"defaultType": "future"},
-                "enableRateLimit": True,
-                "recvWindow": 60000,
-            })
+            exchange = ccxt.bybit(
+                {
+                    "apiKey": os.getenv("BYBIT_API_KEY"),
+                    "secret": os.getenv("BYBIT_API_SECRET"),
+                    "options": {"defaultType": "future"},
+                    "enableRateLimit": True,
+                    "recvWindow": 60000,
+                }
+            )
             exchange.load_markets()
             logger.info(f"{Fore.GREEN}Connected to Bybit successfully")
             return exchange
@@ -178,64 +180,84 @@ class ImprovedTradingBot:
 
             # Price vs EMA signal
             if closes[-1] > tf_analysis["ema"]:
-                analysis["signals"].append((
-                    f"{tf} EMA Bullish",
-                    self.config["weights"]["ema"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} EMA Bullish",
+                        self.config["weights"]["ema"],
+                    )
+                )
             elif closes[-1] < tf_analysis["ema"]:
-                analysis["signals"].append((
-                    f"{tf} EMA Bearish",
-                    -self.config["weights"]["ema"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} EMA Bearish",
+                        -self.config["weights"]["ema"],
+                    )
+                )
 
             # RSI signal
             if tf_analysis["rsi"] < 30:
-                analysis["signals"].append((
-                    f"{tf} RSI Oversold",
-                    self.config["weights"]["rsi"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} RSI Oversold",
+                        self.config["weights"]["rsi"],
+                    )
+                )
             elif tf_analysis["rsi"] > 70:
-                analysis["signals"].append((
-                    f"{tf} RSI Overbought",
-                    -self.config["weights"]["rsi"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} RSI Overbought",
+                        -self.config["weights"]["rsi"],
+                    )
+                )
 
             # MACD signal
             if tf_analysis["macd"]["macd"] > tf_analysis["macd"]["signal"]:
-                analysis["signals"].append((
-                    f"{tf} MACD Bullish",
-                    self.config["weights"]["macd"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} MACD Bullish",
+                        self.config["weights"]["macd"],
+                    )
+                )
             elif tf_analysis["macd"]["macd"] < tf_analysis["macd"]["signal"]:
-                analysis["signals"].append((
-                    f"{tf} MACD Bearish",
-                    -self.config["weights"]["macd"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} MACD Bearish",
+                        -self.config["weights"]["macd"],
+                    )
+                )
 
             # Bollinger Bands signal
             if closes[-1] < tf_analysis["bollinger"]["lower"]:
-                analysis["signals"].append((
-                    f"{tf} BB Oversold",
-                    self.config["weights"]["bollinger"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} BB Oversold",
+                        self.config["weights"]["bollinger"],
+                    )
+                )
             elif closes[-1] > tf_analysis["bollinger"]["upper"]:
-                analysis["signals"].append((
-                    f"{tf} BB Overbought",
-                    -self.config["weights"]["bollinger"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} BB Overbought",
+                        -self.config["weights"]["bollinger"],
+                    )
+                )
 
             # Order book imbalance signal
             ob_analysis = tf_analysis["order_book"]
             if ob_analysis["imbalance"] > self.imbalance_threshold:
-                analysis["signals"].append((
-                    f"{tf} Strong Bid Pressure",
-                    self.config["weights"]["imbalance"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} Strong Bid Pressure",
+                        self.config["weights"]["imbalance"],
+                    )
+                )
             elif ob_analysis["imbalance"] < 1 / self.imbalance_threshold:
-                analysis["signals"].append((
-                    f"{tf} Strong Ask Pressure",
-                    -self.config["weights"]["imbalance"],
-                ))
+                analysis["signals"].append(
+                    (
+                        f"{tf} Strong Ask Pressure",
+                        -self.config["weights"]["imbalance"],
+                    )
+                )
 
         # Aggregate confidence level
         analysis["confidence"] = sum(weight for _, weight in analysis["signals"])
@@ -298,10 +320,12 @@ class ImprovedTradingBot:
 
     def calculate_stoch_rsi(self, data: np.ndarray) -> tuple[float, float]:
         """Calculate Stochastic RSI."""
-        rsi_values = np.array([
-            self.calculate_rsi(data[i:])
-            for i in range(len(data) - self.stoch_period + 1)
-        ])
+        rsi_values = np.array(
+            [
+                self.calculate_rsi(data[i:])
+                for i in range(len(data) - self.stoch_period + 1)
+            ]
+        )
         min_val = np.min(rsi_values)
         max_val = np.max(rsi_values)
         k = (

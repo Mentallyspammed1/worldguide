@@ -249,7 +249,7 @@ def log_metrics(message: str):
         message: The metrics message string (should be comma-separated).
     """
     metrics_logger.info(message)
-    print(f"{Fore.MAGENTA+Style.BRIGHT}METRICS:{Style.RESET_ALL} {message}")
+    print(f"{Fore.MAGENTA + Style.BRIGHT}METRICS:{Style.RESET_ALL} {message}")
 
 
 # --- Load API Keys from Environment Variables ---
@@ -1543,7 +1543,7 @@ def calculate_position_size_atr(
         position_size = risk_amount_usdt / sl_distance_price
         log_console(
             logging.DEBUG,
-            f"Position Size Calc: Initial size (Risk/SL): {position_size:.{qty_precision+4}f}",
+            f"Position Size Calc: Initial size (Risk/SL): {position_size:.{qty_precision + 4}f}",
         )
     except ZeroDivisionError:  # Should be caught by check above, but safeguard
         log_console(
@@ -1581,7 +1581,7 @@ def calculate_position_size_atr(
     if position_size < min_order_qty - min_qty_tolerance:
         log_console(
             logging.DEBUG,
-            f"Position Size Calc: Calculated size {position_size:.{qty_precision+4}f} is below minimum required {min_order_qty}. Returning size 0.",
+            f"Position Size Calc: Calculated size {position_size:.{qty_precision + 4}f} is below minimum required {min_order_qty}. Returning size 0.",
         )
         return 0.0
 
@@ -1604,7 +1604,7 @@ def calculate_position_size_atr(
         )
         log_console(
             logging.DEBUG,
-            f"Position Size Calc: Size after step rounding DOWN ({qty_step_float}): {position_size_adjusted:.{qty_precision+4}f}",
+            f"Position Size Calc: Size after step rounding DOWN ({qty_step_float}): {position_size_adjusted:.{qty_precision + 4}f}",
         )
         position_size = position_size_adjusted
     except ZeroDivisionError:
@@ -1618,7 +1618,7 @@ def calculate_position_size_atr(
     if position_size < min_order_qty - min_qty_tolerance:
         log_console(
             logging.INFO,
-            f"Position Size Calc: Final size {position_size:.{qty_precision+4}f} is below minimum {min_order_qty} after rounding down to step. Returning size 0.",
+            f"Position Size Calc: Final size {position_size:.{qty_precision + 4}f} is below minimum {min_order_qty} after rounding down to step. Returning size 0.",
         )
         return 0.0
 
@@ -1636,7 +1636,7 @@ def calculate_position_size_atr(
 
     log_console(
         logging.INFO,
-        f"Position Size Calc: Balance={balance:.2f}, Risk%={risk_percent}, SL Dist={sl_distance_price:.{qty_precision+2}f}, Entry={entry_price:.{qty_precision+2}f} -> Final Size = {final_size:.{qty_precision}f}",
+        f"Position Size Calc: Balance={balance:.2f}, Risk%={risk_percent}, SL Dist={sl_distance_price:.{qty_precision + 2}f}, Entry={entry_price:.{qty_precision + 2}f} -> Final Size = {final_size:.{qty_precision}f}",
     )
     return final_size
 
@@ -2985,7 +2985,7 @@ class SymbolTrader:
                 tp_str = f"{take_profit_price:.{self.price_precision}f}"
 
         log_prefix = (
-            f"{Fore.YELLOW+Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} "
+            f"{Fore.YELLOW + Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} "
             if self.dry_run
             else ""
         )
@@ -2996,7 +2996,7 @@ class SymbolTrader:
         if tp_str:
             log_msg += f", TP={tp_str}"
         action_prefix = (
-            f"{Fore.MAGENTA+Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
+            f"{Fore.MAGENTA + Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
         )
         print(action_prefix + log_msg)  # Print action immediately
         log_console(
@@ -3005,7 +3005,7 @@ class SymbolTrader:
 
         if self.dry_run:
             # Use a more descriptive dry run order ID
-            order_id = f"dryrun_{self.symbol}_{side.lower()}_{int(time.time()*1000)}"
+            order_id = f"dryrun_{self.symbol}_{side.lower()}_{int(time.time() * 1000)}"
             sim_entry_price = 0.0
             # Try to get realistic price from klines
             if self.kline_df is not None and not self.kline_df.empty:
@@ -3068,7 +3068,7 @@ class SymbolTrader:
 
             # Generate unique order link ID if not provided
             order_params["orderLinkId"] = (
-                order_link_id or f"momscan_{self.symbol}_{int(time.time()*1000)}"
+                order_link_id or f"momscan_{self.symbol}_{int(time.time() * 1000)}"
             )
 
             response = self.session.place_order(**order_params)
@@ -3274,7 +3274,7 @@ class SymbolTrader:
         qty_str = f"{abs_size:.{self.qty_precision}f}"
 
         log_prefix = (
-            f"{Fore.YELLOW+Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} "
+            f"{Fore.YELLOW + Style.BRIGHT}[DRY RUN]{Style.RESET_ALL} "
             if self.dry_run
             else ""
         )
@@ -3284,7 +3284,7 @@ class SymbolTrader:
             f"{Style.RESET_ALL} Qty={qty_str} | Reason: {exit_reason}"
         )
         action_prefix = (
-            f"{Fore.MAGENTA+Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
+            f"{Fore.MAGENTA + Style.BRIGHT}ACTION:{Style.RESET_ALL} [{self.symbol}] "
         )
         print(action_prefix + log_msg)
         log_console(
@@ -3368,7 +3368,7 @@ class SymbolTrader:
 
         # --- Real Position Close (V5) ---
         try:
-            close_order_link_id = f"close_{self.symbol}_{int(time.time()*1000)}"
+            close_order_link_id = f"close_{self.symbol}_{int(time.time() * 1000)}"
             response = self.session.place_order(
                 category=self.category,
                 symbol=self.symbol,

@@ -1,0 +1,20 @@
+{
+    "user_settings": {
+        "name": "Alice",
+        "preferences": {
+            "theme": "dark",
+            "language": "en_US"
+        }
+    },
+    "display_settings": {
+        "greeting_format": "Welcome back, {name}! Hope you have a productive day.",
+        "show_tips": true
+    },
+    "feature_flags": {
+        "new_dashboard_feature": false,
+        "beta_access": true
+    },
+    "api_keys": {
+        "service_x": "YOUR_API_KEY_HERE_IF_NEEDED"
+    }
+}

@@ -288,3 +288,27 @@ AttributeError: 'BybitV5Wrapper' object has no attribute 'exchange_id'. Did you 
 2025-05-03 05:20:58,148 - ERROR - [y.1.5.py:2118] - Failed to set initial leverage to 25.0x for FARTCOINUSDT. Check permissions/settings. Continuing but trading might fail.
 2025-05-03 05:20:58,148 - CRITICAL - [y.1.5.py:2019] - Failed to initialize exchange settings (e.g., leverage). Exiting.
 2025-05-03 05:20:58,149 - INFO - [y.1.5.py:2860] - Bot process terminated with exit code 1.
+2025-05-07 23:47:13,187 - INFO - [y.1.5.py:143] - Configuration loaded successfully from config.json
+2025-05-07 23:47:13,188 - INFO - [y.1.5.py:224] - Configuration validation successful.
+2025-05-07 23:47:13,189 - INFO - [y.1.5.py:237] - Bot state loaded successfully from bot_state.json
+2025-05-07 23:47:27,879 - INFO - [y.1.5.py:307] - Markets loaded successfully for Bybit.
+2025-05-07 23:47:27,884 - INFO - [y.1.5.py:2013] - --- Starting Trading Bot ---
+2025-05-07 23:47:27,885 - INFO - [y.1.5.py:2014] - Symbol: FARTCOINUSDT, Timeframe: 1m, Quote: USDT, Leverage: 25.0x, Hedge Mode: False
+2025-05-07 23:47:27,885 - INFO - [y.1.5.py:2015] - Poll Interval: 60s
+2025-05-07 23:47:27,885 - INFO - [y.1.5.py:2112] - Initializing exchange settings...
+2025-05-07 23:47:27,885 - INFO - [y.1.5.py:885] - Setting leverage for FARTCOINUSDT to 25.0x...
+2025-05-07 23:47:28,369 - INFO - [y.1.5.py:912] - Leverage for FARTCOINUSDT set to 25.0x request sent successfully.
+2025-05-07 23:47:28,369 - INFO - [y.1.5.py:2121] - Leverage set to 25.0x for FARTCOINUSDT.
+2025-05-07 23:47:28,369 - INFO - [y.1.5.py:2023] - Performing initial position sync...
+2025-05-07 23:47:28,979 - INFO - [y.1.5.py:750] - Fetched 0 active position(s) for FARTCOINUSDT.
+2025-05-07 23:47:28,980 - INFO - [y.1.5.py:2213] - No active position found on exchange for FARTCOINUSDT.
+2025-05-07 23:47:28,988 - INFO - [y.1.5.py:2031] - --- New Trading Cycle ---
+2025-05-07 23:47:28,988 - INFO - [y.1.5.py:470] - Fetching 250 OHLCV candles for FARTCOINUSDT (1m)...
+2025-05-07 23:47:29,549 - INFO - [y.1.5.py:502] - Successfully fetched and processed 250 OHLCV candles for FARTCOINUSDT.
+2025-05-07 23:47:29,616 - INFO - [y.1.5.py:1344] - Signal generated: SELL (Score: -0.4000)
+2025-05-07 23:47:30,559 - INFO - [y.1.5.py:750] - Fetched 0 active position(s) for FARTCOINUSDT.
+2025-05-07 23:47:30,559 - INFO - [y.1.5.py:2213] - No active position found on exchange for FARTCOINUSDT.
+2025-05-07 23:47:30,559 - INFO - [y.1.5.py:2571] - Checking for new entry opportunities...
+2025-05-07 23:47:30,560 - INFO - [y.1.5.py:2591] - Entry signal SELL received. Preparing entry for SHORT...
+2025-05-07 23:47:30,560 - ERROR - [y.1.5.py:1633] - ATR column 'ATR_14' not found in latest indicators.
+2025-05-07 23:47:30,560 - ERROR - [y.1.5.py:2615] - Failed to calculate a valid stop loss price. Cannot proceed with entry.

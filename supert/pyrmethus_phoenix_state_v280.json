@@ -1,0 +1,10 @@
+{
+    "timestamp_utc_iso": "2025-05-10T04:16:58.404398+00:00",
+    "last_heartbeat_utc_iso": "2025-05-10T04:16:58.404770+00:00",
+    "active_trade_parts": [],
+    "trade_metrics_trades": [],
+    "config_symbol": "TRUMP/USDT:USDT",
+    "config_strategy": "DUAL_SUPERTREND_MOMENTUM",
+    "daily_start_equity_str": "6.85478287",
+    "last_daily_reset_day": 10
+}

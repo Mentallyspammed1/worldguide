@@ -1,0 +1,2 @@
+2025-05-09 22:41:38 [[34mINFO[0m] __main__.ConfigSummoner        [35m--- Summoning Configuration Runes from the Environment Scroll (.env) ---[0m
+2025-05-09 22:41:38 [[41m[37m[1mCRITICAL[0m] root                           [41m[37mFatal Configuration Error: 'DUAL_SUPERTREND_MOMENTUM' is not a valid StrategyName. Pyrmethus cannot awaken.[0m

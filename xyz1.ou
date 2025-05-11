@@ -1,0 +1,252 @@
+import json
+import logging
+from pathlib import Path
+from typing import Dict, Any, Optional
+
+# --- Constants ---
+# Configuration for file names, default values, and formats.
+# Using uppercase for constants is a Python convention (PEP 8).
+CONFIG_FILE_NAME: str = "app_config.json"
+DEFAULT_USERNAME: str = "Guest"
+DEFAULT_GREETING_TEMPLATE: str = "Hello, {name}!"
+LOG_FORMAT: str = "%(asctime)s - %(levelname)s - [%(name)s] - %(funcName)s - %(message)s"
+
+# --- Setup Logging ---
+# Configure basic logging for the application.
+# This provides better traceability and debugging capabilities than print statements.
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+# Get a logger instance for the current module.
+logger = logging.getLogger(__name__)
+
+# --- Custom Exceptions ---
+# Defining custom exceptions can make error handling more specific and maintainable.
+class ConfigError(Exception):
+    """Custom exception for configuration related errors."""
+    pass
+
+class DataProcessingError(Exception):
+    """Custom exception for data processing errors."""
+    pass
+
+# --- Core Functions ---
+def load_configuration(config_path: Path) -> Dict[str, Any]:
+    """
+    Loads configuration from a JSON file.
+
+    Args:
+        config_path: Path object pointing to the configuration file.
+
+    Returns:
+        A dictionary containing the configuration data.
+
+    Raises:
+        ConfigError: If the file is not found, cannot be read,
+                     is not valid JSON, or content is not a dictionary.
+    """
+    if not config_path.exists():
+        msg = f"Configuration file not found: {config_path}"
+        logger.error(msg)
+        raise ConfigError(msg)
+
+    if not config_path.is_file():
+        msg = f"Configuration path is not a file: {config_path}"
+        logger.error(msg)
+        raise ConfigError(msg)
+
+    try:
+        # Using 'with' statement for automatic file closing (resource management).
+        # Specifying 'utf-8' encoding is a good practice for broad compatibility.
+        with config_path.open("r", encoding="utf-8") as f:
+            config_data = json.load(f)
+
+        if not isinstance(config_data, dict):
+            msg = f"Configuration file content is not a JSON object (dictionary): {config_path}"
+            logger.error(msg)
+            raise ConfigError(msg)
+
+        logger.info(f"Configuration loaded successfully from {config_path}")
+        return config_data
+    except json.JSONDecodeError as e:
+        msg = f"Error decoding JSON from {config_path}: {e}"
+        logger.error(msg)
+        # Raise custom exception, chaining the original exception for context.
+        raise ConfigError(msg) from e
+    except IOError as e:
+        msg = f"IOError reading configuration file {config_path}: {e}"
+        logger.error(msg)
+        raise ConfigError(msg) from e
+    except Exception as e: # Catch any other unexpected errors during loading
+        msg = f"Unexpected error loading configuration from {config_path}: {e}"
+        logger.error(msg, exc_info=True) # exc_info=True logs stack trace
+        raise ConfigError(msg) from e
+
+
+def get_greeting_message(config: Dict[str, Any], user_override: Optional[str] = None) -> str:
+    """
+    Generates a greeting message based on the configuration and an optional user override.
+
+    Args:
+        config: A dictionary containing application configuration.
+        user_override: An optional username to override the one in config.
+
+    Returns:
+        A formatted greeting string.
+
+    Raises:
+        DataProcessingError: If there's an issue processing the data for the greeting.
+    """
+    try:
+        # Determine username: prioritize user_override, then config, then default.
+        # .get() is used for safe dictionary access, returning None if keys are missing.
+        raw_username_from_config = config.get("user_settings", {}).get("name")
+
+        # Select username source
+        if user_override is not None:
+            chosen_username_source = user_override
+            source_description = "user_override"
+        elif raw_username_from_config is not None:
+            chosen_username_source = raw_username_from_config
+            source_description = "configuration file"
+        else:
+            chosen_username_source = DEFAULT_USERNAME
+            source_description = "default"
+
+        # Validate and set final username
+        if isinstance(chosen_username_source, str) and chosen_username_source.strip():
+            username = chosen_username_source
+        else:
+            logger.warning(
+                f"Invalid or empty username ('{chosen_username_source}') from {source_description}. "
+                f"Falling back to default username '{DEFAULT_USERNAME}'."
+            )
+            username = DEFAULT_USERNAME
+
+        # Get greeting template from config, with a fallback to a default template.
+        greeting_template: str = config.get("display_settings", {}).get(
+            "greeting_format", DEFAULT_GREETING_TEMPLATE
+        )
+
+        # Validate the template
+        if not isinstance(greeting_template, str) or "{name}" not in greeting_template:
+            logger.warning(
+                f"Invalid or malformed greeting template ('{greeting_template}') found in config. "
+                f"Using default template: '{DEFAULT_GREETING_TEMPLATE}'"
+            )
+            greeting_template = DEFAULT_GREETING_TEMPLATE
+
+        # Using f-string for modern string formatting.
+        return greeting_template.format(name=username)
+
+    except Exception as e: # Catch any other unexpected errors during processing
+        msg = f"Unexpected error during message generation: {e}"
+        logger.error(msg, exc_info=True)
+        raise DataProcessingError(msg) from e
+
+
+def _ensure_dummy_config_exists(config_file_path: Path) -> None:
+    """Creates a dummy config file if it doesn't exist, for demonstration purposes."""
+    if not config_file_path.exists():
+        logger.warning(
+            f"{config_file_path.name} not found. "
+            "Creating a dummy file for demonstration."
+        )
+        dummy_config = {
+            "user_settings": {
+                "name": "Alice",
+                "preferences": {
+                    "theme": "dark",
+                    "language": "en_US"
+                }
+            },
+            "display_settings": {
+                "greeting_format": "Welcome back, {name}! Hope you have a productive day.",
+                "show_tips": True
+            },
+            "feature_flags": {
+                "new_dashboard_feature": False,
+                "beta_access": True
+            },
+            "api_keys": {
+                "service_x": "YOUR_API_KEY_HERE_IF_NEEDED" # Example, store securely
+            }
+        }
+        try:
+            with config_file_path.open("w", encoding="utf-8") as f:
+                json.dump(dummy_config, f, indent=4)
+            logger.info(f"Dummy {config_file_path.name} created at {config_file_path}")
+        except IOError as e:
+            # Log error but allow application to attempt to proceed if config is not critical
+            # or if other fallbacks are in place.
+            logger.error(f"Could not create dummy config file at {config_file_path}: {e}")
+
+
+# --- Main Application Logic ---
+def main() -> None:
+    """
+    Main function to run the application logic.
+    Orchestrates loading configuration, processing data, and handling errors.
+    """
+    logger.info("Application starting...")
+
+    # Using pathlib for modern and OS-agnostic path manipulation.
+    # __file__ gives the path to the current script.
+    # .resolve() makes the path absolute. .parent gets the directory.
+    script_dir = Path(__file__).resolve().parent
+    config_file_path = script_dir / CONFIG_FILE_NAME
+
+    # For demonstration: ensure a dummy config file exists if none is found.
+    # In a real application, configuration might be mandatory.
+    _ensure_dummy_config_exists(config_file_path)
+
+    try:
+        app_config = load_configuration(config_file_path)
+
+        # Example of using other parts of the configuration
+        user_prefs = app_config.get("user_settings", {}).get("preferences", {})
+        logger.info(f"User preferences loaded: Theme='{user_prefs.get('theme', 'default')}', "
+                    f"Language='{user_prefs.get('language', 'default')}'")
+
+        if app_config.get("feature_flags", {}).get("new_dashboard_feature", False):
+            logger.info("The 'new_dashboard_feature' is ENABLED.")
+        else:
+            logger.info("The 'new_dashboard_feature' is DISABLED.")
+
+        # Generate and print a greeting using data from the configuration
+        greeting = get_greeting_message(app_config)
+        print(f"\n{greeting}\n")
+
+        # Example with a user override for the greeting
+        custom_greeting = get_greeting_message(app_config, user_override="Bob")
+        print(f"{custom_greeting}\n")
+
+        # Example with an invalid user override to test fallback
+        invalid_override_greeting = get_greeting_message(app_config, user_override="   ") # Empty after strip
+        print(f"{invalid_override_greeting}\n")
+
+
+    except ConfigError as e:
+        # Handle specific configuration errors.
+        # For critical errors like this, logging as CRITICAL and exiting might be appropriate.
+        logger.critical(f"Application cannot run due to a configuration error: {e}")
+        print(f"FATAL ERROR: Configuration problem - {e}. Please check the logs.")
+        # import sys; sys.exit(1) # Uncomment to exit on critical config error
+    except DataProcessingError as e:
+        # Handle specific data processing errors.
+        logger.error(f"An error occurred during data processing: {e}")
+        print(f"ERROR: Data processing issue - {e}. Please check the logs.")
+    except Exception as e:
+        # Catch-all for any other unexpected errors in the main execution flow.
+        # logger.exception automatically includes stack trace information.
+        logger.exception(f"An unexpected critical error occurred in main: {e}")
+        print(f"UNEXPECTED CRITICAL ERROR: {e}. Please check the logs for details.")
+    finally:
+        # This block executes regardless of whether an exception occurred or not.
+        # Useful for cleanup tasks.
+        logger.info("Application finished or attempted to finish.")
+
+
+# --- Script Entry Point ---
+if __name__ == "__main__":
+    # This standard Python construct ensures that main() is called only when the script
+    # is executed directly (e.g., `python your_script.py`), not when it's imported as a module.
+    main()

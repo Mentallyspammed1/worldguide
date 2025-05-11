@@ -339,12 +339,14 @@ class ScalpingBot:
     def _initialize_exchange(self):
         """Initialize and connect to the exchange."""
         try:
-            exchange = getattr(ccxt, self.exchange_id)({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "options": {"defaultType": "future"},
-                "recvWindow": 60000,
-            })
+            exchange = getattr(ccxt, self.exchange_id)(
+                {
+                    "apiKey": self.api_key,
+                    "secret": self.api_secret,
+                    "options": {"defaultType": "future"},
+                    "recvWindow": 60000,
+                }
+            )
             exchange.load_markets()
             logger.info(
                 f"{Fore.GREEN}Connected to {self.exchange_id.upper()} successfully.{Style.RESET_ALL}"
@@ -908,19 +910,21 @@ class ScalpingBot:
                             f"{Fore.GREEN}Entering LONG position. Confidence: {signal_score}, "
                             f"SL: {stop_loss_pct * 100:.2f}%, TP: {take_profit_pct * 100:.2f}%{Style.RESET_ALL}"
                         )
-                        self.open_positions.append({
-                            "side": "buy",
-                            "size": order_size,
-                            "entry_price": entry_order["price"]
-                            if not self.simulation_mode and "price" in entry_order
-                            else price
-                            if self.entry_order_type == "market"
-                            else limit_price,
-                            "entry_time": time.time(),
-                            "stop_loss": stop_loss_price,
-                            "take_profit": take_profit_price,
-                            "confidence": signal_score,  # Store confidence level
-                        })
+                        self.open_positions.append(
+                            {
+                                "side": "buy",
+                                "size": order_size,
+                                "entry_price": entry_order["price"]
+                                if not self.simulation_mode and "price" in entry_order
+                                else price
+                                if self.entry_order_type == "market"
+                                else limit_price,
+                                "entry_time": time.time(),
+                                "stop_loss": stop_loss_price,
+                                "take_profit": take_profit_price,
+                                "confidence": signal_score,  # Store confidence level
+                            }
+                        )
 
                 elif signal_score <= -2:
                     take_profit_pct = self.base_take_profit_pct
@@ -955,19 +959,21 @@ class ScalpingBot:
                             f"{Fore.RED}Entering SHORT position. Confidence: {signal_score}, "
                             f"SL: {stop_loss_pct * 100:.2f}%, TP: {take_profit_pct * 100:.2f}%{Style.RESET_ALL}"
                         )
-                        self.open_positions.append({
-                            "side": "sell",
-                            "size": order_size,
-                            "entry_price": entry_order["price"]
-                            if not self.simulation_mode and "price" in entry_order
-                            else price
-                            if self.entry_order_type == "market"
-                            else limit_price,
-                            "entry_time": time.time(),
-                            "stop_loss": stop_loss_price,
-                            "take_profit": take_profit_price,
-                            "confidence": signal_score,  # Store confidence level
-                        })
+                        self.open_positions.append(
+                            {
+                                "side": "sell",
+                                "size": order_size,
+                                "entry_price": entry_order["price"]
+                                if not self.simulation_mode and "price" in entry_order
+                                else price
+                                if self.entry_order_type == "market"
+                                else limit_price,
+                                "entry_time": time.time(),
+                                "stop_loss": stop_loss_price,
+                                "take_profit": take_profit_price,
+                                "confidence": signal_score,  # Store confidence level
+                            }
+                        )
             else:
                 logger.info(
                     f"{Fore.YELLOW}Max open positions reached ({self.max_open_positions}).  "

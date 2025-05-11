@@ -1,0 +1,321 @@
+```python
+#--*- coding: utf-8 -*-
+# pylint: disable=logging-fstring-interpolation, too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods, invalid-name, unused-argument, too-many-lines, unnecessary-pass
+# fmt: off
+#   ____        _       _   _                  _            _         _
+#  |  _ \\ _   _| |_ ___| | | | __ ___   ____ _| |_ ___  ___| |_ _ __ | |__   ___ _ __ ___  _ __
+#  | |_) | | | | __/ _ \\ | | |/ _` \\ \\ / / _` | __/ _ \\/ __| __| '_ \\| '_ \\ / _ \\ '_ ` _ \\| '_ \\
+#  |  __/| |_| | ||  __/ | | | (_| |\\ V / (_| | ||  __/\\__ \\ |_| |_) | | | |  __/ | | | | | |_) |
+#  |_|    \\__, |\\__\\___|_|_|_|\\__,_| \\_/ \\__,_|\\__\\___||___/\\__| .__/|_| |_|\\___|_| |_| |_| .__/
+#         |___/                                                |_|                      |_|
+# Pyrmethus v4.5.8 - Neon Nexus Edition (VolumaticTrend Integration)
+# fmt: on
+"""
+Pyrmethus - Termux Trading Spell (v4.5.8 - Neon Nexus Edition)
+
+Conjures market insights and executes trades on Bybit Futures.
+This version integrates the VolumaticTrend strategy and uses the V5 Unified Account API
+via CCXT, employing classes for better structure and leveraging V5 position-based
+stop-loss, take-profit, and trailing-stop features.
+"""
+
+# Standard Library Imports
+import copy
+import csv
+import logging
+import os
+import signal
+import subprocess
+import sys
+import textwrap
+import time
+from datetime import datetime, timezone
+from decimal import (
+    ROUND_DOWN,
+    ROUND_HALF_EVEN,
+    ROUND_UP,
+    Decimal,
+    DivisionByZero,
+    InvalidOperation,
+    getcontext,
+)
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, Literal
+
+# Third-Party Imports
+# Define COMMON_PACKAGES before the try-except block for imports
+COMMON_PACKAGES = [
+    "ccxt",
+    "python-dotenv",
+    "pandas",
+    "numpy",
+    "pandas-ta", # For VolumaticTrend indicators like VWMA
+    "rich",
+    "colorama",
+    "requests",
+]
+
+# Attempt to import colorama first for styled error messages
+_COLORAMA_SUCCESSFULLY_IMPORTED = False
+try:
+    from colorama import Fore, Style, init as colorama_init
+    _COLORAMA_SUCCESSFULLY_IMPORTED = True
+except ImportError:
+    # colorama itself is missing, this will be handled in the main try-except block
+    # Define dummy Fore, Style, colorama_init so the rest of the script doesn't break if it tries to use them before exit
+    class _DummyColor:
+        def __getattr__(self, name: str) -> str: return "" # Return empty string for any attribute
+    Fore, Style = _DummyColor(), _DummyColor() # type: ignore
+    def colorama_init(*_args: Any, **_kwargs: Any) -> None: pass # Dummy init function
+
+try:
+    import ccxt
+    import numpy as np
+    import pandas as pd
+    import pandas_ta as ta # For VWMA and other TA functions
+    import requests
+    from dotenv import load_dotenv
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.table import Table # Keep for potential future use
+    from rich.text import Text
+
+except ImportError as e:
+    missing_pkg = e.name
+    can_use_colorama_for_error = _COLORAMA_SUCCESSFULLY_IMPORTED and missing_pkg != "colorama"
+
+    if missing_pkg == "colorama" or not can_use_colorama_for_error:
+        print(f"Missing essential spell component: {missing_pkg}")
+        if missing_pkg == "colorama":
+            print("Missing essential package: colorama. Cannot display colored output.")
+        print(f"To conjure it, cast: pip install {missing_pkg}")
+        print("\nOr, to ensure all scrolls are present, cast:")
+        print(f"pip install {' '.join(COMMON_PACKAGES)}")
+    else:
+        colorama_init(autoreset=True)
+        print(
+            f"{Fore.RED}{Style.BRIGHT}Missing essential spell component: {Style.BRIGHT}{missing_pkg}{Style.NORMAL}"
+        )
+        print(
+            f"{Fore.YELLOW}To conjure it, cast: {Style.BRIGHT}pip install {missing_pkg}{Style.RESET_ALL}"
+        )
+        print(f"\n{Fore.CYAN}Or, to ensure all scrolls are present, cast:")
+        is_termux = "com.termux" in os.environ.get("PREFIX", "")
+
+        if is_termux:
+            termux_pkgs_to_install = []
+            pip_pkgs_to_install = list(COMMON_PACKAGES)
+
+            if "pandas" in COMMON_PACKAGES:
+                termux_pkgs_to_install.append("python-pandas")
+                if 'pandas' in pip_pkgs_to_install: pip_pkgs_to_install.remove('pandas')
+            if "numpy" in COMMON_PACKAGES:
+                termux_pkgs_to_install.append("python-numpy")
+                if 'numpy' in pip_pkgs_to_install: pip_pkgs_to_install.remove('numpy')
+
+            install_cmd_parts = []
+            if termux_pkgs_to_install:
+                install_cmd_parts.append(f"pkg install {' '.join(termux_pkgs_to_install)}")
+            if pip_pkgs_to_install:
+                install_cmd_parts.append(f"pip install {' '.join(pip_pkgs_to_install)}")
+
+            install_cmd = " && ".join(install_cmd_parts) if install_cmd_parts else f"pip install {' '.join(COMMON_PACKAGES)}"
+            print(f"{Style.BRIGHT}{install_cmd}{Style.RESET_ALL}")
+
+            if termux_pkgs_to_install:
+                termux_base_names = [pkg.replace('python-','') for pkg in termux_pkgs_to_install]
+                print(
+                    f"{Fore.YELLOW}Note: In Termux, {' and '.join(termux_base_names)} are often best installed via 'pkg' for compatibility.{Style.RESET_ALL}"
+                )
+        else:
+            print(
+                f"{Style.BRIGHT}pip install {' '.join(COMMON_PACKAGES)}{Style.RESET_ALL}"
+            )
+    sys.exit(1)
+
+# --- Constants ---
+DECIMAL_PRECISION = 50
+POSITION_QTY_EPSILON = Decimal("1E-12")
+DEFAULT_PRICE_DP = 4
+DEFAULT_AMOUNT_DP = 6
+DEFAULT_OHLCV_LIMIT = 200
+DEFAULT_LOOP_SLEEP = 15
+DEFAULT_RETRY_DELAY = 3
+DEFAULT_MAX_RETRIES = 3
+DEFAULT_RISK_PERCENT = Decimal("0.01")
+DEFAULT_SL_MULT = Decimal("1.5")
+DEFAULT_TP_MULT = Decimal("3.0")
+DEFAULT_TSL_ACT_MULT = Decimal("1.0")
+DEFAULT_TSL_PERCENT = Decimal("0.5")
+DEFAULT_STOCH_OVERSOLD = Decimal("30")
+DEFAULT_STOCH_OVERBOUGHT = Decimal("70")
+DEFAULT_MIN_ADX = Decimal("20")
+DEFAULT_JOURNAL_FILE = "pyrmethus_trading_journal.csv"
+V5_UNIFIED_ACCOUNT_TYPE = "UNIFIED"
+DEFAULT_POSITION_IDX = 0 # 0 for One-Way mode; Hedge mode uses 1 (Long) or 2 (Short)
+V5_TPSL_MODE_FULL = "Full"
+V5_SUCCESS_RETCODE = 0
+TERMUX_NOTIFY_TIMEOUT = 10
+
+# OrderManager internal states for protection_tracker
+PROTECTION_STATE_SLTP = "ACTIVE_SLTP"
+PROTECTION_STATE_TSL = "ACTIVE_TSL"
+
+
+colorama_init(autoreset=True)
+console = Console(log_path=False) # Disable Rich's own log file handling
+getcontext().prec = DECIMAL_PRECISION
+
+# --- Logging Setup ---
+TRADE_LEVEL_NUM = 25
+log_level_display_name: str # To be set during log level configuration
+if not hasattr(logging, "TRADE"):
+    logging.addLevelName(TRADE_LEVEL_NUM, "TRADE")
+
+# Ensure the 'trade' method is only added if it doesn't exist
+if not hasattr(logging.Logger, "trade"):
+    def trade_log(self: logging.Logger, message: str, *args: Any, **kws: Any) -> None:
+        """Logs a message with custom level TRADE."""
+        if self.isEnabledFor(TRADE_LEVEL_NUM):
+            # pylint: disable=protected-access
+            self._log(TRADE_LEVEL_NUM, message, args, **kws) # type: ignore[arg-type]
+    logging.Logger.trade = trade_log # type: ignore[attr-defined]
+
+logger = logging.getLogger(__name__)
+log_formatter = logging.Formatter(
+    "%(asctime)s [%(levelname)-8s] (%(filename)s:%(lineno)d) %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+log_level_str_env = os.getenv("LOG_LEVEL", "INFO").upper()
+valid_log_levels = ["DEBUG", "INFO", "TRADE", "WARNING", "ERROR", "CRITICAL"]
+log_level_to_set: int
+
+if log_level_str_env.isdigit() and int(log_level_str_env) == TRADE_LEVEL_NUM:
+    log_level_to_set = TRADE_LEVEL_NUM
+    log_level_display_name = "TRADE"
+elif log_level_str_env in valid_log_levels:
+    log_level_to_set = getattr(logging, log_level_str_env)
+    log_level_display_name = log_level_str_env
+else:
+    print(f"{Fore.YELLOW}Warning: Invalid LOG_LEVEL '{log_level_str_env}'. Defaulting to INFO.{Style.RESET_ALL}")
+    log_level_to_set = logging.INFO
+    log_level_display_name = "INFO"
+
+logger.setLevel(log_level_to_set)
+if not logger.hasHandlers():
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(log_formatter)
+    logger.addHandler(stream_handler)
+logger.propagate = False # Prevent duplicate logs if root logger is configured
+
+# --- Utility Functions ---
+def safe_decimal(value: Any, default: Decimal = Decimal("NaN")) -> Decimal:
+    """Safely converts a value to Decimal, returning a default (NaN) on failure."""
+    if value is None: return default
+    try:
+        str_value = str(value).strip()
+        if not str_value or str_value.lower() in ("nan", "none", "null"): return default
+        return Decimal(str_value)
+    except (InvalidOperation, ValueError, TypeError):
+        return default
+
+def termux_notify(title: str, content: str) -> None:
+    """Sends a toast notification in Termux if available."""
+    if "com.termux" not in os.environ.get("PREFIX", ""):
+        return
+    try:
+        # Title is not directly supported by termux-toast, content is key.
+        # We can prepend title to content if desired, but keeping it simple.
+        # Using a short timeout for the notification command.
+        result = subprocess.run(
+            ["termux-toast", content],
+            check=False, timeout=TERMUX_NOTIFY_TIMEOUT,
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            # Consolidate error output checking
+            error_output = (result.stderr or result.stdout or "[No output]").strip()
+            logger.warning(f"Termux toast command failed (code {result.returncode}): {error_output}")
+    except FileNotFoundError:
+        logger.warning("Termux notify failed: 'termux-toast' command not found. Is Termux:API installed and configured?")
+    except subprocess.TimeoutExpired:
+        logger.warning(f"Termux notify failed: command timed out after {TERMUX_NOTIFY_TIMEOUT} seconds.")
+    except Exception as e:
+        # Log generic exceptions with exc_info=False to avoid large tracebacks for simple notification failures
+        logger.warning(f"Termux notify failed unexpectedly: {e}", exc_info=False)
+
+def fetch_with_retries(
+    fetch_function: Callable[..., Any], *args: Any,
+    max_retries: int = DEFAULT_MAX_RETRIES, delay_seconds: int = DEFAULT_RETRY_DELAY,
+    retry_on_exceptions: Tuple[Type[Exception], ...] = (
+        ccxt.DDoSProtection, ccxt.RequestTimeout, ccxt.ExchangeNotAvailable,
+        ccxt.NetworkError, ccxt.RateLimitExceeded, requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout, requests.exceptions.ChunkedEncodingError,
+        requests.exceptions.ReadTimeout),
+    fatal_exceptions: Tuple[Type[Exception], ...] = (ccxt.AuthenticationError, ccxt.PermissionDenied),
+    fail_fast_exceptions: Tuple[Type[Exception], ...] = (ccxt.InsufficientFunds, ccxt.InvalidOrder, ccxt.OrderNotFound),
+    **kwargs: Any
+) -> Any:
+    """Executes a function with retries for specified exceptions."""
+    last_exception: Optional[Exception] = None
+    func_name = getattr(fetch_function, "__name__", "Unnamed function")
+    for attempt in range(max_retries + 1):
+        try:
+            result = fetch_function(*args, **kwargs)
+            if attempt > 0: # Log success only if it was a retry
+                logger.info(f"{Style.BRIGHT}{Fore.GREEN}Successfully executed {func_name} on attempt {attempt + 1}/{max_retries + 1}.{Style.RESET_ALL}")
+            return result
+        except fatal_exceptions as e:
+            logger.critical(f"{Style.BRIGHT}{Fore.RED}Fatal error ({type(e).__name__}) executing {func_name}: {e}. Halting.{Style.RESET_ALL}", exc_info=False)
+            raise
+        except fail_fast_exceptions as e:
+            logger.error(f"{Fore.RED}Fail-fast error ({type(e).__name__}) executing {func_name}: {e}. Not retrying this call.{Style.RESET_ALL}", exc_info=False)
+            last_exception = e; break # Break from retry loop
+        except retry_on_exceptions as e:
+            last_exception = e
+            err_summary = str(e)[:150] + ("..." if len(str(e)) > 150 else "") # Truncate long error messages
+            msg_base = f"Retryable error ({type(e).__name__}) on attempt {attempt + 1}/{max_retries + 1} for {func_name}: {err_summary}."
+            if attempt < max_retries:
+                logger.warning(f"{Fore.YELLOW}{msg_base} Retrying in {delay_seconds}s...{Style.RESET_ALL}")
+                time.sleep(delay_seconds)
+            else:
+                logger.error(f"{Fore.RED}Max retries ({max_retries + 1}) reached for {func_name}. Last error: {e}{Style.RESET_ALL}", exc_info=False)
+        except ccxt.ExchangeError as e: # Catch other exchange errors not specified above
+            last_exception = e
+            err_summary = str(e)[:150] + ("..." if len(str(e)) > 150 else "")
+            logger.error(f"{Fore.RED}Unhandled ExchangeError during {func_name}: {err_summary}{Style.RESET_ALL}", exc_info=False) # exc_info=False for brevity unless debugging
+            if attempt < max_retries:
+                logger.warning(f"Retrying generic exchange error in {delay_seconds}s...")
+                time.sleep(delay_seconds)
+            else:
+                logger.error(f"Max retries reached after generic exchange error for {func_name}."); break
+        except Exception as e: # Catch any other Python exceptions
+            last_exception = e
+            logger.error(f"{Fore.RED}Unexpected Python error during {func_name}: {e}{Style.RESET_ALL}", exc_info=True) # exc_info=True for unexpected Python errors
+            break # Do not retry unexpected Python errors by default
+    if last_exception: raise last_exception
+    # This line should ideally be unreachable if the loop always raises or returns.
+    raise RuntimeError(f"Function {func_name} failed after {max_retries + 1} attempts without returning or raising a recognized exception.")
+
+# --- Configuration Class ---
+class TradingConfig:
+    # pylint: disable=too-many-statements
+    def __init__(self, env_file: str = ".env"):
+        logger.debug(f"Loading configuration from environment variables / '{env_file}'...")
+        env_path = Path(env_file)
+        if env_path.is_file():
+            load_dotenv(dotenv_path=env_path, override=True)
+            logger.info(f"Loaded configuration from {env_path}")
+        else:
+            logger.warning(f"Environment file '{env_path}' not found. Relying solely on system environment variables.")
+
+        # Initialize attributes used by _determine_v5_category first
+        self.symbol: str = self._get_env("SYMBOL", "BTC/USDT:USDT", Style.DIM)
+        self.market_type: str = self._get_env("MARKET_TYPE", "linear", Style.DIM, allowed_values=["linear", "inverse", "swap"]).lower()
+        
+        # Now determine category as dependent attributes are set
+        self.bybit_v5_category: str = self._determine_v5_category()
+
+        self.interval: str = self._get_env("INTERVAL", "1m", Style.DIM)
+        self.risk_percentage: Decimal = self._get_env("RISK_PERCENTAGE", DEFAULT_RISK_PERCENT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.00001"), max_val=Decimal("0.5"))
+        self.sl_atr_multiplier: Decimal = self._get_env("SL_ATR_MULTIPLIER", DEFAULT_SL_MULT, Fore.YELLOW

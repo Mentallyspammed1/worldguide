@@ -24,18 +24,20 @@ getcontext().prec = 10
 load_dotenv()
 
 # Rich Theme Definition
-custom_theme = Theme({
-    "repr.number": "bold bright_white",
-    "level.support": "bold green",
-    "level.resistance": "bold red",
-    "level.pivot": "bold cyan",
-    "indicator.bullish": "bold green",
-    "indicator.bearish": "bold red",
-    "indicator.neutral": "bold yellow",
-    "signal.long": "bold green",
-    "signal.short": "bold red",
-    "signal.neutral": "bold yellow",
-})
+custom_theme = Theme(
+    {
+        "repr.number": "bold bright_white",
+        "level.support": "bold green",
+        "level.resistance": "bold red",
+        "level.pivot": "bold cyan",
+        "indicator.bullish": "bold green",
+        "indicator.bearish": "bold red",
+        "indicator.neutral": "bold yellow",
+        "signal.long": "bold green",
+        "signal.short": "bold red",
+        "signal.neutral": "bold yellow",
+    }
+)
 
 console = Console(theme=custom_theme)
 
@@ -833,14 +835,16 @@ def analyze_market_data_signals(
             confidence = (
                 "Medium" if is_oversold_stoch_rsi and is_ema_above_sma else "Low"
             )
-            rationale_parts.extend([
-                f"Detected [bold signal.long]Significant bid volume[/bold signal.long] near [level.support]{entry_level_name}[/level.support] at [repr.number]${entry_price:.2f}[/repr.number].",
-                f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bullish]{stoch_rsi_status}[/indicator.bullish] signal.",
-                f"Williams %R is [indicator.neutral]{williams_r_status}[/indicator.neutral].",
-                "EMA 20 is above SMA 10 indicating short term bullish momentum.",
-                f"Overall trend is [indicator.bearish]{trend_status}[/indicator.bearish] and OBV is [indicator.bearish]{obv_status}[/indicator.bearish], consider counter-trend trade with caution.",
-                f"Stop-loss at [repr.number]${stop_loss:.4f}[/repr.number], Take-profit at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
-            ])
+            rationale_parts.extend(
+                [
+                    f"Detected [bold signal.long]Significant bid volume[/bold signal.long] near [level.support]{entry_level_name}[/level.support] at [repr.number]${entry_price:.2f}[/repr.number].",
+                    f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bullish]{stoch_rsi_status}[/indicator.bullish] signal.",
+                    f"Williams %R is [indicator.neutral]{williams_r_status}[/indicator.neutral].",
+                    "EMA 20 is above SMA 10 indicating short term bullish momentum.",
+                    f"Overall trend is [indicator.bearish]{trend_status}[/indicator.bearish] and OBV is [indicator.bearish]{obv_status}[/indicator.bearish], consider counter-trend trade with caution.",
+                    f"Stop-loss at [repr.number]${stop_loss:.4f}[/repr.number], Take-profit at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
+                ]
+            )
             signal = {
                 "signal_type": signal_type,
                 "entry_price": entry_price,
@@ -905,14 +909,16 @@ def analyze_market_data_signals(
             confidence = (
                 "Medium" if is_overbought_stoch_rsi and is_ema_above_sma else "Low"
             )
-            rationale_parts.extend([
-                f"Detected [bold signal.short]Significant ask volume[/bold signal.short] near [level.resistance]{entry_level_name}[/level.resistance] at [repr.number]${entry_price:.2f}[/repr.number].",
-                f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bearish]{stoch_rsi_status}[/indicator.bearish] signal.",
-                f"Williams %R is [indicator.neutral]{williams_r_overbought}[/indicator.neutral].",
-                "EMA 20 is below SMA 10 indicating short term bearish momentum.",
-                f"Overall trend is [indicator.neutral]{trend_status}[/indicator.neutral] and OBV is [indicator.neutral]{obv_status}[/indicator.neutral].",
-                f"Stop-loss at [repr.number]${stop_loss:.4f}[/repr.number], Take-profit at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
-            ])
+            rationale_parts.extend(
+                [
+                    f"Detected [bold signal.short]Significant ask volume[/bold signal.short] near [level.resistance]{entry_level_name}[/level.resistance] at [repr.number]${entry_price:.2f}[/repr.number].",
+                    f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bearish]{stoch_rsi_status}[/indicator.bearish] signal.",
+                    f"Williams %R is [indicator.neutral]{williams_r_overbought}[/indicator.neutral].",
+                    "EMA 20 is below SMA 10 indicating short term bearish momentum.",
+                    f"Overall trend is [indicator.neutral]{trend_status}[/indicator.neutral] and OBV is [indicator.neutral]{obv_status}[/indicator.neutral].",
+                    f"Stop-loss at [repr.number]${stop_loss:.4f}[/repr.number], Take-profit at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
+                ]
+            )
             signal = {
                 "signal_type": signal_type,
                 "entry_price": entry_price,
@@ -951,14 +957,16 @@ def analyze_market_data_signals(
                 else None
             )
             confidence = "High"
-            rationale_parts.extend([
-                f"Price breaking above [bold signal.long]Bollinger Upper Band[/bold signal.long] at [repr.number]${bb_upper:.2f}[/repr.number], confirming a bullish breakout.",
-                f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bullish]{stoch_rsi_status}[/indicator.bullish] signal, supporting breakout momentum.",
-                f"Trend is [indicator.neutral]{trend_status}[/indicator.neutral], aligning with breakout direction.",
-                "Breaking above resistance level (confirmation needed).",
-                f"Stop-loss set at Bollinger Middle Band ([repr.number]${bb_middle:.2f}[/repr.number]) for dynamic support.",
-                f"Take-profit target is set at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
-            ])
+            rationale_parts.extend(
+                [
+                    f"Price breaking above [bold signal.long]Bollinger Upper Band[/bold signal.long] at [repr.number]${bb_upper:.2f}[/repr.number], confirming a bullish breakout.",
+                    f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bullish]{stoch_rsi_status}[/indicator.bullish] signal, supporting breakout momentum.",
+                    f"Trend is [indicator.neutral]{trend_status}[/indicator.neutral], aligning with breakout direction.",
+                    "Breaking above resistance level (confirmation needed).",
+                    f"Stop-loss set at Bollinger Middle Band ([repr.number]${bb_middle:.2f}[/repr.number]) for dynamic support.",
+                    f"Take-profit target is set at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
+                ]
+            )
             signal = {
                 "signal_type": signal_type,
                 "entry_price": entry_price,
@@ -997,14 +1005,16 @@ def analyze_market_data_signals(
                 else None
             )
             confidence = "High"
-            rationale_parts.extend([
-                f"Price breaking below [bold signal.short]Bollinger Lower Band[/bold signal.short] at [repr.number]${bb_lower:.2f}[/repr.number], signaling a bearish breakout.",
-                f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bearish]{stoch_rsi_status}[/indicator.bearish] signal, reinforcing breakout momentum.",
-                f"Trend is [indicator.neutral]{trend_status}[/indicator.neutral], in line with breakout direction.",
-                "Breaking below support level (confirmation needed).",
-                f"Stop-loss set at Bollinger Middle Band ([repr.number]${bb_middle:.2f}[/repr.number]) for dynamic resistance.",
-                f"Take-profit target is set at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
-            ])
+            rationale_parts.extend(
+                [
+                    f"Price breaking below [bold signal.short]Bollinger Lower Band[/bold signal.short] at [repr.number]${bb_lower:.2f}[/repr.number], signaling a bearish breakout.",
+                    f"Stochastic RSI K is [indicator.neutral]{stoch_rsi_k_status}[/indicator.neutral] and showing [indicator.bearish]{stoch_rsi_status}[/indicator.bearish] signal, reinforcing breakout momentum.",
+                    f"Trend is [indicator.neutral]{trend_status}[/indicator.neutral], in line with breakout direction.",
+                    "Breaking below support level (confirmation needed).",
+                    f"Stop-loss set at Bollinger Middle Band ([repr.number]${bb_middle:.2f}[/repr.number]) for dynamic resistance.",
+                    f"Take-profit target is set at [repr.number]${take_profit:.4f}[/repr.number] (Risk:Reward [repr.number]{take_profit_risk_reward_ratio}:1[/repr.number]).",
+                ]
+            )
             signal = {
                 "signal_type": signal_type,
                 "entry_price": entry_price,

@@ -1,0 +1,19 @@
+{"timestamp": "2025-05-09 22:22:44", "level": "INFO", "name": "ConfigModule", "message": "Summoning Configuration Runes v3.0.0"}
+{"timestamp": "2025-05-09 22:22:44", "level": "ERROR", "name": "ConfigModule", "message": "Invalid type/value for 'SESSION_PROFIT_TARGET_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]."}
+{"timestamp": "2025-05-09 22:22:44", "level": "ERROR", "name": "ConfigModule", "message": "Invalid type/value for 'SESSION_MAX_LOSS_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]."}
+{"timestamp": "2025-05-09 22:22:44", "level": "INFO", "name": "ConfigModule", "message": "Configuration Runes v3.0.0 Summoned and Verified"}
+{"timestamp": "2025-05-09 22:22:44", "level": "INFO", "name": "Strategy.DualSupertrendMomentumStrategy", "message": "Strategy Form 'DualSupertrendMomentumStrategy' materializing..."}
+{"timestamp": "2025-05-09 22:22:44", "level": "SUCCESS", "name": "PyrmethusCore", "message": "Strategy 'DUAL_SUPERTREND_MOMENTUM' invoked."}
+{"timestamp": "2025-05-09 22:22:44", "level": "INFO", "name": "TradeMetrics", "message": "TradeMetrics Ledger opened."}
+{"timestamp": "2025-05-09 22:22:44", "level": "INFO", "name": "PyrmethusCore", "message": "Pyrmethus prepares to breach veil to exchange realm..."}
+{"timestamp": "2025-05-09 22:22:44", "level": "INFO", "name": "PyrmethusCore", "message": "Connecting to: bybit (CCXT: 4.4.72)"}
+{"timestamp": "2025-05-09 22:22:54", "level": "SUCCESS", "name": "PyrmethusCore", "message": "Market runes for TRUMP/USDT:USDT: Price Tick 0.001, Amount Step 0.1"}
+{"timestamp": "2025-05-09 22:22:54", "level": "WARNING", "name": "PyrmethusCore", "message": "Could not set leverage: bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746847375430}"}
+{"timestamp": "2025-05-09 22:22:54", "level": "INFO", "name": "PyrmethusCore", "message": "=== Pyrmethus Spell v3.0.0 Awakening on bybit ==="}
+{"timestamp": "2025-05-09 22:22:54", "level": "INFO", "name": "PyrmethusCore", "message": "No prior state scroll found."}
+{"timestamp": "2025-05-09 22:22:56", "level": "INFO", "name": "TradeMetrics", "message": "Initial Session Equity: 6.85 USDT"}
+{"timestamp": "2025-05-09 22:22:56", "level": "INFO", "name": "TradeMetrics", "message": "Daily Equity Ward reset. Dawn Equity: 6.85 USDT"}
+{"timestamp": "2025-05-09 22:22:56", "level": "INFO", "name": "TradeMetrics", "message": "Daily trade entry count reset to 0."}
+{"timestamp": "2025-05-09 22:22:57", "level": "ERROR", "name": "PyrmethusCore", "message": "WebSocket streaming error: bybit watchTicker() is not supported yet"}
+{"timestamp": "2025-05-09 22:24:22", "level": "INFO", "name": "PyrmethusCore", "message": "=== Pyrmethus Spell Concludes ==="}
+{"timestamp": "2025-05-09 22:24:22", "level": "WARNING", "name": "PyrmethusCore", "message": "Forceful unraveling of ALL positions for TRUMP/USDT:USDT due to: Spell Ending Sequence"}

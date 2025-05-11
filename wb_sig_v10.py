@@ -474,24 +474,28 @@ class TradingAnalyzer:
         try:
             typical_price = (self.df["high"] + self.df["low"] + self.df["close"]) / 3
             raw_money_flow = typical_price * self.df["volume"]
-            positive_flow = pd.Series([
-                mf if tp > tp_prev else 0
-                for tp, tp_prev, mf in zip(
-                    typical_price[1:],
-                    typical_price[:-1],
-                    raw_money_flow[1:],
-                    strict=False,
-                )
-            ])
-            negative_flow = pd.Series([
-                mf if tp < tp_prev else 0
-                for tp, tp_prev, mf in zip(
-                    typical_price[1:],
-                    typical_price[:-1],
-                    raw_money_flow[1:],
-                    strict=False,
-                )
-            ])
+            positive_flow = pd.Series(
+                [
+                    mf if tp > tp_prev else 0
+                    for tp, tp_prev, mf in zip(
+                        typical_price[1:],
+                        typical_price[:-1],
+                        raw_money_flow[1:],
+                        strict=False,
+                    )
+                ]
+            )
+            negative_flow = pd.Series(
+                [
+                    mf if tp < tp_prev else 0
+                    for tp, tp_prev, mf in zip(
+                        typical_price[1:],
+                        typical_price[:-1],
+                        raw_money_flow[1:],
+                        strict=False,
+                    )
+                ]
+            )
             positive_mf = positive_flow.rolling(window=window).sum()
             negative_mf = negative_flow.rolling(window=window).sum()
             money_ratio = positive_mf / negative_mf
@@ -621,11 +625,13 @@ class TradingAnalyzer:
             self.indicator_values["BB_Lower"] = (
                 float(bb_lower.iloc[-1]) if not bb_lower.empty else np.nan
             )
-            return pd.DataFrame({
-                "bb_upper": bb_upper,
-                "bb_mid": rolling_mean,
-                "bb_lower": bb_lower,
-            })
+            return pd.DataFrame(
+                {
+                    "bb_upper": bb_upper,
+                    "bb_mid": rolling_mean,
+                    "bb_lower": bb_lower,
+                }
+            )
         except KeyError as e:
             self.logger.error(f"{NEON_RED}Bollinger Bands error: {e}{RESET}")
             return pd.DataFrame()

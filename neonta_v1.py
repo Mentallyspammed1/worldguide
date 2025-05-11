@@ -293,17 +293,19 @@ class BybitCCXTClient:
         logger_instance: logging.Logger,
     ) -> None:
         self.logger = logger_instance
-        self.exchange = ccxt_async.bybit({
-            "apiKey": api_key,
-            "secret": api_secret,
-            "enableRateLimit": True,  # Enable ccxt's built-in rate limiter
-            "options": {
-                "defaultType": "linear",  # Or 'inverse' or 'spot'
-                "adjustForTimeDifference": True,  # Auto-sync time
-            },
-            "urls": {"api": base_url},
-            "timeout": CCXT_TIMEOUT_MS,
-        })
+        self.exchange = ccxt_async.bybit(
+            {
+                "apiKey": api_key,
+                "secret": api_secret,
+                "enableRateLimit": True,  # Enable ccxt's built-in rate limiter
+                "options": {
+                    "defaultType": "linear",  # Or 'inverse' or 'spot'
+                    "adjustForTimeDifference": True,  # Auto-sync time
+                },
+                "urls": {"api": base_url},
+                "timeout": CCXT_TIMEOUT_MS,
+            }
+        )
 
     async def close(self) -> None:
         """Close the underlying exchange connection."""
@@ -748,13 +750,15 @@ class TradingAnalyzer:
                 ]
                 bid_cluster_value = bids_near_level["value_usd"].sum()
                 if bid_cluster_value >= cluster_threshold:
-                    analysis["clusters"].append({
-                        "type": "Support Cluster (Bids)",
-                        "level_name": name,
-                        "level_price": f"{level_price:.4f}",
-                        "cluster_value_usd": f"{bid_cluster_value:,.0f}",
-                        "price_range": f"{min_price:.4f}-{max_price:.4f}",
-                    })
+                    analysis["clusters"].append(
+                        {
+                            "type": "Support Cluster (Bids)",
+                            "level_name": name,
+                            "level_price": f"{level_price:.4f}",
+                            "cluster_value_usd": f"{bid_cluster_value:,.0f}",
+                            "price_range": f"{min_price:.4f}-{max_price:.4f}",
+                        }
+                    )
 
                 # Check ask clusters above/at level (potential resistance)
                 asks_near_level = asks[
@@ -762,13 +766,15 @@ class TradingAnalyzer:
                 ]
                 ask_cluster_value = asks_near_level["value_usd"].sum()
                 if ask_cluster_value >= cluster_threshold:
-                    analysis["clusters"].append({
-                        "type": "Resistance Cluster (Asks)",
-                        "level_name": name,
-                        "level_price": f"{level_price:.4f}",
-                        "cluster_value_usd": f"{ask_cluster_value:,.0f}",
-                        "price_range": f"{min_price:.4f}-{max_price:.4f}",
-                    })
+                    analysis["clusters"].append(
+                        {
+                            "type": "Resistance Cluster (Asks)",
+                            "level_name": name,
+                            "level_price": f"{level_price:.4f}",
+                            "cluster_value_usd": f"{ask_cluster_value:,.0f}",
+                            "price_range": f"{min_price:.4f}-{max_price:.4f}",
+                        }
+                    )
 
         except (KeyError, ValueError, TypeError, InvalidOperation) as e:
             self.logger.error(f"Error analyzing orderbook: {e}")

@@ -1,0 +1,63 @@
+2025-05-10 03:49:14,898 - INFO - Attempting to load markets...
+2025-05-10 03:49:14,935 - ERROR - Unexpected error loading markets (Attempt 1/3): string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/fix_script.py", line 296, in initialize_markets
+    self.markets = await self._temp_exchange_for_init.load_markets()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 275, in load_markets_helper
+    markets = await self.fetch_markets(params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1724, in fetch_markets
+    await self.load_time_difference()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 1644, in load_time_difference
+    serverTime = await self.fetch_time(params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1572, in fetch_time
+    response = await self.publicGetV5MarketTime(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'
+2025-05-10 03:49:20,064 - ERROR - Unexpected error loading markets (Attempt 2/3): string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/fix_script.py", line 296, in initialize_markets
+    self.markets = await self._temp_exchange_for_init.load_markets()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+    raise e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 275, in load_markets_helper
+    markets = await self.fetch_markets(params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1724, in fetch_markets
+    await self.load_time_difference()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 1644, in load_time_difference
+    serverTime = await self.fetch_time(params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 1572, in fetch_time
+    response = await self.publicGetV5MarketTime(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 901, in request
+    return await self.fetch2(path, api, method, params, headers, body, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 876, in fetch2
+    request = self.sign(path, api, method, params, headers, body)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/bybit.py", line 8713, in sign
+    url = self.implode_hostname(self.urls['api'][api]) + '/' + path
+                                ~~~~~~~~~~~~~~~~^^^^^
+TypeError: string indices must be integers, not 'str'

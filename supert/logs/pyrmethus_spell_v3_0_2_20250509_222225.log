@@ -1,0 +1,9 @@
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "INFO", "name": "Pyrmethus.PreConfig", "message": "Secrets whispered from .env scroll: \u001b[93m\u001b[1m/data/data/com.termux/files/home/worldguide/supert/.env\u001b[0m"}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Summoning Configuration Runes v3.0.2"}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "ERROR", "name": "Pyrmethus.Config", "message": "Invalid type/value for 'SESSION_PROFIT_TARGET_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]. Using Default: '2.0'."}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "Used casted default for SESSION_PROFIT_TARGET_USDT: '2.0'"}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "ERROR", "name": "Pyrmethus.Config", "message": "Invalid type/value for 'SESSION_MAX_LOSS_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]. Using Default: '10.0'."}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "Used casted default for SESSION_MAX_LOSS_USDT: '10.0'"}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Configuration Runes v3.0.2 Summoned and Verified."}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Chosen path: DUAL_SUPERTREND_MOMENTUM"}
+{"timestamp": "2025-05-09T22:22:25.fZ", "level": "INFO", "name": "Pyrmethus.Strategy.DualSupertrendMomentumStrategy", "message": "Strategy Form 'DualSupertrendMomentumStrategy' materializing..."}

@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced pornLib Python Code with Video Playback</title>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"> <!-- Using Okaidia theme for better dark mode compatibility -->
+    <style>
+        /* General Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa; /* Light background */
+            color: #212529; /* Dark text */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: #ffffff; /* White container background */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        h1, h2, h3 {
+            color: #343a40; /* Slightly darker headings */
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+        h1 {
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 0.5em;
+        }
+        pre {
+            background: #282c34; /* Dark background for code */
+            color: #abb2bf; /* Light text for code */
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            position: relative;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace; /* Code font */
+            font-size: 0.9em;
+            margin-bottom: 1.5em;
+        }
+        code {
+            font-family: inherit; /* Inherit from pre */
+        }
+        .section {
+            margin-bottom: 25px;
+            border: 1px solid #dee2e6; /* Section border */
+            border-radius: 5px;
+            overflow: hidden; /* Contain children */
+        }
+        .section-header {
+            cursor: pointer;
+            background: #e9ecef; /* Light gray header */
+            padding: 12px 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .section-header:hover {
+            background: #ced4da; /* Slightly darker on hover */
+        }
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #495057;
+        }
+        .section-header span { /* Arrow icon */
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+        .section-content {
+            display: none;
+            padding: 20px;
+            border-top: none;
+        }
+        .section-content.active {
+            display: block;
+        }
+        .section-header.active span {
+             transform: rotate(180deg);
+        }
+        .copy-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            background: #007bff; /* Blue button */
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            opacity: 0.8;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+        .copy-button:hover {
+            background: #0056b3; /* Darker blue */
+            opacity: 1;
+        }
+        .search-bar {
+            margin-bottom: 15px;
+        }
+        .search-bar input {
+            padding: 8px 12px;
+            width: 100%;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .highlight {
+            background-color: rgba(255, 229, 100, 0.5); /* Softer yellow highlight */
+            border-radius: 2px;
+            padding: 0.1em 0.2em;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 8px 15px;
+            background: #6c757d; /* Gray button */
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: background-color 0.2s;
+        }
+        .theme-toggle:hover {
+            background: #5a6268; /* Darker gray */
+        }
+        .note {
+            background: #fff3cd; /* Yellow note background */
+            border-left: 5px solid #ffc107; /* Yellow border */
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #856404; /* Darker text for note */
+        }
+        .note strong {
+            color: #856404;
+        }
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        a {
+            color: #007bff; /* Blue links */
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        .message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            background: #28a745; /* Green success message */
+            color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1001;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .message.show {
+            display: block;
+            opacity: 1;
+        }
+        .error-message {
+            background: #dc3545; /* Red error message */
+        }
+        /* Video Playback Styles */
+        .video-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .video-form input[type="text"] {
+            flex-grow: 1; /* Take available space */
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            min-width: 250px; /* Minimum width */
+        }
+        .video-form select {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .video-form button {
+            padding: 10px 18px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .video-form button:hover {
+            background: #0056b3;
+        }
+        .video-player {
+            margin-top: 15px;
+            background-color: #000; /* Black background for video area */
+            border-radius: 5px;
+            overflow: hidden; /* Ensure video stays within bounds */
+            position: relative; /* For potential overlays or controls */
+        }
+        .video-player video {
+            width: 100%;
+            display: block; /* Remove extra space below video */
+            border-radius: 5px; /* Match container */
+            max-height: 70vh; /* Limit video height */
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        /* Dark Theme Styles */
+        body.dark-theme {
+            background-color: #1a1a1a; /* Very dark background */
+            color: #e0e0e0; /* Light gray text */
+        }
+        .dark-theme .container {
+            background: #2c2c2c; /* Dark container */
+            box-shadow: 0 4px 12px rgba(255,255,255,0.05);
+            border-color: #444;
+        }
+        .dark-theme h1, .dark-theme h2, .dark-theme h3 {
+            color: #ffffff; /* White headings */
+        }
+        .dark-theme h1 {
+            border-bottom-color: #555;
+        }
+        /* Code block uses Prism Okaidia theme, which is already dark */
+        .dark-theme .section {
+             border-color: #444;
+        }
+        .dark-theme .section-header {
+            background: #3a3a3a; /* Darker header */
+            border-bottom-color: #444;
+        }
+        .dark-theme .section-header:hover {
+            background: #4a4a4a;
+        }
+         .dark-theme .section-header h2 {
+            color: #e0e0e0;
+        }
+        .dark-theme .copy-button {
+            background: #0056b3;
+            color: #e0e0e0;
+        }
+        .dark-theme .copy-button:hover {
+            background: #004494;
+        }
+        .dark-theme .search-bar input {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        .dark-theme .highlight {
+            background-color: rgba(100, 100, 0, 0.6); /* Darker highlight */
+            color: #fff;
+        }
+        .dark-theme .theme-toggle {
+            background: #4a4a4a;
+        }
+        .dark-theme .theme-toggle:hover {
+            background: #5a5a5a;
+        }
+        .dark-theme .note {
+            background: #4a3c00; /* Dark yellow note */
+            border-left-color: #ffca28;
+            color: #ffecb3; /* Lighter text for note */
+        }
+        .dark-theme .note strong {
+             color: #ffecb3;
+        }
+        .dark-theme a {
+            color: #61daff; /* Lighter blue links */
+        }
+        .dark-theme a:hover {
+            color: #8aedff;
+        }
+        .dark-theme footer {
+            color: #aaa;
+        }
+        /* Dark theme for video form/player */
+        .dark-theme .video-form input[type="text"],
+        .dark-theme .video-form select {
+            background-color: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        .dark-theme .video-form button {
+            background: #0056b3;
+        }
+        .dark-theme .video-form button:hover {
+            background: #004494;
+        }
+         /* Message styling remains consistent, backgrounds are explicit */
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+    <div class="message" id="copyMessage">Code copied to clipboard!</div>
+    <div class="message error-message" id="errorMessage">Error message placeholder.</div>
+
+    <div class="container">
+        <h1>Enhanced pornLib Python Code with Video Playback</h1>
+        <p>
+            This page presents an enhanced Python script utilizing the <code>pornLib</code> library to interact with xvideos. The script incorporates error handling, logging, rate limiting, and a modular class structure. This interactive interface includes collapsible sections, a copy-to-clipboard button for the code, a searchable code block, a dark/light theme toggle, and a **simulated video playback feature**.
+        </p>
+
+        <!-- Python Code Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Python Code</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content active">
+                <p>
+                    The following Python code demonstrates using the <code>pornLib</code> library to list videos, fetch tags, search videos, and retrieve download links from xvideos. It features an <code>XvideosClient</code> class for structured interaction, along with best practices like logging and rate limiting.
+                </p>
+                <div class="search-bar">
+                    <input type="text" id="codeSearch" placeholder="Search within the Python code..." oninput="searchCode()">
+                </div>
+                <pre><code class="language-python">
+# (Python code remains exactly the same as provided in the user's prompt)
+import pornLib
+import logging
+import time
+from typing import List, Optional
+from dataclasses import dataclass
+from ratelimit import limits, sleep_and_retry
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
+# Rate limiting configuration (e.g., 10 calls per minute)
+CALLS = 10
+PERIOD = 60  # in seconds
+
+# Data classes (as provided)
+@dataclass
+class VideoDataClass:
+    title: str
+    img: str
+    link: str
+    quality: int
+    time: str
+    channel_name: str
+    channel_link: str
+
+@dataclass
+class VideoDownloadDataClass:
+    low: Optional[str]
+    high: Optional[str]
+    hls: Optional[str]
+
+@dataclass
+class Tags:
+    name: Optional[str]
+    id: Optional[str]
+
+class XvideosClient:
+    """A client for interacting with xvideos using pornLib with enhanced error handling and rate limiting."""
+
+    def __init__(self, engine: str = "xvideos", soup_sleep: float = 1.0):
+        """
+        Initialize the Xvideos client.
+
+        Args:
+            engine (str): The target site engine (default: 'xvideos').
+            soup_sleep (float): Delay for site loading (default: 1.0 second).
+        """
+        try:
+            self.client = pornLib.PornLib(engine=engine, soupSleep=soup_sleep)
+            logger.info(f"Initialized XvideosClient with engine={engine}, soup_sleep={soup_sleep}")
+        except Exception as e:
+            logger.error(f"Failed to initialize XvideosClient: {e}")
+            raise
+
+    @sleep_and_retry
+    @limits(calls=CALLS, period=PERIOD)
+    def list_videos(self, limit: int = 12) -> List[VideoDataClass]:
+        """
+        Fetch a list of videos from xvideos.
+
+        Args:
+            limit (int): Maximum number of videos to fetch (default: 12).
+
+        Returns:
+            List[VideoDataClass]: List of video data.
+
+        Raises:
+            ValueError: If limit is invalid.
+            Exception: For other errors during fetching.
+        """
+        if not isinstance(limit, int) or limit <= 0:
+            logger.error("Invalid limit: must be a positive integer")
+            raise ValueError("Limit must be a positive integer")
+
+        try:
+            videos = self.client.list(limit=limit)
+            logger.info(f"Fetched {len(videos)} videos")
+            return videos
+        except Exception as e:
+            logger.error(f"Error fetching video list: {e}")
+            raise
+
+    @sleep_and_retry
+    @limits(calls=CALLS, period=PERIOD)
+    def get_tags(self, keyword: Optional[str] = None) -> List[Tags]:
+        """
+        Fetch tags, optionally filtered by keyword.
+
+        Args:
+            keyword (Optional[str]): Keyword to filter tags (default: None).
+
+        Returns:
+            List[Tags]: List of tags.
+
+        Raises:
+            Exception: For errors during tag fetching.
+        """
+        try:
+            tags = self.client.tags(keyword=keyword) if keyword else self.client.tags()
+            logger.info(f"Fetched {len(tags)} tags with keyword={keyword}")
+            return tags
+        except Exception as e:
+            logger.error(f"Error fetching tags: {e}")
+            raise
+
+    @sleep_and_retry
+    @limits(calls=CALLS, period=PERIOD)
+    def search_videos(self,
+                      keyword: Optional[str] = None,
+                      channel: Optional[str] = None,
+                      tag: Optional[str] = None,
+                      tags: Optional[List[Tags]] = None,
+                      best: Optional[str] = None) -> List[VideoDataClass]:
+        """
+        Search videos by keyword, channel, tag, tags list, or best period.
+
+        Args:
+            keyword (Optional[str]): Search by keyword.
+            channel (Optional[str]): Search by channel name.
+            tag (Optional[str]): Search by tag ID.
+            tags (Optional[List[Tags]]): Search by list of tags.
+            best (Optional[str]): Search by best period (e.g., '2024-01').
+
+        Returns:
+            List[VideoDataClass]: List of matching videos.
+
+        Raises:
+            ValueError: If no search criteria provided or invalid.
+            Exception: For errors during search.
+        """
+        if not any([keyword, channel, tag, tags, best]):
+            logger.error("At least one search criterion must be provided")
+            raise ValueError("At least one search criterion must be provided")
+
+        try:
+            if keyword:
+                videos = self.client.search(keyword=keyword)
+                logger.info(f"Searched videos by keyword={keyword}, found {len(videos)}")
+            elif channel:
+                videos = self.client.search(channel=channel)
+                logger.info(f"Searched videos by channel={channel}, found {len(videos)}")
+            elif tag:
+                videos = self.client.search(tag=tag)
+                logger.info(f"Searched videos by tag={tag}, found {len(videos)}")
+            elif tags:
+                # Assuming pornLib handles list of Tags correctly here based on documentation/intent
+                videos = self.client.search(tag=tags)
+                logger.info(f"Searched videos by tags list, found {len(videos)}")
+            else:  # best
+                videos = self.client.search(best=best)
+                logger.info(f"Searched videos by best={best}, found {len(videos)}")
+            return videos
+        except Exception as e:
+            logger.error(f"Error searching videos: {e}")
+            raise
+
+    @sleep_and_retry
+    @limits(calls=CALLS, period=PERIOD)
+    def get_download_link(self, video_link: str) -> VideoDownloadDataClass:
+        """
+        Fetch download links for a video.
+
+        Args:
+            video_link (str): URL of the video page (e.g., from VideoDataClass.link).
+
+        Returns:
+            VideoDownloadDataClass: Download links (low, high, hls).
+
+        Raises:
+            ValueError: If video_link is invalid.
+            Exception: For errors during link fetching.
+        """
+        if not isinstance(video_link, str) or not video_link.strip() or not video_link.startswith('http'):
+            logger.error("Invalid video link: must be a valid URL string")
+            raise ValueError("Video link must be a valid URL string")
+
+        try:
+            download_link = self.client.getDownloadLink(video_link)
+            logger.info(f"Fetched download links for video: {video_link}")
+            return download_link
+        except Exception as e:
+            logger.error(f"Error fetching download link for {video_link}: {e}")
+            raise
+
+def main():
+    """Example usage of the XvideosClient."""
+    try:
+        # Initialize client
+        client = XvideosClient(soup_sleep=1.0)
+
+        # --- Example Operations ---
+
+        # 1. List videos
+        logger.info("--- Fetching Video List ---")
+        videos = client.list_videos(limit=5) # Reduced limit for brevity
+        if videos:
+            logger.info(f"Found {len(videos)} videos. Example:")
+            for i, video in enumerate(videos):
+                logger.info(f"  {i+1}. Title: {video.title[:50]}..., Link: {video.link}")
+        else:
+            logger.info("No videos found in list.")
+
+        # 2. Fetch tags (example: search for 'asian')
+        logger.info("--- Fetching Tags (keyword='asian') ---")
+        tags = client.get_tags(keyword="asian")
+        if tags:
+             logger.info(f"Found {len(tags)} tags related to 'asian'. Example:")
+             for i, tag in enumerate(tags[:5]): # Show first 5
+                 logger.info(f"  {i+1}. Name: {tag.name}, ID: {tag.id}")
+        else:
+             logger.info("No tags found for keyword 'asian'.")
+
+        # 3. Search videos (example: search for 'tutorial')
+        logger.info("--- Searching Videos (keyword='tutorial') ---")
+        search_results = client.search_videos(keyword="tutorial")
+        if search_results:
+            logger.info(f"Found {len(search_results)} videos for 'tutorial'. Example:")
+            for i, video in enumerate(search_results[:3]): # Show first 3
+                 logger.info(f"  {i+1}. Title: {video.title[:50]}..., Quality: {video.quality}p")
+
+            # 4. Get download link for the first search result
+            first_video_link = search_results[0].link
+            logger.info(f"--- Fetching Download Link for: {first_video_link} ---")
+            try:
+                download_links = client.get_download_link(first_video_link)
+                logger.info("Download Links:")
+                logger.info(f"  Low Quality: {download_links.low}")
+                logger.info(f"  High Quality: {download_links.high}")
+                logger.info(f"  HLS Stream: {download_links.hls}")
+                # Display these links on the webpage or use them for playback
+                print(f"\n>>> Use this link in the web interface player: {first_video_link}")
+                print(f"    (Or potentially the direct links above if they work)")
+
+            except Exception as e:
+                 logger.error(f"Could not get download link for {first_video_link}: {e}")
+
+        else:
+            logger.info("No search results found for 'tutorial'.")
+
+
+    except ValueError as ve:
+         logger.error(f"Configuration or Input Error: {ve}")
+    except Exception as e:
+        logger.critical(f"An unexpected error occurred in main execution: {e}")
+
+if __name__ == "__main__":
+    main()
+                </code></pre>
+                <button class="copy-button" onclick="copyCode()">Copy Code</button>
+            </div>
+        </div>
+
+        <!-- Video Playback Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Video Playback (Simulated)</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <p>
+                    Use the form below to **simulate** playing a video. Enter a video page URL (e.g., one obtained from the Python script's output like <code>https://www.xvideos.com/video123456/example_title</code>) and select a desired quality.
+                </p>
+                <div class="note">
+                    <p><strong>Important Disclaimer</strong>: This is a **simulation**. The <code>pornLib</code> library runs in Python (server-side) and cannot directly fetch download links within this browser page. The "Play Video" button assumes a hypothetical direct video URL exists based on your input for demonstration purposes. **Actual playback requires a backend server running the Python code to provide valid download links.**</p>
+                    <p>Furthermore, ensure your use complies with xvideos' <a href="https://info.xvideos.com/legal/tos/" target="_blank" rel="noopener noreferrer">Terms of Service</a> and all applicable local laws regarding adult content access and automated interaction with websites.</p>
+                </div>
+
+                <form class="video-form" onsubmit="playVideo(event)">
+                    <input type="text" id="videoUrl" placeholder="Enter XVideos Page URL (e.g., https://www.xvideos.com/...)" required>
+                    <select id="videoQuality">
+                        <option value="high">High Quality (MP4 - Mock)</option>
+                        <option value="low">Low Quality (MP4 - Mock)</option>
+                        <option value="hls">HLS Stream (M3U8 - Mock)</option>
+                    </select>
+                    <button type="submit">Play Video (Simulated)</button>
+                </form>
+
+                <div class="video-player" id="videoPlayerContainer" style="display: none;"> <!-- Initially hidden -->
+                    <video id="htmlVideoPlayer" controls preload="metadata">
+                        <source id="videoSource" src="" type="video/mp4"> <!-- Type will be updated by JS -->
+                        Your browser does not support the HTML5 video tag. Please update your browser.
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhancements Made Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Enhancements Made</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <p>The original Python code and this interactive page include several enhancements:</p>
+                <ol>
+                    <li><strong>Modular Class Structure</strong>: <code>XvideosClient</code> class in Python for better organization.</li>
+                    <li><strong>Robust Error Handling</strong>: Python code includes try-except blocks and input validation.</li>
+                    <li><strong>Detailed Logging</strong>: Python script uses logging for tracking operations and debugging.</li>
+                    <li><strong>Rate Limiting</strong>: Python client uses <code>ratelimit</code> to prevent excessive requests.</li>
+                    <li><strong>Type Hinting</strong>: Python code includes type hints for clarity and static analysis.</li>
+                    <li><strong>Flexible Search</strong>: Consolidated search functionality in the Python client.</li>
+                    <li><strong>Clear Documentation</strong>: Docstrings and comments explain Python code sections.</li>
+                    <li><strong>Interactive Web Interface</strong>: This HTML page provides:
+                        <ul>
+                            <li>Collapsible sections for better navigation.</li>
+                            <li>A copy-to-clipboard button for the Python code.</li>
+                            <li>A search bar to highlight text within the code block.</li>
+                            <li>A dark/light theme toggle for user preference.</li>
+                            <li>Syntax highlighting using Prism.js.</li>
+                            <li>**Simulated Video Playback**: An interactive form and HTML5 video player to demonstrate potential usage (requires backend for real functionality).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Ethical/Legal Emphasis</strong>: Prominent disclaimers regarding terms of service and legal compliance, especially for scraping and video playback.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Prerequisites Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Prerequisites (Python)</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <p>To run the Python script locally, ensure you have Python installed and install the necessary libraries:</p>
+                <pre><code class="language-bash">pip install pornLib ratelimit</code></pre>
+                <ul>
+                    <li><strong>pornLib</strong>: The core library for interacting with xvideos. (<a href="https://pypi.org/project/pornLib/" target="_blank" rel="noopener noreferrer">PyPI</a>, <a href="https://github.com/sofia-gros/porn-lib-python" target="_blank" rel="noopener noreferrer">GitHub</a>). Note: Library status and maintenance may vary.</li>
+                    <li><strong>ratelimit</strong>: Used for implementing rate limits on function calls. (<a href="https://pypi.org/project/ratelimit/" target="_blank" rel="noopener noreferrer">PyPI</a>)</li>
+                </ul>
+                 <p>This HTML page requires a modern web browser with JavaScript enabled. An internet connection is needed for loading Prism.js.</p>
+            </div>
+        </div>
+
+        <!-- Example Output Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Example Python Output</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <p>Running the Python script (<code>python your_script_name.py</code>) will produce logs in the console similar to this:</p>
+                <pre><code class="language-log">
+2024-07-27 15:30:00,100 - INFO - Initialized XvideosClient with engine=xvideos, soup_sleep=1.0
+2024-07-27 15:30:00,100 - INFO - --- Fetching Video List ---
+# ... (Network request delay) ...
+2024-07-27 15:30:02,500 - INFO - Fetched 5 videos
+2024-07-27 15:30:02,501 - INFO - Found 5 videos. Example:
+2024-07-27 15:30:02,501 - INFO -   1. Title: Hot Blonde Stepsister Gets Stuck And Needs Help..., Link: https://www.xvideos.com/video123456/hot_blonde_stepsister...
+# ... (more videos listed) ...
+2024-07-27 15:30:03,000 - INFO - --- Fetching Tags (keyword='asian') ---
+# ... (Network request delay) ...
+2024-07-27 15:30:04,800 - INFO - Fetched 15 tags with keyword=asian
+2024-07-27 15:30:04,801 - INFO - Found 15 tags related to 'asian'. Example:
+2024-07-27 15:30:04,801 - INFO -   1. Name: Asian, ID: 1
+# ... (more tags listed) ...
+2024-07-27 15:30:05,200 - INFO - --- Searching Videos (keyword='tutorial') ---
+# ... (Network request delay) ...
+2024-07-27 15:30:07,100 - INFO - Searched videos by keyword=tutorial, found 8
+2024-07-27 15:30:07,101 - INFO - Found 8 videos for 'tutorial'. Example:
+2024-07-27 15:30:07,101 - INFO -   1. Title: Anal Sex Tutorial For Beginners..., Quality: 720p
+# ... (more search results) ...
+2024-07-27 15:30:07,500 - INFO - --- Fetching Download Link for: https://www.xvideos.com/video654321/anal_sex_tutorial... ---
+# ... (Network request delay) ...
+2024-07-27 15:30:09,900 - INFO - Fetched download links for video: https://www.xvideos.com/video654321/anal_sex_tutorial...
+2024-07-27 15:30:09,901 - INFO - Download Links:
+2024-07-27 15:30:09,901 - INFO -   Low Quality: https://cdn-l.xvideos-cdn.com/..../video_lq.mp4?token=...
+2024-07-27 15:30:09,902 - INFO -   High Quality: https://cdn-h.xvideos-cdn.com/..../video_hq.mp4?token=...
+2024-07-27 15:30:09,902 - INFO -   HLS Stream: https://cdn-hls.xvideos-cdn.com/..../video.m3u8?token=...
+
+>>> Use this link in the web interface player: https://www.xvideos.com/video654321/anal_sex_tutorial...
+    (Or potentially the direct links above if they work)
+                </code></pre>
+                <p>You would typically copy the video page URL (like <code>https://www.xvideos.com/video654321/...</code>) from the output and paste it into the "Video Playback" form on this page.</p>
+            </div>
+        </div>
+
+        <!-- Ethical and Legal Considerations Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Ethical and Legal Considerations</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <div class="note" style="border-left-color: #dc3545; background-color: #f8d7da; color: #721c24;">
+                    <p>
+                        <strong>Critical Warning</strong>: Interacting with websites like xvideos using automated tools (scraping) or accessing content (video playback) carries significant ethical and legal risks. Users **must**:
+                    </p>
+                    <ul>
+                        <li><strong>Strictly Adhere to Terms of Service</strong>: Review and comply with the <a href="https://info.xvideos.com/legal/tos/" target="_blank" rel="noopener noreferrer">xvideos Terms of Service</a>. Automated access, scraping, and downloading/streaming content without explicit permission are often prohibited and can lead to IP bans or legal action.</li>
+                        <li><strong>Comply with Local Laws</strong>: Ensure your activities comply with all local, national, and international laws regarding adult content, copyright, privacy, and computer access.</li>
+                        <li><strong>Use Ethically</strong>: Avoid any use that could infringe on privacy, security, copyright, or contribute to illegal activities. Respect the platform's operational integrity (e.g., do not overload servers).</li>
+                        <li><strong>Understand Risks</strong>: Unauthorized use may result in legal penalties, account restrictions, and IP blocking. The developers of `pornLib` and this interface are not responsible for misuse.</li>
+                    </ul>
+                    <p><strong>Proceed with extreme caution and at your own risk. If unsure, consult legal advice before using such tools or accessing content in this manner.</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Notes Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2>Additional Notes</h2>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <ul>
+                    <li><strong>`soupSleep` Parameter</strong>: The `soupSleep` value in `XvideosClient` adds a delay, which can be crucial for stability when interacting with web pages. Adjust as needed based on network speed and site responsiveness.</li>
+                    <li><strong>Library Limitations</strong>: The `pornLib` library might have limitations or bugs. Refer to its <a href="https://github.com/sofia-gros/porn-lib-python" target="_blank" rel="noopener noreferrer">GitHub repository</a> for issues and updates. Its maintenance status may affect reliability.</li>
+                    <li><strong>License</strong>: The license for `pornLib` was not clearly specified at the time of writing. Verify licensing terms before incorporating it into projects, especially commercial ones.</li>
+                    <li><strong>Simulated Playback Nature</strong>: As emphasized, the video playback on this page is a **simulation**. A real implementation requires a backend server to securely run the Python `pornLib` code, fetch actual download links via an API, and handle potential complexities like expiring tokens or CORS (Cross-Origin Resource Sharing) issues.</li>
+                    <li><strong>CORS Issues</strong>: Even with valid download links from a backend, direct playback in the browser might be blocked by the video host's CORS policy. A backend proxy might be necessary in a real application.</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Interactive interface generated on July 27, 2024. Use responsibly and legally.</p>
+            <p>For more details on the Python library, visit <a href="https://pypi.org/project/pornLib/" target="_blank" rel="noopener noreferrer">pornLib on PyPI</a> or its <a href="https://github.com/sofia-gros/porn-lib-python" target="_blank" rel="noopener noreferrer">GitHub repository</a>.</p>
+        </footer>
+    </div>
+
+    <!-- Prism.js Core and Python Component -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-log.min.js"></script>
+
+    <script>
+        // --- Existing Interactive Features ---
+
+        // Toggle section visibility and arrow direction
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('span');
+            const isActive = content.classList.toggle('active');
+            header.classList.toggle('active', isActive); // Add active class to header too if needed for styling
+            arrow.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // Copy code to clipboard
+        function copyCode() {
+            const codeElement = document.querySelector('pre code.language-python');
+            if (codeElement) {
+                const code = codeElement.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    showMessage('copyMessage', 'Python code copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy code: ', err);
+                    showMessage('errorMessage', 'Failed to copy code. See console for details.');
+                });
+            } else {
+                 showMessage('errorMessage', 'Could not find code block to copy.');
+            }
+        }
+
+        // Debounce function for search highlighting
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Search and highlight code (debounced)
+        const searchCodeDebounced = debounce(() => {
+            const searchTerm = document.getElementById('codeSearch').value;
+            const codeElement = document.querySelector('pre code.language-python');
+            const codeContainer = codeElement.parentNode; // The <pre> tag
+
+            if (!codeElement || !codeContainer._originalContent) {
+                 // Store original highlighted HTML only once
+                 if (codeElement) codeContainer._originalContent = codeElement.innerHTML;
+                 else return;
+            }
+
+            // Restore original content before searching
+            codeElement.innerHTML = codeContainer._originalContent;
+
+            if (searchTerm.trim()) {
+                const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+                // We need to walk the text nodes to avoid breaking HTML structure
+                const walker = document.createTreeWalker(codeElement, NodeFilter.SHOW_TEXT);
+                let node;
+                const nodesToReplace = [];
+
+                while (node = walker.nextNode()) {
+                    if (node.nodeValue.match(regex)) {
+                        nodesToReplace.push(node);
+                    }
+                }
+
+                nodesToReplace.forEach(textNode => {
+                    const span = document.createElement('span');
+                    span.innerHTML = textNode.nodeValue.replace(regex, '<span class="highlight">$1</span>');
+                    textNode.parentNode.replaceChild(span, textNode);
+                     // Unwrap the outer span to prevent nested spans from breaking Prism structure
+                    unwrap(span);
+                });
+            }
+        }, 250); // 250ms delay
+
+        // Helper to escape regex special characters
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Helper function to remove a wrapper element but keep its children
+        function unwrap(wrapper) {
+            const parent = wrapper.parentNode;
+            while (wrapper.firstChild) {
+                parent.insertBefore(wrapper.firstChild, wrapper);
+            }
+            parent.removeChild(wrapper);
+        }
+
+        // Attach search handler
+        document.getElementById('codeSearch')?.addEventListener('input', searchCodeDebounced);
+
+
+        // Toggle dark/light theme
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+                // Update Prism theme if needed, although Okaidia works well for both
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            const newTheme = isDark ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme); // Apply immediately
+        }
+
+        // Show message (success or error)
+        function showMessage(id, text, isError = false) {
+            const message = document.getElementById(id);
+            if (!message) return;
+
+            message.textContent = text;
+            message.classList.toggle('error-message', isError); // Add/remove error class
+            message.classList.add('show'); // Make it visible with transition
+
+            // Clear previous timeouts if any
+            if (message._timeoutId) {
+                clearTimeout(message._timeoutId);
+            }
+
+            message._timeoutId = setTimeout(() => {
+                message.classList.remove('show');
+                // Optional: Reset error class after hiding
+                // setTimeout(() => message.classList.remove('error-message'), 300);
+            }, 3500); // Show for 3.5 seconds
+        }
+
+
+        // --- New Video Playback Logic ---
+
+        function playVideo(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const videoUrlInput = document.getElementById('videoUrl');
+            const qualitySelect = document.getElementById('videoQuality');
+            const videoSource = document.getElementById('videoSource');
+            const videoPlayer = document.getElementById('htmlVideoPlayer');
+            const playerContainer = document.getElementById('videoPlayerContainer');
+
+            const pageUrl = videoUrlInput.value.trim();
+            const quality = qualitySelect.value;
+
+            // Basic URL validation (should be more robust in production)
+            if (!pageUrl || !pageUrl.toLowerCase().startsWith('http')) {
+                showMessage('errorMessage', 'Please enter a valid video page URL (starting with http/https).', true);
+                return;
+            }
+             // Validate it looks like an xvideos URL (optional but good for context)
+             if (!pageUrl.includes('xvideos.com/video')) {
+                 showMessage('errorMessage', 'Please enter a valid XVideos video page URL.', true);
+                 // Allow proceeding anyway for flexibility, but show warning
+                 console.warn("URL doesn't look like a standard xvideos video page URL:", pageUrl);
+             }
+
+
+            // --- SIMULATION LOGIC ---
+            // In a real app, you'd make an API call here to your backend:
+            // fetch(`/api/get-video-link?url=${encodeURIComponent(pageUrl)}&quality=${quality}`)
+            //   .then(response => response.json())
+            //   .then(data => {
+            //     if (data.success && data.link) {
+            //       setupPlayer(data.link, quality);
+            //     } else {
+            //       showMessage('errorMessage', data.message || 'Could not get video link from backend.', true);
+            //     }
+            //   })
+            //   .catch(error => {
+            //      console.error("API call failed:", error);
+            //      showMessage('errorMessage', 'Failed to contact backend service.', true);
+            //   });
+
+            // For this simulation, we'll generate a plausible *mock* URL.
+            // THIS WILL LIKELY NOT WORK for actual playback.
+            let mockVideoSrc = null;
+            let videoType = 'video/mp4'; // Default assumption
+
+            // Example mock logic: Generate a fake CDN URL structure
+            const videoIdMatch = pageUrl.match(/video(\d+)/);
+            const mockBase = `https://mock-cdn.example.com/v/${videoIdMatch ? videoIdMatch[1] : 'unknown'}/`;
+
+            switch (quality) {
+                case 'high':
+                    mockVideoSrc = `${mockBase}video_high.mp4`;
+                    videoType = 'video/mp4';
+                    break;
+                case 'low':
+                    mockVideoSrc = `${mockBase}video_low.mp4`;
+                    videoType = 'video/mp4';
+                    break;
+                case 'hls':
+                    mockVideoSrc = `${mockBase}playlist.m3u8`;
+                    // Correct MIME type for HLS
+                    videoType = 'application/vnd.apple.mpegurl'; // Standard HLS MIME type
+                    break;
+            }
+
+            if (!mockVideoSrc) {
+                 showMessage('errorMessage', `Simulation logic failed for quality: ${quality}.`, true);
+                 return;
+            }
+            // --- END SIMULATION LOGIC ---
+
+            console.log(`Simulating playback for: ${pageUrl}`);
+            console.log(`Selected quality: ${quality}`);
+            console.log(`Using MOCK source URL: ${mockVideoSrc}`);
+            console.log(`Setting video type to: ${videoType}`);
+
+            showMessage('copyMessage', `Attempting to load MOCK ${quality} video...`, false); // Use success style for info
+
+            setupPlayer(mockVideoSrc, videoType, playerContainer, videoPlayer, videoSource);
+        }
+
+        function setupPlayer(src, type, container, player, sourceElement) {
+             // Make player visible
+            container.style.display = 'block';
+
+            // Update the source element
+            sourceElement.src = src;
+            sourceElement.type = type;
+
+            // Load the new source into the player
+            player.load();
+
+            // Attempt to play (might fail due to invalid mock URL or browser restrictions)
+            player.play().then(() => {
+                console.log("Mock playback started (or attempted).");
+                showMessage('copyMessage', `Playing mock video (${type}). Remember this is a simulation!`, false);
+            }).catch(error => {
+                console.error('Video playback failed:', error);
+                showMessage('errorMessage', `Error playing video: ${error.message}. (Mock URL likely invalid or blocked).`, true);
+                // Optionally hide the player again on error
+                // container.style.display = 'none';
+            });
+        }
+
+
+        // --- Initialization ---
+        window.onload = () => {
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
+            applyTheme(savedTheme);
+
+            // Apply Prism highlighting
+            Prism.highlightAll();
+
+            // Store original code content for search resetting
+             const codeElement = document.querySelector('pre code.language-python');
+             if (codeElement) {
+                 codeElement.parentNode._originalContent = codeElement.innerHTML;
+             }
+
+             // Add event listener for the form
+             const videoForm = document.querySelector('.video-form');
+             if (videoForm) {
+                 videoForm.addEventListener('submit', playVideo);
+             } else {
+                 console.error("Video form not found.");
+             }
+
+             // Initially hide error message div until needed
+             const errorDiv = document.getElementById('errorMessage');
+             if(errorDiv) errorDiv.style.display = 'none';
+             const copyDiv = document.getElementById('copyMessage');
+             if(copyDiv) copyDiv.style.display = 'none';
+
+             // Set initial state for arrows on collapsible sections
+             document.querySelectorAll('.section-header').forEach(header => {
+                 const content = header.nextElementSibling;
+                 const arrow = header.querySelector('span');
+                 const isActive = content.classList.contains('active');
+                 arrow.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+                 header.classList.toggle('active', isActive);
+             });
+        };
+
+    </script>
+</body>
+</html>

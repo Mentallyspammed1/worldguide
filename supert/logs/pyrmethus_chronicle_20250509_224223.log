@@ -1,0 +1,4 @@
+2025-05-09 22:42:23 [[34mINFO[0m] __main__.ConfigSummoner        [35m--- Summoning Configuration Runes from the Environment Scroll (.env) ---[0m
+2025-05-09 22:42:23 [[34mINFO[0m] __main__.ConfigSummoner        [36mChosen Path of Magic: DUAL_SUPERTREND[0m
+2025-05-09 22:42:23 [[34mINFO[0m] __main__.ConfigSummoner        [32m[1m--- All Configuration Runes Summoned and Verified. The Spell is Ready to be Woven. ---[0m
+2025-05-09 22:42:23 [[34mINFO[0m] PyrmethusCore                  Path of Magic 'DUAL_SUPERTREND' has been chosen and its avatar initialized.

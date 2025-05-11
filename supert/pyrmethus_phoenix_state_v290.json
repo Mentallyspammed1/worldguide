@@ -1,0 +1,27 @@
+{
+    "pyrmethus_version": "2.9.0",
+    "timestamp_utc_iso": "2025-05-10T03:47:37.287995+00:00",
+    "active_trade_parts": [],
+    "trade_metrics_trades": [],
+    "trade_metrics_consecutive_losses": 0,
+    "trade_metrics_daily_trade_entry_count": 0,
+    "trade_metrics_last_daily_trade_count_reset_day": 10,
+    "trade_metrics_daily_trades_rest_active_until": 0.0,
+    "config_symbol": "TRUMP/USDT:USDT",
+    "config_strategy": "DUAL_SUPERTREND_MOMENTUM",
+    "initial_equity_str": "6.85478287",
+    "daily_start_equity_str": "6.85478287",
+    "last_daily_reset_day": 10,
+    "whipsaw_cooldown_active_until": 0.0,
+    "trade_timestamps_for_whipsaw": [],
+    "persistent_signal_counter": {
+        "long": 0,
+        "short": 0
+    },
+    "last_signal_type": null,
+    "previous_day_high_str": null,
+    "previous_day_low_str": null,
+    "last_key_level_update_day": null,
+    "contradiction_cooldown_active_until": 0.0,
+    "consecutive_loss_cooldown_active_until": 0.0
+}

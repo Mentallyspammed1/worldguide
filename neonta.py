@@ -447,15 +447,17 @@ class TradingAnalyzer:
             s2 = pivot - (high - low)
             r3 = high + 2 * (pivot - low)
             s3 = low - 2 * (high - pivot)
-            self.levels.update({
-                "pivot": pivot,
-                "r1": r1,
-                "s1": s1,
-                "r2": r2,
-                "s2": s2,
-                "r3": r3,
-                "s3": s3,
-            })
+            self.levels.update(
+                {
+                    "pivot": pivot,
+                    "r1": r1,
+                    "s1": s1,
+                    "r2": r2,
+                    "s2": s2,
+                    "r3": r3,
+                    "s3": s3,
+                }
+            )
         except Exception as e:
             self.logger.exception(
                 f"{NEON_RED}Pivot point calculation error: {e}{RESET}"
@@ -582,11 +584,13 @@ class TradingAnalyzer:
             macd = ma_short - ma_long
             signal = macd.ewm(span=9, adjust=False).mean()
             histogram = macd - signal
-            return pd.DataFrame({
-                "macd": macd,
-                "signal": signal,
-                "histogram": histogram,
-            })
+            return pd.DataFrame(
+                {
+                    "macd": macd,
+                    "signal": signal,
+                    "histogram": histogram,
+                }
+            )
         except KeyError:
             self.logger.error(
                 f"{NEON_RED}Missing 'close' column for MACD calculation.{RESET}"

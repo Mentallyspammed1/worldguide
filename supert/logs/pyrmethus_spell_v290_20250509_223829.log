@@ -1,0 +1,19 @@
+2025-05-09 22:38:29 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Summoning Configuration Runes v2.9.0 ---[0m
+2025-05-09 22:38:29 [[31m[1mERROR   [0m] ConfigModule._get_env          [31m[1mInvalid type/value for 'SESSION_PROFIT_TARGET_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]. Using Default: 'None'.[0m
+2025-05-09 22:38:29 [[33m[1mWARNING [0m] ConfigModule._get_env          [33m[1mCast fail for optional 'SESSION_PROFIT_TARGET_USDT', default is None. Final: None[0m
+2025-05-09 22:38:29 [[31m[1mERROR   [0m] ConfigModule._get_env          [31m[1mInvalid type/value for 'SESSION_MAX_LOSS_USDT': '' (Source: Env Var). Expected Decimal. Err: [<class 'decimal.ConversionSyntax'>]. Using Default: 'None'.[0m
+2025-05-09 22:38:29 [[33m[1mWARNING [0m] ConfigModule._get_env          [33m[1mCast fail for optional 'SESSION_MAX_LOSS_USDT', default is None. Final: None[0m
+2025-05-09 22:38:29 [[36mINFO    [0m] ConfigModule                   [35m[1m--- Configuration Runes v2.9.0 Summoned and Verified ---[0m
+2025-05-09 22:38:29 [[36mINFO    [0m] ConfigModule                   [36m[2m# The chosen path: [35mDUAL_SUPERTREND_MOMENTUM[0m
+2025-05-09 22:38:29 [[36mINFO    [0m] Strategy.DualSupertrendMomentumStrategy [35mStrategy Form 'DualSupertrendMomentumStrategy' materializing...[0m
+2025-05-09 22:38:29 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mStrategy '[35mDUAL_SUPERTREND_MOMENTUM[32m[1m' invoked.[0m
+2025-05-09 22:38:29 [[36mINFO    [0m] TradeMetrics                   [36mTradeMetrics Ledger opened.[0m
+2025-05-09 22:38:29 [[36mINFO    [0m] PyrmethusCore                  [36m[2m# Pyrmethus prepares to breach veil to the exchange realm...[0m
+2025-05-09 22:38:29 [[36mINFO    [0m] PyrmethusCore                  Attempting to connect to: bybit (CCXT Version: 4.4.72)
+2025-05-09 22:38:39 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mMarket runes for TRUMP/USDT:USDT: Price Tick 0.001, Amount Step 0.1[0m
+2025-05-09 22:38:39 [[36mINFO    [0m] PyrmethusCore                  Setting leverage to 25x for TRUMP/USDT:USDT (Category: linear)...
+2025-05-09 22:38:40 [[33m[1mWARNING [0m] PyrmethusCore                  [33m[1mCould not set leverage for TRUMP/USDT:USDT (may be pre-set, or an issue with API/permissions): bybit {"retCode":110043,"retMsg":"leverage not modified","result":{},"retExtInfo":{},"time":1746848320784}[0m
+2025-05-09 22:38:43 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Leverage Warn' sent successfully.[0m
+2025-05-09 22:38:43 [[32m[1mSUCCESS [0m] PyrmethusCore                  [32m[1mSuccessfully connected to bybit for trading TRUMP/USDT:USDT.[0m
+2025-05-09 22:38:43 [[41m[37m[1mCRITICAL[0m] PyrmethusCore                  [41m[37m[1mA critical error occurred during Pyrmethus's awakening (exchange init or pre-requisites): name 'config' is not defined[0m
+2025-05-09 22:38:44 [[36mINFO    [0m] TermuxNotification             [32m[1mTermux notification 'Pyrmethus Init Error' sent successfully.[0m

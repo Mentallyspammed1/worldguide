@@ -149,7 +149,6 @@ def setup_logger(
     Returns:
         The configured logging.Logger instance.
     """
-    func_name = "setup_logger"  # For internal logging if needed
 
     # --- Environment Variable Overrides ---
     env_console_level_str = os.getenv("LOG_CONSOLE_LEVEL")

@@ -52,11 +52,11 @@ jobs:
 
       - name: Ensure Enhancement Script
         run: |
-          if [ ! -f process_files.py ]; then
-            echo "Error: process_files.py not found in repository root"
+          if [ ! -f xfix_files.py ]; then
+            echo "Error: xfix_files.py not found in repository root"
             exit 1
           fi
-          chmod +x process_files.py
+          chmod +x xfix_files.py
 
       - name: Create Output Directory
         run: |
@@ -68,7 +68,7 @@ jobs:
           MAX_API_CALLS: ${{ github.event.inputs.max-api-calls }}
           FILE_PATTERN: ${{ github.event.inputs.file-pattern }}
         run: |
-          ./process_files.py "$(pwd)" "$FILE_PATTERN" > enhancement_log.txt 2>&1 || {
+          ./xfix_files.py "$(pwd)" "$FILE_PATTERN" > enhancement_log.txt 2>&1 || {
             cat enhancement_log.txt
             exit 1
           }

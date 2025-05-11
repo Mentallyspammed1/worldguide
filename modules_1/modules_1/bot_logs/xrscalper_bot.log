@@ -1,0 +1,53 @@
+2025-05-07 12:06:14,290410 - INFO - [xrscalper_bot_init:118] - Logging configured successfully with level: INFO
+2025-05-07 12:06:14,291001 - INFO - [XRSCALPER_BOT:189] - Logging configured successfully.
+2025-05-07 12:06:14,291310 - INFO - [XRSCALPER_BOT:197] - --- Initializing XRSCALPER_BOT (Async Version) ---
+2025-05-07 12:06:14,292375 - CRITICAL - [XRSCALPER_BOT_runner:333] - Unhandled exception in asyncio.run(main()): module 'ccxt.async_support' has no attribute 'version'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/modules_1/modules_1/main.py", line 321, in <module>
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/modules_1/modules_1/main.py", line 198, in main
+    main_logger.info(f"CCXT Version: {ccxt_async.version}") # Use async version
+                                      ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'ccxt.async_support' has no attribute 'version'
+2025-05-07 12:07:33,343397 - INFO - [xrscalper_bot_init:118] - Logging configured successfully with level: INFO
+2025-05-07 12:07:33,344035 - INFO - [XRSCALPER_BOT:189] - Logging configured successfully.
+2025-05-07 12:07:33,344336 - INFO - [XRSCALPER_BOT:197] - --- Initializing XRSCALPER_BOT (Async Version) ---
+2025-05-07 12:07:33,344635 - INFO - [XRSCALPER_BOT:198] - CCXT Version: <module 'ccxt.async_support' from '/data/data/com.termux/files/usr/lib/python3.12/site-packages/ccxt/async_support/__init__.py'>
+2025-05-07 12:07:33,344946 - INFO - [utils:236] - Timezone successfully set to: America/Chicago
+2025-05-07 12:07:33,345230 - INFO - [XRSCALPER_BOT:204] - Using Timezone: America/Chicago
+2025-05-07 12:07:33,345518 - WARNING - [XRSCALPER_BOT:222] - API key or secret not found in configuration. Sensitive data masking may not be fully effective.
+2025-05-07 12:07:33,345958 - INFO - [XRSCALPER_BOT:232] - Startup Time: 2025-05-07 12:07:33 CDT
+2025-05-07 12:07:33,346956 - CRITICAL - [XRSCALPER_BOT_runner:333] - Unhandled exception in asyncio.run(main()): name 'ccxt' is not defined
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/modules_1/modules_1/main.py", line 242, in main
+    exchange = await exchange_api.initialize_exchange(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: initialize_exchange() got an unexpected keyword argument 'exchange_id'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/worldguide/modules_1/modules_1/main.py", line 321, in <module>
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/worldguide/modules_1/modules_1/main.py", line 254, in main
+    except ccxt.AuthenticationError as e:
+           ^^^^
+NameError: name 'ccxt' is not defined

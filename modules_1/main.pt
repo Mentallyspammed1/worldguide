@@ -1,0 +1,364 @@
+#file: main.py
+"""
+Main execution script for the XR Scalper Trading Bot.
+
+This script initializes the bot, loads configuration, sets up logging,
+connects to the exchange, and runs the main trading loop which iterates
+through specified symbols, analyzes market data, and potentially places trades
+based on the defined strategy.
+"""
+
+import logging
+import os
+import sys
+import time
+import signal # Import signal for graceful shutdown
+import traceback # Import traceback for detailed error reporting
+from datetime import datetime
+from typing import Dict, Any, List
+
+import ccxt
+import pandas as pd
+import pandas_ta as ta
+from dotenv import load_dotenv
+
+# --- Load Environment Variables Early ---
+# API keys and other sensitive information loaded globally here
+load_dotenv()
+API_KEY = os.getenv("BYBIT_API_KEY")
+API_SECRET = os.getenv("BYBIT_API_SECRET")
+
+# Validate essential environment variables before proceeding with imports or main logic
+if not API_KEY or not API_SECRET:
+    # Use basic print as logger is not yet configured
+    print("CRITICAL ERROR: BYBIT_API_KEY and BYBIT_API_SECRET must be set in the .env file or environment.", file=sys.stderr)
+    sys.exit(1) # Exit immediately if keys are missing
+
+
+# --- Import Custom Modules ---
+# Wrap imports in a try block to catch ImportErrors early.
+# Ensure these modules exist and are correctly implemented.
+try:
+    import config_loader
+    import exchange_api
+    import logger_setup # logger_setup should provide configure_logging(config)
+    import trading_strategy # Module for trading logic
+    import utils # utils should provide constants, timezone handling, sensitive data masking, etc.
+except ImportError as e:
+    # Use basic print/stderr because logging might not be fully set up yet.
+    print("CRITICAL ERROR: Failed to import one or more custom modules. Ensure all required modules "
+          "(config_loader.py, exchange_api.py, logger_setup.py, trading_strategy.py, utils.py) "
+          "are in the correct directory and do not have syntax errors.", file=sys.stderr)
+    print(f"ImportError details: {e}", file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+    sys.exit(1) # Exit immediately if core modules cannot be imported
+except Exception as e:
+     # Catch any other unexpected errors that might occur during the import phase
+     print(f"CRITICAL ERROR: An unexpected error occurred during module import: {e}", file=sys.stderr)
+     traceback.print_exc(file=sys.stderr)
+     sys.exit(1)
+
+
+# --- Constants ---
+DEFAULT_LOOP_INTERVAL_SECONDS = 60  # Default loop interval if not in config
+
+# --- Global State for Shutdown ---
+# Flag to signal when the bot should stop
+shutdown_requested = False
+
+def signal_handler(signum: int, frame: Any) -> None:
+    """
+    Signal handler to set the shutdown flag on receiving signals like SIGINT or SIGTERM.
+    """
+    global shutdown_requested
+    shutdown_requested = True
+    # Use basic print/stderr here because the logger might be in the process of shutting down
+    # or might not be available in this signal context.
+    print(f"\nSignal {signum} received ({signal.Signals(signum).name}). Requesting bot shutdown...", file=sys.stderr)
+    # The main loop will check the flag and exit gracefully.
+
+
+# --- Main Execution Function ---
+def main() -> None:
+    """
+    Main function to initialize the bot, set up resources, and run the analysis/trading loop.
+    Handles setup, configuration loading, exchange connection, and the main processing loop.
+    """
+    global shutdown_requested # Allow main to modify if needed, though primarily read here.
+
+    # Load configuration first, as logging setup depends on it
+    CONFIG: Dict[str, Any] = {}
+    try:
+        # Assuming utils.CONFIG_FILE is defined in utils.py and accessible
+        CONFIG = config_loader.load_config()
+        print(f"Configuration loaded successfully from '{getattr(utils, 'CONFIG_FILE', 'config.ini')}'.", file=sys.stderr)
+    except FileNotFoundError:
+        config_file_path = getattr(utils, 'CONFIG_FILE', 'config.ini')
+        print(f"CRITICAL: Configuration file '{config_file_path}' not found. Exiting.", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"CRITICAL: Error loading configuration: {e}. Exiting.", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+
+    # Configure logging using the loaded configuration
+    try:
+        logger_setup.configure_logging(CONFIG)
+    except Exception as e:
+         print(f"CRITICAL: Error configuring logging: {e}. Exiting.", file=sys.stderr)
+         traceback.print_exc(file=sys.stderr)
+         sys.exit(1)
+
+    # Now that logging is configured, get the main logger instance
+    init_logger = logging.getLogger("xrscalper_bot_init")
+    init_logger.info("--- Initializing XR Scalper Bot ---")
+
+    # Set global timezone (important for timestamp consistency)
+    configured_timezone_str = os.getenv("TIMEZONE", CONFIG.get("timezone", utils.DEFAULT_TIMEZONE))
+    try:
+        utils.set_timezone(configured_timezone_str)
+        init_logger.info(f"Using Timezone: {utils.get_timezone()}")
+    except Exception as e:
+         init_logger.warning(f"Failed to set timezone to '{configured_timezone_str}': {e}. Using system default or previous setting.", exc_info=True)
+
+    # Configure sensitive data masking for logging
+    try:
+        if hasattr(utils, 'SensitiveFormatter') and hasattr(utils.SensitiveFormatter, 'set_sensitive_data'):
+             # API_KEY and API_SECRET are global variables loaded at script start
+             utils.SensitiveFormatter.set_sensitive_data(API_KEY, API_SECRET)
+             init_logger.debug("Sensitive data masking configured for logging.")
+        else:
+             init_logger.warning("Sensitive data masking features (SensitiveFormatter or set_sensitive_data) not found in utils module.")
+    except Exception as e:
+        init_logger.warning(f"Error configuring sensitive data masking: {e}", exc_info=True)
+
+    # Log startup information
+    try:
+        current_time_str = datetime.now(utils.get_timezone()).strftime('%Y-%m-%d %H:%M:%S %Z')
+        init_logger.info(f"Startup Time: {current_time_str}")
+    except Exception as e:
+         init_logger.warning(f"Could not format startup time with timezone: {e}. Falling back.", exc_info=True)
+         init_logger.info(f"Startup Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    quote_currency = CONFIG.get('quote_currency')
+    if quote_currency:
+        init_logger.info(f"Quote Currency: {quote_currency}")
+    else:
+        init_logger.warning("Quote currency not specified in configuration.")
+
+    # Log dependency versions
+    try:
+        python_version = sys.version.split()[0]
+        ccxt_version = getattr(ccxt, '__version__', 'N/A')
+        pandas_version = getattr(pd, '__version__', 'N/A')
+        pandas_ta_version = getattr(ta, '__version__', None)
+        if pandas_ta_version is None and hasattr(ta, 'version') and callable(ta.version):
+             try:
+                pandas_ta_version = ta.version()
+             except Exception:
+                 pandas_ta_version = 'N/A (version() call failed)'
+        if pandas_ta_version is None:
+             pandas_ta_version = 'N/A'
+
+        init_logger.info(f"Versions: Python={python_version}, CCXT={ccxt_version}, "
+                         f"Pandas={pandas_version}, PandasTA={pandas_ta_version}")
+    except Exception as e:
+        init_logger.warning(f"Error getting dependency versions: {e}", exc_info=True)
+        init_logger.info(f"Versions: Python={sys.version.split()[0]}, CCXT=N/A, Pandas=N/A, PandasTA=N/A")
+
+
+    # --- Trading Mode and Settings Summary ---
+    enable_trading = CONFIG.get("enable_trading", False)
+    use_sandbox = CONFIG.get("use_sandbox", True) # Default to sandbox for safety
+    configured_symbols: List[str] = CONFIG.get('symbols_to_trade', [])
+
+    if enable_trading:
+        init_logger.warning("!!! LIVE TRADING IS ENABLED !!!")
+        if use_sandbox:
+            init_logger.warning("--> Operating in SANDBOX (Testnet) Environment.")
+        else:
+            init_logger.warning("!!! CAUTION: OPERATING WITH REAL MONEY !!!")
+
+        risk_per_trade_config = CONFIG.get('risk_per_trade', 0.0)
+        risk_pct = risk_per_trade_config * 100.0
+        leverage = CONFIG.get('leverage', 1)
+        tsl_enabled = CONFIG.get('enable_trailing_stop', False)
+        be_enabled = CONFIG.get('enable_break_even', False)
+        entry_order_type = CONFIG.get('entry_order_type', 'market').lower()
+        interval_config = CONFIG.get('interval', 'N/A') # Renamed to avoid conflict with 'interval' module
+
+        init_logger.info("--- Critical Trading Settings ---")
+        init_logger.info(f"  Symbols: {configured_symbols}")
+        init_logger.info(f"  Interval: {interval_config}")
+        init_logger.info(f"  Entry Order Type: {entry_order_type}")
+        init_logger.info(f"  Risk per Trade: {risk_pct:.2f}% ({risk_per_trade_config})")
+        init_logger.info(f"  Leverage: {leverage}x")
+        init_logger.info(f"  Trailing Stop Loss Enabled: {tsl_enabled}")
+        init_logger.info(f"  Break Even Enabled: {be_enabled}")
+        init_logger.info("---------------------------------")
+
+        # Sanity checks for critical settings
+        if not configured_symbols:
+             init_logger.error("Trading enabled, but 'symbols_to_trade' list is empty in config. Exiting.")
+             sys.exit(1)
+        if risk_per_trade_config <= 0.0:
+            init_logger.warning(f"Risk per trade is set to {risk_pct:.2f}%. Positions might not open unless strategy logic overrides risk calculation.")
+        if leverage <= 0:
+             init_logger.error(f"Leverage must be greater than 0. Found {leverage}. Exiting.")
+             sys.exit(1)
+        if entry_order_type not in ['market', 'limit']:
+             init_logger.error(f"Invalid 'entry_order_type' in config: '{entry_order_type}'. Must be 'market' or 'limit'. Exiting.")
+             sys.exit(1)
+        if not interval_config or interval_config not in getattr(utils, 'CCXT_INTERVAL_MAP', {}):
+             init_logger.error(f"Invalid or missing 'interval' in config: '{interval_config}'. Cannot map to CCXT timeframe. Exiting.")
+             sys.exit(1)
+
+        init_logger.info("Review settings. Starting trading loop in 5 seconds...")
+        time.sleep(5)
+    else:
+        init_logger.info("Live trading is DISABLED. Running in analysis-only mode.")
+        if not configured_symbols:
+             init_logger.error("'symbols_to_trade' list is empty in config. Nothing to process (even in analysis mode). Exiting.")
+             sys.exit(1)
+        init_logger.info(f"Analysis symbols: {configured_symbols}")
+
+
+    # --- Initialize Exchange Connection ---
+    init_logger.info("Initializing exchange connection...")
+    exchange = exchange_api.initialize_exchange(API_KEY, API_SECRET, CONFIG, init_logger)
+    if not exchange:
+        init_logger.error("Failed to initialize exchange connection. Bot cannot continue. Exiting.")
+        sys.exit(1)
+
+    try:
+        init_logger.info(f"Loading exchange markets for {exchange.id}...")
+        exchange.load_markets()
+        init_logger.info(f"Exchange '{exchange.id}' initialized and markets loaded successfully.")
+
+        if enable_trading:
+            mode_message = "SANDBOX mode." if use_sandbox else "LIVE (Real Money) mode."
+            init_logger.info(f"Connected to exchange in {mode_message}")
+        else:
+             init_logger.info(f"Connected to exchange (mode: {'sandbox' if use_sandbox else 'live'}) for analysis.")
+
+        available_symbols = exchange.symbols if hasattr(exchange, 'symbols') and exchange.symbols else []
+        if not available_symbols:
+             init_logger.error("Could not retrieve available symbols from exchange. Cannot validate configured symbols. Exiting.")
+             sys.exit(1)
+
+        invalid_symbols = [s for s in configured_symbols if s not in available_symbols]
+        if invalid_symbols:
+            init_logger.error(f"The following configured symbols are not available on the exchange: {invalid_symbols}. Please check configuration. Exiting.")
+            sys.exit(1)
+        init_logger.info("All configured symbols validated against exchange markets.")
+
+    except ccxt.NetworkError as ne:
+        init_logger.error(f"Network Error during exchange setup: {ne}. Check internet connection or exchange status. Exiting.", exc_info=True)
+        sys.exit(1)
+    except ccxt.ExchangeError as ee:
+        init_logger.error(f"Exchange Error during exchange setup: {ee}. Check API keys, permissions, or exchange configuration. Exiting.", exc_info=True)
+        sys.exit(1)
+    except Exception as e:
+        init_logger.error(f"An unexpected error occurred during exchange initialization: {e}. Exiting.", exc_info=True)
+        sys.exit(1)
+
+
+    # --- Register Signal Handlers ---
+    try:
+        signal.signal(signal.SIGINT, signal_handler)  # Handles Ctrl+C
+        signal.signal(signal.SIGTERM, signal_handler) # Handles kill signal
+        init_logger.info("Signal handlers registered for graceful shutdown.")
+    except Exception as e: # Catch broader errors like non-existence on some OS (e.g. Windows for SIGTERM)
+         init_logger.warning(f"Failed to register signal handlers: {e}. Graceful shutdown via signals might be affected.", exc_info=True)
+
+
+    # --- Prepare for Trading Loop ---
+    loop_interval_seconds = CONFIG.get("loop_interval_seconds", DEFAULT_LOOP_INTERVAL_SECONDS)
+    if not isinstance(loop_interval_seconds, (int, float)) or loop_interval_seconds <= 0:
+         init_logger.error(f"Invalid 'loop_interval_seconds' in config ({loop_interval_seconds}). Must be a positive number. Exiting.")
+         sys.exit(1)
+
+    init_logger.info(f"Starting main analysis/trading loop for symbols: {configured_symbols}")
+    init_logger.info(f"Loop Interval: {loop_interval_seconds} seconds")
+
+    # --- Main Trading Loop ---
+    try:
+        while not shutdown_requested:
+            loop_start_time = time.monotonic()
+            current_cycle_time_obj = datetime.now(utils.get_timezone()) # Renamed to avoid conflict
+            init_logger.info(f"--- Starting Loop Cycle @ {current_cycle_time_obj.strftime('%Y-%m-%d %H:%M:%S %Z')} ---")
+
+            for symbol in configured_symbols:
+                if shutdown_requested:
+                    init_logger.info("Shutdown requested, stopping symbol processing for this cycle.")
+                    break
+
+                safe_symbol_name = symbol.replace('/', '_').replace(':', '-')
+                symbol_logger = logging.getLogger(f"xrscalper_bot_symbol_{safe_symbol_name}") # Added prefix for clarity
+
+                try:
+                    symbol_logger.info(f"Processing symbol: {symbol}")
+                    trading_strategy.analyze_and_trade_symbol(
+                        exchange,
+                        symbol,
+                        CONFIG,
+                        symbol_logger,
+                        enable_trading
+                    )
+                except ccxt.NetworkError as ne:
+                     symbol_logger.error(f"Network Error for {symbol}: {ne}. Check connection. Will retry next cycle.", exc_info=True)
+                except ccxt.ExchangeError as ee:
+                     symbol_logger.error(f"Exchange Error for {symbol}: {ee}. May need intervention. Will retry next cycle.", exc_info=True)
+                except Exception as symbol_err:
+                    symbol_logger.error(
+                        f"!!! Unhandled Exception during analysis for {symbol}: {symbol_err} !!!",
+                        exc_info=True
+                    )
+                    symbol_logger.warning("Attempting to continue to the next symbol or cycle despite the error.")
+                finally:
+                    # Optional: Add a small delay between processing symbols if needed
+                    # time.sleep(CONFIG.get("delay_between_symbols_seconds", 0.5))
+                    symbol_logger.info(f"Finished processing symbol: {symbol}\n") # Newline kept for intended console log formatting
+
+            if shutdown_requested:
+                init_logger.info("Shutdown requested, exiting main loop after current cycle.")
+                break
+
+            loop_end_time = time.monotonic()
+            elapsed_time = loop_end_time - loop_start_time
+            sleep_duration = max(0.1, loop_interval_seconds - elapsed_time)
+
+            init_logger.debug(f"Loop cycle finished. Elapsed: {elapsed_time:.2f}s. Sleeping for: {sleep_duration:.2f}s.")
+            if sleep_duration > 0.1:
+                # Check shutdown_requested more frequently during long sleeps if necessary,
+                # but for typical intervals, checking at loop start is often sufficient.
+                # A more responsive sleep:
+                # for _ in range(int(sleep_duration / 0.5)): # Check every 0.5s
+                #    if shutdown_requested: break
+                #    time.sleep(0.5)
+                # if not shutdown_requested: time.sleep(sleep_duration % 0.5)
+                time.sleep(sleep_duration) # Simple sleep
+            elif elapsed_time > loop_interval_seconds:
+                init_logger.warning(f"Loop cycle duration ({elapsed_time:.2f}s) exceeded target interval ({loop_interval_seconds}s). Running next cycle with minimal delay.")
+
+    except Exception as loop_err:
+        init_logger.critical(
+            f"!!! CRITICAL UNHANDLED EXCEPTION IN MAIN LOOP: {loop_err} !!!",
+            exc_info=True
+        )
+        init_logger.critical("The bot encountered a critical error and will exit.")
+    finally:
+        init_logger.info("--- XR Scalper Bot Shutting Down ---")
+        # Perform any final cleanup tasks (e.g., strategy-specific cleanup like cancelling open orders)
+        # Example: if hasattr(trading_strategy, 'cleanup_on_shutdown'):
+        #              trading_strategy.cleanup_on_shutdown(exchange, CONFIG, init_logger)
+
+        init_logger.info("Flushing log buffers and closing handlers...")
+        logging.shutdown()
+        print("Bot shutdown complete.", file=sys.stderr)
+
+
+# --- Script Entry Point ---
+if __name__ == "__main__":
+    # Global API_KEY and API_SECRET are already loaded and validated at the top.
+    main()

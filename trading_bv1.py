@@ -190,12 +190,14 @@ class EnhancedTradingBot:
     def _initialize_exchange(self):
         logger.info(f"Initializing exchange: {self.exchange_id.upper()}...")
         try:
-            exchange = getattr(ccxt, self.exchange_id)({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "options": {"defaultType": "future"},
-                "recvWindow": 60000,
-            })
+            exchange = getattr(ccxt, self.exchange_id)(
+                {
+                    "apiKey": self.api_key,
+                    "secret": self.api_secret,
+                    "options": {"defaultType": "future"},
+                    "recvWindow": 60000,
+                }
+            )
             exchange.load_markets()
             logger.info(
                 f"{Fore.GREEN}Connected to {self.exchange_id.upper()} successfully.{Style.RESET_ALL}"

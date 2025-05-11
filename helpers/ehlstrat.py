@@ -183,12 +183,14 @@ class Config:
         self.strategy = {"name": "ehlers_volumetric"}
 
         # --- Validate SMS Config if enabled ---
-        if self.ENABLE_SMS_ALERTS and not all([
-            self.SMS_RECIPIENT_NUMBER,
-            self.TWILIO_ACCOUNT_SID,
-            self.TWILIO_AUTH_TOKEN,
-            self.TWILIO_PHONE_NUMBER,
-        ]):
+        if self.ENABLE_SMS_ALERTS and not all(
+            [
+                self.SMS_RECIPIENT_NUMBER,
+                self.TWILIO_ACCOUNT_SID,
+                self.TWILIO_AUTH_TOKEN,
+                self.TWILIO_PHONE_NUMBER,
+            ]
+        ):
             print(
                 f"{Fore.YELLOW}Warning: SMS alerts enabled, but one or more Twilio config variables (SID, TOKEN, NUMBER) or recipient number are missing.{Style.RESET_ALL}"
             )
@@ -237,11 +239,13 @@ def calculate_indicators(df: pd.DataFrame, config: Config) -> pd.DataFrame | Non
         # Validate required columns exist
         required_cols = []
         if config.EVT_ENABLED:
-            required_cols.extend([
-                f"evt_trend_{config.EVT_LENGTH}",
-                f"evt_buy_{config.EVT_LENGTH}",
-                f"evt_sell_{config.EVT_LENGTH}",
-            ])
+            required_cols.extend(
+                [
+                    f"evt_trend_{config.EVT_LENGTH}",
+                    f"evt_buy_{config.EVT_LENGTH}",
+                    f"evt_sell_{config.EVT_LENGTH}",
+                ]
+            )
         if config.analysis_flags.get("use_atr", False):
             required_cols.append(f"ATRr_{config.STOP_LOSS_ATR_PERIOD}")
 

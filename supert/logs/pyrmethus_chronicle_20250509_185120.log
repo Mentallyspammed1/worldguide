@@ -1,0 +1,88 @@
+2025-05-09 18:51:20 [[34mINFO[0m] __main__.ConfigSummoner        [35m--- Summoning Configuration Runes from the Environment Scroll (.env) ---[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [31mRune 'BYBIT_API_KEY': Sourced from environment: '***SECRET***'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [31mRune 'BYBIT_API_KEY': Using value '***SECRET***' (Type: str, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [31mRune 'BYBIT_API_SECRET': Sourced from environment: '***SECRET***'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [31mRune 'BYBIT_API_SECRET': Using value '***SECRET***' (Type: str, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'SYMBOL': Sourced from environment: 'TRUMP/USDT:USDT'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'SYMBOL': Using value 'TRUMP/USDT:USDT' (Type: str, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'INTERVAL': Sourced from environment: '1m'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'INTERVAL': Using value '1m' (Type: str, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'LEVERAGE': Sourced from environment: '20'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'LEVERAGE': Using value '20' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'SLEEP_SECONDS': Sourced from environment: '10'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'SLEEP_SECONDS': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STRATEGY_NAME': Sourced from environment: 'EHLERS_FISHER'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STRATEGY_NAME': Using value 'EHLERS_FISHER' (Type: str, Source: Env Var)[0m
+2025-05-09 18:51:20 [[34mINFO[0m] __main__.ConfigSummoner        [36mChosen Path of Magic: EHLERS_FISHER[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'RISK_PER_TRADE_PERCENTAGE': Sourced from environment: '0.01'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'RISK_PER_TRADE_PERCENTAGE': Using value '0.01' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'ATR_STOP_LOSS_MULTIPLIER': Sourced from environment: '1.5'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'ATR_STOP_LOSS_MULTIPLIER': Using value '1.5' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'MAX_ORDER_USDT_AMOUNT': Sourced from environment: '50.0'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'MAX_ORDER_USDT_AMOUNT': Using value '50.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'REQUIRED_MARGIN_BUFFER': Sourced from environment: '1.10'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'REQUIRED_MARGIN_BUFFER': Using value '1.10' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'MAX_ACCOUNT_MARGIN_RATIO': Undefined in environment. Conjuring default: '0.8'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'MAX_ACCOUNT_MARGIN_RATIO': Using value '0.8' (Type: Decimal, Source: Default)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'TRAILING_STOP_PERCENTAGE': Sourced from environment: '0.007'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'TRAILING_STOP_PERCENTAGE': Using value '0.007' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT': Sourced from environment: '0.002'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT': Using value '0.002' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'ST_ATR_LENGTH': Sourced from environment: '3'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'ST_ATR_LENGTH': Using value '3' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'ST_MULTIPLIER': Sourced from environment: '0.8'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'ST_MULTIPLIER': Using value '0.8' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'CONFIRM_ST_ATR_LENGTH': Sourced from environment: '5'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'CONFIRM_ST_ATR_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'CONFIRM_ST_MULTIPLIER': Sourced from environment: '0.4'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'CONFIRM_ST_MULTIPLIER': Using value '0.4' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_RSI_LENGTH': Sourced from environment: '7'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_RSI_LENGTH': Using value '7' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_STOCH_LENGTH': Sourced from environment: '5'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_STOCH_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_K_PERIOD': Sourced from environment: '3'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_K_PERIOD': Using value '3' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_D_PERIOD': Sourced from environment: '2'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_D_PERIOD': Using value '2' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_OVERBOUGHT': Sourced from environment: '75.0'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_OVERBOUGHT': Using value '75.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_OVERSOLD': Sourced from environment: '25.0'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'STOCHRSI_OVERSOLD': Using value '25.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'MOMENTUM_LENGTH': Sourced from environment: '5'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'MOMENTUM_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_FISHER_LENGTH': Sourced from environment: '5'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_FISHER_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_FISHER_SIGNAL_LENGTH': Sourced from environment: '1'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_FISHER_SIGNAL_LENGTH': Using value '1' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_FAST_PERIOD': Sourced from environment: '5'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_FAST_PERIOD': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_SLOW_PERIOD': Sourced from environment: '15'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_SLOW_PERIOD': Using value '15' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_SSF_POLES': Sourced from environment: '2'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [36mRune 'EHLERS_SSF_POLES': Using value '2' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'VOLUME_MA_PERIOD': Sourced from environment: '10'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'VOLUME_MA_PERIOD': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'VOLUME_SPIKE_THRESHOLD': Sourced from environment: '1.8'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'VOLUME_SPIKE_THRESHOLD': Using value '1.8' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'REQUIRE_VOLUME_SPIKE_FOR_ENTRY': Sourced from environment: 'true'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'REQUIRE_VOLUME_SPIKE_FOR_ENTRY': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_BOOK_DEPTH': Sourced from environment: '20'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_BOOK_DEPTH': Using value '20' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_BOOK_RATIO_THRESHOLD_LONG': Sourced from environment: '1.3'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_BOOK_RATIO_THRESHOLD_LONG': Using value '1.3' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_BOOK_RATIO_THRESHOLD_SHORT': Sourced from environment: '0.7'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_BOOK_RATIO_THRESHOLD_SHORT': Using value '0.7' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'FETCH_ORDER_BOOK_PER_CYCLE': Sourced from environment: 'true'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'FETCH_ORDER_BOOK_PER_CYCLE': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'ATR_CALCULATION_PERIOD': Sourced from environment: '7'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [32mRune 'ATR_CALCULATION_PERIOD': Using value '7' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [35mRune 'ENABLE_SMS_ALERTS': Sourced from environment: 'true'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [35mRune 'ENABLE_SMS_ALERTS': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [35mRune 'SMS_RECIPIENT_NUMBER': Sourced from environment: '16364866381'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [35mRune 'SMS_RECIPIENT_NUMBER': Using value '16364866381' (Type: str, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [35mRune 'SMS_TIMEOUT_SECONDS': Sourced from environment: '30'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [35mRune 'SMS_TIMEOUT_SECONDS': Using value '30' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_FILL_TIMEOUT_SECONDS': Sourced from environment: '10'[0m
+2025-05-09 18:51:20 [[36m[2mDEBUG[0m] __main__.ConfigSummoner        [33mRune 'ORDER_FILL_TIMEOUT_SECONDS': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-09 18:51:20 [[34mINFO[0m] __main__.ConfigSummoner        [32m[1m--- All Configuration Runes Summoned and Verified. The Spell is Ready to be Woven. ---[0m
+2025-05-09 18:51:20 [[34mINFO[0m] PyrmethusCore                  Path of Magic 'EHLERS_FISHER' has been chosen and its avatar initialized.

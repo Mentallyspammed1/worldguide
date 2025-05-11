@@ -1,0 +1,13 @@
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "INFO", "name": "Pyrmethus.PreConfig", "message": "Secrets whispered from .env scroll: \u001b[93m\u001b[1m/data/data/com.termux/files/home/worldguide/supert/.env\u001b[0m"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Summoning Configuration Runes v3.1.0"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "\u001b[41m\u001b[37m\u001b[1m\u001b[1mLIVE TRADING MODE ENABLED. Ensure API keys are for MAINNET and you understand ALL RISKS.\u001b[0m"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "\u001b[41m\u001b[37m\u001b[1m\u001b[1mPyrmethus bears NO RESPONSIBILITY for financial outcomes.\u001b[0m"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "ERROR", "name": "Pyrmethus.Config", "message": "Invalid type/value for 'SESSION_PROFIT_TARGET_USDT': '' (Source: Env Var). Error: [<class 'decimal.ConversionSyntax'>]. Attempting to use Default: '5.0'."}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "Used casted default for SESSION_PROFIT_TARGET_USDT: '5.0'"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "ERROR", "name": "Pyrmethus.Config", "message": "Invalid type/value for 'SESSION_MAX_LOSS_USDT': '' (Source: Env Var). Error: [<class 'decimal.ConversionSyntax'>]. Attempting to use Default: '15.0'."}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "WARNING", "name": "Pyrmethus.Config", "message": "Used casted default for SESSION_MAX_LOSS_USDT: '15.0'"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Configuration Runes v3.1.0 Summoned and Verified."}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "INFO", "name": "Pyrmethus.Config", "message": "Chosen path: DUAL_SUPERTREND_MOMENTUM"}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "INFO", "name": "Pyrmethus.TradeMetrics", "message": "TradeMetrics Ledger (Oracle's Edition) opened."}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "INFO", "name": "Pyrmethus.Strategy.DualSupertrendMomentumStrategy", "message": "Strategy Form 'DualSupertrendMomentumStrategy' materializing..."}
+{"timestamp": "2025-05-10T00:39:51.fZ", "level": "SUCCESS", "name": "Pyrmethus.Core", "message": "Strategy 'DUAL_SUPERTREND_MOMENTUM' invoked and ready."}

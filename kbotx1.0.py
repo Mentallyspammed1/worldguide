@@ -1,3 +1,303 @@
+
+
+### Analysis of Pyrmethus Trading Bot Log Output (Cycles 1–4, New Session)
+
+The log output from the Pyrmethus trading bot (version 4.5.7, Neon Nexus Edition) covers a new session with four trading cycles for scalping on the `FARTCOIN/USDT:USDT` pair, initialized on 2025-05-10 19:06:20. The configuration aligns with prior optimizations for high-frequency trading on a 1-minute timeframe, but a critical error in Cycle 4 caused a trade to fail due to a missing CCXT method for setting position protections, leading to an emergency position closure. Below, I’ll review the configuration, analyze the cycles, address the protection error and insufficient funds issue, and propose refinements to enhance scalping performance.
+
+---
+
+### Configuration Review
+
+The configuration is loaded from the `.env` file, with a notable correction from previous logs: the `RISK_PERCENTAGE` is now correctly set to `0.5%` (0.005), addressing the oversized position issue seen in earlier logs (e.g., Cycles 18–19 requiring ~408 USDT). Here’s a summary:
+
+#### Trading Setup
+- **Symbol**: `FARTCOIN/USDT:USDT` (linear perpetual futures)  
+- **Market Type**: `linear` (USDT-margined)  
+- **Interval**: `1m`  
+- **Risk Percentage**: `0.5%` (corrected from 50%)  
+  - Risk per trade is now `0.0182 USDT` (0.005 * 3.65 USDT), suitable for low equity.
+
+#### Stop-Loss and Take-Profit
+- **Stop-Loss ATR Multiplier**: `1.0` (SL at 1x ATR)  
+- **Take-Profit ATR Multiplier**: `2.0` (TP at 2x ATR, 2:1 reward-to-risk)  
+- **Trailing Stop Activation ATR Multiplier**: `0.5` (activates after 0.5x ATR move)  
+- **Trailing Stop Percentage**: `0.3%` (trails by 0.3%)  
+- **SL/TSL Trigger**: `MarkPrice` (reduces volatility-induced stop-outs)  
+- **Position Index**: `0` (One-Way mode)  
+
+#### Indicators
+- **EMA Periods**: Fast: `5`, Slow: `13`, Trend: `8`  
+- **Stochastic**: Period: `5`, Smooth K/D: `3`, Oversold: `20`, Overbought: `80`  
+- **ATR Period**: `5`  
+- **ADX Period**: `7`, Min ADX Level: `15`  
+- **Trend Filter Buffer Percent**: `0.2`  
+- **ATR Move Filter Multiplier**: `0.3`  
+
+#### Bot Operation
+- **OHLCV Limit**: `100`  
+- **Loop Sleep Seconds**: `10`  
+- **Order Check Delay**: `2 seconds`  
+- **Order Fill Timeout**: `10 seconds`  
+- **Max Fetch Retries**: `3`, Retry Delay: `3 seconds`  
+- **Trade Only With Trend**: `true`  
+- **Journaling**: Enabled (`pyrmethus_trading_journal.csv`)  
+
+#### Market Info
+- **Formatting**: Amount = 0 DP, Price = 4 DP  
+- **Step Sizes**: Tick Size = `0.0001`, Amount Step = `1`  
+- **Limits**: Min Amount = `1`  
+- **Contract Size**: `1`  
+
+---
+
+### Warnings
+
+The warnings are unchanged:
+1. **TREND_EMA_PERIOD (8) <= SLOW_EMA_PERIOD (13)**: Intentional for scalping; no action needed.
+2. **TSL_ACTIVATION_ATR_MULTIPLIER (0.5) < SL_ATR_MULTIPLIER (1)**: Suitable for scalping but monitor for premature trailing stop triggers.
+
+---
+
+### Trading Cycle Analysis
+
+The log covers four cycles in a new session, with one trade attempt in Cycle 4 that failed due to a CCXT error in setting protections, resulting in an emergency close. Here’s a detailed analysis:
+
+#### Cycle 1 (2025-05-11 00:06:00 UTC)
+- **Price**: `1.4286`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4291/1.4265/1.4279` (Bullish: Fast > Slow)  
+  - Stochastic: `63.0/71.7/74.6` (Bearish K/D crossover, neutral)  
+  - ATR: `0.00976`, ADX: `33.4` (+DI: `18.8`, -DI: `8.6`)  
+- **Position**: `FLAT`  
+- **Status**: No signal (EMA Bullish, but Stochastic K not oversold/overbought, bearish K/D crossover).  
+- **Analysis**: Strong trend (ADX = `33.4`, +DI > -DI), but no trade due to Stochastic conditions.
+
+#### Cycle 2 (2025-05-11 00:06:00 UTC)
+- **Price**: `1.4328`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4305/1.4271/1.4288` (Bullish)  
+  - Stochastic: `70.7/74.3/74.6` (Bearish K/D crossover, near overbought)  
+  - ATR: `0.00976`, ADX: `33.4` (+DI: `18.8`, -DI: `8.6`)  
+- **Position**: `FLAT`  
+- **Status**: No signal (EMA Bullish, Stochastic near overbought, bearish K/D crossover).  
+- **Analysis**: Similar to Cycle 1, no trade due to Stochastic constraints.
+
+#### Cycle 3 (2025-05-11 00:06:00 UTC)
+- **Price**: `1.4300`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4296/1.4267/1.4282` (Bullish)  
+  - Stochastic: `65.5/72.6/74.6` (Bearish K/D crossover, neutral)  
+  - ATR: `0.00976`, ADX: `33.4` (+DI: `18.8`, -DI: `8.6`)  
+- **Position**: `FLAT`  
+- **Status**: No signal (EMA Bullish, Stochastic neutral, bearish K/D crossover).  
+- **Analysis**: Consistent with prior cycles, no trade due to Stochastic conditions.
+
+#### Cycle 4 (2025-05-11 00:07:00 UTC)
+- **Price**: `1.4342`, **Equity**: `3.65 USDT`  
+- **Indicators**: 
+  - EMA: `1.4314/1.4279/1.4298` (Bullish)  
+  - Stochastic: `84.1/75.6/68.1` (Bullish K/D crossover, overbought)  
+  - ATR: `0.00855`, ADX: `34.0` (+DI: `18.4`, -DI: `8.4`)  
+- **Position**: `FLAT`  
+- **Status**: `FAIL:ENTRY_LONG` (protection setting error, emergency close)  
+- **Details**: 
+  - **Signal**: Long triggered by:
+    - EMA Bullish (`1.4314 > 1.4279`)  
+    - Stochastic K = `84.1` (overbought, but K/D crossover bullish)  
+    - Trend OK (price `1.4342` within `1.4298 ± 0.0029`)  
+    - ATR move OK (`0.0028 > 0.0026`)  
+    - ADX OK (`34.0 > 15`, +DI > -DI)  
+  - **Trade Parameters**: 
+    - Qty: `2`  
+    - Entry Price: `1.4342` (filled at `1.435`)  
+    - SL: `1.4257` (1x ATR = `0.00855` below entry)  
+    - TP: `1.4513` (2x ATR above entry)  
+    - TSL Distance: `0.0043` (0.5x ATR)  
+    - Risk Amount: `0.0182 USDT` (0.5% of 3.65 USDT)  
+  - **Execution**: 
+    - Market buy order (`Qty=2`) submitted successfully (ID: `ef16cc19-1886-4d1d-a4db-61aee1fbb488`).  
+    - Position confirmed: `LONG, Qty=2, AvgEntryPx=1.435`.  
+  - **Error**: Attempt to set SL (`1.4257`) and TP (`1.4513`) failed with:
+    ```
+    Fatal Error: CCXT private method 'privatePostPositionTradingStop' for setting position protection not found. Check CCXT version or Bybit V5 implementation.
+    ```
+    - This caused an emergency close:
+      - Attempted to clear SL/TP/TSL (failed with same CCXT error).  
+      - Market sell order (`Qty=2`, ID: `80bebdeb-63f3-4754-92f9-425c01c26e15`) submitted.  
+      - Position closed successfully (verified FLAT).  
+  - **Outcome**: Equity unchanged (`3.65 USDT`), suggesting the trade closed at breakeven or with negligible loss (likely due to tight spread and no significant price movement during the brief position duration).  
+- **Analysis**: The position sizing issue was resolved (`Qty=2` fits equity), but the CCXT error prevented setting protections, triggering an emergency exit. The bot handled the failure gracefully by closing the position.
+
+---
+
+### Key Observations and Issues
+
+1. **CCXT Protection Error**:
+   - The fatal error in Cycle 4 (`privatePostPositionTradingStop` not found) indicates a compatibility issue between the bot’s CCXT implementation and Bybit’s V5 API. This caused the failure to set SL/TP, leading to an emergency close. This explains the “Protection: None” issue in earlier logs (e.g., Cycles 4, 16).
+
+2. **Low Trade Frequency**:
+   - Only one trade attempt in four cycles, with Cycles 1–3 blocked by Stochastic conditions (K not oversold/overbought, bearish K/D crossover despite bullish EMA). The `TRADE_ONLY_WITH_TREND=true` and strict Stochastic thresholds (`20/80`) limit opportunities.
+
+3. **Low Equity**:
+   - Equity (`3.65 USDT`) is still very low, though the corrected `RISK_PERCENTAGE=0.5%` ensures viable position sizes (`Qty=2`). However, this limits scalability and profitability for scalping.
+
+4. **Market Volatility**:
+   - `FARTCOIN/USDT:USDT` shows moderate volatility (ATR ~0.008–0.009), but the market appears to lack consistent directional movement, reducing trade signals. A more volatile pair like `BTC/USDT:USDT` would likely yield more opportunities.
+
+5. **Stochastic Constraints**:
+   - The Stochastic K values (`63.0–84.1`) rarely hit oversold (`<20`) or overbought (`>80`), and bearish K/D crossovers blocked trades despite bullish EMA and strong ADX (`33.4–34.0`).
+
+---
+
+### Recommendations for Scalping Optimization
+
+To address the CCXT protection error, increase trade frequency, and enhance performance, consider the following:
+
+1. **Fix CCXT Protection Error**:
+   - **Update CCXT**: Ensure the latest CCXT version is installed, as Bybit’s V5 API requires specific methods for setting trading stops. Run:
+     ```bash
+     pip install ccxt --upgrade
+     ```
+   - **Verify Bybit V5 API Implementation**: Check if the bot uses the correct CCXT method for Bybit V5. The `privatePostPositionTradingStop` method may be outdated or misconfigured. Use the Bybit V5 equivalent (e.g., `set_trading_stop` or `private_post_v5_position_trading_stop`). Example:
+     ```python
+     try:
+         response = self.ccxt_exchange.private_post_v5_position_trading_stop({
+             'category': 'linear',
+             'symbol': symbol,
+             'stopLoss': str(stop_loss),
+             'takeProfit': str(take_profit),
+             'trailingStop': str(trailing_stop),
+             'slTriggerBy': 'MarkPrice',
+             'tpTriggerBy': 'MarkPrice'
+         })
+         logger.debug(f"Trading stop response: {response}")
+         if response.get('retCode', -1) != 0:
+             raise Exception(f"Failed to set protections: {response['retMsg']}")
+     except Exception as e:
+         logger.error(f"Failed to set protections: {e}")
+         self.ccxt_exchange.cancel_order(order_id, symbol)
+         return False
+     ```
+   - **Fallback Mechanism**: If protections fail, close the position immediately (as done in Cycle 4) and log the error for debugging.
+   - **Test API Call**: Isolate the trading stop API call in a test script to confirm functionality before running the bot.
+
+2. **Loosen Entry Conditions**:
+   - **Stochastic Thresholds**: Adjust to `25` and `75` to capture more signals:
+     ```env
+     STOCH_OVERSOLD_THRESHOLD=25
+     STOCH_OVERBOUGHT_THRESHOLD=75
+     ```
+   - **Trend Filter**: Increase to `0.5` for more flexibility:
+     ```env
+     TREND_FILTER_BUFFER_PERCENT=0.5
+     ```
+   - **ADX**: Lower to `10` to allow weaker trends:
+     ```env
+     MIN_ADX_LEVEL=10
+     ```
+   - **Trend Restriction**: Temporarily disable `TRADE_ONLY_WITH_TREND` to test increased trade frequency:
+     ```env
+     TRADE_ONLY_WITH_TREND=false
+     ```
+
+3. **Increase Account Equity**:
+   - Fund the testnet account with at least `100 USDT` to support larger position sizes and improve scalability for scalping.
+
+4. **Switch to a Volatile Pair**:
+   - Use `BTC/USDT:USDT` for higher volatility and liquidity:
+     ```env
+     SYMBOL=BTC/USDT:USDT
+     ```
+
+5. **Adjust Trailing Stop**:
+   - Increase `TSL_ACTIVATION_ATR_MULTIPLIER` to `0.75` to reduce premature exits:
+     ```env
+     TSL_ACTIVATION_ATR_MULTIPLIER=0.75
+     ```
+
+---
+
+### Updated `.env` File
+
+Here’s the refined `.env` file incorporating the recommendations:
+
+```env
+# Bybit API Credentials
+BYBIT_API_KEY=your_api_key_here
+BYBIT_API_SECRET=your_api_secret_here
+USE_BYBIT_TESTNET=true  # Use testnet for initial testing
+
+# Trading Symbol and Market Type
+SYMBOL=BTC/USDT:USDT  # Switched to BTC for volatility
+MARKET_TYPE=linear
+
+# Trading Parameters
+RISK_PERCENTAGE=0.005  # 0.5% of equity
+SL_ATR_MULTIPLIER=1.0
+TP_ATR_MULTIPLIER=2.0
+TSL_ACTIVATION_ATR_MULTIPLIER=0.75
+TRAILING_STOP_PERCENT=0.3
+SL_TRIGGER_BY=MarkPrice
+TSL_TRIGGER_BY=MarkPrice
+POSITION_IDX=0
+
+# Strategy Parameters
+INTERVAL=1m
+FAST_EMA_PERIOD=5
+SLOW_EMA_PERIOD=13
+TREND_EMA_PERIOD=8
+STOCH_PERIOD=5
+STOCH_SMOOTH_K=3
+STOCH_SMOOTH_D=3
+ATR_PERIOD=5
+ADX_PERIOD=7
+STOCH_OVERSOLD_THRESHOLD=25
+STOCH_OVERBOUGHT_THRESHOLD=75
+TREND_FILTER_BUFFER_PERCENT=0.5
+ATR_MOVE_FILTER_MULTIPLIER=0.3
+MIN_ADX_LEVEL=10
+TRADE_ONLY_WITH_TREND=false  # Disabled for testing
+
+# Bot Operation
+OHLCV_LIMIT=100
+LOOP_SLEEP_SECONDS=10
+ORDER_CHECK_DELAY_SECONDS=2
+ORDER_FILL_TIMEOUT_SECONDS=10
+MAX_FETCH_RETRIES=3
+RETRY_DELAY_SECONDS=3
+JOURNAL_FILE_PATH=pyrmethus_trading_journal.csv
+ENABLE_JOURNALING=true
+```
+
+---
+
+### Deployment and Testing Plan
+
+1. **Testnet Testing**:
+   - Run with `USE_BYBIT_TESTNET=true` and fund the testnet account with `100 USDT`.
+   - Verify position sizing (`RISK_PERCENTAGE=0.005`) and trade execution.
+
+2. **Debug CCXT Protection Issue**:
+   - Upgrade CCXT and test the `private_post_v5_position_trading_stop` API call in isolation.
+   - Add detailed logging for protection API responses. Ensure trades are canceled if protections fail.
+   - Test a single trade to confirm SL/TP/TSL settings.
+
+3. **Performance Monitoring**:
+   - Monitor trade frequency with `TRADE_ONLY_WITH_TREND=false`. If frequency improves, consider permanent ADX relaxation.
+   - Check `pyrmethus_trading_journal.csv` for trade outcomes and adjust `TSL_ACTIVATION_ATR_MULTIPLIER` if stops are too tight.
+
+4. **Security**:
+   - Update API credentials and secure the `.env` file.
+
+5. **Backtesting**:
+   - Use [backtrader](https://www.backtrader.com/) with `BTC/USDT:USDT` historical data to optimize parameters.
+
+---
+
+### Conclusion
+
+The Pyrmethus bot is well-configured for scalping, with the `RISK_PERCENTAGE` correction resolving the insufficient funds issue. However, the CCXT error in Cycle 4 (`privatePostPositionTradingStop` not found) is a critical blocker, causing failed protections and emergency closures. The updated `.env` file switches to `BTC/USDT:USDT`, loosens entry conditions, and adjusts the trailing stop. Prioritize updating CCXT, fixing the protection API call, and testing with adequate testnet funds (`100 USDT`). Monitor the journal file to refine parameters and ensure robust trade execution.
+
 # -*- coding: utf-8 -*-
 # pylint: disable=logging-fstring-interpolation, too-many-instance-attributes, too-many-arguments, too-many-locals, too-many-public-methods, invalid-name, unused-argument, too-many-lines, wrong-import-order, wrong-import-position, unnecessary-pass, unnecessary-lambda-assignment, bad-option-value, line-too-long
 # fmt: off
@@ -6,7 +306,7 @@
 #  | |_) | | | | __/ _ \ | | |/ _` |\ V / _` | __/ _ \/ __| __| '_ \| '_ \ / _ \ '_ ` _ \| '_ \
 #  |  __/| |_| | ||  __/ | | | (_| |\ V / (_| | ||  __/\__ \ |_| |_) | | | |  __/ | | | | | |_) |
 #  |_|    \__,_|\__\___|_|_|_|\__,_| \_/ \__,_|\__\___||___/\__| .__/|_| |_| \___|_| |_| |_| .__/
-#                                                              |_|                       |_| 
+#                                                              |_|                       |_|
 # fmt: on
 """
 Pyrmethus - Termux Trading Spell (v4.6.0 - Quantum Nexus Edition)
@@ -41,28 +341,24 @@ from decimal import (
     ROUND_DOWN,
     ROUND_HALF_EVEN,
     Decimal,
-    DivisionByZero,
     InvalidOperation,
     getcontext,
 )
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, Callable, Type
+from typing import Any, Dict, List, Optional, Tuple, Union
 import types
 
 # Third-Party Imports
 import ccxt.async_support as ccxt_async
 import numpy as np
 import pandas as pd
-import requests
 from colorama import Fore, Style, init as colorama_init
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 from sklearn.linear_model import LogisticRegression
-from telegram.ext import Application
 from telegram import Bot
 
 # Constants
@@ -103,15 +399,17 @@ getcontext().prec = DECIMAL_PRECISION
 TRADE_LEVEL_NUM = 25
 if not hasattr(logging.Logger, "trade"):
     logging.addLevelName(TRADE_LEVEL_NUM, "TRADE")
+
     def trade_log(self, message, *args, **kws):
         if self.isEnabledFor(TRADE_LEVEL_NUM):
             self._log(TRADE_LEVEL_NUM, message, args, **kws)
+
     logging.Logger.trade = trade_log
 
 logger = logging.getLogger(__name__)
 log_formatter = logging.Formatter(
     "%(asctime)s [%(levelname)-8s] (%(filename)s:%(lineno)d) %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 log_level_str = os.getenv("LOG_LEVEL", "INFO").upper()
 log_level = getattr(logging, log_level_str, logging.INFO)
@@ -121,6 +419,7 @@ if not logger.hasHandlers():
     stream_handler.setFormatter(log_formatter)
     logger.addHandler(stream_handler)
 logger.propagate = False
+
 
 # Utility Functions
 def safe_decimal(value: Any, default: Decimal = Decimal("NaN")) -> Decimal:
@@ -134,6 +433,7 @@ def safe_decimal(value: Any, default: Decimal = Decimal("NaN")) -> Decimal:
     except (InvalidOperation, ValueError, TypeError):
         return default
 
+
 def termux_notify(title: str, content: str) -> None:
     if "com.termux" in os.environ.get("PREFIX", ""):
         try:
@@ -146,9 +446,12 @@ def termux_notify(title: str, content: str) -> None:
             )
             if result.returncode != 0:
                 error_output = result.stderr or result.stdout
-                logger.warning(f"Termux toast failed (code {result.returncode}): {error_output.strip()}")
+                logger.warning(
+                    f"Termux toast failed (code {result.returncode}): {error_output.strip()}"
+                )
         except (FileNotFoundError, subprocess.TimeoutExpired, Exception) as e:
             logger.warning(f"Termux notify failed: {e}")
+
 
 async def telegram_notify(bot: Bot, chat_id: str, message: str) -> None:
     try:
@@ -158,6 +461,7 @@ async def telegram_notify(bot: Bot, chat_id: str, message: str) -> None:
         logger.debug(f"Telegram notification sent: {message[:50]}...")
     except Exception as e:
         logger.error(f"Telegram notify failed: {e}")
+
 
 # Configuration Class
 class TradingConfig:
@@ -177,85 +481,237 @@ class TradingConfig:
 
         # Symbols (support multiple)
         self.symbols: List[str] = self._get_env(
-            "SYMBOLS", "FARTCOINUSDT", Style.DIM, cast_type=lambda x: [s.strip() for s in x.split(",")]
+            "SYMBOLS",
+            "FARTCOINUSDT",
+            Style.DIM,
+            cast_type=lambda x: [s.strip() for s in x.split(",")],
         )
         self.market_type: str = self._get_env(
-            "MARKET_TYPE", "linear", Style.DIM, allowed_values=["linear", "inverse", "swap"]
+            "MARKET_TYPE",
+            "linear",
+            Style.DIM,
+            allowed_values=["linear", "inverse", "swap"],
         ).lower()
         self.bybit_v5_category: str = self._determine_v5_category()
         self.interval: str = self._get_env("INTERVAL", "1m", Style.DIM)
-        self.confirmation_interval: str = self._get_env("CONFIRMATION_INTERVAL", "15m", Style.DIM)
+        self.confirmation_interval: str = self._get_env(
+            "CONFIRMATION_INTERVAL", "15m", Style.DIM
+        )
         self.risk_percentage: Decimal = self._get_env(
-            "RISK_PERCENTAGE", DEFAULT_RISK_PERCENT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.00001"), max_val=Decimal("0.5")
+            "RISK_PERCENTAGE",
+            DEFAULT_RISK_PERCENT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.00001"),
+            max_val=Decimal("0.5"),
         )
         self.sl_atr_multiplier: Decimal = self._get_env(
-            "SL_ATR_MULTIPLIER", DEFAULT_SL_MULT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")
+            "SL_ATR_MULTIPLIER",
+            DEFAULT_SL_MULT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.1"),
+            max_val=Decimal("20.0"),
         )
         self.tp_atr_multiplier: Decimal = self._get_env(
-            "TP_ATR_MULTIPLIER", DEFAULT_TP_MULT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.0"), max_val=Decimal("50.0")
+            "TP_ATR_MULTIPLIER",
+            DEFAULT_TP_MULT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.0"),
+            max_val=Decimal("50.0"),
         )
         self.tsl_activation_atr_multiplier: Decimal = self._get_env(
-            "TSL_ACTIVATION_ATR_MULTIPLIER", DEFAULT_TSL_ACT_MULT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.1"), max_val=Decimal("20.0")
+            "TSL_ACTIVATION_ATR_MULTIPLIER",
+            DEFAULT_TSL_ACT_MULT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.1"),
+            max_val=Decimal("20.0"),
         )
         self.trailing_stop_percent: Decimal = self._get_env(
-            "TRAILING_STOP_PERCENT", DEFAULT_TSL_PERCENT, Fore.YELLOW, cast_type=Decimal, min_val=Decimal("0.01"), max_val=Decimal("10.0")
+            "TRAILING_STOP_PERCENT",
+            DEFAULT_TSL_PERCENT,
+            Fore.YELLOW,
+            cast_type=Decimal,
+            min_val=Decimal("0.01"),
+            max_val=Decimal("10.0"),
         )
         self.sl_trigger_by: str = self._get_env(
-            "SL_TRIGGER_BY", "LastPrice", Style.DIM, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"]
+            "SL_TRIGGER_BY",
+            "LastPrice",
+            Style.DIM,
+            allowed_values=["LastPrice", "MarkPrice", "IndexPrice"],
         )
         self.tsl_trigger_by: str = self._get_env(
-            "TSL_TRIGGER_BY", "LastPrice", Style.DIM, allowed_values=["LastPrice", "MarkPrice", "IndexPrice"]
+            "TSL_TRIGGER_BY",
+            "LastPrice",
+            Style.DIM,
+            allowed_values=["LastPrice", "MarkPrice", "IndexPrice"],
         )
         self.position_idx: int = self._get_env(
-            "POSITION_IDX", V5_HEDGE_MODE_POSITION_IDX, Style.DIM, cast_type=int, allowed_values=[0, 1, 2]
+            "POSITION_IDX",
+            V5_HEDGE_MODE_POSITION_IDX,
+            Style.DIM,
+            cast_type=int,
+            allowed_values=[0, 1, 2],
         )
-        self.trend_ema_period: int = self._get_env("TREND_EMA_PERIOD", 12, Style.DIM, cast_type=int, min_val=5, max_val=500)
-        self.fast_ema_period: int = self._get_env("FAST_EMA_PERIOD", 9, Style.DIM, cast_type=int, min_val=1, max_val=200)
-        self.slow_ema_period: int = self._get_env("SLOW_EMA_PERIOD", 21, Style.DIM, cast_type=int, min_val=2, max_val=500)
-        self.stoch_period: int = self._get_env("STOCH_PERIOD", 7, Style.DIM, cast_type=int, min_val=1, max_val=100)
-        self.stoch_smooth_k: int = self._get_env("STOCH_SMOOTH_K", 3, Style.DIM, cast_type=int, min_val=1, max_val=10)
-        self.stoch_smooth_d: int = self._get_env("STOCH_SMOOTH_D", 3, Style.DIM, cast_type=int, min_val=1, max_val=10)
-        self.atr_period: int = self._get_env("ATR_PERIOD", 5, Style.DIM, cast_type=int, min_val=1, max_val=100)
-        self.adx_period: int = self._get_env("ADX_PERIOD", 14, Style.DIM, cast_type=int, min_val=2, max_val=100)
-        self.bb_period: int = self._get_env("BB_PERIOD", 20, Style.DIM, cast_type=int, min_val=5, max_val=100)
-        self.bb_std_dev: Decimal = self._get_env("BB_STD_DEV", Decimal("2.0"), Style.DIM, cast_type=Decimal, min_val=Decimal("1.0"), max_val=Decimal("5.0"))
-        self.min_bb_width: Decimal = self._get_env("MIN_BB_WIDTH", DEFAULT_BB_WIDTH_MIN, Style.DIM, cast_type=Decimal, min_val=Decimal("0.0"), max_val=Decimal("0.1"))
+        self.trend_ema_period: int = self._get_env(
+            "TREND_EMA_PERIOD", 12, Style.DIM, cast_type=int, min_val=5, max_val=500
+        )
+        self.fast_ema_period: int = self._get_env(
+            "FAST_EMA_PERIOD", 9, Style.DIM, cast_type=int, min_val=1, max_val=200
+        )
+        self.slow_ema_period: int = self._get_env(
+            "SLOW_EMA_PERIOD", 21, Style.DIM, cast_type=int, min_val=2, max_val=500
+        )
+        self.stoch_period: int = self._get_env(
+            "STOCH_PERIOD", 7, Style.DIM, cast_type=int, min_val=1, max_val=100
+        )
+        self.stoch_smooth_k: int = self._get_env(
+            "STOCH_SMOOTH_K", 3, Style.DIM, cast_type=int, min_val=1, max_val=10
+        )
+        self.stoch_smooth_d: int = self._get_env(
+            "STOCH_SMOOTH_D", 3, Style.DIM, cast_type=int, min_val=1, max_val=10
+        )
+        self.atr_period: int = self._get_env(
+            "ATR_PERIOD", 5, Style.DIM, cast_type=int, min_val=1, max_val=100
+        )
+        self.adx_period: int = self._get_env(
+            "ADX_PERIOD", 14, Style.DIM, cast_type=int, min_val=2, max_val=100
+        )
+        self.bb_period: int = self._get_env(
+            "BB_PERIOD", 20, Style.DIM, cast_type=int, min_val=5, max_val=100
+        )
+        self.bb_std_dev: Decimal = self._get_env(
+            "BB_STD_DEV",
+            Decimal("2.0"),
+            Style.DIM,
+            cast_type=Decimal,
+            min_val=Decimal("1.0"),
+            max_val=Decimal("5.0"),
+        )
+        self.min_bb_width: Decimal = self._get_env(
+            "MIN_BB_WIDTH",
+            DEFAULT_BB_WIDTH_MIN,
+            Style.DIM,
+            cast_type=Decimal,
+            min_val=Decimal("0.0"),
+            max_val=Decimal("0.1"),
+        )
         self.stoch_oversold_threshold: Decimal = self._get_env(
-            "STOCH_OVERSOLD_THRESHOLD", DEFAULT_STOCH_OVERSOLD, Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("45")
+            "STOCH_OVERSOLD_THRESHOLD",
+            DEFAULT_STOCH_OVERSOLD,
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("45"),
         )
         self.stoch_overbought_threshold: Decimal = self._get_env(
-            "STOCH_OVERBOUGHT_THRESHOLD", DEFAULT_STOCH_OVERBOUGHT, Fore.CYAN, cast_type=Decimal, min_val=Decimal("55"), max_val=Decimal("100")
+            "STOCH_OVERBOUGHT_THRESHOLD",
+            DEFAULT_STOCH_OVERBOUGHT,
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("55"),
+            max_val=Decimal("100"),
         )
         self.trend_filter_buffer_percent: Decimal = self._get_env(
-            "TREND_FILTER_BUFFER_PERCENT", Decimal("0.5"), Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("5")
+            "TREND_FILTER_BUFFER_PERCENT",
+            Decimal("0.5"),
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("5"),
         )
         self.atr_move_filter_multiplier: Decimal = self._get_env(
-            "ATR_MOVE_FILTER_MULTIPLIER", Decimal("0.5"), Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("5")
+            "ATR_MOVE_FILTER_MULTIPLIER",
+            Decimal("0.5"),
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("5"),
         )
         self.min_adx_level: Decimal = self._get_env(
-            "MIN_ADX_LEVEL", DEFAULT_MIN_ADX, Fore.CYAN, cast_type=Decimal, min_val=Decimal("0"), max_val=Decimal("90")
+            "MIN_ADX_LEVEL",
+            DEFAULT_MIN_ADX,
+            Fore.CYAN,
+            cast_type=Decimal,
+            min_val=Decimal("0"),
+            max_val=Decimal("90"),
         )
-        self.api_key: str = self._get_env("BYBIT_API_KEY", None, Fore.RED, is_secret=True)
-        self.api_secret: str = self._get_env("BYBIT_API_SECRET", None, Fore.RED, is_secret=True)
-        self.telegram_token: str = self._get_env("TELEGRAM_TOKEN", None, Fore.RED, is_secret=True)
-        self.telegram_chat_id: str = self._get_env("TELEGRAM_CHAT_ID", None, Fore.RED, is_secret=True)
-        self.ohlcv_limit: int = self._get_env("OHLCV_LIMIT", DEFAULT_OHLCV_LIMIT, Style.DIM, cast_type=int, min_val=50, max_val=1000)
-        self.loop_sleep_seconds: int = self._get_env("LOOP_SLEEP_SECONDS", DEFAULT_LOOP_SLEEP, Style.DIM, cast_type=int, min_val=1)
-        self.order_check_delay_seconds: int = self._get_env("ORDER_CHECK_DELAY_SECONDS", 2, Style.DIM, cast_type=int, min_val=1)
-        self.order_fill_timeout_seconds: int = self._get_env("ORDER_FILL_TIMEOUT_SECONDS", 20, Style.DIM, cast_type=int, min_val=5)
-        self.max_fetch_retries: int = self._get_env("MAX_FETCH_RETRIES", DEFAULT_MAX_RETRIES, Style.DIM, cast_type=int, min_val=0, max_val=10)
-        self.retry_delay_seconds: int = self._get_env("RETRY_DELAY_SECONDS", DEFAULT_RETRY_DELAY, Style.DIM, cast_type=int, min_val=1)
-        self.trade_only_with_trend: bool = self._get_env("TRADE_ONLY_WITH_TREND", True, Style.DIM, cast_type=bool)
-        self.journal_file_path: str = self._get_env("JOURNAL_FILE_PATH", DEFAULT_JOURNAL_FILE, Style.DIM)
-        self.telemetry_file_path: str = self._get_env("TELEMETRY_FILE_PATH", DEFAULT_TELEMETRY_FILE, Style.DIM)
-        self.enable_journaling: bool = self._get_env("ENABLE_JOURNALING", True, Style.DIM, cast_type=bool)
-        self.enable_telemetry: bool = self._get_env("ENABLE_TELEMETRY", True, Style.DIM, cast_type=bool)
+        self.api_key: str = self._get_env(
+            "BYBIT_API_KEY", None, Fore.RED, is_secret=True
+        )
+        self.api_secret: str = self._get_env(
+            "BYBIT_API_SECRET", None, Fore.RED, is_secret=True
+        )
+        self.telegram_token: str = self._get_env(
+            "TELEGRAM_TOKEN", None, Fore.RED, is_secret=True
+        )
+        self.telegram_chat_id: str = self._get_env(
+            "TELEGRAM_CHAT_ID", None, Fore.RED, is_secret=True
+        )
+        self.ohlcv_limit: int = self._get_env(
+            "OHLCV_LIMIT",
+            DEFAULT_OHLCV_LIMIT,
+            Style.DIM,
+            cast_type=int,
+            min_val=50,
+            max_val=1000,
+        )
+        self.loop_sleep_seconds: int = self._get_env(
+            "LOOP_SLEEP_SECONDS",
+            DEFAULT_LOOP_SLEEP,
+            Style.DIM,
+            cast_type=int,
+            min_val=1,
+        )
+        self.order_check_delay_seconds: int = self._get_env(
+            "ORDER_CHECK_DELAY_SECONDS", 2, Style.DIM, cast_type=int, min_val=1
+        )
+        self.order_fill_timeout_seconds: int = self._get_env(
+            "ORDER_FILL_TIMEOUT_SECONDS", 20, Style.DIM, cast_type=int, min_val=5
+        )
+        self.max_fetch_retries: int = self._get_env(
+            "MAX_FETCH_RETRIES",
+            DEFAULT_MAX_RETRIES,
+            Style.DIM,
+            cast_type=int,
+            min_val=0,
+            max_val=10,
+        )
+        self.retry_delay_seconds: int = self._get_env(
+            "RETRY_DELAY_SECONDS",
+            DEFAULT_RETRY_DELAY,
+            Style.DIM,
+            cast_type=int,
+            min_val=1,
+        )
+        self.trade_only_with_trend: bool = self._get_env(
+            "TRADE_ONLY_WITH_TREND", True, Style.DIM, cast_type=bool
+        )
+        self.journal_file_path: str = self._get_env(
+            "JOURNAL_FILE_PATH", DEFAULT_JOURNAL_FILE, Style.DIM
+        )
+        self.telemetry_file_path: str = self._get_env(
+            "TELEMETRY_FILE_PATH", DEFAULT_TELEMETRY_FILE, Style.DIM
+        )
+        self.enable_journaling: bool = self._get_env(
+            "ENABLE_JOURNALING", True, Style.DIM, cast_type=bool
+        )
+        self.enable_telemetry: bool = self._get_env(
+            "ENABLE_TELEMETRY", True, Style.DIM, cast_type=bool
+        )
 
         if not self.api_key or not self.api_secret:
-            logger.critical(f"{Fore.RED}Missing BYBIT_API_KEY or BYBIT_API_SECRET. Halting.{Style.RESET_ALL}")
+            logger.critical(
+                f"{Fore.RED}Missing BYBIT_API_KEY or BYBIT_API_SECRET. Halting.{Style.RESET_ALL}"
+            )
             sys.exit(1)
         if not self.telegram_token or not self.telegram_chat_id:
-            logger.warning(f"{Fore.YELLOW}Telegram notifications disabled: Missing TELEGRAM_TOKEN or TELEGRAM_CHAT_ID.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}Telegram notifications disabled: Missing TELEGRAM_TOKEN or TELEGRAM_CHAT_ID.{Style.RESET_ALL}"
+            )
             self.telegram_token = None
             self.telegram_chat_id = None
 
@@ -268,10 +724,16 @@ class TradingConfig:
 
     def _validate_config(self):
         if self.fast_ema_period >= self.slow_ema_period:
-            logger.critical(f"{Fore.RED}FAST_EMA ({self.fast_ema_period}) must be < SLOW_EMA ({self.slow_ema_period}). Halting.{Style.RESET_ALL}")
+            logger.critical(
+                f"{Fore.RED}FAST_EMA ({self.fast_ema_period}) must be < SLOW_EMA ({self.slow_ema_period}). Halting.{Style.RESET_ALL}"
+            )
             sys.exit(1)
         if self.trend_ema_period <= self.slow_ema_period:
-            logger.warning(f"{Fore.YELLOW}TREND_EMA ({self.trend_ema_period}) <= SLOW_EMA ({self.slow_ema_period}). Consider adjusting periods.{Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.YELLOW}TREND_EMA ({self.trend_ema_period}) <= SLOW_EMA ({self.slow_ema_period}). Consider adjusting periods.{Style.RESET_ALL}"
+            )
+
+
 class ExchangeManager:
     def __init__(self, config: TradingConfig):
         self.config = config
@@ -281,7 +743,9 @@ class ExchangeManager:
         self._load_markets()
 
     async def _initialize_exchange(self):
-        logger.info(f"Initializing Bybit async exchange (V5 {self.config.market_type})...")
+        logger.info(
+            f"Initializing Bybit async exchange (V5 {self.config.market_type})..."
+        )
         try:
             exchange_params = {
                 "apiKey": self.config.api_key,
@@ -296,9 +760,13 @@ class ExchangeManager:
             }
             self.exchange = ccxt_async.bybit(exchange_params)
             await self.exchange.load_markets()
-            logger.info(f"{Fore.GREEN}Bybit V5 async interface initialized.{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Bybit V5 async interface initialized.{Style.RESET_ALL}"
+            )
         except Exception as e:
-            logger.critical(f"{Fore.RED}Exchange initialization failed: {e}. Halting.{Style.RESET_ALL}")
+            logger.critical(
+                f"{Fore.RED}Exchange initialization failed: {e}. Halting.{Style.RESET_ALL}"
+            )
             sys.exit(1)
 
     async def _load_markets(self):
@@ -306,7 +774,9 @@ class ExchangeManager:
             markets = await self.exchange.load_markets(True)
             for symbol in self.config.symbols:
                 if symbol not in markets:
-                    logger.critical(f"{Fore.RED}Symbol {symbol} not found in markets. Halting.{Style.RESET_ALL}")
+                    logger.critical(
+                        f"{Fore.RED}Symbol {symbol} not found in markets. Halting.{Style.RESET_ALL}"
+                    )
                     sys.exit(1)
                 market = markets[symbol]
                 self.markets_cache[symbol] = {
@@ -317,15 +787,25 @@ class ExchangeManager:
                     "id": market.get("id"),
                 }
                 self.markets_cache[symbol]["precision_dp"] = {
-                    "amount": self._get_dp(market["precision"].get("amount"), DEFAULT_AMOUNT_DP),
-                    "price": self._get_dp(market["precision"].get("price"), DEFAULT_PRICE_DP),
+                    "amount": self._get_dp(
+                        market["precision"].get("amount"), DEFAULT_AMOUNT_DP
+                    ),
+                    "price": self._get_dp(
+                        market["precision"].get("price"), DEFAULT_PRICE_DP
+                    ),
                 }
-                logger.info(f"Loaded market info for {symbol}: {self.markets_cache[symbol]}")
+                logger.info(
+                    f"Loaded market info for {symbol}: {self.markets_cache[symbol]}"
+                )
         except Exception as e:
-            logger.critical(f"{Fore.RED}Failed to load markets: {e}. Halting.{Style.RESET_ALL}")
+            logger.critical(
+                f"{Fore.RED}Failed to load markets: {e}. Halting.{Style.RESET_ALL}"
+            )
             sys.exit(1)
 
-    def _get_dp(self, precision_val: Optional[Union[str, float, int]], default_dp: int) -> int:
+    def _get_dp(
+        self, precision_val: Optional[Union[str, float, int]], default_dp: int
+    ) -> int:
         prec_dec = safe_decimal(precision_val)
         if prec_dec.is_nan() or prec_dec == 0:
             return default_dp
@@ -341,10 +821,16 @@ class ExchangeManager:
         if not await self.validate_symbol(symbol):
             logger.error(f"Invalid symbol {symbol}")
             return None
-        logger.debug(f"Fetching {self.config.ohlcv_limit} {timeframe} candles for {symbol}...")
+        logger.debug(
+            f"Fetching {self.config.ohlcv_limit} {timeframe} candles for {symbol}..."
+        )
         try:
-            ohlcv = await self.exchange.fetch_ohlcv(symbol, timeframe, limit=self.config.ohlcv_limit)
-            df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
+            ohlcv = await self.exchange.fetch_ohlcv(
+                symbol, timeframe, limit=self.config.ohlcv_limit
+            )
+            df = pd.DataFrame(
+                ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"]
+            )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
             df.set_index("timestamp", inplace=True)
             df = df.applymap(safe_decimal)
@@ -363,9 +849,15 @@ class ExchangeManager:
         try:
             params = {"accountType": V5_UNIFIED_ACCOUNT_TYPE, "coin": settle_currency}
             balance_data = await self.exchange.fetch_balance(params=params)
-            total_equity = safe_decimal(balance_data["total"].get(settle_currency, "NaN"))
-            available_balance = safe_decimal(balance_data["free"].get(settle_currency, "NaN"))
-            logger.debug(f"Balance: Equity={total_equity}, Available={available_balance} {settle_currency}")
+            total_equity = safe_decimal(
+                balance_data["total"].get(settle_currency, "NaN")
+            )
+            available_balance = safe_decimal(
+                balance_data["free"].get(settle_currency, "NaN")
+            )
+            logger.debug(
+                f"Balance: Equity={total_equity}, Available={available_balance} {settle_currency}"
+            )
             return total_equity, available_balance
         except Exception as e:
             logger.error(f"Failed to fetch balance: {e}")
@@ -399,20 +891,29 @@ class ExchangeManager:
         precision = self.markets_cache[symbol]["precision_dp"]["price"]
         try:
             quantizer = Decimal(f"1e-{precision}")
-            formatted_price = price_decimal.quantize(quantizer, rounding=ROUND_HALF_EVEN)
+            formatted_price = price_decimal.quantize(
+                quantizer, rounding=ROUND_HALF_EVEN
+            )
             return f"{formatted_price:.{precision}f}"
         except Exception as e:
             logger.error(f"Error formatting price {price_decimal} for {symbol}: {e}")
             return "ERR"
 
-    def format_amount(self, symbol: str, amount: Union[Decimal, str, float, int], rounding_mode=ROUND_DOWN) -> str:
+    def format_amount(
+        self,
+        symbol: str,
+        amount: Union[Decimal, str, float, int],
+        rounding_mode=ROUND_DOWN,
+    ) -> str:
         amount_decimal = safe_decimal(amount)
         if amount_decimal.is_nan():
             return "NaN"
         precision = self.markets_cache[symbol]["precision_dp"]["amount"]
         try:
             quantizer = Decimal(f"1e-{precision}")
-            formatted_amount = amount_decimal.quantize(quantizer, rounding=rounding_mode)
+            formatted_amount = amount_decimal.quantize(
+                quantizer, rounding=rounding_mode
+            )
             return f"{formatted_amount:.{precision}f}"
         except Exception as e:
             logger.error(f"Error formatting amount {amount_decimal} for {symbol}: {e}")
@@ -423,37 +924,69 @@ class ExchangeManager:
             await self.exchange.close()
             logger.info("Exchange connection closed.")
 
+
 class OrderManager:
     def __init__(self, config: TradingConfig, exchange_manager: ExchangeManager):
         self.config = config
         self.exchange_manager = exchange_manager
-        self.protection_tracker: Dict[str, Dict[str, Optional[str]]] = {s: {"long": None, "short": None} for s in config.symbols}
+        self.protection_tracker: Dict[str, Dict[str, Optional[str]]] = {
+            s: {"long": None, "short": None} for s in config.symbols
+        }
         self.exchange = exchange_manager.exchange
         self.markets_cache = exchange_manager.markets_cache
 
-    async def _verify_position_state(self, symbol: str, expected_side: Optional[str], max_attempts: int, delay_seconds: float) -> Tuple[bool, Optional[Dict]]:
+    async def _verify_position_state(
+        self,
+        symbol: str,
+        expected_side: Optional[str],
+        max_attempts: int,
+        delay_seconds: float,
+    ) -> Tuple[bool, Optional[Dict]]:
         for attempt in range(max_attempts):
             positions = await self.exchange_manager.get_current_position(symbol)
             if positions is None:
-                logger.warning(f"Attempt {attempt + 1}/{max_attempts}: Failed to fetch positions for {symbol}")
+                logger.warning(
+                    f"Attempt {attempt + 1}/{max_attempts}: Failed to fetch positions for {symbol}"
+                )
                 await asyncio.sleep(delay_seconds)
                 continue
             long_qty = safe_decimal(positions.get("long", {}).get("qty", "0"))
             short_qty = safe_decimal(positions.get("short", {}).get("qty", "0"))
-            is_flat = long_qty.copy_abs() < POSITION_QTY_EPSILON and short_qty.copy_abs() < POSITION_QTY_EPSILON
+            is_flat = (
+                long_qty.copy_abs() < POSITION_QTY_EPSILON
+                and short_qty.copy_abs() < POSITION_QTY_EPSILON
+            )
             if expected_side is None:
                 return is_flat, positions
-            current_side = "long" if long_qty.copy_abs() >= POSITION_QTY_EPSILON else "short" if short_qty.copy_abs() >= POSITION_QTY_EPSILON else None
+            current_side = (
+                "long"
+                if long_qty.copy_abs() >= POSITION_QTY_EPSILON
+                else "short"
+                if short_qty.copy_abs() >= POSITION_QTY_EPSILON
+                else None
+            )
             if current_side == expected_side:
                 return True, positions
             await asyncio.sleep(delay_seconds)
         logger.error(f"Verification failed for {symbol}")
         return False, await self.exchange_manager.get_current_position(symbol)
 
-    async def _set_position_stops(self, symbol: str, position_side: str, qty: Decimal, entry_price: Decimal, sl_price: Decimal, tp_price: Optional[Decimal]) -> bool:
-        logger.debug(f"Setting SL/TP for {symbol} {position_side.upper()} (Qty: {qty}, Entry: {entry_price})")
+    async def _set_position_stops(
+        self,
+        symbol: str,
+        position_side: str,
+        qty: Decimal,
+        entry_price: Decimal,
+        sl_price: Decimal,
+        tp_price: Optional[Decimal],
+    ) -> bool:
+        logger.debug(
+            f"Setting SL/TP for {symbol} {position_side.upper()} (Qty: {qty}, Entry: {entry_price})"
+        )
         sl_str = self.exchange_manager.format_price(symbol, sl_price)
-        tp_str = self.exchange_manager.format_price(symbol, tp_price) if tp_price else ""
+        tp_str = (
+            self.exchange_manager.format_price(symbol, tp_price) if tp_price else ""
+        )
         if not sl_str:
             logger.error(f"Invalid SL price for {symbol}: {sl_price}")
             return False
@@ -469,12 +1002,18 @@ class OrderManager:
         }
         for attempt in range(self.config.max_fetch_retries):
             try:
-                response = await self.exchange.private_post_v5_position_trading_stop(params=params)
+                response = await self.exchange.private_post_v5_position_trading_stop(
+                    params=params
+                )
                 if response.get("retCode") == V5_SUCCESS_RETCODE:
-                    logger.info(f"{Fore.GREEN}SL/TP set for {symbol} {position_side.upper()}: SL={sl_str}, TP={tp_str or 'N/A'}{Style.RESET_ALL}")
+                    logger.info(
+                        f"{Fore.GREEN}SL/TP set for {symbol} {position_side.upper()}: SL={sl_str}, TP={tp_str or 'N/A'}{Style.RESET_ALL}"
+                    )
                     self.protection_tracker[symbol][position_side] = "ACTIVE_SLTP"
                     return True
-                logger.warning(f"SL/TP attempt {attempt + 1} failed: {response.get('retMsg')}")
+                logger.warning(
+                    f"SL/TP attempt {attempt + 1} failed: {response.get('retMsg')}"
+                )
                 await asyncio.sleep(self.config.retry_delay_seconds)
             except Exception as e:
                 logger.warning(f"SL/TP attempt {attempt + 1} error: {e}")
@@ -494,23 +1033,49 @@ class OrderManager:
                 "positionIdx": self.config.position_idx,
                 "reduceOnly": True,
             }
-            sl_response = await self.exchange.create_order(symbol, "limit", sl_order_side.lower(), qty, sl_price, sl_order_params)
-            logger.info(f"{Fore.GREEN}Fallback SL order placed for {symbol} {position_side.upper()}: {sl_response.get('id')}{Style.RESET_ALL}")
+            sl_response = await self.exchange.create_order(
+                symbol, "limit", sl_order_side.lower(), qty, sl_price, sl_order_params
+            )
+            logger.info(
+                f"{Fore.GREEN}Fallback SL order placed for {symbol} {position_side.upper()}: {sl_response.get('id')}{Style.RESET_ALL}"
+            )
             self.protection_tracker[symbol][position_side] = "ACTIVE_SLTP"
             return True
         except Exception as e:
-            logger.error(f"{Fore.RED}Fallback SL failed for {symbol}: {e}{Style.RESET_ALL}")
+            logger.error(
+                f"{Fore.RED}Fallback SL failed for {symbol}: {e}{Style.RESET_ALL}"
+            )
             return False
 
-    async def place_risked_market_order(self, symbol: str, side: str, atr: Decimal, total_equity: Decimal, current_price: Decimal, confidence: Decimal) -> bool:
+    async def place_risked_market_order(
+        self,
+        symbol: str,
+        side: str,
+        atr: Decimal,
+        total_equity: Decimal,
+        current_price: Decimal,
+        confidence: Decimal,
+    ) -> bool:
         position_side = "long" if side == "buy" else "short"
-        risk_factor = min(Decimal("1.5"), max(Decimal("0.5"), confidence))  # Scale risk by confidence
+        risk_factor = min(
+            Decimal("1.5"), max(Decimal("0.5"), confidence)
+        )  # Scale risk by confidence
         risk_amount = total_equity * self.config.risk_percentage * risk_factor
         sl_distance = atr * self.config.sl_atr_multiplier
-        sl_price = current_price - sl_distance if side == "buy" else current_price + sl_distance
-        tp_price = current_price + atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+        sl_price = (
+            current_price - sl_distance
+            if side == "buy"
+            else current_price + sl_distance
+        )
+        tp_price = (
+            current_price + atr * self.config.tp_atr_multiplier
+            if self.config.tp_atr_multiplier > 0
+            else None
+        )
         try:
-            qty = risk_amount / sl_distance * self.markets_cache[symbol]["contract_size"]
+            qty = (
+                risk_amount / sl_distance * self.markets_cache[symbol]["contract_size"]
+            )
             qty = safe_decimal(self.exchange_manager.format_amount(symbol, qty))
             if qty < self.markets_cache[symbol]["limits"]["amount"]["min"]:
                 logger.error(f"Order qty {qty} below min for {symbol}")
@@ -521,39 +1086,57 @@ class OrderManager:
                 "positionIdx": self.config.position_idx,
                 "reduceOnly": False,
             }
-            order = await self.exchange.create_order(symbol, "market", side.lower(), qty, None, order_params)
+            order = await self.exchange.create_order(
+                symbol, "market", side.lower(), qty, None, order_params
+            )
             filled_qty = safe_decimal(order.get("info", {}).get("cumExecQty", qty))
             avg_entry_price = safe_decimal(order.get("avgPrice", current_price))
             fees = safe_decimal(order.get("info", {}).get("cumExecFee", "0"))
             fill_ratio = filled_qty / qty
             if fill_ratio < 0.99:
-                logger.warning(f"Partial fill for {symbol}: {filled_qty}/{qty} ({fill_ratio:.2%})")
+                logger.warning(
+                    f"Partial fill for {symbol}: {filled_qty}/{qty} ({fill_ratio:.2%})"
+                )
             if filled_qty < self.markets_cache[symbol]["limits"]["amount"]["min"]:
                 logger.error(f"Filled qty {filled_qty} below min for {symbol}")
                 await self._handle_entry_failure(symbol, side, filled_qty)
                 return False
-            logger.info(f"{Fore.GREEN}Order filled for {symbol}: {side.upper()}, Qty={filled_qty}, Price={avg_entry_price}, Fees={fees}{Style.RESET_ALL}")
+            logger.info(
+                f"{Fore.GREEN}Order filled for {symbol}: {side.upper()}, Qty={filled_qty}, Price={avg_entry_price}, Fees={fees}{Style.RESET_ALL}"
+            )
             if self.config.enable_journaling:
-                self.log_trade_entry_to_journal(symbol, side, filled_qty, avg_entry_price, order.get("id"))
-            verification_ok, _ = await self._verify_position_state(symbol, position_side, 3, self.config.order_check_delay_seconds)
+                self.log_trade_entry_to_journal(
+                    symbol, side, filled_qty, avg_entry_price, order.get("id")
+                )
+            verification_ok, _ = await self._verify_position_state(
+                symbol, position_side, 3, self.config.order_check_delay_seconds
+            )
             if not verification_ok:
                 logger.error(f"Position verification failed for {symbol}")
                 await self._handle_entry_failure(symbol, side, filled_qty)
                 return False
-            success = await self._set_position_stops(symbol, position_side, filled_qty, avg_entry_price, sl_price, tp_price)
+            success = await self._set_position_stops(
+                symbol, position_side, filled_qty, avg_entry_price, sl_price, tp_price
+            )
             if not success:
                 logger.error(f"SL/TP set failed for {symbol}")
                 await self._handle_entry_failure(symbol, side, filled_qty)
                 return False
-            logger.trade(f"{Fore.GREEN}Entry successful for {symbol} {position_side.upper()}: Qty={filled_qty}, Entry={avg_entry_price}{Style.RESET_ALL}")
+            logger.trade(
+                f"{Fore.GREEN}Entry successful for {symbol} {position_side.upper()}: Qty={filled_qty}, Entry={avg_entry_price}{Style.RESET_ALL}"
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to place order for {symbol}: {e}")
             await self._handle_entry_failure(symbol, side, qty)
             return False
 
-    async def close_position(self, symbol: str, position_side: str, qty: Decimal, reason: str) -> bool:
-        logger.info(f"Closing {symbol} {position_side.upper()} (Qty: {qty}, Reason: {reason})")
+    async def close_position(
+        self, symbol: str, position_side: str, qty: Decimal, reason: str
+    ) -> bool:
+        logger.info(
+            f"Closing {symbol} {position_side.upper()} (Qty: {qty}, Reason: {reason})"
+        )
         close_side = "sell" if position_side == "long" else "buy"
         try:
             await self._clear_position_stops(symbol, position_side)
@@ -563,18 +1146,31 @@ class OrderManager:
                 "positionIdx": self.config.position_idx,
                 "reduceOnly": True,
             }
-            order = await self.exchange.create_order(symbol, "market", close_side.lower(), qty, None, order_params)
+            order = await self.exchange.create_order(
+                symbol, "market", close_side.lower(), qty, None, order_params
+            )
             avg_close_price = safe_decimal(order.get("avgPrice", "NaN"))
             fees = safe_decimal(order.get("info", {}).get("cumExecFee", "0"))
-            logger.info(f"Close order for {symbol}: Price={avg_close_price}, Fees={fees}")
+            logger.info(
+                f"Close order for {symbol}: Price={avg_close_price}, Fees={fees}"
+            )
             if self.config.enable_journaling:
-                self.log_trade_exit_to_journal(symbol, position_side, qty, avg_close_price, order.get("id"), reason)
-            verification_ok, _ = await self._verify_position_state(symbol, None, 5, self.config.order_check_delay_seconds + 1.0)
+                self.log_trade_exit_to_journal(
+                    symbol, position_side, qty, avg_close_price, order.get("id"), reason
+                )
+            verification_ok, _ = await self._verify_position_state(
+                symbol, None, 5, self.config.order_check_delay_seconds + 1.0
+            )
             if not verification_ok:
                 logger.error(f"Closure verification failed for {symbol}")
-                termux_notify(f"{symbol} CLOSE FAILED", f"{position_side.upper()} may still be open!")
+                termux_notify(
+                    f"{symbol} CLOSE FAILED",
+                    f"{position_side.upper()} may still be open!",
+                )
                 return False
-            logger.trade(f"{Fore.GREEN}Position {symbol} {position_side.upper()} closed{Style.RESET_ALL}")
+            logger.trade(
+                f"{Fore.GREEN}Position {symbol} {position_side.upper()} closed{Style.RESET_ALL}"
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to close position for {symbol}: {e}")
@@ -590,18 +1186,24 @@ class OrderManager:
                 "positionIdx": self.config.position_idx,
                 "tpslMode": V5_TPSL_MODE_FULL,
             }
-            response = await self.exchange.private_post_v5_position_trading_stop(params=params)
+            response = await self.exchange.private_post_v5_position_trading_stop(
+                params=params
+            )
             if response.get("retCode") == V5_SUCCESS_RETCODE:
                 logger.info(f"SL/TP cleared for {symbol} {position_side.upper()}")
                 self.protection_tracker[symbol][position_side] = None
                 return True
-            logger.warning(f"Failed to clear SL/TP for {symbol}: {response.get('retMsg')}")
+            logger.warning(
+                f"Failed to clear SL/TP for {symbol}: {response.get('retMsg')}"
+            )
             return False
         except Exception as e:
             logger.warning(f"Error clearing SL/TP for {symbol}: {e}")
             return False
 
-    async def _handle_entry_failure(self, symbol: str, failed_entry_side: str, attempted_qty: Decimal):
+    async def _handle_entry_failure(
+        self, symbol: str, failed_entry_side: str, attempted_qty: Decimal
+    ):
         position_side = "long" if failed_entry_side == "buy" else "short"
         await asyncio.sleep(self.config.order_check_delay_seconds + 1)
         _, positions = await self._verify_position_state(symbol, None, 2, 1)
@@ -612,7 +1214,9 @@ class OrderManager:
         qty = safe_decimal(positions.get(position_side, {}).get("qty", "0"))
         if qty.copy_abs() >= POSITION_QTY_EPSILON:
             logger.error(f"Lingering {symbol} {position_side.upper()} (Qty: {qty})")
-            close_success = await self.close_position(symbol, position_side, qty, "EmergencyClose:EntryFail")
+            close_success = await self.close_position(
+                symbol, position_side, qty, "EmergencyClose:EntryFail"
+            )
             if not close_success:
                 logger.critical(f"EMERGENCY CLOSE FAILED for {symbol}")
                 termux_notify(f"{symbol} URGENT", "Emergency close FAILED!")
@@ -620,7 +1224,14 @@ class OrderManager:
             logger.info(f"No lingering position for {symbol}")
             self.protection_tracker[symbol][position_side] = None
 
-    def log_trade_entry_to_journal(self, symbol: str, side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str]):
+    def log_trade_entry_to_journal(
+        self,
+        symbol: str,
+        side: str,
+        qty: Decimal,
+        avg_price: Decimal,
+        order_id: Optional[str],
+    ):
         position_side = "long" if side == "buy" else "short"
         data = {
             "TimestampUTC": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
@@ -634,7 +1245,15 @@ class OrderManager:
         }
         self._write_journal_row(data)
 
-    def log_trade_exit_to_journal(self, symbol: str, position_side: str, qty: Decimal, avg_price: Decimal, order_id: Optional[str], reason: str):
+    def log_trade_exit_to_journal(
+        self,
+        symbol: str,
+        position_side: str,
+        qty: Decimal,
+        avg_price: Decimal,
+        order_id: Optional[str],
+        reason: str,
+    ):
         data = {
             "TimestampUTC": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
             "Symbol": symbol,
@@ -654,44 +1273,88 @@ class OrderManager:
         try:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open("a", newline="", encoding="utf-8") as csvfile:
-                fieldnames = ["TimestampUTC", "Symbol", "Action", "Side", "Quantity", "AvgPrice", "OrderID", "Reason", "Notes"]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL)
+                fieldnames = [
+                    "TimestampUTC",
+                    "Symbol",
+                    "Action",
+                    "Side",
+                    "Quantity",
+                    "AvgPrice",
+                    "OrderID",
+                    "Reason",
+                    "Notes",
+                ]
+                writer = csv.DictWriter(
+                    csvfile, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL
+                )
                 if not file_path.exists() or file_path.stat().st_size == 0:
                     writer.writeheader()
-                row = {field: str(data.get(field, "N/A")).replace('NaN', 'N/A') for field in fieldnames}
+                row = {
+                    field: str(data.get(field, "N/A")).replace("NaN", "N/A")
+                    for field in fieldnames
+                }
                 writer.writerow(row)
             logger.debug(f"Trade {data['Action'].lower()} logged for {data['Symbol']}")
         except Exception as e:
             logger.error(f"Failed to write journal: {e}")
 
+
 class IndicatorCalculator:
     def __init__(self, config: TradingConfig):
         self.config = config
 
-    def calculate_indicators(self, df: pd.DataFrame) -> Dict[str, Union[Decimal, np.ndarray]]:
+    def calculate_indicators(
+        self, df: pd.DataFrame
+    ) -> Dict[str, Union[Decimal, np.ndarray]]:
         indicators = {}
         indicators["trend_ema"] = self._ema(df["close"], self.config.trend_ema_period)
         indicators["fast_ema"] = self._ema(df["close"], self.config.fast_ema_period)
         indicators["slow_ema"] = self._ema(df["close"], self.config.slow_ema_period)
-        indicators["atr"] = self._atr(df["high"], df["low"], df["close"], self.config.atr_period)
-        indicators["adx"] = self._adx(df["high"], df["low"], df["close"], self.config.adx_period)
-        indicators["pdi"] = self._plus_di(df["high"], df["low"], df["close"], self.config.adx_period)
-        indicators["mdi"] = self._minus_di(df["high"], df["low"], df["close"], self.config.adx_period)
-        stoch_k, stoch_d = self._stochastic(df["high"], df["low"], df["close"], self.config.stoch_period, self.config.stoch_smooth_k, self.config.stoch_smooth_d)
+        indicators["atr"] = self._atr(
+            df["high"], df["low"], df["close"], self.config.atr_period
+        )
+        indicators["adx"] = self._adx(
+            df["high"], df["low"], df["close"], self.config.adx_period
+        )
+        indicators["pdi"] = self._plus_di(
+            df["high"], df["low"], df["close"], self.config.adx_period
+        )
+        indicators["mdi"] = self._minus_di(
+            df["high"], df["low"], df["close"], self.config.adx_period
+        )
+        stoch_k, stoch_d = self._stochastic(
+            df["high"],
+            df["low"],
+            df["close"],
+            self.config.stoch_period,
+            self.config.stoch_smooth_k,
+            self.config.stoch_smooth_d,
+        )
         indicators["stoch_k"] = stoch_k
         indicators["stoch_d"] = stoch_d
-        bb_upper, bb_lower = self._bollinger_bands(df["close"], self.config.bb_period, self.config.bb_std_dev)
+        bb_upper, bb_lower = self._bollinger_bands(
+            df["close"], self.config.bb_period, self.config.bb_std_dev
+        )
         indicators["bb_width"] = (bb_upper - bb_lower) / df["close"]
-        return {k: safe_decimal(v[-1]) if isinstance(v, np.ndarray) else v for k, v in indicators.items()}
+        return {
+            k: safe_decimal(v[-1]) if isinstance(v, np.ndarray) else v
+            for k, v in indicators.items()
+        }
 
     def _ema(self, series: pd.Series, period: int) -> np.ndarray:
         return series.ewm(span=period, adjust=False).mean().values
 
-    def _atr(self, high: pd.Series, low: pd.Series, close: pd.Series, period: int) -> np.ndarray:
-        tr = np.maximum(high - low, np.abs(high - close.shift(1)), np.abs(low - close.shift(1)))
+    def _atr(
+        self, high: pd.Series, low: pd.Series, close: pd.Series, period: int
+    ) -> np.ndarray:
+        tr = np.maximum(
+            high - low, np.abs(high - close.shift(1)), np.abs(low - close.shift(1))
+        )
         return tr.rolling(window=period).mean().values
 
-    def _adx(self, high: pd.Series, low: pd.Series, close: pd.Series, period: int) -> np.ndarray:
+    def _adx(
+        self, high: pd.Series, low: pd.Series, close: pd.Series, period: int
+    ) -> np.ndarray:
         plus_dm = high.diff()
         minus_dm = -low.diff()
         plus_dm[plus_dm < 0] = 0
@@ -703,19 +1366,31 @@ class IndicatorCalculator:
         adx = dx.rolling(window=period).mean()
         return adx.values
 
-    def _plus_di(self, high: pd.Series, low: pd.Series, close: pd.Series, period: int) -> np.ndarray:
+    def _plus_di(
+        self, high: pd.Series, low: pd.Series, close: pd.Series, period: int
+    ) -> np.ndarray:
         plus_dm = high.diff()
         plus_dm[plus_dm < 0] = 0
         tr = self._atr(high, low, close, period)
         return 100 * plus_dm.rolling(window=period).mean() / tr
 
-    def _minus_di(self, high: pd.Series, low: pd.Series, close: pd.Series, period: int) -> np.ndarray:
+    def _minus_di(
+        self, high: pd.Series, low: pd.Series, close: pd.Series, period: int
+    ) -> np.ndarray:
         minus_dm = -low.diff()
         minus_dm[minus_dm < 0] = 0
         tr = self._atr(high, low, close, period)
         return 100 * minus_dm.rolling(window=period).mean() / tr
 
-    def _stochastic(self, high: pd.Series, low: pd.Series, close: pd.Series, k_period: int, smooth_k: int, smooth_d: int) -> Tuple[np.ndarray, np.ndarray]:
+    def _stochastic(
+        self,
+        high: pd.Series,
+        low: pd.Series,
+        close: pd.Series,
+        k_period: int,
+        smooth_k: int,
+        smooth_d: int,
+    ) -> Tuple[np.ndarray, np.ndarray]:
         lowest_low = low.rolling(window=k_period).min()
         highest_high = high.rolling(window=k_period).max()
         stoch_k = 100 * (close - lowest_low) / (highest_high - lowest_low)
@@ -723,12 +1398,15 @@ class IndicatorCalculator:
         stoch_d = stoch_k.rolling(window=smooth_d).mean()
         return stoch_k.values, stoch_d.values
 
-    def _bollinger_bands(self, series: pd.Series, period: int, std_dev: Decimal) -> Tuple[np.ndarray, np.ndarray]:
+    def _bollinger_bands(
+        self, series: pd.Series, period: int, std_dev: Decimal
+    ) -> Tuple[np.ndarray, np.ndarray]:
         sma = series.rolling(window=period).mean()
         std = series.rolling(window=period).std()
         upper = sma + float(std_dev) * std
         lower = sma - float(std_dev) * std
         return upper.values, lower.values
+
 
 class SignalGenerator:
     def __init__(self, config: TradingConfig):
@@ -740,14 +1418,19 @@ class SignalGenerator:
         if len(df) < 50:
             logger.warning("Insufficient data for ML training")
             return
-        X = pd.DataFrame({
-            "trend_ema_diff": (df["close"] - indicators["trend_ema"]) / df["close"],
-            "fast_ema_diff": (indicators["fast_ema"] - indicators["slow_ema"]) / df["close"],
-            "stoch_k": indicators["stoch_k"],
-            "adx": indicators["adx"],
-            "bb_width": indicators["bb_width"],
-        }).dropna()
-        y = (df["close"].shift(-5) > df["close"]).astype(int)  # Predict price increase in 5 candles
+        X = pd.DataFrame(
+            {
+                "trend_ema_diff": (df["close"] - indicators["trend_ema"]) / df["close"],
+                "fast_ema_diff": (indicators["fast_ema"] - indicators["slow_ema"])
+                / df["close"],
+                "stoch_k": indicators["stoch_k"],
+                "adx": indicators["adx"],
+                "bb_width": indicators["bb_width"],
+            }
+        ).dropna()
+        y = (df["close"].shift(-5) > df["close"]).astype(
+            int
+        )  # Predict price increase in 5 candles
         if len(X) < 10:
             logger.warning("Not enough valid samples for ML training")
             return
@@ -755,8 +1438,18 @@ class SignalGenerator:
         self.is_model_trained = True
         logger.info("ML model trained for signal confidence")
 
-    def generate_signals(self, recent_candles: pd.DataFrame, indicators: Dict, confirmation_indicators: Dict) -> Dict[str, Union[bool, str, Decimal]]:
-        signals = {"long": False, "short": False, "reason": "No Signal", "confidence": Decimal("0.5")}
+    def generate_signals(
+        self,
+        recent_candles: pd.DataFrame,
+        indicators: Dict,
+        confirmation_indicators: Dict,
+    ) -> Dict[str, Union[bool, str, Decimal]]:
+        signals = {
+            "long": False,
+            "short": False,
+            "reason": "No Signal",
+            "confidence": Decimal("0.5"),
+        }
         if len(recent_candles) < 2:
             signals["reason"] = "Insufficient candles"
             return signals
@@ -772,51 +1465,97 @@ class SignalGenerator:
         mdi = safe_decimal(indicators.get("mdi", "NaN"))
         bb_width = safe_decimal(indicators.get("bb_width", "NaN"))
         conf_trend_ema = safe_decimal(confirmation_indicators.get("trend_ema", "NaN"))
-        if any(v.is_nan() for v in [current_price, trend_ema, fast_ema, stoch_k, stoch_d, atr, adx, bb_width, conf_trend_ema]):
+        if any(
+            v.is_nan()
+            for v in [
+                current_price,
+                trend_ema,
+                fast_ema,
+                stoch_k,
+                stoch_d,
+                atr,
+                adx,
+                bb_width,
+                conf_trend_ema,
+            ]
+        ):
             signals["reason"] = "Invalid indicator data"
             return signals
         price_move = abs(current_price - prev_price)
         atr_move_threshold = atr * self.config.atr_move_filter_multiplier
-        trend_buffer = trend_ema * self.config.trend_filter_buffer_percent / Decimal("100")
-        is_bullish_trend = current_price > (trend_ema + trend_buffer) and fast_ema > trend_ema and current_price > conf_trend_ema
-        is_bearish_trend = current_price < (trend_ema - trend_buffer) and fast_ema < trend_ema and current_price < conf_trend_ema
-        stoch_oversold = self.config.stoch_oversold_threshold + (atr / current_price) * 10  # Adaptive threshold
-        stoch_overbought = self.config.stoch_overbought_threshold - (atr / current_price) * 10
+        trend_buffer = (
+            trend_ema * self.config.trend_filter_buffer_percent / Decimal("100")
+        )
+        is_bullish_trend = (
+            current_price > (trend_ema + trend_buffer)
+            and fast_ema > trend_ema
+            and current_price > conf_trend_ema
+        )
+        is_bearish_trend = (
+            current_price < (trend_ema - trend_buffer)
+            and fast_ema < trend_ema
+            and current_price < conf_trend_ema
+        )
+        stoch_oversold = (
+            self.config.stoch_oversold_threshold + (atr / current_price) * 10
+        )  # Adaptive threshold
+        stoch_overbought = (
+            self.config.stoch_overbought_threshold - (atr / current_price) * 10
+        )
         is_stoch_long_ok = stoch_k < stoch_oversold and stoch_k > stoch_d
         is_stoch_short_ok = stoch_k > stoch_overbought and stoch_k < stoch_d
-        is_trend_ok = not self.config.trade_only_with_trend or (is_bullish_trend or is_bearish_trend)
+        is_trend_ok = not self.config.trade_only_with_trend or (
+            is_bullish_trend or is_bearish_trend
+        )
         is_atr_move_ok = price_move >= atr_move_threshold
         is_adx_ok = adx >= self.config.min_adx_level
         is_volatility_ok = bb_width >= self.config.min_bb_width
         is_direction_ok = pdi > mdi if is_bullish_trend else mdi > pdi
         confidence = Decimal("0.5")
         if self.is_model_trained:
-            X = np.array([[
-                (current_price - trend_ema) / current_price,
-                (fast_ema - indicators["slow_ema"]) / current_price,
-                stoch_k,
-                adx,
-                bb_width,
-            ]])
+            X = np.array(
+                [
+                    [
+                        (current_price - trend_ema) / current_price,
+                        (fast_ema - indicators["slow_ema"]) / current_price,
+                        stoch_k,
+                        adx,
+                        bb_width,
+                    ]
+                ]
+            )
             confidence = Decimal(str(self.ml_model.predict_proba(X)[0][1]))
             confidence = max(Decimal("0.3"), min(Decimal("0.7"), confidence))
-        if is_trend_ok and is_atr_move_ok and is_adx_ok and is_volatility_ok and is_direction_ok:
+        if (
+            is_trend_ok
+            and is_atr_move_ok
+            and is_adx_ok
+            and is_volatility_ok
+            and is_direction_ok
+        ):
             if is_bullish_trend and is_stoch_long_ok:
                 signals["long"] = True
-                signals["reason"] = f"Bullish Trend | Stoch(K:{stoch_k:.1f}) | ADX:{adx:.1f} | Conf:{confidence:.2f}"
+                signals["reason"] = (
+                    f"Bullish Trend | Stoch(K:{stoch_k:.1f}) | ADX:{adx:.1f} | Conf:{confidence:.2f}"
+                )
                 signals["confidence"] = confidence
             elif is_bearish_trend and is_stoch_short_ok:
                 signals["short"] = True
-                signals["reason"] = f"Bearish Trend | Stoch(K:{stoch_k:.1f}) | ADX:{adx:.1f} | Conf:{confidence:.2f}"
+                signals["reason"] = (
+                    f"Bearish Trend | Stoch(K:{stoch_k:.1f}) | ADX:{adx:.1f} | Conf:{confidence:.2f}"
+                )
                 signals["confidence"] = confidence
             else:
-                signals["reason"] = f"Stoch(K:{stoch_k:.1f}, L:{is_stoch_long_ok}, S:{is_stoch_short_ok})"
+                signals["reason"] = (
+                    f"Stoch(K:{stoch_k:.1f}, L:{is_stoch_long_ok}, S:{is_stoch_short_ok})"
+                )
         else:
             signals["reason"] = (
                 f"Blocked: Trend({is_trend_ok}) | ATR({is_atr_move_ok}) | "
                 f"ADX({is_adx_ok}) | Volatility({is_volatility_ok}) | Dir({is_direction_ok})"
             )
         return signals
+
 
 class TelemetryManager:
     def __init__(self, config: TradingConfig):
@@ -844,20 +1583,26 @@ class TelemetryManager:
         if entry_price.is_nan() or exit_price.is_nan() or qty.is_nan():
             logger.warning(f"Invalid trade data for telemetry: {trade}")
             return
-        pnl = (exit_price - entry_price) * qty if side == "long" else (entry_price - exit_price) * qty
+        pnl = (
+            (exit_price - entry_price) * qty
+            if side == "long"
+            else (entry_price - exit_price) * qty
+        )
         pnl -= fees
         self.metrics["total_pnl"] += pnl
         self.metrics["wins" if pnl > 0 else "losses"] += 1
-        self.trade_history.append({
-            "timestamp": trade.get("timestamp", datetime.now(timezone.utc)),
-            "symbol": trade.get("symbol", ""),
-            "side": side,
-            "pnl": pnl,
-            "entry_price": entry_price,
-            "exit_price": exit_price,
-            "qty": qty,
-            "fees": fees,
-        })
+        self.trade_history.append(
+            {
+                "timestamp": trade.get("timestamp", datetime.now(timezone.utc)),
+                "symbol": trade.get("symbol", ""),
+                "side": side,
+                "pnl": pnl,
+                "entry_price": entry_price,
+                "exit_price": exit_price,
+                "qty": qty,
+                "fees": fees,
+            }
+        )
         self._write_telemetry()
 
     def update_equity(self, equity: Decimal):
@@ -882,11 +1627,16 @@ class TelemetryManager:
             logger.error(f"Failed to write telemetry: {e}")
 
     def get_summary(self) -> Dict:
-        win_rate = self.metrics["wins"] / self.metrics["trades"] if self.metrics["trades"] > 0 else 0
+        win_rate = (
+            self.metrics["wins"] / self.metrics["trades"]
+            if self.metrics["trades"] > 0
+            else 0
+        )
         profit_factor = (
-            sum(t["pnl"] for t in self.trade_history if t["pnl"] > 0) /
-            abs(sum(t["pnl"] for t in self.trade_history if t["pnl"] < 0))
-            if any(t["pnl"] < 0 for t in self.trade_history) else float("inf")
+            sum(t["pnl"] for t in self.trade_history if t["pnl"] > 0)
+            / abs(sum(t["pnl"] for t in self.trade_history if t["pnl"] < 0))
+            if any(t["pnl"] < 0 for t in self.trade_history)
+            else float("inf")
         )
         return {
             "trades": self.metrics["trades"],
@@ -897,8 +1647,15 @@ class TelemetryManager:
             "current_equity": self.metrics["current_equity"],
         }
 
+
 class BacktestEngine:
-    def __init__(self, config: TradingConfig, exchange_manager: ExchangeManager, signal_generator: SignalGenerator, indicator_calculator: IndicatorCalculator):
+    def __init__(
+        self,
+        config: TradingConfig,
+        exchange_manager: ExchangeManager,
+        signal_generator: SignalGenerator,
+        indicator_calculator: IndicatorCalculator,
+    ):
         self.config = config
         self.exchange_manager = exchange_manager
         self.signal_generator = signal_generator
@@ -910,7 +1667,10 @@ class BacktestEngine:
         if df is None or df.empty:
             logger.error("No data for backtest")
             return {}
-        df = df[(df.index >= pd.to_datetime(start_date)) & (df.index <= pd.to_datetime(end_date))]
+        df = df[
+            (df.index >= pd.to_datetime(start_date))
+            & (df.index <= pd.to_datetime(end_date))
+        ]
         if df.empty:
             logger.error("No data in specified date range")
             return {}
@@ -919,15 +1679,23 @@ class BacktestEngine:
         trades = []
         positions = {"long": None, "short": None}
         for i in range(len(df) - 1):
-            recent_candles = df.iloc[:i + 1]
+            recent_candles = df.iloc[: i + 1]
             indicators = self.indicator_calculator.calculate_indicators(recent_candles)
-            signals = self.signal_generator.generate_signals(recent_candles, indicators, indicators)
+            signals = self.signal_generator.generate_signals(
+                recent_candles, indicators, indicators
+            )
             current_price = safe_decimal(recent_candles.iloc[-1]["close"])
             atr = indicators.get("atr", Decimal("0.001"))
             if signals["long"] and not positions["long"]:
-                qty = (equity * self.config.risk_percentage) / (atr * self.config.sl_atr_multiplier)
+                qty = (equity * self.config.risk_percentage) / (
+                    atr * self.config.sl_atr_multiplier
+                )
                 sl_price = current_price - atr * self.config.sl_atr_multiplier
-                tp_price = current_price + atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+                tp_price = (
+                    current_price + atr * self.config.tp_atr_multiplier
+                    if self.config.tp_atr_multiplier > 0
+                    else None
+                )
                 positions["long"] = {
                     "qty": qty,
                     "entry_price": current_price,
@@ -935,9 +1703,15 @@ class BacktestEngine:
                     "tp_price": tp_price,
                 }
             elif signals["short"] and not positions["short"]:
-                qty = (equity * self.config.risk_percentage) / (atr * self.config.sl_atr_multiplier)
+                qty = (equity * self.config.risk_percentage) / (
+                    atr * self.config.sl_atr_multiplier
+                )
                 sl_price = current_price + atr * self.config.sl_atr_multiplier
-                tp_price = current_price - atr * self.config.tp_atr_multiplier if self.config.tp_atr_multiplier > 0 else None
+                tp_price = (
+                    current_price - atr * self.config.tp_atr_multiplier
+                    if self.config.tp_atr_multiplier > 0
+                    else None
+                )
                 positions["short"] = {
                     "qty": qty,
                     "entry_price": current_price,
@@ -949,40 +1723,49 @@ class BacktestEngine:
                 if positions[side]:
                     pos = positions[side]
                     if side == "long":
-                        if next_price <= pos["sl_price"] or (pos["tp_price"] and next_price >= pos["tp_price"]):
+                        if next_price <= pos["sl_price"] or (
+                            pos["tp_price"] and next_price >= pos["tp_price"]
+                        ):
                             pnl = (next_price - pos["entry_price"]) * pos["qty"]
                             equity += pnl
-                            trades.append({
-                                "timestamp": df.index[i + 1],
-                                "symbol": symbol,
-                                "side": side,
-                                "pnl": pnl,
-                                "entry_price": pos["entry_price"],
-                                "exit_price": next_price,
-                                "qty": pos["qty"],
-                                "fees": Decimal("0"),
-                            })
+                            trades.append(
+                                {
+                                    "timestamp": df.index[i + 1],
+                                    "symbol": symbol,
+                                    "side": side,
+                                    "pnl": pnl,
+                                    "entry_price": pos["entry_price"],
+                                    "exit_price": next_price,
+                                    "qty": pos["qty"],
+                                    "fees": Decimal("0"),
+                                }
+                            )
                             positions[side] = None
                     else:
-                        if next_price >= pos["sl_price"] or (pos["tp_price"] and next_price <= pos["tp_price"]):
+                        if next_price >= pos["sl_price"] or (
+                            pos["tp_price"] and next_price <= pos["tp_price"]
+                        ):
                             pnl = (pos["entry_price"] - next_price) * pos["qty"]
                             equity += pnl
-                            trades.append({
-                                "timestamp": df.index[i + 1],
-                                "symbol": symbol,
-                                "side": side,
-                                "pnl": pnl,
-                                "entry_price": pos["entry_price"],
-                                "exit_price": next_price,
-                                "qty": pos["qty"],
-                                "fees": Decimal("0"),
-                            })
+                            trades.append(
+                                {
+                                    "timestamp": df.index[i + 1],
+                                    "symbol": symbol,
+                                    "side": side,
+                                    "pnl": pnl,
+                                    "entry_price": pos["entry_price"],
+                                    "exit_price": next_price,
+                                    "qty": pos["qty"],
+                                    "fees": Decimal("0"),
+                                }
+                            )
                             positions[side] = None
         telemetry = TelemetryManager(self.config)
         for trade in trades:
             telemetry.update_metrics(trade)
         telemetry.update_equity(equity)
         return telemetry.get_summary()
+
 
 class StatusDisplay:
     def __init__(self, config: TradingConfig, telemetry: TelemetryManager):
@@ -1009,18 +1792,28 @@ class StatusDisplay:
         for symbol, state in symbol_states.items():
             signals = state.get("signals", {})
             table.add_row(f"{symbol} Signal", signals.get("reason", "N/A"))
-            table.add_row(f"{symbol} Confidence", f"{signals.get('confidence', Decimal('0')):.2f}")
+            table.add_row(
+                f"{symbol} Confidence", f"{signals.get('confidence', Decimal('0')):.2f}"
+            )
             positions = state.get("positions", {})
             for side in ["long", "short"]:
                 pos = positions.get(side, {})
                 if pos.get("qty", Decimal("0")).copy_abs() >= POSITION_QTY_EPSILON:
-                    table.add_row(f"{symbol} {side.capitalize()} Pos", f"Qty: {pos['qty']}, Entry: {pos['entry_price']}")
-        self.live.update(Panel(table, title="Pyrmethus Dashboard", border_style="bright_magenta"))
+                    table.add_row(
+                        f"{symbol} {side.capitalize()} Pos",
+                        f"Qty: {pos['qty']}, Entry: {pos['entry_price']}",
+                    )
+        self.live.update(
+            Panel(table, title="Pyrmethus Dashboard", border_style="bright_magenta")
+        )
         self.live.refresh()
+
 
 class TradingBot:
     def __init__(self):
-        logger.info(f"{Fore.MAGENTA}Initializing Pyrmethus v4.6.0 (Quantum Nexus Edition)...{Style.RESET_ALL}")
+        logger.info(
+            f"{Fore.MAGENTA}Initializing Pyrmethus v4.6.0 (Quantum Nexus Edition)...{Style.RESET_ALL}"
+        )
         self.config = TradingConfig()
         self.exchange_manager = ExchangeManager(self.config)
         self.indicator_calculator = IndicatorCalculator(self.config)
@@ -1028,9 +1821,16 @@ class TradingBot:
         self.order_manager = OrderManager(self.config, self.exchange_manager)
         self.telemetry = TelemetryManager(self.config)
         self.status_display = StatusDisplay(self.config, self.telemetry)
-        self.backtest_engine = BacktestEngine(self.config, self.exchange_manager, self.signal_generator, self.indicator_calculator)
+        self.backtest_engine = BacktestEngine(
+            self.config,
+            self.exchange_manager,
+            self.signal_generator,
+            self.indicator_calculator,
+        )
         self.shutdown_requested = False
-        self.telegram_bot = Bot(self.config.telegram_token) if self.config.telegram_token else None
+        self.telegram_bot = (
+            Bot(self.config.telegram_token) if self.config.telegram_token else None
+        )
         self._setup_signal_handlers()
         logger.info(f"{Fore.GREEN}Pyrmethus initialized{Style.RESET_ALL}")
 
@@ -1042,7 +1842,9 @@ class TradingBot:
     def _signal_handler(self, sig: int, frame: Optional[types.FrameType]):
         if not self.shutdown_requested:
             sig_name = signal.Signals(sig).name
-            console.print(f"\n[bold yellow]Signal {sig_name} received. Shutting down...[/]")
+            console.print(
+                f"\n[bold yellow]Signal {sig_name} received. Shutting down...[/]"
+            )
             self.shutdown_requested = True
 
     async def graceful_shutdown(self):
@@ -1051,7 +1853,9 @@ class TradingBot:
         for symbol in self.config.symbols:
             try:
                 params = {"category": self.config.bybit_v5_category, "symbol": symbol}
-                await self.exchange_manager.exchange.cancel_all_orders(symbol, params=params)
+                await self.exchange_manager.exchange.cancel_all_orders(
+                    symbol, params=params
+                )
                 logger.info(f"Cancelled orders for {symbol}")
             except Exception as e:
                 logger.error(f"Failed to cancel orders for {symbol}: {e}")
@@ -1060,7 +1864,9 @@ class TradingBot:
                 for side in ["long", "short"]:
                     qty = safe_decimal(positions.get(side, {}).get("qty", "0"))
                     if qty.copy_abs() >= POSITION_QTY_EPSILON:
-                        await self.order_manager.close_position(symbol, side, qty, "GracefulShutdown")
+                        await self.order_manager.close_position(
+                            symbol, side, qty, "GracefulShutdown"
+                        )
         await self.exchange_manager.close()
         self.status_display.stop()
         if self.telegram_bot:
@@ -1072,34 +1878,48 @@ class TradingBot:
                 f"Total PnL: {summary['total_pnl']:.2f}\n"
                 f"Max Drawdown: {summary['max_drawdown']}"
             )
-            await telegram_notify(self.telegram_bot, self.config.telegram_chat_id, message)
+            await telegram_notify(
+                self.telegram_bot, self.config.telegram_chat_id, message
+            )
         console.print("[bold yellow]Shutdown Complete.[/]")
         logger.warning(f"{Fore.YELLOW}Shutdown Complete{Style.RESET_ALL}")
 
     async def trading_spell_cycle(self, cycle_count: int, symbol: str) -> Dict:
         state = {"signals": {}, "positions": {}, "status": "OK"}
         df = await self.exchange_manager.fetch_ohlcv(symbol, self.config.interval)
-        conf_df = await self.exchange_manager.fetch_ohlcv(symbol, self.config.confirmation_interval)
+        conf_df = await self.exchange_manager.fetch_ohlcv(
+            symbol, self.config.confirmation_interval
+        )
         if df is None or df.empty or conf_df is None or conf_df.empty:
             state["status"] = "FAIL:FETCH_OHLCV"
             return state
         indicators = self.indicator_calculator.calculate_indicators(df)
         conf_indicators = self.indicator_calculator.calculate_indicators(conf_df)
         if not self.signal_generator.is_model_trained:
-            await self.signal_generator.train_ml_model(df, {k: pd.Series(v) for k, v in indicators.items()})
-        signals = self.signal_generator.generate_signals(df, indicators, conf_indicators)
+            await self.signal_generator.train_ml_model(
+                df, {k: pd.Series(v) for k, v in indicators.items()}
+            )
+        signals = self.signal_generator.generate_signals(
+            df, indicators, conf_indicators
+        )
         state["signals"] = signals
         total_equity, _ = await self.exchange_manager.get_balance()
         self.telemetry.update_equity(total_equity)
         if total_equity is None or total_equity.is_nan() or total_equity <= 0:
             state["status"] = "FAIL:FETCH_EQUITY"
             return state
-        drawdown = (self.telemetry.metrics["peak_equity"] - total_equity) / self.telemetry.metrics["peak_equity"]
+        drawdown = (
+            self.telemetry.metrics["peak_equity"] - total_equity
+        ) / self.telemetry.metrics["peak_equity"]
         if drawdown > MAX_DRAWDOWN_PERCENT:
             logger.error(f"Max drawdown exceeded: {drawdown:.2%}")
             state["status"] = "FAIL:MAX_DRAWDOWN"
             if self.telegram_bot:
-                await telegram_notify(self.telegram_bot, self.config.telegram_chat_id, f"<b>Max Drawdown Exceeded</b>: {drawdown:.2%}")
+                await telegram_notify(
+                    self.telegram_bot,
+                    self.config.telegram_chat_id,
+                    f"<b>Max Drawdown Exceeded</b>: {drawdown:.2%}",
+                )
             self.shutdown_requested = True
             return state
         positions = await self.exchange_manager.get_current_position(symbol)
@@ -1109,22 +1929,35 @@ class TradingBot:
             return state
         long_qty = safe_decimal(positions.get("long", {}).get("qty", "0"))
         short_qty = safe_decimal(positions.get("short", {}).get("qty", "0"))
-        if long_qty.copy_abs() >= POSITION_QTY_EPSILON or short_qty.copy_abs() >= POSITION_QTY_EPSILON:
-            logger.debug(f"Position exists for {symbol}: Long={long_qty}, Short={short_qty}")
+        if (
+            long_qty.copy_abs() >= POSITION_QTY_EPSILON
+            or short_qty.copy_abs() >= POSITION_QTY_EPSILON
+        ):
+            logger.debug(
+                f"Position exists for {symbol}: Long={long_qty}, Short={short_qty}"
+            )
             return state
         current_price = safe_decimal(df.iloc[-1]["close"])
         atr = indicators.get("atr", Decimal("0.001"))
         if signals["long"]:
-            await self.order_manager.place_risked_market_order(symbol, "buy", atr, total_equity, current_price, signals["confidence"])
+            await self.order_manager.place_risked_market_order(
+                symbol, "buy", atr, total_equity, current_price, signals["confidence"]
+            )
         elif signals["short"]:
-            await self.order_manager.place_risked_market_order(symbol, "sell", atr, total_equity, current_price, signals["confidence"])
+            await self.order_manager.place_risked_market_order(
+                symbol, "sell", atr, total_equity, current_price, signals["confidence"]
+            )
         return state
 
     async def run(self):
         self._display_startup_info()
         termux_notify("Pyrmethus Started", f"Trading {', '.join(self.config.symbols)}")
         if self.telegram_bot:
-            await telegram_notify(self.telegram_bot, self.config.telegram_chat_id, f"<b>Pyrmethus Started</b>: Trading {', '.join(self.config.symbols)}")
+            await telegram_notify(
+                self.telegram_bot,
+                self.config.telegram_chat_id,
+                f"<b>Pyrmethus Started</b>: Trading {', '.join(self.config.symbols)}",
+            )
         self.status_display.start()
         cycle_count = 0
         last_config_reload = time.monotonic()
@@ -1136,19 +1969,28 @@ class TradingBot:
                 last_config_reload = time.monotonic()
             symbol_states = {}
             total_equity, _ = await self.exchange_manager.get_balance()
-            tasks = [self.trading_spell_cycle(cycle_count, symbol) for symbol in self.config.symbols]
+            tasks = [
+                self.trading_spell_cycle(cycle_count, symbol)
+                for symbol in self.config.symbols
+            ]
             results = await asyncio.gather(*tasks, return_exceptions=True)
             for symbol, result in zip(self.config.symbols, results):
                 if isinstance(result, Exception):
                     logger.error(f"Cycle {cycle_count} failed for {symbol}: {result}")
-                    symbol_states[symbol] = {"status": "ERROR", "signals": {}, "positions": {}}
+                    symbol_states[symbol] = {
+                        "status": "ERROR",
+                        "signals": {},
+                        "positions": {},
+                    }
                 else:
                     symbol_states[symbol] = result
-            self.status_display.update(symbol_states, total_equity or Decimal("0"), cycle_count)
+            self.status_display.update(
+                symbol_states, total_equity or Decimal("0"), cycle_count
+            )
             cycle_duration = time.monotonic() - cycle_start
             sleep_duration = max(0, self.config.loop_sleep_seconds - cycle_duration)
             if sleep_duration > 0:
                 await asyncio.sleep(sleep_duration)
         await self.graceful_shutdown()
-        console.print(f"\n[bold bright_cyan]Pyrmethus terminated.[/]")
-        sys.exit();
+        console.print("\n[bold bright_cyan]Pyrmethus terminated.[/]")
+        sys.exit()

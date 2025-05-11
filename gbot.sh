@@ -1,0 +1,972 @@
+#!/bin/bash
+
+# --- GridBot Enhanced v7 ---
+# Description: Advanced Bybit Grid Trading Bot - Enhanced Robustness & Error Handling (v6 Issues Addressed + URL Fixes, Validation)
+# Version: 7.0
+# Disclaimer: Trading involves risk. Use this script at your own risk.
+#             Thoroughly test in Paper Trading mode and on Bybit Testnet before real funds.
+
+# --- Configuration ---
+
+CONFIG_FILE="gridbot.conf"
+
+# Load configuration from file or prompt user
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+    if [ -z "$BYBIT_API_KEY" ] || [ -z "$BYBIT_API_SECRET" ] || [ -z "$SYMBOL" ] || [ -z "$GRID_LEVELS" ] || [ -z "$GRID_INTERVAL" ] || [ -z "$ORDER_SIZE" ]; then
+        log_message "ERROR" "Incomplete configuration in $CONFIG_FILE. Please check required parameters."
+        exit 1
+    fi
+else
+    echo "Configuration file '$CONFIG_FILE' not found. Please create it or enter settings manually:"
+    read -p "Enter your Bybit API Key: " BYBIT_API_KEY
+    read -s -p "Enter your Bybit API Secret: " BYBIT_API_SECRET
+    echo ""
+    read -p "Enter trading symbol (e.g., BTCUSDT): " SYMBOL
+    read -p "Enter number of grid levels (per side, e.g., 5): " GRID_LEVELS
+    read -p "Enter base grid interval (price difference, e.g., 100): " GRID_INTERVAL
+    read -p "Enter order size (e.g., 0.001): " ORDER_SIZE
+    read -p "Enter leverage (e.g., 2): " LEVERAGE
+    read -p "Enter max open orders (e.g., 20): " MAX_OPEN_ORDERS
+    read -p "Enter min 24h turnover (e.g., 50000000): " MIN_24H_TURNOVER
+    read -p "Enter max spread percent (e.g., 0.1): " MAX_SPREAD_PERCENT
+    read -p "Enter total profit target USD (e.g., 50): " GRID_TOTAL_PROFIT_TARGET_USD
+    read -p "Enter total loss limit USD (e.g., 25): " GRID_TOTAL_LOSS_LIMIT_USD
+    read -p "Enter check interval seconds (e.g., 30): " CHECK_INTERVAL_SECONDS
+    read -p "Enter log file name (e.g., gridbot.log): " LOG_FILE
+    read -p "Enable Paper Trading Mode? (yes/no): " PAPER_TRADING_MODE_INPUT
+    read -p "Enable SMS Notifications? (yes/no): " SMS_NOTIFICATIONS_ENABLED_INPUT
+    if [[ "$SMS_NOTIFICATIONS_ENABLED_INPUT" == "yes" ]]; then
+        read -p "Enter SMS Phone Number (e.g., +15551234567): " SMS_PHONE_NUMBER
+    fi
+
+    if [[ -z "$LEVERAGE" ]]; then LEVERAGE=1; fi # Default leverage to 1 if not provided
+    if [[ -z "$MAX_OPEN_ORDERS" ]]; then MAX_OPEN_ORDERS=20; fi # Default max orders
+    if [[ -z "$MIN_24H_TURNOVER" ]]; then MIN_24H_TURNOVER=50000000; fi #Default turnover
+    if [[ -z "$MAX_SPREAD_PERCENT" ]]; then MAX_SPREAD_PERCENT=0.1; fi #Default spread
+    if [[ -z "$GRID_TOTAL_PROFIT_TARGET_USD" ]]; then GRID_TOTAL_PROFIT_TARGET_USD=50; fi #Default profit target
+    if [[ -z "$GRID_TOTAL_LOSS_LIMIT_USD" ]]; then GRID_TOTAL_LOSS_LIMIT_USD=25; fi #Default loss limit
+    if [[ -z "$CHECK_INTERVAL_SECONDS" ]]; then CHECK_INTERVAL_SECONDS=30; fi #Default check interval
+    if [[ -z "$LOG_FILE" ]]; then LOG_FILE="gridbot.log"; fi #Default log file
+    if [[ "$PAPER_TRADING_MODE_INPUT" == "yes" ]]; then PAPER_TRADING_MODE="true"; else PAPER_TRADING_MODE="false"; fi # Paper Trading Mode
+    if [[ "$SMS_NOTIFICATIONS_ENABLED_INPUT" == "yes" ]]; then SMS_NOTIFICATIONS_ENABLED="true"; else SMS_NOTIFICATIONS_ENABLED="false"; fi # SMS Notifications
+
+fi
+
+# --- Script Settings & Defaults (Do not modify here, use config file) ---
+: ${BYBIT_API_URL:="https://api.bybit.com"}       # Default to mainnet API URL if not set in config
+: ${LEVERAGE:=1}                                  # Default leverage if not set in config
+: ${MAX_OPEN_ORDERS:=20}                          # Default max open orders if not set in config
+: ${MIN_24H_TURNOVER:=50000000}                    # Default min 24h turnover
+: ${MAX_SPREAD_PERCENT:=0.1}                     # Default max spread percentage
+: ${GRID_TOTAL_PROFIT_TARGET_USD:=50}              # Default grid profit target
+: ${GRID_TOTAL_LOSS_LIMIT_USD:=25}                 # Default grid loss limit
+: ${CHECK_INTERVAL_SECONDS:=30}                   # Default check interval
+: ${LOG_FILE:="gridbot.log"}                       # Default log file
+: ${PAPER_TRADING_MODE:="false"}                   # Default Paper Trading Mode - disabled
+: ${SMS_NOTIFICATIONS_ENABLED:="false"}          # SMS Notifications - disabled by default
+
+
+# --- Global Variables ---
+ACTIVE_BUY_ORDERS=()    # Associative array to track active buy orders (price as key, order_id as value)
+ACTIVE_SELL_ORDERS=()   # Associative array to track active sell orders (price as key, order_id as value)
+POSITION_SIZE=0         # Current position size (from Bybit API)
+ENTRY_PRICE=0           # Entry price of the current position
+REALIZED_PNL_USD=0      # Accumulated realized PNL in USD
+LAST_PNL_CHECK_TIME=$(date +%s) # Timestamp of last PNL check for avg trade duration
+ORDER_FILL_COUNT=0      # Count of filled orders for fill rate calculation
+ORDER_PLACED_COUNT=0    # Count of placed orders
+VOLATILITY_MULTIPLIER=1 # Dynamic Volatility Multiplier for grid spacing (initially 1x)
+TREND_BIAS=0            # Trend bias (0=Neutral, 1=Uptrend bias, -1=Downtrend bias - not fully implemented yet)
+
+
+# --- Dependency Check ---
+check_dependencies() {
+    if ! command -v curl &> /dev/null; then
+        echo "Error: curl is not installed. Please install it (e.g., sudo apt install curl)."
+        exit 1
+    fi
+    if ! command -v jq &> /dev/null; then
+        echo "Error: jq is not installed. Please install it (e.g., sudo apt install jq)."
+        exit 1
+    fi
+    if ! command -v bc &> /dev/null; then
+        echo "Error: bc is not installed. Please install it (e.g., sudo apt install bc)."
+        exit 1
+    fi
+    if ! command -v openssl &> /dev/null; then
+        echo "Error: openssl is not installed. Please install it (e.g., sudo apt install openssl)."
+        exit 1
+    fi
+    if [[ "$SMS_NOTIFICATIONS_ENABLED" == "true" ]]; then
+        if ! command -v termux-sms-send &> /dev/null; then
+            echo "Error: termux-api or termux-sms-send is not installed."
+            echo "       Please install termux-api and grant SMS permissions in Termux."
+            echo "       (pkg install termux-api)"
+            exit 1
+        fi
+    fi
+    echo "Dependencies check passed."
+}
+
+# --- Logging Function ---
+log_message() {
+    local level="$1" # INFO, WARNING, ERROR
+    local message="$2"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    printf "[$timestamp] [$level] %s\n" "$message" >> "$LOG_FILE"  # Use printf %s for message
+    if [[ "$level" == "ERROR" ]]; then
+        printf "[$timestamp] [ERROR] %s\n" "$message" # Also print errors to console
+    fi
+}
+
+# --- Notification Functions ---
+send_sms_notification() {
+    if [[ "$SMS_NOTIFICATIONS_ENABLED" == "true" ]]; then
+        local message="$1"
+        termux-sms-send -n "$SMS_PHONE_NUMBER" "$(printf '%s' "$message")" # Use printf %s for message
+        local sms_status=$?
+        if [[ "$sms_status" -ne "0" ]]; then
+            log_message "WARNING" "Failed to send SMS notification. Termux-sms-send exit code: $sms_status"
+        fi
+    fi
+}
+
+
+# --- API Request Function (V5 - Enhanced Error Handling & Auth) ---
+bybit_request() {
+    local endpoint="$1"       # API endpoint (e.g., /v5/market/tickers)
+    local method="${2:-GET}"  # HTTP method, default GET
+    local data="${3:-}"       # JSON data for POST/PUT requests
+    local retries=3           # Number of retries
+    local delay=5             # Delay between retries in seconds
+    local response=""         # Initialize response variable
+
+    while [[ $retries -gt 0 ]]; do
+        local timestamp=$(date +%s%3N) # Milliseconds timestamp for V5
+        local recv_window=5000       # Recommended recvWindow
+        local signature_payload="GET$timestamp$recv_window$data" # Payload for signature
+        if [[ "$method" != "GET" ]]; then
+            signature_payload="$method$timestamp$recv_window$endpoint$data" # Different payload for POST/PUT
+        fi
+
+
+        local signature=$(echo -n "$signature_payload" | openssl dgst -sha256 -hmac "$BYBIT_API_SECRET" | awk '{print $2}')
+        local auth_params="api_key=$BYBIT_API_KEY&timestamp=$timestamp&recv_window=$recv_window&sign=$signature"
+
+        local url_base="$BYBIT_API_URL$endpoint"
+        local full_url=""
+
+        if [[ "$method" == "GET" ]]; then
+            full_url="$url_base?$auth_params"
+        else
+            full_url="$url_base?$auth_params"
+        fi
+
+        log_message "DEBUG" "API Request URL: $full_url" # Log the full constructed URL
+
+        local curl_command="curl -s -X $method -H 'Content-Type: application/json'"
+
+        if [[ "$method" != "GET" ]]; then
+            curl_command="$curl_command -d '$data'"
+        fi
+
+        curl_command="$curl_command \"$full_url\"" # Quote the full URL
+
+        log_message "DEBUG" "Full curl command: $curl_command" # Log the full curl command
+
+        response=$("$curl_command")
+        curl_exit_code=$?
+
+        if [[ $curl_exit_code -eq 0 ]]; then # Check curl command exit code
+            ret_code=$(echo "$response" | jq -r '.retCode')
+            if [[ "$ret_code" == "0" ]]; then # Check Bybit API retCode
+                echo "$response"
+                return 0 # Success
+            else
+                ret_msg=$(echo "$response" | jq -r '.retMsg')
+                log_message "WARNING" "API Request Failed (retCode: $ret_code, retMsg: $retMsg). Retrying... (Retries left: $retries)"
+            fi
+        else
+            log_message "WARNING" "curl command failed with exit code: $curl_exit_code. Response: $response. Retrying... (Retries left: $retries)"
+        fi
+
+        retries=$((retries - 1))
+        if [[ $retries -gt 0 ]]; then
+            sleep $delay
+        fi
+    done
+
+    log_message "ERROR" "API Request failed after multiple retries. Endpoint: $endpoint, Method: $method, Data: $data, Response: $response"
+    send_sms_notification "ERROR: API Request failed after retries for endpoint: $endpoint"
+    return 1 # Failure
+}
+
+
+# --- Get Market Price (V5) ---
+get_market_price() {
+    local response=$(bybit_request "/v5/market/tickers?symbol=$SYMBOL")
+    if [[ $? -eq 0 ]]; then
+        echo "$(echo "$response" | jq -r '.result.list[0].lastPrice')"
+    else
+        return 1 # bybit_request already logged the error
+    fi
+}
+
+# --- Get Order Book (V5) ---
+get_order_book() {
+    bybit_request "/v5/market/orderbook?symbol=$SYMBOL&limit=200"
+}
+
+# --- Get Ticker Info (V5 - for Volume & Spread) ---
+get_ticker_info() {
+    bybit_request "/v5/market/tickers?symbol=$SYMBOL"
+}
+
+# --- Get Kline Data (V5 - for EMA Calculation) ---
+get_kline_data() {
+    local interval="${1:-15}" # Default interval 15 minutes
+    local limit="${2:-200}"   # Default limit 200 data points
+    bybit_request "/v5/market/kline?symbol=$SYMBOL&interval=$interval&limit=$limit"
+}
+
+
+# --- Check Market Conditions (Volume & Spread - V5 Ticker) ---
+check_market_conditions() {
+    local ticker_response=$(get_ticker_info)
+    if [[ $? -ne 0 ]]; then
+        log_message "WARNING" "Failed to get ticker info for market condition check."
+        return 1 # Treat as market condition failure
+    fi
+
+    local turnover24h=$(echo "$ticker_response" | jq -r '.result.list[0].turnover24h')
+    local best_bid=$(echo "$ticker_response" | jq -r '.result.list[0].bidPrice')
+    local best_ask=$(echo "$ticker_response" | jq -r '.result.list[0].askPrice')
+
+    if [[ $(echo "$turnover24h < $MIN_24H_TURNOVER" | bc -l) -eq 1 ]]; then
+        log_message "WARNING" "24h Turnover ($turnover24h) below threshold ($MIN_24H_TURNOVER). Market may be illiquid."
+        send_sms_notification "WARNING: 24h Turnover below threshold. Market illiquid."
+        return 1
+    fi
+
+    local spread_percent=$(echo "scale=4; ( ($best_ask - $best_bid) / $best_ask ) * 100" | bc -l)
+    if [[ $(echo "$spread_percent > $MAX_SPREAD_PERCENT" | bc -l) -eq 1 ]]; then
+        log_message "WARNING" "Bid-Ask Spread ($spread_percent%) exceeds threshold ($MAX_SPREAD_PERCENT%)."
+        send_sms_notification "WARNING: Bid-Ask Spread exceeds threshold."
+        return 1
+    fi
+
+    echo "Market conditions OK (24h Turnover: $turnover24h, Spread: $spread_percent%)."
+    return 0
+}
+
+# --- Check Volatility (Simple Std Dev of Price Changes) ---
+check_volatility() {
+    local price_history=()
+    local history_count=20 # Number of recent prices to check for volatility
+    local price
+    local current_price
+
+    log_message "INFO" "Checking volatility..."
+
+    for i in $(seq 1 $history_count); do
+        price=$(get_market_price)
+        if [[ $? -ne 0 ]]; then
+            log_message "WARNING" "Failed to get price history for volatility check."
+            return 1 # Volatility check failure if price fetch fails
+        fi
+        price_history+=("$price")
+        sleep 1 # Wait briefly between price fetches
+    done
+
+    local sum=0
+    local sum_sq=0
+    local n=$history_count
+
+    for price in "${price_history[@]}"; do
+        sum=$(echo "$sum + $price" | bc)
+        sum_sq=$(echo "$sum_sq + ($price * $price)" | bc)
+    done
+
+    local average_price=$(echo "scale=8; $sum / $n" | bc)
+    local variance=$(echo "scale=8; ($sum_sq / $n) - ($average_price * $average_price)" | bc)
+    local std_dev=$(echo "scale=8; sqrt($variance)" | bc)
+
+
+    # Heuristic threshold - adjust as needed. Higher = less sensitive to volatility.
+    local volatility_threshold=$(echo "scale=8; $average_price * 0.005" | bc) # e.g., 0.5% of average price
+
+    if [[ $(echo "$std_dev > $volatility_threshold" | bc -l) -eq 1 ]]; then
+        log_message "WARNING" "Market volatility is high (Std Dev: $std_dev, Threshold: $volatility_threshold). Consider pausing grid."
+        send_sms_notification "WARNING: Market volatility is high (Std Dev: $std_dev)."
+        VOLATILITY_MULTIPLIER=$(echo "scale=2; $std_dev / $volatility_threshold" | bc) # Dynamic multiplier
+        if [[ $(echo "$VOLATILITY_MULTIPLIER > 2.0" | bc -l) -eq 1 ]]; then # Limit max multiplier
+             VOLATILITY_MULTIPLIER=2.0
+        fi
+        log_message "INFO" "Volatility Multiplier set to: $VOLATILITY_MULTIPLIER"
+        return 1 # High volatility detected
+    else
+        VOLATILITY_MULTIPLIER=1 # Reset to normal if volatility low
+        log_message "INFO" "Volatility check passed (Std Dev: $std_dev, Threshold: $volatility_threshold). Volatility Multiplier reset to 1x."
+        return 0 # Volatility is acceptable
+    fi
+}
+
+# --- Calculate EMA (Exponential Moving Average) ---
+calculate_ema() {
+    local interval="${1:-15}" # Default 15 minutes
+    local period="${2:-20}"   # Default EMA period 20
+
+    local kline_response=$(get_kline_data "$interval" "$period")
+    if [[ $? -ne 0 ]]; then
+        log_message "WARNING" "Failed to get kline data for EMA calculation."
+        return 1
+    fi
+
+    local close_prices=($(echo "$kline_response" | jq -r '.result.list[].close'))
+    local ema=0
+    local k=$(echo "scale=8; 2 / ($period + 1)" | bc) # Smoothing factor
+
+    # Calculate EMA - Simple implementation (can be optimized for longer periods)
+    for price in "${close_prices[@]}"; do
+        if [[ "$ema" == "0" ]]; then
+            ema="$price" # First EMA is just the first price
+        else
+            ema=$(echo "scale=8; ($price * $k) + ($ema * (1 - $k))" | bc)
+        fi
+    done
+    echo "$ema"
+}
+
+
+# --- Check Trend (using EMA) - Basic ---
+check_trend() {
+    local ema_short=$(calculate_ema 15 20) # 15 min chart, 20 period EMA
+    local ema_long=$(calculate_ema 60 50)  # 1 hour chart, 50 period EMA
+
+    if [[ $? -ne 0 ]]; then
+        log_message "WARNING" "Failed to calculate EMA for trend check."
+        return 1
+    fi
+
+    local current_price=$(get_market_price)
+    if [[ $? -ne 0 ]]; then
+        log_message "WARNING" "Failed to get current price for trend check."
+        return 1
+    fi
+
+
+    if [[ $(echo "$ema_short > $ema_long" | bc -l) -eq 1 ]] && [[ $(echo "$current_price > $ema_short" | bc -l) -eq 1 ]]; then
+        TREND_BIAS=1 # Uptrend
+        log_message "INFO" "Uptrend detected (EMA short > EMA long and Price > EMA short). Trend Bias: Uptrend"
+        send_sms_notification "INFO: Uptrend detected."
+        echo "Uptrend"
+    elif [[ $(echo "$ema_short < $ema_long" | bc -l) -eq 1 ]] && [[ $(echo "$current_price < $ema_short" | bc -l) -eq 1 ]]; then
+        TREND_BIAS=-1 # Downtrend
+        log_message "INFO" "Downtrend detected (EMA short < EMA long and Price < EMA short). Trend Bias: Downtrend"
+        send_sms_notification "INFO: Downtrend detected."
+        echo "Downtrend"
+    else
+        TREND_BIAS=0 # Neutral
+        log_message "INFO" "Neutral trend detected (or mixed signals). Trend Bias: Neutral"
+        echo "Neutral"
+    fi
+    return 0
+}
+
+
+# --- Adjust Grid Interval Dynamically based on Volatility ---
+adjust_grid_interval_dynamic() {
+    local base_interval="$GRID_INTERVAL"
+    local dynamic_interval=$(echo "scale=2; $base_interval * $VOLATILITY_MULTIPLIER" | bc -l)
+    echo "$dynamic_interval"
+}
+
+
+# --- Place Grid Orders ---
+place_grid_orders() {
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        if [[ $(check_market_conditions) -ne 0 ]]; then
+            log_message "WARNING" "Market conditions not favorable. Not placing grid orders."
+            return 1
+        fi
+
+        if [[ $(check_volatility) -ne 0 ]]; then
+            log_message "WARNING" "Market volatility is high. Adjusting grid spacing dynamically."
+            # Continue placing orders, but with adjusted spacing
+        fi
+
+        if [[ $(check_trend) -ne 0 ]]; then
+            log_message "WARNING" "Trend check failed, proceeding with neutral grid placement."
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Market condition and volatility checks skipped."
+        log_message "INFO" "[PAPER TRADING] Trend check skipped."
+    fi
+
+
+    local current_price=$(get_market_price)
+    if [[ $? -ne 0 ]]; then
+        log_message "ERROR" "Failed to get current price for placing grid orders."
+        return 1
+    fi
+    log_message "INFO" "Current Price: $current_price"
+
+
+    # --- Set Leverage (Ensure Isolated Margin Mode) ---
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        set_leverage
+        if [[ $? -ne 0 ]]; then
+            log_message "ERROR" "Failed to set leverage. Aborting grid placement."
+            return 1
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Leverage setting skipped."
+    fi
+
+
+    local grid_levels="$GRID_LEVELS"
+    local base_grid_interval="$GRID_INTERVAL"
+    local dynamic_grid_interval=$(adjust_grid_interval_dynamic) # Get dynamic interval
+    local order_size="$ORDER_SIZE"
+
+
+    log_message "INFO" "Placing grid orders around price: $current_price, Levels: $grid_levels, Base Interval: $base_grid_interval, Dynamic Interval: $dynamic_grid_interval, Size: $order_size"
+
+    # --- Place Sell Orders Above Current Price ---
+    for ((i=1; i<=grid_levels; i++)); do
+        local sell_price=$(echo "$current_price + ($i * $dynamic_grid_interval)" | bc -l)
+        # Validate sell_price before using as array key and in order placement
+        if [[ -n "$sell_price" ]] && echo "$sell_price" | grep -Eq '^[0-9.]+$'; then
+            if [[ ${#ACTIVE_SELL_ORDERS[@]} -lt "$MAX_OPEN_ORDERS" ]]; then # Check max open orders limit
+                if [[ -z "${ACTIVE_SELL_ORDERS[$sell_price]}" ]]; then # Check if order at this price already exists
+                    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+                        place_limit_order "Sell" "$sell_price" "$order_size"
+                        if [[ $? -eq 0 ]]; then
+                            local order_id=$(parse_order_id_from_response "$response") # Get real order ID
+                            ACTIVE_SELL_ORDERS+=([$sell_price]="$order_id")
+                            ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                            log_message "INFO" "Placed SELL limit order at price: $sell_price, size: $order_size, Order ID: $order_id"
+                        else
+                            log_message "WARNING" "Failed to place SELL limit order at price: $sell_price"
+                        fi
+                    else
+                        log_message "INFO" "[PAPER TRADING] Would place SELL limit order at price: $sell_price, size: $order_size, Price: $sell_price"
+                        ACTIVE_SELL_ORDERS+=([$sell_price]="PAPER_ORDER_$RANDOM") # Dummy order ID for paper trading
+                        ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                    fi
+                else
+                     log_message "INFO" "SELL order already exists at price: $sell_price. Skipping."
+                fi
+            else
+                log_message "WARNING" "Max open orders limit ($MAX_OPEN_ORDERS) reached. Not placing more SELL orders."
+                break # Stop placing sell orders if limit reached
+            fi
+         else
+            log_message "WARNING" "Invalid sell price calculated: '$sell_price'. Skipping order placement at this level."
+         fi
+    done
+
+    # --- Place Buy Orders Below Current Price ---
+    for ((i=1; i<=grid_levels; i++)); do
+        local buy_price=$(echo "$current_price - ($i * $dynamic_grid_interval)" | bc -l)
+        # Validate buy_price before using as array key and in order placement
+        if [[ -n "$buy_price" ]] && echo "$buy_price" | grep -Eq '^[0-9.]+$'; then
+             if [[ ${#ACTIVE_BUY_ORDERS[@]} -lt "$MAX_OPEN_ORDERS" ]]; then # Check max open orders limit
+                if [[ -z "${ACTIVE_BUY_ORDERS[$buy_price]}" ]]; then # Check if order at this price already exists
+                    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+                        place_limit_order "Buy" "$buy_price" "$order_size"
+                        if [[ $? -eq 0 ]]; then
+                             local order_id=$(parse_order_id_from_response "$response") # Get real order ID
+                             ACTIVE_BUY_ORDERS+=([$buy_price]="$order_id")
+                             ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                             log_message "INFO" "Placed BUY limit order at price: $buy_price, size: $order_size, Order ID: $order_id"
+                        else
+                            log_message "WARNING" "Failed to place BUY limit order at price: $buy_price"
+                        fi
+                     else
+                        log_message "INFO" "[PAPER TRADING] Would place BUY limit order at price: $buy_price, size: $order_size, Price: $buy_price"
+                        ACTIVE_BUY_ORDERS+=([$buy_price]="PAPER_ORDER_$RANDOM") # Dummy order ID for paper trading
+                        ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                     fi
+                 else
+                     log_message "INFO" "BUY order already exists at price: $buy_price. Skipping."
+                 fi
+             else
+                 log_message "WARNING" "Max open orders limit ($MAX_OPEN_ORDERS) reached. Not placing more BUY orders."
+                 break # Stop placing buy orders if limit reached
+             fi
+         else
+            log_message "WARNING" "Invalid buy price calculated: '$buy_price'. Skipping order placement at this level."
+         fi
+    done
+
+    log_message "INFO" "Grid order placement complete. Placed $ORDER_PLACED_COUNT new orders."
+    ORDER_PLACED_COUNT=0 # Reset counter
+}
+
+
+# --- Set Leverage (Isolated Margin & Leverage) - V5 Account API ---
+set_leverage() {
+    log_message "INFO" "Setting leverage to $LEVERAGE x and isolated margin mode..."
+    local data="symbol=$SYMBOL&leverage=$LEVERAGE"
+    local response=$(bybit_request "/v5/position/set-leverage" "POST" "$data")
+    if [[ $? -eq 0 ]]; then
+        log_message "INFO" "Leverage set successfully to $LEVERAGE x and isolated margin mode."
+        return 0
+    else
+        log_message "ERROR" "Failed to set leverage."
+        return 1
+    fi
+}
+
+
+# --- Place Limit Order (V5 Trading API) ---
+place_limit_order() {
+    local side="$1"      # "Buy" or "Sell"
+    local price="$2"
+    local qty="$3"
+
+    local order_type="Limit"
+    local time_in_force="GTC" # Good-Til-Cancel
+
+    local data="symbol=$SYMBOL&side=$side&orderType=$order_type&qty=$qty&price=$price&timeInForce=$time_in_force&leverage=$LEVERAGE"
+    local response=$(bybit_request "/v5/order/create" "POST" "$data")
+
+    if [[ $? -eq 0 ]]; then
+        echo "$response" # Output full response to parse order ID later
+        return 0
+    else
+        log_message "ERROR" "Failed to place $side limit order at price: $price, size: $qty."
+        return 1
+    fi
+}
+
+# --- Parse Order ID from Response of Place Order API Call ---
+parse_order_id_from_response() {
+    local response="$1"
+    echo "$response" | jq -r '.result.orderId'
+}
+
+
+# --- Get Last Order ID (Now using parsed order ID) ---
+get_last_order_id() {
+    local response="$1"
+    parse_order_id_from_response "$response"
+}
+
+
+# --- Cancel Order by Order ID (V5 Trading API) ---
+cancel_order() {
+    local order_id="$1"
+    local data="symbol=$SYMBOL&orderId=$order_id"
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        local response=$(bybit_request "/v5/order/cancel" "POST" "$data")
+        if [[ $? -eq 0 ]]; then
+            log_message "INFO" "Canceled order ID: $order_id"
+            return 0
+        else
+            log_message "WARNING" "Failed to cancel order ID: $order_id"
+            return 1
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Would cancel order ID: $order_id"
+        return 0 # Simulate success in paper trading
+    fi
+}
+
+
+# --- Cancel All Orders (V5 Trading API) ---
+cancel_all_orders() {
+    log_message "INFO" "Canceling all open orders for symbol: $SYMBOL..."
+    local data="symbol=$SYMBOL"
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        local response=$(bybit_request "/v5/order/cancel-all" "POST" "$data")
+        if [[ $? -eq 0 ]]; then
+            log_message "INFO" "All orders canceled."
+            send_sms_notification "INFO: All orders canceled."
+            # Clear order tracking arrays after successful cancellation
+            ACTIVE_BUY_ORDERS=()
+            ACTIVE_SELL_ORDERS=()
+            return 0
+        else
+            log_message "WARNING" "Failed to cancel all orders."
+            return 1
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Would cancel all orders."
+        ACTIVE_BUY_ORDERS=() # Clear even in paper trading to reset grid
+        ACTIVE_SELL_ORDERS=()
+        return 0 # Simulate success in paper trading
+    fi
+}
+
+
+# --- Get Open Position (V5 Position API) ---
+get_open_position() {
+    local response=$(bybit_request "/v5/position/list?symbol=$SYMBOL")
+    if [[ $? -eq 0 ]]; then
+        echo "$response"
+    else
+        log_message "WARNING" "Failed to get open position data."
+        return 1
+    fi
+}
+
+
+# --- Manage Grid Orders & PNL ---
+manage_grid_orders() {
+    local position_response=$(get_open_position)
+    if [[ $? -eq 0 ]]; then
+        POSITION_SIZE=$(echo "$position_response" | jq -r '.result.list[0].size')
+        ENTRY_PRICE=$(echo "$position_response" | jq -r '.result.list[0].avgEntryPrice')
+        UNREALIZED_PNL_USD=$(echo "$position_response" | jq -r '.result.list[0].unrealizedPnl')
+    else
+        POSITION_SIZE=0
+        ENTRY_PRICE=0
+        UNREALIZED_PNL_USD=0 # Reset if position fetch fails, to avoid stale data
+    fi
+
+
+    local current_price=$(get_market_price)
+    if [[ $? -ne 0 ]]; then
+        log_message "WARNING" "Could not get current price during order management."
+        return 1 # Cannot manage orders properly without price
+    fi
+
+
+    # --- Check for Filled Orders & Replenish Grid ---
+    check_and_replenish_orders "Buy" "$current_price"
+    check_and_replenish_orders "Sell" "$current_price"
+
+
+    # --- PNL Tracking & Logging ---
+    calculate_and_log_pnl "$current_price"
+
+
+    # --- Check Overall PNL Take Profit/Stop Loss ---
+    check_pnl_limits
+}
+
+
+# --- Check for Filled Orders and Replenish Grid ---
+check_and_replenish_orders() {
+    local side="$1" # "Buy" or "Sell"
+    local current_price="$2"
+    local active_orders_array_name # Array name string (for indirect reference)
+
+    if [[ "$side" == "Buy" ]]; then
+        active_orders_array_name="ACTIVE_BUY_ORDERS"
+    else # Sell side
+        active_orders_array_name="ACTIVE_SELL_ORDERS"
+    fi
+
+    declare -n active_orders_array="$active_orders_array_name" # Create nameref to array
+
+    # Iterate through active orders of the given side
+    for price in "${!active_orders_array[@]}"; do # Loop through keys (prices) of associative array
+        local order_id="${active_orders_array[$price]}" # Get order_id for the price
+
+        # Validate price as array key - EXTRA ROBUSTNESS
+        if ! echo "$price" | grep -Eq '^[0-9.]+$'; then
+            log_message "WARNING" "Invalid price key found in ${active_orders_array_name}: '$price'. Skipping order check."
+            continue # Skip to next price if key is invalid
+        fi
+
+        # Skip API call in paper trading mode for order status check (assume filled for paper orders for simplicity)
+        if [[ "$PAPER_TRADING_MODE" == "true" ]]; then
+            local order_status="Filled" # Simulate Filled status for paper orders
+        else
+            # --- Get Order Details (V5 Order API - to check status) ---
+            local order_details_response=$(bybit_request "/v5/order/realtime?symbol=$SYMBOL&orderId=$order_id")
+            if [[ $? -eq 0 ]]; then
+                local order_status=$(echo "$order_details_response" | jq -r '.result.list[0].orderStatus')
+            else
+                log_message "WARNING" "Failed to get order details for Order ID: $order_id during order management. Will retry next cycle."
+                continue # Skip to next order if status fetch fails
+            fi
+        fi
+
+
+        if [[ "$order_status" == "Filled" ]]; then
+            log_message "INFO" "$side order at price: $price (Order ID: $order_id) FILLED."
+            ORDER_FILL_COUNT=$((ORDER_FILL_COUNT + 1))
+
+
+            # --- Calculate Realized PNL for the Filled Order Pair (Crude Approximation) ---
+            calculate_realized_pnl "$side" "$price" "$current_price"
+
+
+            # --- Replenish Grid Order ---
+            replenish_grid_level "$side" "$price" "$current_price"
+
+
+            # --- Remove Filled Order from Tracking Array ---
+            unset active_orders_array["$price"]
+
+
+        elif [[ "$order_status" == "Cancelled" ]] || [[ "$order_status" == "Rejected" ]]; then
+            log_message "WARNING" "$side order at price: $price (Order ID: $order_id) was $order_status. Removing from tracking."
+            unset active_orders_array["$price"]
+
+        elif [[ "$order_status" != "New" ]] && [[ "$order_status" != "PartiallyFilled" ]] && [[ "$order_status" != "Untriggered" ]] && [[ "$order_status" != "Triggered" ]] ; then
+             log_message "WARNING" "$side order at price: $price (Order ID: $order_id) has unusual status: $order_status. Please investigate."
+        fi
+    done
+}
+
+
+# --- Calculate Realized PNL for Filled Order Pair (Approximation) ---
+calculate_realized_pnl() {
+    local filled_side="$1" # "Buy" or "Sell"
+    local filled_price="$2"
+    local current_price="$3"
+    local order_size="$ORDER_SIZE"
+    local pnl_usd=0
+
+
+    if [[ "$filled_side" == "Buy" ]]; then
+        pnl_usd=$(echo "scale=8; ($current_price - $filled_price) * $order_size" | bc -l) # Approx, using current price as sell price
+    else # Sell side
+        pnl_usd=$(echo "scale=8; ($filled_price - $current_price) * $order_size" | bc -l) # Approx, using current price as buy price
+    fi
+
+    REALIZED_PNL_USD=$(echo "$REALIZED_PNL_USD + $pnl_usd" | bc -l) # Accumulate realized PNL
+    log_message "INFO" "Realized PNL from filled $filled_side order (approx.): $(printf "%.4f" "$pnl_usd") USD, Accumulated Realized PNL: $(printf "%.4f" "$REALIZED_PNL_USD") USD"
+
+    LAST_TRADE_DURATION_SECONDS=$(( $(date +%s) - LAST_PNL_CHECK_TIME )) # Approx trade duration
+    LAST_PNL_CHECK_TIME=$(date +%s) # Update timestamp for next trade duration calc
+    log_message "INFO" "Approx. Trade Duration (last trade): $((LAST_TRADE_DURATION_SECONDS)) seconds."
+
+}
+
+
+# --- Replenish Grid Level after Order Fill ---
+replenish_grid_level() {
+    local filled_side="$1" # "Buy" or "Sell"
+    local filled_price="$2"
+    local current_price="$3"
+    local order_size="$ORDER_SIZE"
+    local dynamic_grid_interval=$(adjust_grid_interval_dynamic) # Get dynamic interval
+
+
+    if [[ "$filled_side" == "Buy" ]]; then
+        local new_sell_price=$(echo "$filled_price + $dynamic_grid_interval" | bc -l) # Replenish with SELL order one level UP
+        # Validate new_sell_price before using as array key and in order placement
+        if [[ -n "$new_sell_price" ]] && echo "$new_sell_price" | grep -Eq '^[0-9.]+$'; then
+            if [[ ${#ACTIVE_SELL_ORDERS[@]} -lt "$MAX_OPEN_ORDERS" ]]; then
+                 if [[ -z "${ACTIVE_SELL_ORDERS[$new_sell_price]}" ]]; then # Check if order at this price already exists
+                    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+                        place_limit_order "Sell" "$new_sell_price" "$order_size"
+                        if [[ $? -eq 0 ]]; then
+                             local order_id=$(parse_order_id_from_response "$response") # Get real order ID
+                             ACTIVE_SELL_ORDERS+=([$new_sell_price]="$order_id")
+                             ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                             log_message "INFO" "Replenished SELL limit order at price: $new_sell_price, size: $order_size (after BUY fill at $filled_price), Order ID: $order_id."
+                         else
+                             log_message "WARNING" "Failed to place replenished SELL limit order at price: $new_sell_price."
+                         fi
+                     else
+                        log_message "INFO" "[PAPER TRADING] Would replenish SELL limit order at price: $new_sell_price, size: $order_size (after BUY fill at $filled_price), Price: $new_sell_price"
+                        ACTIVE_SELL_ORDERS+=([$new_sell_price]="PAPER_ORDER_$RANDOM") # Dummy order ID
+                        ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                     fi
+                 else
+                     log_message "INFO" "Replenished SELL order already exists at price: $new_sell_price. Skipping."
+                 fi
+             else
+                 log_message "WARNING" "Max open orders limit ($MAX_OPEN_ORDERS) reached. Not placing replenished SELL order."
+             fi
+        else
+            log_message "WARNING" "Invalid new sell price calculated: '$new_sell_price'. Skipping replenished order placement."
+        fi
+
+
+    else # Sell side filled
+        local new_buy_price=$(echo "$filled_price - $dynamic_grid_interval" | bc -l) # Replenish with BUY order one level DOWN
+        # Validate new_buy_price before using as array key and in order placement
+        if [[ -n "$new_buy_price" ]] && echo "$new_buy_price" | grep -Eq '^[0-9.]+$'; then
+            if [[ ${#ACTIVE_BUY_ORDERS[@]} -lt "$MAX_OPEN_ORDERS" ]]; then
+                if [[ -z "${ACTIVE_BUY_ORDERS[$new_buy_price]}" ]]; then # Check if order at this price already exists
+                     if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+                         place_limit_order "Buy" "$new_buy_price" "$order_size"
+                         if [[ $? -eq 0 ]]; then
+                             local order_id=$(parse_order_id_from_response "$response") # Get real order ID
+                             ACTIVE_BUY_ORDERS+=([$new_buy_price]="$order_id")
+                             ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                             log_message "INFO" "Replenished BUY limit order at price: $new_buy_price, size: $order_size (after SELL fill at $filled_price), Order ID: $order_id."
+                         else
+                             log_message "WARNING" "Failed to place replenished BUY limit order at price: $new_buy_price."
+                         fi
+                     else
+                        log_message "INFO" "[PAPER TRADING] Would replenish BUY limit order at price: $new_buy_price, size: $order_size (after SELL fill at $filled_price), Price: $new_buy_price"
+                        ACTIVE_BUY_ORDERS+=([$new_buy_price]="PAPER_ORDER_$RANDOM") # Dummy order ID
+                        ORDER_PLACED_COUNT=$((ORDER_PLACED_COUNT + 1))
+                     fi
+                 else
+                     log_message "INFO" "Replenished BUY order already exists at price: $new_buy_price. Skipping."
+                 fi
+             else
+                 log_message "WARNING" "Max open orders limit ($MAX_OPEN_ORDERS) reached. Not placing replenished BUY order."
+             fi
+         else
+             log_message "WARNING" "Invalid new buy price calculated: '$new_buy_price'. Skipping replenished order placement."
+         fi
+    fi
+}
+
+
+# --- Calculate and Log PNL & Metrics ---
+calculate_and_log_pnl() {
+    local current_price="$1"
+    local unrealized_pnl_usd_formatted=$(printf "%.4f" "$UNREALIZED_PNL_USD") # Format to 4 decimal places
+    local realized_pnl_usd_formatted=$(printf "%.4f" "$REALIZED_PNL_USD")
+
+    local total_pnl_usd=$(echo "$UNREALIZED_PNL_USD + $REALIZED_PNL_USD" | bc -l)
+    local total_pnl_usd_formatted=$(printf "%.4f" "$total_pnl_usd")
+
+
+    local fill_rate=0
+    if [[ "$ORDER_PLACED_COUNT" -gt 0 ]]; then
+        fill_rate=$(echo "scale=2; ($ORDER_FILL_COUNT / $ORDER_PLACED_COUNT) * 100" | bc -l) # Approx fill rate percentage
+    fi
+
+    log_message "INFO" "--- PNL & Metrics ---"
+    log_message "INFO" "Current Price: $current_price, Position Size: $POSITION_SIZE, Entry Price: $ENTRY_PRICE"
+    log_message "INFO" "Unrealized PNL: $unrealized_pnl_usd_formatted USD, Realized PNL: $realized_pnl_usd_formatted USD, Total PNL: $total_pnl_usd_formatted USD"
+    log_message "INFO" "Approx. Order Fill Rate (last cycle): $(printf "%.2f" "$fill_rate")%"
+    log_message "INFO" "Volatility Multiplier: $VOLATILITY_MULTIPLIER, Trend Bias: $TREND_BIAS"
+    log_message "INFO" "-----------------------"
+
+    if [[ "$SMS_NOTIFICATIONS_ENABLED" == "true" ]]; then
+        local sms_message="Status Update:\nCurrent Price: $current_price\nTotal PNL: $total_pnl_usd_formatted USD\nFill Rate (last cycle): $(printf "%.2f" "$fill_rate")%\nVolatility Multiplier: $VOLATILITY_MULTIPLIER\nTrend Bias: $TREND_BIAS"
+        # Keep SMS messages concise to avoid length limits and cost
+        send_sms_notification "$sms_message"
+    fi
+
+
+    ORDER_FILL_COUNT=0 # Reset fill counter for next cycle
+    ORDER_PLACED_COUNT=0 # Reset placed order counter
+}
+
+
+# --- Check PNL Limits (Take Profit & Stop Loss) ---
+check_pnl_limits() {
+    if [[ $(echo "$REALIZED_PNL_USD >= $GRID_TOTAL_PROFIT_TARGET_USD" | bc -l) -eq 1 ]]; then
+        log_message "INFO" "Total Realized PNL Target ($GRID_TOTAL_PROFIT_TARGET_USD USD) REACHED! Closing grid and exiting."
+        send_sms_notification "INFO: Total Realized PNL Target REACHED! Closing grid and exiting."
+        cancel_all_orders
+        close_position # Function to close position (market order)
+        exit 0 # Exit script after TP
+    fi
+
+    if [[ $(echo "$UNREALIZED_PNL_USD <= -$GRID_TOTAL_LOSS_LIMIT_USD" | bc -l) -eq 1 ]]; then
+        log_message "WARNING" "Unrealized Loss Limit ($GRID_TOTAL_LOSS_LIMIT_USD USD) REACHED! Emergency stop - closing grid and exiting."
+        send_sms_notification "WARNING: Unrealized Loss Limit REACHED! Emergency stop - closing grid and exiting."
+        cancel_all_orders
+        close_position # Function to close position (market order)
+        exit 1 # Exit with error code after SL
+    fi
+}
+
+
+# --- Close Position (Market Order - V5 Trading API) ---
+close_position() {
+    if [[ $(echo "$POSITION_SIZE != 0" | bc -l) -eq 1 ]]; then # Only close if there's a position
+        log_message "INFO" "Closing current position with market order..."
+        send_sms_notification "INFO: Closing current position with market order..."
+        local side="Buy" # Reverse side to close
+        if [[ $(echo "$POSITION_SIZE > 0" | bc -l) -eq 1 ]]; then
+            side="Sell" # Close long position
+        else
+            side="Buy"  # Close short position
+            POSITION_SIZE=$(echo "$POSITION_SIZE * -1" | bc) # Make position size positive for closing order
+        fi
+
+        if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+            local data="symbol=$SYMBOL&side=$side&orderType=Market&qty=$POSITION_SIZE&timeInForce=GTC&reduceOnly=true" # reduceOnly=true for closing position
+            local response=$(bybit_request "/v5/order/create" "POST" "$data")
+            if [[ $? -eq 0 ]]; then
+                log_message "INFO" "Position closed successfully with market order."
+                send_sms_notification "INFO: Position closed successfully with market order."
+                return 0
+            else
+                log_message "ERROR" "Failed to close position with market order."
+                return 1
+            fi
+        else
+            log_message "INFO" "[PAPER TRADING] Would close position with market order."
+            return 0 # Simulate success in paper trading
+        fi
+    else
+        log_message "INFO" "No position to close."
+        return 0
+    fi
+}
+
+
+# --- Main Script Logic ---
+main() {
+    check_dependencies
+    log_message "INFO" "--- Grid Bot Started (Version 7.0) ---"
+    log_message "INFO" "Paper Trading Mode: $PAPER_TRADING_MODE, SMS Notifications: $SMS_NOTIFICATIONS_ENABLED"
+    log_message "INFO" "Symbol: $SYMBOL, Grid Levels: $GRID_LEVELS, Base Interval: $GRID_INTERVAL, Order Size: $ORDER_SIZE, Leverage: $LEVERAGE"
+    log_message "INFO" "Profit Target: $GRID_TOTAL_PROFIT_TARGET_USD USD, Loss Limit: $GRID_TOTAL_LOSS_LIMIT_USD USD, Max Open Orders: $MAX_OPEN_ORDERS"
+    log_message "INFO" "Checking market conditions, volatility and trend before placing initial grid..."
+
+
+    if [[ "$PAPER_TRADING_MODE" == "false" ]]; then
+        if [[ $(check_market_conditions) -ne 0 ]]; then
+            log_message "ERROR" "Initial market conditions check failed. Bot exiting."
+            send_sms_notification "ERROR: Initial market conditions check failed. Bot exiting."
+            exit 1
+        fi
+
+        if [[ $(check_volatility) -ne 0 ]]; then
+            log_message "WARNING" "Initial volatility check indicates high volatility. Proceeding with dynamic grid spacing."
+            send_sms_notification "WARNING: Initial volatility check indicates high volatility. Proceeding with dynamic grid spacing."
+        fi
+
+        if [[ $(check_trend) -ne 0 ]]; then
+            log_message "INFO" "Trend analysis completed." # Trend info already logged in check_trend
+        fi
+    else
+        log_message "INFO" "[PAPER TRADING] Initial market condition, volatility, and trend checks skipped."
+    fi
+
+
+    place_grid_orders # Place initial grid orders
+    if [[ $? -ne 0 ]]; then
+        log_message "ERROR" "Failed to place initial grid orders. Bot exiting."
+        send_sms_notification "ERROR: Failed to place initial grid orders. Bot exiting."
+        exit 1
+    fi
+
+
+    log_message "INFO" "Initial grid orders placed successfully. Starting main loop..."
+    send_sms_notification "INFO: Initial grid orders placed successfully. Starting main loop..."
+
+
+    # --- Main Loop ---
+    while true; do
+        manage_grid_orders # Manage orders, check fills, replenish, track PNL, check limits
+        sleep "$CHECK_INTERVAL_SECONDS"
+    done
+}
+
+
+# --- Trap signals for graceful exit ---
+trap_cleanup() {
+    log_message "INFO" "--- Grid Bot Shutting Down (Signal Received) ---"
+    send_sms_notification "INFO: Grid Bot Shutting Down (Signal Received)."
+    cancel_all_orders
+    close_position
+    log_message "INFO" "--- Bot Shutdown Complete ---"
+    send_sms_notification "INFO: Bot Shutdown Complete."
+    exit 0
+}
+
+trap trap_cleanup SIGINT SIGTERM SIGHUP
+
+# --- Run Main Function ---
+main "$@"

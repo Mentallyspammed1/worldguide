@@ -240,16 +240,26 @@ def fetch_klines(
             data = response["result"]["list"]
             # Minimal processing without pandas
             processed_data = []
-            columns = ["start_time", "open", "high", "low", "close", "volume", "turnover"]
+            columns = [
+                "start_time",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "turnover",
+            ]
             for row in data:
                 entry = {}
                 for i, col in enumerate(columns):
                     if i < len(row):
                         try:
-                            if col == 'start_time':
+                            if col == "start_time":
                                 entry[col] = int(row[i])  # Keep as timestamp
                             else:
-                                entry[col] = float(row[i])  # Convert numeric fields to float
+                                entry[col] = float(
+                                    row[i]
+                                )  # Convert numeric fields to float
                         except (ValueError, TypeError):
                             entry[col] = None  # Handle potential conversion errors
                     else:
@@ -258,10 +268,14 @@ def fetch_klines(
 
             # Ensure required columns exist, even if None
             required_cols = {"close", "high", "low", "volume"}
-            if not processed_data or not all(col in processed_data[0] for col in required_cols):
-                 if logger:
-                     logger.error(f"{NEON_RED}Kline data missing required columns after processing.{RESET}")
-                 return []
+            if not processed_data or not all(
+                col in processed_data[0] for col in required_cols
+            ):
+                if logger:
+                    logger.error(
+                        f"{NEON_RED}Kline data missing required columns after processing.{RESET}"
+                    )
+                return []
 
             return processed_data  # Return list of dictionaries
 
@@ -282,8 +296,12 @@ def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | N
             orderbook_data = exchange.fetch_order_book(symbol, limit=limit)
             if orderbook_data:
                 # Convert prices and sizes to floats if needed (ccxt usually does this)
-                orderbook_data['bids'] = [[float(p), float(s)] for p, s in orderbook_data['bids']]
-                orderbook_data['asks'] = [[float(p), float(s)] for p, s in orderbook_data['asks']]
+                orderbook_data["bids"] = [
+                    [float(p), float(s)] for p, s in orderbook_data["bids"]
+                ]
+                orderbook_data["asks"] = [
+                    [float(p), float(s)] for p, s in orderbook_data["asks"]
+                ]
                 return orderbook_data
             else:
                 logger.error(
@@ -319,6 +337,7 @@ def fetch_orderbook(symbol: str, limit: int, logger: logging.Logger) -> dict | N
         f"{NEON_RED}Max retries reached for orderbook fetch using ccxt. Aborting.{RESET}"
     )
     return None
+
 
 # --- Helper functions for list-based calculations ---
 
@@ -360,6 +379,7 @@ def rolling_max(data: list[float], window: int) -> list[float | None]:
         return [None] * len(data)
     max_vals = [None] * len(data)
     from collections import deque
+
     dq = deque()
     for i, x in enumerate(data):
         while dq and data[dq[-1]] <= x:
@@ -377,6 +397,7 @@ def rolling_min(data: list[float], window: int) -> list[float | None]:
         return [None] * len(data)
     min_vals = [None] * len(data)
     from collections import deque
+
     dq = deque()
     for i, x in enumerate(data):
         while dq and data[dq[-1]] >= x:
@@ -397,12 +418,12 @@ def ewm_mean(data: list[float], span: int, adjust: bool = False) -> list[float |
     if not adjust:
         ewma[0] = data[0]
         for i in range(1, len(data)):
-             ewma[i] = alpha * data[i] + (1 - alpha) * ewma[i - 1]
+            ewma[i] = alpha * data[i] + (1 - alpha) * ewma[i - 1]
     else:  # Adjust=True is more complex without pandas/numpy built-ins
-         # Simplified approach for adjust=False as it's common
+        # Simplified approach for adjust=False as it's common
         ewma[0] = data[0]
         for i in range(1, len(data)):
-             ewma[i] = alpha * data[i] + (1 - alpha) * ewma[i - 1]
+            ewma[i] = alpha * data[i] + (1 - alpha) * ewma[i - 1]
 
     return ewma
 
@@ -422,15 +443,16 @@ def list_cumsum(data: list[float | None]) -> list[float | None]:
     valid_start = False
     for i, x in enumerate(data):
         if x is not None:
-           if not valid_start:
-               current_sum = x
-               valid_start = True
-           else:
-               current_sum += x
-           cumsum[i] = current_sum
+            if not valid_start:
+                current_sum = x
+                valid_start = True
+            else:
+                current_sum += x
+            cumsum[i] = current_sum
         else:
             cumsum[i] = None  # Propagate None if input is None
     return cumsum
+
 
 # --- TradingAnalyzer rewrite without pandas ---
 
@@ -455,11 +477,11 @@ class TradingAnalyzer:
         self.symbol = symbol
         self.interval = interval
         # Extract columns into lists for easier processing
-        self.close = [d.get('close') for d in self.data]
-        self.high = [d.get('high') for d in self.data]
-        self.low = [d.get('low') for d in self.data]
-        self.volume = [d.get('volume') for d in self.data]
-        self.start_time = [d.get('start_time') for d in self.data]
+        self.close = [d.get("close") for d in self.data]
+        self.high = [d.get("high") for d in self.data]
+        self.low = [d.get("low") for d in self.data]
+        self.volume = [d.get("volume") for d in self.data]
+        self.start_time = [d.get("start_time") for d in self.data]
 
     def _get_last_valid(self, data_list):
         """Helper to get the last non-None value."""
@@ -475,94 +497,131 @@ class TradingAnalyzer:
 
     def calculate_sma(self, window: int) -> list[float | None]:
         if not all(isinstance(x, (int, float)) for x in self.close if x is not None):
-             self.logger.error(f"{NEON_RED}Invalid data type in 'close' for SMA.{RESET}")
-             return [None] * len(self.close)
+            self.logger.error(f"{NEON_RED}Invalid data type in 'close' for SMA.{RESET}")
+            return [None] * len(self.close)
         return rolling_mean(self.close, window)
 
     def calculate_momentum(self, period: int = 10) -> list[float | None]:
-         if not self.close or len(self.close) <= period:
-             return [None] * len(self.close)
-         momentum = [None] * period
-         for i in range(period, len(self.close)):
-             prev_close = self.close[i - period]
-             curr_close = self.close[i]
-             if prev_close is not None and curr_close is not None and prev_close != 0:
-                 mom = ((curr_close - prev_close) / prev_close) * 100
-                 momentum.append(mom)
-             else:
-                 momentum.append(None)
-         return momentum
+        if not self.close or len(self.close) <= period:
+            return [None] * len(self.close)
+        momentum = [None] * period
+        for i in range(period, len(self.close)):
+            prev_close = self.close[i - period]
+            curr_close = self.close[i]
+            if prev_close is not None and curr_close is not None and prev_close != 0:
+                mom = ((curr_close - prev_close) / prev_close) * 100
+                momentum.append(mom)
+            else:
+                momentum.append(None)
+        return momentum
 
-    def calculate_cci(self, window: int = 20, constant: float = 0.015) -> list[float | None]:
-         if len(self.close) < window: return [None] * len(self.close)
-         typical_price = [((h + l + c) / 3) if h is not None and l is not None and c is not None else None
-                          for h, l, c in zip(self.high, self.low, self.close, strict=False)]
-         if not any(tp is not None for tp in typical_price): return [None] * len(self.close)
+    def calculate_cci(
+        self, window: int = 20, constant: float = 0.015
+    ) -> list[float | None]:
+        if len(self.close) < window:
+            return [None] * len(self.close)
+        typical_price = [
+            ((h + l + c) / 3)
+            if h is not None and l is not None and c is not None
+            else None
+            for h, l, c in zip(self.high, self.low, self.close, strict=False)
+        ]
+        if not any(tp is not None for tp in typical_price):
+            return [None] * len(self.close)
 
-         sma_typical_price = rolling_mean(typical_price, window)
-         mean_deviation = [None] * len(typical_price)
-         cci = [None] * len(typical_price)
+        sma_typical_price = rolling_mean(typical_price, window)
+        mean_deviation = [None] * len(typical_price)
+        cci = [None] * len(typical_price)
 
-         for i in range(window - 1, len(typical_price)):
-             window_data = [tp for tp in typical_price[i - window + 1:i + 1] if tp is not None]
-             if len(window_data) == window and sma_typical_price[i] is not None:  # Ensure full window and valid mean
+        for i in range(window - 1, len(typical_price)):
+            window_data = [
+                tp for tp in typical_price[i - window + 1 : i + 1] if tp is not None
+            ]
+            if (
+                len(window_data) == window and sma_typical_price[i] is not None
+            ):  # Ensure full window and valid mean
                 dev_sum = sum(abs(x - sma_typical_price[i]) for x in window_data)
                 mean_deviation[i] = dev_sum / window
                 if mean_deviation[i] is not None and mean_deviation[i] != 0:
-                    cci_val = (typical_price[i] - sma_typical_price[i]) / (constant * mean_deviation[i])
+                    cci_val = (typical_price[i] - sma_typical_price[i]) / (
+                        constant * mean_deviation[i]
+                    )
                     cci[i] = cci_val
-         return cci
+        return cci
 
     def calculate_williams_r(self, window: int = 14) -> list[float | None]:
-         if len(self.close) < window: return [None] * len(self.close)
-         highest_high = rolling_max(self.high, window)
-         lowest_low = rolling_min(self.low, window)
-         wr = [None] * len(self.close)
-         for i in range(window - 1, len(self.close)):
-             hh = highest_high[i]
-             ll = lowest_low[i]
-             cl = self.close[i]
-             if hh is not None and ll is not None and cl is not None and (hh - ll) != 0:
-                 wr[i] = (hh - cl) / (hh - ll) * -100
-         return wr
+        if len(self.close) < window:
+            return [None] * len(self.close)
+        highest_high = rolling_max(self.high, window)
+        lowest_low = rolling_min(self.low, window)
+        wr = [None] * len(self.close)
+        for i in range(window - 1, len(self.close)):
+            hh = highest_high[i]
+            ll = lowest_low[i]
+            cl = self.close[i]
+            if hh is not None and ll is not None and cl is not None and (hh - ll) != 0:
+                wr[i] = (hh - cl) / (hh - ll) * -100
+        return wr
 
     def calculate_mfi(self, window: int = 14) -> list[float | None]:
-         if len(self.close) < window + 1: return [None] * len(self.close)
-         typical_price = [((h + l + c) / 3) if h is not None and l is not None and c is not None else None
-                          for h, l, c in zip(self.high, self.low, self.close, strict=False)]
-         if not any(tp is not None for tp in typical_price): return [None] * len(self.close)
+        if len(self.close) < window + 1:
+            return [None] * len(self.close)
+        typical_price = [
+            ((h + l + c) / 3)
+            if h is not None and l is not None and c is not None
+            else None
+            for h, l, c in zip(self.high, self.low, self.close, strict=False)
+        ]
+        if not any(tp is not None for tp in typical_price):
+            return [None] * len(self.close)
 
-         raw_money_flow = [(tp * v) if tp is not None and v is not None else None
-                           for tp, v in zip(typical_price, self.volume, strict=False)]
+        raw_money_flow = [
+            (tp * v) if tp is not None and v is not None else None
+            for tp, v in zip(typical_price, self.volume, strict=False)
+        ]
 
-         positive_flow = [0.0] * len(typical_price)
-         negative_flow = [0.0] * len(typical_price)
+        positive_flow = [0.0] * len(typical_price)
+        negative_flow = [0.0] * len(typical_price)
 
-         for i in range(1, len(typical_price)):
-             if typical_price[i] is not None and typical_price[i - 1] is not None and raw_money_flow[i] is not None:
-                 if typical_price[i] > typical_price[i - 1]:
-                     positive_flow[i] = raw_money_flow[i]
-                 elif typical_price[i] < typical_price[i - 1]:
-                     negative_flow[i] = raw_money_flow[i]
-                 # else: both remain 0
+        for i in range(1, len(typical_price)):
+            if (
+                typical_price[i] is not None
+                and typical_price[i - 1] is not None
+                and raw_money_flow[i] is not None
+            ):
+                if typical_price[i] > typical_price[i - 1]:
+                    positive_flow[i] = raw_money_flow[i]
+                elif typical_price[i] < typical_price[i - 1]:
+                    negative_flow[i] = raw_money_flow[i]
+                # else: both remain 0
 
-         positive_mf_sum = rolling_mean([p or 0 for p in positive_flow], window)  # Treat None as 0 for sum
-         negative_mf_sum = rolling_mean([n or 0 for n in negative_flow], window)  # Treat None as 0 for sum
+        positive_mf_sum = rolling_mean(
+            [p or 0 for p in positive_flow], window
+        )  # Treat None as 0 for sum
+        negative_mf_sum = rolling_mean(
+            [n or 0 for n in negative_flow], window
+        )  # Treat None as 0 for sum
 
-         mfi = [None] * len(typical_price)
-         for i in range(window, len(typical_price)):
-              pos_sum = positive_mf_sum[i] * window if positive_mf_sum[i] is not None else 0  # rolling_mean gives avg, multiply by window
-              neg_sum = negative_mf_sum[i] * window if negative_mf_sum[i] is not None else 0
+        mfi = [None] * len(typical_price)
+        for i in range(window, len(typical_price)):
+            pos_sum = (
+                positive_mf_sum[i] * window if positive_mf_sum[i] is not None else 0
+            )  # rolling_mean gives avg, multiply by window
+            neg_sum = (
+                negative_mf_sum[i] * window if negative_mf_sum[i] is not None else 0
+            )
 
-              if neg_sum != 0:
-                   money_ratio = pos_sum / neg_sum
-                   mfi[i] = 100 - (100 / (1 + money_ratio))
-              elif pos_sum != 0:  # Handle case where negative flow is zero but positive is not
-                   mfi[i] = 100.0
-              else:  # Both sums are zero
-                   mfi[i] = 50.0  # Or some other neutral value, depends on definition
+            if neg_sum != 0:
+                money_ratio = pos_sum / neg_sum
+                mfi[i] = 100 - (100 / (1 + money_ratio))
+            elif (
+                pos_sum != 0
+            ):  # Handle case where negative flow is zero but positive is not
+                mfi[i] = 100.0
+            else:  # Both sums are zero
+                mfi[i] = 50.0  # Or some other neutral value, depends on definition
 
-         return mfi
+        return mfi
 
     def calculate_fibonacci_retracement(
         self, high: float, low: float, current_price: float
@@ -606,15 +665,17 @@ class TradingAnalyzer:
             s2 = pivot - (high - low)
             r3 = high + 2 * (pivot - low)
             s3 = low - 2 * (high - pivot)
-            self.levels.update({
-                "pivot": pivot,
-                "r1": r1,
-                "s1": s1,
-                "r2": r2,
-                "s2": s2,
-                "r3": r3,
-                "s3": s3,
-            })
+            self.levels.update(
+                {
+                    "pivot": pivot,
+                    "r1": r1,
+                    "s1": s1,
+                    "r2": r2,
+                    "s2": s2,
+                    "r3": r3,
+                    "s3": s3,
+                }
+            )
         except Exception as e:
             self.logger.exception(
                 f"{NEON_RED}Pivot point calculation error: {e}{RESET}"
@@ -629,9 +690,11 @@ class TradingAnalyzer:
             resistance_levels = []
 
             def process_level(label, value) -> None:
-                 # Ensure value is a valid number before comparison
+                # Ensure value is a valid number before comparison
                 if isinstance(value, (int, float, Decimal)):
-                    value_float = float(value)  # Convert Decimal to float for comparison
+                    value_float = float(
+                        value
+                    )  # Convert Decimal to float for comparison
                     if value_float < current_price:
                         support_levels.append((label, value_float))
                     elif value_float > current_price:
@@ -643,7 +706,7 @@ class TradingAnalyzer:
                     for sub_label, sub_value in value.items():
                         process_level(f"{label} ({sub_label})", sub_value)
                 else:
-                     process_level(label, value)
+                    process_level(label, value)
 
             # Sort by absolute difference from current price
             support_levels.sort(key=lambda x: abs(x[1] - current_price))
@@ -662,23 +725,25 @@ class TradingAnalyzer:
             return [], []
 
     def calculate_atr(self, window: int = 20) -> list[float | None]:
-         if len(self.close) < window + 1: return [None] * len(self.close)
+        if len(self.close) < window + 1:
+            return [None] * len(self.close)
 
-         tr = [None] * len(self.close)
-         for i in range(1, len(self.close)):
-             h, l, pc = self.high[i], self.low[i], self.close[i - 1]
-             if h is not None and l is not None and pc is not None:
-                 tr1 = h - l
-                 tr2 = abs(h - pc)
-                 tr3 = abs(l - pc)
-                 tr[i] = max(tr1, tr2, tr3)
+        tr = [None] * len(self.close)
+        for i in range(1, len(self.close)):
+            h, l, pc = self.high[i], self.low[i], self.close[i - 1]
+            if h is not None and l is not None and pc is not None:
+                tr1 = h - l
+                tr2 = abs(h - pc)
+                tr3 = abs(l - pc)
+                tr[i] = max(tr1, tr2, tr3)
 
-         # Simple Moving Average of TR for ATR
-         atr = rolling_mean(tr, window)  # Use helper for rolling mean
-         return atr
+        # Simple Moving Average of TR for ATR
+        atr = rolling_mean(tr, window)  # Use helper for rolling mean
+        return atr
 
     def calculate_rsi(self, window: int = 14) -> list[float | None]:
-        if len(self.close) <= window: return [None] * len(self.close)
+        if len(self.close) <= window:
+            return [None] * len(self.close)
         deltas = list_diff(self.close, 1)
 
         gains = [max(d, 0) if d is not None else 0 for d in deltas]
@@ -696,15 +761,15 @@ class TradingAnalyzer:
                 break
 
         if first_valid_idx != -1:
-             # Apply smoothing for subsequent periods
-             for i in range(first_valid_idx + 1, len(self.close)):
-                 current_gain = gains[i] if gains[i] is not None else 0
-                 current_loss = losses[i] if losses[i] is not None else 0
-                 prev_avg_gain = avg_gain[i - 1] if avg_gain[i - 1] is not None else 0
-                 prev_avg_loss = avg_loss[i - 1] if avg_loss[i - 1] is not None else 0
+            # Apply smoothing for subsequent periods
+            for i in range(first_valid_idx + 1, len(self.close)):
+                current_gain = gains[i] if gains[i] is not None else 0
+                current_loss = losses[i] if losses[i] is not None else 0
+                prev_avg_gain = avg_gain[i - 1] if avg_gain[i - 1] is not None else 0
+                prev_avg_loss = avg_loss[i - 1] if avg_loss[i - 1] is not None else 0
 
-                 avg_gain[i] = ((prev_avg_gain * (window - 1)) + current_gain) / window
-                 avg_loss[i] = ((prev_avg_loss * (window - 1)) + current_loss) / window
+                avg_gain[i] = ((prev_avg_gain * (window - 1)) + current_gain) / window
+                avg_loss[i] = ((prev_avg_loss * (window - 1)) + current_loss) / window
 
         rsi = [None] * len(self.close)
         for i in range(window, len(self.close)):
@@ -726,23 +791,23 @@ class TradingAnalyzer:
         d_window: int = 3,
     ) -> dict[str, list[float | None]]:
         if len(self.close) < rsi_window + stoch_window + max(k_window, d_window):
-             return {"stoch_rsi": [], "k": [], "d": []}
+            return {"stoch_rsi": [], "k": [], "d": []}
 
         rsi = self.calculate_rsi(window=rsi_window)
         if not any(r is not None for r in rsi):
-             return {"stoch_rsi": [], "k": [], "d": []}
+            return {"stoch_rsi": [], "k": [], "d": []}
 
         min_rsi = rolling_min(rsi, stoch_window)
         max_rsi = rolling_max(rsi, stoch_window)
 
         stoch_rsi = [None] * len(rsi)
         for i in range(len(rsi)):
-             if rsi[i] is not None and min_rsi[i] is not None and max_rsi[i] is not None:
-                 denominator = max_rsi[i] - min_rsi[i]
-                 if denominator != 0:
-                     stoch_rsi[i] = (rsi[i] - min_rsi[i]) / denominator
-                 else:  # Handle case where max = min (flat RSI)
-                      stoch_rsi[i] = 0.0  # Or 0.5, depending on convention
+            if rsi[i] is not None and min_rsi[i] is not None and max_rsi[i] is not None:
+                denominator = max_rsi[i] - min_rsi[i]
+                if denominator != 0:
+                    stoch_rsi[i] = (rsi[i] - min_rsi[i]) / denominator
+                else:  # Handle case where max = min (flat RSI)
+                    stoch_rsi[i] = 0.0  # Or 0.5, depending on convention
 
         # Calculate %K (SMA of StochRSI)
         k_line = rolling_mean(stoch_rsi, k_window)
@@ -781,50 +846,50 @@ class TradingAnalyzer:
 
         histogram = [None] * len(self.close)
         for i in range(len(self.close)):
-             if macd[i] is not None and signal[i] is not None:
-                  histogram[i] = macd[i] - signal[i]
+            if macd[i] is not None and signal[i] is not None:
+                histogram[i] = macd[i] - signal[i]
 
         return {"macd": macd, "signal": signal, "histogram": histogram}
 
     # MACD Divergence detection is complex without libraries like pandas/numpy for slicing/comparison easily.
     # Skipping a direct list-based equivalent for brevity unless specifically required.
     def detect_macd_divergence(self, macd_data: dict) -> str | None:
-         prices = self.close
-         macd_histogram = macd_data.get("histogram", [])
+        prices = self.close
+        macd_histogram = macd_data.get("histogram", [])
 
-         if len(prices) < 3 or len(macd_histogram) < 3:
-             return None
+        if len(prices) < 3 or len(macd_histogram) < 3:
+            return None
 
-         # Get last two valid values (handling potential Nones)
-         last_price = self._get_last_valid(prices)
-         prev_price = None
-         for p in reversed(prices[:-1]):
-             if p is not None:
-                 prev_price = p
-                 break
+        # Get last two valid values (handling potential Nones)
+        last_price = self._get_last_valid(prices)
+        prev_price = None
+        for p in reversed(prices[:-1]):
+            if p is not None:
+                prev_price = p
+                break
 
-         last_hist = self._get_last_valid(macd_histogram)
-         prev_hist = None
-         for h in reversed(macd_histogram[:-1]):
-              if h is not None:
-                  prev_hist = h
-                  break
+        last_hist = self._get_last_valid(macd_histogram)
+        prev_hist = None
+        for h in reversed(macd_histogram[:-1]):
+            if h is not None:
+                prev_hist = h
+                break
 
-         if None in [last_price, prev_price, last_hist, prev_hist]:
-              return None  # Not enough valid recent data
+        if None in [last_price, prev_price, last_hist, prev_hist]:
+            return None  # Not enough valid recent data
 
-         # Bullish Divergence: Lower low in price, higher low in histogram
-         # Simplified: Check if price fell AND histogram rose
-         if prev_price > last_price and prev_hist < last_hist:
-              # Add more checks (e.g., ensure histogram was negative) for robustness
-              return "bullish"
-         # Bearish Divergence: Higher high in price, lower high in histogram
-         # Simplified: Check if price rose AND histogram fell
-         elif prev_price < last_price and prev_hist > last_hist:
-              # Add more checks (e.g., ensure histogram was positive) for robustness
-              return "bearish"
+        # Bullish Divergence: Lower low in price, higher low in histogram
+        # Simplified: Check if price fell AND histogram rose
+        if prev_price > last_price and prev_hist < last_hist:
+            # Add more checks (e.g., ensure histogram was negative) for robustness
+            return "bullish"
+        # Bearish Divergence: Higher high in price, lower high in histogram
+        # Simplified: Check if price rose AND histogram fell
+        elif prev_price < last_price and prev_hist > last_hist:
+            # Add more checks (e.g., ensure histogram was positive) for robustness
+            return "bearish"
 
-         return None
+        return None
 
     def calculate_ema(self, window: int) -> list[float | None]:
         if not all(isinstance(x, (int, float)) for x in self.close if x is not None):
@@ -833,14 +898,18 @@ class TradingAnalyzer:
         return ewm_mean(self.close, span=window, adjust=False)
 
     def determine_trend_momentum(self) -> dict:
-        if len(self.close) < self.config["momentum_ma_long"]:  # Need enough data for longest MA
+        if (
+            len(self.close) < self.config["momentum_ma_long"]
+        ):  # Need enough data for longest MA
             return {"trend": "Insufficient Data", "strength": 0}
 
         atr_list = self.calculate_atr()
         last_atr = self._get_last_valid(atr_list)
 
         if last_atr is None or last_atr == 0:
-            self.logger.warning(f"{NEON_YELLOW}ATR is zero or unavailable, cannot calculate trend strength.{RESET}")
+            self.logger.warning(
+                f"{NEON_YELLOW}ATR is zero or unavailable, cannot calculate trend strength.{RESET}"
+            )
             return {"trend": "Neutral", "strength": 0}
 
         momentum_data = self.calculate_momentum_ma()
@@ -861,7 +930,8 @@ class TradingAnalyzer:
         return {"trend": trend, "strength": trend_strength}
 
     def calculate_adx(self, window: int = 14) -> float | None:
-        if len(self.close) < window + 1: return None  # Need at least window+1 periods
+        if len(self.close) < window + 1:
+            return None  # Need at least window+1 periods
 
         high, low, close = self.high, self.low, self.close
 
@@ -891,17 +961,20 @@ class TradingAnalyzer:
         # Use Wilder's smoothing (similar to EMA)
         def wilder_smooth(data, period):
             smoothed = [None] * len(data)
-            first_sum = sum(x for x in data[1:period + 1] if x is not None)  # Sum first 'period' values (skip index 0)
-            if first_sum is None: return smoothed  # Cannot start if initial data is missing
+            first_sum = sum(
+                x for x in data[1 : period + 1] if x is not None
+            )  # Sum first 'period' values (skip index 0)
+            if first_sum is None:
+                return smoothed  # Cannot start if initial data is missing
 
             smoothed[period] = first_sum  # Initial value is just the sum
             for i in range(period + 1, len(data)):
-                 prev_smooth = smoothed[i - 1]
-                 current_val = data[i] if data[i] is not None else 0
-                 if prev_smooth is not None:
-                      smoothed[i] = prev_smooth - (prev_smooth / period) + current_val
-                 else:  # If previous calculation failed, cannot continue
-                     return smoothed
+                prev_smooth = smoothed[i - 1]
+                current_val = data[i] if data[i] is not None else 0
+                if prev_smooth is not None:
+                    smoothed[i] = prev_smooth - (prev_smooth / period) + current_val
+                else:  # If previous calculation failed, cannot continue
+                    return smoothed
             return smoothed
 
         atr_smoothed = wilder_smooth(tr, window)
@@ -913,16 +986,21 @@ class TradingAnalyzer:
         dx = [None] * len(close)
 
         for i in range(window, len(close)):
-             atr_s = atr_smoothed[i]
-             pdm_s = pdm_smoothed[i]
-             ndm_s = ndm_smoothed[i]
+            atr_s = atr_smoothed[i]
+            pdm_s = pdm_smoothed[i]
+            ndm_s = ndm_smoothed[i]
 
-             if atr_s is not None and atr_s != 0 and pdm_s is not None and ndm_s is not None:
-                 pdi[i] = 100 * (pdm_s / atr_s)
-                 ndi[i] = 100 * (ndm_s / atr_s)
-                 di_sum = pdi[i] + ndi[i]
-                 if di_sum != 0:
-                     dx[i] = 100 * (abs(pdi[i] - ndi[i]) / di_sum)
+            if (
+                atr_s is not None
+                and atr_s != 0
+                and pdm_s is not None
+                and ndm_s is not None
+            ):
+                pdi[i] = 100 * (pdm_s / atr_s)
+                ndi[i] = 100 * (ndm_s / atr_s)
+                di_sum = pdi[i] + ndi[i]
+                if di_sum != 0:
+                    dx[i] = 100 * (abs(pdi[i] - ndi[i]) / di_sum)
 
         # ADX is the smoothed average of DX
         adx_smoothed = wilder_smooth(dx, window)
@@ -930,61 +1008,75 @@ class TradingAnalyzer:
         return self._get_last_valid(adx_smoothed)
 
     def calculate_obv(self) -> list[float | None]:
-        if len(self.close) < 2: return [None] * len(self.close)
+        if len(self.close) < 2:
+            return [None] * len(self.close)
         obv = [0.0] * len(self.close)  # Start OBV at 0 or first volume? Usually 0.
         if self.volume[0] is not None:  # Initialize based on convention
-            obv[0] = 0  # Or self.volume[0] or None - starting point varies. Let's use 0.
+            obv[0] = (
+                0  # Or self.volume[0] or None - starting point varies. Let's use 0.
+            )
 
         for i in range(1, len(self.close)):
             c, pc, v = self.close[i], self.close[i - 1], self.volume[i]
             prev_obv = obv[i - 1]
 
-            if c is not None and pc is not None and v is not None and prev_obv is not None:
+            if (
+                c is not None
+                and pc is not None
+                and v is not None
+                and prev_obv is not None
+            ):
                 if c > pc:
                     obv[i] = prev_obv + v
                 elif c < pc:
                     obv[i] = prev_obv - v
                 else:
                     obv[i] = prev_obv
-            elif prev_obv is not None:  # Propagate previous OBV if current data is missing
-                 obv[i] = prev_obv
+            elif (
+                prev_obv is not None
+            ):  # Propagate previous OBV if current data is missing
+                obv[i] = prev_obv
             else:  # If previous OBV is None, cannot calculate current
-                 obv[i] = None
+                obv[i] = None
 
         return obv
 
     def calculate_adi(self) -> list[float | None]:
-         if len(self.close) < 1: return []
-         adi = [None] * len(self.close)
-         current_adi = 0.0
-         initialized = False
+        if len(self.close) < 1:
+            return []
+        adi = [None] * len(self.close)
+        current_adi = 0.0
+        initialized = False
 
-         for i in range(len(self.close)):
-             c, h, l, v = self.close[i], self.high[i], self.low[i], self.volume[i]
+        for i in range(len(self.close)):
+            c, h, l, v = self.close[i], self.high[i], self.low[i], self.volume[i]
 
-             if None in [c, h, l, v]:
-                 adi[i] = current_adi if initialized else None
-                 continue  # Skip calculation if data is missing
+            if None in [c, h, l, v]:
+                adi[i] = current_adi if initialized else None
+                continue  # Skip calculation if data is missing
 
-             denominator = h - l
-             if denominator == 0:  # If high == low, multiplier is 0 or undefined
-                 mfm = 0.0  # Money Flow Multiplier
-             else:
-                 mfm = ((c - l) - (h - c)) / denominator
+            denominator = h - l
+            if denominator == 0:  # If high == low, multiplier is 0 or undefined
+                mfm = 0.0  # Money Flow Multiplier
+            else:
+                mfm = ((c - l) - (h - c)) / denominator
 
-             mfv = mfm * v  # Money Flow Volume
+            mfv = mfm * v  # Money Flow Volume
 
-             if not initialized:
-                 current_adi = mfv
-                 initialized = True
-             else:
-                 current_adi += mfv
-             adi[i] = current_adi
+            if not initialized:
+                current_adi = mfv
+                initialized = True
+            else:
+                current_adi += mfv
+            adi[i] = current_adi
 
-         return adi
+        return adi
 
-    def calculate_psar(self, acceleration=0.02, max_acceleration=0.2) -> list[float | None]:
-        if len(self.close) < 2: return [None] * len(self.close)
+    def calculate_psar(
+        self, acceleration=0.02, max_acceleration=0.2
+    ) -> list[float | None]:
+        if len(self.close) < 2:
+            return [None] * len(self.close)
 
         psar_list = [None] * len(self.close)
         trend = 1  # 1 for uptrend, -1 for downtrend
@@ -992,67 +1084,79 @@ class TradingAnalyzer:
         ep = self.high[0]  # Extreme point for uptrend
         sar = self.low[0]  # Initial SAR often set to low[0] for uptrend start
 
-        if self.close[1] < self.close[0]:  # If second candle closes lower, assume initial downtrend
-             trend = -1
-             ep = self.low[0]
-             sar = self.high[0]
+        if (
+            self.close[1] < self.close[0]
+        ):  # If second candle closes lower, assume initial downtrend
+            trend = -1
+            ep = self.low[0]
+            sar = self.high[0]
 
         psar_list[0] = sar  # Set initial SAR
 
         for i in range(1, len(self.close)):
-             prev_sar = psar_list[i - 1]
-             if prev_sar is None: continue  # Cannot calculate if previous SAR missing
+            prev_sar = psar_list[i - 1]
+            if prev_sar is None:
+                continue  # Cannot calculate if previous SAR missing
 
-             current_high = self.high[i]
-             current_low = self.low[i]
-             if current_high is None or current_low is None:
-                 psar_list[i] = prev_sar  # Propagate SAR if data missing
-                 continue
+            current_high = self.high[i]
+            current_low = self.low[i]
+            if current_high is None or current_low is None:
+                psar_list[i] = prev_sar  # Propagate SAR if data missing
+                continue
 
-             if trend == 1:  # --- Uptrend Calculation ---
-                 sar = prev_sar + af * (ep - prev_sar)
-                 # Ensure SAR does not move above the previous two lows
-                 sar = min(sar, self.low[i - 1] if self.low[i - 1] is not None else sar)
-                 if i > 1:
-                     sar = min(sar, self.low[i - 2] if self.low[i - 2] is not None else sar)
+            if trend == 1:  # --- Uptrend Calculation ---
+                sar = prev_sar + af * (ep - prev_sar)
+                # Ensure SAR does not move above the previous two lows
+                sar = min(sar, self.low[i - 1] if self.low[i - 1] is not None else sar)
+                if i > 1:
+                    sar = min(
+                        sar, self.low[i - 2] if self.low[i - 2] is not None else sar
+                    )
 
-                 # Check for trend reversal
-                 if current_low < sar:
-                     trend = -1  # Switch to downtrend
-                     sar = ep  # New SAR is the old EP
-                     ep = current_low  # New EP is the current low
-                     af = acceleration  # Reset AF
-                 else:  # Continue uptrend
-                     # Update EP if new high is made
-                     if current_high > ep:
-                         ep = current_high
-                         af = min(af + acceleration, max_acceleration)
+                # Check for trend reversal
+                if current_low < sar:
+                    trend = -1  # Switch to downtrend
+                    sar = ep  # New SAR is the old EP
+                    ep = current_low  # New EP is the current low
+                    af = acceleration  # Reset AF
+                else:  # Continue uptrend
+                    # Update EP if new high is made
+                    if current_high > ep:
+                        ep = current_high
+                        af = min(af + acceleration, max_acceleration)
 
-             else:  # --- Downtrend Calculation ---
-                 sar = prev_sar + af * (ep - prev_sar)
-                  # Ensure SAR does not move below the previous two highs
-                 sar = max(sar, self.high[i - 1] if self.high[i - 1] is not None else sar)
-                 if i > 1:
-                     sar = max(sar, self.high[i - 2] if self.high[i - 2] is not None else sar)
+            else:  # --- Downtrend Calculation ---
+                sar = prev_sar + af * (ep - prev_sar)
+                # Ensure SAR does not move below the previous two highs
+                sar = max(
+                    sar, self.high[i - 1] if self.high[i - 1] is not None else sar
+                )
+                if i > 1:
+                    sar = max(
+                        sar, self.high[i - 2] if self.high[i - 2] is not None else sar
+                    )
 
-                 # Check for trend reversal
-                 if current_high > sar:
-                     trend = 1  # Switch to uptrend
-                     sar = ep  # New SAR is the old EP
-                     ep = current_high  # New EP is the current high
-                     af = acceleration  # Reset AF
-                 else:  # Continue downtrend
-                     # Update EP if new low is made
-                     if current_low < ep:
-                         ep = current_low
-                         af = min(af + acceleration, max_acceleration)
+                # Check for trend reversal
+                if current_high > sar:
+                    trend = 1  # Switch to uptrend
+                    sar = ep  # New SAR is the old EP
+                    ep = current_high  # New EP is the current high
+                    af = acceleration  # Reset AF
+                else:  # Continue downtrend
+                    # Update EP if new low is made
+                    if current_low < ep:
+                        ep = current_low
+                        af = min(af + acceleration, max_acceleration)
 
-             psar_list[i] = sar
+            psar_list[i] = sar
 
         return psar_list
 
-    def calculate_fve(self) -> list[float | None]:  # Force Index (smoothed is more common)
-        if len(self.close) < 2: return [None] * len(self.close)
+    def calculate_fve(
+        self,
+    ) -> list[float | None]:  # Force Index (smoothed is more common)
+        if len(self.close) < 2:
+            return [None] * len(self.close)
         force = [None] * len(self.close)
         for i in range(1, len(self.close)):
             c, pc, v = self.close[i], self.close[i - 1], self.volume[i]
@@ -1089,12 +1193,12 @@ class TradingAnalyzer:
         }
 
     def analyze_orderbook_levels(self, orderbook: dict, current_price: Decimal) -> str:
-        if not orderbook or 'bids' not in orderbook or 'asks' not in orderbook:
+        if not orderbook or "bids" not in orderbook or "asks" not in orderbook:
             return f"{NEON_YELLOW}Orderbook data not available or incomplete.{RESET}"
 
         # orderbook['bids'] and ['asks'] are lists of [price, size]
-        bids = orderbook['bids']  # Already should be floats from fetch_orderbook
-        asks = orderbook['asks']
+        bids = orderbook["bids"]  # Already should be floats from fetch_orderbook
+        asks = orderbook["asks"]
 
         analysis_output = ""
         float(current_price)
@@ -1105,36 +1209,49 @@ class TradingAnalyzer:
             bids_data,
             asks_data,
             threshold=self.config["orderbook_cluster_threshold"],
-            price_range_factor=0.0005  # 0.05% range around the level
+            price_range_factor=0.0005,  # 0.05% range around the level
         ) -> str | None:
-             if not isinstance(level_price, (float, int)): return None  # Skip if level_price is invalid
+            if not isinstance(level_price, (float, int)):
+                return None  # Skip if level_price is invalid
 
-             price_range = level_price * price_range_factor
-             min_p, max_p = level_price - price_range, level_price + price_range
+            price_range = level_price * price_range_factor
+            min_p, max_p = level_price - price_range, level_price + price_range
 
-             bid_volume_at_level = sum(size for price, size in bids_data if min_p <= price <= max_p)
-             ask_volume_at_level = sum(size for price, size in asks_data if min_p <= price <= max_p)
+            bid_volume_at_level = sum(
+                size for price, size in bids_data if min_p <= price <= max_p
+            )
+            ask_volume_at_level = sum(
+                size for price, size in asks_data if min_p <= price <= max_p
+            )
 
-             if bid_volume_at_level > threshold:
-                 return f"Significant bid volume ({bid_volume_at_level:.0f}) near {level_name} ${level_price:.2f}."
-             if ask_volume_at_level > threshold:
-                 return f"Significant ask volume ({ask_volume_at_level:.0f}) near {level_name} ${level_price:.2f}."
-             return None
+            if bid_volume_at_level > threshold:
+                return f"Significant bid volume ({bid_volume_at_level:.0f}) near {level_name} ${level_price:.2f}."
+            if ask_volume_at_level > threshold:
+                return f"Significant ask volume ({ask_volume_at_level:.0f}) near {level_name} ${level_price:.2f}."
+            return None
 
         # Check Fibonacci Levels
-        for level_type, levels_dict in self.levels.items():  # e.g., level_type = 'Support' or 'Resistance'
-             if isinstance(levels_dict, dict):
-                for level_name, level_value in levels_dict.items():  # e.g., level_name = 'Fib 23.6%'
+        for (
+            level_type,
+            levels_dict,
+        ) in self.levels.items():  # e.g., level_type = 'Support' or 'Resistance'
+            if isinstance(levels_dict, dict):
+                for (
+                    level_name,
+                    level_value,
+                ) in levels_dict.items():  # e.g., level_name = 'Fib 23.6%'
                     cluster_analysis = check_cluster_at_level(
                         f"{level_type} {level_name}", level_value, bids, asks
                     )
                     if cluster_analysis:
-                         color = NEON_GREEN if level_type == "Support" else NEON_RED
-                         analysis_output += f"  {color}{cluster_analysis}{RESET}\n"
+                        color = NEON_GREEN if level_type == "Support" else NEON_RED
+                        analysis_output += f"  {color}{cluster_analysis}{RESET}\n"
 
         # Check Pivot Points
         for level_name, level_price in self.levels.items():
-             if level_name not in ["Support", "Resistance"] and isinstance(level_price, (float, int, Decimal)):
+            if level_name not in ["Support", "Resistance"] and isinstance(
+                level_price, (float, int, Decimal)
+            ):
                 cluster_analysis = check_cluster_at_level(
                     f"Pivot {level_name}", float(level_price), bids, asks
                 )
@@ -1156,8 +1273,10 @@ class TradingAnalyzer:
         last_close = self._get_last_valid(self.close)
 
         if not valid_highs or not valid_lows or last_close is None:
-             self.logger.error(f"{NEON_RED}Insufficient valid high/low/close data for analysis.{RESET}")
-             return
+            self.logger.error(
+                f"{NEON_RED}Insufficient valid high/low/close data for analysis.{RESET}"
+            )
+            return
 
         high = max(valid_highs)
         low = min(valid_lows)
@@ -1220,11 +1339,13 @@ class TradingAnalyzer:
             "psar": get_last_n(psar),
             "fve": get_last_n(fve),
             "macd": [  # Get last 3 tuples of (macd, signal, hist)
-                 list(get_last_n(macd_data.get(k, []), n=3)) for k in ["macd", "signal", "histogram"]
+                list(get_last_n(macd_data.get(k, []), n=3))
+                for k in ["macd", "signal", "histogram"]
             ],
             "bollinger_bands": [  # Get last 3 tuples of (upper, middle, lower)
-                 list(get_last_n(bollinger_bands_data.get(k, []), n=3)) for k in ["upper_band", "middle_band", "lower_band"]
-             ]
+                list(get_last_n(bollinger_bands_data.get(k, []), n=3))
+                for k in ["upper_band", "middle_band", "lower_band"]
+            ],
         }
 
         output = f"""
@@ -1232,8 +1353,8 @@ class TradingAnalyzer:
 {NEON_BLUE}Symbol:{RESET} {self.symbol}
 {NEON_BLUE}Interval:{RESET} {self.interval}
 {NEON_BLUE}Timestamp:{RESET} {timestamp}
-{NEON_BLUE}Price:{RESET}   {'N/A' if last_3_close[0] is None else f'{last_3_close[0]:.2f}'} | {'N/A' if last_3_close[1] is None else f'{last_3_close[1]:.2f}'} | {'N/A' if last_3_close[2] is None else f'{last_3_close[2]:.2f}'}
-{NEON_BLUE}Vol:{RESET}   {'N/A' if last_3_vol[0] is None else f'{last_3_vol[0]:,}'} | {'N/A' if last_3_vol[1] is None else f'{last_3_vol[1]:,}'} | {'N/A' if last_3_vol[2] is None else f'{last_3_vol[2]:,}'}
+{NEON_BLUE}Price:{RESET}   {"N/A" if last_3_close[0] is None else f"{last_3_close[0]:.2f}"} | {"N/A" if last_3_close[1] is None else f"{last_3_close[1]:.2f}"} | {"N/A" if last_3_close[2] is None else f"{last_3_close[2]:.2f}"}
+{NEON_BLUE}Vol:{RESET}   {"N/A" if last_3_vol[0] is None else f"{last_3_vol[0]:,}"} | {"N/A" if last_3_vol[1] is None else f"{last_3_vol[1]:,}"} | {"N/A" if last_3_vol[2] is None else f"{last_3_vol[2]:,}"}
 {NEON_BLUE}Current Price:{RESET} {current_price:.2f}
 {NEON_BLUE}ATR:{RESET} {self._get_last_valid(atr):.4f}
 {NEON_BLUE}Trend:{RESET} {trend} (Strength: {strength:.2f})
@@ -1244,10 +1365,14 @@ class TradingAnalyzer:
         prev_rsi_20 = indicator_values["rsi_20"][-2]
         prev_rsi_100 = indicator_values["rsi_100"][-2]
 
-        rsi_cross = f"{NEON_YELLOW}RSI 20/100:{RESET} No recent cross or insufficient data"
+        rsi_cross = (
+            f"{NEON_YELLOW}RSI 20/100:{RESET} No recent cross or insufficient data"
+        )
         if None not in [rsi_20_val, rsi_100_val, prev_rsi_20, prev_rsi_100]:
             if rsi_20_val > rsi_100_val and prev_rsi_20 <= prev_rsi_100:
-                rsi_cross = f"{NEON_GREEN}RSI 20/100:{RESET} RSI 20 crossed ABOVE RSI 100"
+                rsi_cross = (
+                    f"{NEON_GREEN}RSI 20/100:{RESET} RSI 20 crossed ABOVE RSI 100"
+                )
             elif rsi_20_val < rsi_100_val and prev_rsi_20 >= prev_rsi_100:
                 rsi_cross = f"{NEON_RED}RSI 20/100:{RESET} RSI 20 crossed BELOW RSI 100"
 
@@ -1256,9 +1381,11 @@ class TradingAnalyzer:
         # --- Interpret Indicators ---
         # (interpret_indicator function needs slight modification for new data structure)
         for indicator_name, values in indicator_values.items():
-             interpretation = self.interpret_indicator(self.logger, indicator_name, values, last_close)  # Pass last_close if needed
-             if interpretation:
-                 output += interpretation + "\n"
+            interpretation = self.interpret_indicator(
+                self.logger, indicator_name, values, last_close
+            )  # Pass last_close if needed
+            if interpretation:
+                output += interpretation + "\n"
 
         output += f"""
 {NEON_BLUE}Support and Resistance Levels:{RESET}
@@ -1277,14 +1404,19 @@ class TradingAnalyzer:
         self.logger.info(output)
 
     def interpret_indicator(
-        self, logger: logging.Logger, indicator_name: str, values: list | dict, last_close: float | None
+        self,
+        logger: logging.Logger,
+        indicator_name: str,
+        values: list | dict,
+        last_close: float | None,
     ) -> str | None:
         if values is None:
             return f"{indicator_name.upper()}: No data available."
 
         # Helper to get the last valid numeric value from a list
         def get_last_numeric(value_list):
-            if not isinstance(value_list, list): return None
+            if not isinstance(value_list, list):
+                return None
             for x in reversed(value_list):
                 if isinstance(x, (int, float)):
                     return x
@@ -1292,16 +1424,17 @@ class TradingAnalyzer:
 
         # Helper to get the second to last valid numeric value
         def get_second_last_numeric(value_list):
-             if not isinstance(value_list, list): return None
-             count = 0
-             second_last = None
-             for x in reversed(value_list):
-                 if isinstance(x, (int, float)):
-                     count += 1
-                     if count == 2:
-                         second_last = x
-                         break
-             return second_last
+            if not isinstance(value_list, list):
+                return None
+            count = 0
+            second_last = None
+            for x in reversed(value_list):
+                if isinstance(x, (int, float)):
+                    count += 1
+                    if count == 2:
+                        second_last = x
+                        break
+            return second_last
 
         try:
             last_val = None
@@ -1309,128 +1442,155 @@ class TradingAnalyzer:
 
             # Handle different structures of 'values'
             if indicator_name in ["macd", "bollinger_bands"]:
-                 # These have nested lists, specific handling below
-                 pass
+                # These have nested lists, specific handling below
+                pass
             elif indicator_name == "mom":
-                 # This is a list containing the trend_data dict
-                 if values and isinstance(values[0], dict):
-                     last_val = values[0]  # The dict itself is the 'value'
-                 else:
-                     return f"{indicator_name.upper()}: Trend data missing."
+                # This is a list containing the trend_data dict
+                if values and isinstance(values[0], dict):
+                    last_val = values[0]  # The dict itself is the 'value'
+                else:
+                    return f"{indicator_name.upper()}: Trend data missing."
             elif isinstance(values, list):
                 last_val = get_last_numeric(values)
                 prev_val = get_second_last_numeric(values)
             else:  # Should not happen based on analyze structure, but handle anyway
-                 return f"{indicator_name.upper()}: Unexpected data structure."
+                return f"{indicator_name.upper()}: Unexpected data structure."
 
             # --- Indicator Interpretation Logic ---
             if indicator_name == "rsi_20" or indicator_name == "rsi_100":
-                 if last_val is None: return f"{indicator_name.upper()}: No data."
-                 if last_val > 70: return f"{NEON_RED}{indicator_name.upper()}:{RESET} Overbought ({last_val:.2f})"
-                 if last_val < 30: return f"{NEON_GREEN}{indicator_name.upper()}:{RESET} Oversold ({last_val:.2f})"
-                 return f"{NEON_YELLOW}{indicator_name.upper()}:{RESET} Neutral ({last_val:.2f})"
+                if last_val is None:
+                    return f"{indicator_name.upper()}: No data."
+                if last_val > 70:
+                    return f"{NEON_RED}{indicator_name.upper()}:{RESET} Overbought ({last_val:.2f})"
+                if last_val < 30:
+                    return f"{NEON_GREEN}{indicator_name.upper()}:{RESET} Oversold ({last_val:.2f})"
+                return f"{NEON_YELLOW}{indicator_name.upper()}:{RESET} Neutral ({last_val:.2f})"
 
             elif indicator_name == "mfi":
-                if last_val is None: return "MFI: No data."
-                if last_val > 80: return f"{NEON_RED}MFI:{RESET} Overbought ({last_val:.2f})"
-                if last_val < 20: return f"{NEON_GREEN}MFI:{RESET} Oversold ({last_val:.2f})"
+                if last_val is None:
+                    return "MFI: No data."
+                if last_val > 80:
+                    return f"{NEON_RED}MFI:{RESET} Overbought ({last_val:.2f})"
+                if last_val < 20:
+                    return f"{NEON_GREEN}MFI:{RESET} Oversold ({last_val:.2f})"
                 return f"{NEON_YELLOW}MFI:{RESET} Neutral ({last_val:.2f})"
 
             elif indicator_name == "cci":
-                 if last_val is None: return "CCI: No data."
-                 if last_val > 100: return f"{NEON_RED}CCI:{RESET} Overbought ({last_val:.2f})"
-                 if last_val < -100: return f"{NEON_GREEN}CCI:{RESET} Oversold ({last_val:.2f})"
-                 return f"{NEON_YELLOW}CCI:{RESET} Neutral ({last_val:.2f})"
+                if last_val is None:
+                    return "CCI: No data."
+                if last_val > 100:
+                    return f"{NEON_RED}CCI:{RESET} Overbought ({last_val:.2f})"
+                if last_val < -100:
+                    return f"{NEON_GREEN}CCI:{RESET} Oversold ({last_val:.2f})"
+                return f"{NEON_YELLOW}CCI:{RESET} Neutral ({last_val:.2f})"
 
             elif indicator_name == "wr":
-                 if last_val is None: return "Williams %R: No data."
-                 if last_val < -80: return f"{NEON_GREEN}Williams %R:{RESET} Oversold ({last_val:.2f})"
-                 if last_val > -20: return f"{NEON_RED}Williams %R:{RESET} Overbought ({last_val:.2f})"
-                 return f"{NEON_YELLOW}Williams %R:{RESET} Neutral ({last_val:.2f})"
+                if last_val is None:
+                    return "Williams %R: No data."
+                if last_val < -80:
+                    return f"{NEON_GREEN}Williams %R:{RESET} Oversold ({last_val:.2f})"
+                if last_val > -20:
+                    return f"{NEON_RED}Williams %R:{RESET} Overbought ({last_val:.2f})"
+                return f"{NEON_YELLOW}Williams %R:{RESET} Neutral ({last_val:.2f})"
 
             elif indicator_name == "adx":
-                 # ADX value is directly available in last_val here (repeated 3 times in list)
-                 adx_val = get_last_numeric(values)  # Get the actual ADX value
-                 if adx_val is None: return "ADX: No data."
-                 if adx_val > 25: return f"{NEON_GREEN}ADX:{RESET} Trending ({adx_val:.2f})"
-                 return f"{NEON_YELLOW}ADX:{RESET} Ranging ({adx_val:.2f})"
+                # ADX value is directly available in last_val here (repeated 3 times in list)
+                adx_val = get_last_numeric(values)  # Get the actual ADX value
+                if adx_val is None:
+                    return "ADX: No data."
+                if adx_val > 25:
+                    return f"{NEON_GREEN}ADX:{RESET} Trending ({adx_val:.2f})"
+                return f"{NEON_YELLOW}ADX:{RESET} Ranging ({adx_val:.2f})"
 
             elif indicator_name == "obv":
-                if last_val is None or prev_val is None: return "OBV: Insufficient data."
-                if last_val > prev_val: return f"{NEON_BLUE}OBV:{RESET} Bullish"
-                if last_val < prev_val: return f"{NEON_BLUE}OBV:{RESET} Bearish"
+                if last_val is None or prev_val is None:
+                    return "OBV: Insufficient data."
+                if last_val > prev_val:
+                    return f"{NEON_BLUE}OBV:{RESET} Bullish"
+                if last_val < prev_val:
+                    return f"{NEON_BLUE}OBV:{RESET} Bearish"
                 return f"{NEON_BLUE}OBV:{RESET} Neutral"
 
             elif indicator_name == "adi":
-                if last_val is None or prev_val is None: return "ADI: Insufficient data."
-                if last_val > prev_val: return f"{NEON_BLUE}ADI:{RESET} Accumulation"
-                if last_val < prev_val: return f"{NEON_BLUE}ADI:{RESET} Distribution"
+                if last_val is None or prev_val is None:
+                    return "ADI: Insufficient data."
+                if last_val > prev_val:
+                    return f"{NEON_BLUE}ADI:{RESET} Accumulation"
+                if last_val < prev_val:
+                    return f"{NEON_BLUE}ADI:{RESET} Distribution"
                 return f"{NEON_BLUE}ADI:{RESET} Neutral"
 
             elif indicator_name == "mom":
-                 trend = last_val.get("trend", "N/A")
-                 strength = last_val.get("strength", 0)
-                 return f"{NEON_PURPLE}Momentum:{RESET} {trend} (Strength: {strength:.2f})"
+                trend = last_val.get("trend", "N/A")
+                strength = last_val.get("strength", 0)
+                return (
+                    f"{NEON_PURPLE}Momentum:{RESET} {trend} (Strength: {strength:.2f})"
+                )
 
             elif indicator_name == "sma":
-                 if last_val is None: return "SMA (10): No data."
-                 return f"{NEON_YELLOW}SMA (10):{RESET} {last_val:.2f}"
+                if last_val is None:
+                    return "SMA (10): No data."
+                return f"{NEON_YELLOW}SMA (10):{RESET} {last_val:.2f}"
 
             elif indicator_name == "psar":
-                 if last_val is None: return "PSAR: No data."
-                 # Compare PSAR to price for trend indication
-                 trend_indicator = ""
-                 if last_close is not None:
-                     if last_close > last_val: trend_indicator = f" ({NEON_GREEN}Price Above - Bullish{RESET})"
-                     elif last_close < last_val: trend_indicator = f" ({NEON_RED}Price Below - Bearish{RESET})"
-                 return f"{NEON_BLUE}PSAR:{RESET} {last_val:.4f}{trend_indicator}"
+                if last_val is None:
+                    return "PSAR: No data."
+                # Compare PSAR to price for trend indication
+                trend_indicator = ""
+                if last_close is not None:
+                    if last_close > last_val:
+                        trend_indicator = f" ({NEON_GREEN}Price Above - Bullish{RESET})"
+                    elif last_close < last_val:
+                        trend_indicator = f" ({NEON_RED}Price Below - Bearish{RESET})"
+                return f"{NEON_BLUE}PSAR:{RESET} {last_val:.4f}{trend_indicator}"
 
             elif indicator_name == "fve":
-                 if last_val is None: return "FVE: No data."
-                 return f"{NEON_BLUE}FVE:{RESET} {last_val:,.0f} (Last Value)"  # Raw cumulative force
+                if last_val is None:
+                    return "FVE: No data."
+                return f"{NEON_BLUE}FVE:{RESET} {last_val:,.0f} (Last Value)"  # Raw cumulative force
 
             elif indicator_name == "macd":
-                 # values = [ [macd_n-2, macd_n-1, macd_n], [sig_n-2, sig_n-1, sig_n], [hist_n-2, hist_n-1, hist_n] ]
-                 if len(values) != 3 or not all(isinstance(v, list) for v in values):
-                      return f"{NEON_RED}MACD:{RESET} Data structure issue."
+                # values = [ [macd_n-2, macd_n-1, macd_n], [sig_n-2, sig_n-1, sig_n], [hist_n-2, hist_n-1, hist_n] ]
+                if len(values) != 3 or not all(isinstance(v, list) for v in values):
+                    return f"{NEON_RED}MACD:{RESET} Data structure issue."
 
-                 last_macd = get_last_numeric(values[0])
-                 last_signal = get_last_numeric(values[1])
-                 last_hist = get_last_numeric(values[2])
+                last_macd = get_last_numeric(values[0])
+                last_signal = get_last_numeric(values[1])
+                last_hist = get_last_numeric(values[2])
 
-                 if None in [last_macd, last_signal, last_hist]:
-                      return f"{NEON_RED}MACD:{RESET} Calculation issue or insufficient data."
+                if None in [last_macd, last_signal, last_hist]:
+                    return f"{NEON_RED}MACD:{RESET} Calculation issue or insufficient data."
 
-                 cross_info = ""
-                 # Basic Crossover Check
-                 prev_macd = get_second_last_numeric(values[0])
-                 prev_signal = get_second_last_numeric(values[1])
-                 if prev_macd is not None and prev_signal is not None:
-                      if prev_macd <= prev_signal and last_macd > last_signal:
-                           cross_info = f" ({NEON_GREEN}Bullish Cross{RESET})"
-                      elif prev_macd >= prev_signal and last_macd < last_signal:
-                           cross_info = f" ({NEON_RED}Bearish Cross{RESET})"
+                cross_info = ""
+                # Basic Crossover Check
+                prev_macd = get_second_last_numeric(values[0])
+                prev_signal = get_second_last_numeric(values[1])
+                if prev_macd is not None and prev_signal is not None:
+                    if prev_macd <= prev_signal and last_macd > last_signal:
+                        cross_info = f" ({NEON_GREEN}Bullish Cross{RESET})"
+                    elif prev_macd >= prev_signal and last_macd < last_signal:
+                        cross_info = f" ({NEON_RED}Bearish Cross{RESET})"
 
-                 return f"{NEON_GREEN}MACD:{RESET} MACD={last_macd:.2f}, Signal={last_signal:.2f}, Hist={last_hist:.2f}{cross_info}"
+                return f"{NEON_GREEN}MACD:{RESET} MACD={last_macd:.2f}, Signal={last_signal:.2f}, Hist={last_hist:.2f}{cross_info}"
 
             elif indicator_name == "bollinger_bands":
-                 # values = [ [ub_n-2, ub_n-1, ub_n], [mb_n-2, mb_n-1, mb_n], [lb_n-2, lb_n-1, lb_n] ]
-                 if len(values) != 3 or not all(isinstance(v, list) for v in values):
-                      return f"{NEON_RED}Bollinger Bands:{RESET} Data structure issue."
+                # values = [ [ub_n-2, ub_n-1, ub_n], [mb_n-2, mb_n-1, mb_n], [lb_n-2, lb_n-1, lb_n] ]
+                if len(values) != 3 or not all(isinstance(v, list) for v in values):
+                    return f"{NEON_RED}Bollinger Bands:{RESET} Data structure issue."
 
-                 upper_band = get_last_numeric(values[0])
-                 middle_band = get_last_numeric(values[1])
-                 lower_band = get_last_numeric(values[2])
+                upper_band = get_last_numeric(values[0])
+                middle_band = get_last_numeric(values[1])
+                lower_band = get_last_numeric(values[2])
 
-                 if None in [upper_band, middle_band, lower_band, last_close]:
-                      return f"{NEON_RED}Bollinger Bands:{RESET} Calculation issue or insufficient data."
+                if None in [upper_band, middle_band, lower_band, last_close]:
+                    return f"{NEON_RED}Bollinger Bands:{RESET} Calculation issue or insufficient data."
 
-                 if last_close > upper_band:
-                     return f"{NEON_RED}Bollinger Bands:{RESET} Price above Upper Band ({upper_band:.2f})"
-                 elif last_close < lower_band:
-                     return f"{NEON_GREEN}Bollinger Bands:{RESET} Price below Lower Band ({lower_band:.2f})"
-                 else:
-                     return f"{NEON_YELLOW}Bollinger Bands:{RESET} Price within Bands (Upper={upper_band:.2f}, Middle={middle_band:.2f}, Lower={lower_band:.2f})"
+                if last_close > upper_band:
+                    return f"{NEON_RED}Bollinger Bands:{RESET} Price above Upper Band ({upper_band:.2f})"
+                elif last_close < lower_band:
+                    return f"{NEON_GREEN}Bollinger Bands:{RESET} Price below Lower Band ({lower_band:.2f})"
+                else:
+                    return f"{NEON_YELLOW}Bollinger Bands:{RESET} Price within Bands (Upper={upper_band:.2f}, Middle={middle_band:.2f}, Lower={lower_band:.2f})"
             else:
                 return None  # Unknown indicator
         except (TypeError, IndexError, KeyError) as e:
@@ -1463,7 +1623,7 @@ def main() -> None:
         if interval in VALID_INTERVALS:
             break
         else:
-             pass
+            pass
 
     logger = setup_logger(symbol)
     analysis_interval = CONFIG["analysis_interval"]
@@ -1480,7 +1640,9 @@ def main() -> None:
                 continue
 
             # Fetch klines as list of dictionaries
-            kline_list = fetch_klines(symbol, interval, logger=logger, limit=200)  # Fetch enough for calculations
+            kline_list = fetch_klines(
+                symbol, interval, logger=logger, limit=200
+            )  # Fetch enough for calculations
             if not kline_list:
                 logger.error(
                     f"{NEON_RED}Failed to fetch kline data or data is empty. Retrying in {retry_delay} seconds...{RESET}"
@@ -1493,7 +1655,9 @@ def main() -> None:
             analyzer.analyze(current_price, timestamp)
 
             # Wait before next analysis cycle
-            logger.info(f"{NEON_BLUE}Waiting {analysis_interval} seconds for next analysis...{RESET}")
+            logger.info(
+                f"{NEON_BLUE}Waiting {analysis_interval} seconds for next analysis...{RESET}"
+            )
             time.sleep(analysis_interval)
 
         except requests.exceptions.RequestException as e:

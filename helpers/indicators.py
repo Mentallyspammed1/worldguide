@@ -956,16 +956,20 @@ if __name__ == "__main__":
         1 - np.random.uniform(0, 0.01, periods - 1)
     )
     # Ensure H >= max(O,C) and L <= min(O,C)
-    df_test["high"] = np.maximum.reduce([
-        df_test["open"],
-        df_test["close"],
-        df_test["high"],
-    ])
-    df_test["low"] = np.minimum.reduce([
-        df_test["open"],
-        df_test["close"],
-        df_test["low"],
-    ])
+    df_test["high"] = np.maximum.reduce(
+        [
+            df_test["open"],
+            df_test["close"],
+            df_test["high"],
+        ]
+    )
+    df_test["low"] = np.minimum.reduce(
+        [
+            df_test["open"],
+            df_test["close"],
+            df_test["low"],
+        ]
+    )
     df_test["volume"] = np.random.uniform(100, 2000, periods - 1) * (
         1 + 0.5 * np.abs(df_test["close"].pct_change().fillna(0))
     )  # Volume increases with price change

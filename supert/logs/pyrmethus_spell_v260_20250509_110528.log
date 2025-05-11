@@ -1,0 +1,76 @@
+2025-05-09 11:05:28 [[34mINFO[0m] __main__                       [35m--- Summoning Configuration Runes v2.6.0 ---[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [31mConfig Rune 'BYBIT_API_KEY': Found in environment: '*******'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [31mConfig Rune 'BYBIT_API_KEY': Using value '*******' (Type: str, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [31mConfig Rune 'BYBIT_API_SECRET': Found in environment: '*******'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [31mConfig Rune 'BYBIT_API_SECRET': Using value '*******' (Type: str, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'SYMBOL': Found in environment: 'TRUMP/USDT:USDT'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'SYMBOL': Using value 'TRUMP/USDT:USDT' (Type: str, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'INTERVAL': Found in environment: '1m'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'INTERVAL': Using value '1m' (Type: str, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'LEVERAGE': Found in environment: '20'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'LEVERAGE': Using value '20' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'SLEEP_SECONDS': Found in environment: '10'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'SLEEP_SECONDS': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'STRATEGY_NAME': Found in environment: 'EHLERS_FISHER'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'STRATEGY_NAME': Using value 'EHLERS_FISHER' (Type: str, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'RISK_PER_TRADE_PERCENTAGE': Found in environment: '0.01'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'RISK_PER_TRADE_PERCENTAGE': Using value '0.01' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'MAX_ORDER_USDT_AMOUNT': Found in environment: '50.0'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'MAX_ORDER_USDT_AMOUNT': Using value '50.0' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'REQUIRED_MARGIN_BUFFER': Found in environment: '1.10'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'REQUIRED_MARGIN_BUFFER': Using value '1.10' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'MAX_ACCOUNT_MARGIN_RATIO': Not set. Using default enchantment: '0.8'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'MAX_ACCOUNT_MARGIN_RATIO': Using value '0.8' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ENABLE_DYNAMIC_ATR_SL': Not set. Using default enchantment: 'true'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ENABLE_DYNAMIC_ATR_SL': Using value 'True' (Type: bool, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SHORT_TERM_PERIOD': Not set. Using default enchantment: '7'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SHORT_TERM_PERIOD': Using value '7' (Type: int, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_LONG_TERM_PERIOD': Not set. Using default enchantment: '50'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_LONG_TERM_PERIOD': Using value '50' (Type: int, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'VOLATILITY_RATIO_LOW_THRESHOLD': Not set. Using default enchantment: '0.7'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'VOLATILITY_RATIO_LOW_THRESHOLD': Using value '0.7' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'VOLATILITY_RATIO_HIGH_THRESHOLD': Not set. Using default enchantment: '1.5'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'VOLATILITY_RATIO_HIGH_THRESHOLD': Using value '1.5' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SL_MULTIPLIER_LOW_VOL': Not set. Using default enchantment: '1.0'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SL_MULTIPLIER_LOW_VOL': Using value '1.0' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SL_MULTIPLIER_NORMAL_VOL': Not set. Using default enchantment: '1.3'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SL_MULTIPLIER_NORMAL_VOL': Using value '1.3' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SL_MULTIPLIER_HIGH_VOL': Not set. Using default enchantment: '1.8'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_SL_MULTIPLIER_HIGH_VOL': Using value '1.8' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_STOP_LOSS_MULTIPLIER': Found in environment: '1.5'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'ATR_STOP_LOSS_MULTIPLIER': Using value '1.5' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'ENABLE_POSITION_SCALING': Not set. Using default enchantment: 'true'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'ENABLE_POSITION_SCALING': Using value 'True' (Type: bool, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'MAX_SCALE_INS': Not set. Using default enchantment: '1'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'MAX_SCALE_INS': Using value '1' (Type: int, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'SCALE_IN_RISK_PERCENTAGE': Not set. Using default enchantment: '0.005'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'SCALE_IN_RISK_PERCENTAGE': Using value '0.005' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'MIN_PROFIT_FOR_SCALE_IN_ATR': Not set. Using default enchantment: '1.0'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'MIN_PROFIT_FOR_SCALE_IN_ATR': Using value '1.0' (Type: Decimal, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'TRAILING_STOP_PERCENTAGE': Found in environment: '0.007'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'TRAILING_STOP_PERCENTAGE': Using value '0.007' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT': Found in environment: '0.002'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [32mConfig Rune 'TRAILING_STOP_ACTIVATION_PRICE_OFFSET_PERCENT': Using value '0.002' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'ST_ATR_LENGTH': Found in environment: '3'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'ST_ATR_LENGTH': Using value '3' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'ST_MULTIPLIER': Found in environment: '0.8'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [36mConfig Rune 'ST_MULTIPLIER': Using value '0.8' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [37mConfig Rune 'CONFIRM_ST_ATR_LENGTH': Found in environment: '5'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [37mConfig Rune 'CONFIRM_ST_ATR_LENGTH': Using value '5' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [37mConfig Rune 'CONFIRM_ST_MULTIPLIER': Found in environment: '0.4'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [37mConfig Rune 'CONFIRM_ST_MULTIPLIER': Using value '0.4' (Type: Decimal, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'VOLUME_MA_PERIOD': Found in environment: '10'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'VOLUME_MA_PERIOD': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [35mConfig Rune 'ENABLE_SMS_ALERTS': Found in environment: 'true'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [35mConfig Rune 'ENABLE_SMS_ALERTS': Using value 'True' (Type: bool, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [35mConfig Rune 'SMS_RECIPIENT_NUMBER': Found in environment: '16364866381'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [35mConfig Rune 'SMS_RECIPIENT_NUMBER': Using value '16364866381' (Type: str, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [35mConfig Rune 'SMS_TIMEOUT_SECONDS': Found in environment: '30'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [35mConfig Rune 'SMS_TIMEOUT_SECONDS': Using value '30' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'DEFAULT_RECV_WINDOW': Not set. Using default enchantment: '13000'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'DEFAULT_RECV_WINDOW': Using value '13000' (Type: int, Source: Default)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'ORDER_BOOK_DEPTH': Found in environment: '20'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'ORDER_BOOK_DEPTH': Using value '20' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'ORDER_FILL_TIMEOUT_SECONDS': Found in environment: '10'[0m
+2025-05-09 11:05:28 [[36m[2mDEBUG[0m] __main__                       [33mConfig Rune 'ORDER_FILL_TIMEOUT_SECONDS': Using value '10' (Type: int, Source: Env Var)[0m
+2025-05-09 11:05:28 [[34mINFO[0m] __main__                       [35m[1m--- Configuration Runes v2.6.0 Summoned and Verified ---[0m

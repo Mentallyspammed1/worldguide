@@ -1,137 +1,322 @@
 #!/usr/bin/env python3
+import logging
 import os
+import re
 import sys
-import glob
 import time
-import google.generativeai as genai
-from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
 
-def configure_gemini(api_key):
-    """Configure the Gemini API with the provided API key."""
+import google.generativeai as genai
+
+# --- Constants ---
+MODEL_NAME: str = "gemini-2.5-pro-exp-03-25"
+LOG_FILE_NAME: str = "enhancement_log.txt"
+MATCHED_FILES_LOG_NAME: str = "matched_files.txt"
+DEFAULT_MAX_API_CALLS_PER_MINUTE: int = 59  # Default for Gemini API, adjust if needed
+
+# --- Configure Logging ---
+# Basic configuration sets up the root logger.
+# FileHandler will append to the log file.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - [%(module)s.%(funcName)s:%(lineno)d] - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # Log to console
+        logging.FileHandler(LOG_FILE_NAME, mode="a", encoding="utf-8"),  # Log to file
+    ],
+)
+logger = logging.getLogger(__name__)
+
+
+# --- API Configuration ---
+def configure_api() -> Optional[genai.GenerativeModel]:
+    """
+    Configures and returns the Gemini GenerativeModel.
+    Reads the API key from the GOOGLE_API_KEY environment variable.
+    Sets safety configurations for the model.
+    Exits the script if configuration fails.
+    """
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        logger.error(
+            "GOOGLE_API_KEY environment variable not set. Please set it to your API key."
+        )
+        sys.exit(1)
+
     try:
         genai.configure(api_key=api_key)
-        return genai.GenerativeModel('gemini-pro')
+        safety_settings = [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+        ]
+        model = genai.GenerativeModel(MODEL_NAME, safety_settings=safety_settings)
+        logger.info(f"Successfully configured Gemini API with model: {MODEL_NAME}")
+        return model
     except Exception as e:
-        print(f"Error configuring Gemini API: {e}")
+        logger.error(f"Error configuring Gemini API: {e}")
+        sys.exit(1)
+    return None  # Should not be reached due to sys.exit(1)
+
+
+# --- File Operations ---
+def get_python_files(base_dir_str: str, pattern: str) -> List[str]:
+    """
+    Gets a sorted list of Python files matching the pattern in the base directory.
+    Logs the matched files to MATCHED_FILES_LOG_NAME.
+    Exits if the base directory is invalid or an error occurs during file search.
+    """
+    base_path = Path(base_dir_str)
+    matched_files_log_path = Path(MATCHED_FILES_LOG_NAME)
+
+    # This check is also in main, but good to have if function is used elsewhere.
+    if not base_path.is_dir():
+        logger.error(
+            f"Base directory '{base_path}' does not exist or is not a directory."
+        )
+        with matched_files_log_path.open("w", encoding="utf-8") as f:
+            f.write(
+                f"Error: Base directory '{base_path}' does not exist or is not a directory.\n"
+            )
         sys.exit(1)
 
-def enhance_code(content, model, max_attempts=3):
-    """Enhance Python code using the Gemini API with retry logic."""
-    prompt = (
-        "Enhance the following Python code. Improve readability, performance, and maintainability. "
-        "Add comments where necessary, optimize algorithms, and follow PEP 8 guidelines. "
-        "Return only the enhanced code without any explanations or markdown formatting:\n\n"
-        f"{content}"
+    files: List[str] = []
+    try:
+        files = sorted(
+            [str(f.resolve()) for f in base_path.glob(pattern) if f.is_file()]
+        )
+
+        with matched_files_log_path.open("w", encoding="utf-8") as f:
+            f.write(
+                f"Matched files for pattern '{pattern}' in directory '{base_path}':\n"
+            )
+            if files:
+                f.write("\n".join(files) + "\n")
+            else:
+                f.write("No Python files matched the pattern.\n")
+
+        if files:
+            logger.info(
+                f"Found {len(files)} Python files matching pattern '{pattern}' in '{base_path}'. See {MATCHED_FILES_LOG_NAME}."
+            )
+        else:
+            # This is not an error, just no files found.
+            logger.info(
+                f"No Python files matched pattern '{pattern}' in '{base_path}'. See {MATCHED_FILES_LOG_NAME}."
+            )
+        return files
+
+    except Exception as e:
+        logger.error(
+            f"Error during file search with pattern '{pattern}' in directory '{base_path}': {e}"
+        )
+        with matched_files_log_path.open("w", encoding="utf-8") as f:
+            f.write(
+                f"Error finding files with pattern '{pattern}' in '{base_path}': {e}\n"
+            )
+        sys.exit(1)
+    return []  # Should not be reached
+
+
+def read_file(file_path_str: str) -> Optional[str]:
+    """Reads content of a file. Returns None if an error occurs."""
+    file_path = Path(file_path_str)
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        logger.info(f"Successfully read {file_path}")
+        return content
+    except Exception as e:
+        logger.error(f"Failed to read {file_path}: {e}")
+        return None
+
+
+def write_file(file_path_str: str, content: str) -> bool:
+    """Writes content to a file. Returns True on success, False otherwise."""
+    file_path = Path(file_path_str)
+    try:
+        file_path.write_text(content, encoding="utf-8")
+        logger.info(f"Successfully wrote enhanced code to {file_path}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to write to {file_path}: {e}")
+        return False
+
+
+# --- Code Enhancement ---
+def enhance_code(
+    model: genai.GenerativeModel, code: str, file_path: str
+) -> Optional[str]:
+    """
+    Enhances Python code using the Gemini API.
+    Returns the enhanced code string if successful and changed, otherwise None.
+    """
+    prompt = f"""You are an expert Python code reviewer and enhancer.
+Analyze the following Python code and provide an improved version.
+Focus on these areas:
+1.  **Code Readability & Documentation**: Improve clarity, add or refine docstrings (following Google style or NumPy style if appropriate), and comments where necessary.
+2.  **Performance Optimization**: Suggest more efficient algorithms or data structures if applicable, reduce redundancy.
+3.  **Error Handling**: Implement robust error handling using try-except blocks and input validation where sensible.
+4.  **Pythonic Best Practices & PEP 8**: Ensure the code adheres to PEP 8 guidelines (naming, style, structure) and idiomatic Python.
+5.  **Type Hinting**: Add or improve type hints for function parameters, return types, and variables for better static analysis and readability (PEP 484).
+6.  **Modern Python Features**: Utilize modern Python features (e.g., f-strings, context managers, comprehensions) where they improve the code.
+
+IMPORTANT:
+-   Return ONLY the complete, enhanced Python code block.
+-   Wrap the entire Python code block within ```python ... ```.
+-   Include comments within the code to explain significant changes or rationale if not self-evident.
+-   Do not include any conversational preamble or concluding remarks outside the code block.
+-   If the code is already excellent and requires no changes, return the original code within the ```python ... ``` block.
+
+Original code from file: {file_path}
+```python
+{code}
+```"""
+
+    try:
+        logger.debug(f"Sending code from {file_path} to Gemini API for enhancement.")
+        response = model.generate_content(prompt)
+
+        if (
+            not response.text
+        ):  # Handles cases like empty response or content blocked by safety filters
+            logger.warning(
+                f"No enhancement suggestions or empty response received for {file_path}."
+            )
+            return None
+
+        # Extract Python code block using a more robust regex
+        code_match = re.search(r"```python\s*(.*?)\s*```", response.text, re.DOTALL)
+        if not code_match:
+            logger.error(
+                f"No valid Python code block (```python ... ```) found in the API response for {file_path}."
+            )
+            logger.debug(f"Full response for {file_path}:\n{response.text}")
+            return None
+
+        enhanced_code = code_match.group(1).strip()
+
+        # Check if the code has actually changed (ignoring leading/trailing whitespace)
+        if enhanced_code == code.strip():
+            logger.info(
+                f"No functional changes suggested by the API for {file_path}. Original code retained."
+            )
+            return None  # Indicate no change needed
+
+        logger.info(f"Successfully generated enhancements for {file_path}.")
+        return enhanced_code
+
+    except Exception as e:
+        logger.error(f"API call failed for {file_path}: {e}")
+        if hasattr(e, "response") and hasattr(
+            e.response, "prompt_feedback"
+        ):  # More detailed error for Gemini
+            logger.error(f"Prompt feedback: {e.response.prompt_feedback}")
+        return None
+
+
+# --- Main Logic ---
+def main(base_dir: str, file_pattern: str) -> None:
+    """Main function to process and enhance Python files."""
+
+    logger.info(
+        f"Starting code enhancement process for directory '{base_dir}', pattern '{file_pattern}'."
     )
-    for attempt in range(max_attempts):
-        try:
-            response = model.generate_content(prompt)
-            if response.text:
-                return response.text.strip()
-            print(f"Empty response from Gemini API on attempt {attempt + 1}")
-        except Exception as e:
-            print(f"Error enhancing code on attempt {attempt + 1}: {e}")
-            if attempt < max_attempts - 1:
-                time.sleep(2)  # Wait before retrying
-    print("Failed to enhance code after maximum attempts")
-    return content  # Return original content if enhancement fails
+    logger.info(f"Log file: {Path(LOG_FILE_NAME).resolve()}")
+    logger.info(f"Matched files list: {Path(MATCHED_FILES_LOG_NAME).resolve()}")
 
-def process_files(directory, file_pattern, api_key, max_calls):
-    """Process Python files in the directory matching the file pattern."""
-    print(f"Starting code enhancement at {datetime.now()}")
-    print(f"Directory: {directory}")
-    print(f"File pattern: {file_pattern}")
-    print(f"Max API calls per minute: {max_calls}")
+    max_api_calls_per_minute = int(
+        os.environ.get("MAX_API_CALLS", DEFAULT_MAX_API_CALLS_PER_MINUTE)
+    )
+    logger.info(f"Using MAX_API_CALLS_PER_MINUTE: {max_api_calls_per_minute}")
 
-    # Change to the specified directory
-    try:
-        os.chdir(directory)
-    except Exception as e:
-        print(f"Error changing to directory {directory}: {e}")
-        sys.exit(1)
+    model = configure_api()
+    if not model:  # configure_api calls sys.exit on failure, but as a safeguard
+        logger.critical("Failed to configure API model. Exiting.")
+        return
 
-    # Configure Gemini API
-    model = configure_gemini(api_key)
-    max_calls = int(max_calls)
-    call_interval = 60.0 / max_calls  # Seconds between API calls
-    modified_files = []
-    processed_files = 0
+    files_to_process = get_python_files(base_dir, file_pattern)
 
-    # Find matching files
-    files = list(glob.glob(file_pattern, recursive=True))
-    if not files:
-        print(f"No files found matching pattern '{file_pattern}'")
-        return modified_files
+    if not files_to_process:
+        logger.warning(
+            "No Python files found matching the pattern. Nothing to enhance."
+        )
+        return  # Exit if no files
 
-    print(f"Found {len(files)} file(s) to process")
+    # Calculate delay to respect API rate limit (calls per minute)
+    # Add a small buffer to be safe, e.g., 0.1 seconds
+    delay_seconds = (
+        60.0 / max_api_calls_per_minute if max_api_calls_per_minute > 0 else 0
+    ) + 0.1
+    logger.info(f"Calculated API call delay: {delay_seconds:.2f} seconds per call.")
 
-    for filepath in files:
-        print(f"\nProcessing {filepath}")
-        processed_files += 1
+    modified_files_count = 0
+    processed_files_count = 0
 
-        # Read original content
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                original_content = f.read()
-        except Exception as e:
-            print(f"Error reading {filepath}: {e}")
+    for file_path_str in files_to_process:
+        processed_files_count += 1
+        logger.info(
+            f"Processing file {processed_files_count}/{len(files_to_process)}: {file_path_str}"
+        )
+
+        original_code = read_file(file_path_str)
+        if original_code is None:
+            logger.warning(f"Skipping {file_path_str} due to read error.")
+            continue  # Skip to next file
+
+        if not original_code.strip():
+            logger.info(
+                f"Skipping {file_path_str} as it is empty or contains only whitespace."
+            )
             continue
 
-        # Rate limiting
-        if processed_files > 1:
-            time.sleep(call_interval)
+        enhanced_code = enhance_code(model, original_code, file_path_str)
 
-        # Enhance code
-        enhanced_content = enhance_code(original_content, model)
-        if enhanced_content == original_content:
-            print(f"No changes needed for {filepath}")
-            continue
+        if enhanced_code:  # If enhancement was successful and code changed
+            if write_file(file_path_str, enhanced_code):
+                modified_files_count += 1
+            else:
+                logger.error(
+                    f"Failed to write changes to {file_path_str}. Original file remains unchanged."
+                )
+        else:
+            logger.info(
+                f"No enhancements applied to {file_path_str} (either no suggestions, error, or no change)."
+            )
 
-        # Write enhanced content back to file
-        try:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(enhanced_content)
-            print(f"Successfully enhanced {filepath}")
-            modified_files.append(filepath)
-        except Exception as e:
-            print(f"Error writing to {filepath}: {e}")
-            continue
+        # Respect rate limit - sleep after each API call attempt (even if it failed or returned no change)
+        if processed_files_count < len(
+            files_to_process
+        ):  # No need to sleep after the last file
+            if delay_seconds > 0.1:  # Only sleep if a meaningful delay is set
+                logger.debug(
+                    f"Waiting for {delay_seconds:.2f} seconds before next API call..."
+                )
+                time.sleep(delay_seconds)
 
-    print(f"\nProcessing complete at {datetime.now()}")
-    print(f"Processed {processed_files} file(s), modified {len(modified_files)} file(s)")
-    if modified_files:
-        print("Modified files:")
-        for filepath in modified_files:
-            print(f"  - {filepath}")
-    return modified_files
+    logger.info("--- Enhancement Process Completed ---")
+    logger.info(f"Total files matched: {len(files_to_process)}")
+    logger.info(f"Files processed: {processed_files_count}")
+    logger.info(f"Files modified: {modified_files_count}")
+    logger.info(f"Log file: {Path(LOG_FILE_NAME).resolve()}")
 
-def main():
-    """Main function to process command-line arguments and run the enhancement."""
-    if len(sys.argv) < 3:
-        print("Usage: xfix_files.py <directory> <file_pattern>")
-        sys.exit(1)
-
-    directory = sys.argv[1]
-    file_pattern = sys.argv[2]
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
-        print("Error: GOOGLE_API_KEY environment variable not set")
-        sys.exit(1)
-
-    max_calls = os.getenv("MAX_API_CALLS", "59")
-    try:
-        max_calls = int(max_calls)
-        if not 1 <= max_calls <= 60:
-            raise ValueError
-    except ValueError:
-        print("Error: MAX_API_CALLS must be a number between 1 and 60")
-        sys.exit(1)
-
-    modified_files = process_files(directory, file_pattern, api_key, max_calls)
-    if not modified_files:
-        print("No files were modified")
-        sys.exit(0)  # Exit successfully if no changes, but workflow will skip commit
-    sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 3:
+        # Use sys.argv[0] for dynamic script name in usage
+        logger.error(f"Usage: {sys.argv[0]} <base_directory> <file_pattern>")
+        logger.error("Example: python3 script_name.py ./my_project '**/*.py'")
+        sys.exit(1)
+
+    cli_base_dir = sys.argv[1]
+    cli_file_pattern = sys.argv[2]
+
+    # Validate base_directory existence before starting main logic
+    if not Path(cli_base_dir).is_dir():
+        logger.error(
+            f"Error: Base directory '{cli_base_dir}' does not exist or is not a directory."
+        )
+        sys.exit(1)
+
+    main(cli_base_dir, cli_file_pattern)

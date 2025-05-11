@@ -5,7 +5,7 @@
 
 # --- Configuration ---
 # Use a capable model like 1.5 Pro for better results on complex tasks
-API_MODEL="gemini-1.5-pro-latest"
+API_MODEL="gemini-2.5-pro-exp-03-25"
 # API_MODEL="gemini-1.0-pro" # Alternative stable model
 
 # Temporary file for the API response body

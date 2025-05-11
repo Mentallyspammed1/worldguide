@@ -249,12 +249,14 @@ class ScalpingBot:
     def _initialize_exchange(self):
         """Initializes the exchange connection."""
         try:
-            exchange = getattr(ccxt, self.exchange_id)({
-                "apiKey": self.api_key,
-                "secret": self.api_secret,
-                "options": {"defaultType": "future"},
-                "recvWindow": 60000,
-            })
+            exchange = getattr(ccxt, self.exchange_id)(
+                {
+                    "apiKey": self.api_key,
+                    "secret": self.api_secret,
+                    "options": {"defaultType": "future"},
+                    "recvWindow": 60000,
+                }
+            )
             exchange.load_markets()  # Ensure markets are loaded
             logger.info(
                 f"{Fore.GREEN}Connected to {self.exchange_id.upper()} successfully.{Style.RESET_ALL}"
@@ -703,16 +705,18 @@ class ScalpingBot:
                         logger.info(
                             f"{Fore.GREEN}Entering LONG position.{Style.RESET_ALL}"
                         )
-                        self.open_positions.append({
-                            "side": "buy",
-                            "size": order_size,
-                            "entry_price": entry_order["price"]
-                            if not self.simulation_mode
-                            else entry_order["price"],
-                            "entry_time": time.time(),
-                            "stop_loss": stop_loss_price,  # Store SL and TP
-                            "take_profit": take_profit_price,
-                        })
+                        self.open_positions.append(
+                            {
+                                "side": "buy",
+                                "size": order_size,
+                                "entry_price": entry_order["price"]
+                                if not self.simulation_mode
+                                else entry_order["price"],
+                                "entry_time": time.time(),
+                                "stop_loss": stop_loss_price,  # Store SL and TP
+                                "take_profit": take_profit_price,
+                            }
+                        )
 
                 elif signal_score <= -2:
                     # Calculate stop-loss and take-profit prices
@@ -733,16 +737,18 @@ class ScalpingBot:
                         logger.info(
                             f"{Fore.RED}Entering SHORT position.{Style.RESET_ALL}"
                         )
-                        self.open_positions.append({
-                            "side": "sell",
-                            "size": order_size,
-                            "entry_price": entry_order["price"]
-                            if not self.simulation_mode
-                            else entry_order["price"],
-                            "entry_time": time.time(),
-                            "stop_loss": stop_loss_price,
-                            "take_profit": take_profit_price,
-                        })
+                        self.open_positions.append(
+                            {
+                                "side": "sell",
+                                "size": order_size,
+                                "entry_price": entry_order["price"]
+                                if not self.simulation_mode
+                                else entry_order["price"],
+                                "entry_time": time.time(),
+                                "stop_loss": stop_loss_price,
+                                "take_profit": take_profit_price,
+                            }
+                        )
             else:
                 logger.info(
                     f"{Fore.YELLOW}Max open positions reached ({self.max_open_positions}).  Not entering new trades.{Style.RESET_ALL}"
