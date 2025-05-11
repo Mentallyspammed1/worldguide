@@ -1,4 +1,4 @@
-name: Pyrmethus Code Enhancement Workflowx
+name: xfix Pyrmethus Code Enhancement Workflow
 
 on:
   workflow_dispatch:
@@ -16,14 +16,14 @@ on:
         required: true
         default: './xfix_files.py'
       enhancement_script_args:
-        description: 'Additional arguments to pass to the enhancement script (e.g., --model gemini-1.5-pro).'
+        description: 'Additional arguments to pass to the enhancement script (e.g., --model gemini-1.5-pro --mode performance).'
         required: false
         default: ''
       google_api_key:
         description: 'Google API Key for the enhancement script. Leave blank to use repository secret `GOOGLE_API_KEY`.'
         required: false
       max_api_calls_per_minute:
-        description: 'Maximum API calls per minute for the enhancement script (1-60, or as script supports).'
+        description: 'Maximum API calls per minute for the enhancement script (1-60).'
         required: false
         default: '59'
       batch_size:
@@ -34,14 +34,10 @@ on:
         description: 'Custom commit message for the enhancement changes.'
         required: false
         default: 'Apply automated code enhancements via Pyrmethus'
-      pull_request_title:
-        description: 'Title for the Pull Request.'
+      pull_request_config:
+        description: 'JSON string for PR configuration, e.g., {"title": "Automated Enhancements", "labels": "enhancement,automated"}.'
         required: false
-        default: 'Automated Code Enhancements by Pyrmethus'
-      pull_request_labels:
-        description: 'Comma-separated list of labels for the Pull Request.'
-        required: false
-        default: 'enhancement,automated,ai-assisted'
+        default: '{"title": "Automated Code Enhancements by Pyrmethus", "labels": "enhancement,automated,ai-assisted"}'
       target_branch:
         description: 'The branch to base enhancements off of and create a PR against.'
         required: true
@@ -81,6 +77,11 @@ jobs:
             echo "Error: Enhancement script '${{ inputs.enhancement_script_path }}' not found." | tee -a enhancement_log.txt
             exit 1
           fi
+          # Validate pull_request_config JSON
+          echo "${{ inputs.pull_request_config }}" | jq . > /dev/null 2>&1 || {
+            echo "Error: pull_request_config must be valid JSON, got '${{ inputs.pull_request_config }}'." | tee -a enhancement_log.txt
+            exit 1
+          }
           echo "Input validation completed successfully." >> enhancement_log.txt
 
       - name: Checkout Code
@@ -106,7 +107,7 @@ jobs:
         run: |
           echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Installing dependencies..." >> enhancement_log.txt
           python -m pip install --upgrade pip
-          pip install google-generativeai aiohttp colorama
+          pip install google-generativeai aiohttp colorama tqdm diff-match-patch
           echo "Installed Python packages:" >> enhancement_log.txt
           pip list >> enhancement_log.txt
 
@@ -119,7 +120,7 @@ jobs:
       - name: List Matched Python Files
         id: list_files
         run: |
-          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Listing files in '${{ inputs.base_directory }}' with pattern '${{ inputs.file_pattern }}'..." >> enhancement_log.txt
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Listing Python files in '${{ inputs.base_directory }}' with pattern '${{ inputs.file_pattern }}'..." >> enhancement_log.txt
           normalized_base_dir=$(echo "${{ inputs.base_directory }}" | sed 's:/*$::')
           if [ "$normalized_base_dir" == "." ] || [ -z "$normalized_base_dir" ]; then
             full_pattern="${{ inputs.file_pattern }}"
@@ -129,7 +130,7 @@ jobs:
           full_pattern=$(echo "$full_pattern" | sed 's#^\./##' | sed 's#//\+#/#g')
           echo "Effective pattern: '$full_pattern'" | tee -a enhancement_log.txt matched_files.txt
 
-          git ls-files -- "$full_pattern" | sort > matched_files_list.txt
+          git ls-files -- "$full_pattern" | grep '\.py$' | sort > matched_files_list.txt
           file_count=$(wc -l < matched_files_list.txt)
           if [ "$file_count" -eq 0 ]; then
             echo "Warning: No Python files matched the pattern '$full_pattern'." | tee -a enhancement_log.txt matched_files.txt
@@ -188,7 +189,7 @@ jobs:
             while IFS= read -r file_path || [[ -n "$file_path" ]]; do
               if [ -z "$file_path" ]; then continue; fi
               echo "Enhancing: $file_path" | tee -a enhancement_log.txt
-              if ! "${{ inputs.enhancement_script_path }}" "$file_path" $ENHANCEMENT_SCRIPT_ARGS >> enhancement_log.txt 2>&1; then
+              if ! python3 "${{ inputs.enhancement_script_path }}" "$file_path" $ENHANCEMENT_SCRIPT_ARGS >> enhancement_log.txt 2>&1; then
                 echo "Failed to enhance: $file_path" | tee -a enhancement_log.txt
                 echo "$file_path" >> failed_enhancement_files.txt
                 failed_enhancement_count=$((failed_enhancement_count + 1))
@@ -214,7 +215,7 @@ jobs:
             if [ -f "$file_path" ]; then
               is_failed=$(grep -Fx "$file_path" failed_enhancement_files.txt && echo "true" || echo "false")
               echo "Validating: $file_path (Enhancement failed: $is_failed)" | tee -a enhancement_log.txt
-              if ! python -m py_compile "$file_path" >> enhancement_log.txt 2>&1; then
+              if ! python3 -m py_compile "$file_path" >> enhancement_log.txt 2>&1; then
                 echo "Syntax error in: $file_path" | tee -a enhancement_log.txt
                 echo "$file_path" >> syntax_error_files.txt
                 syntax_error_count=$((syntax_error_count + 1))
@@ -249,7 +250,7 @@ jobs:
         if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
         run: |
           echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Configuring Git user..." >> enhancement_log.txt
-          git config user.name "github-actions[bot]"
+          git config user.name "github-actions[ Modern
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Commit Changes
@@ -267,8 +268,8 @@ jobs:
         if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
         run: |
           echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Pushing branch ${{ steps.commit-changes.outputs.branch_name }}..." >> enhancement_log.txt
-          git push origin "${{(steps.commit-changes.outputs.branch_name)}}" --force-with-lease
-          echo "Branch pushed." | tee -a enhancement_log.txt
+          git push origin "${{ steps.commit-changes.outputs.branch_name }}" --force-with-lease
+          echo "Branch pushed." >> enhancement_log.txt
 
       - name: Create Pull Request
         if: steps.git_status.outputs.changes_made == 'true' && steps.validate-enhanced-files.outcome == 'success'
@@ -278,7 +279,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.commit-changes.outputs.branch_name }}
           base: ${{ inputs.target_branch }}
-          title: ${{ inputs.pull_request_title }}
+          title: ${{ fromJson(inputs.pull_request_config).title }}
           body: |
             This PR contains automated code enhancements by Pyrmethus.
 
@@ -302,7 +303,7 @@ jobs:
             - Syntax errors: ${{ steps.validate-enhanced-files.outputs.syntax_error_count }}
 
             Review the changes. Logs and file lists are available as artifacts.
-          labels: ${{ inputs.pull_request_labels }}
+          labels: ${{ fromJson(inputs.pull_request_config).labels }}
           assignees: ${{ github.actor }}
           delete-branch: true
 
