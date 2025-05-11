@@ -1,15 +1,14 @@
 [0;35m# Pyrmethus Git Resolution Spell Initiated[0m
-[0;36m[2025-05-11 20:47:15 UTC] [INFO] Starting Git changes resolution in Termux[0m
-[0;34m[2025-05-11 20:47:15 UTC] [INFO] Using repository directory: /data/data/com.termux/files/home/worldguide[0m
-[0;36m[2025-05-11 20:47:15 UTC] [INFO] Configuring Git user...[0m
-[0;34m[2025-05-11 20:47:16 UTC] [INFO] Using existing remote: https://github.com/Mentallyspammed1/worldguide.git[0m
-[0;36m[2025-05-11 20:47:16 UTC] [INFO] Checking Git status...[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING] Unstaged changes detected:[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING]   m WGX[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING]   ?? git_resolve.log[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING]   ?? git_status.txt[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING]   ?? pyrmethus_setup.log[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING]   ?? resolvegitc.sh[0m
-[1;33m[2025-05-11 20:47:16 UTC] [WARNING]   ?? set_pyrm.sh[0m
-[0;34m[2025-05-11 20:47:16 UTC] [INFO] Choose action for unstaged changes (select a number):[0m
-[1;33m[2025-05-11 20:47:29 UTC] [INFO] Committing unstaged changes...[0m
+[0;36m[2025-05-11 20:59:11 UTC] [INFO] Starting Git changes resolution in Termux[0m
+[0;34m[2025-05-11 20:59:11 UTC] [INFO] Using repository directory: /data/data/com.termux/files/home/worldguide[0m
+[0;36m[2025-05-11 20:59:11 UTC] [INFO] Configuring Git user...[0m
+[0;34m[2025-05-11 20:59:12 UTC] [INFO] Using existing remote: https://github.com/Mentallyspammed1/worldguide.git[0m
+[0;36m[2025-05-11 20:59:12 UTC] [INFO] Updating .gitignore to exclude logs...[0m
+[0;36m[2025-05-11 20:59:12 UTC] [INFO] Checking Git status...[0m
+[1;33m[2025-05-11 20:59:13 UTC] [WARNING] Unstaged or untracked changes detected:[0m
+[1;33m[2025-05-11 20:59:13 UTC] [WARNING]   m WGX[0m
+[1;33m[2025-05-11 20:59:13 UTC] [WARNING]   M git_resolve.log[0m
+[1;33m[2025-05-11 20:59:13 UTC] [WARNING]   M git_status.txt[0m
+[1;33m[2025-05-11 20:59:13 UTC] [WARNING]   M resolvegitc.sh[0m
+[0;34m[2025-05-11 20:59:13 UTC] [INFO] Choose action for unstaged changes (select a number):[0m
+[1;33m[2025-05-11 20:59:17 UTC] [INFO] Committing unstaged changes...[0m

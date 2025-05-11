@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# resolve_git_changes.sh: Resolve unstaged changes and commit Pyrmethus files in Termux
+# resolve_git_changes.sh: Resolve unstaged changes and sync Pyrmethus repository in Termux
 
 # ANSI color codes for vibrant output
 RED='\033[0;31m'
@@ -51,7 +51,7 @@ if [ ! -d "$REPO_DIR/.git" ]; then
     exit 1
 fi
 
-# Configure Git user if not set
+# Configure Git user
 log_message "INFO" "Configuring Git user..." "$CYAN"
 git config user.name >/dev/null || git config user.name "Termux User" || {
     log_message "ERROR" "Failed to configure Git user name. Exiting." "$RED"
@@ -80,11 +80,25 @@ else
     log_message "INFO" "Using existing remote: $REMOTE_URL" "$BLUE"
 fi
 
+# Update .gitignore to exclude logs and temp files
+log_message "INFO" "Updating .gitignore to exclude logs..." "$CYAN"
+cat >> .gitignore << 'EOF'
+git_resolve.log
+git_status.txt
+pyrmethus_setup.log
+enhancement_log.txt
+syntax_validation.log
+EOF
+git add .gitignore
+git commit -m "Update .gitignore to exclude Pyrmethus logs" --allow-empty || {
+    log_message "WARNING" "No changes in .gitignore to commit." "$YELLOW"
+}
+
 # Check Git status
 log_message "INFO" "Checking Git status..." "$CYAN"
 git status --short > git_status.txt
 if [ -s git_status.txt ]; then
-    log_message "WARNING" "Unstaged changes detected:" "$YELLOW"
+    log_message "WARNING" "Unstaged or untracked changes detected:" "$YELLOW"
     cat git_status.txt | while read -r line; do
         log_message "WARNING" "  $line" "$YELLOW"
     done
@@ -115,7 +129,7 @@ case "$choice" in
         ;;
     2)
         log_message "INFO" "Stashing unstaged changes..." "$YELLOW"
-        git stash push -m "Pyrmethus setup stash" || {
+        git stash push -m "Pyrmethus setup stash" --include-untracked || {
             log_message "ERROR" "Failed to stash changes. Exiting." "$RED"
             exit 1
         }
@@ -143,6 +157,26 @@ case "$choice" in
         ;;
 esac
 
+# Clean working directory
+log_message "INFO" "Cleaning working directory to ensure no unstaged changes..." "$CYAN"
+git reset --hard HEAD || {
+    log_message "ERROR" "Failed to reset working directory. Exiting." "$RED"
+    exit 1
+}
+git clean -fd || {
+    log_message "ERROR" "Failed to clean untracked files. Exiting." "$RED"
+    exit 1
+}
+log_message "INFO" "Working directory cleaned." "$GREEN"
+
+# Verify no unstaged changes
+if [ -n "$(git status --porcelain)" ]; then
+    log_message "ERROR" "Unstaged changes remain after cleaning:" "$RED"
+    git status --short >> "$LOG_FILE"
+    exit 1
+fi
+log_message "INFO" "Repository is clean. No unstaged changes." "$GREEN"
+
 # Verify Pyrmethus files
 XFIX_FILE="$REPO_DIR/xfix_files.py"
 WORKFLOW_FILE="$REPO_DIR/.github/workflows/pyrmethus-code-fixer.yml"
@@ -160,12 +194,12 @@ else
     log_message "WARNING" "pyrmethus-code-fixer.yml not found. Ensure it’s created by setup_pyrmethus.sh." "$YELLOW"
 fi
 
-# Stage Pyrmethus files (if present)
+# Stage Pyrmethus files
 log_message "INFO" "Staging Pyrmethus files..." "$CYAN"
 [ -f "$XFIX_FILE" ] && git add "$XFIX_FILE"
 [ -f "$WORKFLOW_FILE" ] && git add "$WORKFLOW_FILE"
 
-# Commit if there are staged changes
+# Commit if staged changes exist
 if ! git diff --cached --quiet; then
     log_message "INFO" "Committing Pyrmethus files..." "$YELLOW"
     git commit -m "Ensure Pyrmethus files for code enhancement workflow" || {
@@ -177,11 +211,12 @@ else
     log_message "INFO" "No new changes to commit." "$BLUE"
 fi
 
-# Pull with rebase to sync
+# Pull with rebase
 log_message "INFO" "Syncing with remote main..." "$CYAN"
 if ! git pull origin main --rebase; then
-    log_message "ERROR" "Failed to pull with rebase. Resolve conflicts manually and try again. Exiting." "$RED"
+    log_message "ERROR" "Failed to pull with rebase. Attempting to resolve conflicts..." "$RED"
     git status >> "$LOG_FILE"
+    log_message "INFO" "Please resolve conflicts manually, then run 'git rebase --continue' and push." "$YELLOW"
     exit 1
 fi
 log_message "INFO" "Repository synced with remote main." "$GREEN"
