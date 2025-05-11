@@ -66,7 +66,7 @@ git config user.email >/dev/null || git config user.email "termux.user@example.c
 REMOTE_URL=$(git remote get-url origin 2>/dev/null)
 if [ -z "$REMOTE_URL" ]; then
     log_message "WARNING" "No remote repository set. Please provide the remote URL (e.g., https://github.com/username/repo.git):" "$YELLOW"
-    read -p "Remote URL: " REMOTE_URL
+    read18read -p "Remote URL: " REMOTE_URL
     if [ -z "$REMOTE_URL" ]; then
         log_message "ERROR" "No remote URL provided. Exiting." "$RED"
         exit 1
@@ -82,17 +82,27 @@ fi
 
 # Update .gitignore to exclude logs and temp files
 log_message "INFO" "Updating .gitignore to exclude logs..." "$CYAN"
-cat >> .gitignore << 'EOF'
+cat > .gitignore << 'EOF'
+# Pyrmethus logs and temp files
 git_resolve.log
 git_status.txt
 pyrmethus_setup.log
 enhancement_log.txt
 syntax_validation.log
+*.bak
+# Other common ignores
+*.o
+*.swp
+*.pyc
+__pycache__/
 EOF
 git add .gitignore
-git commit -m "Update .gitignore to exclude Pyrmethus logs" --allow-empty || {
+git commit -m "Update .gitignore to exclude Pyrmethus logs and temp files" --allow-empty || {
     log_message "WARNING" "No changes in .gitignore to commit." "$YELLOW"
 }
+# Refresh Git index
+git update-index --refresh
+log_message "INFO" "Git index refreshed." "$CYAN"
 
 # Check Git status
 log_message "INFO" "Checking Git status..." "$CYAN"
@@ -167,12 +177,20 @@ git clean -fd || {
     log_message "ERROR" "Failed to clean untracked files. Exiting." "$RED"
     exit 1
 }
-log_message "INFO" "Working directory cleaned." "$GREEN"
+# Brief delay to ensure file system sync
+sleep 1
+# Refresh Git index again
+git update-index --refresh
+log_message "INFO" "Working directory cleaned and index refreshed." "$GREEN"
 
 # Verify no unstaged changes
-if [ -n "$(git status --porcelain)" ]; then
+log_message "INFO" "Verifying repository state..." "$CYAN"
+git status --short > git_status.txt
+if [ -s git_status.txt ]; then
     log_message "ERROR" "Unstaged changes remain after cleaning:" "$RED"
-    git status --short >> "$LOG_FILE"
+    cat git_status.txt >> "$LOG_FILE"
+    log_message "ERROR" "Detailed Git status:" "$RED"
+    git status >> "$LOG_FILE"
     exit 1
 fi
 log_message "INFO" "Repository is clean. No unstaged changes." "$GREEN"
@@ -211,15 +229,27 @@ else
     log_message "INFO" "No new changes to commit." "$BLUE"
 fi
 
-# Pull with rebase
+# Pull with rebase (retry up to 3 times)
 log_message "INFO" "Syncing with remote main..." "$CYAN"
-if ! git pull origin main --rebase; then
-    log_message "ERROR" "Failed to pull with rebase. Attempting to resolve conflicts..." "$RED"
-    git status >> "$LOG_FILE"
-    log_message "INFO" "Please resolve conflicts manually, then run 'git rebase --continue' and push." "$YELLOW"
-    exit 1
-fi
-log_message "INFO" "Repository synced with remote main." "$GREEN"
+for attempt in {1..3}; do
+    log_message "INFO" "Pull attempt $attempt/3..." "$CYAN"
+    if git pull origin main --rebase; then
+        log_message "INFO" "Repository synced with remote main." "$GREEN"
+        break
+    else
+        log_message "WARNING" "Pull failed on attempt $attempt. Resetting and retrying..." "$YELLOW"
+        git rebase --abort 2>/dev/null || true
+        git reset --hard HEAD
+        git clean -fd
+        git update-index --refresh
+        if [ $attempt -eq 3 ]; then
+            log_message "ERROR" "Failed to pull with rebase after 3 attempts. Resolve conflicts manually and run 'git rebase --continue'." "$RED"
+            git status >> "$LOG_FILE"
+            exit 1
+        fi
+        sleep 1
+    fi
+done
 
 # Push to main
 log_message "INFO" "Pushing to main branch..." "$CYAN"
