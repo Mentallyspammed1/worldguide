@@ -12,3 +12,22 @@
 [1;33m[2025-05-11 21:09:10 UTC] [WARNING]   M git_status.txt[0m
 [0;34m[2025-05-11 21:09:10 UTC] [INFO] Choose action for unstaged changes (select a number):[0m
 [1;33m[2025-05-11 21:09:16 UTC] [INFO] Committing unstaged changes...[0m
+[0;32m[2025-05-11 21:09:17 UTC] [INFO] Working directory cleaned and index refreshed.[0m
+[0;36m[2025-05-11 21:09:17 UTC] [INFO] Verifying repository state...[0m
+[0;31m[2025-05-11 21:09:17 UTC] [ERROR] Unstaged changes remain after cleaning:[0m
+ m WGX
+ M git_resolve.log
+ M git_status.txt
+[0;31m[2025-05-11 21:09:17 UTC] [ERROR] Detailed Git status:[0m
+On branch main
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+  (commit or discard the untracked or modified content in submodules)
+	modified:   WGX (modified content, untracked content)
+	modified:   git_resolve.log
+
+no changes added to commit (use "git add" and/or "git commit -a")

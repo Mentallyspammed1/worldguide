@@ -1,18 +1,14 @@
 [0;35m# Pyrmethus Setup Spell Initiated[0m
-[0;36m[2025-05-11 20:42:05 UTC] [INFO] Starting setup in Termux environment[0m
-[0;34m[2025-05-11 20:42:05 UTC] [INFO] Using repository directory: /data/data/com.termux/files/home/worldguide[0m
-[0;36m[2025-05-11 20:42:05 UTC] [INFO] Creating directory structure...[0m
-[0;34m[2025-05-11 20:42:05 UTC] [INFO] Writing xfix_files.py to /data/data/com.termux/files/home/worldguide/xfix_files.py...[0m
-[0;32m[2025-05-11 20:42:05 UTC] [INFO] Successfully created xfix_files.py[0m
-[1;33m[2025-05-11 20:42:05 UTC] [INFO] Making xfix_files.py executable...[0m
-[0;34m[2025-05-11 20:42:05 UTC] [INFO] Writing pyrmethus-code-fixer.yml to /data/data/com.termux/files/home/worldguide/.github/workflows/pyrmethus-code-fixer.yml...[0m
-[0;32m[2025-05-11 20:42:05 UTC] [INFO] Successfully created pyrmethus-code-fixer.yml[0m
-[0;36m[2025-05-11 20:42:05 UTC] [INFO] Configuring Git user...[0m
-[0;34m[2025-05-11 20:42:05 UTC] [INFO] Using existing remote: https://github.com/Mentallyspammed1/worldguide.git[0m
-[0;36m[2025-05-11 20:42:05 UTC] [INFO] Staging files for commit...[0m
-[1;33m[2025-05-11 20:42:05 UTC] [INFO] Committing files...[0m
-[0;32m[2025-05-11 20:42:05 UTC] [INFO] Files committed successfully[0m
-[0;36m[2025-05-11 20:42:05 UTC] [INFO] Pushing to main branch...[0m
-[0;32m[2025-05-11 20:42:07 UTC] [INFO] Successfully pushed to main branch[0m
-[0;35m[2025-05-11 20:42:07 UTC] [INFO] Pyrmethus setup complete. Files created and committed.[0m
-[0;34m[2025-05-11 20:42:07 UTC] [INFO] Check pyrmethus_setup.log for details.[0m
+[0;36m[2025-05-11 21:09:39 UTC] [INFO] Starting setup in Termux environment[0m
+[0;34m[2025-05-11 21:09:39 UTC] [INFO] Using repository directory: /data/data/com.termux/files/home/worldguide[0m
+[0;36m[2025-05-11 21:09:39 UTC] [INFO] Creating directory structure...[0m
+[0;34m[2025-05-11 21:09:39 UTC] [INFO] Writing xfix_files.py to /data/data/com.termux/files/home/worldguide/xfix_files.py...[0m
+[0;32m[2025-05-11 21:09:39 UTC] [INFO] Successfully created xfix_files.py[0m
+[1;33m[2025-05-11 21:09:39 UTC] [INFO] Making xfix_files.py executable...[0m
+[0;34m[2025-05-11 21:09:39 UTC] [INFO] Writing pyrmethus-code-fixer.yml to /data/data/com.termux/files/home/worldguide/.github/workflows/pyrmethus-code-fixer.yml...[0m
+[0;32m[2025-05-11 21:09:39 UTC] [INFO] Successfully created pyrmethus-code-fixer.yml[0m
+[0;36m[2025-05-11 21:09:39 UTC] [INFO] Configuring Git user...[0m
+[0;34m[2025-05-11 21:09:39 UTC] [INFO] Using existing remote: https://github.com/Mentallyspammed1/worldguide.git[0m
+[0;36m[2025-05-11 21:09:39 UTC] [INFO] Staging files for commit...[0m
+[1;33m[2025-05-11 21:09:39 UTC] [INFO] Committing files...[0m
+[0;31m[2025-05-11 21:09:39 UTC] [ERROR] Failed to commit files. Exiting.[0m
