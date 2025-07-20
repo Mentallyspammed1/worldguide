@@ -1,0 +1,6 @@
+{
+  "name": "Gemini Trading Bot Dashboard",
+  "description": "A sophisticated dashboard that uses the Gemini API to generate trading signals based on a user-defined strategy, visualizing bot status, market data, and trade history in real-time.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

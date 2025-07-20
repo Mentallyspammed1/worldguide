@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%230ff'/%3E%3Cstop offset='100%25' stop-color='%23077'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='%230d0d12'/%3E%3Cpath d='M20,55 l15,-15 a10,10 0 0,1 14,0 l10,10 a10,10 0 0,0 14,0 l15,-15' stroke='url(%23g)' stroke-width='8' fill='none' stroke-linecap='round' filter='url(%23glow)'/%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='2.5' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/svg%3E" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini Pro Trading Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'neon-cyan': '#00ffff',
+            'neon-pink': '#ff00ff',
+            'neon-green': '#39ff14',
+            'neon-orange': '#ff8c00',
+            'base-bg': '#0d0d12', // Near black
+            'panel-bg': '#1a1a2e', // Dark blue/purple
+            'border-color': '#4a4a5f',
+            'text-primary': '#e0e0e0',
+            'text-secondary': '#a0a0b0',
+          },
+           keyframes: {
+                fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+                slideInUp: { '0%': { transform: 'translateY(20px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+                pulse: { '0%, 100%': { opacity: 1, filter: 'brightness(1)' }, '50%': { opacity: 0.9, filter: 'brightness(1.5)' } },
+            },
+            animation: {
+                fadeIn: 'fadeIn 0.5s ease-in-out',
+                slideInUp: 'slideInUp 0.5s ease-in-out',
+                pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            textShadow: {
+              'glow-cyan': '0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff',
+              'glow-pink': '0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff',
+              'glow-green': '0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 15px #39ff14',
+              'glow-orange': '0 0 5px #ff8c00, 0 0 10px #ff8c00, 0 0 15px #ff8c00',
+            }
+        }
+      }
+    }
+    </script>
+<style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1a1a2e; }
+    ::-webkit-scrollbar-thumb { background: #4a4a5f; border-radius: 4px; border: 2px solid #1a1a2e; }
+    ::-webkit-scrollbar-thumb:hover { background: #00ffff; }
+
+    /* Neon Panel Effect */
+    .neon-panel {
+        background-color: rgba(26, 26, 46, 0.6); /* panel-bg with opacity */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid #4a4a5f;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 5px rgba(0, 255, 255, 0.1);
+        transition: box-shadow 0.3s ease-in-out;
+    }
+    .neon-panel:hover {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.2);
+    }
+
+    /* Helper for text glow */
+    .text-glow-cyan { text-shadow: 0 0 3px #00ffff, 0 0 5px #00ffff; }
+    .text-glow-pink { text-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff; }
+    .text-glow-green { text-shadow: 0 0 3px #39ff14, 0 0 5px #39ff14; }
+    .text-glow-orange { text-shadow: 0 0 3px #ff8c00, 0 0 5px #ff8c00; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "fs": "https://esm.sh/fs@^0.0.1-security",
+    "path": "https://esm.sh/path@^0.12.7",
+    "chalk": "https://esm.sh/chalk@^5.4.1",
+    "recharts": "https://esm.sh/recharts@^3.1.0",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.9.0",
+    "@heroicons/react/": "https://esm.sh/@heroicons/react@^2.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-base-bg text-text-primary">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
