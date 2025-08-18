@@ -1,0 +1,43 @@
+{
+  "name": "gemini-pro-trading-bot",
+  "version": "2.1.0",
+  "type": "module",
+  "description": "A trading bot that uses Gemini AI for signals, designed to run headlessly (CLI) with a web-based visualizer.",
+  "main": "cli.js",
+  "scripts": {
+    "start:cli": "echo 'Starting bot in CLI mode...' && NODE_ENV=production GEMINI_API_KEY=AIzaSyCQXr40O5ANbvqJGe9DiNk6AQQE1S3shTg BYBIT_API_KEY=NRrb4Biggi3sO7rKZ1 BYBIT_API_SECRET=TXztLxhYdHIcyzmN6QR2zSc2Dxj0UuQRiMzQ npx vite-node cli.tsx",
+    "start:web": "npx vite-node init.ts && echo 'Serving web visualizer...' && npx vite --port 3000",
+    "start:backtest": "echo 'Starting backtest...' && npx vite-node cli.tsx",
+    "test": "vitest",
+    "lint": "eslint . --ext .ts,.tsx",
+    "build": "tsc"
+  },
+  "author": "World-Class Senior Frontend Engineer",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.10.0",
+    "bybit-api": "^4.1.14",
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
+    "dotenv": "^17.2.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.8.3",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "vite": "^5.4.19",
+    "vite-node": "^1.6.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  }
+}

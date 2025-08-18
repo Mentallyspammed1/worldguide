@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # === Gemini Code Review Script v3.4 ===
-Target Model: gemini-2.5-pro-exp-03-25 (or override via GEMINI_MODEL env var)
+# Target Model: gemini-2.5-pro-exp-03-25 (or override via GEMINI_MODEL env var)
 # Enhancements:
 # - Prompts interactively for both Input and Output filenames.
 # - Handles large input files by piping content to jq (--rawfile).

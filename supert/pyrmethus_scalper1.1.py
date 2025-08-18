@@ -47,6 +47,7 @@ pip install ccxt pandas pandas_ta python-dotenv colorama # termux-api (if using 
 """
 
 # Standard Library Imports - The Foundational Runes
+import asyncio
 import contextlib
 import logging
 import os
@@ -66,6 +67,7 @@ try:
     from colorama import Back, Fore, Style
     from colorama import init as colorama_init
     from dotenv import load_dotenv
+    from pybit.unified_trading import WebSocket # New: Pybit WebSocket client
 except ImportError as e:
     missing_pkg = e.name
     # Use Colorama's raw codes here as it might not be initialized yet
@@ -638,6 +640,93 @@ def initialize_exchange() -> ccxt.Exchange | None:
             f"[ScalpBot] CRITICAL: Unexpected Init Error: {type(e).__name__}. Bot stopped."
         )
         return None
+
+
+# --- WebSocket Manager - The Real-Time Oracle ---
+class WebSocketManager:
+    def __init__(self, api_key: str, api_secret: str, testnet: bool = True, channel_type: str = "linear"):
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.testnet = testnet
+        self.channel_type = channel_type
+        self.ws = None
+        self.kline_data_queue = asyncio.Queue() # To store incoming kline data
+
+    async def connect(self):
+        logger.info(f"{Fore.BLUE}WebSocket Manager: Connecting to Bybit WebSocket (Testnet: {self.testnet})...{Style.RESET_ALL}")
+        try:
+            self.ws = WebSocket(
+                testnet=self.testnet,
+                channel_type=self.channel_type,
+                api_key=self.api_key,
+                api_secret=self.api_secret
+            )
+            logger.success(f"{Fore.GREEN}WebSocket Manager: Connection established.{Style.RESET_ALL}")
+        except Exception as e:
+            logger.critical(f"{Back.RED}{Fore.WHITE}WebSocket Manager: Failed to connect: {e}{Style.RESET_ALL}")
+            sys.exit(1)
+
+    async def subscribe_kline(self, symbol: str, interval: str):
+        logger.info(f"{Fore.BLUE}WebSocket Manager: Subscribing to {symbol} {interval} kline stream...{Style.RESET_ALL}")
+        try:
+            # pybit kline_stream expects interval as int for some versions, or string.
+            # Let's try converting to int if it's a simple number like '1m', '5m'
+            interval_val = interval
+            if interval.endswith('m'):
+                try:
+                    interval_val = int(interval[:-1])
+                except ValueError:
+                    pass # Keep as string if not a simple number
+            elif interval.endswith('h'):
+                try:
+                    interval_val = int(interval[:-1]) * 60 # Convert hours to minutes
+                except ValueError:
+                    pass
+
+            self.ws.kline_stream(
+                interval=interval_val,
+                symbol=symbol,
+                callback=self._kline_message_handler
+            )
+            logger.success(f"{Fore.GREEN}WebSocket Manager: Subscribed to kline stream.{Style.RESET_ALL}")
+        except Exception as e:
+            logger.error(f"{Fore.RED}WebSocket Manager: Failed to subscribe to kline stream: {e}{Style.RESET_ALL}")
+
+    def _kline_message_handler(self, message):
+        # This runs in a separate thread managed by pybit, so we use asyncio.run_coroutine_threadsafe
+        # to put data into the queue for the main async loop to process.
+        try:
+            # Add a check to ensure 'message' is a dictionary
+            if isinstance(message, dict) and 'data' in message:
+                # Assuming 'data' contains a list of kline objects
+                for kline_data in message['data']:
+                    # Only process completed candles (is_closed = True)
+                    if kline_data.get('confirm'): # 'confirm' field indicates candle is closed
+                        # Put the kline data into the queue
+                        asyncio.run_coroutine_threadsafe(
+                            self.kline_data_queue.put(kline_data), asyncio.get_event_loop()
+                        )
+                        logger.debug(f"WS: Received and queued kline for {kline_data.get('symbol')} {kline_data.get('interval')} {kline_data.get('start')}")
+            else:
+                # Log the unexpected message type/content
+                logger.warning(f"{Fore.YELLOW}WS: Received non-dict or non-data message: {message} (Type: {type(message).__name__}){Style.RESET_ALL}")
+        except Exception as e:
+            logger.error(f"{Fore.RED}WebSocket Manager: Error in kline message handler: {e}{Style.RESET_ALL}")
+            logger.debug(traceback.format_exc())
+
+    async def get_latest_kline(self):
+        # This method will be called from the main async loop to get the latest kline
+        if not self.kline_data_queue.empty():
+            return await self.kline_data_queue.get()
+        return None
+
+    async def disconnect(self):
+        logger.info(f"{Fore.BLUE}WebSocket Manager: Disconnecting from Bybit WebSocket...{Style.RESET_ALL}")
+        if self.ws:
+            self.ws.exit()
+            logger.success(f"{Fore.GREEN}WebSocket Manager: Disconnected.{Style.RESET_ALL}")
+        else:
+            logger.warning(f"{Fore.YELLOW}WebSocket Manager: No active connection to disconnect.{Style.RESET_ALL}")
 
 
 # --- Indicator Calculation Functions - Scrying the Market ---
@@ -2311,11 +2400,11 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, timeframe: str) -> None:
 
 
 # --- Main Execution - Igniting the Spell ---
-def main() -> None:
-    """Main function to run the bot."""
+async def main_async() -> None:
+    """Main asynchronous function to run the bot."""
     start_time_str = time.strftime("%Y-%m-%d %H:%M:%S %Z")
     logger.info(
-        f"{Back.BLUE}{Fore.WHITE}{Style.BRIGHT}--- Pyrmethus Bybit Scalping Spell v10.1.0 Initializing ({start_time_str}) ---{Style.RESET_ALL}"
+        f"{Back.BLUE}{Fore.WHITE}{Style.BRIGHT}--- Pyrmethus Bybit Scalping Spell v10.1.0 Initializing ({start_time_str}) ---" 
     )
     logger.info(
         f"{Fore.CYAN}--- Strategy Enchantment: Dual Supertrend ---{Style.RESET_ALL}"
@@ -2341,6 +2430,16 @@ def main() -> None:
             f"Failed to set leverage to {CONFIG.leverage}x for {CONFIG.symbol}. Spell cannot bind."
         )
         sys.exit(1)
+
+    # --- WebSocket Manager Initialization ---
+    ws_manager = WebSocketManager(
+        api_key=CONFIG.api_key,
+        api_secret=CONFIG.api_secret,
+        testnet=True, # Assuming testnet for now, can be configured
+        channel_type="linear" # Assuming linear for now, can be configured
+    )
+    await ws_manager.connect()
+    await ws_manager.subscribe_kline(CONFIG.symbol, CONFIG.interval)
 
     # Log Final Config Summary (using CONFIG object)
     logger.info(f"{Fore.MAGENTA}--- Final Spell Configuration ---{Style.RESET_ALL}")
@@ -2379,11 +2478,12 @@ def main() -> None:
             f"{Fore.CYAN}--- Cycle {cycle_count} Weaving Start ---{Style.RESET_ALL}"
         )
         try:
-            trade_logic(exchange, CONFIG.symbol, CONFIG.interval)  # Pass necessary args
+            # trade_logic(exchange, CONFIG.symbol, CONFIG.interval)  # Pass necessary args
+            # For now, just sleep to keep the async loop running and receive WS data
+            await asyncio.sleep(CONFIG.sleep_seconds)
             logger.debug(
                 f"Cycle {cycle_count} complete. Sleeping for {CONFIG.sleep_seconds} seconds..."
             )
-            time.sleep(CONFIG.sleep_seconds)
 
         except KeyboardInterrupt:
             logger.warning(
@@ -2406,13 +2506,13 @@ def main() -> None:
             logger.error(
                 f"{Fore.RED}ERROR: Network error in main loop: {e}. Retrying after delay...{Style.RESET_ALL}"
             )
-            time.sleep(CONFIG.sleep_seconds * 2)  # Longer delay
+            await asyncio.sleep(CONFIG.sleep_seconds * 2)  # Longer delay
         except ccxt.ExchangeError as e:
             logger.error(
                 f"{Fore.RED}ERROR: Exchange error in main loop: {e}. Retrying after delay...{Style.RESET_ALL}"
             )
             logger.debug(traceback.format_exc())
-            time.sleep(CONFIG.sleep_seconds)
+            await asyncio.sleep(CONFIG.sleep_seconds)
         except Exception as e:
             logger.error(
                 f"{Back.RED}{Fore.WHITE}FATAL: An unexpected error occurred in the main loop: {e}{Style.RESET_ALL}"
@@ -2446,6 +2546,10 @@ def main() -> None:
                 logger.info("No open position found to close.")
         else:
             logger.warning("Exchange object not available for final position check.")
+
+        # Disconnect WebSocket
+        await ws_manager.disconnect()
+
     except Exception as close_err:
         logger.error(
             f"{Fore.RED}Failed to check/close position during final shutdown: {close_err}{Style.RESET_ALL}"
@@ -2460,4 +2564,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main_async())
+

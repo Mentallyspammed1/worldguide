@@ -1,0 +1,30 @@
+// .github/workflows/gemini-code-review.yml
+name: Gemini AI Code Review
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  gemini-code-review:
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/gemini-review')
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout @v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node @v3
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: npm install @google/generative-ai
+      - name: Run Gemini Code Review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm install axios
+          node scripts/reviewCode.js
