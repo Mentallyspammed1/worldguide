@@ -51,6 +51,7 @@ import asyncio
 import contextlib
 import logging
 import os
+import queue # Added for thread-safe queue
 import shutil  # For checking command existence
 import subprocess  # For Termux API calls
 import sys
@@ -400,10 +401,6 @@ class Config:
                 "FETCH_ORDER_STATUS_DELAY", Decimal("0.5"), Decimal, color=Fore.WHITE
             )
         )
-        self.enable_monitor_sltp: bool = self._get_env(
-            "ENABLE_MONITOR_SLTP", False, bool, color=Fore.YELLOW
-        )  # Redundant check flag
-
         # --- Final Validation Check ---
         if not valid:
             logger.critical(
@@ -650,7 +647,7 @@ class WebSocketManager:
         self.testnet = testnet
         self.channel_type = channel_type
         self.ws = None
-        self.kline_data_queue = asyncio.Queue() # To store incoming kline data
+        self.kline_data_queue = queue.Queue() # To store incoming kline data
 
     async def connect(self):
         logger.info(f"{Fore.BLUE}WebSocket Manager: Connecting to Bybit WebSocket (Testnet: {self.testnet})...{Style.RESET_ALL}")
@@ -667,7 +664,9 @@ class WebSocketManager:
             sys.exit(1)
 
     async def subscribe_kline(self, symbol: str, interval: str):
-        logger.info(f"{Fore.BLUE}WebSocket Manager: Subscribing to {symbol} {interval} kline stream...{Style.RESET_ALL}")
+        # Convert CCXT symbol like 'TRUMP/USDT:USDT' to 'TRUMPUSDT' for WebSocket
+        ws_symbol = symbol.replace("/", "").split(":")[0]
+        logger.info(f"{Fore.BLUE}WebSocket Manager: Subscribing to {ws_symbol} (from {symbol}) {interval} kline stream...{Style.RESET_ALL}")
         try:
             # pybit kline_stream expects interval as int for some versions, or string.
             # Let's try converting to int if it's a simple number like '1m', '5m'
@@ -685,7 +684,7 @@ class WebSocketManager:
 
             self.ws.kline_stream(
                 interval=interval_val,
-                symbol=symbol,
+                symbol=ws_symbol,
                 callback=self._kline_message_handler
             )
             logger.success(f"{Fore.GREEN}WebSocket Manager: Subscribed to kline stream.{Style.RESET_ALL}")
@@ -703,9 +702,7 @@ class WebSocketManager:
                     # Only process completed candles (is_closed = True)
                     if kline_data.get('confirm'): # 'confirm' field indicates candle is closed
                         # Put the kline data into the queue
-                        asyncio.run_coroutine_threadsafe(
-                            self.kline_data_queue.put(kline_data), asyncio.get_event_loop()
-                        )
+                        self.kline_data_queue.put_nowait(kline_data)
                         logger.debug(f"WS: Received and queued kline for {kline_data.get('symbol')} {kline_data.get('interval')} {kline_data.get('start')}")
             else:
                 # Log the unexpected message type/content
@@ -717,7 +714,7 @@ class WebSocketManager:
     async def get_latest_kline(self):
         # This method will be called from the main async loop to get the latest kline
         if not self.kline_data_queue.empty():
-            return await self.kline_data_queue.get()
+            return self.kline_data_queue.get_nowait()
         return None
 
     async def disconnect(self):
@@ -2077,7 +2074,7 @@ def place_risked_market_order(
 
 
 # --- Core Trading Logic - The Spell Weaving Cycle ---
-def trade_logic(exchange: ccxt.Exchange, symbol: str, timeframe: str) -> None:
+async def trade_logic(exchange: ccxt.Exchange, symbol: str, timeframe: str) -> None:
     """Main trading logic loop."""
     cycle_time_str = time.strftime("%Y-%m-%d %H:%M:%S %Z")
     logger.info(
@@ -2100,6 +2097,10 @@ def trade_logic(exchange: ccxt.Exchange, symbol: str, timeframe: str) -> None:
             f"{Fore.YELLOW}Trade Logic: Skipping cycle - unable to fetch valid OHLCV data.{Style.RESET_ALL}"
         )
         return
+
+    # Log current price (last close)
+    current_price = df['close'].iloc[-1] if not df.empty else 'N/A'
+    logger.info(f"{Fore.CYAN}Current Price: {current_price:.4f}{Style.RESET_ALL}")
 
     order_book_data = None
     # Fetch OB if always required OR if confirmation is enabled (fetch only when needed later)
@@ -2478,12 +2479,11 @@ async def main_async() -> None:
             f"{Fore.CYAN}--- Cycle {cycle_count} Weaving Start ---{Style.RESET_ALL}"
         )
         try:
-            # trade_logic(exchange, CONFIG.symbol, CONFIG.interval)  # Pass necessary args
-            # For now, just sleep to keep the async loop running and receive WS data
-            await asyncio.sleep(CONFIG.sleep_seconds)
+            await trade_logic(exchange, CONFIG.symbol, CONFIG.interval)  # Pass necessary args
             logger.debug(
                 f"Cycle {cycle_count} complete. Sleeping for {CONFIG.sleep_seconds} seconds..."
             )
+            await asyncio.sleep(CONFIG.sleep_seconds) # Keep this sleep to control cycle frequency
 
         except KeyboardInterrupt:
             logger.warning(
