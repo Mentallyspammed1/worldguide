@@ -1,5 +1,2246 @@
 
 
+# Complete In-Depth Guide to Creating and Using Extensions with Gemini CLI on Termux
+
+## Table of Contents
+
+### Part I: Foundation & Architecture
+1. [Deep Dive into Gemini CLI Architecture](#deep-dive-into-gemini-cli-architecture)
+2. [Complete Termux Setup & Optimization](#complete-termux-setup--optimization)
+3. [Authentication Deep Dive](#authentication-deep-dive)
+4. [Extension System Internals](#extension-system-internals)
+
+### Part II: Advanced Extension Development
+5. [MCP Server Architecture & Implementation](#mcp-server-architecture--implementation)
+6. [Complex Command Hierarchies](#complex-command-hierarchies)
+7. [Context Management System](#context-management-system)
+8. [Tool Integration & Security](#tool-integration--security)
+
+### Part III: Production Implementation
+9. [Building Production-Ready Extensions](#building-production-ready-extensions)
+10. [Performance Optimization Strategies](#performance-optimization-strategies)
+11. [Debugging & Troubleshooting](#debugging--troubleshooting)
+12. [Real-World Case Studies](#real-world-case-studies)
+
+---
+
+## Part I: Foundation & Architecture
+
+## Deep Dive into Gemini CLI Architecture
+
+### Core Components
+
+Gemini CLI is an open-source AI agent that brings the power of Gemini directly into your terminal. It provides lightweight access to Gemini, giving you the most direct path from your prompt to our model.
+
+The architecture consists of several key layers:
+
+```
+┌─────────────────────────────────────────┐
+│         User Interface Layer            │
+│    (REPL, Commands, Shell Integration)  │
+├─────────────────────────────────────────┤
+│         Extension System                │
+│  (Extensions, Commands, Context Files)  │
+├─────────────────────────────────────────┤
+│         Tool Orchestration              │
+│    (Built-in Tools, MCP Servers)        │
+├─────────────────────────────────────────┤
+│         Core Engine                     │
+│    (ReAct Loop, Tool Discovery)         │
+├─────────────────────────────────────────┤
+│         Model Interface                 │
+│    (Gemini 2.5 Pro, API Integration)    │
+└─────────────────────────────────────────┘
+```
+
+### ReAct Loop Implementation
+
+The Gemini command line interface (CLI) is an open source AI agent that provides access to Gemini directly in your terminal. The Gemini CLI uses a reason and act (ReAct) loop with your built-in tools and local or remote MCP servers to complete complex use cases like fixing bugs, creating new
+
+The ReAct (Reason and Act) loop is the core execution model:
+
+```javascript
+// Conceptual ReAct loop implementation
+class ReActLoop {
+  constructor(model, tools, context) {
+    this.model = model;
+    this.tools = tools;
+    this.context = context;
+    this.maxIterations = 10;
+  }
+
+  async execute(prompt) {
+    let iteration = 0;
+    let thought = "";
+    let observations = [];
+    
+    while (iteration < this.maxIterations) {
+      // Reasoning phase
+      thought = await this.model.reason(prompt, observations, this.context);
+      
+      // Action phase
+      if (thought.requiresTool) {
+        const toolResult = await this.executeTool(thought.tool, thought.params);
+        observations.push(toolResult);
+      } else if (thought.isComplete) {
+        return thought.finalAnswer;
+      }
+      
+      iteration++;
+    }
+  }
+  
+  async executeTool(toolName, params) {
+    const tool = this.tools.get(toolName);
+    if (!tool) throw new Error(`Tool ${toolName} not found`);
+    
+    // Permission check for Termux environment
+    if (this.requiresPermission(tool)) {
+      const granted = await this.requestPermission(tool);
+      if (!granted) return { error: "Permission denied" };
+    }
+    
+    return await tool.execute(params);
+  }
+}
+```
+
+### Token Management & Context Window
+
+That free license gets you access to Gemini 2.5 Pro and its massive 1 million token context window.
+
+The 1M token context window requires sophisticated management:
+
+```javascript
+class ContextManager {
+  constructor(maxTokens = 1000000) {
+    this.maxTokens = maxTokens;
+    this.contextStack = [];
+    this.tokenCounter = new TokenCounter();
+  }
+  
+  addContext(content, priority = 0) {
+    const tokens = this.tokenCounter.count(content);
+    this.contextStack.push({ content, tokens, priority });
+    this.optimizeContext();
+  }
+  
+  optimizeContext() {
+    // Sort by priority
+    this.contextStack.sort((a, b) => b.priority - a.priority);
+    
+    // Trim to fit token limit
+    let totalTokens = 0;
+    const optimized = [];
+    
+    for (const item of this.contextStack) {
+      if (totalTokens + item.tokens <= this.maxTokens) {
+        optimized.push(item);
+        totalTokens += item.tokens;
+      }
+    }
+    
+    this.contextStack = optimized;
+  }
+}
+```
+
+## Complete Termux Setup & Optimization
+
+### Advanced Installation Process
+
+The installation process is identical to Linux. You'll need Termux or a similar terminal emulator. I prefer Termux, make sure to download it from F-Droid store or GitHub. Version on Google Play is discontinued.
+
+#### Step 1: Termux Environment Preparation
+
+```bash
+# Update Termux repositories
+pkg update && pkg upgrade -y
+
+# Install essential development tools
+pkg install -y \
+  nodejs-lts \
+  python \
+  git \
+  build-essential \
+  termux-api \
+  termux-tools \
+  openssh \
+  vim \
+  curl \
+  wget
+
+# Set up storage access
+termux-setup-storage
+
+# Configure Node.js environment
+npm config set prefix ~/.npm-global
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify Node.js version (should be 18+)
+node --version
+npm --version
+```
+
+#### Step 2: Gemini CLI Installation with Error Handling
+
+```bash
+# Install Gemini CLI with retry logic
+install_gemini_cli() {
+  local max_attempts=3
+  local attempt=1
+  
+  while [ $attempt -le $max_attempts ]; do
+    echo "Attempt $attempt: Installing Gemini CLI..."
+    
+    if npm install -g @google/gemini-cli; then
+      echo "✓ Gemini CLI installed successfully"
+      return 0
+    else
+      echo "✗ Installation failed, attempt $attempt of $max_attempts"
+      attempt=$((attempt + 1))
+      sleep 2
+    fi
+  done
+  
+  echo "Failed to install Gemini CLI after $max_attempts attempts"
+  return 1
+}
+
+install_gemini_cli
+
+# Verify installation
+gemini --version
+```
+
+### Authentication Deep Dive
+
+This is the simplest method. Run Gemini CLI with the --debug flag: ... Choose Google Login. The CLI will display a login URL in the terminal. Copy this link into your browser, authenticate with your Google account, and return to Termux. Gemini CLI will now be successfully authenticated.
+
+#### Method 1: Debug Authentication (Manual)
+
+```bash
+#!/bin/bash
+# auth-debug.sh - Debug authentication helper
+
+echo "Starting Gemini CLI authentication in debug mode..."
+echo "="*50
+
+# Run in debug mode and capture output
+gemini --debug 2>&1 | tee auth.log &
+GEMINI_PID=$!
+
+# Wait for authentication URL
+echo "Waiting for authentication URL..."
+while ! grep -q "https://accounts.google.com" auth.log 2>/dev/null; do
+  sleep 1
+done
+
+# Extract and display URL
+AUTH_URL=$(grep -o "https://accounts.google.com[^\"]*" auth.log | head -1)
+echo ""
+echo "Authentication URL found!"
+echo "="*50
+echo "$AUTH_URL"
+echo "="*50
+echo ""
+echo "1. Copy the above URL"
+echo "2. Open it in your browser"
+echo "3. Complete authentication"
+echo "4. Return here and press Enter"
+read -r
+
+# Clean up
+rm -f auth.log
+```
+
+#### Method 2: Termux:API Integration (Automated)
+
+For a more seamless experience, you can use Termux:API to open the login URL directly in your browser. Termux-api allows you to send commands to the Android system and send command to open a browser. This means that Termux would trigger Google authentication automatically by opening a browser, just like it would behave on desktop system. For that you need to install: Install Termux:API app from F-Droid. This will open the browser automatically, mimicking desktop behavior. Once authenticated, return to Termux and continue using Gemini CLI.
+
+```bash
+#!/bin/bash
+# auth-api.sh - Automated authentication with Termux:API
+
+# Check if Termux:API is installed
+if ! command -v termux-open-url &> /dev/null; then
+  echo "Installing termux-api package..."
+  pkg install termux-api -y
+fi
+
+# Create authentication wrapper
+cat > ~/gemini-auth-wrapper.sh << 'EOF'
+#!/bin/bash
+
+# Intercept authentication URL and open automatically
+gemini "$@" 2>&1 | while IFS= read -r line; do
+  echo "$line"
+  
+  # Check for Google auth URL
+  if [[ "$line" =~ https://accounts.google.com ]]; then
+    URL=$(echo "$line" | grep -o 'https://[^"]*' | head -1)
+    if [ -n "$URL" ]; then
+      echo "Opening authentication URL in browser..."
+      termux-open-url "$URL"
+      
+      # Vibrate to notify user
+      termux-vibrate -d 500
+      
+      # Show notification
+      termux-notification \
+        --title "Gemini CLI Authentication" \
+        --content "Please complete authentication in browser" \
+        --action "termux-open-url $URL"
+    fi
+  fi
+done
+EOF
+
+chmod +x ~/gemini-auth-wrapper.sh
+
+# Create alias for easy use
+echo 'alias gemini-auth="~/gemini-auth-wrapper.sh"' >> ~/.bashrc
+source ~/.bashrc
+
+echo "✓ Automated authentication setup complete"
+echo "Run 'gemini-auth' to start Gemini CLI with automatic browser opening"
+```
+
+#### Method 3: API Key Authentication
+
+Get Your Key: Get an API key from Google AI Studio. Set Your Key: Make the key available to the CLI with one of these methods. Method 1: Shell Environment Variable Set the GEMINI_API_KEY environment variable. To use it across terminal sessions, add this line to your shell's profile (e.g., ~/.bashrc, ~/.zshrc).
+
+```bash
+#!/bin/bash
+# setup-api-key.sh - Secure API key setup
+
+# Secure API key storage with encryption
+setup_api_key() {
+  echo "Setting up Gemini API key..."
+  
+  # Create secure directory
+  mkdir -p ~/.gemini/secure
+  chmod 700 ~/.gemini/secure
+  
+  # Prompt for API key
+  echo -n "Enter your Gemini API key: "
+  read -rs API_KEY
+  echo
+  
+  # Validate key format
+  if [[ ! "$API_KEY" =~ ^[A-Za-z0-9_-]{39}$ ]]; then
+    echo "Invalid API key format"
+    return 1
+  fi
+  
+  # Store encrypted (using simple base64 for Termux compatibility)
+  echo "$API_KEY" | base64 > ~/.gemini/secure/api_key.enc
+  chmod 600 ~/.gemini/secure/api_key.enc
+  
+  # Create loader script
+  cat > ~/.gemini/load_api_key.sh << 'EOF'
+#!/bin/bash
+if [ -f ~/.gemini/secure/api_key.enc ]; then
+  export GEMINI_API_KEY=$(base64 -d < ~/.gemini/secure/api_key.enc)
+fi
+EOF
+  
+  chmod +x ~/.gemini/load_api_key.sh
+  
+  # Add to bashrc
+  echo 'source ~/.gemini/load_api_key.sh' >> ~/.bashrc
+  
+  echo "✓ API key configured successfully"
+  echo "Run 'source ~/.bashrc' to load the key"
+}
+
+setup_api_key
+```
+
+## Extension System Internals
+
+### Extension Discovery and Loading Process
+
+name: The name of the extension. This is used to uniquely identify the extension and for conflict resolution when extension commands have the same name as user or project commands. ... mcpServers: A map of MCP servers to configure. The key is the name of the server, and the value is the server configuration. These servers will be loaded on startup just like MCP servers configured in a settings.json file. If both an extension and a settings.json file configure an MCP server with the same name, the server defined in the settings.json file takes precedence.
+
+```javascript
+// Extension loader implementation concept
+class ExtensionLoader {
+  constructor() {
+    this.extensions = new Map();
+    this.loadOrder = [];
+    this.conflicts = [];
+  }
+  
+  async discoverExtensions() {
+    const locations = [
+      path.join(os.homedir(), '.gemini', 'extensions'),  // Global
+      path.join(process.cwd(), '.gemini', 'extensions')   // Project
+    ];
+    
+    for (const location of locations) {
+      if (await this.directoryExists(location)) {
+        await this.loadExtensionsFromDirectory(location);
+      }
+    }
+    
+    this.resolveConflicts();
+    return this.extensions;
+  }
+  
+  async loadExtensionsFromDirectory(dir) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const extPath = path.join(dir, entry.name);
+        const configPath = path.join(extPath, 'gemini-extension.json');
+        
+        if (await this.fileExists(configPath)) {
+          try {
+            const config = await this.loadExtensionConfig(configPath);
+            const extension = new Extension(config, extPath);
+            
+            // Check for conflicts
+            if (this.extensions.has(config.name)) {
+              this.conflicts.push({
+                name: config.name,
+                existing: this.extensions.get(config.name).path,
+                new: extPath
+              });
+            }
+            
+            this.extensions.set(config.name, extension);
+            this.loadOrder.push(config.name);
+          } catch (error) {
+            console.error(`Failed to load extension from ${extPath}:`, error);
+          }
+        }
+      }
+    }
+  }
+  
+  resolveConflicts() {
+    // Project extensions take precedence over global
+    for (const conflict of this.conflicts) {
+      const projectPath = path.join(process.cwd(), '.gemini', 'extensions');
+      
+      if (conflict.new.startsWith(projectPath)) {
+        // Keep project extension
+        console.log(`Extension conflict resolved: ${conflict.name} (using project version)`);
+      } else {
+        // Revert to existing
+        const existing = this.extensions.get(conflict.name);
+        existing.path = conflict.existing;
+      }
+    }
+  }
+}
+```
+
+### Extension Configuration Schema
+
+```typescript
+interface ExtensionConfig {
+  name: string;
+  version: string;
+  description?: string;
+  author?: string;
+  license?: string;
+  
+  // MCP Server configuration
+  mcpServers?: {
+    [serverName: string]: {
+      command: string;
+      args?: string[];
+      env?: Record<string, string>;
+      cwd?: string;
+      timeout?: number;
+      trust?: boolean;
+      includeTools?: string[];
+      excludeTools?: string[];
+    };
+  };
+  
+  // Context configuration
+  contextFileName?: string;
+  additionalContexts?: string[];
+  
+  // Tool restrictions
+  excludeTools?: string[];
+  includeTools?: string[];
+  
+  // Dependencies
+  dependencies?: {
+    extensions?: string[];
+    packages?: string[];
+    termuxPackages?: string[];
+  };
+  
+  // Hooks
+  hooks?: {
+    onLoad?: string;
+    onUnload?: string;
+    beforeCommand?: string;
+    afterCommand?: string;
+  };
+}
+```
+
+## Part II: Advanced Extension Development
+
+## MCP Server Architecture & Implementation
+
+### Understanding MCP Protocol
+
+An MCP server is an application that exposes tools and resources to the Gemini CLI through the Model Context Protocol, allowing it to interact with external systems and data sources. MCP servers act as a bridge between the Gemini model and your local environment or other services like APIs.
+
+```javascript
+// Complete MCP Server implementation for Termux
+const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
+const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const fs = require('fs').promises;
+const path = require('path');
+
+const execAsync = promisify(exec);
+
+class TermuxMCPServer {
+  constructor() {
+    this.server = new Server(
+      {
+        name: 'termux-advanced',
+        version: '2.0.0',
+      },
+      {
+        capabilities: {
+          tools: {},
+          resources: {},
+        },
+      }
+    );
+    
+    this.setupTools();
+    this.setupResources();
+  }
+  
+  setupTools() {
+    // Battery status tool
+    this.server.setRequestHandler('tools/list', async () => ({
+      tools: [
+        {
+          name: 'battery_status',
+          description: 'Get Android battery status via Termux',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
+          name: 'termux_notification',
+          description: 'Send Android notification',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              title: {
+                type: 'string',
+                description: 'Notification title',
+              },
+              content: {
+                type: 'string',
+                description: 'Notification content',
+              },
+              priority: {
+                type: 'string',
+                enum: ['min', 'low', 'default', 'high', 'max'],
+                default: 'default',
+              },
+              vibrate: {
+                type: 'boolean',
+                default: false,
+              },
+            },
+            required: ['title', 'content'],
+          },
+        },
+        {
+          name: 'storage_info',
+          description: 'Get Android storage information',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              path: {
+                type: 'string',
+                description: 'Storage path to check',
+                default: '/storage/emulated/0',
+              },
+            },
+          },
+        },
+        {
+          name: 'termux_tts',
+          description: 'Text-to-speech using Android TTS',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              text: {
+                type: 'string',
+                description: 'Text to speak',
+              },
+              language: {
+                type: 'string',
+                description: 'Language code (e.g., en-US)',
+                default: 'en-US',
+              },
+              rate: {
+                type: 'number',
+                description: 'Speech rate (0.5 - 2.0)',
+                minimum: 0.5,
+                maximum: 2.0,
+                default: 1.0,
+              },
+            },
+            required: ['text'],
+          },
+        },
+        {
+          name: 'clipboard_manager',
+          description: 'Manage Android clipboard',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              action: {
+                type: 'string',
+                enum: ['get', 'set'],
+                description: 'Clipboard action',
+              },
+              text: {
+                type: 'string',
+                description: 'Text to set (required for set action)',
+              },
+            },
+            required: ['action'],
+          },
+        },
+      ],
+    }));
+    
+    // Tool execution handler
+    this.server.setRequestHandler('tools/call', async (request) => {
+      const { name, arguments: args } = request.params;
+      
+      try {
+        switch (name) {
+          case 'battery_status':
+            return await this.getBatteryStatus();
+            
+          case 'termux_notification':
+            return await this.sendNotification(args);
+            
+          case 'storage_info':
+            return await this.getStorageInfo(args.path);
+            
+          case 'termux_tts':
+            return await this.textToSpeech(args);
+            
+          case 'clipboard_manager':
+            return await this.manageClipboard(args);
+            
+          default:
+            throw new Error(`Unknown tool: ${name}`);
+        }
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error executing ${name}: ${error.message}`,
+            },
+          ],
+        };
+      }
+    });
+  }
+  
+  async getBatteryStatus() {
+    try {
+      const { stdout } = await execAsync('termux-battery-status');
+      const battery = JSON.parse(stdout);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Battery Status:
+- Level: ${battery.percentage}%
+- Status: ${battery.status}
+- Health: ${battery.health}
+- Temperature: ${battery.temperature}°C
+- Plugged: ${battery.plugged}`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to get battery status: ${error.message}`);
+    }
+  }
+  
+  async sendNotification(args) {
+    const { title, content, priority, vibrate } = args;
+    
+    let command = `termux-notification --title "${title}" --content "${content}"`;
+    
+    if (priority && priority !== 'default') {
+      command += ` --priority ${priority}`;
+    }
+    
+    if (vibrate) {
+      command += ' --vibrate 200,100,200';
+    }
+    
+    try {
+      await execAsync(command);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Notification sent: ${title}`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to send notification: ${error.message}`);
+    }
+  }
+  
+  async getStorageInfo(storagePath = '/storage/emulated/0') {
+    try {
+      const { stdout } = await execAsync(`df -h ${storagePath}`);
+      const lines = stdout.trim().split('\n');
+      const data = lines[1].split(/\s+/);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Storage Information for ${storagePath}:
+- Total: ${data[1]}
+- Used: ${data[2]}
+- Available: ${data[3]}
+- Usage: ${data[4]}`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to get storage info: ${error.message}`);
+    }
+  }
+  
+  async textToSpeech(args) {
+    const { text, language, rate } = args;
+    
+    let command = `termux-tts-speak "${text}"`;
+    
+    if (language) {
+      command += ` -l ${language}`;
+    }
+    
+    if (rate) {
+      command += ` -r ${rate}`;
+    }
+    
+    try {
+      await execAsync(command);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Speaking: "${text}" in ${language || 'default language'}`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to speak text: ${error.message}`);
+    }
+  }
+  
+  async manageClipboard(args) {
+    const { action, text } = args;
+    
+    try {
+      if (action === 'get') {
+        const { stdout } = await execAsync('termux-clipboard-get');
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Clipboard content: ${stdout}`,
+            },
+          ],
+        };
+      } else if (action === 'set') {
+        if (!text) {
+          throw new Error('Text is required for set action');
+        }
+        await execAsync(`termux-clipboard-set "${text}"`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Clipboard set to: ${text}`,
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      throw new Error(`Clipboard operation failed: ${error.message}`);
+    }
+  }
+  
+  setupResources() {
+    // Resource discovery
+    this.server.setRequestHandler('resources/list', async () => ({
+      resources: [
+        {
+          uri: 'termux://system/info',
+          name: 'System Information',
+          description: 'Termux and Android system information',
+          mimeType: 'application/json',
+        },
+        {
+          uri: 'termux://contacts/list',
+          name: 'Contact List',
+          description: 'Android contacts (requires permission)',
+          mimeType: 'application/json',
+        },
+      ],
+    }));
+    
+    // Resource reading
+    this.server.setRequestHandler('resources/read', async (request) => {
+      const { uri } = request.params;
+      
+      if (uri === 'termux://system/info') {
+        return await this.getSystemInfo();
+      } else if (uri === 'termux://contacts/list') {
+        return await this.getContactList();
+      }
+      
+      throw new Error(`Unknown resource: ${uri}`);
+    });
+  }
+  
+  async getSystemInfo() {
+    try {
+      const [deviceInfo, termuxInfo] = await Promise.all([
+        execAsync('termux-info'),
+        execAsync('uname -a'),
+      ]);
+      
+      return {
+        contents: [
+          {
+            uri: 'termux://system/info',
+            mimeType: 'application/json',
+            text: JSON.stringify({
+              device: deviceInfo.stdout,
+              system: termuxInfo.stdout,
+              termuxHome: process.env.HOME,
+              prefix: process.env.PREFIX,
+            }, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to get system info: ${error.message}`);
+    }
+  }
+  
+  async getContactList() {
+    try {
+      const { stdout } = await execAsync('termux-contact-list');
+      const contacts = JSON.parse(stdout);
+      
+      return {
+        contents: [
+          {
+            uri: 'termux://contacts/list',
+            mimeType: 'application/json',
+            text: JSON.stringify(contacts, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to get contacts: ${error.message}`);
+    }
+  }
+  
+  async start() {
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
+    console.error('Termux MCP Server started');
+  }
+}
+
+// Start the server
+const server = new TermuxMCPServer();
+server.start().catch(console.error);
+```
+
+### Configuring MCP Servers in Extensions
+
+The Gemini CLI uses the mcpServers configuration in your settings.json file to locate and connect to MCP servers. This configuration supports multiple servers with different transport mechanisms. You can configure MCP servers at the global level in the ~/.gemini/settings.json file or in your project's root directory, create or open the .gemini/settings.json file. Within the file, add the mcpServers configuration block. Add an mcpServers object to your settings.json file:
+
+```json
+{
+  "mcpServers": {
+    "termux-advanced": {
+      "command": "node",
+      "args": ["./mcp-servers/termux-advanced.js"],
+      "env": {
+        "TERMUX_HOME": "/data/data/com.termux/files/home",
+        "ANDROID_DATA": "/storage/emulated/0",
+        "NODE_ENV": "production"
+      },
+      "cwd": "~/.gemini/extensions/termux-suite",
+      "timeout": 30000,
+      "trust": false,
+      "includeTools": [
+        "battery_status",
+        "termux_notification",
+        "storage_info",
+        "termux_tts",
+        "clipboard_manager"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite", "~/databases/"],
+      "trust": true
+    }
+  }
+}
+```
+
+## Complex Command Hierarchies
+
+### Namespace Architecture
+
+Sub-directories are used to create namespaced commands, with the path separator (/ or \) being converted to a colon (:). A file at <project>/.gemini/commands/test.toml becomes the command /test. A file at <project>/.gemini/commands/git/commit.toml becomes the namespaced command /git:commit.
+
+Create a sophisticated command structure:
+
+```bash
+# Create complex command hierarchy
+mkdir -p ~/.gemini/extensions/termux-suite/commands/{android,dev,security,network,data}
+```
+
+### Android Integration Commands
+
+```toml
+# commands/android/intent.toml
+description = "Create and execute Android intents"
+prompt = """
+Create an Android intent to {{args}}.
+
+Provide:
+1. The complete termux-open or am start command
+2. Explanation of intent components:
+   - Action (e.g., android.intent.action.VIEW)
+   - Data URI if applicable
+   - Package/Component if targeting specific app
+   - Flags and extras
+3. Alternative methods using termux-open
+4. Security considerations
+
+Include examples for common scenarios:
+- Opening URLs
+- Launching apps
+- Sharing content
+- Starting activities
+"""
+
+# commands/android/permissions.toml
+description = "Check and request Android permissions"
+prompt = """
+For the operation: {{args}}
+
+Analyze and provide:
+1. Required Android permissions
+2. How to check current permissions: !{termux-info}
+3. Commands to request permissions
+4. Fallback strategies if permissions are denied
+5. Security best practices
+
+Current permission status:
+!{pm list permissions -g | grep -A 10 "permission:"}
+"""
+
+# commands/android/sensors.toml
+description = "Access Android sensor data"
+prompt = """
+Access sensor data for: {{args}}
+
+Available sensors:
+!{termux-sensor -l}
+
+Provide:
+1. Command to access the requested sensor
+2. Data parsing strategy
+3. Real-time monitoring setup
+4. Battery impact considerations
+5. Example processing script
+"""
+```
+
+### Development Workflow Commands
+
+```toml
+# commands/dev/setup.toml
+description = "Set up complete development environment"
+prompt = """
+Set up a development environment for {{args}} in Termux.
+
+System info:
+!{uname -a}
+!{node --version}
+!{python --version}
+
+Create:
+1. Project structure with proper directories
+2. Package installation commands (pkg and language-specific)
+3. Configuration files (.bashrc additions, env vars)
+4. Git setup with proper .gitignore
+5. Editor configuration (vim/neovim)
+6. Testing framework setup
+7. Build scripts adapted for Termux
+8. Debugging setup
+
+Consider Termux limitations:
+- No systemd (use termux-services)
+- Modified FHS (PREFIX=/data/data/com.termux/files/usr)
+- Limited syscalls
+- Android storage restrictions
+"""
+
+# commands/dev/debug.toml
+description = "Advanced debugging assistance"
+prompt = """
+Debug this issue: {{args}}
+
+Current environment:
+!{env | grep -E "TERMUX|ANDROID|PREFIX"}
+!{pwd}
+!{ls -la}
+
+Perform:
+1. Analyze error symptoms
+2. Check common Termux-specific issues:
+   - Shebang paths (#!/data/data/com.termux/files/usr/bin/bash)
+   - Permission problems
+   - Missing dependencies
+   - Path issues
+3. Provide diagnostic commands
+4. Suggest fixes with explanations
+5. Create test cases to verify fix
+"""
+
+# commands/dev/optimize.toml
+description = "Optimize code for Termux constraints"
+prompt = """
+Optimize this code/process for Termux: {{args}}
+
+Current resource usage:
+!{free -h}
+!{df -h /data}
+!{top -n 1 -b | head -20}
+
+Optimization strategies:
+1. Memory optimization (limited RAM on mobile)
+2. Storage optimization (internal vs SD card)
+3. Battery efficiency
+4. Network usage reduction
+5. Process management
+6. Caching strategies
+7. Background task handling
+
+Provide optimized version with benchmarks.
+"""
+```
+
+### Security Commands
+
+```toml
+# commands/security/audit.toml
+description = "Security audit for Termux environment"
+prompt = """
+Perform security audit for: {{args}}
+
+Current security status:
+!{ls -la ~/.ssh 2>/dev/null || echo "No SSH directory"}
+!{find ~ -name "*.key" -o -name "*.pem" 2>/dev/null | head -10}
+!{ps aux | grep -E "ssh|vpn|tunnel" | grep -v grep}
+
+Audit:
+1. File permissions check
+2. Exposed credentials scan
+3. Network connections review
+4. Running processes analysis
+5. Package vulnerabilities
+6. Configuration weaknesses
+7. Encryption status
+
+Provide remediation steps for any issues found.
+"""
+
+# commands/security/encrypt.toml
+description = "Implement encryption for sensitive data"
+prompt = """
+Set up encryption for: {{args}}
+
+Available tools:
+!{pkg list-installed | grep -E "gpg|openssl|crypt"}
+
+Implement:
+1. Choose appropriate encryption method
+2. Key generation commands
+3. Encryption/decryption scripts
+4. Secure key storage strategy
+5. Integration with Termux-keyring if applicable
+6. Backup and recovery procedures
+
+Create working examples with proper error handling.
+"""
+```
+
+### Network Commands
+
+```toml
+# commands/network/tunnel.toml
+description = "Set up network tunnels and proxies"
+prompt = """
+Create network tunnel for: {{args}}
+
+Network status:
+!{ip addr show}
+!{netstat -tuln | head -20}
+
+Configure:
+1. SSH tunnel setup (if applicable)
+2. VPN configuration
+3. Proxy settings
+4. Port forwarding rules
+5. DNS configuration
+6. Firewall rules (iptables if available)
+7. Connection persistence
+8. Auto-reconnect scripts
+
+Handle Termux networking limitations appropriately.
+"""
+
+# commands/network/api.toml
+description = "Create API client/server in Termux"
+prompt = """
+Build API {{args}} for Termux.
+
+Requirements analysis based on:
+- Available ports
+- Network interfaces
+- Security constraints
+
+Implement:
+1. Server setup (if server)
+2. Client configuration (if client)
+3. Authentication mechanism
+4. Rate limiting
+5. Error handling
+6. Logging system
+7. Testing endpoints
+8. Documentation
+
+Use Termux-compatible libraries and consider mobile constraints.
+"""
+```
+
+## Context Management System
+
+### Hierarchical Context Loading
+
+Hierarchical Loading: The CLI combines GEMINI.md files from multiple locations. More specific files override general ones. The loading order is: Global Context: ~/.gemini/GEMINI.md (for instructions that apply to all your projects). Project/Ancestor Context: The CLI searches from your current directory up to the project root for GEMINI.md files. Sub-directory Context: The CLI also scans subdirectories for GEMINI.md files, allowing for component-specific instructions.
+
+Create a comprehensive context system:
+
+```markdown
+# ~/.gemini/extensions/termux-suite/GEMINI.md
+
+# Termux Development Context
+
+## System Environment
+You are operating in a Termux environment on Android. This is a Linux environment with significant constraints and unique characteristics.
+
+### System Paths
+- Home: /data/data/com.termux/files/home
+- Prefix: /data/data/com.termux/files/usr
+- Temp: /data/data/com.termux/files/usr/tmp
+- Android Storage: ~/storage/ (after termux-setup-storage)
+  - Shared: ~/storage/shared (maps to /storage/emulated/0)
+  - Downloads: ~/storage/downloads
+  - DCIM: ~/storage/dcim
+  - Pictures: ~/storage/pictures
+  - Music: ~/storage/music
+
+### Available Package Managers
+- Primary: `pkg` (wrapper around apt)
+- Python: `pip` (use `pip install --user` for user packages)
+- Node.js: `npm` (configure prefix to avoid permission issues)
+- Ruby: `gem` (may require special flags)
+
+### Shell Environment
+- Default shell: bash
+- Shebang for scripts: `#!/data/data/com.termux/files/usr/bin/bash`
+- Alternative: `#!/usr/bin/env bash`
+
+## Import Specialized Contexts
+@./contexts/android-integration.md
+@./contexts/security-policies.md
+@./contexts/performance-guidelines.md
+@./contexts/networking-rules.md
+
+## Development Standards
+
+### Code Style
+```bash
+# Always use POSIX-compliant shell scripts
+set -euo pipefail  # Safe script settings
+IFS=$'\n\t'        # Safe IFS
+
+# Function template
+function_name() {
+    local arg1="${1:-default}"
+    local arg2="${2:-}"
+    
+    # Validate inputs
+    [[ -z "$arg1" ]] && echo "Error: arg1 required" && return 1
+    
+    # Process
+    echo "Processing: $arg1"
+    
+    # Return
+    return 0
+}
+```
+
+### Error Handling
+Always implement comprehensive error handling:
+1. Check command availability before use
+2. Validate all inputs
+3. Use trap for cleanup
+4. Provide meaningful error messages
+5. Log errors to: ~/.gemini/logs/
+
+### Testing Requirements
+- Test all scripts in actual Termux environment
+- Check compatibility with different Android versions
+- Verify termux-api calls work correctly
+- Test with limited permissions
+- Validate storage access
+
+## Security Policies
+
+### Forbidden Operations
+NEVER attempt or suggest:
+- Rooting device
+- Modifying system files outside Termux
+- Accessing other app's private data
+- Running commands with `su` or `sudo`
+- Disabling Android security features
+
+### Credential Management
+- Use termux-keyring when available
+- Never store plaintext passwords
+- Use environment variables from encrypted sources
+- Implement proper session management
+- Regular credential rotation
+
+### Network Security
+- Always use HTTPS when possible
+- Validate SSL certificates
+- Implement rate limiting
+- Use SSH keys instead of passwords
+- Configure fail2ban equivalents
+
+## Performance Optimization
+
+### Resource Constraints
+Mobile devices have limited:
+- RAM (typically 2-8GB, shared with Android)
+- CPU (thermal throttling is common)
+- Battery (optimize for power efficiency)
+- Storage (internal is faster but limited)
+
+### Optimization Strategies
+1. **Memory Management**
+   - Use streaming instead of loading entire files
+   - Implement aggressive garbage collection
+   - Monitor memory usage with `free -h`
+   
+2. **CPU Optimization**
+   - Use nice values for background tasks
+   - Implement task queuing
+   - Avoid CPU-intensive operations during peak hours
+   
+3. **Battery Optimization**
+   - Use wake locks sparingly
+   - Batch network requests
+   - Implement exponential backoff
+   - Use Termux:Boot for scheduled tasks
+
+## Integration Guidelines
+
+### Termux:API Integration
+When using Termux:API, always:
+1. Check if termux-api package is installed
+2. Verify Termux:API app is installed
+3. Handle permission requests gracefully
+4. Provide fallbacks for missing permissions
+5. Test on different Android versions
+
+### Android Integration
+- Use intents for app interaction
+- Respect Android's permission model
+- Handle storage access framework properly
+- Work with content providers when needed
+- Implement proper broadcast receivers
+
+## Project Structure Templates
+
+### Standard Project Layout
+```
+project/
+├── .gemini/
+│   ├── commands/      # Project-specific commands
+│   ├── extensions/    # Project extensions
+│   └── GEMINI.md     # Project context
+├── src/              # Source code
+├── tests/            # Test files
+├── docs/             # Documentation
+├── scripts/          # Utility scripts
+│   ├── setup.sh     # Setup script
+│   ├── build.sh     # Build script
+│   └── deploy.sh    # Deployment script
+├── .env.example      # Environment template
+├── .gitignore        # Git ignore rules
+└── README.md         # Project documentation
+```
+
+## Error Messages and Solutions
+
+### Common Issues Database
+When encountering errors, check:
+
+1. **"Permission denied"**
+   - Check file permissions: `ls -la`
+   - Verify storage access: `termux-setup-storage`
+   - Check SELinux context if applicable
+
+2. **"Command not found"**
+   - Install missing package: `pkg install <package>`
+   - Check PATH: `echo $PATH`
+   - Verify shebang path
+
+3. **"No such file or directory"**
+   - Check PREFIX paths
+   - Verify symbolic links
+   - Check case sensitivity
+
+4. **"Cannot allocate memory"**
+   - Check available memory: `free -h`
+   - Kill unnecessary processes
+   - Increase swap if possible
+
+## Workflow Automation
+
+### Task Automation Rules
+1. Use Termux:Boot for startup tasks
+2. Implement proper logging
+3. Handle network connectivity changes
+4. Respect Doze mode and battery optimization
+5. Use Termux:Widget for quick actions
+
+### CI/CD in Termux
+- Use local Git hooks
+- Implement testing pipelines
+- Automate builds with make or npm scripts
+- Deploy using rsync or scp
+- Monitor with custom scripts
+
+## Communication Protocols
+
+### User Interaction
+- Always explain Termux-specific considerations
+- Provide alternative solutions for limitations
+- Include installation commands for dependencies
+- Warn about battery/performance impact
+- Suggest optimization opportunities
+
+### Code Generation
+When generating code:
+1. Include proper error handling
+2. Add comprehensive comments
+3. Provide usage examples
+4. Include dependency checks
+5. Add performance considerations
+
+## Maintenance Guidelines
+
+### Regular Maintenance Tasks
+```bash
+# Weekly maintenance script
+#!/data/data/com.termux/files/usr/bin/bash
+
+# Update packages
+pkg update && pkg upgrade -y
+
+# Clean package cache
+apt autoremove -y
+apt clean
+
+# Clear temporary files
+find /data/data/com.termux/files/usr/tmp -type f -mtime +7 -delete
+
+# Rotate logs
+find ~/.gemini/logs -name "*.log" -mtime +30 -delete
+
+# Check disk usage
+df -h
+du -sh ~/.gemini/*
+```
+
+## Advanced Features
+
+### Custom Tool Integration
+When integrating new tools:
+1. Check Termux compatibility
+2. Verify architecture support (arm64, etc.)
+3. Test resource consumption
+4. Document installation process
+5. Create wrapper scripts if needed
+
+### Extension Development
+For new extensions:
+1. Follow modular design
+2. Implement proper error handling
+3. Include comprehensive tests
+4. Document all features
+5. Provide migration guides
+```
+
+### Context File Imports
+
+Create specialized context files:
+
+```markdown
+# contexts/android-integration.md
+
+# Android Integration Context
+
+## Available Termux:API Commands
+
+### Device Information
+- `termux-battery-status` - Battery information
+- `termux-brightness` - Screen brightness control
+- `termux-call-log` - Call history
+- `termux-camera-info` - Camera information
+- `termux-contact-list` - Access contacts
+- `termux-infrared-frequencies` - IR capabilities
+- `termux-location` - GPS location
+- `termux-sensor` - Sensor data
+- `termux-telephony-deviceinfo` - Device info
+- `termux-wifi-connectioninfo` - WiFi status
+- `termux-wifi-scaninfo` - WiFi networks
+
+### System Interaction
+- `termux-clipboard-get/set` - Clipboard access
+- `termux-dialog` - UI dialogs
+- `termux-download` - Download manager
+- `termux-fingerprint` - Biometric auth
+- `termux-keystore` - Android keystore
+- `termux-media-player` - Media control
+- `termux-media-scan` - Media scanner
+- `termux-microphone-record` - Audio recording
+- `termux-notification` - Notifications
+- `termux-notification-remove` - Clear notifications
+- `termux-open` - Open files/URLs
+- `termux-open-url` - Open URLs
+- `termux-share` - Share content
+- `termux-sms-list` - SMS history
+- `termux-sms-send` - Send SMS
+- `termux-storage-get` - Storage access
+- `termux-toast` - Toast messages
+- `termux-torch` - Flashlight control
+- `termux-tts-engines` - TTS engines
+- `termux-tts-speak` - Text to speech
+- `termux-usb` - USB device access
+- `termux-vibrate` - Vibration control
+- `termux-volume` - Volume control
+- `termux-wallpaper` - Wallpaper control
+- `termux-wake-lock` - Wake lock control
+- `termux-wake-unlock` - Release wake lock
+
+## Permission Requirements
+
+### Critical Permissions
+These require explicit user consent:
+- Location access
+- Contact access  
+- SMS access
+- Call log access
+- Microphone access
+- Camera access
+- Storage access
+
+### Best Practices
+1. Always check permission before use
+2. Provide graceful fallbacks
+3. Explain why permission is needed
+4. Don't request unnecessary permissions
+5. Cache permission status
+
+## Intent Examples
+
+### Common Intent Patterns
+```bash
+# Open URL in browser
+termux-open-url "https://example.com"
+
+# Share text
+echo "Hello" | termux-share -a send
+
+# Open specific app
+am start -n com.android.settings/.Settings
+
+# Send broadcast
+am broadcast -a android.intent.action.BOOT_COMPLETED
+
+# Start service
+am startservice -n com.example/.MyService
+```
+
+## Storage Access
+
+### Storage Paths After Setup
+```bash
+# Run first:
+termux-setup-storage
+
+# Then access:
+~/storage/shared/          # Main storage
+~/storage/downloads/       # Downloads folder
+~/storage/dcim/           # Camera folder
+~/storage/pictures/       # Pictures
+~/storage/music/          # Music
+~/storage/movies/         # Videos
+~/storage/external-1/     # SD card (if present)
+```
+
+### File Access Patterns
+- Use `~/storage/shared/` for user-accessible files
+- Keep app data in `~/.local/share/`
+- Use `$PREFIX/tmp/` for temporary files
+- Cache in `~/.cache/`
+```
+
+## Tool Integration & Security
+
+### Advanced Tool Restrictions
+
+excludeTools: ["run_shell_command"]
+
+Create sophisticated tool restriction patterns:
+
+```json
+{
+  "name": "termux-secure",
+  "version": "1.0.0",
+  "excludeTools": [
+    "run_shell_command(rm -rf)",
+    "run_shell_command(su)",
+    "run_shell_command(sudo)",
+    "run_shell_command(chmod 777)",
+    "run_shell_command(kill -9)",
+    "run_shell_command(dd if=)",
+    "run_shell_command(mkfs)",
+    "file_delete(/data/data/com.termux/files/home/.bashrc)",
+    "file_delete(/data/data/com.termux/files/home/.profile)",
+    "file_write(/system)",
+    "file_write(/proc)",
+    "file_write(/sys)"
+  ],
+  "includeTools": [
+    "read_file",
+    "read_many_files",
+    "file_write",
+    "run_shell_command",
+    "google_web_search",
+    "save_memory",
+    "web_fetch"
+  ],
+  "toolRestrictions": {
+    "run_shell_command": {
+      "allowedCommands": [
+        "ls", "pwd", "echo", "cat", "grep", "find",
+        "node", "python", "git", "npm", "pip",
+        "termux-*", "pkg", "apt"
+      ],
+      "blockedPatterns": [
+        "*/etc/*",
+        "*/system/*",
+        "*password*",
+        "*secret*",
+        "*private*key*"
+      ],
+      "requireConfirmation": true,
+      "logCommands": true
+    },
+    "file_write": {
+      "allowedPaths": [
+        "~/projects/*",
+        "~/.gemini/*",
+        "/data/data/com.termux/files/home/*"
+      ],
+      "maxFileSize": "10MB",
+      "allowedExtensions": [
+        ".js", ".py", ".sh", ".json", ".md",
+        ".txt", ".toml", ".yaml", ".yml"
+      ]
+    }
+  }
+}
+```
+
+### Security Middleware Implementation
+
+```javascript
+// security-middleware.js
+class SecurityMiddleware {
+  constructor(config) {
+    this.config = config;
+    this.auditLog = [];
+  }
+  
+  async validateToolCall(tool, params) {
+    const restriction = this.config.toolRestrictions[tool];
+    if (!restriction) return true;
+    
+    // Log the attempt
+    this.auditLog.push({
+      timestamp: new Date(),
+      tool,
+      params,
+      user: process.env.USER
+    });
+    
+    // Check allowed commands
+    if (tool === 'run_shell_command' && restriction.allowedCommands) {
+      const command = params.command.split(' ')[0];
+      if (!restriction.allowedCommands.includes(command)) {
+        throw new Error(`Command '${command}' is not allowed`);
+      }
+    }
+    
+    // Check blocked patterns
+    if (restriction.blockedPatterns) {
+      for (const pattern of restriction.blockedPatterns) {
+        const regex = new RegExp(pattern.replace('*', '.*'));
+        if (regex.test(JSON.stringify(params))) {
+          throw new Error(`Blocked pattern detected: ${pattern}`);
+        }
+      }
+    }
+    
+    // Check file paths
+    if (tool === 'file_write' && restriction.allowedPaths) {
+      const filePath = params.path;
+      const allowed = restriction.allowedPaths.some(allowedPath => {
+        const regex = new RegExp('^' + allowedPath.replace('*', '.*') + '$');
+        return regex.test(filePath);
+      });
+      
+      if (!allowed) {
+        throw new Error(`Path '${filePath}' is not in allowed paths`);
+      }
+    }
+    
+    // Check file size
+    if (tool === 'file_write' && restriction.maxFileSize) {
+      const maxSize = this.parseSize(restriction.maxFileSize);
+      const content = params.content || '';
+      if (content.length > maxSize) {
+        throw new Error(`File size exceeds maximum of ${restriction.maxFileSize}`);
+      }
+    }
+    
+    // Require confirmation if needed
+    if (restriction.requireConfirmation) {
+      return await this.requestConfirmation(tool, params);
+    }
+    
+    return true;
+  }
+  
+  parseSize(sizeStr) {
+    const units = { KB: 1024, MB: 1024*1024, GB: 1024*1024*1024 };
+    const match = sizeStr.match(/^(\d+)(KB|MB|GB)$/i);
+    if (!match) return parseInt(sizeStr);
+    return parseInt(match[1]) * units[match[2].toUpperCase()];
+  }
+  
+  async requestConfirmation(tool, params) {
+    // In real implementation, this would interact with user
+    console.log(`Confirmation required for ${tool}:`, params);
+    // Return true for auto-approval in this example
+    return true;
+  }
+  
+  getAuditLog() {
+    return this.auditLog;
+  }
+}
+
+module.exports = SecurityMiddleware;
+```
+
+## Part III: Production Implementation
+
+## Building Production-Ready Extensions
+
+### Complete Extension Package Structure
+
+```bash
+termux-ultimate-extension/
+├── gemini-extension.json
+├── package.json
+├── README.md
+├── LICENSE
+├── CHANGELOG.md
+├── .github/
+│   └── workflows/
+│       └── test.yml
+├── commands/
+│   ├── android/
+│   │   ├── intent.toml
+│   │   ├── permissions.toml
+│   │   └── sensors.toml
+│   ├── dev/
+│   │   ├── setup.toml
+│   │   ├── debug.toml
+│   │   └── optimize.toml
+│   ├── security/
+│   │   ├── audit.toml
+│   │   └── encrypt.toml
+│   └── network/
+│       ├── tunnel.toml
+│       └── api.toml
+├── contexts/
+│   ├── GEMINI.md
+│   ├── android-integration.md
+│   ├── security-policies.md
+│   └── performance-guidelines.md
+├── mcp-servers/
+│   ├── termux-advanced/
+│   │   ├── index.js
+│   │   ├── package.json
+│   │   └── test/
+│   ├── android-bridge/
+│   │   ├── index.js
+│   │   └── package.json
+│   └── security-monitor/
+│       ├── index.js
+│       └── package.json
+├── scripts/
+│   ├── install.sh
+│   ├── uninstall.sh
+│   ├── update.sh
+│   └── test.sh
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+└── docs/
+    ├── installation.md
+    ├── configuration.md
+    ├── commands.md
+    └── troubleshooting.md
+```
+
+### Production gemini-extension.json
+
+```json
+{
+  "name": "termux-ultimate",
+  "version": "3.0.0",
+  "description": "Comprehensive Termux integration for Gemini CLI",
+  "author": "Your Name",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/termux-ultimate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/termux-ultimate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/termux-ultimate/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "gemini-cli": ">=1.0.0"
+  },
+  "mcpServers": {
+    "termux-advanced": {
+      "command": "node",
+      "args": ["./mcp-servers/termux-advanced/index.js"],
+      "env": {
+        "NODE_ENV": "production",
+        "LOG_LEVEL": "${LOG_LEVEL:-info}"
+      },
+      "timeout": 30000,
+      "trust": false,
+      "includeTools": [
+        "battery_status",
+        "termux_notification",
+        "storage_info",
+        "termux_tts",
+        "clipboard_manager"
+      ]
+    },
+    "android-bridge": {
+      "command": "node",
+      "args": ["./mcp-servers/android-bridge/index.js"],
+      "timeout": 60000
+    },
+    "security-monitor": {
+      "command": "node", 
+      "args": ["./mcp-servers/security-monitor/index.js"],
+      "trust": true
+    }
+  },
+  "contextFileName": "contexts/GEMINI.md",
+  "additionalContexts": [
+    "contexts/android-integration.md",
+    "contexts/security-policies.md",
+    "contexts/performance-guidelines.md"
+  ],
+  "excludeTools": [
+    "run_shell_command(su)",
+    "run_shell_command(sudo)",
+    "run_shell_command(rm -rf /)",
+    "file_delete(/system)",
+    "file_write(/proc)",
+    "file_write(/sys)"
+  ],
+  "dependencies": {
+    "extensions": ["base-gemini-ext"],
+    "packages": [
+      "@modelcontextprotocol/sdk@^0.5.0",
+      "sqlite3@^5.1.6"
+    ],
+    "termuxPackages": [
+      "nodejs-lts",
+      "python",
+      "git",
+      "termux-api"
+    ]
+  },
+  "hooks": {
+    "onLoad": "./scripts/on-load.js",
+    "onUnload": "./scripts/on-unload.js",
+    "beforeCommand": "./scripts/before-command.js",
+    "afterCommand": "./scripts/after-command.js"
+  },
+  "configuration": {
+    "properties": {
+      "termux-ultimate.enableAdvancedFeatures": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable advanced experimental features"
+      },
+      "termux-ultimate.logLevel": {
+        "type": "string",
+        "enum": ["debug", "info", "warn", "error"],
+        "default": "info",
+        "description": "Logging level for extension"
+      }
+    }
+  }
+}
+```
+
+### Installation Script
+
+```bash
+#!/data/data/com.termux/files/usr/bin/bash
+# install.sh - Production installation script
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Configuration
+EXTENSION_NAME="termux-ultimate"
+EXTENSION_VERSION="3.0.0"
+INSTALL_DIR="$HOME/.gemini/extensions/$EXTENSION_NAME"
+LOG_FILE="$HOME/.gemini/logs/install-$(date +%Y%m%d-%H%M%S).log"
+
+# Logging functions
+log() {
+    echo -e "${GREEN}[INFO]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+error() {
+    echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE"
+    exit 1
+}
+
+warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+# Create log directory
+mkdir -p "$(dirname "$LOG_FILE")"
+
+# Header
+echo "=================================" | tee -a "$LOG_FILE"
+echo "Termux Ultimate Extension Installer" | tee -a "$LOG_FILE"
+echo "Version: $EXTENSION_VERSION" | tee -a "$LOG_FILE"
+echo "=================================" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+
+# Check prerequisites
+check_prerequisites() {
+    log "Checking prerequisites..."
+    
+    # Check Node.js
+    if ! command -v node &> /dev/null; then
+        error "Node.js is not installed. Run: pkg install nodejs-lts"
+    fi
+    
+    NODE_VERSION=$(node -v | cut -d'v' -f2)
+    REQUIRED_VERSION="18.0.0"
+    if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NODE_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
+        error "Node.js version $NODE_VERSION is too old. Required: v$REQUIRED_VERSION+"
+    fi
+    
+    # Check Gemini CLI
+    if ! command -v gemini &> /dev/null; then
+        error "Gemini CLI is not installed. Run: npm install -g @google/gemini-cli"
+    fi
+    
+    # Check Termux packages
+    REQUIRED_PACKAGES=("git" "python" "termux-api")
+    for pkg in "${REQUIRED_PACKAGES[@]}"; do
+        if ! pkg list-installed 2>/dev/null | grep -q "^$pkg/"; then
+            warn "Package '$pkg' is not installed. Installing..."
+            pkg install -y "$pkg" || error "Failed to install $pkg"
+        fi
+    done
+    
+    # Check Termux:API app
+    if ! termux-api-start 2>/dev/null; then
+        warn "Termux:API app might not be installed. Some features may not work."
+    fi
+    
+    log "Prerequisites check completed"
+}
+
+# Backup existing installation
+backup_existing() {
+    if [ -d "$INSTALL_DIR" ]; then
+        log "Backing up existing installation..."
+        BACKUP_DIR="$INSTALL_DIR.backup.$(date +%Y%m%d-%H%M%S)"
+        mv "$INSTALL_DIR" "$BACKUP_DIR"
+        log "Backup created at: $BACKUP_DIR"
+    fi
+}
+
+# Install extension
+install_extension() {
+    log "Installing extension..."
+    
+    # Create installation directory
+    mkdir -p "$INSTALL_DIR"
+    
+    # Copy files
+    cp -r ./* "$INSTALL_DIR/" 2>/dev/null || true
+    
+    # Install Node.# Advanced Gemini CLI Setup and Configuration
+
+After the initial installation, there are several important configuration steps and features to set up for a more powerful Gemini CLI experience. Here's a comprehensive guide to the advanced setup options.
+
+## Configuration Files and Settings
+
+### The settings.json File
+
+The main configuration file for Gemini CLI is `settings.json`, which controls how the tool behaves. Settings are applied with the following precedence order:
+
+- **Project Settings**: `.gemini/settings.json` (highest priority, overrides user and system settings)
+- **User Settings**: `~/.gemini/settings.json` (overrides system settings)
+- **System Settings**: `/etc/gemini-cli/settings.json` (lowest priority, applies to all users)
+
+### Key Configuration Options
+
+Create or edit your `~/.gemini/settings.json` file to include these important settings:
+
+```json
+{
+  "theme": "Default",
+  "selectedAuthType": "oauth-personal",
+  "autoAccept": false,
+  "sandbox": true,
+  "vimMode": false,
+  "checkpointing": true,
+  "includeDirectories": ["../lib", "../docs"],
+  "chatCompression": true,
+  "usageStatisticsEnabled": true
+}
+```
+
+**Important settings explained:**
+- `autoAccept`: Auto-approves safe, read-only tool calls
+- `sandbox`: Isolates tool execution (set to `true`, `"docker"`, or `"podman"`)
+- `vimMode`: Enables Vim-style editing for the input prompt
+- `checkpointing`: Enables the `/restore` command to undo file changes
+- `includeDirectories`: Defines a multi-directory workspace
+
+## Authentication Methods
+
+### Option 1: OAuth Login (Recommended)
+
+This is the simplest method for individual developers:
+
+1. Start Gemini CLI by typing `gemini`
+2. Choose OAuth and follow the browser authentication flow
+3. Sign in with your personal Google account
+
+**Benefits:**
+- **Free tier**: 60 requests/min and 1,000 requests/day
+- Access to Gemini 2.5 Pro with 1M token context window
+- No API key management required
+
+### Option 2: API Key Authentication
+
+For specific model control or paid tier access:
+
+1. Get your API key from [Google AI Studio](https://aistudio.google.com/apikey)
+2. Set the environment variable:
+   ```bash
+   export GEMINI_API_KEY="YOUR_API_KEY"
+   ```
+3. Launch Gemini CLI with `gemini`
+
+### Option 3: Vertex AI
+
+For enterprise teams and production workloads:
+
+```bash
+export GOOGLE_API_KEY="YOUR_API_KEY"
+export GOOGLE_GENAI_USE_VERTEXAI=true
+gemini
+```
+
+## Context Files (GEMINI.md)
+
+Context files allow you to provide project-specific instructions to tailor Gemini CLI's behavior. These files use a hierarchical loading system:
+
+1. **Global Context**: `~/.gemini/GEMINI.md` (applies to all projects)
+2. **Project Context**: Search from current directory up to project root
+3. **Sub-directory Context**: Scans subdirectories for component-specific instructions
+
+### Creating a GEMINI.md File
+
+Create a `GEMINI.md` file in your project root or `~/.gemini/` directory:
+
+```markdown
+# Project Instructions
+
+## General Guidelines
+- Use TypeScript for all new code
+- Follow ESLint configuration
+- Write comprehensive tests for new features
+
+## Coding Standards
+- Use 2 spaces for indentation
+- Prefer functional programming patterns
+- Always use strict equality (=== and !==)
+
+## Dependencies
+- Avoid adding new dependencies unless necessary
+- Document reasons for any new packages
+```
+
+Use `/memory show` to see the combined context being sent to the model.
+
+## MCP Server Integration
+
+Model Context Protocol (MCP) servers extend Gemini CLI with custom tools and integrations. Configure them in your `settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "httpUrl": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "YOUR_GITHUB_PAT"
+      },
+      "timeout": 5000
+    },
+    "context7": {
+      "httpUrl": "https://mcp.context7.com/mcp"
+    }
+  }
+}
+```
+
+### Popular MCP Servers
+
+- **GitHub MCP**: Integrates with GitHub repositories and issues
+- **Context7**: Provides up-to-date documentation for frameworks
+- **Firebase**: Manages Firebase projects
+- **Google Workspace**: Works with Docs, Sheets, Calendar, and Gmail
+
+Use `/mcp` to list configured servers and their available tools.
+
+## IDE Integration
+
+### VS Code Setup
+
+Connect Gemini CLI to VS Code for enhanced context awareness:
+
+1. Run `/ide install` to set up the extension
+2. Use `/ide enable` to connect to your editor
+3. Benefits include:
+   - Automatic workspace context (recent files, cursor position, selected text)
+   - Native diffing capabilities
+   - Direct code change approval in the editor
+
+
+
+## Custom Commands
+
+Create reusable shortcuts for frequently used prompts. Store them in:
+- `~/.gemini/commands/` (global commands)
+- `<project>/.gemini/commands/` (project-specific)
+
+### Example Custom Command
+
+Create `~/.gemini/commands/test/gen.toml`:
+
+```toml
+description = "Generate unit tests for selected code"
+prompt = """
+Generate comprehensive unit tests for the following code: {{args}}
+Use the project's existing testing framework and follow established patterns.
+"""
+```
+
+## Advanced Features
+
+### Checkpointing and Restore
+
+Enable checkpointing to save project snapshots before file modifications:
+
+```bash
+# Enable via flag
+gemini --checkpointing
+
+# Or in settings.json
+"checkpointing": true
+```
+
+Restore previous states with `/restore` command.
+
+### Extensions
+
+Create extensions by placing them in:
+- `<workspace>/.gemini/extensions/`
+- `~/.gemini/extensions/`
+
+Each extension directory needs a `gemini-extension.json` file configuring MCP servers, tools, and context files.
+
+### File Ignoring
+
+Create a `.geminiignore` file to exclude files and directories:
+
+```
+/backups/
+*.log
+secret-config.json
+node_modules/
+```
+
+## Useful Command-Line Flags
+
+Launch Gemini CLI with specific options:
+
+```bash
+# Use a specific model
+gemini -m gemini-2.5-flash
+
+# Non-interactive mode for scripts
+gemini -p "Explain this architecture"
+
+# Include multiple directories
+gemini --include-directories ../lib,../docs
+
+# Enable sandbox mode
+gemini --sandbox
+
+# Auto-approve all tool calls (use with caution)
+gemini --yolo
+
+# Enable debug output
+gemini -d
+```
+
+
+
+## Essential Slash Commands
+
+Key commands to use within Gemini CLI:
+
+- `/settings` - Open settings editor
+- `/memory refresh` - Reload GEMINI.md files
+- `/tools` - List available tools
+- `/compress` - Compress chat context to save tokens
+- `/chat save <tag>` - Save current conversation
+- `/chat resume <tag>` - Resume saved conversation
+- `/stats` - Show token usage
+- `/init` - Generate starter GEMINI.md for your project
+- `/theme` - Change visual theme
+
+## Tips for Optimal Setup
+
+1. **Start with basic configuration**: Begin with OAuth authentication and default settings
+2. **Customize gradually**: Add GEMINI.md files and MCP servers as needed
+3. **Use checkpointing**: Enable it for projects where you want rollback capability
+4. **Configure project-specific settings**: Use local `.gemini/settings.json` for project overrides
+5. **Set up relevant MCP servers**: Add GitHub, Context7, or other servers based on your workflow
+
+With these advanced configurations, Gemini CLI becomes a powerful, customized AI assistant tailored to your specific development needs and workflow preferences.
+
+
 # Complete Walkthrough: Integrating Custom Toolsets into Gemini CLI for Coding
 
 Gemini CLI is an open-source AI agent that provides lightweight access to Gemini directly in your terminal, offering a free tier with 60 requests/min and 1,000 requests/day with a personal Google account. The real power of Gemini CLI lies in its extensibility through the Model Context Protocol (MCP), which allows you to seamlessly integrate custom tools and services into your AI-powered development workflow.
