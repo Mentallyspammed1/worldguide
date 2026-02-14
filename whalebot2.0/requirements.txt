@@ -1,0 +1,7 @@
+argparse
+numpy
+pandas
+requests
+colorama
+python-dotenv
+scipy
