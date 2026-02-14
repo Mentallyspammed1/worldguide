@@ -24,6 +24,7 @@ Codified by Pyrmethus for the digital sanctum.
 """
 
 import argparse
+import asyncio
 import decimal
 import hashlib
 import hmac
@@ -36,6 +37,8 @@ import statistics
 import threading
 import time
 import warnings
+
+import aiohttp
 import websocket
 from dataclasses import dataclass
 from datetime import datetime
@@ -315,6 +318,12 @@ class NotificationSystem:
         except Exception as e:
             logger.error(f"{NEON_RED}Failed to send webhook notification: {e}{RESET}")
             return False
+
+    def send_combined_notification(self, subject: str, message: str, payload: dict, sms_message: str) -> None:
+        """Send combined notification (email + webhook + sms) in one call."""
+        self.send_email(subject, message)
+        self.send_webhook(payload)
+        self.send_sms(sms_message)
 
     def send_signal_notification(
         self, signal: TradingSignal, l2_metrics: dict = None, depth_profile: dict = None
@@ -690,11 +699,16 @@ class DatabaseManager:
 
     def __init__(self, db_path: str):
         self.db_path = db_path
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
+        self.conn.execute('PRAGMA journal_mode=WAL;')
         self._ensure_db_exists()
+
+    def _get_conn(self) -> sqlite3.Connection:
+        return self.conn
 
     def _ensure_db_exists(self):
         """Ensure the database and tables exist."""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_conn()
         cursor = conn.cursor()
 
         # Create signal_history table
@@ -942,6 +956,12 @@ class DatabaseManager:
             logger.error(f"{NEON_RED}Failed to backup database: {e}{RESET}")
             return False
 
+    def vacuum_database(self):
+        """Perform database vacuum periodically to optimize database file size."""
+        conn = sqlite3.connect(self.db_path)
+        conn.execute('VACUUM')
+        conn.close()
+
 
 # --- Performance Calculator ---
 class PerformanceCalculator:
@@ -1081,11 +1101,13 @@ class DataValidator:
             # Fill NaN values with previous values
             df.ffill(inplace=True)
             # If there are still NaN values (at the beginning), drop those rows
-            df.dropna(inplace=True)
+            df.dropna(how='any', inplace=True)
 
         # Check data age - Fixed timezone issue
         max_data_age_minutes = self.validation_config.get("max_data_age_minutes", 60)
         if "start_time" in df.columns:
+            if not pd.api.types.is_datetime64_any_dtype(df['start_time']):
+                df['start_time'] = pd.to_datetime(df['start_time'])
             latest_timestamp = df["start_time"].max()
 
             # Make both timestamps timezone-aware or both timezone-naive
@@ -1172,11 +1194,7 @@ class MarketRegimeDetector:
         tr3 = np.abs(low[1:] - close[:-1])
 
         tr = np.maximum(np.maximum(tr1, tr2), tr3)
-        atr = (
-            np.mean(tr[-self.atr_period :])
-            if len(tr) >= self.atr_period
-            else np.mean(tr)
-        )
+        atr = (np.mean(tr[-self.atr_period:]) if len(tr) >= self.atr_period and np.any(tr[-self.atr_period:] > 0) else np.mean(tr))
 
         return atr
 
@@ -1372,6 +1390,14 @@ class APIClient:
 
         self.rate_limiter = RateLimiter(logger)
         self.instrument_info_cache = {}
+        self._fee_cache = {}
+
+    async def make_request_async(self, method: str, endpoint: str, params: dict = None):
+        """Execute an asynchronous signed request."""
+        async with aiohttp.ClientSession() as session:
+            # Implement similar logic as synchronous with retries
+            # For now, this is a placeholder as per updates.md
+            pass
 
     def fetch_instrument_info(self, symbol: str) -> dict | None:
         """Cache and return exchange filters for precision management."""
@@ -1456,6 +1482,8 @@ class APIClient:
                 response = self.session.request(
                     method, url, headers=headers, data=body, timeout=10
                 )
+                if 'X-RateLimit-Remaining' in response.headers:
+                    self.logger.debug(f"API Rate Limit Remaining: {response.headers['X-RateLimit-Remaining']}")
                 if response.status_code == 429:
                     self.logger.warning(
                         f"{NEON_YELLOW}Rate limit hit, backing off...{RESET}"
@@ -1470,14 +1498,16 @@ class APIClient:
         return None
 
     def fetch_fee_rates(self, symbol: str) -> tuple[Decimal, Decimal]:
-        """Fetch maker and taker fee rates."""
-        res = self.make_request("GET", "/v5/contract/fee-rate", {"symbol": symbol})
-        if res and res.get("retCode") == 0:
-            data = res.get("result", {})
-            maker = Decimal(str(data.get("makerFeeRate", "0")))
-            taker = Decimal(str(data.get("takerFeeRate", "0")))
+        """Fetch maker and taker fee rates with caching."""
+        if hasattr(self, '_fee_cache') and symbol in self._fee_cache:
+            return self._fee_cache[symbol]
+        res = self.make_request('GET', '/v5/contract/fee-rate', {'symbol': symbol})
+        if res and res.get('retCode') == 0:
+            maker = Decimal(str(res['result'].get('makerFeeRate', '0')))
+            taker = Decimal(str(res['result'].get('takerFeeRate', '0')))
+            self._fee_cache[symbol] = (maker, taker)
             return maker, taker
-        return Decimal("0"), Decimal("0")
+        return Decimal('0'), Decimal('0')
 
     def fetch_balance(self, coin: str = "USDT") -> Decimal:
         """Fetch available balance with UNIFIED/CONTRACT auto-detection."""
@@ -1848,7 +1878,7 @@ class IndicatorCalculator:
             0
         )  # Fill NaN from division by zero with 0
 
-    def calculate_adx(self, window: int = 14) -> float:
+    def calculate_adx(self, window: int = 14) -> dict[str, float]:
         """Calculates the Average Directional Index (ADX)."""
         # True Range
         tr = pd.concat(
@@ -1896,10 +1926,14 @@ class IndicatorCalculator:
         )
 
         # Average Directional Index (ADX)
-        adx_value = self._safe_series_operation(None, "ema", window, df_adx["DX"]).iloc[
-            -1
-        ]
-        return adx_value if not pd.isna(adx_value) else 0.0
+        adx_series = self._safe_series_operation(None, "ema", window, df_adx["DX"])
+        adx_value = adx_series.iloc[-1] if not adx_series.empty else 0.0
+
+        return {
+            "adx": float(adx_value) if not pd.isna(adx_value) else 0.0,
+            "plus_di": float(df_adx["+DI"].iloc[-1]) if not df_adx["+DI"].empty else 0.0,
+            "minus_di": float(df_adx["-DI"].iloc[-1]) if not df_adx["-DI"].empty else 0.0
+        }
 
     def calculate_obv(self) -> pd.Series:
         """Calculates On-Balance Volume (OBV)."""
@@ -2358,29 +2392,32 @@ class SignalHistoryTracker:
 
     def sync_with_exchange(self, api_client: APIClient, symbol: str) -> None:
         """Synchronize internal state with exchange positions."""
-        res = api_client.make_request(
-            "GET", "/v5/position/list", {"category": "linear", "symbol": symbol}
-        )
-        if res and res.get("retCode") == 0:
-            for pos in res["result"].get("list", []):
-                size = Decimal(pos.get("size", "0"))
-                if size > 0:
-                    side = pos.get("side")
-                    entry = Decimal(pos.get("avgPrice", "0"))
-                    signal = TradingSignal(
-                        signal_type=SignalType.BUY
-                        if side == "Buy"
-                        else SignalType.SELL,
-                        confidence=1.0,
-                        conditions_met=["Sync"],
-                        stop_loss=Decimal(pos.get("stopLoss", "0")) or None,
-                        take_profit=Decimal(pos.get("takeProfit", "0")) or None,
-                        timestamp=time.time(),
-                        symbol=symbol,
-                        timeframe="sync",
-                        position_size=size,
-                    )
-                    self.add_signal(signal, entry)
+        try:
+            res = api_client.make_request(
+                "GET", "/v5/position/list", {"category": "linear", "symbol": symbol}
+            )
+            if res and res.get("retCode") == 0:
+                for pos in res["result"].get("list", []):
+                    size = Decimal(pos.get("size", "0"))
+                    if size > 0:
+                        side = pos.get("side")
+                        entry = Decimal(pos.get("avgPrice", "0"))
+                        signal = TradingSignal(
+                            signal_type=SignalType.BUY
+                            if side == "Buy"
+                            else SignalType.SELL,
+                            confidence=1.0,
+                            conditions_met=["Sync"],
+                            stop_loss=Decimal(pos.get("stopLoss", "0")) or None,
+                            take_profit=Decimal(pos.get("takeProfit", "0")) or None,
+                            timestamp=time.time(),
+                            symbol=symbol,
+                            timeframe="sync",
+                            position_size=size,
+                        )
+                        self.add_signal(signal, entry)
+        except Exception as e:
+            self.logger.error(f"Error syncing with exchange: {e}")
 
     def add_signal(self, signal: TradingSignal, entry_price: Decimal) -> int | None:
         """Add signal to history and tracking."""
@@ -2684,11 +2721,14 @@ class SignalHistoryTracker:
         """Vectorized EMA alignment scoring for the entire history."""
         ema_short = self.calculate_ema(self.config["ema_short_period"])
         ema_long = self.calculate_ema(self.config["ema_long_period"])
+        if ema_short.empty or ema_long.empty:
+            return pd.Series(dtype=float)
         alignment = pd.Series(0.0, index=self.df.index)
 
         # Simple crossover logic for backtest history
         alignment[(ema_short > ema_long) & (self.df["close"] > ema_short)] = 1.0
         alignment[(ema_short < ema_long) & (self.df["close"] < ema_short)] = -1.0
+        alignment = alignment.fillna(0.0)
         return alignment
 
     def calculate_all_indicators(self) -> dict[str, Any]:
@@ -2762,10 +2802,11 @@ class SignalHistoryTracker:
             results["wr"] = wr_series.iloc[-1] if not wr_series.empty else np.nan
 
         if self.config["indicators"].get("adx"):
-            # ADX itself is a single float, no need for iloc[-1]
-            results["adx"] = self.calculate_adx(
+            adx_data = self.calculate_adx(
                 window=self.config["indicator_periods"]["adx"]
             )
+            results["adx"] = adx_data["adx"]
+            results["adx_data"] = adx_data
 
         if self.config["indicators"].get("obv"):
             obv_series = self.calculate_obv()
@@ -3132,12 +3173,8 @@ class SupportResistanceAnalyzer:
     ) -> dict[str, Decimal]:
         """Calculates Fibonacci retracement levels based on a given high and low."""
         diff = high - low
-        if diff <= 0:  # Handle cases where high <= low
-            self.logger.warning(
-                f"{NEON_YELLOW}Cannot calculate Fibonacci retracement: High ({high}) <= Low ({low}).{RESET}"
-            )
-            self.fib_levels = {}
-            self.levels = {"Support": {}, "Resistance": {}}
+        if diff <= 0:
+            self.logger.warning(f"{NEON_YELLOW}High less or equal to Low, skipping Fibonacci retracement.{RESET}")
             return {}
 
         # Standard Fibonacci ratios
@@ -3922,6 +3959,24 @@ class TradingAnalyzer:
             )
             conditions_met.append("Bullish Order Book Wall")
 
+        # Fibonacci Retracement Support
+        for label, level in self.sr_analyzer.fib_levels.items():
+            if abs(current_price - level) / current_price < Decimal("0.005"):
+                if level < current_price:
+                    signal_score += Decimal(str(self.user_defined_weights.get('fib_retracement', 0)))
+                    conditions_met.append(f"Near Fibonacci Support: {label}")
+
+        # ADX Trend Confirmation
+        if self.indicator_values.get("adx", 0) > 25:
+            signal_score += Decimal("0.1")
+            conditions_met.append("ADX Strong Trend Confirmation")
+
+        # ADX +DI > -DI Bullish Signal
+        if "adx_data" in self.indicator_values:
+            if self.indicator_values["adx_data"]["plus_di"] > self.indicator_values["adx_data"]["minus_di"]:
+                signal_score += Decimal(str(self.user_defined_weights.get('adx', 0)))
+                conditions_met.append("ADX Bullish (+DI > -DI)")
+
         # New Indicator Bullish Logic
         if self.config["indicators"].get(
             "bollinger_bands"
@@ -4071,14 +4126,14 @@ class TradingAnalyzer:
             signal_type = SignalType.BUY
             # Calculate Stop Loss and Take Profit
             if self.atr_value > 0:
-                stop_loss = current_price - (
+                stop_loss = (current_price - (
                     Decimal(str(self.atr_value))
                     * Decimal(str(self.config["stop_loss_multiple"]))
-                )
-                take_profit = current_price + (
+                )).quantize(Decimal('0.00001'))
+                take_profit = (current_price + (
                     Decimal(str(self.atr_value))
                     * Decimal(str(self.config["take_profit_multiple"]))
-                )
+                )).quantize(Decimal('0.00001'))
 
         # --- Bearish Signal Logic (similar structure) ---
         bearish_score = Decimal("0.0")
@@ -4153,6 +4208,19 @@ class TradingAnalyzer:
                 str(self.config["order_book_resistance_confidence_boost"])
             )
             bearish_conditions.append("Bearish Order Book Wall")
+
+        # Fibonacci Retracement Resistance
+        for label, level in self.sr_analyzer.fib_levels.items():
+            if abs(current_price - level) / current_price < Decimal("0.005"):
+                if level > current_price:
+                    bearish_score += Decimal(str(self.user_defined_weights.get('fib_retracement', 0)))
+                    bearish_conditions.append(f"Near Fibonacci Resistance: {label}")
+
+        # ADX -DI > +DI Bearish Signal
+        if "adx_data" in self.indicator_values:
+            if self.indicator_values["adx_data"]["minus_di"] > self.indicator_values["adx_data"]["plus_di"]:
+                bearish_score += Decimal(str(self.user_defined_weights.get('adx', 0)))
+                bearish_conditions.append("ADX Bearish (-DI > +DI)")
 
         # New Indicator Bearish Logic
         if self.config["indicators"].get(
@@ -4302,14 +4370,14 @@ class TradingAnalyzer:
 
             # Calculate Stop Loss and Take Profit for sell signal
             if self.atr_value > 0:
-                stop_loss = current_price + (
+                stop_loss = (current_price + (
                     Decimal(str(self.atr_value))
                     * Decimal(str(self.config["stop_loss_multiple"]))
-                )
-                take_profit = current_price - (
+                )).quantize(Decimal('0.00001'))
+                take_profit = (current_price - (
                     Decimal(str(self.atr_value))
                     * Decimal(str(self.config["take_profit_multiple"]))
-                )
+                )).quantize(Decimal('0.00001'))
 
         # Calculate risk/reward ratio
         risk_reward_ratio = None
@@ -4360,6 +4428,7 @@ class SignalGenerator:
     def generate_signal(
         self,
         indicator_values: dict[str, Any],
+        previous_values: dict[str, Any],
         market_regime: MarketRegime,
         current_price: Decimal,
         atr_value: Decimal,
@@ -4506,10 +4575,10 @@ class SignalGenerator:
         if (
             self.config["indicators"].get("obv")
             and "obv" in indicator_values
-            and "prev_obv" in indicator_values
-        ):  # Assuming prev_obv is also passed
+            and "obv" in previous_values
+        ):
             current_obv = Decimal(str(indicator_values["obv"]))
-            prev_obv = Decimal(str(indicator_values["prev_obv"]))
+            prev_obv = Decimal(str(previous_values["obv"]))
             weight = Decimal(str(self._get_indicator_weight("obv", market_regime)))
             if current_obv > prev_obv:
                 bullish_score += weight
@@ -4522,10 +4591,10 @@ class SignalGenerator:
         if (
             self.config["indicators"].get("adi")
             and "adi" in indicator_values
-            and "prev_adi" in indicator_values
-        ):  # Assuming prev_adi is also passed
+            and "adi" in previous_values
+        ):
             current_adi = Decimal(str(indicator_values["adi"]))
-            prev_adi = Decimal(str(indicator_values["prev_adi"]))
+            prev_adi = Decimal(str(previous_values["adi"]))
             weight = Decimal(str(self._get_indicator_weight("adi", market_regime)))
             if current_adi > prev_adi:
                 bullish_score += weight
@@ -4933,9 +5002,9 @@ class SignalGenerator:
             and not pd.isna(indicator_values["nvi"])
         ):
             # NVI requires historical context for trend, simplify to current > previous
-            if "prev_nvi" in indicator_values:  # Assuming prev_nvi is also passed
+            if "nvi" in previous_values:
                 current_nvi = Decimal(str(indicator_values["nvi"]))
-                prev_nvi = Decimal(str(indicator_values["prev_nvi"]))
+                prev_nvi = Decimal(str(previous_values["nvi"]))
                 weight = Decimal(str(self._get_indicator_weight("nvi", market_regime)))
                 if current_nvi > prev_nvi:
                     bullish_score += weight
@@ -4951,9 +5020,9 @@ class SignalGenerator:
             and not pd.isna(indicator_values["pvi"])
         ):
             # PVI requires historical context for trend, simplify to current > previous
-            if "prev_pvi" in indicator_values:  # Assuming prev_pvi is also passed
+            if "pvi" in previous_values:
                 current_pvi = Decimal(str(indicator_values["pvi"]))
-                prev_pvi = Decimal(str(indicator_values["prev_pvi"]))
+                prev_pvi = Decimal(str(previous_values["pvi"]))
                 weight = Decimal(str(self._get_indicator_weight("pvi", market_regime)))
                 if current_pvi > prev_pvi:
                     bullish_score += weight
@@ -5139,12 +5208,12 @@ class SignalGenerator:
             final_signal_type = SignalType.BUY
             final_confidence = bullish_score
             if atr_value > 0:
-                final_stop_loss = current_price - (
+                final_stop_loss = (current_price - (
                     atr_value * Decimal(str(self.config["stop_loss_multiple"]))
-                )
-                final_take_profit = current_price + (
+                )).quantize(Decimal('0.00001'))
+                final_take_profit = (current_price + (
                     atr_value * Decimal(str(self.config["take_profit_multiple"]))
-                )
+                )).quantize(Decimal('0.00001'))
         elif (
             bearish_score > bullish_score
             and bearish_score >= self.signal_score_threshold
@@ -5152,12 +5221,12 @@ class SignalGenerator:
             final_signal_type = SignalType.SELL
             final_confidence = bearish_score
             if atr_value > 0:
-                final_stop_loss = current_price + (
+                final_stop_loss = (current_price + (
                     atr_value * Decimal(str(self.config["stop_loss_multiple"]))
-                )
-                final_take_profit = current_price - (
+                )).quantize(Decimal('0.00001'))
+                final_take_profit = (current_price - (
                     atr_value * Decimal(str(self.config["take_profit_multiple"]))
-                )
+                )).quantize(Decimal('0.00001'))
 
         # Calculate risk/reward ratio
         risk_reward_ratio = None
@@ -5410,6 +5479,220 @@ class BacktestingEngine:
         pass  # Placeholder implementation
 
 
+# --- UI and Output Helpers ---
+
+def show_loading_spinner():
+    import itertools, sys, threading, time
+    spinner_state = {'done': False}
+    def animate():
+        for c in itertools.cycle(['|', '/', '-', '\\']):
+            if spinner_state['done']:
+                break
+            sys.stdout.write(f'\rLoading {c}')
+            sys.stdout.flush()
+            time.sleep(0.1)
+        sys.stdout.write('\rDone!     \n')
+    t = threading.Thread(target=animate)
+    t.start()
+    return lambda: spinner_state.update({'done': True})
+
+def format_pnl_output(pnl: Decimal) -> str:
+    if pnl > 0:
+        color = NEON_GREEN
+    elif pnl < 0:
+        color = NEON_RED
+    else:
+        color = NEON_WHITE
+    return f'{color}${pnl:.2f}{RESET}'
+
+def confidence_bar(confidence: float, length: int = 20) -> str:
+    filled_length = int(length * confidence)
+    bar = NEON_GREEN + '█' * filled_length + NEON_WHITE + '-' * (length - filled_length) + RESET
+    return bar
+
+def display_signal_with_confidence(signal: TradingSignal):
+    bar = confidence_bar(signal.confidence)
+    return f'Signal: {signal.signal_type.value.upper()} {bar} Confidence: {signal.confidence:.2f}'
+
+def format_timestamp(timestamp: float, tz: ZoneInfo = TIMEZONE) -> str:
+    dt = datetime.fromtimestamp(timestamp, tz)
+    return dt.strftime('%Y-%m-%d %H:%M:%S %Z')
+
+def signal_to_json(signal: TradingSignal) -> str:
+    output = {
+        'type': signal.signal_type.value if signal.signal_type else None,
+        'confidence': signal.confidence,
+        'conditions_met': signal.conditions_met,
+        'stop_loss': str(signal.stop_loss) if signal.stop_loss else None,
+        'take_profit': str(signal.take_profit) if signal.take_profit else None,
+        'timestamp': format_timestamp(signal.timestamp),
+        'symbol': signal.symbol,
+        'timeframe': signal.timeframe,
+        'position_size': str(signal.position_size) if signal.position_size else None,
+        'risk_reward_ratio': signal.risk_reward_ratio
+    }
+    return json.dumps(output, indent=2)
+
+def display_backtest_progress(current: int, total: int) -> None:
+    percent = (current / total) * 100
+    bar_length = 30
+    filled_length = int(bar_length * current // total)
+    bar = NEON_GREEN + '█' * filled_length + NEON_WHITE + '-' * (bar_length - filled_length) + RESET
+    sys.stdout.write(f'\rBacktesting: |{bar}| {percent:.2f}% Complete')
+    sys.stdout.flush()
+    if current == total:
+        print()
+
+def summarized_indicator_output(indicators: dict[str, Any]) -> str:
+    lines = []
+    for name, val in indicators.items():
+        if val is None or (isinstance(val, float) and np.isnan(val)):
+            continue
+        color = NEON_WHITE
+        try:
+            val_float = float(val) if not isinstance(val, dict) else None
+            if val_float is not None:
+                if val_float > 0:
+                    color = NEON_GREEN
+                elif val_float < 0:
+                    color = NEON_RED
+                else:
+                    color = NEON_YELLOW
+            lines.append(f'{name.upper()}: {color}{val}{RESET}')
+        except Exception:
+            lines.append(f'{name.upper()}: {NEON_WHITE}{val}{RESET}')
+    return ' | '.join(lines)
+
+def display_support_resistance(supports: list[tuple[str, Decimal]], resistances: list[tuple[str, Decimal]]) -> str:
+    sup_str = ', '.join([f'{label}@${value:.4f}' for label, value in supports]) or 'None'
+    res_str = ', '.join([f'{label}@${value:.4f}' for label, value in resistances]) or 'None'
+    return f'Supports: {NEON_GREEN}{sup_str}{RESET} | Resistances: {NEON_RED}{res_str}{RESET}'
+
+def conditions_to_text(conditions: list[str]) -> str:
+    if not conditions:
+        return 'None'
+    bullet = '\u2022'
+    return '\n'.join([f'{bullet} {cond}' for cond in conditions])
+
+def indicators_to_compact_json(indicators: dict[str, Any]) -> dict:
+    output = {}
+    for key, val in indicators.items():
+        if isinstance(val, (float, int, str)):
+            output[key] = val
+        elif isinstance(val, dict):
+            output[key] = {k: v for k, v in val.items() if isinstance(v, (float, int, str))}
+        elif isinstance(val, pd.Series) and not val.empty:
+            output[key] = float(val.iloc[-1])
+    return output
+
+def display_trailing_stop_update(symbol: str, old_sl: Decimal, new_sl: Decimal) -> str:
+    if new_sl > old_sl:
+        color = NEON_GREEN
+        direction = 'Increased'
+    elif new_sl < old_sl:
+        color = NEON_RED
+        direction = 'Decreased'
+    else:
+        color = NEON_WHITE
+        direction = 'Unchanged'
+    return f'{color}Trailing Stop {direction} for {symbol}: {old_sl:.4f} -> {new_sl:.4f}{RESET}'
+
+def format_position_size(size: Decimal) -> str:
+    return f'{size.quantize(Decimal("0.0001"))}'
+
+def display_open_positions(signals: dict[int, SignalHistory], current_price: Decimal) -> str:
+    lines = []
+    for sid, signal in signals.items():
+        if signal.signal_type == SignalType.BUY:
+            unrealized_pnl = (current_price - signal.entry_price) * signal.quantity
+        else:
+            unrealized_pnl = (signal.entry_price - current_price) * signal.quantity
+        r_str = f'R:R={float(signal.risk_reward_ratio):.2f}' if signal.risk_reward_ratio else 'R:R=N/A'
+        lines.append(f'ID:{sid} {signal.signal_type.value.upper()} {signal.symbol} Qty:{signal.quantity:.4f} Entry:${signal.entry_price:.4f} PnL:${unrealized_pnl:.2f} {r_str}')
+    return '\n'.join(lines)
+
+def active_positions_to_json(signals: dict[int, SignalHistory]) -> str:
+    results = []
+    for sid, s in signals.items():
+        results.append({
+            'id': sid,
+            'symbol': s.symbol,
+            'signal_type': s.signal_type.value,
+            'entry_price': str(s.entry_price),
+            'quantity': str(s.quantity),
+            'stop_loss': str(s.stop_loss) if s.stop_loss else None,
+            'take_profit': str(s.take_profit) if s.take_profit else None,
+            'trailing_sl': str(s.trailing_sl) if s.trailing_sl else None,
+            'highest_price': str(s.highest_price) if s.highest_price else None,
+            'lowest_price': str(s.lowest_price) if s.lowest_price else None,
+            'profit_loss': str(s.profit_loss) if s.profit_loss else None,
+            'net_pnl': str(s.net_pnl) if s.net_pnl else None,
+            'exit_reason': s.exit_reason,
+            'market_regime': s.market_regime.value if s.market_regime else None
+        })
+    return json.dumps(results, indent=2)
+
+def nearest_levels_ui(current_price: Decimal, supports: list[tuple[str, Decimal]], resistances: list[tuple[str, Decimal]]) -> str:
+    def format_level(label, val):
+        diff = abs((val - current_price) / current_price) * 100
+        color = NEON_GREEN if val < current_price else NEON_RED
+        return f'{color}{label}@${val:.4f} ({diff:.2f}%) {RESET}'
+    sup_lines = [format_level(l, v) for l, v in sorted(supports, key=lambda x: abs((current_price - x[1])/current_price))]
+    res_lines = [format_level(l, v) for l, v in sorted(resistances, key=lambda x: abs((x[1] - current_price)/current_price))]
+    return 'Supports: ' + ', '.join(sup_lines) + '\nResistances: ' + ', '.join(res_lines)
+
+def terminal_indicator_dashboard(indicators: dict[str, float]) -> str:
+    parts = []
+    for name in ['rsi', 'mfi', 'cci', 'fve', 'stc', 'cmo']:
+        val = indicators.get(name, None)
+        if val is not None and not pd.isna(val):
+            parts.append(f'{name.upper()}: {val:.2f}')
+    return ' | '.join(parts)
+
+def order_book_imbalance_ui(imbalance: float) -> str:
+    if imbalance > 0.3:
+        color = NEON_GREEN
+        state = "Strong Buy"
+    elif imbalance < -0.3:
+        color = NEON_RED
+        state = "Strong Sell"
+    else:
+        color = NEON_YELLOW
+        state = "Neutral"
+    return f'Order Book Imbalance: {color}{imbalance:.2f} ({state}){RESET}'
+
+def notification_summary(signal: TradingSignal, indicators: dict[str, Any]) -> str:
+    parts = [f'Signal: {signal.signal_type.value.upper()} {signal.symbol}', f'Confidence: {signal.confidence:.2f}']
+    key_indicators = ['rsi', 'mfi', 'atr', 'momentum_ma_short', 'momentum_ma_long']
+    for k in key_indicators:
+        v = indicators.get(k, None)
+        if v is not None and not pd.isna(v):
+            parts.append(f'{k.upper()}: {v:.2f}')
+    return ' | '.join(parts)
+
+def performance_metrics_to_json(metrics_list: list[PerformanceMetrics]) -> str:
+    results = []
+    for m in metrics_list:
+        results.append({
+            'total_trades': m.total_trades,
+            'winning_trades': m.winning_trades,
+            'losing_trades': m.losing_trades,
+            'win_rate': m.win_rate,
+            'profit_factor': m.profit_factor,
+            'max_drawdown': m.max_drawdown,
+            'sharpe_ratio': m.sharpe_ratio,
+            'total_profit': str(m.total_profit),
+            'total_loss': str(m.total_loss),
+            'net_profit': str(m.net_profit),
+            'average_win': str(m.average_win),
+            'average_loss': str(m.average_loss)
+        })
+    return json.dumps(results, indent=2)
+
+def print_separator():
+    print(f'{NEON_CYAN}{"-" * 60}{RESET}')
+
+
 # --- Utility Snippets ---
 
 def connect_websocket(url, on_message, headers=None):
@@ -5463,8 +5746,15 @@ def rest_post_with_retry(api_client, endpoint, payload, retries=3, delay=5):
 
 def reconnect_websocket(ws, url, on_message):
     ws.close()
-    time.sleep(2)  # brief pause before reconnect
-    return connect_websocket(url, on_message)
+    time.sleep(1)
+    backoff = 1
+    while True:
+        try:
+            ws = connect_websocket(url, on_message)
+            return ws
+        except Exception:
+            time.sleep(backoff)
+            backoff = min(backoff * 2, 60)
 
 def parse_websocket_message(message):
     try:
