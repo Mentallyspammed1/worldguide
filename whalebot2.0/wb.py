@@ -36,6 +36,7 @@ import statistics
 import threading
 import time
 import warnings
+import websocket
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, getcontext
@@ -2073,12 +2074,6 @@ class IndicatorCalculator:
             prev_direction = curr_direction
         
         return pd.DataFrame({"supertrend": supertrend, "direction": direction})
-                    direction.iloc[i] = -1
-                else:
-                    supertrend.iloc[i] = final_lower_band.iloc[i]
-                    direction.iloc[i] = 1
-                    
-        return pd.DataFrame({"supertrend": supertrend, "direction": direction})
 
     def calculate_cmo(self, period: int = 14) -> pd.Series:
         """Calculates Chande Momentum Oscillator (CMO)."""
@@ -2526,6 +2521,9 @@ class SignalHistoryTracker:
         notification_system: NotificationSystem,
     ) -> None:
         """Updates trailing stops for all active signals and sends notifications on significant moves."""
+        if not self.config.get("trailing_stop_loss", {}).get("enabled", False):
+            return  # Skip trailing stop updates if disabled
+
         for _signal_id, signal in self.active_signals.items():
             old_sl = signal.trailing_sl or signal.stop_loss
 
@@ -2596,7 +2594,7 @@ class SignalHistoryTracker:
                 )
 
             # Check take profit (Requires Net Profit)
-            elif signal.take_profit and (
+            if signal.take_profit and (
                 (
                     signal.signal_type == SignalType.BUY
                     and current_price >= signal.take_profit
@@ -3904,6 +3902,20 @@ class TradingAnalyzer:
             signal_score += Decimal(str(self.user_defined_weights["divergence"]))
             conditions_met.append("Bullish MACD Divergence")
 
+        if self.config["indicators"].get("momentum") and "mom" in self.indicator_values:
+            mom_data = self.indicator_values["mom"]
+            if mom_data["trend"] == "Uptrend":
+                signal_score += Decimal(str(self.user_defined_weights["momentum"])) * Decimal(str(mom_data["strength"]))
+                conditions_met.append(f"Momentum Uptrend (Strength: {mom_data['strength']:.2f})")
+
+        if (self.config["indicators"].get("macd") and self.indicator_values.get("macd")):
+            macd_vals = self.indicator_values["macd"]
+            macd_line = Decimal(str(macd_vals.get("macd", 0)))
+            signal_line = Decimal(str(macd_vals.get("signal", 0)))
+            if (macd_line > signal_line and macd_line > 0):
+                signal_score += Decimal(str(self.user_defined_weights["macd"]))
+                conditions_met.append("MACD Bullish Crossover")
+
         if self.indicator_values["order_book_walls"].get("bullish"):
             signal_score += Decimal(
                 str(self.config["order_book_support_confidence_boost"])
@@ -4122,6 +4134,20 @@ class TradingAnalyzer:
             bearish_score += Decimal(str(self.user_defined_weights["divergence"]))
             bearish_conditions.append("Bearish MACD Divergence")
 
+        if self.config["indicators"].get("momentum") and "mom" in self.indicator_values:
+            mom_data = self.indicator_values["mom"]
+            if mom_data["trend"] == "Downtrend":
+                bearish_score += Decimal(str(self.user_defined_weights["momentum"])) * Decimal(str(mom_data["strength"]))
+                bearish_conditions.append(f"Momentum Downtrend (Strength: {mom_data['strength']:.2f})")
+
+        if (self.config["indicators"].get("macd") and self.indicator_values.get("macd")):
+            macd_vals = self.indicator_values["macd"]
+            macd_line = Decimal(str(macd_vals.get("macd", 0)))
+            signal_line = Decimal(str(macd_vals.get("signal", 0)))
+            if (macd_line < signal_line and macd_line < 0):
+                bearish_score += Decimal(str(self.user_defined_weights["macd"]))
+                bearish_conditions.append("MACD Bearish Crossover")
+
         if self.indicator_values["order_book_walls"].get("bearish"):
             bearish_score += Decimal(
                 str(self.config["order_book_resistance_confidence_boost"])
@@ -4167,96 +4193,6 @@ class TradingAnalyzer:
                 bearish_score += Decimal("0.2")
                 bearish_conditions.append("Strong L2 Sell Imbalance (Top 10)")
 
-        if self.indicator_values.get("depth_profile"):
-            if self.indicator_values["depth_profile"].get("imbalance_0.5%", 0) < -0.4:
-                bearish_score += Decimal("0.3")
-                bearish_conditions.append("Heavy Sell Liquidity (0.5% Range)")
-
-        if (
-            self.config["indicators"].get("rsi")
-            and self.indicator_values.get("rsi") is not None
-        ):
-            rsi_val = (
-                self.indicator_values["rsi"].iloc[-1]
-                if isinstance(self.indicator_values["rsi"], pd.Series)
-                else self.indicator_values["rsi"]
-            )
-            if rsi_val > 70:
-                bearish_score += Decimal(str(self.user_defined_weights["rsi"]))
-                bearish_conditions.append("RSI Overbought")
-
-        if (
-            self.config["indicators"].get("mfi")
-            and self.indicator_values.get("mfi") is not None
-        ):
-            mfi_val = (
-                self.indicator_values["mfi"].iloc[-1]
-                if isinstance(self.indicator_values["mfi"], pd.Series)
-                else self.indicator_values["mfi"]
-            )
-            if mfi_val > 80:
-                bearish_score += Decimal(str(self.user_defined_weights["mfi"]))
-                bearish_conditions.append("MFI Overbought")
-
-        if (
-            self.config["indicators"].get("ema_alignment")
-            and self.indicator_values.get("ema_alignment", 0.0) < 0
-        ):
-            bearish_score += Decimal(
-                str(self.user_defined_weights["ema_alignment"])
-            ) * Decimal(str(abs(self.indicator_values["ema_alignment"])))
-            bearish_conditions.append("Bearish EMA Alignment")
-
-        if (
-            self.config["indicators"].get("divergence")
-            and self.indicator_calc.detect_macd_divergence() == "bearish"
-        ):
-            bearish_score += Decimal(str(self.user_defined_weights["divergence"]))
-            bearish_conditions.append("Bearish MACD Divergence")
-
-        if self.indicator_values["order_book_walls"].get("bearish"):
-            bearish_score += Decimal(
-                str(self.config["order_book_resistance_confidence_boost"])
-            )
-            bearish_conditions.append("Bearish Order Book Wall")
-
-        # New Indicator Bearish Logic
-        if self.config["indicators"].get(
-            "bollinger_bands"
-        ) and self.indicator_values.get("bollinger_bands"):
-            if current_price > Decimal(
-                str(self.indicator_values["bollinger_bands"]["upper"])
-            ):
-                bearish_score += Decimal(
-                    str(self.user_defined_weights["bollinger_bands"])
-                )
-                bearish_conditions.append("Price Above Bollinger Upper Band")
-
-        if self.config["indicators"].get(
-            "awesome_oscillator"
-        ) and self.indicator_values.get("awesome_oscillator") is not None:
-            ao_series = self.indicator_values["awesome_oscillator"]
-            if isinstance(ao_series, pd.Series) and len(ao_series) >= 2:
-                if ao_series.iloc[-1] < 0 and ao_series.iloc[-2] >= 0:
-                    bearish_score += Decimal(
-                        str(self.user_defined_weights["awesome_oscillator"])
-                    )
-                    bearish_conditions.append("Awesome Oscillator Bearish Zero-Cross")
-
-        if self.config["indicators"].get("vortex") and self.indicator_values.get(
-            "vortex"
-        ):
-            if (
-                self.indicator_values["vortex"]["vi_minus"]
-                > self.indicator_values["vortex"]["vi_plus"]
-            ):
-                bearish_score += Decimal(str(self.user_defined_weights["vortex"]))
-                bearish_conditions.append("Vortex Bearish Crossover")
-
-        if self.indicator_values.get("l2_metrics"):
-            if self.indicator_values["l2_metrics"].get("imbalance_10", 0) < -0.3:
-                bearish_score += Decimal("0.2")
-                bearish_conditions.append("Strong L2 Sell Imbalance (Top 10)")
 
         if self.indicator_values.get("depth_profile"):
             if self.indicator_values["depth_profile"].get("imbalance_0.5%", 0) < -0.4:
@@ -4315,39 +4251,6 @@ class TradingAnalyzer:
                 bearish_score += Decimal("0.4")
                 bearish_conditions.append("Laguerre RSI Overbought")
 
-        # Stochastic Oscillator Bearish Signal
-        if (
-            self.config["indicators"].get("stochastic_oscillator")
-            and isinstance(self.indicator_values.get("stoch_osc_vals"), pd.DataFrame)
-            and not self.indicator_values["stoch_osc_vals"].empty
-        ):
-            stoch_k = Decimal(
-                str(self.indicator_values["stoch_osc_vals"]["k"].iloc[-1])
-            )
-            stoch_d = Decimal(
-                str(self.indicator_values["stoch_osc_vals"]["d"].iloc[-1])
-            )
-            if stoch_k > 80 and stoch_k < stoch_d:  # Overbought and K crossing below D
-                bearish_score += Decimal(
-                    str(self.user_defined_weights["stochastic_oscillator"])
-                )
-                bearish_conditions.append("Stoch Oscillator Overbought Crossover")
-
-        # EC5 Bearish Logic
-        if (
-            self.indicator_values.get("ehlers_fisher")
-            and self.indicator_values["ehlers_fisher"][-1] < 0
-            and self.indicator_values["ehlers_fisher"][-2] >= 0
-        ):
-            bearish_score += Decimal("0.5")
-            bearish_conditions.append("Ehlers Fisher Bearish Crossover")
-
-        if (
-            self.indicator_values.get("laguerre_rsi")
-            and self.indicator_values["laguerre_rsi"][-1] > 0.8
-        ):
-            bearish_score += Decimal("0.4")
-            bearish_conditions.append("Laguerre RSI Overbought")
 
         if (
             self.indicator_values.get("supertrend")
@@ -5506,6 +5409,165 @@ class BacktestingEngine:
         )
         pass  # Placeholder implementation
 
+
+# --- Utility Snippets ---
+
+def connect_websocket(url, on_message, headers=None):
+    import websocket
+    import threading
+
+    def on_open(ws):
+        print('WebSocket connection opened')
+
+    def on_close(ws, close_status_code, close_msg):
+        print('WebSocket connection closed')
+
+    ws = websocket.WebSocketApp(
+        url,
+        header=headers or [],
+        on_open=on_open,
+        on_message=on_message,
+        on_close=on_close
+    )
+
+    wst = threading.Thread(target=ws.run_forever)
+    wst.daemon = True
+    wst.start()
+    return ws
+
+def safe_rest_get(api_client, endpoint, params=None):
+    import time
+    attempts = 0
+    while attempts < MAX_API_RETRIES:
+        response = api_client.make_request('GET', endpoint, params)
+        if response is not None:
+            return response
+        attempts += 1
+        time.sleep(RETRY_DELAY_SECONDS * attempts)
+    return None
+
+def send_websocket_ping(ws):
+    try:
+        ws.send('ping')
+    except Exception as e:
+        logger.error(f'Failed to send ping: {e}')
+
+def rest_post_with_retry(api_client, endpoint, payload, retries=3, delay=5):
+    for attempt in range(1, retries + 1):
+        response = api_client.make_request('POST', endpoint, payload)
+        if response and response.get('retCode') == 0:
+            return response
+        logger.warning(f'POST request failed attempt {attempt}'.format(attempt))
+        time.sleep(delay * attempt)
+    return None
+
+def reconnect_websocket(ws, url, on_message):
+    ws.close()
+    time.sleep(2)  # brief pause before reconnect
+    return connect_websocket(url, on_message)
+
+def parse_websocket_message(message):
+    try:
+        data = json.loads(message)
+        return data
+    except json.JSONDecodeError:
+        logger.error('WebSocket message JSON decode error')
+        return None
+
+def get_current_price_rest(api_client, symbol):
+    res = safe_rest_get(api_client, '/v5/market/tickers', {'category': 'linear', 'symbol': symbol})
+    if res and res.get('retCode') == 0:
+        for ticker in res['result'].get('list', []):
+            if ticker['symbol'] == symbol:
+                return Decimal(ticker['lastPrice'])
+    return None
+
+def subscribe_to_orderbook_ws(ws, symbol):
+    sub_request = {
+        "op": "subscribe",
+        "args": [
+            {
+                "channel": "orderbook",
+                "symbol": symbol
+            }
+        ]
+    }
+    ws.send(json.dumps(sub_request))
+
+def fetch_orderbook_rest(api_client, symbol, limit=50):
+    response = safe_rest_get(api_client, '/v5/market/orderbook', {'symbol': symbol, 'limit': str(limit), 'category': 'linear'})
+    if response and response.get('retCode') == 0:
+        return response.get('result')
+    return None
+
+def websocket_message_handler(ws, message):
+    data = parse_websocket_message(message)
+    if not data:
+        return
+    if 'topic' in data:
+        if data['topic'].startswith('orderbook'):
+            orderbook_data = data.get('data')
+            # Process orderbook_data here
+            logger.info(f'Received orderbook update: {orderbook_data}')
+
+def rest_get_with_headers(api_client, endpoint, params=None, headers=None):
+    api_client.session.headers.update(headers or {})
+    return safe_rest_get(api_client, endpoint, params)
+
+def format_order_quantity(api_client, symbol, qty):
+    # Match the APIClient's formatting
+    return api_client.format_quantity(symbol, qty)
+
+def format_order_price(api_client, symbol, price):
+    return api_client.format_price(symbol, price)
+
+def send_order_ws(ws, symbol, side, order_type, qty, price=None, stop_loss=None, take_profit=None):
+    order = {
+        "category": "linear",
+        "symbol": symbol,
+        "side": side.capitalize(),
+        "orderType": order_type,
+        "qty": str(qty),
+        "timeInForce": "GTC"
+    }
+    if price:
+        order["price"] = str(price)
+    if stop_loss:
+        order["stopLoss"] = str(stop_loss)
+    if take_profit:
+        order["takeProfit"] = str(take_profit)
+    ws.send(json.dumps({"op": "order", "args": [order]}))
+
+def websocket_heartbeat(ws, interval=30):
+    import threading
+    def run():
+        while True:
+            send_websocket_ping(ws)
+            time.sleep(interval)
+    threading.Thread(target=run, daemon=True).start()
+
+def fetch_multiple_klines(api_client, symbol, intervals):
+    data = {}
+    for interval in intervals:
+        df = api_client.fetch_klines(symbol, interval, limit=200)
+        data[interval] = df
+    return data
+
+def fetch_fee_rates_rest(api_client, symbol):
+    return api_client.fetch_fee_rates(symbol)
+
+def websocket_close(ws):
+    ws.close()
+
+def send_rest_delete(api_client, endpoint, params=None):
+    # Generalized DELETE call
+    return api_client.make_request('DELETE', endpoint, params)
+
+def websocket_is_alive(ws):
+    try:
+        return ws.keep_running and ws.sock and ws.sock.connected
+    except Exception:
+        return False
 
 def main():
     """
