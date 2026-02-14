@@ -5525,7 +5525,9 @@ def format_pnl_output(pnl: Decimal) -> str:
     return f'{color}${pnl:.2f}{RESET}'
 
 def confidence_bar(confidence: float, length: int = 20) -> str:
-    filled_length = int(length * confidence)
+    # Clamp confidence to the [0.0, 1.0] range to avoid overflowing or negative bars
+    clamped_confidence = max(0.0, min(1.0, confidence))
+    filled_length = int(length * clamped_confidence)
     bar = NEON_GREEN + '█' * filled_length + NEON_WHITE + '-' * (length - filled_length) + RESET
     return bar
 
