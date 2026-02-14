@@ -24,7 +24,7 @@ Codified by Pyrmethus for the digital sanctum.
 """
 
 import argparse
-import asyncio
+import sys
 import decimal
 import hashlib
 import hmac
@@ -763,8 +763,8 @@ class DatabaseManager:
         cursor.execute(
             """
         INSERT INTO signal_history (
-            timestamp, symbol, timeframe, signal_type, confidence, 
-            entry_price, exit_price, stop_loss, take_profit, 
+            timestamp, symbol, timeframe, signal_type, confidence,
+            entry_price, exit_price, stop_loss, take_profit,
             profit_loss, exit_reason, market_regime
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -803,7 +803,7 @@ class DatabaseManager:
 
         cursor.execute(
             """
-        UPDATE signal_history 
+        UPDATE signal_history
         SET exit_price = ?, profit_loss = ?, exit_reason = ?
         WHERE id = ?
         """,
@@ -876,9 +876,9 @@ class DatabaseManager:
         cursor.execute(
             """
         INSERT INTO performance_metrics (
-            timestamp, symbol, timeframe, total_trades, winning_trades, 
-            losing_trades, win_rate, profit_factor, max_drawdown, 
-            sharpe_ratio, total_profit, total_loss, net_profit, 
+            timestamp, symbol, timeframe, total_trades, winning_trades,
+            losing_trades, win_rate, profit_factor, max_drawdown,
+            sharpe_ratio, total_profit, total_loss, net_profit,
             average_win, average_loss
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -916,8 +916,8 @@ class DatabaseManager:
 
         cursor.execute(
             """
-        SELECT * FROM performance_metrics 
-        WHERE symbol = ? AND timeframe = ? 
+        SELECT * FROM performance_metrics
+        WHERE symbol = ? AND timeframe = ?
         ORDER BY timestamp DESC LIMIT 1
         """,
             (symbol, timeframe),
@@ -1394,7 +1394,7 @@ class APIClient:
 
     async def make_request_async(self, method: str, endpoint: str, params: dict = None):
         """Execute an asynchronous signed request."""
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession():
             # Implement similar logic as synchronous with retries
             # For now, this is a placeholder as per updates.md
             pass
@@ -1878,8 +1878,8 @@ class IndicatorCalculator:
             0
         )  # Fill NaN from division by zero with 0
 
-    def calculate_adx(self, window: int = 14) -> dict[str, float]:
-        """Calculates the Average Directional Index (ADX)."""
+    def calculate_adx_series(self, window: int = 14) -> pd.DataFrame:
+        """Calculates the Average Directional Index (ADX) series."""
         # True Range
         tr = pd.concat(
             [
@@ -1926,8 +1926,13 @@ class IndicatorCalculator:
         )
 
         # Average Directional Index (ADX)
-        adx_series = self._safe_series_operation(None, "ema", window, df_adx["DX"])
-        adx_value = adx_series.iloc[-1] if not adx_series.empty else 0.0
+        df_adx["ADX"] = self._safe_series_operation(None, "ema", window, df_adx["DX"])
+        return df_adx
+
+    def calculate_adx(self, window: int = 14) -> dict[str, float]:
+        """Calculates the Average Directional Index (ADX)."""
+        df_adx = self.calculate_adx_series(window)
+        adx_value = df_adx["ADX"].iloc[-1] if not df_adx["ADX"].empty else 0.0
 
         return {
             "adx": float(adx_value) if not pd.isna(adx_value) else 0.0,
@@ -1992,15 +1997,15 @@ class IndicatorCalculator:
         high = self.df["high"]
         low = self.df["low"]
         close = self.df["close"]
-        
+
         tr = pd.concat([high - low, abs(high - close.shift()), abs(low - close.shift())], axis=1).max(axis=1)
         vmp = abs(high - low.shift())
         vmm = abs(low - high.shift())
-        
+
         str_sum = tr.rolling(window).sum()
         svmp = vmp.rolling(window).sum()
         svmm = vmm.rolling(window).sum()
-        
+
         vi_plus = svmp / str_sum
         vi_minus = svmm / str_sum
         return pd.DataFrame({"vi_plus": vi_plus, "vi_minus": vi_minus})
@@ -2030,11 +2035,11 @@ class IndicatorCalculator:
     def calculate_supertrend(self, period: int = 10, multiplier: float = 3.0) -> pd.DataFrame:
         """
         Calculate Supertrend indicator.
-        
+
         Args:
             period (int): ATR period, default 10
             multiplier (float): ATR multiplier, default 3.0
-        
+
         Returns:
             pd.Series: Supertrend values
             pd.Series: Supertrend direction (1=bullish, -1=bearish)
@@ -2042,71 +2047,71 @@ class IndicatorCalculator:
         high = self.df['high']
         low = self.df['low']
         close = self.df['close']
-        
+
         # Calculate ATR
         tr1 = high - low
         tr2 = abs(high - close.shift())
         tr3 = abs(low - close.shift())
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr = tr.rolling(window=period).mean()
-        
+
         # Calculate basic bands
         hl2 = (high + low) / 2
         upper_band = hl2 + (multiplier * atr)
         lower_band = hl2 - (multiplier * atr)
-        
+
         # Initialize supertrend
         supertrend = pd.Series(index=self.df.index, dtype=float)
         direction = pd.Series(0, index=self.df.index)
-        
+
         prev_upper = upper_band.iloc[period-1] if period > 0 else upper_band.iloc[0]
         prev_lower = lower_band.iloc[period-1] if period > 0 else lower_band.iloc[0]
         prev_supertrend = hl2.iloc[period-1] if period > 0 else hl2.iloc[0]
         prev_direction = 1
-        
+
         # Fill initial NaN values from ATR calculation
         for i in range(period):
             supertrend.iloc[i] = hl2.iloc[i]
             direction.iloc[i] = 1
-            
+
         for i in range(period, len(self.df)):
             curr_close = close.iloc[i]
+            prev_close = close.iloc[i-1]
             curr_upper = upper_band.iloc[i]
             curr_lower = lower_band.iloc[i]
-            
-            # Adjust bands
-            if curr_close > prev_upper:
-                curr_upper = max(curr_upper, prev_upper) # Ensure band doesn't go below prev_upper
-            
-            if curr_close < prev_lower:
-                curr_lower = min(curr_lower, prev_lower) # Ensure band doesn't go above prev_lower
-            
-            # Determine direction
-            if prev_supertrend == prev_upper and curr_close <= curr_upper:
-                curr_direction = 1 # Was bullish, now flat or slightly down, keep bullish
-            elif prev_supertrend == prev_lower and curr_close >= curr_lower:
-                curr_direction = -1 # Was bearish, now flat or slightly up, keep bearish
-            elif curr_close > curr_upper:
-                curr_direction = 1 # Price breaks above upper band, switch to bullish
-            elif curr_close < curr_lower:
-                curr_direction = -1 # Price breaks below lower band, switch to bearish
+
+            # Adjust Final Upper Band
+            if curr_upper < prev_upper or prev_close > prev_upper:
+                curr_upper = curr_upper
             else:
-                curr_direction = prev_direction # Maintain previous direction
-                
+                curr_upper = prev_upper
+
+            # Adjust Final Lower Band
+            if curr_lower > prev_lower or prev_close < prev_lower:
+                curr_lower = curr_lower
+            else:
+                curr_lower = prev_lower
+
+            # Determine direction
+            if prev_direction == 1:
+                curr_direction = 1 if curr_close >= curr_lower else -1
+            else:
+                curr_direction = 1 if curr_close > curr_upper else -1
+
             # Calculate supertrend
             if curr_direction == 1:
                 curr_supertrend = curr_lower
             else:
                 curr_supertrend = curr_upper
-            
+
             supertrend.iloc[i] = curr_supertrend
             direction.iloc[i] = curr_direction
-            
+
             prev_upper = curr_upper
             prev_lower = curr_lower
             prev_supertrend = curr_supertrend
             prev_direction = curr_direction
-        
+
         return pd.DataFrame({"supertrend": supertrend, "direction": direction})
 
     def calculate_cmo(self, period: int = 14) -> pd.Series:
@@ -2120,12 +2125,12 @@ class IndicatorCalculator:
     def calculate_stc(self, period: int = 10, fast: int = 23, slow: int = 50) -> pd.Series:
         """Calculates Schaff Trend Cycle (STC)."""
         macd = self.calculate_ema(fast) - self.calculate_ema(slow)
-        
+
         def calculate_stoch(series, window):
             low = series.rolling(window).min()
             high = series.rolling(window).max()
             return 100 * (series - low) / (high - low).replace(0, np.nan)
-            
+
         stoch_k = calculate_stoch(macd, period).fillna(0)
         stoch_d = stoch_k.rolling(3).mean().fillna(0)
         stc = stoch_d.rolling(3).mean().fillna(0)
@@ -2149,14 +2154,14 @@ class IndicatorCalculator:
         hp = high.iloc[0]
         lp = low.iloc[0]
         psar.iloc[0] = low.iloc[0]
-        
+
         for i in range(1, len(self.df)):
             prev_psar = psar.iloc[i-1]
             if bull:
                 psar.iloc[i] = prev_psar + af * (hp - prev_psar)
             else:
                 psar.iloc[i] = prev_psar + af * (lp - prev_psar)
-                
+
             reverse = False
             if bull:
                 if low.iloc[i] < psar.iloc[i]:
@@ -2172,7 +2177,7 @@ class IndicatorCalculator:
                     psar.iloc[i] = lp
                     hp = high.iloc[i]
                     af = step
-                    
+
             if not reverse:
                 if bull:
                     if high.iloc[i] > hp:
@@ -2337,10 +2342,10 @@ class IndicatorCalculator:
         atr = self.calculate_atr(period)
         highest_high = self.df["high"].rolling(period).max()
         lowest_low = self.df["low"].rolling(period).min()
-        
+
         long_exit = highest_high - (atr * multiplier)
         short_exit = lowest_low + (atr * multiplier)
-        
+
         return {"long": float(long_exit.iloc[-1]), "short": float(short_exit.iloc[-1])}
 
     def calculate_all_indicators(self) -> dict[str, Any]:
@@ -2368,7 +2373,7 @@ class IndicatorCalculator:
             if not stoch_rsi_df.empty:
                 res["stoch_rsi"] = stoch_rsi_df.iloc[-1].to_dict()
                 res["stoch_rsi_vals"] = stoch_rsi_df
-        
+
         res["mom"] = self.determine_trend_momentum()
         return res
 
@@ -2692,9 +2697,12 @@ class SignalHistoryTracker:
         results["wr"] = self.calculate_williams_r(
             window=self.config["indicator_periods"]["williams_r"]
         )
-        results["adx"] = self.calculate_rsi(
+        adx_df = self.calculate_adx_series(
             window=self.config["indicator_periods"]["adx"]
-        )  # Using RSI as proxy for DX series
+        )
+        results["adx"] = adx_df["ADX"]
+        results["adx_plus_di"] = adx_df["+DI"]
+        results["adx_minus_di"] = adx_df["-DI"]
         results["obv"] = self.calculate_obv()
         results["adi"] = self.calculate_adi()
         results["fve"] = self.calculate_fve()
@@ -4633,19 +4641,32 @@ class SignalGenerator:
                 bearish_score += weight
                 conditions_met.append("Williams %R Overbought")
 
-        # ADX (Average Directional Index) - Needs +DI and -DI for a directional signal.
-        # Here we'll just use the ADX value to confirm trend strength if other indicators give direction.
-        # No direct score change here, but can be used as a multiplier later.
+        # ADX (Average Directional Index)
         if (
             self.config["indicators"].get("adx")
             and "adx" in indicator_values
             and not pd.isna(indicator_values["adx"])
         ):
             adx_val = Decimal(str(indicator_values["adx"]))
-            # If ADX is high, it means a strong trend. This adds confidence to other directional signals.
-            # Adding a placeholder for now, assuming external logic for DI.
             if adx_val > 25:
                 conditions_met.append(f"ADX Confirms Strong Trend ({adx_val:.2f})")
+
+        # ADX +DI / -DI Directional Signal
+        if (
+            self.config["indicators"].get("adx")
+            and "adx_data" in indicator_values
+        ):
+            adx_data = indicator_values["adx_data"]
+            plus_di = Decimal(str(adx_data.get("plus_di", 0)))
+            minus_di = Decimal(str(adx_data.get("minus_di", 0)))
+            weight = Decimal(str(self._get_indicator_weight("adx", market_regime)))
+
+            if plus_di > minus_di:
+                bullish_score += weight
+                conditions_met.append("ADX Bullish (+DI > -DI)")
+            elif minus_di > plus_di:
+                bearish_score += weight
+                conditions_met.append("ADX Bearish (-DI > +DI)")
 
         # PSAR (Parabolic SAR)
         if (
@@ -5482,7 +5503,7 @@ class BacktestingEngine:
 # --- UI and Output Helpers ---
 
 def show_loading_spinner():
-    import itertools, sys, threading, time
+    import itertools
     spinner_state = {'done': False}
     def animate():
         for c in itertools.cycle(['|', '/', '-', '\\']):
@@ -5637,8 +5658,8 @@ def nearest_levels_ui(current_price: Decimal, supports: list[tuple[str, Decimal]
         diff = abs((val - current_price) / current_price) * 100
         color = NEON_GREEN if val < current_price else NEON_RED
         return f'{color}{label}@${val:.4f} ({diff:.2f}%) {RESET}'
-    sup_lines = [format_level(l, v) for l, v in sorted(supports, key=lambda x: abs((current_price - x[1])/current_price))]
-    res_lines = [format_level(l, v) for l, v in sorted(resistances, key=lambda x: abs((x[1] - current_price)/current_price))]
+    sup_lines = [format_level(label, v) for label, v in sorted(supports, key=lambda x: abs((current_price - x[1])/current_price))]
+    res_lines = [format_level(label, v) for label, v in sorted(resistances, key=lambda x: abs((x[1] - current_price)/current_price))]
     return 'Supports: ' + ', '.join(sup_lines) + '\nResistances: ' + ', '.join(res_lines)
 
 def terminal_indicator_dashboard(indicators: dict[str, float]) -> str:
@@ -5696,9 +5717,6 @@ def print_separator():
 # --- Utility Snippets ---
 
 def connect_websocket(url, on_message, headers=None):
-    import websocket
-    import threading
-
     def on_open(ws):
         print('WebSocket connection opened')
 
