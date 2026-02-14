@@ -2066,7 +2066,6 @@ class IndicatorCalculator:
 
         prev_upper = upper_band.iloc[period-1] if period > 0 else upper_band.iloc[0]
         prev_lower = lower_band.iloc[period-1] if period > 0 else lower_band.iloc[0]
-        prev_supertrend = hl2.iloc[period-1] if period > 0 else hl2.iloc[0]
         prev_direction = 1
 
         # Fill initial NaN values from ATR calculation
@@ -2109,7 +2108,6 @@ class IndicatorCalculator:
 
             prev_upper = curr_upper
             prev_lower = curr_lower
-            prev_supertrend = curr_supertrend
             prev_direction = curr_direction
 
         return pd.DataFrame({"supertrend": supertrend, "direction": direction})
