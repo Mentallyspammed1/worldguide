@@ -1,209 +1,279 @@
-  {
-    "fix_or_upgrade": "Add missing NEON_CYAN constant definition",
-    "code": "NEON_CYAN = Fore.CYAN"
-  },
-  {
-    "fix_or_upgrade": "Improve database backup to handle backup failures gracefully",
-    "code": "def backup_database(self, backup_path: str) -> bool:\n    try:\n        import shutil\n        shutil.copy2(self.db_path, backup_path)\n        logger.info(f\"{NEON_GREEN}Database backed up to {backup_path}{RESET}\")\n        return True\n    except Exception as e:\n        logger.error(f\"{NEON_RED}Failed to backup database: {e}{RESET}\")\n        return False"
-  },
-  {
-    "fix_or_upgrade": "Handle timezone-aware timestamps consistently in DataValidator",
-    "code": "if 'start_time' in df.columns:\n    latest_timestamp = df['start_time'].max()\n    from zoneinfo import ZoneInfo\n    now = datetime.now(ZoneInfo('UTC'))\n    if latest_timestamp.tzinfo is None:\n        latest_timestamp = latest_timestamp.replace(tzinfo=ZoneInfo('UTC'))\n    data_age = (now - latest_timestamp).total_seconds() / 60\n    if data_age > max_data_age_minutes:\n        self.logger.warning(f\"{NEON_YELLOW}Data for {symbol} {interval} is stale: {data_age:.1f} minutes old{RESET}\")"
-  },
-  {
-    "fix_or_upgrade": "Optimize Cache usage in APIClient for instrument info",
-    "code": "def fetch_instrument_info(self, symbol: str) -> dict | None:\n    if symbol in self.instrument_info_cache:\n        return self.instrument_info_cache[symbol]\n    res = self.make_request(\n        \"GET\",\n        \"/v5/market/instruments-info\",\n        {\"category\": \"linear\", \"symbol\": symbol},\n    )\n    if res and res.get(\"retCode\") == 0:\n        for item in res[\"result\"].get(\"list\", []):\n            if item[\"symbol\"] == symbol:\n                self.instrument_info_cache[symbol] = item\n                return item\n    return None"
-  },
-  {
-    "fix_or_upgrade": "Add rate limiting compliance to APIClient make_request method",
-    "code": "for retry in range(MAX_API_RETRIES):\n    try:\n        self.rate_limiter.wait_if_needed()\n        response = self.session.request(method, url, headers=headers, data=body, timeout=10)\n        if response.status_code == 429:\n            self.logger.warning(f\"{NEON_YELLOW}Rate limit hit, backing off...{RESET}\")\n            time.sleep(5)\n            continue\n        response.raise_for_status()\n        return response.json()\n    except Exception as e:\n        self.logger.error(f\"{NEON_RED}Request Error ({retry + 1}): {e}{RESET}\")\n        time.sleep(RETRY_DELAY_SECONDS * (retry + 1))"
-  },
-  {
-    "fix_or_upgrade": "Add fail-safe when calculating position size to avoid zero division and invalid outputs",
-    "code": "if price_risk == 0:\n    self.logger.warning(f\"{NEON_YELLOW}Stop loss matches entry price. Risk cannot be calculated.{RESET}\")\n    return Decimal('0')"
-  },
-  {
-    "fix_or_upgrade": "Add trailing stop loss enable flag and logic to SignalHistoryTracker update_trailing_stops",
-    "code": "if not self.config.get('trailing_stop_loss', {}).get('enabled', False):\n    return  # Skip trailing stop updates if disabled"
-  },
-  {
-    "fix_or_upgrade": "Add multi-timeframe signal consensus weighting in MultiTimeframeAnalyzer",
-    "code": "for timeframe, signal in timeframe_signals.items():\n    weight = self.weighting.get(timeframe, 1.0 / len(timeframe_signals))\n    if signal.signal_type == SignalType.BUY:\n        buy_score += signal.confidence * weight\n        buy_conditions.extend([f\"{timeframe}: {cond}\" for cond in signal.conditions_met])\n    elif signal.signal_type == SignalType.SELL:\n        sell_score += signal.confidence * weight\n        sell_conditions.extend([f\"{timeframe}: {cond}\" for cond in signal.conditions_met])"
-  },
-  {
-    "fix_or_upgrade": "Add circuit breaker cooldown based on time elapsed",
-    "code": "if self.circuit_breaker_active:\n    if self.circuit_breaker_end_time and time.time() > self.circuit_breaker_end_time:\n        self.circuit_breaker_active = False\n        self.consecutive_losses = 0\n        self.logger.info(f\"{NEON_GREEN}Circuit breaker cooldown complete. Resuming operations.{RESET}\")\n        return False\n    return True"
-  },
-  {
-    "fix_or_upgrade": "Add enhanced logging and indicator interpretation support in TradingAnalyzer",
-    "code": "def get_color_for_value(self, name: str, value: float) -> str:\n    try:\n        name = name.lower()\n        if name == \"rsi\":\n            return NEON_GREEN if value < 30 else NEON_RED if value > 70 else NEON_YELLOW\n        # Similar detailed mappings for other indicators\n    except Exception:\n        return NEON_WHITE"
-  },
-  {
-    "fix_or_upgrade": "Add NotificationSystem method to send combined email, webhook, and SMS with signal details",
-    "code": "def send_signal_notification(self, signal: TradingSignal, l2_metrics: dict = None, depth_profile: dict = None) -> None:\n    subject = f\"Trading Signal: {signal.signal_type.value.upper()} for {signal.symbol}\"\n    message = f\"Signal: {signal.signal_type.value.upper()}\\nSymbol: {signal.symbol}\\nConfidence: {signal.confidence:.2f}\\nConditions: {', '.join(signal.conditions_met)}\"\n    self.send_email(subject, message)\n    self.send_webhook({\"signal_type\": signal.signal_type.value, \"symbol\": signal.symbol})\n    self.send_sms(f\"{signal.signal_type.value.upper()} {signal.symbol}@{signal.confidence:.2f}\")"
-  },
-  {
-    "fix_or_upgrade": "Implement weighted position size calculation with consideration for stop loss, max position size, leverage, min order value, and qty step",
-    "code": "risk_amount = account_balance * risk_per_trade\nprice_risk = abs(price - stop_loss)\nif price_risk == 0:\n    return Decimal('0')\npos_size_risk = risk_amount / price_risk\nmax_pos_value = account_balance * max_pos_pct\npos_size_cap = max_pos_value / price\nmax_leverage_qty = (account_balance * leverage * Decimal('0.95')) / price\nfinal_size = min(pos_size_risk, pos_size_cap, max_leverage_qty)\n# Align with qtyStep and enforce min order value..."
-  },
-  {
-    "fix_or_upgrade": "Add default data validation checks for DataFrame columns and minimum rows",
-    "code": "if df.empty or len(df) < min_data_points or missing_columns:\n    logger.error(f\"{NEON_RED}Insufficient or invalid data for {symbol} {interval}{RESET}\")\n    return False"
-  },
-  {
-    "fix_or_upgrade": "Add enhanced exit condition check using trailing stop loss and take profit with fees",
-    "code": "for signal_id, signal in self.active_signals.items():\n    if current_sl and ((signal.signal_type == SignalType.BUY and current_price <= current_sl) or (signal.signal_type == SignalType.SELL and current_price >= current_sl)):\n        exit_reason = \"Trailing Stop Loss\" if signal.trailing_sl else \"Stop Loss\"\n    if signal.take_profit and ((signal.signal_type == SignalType.BUY and current_price >= signal.take_profit) or (signal.signal_type == SignalType.SELL and current_price <= signal.take_profit)):\n        if (signal.signal_type == SignalType.BUY and current_price > break_even) or (signal.signal_type == SignalType.SELL and current_price < break_even):\n            exit_reason = \"Take Profit\""
-  },
-  {
-    "fix_or_upgrade": "Add folding and handling of paper mode in APIClient.place_order",
-    "code": "if self.paper_mode:\n    self.logger.info(f\"{NEON_YELLOW}PAPER ORDER: {side} {qty} {symbol} @ {price or 'Market'}{RESET}\")\n    return {'retCode': 0, 'result': {'orderId': f'paper_{int(time.time())}'}}"
-  },
-  {
-    "fix_or_upgrade": "Add EMA alignment scoring with checking for consistent bullish/bearish crossover",
-    "code": "def calculate_ema_alignment(self) -> float:\n    ema_short = self.calculate_ema(self.config['ema_short_period'])\n    ema_long = self.calculate_ema(self.config['ema_long_period'])\n    if len(ema_short) < 3 or len(ema_long) < 3:\n        return 0.0\n    bullish_aligned = sum((ema_short.iloc[-i] > ema_long.iloc[-i] and self.df['close'].iloc[-i] > ema_short.iloc[-i]) for i in range(1,4))\n    bearish_aligned = sum((ema_short.iloc[-i] < ema_long.iloc[-i] and self.df['close'].iloc[-i] < ema_short.iloc[-i]) for i in range(1,4))\n    if bullish_aligned >= 2:\n        return 1.0\n    elif bearish_aligned >= 2:\n        return -1.0\n    return 0.0"
-  },
-  {
-    "fix_or_upgrade": "Add multi-timeframe analyzer to prioritize first timeframe as primary for trailing stop updates",
-    "code": "for i, timeframe in enumerate(self.timeframes):\n    # ... analysis code ...\n    if i == 0:\n        self.last_primary_analyzer = analyzer"
-  },
-  {
-    "fix_or_upgrade": "Add wrapper in main loop to catch KeyboardInterrupt and exit gracefully",
-    "code": "try:\n    # main trading loop\nexcept KeyboardInterrupt:\n    symbol_logger.info(f\"{NEON_YELLOW}Analysis stopped by user.{RESET}\")\n    break"
-  }
-]
-  {
-    "snippet": "def connect_websocket(url, on_message, headers=None):\n    import websocket\n    import threading\n\n    def on_open(ws):\n        print('WebSocket connection opened')\n\n    def on_close(ws, close_status_code, close_msg):\n        print('WebSocket connection closed')\n\n    ws = websocket.WebSocketApp(\n        url,\n        header=headers or [],\n        on_open=on_open,\n        on_message=on_message,\n        on_close=on_close\n    )\n\n    wst = threading.Thread(target=ws.run_forever)\n    wst.daemon = True\n    wst.start()\n    return ws"
-  },
-  {
-    "snippet": "def safe_rest_get(api_client, endpoint, params=None):\n    import time\n    attempts = 0\n    while attempts < MAX_API_RETRIES:\n        response = api_client.make_request('GET', endpoint, params)\n        if response is not None:\n            return response\n        attempts += 1\n        time.sleep(RETRY_DELAY_SECONDS * attempts)\n    return None"
-  },
-  {
-    "snippet": "def send_websocket_ping(ws):\n    try:\n        ws.send('ping')\n    except Exception as e:\n        logger.error(f'Failed to send ping: {e}')"
-  },
-  {
-    "snippet": "def rest_post_with_retry(api_client, endpoint, payload, retries=3, delay=5):\n    for attempt in range(1, retries + 1):\n        response = api_client.make_request('POST', endpoint, payload)\n        if response and response.get('retCode') == 0:\n            return response\n        logger.warning(f'POST request failed attempt {attempt}'.format(attempt))\n        time.sleep(delay * attempt)\n    return None"
-  },
-  {
-    "snippet": "def reconnect_websocket(ws, url, on_message):\n    ws.close()\n    time.sleep(2)  # brief pause before reconnect\n    return connect_websocket(url, on_message)"
-  },
-  {
-    "snippet": "def parse_websocket_message(message):\n    try:\n        data = json.loads(message)\n        return data\n    except json.JSONDecodeError:\n        logger.error('WebSocket message JSON decode error')\n        return None"
-  },
-  {
-    "snippet": "def get_current_price_rest(api_client, symbol):\n    res = safe_rest_get(api_client, '/v5/market/tickers', {'category': 'linear', 'symbol': symbol})\n    if res and res.get('retCode') == 0:\n        for ticker in res['result'].get('list', []):\n            if ticker['symbol'] == symbol:\n                return Decimal(ticker['lastPrice'])\n    return None"
-  },
-  {
-    "snippet": "def subscribe_to_orderbook_ws(ws, symbol):\n    sub_request = {\n        \"op\": \"subscribe\",\n        \"args\": [\n            {\n                \"channel\": \"orderbook\",\n                \"symbol\": symbol\n            }\n        ]\n    }\n    ws.send(json.dumps(sub_request))"
-  },
-  {
-    "snippet": "def fetch_orderbook_rest(api_client, symbol, limit=50):\n    response = safe_rest_get(api_client, '/v5/market/orderbook', {'symbol': symbol, 'limit': str(limit), 'category': 'linear'})\n    if response and response.get('retCode') == 0:\n        return response.get('result')\n    return None"
-  },
-  {
-    "snippet": "def websocket_message_handler(ws, message):\n    data = parse_websocket_message(message)\n    if not data:\n        return\n    if 'topic' in data:\n        if data['topic'].startswith('orderbook'):\n            orderbook_data = data.get('data')\n            # Process orderbook_data here\n            logger.info(f'Received orderbook update: {orderbook_data}')"
-  },
-  {
-    "snippet": "def rest_get_with_headers(api_client, endpoint, params=None, headers=None):\n    api_client.session.headers.update(headers or {})\n    return safe_rest_get(api_client, endpoint, params)"
-  },
-  {
-    "snippet": "def format_order_quantity(api_client, symbol, qty):\n    # Match the APIClient's formatting\n    return api_client.format_quantity(symbol, qty)"
-  },
-  {
-    "snippet": "def format_order_price(api_client, symbol, price):\n    return api_client.format_price(symbol, price)"
-  },
-  {
-    "snippet": "def send_order_ws(ws, symbol, side, order_type, qty, price=None, stop_loss=None, take_profit=None):\n    order = {\n        \"category\": \"linear\",\n        \"symbol\": symbol,\n        \"side\": side.capitalize(),\n        \"orderType\": order_type,\n        \"qty\": str(qty),\n        \"timeInForce\": \"GTC\"\n    }\n    if price:\n        order[\"price\"] = str(price)\n    if stop_loss:\n        order[\"stopLoss\"] = str(stop_loss)\n    if take_profit:\n        order[\"takeProfit\"] = str(take_profit)\n    ws.send(json.dumps({\"op\": \"order\", \"args\": [order]}))"
-  },
-  {
-    "snippet": "def websocket_heartbeat(ws, interval=30):\n    import threading\n    def run():\n        while True:\n            send_websocket_ping(ws)\n            time.sleep(interval)\n    threading.Thread(target=run, daemon=True).start()"
-  },
-  {
-    "snippet": "def fetch_multiple_klines(api_client, symbol, intervals):\n    data = {}\n    for interval in intervals:\n        df = api_client.fetch_klines(symbol, interval, limit=200)\n        data[interval] = df\n    return data"
-  },
-  {
-    "snippet": "def fetch_fee_rates_rest(api_client, symbol):\n    return api_client.fetch_fee_rates(symbol)"
-  },
-  {
-    "snippet": "def websocket_close(ws):\n    ws.close()"
-  },
-  {
-    "snippet": "def send_rest_delete(api_client, endpoint, params=None):\n    # Generalized DELETE call\n    return api_client.make_request('DELETE', endpoint, params)"
-  },
-  {
-    "snippet": "def websocket_is_alive(ws):\n    try:\n        return ws.keep_running and ws.sock and ws.sock.connected\n    except Exception:\n        return False"
-  }
-]
-
-[  Loading
-  {
+ {
     "name": "ema_alignment",
-    "code": "if (self.config[\"indicators\"].get(\"ema_alignment\") and self.indicator_values.get(\"ema_alignment\", 0.0) > 0):\n    signal_score += Decimal(str(self.user_defined_weights[\"ema_alignment\"])) * Decimal(str(abs(self.indicator_values[\"ema_alignment\"])))\n    conditions_met.append(\"Bullish EMA Alignment\")"
+    "description": "EMA alignment scoring for trend direction",
+    "code": "\"ema_short = indicator_calc.calculate_ema(config['ema_short_period'])\\nema_long = indicator_calc.calculate_ema(config['ema_long_period'])\\nalignment = 0\\nif ema_short.iloc[-1] > ema_long.iloc[-1] and df['close'].iloc[-1] > ema_short.iloc[-1]:\\n    alignment = 1\\nelif ema_short.iloc[-1] < ema_long.iloc[-1] and df['close'].iloc[-1] < ema_short.iloc[-1]:\\n    alignment = -1\\nscore = weights['ema_alignment'] * alignment\""
   },
   {
-    "name": "momentum",
-    "code": "if self.config[\"indicators\"].get(\"momentum\") and \"mom\" in self.indicator_values:\n    mom_data = self.indicator_values[\"mom\"]\n    if mom_data[\"trend\"] == \"Uptrend\":\n        signal_score += Decimal(str(self.user_defined_weights[\"momentum\"])) * Decimal(str(mom_data[\"strength\"]))\n        conditions_met.append(f\"Momentum Uptrend (Strength: {mom_data['strength']:.2f})\")"
-  },
-  {
-    "name": "divergence",
-    "code": "if (self.config[\"indicators\"].get(\"divergence\") and self.indicator_calc.detect_macd_divergence() == \"bullish\"):\n    signal_score += Decimal(str(self.user_defined_weights[\"divergence\"]))\n    conditions_met.append(\"Bullish MACD Divergence\")"
-  },
-  {
-    "name": "stoch_rsi",
-    "code": "if (self.config[\"indicators\"].get(\"stoch_rsi\") and isinstance(self.indicator_values.get(\"stoch_rsi_vals\"), pd.DataFrame) and not self.indicator_values[\"stoch_rsi_vals\"].empty):\n    stoch_rsi_k = Decimal(str(self.indicator_values[\"stoch_rsi_vals\"][\"k\"].iloc[-1]))\n    stoch_rsi_d = Decimal(str(self.indicator_values[\"stoch_rsi_vals\"][\"d\"].iloc[-1]))\n    if (stoch_rsi_k < self.config[\"stoch_rsi_oversold_threshold\"] and stoch_rsi_k > stoch_rsi_d):\n        signal_score += Decimal(str(self.user_defined_weights[\"stoch_rsi\"]))\n        conditions_met.append(\"Stoch RSI Oversold Crossover\")"
-  },
-  {
-    "name": "rsi",
-    "code": "if (self.config[\"indicators\"].get(\"rsi\") and self.indicator_values.get(\"rsi\") is not None):\n    rsi_val = self.indicator_values[\"rsi\"] if not isinstance(self.indicator_values[\"rsi\"], pd.Series) else self.indicator_values[\"rsi\"].iloc[-1]\n    if rsi_val < 30:\n        signal_score += Decimal(str(self.user_defined_weights[\"rsi\"]))\n        conditions_met.append(\"RSI Oversold\")"
-  },
-  {
-    "name": "macd",
-    "code": "if (self.config[\"indicators\"].get(\"macd\") and self.indicator_values.get(\"macd\")):\n    macd_vals = self.indicator_values[\"macd\"]\n    macd_line = Decimal(str(macd_vals.get(\"macd\", 0)))\n    signal_line = Decimal(str(macd_vals.get(\"signal\", 0)))\n    if (macd_line > signal_line and macd_line > 0):\n        signal_score += Decimal(str(self.user_defined_weights[\"macd\"]))\n        conditions_met.append(\"MACD Bullish Crossover\")"
+    "name": "stoch_rsi_signal",
+    "description": "Stochastic RSI oversold/overbought crossover detection",
+    "code": "\"stoch_rsi = indicator_calc.calculate_stoch_rsi()\\nk = stoch_rsi['k'].iloc[-1] if not stoch_rsi.empty else None\\nd = stoch_rsi['d'].iloc[-1] if not stoch_rsi.empty else None\\nsignal = 0\\nif k is not None and d is not None:\\n    if k < config['stoch_rsi_oversold_threshold'] and k > d:\\n        signal = weights['stoch_rsi']  # bullish\\n    elif k > config['stoch_rsi_overbought_threshold'] and k < d:\\n        signal = -weights['stoch_rsi']  # bearish\""
   },
   {
     "name": "volume_confirmation",
-    "code": "if (self.config[\"indicators\"].get(\"volume_confirmation\") and self.indicator_calc.calculate_volume_confirmation()):\n    signal_score += Decimal(str(self.user_defined_weights[\"volume_confirmation\"]))\n    conditions_met.append(\"Volume Confirmation\")"
+    "description": "Volume spike confirmation",
+    "code": "\"volume_ma = df['volume'].rolling(config['volume_ma_period']).mean()\\nvolume_now = df['volume'].iloc[-1]\\nvolume_avg = volume_ma.iloc[-1]\\nif volume_avg and volume_now > volume_avg * config['volume_confirmation_multiplier']:\\n    signal_strength = weights['volume_confirmation']\""
   },
   {
-    "name": "order_book_walls",
-    "code": "if self.indicator_values[\"order_book_walls\"].get(\"bullish\"):\n    signal_score += Decimal(str(self.config[\"order_book_support_confidence_boost\"]))\n    conditions_met.append(\"Bullish Order Book Wall\")"
+    "name": "macd_crossover",
+    "description": "MACD bullish/bearish crossover",
+    "code": "\"macd_df = indicator_calc.calculate_macd()\\nmacd_line = macd_df['macd'].iloc[-1] if not macd_df.empty else None\\nsignal_line = macd_df['signal'].iloc[-1] if not macd_df.empty else None\\nsignal = 0\\nif macd_line is not None and signal_line is not None:\\n    if macd_line > signal_line and macd_line > 0:\\n        signal = weights['macd']  # bullish\\n    elif macd_line < signal_line and macd_line < 0:\\n        signal = -weights['macd']  # bearish\""
   },
   {
-    "name": "bollinger_bands",
-    "code": "if (self.config[\"indicators\"].get(\"bollinger_bands\") and self.indicator_values.get(\"bollinger_bands\")):\n    if current_price < Decimal(str(self.indicator_values[\"bollinger_bands\"][\"lower\"])):\n        signal_score += Decimal(str(self.user_defined_weights[\"bollinger_bands\"]))\n        conditions_met.append(\"Price Below Bollinger Lower Band\")"
+    "name": "order_book_wall_detection",
+    "description": "Detect bullish/bearish walls in order book",
+    "code": "\"walls = order_book_analyzer.analyze_order_book_walls(order_book, current_price)\\nhas_bullish_wall, has_bearish_wall = walls[0], walls[1]\\nsignal_score = 0\\nif has_bullish_wall:\\n    signal_score += config['order_book_support_confidence_boost']\\nif has_bearish_wall:\\n    signal_score -= config['order_book_resistance_confidence_boost']\""
   },
   {
-    "name": "awesome_oscillator",
-    "code": "if (self.config[\"indicators\"].get(\"awesome_oscillator\") and self.indicator_values.get(\"awesome_oscillator\") is not None):\n    ao_series = self.indicator_values[\"awesome_oscillator\"]\n    if isinstance(ao_series, pd.Series) and len(ao_series) >= 2:\n        if ao_series.iloc[-1] > 0 and ao_series.iloc[-2] <= 0:\n            signal_score += Decimal(str(self.user_defined_weights[\"awesome_oscillator\"]))\n            conditions_met.append(\"Awesome Oscillator Bullish Zero-Cross\")"
+    "name": "rsi_signal",
+    "description": "RSI oversold/overbought levels",
+    "code": "\"rsi_series = indicator_calc.calculate_rsi()\\nrsi_val = rsi_series.iloc[-1] if not rsi_series.empty else None\\nsignal_strength = 0\\nif rsi_val:\\n    if rsi_val < 30:\\n        signal_strength = weights['rsi']  # bullish\\n    elif rsi_val > 70:\\n        signal_strength = -weights['rsi']  # bearish\""
   },
   {
-    "name": "vortex",
-    "code": "if (self.config[\"indicators\"].get(\"vortex\") and self.indicator_values.get(\"vortex\")):\n    if self.indicator_values[\"vortex\"][\"vi_plus\"] > self.indicator_values[\"vortex\"][\"vi_minus\"]:\n        signal_score += Decimal(str(self.user_defined_weights[\"vortex\"]))\n        conditions_met.append(\"Vortex Bullish Crossover\")"
+    "name": "atr_based_stoploss_takeprofit",
+    "description": "Calculate stop loss and take profit based on ATR",
+    "code": "\"atr = indicator_calc.calculate_atr().iloc[-1] if not indicator_calc.calculate_atr().empty else 0\\nsl = current_price - (Decimal(atr) * Decimal(config['stop_loss_multiple'])) if signal_type == 'buy' else current_price + (Decimal(atr) * Decimal(config['stop_loss_multiple']))\\ntp = current_price + (Decimal(atr) * Decimal(config['take_profit_multiple'])) if signal_type == 'buy' else current_price - (Decimal(atr) * Decimal(config['take_profit_multiple']))\""
   },
   {
-    "name": "l2_metrics_imbalance",
-    "code": "if self.indicator_values.get(\"l2_metrics\") and self.indicator_values[\"l2_metrics\"].get(\"imbalance_10\", 0) > 0.3:\n    signal_score += Decimal(\"0.2\")\n    conditions_met.append(\"Strong L2 Imbalance (Top 10)\")"
+    "name": "momentum_trend_strength",
+    "description": "Use momentum moving averages for trend strength",
+    "code": "\"momentum = df['close'].diff(config['momentum_period'])\\nmomentum_ma_short = momentum.rolling(config['momentum_ma_short']).mean()\\nmomentum_ma_long = momentum.rolling(config['momentum_ma_long']).mean()\\ntrend = 'neutral'\\nstrength = 0\\nif momentum_ma_short.iloc[-1] > momentum_ma_long.iloc[-1]:\\n    trend = 'uptrend'\\n    strength = abs(momentum_ma_short.iloc[-1] - momentum_ma_long.iloc[-1]) / atr_value\\nelif momentum_ma_short.iloc[-1] < momentum_ma_long.iloc[-1]:\\n    trend = 'downtrend'\\n    strength = abs(momentum_ma_long.iloc[-1] - momentum_ma_short.iloc[-1]) / atr_value\""
   },
   {
-    "name": "depth_profile_liquidity",
-    "code": "if self.indicator_values.get(\"depth_profile\") and self.indicator_values[\"depth_profile\"].get(\"imbalance_0.5%\", 0) > 0.4:\n    signal_score += Decimal(\"0.3\")\n    conditions_met.append(\"Heavy Buy Liquidity (0.5% Range)\")"
+    "name": "stochastic_oscillator_signal",
+    "description": "Stochastic oscillator crossovers",
+    "code": "\"stoch_osc = indicator_calc.calculate_stochastic_oscillator()\\nk = stoch_osc['k'].iloc[-1]\\nd = stoch_osc['d'].iloc[-1]\\nsignal_strength = 0\\nif k < 20 and k > d:\\n    signal_strength = weights['stochastic_oscillator']  # bullish\\nelif k > 80 and k < d:\\n    signal_strength = -weights['stochastic_oscillator']  # bearish\""
   },
   {
-    "name": "liquidity_clusters_support",
-    "code": "if self.indicator_values.get(\"liquidity_clusters\"):\n    for p, _q in self.indicator_values[\"liquidity_clusters\"][\"bids\"]:\n        if current_price > p and (current_price - p) / current_price < Decimal(\"0.002\"):\n            signal_score += Decimal(\"0.4\")\n            conditions_met.append(f\"Price Near Heavy Support Cluster (${p:.2f})\")\n            break"
+    "name": "supertrend_signal",
+    "description": "Use supertrend direction as signal",
+    "code": "\"supertrend = indicator_calc.calculate_supertrend()\\ndirection = supertrend['direction'].iloc[-1]\\nsignal_strength = 0\\nif direction == 1:\\n    signal_strength = weights['supertrend']  # bullish\\nelif direction == -1:\\n    signal_strength = -weights['supertrend']  # bearish\""
   },
   {
-    "name": "stochastic_oscillator",
-    "code": "if (self.config[\"indicators\"].get(\"stochastic_oscillator\") and isinstance(self.indicator_values.get(\"stoch_osc_vals\"), pd.DataFrame) and not self.indicator_values[\"stoch_osc_vals\"].empty):\n    stoch_k = Decimal(str(self.indicator_values[\"stoch_osc_vals\"][\"k\"].iloc[-1]))\n    stoch_d = Decimal(str(self.indicator_values[\"stoch_osc_vals\"][\"d\"].iloc[-1]))\n    if stoch_k < 20 and stoch_k > stoch_d:\n        signal_score += Decimal(str(self.user_defined_weights.get(\"stochastic_oscillator\", 0.4)))\n        conditions_met.append(\"Stoch Oscillator Oversold Crossover\")"
+    "name": "trend_confirmation_with_adx",
+    "description": "Use ADX to confirm trend strength",
+    "code": "\"adx_val = indicator_calc.calculate_adx()\\nif adx_val > 25:\\n    # confirm other trend signals\\n    confidence_boost = 0.1\""
   },
   {
-    "name": "ehlers_fisher",
-    "code": "if (self.indicator_values.get(\"ehlers_fisher\") is not None and isinstance(self.indicator_values[\"ehlers_fisher\"], (pd.Series, np.ndarray, list)) and len(self.indicator_values[\"ehlers_fisher\"]) >= 2):\n    ef_series = self.indicator_values[\"ehlers_fisher\"]\n    ef_curr = ef_series.iloc[-1] if isinstance(ef_series, pd.Series) else ef_series[-1]\n    ef_prev = ef_series.iloc[-2] if isinstance(ef_series, pd.Series) else ef_series[-2]\n    if ef_curr > 0 and ef_prev <= 0:\n        signal_score += Decimal(str(self.user_defined_weights.get(\"ehlers_fisher\", 0.5)))\n        conditions_met.append(\"Ehlers Fisher Bullish Crossover\")"
+    "name": "bollinger_band_breakout",
+    "description": "Price crossing Bollinger Bands upper or lower",
+    "code": "\"bb = indicator_calc.calculate_bollinger_bands()\\nprice = df['close'].iloc[-1]\\nif price > bb['upper'].iloc[-1]:\\n    signal_strength = -weights['bollinger_bands']  # bearish breakout\\nelif price < bb['lower'].iloc[-1]:\\n    signal_strength = weights['bollinger_bands']  # bullish breakout\""
   },
   {
-    "name": "laguerre_rsi",
-    "code": "if (self.indicator_values.get(\"laguerre_rsi\") is not None):\n    lrsi_series = self.indicator_values[\"laguerre_rsi\"]\n    lrsi_val = lrsi_series.iloc[-1] if isinstance(lrsi_series, pd.Series) else (lrsi_series[-1] if isinstance(lrsi_series, (np.ndarray, list)) else lrsi_series)\n    if lrsi_val < 0.2:\n        signal_score += Decimal(str(self.user_defined_weights.get(\"laguerre_rsi\", 0.4)))\n        conditions_met.append(\"Laguerre RSI Oversold\")"
+    "name": "vortex_indicator_signal",
+    "description": "Vortex indicator bullish/bearish cross",
+    "code": "\"vortex = indicator_calc.calculate_vortex()\\nif vortex['vi_plus'].iloc[-1] > vortex['vi_minus'].iloc[-1]:\\n    signal_strength = weights['vortex']  # bullish\\nelif vortex['vi_plus'].iloc[-1] < vortex['vi_minus'].iloc[-1]:\\n    signal_strength = -weights['vortex']  # bearish\""
   },
   {
-    "name": "supertrend",
-    "code": "if (self.indicator_values.get(\"supertrend\") and self.indicator_values[\"supertrend\"].get(\"direction\") == 1):\n    signal_score += Decimal(str(self.user_defined_weights.get(\"supertrend\", 0.3)))\n    conditions_met.append(\"Supertrend Bullish Alignment\")"
+    "name": "fibonacci_retracement_levels",
+    "description": "Calculate fib retracement and check if price is near support or resistance",
+    "code": "\"fib_levels = sr_analyzer.calculate_fibonacci_retracement(high, low, current_price)\\nfor label, level in fib_levels.items():\\n    if abs(current_price - level) / current_price < 0.005:\\n        if level < current_price:\\n            signal_strength += weights.get('fib_retracement', 0)  # support\\n        else:\\n            signal_strength -= weights.get('fib_retracement', 0)  # resistance\""
+  },
+  {
+    "name": "adx_di_based_signal",
+    "description": "Directional Movement Index based signal using +DI and -DI",
+    "code": "\"df_adx = pd.DataFrame()\\ndf_adx['+DM'] = ...  # calculated as per indicator_calc.calculate_adx\\ndf_adx['-DM'] = ...\\nplus_di = df_adx['+DI'].iloc[-1]\\nminus_di = df_adx['-DI'].iloc[-1]\\nsignal_strength = 0\\nif plus_di > minus_di:\\n    signal_strength = weights['adx']\\nelif minus_di > plus_di:\\n    signal_strength = -weights['adx']\""
+  },
+  {
+    "name": "risk_reward_calculation",
+    "description": "Calculate risk reward ratio based on SL and TP",
+    "code": "\"if stop_loss and take_profit and signal_type != SignalType.HOLD:\\n    if signal_type == SignalType.BUY:\\n        risk = abs(current_price - stop_loss)\\n        reward = abs(take_profit - current_price)\\n    else:\\n        risk = abs(stop_loss - current_price)\\n        reward = abs(current_price - take_profit)\\n    risk_reward_ratio = reward / risk if risk > 0 else None\""
+  },
+  {
+    "name": "order_book_liquidity_cluster_detection",
+    "description": "Detect price proximity to liquidity clusters",
+    "code": "\"clusters = order_book_analyzer.find_liquidity_clusters(order_book)\\nfor p, qty in clusters['bids']:\\n    if (current_price - p) / current_price < 0.002 and current_price > p:\\n        signal_score += 0.4  # bullish\\nfor p, qty in clusters['asks']:\\n    if (p - current_price) / current_price < 0.002 and current_price < p:\\n        signal_score -= 0.4  # bearish\""
+  },
+  {
+    "name": "trailing_stop_loss_update",
+    "description": "Update trailing stop loss based on Chandelier Exit",
+    "code": "\"ce = indicator_values.get('chandelier_exit', {})\\nif signal_type == SignalType.BUY and ce.get('long'):\n    if trailing_stop is None or ce['long'] > trailing_stop:\n        trailing_stop = ce['long']\nelif signal_type == SignalType.SELL and ce.get('short'):\n    if trailing_stop is None or ce['short'] < trailing_stop:\n        trailing_stop = ce['short']\""
+  },
+  {
+    "name": "macd_divergence_detection",
+    "description": "Detect bullish or bearish MACD divergence",
+    "code": "\"macd_df = indicator_calc.calculate_macd()\\nprices = df['close']\\nhist = macd_df['histogram']\\nif prices.iloc[-2] > prices.iloc[-1] and hist.iloc[-2] < hist.iloc[-1]:\\n    divergence = 'bullish'\\nelif prices.iloc[-2] < prices.iloc[-1] and hist.iloc[-2] > hist.iloc[-1]:\\n    divergence = 'bearish'\\nelse:\\n    divergence = None\""
   }
 ]
+
+  {
+    "fix": "Add missing NEON_CYAN definition for consistent coloring",
+    "code_snippet": "\"NEON_CYAN = Fore.CYAN\""
+  },
+  {
+    "fix": "In DataValidator.validate_dataframe, convert 'start_time' column to datetime if needed",
+    "code_snippet": "if 'start_time' in df.columns:\n    if not pd.api.types.is_datetime64_any_dtype(df['start_time']):\n        df['start_time'] = pd.to_datetime(df['start_time'])"
+  },
+  {
+    "fix": "In RiskManager.calculate_position_size align quantity using floor division and rounding down",
+    "code_snippet": "final_size = (final_size // qty_step) * qty_step"
+  },
+  {
+    "upgrade": "Add async support in APIClient.make_request for better concurrency",
+    "code_snippet": "import asyncio\nimport aiohttp\n\nasync def make_request_async(self, method: str, endpoint: str, params: dict = None):\n    async with aiohttp.ClientSession() as session:\n        # Implement similar logic as synchronous with retries\n        pass"
+  },
+  {
+    "fix": "In TradingAnalyzer.generate_trading_signal, fix rounding error with Decimal by quantizing stop_loss and take_profit",
+    "code_snippet": "if stop_loss and take_profit:\n    stop_loss = stop_loss.quantize(Decimal('0.00001'))\n    take_profit = take_profit.quantize(Decimal('0.00001'))"
+  },
+  {
+    "upgrade": "Implement database connection pooling in DatabaseManager to improve performance",
+    "code_snippet": "import sqlite3\nfrom sqlite3 import Connection\n\nclass DatabaseManager:\n    def __init__(self, db_path: str):\n        self.db_path = db_path\n        self.conn = sqlite3.connect(db_path, check_same_thread=False)\n        self.conn.execute('PRAGMA journal_mode=WAL;')\n        self._ensure_db_exists()\n    def _get_conn(self) -> Connection:\n        return self.conn"
+  },
+  {
+    "fix": "Handle edge case in IndicatorCalculator.calculate_ema_alignment_series to avoid empty DataFrame",
+    "code_snippet": "if ema_short.empty or ema_long.empty:\n    return pd.Series(dtype=float)"
+  },
+  {
+    "fix": "Add exception handling in SignalHistoryTracker.sync_with_exchange to avoid crashing",
+    "code_snippet": "try:\n    # existing sync code\nexcept Exception as e:\n    self.logger.error(f\"Error syncing with exchange: {e}\")"
+  },
+  {
+    "upgrade": "Add logging of API rate limit remaining in APIClient.make_request",
+    "code_snippet": "if 'X-RateLimit-Remaining' in response.headers:\n    self.logger.debug(f\"API Rate Limit Remaining: {response.headers['X-RateLimit-Remaining']}\")"
+  },
+  {
+    "fix": "In RiskManager.calculate_position_size, correctly apply rounding for final_size with Decimal.quantize and rounding=ROUND_DOWN",
+    "code_snippet": "final_size = (final_size / qty_step).quantize(Decimal('1'), rounding=decimal.ROUND_DOWN) * qty_step"
+  },
+  {
+    "upgrade": "Add caching for fetch_fee_rates in APIClient to reduce redundant calls",
+    "code_snippet": "def fetch_fee_rates(self, symbol: str) -> tuple[Decimal, Decimal]:\n    if hasattr(self, '_fee_cache') and symbol in self._fee_cache:\n        return self._fee_cache[symbol]\n    res = self.make_request('GET', '/v5/contract/fee-rate', {'symbol': symbol})\n    if res and res.get('retCode') == 0:\n        maker = Decimal(str(res['result'].get('makerFeeRate', '0')))\n        taker = Decimal(str(res['result'].get('takerFeeRate', '0')))\n        self._fee_cache[symbol] = (maker, taker)\n        return maker, taker\n    return Decimal('0'), Decimal('0')"
+  },
+  {
+    "fix": "In TradingAnalyzer._calculate_ema_alignment_series add fillna(0) after comparison to avoid NaNs",
+    "code_snippet": "alignment[(ema_short > ema_long) & (self.df['close'] > ema_short)] = 1.0\nalignment = alignment.fillna(0.0)"
+  },
+  {
+    "upgrade": "Add graceful websocket reconnect logic with backoff in utility function reconnect_websocket",
+    "code_snippet": "def reconnect_websocket(ws, url, on_message):\n    ws.close()\n    time.sleep(1)\n    backoff = 1\n    while True:\n        try:\n            ws = connect_websocket(url, on_message)\n            return ws\n        except Exception:\n            time.sleep(backoff)\n            backoff = min(backoff * 2, 60)"
+  },
+  {
+    "fix": "Add type hints for all methods missing them to improve readability and static analysis",
+    "code_snippet": "def generate_signal(self, indicator_values: dict[str, Any], market_regime: MarketRegime, current_price: Decimal, atr_value: Decimal) -> TradingSignal:"
+  },
+  {
+    "upgrade": "Add method in NotificationSystem to send combined notification (email + webhook + sms) in one call",
+    "code_snippet": "def send_combined_notification(self, subject: str, message: str, payload: dict, sms_message: str) -> None:\n    self.send_email(subject, message)\n    self.send_webhook(payload)\n    self.send_sms(sms_message)"
+  },
+  {
+    "fix": "In DataValidator.validate_dataframe, change dropna() to dropna(how='any', inplace=True) to avoid copy warning",
+    "code_snippet": "df.dropna(how='any', inplace=True)"
+  },
+  {
+    "upgrade": "Add function to perform database vacuum periodically to optimize database file size",
+    "code_snippet": "def vacuum_database(self):\n    conn = sqlite3.connect(self.db_path)\n    conn.execute('VACUUM')\n    conn.close()"
+  },
+  {
+    "fix": "Add check for zero division in SupportResistanceAnalyzer.calculate_fibonacci_retracement before dividing diff",
+    "code_snippet": "if diff <= 0:\n    self.logger.warning(f\"{NEON_YELLOW}High less or equal to Low, skipping Fibonacci retracement.{RESET}\")\n    return {}"
+  },
+  {
+    "upgrade": "Enhance SignalGenerator.generate_signal to accept previous indicator values for delta calculations",
+    "code_snippet": "def generate_signal(self, indicator_values: dict[str, Any], previous_values: dict[str, Any], market_regime: MarketRegime, current_price: Decimal, atr_value: Decimal) -> TradingSignal:"
+  },
+  {
+    "fix": "Fix potential division by zero in MarketRegimeDetector._calculate_atr",
+    "code_snippet": "atr = (np.mean(tr[-self.atr_period:]) if len(tr) >= self.atr_period and np.any(tr[-self.atr_period:] > 0) else np.mean(tr))"
+  }
+]
+
+      "id": 1,
+      "description": "Add a loading spinner during data fetch in UI",
+      "code": "def show_loading_spinner():\n    import itertools, sys, threading, time\n    done = False\n    def animate():\n        for c in itertools.cycle(['|', '/', '-', '\\\\']):\n            if done:\n                break\n            sys.stdout.write(f'\\rLoading {c}')\n            sys.stdout.flush()\n            time.sleep(0.1)\n        sys.stdout.write('\\rDone!     \\n')\n    t = threading.Thread(target=animate)\n    t.start()\n    return lambda: setattr(globals(), 'done', True)"
+    },
+    {
+      "id": 2,
+      "description": "Format PnL output with color gradients for UI",
+      "code": "def format_pnl_output(pnl: Decimal) -> str:\n    if pnl > 0:\n        color = NEON_GREEN\n    elif pnl < 0:\n        color = NEON_RED\n    else:\n        color = NEON_WHITE\n    return f'{color}${pnl:.2f}{RESET}'"
+    },
+    {
+      "id": 3,
+      "description": "Upgrade signal display with confidence bar",
+      "code": "def confidence_bar(confidence: float, length: int = 20) -> str:\n    filled_length = int(length * confidence)\n    bar = NEON_GREEN + '█' * filled_length + NEON_WHITE + '-' * (length - filled_length) + RESET\n    return bar\n\ndef display_signal_with_confidence(signal: TradingSignal):\n    bar = confidence_bar(signal.confidence)\n    return f'Signal: {signal.signal_type.value.upper()} {bar} Confidence: {signal.confidence:.2f}'"
+    },
+    {
+      "id": 4,
+      "description": "Add timestamp formatted in local timezone to outputs",
+      "code": "def format_timestamp(timestamp: float, tz: ZoneInfo = TIMEZONE) -> str:\n    dt = datetime.fromtimestamp(timestamp, tz)\n    return dt.strftime('%Y-%m-%d %H:%M:%S %Z')"
+    },
+    {
+      "id": 5,
+      "description": "Add JSON output for trading signal with all metadata",
+      "code": "def signal_to_json(signal: TradingSignal) -> str:\n    output = {\n        'type': signal.signal_type.value if signal.signal_type else None,\n        'confidence': signal.confidence,\n        'conditions_met': signal.conditions_met,\n        'stop_loss': str(signal.stop_loss) if signal.stop_loss else None,\n        'take_profit': str(signal.take_profit) if signal.take_profit else None,\n        'timestamp': format_timestamp(signal.timestamp),\n        'symbol': signal.symbol,\n        'timeframe': signal.timeframe,\n        'position_size': str(signal.position_size) if signal.position_size else None,\n        'risk_reward_ratio': signal.risk_reward_ratio\n    }\n    return json.dumps(output, indent=2)"
+    },
+    {
+      "id": 6,
+      "description": "Add progress percentage output for backtesting",
+      "code": "def display_backtest_progress(current: int, total: int) -> None:\n    percent = (current / total) * 100\n    bar_length = 30\n    filled_length = int(bar_length * current // total)\n    bar = NEON_GREEN + '█' * filled_length + NEON_WHITE + '-' * (bar_length - filled_length) + RESET\n    sys.stdout.write(f'\\rBacktesting: |{bar}| {percent:.2f}% Complete')\n    sys.stdout.flush()\n    if current == total:\n        print()"
+    },
+    {
+      "id": 7,
+      "description": "Add summarized indicator output with color highlights",
+      "code": "def summarized_indicator_output(indicators: dict[str, Any]) -> str:\n    lines = []\n    for name, val in indicators.items():\n        if val is None or (isinstance(val, float) and np.isnan(val)):\n            continue\n        color = NEON_WHITE\n        try:\n            val_float = float(val) if not isinstance(val, dict) else None\n            if val_float is not None:\n                if val_float > 0:\n                    color = NEON_GREEN\n                elif val_float < 0:\n                    color = NEON_RED\n                else:\n                    color = NEON_YELLOW\n            lines.append(f'{name.upper()}: {color}{val}{RESET}')\n        except Exception:\n            lines.append(f'{name.upper()}: {NEON_WHITE}{val}{RESET}')\n    return ' | '.join(lines)"
+    },
+    {
+      "id": 8,
+      "description": "Add support/resistance level outputs in UI",
+      "code": "def display_support_resistance(supports: list[tuple[str, Decimal]], resistances: list[tuple[str, Decimal]]) -> str:\n    sup_str = ', '.join([f'{label}@${value:.4f}' for label, value in supports]) or 'None'\n    res_str = ', '.join([f'{label}@${value:.4f}' for label, value in resistances]) or 'None'\n    return f'Supports: {NEON_GREEN}{sup_str}{RESET} | Resistances: {NEON_RED}{res_str}{RESET}'"
+    },
+    {
+      "id": 9,
+      "description": "Add condition met list with bullet points in outputs",
+      "code": "def conditions_to_text(conditions: list[str]) -> str:\n    if not conditions:\n        return 'None'\n    bullet = '\\u2022'\n    return '\\n'.join([f'{bullet} {cond}' for cond in conditions])"
+    },
+    {
+      "id": 10,
+      "description": "Add compact indicator summary in json format",
+      "code": "def indicators_to_compact_json(indicators: dict[str, Any]) -> dict:\n    output = {}\n    for key, val in indicators.items():\n        if isinstance(val, (float, int, str)):\n            output[key] = val\n        elif isinstance(val, dict):\n            output[key] = {k: v for k, v in val.items() if isinstance(v, (float, int, str))}\n        elif isinstance(val, pd.Series) and not val.empty:\n            output[key] = float(val.iloc[-1])\n    return output"
+    },
+    {
+      "id": 11,
+      "description": "Display trailing stop updates with color-coded notifications",
+      "code": "def display_trailing_stop_update(symbol: str, old_sl: Decimal, new_sl: Decimal) -> str:\n    if new_sl > old_sl:\n        color = NEON_GREEN\n        direction = 'Increased'\n    elif new_sl < old_sl:\n        color = NEON_RED\n        direction = 'Decreased'\n    else:\n        color = NEON_WHITE\n        direction = 'Unchanged'\n    return f'{color}Trailing Stop {direction} for {symbol}: {old_sl:.4f} -> {new_sl:.4f}{RESET}'"
+    },
+    {
+      "id": 12,
+      "description": "Add position size output with rounding to 4 decimals",
+      "code": "def format_position_size(size: Decimal) -> str:\n    return f'{size.quantize(Decimal(\"0.0001\"))}'"
+    },
+    {
+      "id": 13,
+      "description": "Output open positions list with pnl and risk/reward",
+      "code": "def display_open_positions(signals: dict[int, SignalHistory], current_price: Decimal) -> str:\n    lines = []\n    for sid, signal in signals.items():\n        if signal.signal_type == SignalType.BUY:\n            unrealized_pnl = (current_price - signal.entry_price) * signal.quantity\n        else:\n            unrealized_pnl = (signal.entry_price - current_price) * signal.quantity\n        r_str = f'R:R={float(signal.risk_reward_ratio):.2f}' if signal.risk_reward_ratio else 'R:R=N/A'\n        lines.append(f'ID:{sid} {signal.signal_type.value.upper()} {signal.symbol} Qty:{signal.quantity:.4f} Entry:${signal.entry_price:.4f} PnL:${unrealized_pnl:.2f} {r_str}')\n    return '\\n'.join(lines)"
+    },
+    {
+      "id": 14,
+      "description": "Add detailed JSON output for active positions including stop loss and take profit",
+      "code": "def active_positions_to_json(signals: dict[int, SignalHistory]) -> str:\n    results = []\n    for sid, s in signals.items():\n        results.append({\n            'id': sid,\n            'symbol': s.symbol,\n            'signal_type': s.signal_type.value,\n            'entry_price': str(s.entry_price),\n            'quantity': str(s.quantity),\n            'stop_loss': str(s.stop_loss) if s.stop_loss else None,\n            'take_profit': str(s.take_profit) if s.take_profit else None,\n            'trailing_sl': str(s.trailing_sl) if s.trailing_sl else None,\n            'highest_price': str(s.highest_price) if s.highest_price else None,\n            'lowest_price': str(s.lowest_price) if s.lowest_price else None,\n            'profit_loss': str(s.profit_loss) if s.profit_loss else None,\n            'net_pnl': str(s.net_pnl) if s.net_pnl else None,\n            'exit_reason': s.exit_reason,\n            'market_regime': s.market_regime.value if s.market_regime else None\n        })\n    return json.dumps(results, indent=2)"
+    },
+    {
+      "id": 15,
+      "description": "Color-code and format support/resistance nearby levels sorted by proximity",
+      "code": "def nearest_levels_ui(current_price: Decimal, supports: list[tuple[str, Decimal]], resistances: list[tuple[str, Decimal]]) -> str:\n    def format_level(label, val):\n        diff = abs((val - current_price) / current_price) * 100\n        color = NEON_GREEN if val < current_price else NEON_RED\n        return f'{color}{label}@${val:.4f} ({diff:.2f}%) {RESET}'\n    sup_lines = [format_level(l, v) for l, v in sorted(supports, key=lambda x: abs((current_price - x[1])/current_price))]\n    res_lines = [format_level(l, v) for l, v in sorted(resistances, key=lambda x: abs((x[1] - current_price)/current_price))]\n    return 'Supports: ' + ', '.join(sup_lines) + '\\nResistances: ' + ', '.join(res_lines)"
+    },
+    {
+      "id": 16,
+      "description": "Add compact indicator output for terminal dashboard",
+      "code": "def terminal_indicator_dashboard(indicators: dict[str, float]) -> str:\n    parts = []\n    for name in ['rsi', 'mfi', 'cci', 'fve', 'stc', 'cmo']:\n        val = indicators.get(name, None)\n        if val is not None and not pd.isna(val):\n            parts.append(f'{name.upper()}: {val:.2f}')\n    return ' | '.join(parts)"
+    },
+    {
+      "id": 17,
+      "description": "Add order book imbalance output with colors",
+      "code": "def order_book_imbalance_ui(imbalance: float) -> str:\n    if imbalance > 0.3:\n        color = NEON_GREEN\n        state = \"Strong Buy\"\n    elif imbalance < -0.3:\n        color = NEON_RED\n        state = \"Strong Sell\"\n    else:\n        color = NEON_YELLOW\n        state = \"Neutral\"\n    return f'Order Book Imbalance: {color}{imbalance:.2f} ({state}){RESET}'"
+    },
+    {
+      "id": 18,
+      "description": "Show notification summary with key indicators",
+      "code": "def notification_summary(signal: TradingSignal, indicators: dict[str, Any]) -> str:\n    parts = [f'Signal: {signal.signal_type.value.upper()} {signal.symbol}', f'Confidence: {signal.confidence:.2f}']\n    key_indicators = ['rsi', 'mfi', 'atr', 'momentum_ma_short', 'momentum_ma_long']\n    for k in key_indicators:\n        v = indicators.get(k, None)\n        if v is not None and not pd.isna(v):\n            parts.append(f'{k.upper()}: {v:.2f}')\n    return ' | '.join(parts)"
+    },
+    {
+      "id": 19,
+      "description": "Provide JSON array output of recent trade performance metrics",
+      "code": "def performance_metrics_to_json(metrics_list: list[PerformanceMetrics]) -> str:\n    results = []\n    for m in metrics_list:\n        results.append({\n            'total_trades': m.total_trades,\n            'winning_trades': m.winning_trades,\n            'losing_trades': m.losing_trades,\n            'win_rate': m.win_rate,\n            'profit_factor': m.profit_factor,\n            'max_drawdown': m.max_drawdown,\n            'sharpe_ratio': m.sharpe_ratio,\n            'total_profit': str(m.total_profit),\n            'total_loss': str(m.total_loss),\n            'net_profit': str(m.net_profit),\n            'average_win': str(m.average_win),\n            'average_loss': str(m.average_loss)\n        })\n    return json.dumps(results, indent=2)"
+    },
+    {
+      "id": 20,
+      "description": "Add clear console output separator",
+      "code": "def print_separator():\n    print(f'{NEON_CYAN}{\"-\" * 60}{RESET}')"
+    }
+  ]
