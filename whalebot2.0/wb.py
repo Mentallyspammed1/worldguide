@@ -749,8 +749,8 @@ class DatabaseManager:
         cursor.execute(
             """
         INSERT INTO signal_history (
-            timestamp, symbol, timeframe, signal_type, confidence, 
-            entry_price, exit_price, stop_loss, take_profit, 
+            timestamp, symbol, timeframe, signal_type, confidence,
+            entry_price, exit_price, stop_loss, take_profit,
             profit_loss, exit_reason, market_regime
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -789,7 +789,7 @@ class DatabaseManager:
 
         cursor.execute(
             """
-        UPDATE signal_history 
+        UPDATE signal_history
         SET exit_price = ?, profit_loss = ?, exit_reason = ?
         WHERE id = ?
         """,
@@ -862,9 +862,9 @@ class DatabaseManager:
         cursor.execute(
             """
         INSERT INTO performance_metrics (
-            timestamp, symbol, timeframe, total_trades, winning_trades, 
-            losing_trades, win_rate, profit_factor, max_drawdown, 
-            sharpe_ratio, total_profit, total_loss, net_profit, 
+            timestamp, symbol, timeframe, total_trades, winning_trades,
+            losing_trades, win_rate, profit_factor, max_drawdown,
+            sharpe_ratio, total_profit, total_loss, net_profit,
             average_win, average_loss
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -902,8 +902,8 @@ class DatabaseManager:
 
         cursor.execute(
             """
-        SELECT * FROM performance_metrics 
-        WHERE symbol = ? AND timeframe = ? 
+        SELECT * FROM performance_metrics
+        WHERE symbol = ? AND timeframe = ?
         ORDER BY timestamp DESC LIMIT 1
         """,
             (symbol, timeframe),
@@ -1173,7 +1173,7 @@ class MarketRegimeDetector:
 
         tr = np.maximum(np.maximum(tr1, tr2), tr3)
         atr = (
-            np.mean(tr[-self.atr_period :])
+            np.mean(tr[-self.atr_period:])
             if len(tr) >= self.atr_period
             else np.mean(tr)
         )
@@ -1958,15 +1958,15 @@ class IndicatorCalculator:
         high = self.df["high"]
         low = self.df["low"]
         close = self.df["close"]
-        
+
         tr = pd.concat([high - low, abs(high - close.shift()), abs(low - close.shift())], axis=1).max(axis=1)
         vmp = abs(high - low.shift())
         vmm = abs(low - high.shift())
-        
+
         str_sum = tr.rolling(window).sum()
         svmp = vmp.rolling(window).sum()
         svmm = vmm.rolling(window).sum()
-        
+
         vi_plus = svmp / str_sum
         vi_minus = svmm / str_sum
         return pd.DataFrame({"vi_plus": vi_plus, "vi_minus": vi_minus})
@@ -1996,11 +1996,11 @@ class IndicatorCalculator:
     def calculate_supertrend(self, period: int = 10, multiplier: float = 3.0) -> pd.DataFrame:
         """
         Calculate Supertrend indicator.
-        
+
         Args:
             period (int): ATR period, default 10
             multiplier (float): ATR multiplier, default 3.0
-        
+
         Returns:
             pd.Series: Supertrend values
             pd.Series: Supertrend direction (1=bullish, -1=bearish)
@@ -2008,45 +2008,45 @@ class IndicatorCalculator:
         high = self.df['high']
         low = self.df['low']
         close = self.df['close']
-        
+
         # Calculate ATR
         tr1 = high - low
         tr2 = abs(high - close.shift())
         tr3 = abs(low - close.shift())
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr = tr.rolling(window=period).mean()
-        
+
         # Calculate basic bands
         hl2 = (high + low) / 2
         upper_band = hl2 + (multiplier * atr)
         lower_band = hl2 - (multiplier * atr)
-        
+
         # Initialize supertrend
         supertrend = pd.Series(index=self.df.index, dtype=float)
         direction = pd.Series(0, index=self.df.index)
-        
+
         prev_upper = upper_band.iloc[period-1] if period > 0 else upper_band.iloc[0]
         prev_lower = lower_band.iloc[period-1] if period > 0 else lower_band.iloc[0]
         prev_supertrend = hl2.iloc[period-1] if period > 0 else hl2.iloc[0]
         prev_direction = 1
-        
+
         # Fill initial NaN values from ATR calculation
         for i in range(period):
             supertrend.iloc[i] = hl2.iloc[i]
             direction.iloc[i] = 1
-            
+
         for i in range(period, len(self.df)):
             curr_close = close.iloc[i]
             curr_upper = upper_band.iloc[i]
             curr_lower = lower_band.iloc[i]
-            
+
             # Adjust bands
             if curr_close > prev_upper:
                 curr_upper = max(curr_upper, prev_upper) # Ensure band doesn't go below prev_upper
-            
+
             if curr_close < prev_lower:
                 curr_lower = min(curr_lower, prev_lower) # Ensure band doesn't go above prev_lower
-            
+
             # Determine direction
             if prev_supertrend == prev_upper and curr_close <= curr_upper:
                 curr_direction = 1 # Was bullish, now flat or slightly down, keep bullish
@@ -2058,21 +2058,21 @@ class IndicatorCalculator:
                 curr_direction = -1 # Price breaks below lower band, switch to bearish
             else:
                 curr_direction = prev_direction # Maintain previous direction
-                
+
             # Calculate supertrend
             if curr_direction == 1:
                 curr_supertrend = curr_lower
             else:
                 curr_supertrend = curr_upper
-            
+
             supertrend.iloc[i] = curr_supertrend
             direction.iloc[i] = curr_direction
-            
+
             prev_upper = curr_upper
             prev_lower = curr_lower
             prev_supertrend = curr_supertrend
             prev_direction = curr_direction
-        
+
         return pd.DataFrame({"supertrend": supertrend, "direction": direction})
 
     def calculate_cmo(self, period: int = 14) -> pd.Series:
@@ -2086,12 +2086,12 @@ class IndicatorCalculator:
     def calculate_stc(self, period: int = 10, fast: int = 23, slow: int = 50) -> pd.Series:
         """Calculates Schaff Trend Cycle (STC)."""
         macd = self.calculate_ema(fast) - self.calculate_ema(slow)
-        
+
         def calculate_stoch(series, window):
             low = series.rolling(window).min()
             high = series.rolling(window).max()
             return 100 * (series - low) / (high - low).replace(0, np.nan)
-            
+
         stoch_k = calculate_stoch(macd, period).fillna(0)
         stoch_d = stoch_k.rolling(3).mean().fillna(0)
         stc = stoch_d.rolling(3).mean().fillna(0)
@@ -2115,14 +2115,14 @@ class IndicatorCalculator:
         hp = high.iloc[0]
         lp = low.iloc[0]
         psar.iloc[0] = low.iloc[0]
-        
+
         for i in range(1, len(self.df)):
             prev_psar = psar.iloc[i-1]
             if bull:
                 psar.iloc[i] = prev_psar + af * (hp - prev_psar)
             else:
                 psar.iloc[i] = prev_psar + af * (lp - prev_psar)
-                
+
             reverse = False
             if bull:
                 if low.iloc[i] < psar.iloc[i]:
@@ -2138,7 +2138,7 @@ class IndicatorCalculator:
                     psar.iloc[i] = lp
                     hp = high.iloc[i]
                     af = step
-                    
+
             if not reverse:
                 if bull:
                     if high.iloc[i] > hp:
@@ -2303,10 +2303,10 @@ class IndicatorCalculator:
         atr = self.calculate_atr(period)
         highest_high = self.df["high"].rolling(period).max()
         lowest_low = self.df["low"].rolling(period).min()
-        
+
         long_exit = highest_high - (atr * multiplier)
         short_exit = lowest_low + (atr * multiplier)
-        
+
         return {"long": float(long_exit.iloc[-1]), "short": float(short_exit.iloc[-1])}
 
     def calculate_all_indicators(self) -> dict[str, Any]:
@@ -2334,7 +2334,7 @@ class IndicatorCalculator:
             if not stoch_rsi_df.empty:
                 res["stoch_rsi"] = stoch_rsi_df.iloc[-1].to_dict()
                 res["stoch_rsi_vals"] = stoch_rsi_df
-        
+
         res["mom"] = self.determine_trend_momentum()
         return res
 
@@ -3375,13 +3375,13 @@ class OrderBookAnalyzer:
         bids = [
             (Decimal(price), Decimal(qty))
             for price, qty in order_book["bids"][
-                : self.config["order_book_analysis"]["depth_to_check"]
+               : self.config["order_book_analysis"]["depth_to_check"]
             ]
         ]
         asks = [
             (Decimal(price), Decimal(qty))
             for price, qty in order_book["asks"][
-                : self.config["order_book_analysis"]["depth_to_check"]
+               : self.config["order_book_analysis"]["depth_to_check"]
             ]
         ]
 
@@ -3810,7 +3810,7 @@ class TradingAnalyzer:
                 dashboard.append(f"{name.upper()}: {color}{float(val):.2f}{RESET}")
 
         for i in range(0, len(dashboard), 4):
-            output += "  " + " | ".join(dashboard[i : i + 4]) + "\n"
+            output += "  " + " | ".join(dashboard[i: i + 4]) + "\n"
 
         if walls[0] or walls[1]:
             output += f"{NEON_YELLOW}OB Walls:{RESET} {'Bullish' if walls[0] else ''} {'Bearish' if walls[1] else ''}\n"
