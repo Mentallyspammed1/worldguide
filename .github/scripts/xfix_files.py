@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from colorama import init, Fore, Style
-import google.generativeai as genai
+import requests
 import os
 import sys
 import argparse
@@ -26,6 +26,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# NVIDIA NIM configuration
+NIM_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions'
+DEFAULT_NIM_MODEL = 'nvidia/nemotron-4-340b-instruct'
+
+
 class RateLimiter:
     """Token-bucket rate limiter for API calls."""
     def __init__(self, calls_per_minute):
@@ -50,18 +55,19 @@ class RateLimiter:
 
         self.tokens -= 1
 
+
 def configure_api(api_key):
-    """Configure the Google Generative AI API."""
+    """Validate the NVIDIA NIM API key."""
     if not api_key:
-        logger.error(Fore.RED + "Error: GOOGLE_API_KEY is not set." + Style.RESET_ALL)
+        logger.error(Fore.RED + "Error: NVIDIA_API_KEY is not set." + Style.RESET_ALL)
         sys.exit(1)
-    genai.configure(api_key=api_key)
-    logger.info(Fore.CYAN + "# API configured successfully." + Style.RESET_ALL)
+    logger.info(Fore.CYAN + "# NVIDIA NIM API key configured successfully." + Style.RESET_ALL)
+
 
 def load_config(config_path):
     """Load configuration from a JSON file."""
     default_config = {
-        "model": "gemini-2.5-pro-exp-03-25",
+        "model": DEFAULT_NIM_MODEL,
         "max_calls_per_minute": 59,
         "enhancement_mode": "comprehensive",
         "backup_dir": ".enhancement_backups"
@@ -76,6 +82,7 @@ def load_config(config_path):
             logger.warning(Fore.YELLOW + f"# Failed to load config: {e}. Using defaults." + Style.RESET_ALL)
     return default_config
 
+
 def create_backup(file_path, original_code, backup_dir):
     """Create a backup of the original file."""
     os.makedirs(backup_dir, exist_ok=True)
@@ -85,6 +92,7 @@ def create_backup(file_path, original_code, backup_dir):
         f.write(original_code)
     logger.info(Fore.MAGENTA + f"# Backed up {file_path} to {backup_path}." + Style.RESET_ALL)
     return backup_path
+
 
 def compute_diff(original, enhanced):
     """Compute a human-readable diff between original and enhanced code."""
@@ -101,8 +109,9 @@ def compute_diff(original, enhanced):
             diff_text.append(Fore.RED + f"- {data}" + Style.RESET_ALL)
     return '\n'.join(diff_text)
 
-async def enhance_code(file_path, model_name, mode, rate_limiter, dry_run=False):
-    """Enhance a Python file using the generative AI model."""
+
+async def enhance_code(file_path, model_name, mode, rate_limiter, api_key, dry_run=False):
+    """Enhance a Python file using NVIDIA NIM."""
     try:
         logger.info(Fore.BLUE + f"# Summoning enhancements for {file_path} (Mode: {mode})..." + Style.RESET_ALL)
         if not os.path.exists(file_path):
@@ -118,7 +127,7 @@ async def enhance_code(file_path, model_name, mode, rate_limiter, dry_run=False)
             "readability": """Fix syntax errors and enhance the Python code for readability and maintainability. Follow PEP 8, add clear comments, and improve variable names. Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
             "performance": """Fix syntax errors and optimize the Python code for performance. Reduce time complexity, minimize memory usage, and use efficient data structures. Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
             "type_hints": """Fix syntax errors and add type hints to the Python code to improve type safety, following PEP 484. Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
-            "comprehensive": """Fix syntax errors and enhance the Python code comprehensively: improve readability (PEP 8, comments, naming), optimize performance, and add type hints (PEP 484). Preserve functionality. Return only the enhanced code wrapped in ```python ... ```."""
+            "comprehensive": """Fix syntax errors and enhance the Python code comprehensively: improve readability (PEP 8, comments, naming), optimize performance, and add type hints (PEP 484). Preserve functionality. Return only the enhanced code wrapped in ```python ... ```.""",
         }
         prompt_template = prompts.get(mode, prompts["comprehensive"])
         prompt = f"{prompt_template}\n\n```python\n{original_code}\n```"
@@ -126,18 +135,41 @@ async def enhance_code(file_path, model_name, mode, rate_limiter, dry_run=False)
         # Rate limiting
         await rate_limiter.acquire()
 
-        # Call the AI model
-        model = genai.GenerativeModel(model_name)
-        response = model.generate_content(prompt)
+        # Call NVIDIA NIM API
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": "You are an expert Python code enhancer. Return only the enhanced code wrapped in ```python ... ``` blocks."},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "max_tokens": 8192,
+        }
 
-        if not response or not hasattr(response, 'text') or not response.text:
-            logger.error(Fore.RED + f"Error: No valid response from AI for {file_path}." + Style.RESET_ALL)
+        try:
+            resp = requests.post(NIM_BASE_URL, headers=headers, json=payload, timeout=120)
+            resp.raise_for_status()
+            data = resp.json()
+            response_text = data["choices"][0]["message"]["content"]
+        except Exception as e:
+            logger.error(Fore.RED + f"Error calling NVIDIA NIM API for {file_path}: {str(e)}" + Style.RESET_ALL)
+            return False
+
+        if not response_text:
+            logger.error(Fore.RED + f"Error: No valid response from NVIDIA NIM for {file_path}." + Style.RESET_ALL)
             return False
 
         # Extract enhanced code
-        enhanced_code = response.text.strip()
+        enhanced_code = response_text.strip()
         if enhanced_code.startswith('```python') and enhanced_code.endswith('```'):
             enhanced_code = enhanced_code[10:-3].strip()
+        elif enhanced_code.startswith('```') and enhanced_code.endswith('```'):
+            enhanced_code = enhanced_code[3:-3].strip()
         else:
             logger.warning(Fore.YELLOW + f"# Response not properly formatted; assuming raw code." + Style.RESET_ALL)
 
@@ -164,18 +196,19 @@ async def enhance_code(file_path, model_name, mode, rate_limiter, dry_run=False)
         logger.error(Fore.RED + f"Error enhancing {file_path}: {str(e)}" + Style.RESET_ALL)
         return False
 
+
 async def main():
     """Main function to parse arguments and enhance files."""
-    parser = argparse.ArgumentParser(description="Pyrmethus Advanced Code Enhancer")
+    parser = argparse.ArgumentParser(description="Pyrmethus Advanced Code Enhancer (NVIDIA NIM)")
     parser.add_argument("file_path", help="Path to the Python file to enhance")
-    parser.add_argument("--model", default="gemini-1.5-pro", help="AI model to use")
+    parser.add_argument("--model", default=DEFAULT_NIM_MODEL, help="NVIDIA NIM model to use")
     parser.add_argument("--max-calls", type=int, default=59, help="Max API calls per minute (1-60)")
     parser.add_argument("--mode", choices=["readability", "performance", "type_hints", "comprehensive"], default="comprehensive", help="Enhancement mode")
     parser.add_argument("--config", help="Path to JSON config file")
     parser.add_argument("--dry-run", action="store_true", help="Preview changes without applying them")
     args = parser.parse_args()
 
-    logger.info(Fore.MAGENTA + "# Pyrmethus Advanced Code Enhancer Initialized" + Style.RESET_ALL)
+    logger.info(Fore.MAGENTA + "# Pyrmethus Advanced Code Enhancer Initialized (NVIDIA NIM)" + Style.RESET_ALL)
 
     # Load configuration
     config = load_config(args.config)
@@ -188,8 +221,8 @@ async def main():
         logger.error(Fore.RED + f"Error: max-calls must be between 1 and 60, got {max_calls}." + Style.RESET_ALL)
         sys.exit(1)
 
-    # Configure API
-    api_key = os.getenv("GOOGLE_API_KEY")
+    # Get NVIDIA API key
+    api_key = os.getenv("NVIDIA_API_KEY")
     configure_api(api_key)
 
     # Initialize rate limiter
@@ -197,7 +230,7 @@ async def main():
 
     # Enhance file with progress feedback
     with tqdm(total=1, desc="Enhancing", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}]") as pbar:
-        success = await enhance_code(args.file_path, model_name, mode, rate_limiter, args.dry_run)
+        success = await enhance_code(args.file_path, model_name, mode, rate_limiter, api_key, args.dry_run)
         pbar.update(1)
 
     if success:
@@ -206,6 +239,7 @@ async def main():
     else:
         logger.error(Fore.RED + "# Enhancement spell failed." + Style.RESET_ALL)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

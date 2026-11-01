@@ -1,4 +1,4 @@
-name: Pyrmethus Code Fixer Workflow
+name: NVIDIA NIM Code Fixer Workflow
 
 on:
   workflow_dispatch:
@@ -16,11 +16,11 @@ on:
         required: true
         default: './xfix_files.py'
       enhancement_script_args:
-        description: 'Arguments for xfix_files.py (e.g., --model gemini-2.5-pro-exp-03-25 --mode comprehensive).'
+        description: 'Arguments for xfix_files.py (e.g., --model nvidia/nemotron-4-340b-instruct --mode comprehensive).'
         required: false
         default: ''
-      google_api_key:
-        description: 'Google API Key (leave blank to use secret GOOGLE_API_KEY).'
+      nvidia_api_key:
+        description: 'NVIDIA API Key (leave blank to use secret NVIDIA_API_KEY).'
         required: false
       max_api_calls_per_minute:
         description: 'Max API calls per minute (1-60).'
@@ -125,7 +125,7 @@ jobs:
         run: |
           echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Installing dependencies..." >> enhancement_log.txt
           python -m pip install --upgrade pip
-          pip install google-generativeai aiohttp colorama tqdm diff-match-patch
+          pip install requests aiohttp colorama tqdm diff-match-patch
           pip list >> enhancement_log.txt
 
       - name: Make Enhancement Script Executable
@@ -144,7 +144,7 @@ jobs:
           else
             full_pattern="${normalized_base_dir}/${{ inputs.file_pattern }}"
           fi
-          full_pattern=$(echo "$full_pattern" | sed 's#^\./##' | sed 's#//\+#/#g')
+          full_pattern=$(echo "$full_pattern" | sed 's#^\./##' | sed 's#//\\+#/#g')
           echo "Effective pattern: '$full_pattern'" | tee -a enhancement_log.txt matched_files.txt
 
           git ls-files -- "$full_pattern" | grep '\.py$' | sort > matched_files_list.txt
@@ -184,13 +184,13 @@ jobs:
         id: run-enhancement
         if: steps.prepare_batching.outputs.files_available_for_batching == 'true'
         env:
-          GOOGLE_API_KEY: ${{ inputs.google_api_key || secrets.GOOGLE_API_KEY }}
+          NVIDIA_API_KEY: ${{ inputs.nvidia_api_key || secrets.NVIDIA_API_KEY }}
           MAX_API_CALLS_PER_MINUTE: ${{ inputs.max_api_calls_per_minute }}
           ENHANCEMENT_SCRIPT_ARGS: ${{ inputs.enhancement_script_args }}
         run: |
           echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Running enhancement script on batches..." >> enhancement_log.txt
-          if [ -z "$GOOGLE_API_KEY" ]; then
-            echo "Error: GOOGLE_API_KEY is not set." | tee -a enhancement_log.txt
+          if [ -z "$NVIDIA_API_KEY" ]; then
+            echo "Error: NVIDIA_API_KEY is not set." | tee -a enhancement_log.txt
             exit 1
           fi
           processed_count=0

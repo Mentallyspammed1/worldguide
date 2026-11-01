@@ -2,20 +2,23 @@
 import os
 import json
 import requests
-import google.generativeai as genai
 from colorama import init, Fore, Style, Back
 
 init(autoreset=True)
 
 MAX_CHUNK_TOKENS = 3800
-GEMINI_MODEL_NAME = 'gemini-2.5-pro-exp-03-25'
+NIM_MODEL_NAME = 'nvidia/nemotron-4-340b-instruct'
+NIM_BASE_URL = 'https://integrate.api.nvidia.com/v1/chat/completions'
 GITHUB_API_BASE_URL = "https://api.github.com"
+
 
 def print_wizard_message(message, color=Fore.CYAN):
     print(color + Style.BRIGHT + "✨ Pyrmethus whispers: " + Style.RESET_ALL + color + message + Style.RESET_ALL)
 
+
 def print_error_message(message):
     print(Back.RED + Fore.WHITE + Style.BRIGHT + "⚠️ Arcane Anomaly: " + Style.RESET_ALL + Fore.RED + message + Style.RESET_ALL)
+
 
 def chunk_diff(diff_text, max_tokens=MAX_CHUNK_TOKENS):
     print_wizard_message(f"Chunking the diff (max ~{max_tokens} tokens per chunk)...", Fore.MAGENTA)
@@ -55,7 +58,13 @@ def chunk_diff(diff_text, max_tokens=MAX_CHUNK_TOKENS):
     print_wizard_message(f"Diff split into {Fore.YELLOW}{len(chunks)}{Fore.MAGENTA} chunks.", Fore.MAGENTA)
     return chunks
 
-def analyze_code_chunk_with_gemini(diff_chunk, model):
+
+def analyze_code_chunk_with_nim(diff_chunk, api_key):
+    """Send a diff chunk to NVIDIA NIM for code review."""
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
     prompt = f"""
     You are an expert code reviewer AI assistant, Pyrmethus's familiar.
     Analyze the following code diff strictly for potential bugs, security vulnerabilities, and significant logical errors within the changes presented.
@@ -76,3 +85,32 @@ def analyze_code_chunk_with_gemini(diff_chunk, model):
     Diff Chunk:
     ```diff
     {diff_chunk}
+    ```
+    """
+    payload = {
+        "model": NIM_MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": "You are an expert code reviewer that responds only with valid JSON."},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+    }
+    try:
+        resp = requests.post(NIM_BASE_URL, headers=headers, json=payload, timeout=120)
+        resp.raise_for_status()
+        data = resp.json()
+        content = data["choices"][0]["message"]["content"]
+        return content
+    except Exception as e:
+        print_error_message(f"NVIDIA NIM API error: {e}")
+        return "[]"
+
+
+def get_nim_api_key():
+    api_key = os.getenv("NVIDIA_API_KEY")
+    if not api_key:
+        print_error_message("NVIDIA_API_KEY is not set. Please set it as an environment variable or repository secret.")
+        return None
+    return api_key
