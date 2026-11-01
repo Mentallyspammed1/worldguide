@@ -1,6 +1,10 @@
 {
-  "name": "TittyHunter Pro",
-  "description": "A robust media-scraping search engine for adult content sites with multi-proxy support.",
+  "name": "Pyrmsearch",
+  "description": "A local-first 18+ search interface for public adult-site listings. It does not host content or bypass access controls.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "Public listing search",
+    "Browser-local favorites and collections",
+    "Progressive web app installation"
+  ]
 }

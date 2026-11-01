@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "pyrmsearch",
-  "short_name": "pyrmsearch",
-  "description": "Neon Multi-Site Hunter with live hover video preview, favorites, and diagnostics",
+  "name": "Pyrmsearch",
+  "short_name": "Pyrmsearch",
+  "description": "Local-first search interface for public adult-site listings. 18+ only.",
   "theme_color": "#05050a",
   "background_color": "#05050a",
   "display": "standalone",

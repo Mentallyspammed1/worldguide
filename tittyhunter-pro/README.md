@@ -1,250 +1,94 @@
-# TittyHunter Pro
+# Pyrmsearch
 
-**Neon Multi-Site Hunter** — A React 19 + TypeScript + Express/Vite multi-site media scraping search engine for adult content sites, optimized for Termux/Android.
+A local-first progressive web app for searching public listings on adult-content platforms. **18+ only.** The app shows links and metadata; it does not host source content or bypass logins, paywalls, age checks, or other access controls.
 
-> ⚠️ **Disclaimer:** This project is for educational and personal use only. Respect the terms of service of target websites and applicable laws in your jurisdiction. The authors are not responsible for misuse.
+> Use only public pages. Follow the laws where you live and each source site's terms. Availability and page layouts change; a configured site may block automated requests or return no results.
 
----
+## Highlights
 
-## Features
+- Search one configured source at a time across 13 site adapters.
+- Parse results into responsive cards with optional hover previews.
+- Save favorites, recent items, collections, and compressed screenshots in browser storage.
+- Import/export a validated JSON backup.
+- Run per-source or all-source connectivity checks.
+- Install as a PWA; the service worker caches only the app shell and static assets, never search responses or remote media.
+- Same-origin Express API with rate limits, security headers, bounded HTML responses, and allow-listed upstream hosts.
 
-- **Multi-site search** across 13 adult content platforms:
-  - XVideos, XNXX, Eporner, XHamster, Pornhub, RedTube, YouPorn
-  - OK.XXX, Hello.Porn, Users.Porn, PornTrex, HQPorner, SpankBang
-- **Live hover video previews** on search results (touch + mouse support)
-- **Full video playback in teaser modal** — fetch and play the entire video from the source page (`PLAY FULL VIDEO` / `PREVIEW CLIP` toggle)
-- **IntersectionObserver preloading** — videos preload as cards enter the viewport
-- **Save video screenshots** — capture a frame from any video preview and save it to localStorage (`📷` icon on each card)
-- **Saved Screenshots gallery** — view all captured screenshots in a dedicated tab with delete and bulk actions
-- **Favorites system** (persisted via `localStorage`)
-- **Site Diagnostics** tab for connectivity/latency testing per site
-- **CORS proxy** for server-side HTML fetching (`/api/scrape`)
-- **Media stream proxy** with `Range` support (`/api/proxy-media`)
-- **PWA support** (installable as an app)
-- **Rate limiting** and structured `pino` logging
-- **Express + Vite middleware mode** (dev) / static file serving (prod)
-- **Background server management** via npm scripts (`bg`, `stop`, `status`, `logs`, `restart`)
+## Requirements and setup
 
----
+- Node.js 20 or newer
+- npm 10 or newer
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 19, TypeScript, Tailwind CSS v4, Lucide React, Motion (Framer Motion) |
-| Backend | Express, Node.js, tsx |
-| Build Tool | Vite 6, Vite PWA Plugin |
-| Logging | Pino + Pino Pretty |
-| Rate Limiting | express-rate-limit |
-| Security | Helmet |
-| Environment | Termux (Android), Node v26.4.0, npm 11.14.0 |
-
----
-
-## Project Structure
-
-```
-tittyhunter-pro/
-├── server.ts              # Express backend entry point
-├── package.json           # Dependencies & scripts
-├── tsconfig.json          # TypeScript config
-├── vite.config.ts         # Vite build config
-├── tailwind.config.js     # Tailwind CSS v4 config
-├── .env.local             # Environment variables (create this)
-├── server.log             # Background server logs
-├── server.pid             # Background server PID file
-├── public/
-│   ├── pyrmsearch.apk     # Android APK download
-│   ├── manifest.json      # PWA manifest
-│   └── icons/             # PWA icons
-├── src/
-│   ├── main.tsx           # React entry point
-│   ├── App.tsx            # Main app (Hunt / Favorites / Diagnostics tabs)
-│   ├── constants.ts       # Site configs & CSS selectors
-│   ├── index.css          # Tailwind imports & custom styles
-│   ├── usePWAInstall.ts   # PWA install prompt hook
-│   └── lib/
-│       └── scraper.ts     # HTML parsing + proxy fallback logic
-└── dist/                  # Production build output (generated)
+```sh
+cd tittyhunter-pro
+npm ci
+cp .env.example .env
+npm run dev
 ```
 
----
+The development server listens on `0.0.0.0:3000` by default and serves both the React app and API. Set `PORT` to use another port. Do not commit `.env` files.
 
-## Installation
+### Production
 
-### Prerequisites
-
-- Termux (Android) or any Node.js environment
-- Node.js v20+ (tested on v26.4.0)
-- npm v11+
-
-### Setup
-
-```bash
-# Clone / navigate to the project
-cd /data/data/com.termux/files/home/nsfw/Termux_Monkey_Projects/tittyhunter-pro
-
-# Install dependencies (use --legacy-peer-deps on Termux/Android)
-npm install --legacy-peer-deps --no-audit --no-fund
-
-# Create environment file
-cp .env.example .env.local   # if .env.example exists, otherwise create manually
+```sh
+npm ci
+npm run build
+npm ci --omit=dev  # optional: keep only runtime packages after building
+npm start
 ```
 
-### Environment Variables (`.env.local`)
+`npm start` serves the generated `dist/` build and API from Express. The server runner (`tsx`) is a runtime dependency; Vite, React, and test/build tooling are development dependencies. `npm run preview` is an alias for this full production server; it is not Vite's static-only preview server.
 
-```env
-PORT=3000
-NODE_ENV=development
-LOG_LEVEL=info
-```
+### Scripts
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PORT` | No | Server port (default: `3000`) |
-| `NODE_ENV` | No | `development` or `production` (default: `development`) |
-| `LOG_LEVEL` | No | Pino log level (default: `info`) |
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start Express with Vite middleware and hot reload |
+| `npm run build` | Type-check and build the production frontend |
+| `npm run start` | Serve the production build and API |
+| `npm run typecheck` | Run TypeScript checks |
+| `npm test` | Run unit and API tests |
+| `npm run check` | Run type-check, tests, and build |
+| `npm run bg` / `npm run stop` | Start/stop a detached production server |
+| `npm run status` / `npm run logs` | Inspect server state/logs |
+| `npm run restart` | Restart the detached production server |
 
----
+The background scripts track only their own PID; `server.pid` and `server.log` are ignored by Git.
 
-## Available Scripts
+## Configuration
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start server in foreground with `tsx` |
-| `npm run build` | Build frontend for production with Vite |
-| `npm run start` | Start compiled server with `node server.ts` |
-| `npm run preview` | Preview production build with Vite |
-| `npm run clean` | Remove `dist/` directory |
-| `npm run lint` | Type-check with `tsc --noEmit` |
-| `npm run bg` | Start server in background (`nohup`, logs to `server.log`) |
-| `npm run stop` | Stop background server |
-| `npm run status` | Check if background server is running |
-| `npm run logs` | Follow background server logs |
-| `npm run restart` | Stop then start background server |
+| Variable | Default | Description |
+| --- | --- | --- |
+| `PORT` | `3000` | HTTP listening port |
+| `HOST` | `0.0.0.0` | Listening interface |
+| `NODE_ENV` | production when started normally | Use `development` for development behavior |
+| `LOG_LEVEL` | `info` | Pino log level |
+| `MEDIA_HOST_ALLOWLIST` | empty | Optional comma-separated HTTPS media CDN hostnames, without schemes or paths |
 
-### Recommended Workflow (Termux)
+The media proxy already permits configured source-site domains. Add only CDN hosts you trust. Redirects are revalidated against the same allow-list. Do not use this setting to allow private or internal hosts.
 
-```bash
-# Start in background
-npm run bg
+## API
 
-# Check status
-npm run status
+All endpoints are same-origin. No third-party CORS relay is used, so search terms are not sent to public proxy services. Requests to a search source are made by this server on the user's behalf.
 
-# View logs
-npm run logs
+- `GET /health` — server health and runtime metadata.
+- `GET /api/scrape?site=xvideos&query=example&page=1` — fetches a public listing page from a configured source. `site` must be a known key, `query` is limited to 120 characters, and `page` to 1–100.
+- `GET /api/test-sites` — checks all configured sources. Add `?site=xvideos` to check just one.
+- `GET /api/video-source?site=xvideos&url=https%3A%2F%2F...` — inspects a public video page on the selected site for a supported direct media URL.
+- `GET /api/proxy-media?url=https%3A%2F%2F...` — streams media only from configured site domains or `MEDIA_HOST_ALLOWLIST` hosts. Supports a single byte range for seeking.
 
-# Stop when done
-npm run stop
-```
+API requests are rate-limited. Upstream HTML is capped at 2 MiB, redirect targets are checked, and arbitrary URLs cannot be fetched through the scraper routes. Source-site failures are returned as errors rather than relayed through external services.
 
----
+## Local data and privacy
 
-## API Endpoints
+Favorites, search history, recent items, collections, and screenshots are stored in the current browser's `localStorage`. They are not uploaded by the app, but anyone with access to that browser profile can see them. Search queries are sent to the selected source through this server; server request logs deliberately omit query strings. Use **Backup** to export or move data, and clear browser storage when appropriate. Backups may contain sensitive browsing history and screenshots—store them carefully.
 
-### `GET /health`
-Health check. Returns server status, uptime, port, and environment.
+The PWA can reopen its interface offline after it has been loaded once, but searches and media require a network connection. Remote thumbnails and video previews are requested from their source hosts. Browser cross-origin restrictions may prevent screenshot capture for some streams.
 
-### `GET /api/test-sites`
-Tests reachability and latency for all configured scraping sites.
+## Sources and maintenance
 
-### `GET /api/scrape`
-Server-side HTML proxy to bypass CORS when scraping target sites.
-
-**Query Parameters:**
-- `site` — Target site key (e.g., `xvideos`, `pornhub`)
-- `query` — Search query string
-- `page` — Page number (default: `1`)
-
-**Example:**
-```bash
-curl "http://localhost:3000/api/scrape?site=xvideos&query=test&page=1"
-```
-
-### `GET /api/proxy-media`
-Proxies video media streams with `Referer`/`Origin` headers and `Range` request support.
-
-**Query Parameters:**
-- `url` — Direct media URL to proxy
-
-**Example:**
-```bash
-curl "http://localhost:3000/api/proxy-media?url=https://example.com/video.mp4"
-```
-
-### `GET /pyrmsearch.apk`
-Serves the Android APK file from `public/`.
-
----
-
-## Frontend Tabs
-
-### 1. Hunt
-Search across all configured sites with live hover video previews. Results are parsed from target site HTML and displayed in a responsive grid. Videos preload as cards enter the viewport, and previews work on both mouse hover and touch.
-
-Open any result in the **teaser modal** to watch the preview clip, or tap **PLAY FULL VIDEO** to fetch and play the entire video directly from the source site (when a playable video URL can be extracted). Toggle between `PREVIEW CLIP` and `PLAY FULL VIDEO` at any time.
-
-### 2. Favorites
-Bookmark favorite videos. Persisted in browser `localStorage`.
-
-### 3. Site Diagnostics
-Ping each configured site to check connectivity and measure response latency. Useful for debugging which sites are reachable from your network.
-
-### 4. Saved Screenshots
-View all captured video screenshots in a grid. Each screenshot shows the source site, title, and capture timestamp. You can delete individual screenshots or clear all at once. Screenshot data URLs can be copied to clipboard in bulk.
-
----
-
-## Background Server Management
-
-The `bg` script uses `nohup` to detach the process and writes the PID to `server.pid`:
-
-```bash
-npm run bg      # starts: nohup ./node_modules/.bin/tsx server.ts > server.log 2>&1 &
-npm run status  # checks if PID is alive
-npm run logs    # tail -f server.log
-npm run stop    # kills the process and removes server.pid
-npm run restart # stop + start
-```
-
-> **Note:** On Termux, always use `./node_modules/.bin/tsx` directly (not `npx tsx`) for background processes, as `npx` can spawn a short-lived wrapper that exits before the server binds.
-
----
-
-## Troubleshooting
-
-### Port 3000 already in use
-```bash
-npm run stop
-# or manually kill:
-pkill -f 'tsx server.ts'
-```
-
-### TypeScript errors
-```bash
-npm run lint
-```
-
-### Missing optional dependency (`@rollup/rollup-android-arm64`)
-If `npm install` fails on Termux due to missing optional dependencies:
-
-```bash
-rm -rf node_modules package-lock.json
-npm install --legacy-peer-deps --no-audit --no-fund
-```
-
-### Server starts but port never listens (backgrounded)
-Ensure you're using `npm run bg` (which uses `./node_modules/.bin/tsx` directly) rather than `npx tsx server.ts` in the background.
-
----
+Source metadata, URL templates, and selectors live in `src/constants.ts`. Source sites change frequently, so diagnostics indicate basic reachability only—not that selectors are still current or that results will be playable. The parser ignores unsafe link schemes and only keeps result links on the selected source's domain.
 
 ## License
 
 MIT. Use responsibly.
-
----
-
-## Credits
-
-Built with [React](https://react.dev), [Vite](https://vitejs.dev), [Express](https://expressjs.com), [Tailwind CSS](https://tailwindcss.com), and [Pino](https://getpino.io).
