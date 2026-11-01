@@ -224,7 +224,7 @@ export const SITES: Record<string, SiteConfig> = {
     paginate: '&p=',
     icon: 'HQ',
     color: '#8b5cf6',
-    cardSel: 'section.box.feature, .box.feature, div.6u',
+    cardSel: 'section.box.feature, .box.feature, div[class~="6u"]',
     linkSel: 'a[href*="/hdporn/"]',
     titleSel: 'a.image.featured[title], a[href*="/hdporn/"]',
     durationSel: '.duration',
@@ -251,14 +251,6 @@ export const SITES: Record<string, SiteConfig> = {
   }
 };
 
-export const PROXIES = [
-  (url: string) =>
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url: string) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-  (url: string) =>
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-];
-
 export interface TrendingCategory {
   id: string;
   label: string;
@@ -279,7 +271,6 @@ export const TRENDING_CATEGORIES: TrendingCategory[] = [
       'redhead',
       'amateur',
       'milf',
-      'teen 18+',
       'latina',
       'asian',
       'college',
@@ -306,7 +297,7 @@ export const TRENDING_CATEGORIES: TrendingCategory[] = [
     label: 'Featured',
     emoji: '⭐',
     color: '#d300c5',
-    tags: ['amateur', 'milf', 'teen 18+', 'blonde', 'big tits', 'creampie']
+    tags: ['adult amateur', 'milf', 'blonde', 'big tits', 'creampie']
   },
   {
     id: 'ethnic',
@@ -397,7 +388,8 @@ export const TRENDING_CATEGORIES: TrendingCategory[] = [
   }
 ];
 
-export const POPULAR_TAGS = TRENDING_CATEGORIES.find(c => c.id === 'all')?.tags;
+export const POPULAR_TAGS: string[] =
+  TRENDING_CATEGORIES.find(c => c.id === 'all')?.tags ?? [];
 
 export const RANDOM_TAGS = [
   'surprise me',

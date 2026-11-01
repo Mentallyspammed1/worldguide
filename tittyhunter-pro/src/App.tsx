@@ -34,11 +34,8 @@ import {
   VolumeX,
   Download,
   Smartphone,
-  ArrowDownToLine,
   ShieldCheck,
-  Zap,
   Camera,
-  Save,
   PictureInPicture2,
   Share2,
   Upload,
@@ -61,15 +58,29 @@ import {
   SiteTestResult
 } from './lib/scraper';
 import { usePWAInstall } from './usePWAInstall';
+import {
+  parseBackupText,
+  sanitizeCollection,
+  sanitizeHistory,
+  sanitizeRecentlyWatched,
+  sanitizeScreenshot,
+  sanitizeVideoResult,
+  type Collection,
+  type RecentlyWatchedItem,
+  type SavedScreenshot
+} from './lib/backup';
 
 interface VideoCardProps {
   item: VideoResult;
   isFavorited: boolean;
   onToggleFavorite: (e: React.MouseEvent, item: VideoResult) => void;
-  onCopyLink: (e: React.MouseEvent, item: VideoResult) => void;
+  onCopyLink: (e: React.MouseEvent, item: VideoResult) => Promise<boolean>;
   onOpenTeaser: (item: VideoResult) => void;
-  onSaveScreenshot: (item: VideoResult) => void;
+  onMarkWatched: (item: VideoResult) => void;
+  onSaveScreenshot: (item: VideoResult, video: HTMLVideoElement | null) => void;
   onShare: (item: VideoResult) => void;
+  collections: Collection[];
+  onAddToCollection: (collectionId: string, item: VideoResult) => void;
 }
 
 // Self-contained Video Card component to isolate hover, preview, image error, and copy states
@@ -79,8 +90,11 @@ const VideoCard: React.FC<VideoCardProps> = ({
   onToggleFavorite,
   onCopyLink,
   onOpenTeaser,
+  onMarkWatched,
   onSaveScreenshot,
-  onShare
+  onShare,
+  collections,
+  onAddToCollection
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isTouchActive, setIsTouchActive] = useState(false);
@@ -88,131 +102,135 @@ const VideoCard: React.FC<VideoCardProps> = ({
   const [videoError, setVideoError] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string>('');
-  const [isRetryingProxy, setIsRetryingProxy] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
+  const [videoSrc, setVideoSrc] = useState('');
+  const [proxyAttempted, setProxyAttempted] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isPipActive, setIsPipActive] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const preloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
-  const modalAbortRef = useRef<AbortController | null>(null);
+  const videoSrcRef = useRef('');
+  const videoErrorRef = useRef(false);
 
   const hasVideo = Boolean(videoSrc) && !videoError;
   const shouldShowVideo = (isHovered || isTouchActive) && hasVideo;
 
-  // Track mounted state to prevent state updates after unmount
+  useEffect(() => {
+    videoSrcRef.current = videoSrc;
+  }, [videoSrc]);
+  useEffect(() => {
+    videoErrorRef.current = videoError;
+  }, [videoError]);
+
+  // Track mounted state and stop playback when a card leaves the results grid.
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       if (preloadTimeoutRef.current) clearTimeout(preloadTimeoutRef.current);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
       if (videoRef.current) {
         videoRef.current.pause();
-        videoRef.current.src = '';
+        videoRef.current.removeAttribute('src');
         videoRef.current.load();
       }
     };
   }, []);
 
-  // Reset all media and hover states when item changes (e.g. after tests or new search)
+  // Reset media and hover states if React reuses this card for another result.
   useEffect(() => {
     setIsHovered(false);
     setIsTouchActive(false);
     setImgError(false);
     setVideoError(false);
+    videoErrorRef.current = false;
     setVideoLoaded(false);
     setVideoLoading(false);
-    setIsRetryingProxy(false);
-    setRetryCount(0);
+    setProxyAttempted(false);
     setVideoSrc('');
+    videoSrcRef.current = '';
     if (videoRef.current) {
       videoRef.current.pause();
-      videoRef.current.src = '';
+      videoRef.current.removeAttribute('src');
       videoRef.current.load();
     }
   }, [item.id, item.previewVideo]);
 
-  // Preload video metadata when card enters viewport (Intersection Observer)
+  // Defer loading preview streams until a card is near the viewport.
   useEffect(() => {
     if (!item.previewVideo) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      videoSrcRef.current = item.previewVideo;
+      setVideoSrc(item.previewVideo);
+      setVideoLoading(true);
+      return;
+    }
 
     const observer = new IntersectionObserver(
       entries => {
-        const [entry] = entries;
-        if (
-          entry?.isIntersecting &&
-          !videoSrc &&
-          !videoError &&
-          !videoLoading
-        ) {
-          // Delay preload slightly to avoid flooding on rapid scroll
-          preloadTimeoutRef.current = setTimeout(() => {
-            if (isMountedRef.current && !videoSrc && !videoError) {
-              setVideoSrc(item.previewVideo);
-              setVideoLoading(true);
-            }
-          }, 150);
-        }
+        const entry = entries[0];
+        if (!entry?.isIntersecting || videoSrcRef.current || videoErrorRef.current) return;
+        observer.unobserve(entry.target);
+        preloadTimeoutRef.current = setTimeout(() => {
+          if (!isMountedRef.current || videoSrcRef.current || videoErrorRef.current) return;
+          videoSrcRef.current = item.previewVideo;
+          setVideoSrc(item.previewVideo);
+          setVideoLoading(true);
+        }, 150);
       },
       { threshold: 0.1, rootMargin: '100px' }
     );
 
-    const el = containerRef.current;
-    if (el) observer.observe(el);
-
+    const element = containerRef.current;
+    if (element) observer.observe(element);
     return () => {
+      observer.disconnect();
       if (preloadTimeoutRef.current) clearTimeout(preloadTimeoutRef.current);
-      if (modalAbortRef.current) modalAbortRef.current.abort();
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.src = '';
-        videoRef.current.load();
-      }
-      // disconnect the IntersectionObserver that was set up below
-      const obs = containerRef.current?.observer;
-      if (obs) obs.disconnect();
     };
   }, [item.previewVideo, item.id]);
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    onCopyLink(e, item);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    const copied = await onCopyLink(e, item);
+    setIsCopied(copied);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    if (copied) {
+      copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
+    }
   };
 
   const handleVideoLoadedData = () => {
     setVideoLoaded(true);
     setVideoLoading(false);
-    // Auto-play when loaded and visible
-    if (shouldShowVideo && videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay blocked, user interaction needed
-      });
-    }
   };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (shouldShowVideo && videoLoaded) {
+      video.play().catch(() => undefined);
+    } else if (!shouldShowVideo) {
+      video.pause();
+    }
+  }, [shouldShowVideo, videoLoaded, videoSrc]);
 
   const handleVideoError = () => {
     setVideoLoading(false);
-    // If direct CDN video fails, attempt proxy fallback via backend (max 2 retries)
-    if (
-      retryCount < 2 &&
-      item.previewVideo &&
-      !item.previewVideo.startsWith('/api/proxy-media') &&
-      !videoError
-    ) {
-      setRetryCount(prev => prev + 1);
-      setIsRetryingProxy(true);
-      setVideoSrc(
-        `/api/proxy-media?url=${encodeURIComponent(item.previewVideo)}`
-      );
-    } else {
-      setVideoError(true);
+    if (!proxyAttempted && videoSrc && !videoSrc.startsWith('/api/proxy-media')) {
+      setProxyAttempted(true);
       setVideoLoaded(false);
+      setVideoLoading(true);
+      const proxiedUrl = `/api/proxy-media?url=${encodeURIComponent(videoSrc)}`;
+      videoSrcRef.current = proxiedUrl;
+      setVideoSrc(proxiedUrl);
+      return;
     }
+    videoErrorRef.current = true;
+    setVideoError(true);
+    setVideoLoaded(false);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -233,8 +251,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-      className='group bg-[#0a0a12] border border-[#1a1a2e] hover:border-[#ff2a6d] rounded-xl overflow-hidden relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_25px_rgba(255,42,109,0.3)] flex flex-col cursor-pointer'
+      className='group bg-[#0a0a12] border border-[#1a1a2e] hover:border-[#ff2a6d] rounded-xl overflow-hidden relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_8px_25px_rgba(255,42,109,0.3)] flex flex-col'
     >
       {/* Thumbnail / Video Preview Container */}
       <div className='relative w-full h-42 bg-[#070710] overflow-hidden'>
@@ -258,21 +275,21 @@ const VideoCard: React.FC<VideoCardProps> = ({
         )}
 
         {/* Active Hover / Touch Video Preview (Fades in over thumbnail once buffered) */}
-        {shouldShowVideo && (
+        {hasVideo && (
           <video
             ref={videoRef}
             src={videoSrc}
-            autoPlay
+            autoPlay={shouldShowVideo}
             muted
             playsInline
             loop
             preload='metadata'
             referrerPolicy='no-referrer'
             onLoadedData={handleVideoLoadedData}
-            onCanPlay={() => setVideoLoaded(true)}
+            onCanPlay={handleVideoLoadedData}
             onError={handleVideoError}
-            className={`absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-300 ${
-              videoLoaded ? 'opacity-100' : 'opacity-0'
+            className={`absolute inset-0 w-full h-full object-cover z-10 pointer-events-none transition-opacity duration-300 ${
+              shouldShowVideo && videoLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
         )}
@@ -308,29 +325,37 @@ const VideoCard: React.FC<VideoCardProps> = ({
         {/* Picture-in-Picture Button on Top-Right (only when video is active) */}
         {shouldShowVideo &&
           videoRef.current &&
-          document.pictureInPictureEnabled && (
-          <button
-            onClick={e => {
-              e.stopPropagation();
-              if (document.pictureInPictureElement) {
-                document.exitPictureInPicture().catch(() => {});
-                setIsPipActive(false);
-              } else {
-                  videoRef.current!.requestPictureInPicture().catch(() => {});
-                  setIsPipActive(true);
-              }
-            }}
-            title={
-              isPipActive ? 'Exit Picture-in-Picture' : 'Picture-in-Picture'
-            }
-            className='absolute top-2.5 right-11 w-8 h-8 rounded-full border border-[#05d9e8]/50 flex items-center justify-center text-xs transition-all z-20 cursor-pointer hover:bg-[#05d9e8]/20 hover:text-[#05d9e8] hover:border-[#05d9e8]'
-          >
-            <PictureInPicture2 size={14} />
-          </button>
-        )}
+          'pictureInPictureEnabled' in document &&
+          document.pictureInPictureEnabled &&
+          'requestPictureInPicture' in videoRef.current && (
+            <button
+              type='button'
+              aria-label={isPipActive ? 'Exit Picture-in-Picture' : 'Picture-in-Picture'}
+              onClick={async event => {
+                event.stopPropagation();
+                try {
+                  if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                    setIsPipActive(false);
+                  } else if (videoRef.current) {
+                    await videoRef.current.requestPictureInPicture();
+                    setIsPipActive(true);
+                  }
+                } catch {
+                  setIsPipActive(false);
+                }
+              }}
+              title={isPipActive ? 'Exit Picture-in-Picture' : 'Picture-in-Picture'}
+              className='absolute top-2.5 right-11 w-8 h-8 rounded-full border border-[#05d9e8]/50 flex items-center justify-center text-xs transition-all z-20 cursor-pointer hover:bg-[#05d9e8]/20 hover:text-[#05d9e8] hover:border-[#05d9e8]'
+            >
+              <PictureInPicture2 size={14} />
+            </button>
+          )}
 
         {/* Favorite Toggle Button on Top-Right */}
         <button
+          type='button'
+          aria-label={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
           onClick={e => onToggleFavorite(e, item)}
           title={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
           className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full border border-black/40 flex items-center justify-center text-sm transition-all z-20 cursor-pointer ${isFavorited ? 'bg-[#ff2a6d] text-white shadow-[0_0_12px_#ff2a6d] animate-pulse-neon' : 'bg-black/75 text-white/80 hover:bg-[#ff2a6d] hover:text-white hover:scale-110'}`}
@@ -338,14 +363,11 @@ const VideoCard: React.FC<VideoCardProps> = ({
           {isFavorited ? '🔞🔞' : '🔞'}
         </button>
         <button
-          onClick={e => {
-            e.stopPropagation();
-            const cardEl = document.querySelector(
-              `[data-card-id="${item.id}"]`
-            );
-            const videoEl = cardEl?.querySelector('video');
-            const dataUrl = captureVideoFrame(videoEl || null);
-            if (dataUrl) handleSaveScreenshot(item, dataUrl);
+          type='button'
+          aria-label='Save video screenshot'
+          onClick={event => {
+            event.stopPropagation();
+            onSaveScreenshot(item, videoRef.current);
           }}
           title='Save video screenshot'
           className='absolute top-2.5 left-2.5 w-8 h-8 rounded-full border border-[#05d9e8]/50 flex items-center justify-center text-xs transition-all z-20 cursor-pointer hover:bg-[#05d9e8]/20 hover:text-[#05d9e8] hover:border-[#05d9e8]'
@@ -397,6 +419,8 @@ const VideoCard: React.FC<VideoCardProps> = ({
           {/* Quick Teaser Preview Modal Button */}
           {hasVideo && (
             <button
+              type='button'
+              aria-label='Open interactive video teaser'
               onClick={e => {
                 e.stopPropagation();
                 onOpenTeaser(item);
@@ -408,8 +432,29 @@ const VideoCard: React.FC<VideoCardProps> = ({
             </button>
           )}
 
+          {collections.length > 0 && (
+            <select
+              aria-label={`Add ${item.title} to a collection`}
+              defaultValue=''
+              onClick={event => event.stopPropagation()}
+              onChange={event => {
+                const collectionId = event.target.value;
+                if (collectionId) onAddToCollection(collectionId, item);
+                event.target.value = '';
+              }}
+              className='max-w-24 h-8 bg-[#141424] border border-[#1a1a2e] rounded-md px-1 text-[10px] text-[#a0a0cf] focus:border-[#05d9e8] outline-none'
+            >
+              <option value='' disabled>+ LIST</option>
+              {collections.map(collection => (
+                <option key={collection.id} value={collection.id}>{collection.name}</option>
+              ))}
+            </select>
+          )}
+
           {/* Share Button */}
           <button
+            type='button'
+            aria-label='Share video link'
             onClick={e => {
               e.stopPropagation();
               onShare(item);
@@ -448,7 +493,10 @@ const VideoCard: React.FC<VideoCardProps> = ({
             href={item.url}
             target='_blank'
             rel='noopener noreferrer'
-            onClick={e => e.stopPropagation()}
+            onClick={event => {
+              event.stopPropagation();
+              onMarkWatched(item);
+            }}
             className='flex items-center justify-center gap-1 py-1.5 px-3 rounded-md text-xs font-semibold bg-[#ff2a6d]/15 hover:bg-[#ff2a6d] text-[#ff2a6d] hover:text-white border border-[#ff2a6d]/40 transition-all cursor-pointer'
           >
             <span>WATCH</span>
@@ -461,11 +509,14 @@ const VideoCard: React.FC<VideoCardProps> = ({
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'hunt' | 'fav' | 'test'>('hunt');
+  const [activeTab, setActiveTab] = useState<
+    'hunt' | 'fav' | 'test' | 'screenshots' | 'recent' | 'collections' | 'import-export'
+  >('hunt');
   const [query, setQuery] = useState('');
   const [site, setSite] = useState<string>('xvideos');
   const [page, setPage] = useState(1);
   const [results, setResults] = useState<VideoResult[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -479,7 +530,7 @@ export default function App() {
   const [previewModalItem, setPreviewModalItem] = useState<VideoResult | null>(
     null
   );
-  const [modalMuted, setModalMuted] = useState(false);
+  const [modalMuted, setModalMuted] = useState(true);
   const [modalVideoSrc, setModalVideoSrc] = useState<string>('');
   const [modalFullVideoSrc, setModalFullVideoSrc] = useState<string>('');
   const [modalUsingFull, setModalUsingFull] = useState(false);
@@ -487,74 +538,19 @@ export default function App() {
   const [modalVideoRetried, setModalVideoRetried] = useState(false);
   const [modalFetchingFull, setModalFetchingFull] = useState(false);
 
-  // Sync modal video source when previewModalItem opens or changes
-  // Also fetch the full video URL from the video page so users can play the entire video
-  useEffect(() => {
-    let cancelled = false;
-
-    async function initModal() {
-      if (!previewModalItem) {
-        setModalVideoSrc('');
-        setModalFullVideoSrc('');
-        setModalUsingFull(false);
-        setModalVideoLoaded(false);
-        setModalVideoRetried(false);
-        setModalFetchingFull(false);
-        return;
-      }
-
-      // Add to recently watched when modal opens
-      addToRecentlyWatched(previewModalItem);
-
-      setModalVideoLoaded(false);
-      setModalVideoRetried(false);
-      setModalFetchingFull(true);
-
-      // Start with preview video if available
-      if (previewModalItem.previewVideo) {
-        setModalVideoSrc(previewModalItem.previewVideo);
-        setModalUsingFull(false);
-      } else {
-        setModalVideoSrc('');
-        setModalUsingFull(false);
-      }
-
-      // Fetch full video URL from the video page
-      try {
-        const fullUrl = await fetchFullVideoUrl(previewModalItem.url);
-        if (!cancelled && fullUrl) {
-          setModalFullVideoSrc(fullUrl);
-        }
-      } catch {
-        // ignore
-      } finally {
-        if (!cancelled) setModalFetchingFull(false);
-      }
-    }
-
-    initModal();
-    return () => {
-      cancelled = true;
-    };
-  }, [previewModalItem, addToRecentlyWatched]);
-
   const handleModalVideoError = useCallback(() => {
-    if (
-      !modalVideoRetried &&
-      previewModalItem?.previewVideo &&
-      !modalVideoSrc.startsWith('/api/proxy-media')
-    ) {
-      setModalVideoRetried(true);
-      setModalVideoSrc(
-        `/api/proxy-media?url=${encodeURIComponent(previewModalItem.previewVideo)}`
-      );
+    if (modalVideoRetried || !modalVideoSrc || modalVideoSrc.startsWith('/api/proxy-media')) {
+      return;
     }
-  }, [modalVideoRetried, previewModalItem, modalVideoSrc]);
+    setModalVideoRetried(true);
+    setModalVideoLoaded(false);
+    setModalVideoSrc(`/api/proxy-media?url=${encodeURIComponent(modalVideoSrc)}`);
+  }, [modalVideoRetried, modalVideoSrc]);
 
-  // Download / Install APK Modal state
-  const [showApkModal, setShowApkModal] = useState(false);
+  // PWA install help modal.
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
-  // PWA & Android WebAPK install hook
+  // Progressive web app install hook
   const { isInstallable, isInstalled, isIOS, isAndroid, install } =
     usePWAInstall();
 
@@ -562,44 +558,15 @@ export default function App() {
   const [favorites, setFavorites] = useState<VideoResult[]>([]);
 
   // Saved video screenshots state
-  interface SavedScreenshot {
-    id: string;
-    title: string;
-    siteName: string;
-    siteColor: string;
-    thumb: string;
-    dataUrl: string; // base64 PNG of captured video frame
-    capturedAt: number;
-  }
   const [screenshots, setScreenshots] = useState<SavedScreenshot[]>([]);
 
   // Search history state
   const [history, setHistory] = useState<string[]>([]);
 
   // Recently watched history state
-  interface RecentlyWatchedItem {
-    id: string;
-    title: string;
-    siteName: string;
-    siteColor: string;
-    thumb: string;
-    url: string;
-    previewVideo?: string;
-    duration?: string;
-    watchedAt: number;
-  }
-  const [recentlyWatched, setRecentlyWatched] = useState<RecentlyWatchedItem[]>(
-    []
-  );
+  const [recentlyWatched, setRecentlyWatched] = useState<RecentlyWatchedItem[]>([]);
 
   // Collections / Playlists state
-  interface Collection {
-    id: string;
-    name: string;
-    color: string;
-    videoIds: string[]; // URLs of videos in this collection
-    createdAt: number;
-  }
   const [collections, setCollections] = useState<Collection[]>([]);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [newCollectionColor, setNewCollectionColor] = useState('#ff2a6d');
@@ -621,7 +588,8 @@ export default function App() {
   const [consoleOpen, setConsoleOpen] = useState(true);
   const consoleBottomRef = useRef<HTMLDivElement>(null);
 
-  // Track seen URLs to avoid duplicate video cards in pagination
+  // Track the search context independently of the currently edited form fields.
+  const activeSearchRef = useRef({ query: '', site: 'xvideos' });
   const seenUrls = useRef<Set<string>>(new Set());
 
   // Prevent duplicate concurrent requests when scrolling fast
@@ -640,56 +608,24 @@ export default function App() {
     }, 2800);
   }, []);
 
-  // Load favorites & search history on mount
+  // Load and validate persisted data before it reaches links, images, or CSS.
   useEffect(() => {
-    try {
-      const savedFavs = localStorage.getItem('pyrmsearchFavorites');
-      if (savedFavs) {
-        setFavorites(JSON.parse(savedFavs));
+    const readArray = (key: string): unknown[] => {
+      try {
+        const value: unknown = JSON.parse(localStorage.getItem(key) || '[]');
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
       }
-    } catch {
-      setFavorites([]);
-    }
+    };
 
-    try {
-      const savedScreenshots = localStorage.getItem('pyrmsearchScreenshots');
-      if (savedScreenshots) {
-        setScreenshots(JSON.parse(savedScreenshots));
-      }
-    } catch {
-      setScreenshots([]);
-    }
+    setFavorites(readArray('pyrmsearchFavorites').map(sanitizeVideoResult).filter((item): item is VideoResult => item !== null));
+    setScreenshots(readArray('pyrmsearchScreenshots').map(sanitizeScreenshot).filter((item): item is SavedScreenshot => item !== null));
+    setHistory(sanitizeHistory(readArray('searchHistory')));
+    setRecentlyWatched(readArray('pyrmsearchRecentlyWatched').map(sanitizeRecentlyWatched).filter((item): item is RecentlyWatchedItem => item !== null));
+    setCollections(readArray('pyrmsearchCollections').map(sanitizeCollection).filter((item): item is Collection => item !== null));
 
-    try {
-      const savedHist = localStorage.getItem('searchHistory');
-      if (savedHist) {
-        setHistory(JSON.parse(savedHist));
-      }
-    } catch {
-      setHistory([]);
-    }
-
-    try {
-      const savedRecent = localStorage.getItem('pyrmsearchRecentlyWatched');
-      if (savedRecent) {
-        setRecentlyWatched(JSON.parse(savedRecent));
-      }
-    } catch {
-      setRecentlyWatched([]);
-    }
-
-    try {
-      const savedCollections = localStorage.getItem('pyrmsearchCollections');
-      if (savedCollections) {
-        setCollections(JSON.parse(savedCollections));
-      }
-    } catch {
-      setCollections([]);
-    }
-
-    addLog(
-      '🔞 pyrmsearch online • 13 Sites armed • Hover-Video-Preview active • APK ready'
-    );
+    addLog(`Pyrmsearch ready • ${Object.keys(SITES).length} public sources configured`);
   }, [addLog]);
 
   // Scroll console to bottom on new log
@@ -699,39 +635,41 @@ export default function App() {
     }
   }, [logs, consoleOpen]);
 
-  // Copy link to clipboard with bulletproof iframe-safe fallback
+  // Copy links only when the browser confirms the operation.
   const handleCopyLink = useCallback(
-    async (e: React.MouseEvent, item: VideoResult) => {
+    async (e: React.MouseEvent, item: VideoResult): Promise<boolean> => {
       e.stopPropagation();
       let copied = false;
       try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
+        if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(item.url);
           copied = true;
         }
       } catch {
-        // ignore and try fallback
+        // Try the legacy clipboard API on older mobile browsers.
       }
 
       if (!copied) {
+        const input = document.createElement('textarea');
+        input.value = item.url;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        input.style.pointerEvents = 'none';
+        document.body.appendChild(input);
+        input.select();
         try {
-          const input = document.createElement('textarea');
-          input.value = item.url;
-          input.setAttribute('readonly', '');
-          input.style.position = 'absolute';
-          input.style.left = '-9999px';
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand('copy');
-          document.body.removeChild(input);
-          copied = true;
-        } catch (err) {
-          console.error('Copy fallback failed', err);
+          copied = document.execCommand('copy');
+        } catch {
+          copied = false;
+        } finally {
+          input.remove();
         }
       }
 
-      showToast('Link copied to clipboard!');
-      addLog(`📋 Copied: ${item.title.substring(0, 36)}...`);
+      showToast(copied ? 'Link copied to clipboard.' : 'Clipboard access was denied.');
+      if (copied) addLog(`Copied link: ${item.title.substring(0, 36)}…`);
+      return copied;
     },
     [addLog, showToast]
   );
@@ -756,6 +694,7 @@ export default function App() {
           localStorage.setItem('pyrmsearchFavorites', JSON.stringify(updated));
         } catch (err) {
           console.error('Storage quota error', err);
+          showToast('Browser storage is full; this favorite may not persist.');
         }
         return updated;
       });
@@ -763,78 +702,76 @@ export default function App() {
     [addLog, showToast]
   );
 
-  // Capture a video frame as a base64 PNG screenshot
+  // Capture a compressed frame. Cross-origin streams can taint canvases, so fail gracefully.
   const captureVideoFrame = useCallback(
     (videoEl: HTMLVideoElement | null): string | null => {
-      if (!videoEl || videoEl.videoWidth === 0 || videoEl.videoHeight === 0)
-        return null;
+      if (!videoEl || videoEl.videoWidth === 0 || videoEl.videoHeight === 0) return null;
+      const scale = Math.min(1, 960 / videoEl.videoWidth, 540 / videoEl.videoHeight);
       const canvas = document.createElement('canvas');
-      canvas.width = videoEl.videoWidth;
-      canvas.height = videoEl.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return null;
-      ctx.drawImage(videoEl, 0, 0);
-      return canvas.toDataURL('image/png');
+      canvas.width = Math.max(1, Math.round(videoEl.videoWidth * scale));
+      canvas.height = Math.max(1, Math.round(videoEl.videoHeight * scale));
+      const context = canvas.getContext('2d');
+      if (!context) return null;
+      try {
+        context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', 0.78);
+      } catch {
+        return null;
+      }
     },
     []
   );
 
-  // Save a screenshot to localStorage
+  // Save a screenshot to localStorage with a conservative cap for mobile storage.
   const handleSaveScreenshot = useCallback(
-    (item: VideoResult, dataUrl: string) => {
-      setScreenshots(prev => {
-        const exists = prev.some(s => s.id === item.id);
-        if (exists) {
-          showToast('Screenshot already saved for this video');
-          return prev;
-        }
-        const entry: SavedScreenshot = {
-          id: item.id,
-          title: item.title,
-          siteName: item.siteName,
-          siteColor: item.siteColor,
-          thumb: item.thumb,
-          dataUrl,
-          capturedAt: Date.now()
-        };
-        const updated = [entry, ...prev];
-        try {
-          localStorage.setItem(
-            'pyrmsearchScreenshots',
-            JSON.stringify(updated)
-          );
-        } catch (err) {
-          console.error('Screenshot storage quota error', err);
-          showToast('Storage full — could not save screenshot');
-          return prev;
-        }
-        addLog(`📸 Screenshot saved: ${item.title.substring(0, 36)}...`);
-        showToast('Screenshot saved!');
-        return updated;
-      });
+    (item: VideoResult, video: HTMLVideoElement | null) => {
+      const dataUrl = captureVideoFrame(video);
+      if (!dataUrl) {
+        showToast('Preview must be playing before a screenshot can be saved.');
+        return;
+      }
+      if (screenshots.some(screenshot => screenshot.id === item.id)) {
+        showToast('A screenshot is already saved for this video.');
+        return;
+      }
+
+      const entry: SavedScreenshot = {
+        id: item.id,
+        title: item.title,
+        siteName: item.siteName,
+        siteColor: item.siteColor,
+        thumb: item.thumb,
+        dataUrl,
+        capturedAt: Date.now()
+      };
+      const updated = [entry, ...screenshots].slice(0, 50);
+      try {
+        localStorage.setItem('pyrmsearchScreenshots', JSON.stringify(updated));
+      } catch {
+        showToast('Browser storage is full; export data or remove screenshots.');
+        return;
+      }
+      setScreenshots(updated);
+      addLog(`Screenshot saved: ${item.title.substring(0, 36)}…`);
+      showToast('Screenshot saved.');
     },
-    [addLog, showToast]
+    [addLog, captureVideoFrame, screenshots, showToast]
   );
 
-  // Delete a saved screenshot
+  // Delete a saved screenshot.
   const handleDeleteScreenshot = useCallback(
     (id: string) => {
-      setScreenshots(prev => {
-        const updated = prev.filter(s => s.id !== id);
-        try {
-          localStorage.setItem(
-            'pyrmsearchScreenshots',
-            JSON.stringify(updated)
-          );
-        } catch {
-          // ignore
-        }
-        addLog('Screenshot deleted');
-        showToast('Screenshot deleted');
-        return updated;
-      });
+      const updated = screenshots.filter(screenshot => screenshot.id !== id);
+      setScreenshots(updated);
+      try {
+        localStorage.setItem('pyrmsearchScreenshots', JSON.stringify(updated));
+      } catch {
+        // The in-memory state is still updated if local storage is unavailable.
+      }
+      addLog('Screenshot deleted');
+      showToast('Screenshot deleted');
     },
-    [addLog, showToast]
+    [addLog, screenshots, showToast]
   );
 
   // Clear all screenshots
@@ -874,46 +811,58 @@ export default function App() {
     showToast('Favorites cleared');
   };
 
-  // Add item to recently watched history
+  // Add item to recently watched history.
   const addToRecentlyWatched = useCallback((item: VideoResult) => {
-    setRecentlyWatched(prev => {
-      const exists = prev.some(r => r.url === item.url);
-      if (exists) {
-        // Move to front
-        const updated = [item, ...prev.filter(r => r.url !== item.url)];
-        try {
-          localStorage.setItem(
-            'pyrmsearchRecentlyWatched',
-            JSON.stringify(updated)
-          );
-        } catch {
-          // ignore
-        }
-        return updated.slice(0, 50);
-      }
-      const entry: RecentlyWatchedItem = {
-        id: item.id,
-        title: item.title,
-        siteName: item.siteName,
-        siteColor: item.siteColor,
-        thumb: item.thumb,
-        url: item.url,
-        previewVideo: item.previewVideo,
-        duration: item.duration,
-        watchedAt: Date.now()
-      };
-      const updated = [entry, ...prev];
+    setRecentlyWatched(previous => {
+      const entry: RecentlyWatchedItem = { ...item, watchedAt: Date.now() };
+      const updated = [entry, ...previous.filter(recent => recent.url !== item.url)].slice(0, 50);
       try {
-        localStorage.setItem(
-          'pyrmsearchRecentlyWatched',
-          JSON.stringify(updated)
-        );
+        localStorage.setItem('pyrmsearchRecentlyWatched', JSON.stringify(updated));
       } catch {
-        // ignore
+        // Keep the in-memory history if storage is unavailable or full.
       }
-      return updated.slice(0, 50);
+      return updated;
     });
   }, []);
+
+  // Load the teaser first, then ask the server for a same-site full-video source.
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!previewModalItem) {
+      setModalVideoSrc('');
+      setModalFullVideoSrc('');
+      setModalUsingFull(false);
+      setModalVideoLoaded(false);
+      setModalVideoRetried(false);
+      setModalFetchingFull(false);
+      return;
+    }
+
+    addToRecentlyWatched(previewModalItem);
+    setModalVideoLoaded(false);
+    setModalVideoRetried(false);
+    setModalMuted(true);
+    setModalFullVideoSrc('');
+    setModalFetchingFull(true);
+    setModalUsingFull(false);
+    setModalVideoSrc(previewModalItem.previewVideo || '');
+
+    void fetchFullVideoUrl(previewModalItem.url, previewModalItem.site).then(fullUrl => {
+      if (cancelled || !fullUrl) return;
+      setModalFullVideoSrc(fullUrl);
+      if (!previewModalItem.previewVideo) {
+        setModalVideoSrc(fullUrl);
+        setModalUsingFull(true);
+      }
+    }).finally(() => {
+      if (!cancelled) setModalFetchingFull(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [previewModalItem, addToRecentlyWatched]);
 
   // Create a new collection
   const handleCreateCollection = () => {
@@ -931,6 +880,7 @@ export default function App() {
       name,
       color: newCollectionColor,
       videoIds: [],
+      videos: [],
       createdAt: Date.now()
     };
     setCollections(prev => {
@@ -961,185 +911,163 @@ export default function App() {
     showToast('Collection deleted');
   };
 
-  // Add video to a collection
+  const handleClearCollections = () => {
+    if (collections.length === 0 || !window.confirm('Delete all collections?')) return;
+    setCollections([]);
+    try {
+      localStorage.removeItem('pyrmsearchCollections');
+    } catch {
+      // The in-memory state is still cleared.
+    }
+    showToast('All collections cleared.');
+  };
+
+  // Store the full safe result with the collection so it remains visible after a new search.
   const handleAddToCollection = (collectionId: string, item: VideoResult) => {
-    setCollections(prev => {
-      const updated = prev.map(c => {
-        if (c.id !== collectionId) return c;
-        if (c.videoIds.includes(item.url)) return c;
-        return { ...c, videoIds: [...c.videoIds, item.url] };
-      });
-      try {
-        localStorage.setItem('pyrmsearchCollections', JSON.stringify(updated));
-      } catch {
-        // ignore
-      }
-      return updated;
-    });
-    showToast('Added to collection');
+    const collection = collections.find(candidate => candidate.id === collectionId);
+    if (!collection) return;
+    if (collection.videoIds.includes(item.url)) {
+      showToast('That video is already in this collection.');
+      return;
+    }
+    const updated = collections.map(candidate => candidate.id !== collectionId
+      ? candidate
+      : {
+          ...candidate,
+          videoIds: [...candidate.videoIds, item.url],
+          videos: [...candidate.videos.filter(video => video.url !== item.url), item]
+        }
+    );
+    setCollections(updated);
+    try {
+      localStorage.setItem('pyrmsearchCollections', JSON.stringify(updated));
+    } catch {
+      showToast('Browser storage is full; the collection was not saved.');
+      return;
+    }
+    showToast(`Added to ${collection.name}.`);
   };
 
-  // Remove video from a collection
-  const handleRemoveFromCollection = (
-    collectionId: string,
-    videoUrl: string
-  ) => {
-    setCollections(prev => {
-      const updated = prev.map(c => {
-        if (c.id !== collectionId) return c;
-        return { ...c, videoIds: c.videoIds.filter(id => id !== videoUrl) };
-      });
-      try {
-        localStorage.setItem('pyrmsearchCollections', JSON.stringify(updated));
-      } catch {
-        // ignore
-      }
-      return updated;
-    });
-    showToast('Removed from collection');
+  // Remove a result from a collection.
+  const handleRemoveFromCollection = (collectionId: string, videoUrl: string) => {
+    const updated = collections.map(collection => collection.id !== collectionId
+      ? collection
+      : {
+          ...collection,
+          videoIds: collection.videoIds.filter(id => id !== videoUrl),
+          videos: collection.videos.filter(video => video.url !== videoUrl)
+        }
+    );
+    setCollections(updated);
+    try {
+      localStorage.setItem('pyrmsearchCollections', JSON.stringify(updated));
+    } catch {
+      // Keep the change in memory if storage is unavailable.
+    }
+    showToast('Removed from collection.');
   };
 
-  // Export all data to JSON
-  const handleExportData = () => {
-    const data = {
-      favorites,
-      screenshots,
-      history,
-      recentlyWatched,
-      collections,
-      exportedAt: Date.now()
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `pyrmsearch-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('Data exported successfully!');
-    addLog('💾 Exported pyrmsearch data backup');
+  // Export private browser data to a local JSON backup.
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const data = {
+        favorites,
+        screenshots,
+        history,
+        recentlyWatched,
+        collections,
+        exportedAt: Date.now()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `pyrmsearch-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Backup downloaded.');
+      addLog('Exported local Pyrmsearch backup');
+    } catch {
+      showToast('Could not create the backup file.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
-  // Import data from JSON file
+  // Import a size-limited, validated backup and only update app state after storage succeeds.
   const handleImportData = async (file: File) => {
     setIsImporting(true);
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (data.favorites && Array.isArray(data.favorites)) {
-        setFavorites(data.favorites);
-        localStorage.setItem(
-          'pyrmsearchFavorites',
-          JSON.stringify(data.favorites)
-        );
+      if (file.size > 20 * 1024 * 1024) throw new Error('Backup file is too large (20 MB maximum).');
+      const data = parseBackupText(await file.text());
+      const updates: Record<string, string> = {};
+      if (data.favorites) updates.pyrmsearchFavorites = JSON.stringify(data.favorites);
+      if (data.screenshots) updates.pyrmsearchScreenshots = JSON.stringify(data.screenshots);
+      if (data.history) updates.searchHistory = JSON.stringify(data.history);
+      if (data.recentlyWatched) updates.pyrmsearchRecentlyWatched = JSON.stringify(data.recentlyWatched);
+      if (data.collections) updates.pyrmsearchCollections = JSON.stringify(data.collections);
+
+      const originalValues = new Map<string, string | null>();
+      try {
+        for (const [key, value] of Object.entries(updates)) {
+          originalValues.set(key, localStorage.getItem(key));
+          localStorage.setItem(key, value);
+        }
+      } catch {
+        for (const [key, value] of originalValues) {
+          try {
+            if (value === null) localStorage.removeItem(key);
+            else localStorage.setItem(key, value);
+          } catch {
+            // Best-effort rollback if the storage quota is exhausted.
+          }
+        }
+        throw new Error('Not enough browser storage for this backup. Remove some screenshots and try again.');
       }
-      if (data.screenshots && Array.isArray(data.screenshots)) {
-        setScreenshots(data.screenshots);
-        localStorage.setItem(
-          'pyrmsearchScreenshots',
-          JSON.stringify(data.screenshots)
-        );
-      }
-      if (data.history && Array.isArray(data.history)) {
-        setHistory(data.history);
-        localStorage.setItem('searchHistory', JSON.stringify(data.history));
-      }
-      if (data.recentlyWatched && Array.isArray(data.recentlyWatched)) {
-        setRecentlyWatched(data.recentlyWatched);
-        localStorage.setItem(
-          'pyrmsearchRecentlyWatched',
-          JSON.stringify(data.recentlyWatched)
-        );
-      }
-      if (data.collections && Array.isArray(data.collections)) {
-        setCollections(data.collections);
-        localStorage.setItem(
-          'pyrmsearchCollections',
-          JSON.stringify(data.collections)
-        );
-      }
-      setIsImporting(false);
+
+      if (data.favorites) setFavorites(data.favorites);
+      if (data.screenshots) setScreenshots(data.screenshots);
+      if (data.history) setHistory(data.history);
+      if (data.recentlyWatched) setRecentlyWatched(data.recentlyWatched);
+      if (data.collections) setCollections(data.collections);
       setImportFile(null);
-      showToast('Data imported successfully!');
-      addLog('📥 Imported pyrmsearch data backup');
-    } catch (err) {
+      showToast('Backup imported. Unsafe or unsupported entries were skipped.');
+      addLog('Imported validated local Pyrmsearch backup');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Import failed.');
+    } finally {
       setIsImporting(false);
-      console.error('Import failed', err);
-      showToast('Import failed — invalid file');
     }
   };
 
-  // Share via termux-share or Web Share API
-  const handleShareVideo = (item: VideoResult) => {
-    const shareData = {
-      title: item.title,
-      text: `Check out "${item.title}" on ${item.siteName} via pyrmsearch`,
-      url: item.url
-    };
-    if (navigator.share) {
-      navigator.share(shareData).catch(() => {
-        // ignore
-      });
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(item.url);
-      showToast('Link copied to clipboard');
-    }
-  };
-
-  // Handle share action for VideoCard
-  const handleShare = (item: VideoResult) => {
-    const shareData = {
-      title: item.title,
-      text: `Check out "${item.title}" on ${item.siteName} via pyrmsearch`,
-      url: item.url
-    };
-
-    // Web Share API (mobile browsers)
-    if (navigator.share) {
-      navigator.share(shareData).catch(() => {
-        // Fallback to clipboard if share fails
-        navigator.clipboard.writeText(item.url).then(() => {
-          showToast('Link copied to clipboard');
+  const handleShare = async (item: VideoResult) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: item.title,
+          text: `Open this listing on ${item.siteName}.`,
+          url: item.url
         });
-      });
-      return;
-    }
-
-    // Fallback: copy to clipboard
-    navigator.clipboard.writeText(item.url).then(() => {
-      showToast('Link copied to clipboard');
-    });
-  };
-
-  // Share screenshot data URL
-  const handleShareScreenshot = (shot: SavedScreenshot) => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: shot.title,
-          text: `Screenshot from ${shot.siteName} via pyrmsearch`,
-          files: []
-        })
-        .catch(() => {
-          // ignore
-        });
-    } else {
-      showToast('Share not available on this device');
+        return;
+      }
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(item.url);
+      showToast('Link copied to clipboard.');
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      showToast('Sharing is unavailable in this browser.');
     }
   };
 
-  // Handle direct WebAPK 1-tap installation
   const handleInstallApp = async () => {
     const success = await install();
     if (success) {
-      showToast('pyrmsearch installed successfully!');
-      addLog('📲 pyrmsearch installed to device home screen');
-      setShowApkModal(false);
+      showToast('Pyrmsearch installed.');
+      addLog('Pyrmsearch installed to the device home screen');
+      setShowInstallModal(false);
     }
   };
 
@@ -1151,8 +1079,14 @@ export default function App() {
   ) => {
     if (loadingRef.current) return;
 
-    const q = (overrideQuery !== undefined ? overrideQuery : query).trim();
-    const currentSite = overrideSite || site;
+    const q = (
+      overrideQuery !== undefined
+        ? overrideQuery
+        : targetPage === 1
+          ? query
+          : activeSearchRef.current.query
+    ).trim();
+    const currentSite = overrideSite || (targetPage === 1 ? site : activeSearchRef.current.site);
     if (overrideSite && overrideSite !== site) {
       setSite(overrideSite);
       setPage(1);
@@ -1163,8 +1097,20 @@ export default function App() {
     const cfg: SiteConfig = SITES[currentSite] || SITES.xvideos;
 
     if (!q) {
-      showToast('Please enter a search query');
+      showToast('Please enter a search query.');
       return;
+    }
+    if (q.length > 120) {
+      showToast('Search queries are limited to 120 characters.');
+      return;
+    }
+    if (!SITES[currentSite]) {
+      showToast('Choose a supported source site.');
+      return;
+    }
+    if (targetPage === 1) {
+      activeSearchRef.current = { query: q, site: currentSite };
+      setHasSearched(true);
     }
 
     loadingRef.current = true;
@@ -1221,10 +1167,11 @@ export default function App() {
           `🔞 Page ${targetPage}: +${newItems.length} videos (${previewCount} with hover video preview)`
         );
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       console.error(error);
-      addLog(`Hunt failed: ${error.message || 'Unknown error'}`);
-      showToast('Search encountered an error. Check console.');
+      addLog(`Search failed: ${message}`);
+      showToast(message);
     } finally {
       loadingRef.current = false;
       setLoading(false);
@@ -1266,62 +1213,43 @@ export default function App() {
         `⚡ Tests completed: ${onlineCount}/${testResults.length} sites operational`
       );
       showToast(`Tests finished: ${onlineCount}/${testResults.length} online`);
-    } catch (err: any) {
-      addLog(`Site tests error: ${err.message}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown diagnostics error.';
+      addLog(`Site tests failed: ${message}`);
+      showToast(message);
     } finally {
       setTestingSites(false);
     }
   };
 
-  // Test single site
+  // Test one site without downloading and parsing an entire search result page.
   const handleTestSingleSite = async (siteId: string) => {
-    const cfg = SITES[siteId];
-    if (!cfg) return;
-    addLog(`⚡ Pinging ${cfg.name}...`);
-    const start = Date.now();
+    const config = SITES[siteId];
+    if (!config) return;
+    addLog(`Checking ${config.name} connectivity…`);
+    const startedAt = Date.now();
     try {
-      const res = await fetch(`/api/scrape?site=${siteId}&query=test&page=1`);
-      const latency = Date.now() - start;
-      const data = await res.json();
-      const isOk = res.ok && data.success;
-      setSiteTests(prev => {
-        const other = prev.filter(s => s.id !== siteId);
-        return [
-          ...other,
-          {
-            id: siteId,
-            name: cfg.name,
-            base: cfg.base,
-            icon: cfg.icon,
-            color: cfg.color,
-            status: res.status,
-            ok: isOk,
-            latencyMs: latency
-          }
-        ];
-      });
-      addLog(`⚡ ${cfg.name}: ${res.status} (${latency}ms)`);
-      showToast(`${cfg.name}: ${isOk ? 'Online' : 'Failed'} (${latency}ms)`);
-    } catch (e: any) {
-      const latency = Date.now() - start;
-      setSiteTests(prev => {
-        const other = prev.filter(s => s.id !== siteId);
-        return [
-          ...other,
-          {
-            id: siteId,
-            name: cfg.name,
-            base: cfg.base,
-            icon: cfg.icon,
-            color: cfg.color,
-            status: 0,
-            ok: false,
-            latencyMs: latency,
-            error: e.message
-          }
-        ];
-      });
-      addLog(`⚡ ${cfg.name} failed: ${e.message}`);
+      const [result] = await testAllSites(siteId);
+      if (!result) throw new Error('No diagnostic result was returned.');
+      setSiteTests(previous => [...previous.filter(item => item.id !== siteId), result]);
+      addLog(`${config.name}: ${result.ok ? 'reachable' : 'unavailable'} (${result.latencyMs}ms)`);
+      showToast(`${config.name}: ${result.ok ? 'Online' : 'Unavailable'} (${result.latencyMs}ms)`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown diagnostics error.';
+      const result: SiteTestResult = {
+        id: config.id,
+        name: config.name,
+        base: config.base,
+        icon: config.icon,
+        color: config.color,
+        status: 0,
+        ok: false,
+        latencyMs: Date.now() - startedAt,
+        error: message
+      };
+      setSiteTests(previous => [...previous.filter(item => item.id !== siteId), result]);
+      addLog(`${config.name} check failed: ${message}`);
+      showToast(message);
     }
   };
 
@@ -1338,136 +1266,65 @@ export default function App() {
         </div>
       )}
 
-      {/* APK & App Installation Modal */}
-      {showApkModal && (
+      {/* Progressive web app install help */}
+      {showInstallModal && (
         <div
-          onClick={() => setShowApkModal(false)}
-          className='fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200'
+          role='presentation'
+          onClick={() => setShowInstallModal(false)}
+          className='fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4'
         >
-          <div
-            onClick={e => e.stopPropagation()}
-            className='bg-[#0a0a14] border border-[#05d9e8] rounded-2xl max-w-xl w-full overflow-hidden shadow-[0_0_35px_rgba(5,217,232,0.35)] relative'
+          <section
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='install-title'
+            onClick={event => event.stopPropagation()}
+            className='bg-[#0a0a14] border border-[#05d9e8] rounded-2xl max-w-lg w-full overflow-hidden shadow-[0_0_35px_rgba(5,217,232,0.35)]'
           >
-            {/* Modal Header */}
-            <div className='p-4 bg-[#070710] border-b border-[#1a1a2e] flex items-center justify-between'>
+            <header className='p-4 bg-[#070710] border-b border-[#1a1a2e] flex items-center justify-between'>
               <div className='flex items-center gap-2.5'>
-                <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff2a6d] to-[#05d9e8] flex items-center justify-center text-white text-xs font-black'>
-                  PY
-                </div>
+                <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff2a6d] to-[#05d9e8] flex items-center justify-center text-white text-xs font-black'>PY</div>
                 <div>
-                  <h3 className='text-sm font-extrabold text-white tracking-wider flex items-center gap-1.5'>
-                    <span>GET PYRMSEARCH APK & APP</span>
-                  </h3>
-                  <p className='text-[10px] text-[#6a6a8a]'>
-                    Android WebAPK • Offline Standalone • Zero Ads
-                  </p>
+                  <h2 id='install-title' className='text-sm font-extrabold text-white tracking-wider'>Install Pyrmsearch</h2>
+                  <p className='text-[10px] text-[#6a6a8a]'>Progressive web app</p>
                 </div>
               </div>
               <button
-                onClick={() => setShowApkModal(false)}
-                className='text-[#6a6a8a] hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer'
+                type='button'
+                aria-label='Close install help'
+                onClick={() => setShowInstallModal(false)}
+                className='text-[#6a6a8a] hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors'
               >
                 <X size={18} />
               </button>
-            </div>
+            </header>
 
-            {/* Modal Content */}
             <div className='p-5 space-y-4'>
-              {/* Option 1: 1-Tap Direct WebAPK Installation */}
-              <div className='bg-[#05050a] border border-[#ff2a6d]/40 rounded-xl p-4 relative overflow-hidden group'>
-                <div className='flex items-start justify-between gap-3'>
-                  <div>
-                    <div className='flex items-center gap-2'>
-                      <Zap size={16} className='text-[#ff2a6d]' />
-                      <h4 className='text-sm font-bold text-white'>
-                        Direct 1-Tap Install (WebAPK)
-                      </h4>
-                      <span className='px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-[#ff2a6d]/20 text-[#ff2a6d] border border-[#ff2a6d]/40'>
-                        RECOMMENDED
-                      </span>
-                    </div>
-                    <p className='text-xs text-[#a0a0cf] mt-1.5 leading-relaxed'>
-                      Installs <strong>pyrmsearch</strong> directly to your
-                      Android device with fullscreen standalone launch, custom
-                      app icon, and hardware acceleration without browser bars.
-                    </p>
-                  </div>
+              {isInstalled ? (
+                <div className='flex items-center gap-2 text-sm font-semibold text-emerald-400'>
+                  <CheckCircle2 size={18} /> Installed on this device.
                 </div>
-
-                <div className='mt-3.5'>
-                  {isInstalled ? (
-                    <div className='flex items-center gap-2 text-xs font-bold text-emerald-400 py-1'>
-                      <CheckCircle2 size={16} />
-                      <span>Already installed as native standalone app!</span>
-                    </div>
-                  ) : isInstallable ? (
-                    <button
-                      onClick={handleInstallApp}
-                      className='w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-[#ff2a6d] to-[#d300c5] hover:opacity-95 text-white font-extrabold text-xs tracking-wider shadow-[0_0_15px_rgba(255,42,109,0.5)] flex items-center justify-center gap-2 cursor-pointer transition-all'
-                    >
-                      <Smartphone size={16} />
-                      <span>INSTALL PYRMSEARCH ON DEVICE</span>
-                    </button>
-                  ) : (
-                    <div className='text-xs text-[#6a6a8a] bg-[#0c0c1a] p-2.5 rounded-lg border border-[#1a1a2e]'>
-                      💡 Open on Android Chrome/Edge and tap the button, or use
-                      Chrome menu (<strong>⋮</strong>) &rarr;{' '}
-                      <strong>Install app</strong> or{' '}
-                      <strong>Add to Home screen</strong>.
-                    </div>
-                  )}
+              ) : isInstallable ? (
+                <button
+                  type='button'
+                  onClick={handleInstallApp}
+                  className='w-full py-3 px-4 rounded-lg bg-gradient-to-r from-[#ff2a6d] to-[#d300c5] text-white font-extrabold text-xs tracking-wider flex items-center justify-center gap-2'
+                >
+                  <Smartphone size={16} /> INSTALL PYRMSEARCH
+                </button>
+              ) : (
+                <div className='text-sm text-[#a0a0cf] bg-[#0c0c1a] p-3 rounded-lg border border-[#1a1a2e]'>
+                  {isIOS
+                    ? 'On iPhone or iPad, open this page in Safari, tap Share, then Add to Home Screen.'
+                    : isAndroid
+                      ? 'In Android Chrome, open the browser menu and choose Install app or Add to Home screen.'
+                      : 'Use your browser menu and choose Install app or Add to Home screen when that option is available.'}
                 </div>
-              </div>
-
-              {/* Option 2: Direct pyrmsearch.apk File Download */}
-              <div className='bg-[#05050a] border border-[#05d9e8]/40 rounded-xl p-4'>
-                <div className='flex items-center gap-2'>
-                  <ArrowDownToLine size={16} className='text-[#05d9e8]' />
-                  <h4 className='text-sm font-bold text-white'>
-                    Download Standalone pyrmsearch.apk
-                  </h4>
-                  <span className='px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#05d9e8]/20 text-[#05d9e8] border border-[#05d9e8]/40'>
-                    APK FILE
-                  </span>
-                </div>
-                <p className='text-xs text-[#a0a0cf] mt-1.5'>
-                  Download the compiled Android package archive (
-                  <code>pyrmsearch.apk</code>) to install or sideload directly.
-                </p>
-
-                <div className='mt-3 flex items-center justify-between gap-3 pt-2 border-t border-[#1a1a2e]'>
-                  <div className='text-[11px] text-[#6a6a8a] font-mono'>
-                    Package: com.pyrmsearch.app • v1.0.0
-                  </div>
-                  <a
-                    href='/pyrmsearch.apk'
-                    download='pyrmsearch.apk'
-                    onClick={() => {
-                      showToast('Downloading pyrmsearch.apk...');
-                      addLog('📥 Download started: pyrmsearch.apk');
-                    }}
-                    className='py-2 px-5 rounded-lg bg-[#05d9e8] text-black font-extrabold text-xs tracking-wider hover:bg-[#00b4d8] shadow-[0_0_12px_rgba(5,217,232,0.4)] flex items-center gap-1.5 cursor-pointer transition-all'
-                  >
-                    <Download size={14} />
-                    <span>DOWNLOAD APK</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* iOS Note */}
-              <div className='bg-[#070710] border border-[#1a1a2e] rounded-xl p-3 text-xs text-[#6a6a8a] flex items-center gap-2'>
-                <ShieldCheck
-                  size={16}
-                  className='text-[#05d9e8] flex-shrink-0'
-                />
-                <span>
-                  For iPhone / iPad users: Tap the <strong>Share</strong> icon
-                  in Safari toolbar, then choose{' '}
-                  <strong>Add to Home Screen</strong>.
-                </span>
-              </div>
+              )}
+              <p className='text-xs text-[#6a6a8a] leading-relaxed'>
+                The app shell and interface can be cached for quick reopening. Searches and source media still require a network connection. No standalone APK is bundled with this project.
+              </p>
             </div>
-          </div>
+          </section>
         </div>
       )}
 
@@ -1550,6 +1407,7 @@ export default function App() {
                         setModalVideoSrc(modalFullVideoSrc);
                         setModalUsingFull(true);
                         setModalVideoLoaded(false);
+                        setModalVideoRetried(false);
                         setModalMuted(false);
                       }}
                       className='absolute bottom-4 left-4 bg-[#05d9e8] text-black px-3 py-1.5 rounded-full text-xs font-black tracking-wider shadow-[0_0_15px_rgba(5,217,232,0.6)] hover:opacity-90 transition-all cursor-pointer z-20 flex items-center gap-1.5'
@@ -1560,12 +1418,14 @@ export default function App() {
                   )}
 
                   {/* Back to preview badge */}
-                  {modalUsingFull && (
+                  {modalUsingFull && previewModalItem.previewVideo && (
                     <button
                       onClick={() => {
                         setModalVideoSrc(previewModalItem.previewVideo || '');
                         setModalUsingFull(false);
                         setModalVideoLoaded(false);
+                        setModalVideoRetried(false);
+                        setModalMuted(true);
                       }}
                       className='absolute bottom-4 left-4 bg-[#ff2a6d] text-white px-3 py-1.5 rounded-full text-xs font-black tracking-wider shadow-[0_0_15px_rgba(255,42,109,0.6)] hover:opacity-90 transition-all cursor-pointer z-20 flex items-center gap-1.5'
                     >
@@ -1677,6 +1537,11 @@ export default function App() {
         </div>
       </header>
 
+      <aside role='note' className='mb-5 flex items-start gap-2 rounded-lg border border-[#1a1a2e] bg-[#0a0a12]/80 px-3 py-2.5 text-xs text-[#a0a0cf]'>
+        <ShieldCheck size={15} className='mt-0.5 shrink-0 text-[#05d9e8]' />
+        <span><strong className='text-white'>18+ only.</strong> Searches are sent to the selected source through this server; saved items stay in this browser unless exported. Use public pages only, and follow applicable laws and each source’s terms.</span>
+      </aside>
+
       {/* Navigation Tabs */}
       <div className='flex items-center gap-2 sm:gap-3 mb-5 overflow-x-auto pb-1'>
         <button
@@ -1751,11 +1616,12 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => setShowApkModal(true)}
+          type='button'
+          onClick={() => setShowInstallModal(true)}
           className='ml-auto hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#05d9e8]/10 border border-[#05d9e8]/40 text-[#05d9e8] text-xs font-bold hover:bg-[#05d9e8]/20 transition-all cursor-pointer'
         >
-          <Download size={13} />
-          <span>DOWNLOAD APK</span>
+          <Smartphone size={13} />
+          <span>INSTALL APP</span>
         </button>
       </div>
 
@@ -1769,7 +1635,17 @@ export default function App() {
               <div className='relative flex-shrink-0'>
                 <select
                   value={site}
-                  onChange={e => setSite(e.target.value)}
+                  disabled={loading}
+                  onChange={event => {
+                    const nextSite = event.target.value;
+                    setSite(nextSite);
+                    setResults([]);
+                    setPage(1);
+                    setHasMore(true);
+                    setHasSearched(false);
+                    activeSearchRef.current = { query: '', site: nextSite };
+                    seenUrls.current.clear();
+                  }}
                   style={{ borderColor: currentSiteConfig.color }}
                   className='w-full sm:w-48 bg-[#05050a] border text-white rounded-lg px-3.5 py-3 text-sm font-semibold outline-none transition-colors cursor-pointer'
                 >
@@ -1794,7 +1670,9 @@ export default function App() {
               {/* Search Input */}
               <div className='relative flex-grow'>
                 <input
-                  type='text'
+                  type='search'
+                  maxLength={120}
+                  aria-label='Search public listings'
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleExecute(1)}
@@ -1886,10 +1764,15 @@ export default function App() {
                       setSelectedTrendingCategory(cat);
                       setTrendingExpanded(false);
                     }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    style={selectedTrendingCategory?.id === cat.id ? {
+                      backgroundImage: `linear-gradient(135deg, ${cat.color}, ${cat.color}aa)`,
+                      borderColor: cat.color,
+                      boxShadow: `0 0 10px ${cat.color}66`
+                    } : undefined}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border ${
                       selectedTrendingCategory?.id === cat.id
-                        ? `bg-gradient-to-r from-${cat.color.replace('#', '')} text-white shadow-[0_0_10px_rgba(${parseInt(cat.color.slice(1, 3), 16)},${parseInt(cat.color.slice(3, 5), 16)},${parseInt(cat.color.slice(5, 7), 16)},0.4)]`
-                        : 'bg-[#05050a] border border-[#1a1a2e] text-[#a0a0cf] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'
+                        ? 'text-white'
+                        : 'bg-[#05050a] border-[#1a1a2e] text-[#a0a0cf] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'
                     }`}
                   >
                     <span className='text-[10px]'>{cat.emoji}</span>
@@ -1963,19 +1846,19 @@ export default function App() {
                 className='mx-auto text-[#1a1a2e] mb-3 stroke-[1.5]'
               />
               <p className='text-lg font-semibold text-[#a0a0cf]'>
-                Ready for the hunt, Master.
+                {hasSearched ? 'No public listings found.' : 'Search public listings.'}
               </p>
               <p className='text-xs text-[#6a6a8a] mt-2 max-w-md mx-auto'>
-                Hover over video cards to watch live video teaser previews!
-                Select from 13 sources like OK.XXX, Hello.Porn, Users.Porn,
-                XVideos, and Eporner.
+                {hasSearched
+                  ? 'Try a different phrase or source. Some sites may block automated requests or change their page layout.'
+                  : `Choose a source and search its public listings. ${Object.keys(SITES).length} sources are configured.`}
               </p>
               <button
-                onClick={() => setShowApkModal(true)}
+                onClick={() => setShowInstallModal(true)}
                 className='mt-4 px-4 py-2 rounded-lg bg-[#05d9e8]/15 border border-[#05d9e8]/40 text-[#05d9e8] text-xs font-bold hover:bg-[#05d9e8]/25 transition-all inline-flex items-center gap-1.5 cursor-pointer'
               >
                 <Smartphone size={14} />
-                <span>Download pyrmsearch APK on Mobile</span>
+                <span>Install Pyrmsearch on this device</span>
               </button>
             </div>
           )}
@@ -2007,16 +1890,11 @@ export default function App() {
                     onToggleFavorite={handleToggleFavorite}
                     onCopyLink={handleCopyLink}
                     onOpenTeaser={v => setPreviewModalItem(v)}
-                    onSaveScreenshot={item => {
-                      // Find the video element inside this card to capture a frame
-                      const cardEl = document.querySelector(
-                        `[data-card-id="${item.id}"]`
-                      );
-                      const videoEl = cardEl?.querySelector('video');
-                      const dataUrl = captureVideoFrame(videoEl || null);
-                      if (dataUrl) handleSaveScreenshot(item, dataUrl);
-                    }}
+                    onMarkWatched={addToRecentlyWatched}
+                    onSaveScreenshot={handleSaveScreenshot}
                     onShare={handleShare}
+                    collections={collections}
+                    onAddToCollection={handleAddToCollection}
                   />
                 ))}
               </div>
@@ -2065,13 +1943,14 @@ export default function App() {
             {favorites.length > 0 && (
               <div className='flex items-center gap-2'>
                 <button
-                  onClick={() => {
-                    const links = favorites.map(f => f.url).join('\n');
-                    navigator.clipboard.writeText(links);
-                    showToast(`Copied ${favorites.length} URLs!`);
-                    addLog(
-                      `Copied all ${favorites.length} favorite links to clipboard`
-                    );
+                  onClick={async () => {
+                    const links = favorites.map(favorite => favorite.url).join('\n');
+                    try {
+                      await navigator.clipboard.writeText(links);
+                      showToast(`Copied ${favorites.length} links.`);
+                    } catch {
+                      showToast('Clipboard access was denied.');
+                    }
                   }}
                   className='px-3 py-1.5 text-xs font-semibold rounded bg-[#141424] border border-[#1a1a2e] hover:border-[#05d9e8] text-[#05d9e8] hover:bg-[#05d9e8]/10 transition-all flex items-center gap-1.5 cursor-pointer'
                 >
@@ -2116,15 +1995,11 @@ export default function App() {
                   onToggleFavorite={handleToggleFavorite}
                   onCopyLink={handleCopyLink}
                   onOpenTeaser={v => setPreviewModalItem(v)}
-                  onSaveScreenshot={item => {
-                    const cardEl = document.querySelector(
-                      `[data-card-id="${item.id}"]`
-                    );
-                    const videoEl = cardEl?.querySelector('video');
-                    const dataUrl = captureVideoFrame(videoEl || null);
-                    if (dataUrl) handleSaveScreenshot(item, dataUrl);
-                  }}
+                  onMarkWatched={addToRecentlyWatched}
+                  onSaveScreenshot={handleSaveScreenshot}
                   onShare={handleShare}
+                  collections={collections}
+                  onAddToCollection={handleAddToCollection}
                 />
               ))}
             </div>
@@ -2150,15 +2025,14 @@ export default function App() {
             {screenshots.length > 0 && (
               <div className='flex items-center gap-2'>
                 <button
-                  onClick={() => {
-                    const dataUrls = screenshots.map(s => s.dataUrl).join('\n');
-                    navigator.clipboard.writeText(dataUrls);
-                    showToast(
-                      `Copied ${screenshots.length} screenshot data URLs!`
-                    );
-                    addLog(
-                      `Copied all ${screenshots.length} screenshot data URLs`
-                    );
+                  onClick={async () => {
+                    const dataUrls = screenshots.map(screenshot => screenshot.dataUrl).join('\n');
+                    try {
+                      await navigator.clipboard.writeText(dataUrls);
+                      showToast(`Copied ${screenshots.length} screenshot data URLs.`);
+                    } catch {
+                      showToast('Could not copy the screenshots; use Backup to export them.');
+                    }
                   }}
                   className='px-3 py-1.5 text-xs font-semibold rounded bg-[#141424] border border-[#1a1a2e] hover:border-[#05d9e8] text-[#05d9e8] hover:bg-[#05d9e8]/10 transition-all flex items-center gap-1.5 cursor-pointer'
                 >
@@ -2202,11 +2076,19 @@ export default function App() {
                   className='bg-[#05050a] border border-[#1a1a2e] rounded-xl overflow-hidden flex flex-col cursor-pointer group hover:border-[#05d9e8]/50 transition-all'
                 >
                   <div className='relative w-full h-42 bg-black overflow-hidden'>
-                    <img
-                      src={shot.dataUrl}
-                      alt={shot.title}
-                      className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
-                    />
+                    <a
+                      href={shot.dataUrl}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      aria-label={`Open full-size screenshot: ${shot.title}`}
+                      className='absolute inset-0'
+                    >
+                      <img
+                        src={shot.dataUrl}
+                        alt={shot.title}
+                        className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
+                      />
+                    </a>
                     <div
                       style={{ backgroundColor: shot.siteColor }}
                       className='absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-black/85 text-white border z-10 backdrop-blur-xs'
@@ -2214,6 +2096,8 @@ export default function App() {
                       {shot.siteName}
                     </div>
                     <button
+                      type='button'
+                      aria-label={`Delete screenshot: ${shot.title}`}
                       onClick={e => {
                         e.stopPropagation();
                         handleDeleteScreenshot(shot.id);
@@ -2250,14 +2134,18 @@ export default function App() {
                 WATCHED
               </h2>
               <p className='text-xs text-[#6a6a8a] mt-0.5'>
-                Videos you've opened in the teaser modal. Tap to re-open.
+                Videos opened in the teaser or sent to the source site. Tap to re-open.
               </p>
             </div>
             {recentlyWatched.length > 0 && (
               <button
                 onClick={() => {
                   setRecentlyWatched([]);
-                  localStorage.removeItem('pyrmsearchRecentlyWatched');
+                  try {
+                    localStorage.removeItem('pyrmsearchRecentlyWatched');
+                  } catch {
+                    // The in-memory history is still cleared.
+                  }
                   showToast('Recent history cleared');
                   addLog('Recent history cleared');
                 }}
@@ -2278,7 +2166,7 @@ export default function App() {
                 No recent history yet.
               </p>
               <p className='text-xs text-[#6a6a8a] mt-1.5'>
-                Open videos in the teaser modal to see them here.
+                Open a teaser or use WATCH to add a listing here.
               </p>
               <button
                 onClick={() => setActiveTab('hunt')}
@@ -2292,19 +2180,17 @@ export default function App() {
               {recentlyWatched.map(item => (
                 <div
                   key={item.id}
-                  className='bg-[#05050a] border border-[#1a1a2e] rounded-xl overflow-hidden flex flex-col cursor-pointer group hover:border-[#05d9e8]/50 transition-all'
-                  onClick={() =>
-                    setPreviewModalItem({
-                      id: item.id,
-                      title: item.title,
-                      siteName: item.siteName,
-                      siteColor: item.siteColor,
-                      thumb: item.thumb,
-                      url: item.url,
-                      previewVideo: item.previewVideo,
-                      duration: item.duration
-                    } as VideoResult)
-                  }
+                  role='button'
+                  tabIndex={0}
+                  aria-label={`Reopen ${item.title}`}
+                  className='bg-[#05050a] border border-[#1a1a2e] rounded-xl overflow-hidden flex flex-col cursor-pointer group hover:border-[#05d9e8]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#05d9e8] transition-all'
+                  onClick={() => setPreviewModalItem(item)}
+                  onKeyDown={event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setPreviewModalItem(item);
+                    }
+                  }}
                 >
                   <div className='relative w-full h-42 bg-black overflow-hidden'>
                     {item.thumb && (
@@ -2352,7 +2238,7 @@ export default function App() {
             </div>
             {collections.length > 0 && (
               <button
-                onClick={handleClearFavorites}
+                onClick={handleClearCollections}
                 className='px-3 py-1.5 text-xs font-semibold rounded border border-[#ff2a6d] text-[#ff2a6d] hover:bg-[#ff2a6d] hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_8px_rgba(255,42,109,0.3)]'
               >
                 <Trash2 size={13} /> CLEAR ALL
@@ -2368,6 +2254,7 @@ export default function App() {
             <div className='flex flex-col sm:flex-row gap-3'>
               <input
                 value={newCollectionName}
+                maxLength={80}
                 onChange={e => setNewCollectionName(e.target.value)}
                 placeholder='Collection name (e.g. Blondes, 4K, Amateur)'
                 className='flex-1 bg-[#0a0a12] border border-[#1a1a2e] text-white rounded-lg px-3 py-2.5 text-sm outline-none focus:border-[#05d9e8]'
@@ -2421,6 +2308,8 @@ export default function App() {
                       </h4>
                     </div>
                     <button
+                      type='button'
+                      aria-label={`Delete collection: ${collection.name}`}
                       onClick={() => handleDeleteCollection(collection.id)}
                       className='text-[#6a6a8a] hover:text-[#ff2a6d] p-1 rounded hover:bg-[#ff2a6d]/20 cursor-pointer'
                     >
@@ -2441,16 +2330,27 @@ export default function App() {
                     <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'>
                       {collection.videoIds.map(url => {
                         const item =
+                          collection.videos.find(video => video.url === url) ||
                           favorites.find(f => f.url === url) ||
                           recentlyWatched.find(r => r.url === url);
                         if (!item) return null;
                         return (
                           <div
                             key={url}
-                            className='bg-[#0a0a12] border border-[#1a1a2e] rounded-lg p-2 cursor-pointer hover:border-[#05d9e8]/50 transition-all group'
-                            onClick={e => {
-                              e.stopPropagation();
+                            role='button'
+                            tabIndex={0}
+                            aria-label={`Open ${item.title} from ${collection.name}`}
+                            className='bg-[#0a0a12] border border-[#1a1a2e] rounded-lg p-2 cursor-pointer hover:border-[#05d9e8]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#05d9e8] transition-all group'
+                            onClick={event => {
+                              event.stopPropagation();
                               setPreviewModalItem(item as VideoResult);
+                            }}
+                            onKeyDown={event => {
+                              if (event.target !== event.currentTarget) return;
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                setPreviewModalItem(item as VideoResult);
+                              }
                             }}
                           >
                             <div className='relative w-full h-24 bg-black overflow-hidden mb-2'>
@@ -2462,6 +2362,8 @@ export default function App() {
                                 />
                               )}
                               <button
+                                type='button'
+                                aria-label={`Remove ${item.title} from ${collection.name}`}
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleRemoveFromCollection(
@@ -2675,7 +2577,7 @@ export default function App() {
                     : 'bg-[#141424] text-[#6a6a8a] hover:text-white'
                 }`}
               >
-                Errors ({Object.keys(SITES).length - onlineSiteCount})
+                Errors ({siteTests.filter(test => !test.ok).length})
               </button>
             </div>
           </div>
