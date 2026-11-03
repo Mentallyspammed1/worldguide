@@ -3,12 +3,16 @@ import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createApp } from '../server';
+import { createApp, withCspNonce } from '../server';
 
 const servers: Server[] = [];
 
-async function withServer(fetcher: typeof fetch, run: (baseUrl: string) => Promise<void>) {
-  const server = createApp({ fetcher }).listen(0, '127.0.0.1');
+async function withServer(
+  fetcher: typeof fetch,
+  run: (baseUrl: string) => Promise<void>,
+  options: { isDevelopment?: boolean } = {}
+) {
+  const server = createApp({ fetcher, ...options }).listen(0, '127.0.0.1');
   servers.push(server);
   await once(server, 'listening');
   const address = server.address() as AddressInfo;
@@ -24,6 +28,7 @@ async function withServer(fetcher: typeof fetch, run: (baseUrl: string) => Promi
 afterEach(() => {
   for (const server of servers) server.closeAllConnections();
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 describe('Express API', () => {
@@ -35,6 +40,44 @@ describe('Express API', () => {
       expect(payload.status).toBe('ok');
       expect(response.headers.get('x-powered-by')).toBeNull();
       expect(response.headers.get('content-security-policy')).toContain("default-src 'self'");
+    });
+  });
+
+  it('issues a per-response nonce for Vite development scripts', async () => {
+    await withServer(fetch, async baseUrl => {
+      const first = await fetch(`${baseUrl}/health`);
+      const second = await fetch(`${baseUrl}/health`);
+      const firstCsp = first.headers.get('content-security-policy') || '';
+      const secondCsp = second.headers.get('content-security-policy') || '';
+      const nonce = firstCsp.match(/'nonce-([^']+)'/)?.[1];
+
+      expect(firstCsp).toContain("script-src 'self' 'unsafe-eval' 'nonce-");
+      expect(firstCsp).not.toContain('frame-ancestors');
+      expect(nonce).toBeTruthy();
+      expect(secondCsp).not.toContain(`'nonce-${nonce}'`);
+
+      const html = withCspNonce(
+        '<script type="module">inline preamble</script><script type="module" src="/src/main.tsx"></script>',
+        nonce!
+      );
+      expect(html).toBe(
+        `<script nonce="${nonce}" type="module">inline preamble</script><script nonce="${nonce}" type="module" src="/src/main.tsx"></script>`
+      );
+    }, { isDevelopment: true });
+  });
+
+  it('keeps framing same-origin by default and allows configured preview ancestors', async () => {
+    await withServer(fetch, async baseUrl => {
+      const response = await fetch(`${baseUrl}/health`);
+      expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'self'");
+    });
+
+    vi.stubEnv('FRAME_ANCESTORS', "'self' https://arena.ai https://*.arena.ai");
+    await withServer(fetch, async baseUrl => {
+      const response = await fetch(`${baseUrl}/health`);
+      expect(response.headers.get('content-security-policy')).toContain(
+        "frame-ancestors 'self' https://arena.ai https://*.arena.ai"
+      );
     });
   });
 

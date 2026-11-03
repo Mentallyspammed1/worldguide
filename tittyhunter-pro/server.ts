@@ -3,6 +3,8 @@ import express, { type Request, type Response as ExpressResponse } from 'express
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import pino from 'pino';
+import { randomBytes } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -32,6 +34,17 @@ class ApiError extends Error {
 
 interface AppOptions {
   fetcher?: typeof fetch;
+  isDevelopment?: boolean;
+}
+
+/** Add the per-response CSP nonce to every script emitted by Vite's dev HTML transform. */
+export function withCspNonce(html: string, nonce: string): string {
+  return html.replace(/<script\b/gi, `<script nonce="${nonce}"`);
+}
+
+function parseFrameAncestors(value: string | undefined): string[] {
+  const sources = (value || "'self'").trim().split(/\s+/).filter(Boolean);
+  return sources.length > 0 ? sources : ["'self'"];
 }
 
 function normalizeHost(host: string): string {
@@ -334,9 +347,20 @@ function extractVideoSource(html: string, pageUrl: string): string {
 export function createApp(options: AppOptions = {}): express.Express {
   const app = express();
   const fetcher = options.fetcher || fetch;
-  const isDevelopment = process.argv.includes('--dev') || process.env.NODE_ENV === 'development';
+  const isDevelopment =
+    options.isDevelopment ??
+    (process.argv.includes('--dev') || process.env.NODE_ENV === 'development');
+  const frameAncestors = process.env.FRAME_ANCESTORS?.trim()
+    ? parseFrameAncestors(process.env.FRAME_ANCESTORS)
+    : isDevelopment
+      ? null
+      : ["'self'"];
 
   app.disable('x-powered-by');
+  app.use((_req, res, next) => {
+    res.locals.cspNonce = randomBytes(16).toString('base64url');
+    next();
+  });
   app.use(
     helmet({
       frameguard: false,
@@ -346,7 +370,9 @@ export function createApp(options: AppOptions = {}): express.Express {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: isDevelopment ? ["'self'", "'unsafe-eval'"] : ["'self'"],
+          scriptSrc: isDevelopment
+            ? ["'self'", "'unsafe-eval'", (_req, res) => `'nonce-${(res as ExpressResponse).locals.cspNonce}'`]
+            : ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'https:', 'data:', 'blob:'],
           mediaSrc: ["'self'", 'https:', 'blob:'],
@@ -355,7 +381,7 @@ export function createApp(options: AppOptions = {}): express.Express {
           workerSrc: ["'self'", 'blob:'],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
-          frameAncestors: isDevelopment ? null : ["'self'"],
+          frameAncestors,
           formAction: ["'self'", 'https:'],
           upgradeInsecureRequests: isDevelopment ? null : []
         }
@@ -587,7 +613,7 @@ export function createApp(options: AppOptions = {}): express.Express {
 export async function startServer(): Promise<import('node:http').Server> {
   const isDevelopment =
     process.argv.includes('--dev') || process.env.NODE_ENV === 'development';
-  const app = createApp();
+  const app = createApp({ isDevelopment });
 
   let closeDevServer: (() => Promise<void>) | undefined;
   if (isDevelopment) {
@@ -605,7 +631,8 @@ export async function startServer(): Promise<import('node:http').Server> {
         const template = await import('node:fs/promises').then(fs =>
           fs.readFile(path.join(projectRoot, 'index.html'), 'utf8')
         );
-        const html = await vite.transformIndexHtml(req.originalUrl, template);
+        const transformed = await vite.transformIndexHtml(req.originalUrl, template);
+        const html = withCspNonce(transformed, res.locals.cspNonce as string);
         res.status(200).type('html').send(html);
       } catch (error) {
         vite.ssrFixStacktrace(error as Error);
@@ -615,6 +642,9 @@ export async function startServer(): Promise<import('node:http').Server> {
     });
   } else {
     const distPath = path.join(projectRoot, 'dist');
+    if (!existsSync(path.join(distPath, 'index.html'))) {
+      throw new Error('Production build not found. Run "npm run build" before "npm start".');
+    }
     app.use(express.static(distPath, { index: false, fallthrough: true, maxAge: '1h' }));
     app.get('*', (req: Request, res: ExpressResponse, next) => {
       if (req.path.startsWith('/api/')) return next();
