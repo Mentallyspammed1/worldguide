@@ -18,7 +18,6 @@ export function isSafePublicHostname(value: string): boolean {
   return Boolean(
     hostname.includes('.') &&
       !/^\[.*\]$/.test(hostname) &&
-      !/^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname) &&
       !BLOCKED_HOST_SUFFIXES.some(suffix => hostname.endsWith(suffix))
   );
 }

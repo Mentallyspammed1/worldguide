@@ -1,6 +1,28 @@
 import { SITES, type SiteConfig } from '../constants';
 import { isSafeHttpsUrl } from './safe-url';
 
+const CLIENT_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+];
+
+async function fetchViaClientProxies(url: string, signal?: AbortSignal): Promise<Response> {
+  const lastError: unknown[] = [];
+  for (const proxy of CLIENT_PROXIES) {
+    try {
+      const response = await fetch(proxy(url), {
+        signal: signal || AbortSignal.timeout(15_000),
+        headers: { Accept: 'application/json' }
+      });
+      if (response.ok) return response;
+    } catch (error) {
+      lastError.push(error);
+    }
+  }
+  throw new Error(`All client proxies failed: ${lastError.map(e => e instanceof Error ? e.message : String(e)).join('; ')}`);
+}
+
 export interface VideoResult {
   id: string;
   title: string;
@@ -40,7 +62,6 @@ export function abs(base: string, href: string | null | undefined): string {
 
   try {
     const url = new URL(value, base);
-    if (url.protocol === 'http:') url.protocol = 'https:';
     if (!isSafeHttpsUrl(url.toString())) {
       return '';
     }
@@ -280,24 +301,33 @@ export async function scrapeSite(
     query: normalizedQuery,
     page: String(page)
   });
-  const response = await fetch(`/api/scrape?${params.toString()}`, {
-    signal: signal || AbortSignal.timeout(18_000),
-    headers: { Accept: 'application/json' }
-  });
-  const payload: unknown = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(readApiError(payload, response.status));
-  if (
-    !payload ||
-    typeof payload !== 'object' ||
-    !('success' in payload) ||
-    payload.success !== true ||
-    !('html' in payload) ||
-    typeof payload.html !== 'string'
-  ) {
-    throw new Error('The search service returned an invalid response.');
-  }
+  const serverUrl = `/api/scrape?${params.toString()}`;
+  try {
+    const response = await fetch(serverUrl, {
+      signal: signal || AbortSignal.timeout(18_000),
+      headers: { Accept: 'application/json' }
+    });
+    const payload: unknown = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(readApiError(payload, response.status));
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      !('success' in payload) ||
+      payload.success !== true ||
+      !('html' in payload) ||
+      typeof payload.html !== 'string'
+    ) {
+      throw new Error('The search service returned an invalid response.');
+    }
 
-  return parseHtml(payload.html, siteKey, config.base);
+    return parseHtml(payload.html, siteKey, config.base);
+  } catch (serverError) {
+    // Fall back to client-side proxies if the server API is unavailable.
+    const proxyUrl = config.buildUrl(normalizedQuery, page);
+    const response = await fetchViaClientProxies(proxyUrl, signal);
+    const html = await response.text();
+    return parseHtml(html, siteKey, config.base);
+  }
 }
 
 /** Ask the server to inspect a public result page for a playable media source. */
@@ -326,41 +356,78 @@ export async function fetchFullVideoUrl(videoPageUrl: string, siteKey: string): 
   }
 }
 
-/** Read source-site diagnostics from the server; no external CORS proxy is used. */
+/** Read source-site diagnostics from the server; falls back to client-side proxies. */
 export async function testAllSites(siteId?: string): Promise<SiteTestResult[]> {
   if (siteId && !SITES[siteId]) throw new Error('Choose a supported source site.');
+  const configs = siteId ? [SITES[siteId]] : Object.values(SITES);
   const endpoint = siteId
     ? `/api/test-sites?${new URLSearchParams({ site: siteId }).toString()}`
     : '/api/test-sites';
-  const response = await fetch(endpoint, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(siteId ? 10_000 : 30_000)
-  });
-  const payload: unknown = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(readApiError(payload, response.status));
-  if (!payload || typeof payload !== 'object' || !('sites' in payload) || !Array.isArray(payload.sites)) {
-    throw new Error('The diagnostics service returned an invalid response.');
-  }
 
-  return payload.sites.flatMap((value): SiteTestResult[] => {
-    if (!value || typeof value !== 'object' || !('id' in value) || typeof value.id !== 'string') {
-      return [];
+  try {
+    const response = await fetch(endpoint, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(siteId ? 10_000 : 30_000)
+    });
+    const payload: unknown = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(readApiError(payload, response.status));
+    if (!payload || typeof payload !== 'object' || !('sites' in payload) || !Array.isArray(payload.sites)) {
+      throw new Error('The diagnostics service returned an invalid response.');
     }
-    const config = SITES[value.id];
-    if (!config) return [];
-    const item = value as Record<string, unknown>;
-    return [
-      {
-        id: config.id,
-        name: config.name,
-        base: config.base,
-        icon: config.icon,
-        color: config.color,
-        status: typeof item.status === 'number' ? item.status : 0,
-        ok: item.ok === true,
-        latencyMs: typeof item.latencyMs === 'number' ? item.latencyMs : 0,
-        ...(typeof item.error === 'string' ? { error: item.error } : {})
+
+    return payload.sites.flatMap((value): SiteTestResult[] => {
+      if (!value || typeof value !== 'object' || !('id' in value) || typeof value.id !== 'string') {
+        return [];
       }
-    ];
-  });
+      const config = SITES[value.id];
+      if (!config) return [];
+      const item = value as Record<string, unknown>;
+      return [
+        {
+          id: config.id,
+          name: config.name,
+          base: config.base,
+          icon: config.icon,
+          color: config.color,
+          status: typeof item.status === 'number' ? item.status : 0,
+          ok: item.ok === true,
+          latencyMs: typeof item.latencyMs === 'number' ? item.latencyMs : 0,
+          ...(typeof item.error === 'string' ? { error: item.error } : {})
+        }
+      ];
+    });
+  } catch (serverError) {
+    // Fall back to client-side proxies if the server API is unavailable.
+    const results: SiteTestResult[] = [];
+    for (const config of configs) {
+      const startedAt = Date.now();
+      try {
+        const proxyUrl = config.buildUrl('test', 1);
+        const response = await fetchViaClientProxies(proxyUrl, AbortSignal.timeout(10_000));
+        results.push({
+          id: config.id,
+          name: config.name,
+          base: config.base,
+          icon: config.icon,
+          color: config.color,
+          status: response.status,
+          ok: response.ok,
+          latencyMs: Date.now() - startedAt
+        });
+      } catch (error) {
+        results.push({
+          id: config.id,
+          name: config.name,
+          base: config.base,
+          icon: config.icon,
+          color: config.color,
+          status: 0,
+          ok: false,
+          latencyMs: Date.now() - startedAt,
+          error: error instanceof Error ? error.message : 'Source site could not be reached.'
+        });
+      }
+    }
+    return results;
+  }
 }

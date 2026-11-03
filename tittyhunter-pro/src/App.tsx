@@ -176,8 +176,9 @@ const VideoCard: React.FC<VideoCardProps> = ({
         observer.unobserve(entry.target);
         preloadTimeoutRef.current = setTimeout(() => {
           if (!isMountedRef.current || videoSrcRef.current || videoErrorRef.current) return;
-          videoSrcRef.current = item.previewVideo;
-          setVideoSrc(item.previewVideo);
+          const preview = item.previewVideo ?? '';
+          videoSrcRef.current = preview;
+          setVideoSrc(preview);
           setVideoLoading(true);
         }, 150);
       },
@@ -284,7 +285,6 @@ const VideoCard: React.FC<VideoCardProps> = ({
             playsInline
             loop
             preload='metadata'
-            referrerPolicy='no-referrer'
             onLoadedData={handleVideoLoadedData}
             onCanPlay={handleVideoLoadedData}
             onError={handleVideoError}
@@ -1385,7 +1385,6 @@ export default function App() {
                     loop={!modalUsingFull}
                     muted={modalMuted}
                     playsInline
-                    referrerPolicy='no-referrer'
                     onLoadedData={() => setModalVideoLoaded(true)}
                     onCanPlay={() => setModalVideoLoaded(true)}
                     onError={handleModalVideoError}
@@ -2637,13 +2636,13 @@ export default function App() {
                           ) : isTested ? (
                             isOk ? (
                               <span className='flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-emerald-950/80 border border-emerald-500/50 text-emerald-400'>
-                                <CheckCircle2 size={13} /> {test.status} OK (
-                                {test.latencyMs}ms)
+                                <CheckCircle2 size={13} /> {test!.status} OK (
+                                {test!.latencyMs}ms)
                               </span>
                             ) : (
                               <span className='flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-amber-950/80 border border-amber-500/50 text-amber-400'>
                                 <AlertCircle size={13} />{' '}
-                                {test.status || 'ERROR'} ({test.latencyMs}ms)
+                                {String(test!.status ?? 'ERROR')} ({test!.latencyMs ?? 0}ms)
                               </span>
                             )
                           ) : (
