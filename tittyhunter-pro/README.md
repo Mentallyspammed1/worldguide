@@ -26,7 +26,7 @@ cp .env.example .env
 npm run dev
 ```
 
-The development server listens on `0.0.0.0:3000` by default and serves both the React app and API. Set `PORT` to use another port. Do not commit `.env` files.
+The development server listens on `0.0.0.0:3000` by default and serves both the React app and API. Vite HMR is served through the same HTTP port, so proxied previews only need one port exposed. Set `PORT` to use another port. Do not commit `.env` files.
 
 ### Production
 
@@ -37,7 +37,17 @@ npm ci --omit=dev  # optional: keep only runtime packages after building
 npm start
 ```
 
-`npm start` serves the generated `dist/` build and API from Express. The server runner (`tsx`) is a runtime dependency; Vite, React, and test/build tooling are development dependencies. `npm run preview` is an alias for this full production server; it is not Vite's static-only preview server.
+`npm start` serves the generated `dist/` build and API from Express. Run `npm run build` first; the server now fails fast with a clear message if `dist/index.html` is missing. The server runner (`tsx`) is a runtime dependency; Vite, React, and test/build tooling are development dependencies. `npm run preview` is an alias for this full production server; it is not Vite's static-only preview server.
+
+### Embedded previews
+
+Production defaults to `frame-ancestors 'self'`, so browsers will block it inside a cross-origin iframe. Development keeps local previews embeddable unless `FRAME_ANCESTORS` is set. For a production Arena live preview, start the server with the Arena parent origins explicitly allowed:
+
+```sh
+FRAME_ANCESTORS="'self' https://arena.ai https://*.arena.ai" npm start
+```
+
+You can use the same setting with `npm run dev` to restrict development previews. Do not use `*` unless you intentionally want any site to embed the app.
 
 ### Scripts
 
@@ -63,6 +73,7 @@ The background scripts track only their own PID; `server.pid` and `server.log` a
 | `HOST` | `0.0.0.0` | Listening interface |
 | `NODE_ENV` | production when started normally | Use `development` for development behavior |
 | `LOG_LEVEL` | `info` | Pino log level |
+| `FRAME_ANCESTORS` | `'self'` | Space-separated CSP `frame-ancestors` sources; add trusted preview parent origins when embedding |
 | `MEDIA_HOST_ALLOWLIST` | empty | Optional comma-separated HTTPS media CDN hostnames, without schemes or paths |
 
 The media proxy already permits configured source-site domains. Add only CDN hosts you trust. Redirects are revalidated against the same allow-list. Do not use this setting to allow private or internal hosts.
