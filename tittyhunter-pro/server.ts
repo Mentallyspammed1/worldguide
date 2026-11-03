@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
+import { createServer as createHttpServer } from 'node:http';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -613,7 +614,14 @@ export function createApp(options: AppOptions = {}): express.Express {
 export async function startServer(): Promise<import('node:http').Server> {
   const isDevelopment =
     process.argv.includes('--dev') || process.env.NODE_ENV === 'development';
+  const port = Number(process.env.PORT || 3000);
+  const host = process.env.HOST || '0.0.0.0';
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+    throw new Error('PORT must be an integer between 1 and 65535.');
+  }
+
   const app = createApp({ isDevelopment });
+  const server = createHttpServer(app);
 
   let closeDevServer: (() => Promise<void>) | undefined;
   if (isDevelopment) {
@@ -621,7 +629,12 @@ export async function startServer(): Promise<import('node:http').Server> {
     const vite = await createViteServer({
       configFile: path.join(projectRoot, 'vite.config.ts'),
       root: projectRoot,
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        // Serve HMR through the same HTTP port so reverse-proxied previews
+        // (e.g. Arena/e2b) do not need a separate websocket port exposed.
+        hmr: process.env.DISABLE_HMR === 'true' ? false : { server }
+      },
       appType: 'custom'
     });
     closeDevServer = () => vite.close();
@@ -662,13 +675,7 @@ export async function startServer(): Promise<import('node:http').Server> {
     if (!res.headersSent) res.status(500).send('Internal server error.');
   });
 
-  const port = Number(process.env.PORT || 3000);
-  const host = process.env.HOST || '0.0.0.0';
-  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error('PORT must be an integer between 1 and 65535.');
-  }
-
-  const server = app.listen(port, host, () => {
+  server.listen(port, host, () => {
     logger.info({ port, host, mode: isDevelopment ? 'development' : 'production' }, 'server_started');
   });
 

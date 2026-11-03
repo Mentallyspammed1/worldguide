@@ -26,7 +26,7 @@ cp .env.example .env
 npm run dev
 ```
 
-The development server listens on `0.0.0.0:3000` by default and serves both the React app and API. Set `PORT` to use another port. Do not commit `.env` files.
+The development server listens on `0.0.0.0:3000` by default and serves both the React app and API. Vite HMR is served through the same HTTP port, so proxied previews only need one port exposed. Set `PORT` to use another port. Do not commit `.env` files.
 
 ### Production
 

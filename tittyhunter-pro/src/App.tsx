@@ -360,7 +360,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
           title={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
           className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full border border-black/40 flex items-center justify-center text-sm transition-all z-20 cursor-pointer ${isFavorited ? 'bg-[#ff2a6d] text-white shadow-[0_0_12px_#ff2a6d] animate-pulse-neon' : 'bg-black/75 text-white/80 hover:bg-[#ff2a6d] hover:text-white hover:scale-110'}`}
         >
-          {isFavorited ? '🔞🔞' : '🔞'}
+          {isFavorited ? <Heart size={16} fill='currentColor' /> : <Heart size={16} />}
         </button>
         <button
           type='button'
@@ -594,6 +594,7 @@ export default function App() {
 
   // Prevent duplicate concurrent requests when scrolling fast
   const loadingRef = useRef(false);
+  const readyLoggedRef = useRef(false);
 
   const addLog = useCallback((msg: string) => {
     const time = new Date().toLocaleTimeString();
@@ -625,7 +626,10 @@ export default function App() {
     setRecentlyWatched(readArray('pyrmsearchRecentlyWatched').map(sanitizeRecentlyWatched).filter((item): item is RecentlyWatchedItem => item !== null));
     setCollections(readArray('pyrmsearchCollections').map(sanitizeCollection).filter((item): item is Collection => item !== null));
 
-    addLog(`Pyrmsearch ready • ${Object.keys(SITES).length} public sources configured`);
+    if (!readyLoggedRef.current) {
+      readyLoggedRef.current = true;
+      addLog(`Pyrmsearch ready • ${Object.keys(SITES).length} public sources configured`);
+    }
   }, [addLog]);
 
   // Scroll console to bottom on new log
@@ -687,7 +691,7 @@ export default function App() {
           showToast('Removed from favorites');
         } else {
           updated = [item, ...prev];
-          addLog(`🔞🔞 Saved favorite: ${item.title.substring(0, 36)}...`);
+          addLog(`Saved favorite: ${item.title.substring(0, 36)}...`);
           showToast('Saved to favorites!');
         }
         try {
@@ -1137,7 +1141,7 @@ export default function App() {
       });
     }
 
-    addLog(`🔞 Hunting ${cfg.name} (page ${targetPage}) for "${q}"...`);
+    addLog(`Hunting ${cfg.name} (page ${targetPage}) for "${q}"...`);
 
     try {
       const data = await scrapeSite(currentSite, q, targetPage);
@@ -1164,7 +1168,7 @@ export default function App() {
         addLog(`Page ${targetPage}: 0 new results • end of stream`);
       } else {
         addLog(
-          `🔞 Page ${targetPage}: +${newItems.length} videos (${previewCount} with hover video preview)`
+          `Page ${targetPage}: +${newItems.length} videos (${previewCount} with hover video preview)`
         );
       }
     } catch (error) {
@@ -1203,14 +1207,14 @@ export default function App() {
   const handleRunSiteTests = async () => {
     setTestingSites(true);
     addLog(
-      `⚡ Testing connectivity and latency for all ${Object.keys(SITES).length} sites...`
+      `Testing connectivity and latency for all ${Object.keys(SITES).length} sites...`
     );
     try {
       const testResults = await testAllSites();
       setSiteTests(testResults);
       const onlineCount = testResults.filter(s => s.ok).length;
       addLog(
-        `⚡ Tests completed: ${onlineCount}/${testResults.length} sites operational`
+        `Tests completed: ${onlineCount}/${testResults.length} sites operational`
       );
       showToast(`Tests finished: ${onlineCount}/${testResults.length} online`);
     } catch (error) {
@@ -1257,7 +1261,7 @@ export default function App() {
   const onlineSiteCount = siteTests.filter(s => s.ok).length;
 
   return (
-    <div className='min-h-screen text-[#e0e0ff] p-3 sm:p-6 pb-40'>
+    <div className={`min-h-screen text-[#e0e0ff] p-3 sm:p-6 ${consoleOpen ? 'pb-40' : 'pb-16'}`}>
       {/* Toast Notification */}
       {toastMessage && (
         <div className='fixed top-5 right-5 z-50 flex items-center gap-2 bg-[#ff2a6d] text-white px-4 py-2.5 rounded-lg shadow-[0_0_20px_rgba(255,42,109,0.7)] text-sm font-semibold tracking-wide animate-bounce'>
@@ -1348,7 +1352,7 @@ export default function App() {
                   {previewModalItem.siteName}
                 </span>
                 <span className='text-xs text-[#05d9e8] font-bold tracking-wider'>
-                  ⚡ FULL VIDEO TEASER PREVIEW
+                  FULL VIDEO TEASER PREVIEW
                 </span>
               </div>
               <button
@@ -1543,27 +1547,27 @@ export default function App() {
       </aside>
 
       {/* Navigation Tabs */}
-      <div className='flex items-center gap-2 sm:gap-3 mb-5 overflow-x-auto pb-1'>
+      <div className='flex flex-wrap items-stretch gap-2 sm:gap-3 mb-5'>
         <button
           onClick={() => setActiveTab('hunt')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'hunt'
               ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#ff2a6d] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]'
               : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#05d9e8] hover:text-[#05d9e8]'
           }`}
         >
-          <span>🔞</span> HUNT
+          <Search size={15} /> HUNT
         </button>
 
         <button
           onClick={() => setActiveTab('fav')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'fav'
               ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#ff2a6d] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]'
               : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#05d9e8] hover:text-[#05d9e8]'
           }`}
         >
-          <span>🔞🔞</span> FAVORITES
+          <Heart size={15} /> FAVORITES
           <span className='text-[#ff2a6d] font-mono text-xs'>
             ({favorites.length})
           </span>
@@ -1574,7 +1578,7 @@ export default function App() {
             setActiveTab('test');
             if (siteTests.length === 0) handleRunSiteTests();
           }}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'test'
               ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#05d9e8] text-white shadow-[0_0_15px_rgba(5,217,232,0.4)]'
               : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#05d9e8] hover:text-[#05d9e8]'
@@ -1585,7 +1589,7 @@ export default function App() {
 
         <button
           onClick={() => setActiveTab('screenshots')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'screenshots'
               ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#05d9e8] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]'
               : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#05d9e8] hover:text-[#05d9e8]'
@@ -1596,21 +1600,21 @@ export default function App() {
 
         <button
           onClick={() => setActiveTab('recent')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${activeTab === 'recent' ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#ff2a6d] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]' : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'}`}
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${activeTab === 'recent' ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#ff2a6d] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]' : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'}`}
         >
           <History size={15} /> RECENT ({recentlyWatched.length})
         </button>
 
         <button
           onClick={() => setActiveTab('collections')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${activeTab === 'collections' ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#05d9e8] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]' : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'}`}
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${activeTab === 'collections' ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#05d9e8] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]' : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'}`}
         >
           <SaveIcon size={15} /> COLLECTIONS ({collections.length})
         </button>
 
         <button
           onClick={() => setActiveTab('import-export')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer ${activeTab === 'import-export' ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#ff2a6d] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]' : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'}`}
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap shrink-0 ${activeTab === 'import-export' ? 'bg-gradient-to-r from-[#ff2a6d]/30 to-[#05d9e8]/20 border border-[#ff2a6d] text-white shadow-[0_0_15px_rgba(255,42,109,0.4)]' : 'bg-[#0a0a12] border border-[#1a1a2e] text-[#6a6a8a] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'}`}
         >
           <Upload size={15} /> BACKUP
         </button>
@@ -1618,7 +1622,7 @@ export default function App() {
         <button
           type='button'
           onClick={() => setShowInstallModal(true)}
-          className='ml-auto hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#05d9e8]/10 border border-[#05d9e8]/40 text-[#05d9e8] text-xs font-bold hover:bg-[#05d9e8]/20 transition-all cursor-pointer'
+          className='sm:ml-auto flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#05d9e8]/10 border border-[#05d9e8]/40 text-[#05d9e8] text-xs font-bold hover:bg-[#05d9e8]/20 transition-all cursor-pointer whitespace-nowrap shrink-0'
         >
           <Smartphone size={13} />
           <span>INSTALL APP</span>
@@ -1696,7 +1700,7 @@ export default function App() {
                 className='bg-gradient-to-r from-[#ff2a6d] to-[#d300c5] hover:opacity-95 text-white font-extrabold px-6 py-3 rounded-lg text-sm tracking-wider cursor-pointer shadow-[0_0_15px_rgba(255,42,109,0.4)] hover:shadow-[0_0_25px_rgba(255,42,109,0.65)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 flex-shrink-0 disabled:opacity-50'
               >
                 <Search size={16} />
-                <span>🔞 HUNT</span>
+                <span>HUNT</span>
               </button>
             </div>
 
@@ -1756,7 +1760,7 @@ export default function App() {
               </div>
 
               {/* Category Pills */}
-              <div className='flex items-center gap-1.5 overflow-x-auto pb-1 mb-3 scrollbar-hide'>
+              <div className='flex flex-wrap items-center gap-1.5 pb-1 mb-3'>
                 {TRENDING_CATEGORIES.map(cat => (
                   <button
                     key={cat.id}
@@ -1769,13 +1773,12 @@ export default function App() {
                       borderColor: cat.color,
                       boxShadow: `0 0 10px ${cat.color}66`
                     } : undefined}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border whitespace-nowrap shrink-0 ${
                       selectedTrendingCategory?.id === cat.id
                         ? 'text-white'
                         : 'bg-[#05050a] border-[#1a1a2e] text-[#a0a0cf] hover:border-[#ff2a6d] hover:text-[#ff2a6d]'
                     }`}
                   >
-                    <span className='text-[10px]'>{cat.emoji}</span>
                     {cat.label}
                   </button>
                 ))}
@@ -1814,9 +1817,9 @@ export default function App() {
                             handleExecute(1, randomTag);
                             setTrendingExpanded(false);
                           }}
-                          className='px-2.5 py-1 bg-[#1a1a2e] border border-[#ff2a6d]/30 rounded text-[11px] text-[#ff2a6d] hover:bg-[#ff2a6d]/20 hover:text-white transition-all cursor-pointer'
+                          className='px-2.5 py-1 bg-[#1a1a2e] border border-[#ff2a6d]/30 rounded text-[11px] text-[#ff2a6d] hover:bg-[#ff2a6d]/20 hover:text-white transition-all cursor-pointer flex items-center gap-1'
                         >
-                          ⚡ {tag}
+                          <Sparkles size={11} /> {tag}
                         </button>
                       ))}
                     </>
@@ -1831,7 +1834,7 @@ export default function App() {
             <div className='flex flex-col items-center justify-center py-20 bg-[#0a0a12]/50 border border-[#1a1a2e] rounded-xl my-6'>
               <div className='w-14 h-14 border-4 border-[#1a1a2e] border-t-[#ff2a6d] border-r-[#05d9e8] rounded-full animate-spin shadow-[0_0_20px_rgba(255,42,109,0.3)]' />
               <p className='mt-5 text-[#ff2a6d] font-bold tracking-widest text-sm animate-pulse flex items-center gap-2'>
-                <span>🔞</span> HUNTING {currentSiteConfig.name.toUpperCase()}
+                <Search size={15} /> HUNTING {currentSiteConfig.name.toUpperCase()}
                 ...
               </p>
               <div className='w-48 h-1 bg-gradient-to-r from-transparent via-[#ff2a6d] to-transparent mt-3 animate-loading-bar rounded' />
@@ -1932,7 +1935,7 @@ export default function App() {
           <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-[#1a1a2e] mb-5'>
             <div>
               <h2 className='text-lg font-bold text-white flex items-center gap-2'>
-                <span>🔞🔞</span> SAVED FAVORITES
+                <Heart size={18} className='text-[#ff2a6d]' /> SAVED FAVORITES
               </h2>
               <p className='text-xs text-[#6a6a8a] mt-0.5'>
                 Saved in local storage. Hover cards to play preview video or
@@ -1976,7 +1979,7 @@ export default function App() {
                 No favorites saved yet.
               </p>
               <p className='text-xs text-[#6a6a8a] mt-1.5'>
-                Hunt videos and click the 🔞 icon on any card to save it here.
+                Hunt videos and click the heart icon on any card to save it here.
               </p>
               <button
                 onClick={() => setActiveTab('hunt')}
@@ -2705,6 +2708,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setConsoleOpen(v => !v)}
+              aria-label={consoleOpen ? 'Collapse system console' : 'Expand system console'}
               className='text-[#6a6a8a] hover:text-white cursor-pointer'
             >
               {consoleOpen ? (
